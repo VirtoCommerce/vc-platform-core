@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+    <AssemblyVersion>2.13.18.0</AssemblyVersion>
+    <Version>2.13.18</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\VirtoCommerce.Platform.Abstractions\VirtoCommerce.Platform.Abstractions.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.Platform.Modules.Abstractions\VirtoCommerce.Platform.Modules.Abstractions.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.Platform.Modules\VirtoCommerce.Platform.Modules.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="wwwroot\App_Data\" />
+  </ItemGroup>
+</Project>
