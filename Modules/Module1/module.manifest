@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <module>
     <id>VirtoCommerce.Module1</id>
     <version>1.0.0</version>
@@ -25,13 +25,8 @@
     </styles>
     <scripts>
         <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
-    </scripts>
-    
-    <incompatibilities>
-        <module id="VirtoCommerce.SearchApi" version="1.0.0" />
-        <module id="VirtoCommerce.Search" version="2.0.0" />
-    </incompatibilities>
-    
+    </scripts> 
+  
     <settings>
         <group name="Commerce|General">
             <setting>

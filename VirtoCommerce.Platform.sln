@@ -5,17 +5,17 @@ VisualStudioVersion = 15.0.27004.2009
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Web", "VirtoCommerce.Platform.Web\VirtoCommerce.Platform.Web.csproj", "{63AE8D85-091F-4F6D-99FC-1BF8F96494F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.Platform.Abstractions", "VirtoCommerce.Platform.Abstractions\VirtoCommerce.Platform.Abstractions.csproj", "{262EABFA-AEF9-4356-BCFE-028E456A6995}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Abstractions", "VirtoCommerce.Platform.Abstractions\VirtoCommerce.Platform.Abstractions.csproj", "{262EABFA-AEF9-4356-BCFE-028E456A6995}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.Platform.Modules.Abstractions", "VirtoCommerce.Platform.Modules.Abstractions\VirtoCommerce.Platform.Modules.Abstractions.csproj", "{3F89BF71-FAA8-4770-8B1E-CFA8B68603FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Modules.Abstractions", "VirtoCommerce.Platform.Modules.Abstractions\VirtoCommerce.Platform.Modules.Abstractions.csproj", "{3F89BF71-FAA8-4770-8B1E-CFA8B68603FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.Platform.Modules", "VirtoCommerce.Platform.Modules\VirtoCommerce.Platform.Modules.csproj", "{9AF23754-5465-43B6-A93E-9C7A346FDDFA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Modules", "VirtoCommerce.Platform.Modules\VirtoCommerce.Platform.Modules.csproj", "{9AF23754-5465-43B6-A93E-9C7A346FDDFA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{7052A390-9A84-46DA-BD3B-556FD74DEC97}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Module1", "Modules\Module1\Module1.csproj", "{74E1DA2B-19EF-4A8D-98CE-D46A6F67BEBA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Module1.Abstractions", "Module1.Abstractions\Module1.Abstractions.csproj", "{4E47018C-335A-4732-9460-176224D830FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Module1.Abstractions", "Module1.Abstractions\Module1.Abstractions.csproj", "{4E47018C-335A-4732-9460-176224D830FE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

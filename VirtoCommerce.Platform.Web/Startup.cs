@@ -1,13 +1,13 @@
+﻿using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
+using Smidge;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Modules;
-using VirtoCommerce.Platform.Modules.Abstractions;
+using VirtoCommerce.Platform.Modules.Extensions;
 using VirtoCommerce.Platform.Web.Extensions;
-using VirtoCommerce.Platform.Web.Modules;
 
 namespace VirtoCommerce.Platform.Web
 {
@@ -30,9 +30,9 @@ namespace VirtoCommerce.Platform.Web
             var mvcBuilder = services.AddMvc();
             services.AddModules(mvcBuilder, options =>
             {
-                options.DiscoveryPath = HostingEnvironment.MapPath(@"c:\Projects\VirtoCommerce\vc-platform-core\Modules");
+                options.DiscoveryPath = HostingEnvironment.MapPath(@"~/Modules");
                 options.ProbingPath = HostingEnvironment.MapPath("~/App_Data/Modules");
-                options.VirtualPath = HostingEnvironment.MapPath("~/Modules");
+                options.VirtualPath = "~/Modules";
             }
             );
             services.AddExternalModules(options =>
@@ -40,7 +40,8 @@ namespace VirtoCommerce.Platform.Web
                 options.ModulesManifestUrl = new Uri(@"http://virtocommerce.blob.core.windows.net/sample-data");
             });
 
-            services.AddSingleton<IAssemblyResolver, LoadContextAssemblyResolver>();
+            //Add Smidge runtime bundling library configuration
+            services.AddSmidge(Configuration.GetSection("smidge"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -64,6 +65,12 @@ namespace VirtoCommerce.Platform.Web
                 routes.MapRoute(
                     name: "default",
                     template: "{controller}/{action=Index}/{id?}");
+            });
+            //Using Smidge runtime bundling library for bundling modules js and css files
+            app.UseSmidge(bundles =>
+            {
+                app.UseModulesContent(bundles);
+
             });
         }
     }

@@ -4,9 +4,9 @@ using System.Linq;
 using VirtoCommerce.Platform.Modules;
 using VirtoCommerce.Platform.Modules.Abstractions;
 
-namespace VirtoCommerce.Platform.Web.Modules
+namespace VirtoCommerce.Platform.Modules
 {
-    public static class ModulesServiceCollectionExtension
+    public static class ModulesServiceCollectionExtensions
     {
         public static IServiceCollection AddModules(this IServiceCollection services, IMvcBuilder mvcBuilder, Action<LocalStorageModuleCatalogOptions> setupAction = null)
         {
@@ -17,6 +17,7 @@ namespace VirtoCommerce.Platform.Web.Modules
             services.AddSingleton<IModuleManager, ModuleManager>();
             services.AddSingleton<ILocalModuleCatalog, LocalStorageModuleCatalog>();
             services.AddSingleton<IModuleCatalog>( provider => provider.GetService<ILocalModuleCatalog>());
+            services.AddSingleton<IAssemblyResolver, LoadContextAssemblyResolver>();
 
             if (setupAction != null)
             {

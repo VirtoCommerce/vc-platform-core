@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Runtime.Loader;
 using VirtoCommerce.Platform.Modules.Abstractions;
 
-namespace VirtoCommerce.Platform.Web.Modules
+namespace VirtoCommerce.Platform.Modules
 {
     public class LoadContextAssemblyResolver : IAssemblyResolver
     {
