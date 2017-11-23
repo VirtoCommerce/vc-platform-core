@@ -4,7 +4,7 @@ using Module1.Services;
 using System;
 using VirtoCommerce.Platform.Modules.Abstractions;
 
-namespace Module1
+namespace Module1.Web
 {
     public class Module : IModule
     {

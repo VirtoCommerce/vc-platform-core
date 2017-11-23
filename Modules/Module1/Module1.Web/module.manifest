@@ -17,8 +17,8 @@
     <copyright>Copyright © 2011-2017 Virto Commerce. All rights reserved</copyright>
     <tags>security core</tags>
 
-    <assemblyFile>Module1.dll</assemblyFile>
-    <moduleType>Module1.Module, Module1</moduleType>
+    <assemblyFile>Module1.Web.dll</assemblyFile>
+    <moduleType>Module1.Web.Module, Module1.Web</moduleType>
 
     <styles>
         <directory virtualPath="$/Content" searchPattern="*.css" searchSubdirectories="true" />

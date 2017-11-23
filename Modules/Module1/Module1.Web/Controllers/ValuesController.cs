@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using VirtoCommerce.Platform.Modules.Abstractions;
-using Module1.Services;
 using Module1.Abstractions;
+using VirtoCommerce.Platform.Modules.Abstractions;
 
-namespace Module2.Controllers
+namespace Module2.Web.Controllers
 {
     [Route("api/[controller]")]
     public class ValuesController : Controller
