@@ -1,12 +1,12 @@
-﻿using Microsoft.Extensions.Options;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Modules.Abstractions;
-using VirtoCommerce.Platform.Modules.Abstractions.Exceptions;
+using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Modularity.Exceptions;
 
 namespace VirtoCommerce.Platform.Modules
 {

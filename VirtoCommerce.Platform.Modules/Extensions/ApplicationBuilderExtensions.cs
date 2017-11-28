@@ -1,39 +1,46 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Smidge;
-using Smidge.Cache;
 using Smidge.Models;
-using Smidge.Options;
-using VirtoCommerce.Platform.Modules.Abstractions;
+using VirtoCommerce.Platform.Core.Modularity;
 
 namespace VirtoCommerce.Platform.Modules.Extensions
 {
     public static class ApplicationBuilderExtensions
     {
+        public static IApplicationBuilder UseModules(this IApplicationBuilder appBuilder)
+        {         
+            using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
+            {
+                var moduleManager = serviceScope.ServiceProvider.GetRequiredService<IModuleManager>();
+                var modules = GetInstalledModules(serviceScope.ServiceProvider);
+                foreach (var module in modules)
+                {
+                    moduleManager.PostInitializeModule(module, serviceScope.ServiceProvider);
+                }
+            }
+            return appBuilder;
+        }
+
         public static IApplicationBuilder UseModulesContent(this IApplicationBuilder appBuilder, IBundleManager bundles)
         {
             var hostingEnv = appBuilder.ApplicationServices.GetRequiredService<IHostingEnvironment>();
-            var moduleCatalog = appBuilder.ApplicationServices.GetRequiredService<ILocalModuleCatalog>();
-            var allModules = moduleCatalog.Modules.OfType<ManifestModuleInfo>().ToArray();
-            var manifestModules = moduleCatalog.CompleteListWithDependencies(allModules)
-                .Where(x => x.State == ModuleState.Initialized)
-                .OfType<ManifestModuleInfo>()
-                .ToArray();
+            var modules = GetInstalledModules(appBuilder.ApplicationServices);
 
-            var cssBundleItems = manifestModules.SelectMany(m => m.Styles).ToArray();
+            var cssBundleItems = modules.SelectMany(m => m.Styles).ToArray();
             
             var cssFiles = cssBundleItems.OfType<ManifestBundleFile>().Select(x => new CssFile(x.VirtualPath));
 
             cssFiles = cssFiles.Concat(cssBundleItems.OfType<ManifestBundleDirectory>().SelectMany(x => new WebFileFolder(hostingEnv, x.VirtualPath)
                                                                                 .AllWebFiles<CssFile>(x.SearchPattern, x.SearchSubdirectories ?  SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)));
 
-            var scriptBundleItems = manifestModules.SelectMany(m => m.Scripts).ToArray();
+            var scriptBundleItems = modules.SelectMany(m => m.Scripts).ToArray();
             var jsFiles = scriptBundleItems.OfType<ManifestBundleFile>().Select(x => new JavaScriptFile(x.VirtualPath));
             jsFiles = jsFiles.Concat(scriptBundleItems.OfType<ManifestBundleDirectory>().SelectMany(x => new WebFileFolder(hostingEnv, x.VirtualPath)
                                                                                 .AllWebFiles<JavaScriptFile>(x.SearchPattern, x.SearchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)));
@@ -51,6 +58,16 @@ namespace VirtoCommerce.Platform.Modules.Extensions
                           
 
             return appBuilder;
+        }
+
+        private static IEnumerable<ManifestModuleInfo> GetInstalledModules(IServiceProvider serviceProvider)
+        {
+            var moduleCatalog = serviceProvider.GetRequiredService<ILocalModuleCatalog>();
+            var allModules = moduleCatalog.Modules.OfType<ManifestModuleInfo>().ToArray();
+            return moduleCatalog.CompleteListWithDependencies(allModules)
+                .Where(x => x.State == ModuleState.Initialized)
+                .OfType<ManifestModuleInfo>()
+                .ToArray();
         }
     }
 

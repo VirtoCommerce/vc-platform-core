@@ -10,8 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VirtoCommerce.Platform.Abstractions\VirtoCommerce.Platform.Abstractions.csproj" />
-    <ProjectReference Include="..\VirtoCommerce.Platform.Modules.Abstractions\VirtoCommerce.Platform.Modules.Abstractions.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

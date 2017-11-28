@@ -1,10 +1,9 @@
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using VirtoCommerce.Platform.Modules.Abstractions;
-using VirtoCommerce.Platform.Modules.Abstractions.Exceptions;
+using Microsoft.Extensions.Logging;
+using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Modularity.Exceptions;
 
 namespace VirtoCommerce.Platform.Modules
 {
@@ -102,12 +101,12 @@ namespace VirtoCommerce.Platform.Modules
             this.LoadModuleTypes(modulesToLoad);
         }
 
-        public void PostInitializeModule(ModuleInfo moduleInfo)
+        public void PostInitializeModule(ModuleInfo moduleInfo, IServiceProvider serviceProvider)
         {
             if (moduleInfo == null)
                 throw new ArgumentNullException("moduleInfo");
 
-            _moduleInitializer.PostInitialize(moduleInfo);
+            _moduleInitializer.PostInitialize(moduleInfo, serviceProvider);
         }
 
         /// <summary>
@@ -341,7 +340,7 @@ namespace VirtoCommerce.Platform.Modules
         /// <filterpriority>2</filterpriority>
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -353,7 +352,7 @@ namespace VirtoCommerce.Platform.Modules
         {
             foreach (IModuleTypeLoader typeLoader in this.ModuleTypeLoaders)
             {
-                IDisposable disposableTypeLoader = typeLoader as IDisposable;
+                var disposableTypeLoader = typeLoader as IDisposable;
                 if (disposableTypeLoader != null)
                 {
                     disposableTypeLoader.Dispose();

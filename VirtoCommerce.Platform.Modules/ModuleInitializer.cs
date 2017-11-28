@@ -1,11 +1,10 @@
+﻿using System;
+using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Globalization;
-using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Modules.Abstractions;
-using VirtoCommerce.Platform.Modules.Abstractions.Exceptions;
+using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Modularity.Exceptions;
 
 namespace VirtoCommerce.Platform.Modules
 {
@@ -43,7 +42,6 @@ namespace VirtoCommerce.Platform.Modules
                 {
                     var moduleInstance = CreateModule(moduleInfo);
                     moduleInfo.ModuleInstance = moduleInstance;
-                    moduleInstance.SetupDatabase();
                     moduleInstance.Initialize(_serviceCollection);
                     moduleInfo.State = ModuleState.Initialized;
                 }
@@ -54,7 +52,7 @@ namespace VirtoCommerce.Platform.Modules
             }
         }
 
-        public void PostInitialize(ModuleInfo moduleInfo)
+        public void PostInitialize(ModuleInfo moduleInfo, IServiceProvider serviceProvider)
         {
             if (moduleInfo == null)
                 throw new ArgumentNullException("moduleInfo");
@@ -63,7 +61,7 @@ namespace VirtoCommerce.Platform.Modules
 
             try
             {
-                moduleInstance.PostInitialize(_serviceCollection);
+                moduleInstance.PostInitialize(serviceProvider);
             }
             catch (Exception ex)
             {

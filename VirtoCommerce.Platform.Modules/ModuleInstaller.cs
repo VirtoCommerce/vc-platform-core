@@ -1,14 +1,14 @@
-﻿using ChinhDo.Transactions.FileManager;
-using Microsoft.Extensions.Options;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Transactions;
+using ChinhDo.Transactions.FileManager;
+using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Modules.Abstractions;
+using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Modules.External;
 
 namespace VirtoCommerce.Platform.Modules

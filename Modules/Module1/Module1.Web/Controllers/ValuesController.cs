@@ -2,7 +2,8 @@
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Module1.Abstractions;
-using VirtoCommerce.Platform.Modules.Abstractions;
+using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Settings;
 
 namespace Module2.Web.Controllers
 {
@@ -11,10 +12,12 @@ namespace Module2.Web.Controllers
     {
         private readonly IModuleCatalog _moduleCatalog;
         private readonly IMyService _myService;
-        public ValuesController(IModuleCatalog moduleCatalog, IMyService myService)
+        private readonly ISettingsManager _settingManager;
+        public ValuesController(IModuleCatalog moduleCatalog, IMyService myService, ISettingsManager settingManager)
         {
             _moduleCatalog = moduleCatalog;
             _myService = myService;
+            _settingManager = settingManager;
         }
         // GET api/values
         [HttpGet]
@@ -27,6 +30,7 @@ namespace Module2.Web.Controllers
         [HttpGet("{id}")]
         public string Get(int id)
         {
+            _settingManager.SaveSettings(new SettingEntry[] { new SettingEntry { Name = id.ToString(), Title = id.ToString(), ValueType = SettingValueType.ShortText, Value = "ss" } });
             return _myService.GetValues();
         }
 

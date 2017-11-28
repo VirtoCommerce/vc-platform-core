@@ -7,8 +7,8 @@
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
   </ItemGroup>
  <ItemGroup>
-   <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Abstractions\VirtoCommerce.Platform.Abstractions.csproj" />
-   <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Modules.Abstractions\VirtoCommerce.Platform.Modules.Abstractions.csproj" />
+   <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
+   <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Data\VirtoCommerce.Platform.Data.csproj" />
    <ProjectReference Include="..\Module1.Abstractions\Module1.Abstractions.csproj" />
  </ItemGroup>
 

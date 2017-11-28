@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
-using VirtoCommerce.Platform.Modules.Abstractions;
+using Microsoft.Extensions.Logging;
+using VirtoCommerce.Platform.Core.Modularity;
 
 namespace VirtoCommerce.Platform.Modules
 {
