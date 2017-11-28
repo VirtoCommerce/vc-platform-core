@@ -1,6 +1,5 @@
-# VirtoCommerce Platform Core
-
-Roadmap:
+# VirtoCommerce Platform Core - COMING SOON!
+TODO check list:
 
 ![8ea72ae0c3d511e7a1325bdfb85b1215 map](https://user-images.githubusercontent.com/7566324/32503635-68fa4a8c-c3e6-11e7-910a-88af3fec87e1.png)
 
