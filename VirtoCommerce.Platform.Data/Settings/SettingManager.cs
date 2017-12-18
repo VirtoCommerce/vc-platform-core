@@ -50,8 +50,7 @@ namespace VirtoCommerce.Platform.Data.Settings
 
             var cacheKey = CacheKey.With(GetType(), "GetSettingByName", name);
             var result = _memoryCache.GetOrCreateExclusive(cacheKey, (cacheEntry) =>
-            {
-            
+            {            
                 SettingEntry setting = null;
                 //Get setting definition from module manifest first
                 var moduleSetting = GetModuleSettingByName(name);
@@ -255,7 +254,7 @@ namespace VirtoCommerce.Platform.Data.Settings
         {
             if (settings != null && settings.Any())
             {
-                var settingKeys = settings.Select(x => String.Join("-", x.Name, x.ObjectType, x.ObjectId)).Distinct().ToArray();
+                var settingKeys = settings.Select(x => string.Join("-", x.Name, x.ObjectType, x.ObjectId)).Distinct().ToArray();
 
                 using (var repository = _repositoryFactory())
                 using (var changeTracker = new ObservableChangeTracker())

@@ -9,8 +9,6 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
     /// </summary>
     public abstract class EFRepositoryBase : IRepository
     {
-        private IUnitOfWork _unitOfWork;
-
         public EFRepositoryBase(DbContext dbContext)
         {
             DbContext = dbContext;

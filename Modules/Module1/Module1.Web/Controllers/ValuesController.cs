@@ -29,8 +29,7 @@ namespace Module2.Web.Controllers
         // GET api/values/5
         [HttpGet("{id}")]
         public string Get(int id)
-        {
-            _settingManager.SaveSettings(new SettingEntry[] { new SettingEntry { Name = id.ToString(), Title = id.ToString(), ValueType = SettingValueType.ShortText, Value = "ss" } });
+        {        
             return _myService.GetValues();
         }
 

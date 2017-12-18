@@ -83,6 +83,7 @@ namespace VirtoCommerce.Platform.Web
                     template: "{controller}/{action=Index}/{id?}");
             });
 
+            //Force migrations
             using (var serviceScope = app.ApplicationServices.CreateScope())
             {
                 var platformDbContext = serviceScope.ServiceProvider.GetRequiredService<PlatformDbContext>();
@@ -96,7 +97,8 @@ namespace VirtoCommerce.Platform.Web
             });
 
             app.UseDbTriggers();
-
+            //Register platform settings
+            app.UsePlatformSettings();
             app.UseModules();
 
 

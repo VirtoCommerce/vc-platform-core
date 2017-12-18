@@ -52,7 +52,5 @@ namespace VirtoCommerce.Platform.Modules
 
             return services;
         }
-
- 
     }
 }

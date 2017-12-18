@@ -20,8 +20,7 @@ namespace Module1.Web
         public void PostInitialize(IServiceProvider serviceProvider)
         {
             var settingsService = serviceProvider.GetRequiredService<ISettingsManager>();
-            var platformRepository = serviceProvider.GetRequiredService<IPlatformRepository>();
-            settingsService.SaveSettings(new SettingEntry[] { new SettingEntry { Name = "a222aaa", Title = "a22aaa", ValueType = SettingValueType.ShortText, Value = "ss" } });
+            var platformRepository = serviceProvider.GetRequiredService<IPlatformRepository>();       
         }
 
         public void Uninstall()
