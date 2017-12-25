@@ -269,3 +269,5 @@ __pycache__/
 /VirtoCommerce.Platform.Web/wwwroot/modules
 /VirtoCommerce.Platform.Web/wwwroot/lib
 /VirtoCommerce.Platform.Web/wwwroot/App_Data
+/VirtoCommerce.Platform.Web/wwwroot/maps
+/VirtoCommerce.Platform.Web/App_Data/Smidge/Cache

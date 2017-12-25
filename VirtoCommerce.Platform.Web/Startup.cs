@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Smidge;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Extensions;
@@ -16,6 +19,8 @@ using VirtoCommerce.Platform.Modules;
 using VirtoCommerce.Platform.Modules.Extensions;
 using VirtoCommerce.Platform.Security;
 using VirtoCommerce.Platform.Web.Extensions;
+using VirtoCommerce.Platform.Web.Infrastructure;
+using VirtoCommerce.Platform.Web.Middelware;
 
 namespace VirtoCommerce.Platform.Web
 {
@@ -34,6 +39,8 @@ namespace VirtoCommerce.Platform.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+            services.Configure<DemoOptions>(Configuration.GetSection("VirtoCommerce"));
 
             PlatformVersion.CurrentVersion = SemanticVersion.Parse(Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default.Application.ApplicationVersion);
 
@@ -74,6 +81,16 @@ namespace VirtoCommerce.Platform.Web
                 app.UseExceptionHandler("/Error");
             }
 
+            app.UseVirtualFolders(folderOptions =>
+            {
+                folderOptions.Items.Add(PathString.FromUriComponent("/$(Platform)/Scripts"), "/js");
+                var localModules = app.ApplicationServices.GetRequiredService<ILocalModuleCatalog>().Modules;
+                foreach (var module in localModules.OfType<ManifestModuleInfo>())
+                {
+                    folderOptions.Items.Add(PathString.FromUriComponent($"/Modules/$({ module.ModuleName })"), HostingEnvironment.GetRelativePath("~/Modules", module.FullPhysicalPath));
+                }
+            });
+
             app.UseStaticFiles();
 
             app.UseMvc(routes =>
@@ -95,14 +112,13 @@ namespace VirtoCommerce.Platform.Web
             {
                 app.UseModulesContent(bundles);
             });
-
+          
             app.UseDbTriggers();
             //Register platform settings
             app.UsePlatformSettings();
             app.UseModules();
-
-
-
+          
+         
         }
     }
 }

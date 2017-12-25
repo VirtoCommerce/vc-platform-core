@@ -1,14 +1,32 @@
 ﻿using System;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Web.Infrastructure;
+using VirtoCommerce.Platform.Web.Middelware;
 
 namespace VirtoCommerce.Platform.Web.Extensions
 {
     public static class ApplicationBuilderExtensions
     {
+        public static IApplicationBuilder UseVirtualFolders(this IApplicationBuilder appBuilder, Action<VirtualFolderOptions> configureVirtualFolders)
+        {
+            if (configureVirtualFolders != null)
+            {
+                var virtualFolderOptions = appBuilder.ApplicationServices.GetRequiredService<IOptions<VirtualFolderOptions>>().Value;
+                configureVirtualFolders(virtualFolderOptions);
+
+                var rewriteOptions = new RewriteOptions().Add(new VirtualFoldersUrlRewriteRule(virtualFolderOptions));
+                appBuilder.UseRewriter(rewriteOptions);
+            }
+           
+            return appBuilder;
+        }
+
         public static IApplicationBuilder UsePlatformSettings(this IApplicationBuilder appBuilder)
         {
             var moduleCatalog = appBuilder.ApplicationServices.GetRequiredService<ILocalModuleCatalog>();
@@ -19,7 +37,7 @@ namespace VirtoCommerce.Platform.Web.Extensions
                 Version = PlatformVersion.CurrentVersion.ToString(),
                 PlatformVersion = PlatformVersion.CurrentVersion.ToString(),
                 Settings = new[]
-               {                  
+               {
                     new ModuleSettingsGroup
                     {
                         Name = "Platform|Security",
@@ -135,5 +153,5 @@ namespace VirtoCommerce.Platform.Web.Extensions
             return appBuilder;
         }
     }
-    
+
 }
