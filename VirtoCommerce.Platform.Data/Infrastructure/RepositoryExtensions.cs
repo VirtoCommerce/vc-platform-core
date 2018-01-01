@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using VirtoCommerce.Platform.Core.Common;
+﻿using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Data.Infrastructure
 {
@@ -8,9 +7,11 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
         public static void DisableChangesTracking(this IRepository repository)
         {
             //http://stackoverflow.com/questions/29106477/nullreferenceexception-in-entity-framework-from-trygetcachedrelatedend
-            if (repository is EFRepositoryBase efRepository)
+            if (repository is System.Data.Entity.DbContext)
             {
-                efRepository.DbContext.ChangeTracker.AutoDetectChangesEnabled = false;
+                var dbConfiguration = ((System.Data.Entity.DbContext)repository).Configuration;
+                dbConfiguration.ProxyCreationEnabled = false;
+                dbConfiguration.AutoDetectChangesEnabled = false;
             }
         }
     }

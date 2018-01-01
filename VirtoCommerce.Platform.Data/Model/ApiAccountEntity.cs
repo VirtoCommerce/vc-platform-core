@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.Platform.Data.Model
 {
-    public class ApiAccountEntity : AuditableEntity
+    public class ApiAccountEntity : Entity
     {
         [StringLength(128)]
         public string Name { get; set; }

@@ -1,9 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Data.Model
 {
-    public class PermissionEntity : AuditableEntity
+    public class PermissionEntity : Entity
     {
         public PermissionEntity()
         {

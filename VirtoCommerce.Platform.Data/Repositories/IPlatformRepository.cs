@@ -22,7 +22,7 @@ namespace VirtoCommerce.Platform.Data.Repositories
 		IQueryable<OperationLogEntity> OperationLogs { get; }
 
         RoleEntity GetRoleById(string id);
-		AccountEntity GetAccountByName(string userName, UserDetails detailsLevel);	
+		AccountEntity GetAccountByName(string userName, UserDetails detailsLevel);		
 		DynamicPropertyDictionaryItemEntity[] GetDynamicPropertyDictionaryItems(string propertyId);
 		DynamicPropertyEntity[] GetDynamicPropertiesByIds(string[] ids);
 		DynamicPropertyEntity[] GetDynamicPropertiesForType(string objectType);

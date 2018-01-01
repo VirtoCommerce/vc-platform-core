@@ -31,20 +31,14 @@ namespace VirtoCommerce.Platform.Core.Common
                     {
                         foreach (var newItem in args.NewItems)
                         {
-                            if (AddAction != null)
-                            {
-                                AddAction(newItem);
-                            }
+                            AddAction?.Invoke(newItem);
                         }
                     }
                     else if (args.Action == NotifyCollectionChangedAction.Remove)
                     {
                         foreach (var oldItem in args.OldItems)
                         {
-                            if (RemoveAction != null)
-                            {
-                                RemoveAction(oldItem);
-                            }
+                            RemoveAction?.Invoke(oldItem);
                         }
                     }
                 };

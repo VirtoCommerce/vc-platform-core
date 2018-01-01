@@ -1,21 +1,87 @@
-﻿using System.Linq;
-using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections;
+using System.Data.Common;
+using System.Data.Entity;
+using System.Data.Entity.Core.Objects;
+using System.Data.Entity.Infrastructure;
+using System.Data.Entity.Migrations;
+using System.Data.Entity.ModelConfiguration.Conventions;
+using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Data.Infrastructure.Interceptors;
 
 namespace VirtoCommerce.Platform.Data.Infrastructure
 {
     /// <summary>
     /// Base class for repository implementations that are based on the Entity Framework.
     /// </summary>
-    public abstract class EFRepositoryBase : IRepository
+    public abstract class EFRepositoryBase : DbContext, IRepository
     {
-        public EFRepositoryBase(DbContext dbContext)
+        private IUnitOfWork _unitOfWork;
+        private readonly IInterceptor[] _interceptors;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EFRepositoryBase"/> class.
+        /// </summary>
+        /// <param name="nameOrConnectionString">The name or connection string.</param>
+        /// <param name="unitOfWork">The unit of work.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        protected EFRepositoryBase(string nameOrConnectionString, IUnitOfWork unitOfWork = null, IInterceptor[] interceptors = null)          
         {
-            DbContext = dbContext;
-            UnitOfWork = new DbContextUnitOfWork(dbContext);
+            _unitOfWork = unitOfWork;
+            _interceptors = interceptors;
+
+            Configuration.LazyLoadingEnabled = false;
+
         }
 
-        public DbContext DbContext { get; private set; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EFRepositoryBase"/> class.
+        /// </summary>
+        /// <param name="existingConnection">The existing connection.</param>
+        /// <param name="unitOfWork">The unit of work.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        protected EFRepositoryBase(DbConnection existingConnection, IUnitOfWork unitOfWork = null, IInterceptor[] interceptors = null)
+            : base(existingConnection, false)
+        {
+            _unitOfWork = unitOfWork;
+            _interceptors = interceptors;
+
+            Configuration.LazyLoadingEnabled = false;
+        }
+
+        /// <summary>
+        /// Sets the unit of work.
+        /// </summary>
+        /// <param name="unitOfWork">The unit of work.</param>
+        protected void SetUnitOfWork(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        /// <summary>
+        /// This method is called when the model for a derived context has been initialized, but
+        /// before the model has been locked down and used to initialize the context.  The default
+        /// implementation of this method does nothing, but it can be overridden in a derived class
+        /// such that the model can be further configured before it is locked down.
+        /// </summary>
+        /// <param name="modelBuilder">The builder that defines the model for the context being created.</param>
+        /// <remarks>
+        /// Typically, this method is called only once when the first instance of a derived context
+        /// is created.  The model for that context is then cached and is for all further instances of
+        /// the context in the app domain.  This caching can be disabled by setting the ModelCaching
+        /// property on the given ModelBuidler, but note that this can seriously degrade performance.
+        /// More control over caching is provided through use of the DbModelBuilder and DbContextFactory
+        /// classes directly.
+        /// </remarks>
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
+
+            modelBuilder.Properties().Where(x => x.Name == "ModifiedBy" || x.Name == "CreatedBy").Configure(x => x.HasMaxLength(64));
+            base.OnModelCreating(modelBuilder);
+        }
+
         #region IRepository Members
 
         /// <summary>
@@ -24,7 +90,7 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
         /// <value>
         /// The unit of work.
         /// </value>
-        public IUnitOfWork UnitOfWork { get; protected set; }
+        public IUnitOfWork UnitOfWork => _unitOfWork ?? (_unitOfWork = new DbContextUnitOfWork(this, _interceptors));
 
         /// <summary>
         /// Attaches the specified item.
@@ -33,9 +99,43 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
         /// <param name="item">The item.</param>
         public void Attach<T>(T item) where T : class
         {
-            DbContext.Attach(item);
-        }  
-       
+            Set(item.GetType()).Attach(item);
+        }
+
+        /// <summary>
+        /// Determines whether [is attached to] [the specified entity].
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="entity">The entity.</param>
+        /// <returns>
+        ///   <c>true</c> if [is attached to] [the specified entity]; otherwise, <c>false</c>.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">entity</exception>
+        public bool IsAttachedTo<T>(T entity) where T : class
+        {
+            if (entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            ObjectStateEntry entry;
+            if (ObjectStateManager.TryGetObjectStateEntry(entity, out entry))
+            {
+                return (entry.State != EntityState.Detached);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Adds the or update.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="item">The item.</param>
+        public void AddOrUpdate<T>(T item) where T : class
+        {
+            Set<T>().AddOrUpdate(item);
+        }
+
         /// <summary>
         /// Adds the specified item.
         /// </summary>
@@ -43,8 +143,8 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
         /// <param name="item">The item.</param>
         public void Add<T>(T item) where T : class
         {
-            DbContext.Add(item);
-        }      
+            Set(item.GetType()).Add(item);
+        }
 
         /// <summary>
         /// Updates the specified item.
@@ -53,9 +153,10 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
         /// <param name="item">The item.</param>
         public void Update<T>(T item) where T : class
         {
-            DbContext.Update(item);
+            Set(item.GetType()).Attach(item);
+            Entry(item).State = EntityState.Modified;
         }
-       
+
         /// <summary>
         /// Removes the specified item.
         /// </summary>
@@ -63,9 +164,9 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
         /// <param name="item">The item.</param>
         public void Remove<T>(T item) where T : class
         {
-            DbContext.Remove(item);
+            Set(item.GetType()).Remove(item);
         }
-
+        
         /// <summary>
         /// Gets as queryable.
         /// </summary>
@@ -73,13 +174,57 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
         /// <returns></returns>
         public IQueryable<T> GetAsQueryable<T>() where T : class
         {
-            return DbContext.Set<T>();
+            return Set<T>();
         }
 
-        public void Dispose()
+        /// <summary>
+        /// Refreshes the specified collection.
+        /// </summary>
+        /// <param name="collection">The collection.</param>
+        public void Refresh(IEnumerable collection)
         {
-            DbContext.Dispose();
+            ObjectContext.Refresh(RefreshMode.StoreWins, collection);
         }
+
+        #endregion
+
+        /// <summary>
+        /// Saves all changes made in this context to the underlying database.
+        /// </summary>
+        /// <returns>
+        /// The number of objects written to the underlying database.
+        /// </returns>
+        public override int SaveChanges()
+        {
+            return UnitOfWork.Commit();
+        }
+
+        /// <summary>
+        /// Saves the changes internal.
+        /// </summary>
+        /// <returns></returns>
+        internal int SaveChangesInternal()
+        {
+            return base.SaveChanges();
+        }
+
+        #region Helper Methods
+        /// <summary>
+        /// Gets the object context.
+        /// </summary>
+        /// <value>
+        /// The object context.
+        /// </value>
+        protected ObjectContext ObjectContext => ((IObjectContextAdapter)this).ObjectContext;
+
+        /// <summary>
+        /// Gets the object state manager.
+        /// </summary>
+        /// <value>
+        /// The object state manager.
+        /// </value>
+        protected ObjectStateManager ObjectStateManager => ObjectContext.ObjectStateManager;
+
         #endregion
     }
 }

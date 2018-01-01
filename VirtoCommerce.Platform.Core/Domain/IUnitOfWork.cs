@@ -6,5 +6,6 @@ namespace VirtoCommerce.Platform.Core.Common
 	{
 		int Commit();
         Task<int> CommitAsync();
-	}
+
+    }
 }

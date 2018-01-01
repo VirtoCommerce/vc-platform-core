@@ -1,16 +1,149 @@
-﻿using System.Linq;
-using Microsoft.EntityFrameworkCore;
+﻿using System.Data.Entity;
+using System.Data.Entity.ModelConfiguration.Conventions;
+using System.Linq;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Data.Infrastructure;
+using VirtoCommerce.Platform.Data.Infrastructure.Interceptors;
 using VirtoCommerce.Platform.Data.Model;
 
 namespace VirtoCommerce.Platform.Data.Repositories
 {
     public class PlatformRepository : EFRepositoryBase, IPlatformRepository
     {
-        public PlatformRepository(PlatformDbContext dbContext)
-            :base(dbContext)
+        public PlatformRepository(string nameOrConnectionString, params IInterceptor[] interceptors)
+            : base(nameOrConnectionString, null, interceptors)
         {
+            Database.SetInitializer<PlatformRepository>(null);
+            Configuration.LazyLoadingEnabled = false;
+        }
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
+            #region Change logging
+            modelBuilder.Entity<OperationLogEntity>().ToTable("PlatformOperationLog");
+            modelBuilder.Entity<OperationLogEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
+                        .IsUnique(false)
+                        .HasName("IX_ObjectType_ObjectId");
+            #endregion
+
+            #region Settings
+            modelBuilder.Entity<SettingEntity>().ToTable("PlatformSetting");
+            modelBuilder.Entity<SettingEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
+                        .IsUnique(false)
+                        .HasName("IX_ObjectType_ObjectId");
+
+            modelBuilder.Entity<SettingValueEntity>().ToTable("PlatformSettingValue");
+
+            modelBuilder.Entity<SettingValueEntity>().HasRequired(x => x.Setting)
+                        .WithMany(x => x.SettingValues)
+                        .HasForeignKey(x => x.SettingId)
+                        .WillCascadeOnDelete(true);
+
+            #endregion
+
+            #region Dynamic Properties
+
+            modelBuilder.Entity<DynamicPropertyEntity>().ToTable("PlatformDynamicProperty");
+            modelBuilder.Entity<DynamicPropertyEntity>().HasIndex(x => new { x.ObjectType, x.Name })
+                        .HasName("IX_PlatformDynamicProperty_ObjectType_Name")
+                        .IsUnique(true);
+
+            modelBuilder.Entity<DynamicPropertyNameEntity>().ToTable("PlatformDynamicPropertyName");
+            modelBuilder.Entity<DynamicPropertyNameEntity>().HasRequired(x => x.Property)
+                        .WithMany(x => x.DisplayNames)
+                        .HasForeignKey(x => x.PropertyId)
+                        .WillCascadeOnDelete(true); 
+            modelBuilder.Entity<DynamicPropertyNameEntity>()
+                        .HasIndex(x => new { x.PropertyId, x.Locale, x.Name })
+                        .HasName("IX_PlatformDynamicPropertyName_PropertyId_Locale_Name")
+                        .IsUnique(true);
+
+
+            modelBuilder.Entity<DynamicPropertyDictionaryItemEntity>().ToTable("PlatformDynamicPropertyDictionaryItem");
+            modelBuilder.Entity<DynamicPropertyDictionaryItemEntity>().HasRequired(x => x.Property)
+                        .WithMany(x => x.DictionaryItems)
+                        .HasForeignKey(x => x.PropertyId)
+                         .WillCascadeOnDelete(true);
+            modelBuilder.Entity<DynamicPropertyDictionaryItemEntity>()
+                        .HasIndex(x => new { x.PropertyId, x.Name })
+                        .HasName("IX_PlatformDynamicPropertyDictionaryItem_PropertyId_Name")
+                        .IsUnique(true);
+
+
+            modelBuilder.Entity<DynamicPropertyDictionaryItemNameEntity>().ToTable("PlatformDynamicPropertyDictionaryItemName");
+            modelBuilder.Entity<DynamicPropertyDictionaryItemNameEntity>().HasRequired(x => x.DictionaryItem)
+                        .WithMany(x => x.DisplayNames)
+                        .HasForeignKey(x => x.DictionaryItemId)
+                        .WillCascadeOnDelete(true);
+            modelBuilder.Entity<DynamicPropertyDictionaryItemNameEntity>()
+                        .HasIndex(x => new { x.DictionaryItemId, x.Locale, x.Name })
+                        .HasName("IX_PlatformDynamicPropertyDictionaryItemName_DictionaryItemId_Locale_Name")
+                        .IsUnique(true);
+
+            modelBuilder.Entity<DynamicPropertyObjectValueEntity>().ToTable("PlatformDynamicPropertyObjectValue");
+            modelBuilder.Entity<DynamicPropertyObjectValueEntity>().HasRequired(x => x.Property)
+                        .WithMany(x => x.ObjectValues)
+                        .HasForeignKey(x => x.PropertyId)
+                        .WillCascadeOnDelete(true);
+            modelBuilder.Entity<DynamicPropertyObjectValueEntity>().HasRequired(x => x.DictionaryItem)
+                        .WithMany(x => x.ObjectValues)
+                        .HasForeignKey(x => x.DictionaryItemId);
+            modelBuilder.Entity<DynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
+                        .IsUnique(false)
+                        .HasName("IX_ObjectType_ObjectId");
+            #endregion
+
+            #region Security
+
+            // Tables
+            modelBuilder.Entity<AccountEntity>().ToTable("PlatformAccount");
+            modelBuilder.Entity<AccountEntity>().HasIndex(x => x.UserName).HasName("IX_UserName").IsUnique(true);
+
+
+            modelBuilder.Entity<ApiAccountEntity>().ToTable("PlatformApiAccount");
+            modelBuilder.Entity<ApiAccountEntity>().HasRequired(x => x.Account)
+                        .WithMany(x => x.ApiAccounts)
+                        .HasForeignKey(x => x.AccountId)
+                        .WillCascadeOnDelete(true);
+            modelBuilder.Entity<ApiAccountEntity>().HasIndex(x => x.AppId).HasName("IX_AppId").IsUnique(true);
+
+            modelBuilder.Entity<RoleEntity>().ToTable("PlatformRole");
+
+            modelBuilder.Entity<PermissionEntity>().ToTable("PlatformPermission");
+
+            modelBuilder.Entity<RolePermissionEntity>().ToTable("PlatformRolePermission");
+            modelBuilder.Entity<RolePermissionEntity>().HasRequired(x => x.Permission)
+                        .WithMany(x => x.RolePermissions)
+                        .HasForeignKey(x => x.PermissionId)
+                        .WillCascadeOnDelete(true);
+
+            modelBuilder.Entity<RolePermissionEntity>().HasRequired(x => x.Role)
+                        .WithMany(x => x.RolePermissions)
+                        .HasForeignKey(x => x.RoleId)
+                        .WillCascadeOnDelete(true);
+
+            modelBuilder.Entity<RoleAssignmentEntity>().ToTable("PlatformRoleAssignment");
+            modelBuilder.Entity<RoleAssignmentEntity>().HasRequired(x => x.Account)
+                        .WithMany(x => x.RoleAssignments)
+                        .HasForeignKey(x => x.AccountId)
+                        .WillCascadeOnDelete(true); 
+
+            modelBuilder.Entity<RoleAssignmentEntity>().HasRequired(x => x.Role)
+                        .WithMany()
+                        .HasForeignKey(x => x.RoleId)
+                        .WillCascadeOnDelete(true);
+
+            modelBuilder.Entity<PermissionScopeEntity>().ToTable("PlatformPermissionScope");
+            modelBuilder.Entity<PermissionScopeEntity>().HasRequired(x => x.RolePermission)
+                        .WithMany(x => x.Scopes)
+                        .HasForeignKey(x => x.RolePermissionId)
+                        .WillCascadeOnDelete(true); ;
+            #endregion
+
+
+
+            base.OnModelCreating(modelBuilder);
         }
 
         #region IPlatformRepository Members

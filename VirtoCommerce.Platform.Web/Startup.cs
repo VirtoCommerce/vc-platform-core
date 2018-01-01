@@ -100,20 +100,13 @@ namespace VirtoCommerce.Platform.Web
                     template: "{controller}/{action=Index}/{id?}");
             });
 
-            //Force migrations
-            using (var serviceScope = app.ApplicationServices.CreateScope())
-            {
-                var platformDbContext = serviceScope.ServiceProvider.GetRequiredService<PlatformDbContext>();
-                platformDbContext.Database.Migrate();
-            }
-
+     
             //Using Smidge runtime bundling library for bundling modules js and css files
             app.UseSmidge(bundles =>
             {
                 app.UseModulesContent(bundles);
             });
           
-            app.UseDbTriggers();
             //Register platform settings
             app.UsePlatformSettings();
             app.UseModules();

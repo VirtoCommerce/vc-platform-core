@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Data.Model
 {
-    public class RoleAssignmentEntity : AuditableEntity
+    public class RoleAssignmentEntity : Entity
     {
         public string AccountId { get; set; }
         public string RoleId { get; set; }

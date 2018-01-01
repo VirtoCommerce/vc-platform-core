@@ -1,10 +1,11 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.Platform.Data.Model
 {
-    public class DynamicPropertyDictionaryItemNameEntity : AuditableEntity
+    public class DynamicPropertyDictionaryItemNameEntity : Entity
     {
         public string DictionaryItemId { get; set; }
         public virtual DynamicPropertyDictionaryItemEntity DictionaryItem { get; set; }
