@@ -87,55 +87,6 @@ namespace VirtoCommerce.Platform.Data.Repositories
                         .HasName("IX_ObjectType_ObjectId");        
             #endregion
 
-            #region Security
-
-            // Tables
-            modelBuilder.Entity<AccountEntity>().ToTable("PlatformAccount");
-            modelBuilder.Entity<AccountEntity>().HasIndex(x => x.UserName).HasName("IX_UserName").IsUnique(true);
-
-
-            modelBuilder.Entity<ApiAccountEntity>().ToTable("PlatformApiAccount");
-            modelBuilder.Entity<ApiAccountEntity>().HasOne(x => x.Account)
-                        .WithMany(x => x.ApiAccounts)
-                        .HasForeignKey(x => x.AccountId)
-                        .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<ApiAccountEntity>().HasIndex(x => x.AppId).HasName("IX_AppId").IsUnique(true);
-
-            modelBuilder.Entity<RoleEntity>().ToTable("PlatformRole");
-
-            modelBuilder.Entity<PermissionEntity>().ToTable("PlatformPermission");
-
-            modelBuilder.Entity<RolePermissionEntity>().ToTable("PlatformRolePermission");
-            modelBuilder.Entity<RolePermissionEntity>().HasOne(x => x.Permission)
-                        .WithMany(x => x.RolePermissions)
-                        .HasForeignKey(x => x.PermissionId)
-                        .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<RolePermissionEntity>().HasOne(x => x.Role)
-                        .WithMany(x => x.RolePermissions)
-                        .HasForeignKey(x => x.RoleId)
-                        .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<RoleAssignmentEntity>().ToTable("PlatformRoleAssignment");
-            modelBuilder.Entity<RoleAssignmentEntity>().HasOne(x => x.Account)
-                        .WithMany(x => x.RoleAssignments)
-                        .HasForeignKey(x => x.AccountId)
-                        .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<RoleAssignmentEntity>().HasOne(x => x.Role)
-                        .WithMany()
-                        .HasForeignKey(x => x.RoleId)
-                        .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<PermissionScopeEntity>().ToTable("PlatformPermissionScope");
-            modelBuilder.Entity<PermissionScopeEntity>().HasOne(x => x.RolePermission)
-                        .WithMany(x => x.Scopes)
-                        .HasForeignKey(x => x.RolePermissionId)
-                        .OnDelete(DeleteBehavior.Cascade);
-            #endregion
-
-        
-
             base.OnModelCreating(modelBuilder);
         }
 

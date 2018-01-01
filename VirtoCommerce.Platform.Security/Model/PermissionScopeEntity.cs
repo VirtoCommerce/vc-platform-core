@@ -1,7 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.Platform.Data.Model
+namespace VirtoCommerce.Platform.Security.Model
 {
     public class PermissionScopeEntity : Entity
     {
@@ -17,7 +20,7 @@ namespace VirtoCommerce.Platform.Data.Model
 
         #region Navigation properties
         public string RolePermissionId { get; set; }
-        public RolePermissionEntity RolePermission { get; set; } 
+        public RolePermissionEntity RolePermission { get; set; }
         #endregion
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.Platform.Data.Model;
 
@@ -20,35 +19,10 @@ namespace VirtoCommerce.Platform.Data.Repositories
         public IQueryable<DynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get { return GetAsQueryable<DynamicPropertyObjectValueEntity>(); } }
         public IQueryable<DynamicPropertyDictionaryItemEntity> DynamicPropertyDictionaryItems { get { return GetAsQueryable<DynamicPropertyDictionaryItemEntity>(); } }
 
-        public IQueryable<AccountEntity> Accounts { get { return GetAsQueryable<AccountEntity>(); } }
-        public IQueryable<ApiAccountEntity> ApiAccounts { get { return GetAsQueryable<ApiAccountEntity>(); } }
-        public IQueryable<RoleEntity> Roles { get { return GetAsQueryable<RoleEntity>(); } }
-        public IQueryable<PermissionEntity> Permissions { get { return GetAsQueryable<PermissionEntity>(); } }
-        public IQueryable<RoleAssignmentEntity> RoleAssignments { get { return GetAsQueryable<RoleAssignmentEntity>(); } }
-        public IQueryable<RolePermissionEntity> RolePermissions { get { return GetAsQueryable<RolePermissionEntity>(); } }
+     
         public IQueryable<OperationLogEntity> OperationLogs { get { return GetAsQueryable<OperationLogEntity>(); } }
 
-        public RoleEntity GetRoleById(string roleId)
-        {
-            return Roles.Include(x => x.RolePermissions.Select(y => y.Permission))
-                        .Include(x => x.RolePermissions.Select(y => y.Scopes))
-                        .FirstOrDefault(x => x.Id == roleId);
-        }
-
-        public AccountEntity GetAccountByName(string userName, UserDetails detailsLevel)
-        {
-            var query = Accounts;
-
-            if (detailsLevel == UserDetails.Full || detailsLevel == UserDetails.Export)
-            {
-                query = query
-                    .Include(a => a.RoleAssignments.Select(ra => ra.Role.RolePermissions.Select(rp => rp.Permission)))
-                    .Include(a => a.RoleAssignments.Select(ra => ra.Role.RolePermissions.Select(rp => rp.Scopes)))
-                    .Include(a => a.ApiAccounts);
-            }
-
-            return query.FirstOrDefault(a => a.UserName == userName);
-        }
+     
 
         public DynamicPropertyDictionaryItemEntity[] GetDynamicPropertyDictionaryItems(string propertyId)
         {

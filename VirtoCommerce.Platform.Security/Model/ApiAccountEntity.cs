@@ -1,13 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
-using VirtoCommerce.Platform.Core.Security;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
+using VirtoCommerce.Platform.Data.Model;
 
-namespace VirtoCommerce.Platform.Data.Model
+namespace VirtoCommerce.Platform.Security.Model
 {
     public class ApiAccountEntity : AuditableEntity
     {
         [StringLength(128)]
         public string Name { get; set; }
-        public ApiAccountType ApiAccountType { get; set; }
+        [StringLength(64)]
+        public string ApiAccountType { get; set; }
         public string AccountId { get; set; }
 
         [StringLength(128)]
@@ -16,6 +20,6 @@ namespace VirtoCommerce.Platform.Data.Model
         public string SecretKey { get; set; }
         public bool IsActive { get; set; }
 
-        public virtual AccountEntity Account { get; set; }
+        public virtual ApplicationUserEntity Account { get; set; }
     }
 }

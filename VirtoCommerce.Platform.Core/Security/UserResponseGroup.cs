@@ -1,6 +1,6 @@
 ﻿namespace VirtoCommerce.Platform.Core.Security
 {
-    public enum UserDetails
+    public enum UserResponseGroup
     {
         Undefined,
         Full,

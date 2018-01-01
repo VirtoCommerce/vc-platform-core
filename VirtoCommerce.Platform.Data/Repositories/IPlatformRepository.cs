@@ -12,18 +12,9 @@ namespace VirtoCommerce.Platform.Data.Repositories
         IQueryable<DynamicPropertyEntity> DynamicProperties { get; }
         IQueryable<DynamicPropertyDictionaryItemEntity> DynamicPropertyDictionaryItems { get; }
         IQueryable<DynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get; }
+        IQueryable<OperationLogEntity> OperationLogs { get; }
 
-		IQueryable<AccountEntity> Accounts { get; }
-		IQueryable<ApiAccountEntity> ApiAccounts { get; }
-		IQueryable<RoleEntity> Roles { get; }
-		IQueryable<PermissionEntity> Permissions { get; }
-		IQueryable<RoleAssignmentEntity> RoleAssignments { get; }
-		IQueryable<RolePermissionEntity> RolePermissions { get; }
-		IQueryable<OperationLogEntity> OperationLogs { get; }
-
-        RoleEntity GetRoleById(string id);
-		AccountEntity GetAccountByName(string userName, UserDetails detailsLevel);	
-		DynamicPropertyDictionaryItemEntity[] GetDynamicPropertyDictionaryItems(string propertyId);
+        DynamicPropertyDictionaryItemEntity[] GetDynamicPropertyDictionaryItems(string propertyId);
 		DynamicPropertyEntity[] GetDynamicPropertiesByIds(string[] ids);
 		DynamicPropertyEntity[] GetDynamicPropertiesForType(string objectType);
 		DynamicPropertyEntity[] GetObjectDynamicProperties(string[] objectTypes, string[] objectIds);

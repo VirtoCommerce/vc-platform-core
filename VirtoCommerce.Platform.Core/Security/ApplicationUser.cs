@@ -4,7 +4,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Core.Security
 {
-    public class ApplicationUserExtended: Entity, IHasChangesHistory
+    public class ApplicationUser: Entity, IHasChangesHistory
     {
         public string UserName { get; set; }
         public string Email { get; set; }

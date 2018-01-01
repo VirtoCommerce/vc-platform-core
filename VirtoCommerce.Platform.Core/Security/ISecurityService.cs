@@ -1,15 +1,16 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Core.Security
 {
     public interface ISecurityService
     {
-        Task<ApplicationUserExtended> FindByNameAsync(string userName, UserDetails detailsLevel);
-        Task<ApplicationUserExtended> FindByIdAsync(string userId, UserDetails detailsLevel);
-        Task<ApplicationUserExtended> FindByEmailAsync(string email, UserDetails detailsLevel);
-        Task<ApplicationUserExtended> FindByLoginAsync(string loginProvider, string providerKey, UserDetails detailsLevel);
-        Task<SecurityResult> CreateAsync(ApplicationUserExtended user);
-        Task<SecurityResult> UpdateAsync(ApplicationUserExtended user);
+        Task<ApplicationUser> FindByNameAsync(string userName, UserResponseGroup detailsLevel);
+        Task<ApplicationUser> FindByIdAsync(string userId, UserResponseGroup detailsLevel);
+        Task<ApplicationUser> FindByEmailAsync(string email, UserResponseGroup detailsLevel);
+        Task<ApplicationUser> FindByLoginAsync(string loginProvider, string providerKey, UserResponseGroup detailsLevel);
+        Task<SecurityResult> CreateAsync(ApplicationUser user);
+        Task<SecurityResult> UpdateAsync(ApplicationUser user);
         Task DeleteAsync(string[] names);
         ApiAccount GenerateNewApiAccount(ApiAccountType type);
         ApiAccount GenerateNewApiKey(ApiAccount account);
@@ -17,7 +18,7 @@ namespace VirtoCommerce.Platform.Core.Security
         Task<SecurityResult> ChangePasswordAsync(string name, string oldPassword, string newPassword);
         Task<SecurityResult> ResetPasswordAsync(string name, string newPassword);
         Task<SecurityResult> ResetPasswordAsync(string userId, string token, string newPassword);
-        Task<UserSearchResponse> SearchUsersAsync(UserSearchRequest request);
+        Task<GenericSearchResult<ApplicationUser>> SearchUsersAsync(UserSearchCriteria request);
         bool UserHasAnyPermission(string userName, string[] scopes, params string[] permissionIds);
         Permission[] GetAllPermissions();
         Permission[] GetUserPermissions(string userName);

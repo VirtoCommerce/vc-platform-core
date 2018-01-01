@@ -1,10 +1,13 @@
-﻿namespace VirtoCommerce.Platform.Core.Security
+﻿using System.Collections.Generic;
+using VirtoCommerce.Platform.Core.Common;
+
+namespace VirtoCommerce.Platform.Core.Security
 {
     public interface IRoleManagementService
     {
-        RoleSearchResponse SearchRoles(RoleSearchRequest request);
-        Role GetRole(string roleId);
-        void DeleteRole(string roleId);
-        Role AddOrUpdateRole(Role role);
+        GenericSearchResult<Role> SearchRoles(RoleSearchCriteria request);
+        IEnumerable<Role> GetRolesByIds(string[] roleIds);
+        void DeleteRoles(string[] roleId);
+        void SaveRolesChanges(Role[] roles);
     }
 }

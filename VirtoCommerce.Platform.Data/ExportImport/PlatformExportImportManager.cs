@@ -19,7 +19,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
     {
         public PlatformExportEntries()
         {
-            Users = new List<ApplicationUserExtended>();
+            Users = new List<ApplicationUser>();
             Settings = new List<SettingEntry>();
             DynamicPropertyDictionaryItems = new List<DynamicPropertyDictionaryItem>();
         }
@@ -30,7 +30,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                 return Users.Any() || Settings.Any();
             }
         }
-        public ICollection<ApplicationUserExtended> Users { get; set; }
+        public ICollection<ApplicationUser> Users { get; set; }
         public ICollection<Role> Roles { get; set; }
         public ICollection<SettingEntry> Settings { get; set; }
         public ICollection<DynamicPropertyDictionaryItem> DynamicPropertyDictionaryItems { get; set; }
@@ -167,14 +167,12 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                     progressCallback(progressInfo);
 
                     //First need import roles
-                    foreach (var role in platformEntries.Roles)
-                    {
-                        _roleManagementService.AddOrUpdateRole(role);
-                    }
+                    _roleManagementService.SaveRolesChanges(platformEntries.Roles.ToArray());
+
                     //Next create or update users
                     foreach (var user in platformEntries.Users)
                     {
-                        if (_securityService.FindByIdAsync(user.Id, UserDetails.Reduced).Result != null)
+                        if (_securityService.FindByIdAsync(user.Id, UserResponseGroup.Reduced).Result != null)
                         {
                             var dummy = _securityService.UpdateAsync(user).Result;
                         }
@@ -211,15 +209,15 @@ namespace VirtoCommerce.Platform.Data.ExportImport
             if (manifest.HandleSecurity)
             {
                 //Roles
-                platformExportObj.Roles = _roleManagementService.SearchRoles(new RoleSearchRequest { SkipCount = 0, TakeCount = int.MaxValue }).Roles;
+                platformExportObj.Roles = _roleManagementService.SearchRoles(new RoleSearchCriteria { Skip = 0, Take = int.MaxValue }).Results;
                 //users 
-                var usersResult = Task.Run(() => _securityService.SearchUsersAsync(new UserSearchRequest { TakeCount = int.MaxValue })).Result;
-                progressInfo.Description = $"Security: {usersResult.Users.Count()} users exporting...";
+                var usersResult = Task.Run(() => _securityService.SearchUsersAsync(new UserSearchCriteria { Take = int.MaxValue })).Result;
+                progressInfo.Description = $"Security: {usersResult.Results.Count()} users exporting...";
                 progressCallback(progressInfo);
 
-                foreach (var user in usersResult.Users)
+                foreach (var user in usersResult.Results)
                 {
-                    var userExt = Task.Run(() => _securityService.FindByIdAsync(user.Id, UserDetails.Export)).Result;
+                    var userExt = Task.Run(() => _securityService.FindByIdAsync(user.Id, UserResponseGroup.Export)).Result;
                     if (userExt != null)
                     {
                         platformExportObj.Users.Add(userExt);

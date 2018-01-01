@@ -11,6 +11,6 @@ namespace VirtoCommerce.Platform.Core.Security
         /// <summary>
         /// All security accounts 
         /// </summary>
-        ICollection<ApplicationUserExtended> SecurityAccounts { get; }
+        ICollection<ApplicationUser> SecurityAccounts { get; }
     }
 }
