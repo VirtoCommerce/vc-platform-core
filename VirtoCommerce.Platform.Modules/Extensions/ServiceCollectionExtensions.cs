@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Modules.External;
 
 namespace VirtoCommerce.Platform.Modules
 {
@@ -42,6 +43,7 @@ namespace VirtoCommerce.Platform.Modules
   
         public static IServiceCollection AddExternalModules(this IServiceCollection services, Action<ExternalModuleCatalogOptions> setupAction = null)
         {
+            services.AddSingleton<IExternalModulesClient, ExternalModulesClient>();
             services.AddSingleton<IExternalModuleCatalog, ExternalModuleCatalog>();
             services.AddSingleton<IModuleInstaller, ModuleInstaller>();
 

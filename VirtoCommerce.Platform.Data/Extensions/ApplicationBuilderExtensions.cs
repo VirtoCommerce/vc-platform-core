@@ -1,14 +1,25 @@
-﻿using System;
+using System;
 using EntityFrameworkCore.Triggers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Data.Model;
+using VirtoCommerce.Platform.Data.PushNotifications;
 
 namespace VirtoCommerce.Platform.Data.Extensions
 {
     public static class ApplicationBuilderExtensions
-    {
+    {      
+
+        public static IApplicationBuilder UsePlatformServices(this IApplicationBuilder appBuilder)
+        {
+            appBuilder.UseSignalR(routes =>
+            {
+                routes.MapHub<PushNotificationHub>("pushNotificationHub");
+            });
+            return appBuilder;
+        }
+
         public static IApplicationBuilder UseDbTriggers(this IApplicationBuilder appBuilder)
         {         
             Triggers<AuditableEntity>.Inserting += entry =>

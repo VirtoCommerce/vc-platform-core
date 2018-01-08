@@ -8,6 +8,6 @@ namespace VirtoCommerce.Platform.Web.Model.Security
 
         public IList<string> Permissions { get; set; } = new List<string>();
         public string UserName { get; set; }
-        public bool IsAdminsitrator { get; set; }
+        public bool isAdministrator { get; set; }
     }
 }

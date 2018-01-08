@@ -72,11 +72,12 @@ angular.module('platformWebApp')
 
     return retVal;
 }])
-.factory('platformWebApp.pushNotificationService', ['$rootScope', 'platformWebApp.signalRHubProxy', '$timeout', '$interval', '$state', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications', 'platformWebApp.signalRServerName',
-    function ($rootScope, signalRHubProxy, $timeout, $interval, $state, mainMenuService, eventTemplateResolver, notifications, signalRServerName) {
+.factory('platformWebApp.pushNotificationService', ['$rootScope', '$timeout', '$interval', '$state', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
+    function ($rootScope, $timeout, $interval, $state, mainMenuService, eventTemplateResolver, notifications) {
 
-        var clientPushHubProxy = signalRHubProxy(signalRServerName, 'clientPushHub', { logging: true });
-        clientPushHubProxy.on('notification', function (data) {
+        var connection = new signalR.HubConnection('/pushNotificationHub');
+
+        connection.on('send', function (data) {
             var notifyMenu = mainMenuService.findByPath('pushNotifications');
             var notificationTemplate = eventTemplateResolver.resolve(data, 'menu');
             //broadcast event

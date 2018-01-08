@@ -1,11 +1,10 @@
-﻿using System;
-using EntityFrameworkCore.Triggers;
+using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Settings;
-using VirtoCommerce.Platform.Data.Model;
+using VirtoCommerce.Platform.Data.PushNotifications;
 using VirtoCommerce.Platform.Data.Repositories;
 using VirtoCommerce.Platform.Data.Settings;
 
@@ -20,6 +19,8 @@ namespace VirtoCommerce.Platform.Data.Extensions
             services.AddSingleton<Func<IPlatformRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IPlatformRepository>());
             services.AddSingleton<ISettingsManager, SettingsManager>();
 
+            services.AddSignalR();
+            services.AddSingleton<IPushNotificationManager, PushNotificationHub>();
             return services;
 
         }

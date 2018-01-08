@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -12,6 +13,14 @@ namespace VirtoCommerce.Platform.Security
 {
     public static class ApplicationBuilderExtensions
     {
+        public static IApplicationBuilder UsePlatformPermissions(this IApplicationBuilder appBuilder)
+        {
+            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsProvider>();
+            permissionsProvider.RegisterPermissions(SecurityConstants.Permissions.AllPermissions.Select(x => new Permission() { Name = x }).ToArray());
+            return appBuilder;
+        }
+
+
         public static async Task<IApplicationBuilder> UseDefaultUsersAsync(this IApplicationBuilder appBuilder)
         {
             using (var scope = appBuilder.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())

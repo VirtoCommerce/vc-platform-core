@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
 
@@ -19,7 +19,7 @@ namespace VirtoCommerce.Platform.Web.Extensions
 
             if (path.StartsWith("~/"))
             {
-                result = System.IO.Path.Combine(result, path.Replace("~/", string.Empty));
+                result = Path.Combine(result, path.Replace("~/", string.Empty));
             }
             else if (Path.IsPathRooted(path))
             {

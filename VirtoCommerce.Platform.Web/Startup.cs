@@ -58,7 +58,7 @@ namespace VirtoCommerce.Platform.Web
             );
             services.AddExternalModules(options =>
             {
-                options.ModulesManifestUrl = new Uri(@"http://virtocommerce.blob.core.windows.net/sample-data");
+                options.ModulesManifestUrl = new Uri(@"https://raw.githubusercontent.com/VirtoCommerce/vc-modules/master/modules.json");
             });
 
             services.AddDbContext<SecurityDbContext>(options =>
@@ -234,7 +234,7 @@ namespace VirtoCommerce.Platform.Web
             app.UseModules();
             //Register platform permissions
             app.UsePlatformPermissions();
-
+            app.UsePlatformServices();
             //Seed default users
             app.UseDefaultUsersAsync().GetAwaiter().GetResult();
         }

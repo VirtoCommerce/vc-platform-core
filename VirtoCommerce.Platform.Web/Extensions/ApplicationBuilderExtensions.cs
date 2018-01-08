@@ -14,13 +14,7 @@ namespace VirtoCommerce.Platform.Web.Extensions
 {
     public static class ApplicationBuilderExtensions
     {
-        public static IApplicationBuilder UsePlatformPermissions(this IApplicationBuilder appBuilder)
-        {
-            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsProvider>();
-            permissionsProvider.RegisterPermissions(SecurityConstants.Permissions.AllPermissions.Select(x=> new Permission() { Name = x }).ToArray());
-            return appBuilder;
-        }
-
+    
         public static IApplicationBuilder UseVirtualFolders(this IApplicationBuilder appBuilder, Action<VirtualFolderOptions> configureVirtualFolders)
         {
             if (configureVirtualFolders != null)

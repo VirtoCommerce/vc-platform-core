@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System;
 
 namespace VirtoCommerce.Platform.Modules
 {
@@ -8,5 +6,6 @@ namespace VirtoCommerce.Platform.Modules
     {
         public Uri ModulesManifestUrl { get; set; }
         public string AuthorizationToken { get; set; }
+        public string[] AutoInstallModuleBundles { get; set; } = new[] { "commerce" };
     }
 }
