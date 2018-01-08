@@ -130,6 +130,7 @@ namespace VirtoCommerce.Platform.Web
                 // encrypted format, the following lines are required:
                 //
                 options.UseJsonWebTokens();
+                //TODO: Replace to X.509 certificate
                 options.AddEphemeralSigningKey();
             });
 
