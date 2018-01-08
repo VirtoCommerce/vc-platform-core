@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.Platform.Web.Model
+namespace VirtoCommerce.Platform.Web.Model.Security
 {
     public class UserDetail  : Entity
     {

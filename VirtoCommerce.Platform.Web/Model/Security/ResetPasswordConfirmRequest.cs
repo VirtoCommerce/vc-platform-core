@@ -1,4 +1,4 @@
-namespace VirtoCommerce.Platform.Web.Model
+namespace VirtoCommerce.Platform.Web.Model.Security
 {
     public class ResetPasswordConfirmRequest
     {
