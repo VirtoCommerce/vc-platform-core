@@ -6,26 +6,33 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
 {
     public class DbContextUnitOfWork : IUnitOfWork
     {
-        private readonly DbContext _dbContext;
+        /// <summary>
+        /// Gets the database context.
+        /// </summary>
+        /// <value>
+        /// The database context.
+        /// </value>
+        public DbContext DbContext { get; private set; }
 
-        public DbContextUnitOfWork(DbContext dbContext)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DbContextUnitOfWork"/> class.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        public DbContextUnitOfWork(DbContext context)
         {
-            _dbContext = dbContext;
+            DbContext = context;
+        }
+              
+        public int Commit()
+        {
+            var result = DbContext.SaveChanges();
+            return result;
         }
 
-        #region IUnitOfWork Members
-
-        public virtual int Commit()
+        public async Task<int> CommitAsync()
         {
-            _dbContext.ChangeTracker.DetectChanges();
-            return _dbContext.SaveChanges();
+            var result = await DbContext.SaveChangesAsync();
+            return result;
         }
-
-        public virtual async Task<int> CommitAsync()
-        {
-            _dbContext.ChangeTracker.DetectChanges();
-            return await _dbContext.SaveChangesAsync();
-        }
-        #endregion
     }
 }

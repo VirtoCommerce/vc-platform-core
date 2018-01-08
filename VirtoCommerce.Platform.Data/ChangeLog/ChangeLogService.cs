@@ -40,6 +40,7 @@ namespace VirtoCommerce.Platform.Data.ChangeLog
                 throw new ArgumentNullException(nameof(operationLogs));
             }
             var pkMap = new PrimaryKeyResolvingMap();
+
             using (var repository = _platformRepositoryFactory())
             using (var changeTracker = GetChangeTracker(repository))
             {

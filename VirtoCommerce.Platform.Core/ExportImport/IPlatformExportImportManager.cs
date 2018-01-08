@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace VirtoCommerce.Platform.Core.ExportImport
 {
@@ -7,7 +9,7 @@ namespace VirtoCommerce.Platform.Core.ExportImport
     {
         PlatformExportManifest GetNewExportManifest(string author);
         PlatformExportManifest ReadExportManifest(Stream stream);
-        void Export(Stream outStream, PlatformExportManifest exportOptions, Action<ExportImportProgressInfo> progressCallback);
-        void Import(Stream inputStream, PlatformExportManifest importOptions, Action<ExportImportProgressInfo> progressCallback);
+        Task ExportAsync(Stream outStream, PlatformExportManifest exportOptions, Action<ExportImportProgressInfo> progressCallback, CancellationToken cancellationToken);
+        Task ImportAsync(Stream inputStream, PlatformExportManifest importOptions, Action<ExportImportProgressInfo> progressCallback, CancellationToken cancellationToken);
     }
 }

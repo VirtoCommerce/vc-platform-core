@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using VirtoCommerce.Platform.Core.Common;
+﻿using System.Collections.Generic;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 namespace VirtoCommerce.Platform.Core.Security
 {
-    public class Role : Entity
+    public class Role : IdentityRole
     {
-        public string Name { get; set; }
         public string Description { get; set; }
-        public Permission[] Permissions { get; set; }
+        public IList<Permission> Permissions { get; set; }
     }
 }

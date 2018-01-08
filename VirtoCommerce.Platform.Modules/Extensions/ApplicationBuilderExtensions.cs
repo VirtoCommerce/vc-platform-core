@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Smidge;
 using Smidge.Models;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.Platform.Modules.Extensions
 {
@@ -20,8 +21,13 @@ namespace VirtoCommerce.Platform.Modules.Extensions
             {
                 var moduleManager = serviceScope.ServiceProvider.GetRequiredService<IModuleManager>();
                 var modules = GetInstalledModules(serviceScope.ServiceProvider);
+                var permissionsProvider = serviceScope.ServiceProvider.GetRequiredService<IPermissionsProvider>();
                 foreach (var module in modules)
                 {
+                    //Register modules permissions defined in the module manifest
+                    var modulePermissions = module.Permissions.SelectMany(x => x.Permissions).Select(x=> new Permission { Name = x.Name }).ToArray();
+                    permissionsProvider.RegisterPermissions(modulePermissions);
+
                     moduleManager.PostInitializeModule(module, serviceScope.ServiceProvider);
                 }
             }

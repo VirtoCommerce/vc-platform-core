@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,13 @@ namespace VirtoCommerce.Platform.Web.Extensions
 {
     public static class ApplicationBuilderExtensions
     {
+        public static IApplicationBuilder UsePlatformPermissions(this IApplicationBuilder appBuilder)
+        {
+            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsProvider>();
+            permissionsProvider.RegisterPermissions(SecurityConstants.Permissions.AllPermissions.Select(x=> new Permission() { Name = x }).ToArray());
+            return appBuilder;
+        }
+
         public static IApplicationBuilder UseVirtualFolders(this IApplicationBuilder appBuilder, Action<VirtualFolderOptions> configureVirtualFolders)
         {
             if (configureVirtualFolders != null)
@@ -37,24 +45,7 @@ namespace VirtoCommerce.Platform.Web.Extensions
                 Version = PlatformVersion.CurrentVersion.ToString(),
                 PlatformVersion = PlatformVersion.CurrentVersion.ToString(),
                 Settings = new[]
-               {
-                    new ModuleSettingsGroup
-                    {
-                        Name = "Platform|Security",
-                        Settings = new []
-                        {
-                            new ModuleSetting
-                            {
-                                Name = "VirtoCommerce.Platform.Security.AccountTypes",
-                                ValueType = ModuleSetting.TypeString,
-                                Title = "Account types",
-                                Description = "Dictionary for possible account types",
-                                IsArray = true,
-                                ArrayValues = Enum.GetNames(typeof(AccountType)),
-                                DefaultValue = AccountType.Manager.ToString()
-                            }
-                        }
-                    },
+               {                 
                     new ModuleSettingsGroup
                     {
                         Name = "Platform|User Profile",

@@ -1,11 +1,10 @@
 ﻿using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Data.Model;
 
 namespace VirtoCommerce.Platform.Data.Repositories
 {
-	public interface IPlatformRepository : IRepository
+    public interface IPlatformRepository : IRepository
 	{
 		IQueryable<SettingEntity> Settings { get; }
 

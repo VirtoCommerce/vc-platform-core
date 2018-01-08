@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace VirtoCommerce.Platform.Core.Common
 {
@@ -18,15 +13,14 @@ namespace VirtoCommerce.Platform.Core.Common
         /// <value>
         /// The unit of work.
         /// </value>
-		IUnitOfWork UnitOfWork { get; }
+        IUnitOfWork UnitOfWork { get; }
 
         /// <summary>
         /// Attaches the specified item to the context that is tracking objects.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="item">The item.</param>
-		void Attach<T>(T item) where T : class;    
-
+		void Attach<T>(T item) where T : class;
       
         /// <summary>
         /// Adds the specified item to the context in the Added state. Meaning item will be created in the underlying storage.
@@ -48,13 +42,5 @@ namespace VirtoCommerce.Platform.Core.Common
         /// <typeparam name="T"></typeparam>
         /// <param name="item">The item.</param>
 		void Remove<T>(T item) where T : class;
-
-        /// <summary>
-        /// Gets as queryable representation of the specified type.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-		IQueryable<T> GetAsQueryable<T>() where T : class;
-     
 	}
 }

@@ -1,7 +1,6 @@
-﻿angular.module('platformWebApp')
+angular.module('platformWebApp')
     .config(['$stateProvider', '$httpProvider', function ($stateProvider, $httpProvider) {
-
-	    $stateProvider.state('loginDialog', {
+        $stateProvider.state('loginDialog', {
 	        url: '/login',
 	        templateUrl: '$(Platform)/Scripts/app/security/login/login.tpl.html',
 	        controller: ['$scope', 'platformWebApp.authService', function ($scope, authService) {
@@ -99,6 +98,7 @@
 	}])
     .run(['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.metaFormsService', 'platformWebApp.widgetService', '$state', 'platformWebApp.authService',
         function ($rootScope, mainMenuService, metaFormsService, widgetService, $state, authService) {
+
         //Register module in main menu
         var menuItem = {
             path: 'configuration/security',

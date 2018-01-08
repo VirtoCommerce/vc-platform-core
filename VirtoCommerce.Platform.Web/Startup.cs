@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Linq;
+using AspNet.Security.OpenIdConnect.Primitives;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,14 +13,15 @@ using Smidge;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Core.Security.Search;
 using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.Platform.Data.Repositories;
-using VirtoCommerce.Platform.Data.Settings;
 using VirtoCommerce.Platform.Modules;
 using VirtoCommerce.Platform.Modules.Extensions;
 using VirtoCommerce.Platform.Security;
+using VirtoCommerce.Platform.Security.Authorization;
 using VirtoCommerce.Platform.Security.Repositories;
+using VirtoCommerce.Platform.Security.Services;
 using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Infrastructure;
 using VirtoCommerce.Platform.Web.Middelware;
@@ -59,8 +61,78 @@ namespace VirtoCommerce.Platform.Web
                 options.ModulesManifestUrl = new Uri(@"http://virtocommerce.blob.core.windows.net/sample-data");
             });
 
+            services.AddDbContext<SecurityDbContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("VirtoCommerce"));
+                // Register the entity sets needed by OpenIddict.
+                // Note: use the generic overload if you need
+                // to replace the default OpenIddict entities.
+                options.UseOpenIddict();
+            });
+
             services.AddIdentity<ApplicationUser, Role>()
+                    .AddEntityFrameworkStores<SecurityDbContext>()
                     .AddDefaultTokenProviders();
+
+            // Configure Identity to use the same JWT claims as OpenIddict instead
+            // of the legacy WS-Federation claims it uses by default (ClaimTypes),
+            // which saves you from doing the mapping in your authorization controller.
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.ClaimsIdentity.UserNameClaimType = OpenIdConnectConstants.Claims.Name;
+                options.ClaimsIdentity.UserIdClaimType = OpenIdConnectConstants.Claims.Subject;
+                options.ClaimsIdentity.RoleClaimType = OpenIdConnectConstants.Claims.Role;
+            });
+
+        
+           // Register the OAuth2 validation handler.
+            services.AddAuthentication().AddOAuthValidation();
+
+
+            // Register the OpenIddict services.
+            // Note: use the generic overload if you need
+            // to replace the default OpenIddict entities.
+            services.AddOpenIddict(options =>
+            {
+                // Register the Entity Framework stores.
+                options.AddEntityFrameworkCoreStores<SecurityDbContext>();
+
+
+                // Register the ASP.NET Core MVC binder used by OpenIddict.
+                // Note: if you don't call this method, you won't be able to
+                // bind OpenIdConnectRequest or OpenIdConnectResponse parameters.
+                options.AddMvcBinders();
+
+                // Enable the authorization, logout, token and userinfo endpoints.
+                options.EnableTokenEndpoint("/connect/token")
+                       .EnableUserinfoEndpoint("/api/security/userinfo");
+
+                // Note: the Mvc.Client sample only uses the code flow and the password flow, but you
+                // can enable the other flows if you need to support implicit or client credentials.
+                options.AllowPasswordFlow()
+                       .AllowRefreshTokenFlow()
+                       .AllowClientCredentialsFlow();
+
+                // Make the "client_id" parameter mandatory when sending a token request.
+                options.RequireClientIdentification();
+
+                // When request caching is enabled, authorization and logout requests
+                // are stored in the distributed cache by OpenIddict and the user agent
+                // is redirected to the same page with a single parameter (request_id).
+                // This allows flowing large OpenID Connect requests even when using
+                // an external authentication provider like Google, Facebook or Twitter.
+                options.EnableRequestCaching();
+
+                // During development, you can disable the HTTPS requirement.
+                options.DisableHttpsRequirement();
+
+                // Note: to use JWT access tokens instead of the default
+                // encrypted format, the following lines are required:
+                //
+                options.UseJsonWebTokens();
+                options.AddEphemeralSigningKey();
+            });
+
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -79,18 +151,14 @@ namespace VirtoCommerce.Platform.Web
 
                 // User settings
                 options.User.RequireUniqueEmail = true;
-            });
+            });         
 
-            services.ConfigureApplicationCookie(options =>
-            {
-                // Cookie settings
-                options.Cookie.HttpOnly = true;
-                options.Cookie.Expiration = TimeSpan.FromDays(150);
-                options.LoginPath = "/Account/Login"; // If the LoginPath is not set here, ASP.NET Core will default to /Account/Login
-                options.LogoutPath = "/Account/Logout"; // If the LogoutPath is not set here, ASP.NET Core will default to /Account/Logout
-                options.AccessDeniedPath = "/Account/AccessDenied"; // If the AccessDeniedPath is not set here, ASP.NET Core will default to /Account/AccessDenied
-                options.SlidingExpiration = true;
-            });
+
+            services.AddAuthorization();
+            // register the AuthorizationPolicyProvider which dynamically registers authorization policies for each permission defined in module manifest
+            services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+            //Platform authorization handler for policies based on permissions 
+            services.AddTransient<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
             // Add memory cache services
             services.AddMemoryCache();
@@ -98,9 +166,11 @@ namespace VirtoCommerce.Platform.Web
             services.AddSmidge(Configuration.GetSection("smidge"));
 
             services.AddPlatformServices(Configuration);
-            services.AddDbContext<SecurityDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("VirtoCommerce")));
-
+          
             services.AddScoped<IUserNameResolver, HttpContextUserResolver>();
+            services.AddSingleton<IPermissionsProvider, DefaultPermissionProvider>();
+            services.AddScoped<IRoleSearchService, RoleSearchService>();
+            services.AddScoped<IUserSearchService, UserSearchService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -118,6 +188,9 @@ namespace VirtoCommerce.Platform.Web
                 app.UseExceptionHandler("/Error");
             }
 
+            //Return all errors as Json response
+            app.UseMiddleware<ApiErrorWrappingMiddleware>();
+
             app.UseVirtualFolders(folderOptions =>
             {
                 folderOptions.Items.Add(PathString.FromUriComponent("/$(Platform)/Scripts"), "/js");
@@ -130,6 +203,8 @@ namespace VirtoCommerce.Platform.Web
 
             app.UseStaticFiles();
 
+            app.UseAuthentication();
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
@@ -141,7 +216,9 @@ namespace VirtoCommerce.Platform.Web
             using (var serviceScope = app.ApplicationServices.CreateScope())
             {
                 var platformDbContext = serviceScope.ServiceProvider.GetRequiredService<PlatformDbContext>();
+                var securityDbContext = serviceScope.ServiceProvider.GetRequiredService<SecurityDbContext>();
                 platformDbContext.Database.Migrate();
+                securityDbContext.Database.Migrate();
             }
 
             //Using Smidge runtime bundling library for bundling modules js and css files
@@ -154,8 +231,11 @@ namespace VirtoCommerce.Platform.Web
             //Register platform settings
             app.UsePlatformSettings();
             app.UseModules();
-          
-         
+            //Register platform permissions
+            app.UsePlatformPermissions();
+
+            //Seed default users
+            app.UseDefaultUsersAsync().GetAwaiter().GetResult();
         }
     }
 }

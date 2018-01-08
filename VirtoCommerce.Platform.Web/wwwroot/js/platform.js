@@ -14375,8 +14375,7 @@ angular.module('platformWebApp')
 
 angular.module('platformWebApp')
     .config(['$stateProvider', '$httpProvider', function ($stateProvider, $httpProvider) {
-
-	    $stateProvider.state('loginDialog', {
+        $stateProvider.state('loginDialog', {
 	        url: '/login',
 	        templateUrl: '$(Platform)/Scripts/app/security/login/login.tpl.html',
 	        controller: ['$scope', 'platformWebApp.authService', function ($scope, authService) {
@@ -14474,6 +14473,7 @@ angular.module('platformWebApp')
 	}])
     .run(['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.metaFormsService', 'platformWebApp.widgetService', '$state', 'platformWebApp.authService',
         function ($rootScope, mainMenuService, metaFormsService, widgetService, $state, authService) {
+
         //Register module in main menu
         var menuItem = {
             path: 'configuration/security',
@@ -14530,6 +14530,7 @@ angular.module('platformWebApp')
             template: '$(Platform)/Scripts/app/changeLog/widgets/operations-widget.tpl.html'
         }, 'accountDetail');
     }]);
+
 angular.module("platformWebApp")
 .config(
   ['$stateProvider', function ($stateProvider) {
@@ -22983,7 +22984,7 @@ angular.module('platformWebApp')
     });
 }]);
 angular.module('platformWebApp')
-.factory('platformWebApp.authService', ['$http', '$rootScope', '$cookieStore', '$state', '$interpolate', function ($http, $rootScope, $cookieStore, $state, $interpolate) {
+    .factory('platformWebApp.authService', ['$http', '$rootScope', '$cookieStore', '$state', '$interpolate', function ($http, $rootScope, $cookieStore, $state, $interpolate) {
     var serviceBase = 'api/platform/security/';
     var authContext = {
         userId: null,
@@ -22994,18 +22995,19 @@ angular.module('platformWebApp')
     };
 
     authContext.fillAuthData = function () {
-        $http.get(serviceBase + 'currentuser').then(
+        return $http.get(serviceBase + 'currentuser').then(
 			function (results) {
 			    changeAuth(results.data);
-			},
-            function (error) { });
+			});
     };
 
-    authContext.login = function (email, password, remember) {
+    authContext.login = function (email, password, remember) {       
         return $http.post(serviceBase + 'login/', { userName: email, password: password, rememberMe: remember }).then(
-			function (results) {
-			    changeAuth(results.data);
-			    return authContext.isAuthenticated;
+            function (results) {
+                if (results.data.succeeded) {
+                    return authContext.fillAuthData().then(function () { return authContext.isAuthenticated; })
+                }
+                return false;
 			});
     };
 
@@ -23054,14 +23056,14 @@ angular.module('platformWebApp')
         return hasPermission;
     };
 
-    function changeAuth(results) {
-        authContext.userId = results.id;
-        authContext.permissions = results.permissions;
-        authContext.userLogin = results.userName;
-        authContext.fullName = results.userLogin;
-        authContext.isAuthenticated = results.userName != null;
-        authContext.userType = results.userType;
-        authContext.isAdministrator = results.isAdministrator;
+    function changeAuth(user) {
+        authContext.userId = user.id;
+        authContext.permissions = user.permissions;
+        authContext.userLogin = user.userName;
+        authContext.fullName = user.userLogin;
+        authContext.isAuthenticated = user.userName != null;
+        authContext.userType = user.userType;
+        authContext.isAdministrator = user.isAdministrator;
         //Interpolate permissions to replace some template to real value
         if (authContext.permissions) {
             authContext.permissions = _.map(authContext.permissions, function (x) {

@@ -1,5 +1,5 @@
-﻿angular.module('platformWebApp')
-.factory('platformWebApp.authService', ['$http', '$rootScope', '$cookieStore', '$state', '$interpolate', function ($http, $rootScope, $cookieStore, $state, $interpolate) {
+angular.module('platformWebApp')
+    .factory('platformWebApp.authService', ['$http', '$rootScope', '$cookieStore', '$state', '$interpolate', function ($http, $rootScope, $cookieStore, $state, $interpolate) {
     var serviceBase = 'api/platform/security/';
     var authContext = {
         userId: null,
@@ -10,18 +10,19 @@
     };
 
     authContext.fillAuthData = function () {
-        $http.get(serviceBase + 'currentuser').then(
+        return $http.get(serviceBase + 'currentuser').then(
 			function (results) {
 			    changeAuth(results.data);
-			},
-            function (error) { });
+			});
     };
 
-    authContext.login = function (email, password, remember) {
+    authContext.login = function (email, password, remember) {       
         return $http.post(serviceBase + 'login/', { userName: email, password: password, rememberMe: remember }).then(
-			function (results) {
-			    changeAuth(results.data);
-			    return authContext.isAuthenticated;
+            function (results) {
+                if (results.data.succeeded) {
+                    return authContext.fillAuthData().then(function () { return authContext.isAuthenticated; })
+                }
+                return false;
 			});
     };
 
@@ -70,14 +71,14 @@
         return hasPermission;
     };
 
-    function changeAuth(results) {
-        authContext.userId = results.id;
-        authContext.permissions = results.permissions;
-        authContext.userLogin = results.userName;
-        authContext.fullName = results.userLogin;
-        authContext.isAuthenticated = results.userName != null;
-        authContext.userType = results.userType;
-        authContext.isAdministrator = results.isAdministrator;
+    function changeAuth(user) {
+        authContext.userId = user.id;
+        authContext.permissions = user.permissions;
+        authContext.userLogin = user.userName;
+        authContext.fullName = user.userLogin;
+        authContext.isAuthenticated = user.userName != null;
+        authContext.userType = user.userType;
+        authContext.isAdministrator = user.isAdministrator;
         //Interpolate permissions to replace some template to real value
         if (authContext.permissions) {
             authContext.permissions = _.map(authContext.permissions, function (x) {

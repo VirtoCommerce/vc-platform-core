@@ -8,9 +8,9 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
         public static void DisableChangesTracking(this IRepository repository)
         {
             //http://stackoverflow.com/questions/29106477/nullreferenceexception-in-entity-framework-from-trygetcachedrelatedend
-            if (repository is EFRepositoryBase efRepository)
+            if (repository.UnitOfWork is DbContextUnitOfWork dbContextUoW)
             {
-                efRepository.DbContext.ChangeTracker.AutoDetectChangesEnabled = false;
+                dbContextUoW.DbContext.ChangeTracker.AutoDetectChangesEnabled = false;
             }
         }
     }

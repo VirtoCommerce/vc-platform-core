@@ -1,11 +1,12 @@
 ﻿using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.Platform.Data.Model;
 
 namespace VirtoCommerce.Platform.Data.Repositories
 {
-    public class PlatformRepository : EFRepositoryBase, IPlatformRepository
+    public class PlatformRepository : DbContextRepositoryBase<PlatformDbContext>, IPlatformRepository
     {
         public PlatformRepository(PlatformDbContext dbContext)
             :base(dbContext)
@@ -13,16 +14,14 @@ namespace VirtoCommerce.Platform.Data.Repositories
         }
 
         #region IPlatformRepository Members
-        public IQueryable<SettingEntity> Settings { get { return GetAsQueryable<SettingEntity>(); } }
+        public IQueryable<SettingEntity> Settings { get { return DbContext.Set<SettingEntity>(); } }
 
-        public IQueryable<DynamicPropertyEntity> DynamicProperties { get { return GetAsQueryable<DynamicPropertyEntity>(); } }
-        public IQueryable<DynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get { return GetAsQueryable<DynamicPropertyObjectValueEntity>(); } }
-        public IQueryable<DynamicPropertyDictionaryItemEntity> DynamicPropertyDictionaryItems { get { return GetAsQueryable<DynamicPropertyDictionaryItemEntity>(); } }
-
-     
-        public IQueryable<OperationLogEntity> OperationLogs { get { return GetAsQueryable<OperationLogEntity>(); } }
+        public IQueryable<DynamicPropertyEntity> DynamicProperties { get { return DbContext.Set<DynamicPropertyEntity>(); } }
+        public IQueryable<DynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get { return DbContext.Set<DynamicPropertyObjectValueEntity>(); } }
+        public IQueryable<DynamicPropertyDictionaryItemEntity> DynamicPropertyDictionaryItems { get { return DbContext.Set<DynamicPropertyDictionaryItemEntity>(); } }
 
      
+        public IQueryable<OperationLogEntity> OperationLogs { get { return DbContext.Set<OperationLogEntity>(); } }
 
         public DynamicPropertyDictionaryItemEntity[] GetDynamicPropertyDictionaryItems(string propertyId)
         {
@@ -78,7 +77,9 @@ namespace VirtoCommerce.Platform.Data.Repositories
             return result;
         }
 
+    
+
         #endregion
-      
+
     }
 }
