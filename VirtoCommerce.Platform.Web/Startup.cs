@@ -172,7 +172,7 @@ namespace VirtoCommerce.Platform.Web
             // Register the Swagger generator
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info { /*Title = "VirtoCommerce Solution REST API documentation",*/ Version = "v1" });
+                c.SwaggerDoc("v1", new Info { Title = "VirtoCommerce Solution REST API documentation", Version = "v1" });
                 c.TagActionsBy(api => api.GroupByModuleName(services));
                 c.DocInclusionPredicate((docName, api) => true);
                 c.DescribeAllEnumsAsStrings();
