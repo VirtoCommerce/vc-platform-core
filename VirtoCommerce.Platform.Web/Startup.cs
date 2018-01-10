@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using AspNet.Security.OpenIdConnect.Primitives;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +10,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Smidge;
+using Swashbuckle.AspNetCore.Swagger;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
@@ -38,7 +41,7 @@ namespace VirtoCommerce.Platform.Web
 
         public IConfiguration Configuration { get; }
         public IHostingEnvironment HostingEnvironment { get; }
-
+        
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -165,6 +168,20 @@ namespace VirtoCommerce.Platform.Web
             services.AddMemoryCache();
             //Add Smidge runtime bundling library configuration
             services.AddSmidge(Configuration.GetSection("smidge"));
+            // Register the Swagger generator
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "VirtoCommerce Solution REST API documentation", Version = "v1" });
+                c.TagActionsBy(api => api.GroupByModuleName(services));
+                c.DocInclusionPredicate((docName, api) => true);
+                var xmlCommentsDirectoryPaths = new[]
+                {
+                    Path.Combine(HostingEnvironment.WebRootPath, "App_Data", "Modules"),
+                    Path.Combine(Directory.GetParent(HostingEnvironment.ContentRootPath).FullName, "Modules"),
+                    AppContext.BaseDirectory
+                };
+                c.AddModulesXmlComments(xmlCommentsDirectoryPaths);
+            });
 
             services.AddPlatformServices(Configuration);
           
@@ -202,7 +219,14 @@ namespace VirtoCommerce.Platform.Web
                 }
             });
 
+            app.UseDefaultFiles();
             app.UseStaticFiles();
+            app.UseFileServer(new FileServerOptions
+            {
+                RequestPath = "/docs",
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot", "swagger")),
+                EnableDefaultFiles = true //serve index.html at /{ options.RoutePrefix }/
+            });
 
             app.UseAuthentication();
 
@@ -227,7 +251,16 @@ namespace VirtoCommerce.Platform.Web
             {
                 app.UseModulesContent(bundles);
             });
-          
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Explore");
+                c.RoutePrefix = "docs";
+                c.EnabledValidator();
+            });
+
             app.UseDbTriggers();
             //Register platform settings
             app.UsePlatformSettings();
