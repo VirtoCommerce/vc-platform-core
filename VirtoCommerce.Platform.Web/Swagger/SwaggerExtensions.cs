@@ -1,24 +1,26 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Reflection;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using VirtoCommerce.Platform.Core.Modularity;
 
-namespace VirtoCommerce.Platform.Web.Extensions
+namespace VirtoCommerce.Platform.Web.Swagger
 {
     public static class SwaggerExtensions
     {
+        /// <summary>
+        /// grouping by Module Names in the ApiDescription
+        /// with comparing Assemlies
+        /// </summary>
+        /// <param name="api"></param>
+        /// <param name="services"></param>
+        /// <returns></returns>
         public static string GroupByModuleName(this ApiDescription api, IServiceCollection services)
         {
-            //var groupNameAttribute = (SwaggerGroupAttribute)api.ControllerAttributes().SingleOrDefault(attribute => attribute is SwaggerGroupAttribute);
-            var groups = api.Properties;
             var providerSnapshot = services.BuildServiceProvider();
-
             var moduleCatalog = providerSnapshot.GetRequiredService<ILocalModuleCatalog>();
             
             // ------
@@ -32,12 +34,17 @@ namespace VirtoCommerce.Platform.Web.Extensions
             }
             // ------
 
-            var moduleName = actionDescriptor.ControllerTypeInfo.Assembly.GetName().Name.Replace(".Web","");
-            var groupName = moduleCatalog.Modules.FirstOrDefault(m => m.ModuleName == moduleName);
+            var moduleAssembly = actionDescriptor?.ControllerTypeInfo.Assembly ?? Assembly.GetExecutingAssembly();
+            var groupName = moduleCatalog.Modules.FirstOrDefault(m => m.Assembly == moduleAssembly);
 
-            return groupName != null ? groupName.ModuleName : actionDescriptor?.ControllerName;
+            return groupName != null ? groupName.ModuleName : "Platform";
         }
 
+        /// <summary>
+        /// Add Comments/Descriptions from XML-files in the ApiDescription
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="xmlCommentsDirectoryPaths"></param>
         public static void AddModulesXmlComments(this SwaggerGenOptions options, string[] xmlCommentsDirectoryPaths)
         {
             foreach (var path in xmlCommentsDirectoryPaths)

@@ -28,6 +28,7 @@ using VirtoCommerce.Platform.Security.Services;
 using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Infrastructure;
 using VirtoCommerce.Platform.Web.Middelware;
+using VirtoCommerce.Platform.Web.Swagger;
 
 namespace VirtoCommerce.Platform.Web
 {
@@ -171,13 +172,18 @@ namespace VirtoCommerce.Platform.Web
             // Register the Swagger generator
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info { Title = "VirtoCommerce Solution REST API documentation", Version = "v1" });
+                c.SwaggerDoc("v1", new Info { /*Title = "VirtoCommerce Solution REST API documentation",*/ Version = "v1" });
                 c.TagActionsBy(api => api.GroupByModuleName(services));
                 c.DocInclusionPredicate((docName, api) => true);
+                c.DescribeAllEnumsAsStrings();
+                c.IgnoreObsoleteProperties();
+                c.IgnoreObsoleteActions();
+                c.OperationFilter<FileResponseTypeFilter>();
+                c.OperationFilter<OptionalParametersFilter>();
+                c.MapType<object>(() => new Schema { Type = "object" });
                 var xmlCommentsDirectoryPaths = new[]
                 {
-                    Path.Combine(HostingEnvironment.WebRootPath, "App_Data", "Modules"),
-                    Path.Combine(Directory.GetParent(HostingEnvironment.ContentRootPath).FullName, "Modules"),
+                    HostingEnvironment.MapPath("~/App_Data/Modules"),
                     AppContext.BaseDirectory
                 };
                 c.AddModulesXmlComments(xmlCommentsDirectoryPaths);
