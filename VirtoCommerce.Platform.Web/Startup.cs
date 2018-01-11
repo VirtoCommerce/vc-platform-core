@@ -260,7 +260,7 @@ namespace VirtoCommerce.Platform.Web
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Explore");
+                c.SwaggerEndpoint("/docs/v1/docs.json", "Explore");
                 c.RoutePrefix = "docs";
                 c.EnabledValidator();
             });
