@@ -180,6 +180,8 @@ namespace VirtoCommerce.Platform.Web
                 c.IgnoreObsoleteActions();
                 c.OperationFilter<FileResponseTypeFilter>();
                 c.OperationFilter<OptionalParametersFilter>();
+                c.OperationFilter<TagsFilter>();
+                c.DocumentFilter<TagsFilter>();
                 c.MapType<object>(() => new Schema { Type = "object" });
                 var xmlCommentsDirectoryPaths = new[]
                 {
