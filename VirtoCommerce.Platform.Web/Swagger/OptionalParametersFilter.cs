@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using VirtoCommerce.Platform.Core.Common;
@@ -16,10 +17,10 @@ namespace VirtoCommerce.Platform.Web.Swagger
             {
                 return;
             }
-
+            
             var optionalParameters = context.ApiDescription.ParameterDescriptions
-                .Where(p => p.ParameterDescriptor.ParameterType != null &&
-                p.ParameterDescriptor.ParameterType.CustomAttributes.OfType<SwaggerOptionalAttribute>().Any()).ToList();
+                .Where(p => p.ParameterDescriptor != null &&
+                ((ControllerParameterDescriptor)p.ParameterDescriptor).ParameterInfo.CustomAttributes.Any(attr => attr.AttributeType == typeof(SwaggerOptionalAttribute))).ToList();
 
             foreach (var apiParameter in optionalParameters)
             {
