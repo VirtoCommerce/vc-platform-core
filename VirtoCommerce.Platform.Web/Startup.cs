@@ -208,6 +208,7 @@ namespace VirtoCommerce.Platform.Web
                 app.UseExceptionHandler("/Error");
             }
 
+            app.UseMvc();
             //Return all errors as Json response
             app.UseMiddleware<ApiErrorWrappingMiddleware>();
 
@@ -256,7 +257,7 @@ namespace VirtoCommerce.Platform.Web
                 app.UseModulesContent(bundles);
             });
             // Enable middleware to serve generated Swagger as a JSON endpoint.
-            app.UseSwagger();
+            app.UseSwagger(c => c.RouteTemplate = "docs/{documentName}/docs.json");
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
