@@ -1,11 +1,14 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Modules;
 
 namespace VirtoCommerce.Platform.Web.Swagger
 {
@@ -44,9 +47,18 @@ namespace VirtoCommerce.Platform.Web.Swagger
         /// Add Comments/Descriptions from XML-files in the ApiDescription
         /// </summary>
         /// <param name="options"></param>
-        /// <param name="xmlCommentsDirectoryPaths"></param>
-        public static void AddModulesXmlComments(this SwaggerGenOptions options, string[] xmlCommentsDirectoryPaths)
+        /// <param name="services"></param>
+        public static void AddModulesXmlComments(this SwaggerGenOptions options, IServiceCollection services)
         {
+            var provider = services.BuildServiceProvider();
+            var localStorageModuleCatalogOptions = provider.GetService<IOptions<LocalStorageModuleCatalogOptions>>().Value;
+
+            var xmlCommentsDirectoryPaths = new[]
+            {
+                localStorageModuleCatalogOptions.DiscoveryPath,
+                AppContext.BaseDirectory
+            };
+
             foreach (var path in xmlCommentsDirectoryPaths)
             {
                 var xmlComments = Directory.GetFiles(path, "*.Web.XML");

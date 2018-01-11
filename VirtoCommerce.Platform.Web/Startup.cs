@@ -58,8 +58,7 @@ namespace VirtoCommerce.Platform.Web
                 options.DiscoveryPath = HostingEnvironment.MapPath(@"~/Modules");
                 options.ProbingPath = HostingEnvironment.MapPath("~/App_Data/Modules");
                 options.VirtualPath = "~/Modules";
-            }
-            );
+            });
             services.AddExternalModules(options =>
             {
                 options.ModulesManifestUrl = new Uri(@"https://raw.githubusercontent.com/VirtoCommerce/vc-modules/master/modules.json");
@@ -183,12 +182,7 @@ namespace VirtoCommerce.Platform.Web
                 c.OperationFilter<TagsFilter>();
                 c.DocumentFilter<TagsFilter>();
                 c.MapType<object>(() => new Schema { Type = "object" });
-                var xmlCommentsDirectoryPaths = new[]
-                {
-                    HostingEnvironment.MapPath("~/App_Data/Modules"),
-                    AppContext.BaseDirectory
-                };
-                c.AddModulesXmlComments(xmlCommentsDirectoryPaths);
+                c.AddModulesXmlComments(services);
             });
 
             services.AddPlatformServices(Configuration);
@@ -229,6 +223,8 @@ namespace VirtoCommerce.Platform.Web
 
             app.UseDefaultFiles();
             app.UseStaticFiles();
+
+            //register swagger content
             app.UseFileServer(new FileServerOptions
             {
                 RequestPath = "/docs",
