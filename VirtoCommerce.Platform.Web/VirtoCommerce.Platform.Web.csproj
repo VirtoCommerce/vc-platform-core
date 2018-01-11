@@ -5,6 +5,9 @@
     <AssemblyVersion>2.13.18.0</AssemblyVersion>
     <Version>2.13.18</Version>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Remove="wwwroot\Scripts\**" />
     <Content Remove="wwwroot\Scripts\**" />
@@ -27,6 +30,7 @@
     <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="2.0.0-rc1-final" />
     <PackageReference Include="OpenIddict.Mvc" Version="2.0.0-rc1-final" />
     <PackageReference Include="Smidge" Version="3.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="1.1.0" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.1" />

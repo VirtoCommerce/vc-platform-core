@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -68,7 +68,10 @@ namespace VirtoCommerce.Platform.Data.Settings
                     }
                 }
                 //Add cache  expiration token for setting
-                cacheEntry.AddExpirationToken(SettingsCacheRegion.CreateChangeToken(setting));
+                if (setting != null)
+                {
+                    cacheEntry.AddExpirationToken(SettingsCacheRegion.CreateChangeToken(setting));
+                }
 
                 return setting;
             });

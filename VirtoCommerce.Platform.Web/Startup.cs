@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Primitives;
@@ -12,7 +13,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Smidge;
+using Swashbuckle.AspNetCore.Swagger;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Jobs;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -30,6 +33,7 @@ using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Hangfire;
 using VirtoCommerce.Platform.Web.Infrastructure;
 using VirtoCommerce.Platform.Web.Middelware;
+using VirtoCommerce.Platform.Web.Swagger;
 
 namespace VirtoCommerce.Platform.Web
 {
@@ -43,7 +47,7 @@ namespace VirtoCommerce.Platform.Web
 
         public IConfiguration Configuration { get; }
         public IHostingEnvironment HostingEnvironment { get; }
-
+        
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -60,8 +64,7 @@ namespace VirtoCommerce.Platform.Web
                 options.DiscoveryPath = HostingEnvironment.MapPath(@"~/Modules");
                 options.ProbingPath = HostingEnvironment.MapPath("~/App_Data/Modules");
                 options.VirtualPath = "~/Modules";
-            }
-            );
+            });
             services.AddExternalModules(options =>
             {
                 options.ModulesManifestUrl = new Uri(@"https://raw.githubusercontent.com/VirtoCommerce/vc-modules/master/modules.json");
@@ -179,6 +182,22 @@ namespace VirtoCommerce.Platform.Web
             services.AddMemoryCache();
             //Add Smidge runtime bundling library configuration
             services.AddSmidge(Configuration.GetSection("smidge"));
+            // Register the Swagger generator
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "VirtoCommerce Solution REST API documentation", Version = "v1" });
+                c.TagActionsBy(api => api.GroupByModuleName(services));
+                c.DocInclusionPredicate((docName, api) => true);
+                c.DescribeAllEnumsAsStrings();
+                c.IgnoreObsoleteProperties();
+                c.IgnoreObsoleteActions();
+                c.OperationFilter<FileResponseTypeFilter>();
+                c.OperationFilter<OptionalParametersFilter>();
+                c.OperationFilter<TagsFilter>();
+                c.DocumentFilter<TagsFilter>();
+                c.MapType<object>(() => new Schema { Type = "object" });
+                c.AddModulesXmlComments(services);
+            });
 
             //Add SignalR for push notifications
             services.AddSignalR();
@@ -213,6 +232,7 @@ namespace VirtoCommerce.Platform.Web
                 app.UseExceptionHandler("/Error");
             }
 
+            app.UseMvc();
             //Return all errors as Json response
             app.UseMiddleware<ApiErrorWrappingMiddleware>();
 
@@ -226,7 +246,16 @@ namespace VirtoCommerce.Platform.Web
                 }
             });
 
+            app.UseDefaultFiles();
             app.UseStaticFiles();
+
+            //register swagger content
+            app.UseFileServer(new FileServerOptions
+            {
+                RequestPath = "/docs",
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot", "swagger")),
+                EnableDefaultFiles = true //serve index.html at /{ options.RoutePrefix }/
+            });
 
             app.UseAuthentication();
 
@@ -251,7 +280,16 @@ namespace VirtoCommerce.Platform.Web
             {
                 app.UseModulesContent(bundles);
             });
-          
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger(c => c.RouteTemplate = "docs/{documentName}/docs.json");
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/docs/v1/docs.json", "Explore");
+                c.RoutePrefix = "docs";
+                c.EnabledValidator();
+            });
+
             app.UseDbTriggers();
             //Register platform settings
             app.UsePlatformSettings();
