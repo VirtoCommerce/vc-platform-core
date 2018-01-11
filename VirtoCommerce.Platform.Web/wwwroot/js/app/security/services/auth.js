@@ -43,7 +43,7 @@ angular.module('platformWebApp')
     authContext.logout = function () {
         changeAuth({});
 
-        $http.post(serviceBase + 'logout/').then(function (result) {
+        $http.get(serviceBase + 'logout/').then(function (result) {
         });
     };
 

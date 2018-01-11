@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
+using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -327,8 +328,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                                 };
                                 //reset finished date
                                 notification.Finished = null;
-                                //TODO: Add hangfire
-                                //BackgroundJob.Enqueue(() => ModuleBackgroundJob(options, notification));
+
+                                BackgroundJob.Enqueue(() => ModuleBackgroundJob(options, notification));
                             }
                         }
                     }
@@ -350,7 +351,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                     lock (_lockObject)
                     {
                         notification.ProgressLog.Add(m);
-                        _pushNotifier.Upsert(notification);
+                        _pushNotifier.Send(notification);
                     }
                 });
 
@@ -380,7 +381,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                     Level = ProgressMessageLevel.Info,
                     Message = "Installation finished.",
                 });
-                _pushNotifier.Upsert(notification);
+                _pushNotifier.Send(notification);
             }
         }
 
@@ -423,10 +424,9 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                     break;
             }
 
-            _pushNotifier.Upsert(notification);
+            _pushNotifier.Send(notification);
 
-            //TODO: Add hangfire
-            //BackgroundJob.Enqueue(() => ModuleBackgroundJob(options, notification));
+            BackgroundJob.Enqueue(() => ModuleBackgroundJob(options, notification));
 
             return notification;
         }

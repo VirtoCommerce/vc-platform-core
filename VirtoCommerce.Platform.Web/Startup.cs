@@ -1,6 +1,9 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Primitives;
+using Hangfire;
+using Hangfire.MemoryStorage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -11,18 +14,20 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Smidge;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Jobs;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.Platform.Core.Security.Search;
 using VirtoCommerce.Platform.Data.Extensions;
+using VirtoCommerce.Platform.Data.PushNotifications;
 using VirtoCommerce.Platform.Data.Repositories;
 using VirtoCommerce.Platform.Modules;
 using VirtoCommerce.Platform.Modules.Extensions;
 using VirtoCommerce.Platform.Security;
 using VirtoCommerce.Platform.Security.Authorization;
+using VirtoCommerce.Platform.Security.Extensions;
 using VirtoCommerce.Platform.Security.Repositories;
-using VirtoCommerce.Platform.Security.Services;
 using VirtoCommerce.Platform.Web.Extensions;
+using VirtoCommerce.Platform.Web.Hangfire;
 using VirtoCommerce.Platform.Web.Infrastructure;
 using VirtoCommerce.Platform.Web.Middelware;
 
@@ -45,6 +50,7 @@ namespace VirtoCommerce.Platform.Web
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             services.Configure<DemoOptions>(Configuration.GetSection("VirtoCommerce"));
+            services.Configure<HangfireOptions>(Configuration.GetSection("VirtoCommerce:Jobs"));
 
             PlatformVersion.CurrentVersion = SemanticVersion.Parse(Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default.Application.ApplicationVersion);
 
@@ -87,7 +93,6 @@ namespace VirtoCommerce.Platform.Web
         
            // Register the OAuth2 validation handler.
             services.AddAuthentication().AddOAuthValidation();
-
 
             // Register the OpenIddict services.
             // Note: use the generic overload if you need
@@ -134,7 +139,6 @@ namespace VirtoCommerce.Platform.Web
                 options.AddEphemeralSigningKey();
             });
 
-
             services.Configure<IdentityOptions>(options =>
             {
                 // Password settings
@@ -152,7 +156,17 @@ namespace VirtoCommerce.Platform.Web
 
                 // User settings
                 options.User.RequireUniqueEmail = true;
-            });         
+            });
+
+            //always  return 401 instead of 302 for unauthorized  requests
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.Events.OnRedirectToLogin = context =>
+                {
+                    context.Response.StatusCode = 401;
+                    return Task.CompletedTask;
+                };
+            });
 
 
             services.AddAuthorization();
@@ -166,12 +180,22 @@ namespace VirtoCommerce.Platform.Web
             //Add Smidge runtime bundling library configuration
             services.AddSmidge(Configuration.GetSection("smidge"));
 
+            //Add SignalR for push notifications
+            services.AddSignalR();
+
             services.AddPlatformServices(Configuration);
-          
-            services.AddScoped<IUserNameResolver, HttpContextUserResolver>();
-            services.AddSingleton<IPermissionsProvider, DefaultPermissionProvider>();
-            services.AddScoped<IRoleSearchService, RoleSearchService>();
-            services.AddScoped<IUserSearchService, UserSearchService>();
+            services.AddSecurityServices();
+            
+            var hangfireOptions = new HangfireOptions();
+            Configuration.GetSection("VirtoCommerce:Hangfire").Bind(hangfireOptions);
+            if (hangfireOptions.JobStorageType == HangfireJobStorageType.SqlServer)
+            {
+                services.AddHangfire(config => config.UseSqlServerStorage(Configuration.GetConnectionString("VirtoCommerce")));
+            }
+            else
+            {
+                services.AddHangfire(config => config.UseMemoryStorage() );
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -234,9 +258,24 @@ namespace VirtoCommerce.Platform.Web
             app.UseModules();
             //Register platform permissions
             app.UsePlatformPermissions();
-            app.UsePlatformServices();
+
+            //Setup SignalR hub
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<PushNotificationHub>("pushNotificationHub");
+            });
+
             //Seed default users
             app.UseDefaultUsersAsync().GetAwaiter().GetResult();
+
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions { Authorization = new [] { new HangfireAuthorizationHandler() }});
+            app.UseHangfireServer(new BackgroundJobServerOptions
+            {
+                // Create some queues for job prioritization.
+                // Normal equals 'default', because Hangfire depends on it.
+                Queues = new[] { JobPriority.High, JobPriority.Normal, JobPriority.Low }
+            });
+
         }
     }
 }

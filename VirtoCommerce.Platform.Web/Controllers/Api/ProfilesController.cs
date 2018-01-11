@@ -56,7 +56,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("currentuser")]
         [Authorize]
-        public async Task<ActionResult> UpdateCurrentUserProfile(UserProfile userProfile)
+        public async Task<ActionResult> UpdateCurrentUserProfile([FromBody] UserProfile userProfile)
         {
             var currentUser = await _userManager.FindByNameAsync(User.Identity.Name);
             if (currentUser.Id != userProfile.Id)
