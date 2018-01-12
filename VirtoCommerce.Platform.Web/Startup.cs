@@ -232,7 +232,6 @@ namespace VirtoCommerce.Platform.Web
                 app.UseExceptionHandler("/Error");
             }
 
-            app.UseMvc();
             //Return all errors as Json response
             app.UseMiddleware<ApiErrorWrappingMiddleware>();
 
