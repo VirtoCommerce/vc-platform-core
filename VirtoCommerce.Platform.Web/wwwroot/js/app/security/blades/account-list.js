@@ -1,4 +1,4 @@
-﻿angular.module('platformWebApp')
+angular.module('platformWebApp')
 .controller('platformWebApp.accountListController', ['$scope', 'platformWebApp.accounts', 'platformWebApp.dialogService', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeNavigationService', 'platformWebApp.bladeUtils',
 function ($scope, accounts, dialogService, uiGridHelper, bladeNavigationService, bladeUtils) {
     $scope.uiGridConstants = uiGridHelper.uiGridConstants;
@@ -10,13 +10,13 @@ function ($scope, accounts, dialogService, uiGridHelper, bladeNavigationService,
         accounts.search({
             keyword: filter.keyword,
             sort: uiGridHelper.getSortExpression($scope),
-            skipCount: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
-            takeCount: $scope.pageSettings.itemsPerPageCount
+            skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
+            take: $scope.pageSettings.itemsPerPageCount
         }, function (data) {
             blade.isLoading = false;
 
             $scope.pageSettings.totalItems = data.totalCount;
-            blade.currentEntities = data.users;
+            blade.currentEntities = data.results;
         }, function (error) {
             bladeNavigationService.setError('Error ' + error.status, blade);
         });

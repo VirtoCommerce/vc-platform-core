@@ -20,7 +20,7 @@ function ($scope, bladeNavigationService, eventTemplateResolver, notifications) 
     blade.refresh = function () {
         blade.isLoading = true;
         var start = $scope.pageSettings.currentPage * $scope.pageSettings.itemsPerPageCount - $scope.pageSettings.itemsPerPageCount;
-        notifications.query({ start: start, count: $scope.pageSettings.itemsPerPageCount, orderBy: getOrderByExpression() }, function (data, status, headers, config) {
+        notifications.query({ skip: start, take: $scope.pageSettings.itemsPerPageCount, sort: getOrderByExpression() }, function (data, status, headers, config) {
             angular.forEach(data.notifyEvents, function (x) {
                 notificationTemplate = eventTemplateResolver.resolve(x, 'history');
                 x.template = notificationTemplate.template;

@@ -9,17 +9,8 @@ using VirtoCommerce.Platform.Data.PushNotifications;
 namespace VirtoCommerce.Platform.Data.Extensions
 {
     public static class ApplicationBuilderExtensions
-    {      
-
-        public static IApplicationBuilder UsePlatformServices(this IApplicationBuilder appBuilder)
-        {
-            appBuilder.UseSignalR(routes =>
-            {
-                routes.MapHub<PushNotificationHub>("pushNotificationHub");
-            });
-            return appBuilder;
-        }
-
+    {   
+  
         public static IApplicationBuilder UseDbTriggers(this IApplicationBuilder appBuilder)
         {         
             Triggers<AuditableEntity>.Inserting += entry =>

@@ -5,6 +5,7 @@ namespace VirtoCommerce.Platform.Core.Security
         public static class Claims
         {
             public const string PermissionClaimType = "permission";
+            public const string UserNameClaimType = "username";
         }
 
         public static class Roles

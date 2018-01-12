@@ -1,8 +1,11 @@
-﻿namespace VirtoCommerce.Platform.Core.PushNotifications
+using System.Threading.Tasks;
+
+namespace VirtoCommerce.Platform.Core.PushNotifications
 {
     public interface IPushNotificationManager
     {
-        void Upsert(PushNotification notification);
+        void Send(PushNotification notification);
+        Task SendAsync(PushNotification notification);
         PushNotificationSearchResult SearchNotifies(string userId, PushNotificationSearchCriteria criteria);
 
     }

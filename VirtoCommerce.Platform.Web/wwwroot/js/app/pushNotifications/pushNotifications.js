@@ -75,9 +75,14 @@ angular.module('platformWebApp')
 .factory('platformWebApp.pushNotificationService', ['$rootScope', '$timeout', '$interval', '$state', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
     function ($rootScope, $timeout, $interval, $state, mainMenuService, eventTemplateResolver, notifications) {
 
-        var connection = new signalR.HubConnection('/pushNotificationHub');
+        //SignalR setup connection
+         var transportType = signalR.TransportType.WebSockets;
+         var http = new signalR.HttpConnection('/pushNotificationHub', { transport: transportType });
+         var connection = new signalR.HubConnection(http);
+         connection.start();
 
-        connection.on('send', function (data) {
+
+        connection.on('Send', function (data) {
             var notifyMenu = mainMenuService.findByPath('pushNotifications');
             var notificationTemplate = eventTemplateResolver.resolve(data, 'menu');
             //broadcast event

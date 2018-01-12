@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace VirtoCommerce.Platform.Core.Common
 {
-    public abstract class GenericSearchCriteria : ValueObject
+    public abstract class SearchCriteriaBase : ValueObject
     {
         public string ResponseGroup { get; set; }
 
@@ -32,14 +33,19 @@ namespace VirtoCommerce.Platform.Core.Common
 
         public IList<string> ObjectIds { get; set; }
 
+        /// <summary>
+        /// Search phrase
+        /// </summary>
         public string Keyword { get; set; }
 
         /// <summary>
         /// Search phrase language 
         /// </summary>
         public string LanguageCode { get; set; }
-     
-        public virtual SortInfo[] SortInfos { get; set; }
+
+        public string Sort { get; set; }
+
+        public virtual SortInfo[] SortInfos => SortInfo.Parse(Sort).ToArray();
 
 
         public int Skip { get; set; }

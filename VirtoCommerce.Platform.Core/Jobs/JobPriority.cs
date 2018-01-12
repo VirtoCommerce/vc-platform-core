@@ -1,4 +1,4 @@
-namespace VirtoCommerce.Platform.Core.Web.Jobs
+namespace VirtoCommerce.Platform.Core.Jobs
 {
     public class JobPriority
     {

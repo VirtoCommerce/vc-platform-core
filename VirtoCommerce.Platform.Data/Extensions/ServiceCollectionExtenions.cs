@@ -1,4 +1,5 @@
 using System;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,9 +19,7 @@ namespace VirtoCommerce.Platform.Data.Extensions
             services.AddTransient<IPlatformRepository, PlatformRepository>();
             services.AddSingleton<Func<IPlatformRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IPlatformRepository>());
             services.AddSingleton<ISettingsManager, SettingsManager>();
-
-            services.AddSignalR();
-            services.AddSingleton<IPushNotificationManager, PushNotificationHub>();
+            services.AddSingleton<IPushNotificationManager, PushNotificationManager>();
             return services;
 
         }
