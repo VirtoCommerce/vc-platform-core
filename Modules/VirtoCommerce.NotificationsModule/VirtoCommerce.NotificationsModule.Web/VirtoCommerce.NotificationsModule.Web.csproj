@@ -13,8 +13,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Properties\" />
-    <Folder Include="Scripts\" />
+    <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
+    <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Data\VirtoCommerce.Platform.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="module.manifest">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
