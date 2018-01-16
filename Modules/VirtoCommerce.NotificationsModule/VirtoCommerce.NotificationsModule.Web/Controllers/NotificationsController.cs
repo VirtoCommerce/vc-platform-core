@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace VirtoCommerce.NotificationsModule.Web.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/notification/notifications")]
     public class NotificationsController : Controller
     {
         [HttpGet]

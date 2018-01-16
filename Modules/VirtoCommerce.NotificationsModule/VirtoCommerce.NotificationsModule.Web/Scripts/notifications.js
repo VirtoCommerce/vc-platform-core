@@ -10,18 +10,18 @@ angular.module(moduleTemplateName, [])
         function ($stateProvider, $urlRouterProvider) {
             $stateProvider
                 .state('workspace.notificationsModule', {
-                    url: '/notifications',
+                    url: '/notifications?objectId&objectTypeId',
                     templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-                    controller: [
-                        '$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-                            var newBlade = {
+                    controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+                            var blade = {
                                 id: 'notifications',
-                                controller: 'virtoCommerce.notificationsModule.notificationsController',
-                                template: 'Modules/$(virtoCommerce.Notifications)/Scripts/blades/notifications-list.tpl.html',
+                                title: 'platform.menu.notifications',
+                                subtitle: 'platform.blades.notifications-menu.subtitle',
+                                controller: 'virtoCommerce.notificationsModule.notificationsMenuController',
+                                template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notifications-menu.tpl.html',
                                 isClosingDisabled: true
                             };
-                            bladeNavigationService.showBlade(newBlade);
-                            $scope.moduleName = "vc-notifications";
+                            bladeNavigationService.showBlade(blade);
                         }
                     ]
                 });
