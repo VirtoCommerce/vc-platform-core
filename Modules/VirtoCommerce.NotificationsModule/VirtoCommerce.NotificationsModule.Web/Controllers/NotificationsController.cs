@@ -11,8 +11,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         public IActionResult GetNotifications()
         {
             //var notifications = _notificationManager.GetNotifications();
-
-            return Ok("");
+            return Ok();
         }
     }
 }
