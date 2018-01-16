@@ -38,7 +38,7 @@ namespace VirtoCommerce.Platform.Web.Swagger
             // ------
 
             var moduleAssembly = actionDescriptor?.ControllerTypeInfo.Assembly ?? Assembly.GetExecutingAssembly();
-            var groupName = moduleCatalog.Modules.FirstOrDefault(m => m.Assembly == moduleAssembly);
+            var groupName = moduleCatalog.Modules.FirstOrDefault(m => m.ModuleInstance != null && m.Assembly == moduleAssembly);
 
             return groupName != null ? groupName.ModuleName : "Platform";
         }
