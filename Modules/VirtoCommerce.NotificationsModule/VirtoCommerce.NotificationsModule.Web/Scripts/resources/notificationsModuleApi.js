@@ -1,3 +1,21 @@
+var fakeData = {
+    "totalCount": 1,
+    "results":
+    [{
+        "id": "123",
+        "displayName": "Registration notification",
+        "description": "This notification is sent by email to a client when he finishes registration",
+        "isEmail": true,
+        "isSms": false,
+        "type": "RegistrationEmailNotification",
+        "isActive": true,
+        "isSuccessSend": false,
+        "attemptCount": 0,
+        "maxAttemptCount": 10
+    }]
+};
+
+
 angular.module('virtoCommerce.notificationsModule')
     .factory('notificationsModuleApi', ['$resource', function ($resource) {
         return $resource('api/notification/notifications/:id', { id: '@Id' }, {
@@ -17,10 +35,31 @@ angular.module('virtoCommerce.notificationsModule')
     }])
   .factory('notificationsService', ['$http', '$q', function ($http, $q) {
     function notificationsService() {
-      var self = this;
-      self.getNotificationList = function() {
-          return $http.get("api/notification/notifications");
-      }
+        var self = this;
+        var fakeHttpCall = function (isSuccessful) {
+            var deferred = $q.defer()
+            if (isSuccessful === true) {
+                deferred.resolve(fakeData)
+            }
+            else {
+                deferred.reject("Oh no! Something went terribly wrong in you fake $http call")
+            }
+            return deferred.promise
+        }
+        self.getNotificationList = function() {
+            //return fakeHttpCall(true).then(
+            //    function(data) {
+            //        // success callback
+            //        console.log(data)
+            //    },
+            //    function(err) {
+            //        // error callback
+            //        console.log(err)
+            //    });
+
+
+            return $http.get("api/notification/notifications");
+        }
     }
     return new notificationsService();
   }]);
