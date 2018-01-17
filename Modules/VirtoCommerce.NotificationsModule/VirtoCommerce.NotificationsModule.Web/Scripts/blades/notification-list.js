@@ -1,20 +1,3 @@
-var fakeData = {
-    "totalCount": 1,
-    "results":
-        [{
-            "id" : "123",
-            "displayName": "Registration notification",
-            "description": "This notification is sent by email to a client when he finishes registration",
-            "isEmail": true,
-            "isSms": false,
-            "type": "RegistrationEmailNotification",
-            "isActive": true,
-            "isSuccessSend": false,
-            "attemptCount": 0,
-            "maxAttemptCount": 10
-        }]
-};
-
 angular.module('virtoCommerce.notificationsModule')
     .controller('virtoCommerce.notificationsModule.notificationsListController', ['$scope', 'notificationsModuleApi', 'notificationsService', 'platformWebApp.dialogService', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper', 'platformWebApp.ui-grid.extension',
     function ($scope, notificationsModuleApi, notificationsService, dialogService, bladeUtils, uiGridHelper, gridOptionExtension) {
@@ -23,7 +6,7 @@ angular.module('virtoCommerce.notificationsModule')
         blade.title = 'Notifications';
         var bladeNavigationService = bladeUtils.bladeNavigationService;
 
-        //TODO
+        //TODO del notificationsService
         // blade.refresh = function () {
         //     notificationsModuleApi.getNotificationList(function (data) {
         //         blade.data = data.result;
@@ -32,55 +15,18 @@ angular.module('virtoCommerce.notificationsModule')
         // }
         blade.refresh = function (parentRefresh) {
             blade.isLoading = true;
-            //var searchCriteria = getSearchCriteria();
-            notificationsService.getNotificationList()
-                .success(function (data) {
+            var searchCriteria = getSearchCriteria();
+            notificationsService.getNotificationList(searchCriteria).then(function(data) {
                     blade.isLoading = false;
-                    data = fakeData;
                     $scope.pageSettings.totalItems = data.totalCount;
                     $scope.listEntries = data.results ? data.results : [];
-                    setBreadcrumbs();
-                })
-                .error(function (error) {
-                    bladeNavigationService.setError('Error ' + error.status, blade);
-                });
+                }
+            );
             if (parentRefresh && blade.parentRefresh) {
                 blade.parentRefresh();
             }
         };
-
-        blade.refresh();
-
-        //Breadcrumbs
-        function setBreadcrumbs() {
-            if (blade.breadcrumbs) {
-                //Clone array (angular.copy leaves the same reference)
-                var breadcrumbs = blade.breadcrumbs.slice(0);
-
-                //prevent duplicate items
-                if (_.all(breadcrumbs, function (x) { return x.id !== blade.currentEntity.id; })) {
-                    var breadCrumb = generateBreadcrumb(blade.currentEntity.id, blade.currentEntity.name);
-                    breadcrumbs.push(breadCrumb);
-                }
-                blade.breadcrumbs = breadcrumbs;
-            } else {
-                blade.breadcrumbs = [generateBreadcrumb(null, 'all')];
-            }
-        }
-
-        function generateBreadcrumb(id, name) {
-            return {
-                id: id,
-                name: name,
-                blade: blade,
-                navigate: function (breadcrumb) {
-                    breadcrumb.blade.disableOpenAnimation = true;
-                    bladeNavigationService.showBlade(breadcrumb.blade);
-                    breadcrumb.blade.refresh();
-                }
-            };
-        }
-
+        
         blade.showDetailBlade = function (listItem, isNew) {
             blade.setSelectedNode(listItem);
 
@@ -179,14 +125,14 @@ angular.module('virtoCommerce.notificationsModule')
                         title: 'customer.blades.member-add.title',
                         subtitle: 'customer.blades.member-add.subtitle',
                         controller: 'virtoCommerce.customerModule.memberAddController',
-                        template: 'Modules/$(VirtoCommerce.Customer)/Scripts/blades/member-add.tpl.html'
+                        template: 'Modules/$(VirtoCommerce.NotificationsModule)/Scripts/blades/notifications-add.tpl.html'
                     };
                     bladeNavigationService.showBlade(newBlade, blade);
                 },
                 canExecuteMethod: function () {
                     return true;
                 },
-                permission: 'customer:create'
+                permission: 'notification:create'
             },
             {
                 name: "platform.commands.delete", icon: 'fa fa-trash-o',
@@ -194,7 +140,7 @@ angular.module('virtoCommerce.notificationsModule')
                 canExecuteMethod: function () {
                     return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
                 },
-                permission: 'customer:delete'
+                permission: 'notification:delete'
             }
         ];
 
@@ -227,16 +173,16 @@ angular.module('virtoCommerce.notificationsModule')
             bladeUtils.initializePagination($scope);
         };
 
-        //function getSearchCriteria() {
-        //    var searchCriteria = {
-        //        memberType: blade.memberType,
-        //        memberId: blade.currentEntity.id,
-        //        searchPhrase: filter.keyword ? filter.keyword : undefined,
-        //        deepSearch: filter.keyword ? true : false,
-        //        sort: uiGridHelper.getSortExpression($scope),
-        //        skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
-        //        take: $scope.pageSettings.itemsPerPageCount
-        //    };
-        //    return searchCriteria;
-        //}
+        function getSearchCriteria() {
+            var searchCriteria = {
+                searchPhrase: filter.keyword ? filter.keyword : undefined,
+                deepSearch: filter.keyword ? true : false,
+                sort: uiGridHelper.getSortExpression($scope),
+                skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
+                take: $scope.pageSettings.itemsPerPageCount
+            };
+            return searchCriteria;
+        }
+
+        //blade.refresh();
     }]);

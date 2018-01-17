@@ -33,7 +33,7 @@ angular.module(moduleTemplateName, [])
             var menuItem = {
                 path: 'browse/notificationsModule',
                 icon: 'fa fa-envelope',
-                title: 'Notifications Module',
+                title: 'Notifications',
                 priority: 7,
                 action: function () { $state.go('workspace.notificationsModule'); },
                 permission: 'notificationsModulePermission'
