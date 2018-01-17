@@ -122,19 +122,20 @@ namespace VirtoCommerce.Platform.Data.Settings
                             setting.Value = storedSetting.Value;
                             setting.ArrayValues = storedSetting.ArrayValues;
                         }
-                        else if(setting.Value == null && setting.ArrayValues == null)
+                        else if (setting.Value == null && setting.ArrayValues == null)
                         {
                             //try to use global setting value
                             var globalSetting = GetSettingByName(setting.Name);
+                            var defaultValue = (globalSetting ?? setting).DefaultValue;
+
                             if (setting.IsArray)
                             {
-                                setting.ArrayValues = globalSetting.ArrayValues ?? new[] { globalSetting.DefaultValue };
+                                setting.ArrayValues = globalSetting?.ArrayValues ?? new[] { defaultValue };
                             }
                             else
                             {
-                                setting.Value = globalSetting.Value ?? globalSetting.DefaultValue;
+                                setting.Value = globalSetting?.Value ?? defaultValue;
                             }
-
                         }
                     }
                 }

@@ -100,9 +100,14 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             var platformFileNames = GetFilesByPath(platformPath, searchPattern, localizationsFolder);
             files.AddRange(platformFileNames);
 
-            // Get modules localization files
-            foreach (var module in _moduleCatalog.Modules.OfType<ManifestModuleInfo>())
-            {
+            // Get modules localization files ordered by dependency.
+            var allModules = _moduleCatalog.Modules.OfType<ManifestModuleInfo>().ToArray();
+            var manifestModules = _moduleCatalog.CompleteListWithDependencies(allModules)
+                .Where(x => x.State == ModuleState.Initialized)
+                .OfType<ManifestModuleInfo>();
+
+            foreach (var module in manifestModules)
+            {             
                 if (!string.IsNullOrEmpty(module.FullPhysicalPath))
                 {
                     var moduleFileNames = GetFilesByPath(module.FullPhysicalPath, searchPattern, localizationsFolder);
