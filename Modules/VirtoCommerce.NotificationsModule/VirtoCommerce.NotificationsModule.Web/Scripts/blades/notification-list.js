@@ -1,10 +1,15 @@
 angular.module('virtoCommerce.notificationsModule')
-    .controller('virtoCommerce.notificationsModule.notificationsListController', ['$scope', 'notificationsModuleApi', 'notificationsService', 'platformWebApp.dialogService', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper', 'platformWebApp.ui-grid.extension',
-    function ($scope, notificationsModuleApi, notificationsService, dialogService, bladeUtils, uiGridHelper, gridOptionExtension) {
+    .controller('virtoCommerce.notificationsModule.notificationsListController', ['$scope', 'virtoCommerce.notificationsModule.notificationsService', 'virtoCommerce.notificationsModule.notificationTypesResolverService', 'platformWebApp.dialogService', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper', 'platformWebApp.ui-grid.extension', 'platformWebApp.settings',
+    function ($scope, notificationsService, notificationTypesResolverService, dialogService, bladeUtils, uiGridHelper, gridOptionExtension, settings) {
         $scope.uiGridConstants = uiGridHelper.uiGridConstants;
         var blade = $scope.blade;
         blade.title = 'Notifications';
+        blade.selectedType = null;
         var bladeNavigationService = bladeUtils.bladeNavigationService;
+        if (!blade.languages) {
+          var languages = [{"language":"default"}, {"language":"en-US"}, {"language":"de-DE"}];
+      		blade.languages = languages;
+      	}
 
         //TODO del notificationsService
         // blade.refresh = function () {
@@ -26,87 +31,65 @@ angular.module('virtoCommerce.notificationsModule')
                 blade.parentRefresh();
             }
         };
-        
-        blade.showDetailBlade = function (listItem, isNew) {
-            blade.setSelectedNode(listItem);
 
-            var foundTemplate = memberTypesResolverService.resolve(listItem.memberType);
-            if (foundTemplate) {
-                var newBlade = angular.copy(foundTemplate.detailBlade);
-                newBlade.currentEntity = listItem;
-                newBlade.currentEntityId = listItem.id;
-                newBlade.isNew = isNew;
-                bladeNavigationService.showBlade(newBlade, blade);
-            } else {
-                dialogService.showNotificationDialog({
-                    id: "error",
-                    title: "customer.dialogs.unknown-member-type.title",
-                    message: "customer.dialogs.unknown-member-type.message",
-                    messageValues: { memberType: listItem.memberType },
-                });
-            }
-        };
+        blade.openList = function (type) {
+      		var newBlade = {
+      			id: 'templatesList',
+      			title: 'platform.blades.notification-templates-list.title',
+      			notificationType: type,
+      			objectId: blade.objectId,
+      			objectTypeId: blade.objectTypeId,
+      			languages: blade.languages,
+      			controller: 'virtoCommerce.notificationsModule.notificationTemplatesListController',
+      			template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notification-templates-list.tpl.html'
+      		};
+
+      		bladeNavigationService.showBlade(newBlade, blade);
+      	}
 
         $scope.delete = function (data) {
-            deleteList([data]);
+            //deleteList([data]);
         };
 
-        function deleteList(selection) {
-            var dialog = {
-                id: "confirmDeleteItem",
-                title: "customer.dialogs.members-delete.title",
-                message: "customer.dialogs.members-delete.message",
-                callback: function (remove) {
-                    if (remove) {
-                        bladeNavigationService.closeChildrenBlades(blade, function () {
-                            var memberIds = _.pluck(selection, 'id');
-
-                            if (($scope.gridApi != undefined) && $scope.gridApi.selection.getSelectAllState()) {
-                                var searchCriteria = getSearchCriteria();
-                                members.delete(searchCriteria, function () {
-                                        $scope.gridApi.selection.clearSelectedRows();
-                                        blade.refresh(true);
-                                    }
-                                );
-                            }
-                            else if (_.any(memberIds)) {
-                                members.remove({ ids: memberIds },
-                                    function () { blade.refresh(true); });
-                            }
-                        });
-                    }
-                }
-            };
-            dialogService.showConfirmationDialog(dialog);
-        }
+        // function deleteList(selection) {
+        //     var dialog = {
+        //         id: "confirmDeleteItem",
+        //         //TODO localization
+        //         title: "customer.dialogs.members-delete.title",
+        //         message: "customer.dialogs.members-delete.message",
+        //         callback: function (remove) {
+        //             if (remove) {
+        //                 bladeNavigationService.closeChildrenBlades(blade, function () {
+        //                     var memberIds = _.pluck(selection, 'id');
+        //
+        //                     if (($scope.gridApi != undefined) && $scope.gridApi.selection.getSelectAllState()) {
+        //                         var searchCriteria = getSearchCriteria();
+        //                         members.delete(searchCriteria, function () {
+        //                                 $scope.gridApi.selection.clearSelectedRows();
+        //                                 blade.refresh(true);
+        //                             }
+        //                         );
+        //                     }
+        //                     else if (_.any(memberIds)) {
+        //                         members.remove({ ids: memberIds },
+        //                             function () { blade.refresh(true); });
+        //                     }
+        //                 });
+        //             }
+        //         }
+        //     };
+        //     dialogService.showConfirmationDialog(dialog);
+        // }
 
         blade.setSelectedNode = function (listItem) {
             $scope.selectedNodeId = listItem.id;
         };
 
-        $scope.selectNode = function (listItem) {
-            blade.setSelectedNode(listItem);
-
-            var foundTemplate = memberTypesResolverService.resolve(listItem.memberType);
-            if (foundTemplate && foundTemplate.knownChildrenTypes && foundTemplate.knownChildrenTypes.length) {
-                var newBlade = {
-                    id: blade.id,
-                    breadcrumbs: blade.breadcrumbs,
-                    subtitle: 'customer.blades.member-list.subtitle',
-                    subtitleValues: { name: listItem.name },
-                    currentEntity: listItem,
-                    disableOpenAnimation: true,
-                    controller: blade.controller,
-                    template: blade.template,
-                    isClosingDisabled: true
-                };
-                bladeNavigationService.showBlade(newBlade, blade.parentBlade);
-            } else {
-                blade.showDetailBlade(listItem);
-            }
+        $scope.selectNode = function (type) {
+            blade.setSelectedNode(type);
+            blade.selectedType = type;
+        		blade.openList(type);
         };
-
-        blade.headIcon = 'fa-user __customers';
 
         blade.toolbarCommands = [
             {
@@ -149,7 +132,7 @@ angular.module('virtoCommerce.notificationsModule')
 
         filter.criteriaChanged = function () {
             if (filter.keyword === null) {
-                blade.memberType = undefined;
+                blade.name = undefined;
             }
             if ($scope.pageSettings.currentPage > 1) {
                 $scope.pageSettings.currentPage = 1;
@@ -161,13 +144,13 @@ angular.module('virtoCommerce.notificationsModule')
         // ui-grid
         $scope.setGridOptions = function (gridId, gridOptions) {
             $scope.gridOptions = gridOptions;
-            gridOptionExtension.tryExtendGridOptions(gridId, gridOptions);
+            //gridOptionExtension.tryExtendGridOptions(gridId, gridOptions);
 
             gridOptions.onRegisterApi = function (gridApi) {
                 $scope.gridApi = gridApi;
-                gridApi.core.on.sortChanged($scope, function () {
-                    if (!blade.isLoading) blade.refresh();
-                });
+                // gridApi.core.on.sortChanged($scope, function () {
+                //     if (!blade.isLoading) blade.refresh();
+                // });
             };
 
             bladeUtils.initializePagination($scope);
@@ -184,5 +167,6 @@ angular.module('virtoCommerce.notificationsModule')
             return searchCriteria;
         }
 
+        blade.headIcon = 'fa-list';
         //blade.refresh();
     }]);

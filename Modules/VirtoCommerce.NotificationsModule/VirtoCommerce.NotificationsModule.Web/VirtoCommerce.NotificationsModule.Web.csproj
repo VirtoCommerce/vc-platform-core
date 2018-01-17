@@ -7,6 +7,8 @@
   <ItemGroup>
     <None Remove="Scripts\blades\notification-journal-details.js" />
     <None Remove="Scripts\blades\notification-journal-details.tpl.html" />
+    <None Remove="Scripts\blades\notification-templates-list.js" />
+    <None Remove="Scripts\blades\notification-templates-list.tpl.html" />
     <None Remove="Scripts\blades\notifications-menu.js" />
     <None Remove="Scripts\blades\notifications-menu.tpl.html" />
   </ItemGroup>
@@ -16,6 +18,12 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
     <Content Include="Scripts\blades\notification-journal-details.tpl.html">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Scripts\blades\notification-templates-list.js">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Scripts\blades\notification-templates-list.tpl.html">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
     <Content Include="Scripts\blades\notifications-menu.js">
