@@ -1,6 +1,6 @@
 angular.module('virtoCommerce.notificationsModule')
-.controller('virtoCommerce.notificationsModule.notificationTemplatesListController', ['$scope', 'virtoCommerce.notificationsModule.notificationsService', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.notifications', 'platformWebApp.settings', 'platformWebApp.ui-grid.extension', 'platformWebApp.uiGridHelper',
-    function ($scope, notificationsService, bladeNavigationService, dialogService, notifications, settings, gridOptionExtension, uiGridHelper) {
+.controller('virtoCommerce.notificationsModule.notificationTemplatesListController', ['$scope', 'virtoCommerce.notificationsModule.notificationsService', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.notifications', 'platformWebApp.settings', 'platformWebApp.ui-grid.extension', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeUtils',
+    function ($scope, notificationsService, bladeNavigationService, dialogService, notifications, settings, gridOptionExtension, uiGridHelper, bladeUtils) {
         $scope.uiGridConstants = uiGridHelper.uiGridConstants;
 	    var blade = $scope.blade;
 	    blade.selectedLanguage = null;
@@ -47,6 +47,16 @@ angular.module('virtoCommerce.notificationsModule')
 		    bladeNavigationService.showBlade(newBlade, blade);
 	    }
 
+      blade.setSelectedNode = function (listItem) {
+          $scope.selectedNodeId = listItem.id;
+      };
+
+      $scope.selectNode = function (type) {
+          blade.setSelectedNode(type);
+          blade.selectedType = type;
+          blade.openTemplate(type);
+      };
+
 	    function createTemplate(template) {
 		    var newBlade = {
 			    id: 'editTemplate',
@@ -75,16 +85,11 @@ angular.module('virtoCommerce.notificationsModule')
 	    ];
 
       // ui-grid
-      $scope.setGridOptions = function (gridId, gridOptions) {
-          $scope.gridOptions = gridOptions;
-          gridOptionExtension.tryExtendGridOptions(gridId, gridOptions);
-
-          gridOptions.onRegisterApi = function (gridApi) {
-              $scope.gridApi = gridApi;
-              gridApi.core.on.sortChanged($scope, function () {
-                  if (!blade.isLoading) blade.refresh();
-              });
-          };
+      $scope.setGridOptions = function (gridOptions) {
+          uiGridHelper.initialize($scope, gridOptions, function (gridApi) {
+              uiGridHelper.bindRefreshOnSortChanged($scope);
+          });
+          bladeUtils.initializePagination($scope);
       };
 
 	    blade.initialize();

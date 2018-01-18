@@ -37,7 +37,7 @@ angular.module('virtoCommerce.notificationsModule')
       			id: 'templatesList',
       			title: 'platform.blades.notification-templates-list.title',
       			notificationType: item.notificationType,
-                sendGatewayType: item.sendGatewayType,
+            sendGatewayType: item.sendGatewayType,
       			objectId: blade.notificationType,
       			objectTypeId: blade.sendGatewayType,
       			languages: blade.languages,
@@ -53,9 +53,9 @@ angular.module('virtoCommerce.notificationsModule')
         };
 
         $scope.selectNode = function (type) {
-            blade.setSelectedNode(type);
-            blade.selectedType = type;
-        	blade.openList(type);
+           blade.setSelectedNode(type);
+           blade.selectedType = type;
+      	   blade.openList(type);
         };
 
         // filtering
