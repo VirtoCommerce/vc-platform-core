@@ -6,8 +6,8 @@
                     <thead>
                         <tr>
                             <th class="table-col">{{ 'platform.blades.notification-templates-list.labels.language' | translate }}</th>
-                            <th class="table-col">{{ 'platform.blades.notification-templates-list.labels.subject' | translate }}</th>
-                            <th class="table-col">{{ 'platform.blades.notification-templates-list.labels.body' | translate }}</th>
+                            <th class="table-col">{{ 'platform.blades.notification-templates-list.labels.created' | translate }}</th>
+                            <th class="table-col">{{ 'platform.blades.notification-templates-list.labels.modified' | translate }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -16,10 +16,10 @@
                                 {{data.language}}
                             </td>
                             <td class="table-col">
-                                {{data.subject.substring(0,10)}}{{data.subject.length > 10 ? '...' : ''}}
+                                {{data.created}}
                             </td>
                             <td class="table-col">
-                                {{data.body.substring(0,10)}}{{data.body.length > 10 ? '...' : ''}}
+                                {{data.modified}}
                             </td>
                         </tr>
                     </tbody>

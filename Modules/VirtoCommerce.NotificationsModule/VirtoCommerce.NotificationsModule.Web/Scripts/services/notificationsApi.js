@@ -3,6 +3,7 @@ var fakeNotifications = {
     "results":
     [
         {
+            "id" : "1",
             "displayName": "Registration notification",
             "description": "This notification is sent by email to a client when he finishes registration",
             "sendGatewayType": 'Email',
@@ -13,6 +14,7 @@ var fakeNotifications = {
             "maxAttemptCount": 10
         },
         {
+            "id" : "2",
             "displayName": "Reset password notification",
             "description": "This notification is sent by email to a client upon reset password request",
             "sendGatewayType": 'SMS',
@@ -23,6 +25,7 @@ var fakeNotifications = {
             "maxAttemptCount": 10
         },
         {
+            "id" : "3",
             "displayName": "Two factor authentication",
             "description": "This notification contains a security token for two factor authentication",
             "sendGatewayType": 'Email',
@@ -33,6 +36,7 @@ var fakeNotifications = {
             "maxAttemptCount": 10
         },
         {
+            "id" : "4",
             "displayName": "Two factor authentication",
             "description": "This notification contains a security token for two factor authentication",
             "sendGatewayType": 'Email',
@@ -43,6 +47,7 @@ var fakeNotifications = {
             "maxAttemptCount": 10
         },
         {
+            "id" : "5",
             "displayName": "Sending custom form from storefront",
             "description": "This notification sends by email to client when he complite some form on storefront, for example contact us form",
             "sendGatewayType": 'Email',
@@ -53,6 +58,7 @@ var fakeNotifications = {
             "maxAttemptCount": 10
         },
         {
+            "id" : "6",
             "displayName": "Create order notification",
             "description": "This notification sends by email to client when he create order",
             "sendGatewayType": 'Email',
@@ -63,6 +69,7 @@ var fakeNotifications = {
             "maxAttemptCount": 10
         },
         {
+            "id" : "7",
             "displayName": "Order paid notification",
             "description": "This notification sends by email to client when all payments of order has status paid",
             "sendGatewayType": 'Email',
@@ -73,6 +80,7 @@ var fakeNotifications = {
             "maxAttemptCount": 10
         },
         {
+            "id" : "8",
             "displayName": "Order sent notification",
             "description": "This notification sends by email to client when all shipments gets status sent",
             "sendGatewayType": 'Email',
@@ -83,6 +91,7 @@ var fakeNotifications = {
             "maxAttemptCount": 10
         },
         {
+            "id" : "9",
             "displayName": "New order status notification",
             "description": "This notification sends by email to client when status of orders has been changed",
             "sendGatewayType": 'Email',
@@ -93,6 +102,7 @@ var fakeNotifications = {
             "maxAttemptCount": 10
         },
         {
+            "id" : "10",
             "displayName": "Cancel order notification",
             "description": "This notification sends by email to client when order canceled",
             "sendGatewayType": 'Email',
@@ -103,6 +113,7 @@ var fakeNotifications = {
             "maxAttemptCount": 10
         },
         {
+            "id" : "11",
             "displayName": "The invoice for customer order",
             "description": "The template for for customer order invoice (used for PDF generation)",
             "sendGatewayType": 'Email',
@@ -113,6 +124,7 @@ var fakeNotifications = {
             "maxAttemptCount": 10
         },
         {
+            "id" : "12",
             "displayName": "New subscription notification",
             "description": "This notification sends by email to client when created new subscription",
             "sendGatewayType": 'Email',
@@ -123,6 +135,7 @@ var fakeNotifications = {
             "maxAttemptCount": 10
         },
         {
+            "id" : "13",
             "displayName": "Subscription canceled notification",
             "description": "This notification sends by email to client when subscription was canceled",
             "sendGatewayType": 'Email',
@@ -134,7 +147,7 @@ var fakeNotifications = {
         }
     ]
 };
-var fakeTemplates = [{"id":"14073a3095bd42feac37bf083b832784","notificationTypeId":"RegistrationEmailNotification","language":"en-US","isDefault":false,"created" :"","modified":""}]
+var fakeTemplates = [{"id":"14073a3095bd42feac37bf083b832784","notificationTypeId":"RegistrationEmailNotification","language":"en-US","isDefault":false,"created" :"2018-01-01","modified":"2018-01-01"}]
 
 angular.module('virtoCommerce.notificationsModule')
   .factory('virtoCommerce.notificationsModule.notificationsService', ['$q', function ($q) {

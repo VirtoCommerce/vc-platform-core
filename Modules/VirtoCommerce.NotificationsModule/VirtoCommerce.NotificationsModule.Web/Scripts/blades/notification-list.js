@@ -38,8 +38,8 @@ angular.module('virtoCommerce.notificationsModule')
       			title: 'platform.blades.notification-templates-list.title',
       			notificationType: item.notificationType,
             sendGatewayType: item.sendGatewayType,
-      			objectId: blade.objectId,
-      			objectTypeId: blade.objectTypeId,
+      			objectId: blade.notificationType,
+      			objectTypeId: blade.sendGatewayType,
       			languages: blade.languages,
       			controller: 'virtoCommerce.notificationsModule.notificationTemplatesListController',
       			template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notification-templates-list.tpl.html'
@@ -47,40 +47,6 @@ angular.module('virtoCommerce.notificationsModule')
 
       		bladeNavigationService.showBlade(newBlade, blade);
       	}
-
-        $scope.delete = function (data) {
-            //deleteList([data]);
-        };
-
-        // function deleteList(selection) {
-        //     var dialog = {
-        //         id: "confirmDeleteItem",
-        //         //TODO localization
-        //         title: "customer.dialogs.members-delete.title",
-        //         message: "customer.dialogs.members-delete.message",
-        //         callback: function (remove) {
-        //             if (remove) {
-        //                 bladeNavigationService.closeChildrenBlades(blade, function () {
-        //                     var memberIds = _.pluck(selection, 'id');
-        //
-        //                     if (($scope.gridApi != undefined) && $scope.gridApi.selection.getSelectAllState()) {
-        //                         var searchCriteria = getSearchCriteria();
-        //                         members.delete(searchCriteria, function () {
-        //                                 $scope.gridApi.selection.clearSelectedRows();
-        //                                 blade.refresh(true);
-        //                             }
-        //                         );
-        //                     }
-        //                     else if (_.any(memberIds)) {
-        //                         members.remove({ ids: memberIds },
-        //                             function () { blade.refresh(true); });
-        //                     }
-        //                 });
-        //             }
-        //         }
-        //     };
-        //     dialogService.showConfirmationDialog(dialog);
-        // }
 
         blade.setSelectedNode = function (listItem) {
             $scope.selectedNodeId = listItem.id;
@@ -91,43 +57,6 @@ angular.module('virtoCommerce.notificationsModule')
             blade.selectedType = type;
         		blade.openList(type);
         };
-
-        blade.toolbarCommands = [
-            {
-                name: "platform.commands.refresh", icon: 'fa fa-refresh',
-                executeMethod: blade.refresh,
-                canExecuteMethod: function () {
-                    return true;
-                }
-            },
-            {
-                name: "platform.commands.add", icon: 'fa fa-plus',
-                executeMethod: function () {
-                    var newBlade = {
-                        id: 'listItemChild',
-                        currentEntity: blade.currentEntity,
-                        //TODO localization
-                        title: 'customer.blades.member-add.title',
-                        subtitle: 'customer.blades.member-add.subtitle',
-                        controller: 'virtoCommerce.customerModule.memberAddController',
-                        template: 'Modules/$(VirtoCommerce.NotificationsModule)/Scripts/blades/notifications-add.tpl.html'
-                    };
-                    bladeNavigationService.showBlade(newBlade, blade);
-                },
-                canExecuteMethod: function () {
-                    return true;
-                },
-                permission: 'notification:create'
-            },
-            {
-                name: "platform.commands.delete", icon: 'fa fa-trash-o',
-                executeMethod: function () { deleteList($scope.gridApi.selection.getSelectedRows()); },
-                canExecuteMethod: function () {
-                    return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
-                },
-                permission: 'notification:delete'
-            }
-        ];
 
         // filtering
         var filter = $scope.filter = {};
