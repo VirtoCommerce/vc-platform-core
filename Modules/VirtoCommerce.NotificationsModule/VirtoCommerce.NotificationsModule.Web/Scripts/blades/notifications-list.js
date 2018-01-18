@@ -1,5 +1,5 @@
 angular.module('virtoCommerce.notificationsModule')
-    .controller('virtoCommerce.notificationsModule.notificationsListController', ['$scope', 'virtoCommerce.notificationsModule.notificationsService', 'virtoCommerce.notificationsModule.notificationTypesResolverService', 'platformWebApp.dialogService', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper', 'platformWebApp.ui-grid.extension', 'platformWebApp.settings',
+.controller('virtoCommerce.notificationsModule.notificationsListController', ['$scope', 'virtoCommerce.notificationsModule.notificationsService', 'virtoCommerce.notificationsModule.notificationTypesResolverService', 'platformWebApp.dialogService', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper', 'platformWebApp.ui-grid.extension', 'platformWebApp.settings',
     function ($scope, notificationsService, notificationTypesResolverService, dialogService, bladeUtils, uiGridHelper, gridOptionExtension, settings) {
         $scope.uiGridConstants = uiGridHelper.uiGridConstants;
         var blade = $scope.blade;
@@ -42,7 +42,7 @@ angular.module('virtoCommerce.notificationsModule')
       			objectTypeId: blade.sendGatewayType,
       			languages: blade.languages,
       			controller: 'virtoCommerce.notificationsModule.notificationTemplatesListController',
-      			template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notification-templates-list.tpl.html'
+      			template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notifications-templates-list.tpl.html'
       		};
 
       		bladeNavigationService.showBlade(newBlade, blade);

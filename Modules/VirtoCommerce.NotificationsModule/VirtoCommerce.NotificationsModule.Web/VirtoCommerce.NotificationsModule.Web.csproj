@@ -5,25 +5,33 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Scripts\blades\notification-journal-details.js" />
-    <None Remove="Scripts\blades\notification-journal-details.tpl.html" />
-    <None Remove="Scripts\blades\notification-templates-list.js" />
-    <None Remove="Scripts\blades\notification-templates-list.tpl.html" />
+    <None Remove="Scripts\blades\notifications-journal-details.js" />
+    <None Remove="Scripts\blades\notifications-journal-details.tpl.html" />
+    <None Remove="Scripts\blades\notifications-journal.js" />
+    <None Remove="Scripts\blades\notifications-journal.tpl.html" />
     <None Remove="Scripts\blades\notifications-menu.js" />
     <None Remove="Scripts\blades\notifications-menu.tpl.html" />
+    <None Remove="Scripts\blades\notifications-templates-list.js" />
+    <None Remove="Scripts\blades\notifications-templates-list.tpl.html" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Scripts\blades\notification-journal-details.js">
+    <Content Include="Scripts\blades\notifications-journal-details.js">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Content Include="Scripts\blades\notification-journal-details.tpl.html">
+    <Content Include="Scripts\blades\notifications-journal-details.tpl.html">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Content Include="Scripts\blades\notification-templates-list.js">
+    <Content Include="Scripts\blades\notifications-journal.js">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Content Include="Scripts\blades\notification-templates-list.tpl.html">
+    <Content Include="Scripts\blades\notifications-journal.tpl.html">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Scripts\blades\notifications-templates-list.js">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Scripts\blades\notifications-templates-list.tpl.html">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
     <Content Include="Scripts\blades\notifications-menu.js">
