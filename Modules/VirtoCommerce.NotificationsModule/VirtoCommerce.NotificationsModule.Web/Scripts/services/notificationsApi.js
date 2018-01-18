@@ -175,6 +175,25 @@ angular.module('virtoCommerce.notificationsModule')
               });
       }
 
+      self.getNotificationByType = function (item) {
+        return fakeHttpCall(true).then(
+            function(data) {
+                // success callback
+                var found;
+                for (var i = 0; i < fakeNotifications.results.length; i++) {
+                    if (fakeNotifications.results[i].notificationType === item.type.notificationType) {
+                        found = fakeNotifications.results[i];
+                        break;
+                    }
+                }
+                return found;
+            },
+            function(err) {
+                // error callback
+                console.log(err)
+            });
+      }
+
       self.getTemplates = function () {
         return fakeHttpCall(true).then(
             function(data) {
@@ -186,6 +205,8 @@ angular.module('virtoCommerce.notificationsModule')
                 console.log(err)
             });
       }
+
+
   }
 
   return new notificationsService();

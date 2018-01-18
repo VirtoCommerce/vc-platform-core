@@ -32,21 +32,19 @@ angular.module('virtoCommerce.notificationsModule')
             }
         };
 
-        blade.openList = function (item) {
+        blade.editTemplate = function (type) {
       		var newBlade = {
-      			id: 'templatesList',
-      			title: 'platform.blades.notification-templates-list.title',
-      			notificationType: item.notificationType,
-            sendGatewayType: item.sendGatewayType,
-      			objectId: blade.notificationType,
-      			objectTypeId: blade.sendGatewayType,
-      			languages: blade.languages,
-      			controller: 'virtoCommerce.notificationsModule.notificationTemplatesListController',
-      			template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notifications-templates-list.tpl.html'
+      			id: 'editNotification',
+      			title: 'platform.blades.notifications-details.title',
+      			notificationType: type,
+      			objectId: blade.objectId,
+      			objectTypeId: blade.objectTypeId,
+      			controller: 'virtoCommerce.notificationsModule.notificationsEditController',
+      			template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notifications-details.tpl.html'
       		};
 
       		bladeNavigationService.showBlade(newBlade, blade);
-      	}
+      	};
 
         blade.setSelectedNode = function (listItem) {
             $scope.selectedNodeId = listItem.id;
@@ -55,7 +53,7 @@ angular.module('virtoCommerce.notificationsModule')
         $scope.selectNode = function (type) {
            blade.setSelectedNode(type);
            blade.selectedType = type;
-      	   blade.openList(type);
+      	   blade.editTemplate(type);
         };
 
         // filtering
