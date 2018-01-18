@@ -1,5 +1,7 @@
 angular.module('virtoCommerce.notificationsModule')
-    .controller('virtoCommerce.notificationsModule.notificationTemplatesListController', ['$scope', 'virtoCommerce.notificationsModule.notificationsService', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.notifications', 'platformWebApp.settings', function ($scope, notificationsService, bladeNavigationService, dialogService, notifications, settings) {
+.controller('virtoCommerce.notificationsModule.notificationTemplatesListController', ['$scope', 'virtoCommerce.notificationsModule.notificationsService', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.notifications', 'platformWebApp.settings', 'platformWebApp.ui-grid.extension', 'platformWebApp.uiGridHelper',
+function ($scope, notificationsService, bladeNavigationService, dialogService, notifications, settings, gridOptionExtension, uiGridHelper) {
+    $scope.uiGridConstants = uiGridHelper.uiGridConstants;
 	var blade = $scope.blade;
 	blade.selectedLanguage = null;
 
@@ -11,10 +13,11 @@ angular.module('virtoCommerce.notificationsModule')
 
 	blade.initialize = function () {
 		blade.isLoading = true;
-    notificationsService.getTemplates({type: blade.notificationType}).then(function (data) {
+        notificationsService.getTemplates({notificationType: blade.notificationType}).then(function (data) {
       blade.isLoading = false;
       blade.currentEntities = data;
     })
+    //TODO use resources
 		// notifications.getTemplates({ type: blade.notificationType, objectId: blade.objectId, objectTypeId: blade.objectTypeId }, function (data) {
 		// 	blade.currentEntities = data;
 		// 	if (blade.currentEntities.length < 1) {
@@ -38,7 +41,7 @@ angular.module('virtoCommerce.notificationsModule')
 			isFirst: false,
 			languages: blade.languages,
             controller: 'virtoCommerce.notificationsModule.editTemplateController',
-            template: '$(virtoCommerce.notificationsModule)/Scripts/blades/notifications-edit-template.tpl.html'
+            template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notifications-edit-template.tpl.html'
 		};
 
 		bladeNavigationService.showBlade(newBlade, blade);
@@ -70,6 +73,19 @@ angular.module('virtoCommerce.notificationsModule')
 				permission: 'platform:notification:create'
 			}
 	];
+
+  // ui-grid
+  $scope.setGridOptions = function (gridId, gridOptions) {
+      $scope.gridOptions = gridOptions;
+      gridOptionExtension.tryExtendGridOptions(gridId, gridOptions);
+
+      gridOptions.onRegisterApi = function (gridApi) {
+          $scope.gridApi = gridApi;
+          gridApi.core.on.sortChanged($scope, function () {
+              if (!blade.isLoading) blade.refresh();
+          });
+      };
+  };
 
 	blade.initialize();
 }]);

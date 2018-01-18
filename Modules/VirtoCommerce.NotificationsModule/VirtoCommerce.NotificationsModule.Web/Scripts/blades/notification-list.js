@@ -37,7 +37,7 @@ angular.module('virtoCommerce.notificationsModule')
       			id: 'templatesList',
       			title: 'platform.blades.notification-templates-list.title',
       			notificationType: item.notificationType,
-            sendGatewayType: item.sendGatewayType,
+                sendGatewayType: item.sendGatewayType,
       			objectId: blade.notificationType,
       			objectTypeId: blade.sendGatewayType,
       			languages: blade.languages,
@@ -55,7 +55,7 @@ angular.module('virtoCommerce.notificationsModule')
         $scope.selectNode = function (type) {
             blade.setSelectedNode(type);
             blade.selectedType = type;
-        		blade.openList(type);
+        	blade.openList(type);
         };
 
         // filtering
@@ -75,13 +75,13 @@ angular.module('virtoCommerce.notificationsModule')
         // ui-grid
         $scope.setGridOptions = function (gridId, gridOptions) {
             $scope.gridOptions = gridOptions;
-            //gridOptionExtension.tryExtendGridOptions(gridId, gridOptions);
+            gridOptionExtension.tryExtendGridOptions(gridId, gridOptions);
 
             gridOptions.onRegisterApi = function (gridApi) {
                 $scope.gridApi = gridApi;
-                // gridApi.core.on.sortChanged($scope, function () {
-                //     if (!blade.isLoading) blade.refresh();
-                // });
+                gridApi.core.on.sortChanged($scope, function () {
+                    if (!blade.isLoading) blade.refresh();
+                });
             };
 
             bladeUtils.initializePagination($scope);

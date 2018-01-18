@@ -15,22 +15,22 @@
     <div class="blade-inner">
         <div class="inner-block">
             <div class="table-wrapper" ng-init="setGridOptions('notificationlist-grid', {
-            useExternalSorting: true,
-            data: 'listEntries',
-            rowTemplate: 'notification-list.row.html',
-            rowHeight: 61,
-            columnDefs: [
-            { name: 'actions', displayName: '', enableColumnResizing: false, enableSorting: false, width: 30, cellTemplate: 'list-actions.cell.html', pinnedLeft:true },
-            { name: 'displayName', displayName: 'Notification Name', sort: { direction: uiGridConstants.ASC }, width : '60%' },
-            { name: 'sendGatewayType', displayName: 'Type' },
-            { name: 'isActive', displayName: 'Active', cellTemplate: 'notification-list-active.cell.html' },
-            ]})">
-            <div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-save-state ui-grid-selection ui-grid-resize-columns ui-grid-move-columns ui-grid-pinning ui-grid-height></div>
-                <ul class="menu __context" role="menu" id="cml_menu">
-                    <li class="menu-item" ng-click='blade.showTemplateBlade(contextMenuEntity)'>
-                        <i class="menu-ico fa fa-edit"></i> {{'platform.commands.manage' | translate}}
-                    </li>
-                </ul>
+              useExternalSorting: true,
+              data: 'listEntries',
+              rowTemplate: 'notification-list.row.html',
+              rowHeight: 61,
+              columnDefs: [
+              { name: 'actions', displayName: '', enableColumnResizing: false, enableSorting: false, width: 30, cellTemplate: 'list-actions.cell.html', pinnedLeft:true },
+              { name: 'displayName', displayName: 'Notification Name', sort: { direction: uiGridConstants.ASC }, cellTemplate: 'notification-list-name.cell.html', width : '60%' },
+              { name: 'sendGatewayType', displayName: 'Type' },
+              { name: 'isActive', displayName: 'Active', cellTemplate: 'notification-list-active.cell.html' },
+              ]})">
+              <div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-save-state ui-grid-selection ui-grid-resize-columns ui-grid-move-columns ui-grid-pinning ui-grid-height></div>
+              <ul class="menu __context" role="menu" id="cml_menu">
+                  <li class="menu-item" ng-click='blade.showTemplateBlade(contextMenuEntity)'>
+                      <i class="menu-ico fa fa-edit"></i> {{'platform.commands.manage' | translate}}
+                  </li>
+              </ul>
             </div>
         </div>
     </div>
@@ -42,6 +42,14 @@
 <script type="text/ng-template" id="list-actions.cell.html">
     <div class="ui-grid-actions" left-click-menu="grid.appScope.contextMenuEntity = row.entity" data-target="cml_menu">
         <i class="fa fa-ellipsis-v"></i>
+    </div>
+</script>
+<script type="text/ng-template" id="notification-list-name.cell.html">
+    <div class='ui-grid-cell-contents'>
+      <div class='list-item'>
+      <span class="list-name ng-binding">{{row.entity.displayName}}</span>
+      <span class="list-descr ng-binding" style="color: #999;display: block;font-size: 12px;margin-top: 5px; white-space: initial;">{{row.entity.description}}</span>
+    </div>
     </div>
 </script>
 <script type="text/ng-template" id="notification-list-active.cell.html">
