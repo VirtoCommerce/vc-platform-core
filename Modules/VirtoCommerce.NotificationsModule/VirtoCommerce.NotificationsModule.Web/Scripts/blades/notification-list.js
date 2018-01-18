@@ -32,11 +32,12 @@ angular.module('virtoCommerce.notificationsModule')
             }
         };
 
-        blade.openList = function (type) {
+        blade.openList = function (item) {
       		var newBlade = {
       			id: 'templatesList',
       			title: 'platform.blades.notification-templates-list.title',
-      			notificationType: type,
+      			notificationType: item.notificationType,
+            sendGatewayType: item.sendGatewayType,
       			objectId: blade.objectId,
       			objectTypeId: blade.objectTypeId,
       			languages: blade.languages,
@@ -105,6 +106,7 @@ angular.module('virtoCommerce.notificationsModule')
                     var newBlade = {
                         id: 'listItemChild',
                         currentEntity: blade.currentEntity,
+                        //TODO localization
                         title: 'customer.blades.member-add.title',
                         subtitle: 'customer.blades.member-add.subtitle',
                         controller: 'virtoCommerce.customerModule.memberAddController',
