@@ -16,10 +16,10 @@
                         <div class="form-group">
                             <label class="form-label">{{ 'notifications.blades.notification-details.labels.name' | translate }}</label>
                             <div class="form-input">
-                                <input ng-model="blade.currentEntity.notificationType" focus-on required placeholder="{{ 'notifications.blades.notification-details.placeholders.notificationType' | translate }}">
+                                <input ng-model="blade.currentEntity.notificationType" ng-disabled="blade.currentEntity.notificationType" focus-on required placeholder="{{ 'notifications.blades.notification-details.placeholders.notificationType' | translate }}">
                             </div>
                         </div>
-                        <div class="form-group" ng-if="blade.currentEntity.isActive">
+                        <div class="form-group">
                             <va-widget-container group="notificationsDetail" blade="blade" data="blade.currentEntity" gridster-opts="{width: 526}"></va-widget-container>
                         </div>
                     </div>
