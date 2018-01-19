@@ -24,7 +24,6 @@ function ($rootScope, $scope, $timeout, notificationsService, bladeNavigationSer
 		data.objectTypeId = blade.objectTypeId;
 		blade.origEntity = _.clone(data);
 		blade.currentEntity = data;
-
 		// $timeout(function () {
 		// 	if (codemirrorEditor) {
 		// 		codemirrorEditor.refresh();
@@ -57,40 +56,6 @@ function ($rootScope, $scope, $timeout, notificationsService, bladeNavigationSer
 		});
 	};
 
-	blade.testResolve = function () {
-		var newBlade = {
-			id: 'testResolve',
-			title: 'platform.blades.notifications-test-resolve.title',
-			subtitle: 'platform.blades.notifications-test-resolve.subtitle',
-			subtitleValues: { type: blade.notificationType },
-			notificationType: blade.notificationType,
-			objectId: blade.objectId,
-			objectTypeId: blade.objectTypeId,
-			language: blade.currentEntity.language,
-			controller: 'platformWebApp.testResolveController',
-			template: '$(Platform)/Scripts/blades/notifications-test-resolve.tpl.html'
-		};
-
-		bladeNavigationService.showBlade(newBlade, blade);
-	}
-
-	blade.testSend = function () {
-		var newBlade = {
-			id: 'testSend',
-			title: 'platform.blades.notifications-test-send.title',
-			subtitle: 'platform.blades.notifications-test-send.subtitle',
-			subtitleValues: { type: blade.notificationType },
-			notificationType: blade.notificationType,
-			objectId: blade.objectId,
-			objectTypeId: blade.objectTypeId,
-			language: blade.currentEntity.language,
-			controller: 'platformWebApp.testSendController',
-			template: '$(Platform)/Scripts/app/notifications/blades/notifications-test-send.tpl.html'
-		};
-
-		bladeNavigationService.showBlade(newBlade, blade);
-	}
-
 	blade.delete = function () {
 		notifications.deleteTemplate({ id: blade.currentEntity.id }, function (data) {
 			blade.parentBlade.initialize();
@@ -100,70 +65,20 @@ function ($rootScope, $scope, $timeout, notificationsService, bladeNavigationSer
 		});
 	}
 
-	if (!blade.isNew) {
-		$scope.blade.toolbarCommands = [
-			{
-				name: "platform.commands.save", icon: 'fa fa-save',
-				executeMethod: blade.updateTemplate,
-				canExecuteMethod: canSave
+	$scope.blade.toolbarCommands = [
+		{
+			name: "platform.commands.save", icon: 'fa fa-save',
+			executeMethod: blade.updateTemplate,
+			canExecuteMethod: canSave
+		},
+		{
+			name: "platform.commands.undo", icon: 'fa fa-undo',
+			executeMethod: function () {
+				blade.currentEntity = _.clone(blade.origEntity);
 			},
-			{
-				name: "platform.commands.undo", icon: 'fa fa-undo',
-				executeMethod: function () {
-					blade.currentEntity = _.clone(blade.origEntity);
-				},
-				canExecuteMethod: isDirty
-			},
-			{
-				name: "platform.commands.preview", icon: 'fa fa-eye',
-				executeMethod: function () {
-					blade.testResolve();
-				},
-				canExecuteMethod: function () {
-					return false;
-				},
-				permission: blade.updatePermission
-			},
-			{
-				name: "platform.commands.send", icon: 'fa fa-envelope',
-				executeMethod: blade.testSend,
-				canExecuteMethod: function () {
-					return true;
-				},
-				permission: blade.updatePermission
-			},
-			{
-				name: "platform.commands.set-active", icon: 'fa fa-pencil-square-o',
-				executeMethod: function () {
-					blade.currentEntity.isDefault = true;
-					blade.updateTemplate();
-				},
-				canExecuteMethod: function () {
-					if (angular.isUndefined(blade.currentEntity)) {
-						return false;
-					}
-					return !blade.currentEntity.isDefault;
-				},
-				permission: blade.updatePermission
-			},
-			{
-				name: "platform.commands.delete", icon: 'fa fa-trash-o',
-				executeMethod: blade.delete,
-				canExecuteMethod: function () { return true; },
-				permission: 'platform:notification:delete'
-			}
-		];
-	}
-	else {
-		$scope.blade.toolbarCommands = [
-			{
-				name: "platform.commands.create", icon: 'fa fa-save',
-				executeMethod: blade.updateTemplate,
-				canExecuteMethod: canSave,
-				permission: 'platform:notification:create'
-			}
-		];
-	}
+			canExecuteMethod: isDirty
+		}
+	];
 
 	$scope.editorOptions = {
 		lineWrapping: true,
@@ -187,7 +102,7 @@ function ($rootScope, $scope, $timeout, notificationsService, bladeNavigationSer
 	}
 
 	blade.onClose = function (closeCallback) {
-		bladeNavigationService.showConfirmationIfNeeded(isDirty(), canSave(), blade, blade.updateTemplate, closeCallback, "platform.dialogs.notification-template-save.title", "platform.dialogs.notification-template-save.message");
+		bladeNavigationService.showConfirmationIfNeeded(isDirty(), canSave(), blade, blade.updateTemplate, closeCallback, "platform.dialogs.notification-details-save.title", "platform.dialogs.notification-details-save.message");
 	};
 
 	blade.headIcon = 'fa-envelope';

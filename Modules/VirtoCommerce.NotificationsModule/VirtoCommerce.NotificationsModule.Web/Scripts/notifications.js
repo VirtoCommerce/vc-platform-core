@@ -39,7 +39,18 @@ angular.module(moduleTemplateName, [])
                 permission: 'notificationsModulePermission'
             };
             mainMenuService.addMenuItem(menuItem);
+
+            widgetService.registerWidget({
+      	        controller: 'virtoCommerce.notificationsModule.notificationsTemplatesWidgetController',
+      	        template: 'Modules/$(VirtoCommerce.notificationsModule)/Scripts/widgets/notificationsTemplatesWidget.tpl.html'
+      	    }, 'notificationsDetail');
+            widgetService.registerWidget({
+      	        controller: 'virtoCommerce.notificationsModule.notificationsLogWidgetController',
+      	        template: 'Modules/$(VirtoCommerce.notificationsModule)/Scripts/widgets/notificationsLogWidget.tpl.html'
+      	    }, 'notificationsDetail');
+            widgetService.registerWidget({
+      	        controller: 'virtoCommerce.notificationsModule.notificationsAttachmentsWidgetController',
+      	        template: 'Modules/$(VirtoCommerce.notificationsModule)/Scripts/widgets/notificationsAttachmentsWidget.tpl.html'
+      	    }, 'notificationsDetail');
         }
     ]);
-
-

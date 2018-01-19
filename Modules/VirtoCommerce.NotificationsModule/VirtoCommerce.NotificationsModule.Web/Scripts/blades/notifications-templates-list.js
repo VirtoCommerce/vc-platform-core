@@ -1,5 +1,5 @@
 angular.module('virtoCommerce.notificationsModule')
-.controller('virtoCommerce.notificationsModule.notificationTemplatesListController', ['$scope', 'virtoCommerce.notificationsModule.notificationsService', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.notifications', 'platformWebApp.settings', 'platformWebApp.ui-grid.extension', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeUtils',
+.controller('virtoCommerce.notificationsModule.notificationsTemplatesListController', ['$scope', 'virtoCommerce.notificationsModule.notificationsService', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.notifications', 'platformWebApp.settings', 'platformWebApp.ui-grid.extension', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeUtils',
     function ($scope, notificationsService, bladeNavigationService, dialogService, notifications, settings, gridOptionExtension, uiGridHelper, bladeUtils) {
         $scope.uiGridConstants = uiGridHelper.uiGridConstants;
 	    var blade = $scope.blade;
@@ -13,7 +13,7 @@ angular.module('virtoCommerce.notificationsModule')
 
 	    blade.initialize = function () {
 		    blade.isLoading = true;
-            notificationsService.getTemplates({notificationType: blade.notificationType}).then(function (data) {
+        notificationsService.getTemplates({notificationType: blade.notificationType}).then(function (data) {
           blade.isLoading = false;
           blade.currentEntities = data;
         })

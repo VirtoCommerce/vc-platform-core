@@ -27,7 +27,7 @@ angular.module('virtoCommerce.notificationsModule')
                 currentNotificationId: data.id,
                 currentEntity: data,
                 controller: 'platformWebApp.notificationsJournalDetailtsController',
-                template: '$(Platform)/Scripts/app/notifications/blades/notification-journal-details.tpl.html'
+                template: '$(Platform)/Scripts/app/notifications/blades/notifications-journal-details.tpl.html'
             };
             bladeNavigationService.showBlade(newBlade, blade);
         };
