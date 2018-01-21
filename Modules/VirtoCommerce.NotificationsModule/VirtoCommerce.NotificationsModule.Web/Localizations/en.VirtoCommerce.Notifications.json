@@ -1,0 +1,99 @@
+﻿{
+  "notifications" : {
+    "blades" : {
+      "notification-journal-details": {
+          "title": "Details of notification",
+          "labels": {
+              "notification-info": "Notification Info",
+              "display-name": "Display name",
+              "source": "Source",
+              "sending-gateway": "Sending gateway",
+              "active": "Active",
+              "not-active": "Not active",
+              "start-sending-date": "Start sending date",
+              "sent-success": "Sent success",
+              "not-sent": "Not sent",
+              "sent": "Sent",
+              "sent-date": "Sent date",
+              "sender": "Sender",
+              "recipient": "Recipient",
+              "sending-attempts-count": "Sending attempts count",
+              "last-fail-attempt-date": "Last fail attempt date",
+              "last-fail-attempt-message": "Last fail attempt message"
+          }
+      },
+      "notifications-edit-template": {
+          "title": "Edit notification template",
+          "title-new": "Create notification template",
+          "labels": {
+              "note": "This is list of notification parameters. You can paste this code and value of parameters will be inserted in your template",
+              "parameter-name": "Parameter name",
+              "parameter-description": "Parameter description",
+              "paremeter-code": "Paremeter code in template (copy this code and insert anywhere in your template)",
+              "language": "Language",
+              "blank-note": "Leave blank to use default value",
+              "sender": "Sender",
+              "recipient": "Recipient",
+              "subject": "Subject",
+              "body": "Body"
+          },
+          "placeholders": {
+              "language": "Select..."
+          }
+      },
+      "notifications-menu": {
+          "subtitle": "Working with notifications system"
+      },
+      "notification-templates-list": {
+          "title": "Notification templates",
+          "labels": {
+              "subject": "Subject",
+              "body": "Body",
+              "language": "Language",
+              "created" : "Created",
+              "modified" : "Modified"
+          }
+      },
+      "notifications-test-resolve": {
+          "title": "Preview notification",
+          "subtitle": "Enter test data for {{type}}",
+          "labels": {
+              "test": "Test",
+              "enter-test-data": "Enter test data"
+          }
+      },
+      "notifications-test-send": {
+          "title": "Send notification",
+          "subtitle": "Enter test data for {{type}}",
+          "labels": {
+              "send": "Send",
+              "enter-test-data": "Enter test data"
+          }
+      },
+      "notifications-journal": {
+          "title": "Notification history",
+          "subtitle": "View notification history",
+          "labels": {
+              "display-name": "Display Name",
+              "recipient": "Recipient",
+              "sent-date": "Sent Date",
+              "channel": "Channel",
+              "error": "Error",
+              "processing": "Processing",
+              "success": "Success",
+              "no-notifications": "No notifications yet"
+          }
+      },
+      "notifications-list": {
+          "title": "Notifications",
+          "subtitle": "View notification templates",
+          "labels": {
+              "no-notifications": "No registered notifications yet"
+          }
+      },
+      "notifications-details" : {
+        "title" : "Notifications details"
+      }
+    }
+  }
+}

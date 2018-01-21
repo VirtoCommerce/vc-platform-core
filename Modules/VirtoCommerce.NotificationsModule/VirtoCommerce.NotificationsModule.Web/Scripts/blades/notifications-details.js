@@ -102,7 +102,7 @@ function ($rootScope, $scope, $timeout, notificationsService, bladeNavigationSer
 	}
 
 	blade.onClose = function (closeCallback) {
-		bladeNavigationService.showConfirmationIfNeeded(isDirty(), canSave(), blade, blade.updateTemplate, closeCallback, "platform.dialogs.notification-details-save.title", "platform.dialogs.notification-details-save.message");
+		bladeNavigationService.showConfirmationIfNeeded(isDirty(), canSave(), blade, blade.updateTemplate, closeCallback, "notifications.dialogs.notification-details-save.title", "notifications.dialogs.notification-details-save.message");
 	};
 
 	blade.headIcon = 'fa-envelope';
