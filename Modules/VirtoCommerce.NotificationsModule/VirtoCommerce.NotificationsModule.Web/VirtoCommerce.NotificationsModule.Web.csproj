@@ -16,22 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Scripts\blades\notifications-journal-details.js">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Include="Scripts\blades\notifications-journal-details.tpl.html">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
     <Content Include="Scripts\blades\notifications-journal.js">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
     <Content Include="Scripts\blades\notifications-journal.tpl.html">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Include="Scripts\blades\notifications-templates-list.js">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Include="Scripts\blades\notifications-templates-list.tpl.html">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
     <Content Include="Scripts\blades\notifications-menu.js">

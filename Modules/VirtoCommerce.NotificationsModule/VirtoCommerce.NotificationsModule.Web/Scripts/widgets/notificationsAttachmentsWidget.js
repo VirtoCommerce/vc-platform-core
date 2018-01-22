@@ -1,5 +1,5 @@
 angular.module('virtoCommerce.notificationsModule')
-.controller('virtoCommerce.notificationsModule.notificationsLogWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    .controller('virtoCommerce.notificationsModule.notificationsAttachmentsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
 	var blade = $scope.widget.blade;
 
 	blade.showAttachments = function () {
@@ -7,13 +7,13 @@ angular.module('virtoCommerce.notificationsModule')
     var objectTypeId = 'Notifications';
 		var newBlade = {
 			id: 'notificationLogWidgetChild',
-			title: 'notifications.widgets.notificationsLogWidget.blade-title',
+            title: 'notifications.widgets.notificationsAttachmentsWidget.blade-title',
 			titleValues: { id: blade.currentEntity.id },
 			objectId: objectId,
 			objectTypeId: objectTypeId,
 			languages: blade.currentEntity.languages,
-			subtitle: 'notifications.widgets.notificationsLogWidget.blade-subtitle',
-      controller: 'virtoCommerce.notificationsModule.notificationsAttachmentsController',
+            subtitle: 'notifications.widgets.notificationsAttachmentsWidget.blade-subtitle',
+            controller: 'virtoCommerce.notificationsModule.notificationsAttachmentsController',
 			template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notifications-attachments.tpl.html'
 		};
 		bladeNavigationService.showBlade(newBlade, blade);

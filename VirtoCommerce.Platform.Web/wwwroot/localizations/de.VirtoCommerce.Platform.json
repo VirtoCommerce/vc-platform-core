@@ -91,6 +91,9 @@
           "no-properties": "Keine dynamische Eigenschaften."
         }
       },
+      "notifications-menu": {
+        "subtitle": "Arbeiten mit Benachrichtigungen System"
+      },
       "property-dictionary": {
         "title": "Wörterbucheinträge",
         "subtitle": "Wörterbucheinträge verwalten",

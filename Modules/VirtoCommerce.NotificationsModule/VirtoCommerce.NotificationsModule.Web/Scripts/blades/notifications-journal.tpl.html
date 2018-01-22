@@ -14,12 +14,10 @@
                  rowHeight: 61,
                  columnDefs: [
                             { name: 'actions', displayName: '', enableColumnResizing: false, enableSorting: false, width: 30, cellTemplate: 'list-actions.cell.html', pinnedLeft:true },
-                            { name: 'displayName', displayName: 'platform.blades.notifications-journal.labels.display-name', cellTemplate: 'displayName.cell.html' },
-                            { name: 'recipient', displayName: 'platform.blades.notifications-journal.labels.recipient' },
-                            {
-                                name: 'sentDate', displayName: 'platform.blades.notifications-journal.labels.sent-date'
-                            },
-                            { name: 'channel', displayName: 'platform.blades.notifications-journal.labels.channel', width: 65, cellTemplate: 'channel.cell.html' }
+                            { name: 'displayName', displayName: 'notifications.blades.notifications-journal.labels.display-name', cellTemplate: 'displayName.cell.html' },
+                            { name: 'recipient', displayName: 'notifications.blades.notifications-journal.labels.recipient' },
+                            { name: 'sentDate', displayName: 'notifications.blades.notifications-journal.labels.sent-date' },
+                            { name: 'channel', displayName: 'notifications.blades.notifications-journal.labels.channel', width: 65, cellTemplate: 'channel.cell.html' }
                 ]})">
             <div class="table-wrapper" ng-if="blade.currentEntities.length">
                 <div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-save-state ui-grid-selection ui-grid-resize-columns ui-grid-move-columns ui-grid-pinning ui-grid-height></div>
@@ -88,9 +86,9 @@
     <div class="ui-grid-cell-contents">
         <div class="inner-contents">
             <span class="table-t">{{COL_FIELD}}</span>
-            <span class="table-status" ng-if="!row.entity.isActive && !row.entity.isSuccessSend" style="background:red">{{ 'platform.blades.notifications-journal.labels.error' | translate }}</span>
-            <span class="table-status" ng-if="row.entity.isActive && !row.entity.isSuccessSend" style="max-width:60px;">{{ 'platform.blades.notifications-journal.labels.processing' | translate }}</span>
-            <span class="table-status __active" ng-if="row.entity.isSuccessSend">{{ 'platform.blades.notifications-journal.labels.success' | translate }}</span>
+            <span class="table-status" ng-if="!row.entity.isActive && !row.entity.isSuccessSend" style="background:red">{{ 'notifications.blades.notifications-journal.labels.error' | translate }}</span>
+            <span class="table-status" ng-if="row.entity.isActive && !row.entity.isSuccessSend" style="max-width:60px;">{{ 'notifications.blades.notifications-journal.labels.processing' | translate }}</span>
+            <span class="table-status __active" ng-if="row.entity.isSuccessSend">{{ 'notifications.blades.notifications-journal.labels.success' | translate }}</span>
         </div>
     </div>
 </script>

@@ -92,6 +92,9 @@
                     "no-properties": "No dynamic properties yet."
                 }
             },
+            "notifications-menu": {
+                "subtitle": "Working with notifications system"
+            },
             "property-dictionary": {
                 "title": "Dictionary values",
                 "subtitle": "Manage dictionary values",

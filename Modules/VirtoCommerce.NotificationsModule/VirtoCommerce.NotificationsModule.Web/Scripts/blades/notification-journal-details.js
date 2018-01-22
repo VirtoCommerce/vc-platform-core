@@ -1,5 +1,5 @@
 angular.module('virtoCommerce.notificationsModule')
-    .controller('virtoCommerce.notificationsModule.notificationsJournalDetailtsController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.notifications', function ($scope, bladeNavigationService, notifications) {
+    .controller('virtoCommerce.notificationsModule.notificationJournalDetailtsController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.notifications', function ($scope, bladeNavigationService, notifications) {
 	var blade = $scope.blade;
 
 	blade.initialize = function () {

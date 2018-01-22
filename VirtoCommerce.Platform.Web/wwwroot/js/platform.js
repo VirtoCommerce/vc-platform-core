@@ -18805,40 +18805,6 @@ angular.module('platformWebApp')
 });
 
 angular.module('platformWebApp')
-.config(['$stateProvider', function ($stateProvider) {
-    $stateProvider
-		.state('workspace.notifications', {
-		    url: '/notifications?objectId&objectTypeId',
-		    templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-		    controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-		        var blade = {
-		            id: 'notifications',
-		            title: 'platform.menu.notifications',
-		            subtitle: 'platform.blades.notifications-menu.subtitle',
-		            controller: 'platformWebApp.notificationsMenuController',
-		            template: '$(Platform)/Scripts/app/notifications/blades/notifications-menu.tpl.html',
-		            isClosingDisabled: true
-		        };
-		        bladeNavigationService.showBlade(blade);
-		    }
-		    ]
-		});
-}])
-.run(
-  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', function ($rootScope, mainMenuService, widgetService, $state) {
-      //Register module in main menu
-      var menuItem = {
-          path: 'configuration/notifications',
-          icon: 'fa fa-envelope',
-          title: 'platform.menu.notifications',
-          priority: 7,
-          action: function () { $state.go('workspace.notifications'); },
-          permission: 'platform:notification:access'
-      };
-      mainMenuService.addMenuItem(menuItem);
-  }])
-;
-angular.module('platformWebApp')
 .config(
   ['$stateProvider', function ($stateProvider) {
       $stateProvider
@@ -19011,6 +18977,40 @@ angular.module('platformWebApp')
 
     }]);
 
+angular.module('platformWebApp')
+.config(['$stateProvider', function ($stateProvider) {
+    $stateProvider
+		.state('workspace.notifications', {
+		    url: '/notifications?objectId&objectTypeId',
+		    templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+		    controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+		        var blade = {
+		            id: 'notifications',
+		            title: 'platform.menu.notifications',
+		            subtitle: 'platform.blades.notifications-menu.subtitle',
+		            controller: 'platformWebApp.notificationsMenuController',
+		            template: '$(Platform)/Scripts/app/notifications/blades/notifications-menu.tpl.html',
+		            isClosingDisabled: true
+		        };
+		        bladeNavigationService.showBlade(blade);
+		    }
+		    ]
+		});
+}])
+.run(
+  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', function ($rootScope, mainMenuService, widgetService, $state) {
+      //Register module in main menu
+      var menuItem = {
+          path: 'configuration/notifications',
+          icon: 'fa fa-envelope',
+          title: 'platform.menu.notifications',
+          priority: 7,
+          action: function () { $state.go('workspace.notifications'); },
+          permission: 'platform:notification:access'
+      };
+      mainMenuService.addMenuItem(menuItem);
+  }])
+;
 angular.module('platformWebApp')
     .config(['$stateProvider', '$httpProvider', function ($stateProvider, $httpProvider) {
         $stateProvider.state('loginDialog', {
@@ -25444,6 +25444,90 @@ angular.module('platformWebApp')
     }
 }]);
 angular.module('platformWebApp')
+.controller('platformWebApp.pushNotificationsHistoryController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
+function ($scope, bladeNavigationService, eventTemplateResolver, notifications) {
+    var blade = $scope.blade;
+
+    $scope.pageSettings = {};
+    $scope.pageSettings.totalItems = 0;
+    $scope.pageSettings.currentPage = 1;
+    $scope.pageSettings.numPages = 5;
+    $scope.pageSettings.itemsPerPageCount = 10;
+    $scope.notifications = [];
+
+    $scope.columns = [
+    	{ title: "platform.blades.history.labels.type", orderBy: "NotifyType" },
+		{ title: "platform.blades.history.labels.title", orderBy: "Title" },
+		{ title: "platform.blades.history.labels.created", orderBy: "Created", checked: true, reverse: true }
+
+    ];
+
+    blade.refresh = function () {
+        blade.isLoading = true;
+        var start = $scope.pageSettings.currentPage * $scope.pageSettings.itemsPerPageCount - $scope.pageSettings.itemsPerPageCount;
+        notifications.query({ skip: start, take: $scope.pageSettings.itemsPerPageCount, sort: getOrderByExpression() }, function (data, status, headers, config) {
+            angular.forEach(data.notifyEvents, function (x) {
+                notificationTemplate = eventTemplateResolver.resolve(x, 'history');
+                x.template = notificationTemplate.template;
+                x.action = notificationTemplate.action;
+            });
+            $scope.notifications = data.notifyEvents;
+            $scope.pageSettings.totalItems = data.totalCount;
+            blade.isLoading = false;
+        }, function (error) {
+            bladeNavigationService.setError('Error ' + error.status, blade);
+        });
+    };
+
+    function getOrderByExpression() {
+        var retVal = '';
+        var column = _.find($scope.columns, function (x) { return x.checked; });
+        if (angular.isDefined(column)) {
+            retVal = column.orderBy;
+            if (column.reverse) {
+                retVal += ":desc";
+            }
+        }
+        return retVal;
+    };
+
+    $scope.setOrder = function (column) {
+        //reset prev selection may be commented if need support multiple order clauses
+        _.each($scope.columns, function (x) { x.checked = false });
+        column.checked = true;
+        column.reverse = !column.reverse;
+        $scope.pageSettings.currentPage = 1;
+
+        blade.refresh();
+    }
+
+    blade.toolbarCommands = [
+			{
+			    name: "platform.commands.refresh",
+			    icon: 'fa fa-refresh',
+			    executeMethod: blade.refresh,
+			    canExecuteMethod: function () {
+			        return true;
+			    }
+			}];
+
+    $scope.$watch('pageSettings.currentPage', blade.refresh);
+
+    // actions on load
+    //No need to call this because page 'pageSettings.currentPage' is watched!!! It would trigger subsequent duplicated req...
+    //blade.refresh();
+}]);
+
+angular.module('platformWebApp')
+.factory('platformWebApp.pushNotifications', ['$resource', function ($resource) {
+
+    return $resource('api/platform/pushnotifications/:id', { id: '@Id' }, {
+        markAllAsRead: { method: 'POST', url: 'api/platform/pushnotifications/markAllAsRead' },
+        query: { method: 'POST', url: 'api/platform/pushnotifications' }
+	});
+}]);
+
+angular.module('platformWebApp')
 .controller('platformWebApp.notificationsJournalDetailtsController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.notifications', function ($scope, bladeNavigationService, notifications) {
 	var blade = $scope.blade;
 
@@ -26289,89 +26373,34 @@ angular.module('platformWebApp')
 	});
 }]);
 angular.module('platformWebApp')
-.controller('platformWebApp.pushNotificationsHistoryController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
-function ($scope, bladeNavigationService, eventTemplateResolver, notifications) {
-    var blade = $scope.blade;
+.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
+	return {
+		link: function (scope, element, attrs) {
 
-    $scope.pageSettings = {};
-    $scope.pageSettings.totalItems = 0;
-    $scope.pageSettings.currentPage = 1;
-    $scope.pageSettings.numPages = 5;
-    $scope.pageSettings.itemsPerPageCount = 10;
-    $scope.notifications = [];
+			if (attrs.vaPermission) {
+				var permissionValue = attrs.vaPermission.trim();
+			
+				//modelObject is a scope property of the parent/current scope
+				scope.$watch(attrs.securityScopes, function (value) {
+					if (value) {
+						toggleVisibilityBasedOnPermission(value);
+					}
+				});
+			
+				function toggleVisibilityBasedOnPermission(securityScopes) {
+					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
+					if (hasPermission)
+						element.show();
+					else
+						element.hide();
+				}
 
-    $scope.columns = [
-    	{ title: "platform.blades.history.labels.type", orderBy: "NotifyType" },
-		{ title: "platform.blades.history.labels.title", orderBy: "Title" },
-		{ title: "platform.blades.history.labels.created", orderBy: "Created", checked: true, reverse: true }
-
-    ];
-
-    blade.refresh = function () {
-        blade.isLoading = true;
-        var start = $scope.pageSettings.currentPage * $scope.pageSettings.itemsPerPageCount - $scope.pageSettings.itemsPerPageCount;
-        notifications.query({ skip: start, take: $scope.pageSettings.itemsPerPageCount, sort: getOrderByExpression() }, function (data, status, headers, config) {
-            angular.forEach(data.notifyEvents, function (x) {
-                notificationTemplate = eventTemplateResolver.resolve(x, 'history');
-                x.template = notificationTemplate.template;
-                x.action = notificationTemplate.action;
-            });
-            $scope.notifications = data.notifyEvents;
-            $scope.pageSettings.totalItems = data.totalCount;
-            blade.isLoading = false;
-        }, function (error) {
-            bladeNavigationService.setError('Error ' + error.status, blade);
-        });
-    };
-
-    function getOrderByExpression() {
-        var retVal = '';
-        var column = _.find($scope.columns, function (x) { return x.checked; });
-        if (angular.isDefined(column)) {
-            retVal = column.orderBy;
-            if (column.reverse) {
-                retVal += ":desc";
-            }
-        }
-        return retVal;
-    };
-
-    $scope.setOrder = function (column) {
-        //reset prev selection may be commented if need support multiple order clauses
-        _.each($scope.columns, function (x) { x.checked = false });
-        column.checked = true;
-        column.reverse = !column.reverse;
-        $scope.pageSettings.currentPage = 1;
-
-        blade.refresh();
-    }
-
-    blade.toolbarCommands = [
-			{
-			    name: "platform.commands.refresh",
-			    icon: 'fa fa-refresh',
-			    executeMethod: blade.refresh,
-			    canExecuteMethod: function () {
-			        return true;
-			    }
-			}];
-
-    $scope.$watch('pageSettings.currentPage', blade.refresh);
-
-    // actions on load
-    //No need to call this because page 'pageSettings.currentPage' is watched!!! It would trigger subsequent duplicated req...
-    //blade.refresh();
+				toggleVisibilityBasedOnPermission();
+				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
+			}
+		}
+	};
 }]);
-
-angular.module('platformWebApp')
-.factory('platformWebApp.pushNotifications', ['$resource', function ($resource) {
-
-    return $resource('api/platform/pushnotifications/:id', { id: '@Id' }, {
-        markAllAsRead: { method: 'POST', url: 'api/platform/pushnotifications/markAllAsRead' },
-        query: { method: 'POST', url: 'api/platform/pushnotifications' }
-	});
-}]);
-
 angular.module('platformWebApp')
 .controller('platformWebApp.accountApiListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
@@ -27515,35 +27544,6 @@ angular.module('platformWebApp')
     initializeBlade();
 }]);
 
-angular.module('platformWebApp')
-.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
-	return {
-		link: function (scope, element, attrs) {
-
-			if (attrs.vaPermission) {
-				var permissionValue = attrs.vaPermission.trim();
-			
-				//modelObject is a scope property of the parent/current scope
-				scope.$watch(attrs.securityScopes, function (value) {
-					if (value) {
-						toggleVisibilityBasedOnPermission(value);
-					}
-				});
-			
-				function toggleVisibilityBasedOnPermission(securityScopes) {
-					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
-					if (hasPermission)
-						element.show();
-					else
-						element.hide();
-				}
-
-				toggleVisibilityBasedOnPermission();
-				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
-			}
-		}
-	};
-}]);
 angular.module('platformWebApp')
 .directive('vaLoginToolbar', ['$document', '$timeout', '$state', 'platformWebApp.authService', function ($document, $timeout, $state, authService) {
     return {

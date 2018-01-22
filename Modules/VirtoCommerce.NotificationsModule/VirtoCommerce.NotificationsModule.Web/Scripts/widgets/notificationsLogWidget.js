@@ -1,5 +1,5 @@
 angular.module('virtoCommerce.notificationsModule')
-.controller('virtoCommerce.notificationsModule.notificationsAttachmentsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+.controller('virtoCommerce.notificationsModule.notificationsLogWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
 	var blade = $scope.widget.blade;
 
 	blade.showLog = function () {
@@ -7,12 +7,12 @@ angular.module('virtoCommerce.notificationsModule')
         var objectTypeId = 'Notifications';
 		var newBlade = {
             id: 'notificationAttachmentsWidgetChild',
-            title: 'notifications.widgets.notificationsAttachmentsWidget.blade-title',
+            title: 'notifications.widgets.notificationsLogWidget.blade-title',
 			titleValues: { id: blade.currentEntity.id },
 			objectId: objectId,
 			objectTypeId: objectTypeId,
 			languages: blade.currentEntity.languages,
-            subtitle: 'notifications.widgets.notificationsAttachmentsWidget.blade-subtitle',
+            subtitle: 'notifications.widgets.notificationsLogWidget.blade-subtitle',
             controller: 'virtoCommerce.notificationsModule.notificationsJournalController',
 			template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notifications-journal.tpl.html'
 		};

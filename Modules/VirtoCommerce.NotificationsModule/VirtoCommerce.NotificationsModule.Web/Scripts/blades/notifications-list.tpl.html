@@ -21,9 +21,9 @@
               rowHeight: 61,
               columnDefs: [
               { name: 'actions', displayName: '', enableColumnResizing: false, enableSorting: false, width: 30, cellTemplate: 'list-actions.cell.html', pinnedLeft:true },
-              { name: 'displayName', displayName: 'Notification Name', sort: { direction: uiGridConstants.ASC }, cellTemplate: 'notification-list-name.cell.html', width : '60%' },
-              { name: 'sendGatewayType', displayName: 'Type' },
-              { name: 'isActive', displayName: 'Active', cellTemplate: 'notification-list-active.cell.html' },
+              { name: 'displayName', displayName: 'notifications.blades.notifications-list.labels.display-name', sort: { direction: uiGridConstants.ASC }, cellTemplate: 'notification-list-name.cell.html', width : '60%' },
+              { name: 'sendGatewayType', displayName: 'notifications.blades.notifications-list.labels.type' },
+              { name: 'isActive', displayName: 'notifications.blades.notifications-list.labels.active', cellTemplate: 'notification-list-active.cell.html' },
               ]})">
               <div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-save-state ui-grid-selection ui-grid-resize-columns ui-grid-move-columns ui-grid-pinning ui-grid-height></div>
               <ul class="menu __context" role="menu" id="cml_menu">

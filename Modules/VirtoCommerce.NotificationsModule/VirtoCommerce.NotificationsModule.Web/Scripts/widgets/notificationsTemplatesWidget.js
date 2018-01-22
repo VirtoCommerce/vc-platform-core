@@ -13,8 +13,8 @@ angular.module('virtoCommerce.notificationsModule')
 			objectTypeId: objectTypeId,
 			languages: blade.currentEntity.languages,
 			subtitle: 'notifications.widgets.notificationsTemplatesWidget.blade-subtitle',
-			controller: 'virtoCommerce.notificationsModule.notificationsTemplatesListController',
-			template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notifications-templates-list.tpl.html'
+			controller: 'virtoCommerce.notificationsModule.notificationTemplatesListController',
+			template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notification-templates-list.tpl.html'
 		};
 		bladeNavigationService.showBlade(newBlade, blade);
 	};
