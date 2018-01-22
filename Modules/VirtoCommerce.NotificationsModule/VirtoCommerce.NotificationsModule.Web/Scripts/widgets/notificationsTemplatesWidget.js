@@ -8,10 +8,10 @@ angular.module('virtoCommerce.notificationsModule')
 		var newBlade = {
 			id: 'notificationTemplatesWidgetChild',
 			title: 'notifications.widgets.notificationsTemplatesWidget.blade-title',
-			titleValues: { id: blade.currentEntity.id },
+			titleValues: { displayName: blade.currentEntity.displayName },
 			objectId: objectId,
 			objectTypeId: objectTypeId,
-			languages: blade.currentEntity.languages,
+            notificationType : blade.currentEntity.notificationType,
 			subtitle: 'notifications.widgets.notificationsTemplatesWidget.blade-subtitle',
 			controller: 'virtoCommerce.notificationsModule.notificationTemplatesListController',
 			template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notification-templates-list.tpl.html'

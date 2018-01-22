@@ -23,7 +23,7 @@
                 }
             },
             "notifications-edit-template": {
-                "title": "Benachrichtigungsvorlage bearbeiten",
+                "title": "{{ displayName }} - vorlage",
                 "title-new": "Benachrichtigung Vorlage erstellen",
                 "labels": {
                     "note": "Dies ist eine Liste der Benachrichtigungsparameter. Sie können diesen Code einfügen und der Wert der Parameter wird in Ihre Vorlage eingefügt",
@@ -87,7 +87,7 @@
                 }
             },
             "notifications-details": {
-                "title": "Benachrichtigungs details",
+                "title": "{{displayName}} - detail",
                 "labels": {
                     "is-active": "Ist aktiv",
                     "name": "Name der Benachrichtigung"
@@ -97,7 +97,7 @@
         "widgets": {
             "notificationsTemplatesWidget": {
                 "title": "Vorlagen",
-                "blade-title": "Benachrichtigungsvorlagen",
+                "blade-title": "{{displayName}} - Benachrichtigungsvorlagen",
                 "blade-subtitle": "Vorlagen"
             },
             "notificationsLogWidget": {

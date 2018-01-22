@@ -147,7 +147,17 @@ var fakeNotifications = {
         }
     ]
 };
-var fakeTemplates = [{"id":"14073a3095bd42feac37bf083b832784","notificationTypeId":"RegistrationEmailNotification","language":"en-US","isDefault":false,"created" :"2018-01-01","modified":"2018-01-01"}]
+var fakeTemplates = [
+    {   
+        "id":"1",
+        "notificationType":"RegistrationEmailNotification",
+        "language":"en-US",
+        "isDefault":false,
+        "created" :"2018-01-01",
+        "modified":"2018-01-01", 
+        "displayName" :"Registration notification",
+        sendGatewayType : "Email"
+    }];
 
 angular.module('virtoCommerce.notificationsModule')
   .factory('virtoCommerce.notificationsModule.notificationsService', ['$q', function ($q) {
@@ -181,7 +191,7 @@ angular.module('virtoCommerce.notificationsModule')
                 // success callback
                 var found;
                 for (var i = 0; i < fakeNotifications.results.length; i++) {
-                    if (fakeNotifications.results[i].notificationType === item.type.notificationType) {
+                    if (fakeNotifications.results[i].notificationType === item.type) {
                         found = fakeNotifications.results[i];
                         break;
                     }
@@ -205,7 +215,25 @@ angular.module('virtoCommerce.notificationsModule')
                 console.log(err)
             });
       }
-
+      
+      self.getTemplateById = function (id) {
+        return fakeHttpCall(true).then(
+            function(data) {
+                // success callback
+                var found;
+                for (var i = 0; i < fakeTemplates.length; i++) {
+                    if (fakeTemplates[i].id === id) {
+                        found = fakeTemplates[i];
+                        break;
+                    }
+                }
+                return found;
+            },
+            function(err) {
+                // error callback
+                console.log(err)
+            });
+      }
 
   }
 

@@ -32,11 +32,12 @@ angular.module('virtoCommerce.notificationsModule')
             }
         };
 
-        blade.editTemplate = function (type) {
+        blade.editTemplate = function (item) {
       		var newBlade = {
       			id: 'editNotification',
       			title: 'notifications.blades.notification-details.title',
-      			notificationType: type,
+                titleValues: { displayName: item.displayName },
+      			notificationType: item.notificationType,
       			objectId: blade.objectId,
       			objectTypeId: blade.objectTypeId,
       			controller: 'virtoCommerce.notificationsModule.notificationsEditController',

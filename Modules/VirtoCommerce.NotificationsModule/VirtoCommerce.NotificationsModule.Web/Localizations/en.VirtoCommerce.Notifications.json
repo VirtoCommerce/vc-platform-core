@@ -23,7 +23,8 @@
                 }
             },
             "notifications-edit-template": {
-                "title": "Edit notification template",
+                "title": "{{ displayName }} - template",
+                "subtitle": "Edit notification template",
                 "title-new": "Create notification template",
                 "labels": {
                     "note": "This is list of notification parameters. You can paste this code and value of parameters will be inserted in your template",
@@ -92,7 +93,7 @@
                 }
             },
             "notification-details": {
-                "title": "Notifications details",
+                "title": "{{displayName}} - detail",
                 "labels": {
                     "is-active": "Is active",
                     "name": "Notification name"
@@ -102,8 +103,8 @@
         "widgets": {
             "notificationsTemplatesWidget": {
                 "title": "Templates",
-                "blade-title": "Notification templates",
-                "blade-subtitle": "Templates"
+                "blade-title": "{{displayName}} - templates list",
+                "blade-subtitle": "Manage notification templates"
             },
             "notificationsLogWidget": {
                 "title": "Send log",

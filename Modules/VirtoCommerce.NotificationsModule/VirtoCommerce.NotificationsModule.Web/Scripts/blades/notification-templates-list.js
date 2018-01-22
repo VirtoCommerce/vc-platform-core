@@ -13,9 +13,9 @@ angular.module('virtoCommerce.notificationsModule')
 
 	    blade.initialize = function () {
 		    blade.isLoading = true;
-        notificationsService.getTemplates({notificationType: blade.notificationType}).then(function (data) {
-          blade.isLoading = false;
-          blade.currentEntities = data;
+            notificationsService.getTemplates({notificationType: blade.notificationType}).then(function (data) {
+            blade.isLoading = false;
+            blade.currentEntities = data;
         })
         //TODO use resources
 		    // notifications.getTemplates({ type: blade.notificationType, objectId: blade.objectId, objectTypeId: blade.objectTypeId }, function (data) {
@@ -25,42 +25,54 @@ angular.module('virtoCommerce.notificationsModule')
 		    // 	}
 		    // 	blade.isLoading = false;
 		    // });
-	    }
-
-	    blade.openTemplate = function (template) {
+        }
+        
+        blade.openTemplate = function (template) {
 		    blade.selectedLanguage = template.language;
-
-		    var newBlade = {
-			    id: 'editTemplate',
-			    title: 'platform.blades.notifications-edit-template.title',
-			    templateId: template.id,
-			    notificationType: blade.notificationType,
-			    objectId: blade.objectId,
-			    objectTypeId: blade.objectTypeId,
-			    isNew: false,
-			    isFirst: false,
-			    languages: blade.languages,
+            var newBlade = {
+                id: 'editTemplate',
+                title: 'notifications.blades.notifications-edit-template.title',
+                titleValues: { displayName: template.displayName },
+                subtitle: 'notifications.blades.notifications-edit-template.subtitle',
+                templateId: template.id,
+                notificationType: blade.notificationType,
+                objectId: blade.objectId,
+                objectTypeId: blade.objectTypeId,
+                isNew: false,
+                isFirst: false,
+                languages: blade.languages,
                 controller: 'virtoCommerce.notificationsModule.editTemplateController',
                 template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notifications-edit-template.tpl.html'
-		    };
+            };
 
-		    bladeNavigationService.showBlade(newBlade, blade);
+            bladeNavigationService.showBlade(newBlade, blade);    
 	    }
 
-      blade.setSelectedNode = function (listItem) {
-          $scope.selectedNodeId = listItem.id;
-      };
+        blade.setSelectedNode = function (listItem) {
+            $scope.selectedNodeId = listItem.id;
+        };
 
-      $scope.selectNode = function (type) {
+        $scope.selectNode = function (type) {
           blade.setSelectedNode(type);
           blade.selectedType = type;
           blade.openTemplate(type);
-      };
+        };
+        
+        function hasLanguage(language) {
+            if (blade.currentEntities) {
+                if (blade.currentEntities.find(language)) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+        }
 
 	    function createTemplate(template) {
 		    var newBlade = {
 			    id: 'editTemplate',
-			    title: 'platform.blades.notifications-edit-template.title-new',
+			    title: 'notifications.blades.notifications-edit-template.title-new',
 			    notificationType: blade.notificationType,
 			    objectId: blade.objectId,
 			    objectTypeId: blade.objectTypeId,

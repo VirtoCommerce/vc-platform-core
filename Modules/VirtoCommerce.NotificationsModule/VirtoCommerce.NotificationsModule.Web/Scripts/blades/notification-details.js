@@ -19,7 +19,6 @@ function ($rootScope, $scope, $timeout, notificationsService, bladeNavigationSer
 	};
 
 	function setNotification(data) {
-		data.type = blade.notificationType;
 		data.objectId = blade.objectId;
 		data.objectTypeId = blade.objectTypeId;
 		blade.origEntity = _.clone(data);

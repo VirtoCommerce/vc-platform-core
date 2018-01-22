@@ -1,32 +1,15 @@
 ﻿angular.module('virtoCommerce.notificationsModule')
-.controller('virtoCommerce.notificationsModule.editTemplateController', ['$rootScope', '$scope', '$timeout', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.notifications', function ($rootScope, $scope, $timeout, bladeNavigationService, dialogService, notifications) {
+.controller('virtoCommerce.notificationsModule.editTemplateController', ['$rootScope', '$scope', '$timeout', 'virtoCommerce.notificationsModule.notificationsService', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.notifications', 
+ function ($rootScope, $scope, $timeout, notificationsService, bladeNavigationService, dialogService, notifications) {
 	$scope.setForm = function (form) { $scope.formScope = form; }
 
 	var blade = $scope.blade;
 	blade.updatePermission = 'platform:notification:update';
 	var codemirrorEditor;
 	blade.parametersForTemplate = [];
-
-	blade.initialize = function () {
-		blade.isLoading = true;
-		if (blade.templateId) {
-			notifications.getTemplateById({ id: blade.templateId }, function (data) {
-				setTemplate(data);
-			}, function (error) {
-				bladeNavigationService.setError('Error ' + error.status, blade);
-			});
-		}
-		else {
-			notifications.getTemplate({ type: blade.notificationType, objectId: blade.objectId, objectTypeId: blade.objectTypeId, language: blade.language }, function (data) {
-				setTemplate(data);
-			}, function (error) {
-				bladeNavigationService.setError('Error ' + error.status, blade);
-			});
-		}
-	};
-
-	function setTemplate(data) {
-		data.type = blade.notificationType;
+     
+    function setTemplate(data) {
+        data.type = blade.notificationType;
 		data.objectId = blade.objectId;
 		data.objectTypeId = blade.objectTypeId;
 		blade.origEntity = _.clone(data);
@@ -48,6 +31,28 @@
 			}
 			blade.origEntity = angular.copy(blade.currentEntity);
 		}, 1);
+	};
+
+	blade.initialize = function () {
+		blade.isLoading = true;
+        //TODO
+//		if (blade.templateId) {
+//			notifications.getTemplateById({ id: blade.templateId }, function (data) {
+//				setTemplate(data);
+//			}, function (error) {
+//				bladeNavigationService.setError('Error ' + error.status, blade);
+//			});
+//		}
+//		else {
+//			notifications.getTemplate({ type: blade.notificationType, objectId: blade.objectId, objectTypeId: blade.objectTypeId, language: blade.language }, function (data) {
+//				setTemplate(data);
+//			}, function (error) {
+//				bladeNavigationService.setError('Error ' + error.status, blade);
+//			});
+//		}
+        notificationsService.getTemplateById(blade.templateId).then(
+            function(data){ setTemplate(data) }
+        );
 	};
 
 	blade.updateTemplate = function () {
@@ -76,8 +81,8 @@
 	blade.testResolve = function () {
 		var newBlade = {
 			id: 'testResolve',
-			title: 'platform.blades.notifications-test-resolve.title',
-			subtitle: 'platform.blades.notifications-test-resolve.subtitle',
+			title: 'notifications.blades.notifications-test-resolve.title',
+			subtitle: 'notifications.blades.notifications-test-resolve.subtitle',
 			subtitleValues: { type: blade.notificationType },
 			notificationType: blade.notificationType,
 			objectId: blade.objectId,
