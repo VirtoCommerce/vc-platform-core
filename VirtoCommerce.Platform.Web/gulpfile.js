@@ -71,7 +71,6 @@ gulp.task("min:js", function () {
     var plainStream = gulp.src(src_paths)
         .pipe(print())
         .pipe(sourcemaps.init())
-        .pipe(print())
         .pipe(concat('platform.js'))
         // Add transformation tasks to the pipeline here.
         .pipe(sourcemaps.write('../maps'))
@@ -113,7 +112,6 @@ gulp.task("min:css", function () {
         .pipe(sourcemaps.write('.', { includeContent: false, sourceRoot: '../sass' }));
 
     var cssStream = gulp.src(['wwwroot/css/custom/*.css', 'wwwroot/css/themes/main/css/**/*.css', 'wwwroot/js/codemirror/**/*.css', '!wwwroot/css/themes/main/css/allPackages.css'])
-        .pipe(print())
         .pipe(print())
         .pipe(concat('css-files.css'));
 
