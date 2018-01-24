@@ -38,10 +38,22 @@
                     "cc-recipients": "CC recipients",
                     "bcc-recipients": "BCC",
                     "subject": "Subject",
-                    "body": "Body"
+                    "body": "Body",
+                    "template": "Template",
+                    "preview-data": "Preview Data"
+                },
+                "descriptions": {
+                    "recipient": "Email recipient address",
+                    "cc-recipients": "CC recipients addresses",
+                    "bcc-recipients": "BCC recipient addresses",
+                    "sender": "Sender address",
+                    "subject": "Subject of notification email"
                 },
                 "placeholders": {
-                    "language": "Select..."
+                    "language": "Select...",
+                    "recipient": "Recipient address",
+                    "email-addresses-note": "Enter email addresses",
+                    "subject": "Enter email subject"
                 }
             },
             "notification-templates-list": {

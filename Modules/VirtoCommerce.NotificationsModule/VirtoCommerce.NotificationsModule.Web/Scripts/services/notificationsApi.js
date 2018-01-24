@@ -156,7 +156,9 @@ var fakeTemplates = [
         "created" :"2018-01-01",
         "modified":"2018-01-01", 
         "displayName" :"Registration notification",
-        sendGatewayType : "Email"
+        sendGatewayType : "Email",
+        "ccRecipients": null,
+        "bccRecipients": null
     }];
 
 angular.module('virtoCommerce.notificationsModule')

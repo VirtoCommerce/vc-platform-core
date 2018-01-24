@@ -35,7 +35,9 @@
                     "sender": "Absender",
                     "recipient": "Empfänger",
                     "subject": "Betreff",
-                    "body": "Körper"
+                    "body": "Körper",
+                    "template": "Vorlage",
+                    "preview-data": "Vorschau der Daten"
                 },
                 "placeholders": {
                     "language": "Wählen Sie aus..."
