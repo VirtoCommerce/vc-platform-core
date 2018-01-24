@@ -13,7 +13,8 @@ var gulp = require("gulp"),
     mainBowerFiles = require('main-bower-files'),
     sass = require('gulp-sass'),
     rename = require('gulp-rename'),
-    sourcemaps = require('gulp-sourcemaps');
+    sourcemaps = require('gulp-sourcemaps'),
+    print = require('gulp-print');
 
 
 gulp.task("min", ["min:bowerPackages:js", "min:bowerPackages:css", "min:js", "min:css"]);
@@ -24,6 +25,7 @@ gulp.task('min:bowerPackages:css', function () {
         // Only the CSS files
         filter: /.*\.css$/i
     }))
+        .pipe(print())
         .pipe(concat('allPackages.css'))
         .pipe(gulp.dest('wwwroot/css/'));
 });
@@ -45,6 +47,7 @@ gulp.task('min:bowerPackages:js', function () {
             }
         }
     }))
+        .pipe(print())
         .pipe(concat('allPackages.js'))
         .pipe(gulp.dest('wwwroot/js/'))
         .pipe(uglify())
@@ -56,6 +59,7 @@ gulp.task("min:js", function () {
     var src_paths = ['wwwroot/js/**/*.js', '!wwwroot/js/**/*.min.js', '!wwwroot/js/allPackages.js', '!wwwroot/js/platform.js'];
     var plainStream = gulp.src(src_paths)
         .pipe(sourcemaps.init())
+        .pipe(print())
         .pipe(concat('platform.js'))
         // Add transformation tasks to the pipeline here.
         .pipe(sourcemaps.write('../maps'))
@@ -75,6 +79,7 @@ gulp.task("min:css", function () {
     var scssStream = gulp.src(['wwwroot/css/themes/main/sass/**/*.sass'])
         // must be executed straigh after source
         .pipe(sourcemaps.init())
+        .pipe(print())
         .pipe(sass({
             includePaths: require('node-bourbon').includePaths
         }))
@@ -95,7 +100,8 @@ gulp.task("min:css", function () {
         // must be executed straight before output
         .pipe(sourcemaps.write('.', { includeContent: false, sourceRoot: '../sass' }));
 
-    var cssStream = gulp.src(['wwwroot/css/themes/main/css/**/*.css', 'wwwroot/js/codemirror/**/*.css', '!wwwroot/css/themes/main/css/allPackages.css'])
+    var cssStream = gulp.src(['wwwroot/css/custom/*.css', 'wwwroot/css/themes/main/css/**/*.css', 'wwwroot/js/codemirror/**/*.css', '!wwwroot/css/themes/main/css/allPackages.css'])
+        .pipe(print())
         .pipe(concat('css-files.css'));
 
     return merge(scssStream, cssStream)

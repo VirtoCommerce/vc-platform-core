@@ -7,7 +7,7 @@ angular.module('virtoCommerce.notificationsModule')
         blade.selectedType = null;
         var bladeNavigationService = bladeUtils.bladeNavigationService;
         if (!blade.languages) {
-          var languages = [{"language":"default"}, {"language":"en-US"}, {"language":"de-DE"}];
+            var languages = ["default", "en-US", "de-DE"];
       		blade.languages = languages;
       	}
 

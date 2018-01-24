@@ -33,8 +33,10 @@
                     "paremeter-code": "Paremeter code in template (copy this code and insert anywhere in your template)",
                     "language": "Language",
                     "blank-note": "Leave blank to use default value",
-                    "sender": "Sender",
-                    "recipient": "Recipient",
+                    "sender": "From",
+                    "recipient": "To",
+                    "cc-recipients": "CC recipients",
+                    "bcc-recipients": "BCC",
                     "subject": "Subject",
                     "body": "Body"
                 },

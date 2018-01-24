@@ -16,6 +16,7 @@
         "gulp-sourcemaps": "^2.4.1",
         "main-bower-files": "2.9.0",
         "node-bourbon": "^4.2.3",
-        "del" : "3.0.0" 
+        "del": "3.0.0",
+        "gulp-print": "2.0.1" 
     }
 }

@@ -135,24 +135,24 @@
 				},
 				canExecuteMethod: isDirty
 			},
-			{
-				name: "platform.commands.preview", icon: 'fa fa-eye',
-				executeMethod: function () {
-					blade.testResolve();
-				},
-				canExecuteMethod: function () {
-					return false;
-				},
-				permission: blade.updatePermission
-			},
-			{
-				name: "platform.commands.send", icon: 'fa fa-envelope',
-				executeMethod: blade.testSend,
-				canExecuteMethod: function () {
-					return true;
-				},
-				permission: blade.updatePermission
-			},
+//			{
+//				name: "platform.commands.preview", icon: 'fa fa-eye',
+//				executeMethod: function () {
+//					blade.testResolve();
+//				},
+//				canExecuteMethod: function () {
+//					return false;
+//				},
+//				permission: blade.updatePermission
+//			},
+//			{
+//				name: "platform.commands.send", icon: 'fa fa-envelope',
+//				executeMethod: blade.testSend,
+//				canExecuteMethod: function () {
+//					return true;
+//				},
+//				permission: blade.updatePermission
+//			},
 			{
 				name: "platform.commands.set-active", icon: 'fa fa-pencil-square-o',
 				executeMethod: function () {
