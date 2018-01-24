@@ -15,6 +15,8 @@
         "gulp-sass": "^2.2.0",
         "gulp-sourcemaps": "^2.4.1",
         "main-bower-files": "2.9.0",
-        "node-bourbon": "^4.2.3"
+        "node-bourbon": "^4.2.3",
+        "gulp-print": "2.0.1",
+        "gulp-sync": "0.1.4"
     }
 }
