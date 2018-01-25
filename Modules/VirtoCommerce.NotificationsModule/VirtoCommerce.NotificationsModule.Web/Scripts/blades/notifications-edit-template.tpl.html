@@ -3,7 +3,7 @@
         <div class="inner-block">
             <form class="form" name="formScope">
                 <div class="columns clearfix">
-                    <div class="column">
+                    <div class="column" ng-init="setForm(formScope)">
                         <div class="form-group" style="margin:0 200px 0 0">
                             <label class="form-label" style="margin:0">{{'notifications.blades.notifications-edit-template.labels.language' | translate}}</label>
                             <div class="form-input" style="margin-top:0">
@@ -20,7 +20,7 @@
                             </div>
                         </div>
                         <div class="form-group" style="margin:0">
-                            <label class="form-label">{{'notifications.blades.notifications-edit-template.labels.cc-recipients' | translate}}</label>
+                            <label class="form-label" style="margin:0">{{'notifications.blades.notifications-edit-template.labels.cc-recipients' | translate}}</label>
                             <div class="form-group" style="margin-top:0">
                                 <tags-input ng-model="blade.currentEntity.ccRecipients"
                                             display-property="value"
@@ -32,7 +32,7 @@
                             </div>
                         </div>
                         <div class="form-group" ng-if="blade.isNew" style="margin:0">
-                            <label class="form-label">{{'notifications.blades.notifications-edit-template.labels.sender' | translate}}</label>
+                            <label class="form-label" style="margin:0">{{'notifications.blades.notifications-edit-template.labels.sender' | translate}}</label>
                             <div class="form-group" style="margin-top:0">
                                 <div class="form-input">
                                     <input type="email" focus-on="" required class="form-control" ng-model="blade.currentEntity.sender" placeholder="{{ 'notifications.blades.notifications-edit-template.placeholders.email-addresses-note' | translate }}"/>
@@ -43,7 +43,7 @@
                             </div>
                         </div>
                         <div class="form-group" ng-if="!blade.isNew" style="margin:0">
-                            <label class="form-label">{{'notifications.blades.notifications-edit-template.labels.sender' | translate}}</label>
+                            <label class="form-label" style="margin:0">{{'notifications.blades.notifications-edit-template.labels.sender' | translate}}</label>
                             <div class="form-group" style="margin-top:0">
                                 <div class="form-input">
                                     <input type="email" focus-on="" required class="form-control" ng-model="blade.currentEntity.sender" placeholder="{{ 'notifications.blades.notifications-edit-template.placeholders.email-addresses-note' | translate }}"/>

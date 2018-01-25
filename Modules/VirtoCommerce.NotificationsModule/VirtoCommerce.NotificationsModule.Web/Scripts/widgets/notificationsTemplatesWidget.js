@@ -12,6 +12,8 @@ angular.module('virtoCommerce.notificationsModule')
 			objectId: objectId,
 			objectTypeId: objectTypeId,
             notificationType : blade.currentEntity.notificationType,
+            displayName : blade.currentEntity.displayName,
+            sendGatewayType: blade.currentEntity.sendGatewayType,
 			subtitle: 'notifications.widgets.notificationsTemplatesWidget.blade-subtitle',
 			controller: 'virtoCommerce.notificationsModule.notificationTemplatesListController',
 			template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notification-templates-list.tpl.html'

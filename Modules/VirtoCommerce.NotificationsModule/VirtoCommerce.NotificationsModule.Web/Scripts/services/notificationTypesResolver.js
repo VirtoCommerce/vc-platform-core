@@ -6,7 +6,7 @@ angular.module('virtoCommerce.notificationsModule')
             notificationTypeDefinition.detailBlade = angular.extend({
                 id: "notificationDetail",
                 metaFields: [],
-                controller: 'virtoCommerce.notificationsModule.notificationDetailController',
+                controller: 'virtoCommerce.notificationsModule.editTemplateController',
                 notificationTypeDefinition: notificationTypeDefinition
             }, notificationTypeDefinition.detailBlade);
 

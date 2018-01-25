@@ -9,20 +9,20 @@
 	blade.parametersForTemplate = [];
      
     function setTemplate(data) {
-        data.type = blade.notificationType;
+        data.notificationType = blade.notificationType;
+        data.displayName = blade.displayName;
 		data.objectId = blade.objectId;
 		data.objectTypeId = blade.objectTypeId;
 		blade.origEntity = _.clone(data);
 		blade.currentEntity = data;
-
-		notifications.prepareTestData({ type: blade.notificationType }, function (data) {
-			blade.parametersForTemplate = data;
-
-			blade.isLoading = false;
-
-		}, function (error) {
-			bladeNavigationService.setError('Error ' + error.status, blade);
-		});
+        blade.isLoading = false;
+//		notifications.prepareTestData({ type: blade.notificationType }, function (data) {
+//			blade.parametersForTemplate = data;
+//			blade.isLoading = false;
+//
+//		}, function (error) {
+//			bladeNavigationService.setError('Error ' + error.status, blade);
+//		});
 
 		$timeout(function () {
 			if (codemirrorEditor) {
@@ -50,15 +50,24 @@
 //				bladeNavigationService.setError('Error ' + error.status, blade);
 //			});
 //		}
-        notificationsService.getTemplateById(blade.templateId).then(
-            function(data){ setTemplate(data) }
-        );
+        if (blade.templateId) {
+            notificationsService.getTemplateById(blade.templateId).then(
+                function(data){ setTemplate(data); }
+            );
+        }
+        else {
+            var data = { id: null, notificationType: null, objectId: null, objectTypeId: null, language: null};
+            setTemplate(data);
+        }
 	};
 
 	blade.updateTemplate = function () {
 		blade.isLoading = true;
-		notifications.updateTemplate({}, blade.currentEntity, function () {
-			blade.isLoading = false;
+        if (!blade.currentEntity.language) {
+            blade.currentEntity.language = 'default';
+        }
+        notificationsService.updateTemplate(blade.currentEntity).then(function(data) {
+            blade.isLoading = false;
 			blade.origEntity = _.clone(blade.currentEntity);
 			if (!blade.isNew) {
 				blade.parentBlade.initialize();
@@ -73,9 +82,27 @@
 					blade.parentBlade.openList(blade.notificationType, blade.objectId, blade.objectTypeId);
 				}
 			}
-		}, function (error) {
-			bladeNavigationService.setError('Error ' + error.status, blade);
-		});
+        });
+        //TODO
+//		notifications.updateTemplate({}, blade.currentEntity, function () {
+//			blade.isLoading = false;
+//			blade.origEntity = _.clone(blade.currentEntity);
+//			if (!blade.isNew) {
+//				blade.parentBlade.initialize();
+//			}
+//			else {
+//				blade.isNew = false;
+//				if (!blade.isFirst) {
+//					blade.parentBlade.initialize();
+//					bladeNavigationService.closeBlade(blade);
+//				}
+//				else {
+//					blade.parentBlade.openList(blade.notificationType, blade.objectId, blade.objectTypeId);
+//				}
+//			}
+//		}, function (error) {
+//			bladeNavigationService.setError('Error ' + error.status, blade);
+//		});
 	};
 
 	blade.testResolve = function () {

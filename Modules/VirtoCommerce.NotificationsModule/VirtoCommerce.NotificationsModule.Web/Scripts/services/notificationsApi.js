@@ -156,13 +156,17 @@ var fakeTemplates = [
         "created" :"2018-01-01",
         "modified":"2018-01-01", 
         "displayName" :"Registration notification",
-        sendGatewayType : "Email",
+        "sendGatewayType" : "Email",
         "ccRecipients": null,
-        "bccRecipients": null
+        "bccRecipients": null,
+        "recipient": "a@a.com",
+        "sender": "s@s.s",
+        "subject": "some",
+        "sendGatewayType": "Email"
     }];
 
 angular.module('virtoCommerce.notificationsModule')
-  .factory('virtoCommerce.notificationsModule.notificationsService', ['$q', function ($q) {
+  .factory('virtoCommerce.notificationsModule.notificationsService', ['$q', '$filter', function ($q, $filter) {
   function notificationsService(searchCriteria) {
       var self = this;
       var fakeHttpCall = function (isSuccessful) {
@@ -206,10 +210,11 @@ angular.module('virtoCommerce.notificationsModule')
             });
       }
 
-      self.getTemplates = function () {
+      self.getTemplates = function (notificationType) {
         return fakeHttpCall(true).then(
             function(data) {
                 // success callback
+                var filterTemplates = $filter('filter')(fakeTemplates, {'notificationType': notificationType});
                 return fakeTemplates;
             },
             function(err) {
@@ -230,6 +235,22 @@ angular.module('virtoCommerce.notificationsModule')
                     }
                 }
                 return found;
+            },
+            function(err) {
+                // error callback
+                console.log(err)
+            });
+      }
+      
+      self.updateTemplate = function(template) {
+          return fakeHttpCall(true).then(
+            function(data) {
+                // success callback
+                template.id = (fakeTemplates.length + 1).toString();
+                var date = new Date();
+                template.created = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
+                fakeTemplates.push(template);
+                return template;
             },
             function(err) {
                 // error callback

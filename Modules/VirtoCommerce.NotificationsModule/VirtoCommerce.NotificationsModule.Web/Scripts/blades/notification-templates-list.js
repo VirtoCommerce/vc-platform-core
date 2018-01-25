@@ -15,10 +15,10 @@ angular.module('virtoCommerce.notificationsModule')
 	    blade.initialize = function () {
 		    blade.isLoading = true;
             notificationsService.getTemplates({notificationType: blade.notificationType}).then(function (data) {
-            blade.isLoading = false;
-            blade.currentEntities = data;
-        })
-        //TODO use resources
+                blade.isLoading = false;
+                blade.currentEntities = data;
+            })
+            //TODO use resources
 		    // notifications.getTemplates({ type: blade.notificationType, objectId: blade.objectId, objectTypeId: blade.objectTypeId }, function (data) {
 		    // 	blade.currentEntities = data;
 		    // 	if (blade.currentEntities.length < 1) {
@@ -54,27 +54,18 @@ angular.module('virtoCommerce.notificationsModule')
         };
 
         $scope.selectNode = function (type) {
-          blade.setSelectedNode(type);
-          blade.selectedType = type;
-          blade.openTemplate(type);
+            blade.setSelectedNode(type);
+            blade.selectedType = type;
+            blade.openTemplate(type);
         };
-        
-        function hasLanguage(language) {
-            if (blade.currentEntities) {
-                if (blade.currentEntities.find(language)) {
-                    return true;
-                }
-                else {
-                    return false;
-                }
-            }
-        }
-
+                
 	    function createTemplate(template) {
 		    var newBlade = {
 			    id: 'editTemplate',
 			    title: 'notifications.blades.notifications-edit-template.title-new',
-			    notificationType: blade.notificationType,
+                titleValues: { displayName: template.displayName },
+			    notificationType: template.notificationType,
+                displayName: template.displayName,
 			    objectId: blade.objectId,
 			    objectTypeId: blade.objectTypeId,
 			    language: 'undefined',

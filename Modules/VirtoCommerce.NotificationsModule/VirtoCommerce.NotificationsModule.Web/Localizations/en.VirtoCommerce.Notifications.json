@@ -25,7 +25,7 @@
             "notifications-edit-template": {
                 "title": "{{ displayName }} - template",
                 "subtitle": "Edit notification template",
-                "title-new": "Create notification template",
+                "title-new": "{{ displayName }} - create template",
                 "labels": {
                     "note": "This is list of notification parameters. You can paste this code and value of parameters will be inserted in your template",
                     "parameter-name": "Parameter name",
