@@ -1,11 +1,11 @@
-﻿<div class="blade-content __large-wide">
+﻿<div class="blade-content __xlarge-wide">
     <div class="blade-inner">
         <div class="inner-block">
             <form class="form" name="formScope">
                 <div class="columns clearfix">
                     <div class="column">
-                        <div class="form-group" style="margin:0">
-                            <label class="form-label">{{'notifications.blades.notifications-edit-template.labels.language' | translate}}</label>
+                        <div class="form-group" style="margin:0 200px 0 0">
+                            <label class="form-label" style="margin:0">{{'notifications.blades.notifications-edit-template.labels.language' | translate}}</label>
                             <div class="form-input" style="margin-top:0">
                                 <ui-select ng-model="blade.currentEntity.language">
                                     <ui-select-match allow-clear placeholder="{{ 'notifications.blades.notifications-edit-template.placeholders.language' | translate }}">{{$select.selected}}</ui-select-match>
@@ -56,8 +56,8 @@
                     </div>
                     <div class="column">
                         <div class="form-group" style="margin:0">
-                            <label class="form-label">{{'notifications.blades.notifications-edit-template.labels.recipient' | translate}}</label>
-                            <div class="form-group" style="margin-top:0">
+                            <label class="form-label" style="margin:0">{{'notifications.blades.notifications-edit-template.labels.recipient' | translate}}</label>
+                            <div class="form-group" style="margin:0">
                                 <div class="form-input">
                                     <input type="email" focus-on="" required class="form-control" ng-model="blade.currentEntity.recipient" placeholder="{{ 'notifications.blades.notifications-edit-template.placeholders.recipient' | translate }}"/>
                                 </div>
@@ -67,8 +67,8 @@
                             </div>
                         </div>
                         <div class="form-group" style="margin:0">
-                            <label class="form-label">{{'notifications.blades.notifications-edit-template.labels.bcc-recipients' | translate}}</label>
-                            <div class="form-group" style="margin-top:0">
+                            <label class="form-label" style="margin:0">{{'notifications.blades.notifications-edit-template.labels.bcc-recipients' | translate}}</label>
+                            <div class="form-group" style="margin:0">
                                 <tags-input ng-model="blade.currentEntity.bccRecipients"
                                             display-property="value"
                                             placeholder="{{ 'notifications.blades.notifications-edit-template.placeholders.email-addresses-note' | translate }}">
@@ -79,8 +79,8 @@
                             </div>
                         </div>
                         <div class="form-group" style="margin:0">
-                            <label class="form-label">{{'notifications.blades.notifications-edit-template.labels.subject' | translate}}</label>
-                            <div class="form-group" style="margin-top:0">
+                            <label class="form-label" style="margin:0">{{'notifications.blades.notifications-edit-template.labels.subject' | translate}}</label>
+                            <div class="form-group" style="margin:0">
                                 <div class="form-input">
                                     <input focus-on="" required class="form-control" ng-model="blade.currentEntity.subject" placeholder="{{ 'notifications.blades.notifications-edit-template.placeholders.subject' | translate }}"/>
                                 </div>
