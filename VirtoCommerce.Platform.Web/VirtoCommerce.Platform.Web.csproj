@@ -43,7 +43,5 @@
   <ItemGroup>
     <Folder Include="TagHelpers\" />
     <Folder Include="wwwroot\App_Data\" />
-    <Folder Include="wwwroot\js\app\Thumbnail\blades\" />
-    <Folder Include="wwwroot\js\app\Thumbnail\resourse\" />
   </ItemGroup>
 </Project>
