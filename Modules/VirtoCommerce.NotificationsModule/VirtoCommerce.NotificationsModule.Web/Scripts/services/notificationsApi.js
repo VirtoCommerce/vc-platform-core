@@ -84,7 +84,7 @@ var fakeNotifications = {
             "displayName": "Order sent notification",
             "description": "This notification sends by email to client when all shipments gets status sent",
             "sendGatewayType": 'Email',
-            "type": "OrderSentEmailNotification",
+            "notificationType": "OrderSentEmailNotification",
             "isActive": true,
             "isSuccessSend": false,
             "attemptCount": 0,
@@ -106,7 +106,7 @@ var fakeNotifications = {
             "displayName": "Cancel order notification",
             "description": "This notification sends by email to client when order canceled",
             "sendGatewayType": 'Email',
-            "type": "CancelOrderEmailNotification",
+            "notificationType": "CancelOrderEmailNotification",
             "isActive": true,
             "isSuccessSend": false,
             "attemptCount": 0,
@@ -162,7 +162,9 @@ var fakeTemplates = [
         "recipient": "a@a.com",
         "sender": "s@s.s",
         "subject": "some",
-        "sendGatewayType": "Email"
+        "sendGatewayType": "Email",
+        "body": "Thank you for registration {{firstname}} {{lastname}}",
+        "dynamicProperties" : "{ 'firstname': 'Name', 'lastname': 'Last' }"
     }];
 
 angular.module('virtoCommerce.notificationsModule')
@@ -179,10 +181,24 @@ angular.module('virtoCommerce.notificationsModule')
           }
           return deferred.promise
       }
-      self.getNotificationList = function() {
+      self.getNotificationList = function(searchCreteria) {
           return fakeHttpCall(true).then(
               function(data) {
                   // success callback
+                  if (searchCreteria.searchPhrase) {
+                    var keyword = searchCreteria.searchPhrase.toUpperCase();  
+                    var filterNotifications = _.filter(fakeNotifications.results, function(item){ 
+                        var ind = item.notificationType.toUpperCase().indexOf(keyword);
+                    return ind !== -1; 
+                    }); 
+                    var result = _.clone(fakeNotifications);
+                    result.results = filterNotifications;
+                    result.totalCount = filterNotifications.length;  
+
+                    return result;
+                       
+                  }
+                  
                   return fakeNotifications;
               },
               function(err) {
@@ -210,12 +226,12 @@ angular.module('virtoCommerce.notificationsModule')
             });
       }
 
-      self.getTemplates = function (notificationType) {
+      self.getTemplates = function (notification) {
         return fakeHttpCall(true).then(
             function(data) {
                 // success callback
-                var filterTemplates = $filter('filter')(fakeTemplates, {'notificationType': notificationType});
-                return fakeTemplates;
+                var filterTemplates = _.filter(fakeTemplates, { 'notificationType': notification.notificationType });
+                return filterTemplates;
             },
             function(err) {
                 // error callback

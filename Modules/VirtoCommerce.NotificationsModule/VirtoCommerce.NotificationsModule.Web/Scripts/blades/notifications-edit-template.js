@@ -1,12 +1,31 @@
 ﻿angular.module('virtoCommerce.notificationsModule')
-.controller('virtoCommerce.notificationsModule.editTemplateController', ['$rootScope', '$scope', '$timeout', 'virtoCommerce.notificationsModule.notificationsService', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.notifications', 
- function ($rootScope, $scope, $timeout, notificationsService, bladeNavigationService, dialogService, notifications) {
+.controller('virtoCommerce.notificationsModule.editTemplateController', ['$rootScope', '$scope', '$timeout', 'FileUploader', 'virtoCommerce.notificationsModule.notificationsService', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.notifications', 
+ function ($rootScope, $scope, $timeout, FileUploader, notificationsService, bladeNavigationService, dialogService, notifications) {
 	$scope.setForm = function (form) { $scope.formScope = form; }
 
 	var blade = $scope.blade;
 	blade.updatePermission = 'platform:notification:update';
 	var codemirrorEditor;
 	blade.parametersForTemplate = [];
+    var contentType = 'image';//blade.contentType.substr(0, 1).toUpperCase() + blade.contentType.substr(1, blade.contentType.length - 1);
+    $scope.fileUploader = new FileUploader({
+        url: 'api/platform/assets?folderUrl=cms-content/' + contentType + '/assets',
+        headers: { Accept: 'application/json' },
+        autoUpload: true,
+        removeAfterUpload: true,
+        onBeforeUploadItem: function (fileItem) {
+            blade.isLoading = true;
+        },
+        onSuccessItem: function (fileItem, response, status, headers) {
+            $scope.$broadcast('filesUploaded', { items: response });
+        },
+        onErrorItem: function (fileItem, response, status, headers) {
+            bladeNavigationService.setError(fileItem._file.name + ' failed: ' + (response.message ? response.message : status), blade);
+        },
+        onCompleteAll: function () {
+            blade.isLoading = false;
+        }
+    });
      
     function setTemplate(data) {
         data.notificationType = blade.notificationType;

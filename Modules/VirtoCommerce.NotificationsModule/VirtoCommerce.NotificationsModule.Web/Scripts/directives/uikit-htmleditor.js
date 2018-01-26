@@ -8,8 +8,10 @@ angular.module('virtoCommerce.notificationsModule')
             fileUploader: '='
         },
         link: function (scope, element, attributes) {
+            
 			var htmlEditor = UIkit.htmleditor(element, { mode: 'split', maxsplitsize: 1000, markdown: true });
             var codeMirror = htmlEditor.editor;
+            
             htmlEditor.addButtons({
                 headerFirst: { label: 'H1', title: 'First level header' },
                 headerSecond: { label: 'H2', title: 'Second level header' }
@@ -118,6 +120,20 @@ angular.module('virtoCommerce.notificationsModule')
                 var date = new Date();
                 return 'image_' + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDay() + '_' + date.getHours() + '-' + date.getMinutes() + '-' + date.getSeconds();
             }
+            
+            $('ul.uk-htmleditor-navbar-nav li.uk-htmleditor-button-preview').click(function(e){
+                //console.log($('div.uk-htmleditor-preview div').html());
+                //editor.refresh();
+                //$('div.uk-htmleditor-preview div').html('<h1>aaa</h1>')
+                //$('.uk-htmleditor-button-preview').trigger('click');
+                console.log("aaa");
+            });
+            
+            $('ul.uk-htmleditor-navbar-nav li.uk-htmleditor-button-preview').bind('click', function() {
+                 console.log("clicked the input");
+            });
+            
+            console.log(htmlEditor);
 
             codeMirror.setValue(scope.ngModel || '');
         }
