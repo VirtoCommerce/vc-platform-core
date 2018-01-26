@@ -1,19 +1,20 @@
 angular.module('platformWebApp')
     .controller('platformWebApp.thumbnail.taskListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.bladeUtils', 'platformWebApp.thumbnail.api', 'platformWebApp.uiGridHelper',
         function ($scope, bladeNavigationService, bladeUtils, thumbnailApi, uiGridHelper) {
-            debugger;
-
-            $scope.uiGridConstants = uiGridHelper.uiGridConstants;
             var blade = $scope.blade;
 
-            blade.refresh = function() {
-                debugger;
+            $scope.uiGridConstants = uiGridHelper.uiGridConstants;
+            $scope.hasMore = true;
+            $scope.items = [];
+
+            blade.refresh = function () {
                 blade.isLoading = true;
 
                 thumbnailApi.getTaskList().then(function (results) {
-                    debugger;
+
                     blade.isLoading = false;
-                    blade.currentEntities = results;
+                    $scope.items = results;
+                    $scope.hasMore = results.length === $scope.pageSettings.itemsPerPageCount;
                 });
             };
 
@@ -25,12 +26,35 @@ angular.module('platformWebApp')
                     canExecuteMethod: function () {
                         return true;
                     }
+                },
+                {
+                    name: "platform.commands.add",
+                    icon: 'fa fa-plus',
+                    executeMethod: blade.refresh,
+                    canExecuteMethod: function () {
+                        return true;
+                    }
+                },
+                {
+                    name: "platform.commands.run",
+                    icon: 'fa fa-exclamation',
+                    executeMethod: blade.refresh,
+                    canExecuteMethod: function () {
+                        return true;
+                    }
+                },
+                {
+                    name: "platform.commands.delete",
+                    icon: 'fa fa-trash-o',
+                    executeMethod: blade.refresh,
+                    canExecuteMethod: function () {
+                        return true;
+                    }
                 }
             ];
 
             // ui-grid
             $scope.setGridOptions = function (gridOptions) {
-                debugger;
 
                 //disable watched
                 bladeUtils.initializePagination($scope, true);

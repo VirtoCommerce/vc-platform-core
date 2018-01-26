@@ -79,7 +79,9 @@ gulp.task("min:js", function () {
     var minStream = gulp.src(src_paths)
         .pipe(sourcemaps.init())
         .pipe(concat('platform.min.js'))
-        .pipe(uglify())
+        .pipe(uglify().on('error', function (e) {
+            console.log(e);
+        }))
         .pipe(sourcemaps.write('../maps'))
         .pipe(gulp.dest('wwwroot/js/'));
     return merge(plainStream, minStream);

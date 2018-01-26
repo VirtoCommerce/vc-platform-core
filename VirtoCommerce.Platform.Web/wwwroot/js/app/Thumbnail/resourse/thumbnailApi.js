@@ -40,7 +40,7 @@ angular.module('platformWebApp')
                         }
                     }
                 ];
-                return $timeout(function () { return { list}}, 1000);
+                return $timeout(function () { return list;}, 1000);
             }
         }
     }]);

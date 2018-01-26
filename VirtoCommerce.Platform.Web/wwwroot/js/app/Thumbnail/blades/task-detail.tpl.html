@@ -1,0 +1,47 @@
+<div class="blade-content __medium-wide">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form name="detailForm">
+                <fieldset ng-init="setForm(detailForm)">
+                    <div class="form-group">
+                        <div class="column">
+                            <div class="form-group __info list">
+                                <label class="form-label">{{ 'catalog.blades.item-detail.labels.gtin' | translate }}</label>
+                                <div class="form-input">
+                                    <input ng-class="{'error': detailForm.gtin.$invalid && !detailForm.gtin.$pristine}" placeholder="{{ 'catalog.blades.item-detail.placeholders.gtin' | translate }}" class="form-control" ng-model="blade.item.gtin" name="gtin" type="text" ng-maxlength="14"/>
+                                </div>
+                                <div class="list-descr">{{ 'catalog.blades.item-detail.descr.start-date' | translate }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="column">
+                            <div class="form-group __info list">
+                                <label class="form-label">{{ 'catalog.blades.item-detail.labels.gtin' | translate }}</label>
+                                <div class="form-input">
+                                    <input ng-class="{'error': detailForm.gtin.$invalid && !detailForm.gtin.$pristine}" placeholder="{{ 'catalog.blades.item-detail.placeholders.gtin' | translate }}" class="form-control" ng-model="blade.item.gtin" name="gtin" type="text" ng-maxlength="14" />
+                                </div>
+                                <div class="list-descr">{{ 'catalog.blades.item-detail.descr.start-date' | translate }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="column">
+                            <div class="form-group">
+                                <label class="form-label">{{ 'catalog.blades.item-detail.labels.vendor' | translate }} <a href="" ng-click="blade.openVendorsManagement()" class="form-edit" va-permission="customer:read"><i class="form-ico fa fa-pencil"></i></a></label>
+                                <div class="form-input">
+                                    <ui-select ng-model="blade.item.vendor">
+                                        <ui-select-match allow-clear placeholder="{{ 'catalog.blades.item-detail.placeholders.vendor' | translate }}">{{$select.selected.name}}</ui-select-match>
+                                        <ui-select-choices repeat="x.id as x in blade.vendors.results | filter: {name: $select.search}">
+                                            <span ng-bind-html="x.name | highlight: $select.search"></span>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>

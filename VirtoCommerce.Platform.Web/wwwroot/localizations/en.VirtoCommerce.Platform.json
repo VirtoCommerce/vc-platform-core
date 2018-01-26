@@ -13,7 +13,8 @@
             "export-import": "Export & Import",
             "user-profile": "User profile",
             "assets": "Assets",
-            "toggle-favorites": "Shift + Space to toggle favorites"
+            "toggle-favorites": "Shift + Space to toggle favorites",
+            "thumbnail": "Thumbnail"
         },
         "navigation": {
             "back": "Back",
@@ -29,7 +30,7 @@
                     "modified": "Modified",
                     "actions": "Actions",
                     "group": "Group",
-                    "language": "Language" 
+                    "language": "Language"
                 }
             },
             "asset-upload": {
@@ -306,30 +307,30 @@
             },
             "module-detail": {
                 "title": "Module information",
-              "labels": {
-                "i-accept-the": "I accept the",
-                "license-link": "license",
-                "license": "License",
-                "agreement": "agreement.",
-                "install-from-file": "Install / update module from file",
-                "select-module-file": "Upload a module (.zip) file from outside the central modules repository",
-                "upload-progress": "Upload progress",
-                "module-info": "Module info",
-                "title": "Title",
-                "official": "Official module by {{$owner}}",
-                "owners": "Developed by {{$owner}}",
-                "author": "Author",
-                "authors": "Authors",
-                "id": "ID",
-                "version": "Version",
-                "project-information": "Project Information",
-                "description": "Description",
-                "platform-version": "Platform Version",
-                "dependencies": "Dependencies",
-                "tags": "Tags",
-                "install-version": "Install version",
-                "errors": "Errors"
-              }
+                "labels": {
+                    "i-accept-the": "I accept the",
+                    "license-link": "license",
+                    "license": "License",
+                    "agreement": "agreement.",
+                    "install-from-file": "Install / update module from file",
+                    "select-module-file": "Upload a module (.zip) file from outside the central modules repository",
+                    "upload-progress": "Upload progress",
+                    "module-info": "Module info",
+                    "title": "Title",
+                    "official": "Official module by {{$owner}}",
+                    "owners": "Developed by {{$owner}}",
+                    "author": "Author",
+                    "authors": "Authors",
+                    "id": "ID",
+                    "version": "Version",
+                    "project-information": "Project Information",
+                    "description": "Description",
+                    "platform-version": "Platform Version",
+                    "dependencies": "Dependencies",
+                    "tags": "Tags",
+                    "install-version": "Install version",
+                    "errors": "Errors"
+                }
             },
             "modules-main": {
                 "title": "Modules",
@@ -350,8 +351,8 @@
                     "no-modules-part1": "No new Modules to install.",
                     "no-installed-modules": "No installed Modules found.",
                     "icon": "Icon",
-                    "up-to-date": "Module is up to date", 
-                    "update-available": "Update available for this module", 
+                    "up-to-date": "Module is up to date",
+                    "update-available": "Update available for this module",
                     "module": "Module",
                     "version": "Version",
                     "author": "Author"
@@ -432,19 +433,19 @@
             },
             "account-detail": {
                 "title-new": "New Account",
-              "labels": {
-                "user-information": "User information",
-                "is-administrator": "Is administrator",
-                "account-type": "Account type",
-                "login": "Login",
-                "account-state": "Account state",
-                "account-email": "Email",
-                "locked-state": "Locked state" 
-              },
+                "labels": {
+                    "user-information": "User information",
+                    "is-administrator": "Is administrator",
+                    "account-type": "Account type",
+                    "login": "Login",
+                    "account-state": "Account state",
+                    "account-email": "Email",
+                    "locked-state": "Locked state"
+                },
                 "placeholders": {
-                  "account-type": "Select ...",
-                  "email": "Enter email",
-                  "user-name": "Enter user name"  
+                    "account-type": "Select ...",
+                    "email": "Enter email",
+                    "user-name": "Enter user name"
                 }
             },
             "account-list": {
@@ -654,6 +655,18 @@
                     "Quarters": "Quarters",
                     "Years": "Years"
                 }
+            },
+            "thumbnail": {
+                "title": "Thumbnails generation tasks list",
+                "subtitle": "List of all tasks for thumbnails generations",
+                "blades": {
+                    "tasks-list": {
+                        "labels": {
+                            "task-name": "Task Name",
+                            "last-run": "Last run" 
+                        } 
+                    }  
+                } 
             }
         },
         "templates": {
