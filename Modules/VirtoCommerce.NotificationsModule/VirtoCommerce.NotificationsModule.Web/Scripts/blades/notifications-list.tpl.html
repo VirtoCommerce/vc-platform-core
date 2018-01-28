@@ -37,7 +37,9 @@
 </div>
 
 <script type="text/ng-template" id="notification-list.row.html">
-    <div ng-click="grid.appScope.selectNode(row.entity)" ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" ui-grid-one-bind-id-grid="rowRenderIndex + '-' + col.uid + '-cell'" class="ui-grid-cell" ng-class="{'ui-grid-row-header-cell': col.isRowHeader, '__hovered': grid.appScope.contextMenuEntity === row.entity, '__selected': row.entity.id===grid.appScope.selectedNodeId }" role="{{col.isRowHeader ? 'rowheader' : 'gridcell' }}" ui-grid-cell context-menu="grid.appScope.contextMenuEntity = row.entity" data-target="cml_menu"></div>
+    <div ng-click="grid.appScope.selectNode(row.entity)" ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" ui-grid-one-bind-id-grid="rowRenderIndex + '-' + col.uid + '-cell'" class="ui-grid-cell" ng-class="{'ui-grid-row-header-cell': col.isRowHeader, '__hovered': grid.appScope.contextMenuEntity === row.entity, '__selected': row.entity.id===grid.appScope.selectedNodeId }" role="{{col.isRowHeader ? 'rowheader' : 'gridcell' }}" ui-grid-cell context-menu="grid.appScope.contextMenuEntity = row.entity" data-target="cml_menu">
+            
+    </div>
 </script>
 <script type="text/ng-template" id="list-actions.cell.html">
     <div class="ui-grid-actions" left-click-menu="grid.appScope.contextMenuEntity = row.entity" data-target="cml_menu">
@@ -47,8 +49,8 @@
 <script type="text/ng-template" id="notification-list-name.cell.html">
     <div class='ui-grid-cell-contents'>
       <div class='list-item'>
-      <span class="list-name ng-binding">{{row.entity.displayName}}</span>
-      <span class="list-descr ng-binding" style="color: #999;display: block;font-size: 12px;margin-top: 5px; white-space: initial;">{{row.entity.description}}</span>
+      <span class="list-name ng-binding">{{row.entity.displayName | translate}}</span>
+      <span class="list-descr ng-binding" style="color: #999;display: block;font-size: 12px;margin-top: 5px; white-space: initial;">{{row.entity.description | translate}}</span>
     </div>
     </div>
 </script>

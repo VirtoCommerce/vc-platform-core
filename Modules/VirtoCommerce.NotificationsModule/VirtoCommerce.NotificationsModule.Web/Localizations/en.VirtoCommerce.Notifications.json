@@ -130,6 +130,12 @@
                 "blade-title": "Attachments",
                 "blade-subtitle": "Attachments"
             } 
-        } 
+        },
+        "types" : {
+            "RegistrationEmailNotification" :  { 
+                "displayName": "Registration notification",
+                "description": "This notification is sent by email to a client when he finishes registration"
+            }
+        }
     }
 }

@@ -4,8 +4,8 @@ var fakeNotifications = {
     [
         {
             "id" : "1",
-            "displayName": "Registration notification",
-            "description": "This notification is sent by email to a client when he finishes registration",
+            "displayName": "notifications.types.RegistrationEmailNotification.displayName",
+            "description": "notifications.types.RegistrationEmailNotification.description",
             "sendGatewayType": 'Email',
             "notificationType": "RegistrationEmailNotification",
             "isActive": true,
@@ -188,8 +188,7 @@ angular.module('virtoCommerce.notificationsModule')
                   if (searchCreteria.searchPhrase) {
                     var keyword = searchCreteria.searchPhrase.toUpperCase();  
                     var filterNotifications = _.filter(fakeNotifications.results, function(item){ 
-                        var ind = item.notificationType.toUpperCase().indexOf(keyword);
-                    return ind !== -1; 
+                        return item.notificationType.toUpperCase().indexOf(keyword) !== -1; 
                     }); 
                     var result = _.clone(fakeNotifications);
                     result.results = filterNotifications;

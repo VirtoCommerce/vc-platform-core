@@ -130,11 +130,9 @@ angular.module('virtoCommerce.notificationsModule')
             });
             
             $('ul.uk-htmleditor-navbar-nav li.uk-htmleditor-button-preview').bind('click', function() {
-                 console.log("clicked the input");
+                 console.log($('div.uk-htmleditor-preview div').html());
             });
             
-            console.log(htmlEditor);
-
             codeMirror.setValue(scope.ngModel || '');
         }
     }
