@@ -102,13 +102,11 @@
                     <div class="tab-item">{{ 'notifications.blades.notifications-edit-template.labels.preview-data' | translate }}</div>
                 </div>
                 <div class="tab-cnt __opened">
-                    <form class="form" name="formScope">
-                        <input id="fileUploader" type="file" multiple style="display: none;" uploader="fileUploader" nv-file-select />
-                        <textarea vc-uk-htmleditor ng-model="blade.currentEntity.body" file-uploader="fileUploader"></textarea>
-                    </form>
+                    <input id="fileUploader" type="file" multiple style="display: none;" uploader="fileUploader" nv-file-select />
+                    <textarea vc-uk-htmleditor ng-model="blade.currentEntity.body" file-uploader="fileUploader"></textarea>
                 </div>
                 <div class="tab-cnt">
-                    <div class="form-group" ng-init="setForm(detailForm)">
+                    <div class="form-group">
                         <label class="form-label">{{ 'notifications.blades.notifications-edit-template.labels.preview-data-comment' | translate }}</label>
                         <div class="form-input">
                             <textarea id="previewData" class="form-control" ng-model="blade.currentEntity.dynamicProperties" placeholder="{{ 'notifications.blades.notifications-edit-template.labels.preview-data-comment' | translate }}"></textarea>

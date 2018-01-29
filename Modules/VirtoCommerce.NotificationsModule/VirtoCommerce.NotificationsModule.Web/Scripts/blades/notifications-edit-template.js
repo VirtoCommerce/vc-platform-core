@@ -1,12 +1,16 @@
 ﻿angular.module('virtoCommerce.notificationsModule')
-.controller('virtoCommerce.notificationsModule.editTemplateController', ['$rootScope', '$scope', '$timeout', 'FileUploader', 'virtoCommerce.notificationsModule.notificationsService', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.notifications', 
- function ($rootScope, $scope, $timeout, FileUploader, notificationsService, bladeNavigationService, dialogService, notifications) {
-	$scope.setForm = function (form) { $scope.formScope = form; }
+.controller('virtoCommerce.notificationsModule.editTemplateController', ['$rootScope', '$scope', '$timeout', '$localStorage', 'FileUploader', 'virtoCommerce.notificationsModule.notificationsService', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.notifications', 
+ function ($rootScope, $scope, $timeout, $localStorage, FileUploader, notificationsService, bladeNavigationService, dialogService, notifications) {
+	$scope.setForm = function (form) { 
+        $scope.formScope = form; 
+    }
+    
 
 	var blade = $scope.blade;
 	blade.updatePermission = 'platform:notification:update';
 	var codemirrorEditor;
 	blade.parametersForTemplate = [];
+    var keyTemplateLocalStorage;
     var contentType = 'image';//blade.contentType.substr(0, 1).toUpperCase() + blade.contentType.substr(1, blade.contentType.length - 1);
     $scope.fileUploader = new FileUploader({
         url: 'api/platform/assets?folderUrl=cms-content/' + contentType + '/assets',
@@ -42,6 +46,12 @@
 //		}, function (error) {
 //			bladeNavigationService.setError('Error ' + error.status, blade);
 //		});
+        keyTemplateLocalStorage = blade.objectTypeId + '.' + blade.notificationType;
+        var itemFromLocalStorage = $localStorage[keyTemplateLocalStorage];
+        
+        if (itemFromLocalStorage) {
+            blade.currentEntity.dynamicProperties = itemFromLocalStorage;
+        }
 
 		$timeout(function () {
 			if (codemirrorEditor) {
@@ -122,6 +132,7 @@
 //		}, function (error) {
 //			bladeNavigationService.setError('Error ' + error.status, blade);
 //		});
+        $localStorage[keyTemplateLocalStorage] = blade.currentEntity.dynamicProperties;
 	};
 
 	blade.testResolve = function () {
@@ -246,11 +257,11 @@
 	};
 
 	function isDirty() {
-		return (!angular.equals(blade.origEntity, blade.currentEntity) || blade.isNew) && blade.hasUpdatePermission();
+        return (!angular.equals(blade.origEntity, blade.currentEntity) || blade.isNew) && blade.hasUpdatePermission();
 	}
 
 	function canSave() {
-		return isDirty() && $scope.formScope && $scope.formScope.$valid;
+        return isDirty() && $scope.formScope && $scope.formScope.$valid;
 	}
 
 	blade.onClose = function (closeCallback) {
