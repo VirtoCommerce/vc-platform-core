@@ -185,20 +185,26 @@ angular.module('virtoCommerce.notificationsModule')
           return fakeHttpCall(true).then(
               function(data) {
                   // success callback
+                  var result = _.clone(fakeNotifications);
                   if (searchCreteria.searchPhrase) {
                     var keyword = searchCreteria.searchPhrase.toUpperCase();  
                     var filterNotifications = _.filter(fakeNotifications.results, function(item){ 
                         return item.notificationType.toUpperCase().indexOf(keyword) !== -1; 
                     }); 
-                    var result = _.clone(fakeNotifications);
                     result.results = filterNotifications;
                     result.totalCount = filterNotifications.length;  
-
-                    return result;
-                       
+                  }
+                  if (searchCreteria.sort) {
+                      //sort : "displayName:desc"
+                      var sortFields = searchCreteria.sort.split(':');
+                      result.results = _.sortBy(result.results, sortFields[0], sortFields[1]);
+                      if (sortFields[1] === 'desc') {
+                          result.results = result.results.reverse();
+                      }
                   }
                   
-                  return fakeNotifications;
+                  
+                  return result;
               },
               function(err) {
                   // error callback

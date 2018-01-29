@@ -98,8 +98,8 @@
                 }
             },
             "notifications-list": {
-                "title": "Notifications",
-                "subtitle": "View notification templates",
+                "title": "Notifications list",
+                "subtitle": "List of all registered notifications in the system",
                 "labels": {
                     "no-notifications": "No registered notifications yet",
                     "display-name": "Display Name",
