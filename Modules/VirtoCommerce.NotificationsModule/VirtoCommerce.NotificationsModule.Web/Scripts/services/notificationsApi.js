@@ -164,7 +164,7 @@ var fakeTemplates = [
         "subject": "some",
         "sendGatewayType": "Email",
         "body": "Thank you for registration {{firstname}} {{lastname}}",
-        "dynamicProperties" : "{ \"firstname\": \"Name\", \"lastname\": \"Last\" }"
+        "dynamicProperties" : "{\n \"firstname\": \"Name\",\n \"lastname\": \"Last\"\n}"
     }];
 
 angular.module('virtoCommerce.notificationsModule')

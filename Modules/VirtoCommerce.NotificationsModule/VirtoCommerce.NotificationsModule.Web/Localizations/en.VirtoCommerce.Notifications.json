@@ -40,7 +40,8 @@
                     "subject": "Subject",
                     "body": "Body",
                     "template": "Template",
-                    "preview-data": "Preview Data"
+                    "preview-data": "Preview Data",
+                    "preview-data-comment": "Template context data(JSON)"
                 },
                 "descriptions": {
                     "recipient": "Email recipient address",

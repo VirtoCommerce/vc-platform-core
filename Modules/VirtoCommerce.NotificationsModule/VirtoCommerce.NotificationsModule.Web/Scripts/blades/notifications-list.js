@@ -1,6 +1,6 @@
 angular.module('virtoCommerce.notificationsModule')
-.controller('virtoCommerce.notificationsModule.notificationsListController', ['$scope', 'virtoCommerce.notificationsModule.notificationsService', 'virtoCommerce.notificationsModule.notificationTypesResolverService', 'platformWebApp.dialogService', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper', 'platformWebApp.ui-grid.extension', 'platformWebApp.settings', 'platformWebApp.i18n',
-    function ($scope, notificationsService, notificationTypesResolverService, dialogService, bladeUtils, uiGridHelper, gridOptionExtension, settings, i18n) {
+.controller('virtoCommerce.notificationsModule.notificationsListController', ['$scope', '$translate', 'virtoCommerce.notificationsModule.notificationsService', 'virtoCommerce.notificationsModule.notificationTypesResolverService', 'platformWebApp.dialogService', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper', 'platformWebApp.ui-grid.extension', 'platformWebApp.settings', 'platformWebApp.i18n',
+    function ($scope, $translate, notificationsService, notificationTypesResolverService, dialogService, bladeUtils, uiGridHelper, gridOptionExtension, settings, i18n) {
         $scope.uiGridConstants = uiGridHelper.uiGridConstants;
         var blade = $scope.blade;
         blade.title = 'Notifications';
@@ -37,7 +37,7 @@ angular.module('virtoCommerce.notificationsModule')
       		var newBlade = {
       			id: 'editNotification',
       			title: 'notifications.blades.notification-details.title',
-                titleValues: { displayName: item.displayName },
+                titleValues: { displayName: $translate.instant(item.displayName) },
       			notificationType: item.notificationType,
       			objectId: blade.objectId,
       			objectTypeId: blade.objectTypeId,

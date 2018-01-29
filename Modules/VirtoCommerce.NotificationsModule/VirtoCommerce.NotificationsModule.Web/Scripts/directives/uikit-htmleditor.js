@@ -124,7 +124,7 @@ angular.module('virtoCommerce.notificationsModule')
             $('.uk-htmleditor-button-preview').click(function(e){
                 var dataHtml = $('div.uk-htmleditor-preview div').html();
                 var dataText = previewData.value;
-                if (dataHtml && dataText) {
+                if (dataText && dataHtml) {
                     var dataObj = $.parseJSON(dataText);
                     for (var key in dataObj) {
                         dataHtml = dataHtml.replace(new RegExp("{{" + key + "}}","g"), dataObj[key]);
