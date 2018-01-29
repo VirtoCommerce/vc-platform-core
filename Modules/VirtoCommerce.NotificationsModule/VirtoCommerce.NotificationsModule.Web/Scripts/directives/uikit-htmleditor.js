@@ -121,16 +121,16 @@ angular.module('virtoCommerce.notificationsModule')
                 return 'image_' + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDay() + '_' + date.getHours() + '-' + date.getMinutes() + '-' + date.getSeconds();
             }
             
-            $('ul.uk-htmleditor-navbar-nav li.uk-htmleditor-button-preview').click(function(e){
-                //console.log($('div.uk-htmleditor-preview div').html());
-                //editor.refresh();
-                //$('div.uk-htmleditor-preview div').html('<h1>aaa</h1>')
-                //$('.uk-htmleditor-button-preview').trigger('click');
-                console.log("aaa");
-            });
-            
-            $('ul.uk-htmleditor-navbar-nav li.uk-htmleditor-button-preview').bind('click', function() {
-                 console.log($('div.uk-htmleditor-preview div').html());
+            $('.uk-htmleditor-button-preview').click(function(e){
+                var dataHtml = $('div.uk-htmleditor-preview div').html();
+                var dataText = previewData.value;
+                if (dataHtml && dataText) {
+                    var dataObj = $.parseJSON(dataText);
+                    for (var key in dataObj) {
+                        dataHtml = dataHtml.replace(new RegExp("{{" + key + "}}","g"), dataObj[key]);
+                    }
+                    $('div.uk-htmleditor-preview div').html(dataHtml);    
+                }
             });
             
             codeMirror.setValue(scope.ngModel || '');
