@@ -39,6 +39,10 @@
 		blade.origEntity = _.clone(data);
 		blade.currentEntity = data;
         blade.isLoading = false;
+        if (!blade.templateId) {
+            blade.isNew = true;    
+        }
+        
 //		notifications.prepareTestData({ type: blade.notificationType }, function (data) {
 //			blade.parametersForTemplate = data;
 //			blade.isLoading = false;

@@ -266,10 +266,14 @@ angular.module('virtoCommerce.notificationsModule')
       self.updateTemplate = function(template) {
           return fakeHttpCall(true).then(
             function(data) {
-                // success callback
-                template.id = (fakeTemplates.length + 1).toString();
                 var date = new Date();
-                template.created = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
+                var now = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
+                if (template.templateId) {
+                    template.modified = now;
+                    return template; 
+                }
+                template.id = (fakeTemplates.length + 1).toString();
+                template.created = now;
                 fakeTemplates.push(template);
                 return template;
             },
