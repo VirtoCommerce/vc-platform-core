@@ -663,10 +663,50 @@
                     "tasks-list": {
                         "labels": {
                             "task-name": "Task Name",
-                            "last-run": "Last run" 
-                        } 
-                    }  
-                } 
+                            "last-run": "Last run"
+                        }
+                    },
+                    "task-detail": {
+                        "title": "Thumbnails generation task detail",
+                        "subtitle": "Manage the task settings and detail",
+                        "labels": {
+                            "name": "Name",
+                            "path-images": "Path to images",
+                            "thumbnail-settings": "Thumbnail settings"
+                        },
+                        "descriptions": {
+                            "name": "The display task name",
+                            "path-images": "The path in asset system which will be used for images discovery. Allimages in this folder will be processed recursively",
+                            "thumbnail-settings": "The list of thumbnails resolutions"
+                        }
+                    },
+                    "setting-managment": {
+                        "title": "Thumbnails settings",
+                        "subtitle": "Manage a thumbnails settings"
+                    },
+                    "setting-detail": {
+                        "title": "Thumbnails settings",
+                        "subtitle": "Manage a thumbnails settings",
+                        "labels": {
+                            "name": "Name",
+                            "file-suffix": "Thumbnail file name suffix",
+                            "resize-method": "Resize method",
+                            "width": "Width (pixels)",
+                            "height": "Height (pixels)",
+                            "background-color": "Background color"
+                        },
+                        "placeholders": {
+                        },
+                        "discription": {
+                            "name": "The display setting name",
+                            "file-suffix": "The suffix whitch will be added to thumbnail file name",
+                            "resize-method": "Resize method which will be used for image transformation",
+                            "width": "Thumbnail width in pixels",
+                            "height": "Thumbnail height in pixels",
+                            "background-color": "Thumbnail background color i.e. #FFFFFF"
+                        }
+                    } 
+                }
             }
         },
         "templates": {

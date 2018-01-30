@@ -1,24 +1,19 @@
 angular.module('platformWebApp')
-    .controller('platformWebApp.thumbnail.taskDetailController', ['$rootScope', '$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.thumbnail.api', function ($rootScope, $scope, bladeNavigationService, thumbnailApi) {
+    .controller('platformWebApp.thumbnail.optionDetailController', ['$rootScope', '$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.thumbnail.api', function ($rootScope, $scope, bladeNavigationService, thumbnailApi) {
         var blade = $scope.blade;
 
+        blade.resizeMethod = resizeMethod.get();
+
         blade.refresh = function (parentRefresh) {
+            debugger;
 
-            thumbnailApi.getTask(blade.itemId).then( function (item) {
+            thumbnailApi.getOptionDetail(blade.itemId).then(function (item) {
 
-                    initializeBlade(item);
+                initializeBlade(item);
 
-                    if (blade.childrenBlades) {
-                        _.each(blade.childrenBlades, function (x) {
-                            if (x.refresh) {
-                                x.refresh(blade.currentEntity);
-                            }
-                        });
-                    }
-
-                    if (parentRefresh) {
-                        blade.parentBlade.refresh();
-                    }
+                if (parentRefresh) {
+                    blade.parentBlade.refresh();
+                }
             }
             );
         };
@@ -76,14 +71,6 @@ angular.module('platformWebApp')
                 }
             },
             {
-                name: "platform.commands.run",
-                icon: 'fa fa-exclamation',
-                executeMethod: blade.refresh,
-                canExecuteMethod: function () {
-                    return true;
-                }
-            },
-            {
                 name: "platform.commands.delete",
                 icon: 'fa fa-trash-o',
                 executeMethod: blade.refresh,
@@ -92,18 +79,6 @@ angular.module('platformWebApp')
                 }
             }
         ];
-
-        blade.openSettingManagement = function () {
-            var newBlade = {
-                id: 'optionListDetail',
-                currentEntityId: blade.itemId,
-                title: 'platform.blades.thumbnail.blades.setting-managment.title',
-                subtitle: 'platform.blades.thumbnail.blades.setting-managment.subtitle',
-                controller: 'platformWebApp.thumbnail.optionListController',
-                template: '$(Platform)/Scripts/app/thumbnail/blades/option-list.tpl.html'
-            };
-            bladeNavigationService.showBlade(newBlade, blade);
-        };
 
         blade.refresh();
 

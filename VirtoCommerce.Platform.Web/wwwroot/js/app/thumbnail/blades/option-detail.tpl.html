@@ -1,0 +1,110 @@
+<div class="blade-content __medium-wide">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form name="detailForm">
+                <fieldset ng-init="setForm(detailForm)">
+
+                    <div class="form-group">
+                        <div class="column">
+                            <div class="form-group __info list">
+                                <label class="form-label">{{ 'platform.blades.thumbnail.blades.setting-detail.labels.name' | translate }}</label>
+                                <div class="form-input">
+                                    <input ng-class="{'error': detailForm.name.$invalid && !detailForm.name.$pristine}" placeholder="{{ 'catalog.blades.item-detail.placeholders.gtin' | translate }}" class="form-control" ng-model="blade.item.name" name="name" type="text" />
+                                </div>
+                                <div class="list-descr">{{ 'platform.blades.thumbnail.blades.setting-detail.discription.name' | translate }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="columns ">
+                            <div class="column">
+                                <div class="form-group ">
+                                    <div class="column">
+                                        <div class="form-group __info list">
+                                            <label class="form-label">{{ 'platform.blades.thumbnail.blades.setting-detail.labels.file-suffix' | translate }}</label>
+                                            <div class="form-input">
+                                                <input ng-class="{'error': detailForm.fileSuffix.$invalid && !detailForm.fileSuffix.$pristine}" required class="form-control" ng-model="blade.item.fileSuffix" name="fileSuffix" placeholder="{{ 'catalog.blades.item-detail.placeholders.sku' | translate }}" ui-validate=" 'blade.codeValidator($value)' " />
+                                            </div>
+                                            <div class="list-descr">{{ 'platform.blades.thumbnail.blades.setting-detail.discription.width' | translate }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="column">
+                                <div class="form-group ">
+                                    <div class="column">
+                                        <div class="form-group __info list">
+                                            <label class="form-label">{{ 'catalog.blades.property-detail.labels.applies-to' | translate }}</label>
+                                            <div class="form-input">
+                                                <ui-select ng-model="blade.currentEntity.type" class="capitalizeText">
+                                                    <ui-select-match>{{$select.selected}}</ui-select-match>
+                                                    <ui-select-choices repeat="propertyType in blade.availablePropertyTypes | filter: $select.search">
+                                                        <span ng-click="blade.currentEntity.type">{{propertyType}}</span>
+                                                    </ui-select-choices>
+                                                </ui-select>
+                                            </div>
+                                            <div class="list-descr">{{ 'platform.blades.thumbnail.blades.setting-detail.discription.height' | translate }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="columns ">
+                            <div class="column">
+                                <div class="form-group ">
+                                    <div class="column">
+                                        <div class="form-group __info list">
+                                            <label class="form-label">{{'platform.blades.thumbnail.blades.setting-detail.labels.width' | translate}}</label>
+                                            <div class="form-input __number">
+                                                <input smart-float num-type="float" ng-model="blade.item.width" placeholder="N/A" />
+                                            </div>
+                                            <div class="list-descr">{{ 'platform.blades.thumbnail.blades.setting-detail.discription.width' | translate }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="column">
+                                <div class="form-group ">
+                                    <div class="column">
+                                        <div class="form-group __info list">
+                                            <label class="form-label">{{'platform.blades.thumbnail.blades.setting-detail.labels.height' | translate}}</label>
+                                            <div class="form-input __number">
+                                                <input smart-float num-type="float" ng-model="blade.item.height" placeholder="N/A" />
+                                            </div>
+                                            <div class="list-descr">{{ 'platform.blades.thumbnail.blades.setting-detail.discription.height' | translate }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="columns">
+                            <div class="column">
+                                <div class="form-group ">
+                                    <div class="column">
+                                        <div class="form-group __info list">
+                                            <label class="form-label">{{ 'platform.blades.thumbnail.blades.setting-detail.labels.background-color' | translate }}</label>
+                                            <div class="form-input">
+                                                <input ng-class="{'error': detailForm.backgroundColor.$invalid && !detailForm.backgroundColor.$pristine}" placeholder="N/A" class="form-control" ng-model="blade.item.backgroundColor" name="backgroundColor" type="text" />
+                                            </div>
+                                            <div class="list-descr">{{ 'platform.blades.thumbnail.blades.setting-detail.discription.background-color' | translate }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="column">
+                                <div class="form-group"></div>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>

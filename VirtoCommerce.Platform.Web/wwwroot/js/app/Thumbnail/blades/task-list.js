@@ -18,6 +18,26 @@ angular.module('platformWebApp')
                 });
             };
 
+            blade.setSelectedItem = function (listItem) {
+                $scope.selectedNodeId = listItem.id;
+            };
+
+            $scope.selectItem = function (e, listItem) {
+                blade.setSelectedItem(listItem);
+
+                    var newBlade = {
+                        id: "listTaskDetail",
+                        itemId: listItem.id,
+                        title: 'platform.blades.thumbnail.blades.task-detail.title',
+                        subtitle: 'platform.blades.thumbnail.blades.task-detail.subtitle',
+                        controller: 'platformWebApp.thumbnail.taskDetailController',
+                        template: '$(Platform)/Scripts/app/thumbnail/blades/task-detail.tpl.html'
+                    };
+                    bladeNavigationService.showBlade(newBlade, blade);
+            };
+
+            blade.headIcon = 'fa fa-picture-o';
+
             blade.toolbarCommands = [
                 {
                     name: "platform.commands.refresh",
