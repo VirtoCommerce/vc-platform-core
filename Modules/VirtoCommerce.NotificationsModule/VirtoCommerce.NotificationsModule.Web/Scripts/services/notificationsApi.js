@@ -268,7 +268,7 @@ angular.module('virtoCommerce.notificationsModule')
             function(data) {
                 var date = new Date();
                 var now = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
-                if (template.templateId) {
+                if (template.id) {
                     template.modified = now;
                     return template; 
                 }
