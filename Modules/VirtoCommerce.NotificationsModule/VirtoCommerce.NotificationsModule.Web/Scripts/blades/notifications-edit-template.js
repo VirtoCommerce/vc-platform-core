@@ -36,6 +36,7 @@
         data.displayName = blade.displayName;
 		data.objectId = blade.objectId;
 		data.objectTypeId = blade.objectTypeId;
+        data.sendGatewayType = blade.sendGatewayType;
 		blade.origEntity = _.clone(data);
 		blade.currentEntity = data;
         blade.isLoading = false;

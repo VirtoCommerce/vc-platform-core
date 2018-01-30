@@ -132,6 +132,12 @@
                 "blade-subtitle": "Attachments"
             } 
         },
+        "dialogs": {
+            "unknown-sendGateway-type": {
+                "title": "Error",
+                "message": "Can't edit a template of unknown type '{{sendGatewayType}}'."
+            }    
+        },
         "types" : {
             "RegistrationEmailNotification" :  { 
                 "displayName": "Registration notification",

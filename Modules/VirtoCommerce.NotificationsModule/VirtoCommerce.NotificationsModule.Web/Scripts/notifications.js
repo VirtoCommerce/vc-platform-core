@@ -27,8 +27,8 @@ angular.module(moduleTemplateName, [])
                 });
         }
     ])
-    .run(['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state',
-        function ($rootScope, mainMenuService, widgetService, $state) {
+    .run(['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', 'virtoCommerce.notificationsModule.notificationTypesResolverService',
+        function ($rootScope, mainMenuService, widgetService, $state, notificationTypesResolverService) {
             //Register module in main menu
             var menuItem = {
                 path: 'browse/notificationsModule',
@@ -52,5 +52,17 @@ angular.module(moduleTemplateName, [])
       	        controller: 'virtoCommerce.notificationsModule.notificationsAttachmentsWidgetController',
       	        template: 'Modules/$(VirtoCommerce.notificationsModule)/Scripts/widgets/notificationsAttachmentsWidget.tpl.html'
       	    }, 'notificationsDetail');
+            
+            // register types
+            notificationTypesResolverService.registerType({
+                type: 'Email',
+                icon: 'fa fa-envelope',
+                detailBlade: {
+                  template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notifications-edit-template.tpl.html'
+                },
+                knownChildrenTypes: ['Email', 'Sms']
+            });  
         }
+          
+        
     ]);

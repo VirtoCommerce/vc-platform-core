@@ -162,7 +162,6 @@ var fakeTemplates = [
         "recipient": "a@a.com",
         "sender": "s@s.s",
         "subject": "some",
-        "sendGatewayType": "Email",
         "body": "Thank you for registration {{firstname}} {{lastname}}",
         "dynamicProperties" : "{\n \"firstname\": \"Name\",\n \"lastname\": \"Last\"\n}"
     }];
@@ -216,14 +215,7 @@ angular.module('virtoCommerce.notificationsModule')
         return fakeHttpCall(true).then(
             function(data) {
                 // success callback
-                var found;
-                for (var i = 0; i < fakeNotifications.results.length; i++) {
-                    if (fakeNotifications.results[i].notificationType === item.type) {
-                        found = fakeNotifications.results[i];
-                        break;
-                    }
-                }
-                return found;
+                return _.findWhere(fakeNotifications.results, { notificationType: item.type });
             },
             function(err) {
                 // error callback
@@ -248,14 +240,7 @@ angular.module('virtoCommerce.notificationsModule')
         return fakeHttpCall(true).then(
             function(data) {
                 // success callback
-                var found;
-                for (var i = 0; i < fakeTemplates.length; i++) {
-                    if (fakeTemplates[i].id === id) {
-                        found = fakeTemplates[i];
-                        break;
-                    }
-                }
-                return found;
+                return _.findWhere(fakeTemplates, { id: id });
             },
             function(err) {
                 // error callback

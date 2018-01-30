@@ -1,6 +1,6 @@
 angular.module('virtoCommerce.notificationsModule')
-.controller('virtoCommerce.notificationsModule.notificationTemplatesListController', ['$scope', 'virtoCommerce.notificationsModule.notificationsService', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.notifications', 'platformWebApp.settings', 'platformWebApp.ui-grid.extension', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeUtils',
-    function ($scope, notificationsService, bladeNavigationService, dialogService, notifications, settings, gridOptionExtension, uiGridHelper, bladeUtils) {
+.controller('virtoCommerce.notificationsModule.notificationTemplatesListController', ['$scope', '$translate', 'virtoCommerce.notificationsModule.notificationsService', 'virtoCommerce.notificationsModule.notificationTypesResolverService', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.notifications', 'platformWebApp.settings', 'platformWebApp.ui-grid.extension', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeUtils',
+    function ($scope, $translate, notificationsService, notificationTypesResolverService, bladeNavigationService, dialogService, notifications, settings, gridOptionExtension, uiGridHelper, bladeUtils) {
         $scope.uiGridConstants = uiGridHelper.uiGridConstants;
 	    var blade = $scope.blade;
 	    blade.selectedLanguage = null;
@@ -28,25 +28,42 @@ angular.module('virtoCommerce.notificationsModule')
 		    // });
         }
         
+        function resolveType(sendGatewayType) {
+            var foundTemplate = notificationTypesResolverService.resolve(sendGatewayType);
+            if (foundTemplate && foundTemplate.knownChildrenTypes && foundTemplate.knownChildrenTypes.length) {
+                    return foundTemplate;
+                } else {
+                    dialogService.showNotificationDialog({
+                        id: "error",
+                        title: "notifications.dialogs.unknown-sendGateway-type.title",
+                        message: "notifications.dialogs.unknown-sendGateway-type.message",
+                        messageValues: { sendGatewayType: sendGatewayType },
+                });
+            }
+        }
+        
         blade.openTemplate = function (template) {
 		    blade.selectedLanguage = template.language;
-            var newBlade = {
-                id: 'editTemplate',
-                title: 'notifications.blades.notifications-edit-template.title',
-                titleValues: { displayName: template.displayName },
-                subtitle: 'notifications.blades.notifications-edit-template.subtitle',
-                templateId: template.id,
-                notificationType: blade.notificationType,
-                objectId: blade.objectId,
-                objectTypeId: blade.objectTypeId,
-                isNew: false,
-                isFirst: false,
-                languages: blade.languages,
-                controller: 'virtoCommerce.notificationsModule.editTemplateController',
-                template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notifications-edit-template.tpl.html'
-            };
+            var foundTemplate = resolveType(template.sendGatewayType);
+            if (foundTemplate) {
+                var newBlade = {
+                    id: foundTemplate.detailBlade.id,
+                    title: 'notifications.blades.notifications-edit-template.title',
+                    titleValues: { displayName: $translate.instant(template.displayName) },
+                    notificationType: blade.notificationType,
+                    templateId: template.id,
+                    isNew: false,
+                    isFirst: false,
+                    languages: blade.languages,
+                    sendGatewayType: blade.sendGatewayType,
+                    objectId: blade.objectId,
+                    objectTypeId: blade.objectTypeId,
+                    controller: foundTemplate.detailBlade.controller,
+                    template: foundTemplate.detailBlade.template
+                };
 
-            bladeNavigationService.showBlade(newBlade, blade);    
+                bladeNavigationService.showBlade(newBlade, blade);
+            } 
 	    }
 
         blade.setSelectedNode = function (listItem) {
@@ -60,23 +77,27 @@ angular.module('virtoCommerce.notificationsModule')
         };
                 
 	    function createTemplate(template) {
-		    var newBlade = {
-			    id: 'editTemplate',
-			    title: 'notifications.blades.notifications-edit-template.title-new',
-                titleValues: { displayName: template.displayName },
-			    notificationType: template.notificationType,
-                displayName: template.displayName,
-			    objectId: blade.objectId,
-			    objectTypeId: blade.objectTypeId,
-			    language: 'undefined',
-			    isNew: true,
-			    isFirst: false,
-			    languages: blade.languages,
-			    controller: 'virtoCommerce.notificationsModule.editTemplateController',
-			    template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notifications-edit-template.tpl.html'
-		    };
+            var foundTemplate = resolveType(template.sendGatewayType);
+            if (foundTemplate) {
+                var newBlade = {
+                    id: foundTemplate.detailBlade.id,
+                    title: 'notifications.blades.notifications-edit-template.title-new',
+                    titleValues: { displayName: $translate.instant(template.displayName) },
+                    notificationType: template.notificationType,
+                    displayName: template.displayName,
+                    objectId: blade.objectId,
+                    objectTypeId: blade.objectTypeId,
+                    language: 'undefined',
+                    isNew: true,
+                    isFirst: false,
+                    languages: blade.languages,
+                    sendGatewayType: blade.sendGatewayType,
+                    controller: foundTemplate.detailBlade.controller,
+                    template: foundTemplate.detailBlade.template
+                };
 
-		    bladeNavigationService.showBlade(newBlade, blade);
+                bladeNavigationService.showBlade(newBlade, blade);
+            }
 	    }
 
 	    blade.toolbarCommands = [

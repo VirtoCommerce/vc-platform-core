@@ -4,7 +4,7 @@ angular.module('virtoCommerce.notificationsModule')
         objects: [],
         registerType: function (notificationTypeDefinition) {
             notificationTypeDefinition.detailBlade = angular.extend({
-                id: "notificationDetail",
+                id: "editTemplate",
                 metaFields: [],
                 controller: 'virtoCommerce.notificationsModule.editTemplateController',
                 notificationTypeDefinition: notificationTypeDefinition
@@ -18,4 +18,4 @@ angular.module('virtoCommerce.notificationsModule')
             return _.findWhere(this.objects, { type: type });
         }
     };
-});﻿
+});
