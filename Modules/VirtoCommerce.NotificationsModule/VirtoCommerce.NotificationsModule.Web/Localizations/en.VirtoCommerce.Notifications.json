@@ -88,6 +88,9 @@
                 "subtitle": "View notification history",
                 "labels": {
                     "display-name": "Display Name",
+                    "notification": "Notification",
+                    "created": "Created",
+                    "status": "Status",
                     "recipient": "Recipient",
                     "sent-date": "Sent Date",
                     "channel": "Channel",

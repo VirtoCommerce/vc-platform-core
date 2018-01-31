@@ -27,6 +27,28 @@ angular.module(moduleTemplateName, [])
                 });
         }
     ])
+    // define search filters to be accessible platform-wide
+    .factory('virtoCommerce.notificationsModule.predefinedSearchFilters', ['$localStorage', function ($localStorage) {
+        $localStorage.notificationJournalSearchFilters = $localStorage.notificationJournalSearchFilters || [];
+        return {
+            register: function (currentFiltersUpdateTime, currentFiltersStorageKey, newFilters) {
+                _.each(newFilters, function (newFilter) {
+                    var found = _.find($localStorage.notificationJournalSearchFilters, function (x) {
+                        return x.id == newFilter.id;
+                    });
+                    if (found) {
+                        if (found && (!found.lastUpdateTime || found.lastUpdateTime < currentFiltersUpdateTime)) {
+                            angular.copy(newFilter, found);
+                        }
+                    } else if (!$localStorage[currentFiltersStorageKey] || $localStorage[currentFiltersStorageKey] < currentFiltersUpdateTime) {
+                        $localStorage.notificationJournalSearchFilters.splice(0, 0, newFilter);
+                    }
+                });
+
+                $localStorage[currentFiltersStorageKey] = currentFiltersUpdateTime;
+            }
+        };
+    }])
     .run(['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', 'virtoCommerce.notificationsModule.notificationTypesResolverService',
         function ($rootScope, mainMenuService, widgetService, $state, notificationTypesResolverService) {
             //Register module in main menu
