@@ -52,7 +52,7 @@ angular.module('platformWebApp')
                     createdBy: 'admin',
                     modifiedBy: 'admin',
                     name: 'Clother catalog test thumbnail',
-                    lastRun: '2018-01-25T16:20:14.493Z',
+                    lastRun: '',
                     workPath: '/catalog/clother',
                     thumbnailOptions: [
                         {
@@ -117,6 +117,14 @@ angular.module('platformWebApp')
                 };
 
                 return $timeout(function () { return result; }, 1000);
+            },
+
+            taskRun: function() {
+                return $timeout(function () { return {}; }, 1000);
+            },
+
+            taskCancel: function () {
+                return $timeout(function () { return true; }, 1000);
             }
     }
 

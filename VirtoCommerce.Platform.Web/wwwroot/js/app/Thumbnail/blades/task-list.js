@@ -1,6 +1,6 @@
 angular.module('platformWebApp')
-    .controller('platformWebApp.thumbnail.taskListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.bladeUtils', 'platformWebApp.thumbnail.api', 'platformWebApp.uiGridHelper',
-        function ($scope, bladeNavigationService, bladeUtils, thumbnailApi, uiGridHelper) {
+    .controller('platformWebApp.thumbnail.taskListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.bladeUtils', 'platformWebApp.thumbnail.api', 'platformWebApp.uiGridHelper', 'platformWebApp.dialogService',
+        function ($scope, bladeNavigationService, bladeUtils, thumbnailApi, uiGridHelper, dialogService) {
             var blade = $scope.blade;
 
             $scope.uiGridConstants = uiGridHelper.uiGridConstants;
@@ -36,8 +36,37 @@ angular.module('platformWebApp')
                     bladeNavigationService.showBlade(newBlade, blade);
             };
 
-            blade.headIcon = 'fa fa-picture-o';
 
+            $scope.taskRun = function (itemsSelect) {
+                debugger;
+                var dialog = {
+                    id: "confirmTaskRun",
+                    callback: function (doReindex) {
+                        var options = _.map(documentTypes, function (x) {
+                            return {
+                                documentType: x.documentType,
+                                deleteExistingIndex: doReindex
+                            };
+                        });
+                        thumbnailApi.taskRun(options).then(function openProgressBlade(data) {
+                            debugger;
+                            var newBlade = {
+                                id: 'thumbnailProgress',
+                                notification: data,
+                                parentRefresh: blade.parentRefresh,
+                                controller: 'virtoCommerce.coreModule.indexProgressController',
+                                template: '$(Platform)/Scripts/app/thumbnail/blades/task-detail.tpl.html'
+                            };
+                            bladeNavigationService.showBlade(newBlade, blade.parentBlade || blade);
+                        });
+                    }
+                }
+                debugger;
+                dialogService.showDialog(dialog, '$(Platform)/Scripts/app/thumbnail/dialogs/run-dialog.tpl.html', 'platformWebApp.confirmDialogController');
+            }
+
+
+            blade.headIcon = 'fa fa-picture-o';
             blade.toolbarCommands = [
                 {
                     name: "platform.commands.refresh",
@@ -58,17 +87,21 @@ angular.module('platformWebApp')
                 {
                     name: "platform.commands.run",
                     icon: 'fa fa-exclamation',
-                    executeMethod: blade.refresh,
                     canExecuteMethod: function () {
-                        return true;
+                        return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
+                    },
+                    executeMethod: function () {
+                        $scope.taskRun($scope.gridApi.selection.getSelectedRows());
                     }
                 },
                 {
                     name: "platform.commands.delete",
                     icon: 'fa fa-trash-o',
-                    executeMethod: blade.refresh,
                     canExecuteMethod: function () {
-                        return true;
+                        return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
+                    },
+                    executeMethod: function () {
+                        $scope.taskDelete($scope.gridApi.selection.getSelectedRows());
                     }
                 }
             ];
@@ -86,7 +119,7 @@ angular.module('platformWebApp')
                     $scope.gridApi = gridApi;
 
                     uiGridHelper.bindRefreshOnSortChanged($scope);
-                    $scope.gridApi.infiniteScroll.on.needLoadMoreData($scope, showMore);
+                    //$scope.gridApi.infiniteScroll.on.needLoadMoreData($scope, showMore);
                 });
 
                 blade.refresh();
