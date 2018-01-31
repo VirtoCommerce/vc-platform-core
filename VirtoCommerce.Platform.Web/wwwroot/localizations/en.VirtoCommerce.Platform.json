@@ -710,7 +710,17 @@
                             "fixed-width": "Fixed Width",
                             "fixed-height": "Fixed Height",
                             "crop": "Crop"
-                        } 
+                        }
+                    }
+                },
+                "dialogs": {
+                    "task-run": {
+                        "title": "The thumbnail generation",
+                        "msg1": "Choose how to generate the thumbnails.</br> Optioms:",
+                        "msg2": "Progress changes: generate thumbnails only for new or changed images",
+                        "msg3": "Regenerate: force to generation progress for all images",
+                        "btn-changes": "Progress changes",
+                        "btn-regenerate": "Regenerate"
                     } 
                 }
             }
