@@ -13,10 +13,19 @@ var gulp = require("gulp"),
     mainBowerFiles = require('main-bower-files'),
     sass = require('gulp-sass'),
     rename = require('gulp-rename'),
-    sourcemaps = require('gulp-sourcemaps');
+    sourcemaps = require('gulp-sourcemaps'),
+    gulpsync = require('gulp-sync')(gulp);
 
 
-gulp.task("min", ["min:bowerPackages:js", "min:bowerPackages:css", "min:js", "min:css"]);
+gulp.task("min", gulpsync.sync(["min:bowerPackages:js", "min:bowerPackages:css", "translateSass", "min:js", "min:css", 'min:allPackages:cs']));
+
+
+// concatenate all css files
+gulp.task('min:allPackages:css', function () {
+    return gulp.src(['wwwroot/css/*.css', '!wwwroot/css/allPackages.css', '!wwwroot/css/platform.css', '!wwwroot/css/main.css'])
+        .pipe(concat('allPackages.css'))
+        .pipe(gulp.dest('wwwroot/css/'));
+});
 
 // concatenate all css files from bower packages to single file
 gulp.task('min:bowerPackages:css', function () {
@@ -24,7 +33,7 @@ gulp.task('min:bowerPackages:css', function () {
         // Only the CSS files
         filter: /.*\.css$/i
     }))
-        .pipe(concat('allPackages.css'))
+        .pipe(concat('bowerPackages.css'))
         .pipe(gulp.dest('wwwroot/css/'));
 });
 
@@ -70,9 +79,9 @@ gulp.task("min:js", function () {
     return merge(plainStream, minStream);
 });
 
-gulp.task("min:css", function () {
-
-    var scssStream = gulp.src(['wwwroot/css/themes/main/sass/**/*.sass'])
+// translate sass to css
+gulp.task('translateSass', function () {
+    return gulp.src(['wwwroot/css/themes/main/sass/**/*.sass'])
         // must be executed straigh after source
         .pipe(sourcemaps.init())
         .pipe(sass({
@@ -93,10 +102,16 @@ gulp.task("min:css", function () {
             ]
         }))
         // must be executed straight before output
-        .pipe(sourcemaps.write('.', { includeContent: false, sourceRoot: '../sass' }));
+        .pipe(sourcemaps.write('.', { includeContent: false, sourceRoot: '../sass' }))
+        .pipe(gulp.dest('wwwroot/css'));
+});
 
-    var cssStream = gulp.src(['wwwroot/css/themes/main/css/**/*.css', 'wwwroot/js/codemirror/**/*.css', '!wwwroot/css/themes/main/css/allPackages.css'])
-        .pipe(concat('css-files.css'));
+
+gulp.task("min:css", function () {
+
+    var scssStream = gulp.src(['wwwroot/css/main.css']);
+
+    var cssStream = gulp.src(['wwwroot/css/themes/main/css/**/*.css', 'wwwroot/js/codemirror/**/*.css', '!wwwroot/css/themes/main/css/allPackages.css']);
 
     return merge(scssStream, cssStream)
         .pipe(concat('platform.css'))
@@ -105,7 +120,7 @@ gulp.task("min:css", function () {
 });
 
 gulp.task("clean", function () {
-    var files = ['wwwroot/css/allPackages.css', 'wwwroot/css/platform.css', 'wwwroot/js/allPackages.(min.js|js)', 'wwwroot/js/platform.(min.js|js'];
+    var files = ['wwwroot/css/allPackages.css', 'wwwroot/css/platform.css', 'wwwroot/css/main.css', 'wwwroot/css/main.css.map', 'wwwroot/js/allPackages.(min.js|js)', 'wwwroot/js/platform.(min.js|js'];
     return del(files);
 });
 
