@@ -67,9 +67,6 @@ angular.module('virtoCommerce.notificationsModule')
             }
         ];
         
-        // simple and advanced filtering
-        var filter = blade.filter = { keyword: blade.filterKeyword };
-        
         // Search Criteria
         function getSearchCriteria()
         {

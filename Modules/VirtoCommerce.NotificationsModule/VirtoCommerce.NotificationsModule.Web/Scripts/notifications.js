@@ -50,8 +50,8 @@ angular.module(moduleTemplateName, [])
             }
         };
     }])
-    .run(['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', 'virtoCommerce.notificationsModule.notificationTypesResolverService', '$http', '$compile',
-        function ($rootScope, mainMenuService, widgetService, $state, notificationTypesResolverService, $http, $compile) {
+    .run(['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', 'virtoCommerce.notificationsModule.notificationTypesResolverService', '$http', '$compile', 'virtoCommerce.notificationsModule.predefinedSearchFilters',
+        function ($rootScope, mainMenuService, widgetService, $state, notificationTypesResolverService, $http, $compile, predefinedSearchFilters) {
             //Register module in main menu
             var menuItem = {
                 path: 'browse/notificationsModule',
@@ -84,7 +84,15 @@ angular.module(moduleTemplateName, [])
                   template: 'Modules/$(VirtoCommerce.notificationsModule)/Scripts/blades/notifications-edit-template.tpl.html'
                 },
                 knownChildrenTypes: ['Email', 'Sms']
-            });  
+            }); 
+            
+            // predefine search filters for search
+            predefinedSearchFilters.register(1485892981, 'notificationsJournalSearchFiltersDate', [
+                { name: 'notifications.blades.notifications-journal.labels.filter-new' },
+                { keyword: 'isActive:true, isSuccessSend:false', id: 2, name: 'notifications.blades.notifications-journal.labels.filter-only-pending' },
+                { keyword: 'isActive:false, isSuccessSend:false', id: 1, name: 'notifications.blades.notifications-journal.labels.filter-with-errors' }
+                
+            ]);
             
             $http.get('Modules/$(VirtoCommerce.notificationsModule)/Scripts/directives/itemSearch.tpl.html').then(function (response) {
                 // compile the response, which will put stuff into the cache

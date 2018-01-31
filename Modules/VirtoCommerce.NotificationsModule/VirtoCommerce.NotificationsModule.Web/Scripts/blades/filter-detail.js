@@ -1,5 +1,5 @@
 ﻿angular.module('virtoCommerce.notificationsModule')
-.controller('virtoCommerce.notificationsModule.filterDetailController', ['$scope', '$localStorage', '$translate',
+.controller('virtoCommerce.notificationsModule.filterJournalDetailController', ['$scope', '$localStorage', '$translate',
     function ($scope, $localStorage, $translate) {
         var blade = $scope.blade;
         var formScope;

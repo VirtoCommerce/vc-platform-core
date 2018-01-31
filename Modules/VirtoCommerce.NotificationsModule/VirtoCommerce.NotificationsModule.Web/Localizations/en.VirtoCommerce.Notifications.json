@@ -98,7 +98,10 @@
                     "processing": "Processing",
                     "success": "Success",
                     "no-notifications": "No notifications yet",
-                    "unnamed-filter": "Unnamed filter"
+                    "unnamed-filter": "Unnamed filter",
+                    "filter-new": "<strong>Add new filter</strong>",
+                    "filter-only-pending": "Only pending",
+                    "filter-with-errors": "With errors"
                 },
                 "placeholders": {
                     "select-filter": "Select filter"

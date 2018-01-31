@@ -17290,6 +17290,454 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/html"))
 });
 
 angular.module('platformWebApp')
+ .factory('platformWebApp.bladeUtils', ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
+     function initializePagination($scope, skipDefaultWatch) {
+         //pagination settings
+         $scope.pageSettings = {};
+         $scope.pageSettings.totalItems = 0;
+         $scope.pageSettings.currentPage = 1;
+         $scope.pageSettings.numPages = 5;
+         $scope.pageSettings.itemsPerPageCount = 20;
+
+         if (!skipDefaultWatch)
+             $scope.$watch('pageSettings.currentPage', $scope.blade.refresh);
+     }
+
+     return {
+         bladeNavigationService: bladeNavigationService,
+         initializePagination: initializePagination
+     };
+ }]);
+
+angular.module('platformWebApp')
+    .filter('boolToValue', function () {
+        return function (input, trueValue, falseValue) {
+            return input ? trueValue : falseValue;
+        };
+    })
+    .filter('slice', function () {
+        return function (arr, start, end) {
+            return (arr || []).slice(start, end);
+        };
+    })
+    .filter('readablesize', function () {
+        return function (input) {
+            if (!input)
+                return null;
+
+            var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+            var order = 0;
+            while (input >= 1024 && order + 1 < sizes.length) {
+                order++;
+                input = input / 1024;
+            }
+            return Math.round(input) + ' ' + sizes[order];
+        };
+    })
+    // translate the given properties in the input array
+    .filter('translateArray', ['$translate', function ($translate) {
+        return function (inputArray, propertiesList) {
+            _.each(inputArray, function (inputItem) {
+                _.each(propertiesList, function (prop) {
+                    if (angular.isString(inputItem[prop])) {
+                        var translateKey = inputItem[prop].toLowerCase();
+                        var result = $translate.instant(translateKey);
+                        if (result !== translateKey) inputItem[prop] = result;
+                    }
+                });
+            });
+            return inputArray;
+        }
+    }])
+    // translation with fall-back value if key not found
+    .filter('fallbackTranslate', ['$translate', function ($translate) {
+        return function (translateKey, fallbackValue) {
+            var result = $translate.instant(translateKey);
+            return result === translateKey ? fallbackValue : result;
+        };
+    }]);
+angular.module('platformWebApp')
+.factory('platformWebApp.objCompareService', function () {
+
+	//https://stamat.wordpress.com/2013/06/22/javascript-object-comparison/
+
+	var specialChars = [ '$', '_' ];
+	//Returns the object's class, Array, Date, RegExp, Object are of interest to us
+	var getClass = function (val) {
+		return Object.prototype.toString.call(val)
+			.match(/^\[object\s(.*)\]$/)[1];
+	};
+
+	//Defines the type of the value, extended typeof
+	var whatis = function (val) {
+
+		if (val === undefined)
+			return 'undefined';
+		if (val === null)
+			return 'null';
+
+		var type = typeof val;
+
+		if (type === 'object')
+			type = getClass(val).toLowerCase();
+
+		if (type === 'number') {
+			if (val.toString().indexOf('.') > 0)
+				return 'float';
+			else
+				return 'integer';
+		}
+
+		return type;
+	};
+
+	var compareObjects = function (a, b) {
+		if (a === b)
+			return true;
+
+		if (Object.keys(a).length < Object.keys(b).length)
+		{
+			var tmp = a;
+			a = b;
+			b = tmp;
+		}
+
+		for (var i in a) {
+			//ignore system properties and functions
+			if (!_.contains(specialChars, i.charAt(0)) && whatis(a[i]) != 'function') {
+				if (b.hasOwnProperty(i)) {
+					if (!equal(a[i], b[i]))
+						return false;
+				} else {
+					return false;
+				}
+			}
+		}
+
+		//for (var i in b) {
+		//	if (!a.hasOwnProperty(i)) {
+		//		return false;
+		//	}
+		//}
+		return true;
+	};
+
+	var compareArrays = function (a, b) {
+		if (a === b)
+			return true;
+		if (a.length !== b.length)
+			return false;
+		for (var i = 0; i < a.length; i++) {
+			if (!equal(a[i], b[i])) return false;
+		};
+		return true;
+	};
+
+	var _equal = {};
+	_equal.array = compareArrays;
+	_equal.object = compareObjects;
+	_equal.date = function (a, b) {
+		return a.getTime() === b.getTime();
+	};
+	_equal.regexp = function (a, b) {
+		return a.toString() === b.toString();
+	};
+	//	uncoment to support function as string compare
+	//	_equal.fucntion =  _equal.regexp;
+	/*
+	* Are two values equal, deep compare for objects and arrays.
+	* @param a {any}
+	* @param b {any}
+	* @return {boolean} Are equal?
+	*/
+	var equal = function (a, b) {
+		var retVal = a === b;
+		if (!retVal) {
+			var atype = whatis(a), btype = whatis(b);
+			if (atype === btype)
+			{
+				retVal = _equal.hasOwnProperty(atype) ? _equal[atype](a, b) : a == b;
+			}
+		}
+
+		return retVal;
+	}
+
+	return {
+		equal: equal
+	};
+});
+
+angular.module('platformWebApp')
+    .config(['$provide', 'uiGridConstants', function ($provide, uiGridConstants) {
+        $provide.decorator('GridOptions', ['$delegate', '$localStorage', '$translate', 'platformWebApp.bladeNavigationService', function ($delegate, $localStorage, $translate, bladeNavigationService) {
+            var gridOptions = angular.copy($delegate);
+            gridOptions.initialize = function (options) {
+                var initOptions = $delegate.initialize(options);
+                var blade = bladeNavigationService.currentBlade;
+                var $scope = blade.$scope;
+
+                // restore saved state, if any
+                var savedState = $localStorage['gridState:' + blade.template];
+                if (savedState) {
+                    // extend saved columns with custom columnDef information (e.g. cellTemplate, displayName)
+                    var foundDef;
+                    _.each(savedState.columns, function (x) {
+                        if (foundDef = _.findWhere(initOptions.columnDefs, { name: x.name })) {
+                            foundDef.sort = x.sort;
+                            foundDef.width = x.width || foundDef.width;
+                            foundDef.visible = x.visible;
+                            // prevent loading outdated cellTemplate
+                            delete x.cellTemplate;
+                            _.extend(x, foundDef);
+                            x.wasPredefined = true;
+                            initOptions.columnDefs.splice(initOptions.columnDefs.indexOf(foundDef), 1);
+                        } else {
+                            x.wasPredefined = false;
+                        }
+                    });
+                    // savedState.columns = _.reject(savedState.columns, function (x) { return x.cellTemplate && !x.wasPredefined; }); // not sure why was this, but it rejected custom templated fields
+                    initOptions.columnDefs = _.union(initOptions.columnDefs, savedState.columns);
+                } else {
+                    // mark predefined columns
+                    _.each(initOptions.columnDefs, function (x) {
+                        x.visible = angular.isDefined(x.visible) ? x.visible : true;
+                        x.wasPredefined = true;
+                    });
+                }
+
+                // translate headers
+                _.each(initOptions.columnDefs, function (x) { x.headerCellFilter = 'translate'; });
+
+                var customOnRegisterApiCallback = initOptions.onRegisterApi;
+
+                angular.extend(initOptions, {
+                    rowHeight: initOptions.rowHeight === 30 ? 40 : initOptions.rowHeight,
+                    enableGridMenu: true,
+                    //enableVerticalScrollbar: uiGridConstants.scrollbars.NEVER,
+                    //enableHorizontalScrollbar: uiGridConstants.scrollbars.NEVER,
+                    saveFocus: false,
+                    saveFilter: false,
+                    saveGrouping: false,
+                    savePinning: false,
+                    saveSelection: false,
+                    gridMenuTitleFilter: $translate,
+                    onRegisterApi: function (gridApi) {
+                        //set gridApi on scope
+                        $scope.gridApi = gridApi;
+
+                        if (gridApi.saveState) {
+                            if (savedState) {
+                                //$timeout(function () {
+                                gridApi.saveState.restore($scope, savedState);
+                                //}, 10);
+                            }
+
+                            if (gridApi.colResizable)
+                                gridApi.colResizable.on.columnSizeChanged($scope, saveState);
+                            if (gridApi.colMovable)
+                                gridApi.colMovable.on.columnPositionChanged($scope, saveState);
+                            gridApi.core.on.columnVisibilityChanged($scope, saveState);
+                            gridApi.core.on.sortChanged($scope, saveState);
+                            function saveState() {
+                                $localStorage['gridState:' + blade.template] = gridApi.saveState.save();
+                            }
+                        }
+
+                        gridApi.grid.registerDataChangeCallback(processMissingColumns, [uiGridConstants.dataChange.ROW]);
+                        gridApi.grid.registerDataChangeCallback(autoFormatColumns, [uiGridConstants.dataChange.ROW]);
+
+                        if (customOnRegisterApiCallback) {
+                            customOnRegisterApiCallback(gridApi);
+                        }
+                    },
+                    onCollapse: function () {
+                        updateColumnsVisibility(this, true);
+                    },
+                    onExpand: function () {
+                        updateColumnsVisibility(this, false);
+                    }
+                });
+
+                return initOptions;
+            };
+
+            function processMissingColumns(grid) {
+                var gridOptions = grid.options;
+
+                if (!gridOptions.columnDefsGenerated && _.any(grid.rows)) {
+                    var filteredColumns = _.filter(_.pairs(grid.rows[0].entity), function (x) {
+                        return !x[0].startsWith('$$') && (!_.isObject(x[1]) || _.isDate(x[1]));
+                    });
+
+                    var allKeysFromEntity = _.map(filteredColumns, function (x) {
+                        return x[0];
+                    });
+                    // remove non-existing columns
+                    _.each(gridOptions.columnDefs.slice(), function (x) {
+                        if (!_.contains(allKeysFromEntity, x.name) && !x.wasPredefined) {
+                            gridOptions.columnDefs = _.reject(gridOptions.columnDefs, function (d) {
+                                return d.name == x.name;
+                            });
+                        }
+                    });
+
+                    // generate columnDefs for each undefined property
+                    _.each(allKeysFromEntity, function (x) {
+                        if (!_.findWhere(gridOptions.columnDefs, { name: x })) {
+                            gridOptions.columnDefs.push({ name: x, visible: false });
+                        }
+                    });
+                    gridOptions.columnDefsGenerated = true;
+                    grid.api.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
+                }
+            }
+
+            // Configure automatic formatting of columns/
+            // Column with type number will use numberFilter to correct display of values
+            // Column with type date will use predefined template with am-time-ago directive to display date in human-readable format
+            function autoFormatColumns(grid) {
+                var gridOptions = grid.options;
+                grid.buildColumns();
+                var columnDefs = angular.copy(gridOptions.columnDefs);
+                for (var i = 0; i < columnDefs.length; i++) {
+                    var columnDef = columnDefs[i];
+                    for (var j = 0; j < grid.rows.length; j++) {
+                        var value = grid.getCellValue(grid.rows[j], grid.getColumn(columnDef.name));
+                        if (angular.isDefined(value)) {
+                            if (angular.isNumber(value)) {
+                                columnDef.cellFilter = columnDef.cellFilter || 'number';
+                            }
+                            // Default template for columns with dates
+                            else if (angular.isDate(value) || angular.isString(value) && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d+)?Z/.test(value)) {
+                                columnDef.cellTemplate = columnDef.cellTemplate || '$(Platform)/Scripts/common/templates/ui-grid/am-time-ago.cell.html';
+                            }
+                            break;
+                        }
+                    }
+                    gridOptions.columnDefs[i] = columnDef;
+                }
+                grid.options.columnDefs = columnDefs;
+                grid.api.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
+            }
+
+            function updateColumnsVisibility(gridOptions, isCollapsed) {
+                var blade = bladeNavigationService.currentBlade;
+                var $scope = blade.$scope;
+                _.each(gridOptions.columnDefs, function (x) {
+                    // normal: visible, if column was predefined
+                    // collapsed: visible only if we must display column always
+                    if (isCollapsed) {
+                        x.wasVisible = !!x.wasPredefined && x.visible !== false || !!x.visible;
+                    }
+                    x.visible = !isCollapsed ? !!x.wasVisible : !!x.displayAlways;
+                });
+                if ($scope && $scope.gridApi)
+                    $scope.gridApi.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
+            }
+
+            return gridOptions;
+        }]);
+    }])
+
+    .factory('platformWebApp.uiGridHelper', ['$localStorage', '$timeout', 'uiGridConstants', '$translate', function ($localStorage, $timeout, uiGridConstants, $translate) {
+        var retVal = {};
+        retVal.uiGridConstants = uiGridConstants;
+        retVal.initialize = function ($scope, gridOptions, externalRegisterApiCallback) {
+            $scope.gridOptions = angular.extend({
+                data: _.any(gridOptions.data) ? gridOptions.data : 'blade.currentEntities',
+                onRegisterApi: function (gridApi) {
+                    if (externalRegisterApiCallback) {
+                        externalRegisterApiCallback(gridApi);
+                    }
+                }
+            }, gridOptions);
+        };
+
+        retVal.getSortExpression = function ($scope) {
+            var columnDefs;
+            if ($scope.gridApi) {
+                columnDefs = $scope.gridApi.grid.columns;
+            } else {
+                var savedState = $localStorage['gridState:' + $scope.blade.template];
+                columnDefs = savedState ? savedState.columns : $scope.gridOptions.columnDefs;
+            }
+
+            var sorts = _.filter(columnDefs, function (x) {
+                return x.name !== '$path' && x.sort && (x.sort.direction === uiGridConstants.ASC || x.sort.direction === uiGridConstants.DESC);
+            });
+            sorts = _.sortBy(sorts, function (x) {
+                return x.sort.priority;
+            });
+            sorts = _.map(sorts, function (x) {
+                return (x.field ? x.field : x.name) + ':' + (x.sort.direction === uiGridConstants.ASC ? 'asc' : 'desc');
+            });
+            return sorts.join(';');
+        };
+
+        retVal.bindRefreshOnSortChanged = function ($scope) {
+            $scope.gridApi.core.on.sortChanged($scope, function () {
+                if (!$scope.blade.isLoading) $scope.blade.refresh();
+            });
+        };
+
+        return retVal;
+    }])
+
+    // ui-grid extension service. Used for extension grid options from other modules
+    .factory('platformWebApp.ui-grid.extension', [function () {
+        return {
+            extensionsMap: [],
+            registerExtension: function (gridId, extensionFn) {
+                this.extensionsMap[gridId] = extensionFn;
+            },
+            tryExtendGridOptions: function (gridId, gridOptions) {
+                if (this.extensionsMap[gridId]) {
+                    this.extensionsMap[gridId](gridOptions);
+                }
+            }
+        };
+    }])
+
+    // auto height and additional class for ui-grid
+    .directive('uiGridHeight', ['$timeout', '$window', function ($timeout, $window) {
+        return {
+            restrict: 'A',
+            link: {
+                pre: function (scope, element) {
+                    var bladeInner = $(element).parents('.blade-inner');
+                    bladeInner.addClass('ui-grid-no-scroll');
+
+                    var setGridHeight = function () {
+                        $timeout(function () {
+                            $(element).height(bladeInner.height());
+                        });
+                    };
+                    scope.$watch('blade.isExpanded', setGridHeight);
+                    scope.$watch('pageSettings.totalItems', setGridHeight);
+                    angular.element($window).bind('resize', setGridHeight);
+                }
+            }
+        };
+    }])
+    .run(['$templateRequest', function ($templateRequest) {
+        // Pre-load default templates, because we inject templates to grid options dynamically, so they not loaded by default
+        $templateRequest('$(Platform)/Scripts/common/templates/ui-grid/am-time-ago.cell.html');
+    }]);
+
+angular.module('platformWebApp')
+ .factory('platformWebApp.validators', [function () {
+     function webSafeFileNameValidator(value) {
+         var pattern = /^[\w.-]+$/;
+         return pattern.test(value);
+     }
+
+     return {
+         webSafeFileNameValidator: webSafeFileNameValidator
+     };
+ }]);
+
+angular.module('platformWebApp')
 .config(['$provide', function ($provide) {
     // Provide default format
     $provide.decorator('currencyFilter', ['$delegate', function ($delegate) {
@@ -17894,454 +18342,6 @@ angular.module('platformWebApp')
     i18n.changeTimeAgoSettings();
 }]);
 angular.module('platformWebApp')
- .factory('platformWebApp.bladeUtils', ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
-     function initializePagination($scope, skipDefaultWatch) {
-         //pagination settings
-         $scope.pageSettings = {};
-         $scope.pageSettings.totalItems = 0;
-         $scope.pageSettings.currentPage = 1;
-         $scope.pageSettings.numPages = 5;
-         $scope.pageSettings.itemsPerPageCount = 20;
-
-         if (!skipDefaultWatch)
-             $scope.$watch('pageSettings.currentPage', $scope.blade.refresh);
-     }
-
-     return {
-         bladeNavigationService: bladeNavigationService,
-         initializePagination: initializePagination
-     };
- }]);
-
-angular.module('platformWebApp')
-    .filter('boolToValue', function () {
-        return function (input, trueValue, falseValue) {
-            return input ? trueValue : falseValue;
-        };
-    })
-    .filter('slice', function () {
-        return function (arr, start, end) {
-            return (arr || []).slice(start, end);
-        };
-    })
-    .filter('readablesize', function () {
-        return function (input) {
-            if (!input)
-                return null;
-
-            var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-            var order = 0;
-            while (input >= 1024 && order + 1 < sizes.length) {
-                order++;
-                input = input / 1024;
-            }
-            return Math.round(input) + ' ' + sizes[order];
-        };
-    })
-    // translate the given properties in the input array
-    .filter('translateArray', ['$translate', function ($translate) {
-        return function (inputArray, propertiesList) {
-            _.each(inputArray, function (inputItem) {
-                _.each(propertiesList, function (prop) {
-                    if (angular.isString(inputItem[prop])) {
-                        var translateKey = inputItem[prop].toLowerCase();
-                        var result = $translate.instant(translateKey);
-                        if (result !== translateKey) inputItem[prop] = result;
-                    }
-                });
-            });
-            return inputArray;
-        }
-    }])
-    // translation with fall-back value if key not found
-    .filter('fallbackTranslate', ['$translate', function ($translate) {
-        return function (translateKey, fallbackValue) {
-            var result = $translate.instant(translateKey);
-            return result === translateKey ? fallbackValue : result;
-        };
-    }]);
-angular.module('platformWebApp')
-.factory('platformWebApp.objCompareService', function () {
-
-	//https://stamat.wordpress.com/2013/06/22/javascript-object-comparison/
-
-	var specialChars = [ '$', '_' ];
-	//Returns the object's class, Array, Date, RegExp, Object are of interest to us
-	var getClass = function (val) {
-		return Object.prototype.toString.call(val)
-			.match(/^\[object\s(.*)\]$/)[1];
-	};
-
-	//Defines the type of the value, extended typeof
-	var whatis = function (val) {
-
-		if (val === undefined)
-			return 'undefined';
-		if (val === null)
-			return 'null';
-
-		var type = typeof val;
-
-		if (type === 'object')
-			type = getClass(val).toLowerCase();
-
-		if (type === 'number') {
-			if (val.toString().indexOf('.') > 0)
-				return 'float';
-			else
-				return 'integer';
-		}
-
-		return type;
-	};
-
-	var compareObjects = function (a, b) {
-		if (a === b)
-			return true;
-
-		if (Object.keys(a).length < Object.keys(b).length)
-		{
-			var tmp = a;
-			a = b;
-			b = tmp;
-		}
-
-		for (var i in a) {
-			//ignore system properties and functions
-			if (!_.contains(specialChars, i.charAt(0)) && whatis(a[i]) != 'function') {
-				if (b.hasOwnProperty(i)) {
-					if (!equal(a[i], b[i]))
-						return false;
-				} else {
-					return false;
-				}
-			}
-		}
-
-		//for (var i in b) {
-		//	if (!a.hasOwnProperty(i)) {
-		//		return false;
-		//	}
-		//}
-		return true;
-	};
-
-	var compareArrays = function (a, b) {
-		if (a === b)
-			return true;
-		if (a.length !== b.length)
-			return false;
-		for (var i = 0; i < a.length; i++) {
-			if (!equal(a[i], b[i])) return false;
-		};
-		return true;
-	};
-
-	var _equal = {};
-	_equal.array = compareArrays;
-	_equal.object = compareObjects;
-	_equal.date = function (a, b) {
-		return a.getTime() === b.getTime();
-	};
-	_equal.regexp = function (a, b) {
-		return a.toString() === b.toString();
-	};
-	//	uncoment to support function as string compare
-	//	_equal.fucntion =  _equal.regexp;
-	/*
-	* Are two values equal, deep compare for objects and arrays.
-	* @param a {any}
-	* @param b {any}
-	* @return {boolean} Are equal?
-	*/
-	var equal = function (a, b) {
-		var retVal = a === b;
-		if (!retVal) {
-			var atype = whatis(a), btype = whatis(b);
-			if (atype === btype)
-			{
-				retVal = _equal.hasOwnProperty(atype) ? _equal[atype](a, b) : a == b;
-			}
-		}
-
-		return retVal;
-	}
-
-	return {
-		equal: equal
-	};
-});
-
-angular.module('platformWebApp')
-    .config(['$provide', 'uiGridConstants', function ($provide, uiGridConstants) {
-        $provide.decorator('GridOptions', ['$delegate', '$localStorage', '$translate', 'platformWebApp.bladeNavigationService', function ($delegate, $localStorage, $translate, bladeNavigationService) {
-            var gridOptions = angular.copy($delegate);
-            gridOptions.initialize = function (options) {
-                var initOptions = $delegate.initialize(options);
-                var blade = bladeNavigationService.currentBlade;
-                var $scope = blade.$scope;
-
-                // restore saved state, if any
-                var savedState = $localStorage['gridState:' + blade.template];
-                if (savedState) {
-                    // extend saved columns with custom columnDef information (e.g. cellTemplate, displayName)
-                    var foundDef;
-                    _.each(savedState.columns, function (x) {
-                        if (foundDef = _.findWhere(initOptions.columnDefs, { name: x.name })) {
-                            foundDef.sort = x.sort;
-                            foundDef.width = x.width || foundDef.width;
-                            foundDef.visible = x.visible;
-                            // prevent loading outdated cellTemplate
-                            delete x.cellTemplate;
-                            _.extend(x, foundDef);
-                            x.wasPredefined = true;
-                            initOptions.columnDefs.splice(initOptions.columnDefs.indexOf(foundDef), 1);
-                        } else {
-                            x.wasPredefined = false;
-                        }
-                    });
-                    // savedState.columns = _.reject(savedState.columns, function (x) { return x.cellTemplate && !x.wasPredefined; }); // not sure why was this, but it rejected custom templated fields
-                    initOptions.columnDefs = _.union(initOptions.columnDefs, savedState.columns);
-                } else {
-                    // mark predefined columns
-                    _.each(initOptions.columnDefs, function (x) {
-                        x.visible = angular.isDefined(x.visible) ? x.visible : true;
-                        x.wasPredefined = true;
-                    });
-                }
-
-                // translate headers
-                _.each(initOptions.columnDefs, function (x) { x.headerCellFilter = 'translate'; });
-
-                var customOnRegisterApiCallback = initOptions.onRegisterApi;
-
-                angular.extend(initOptions, {
-                    rowHeight: initOptions.rowHeight === 30 ? 40 : initOptions.rowHeight,
-                    enableGridMenu: true,
-                    //enableVerticalScrollbar: uiGridConstants.scrollbars.NEVER,
-                    //enableHorizontalScrollbar: uiGridConstants.scrollbars.NEVER,
-                    saveFocus: false,
-                    saveFilter: false,
-                    saveGrouping: false,
-                    savePinning: false,
-                    saveSelection: false,
-                    gridMenuTitleFilter: $translate,
-                    onRegisterApi: function (gridApi) {
-                        //set gridApi on scope
-                        $scope.gridApi = gridApi;
-
-                        if (gridApi.saveState) {
-                            if (savedState) {
-                                //$timeout(function () {
-                                gridApi.saveState.restore($scope, savedState);
-                                //}, 10);
-                            }
-
-                            if (gridApi.colResizable)
-                                gridApi.colResizable.on.columnSizeChanged($scope, saveState);
-                            if (gridApi.colMovable)
-                                gridApi.colMovable.on.columnPositionChanged($scope, saveState);
-                            gridApi.core.on.columnVisibilityChanged($scope, saveState);
-                            gridApi.core.on.sortChanged($scope, saveState);
-                            function saveState() {
-                                $localStorage['gridState:' + blade.template] = gridApi.saveState.save();
-                            }
-                        }
-
-                        gridApi.grid.registerDataChangeCallback(processMissingColumns, [uiGridConstants.dataChange.ROW]);
-                        gridApi.grid.registerDataChangeCallback(autoFormatColumns, [uiGridConstants.dataChange.ROW]);
-
-                        if (customOnRegisterApiCallback) {
-                            customOnRegisterApiCallback(gridApi);
-                        }
-                    },
-                    onCollapse: function () {
-                        updateColumnsVisibility(this, true);
-                    },
-                    onExpand: function () {
-                        updateColumnsVisibility(this, false);
-                    }
-                });
-
-                return initOptions;
-            };
-
-            function processMissingColumns(grid) {
-                var gridOptions = grid.options;
-
-                if (!gridOptions.columnDefsGenerated && _.any(grid.rows)) {
-                    var filteredColumns = _.filter(_.pairs(grid.rows[0].entity), function (x) {
-                        return !x[0].startsWith('$$') && (!_.isObject(x[1]) || _.isDate(x[1]));
-                    });
-
-                    var allKeysFromEntity = _.map(filteredColumns, function (x) {
-                        return x[0];
-                    });
-                    // remove non-existing columns
-                    _.each(gridOptions.columnDefs.slice(), function (x) {
-                        if (!_.contains(allKeysFromEntity, x.name) && !x.wasPredefined) {
-                            gridOptions.columnDefs = _.reject(gridOptions.columnDefs, function (d) {
-                                return d.name == x.name;
-                            });
-                        }
-                    });
-
-                    // generate columnDefs for each undefined property
-                    _.each(allKeysFromEntity, function (x) {
-                        if (!_.findWhere(gridOptions.columnDefs, { name: x })) {
-                            gridOptions.columnDefs.push({ name: x, visible: false });
-                        }
-                    });
-                    gridOptions.columnDefsGenerated = true;
-                    grid.api.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
-                }
-            }
-
-            // Configure automatic formatting of columns/
-            // Column with type number will use numberFilter to correct display of values
-            // Column with type date will use predefined template with am-time-ago directive to display date in human-readable format
-            function autoFormatColumns(grid) {
-                var gridOptions = grid.options;
-                grid.buildColumns();
-                var columnDefs = angular.copy(gridOptions.columnDefs);
-                for (var i = 0; i < columnDefs.length; i++) {
-                    var columnDef = columnDefs[i];
-                    for (var j = 0; j < grid.rows.length; j++) {
-                        var value = grid.getCellValue(grid.rows[j], grid.getColumn(columnDef.name));
-                        if (angular.isDefined(value)) {
-                            if (angular.isNumber(value)) {
-                                columnDef.cellFilter = columnDef.cellFilter || 'number';
-                            }
-                            // Default template for columns with dates
-                            else if (angular.isDate(value) || angular.isString(value) && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d+)?Z/.test(value)) {
-                                columnDef.cellTemplate = columnDef.cellTemplate || '$(Platform)/Scripts/common/templates/ui-grid/am-time-ago.cell.html';
-                            }
-                            break;
-                        }
-                    }
-                    gridOptions.columnDefs[i] = columnDef;
-                }
-                grid.options.columnDefs = columnDefs;
-                grid.api.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
-            }
-
-            function updateColumnsVisibility(gridOptions, isCollapsed) {
-                var blade = bladeNavigationService.currentBlade;
-                var $scope = blade.$scope;
-                _.each(gridOptions.columnDefs, function (x) {
-                    // normal: visible, if column was predefined
-                    // collapsed: visible only if we must display column always
-                    if (isCollapsed) {
-                        x.wasVisible = !!x.wasPredefined && x.visible !== false || !!x.visible;
-                    }
-                    x.visible = !isCollapsed ? !!x.wasVisible : !!x.displayAlways;
-                });
-                if ($scope && $scope.gridApi)
-                    $scope.gridApi.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
-            }
-
-            return gridOptions;
-        }]);
-    }])
-
-    .factory('platformWebApp.uiGridHelper', ['$localStorage', '$timeout', 'uiGridConstants', '$translate', function ($localStorage, $timeout, uiGridConstants, $translate) {
-        var retVal = {};
-        retVal.uiGridConstants = uiGridConstants;
-        retVal.initialize = function ($scope, gridOptions, externalRegisterApiCallback) {
-            $scope.gridOptions = angular.extend({
-                data: _.any(gridOptions.data) ? gridOptions.data : 'blade.currentEntities',
-                onRegisterApi: function (gridApi) {
-                    if (externalRegisterApiCallback) {
-                        externalRegisterApiCallback(gridApi);
-                    }
-                }
-            }, gridOptions);
-        };
-
-        retVal.getSortExpression = function ($scope) {
-            var columnDefs;
-            if ($scope.gridApi) {
-                columnDefs = $scope.gridApi.grid.columns;
-            } else {
-                var savedState = $localStorage['gridState:' + $scope.blade.template];
-                columnDefs = savedState ? savedState.columns : $scope.gridOptions.columnDefs;
-            }
-
-            var sorts = _.filter(columnDefs, function (x) {
-                return x.name !== '$path' && x.sort && (x.sort.direction === uiGridConstants.ASC || x.sort.direction === uiGridConstants.DESC);
-            });
-            sorts = _.sortBy(sorts, function (x) {
-                return x.sort.priority;
-            });
-            sorts = _.map(sorts, function (x) {
-                return (x.field ? x.field : x.name) + ':' + (x.sort.direction === uiGridConstants.ASC ? 'asc' : 'desc');
-            });
-            return sorts.join(';');
-        };
-
-        retVal.bindRefreshOnSortChanged = function ($scope) {
-            $scope.gridApi.core.on.sortChanged($scope, function () {
-                if (!$scope.blade.isLoading) $scope.blade.refresh();
-            });
-        };
-
-        return retVal;
-    }])
-
-    // ui-grid extension service. Used for extension grid options from other modules
-    .factory('platformWebApp.ui-grid.extension', [function () {
-        return {
-            extensionsMap: [],
-            registerExtension: function (gridId, extensionFn) {
-                this.extensionsMap[gridId] = extensionFn;
-            },
-            tryExtendGridOptions: function (gridId, gridOptions) {
-                if (this.extensionsMap[gridId]) {
-                    this.extensionsMap[gridId](gridOptions);
-                }
-            }
-        };
-    }])
-
-    // auto height and additional class for ui-grid
-    .directive('uiGridHeight', ['$timeout', '$window', function ($timeout, $window) {
-        return {
-            restrict: 'A',
-            link: {
-                pre: function (scope, element) {
-                    var bladeInner = $(element).parents('.blade-inner');
-                    bladeInner.addClass('ui-grid-no-scroll');
-
-                    var setGridHeight = function () {
-                        $timeout(function () {
-                            $(element).height(bladeInner.height());
-                        });
-                    };
-                    scope.$watch('blade.isExpanded', setGridHeight);
-                    scope.$watch('pageSettings.totalItems', setGridHeight);
-                    angular.element($window).bind('resize', setGridHeight);
-                }
-            }
-        };
-    }])
-    .run(['$templateRequest', function ($templateRequest) {
-        // Pre-load default templates, because we inject templates to grid options dynamically, so they not loaded by default
-        $templateRequest('$(Platform)/Scripts/common/templates/ui-grid/am-time-ago.cell.html');
-    }]);
-
-angular.module('platformWebApp')
- .factory('platformWebApp.validators', [function () {
-     function webSafeFileNameValidator(value) {
-         var pattern = /^[\w.-]+$/;
-         return pattern.test(value);
-     }
-
-     return {
-         webSafeFileNameValidator: webSafeFileNameValidator
-     };
- }]);
-
-angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
     $stateProvider
         .state('workspace.assets', {
@@ -18429,6 +18429,272 @@ angular.module('platformWebApp')
         return retVal;
     }
 });
+angular.module('platformWebApp')
+.config(['$stateProvider', function ($stateProvider) {
+	$stateProvider
+        .state('workspace.modularity', {
+        	url: '/modules',
+        	templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+        	controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+        		var blade = {
+        			id: 'modulesMain',
+        			title: 'platform.blades.modules-main.title',
+        			controller: 'platformWebApp.modulesMainController',
+        			template: '$(Platform)/Scripts/app/modularity/blades/modules-main.tpl.html',
+        			isClosingDisabled: true
+        		};
+        		bladeNavigationService.showBlade(blade);
+        	}]
+        });
+
+	$stateProvider
+	.state('setupWizard.modulesInstallation', {
+		url: '/modulesInstallation',
+		templateUrl: '$(Platform)/Scripts/app/modularity/templates/modulesInstallation.tpl.html',
+		controller: ['$scope', '$state', '$stateParams', '$window', 'platformWebApp.modules', 'platformWebApp.exportImport.resource', 'platformWebApp.setupWizard', function ($scope, $state, $stateParams, $window, modules, exportImportResourse, setupWizard) {
+			$scope.notification = {};
+			if ($stateParams.notification)
+			{
+				$scope.notification = $stateParams.notification;
+			}
+			//thats need when state direct open by url or push notification
+			var step = setupWizard.findStep($state.current.name);
+			if (!$scope.notification.created) {
+			modules.autoInstall({}, function (data) {
+				//if already installed need skip this step
+				if (data.finished) {					
+						setupWizard.showStep(step.nextStep);
+				}
+			});
+			}
+
+			$scope.restart = function () {
+				$scope.restarted = true;
+				modules.restart({}, function () {
+					setupWizard.showStep(step.nextStep);
+					$window.location.reload();
+				});
+			};		
+
+			$scope.$on("new-notification-event", function (event, notification) {
+				if (notification.notifyType == 'ModuleAutoInstallPushNotification') {
+					angular.copy(notification, $scope.notification);
+					if (notification.finished && notification.errorCount == 0) {
+						$scope.close();
+					}
+				}
+			});
+		}]
+	});
+}])
+.run(
+  ['platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.bladeNavigationService', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', '$rootScope', 'platformWebApp.modules', 'platformWebApp.setupWizard', function (pushNotificationTemplateResolver, bladeNavigationService, mainMenuService, widgetService, $state, $rootScope, modules, setupWizard) {
+  	//Register module in main menu
+  	var menuItem = {
+  		path: 'configuration/modularity',
+  		icon: 'fa fa-cubes',
+  		title: 'platform.menu.modules',
+  		priority: 6,
+  		action: function () { $state.go('workspace.modularity'); },
+  		permission: 'platform:module:access'
+  	};
+  	mainMenuService.addMenuItem(menuItem);
+
+      // Register push notification template
+      pushNotificationTemplateResolver.register({
+	   	priority: 900,
+	   	satisfy: function (notify, place) { return place == 'menu' && notify.notifyType == 'ModulePushNotification'; },
+	   	template: '$(Platform)/Scripts/app/modularity/notifications/menu.tpl.html',
+	   	action: function (notify) { $state.go('workspace.pushNotificationsHistory', notify); }
+      });
+
+  	var historyExportImportTemplate =
+	{
+		priority: 900,
+		satisfy: function (notify, place) { return place == 'history' && notify.notifyType == 'ModulePushNotification'; },
+		template: '$(Platform)/Scripts/app/modularity/notifications/history.tpl.html',
+		action: function (notify) {
+			var blade = {
+				id: 'moduleInstallProgress',
+				title: notify.title,
+				currentEntity: notify,
+				controller: 'platformWebApp.moduleInstallProgressController',
+				template: '$(Platform)/Scripts/app/modularity/wizards/newModule/module-wizard-progress-step.tpl.html'
+			};
+			bladeNavigationService.showBlade(blade);
+		}
+	};
+  	pushNotificationTemplateResolver.register(historyExportImportTemplate);
+
+  	//Switch to  setupWizard.modulesInstallation state when receive ModuleAutoInstallPushNotification push notification
+  	$rootScope.$on("new-notification-event", function (event, notification) {
+  		if (notification.notifyType == 'ModuleAutoInstallPushNotification' && $state.current && $state.current.name != 'setupWizard.modulesInstallation') {
+  			$state.go('setupWizard.modulesInstallation', { notification: notification });
+  		}
+  	});
+	//register setup wizard step - modules auto installation
+  	setupWizard.registerStep({
+  		state: "setupWizard.modulesInstallation",
+  		priority: 1
+  	});
+  
+  }])
+.factory('platformWebApp.moduleHelper', function () {
+	// semver comparison: https://gist.github.com/TheDistantSea/8021359
+	return {};
+});
+
+angular.module('platformWebApp')
+.controller('platformWebApp.licenseDetailController', ['$scope', '$window', 'FileUploader', '$http', 'platformWebApp.bladeNavigationService', function ($scope, $window, FileUploader, $http, bladeNavigationService) {
+    var blade = $scope.blade;
+    blade.isNew = blade.isNew || !$scope.license;
+
+    $scope.activate = function (activationCode) {
+        blade.isLoading = true;
+        $scope.activationError = null;
+        $scope.filename = null;
+
+        $http.post('api/platform/licensing/activateByCode', JSON.stringify(activationCode)).then(function (response) {
+            activationCallback(response.data, true);
+        }, function (error) {
+            $scope.activationError = error.data.message;
+        });
+    };
+
+    function activationCallback(license, isActivationByCode) {
+        blade.isLoading = false;
+        if (license) {
+            $scope.currentEntity = license;
+            if ($scope.currentEntity.expirationDate && new Date($scope.currentEntity.expirationDate) < new Date()) {
+                $scope.activationError = 'Activation failed. This license has expired.';
+            }
+        } else {
+            $scope.activationError = isActivationByCode ? 'Activation failed. Check the activation code.' : 'Activation failed. Check the license file.';
+        }
+    }
+
+    $scope.activateLicense = function () {
+        // confirmed. Activate the license
+        blade.isLoading = true;
+        $http.post('api/platform/licensing/activateLicense', $scope.currentEntity).then(function () {
+            $window.location.reload();
+        });
+    };
+
+    if (blade.isNew) {
+        // create the uploader
+        var uploader = $scope.uploader = new FileUploader({
+            scope: $scope,
+            headers: {
+                Accept: 'application/json'
+            },
+            url: 'api/platform/licensing/activateByFile',
+            method: 'POST',
+            autoUpload: true,
+            removeAfterUpload: true
+        });
+
+        // ADDING FILTERS
+        // lic only
+        uploader.filters.push({
+            name: 'licFilter',
+            fn: function (i /*{File|FileLikeObject}*/, options) {
+                return i.name.toLowerCase().endsWith('.lic');
+            }
+        });
+
+        uploader.onAfterAddingFile = function (fileItem) {
+            $scope.filename = fileItem.file.name;
+            $scope.activationError = null;
+        };
+
+        uploader.onSuccessItem = function (item, response) {
+            activationCallback(response, false);
+        };
+
+        uploader.onErrorItem = function (item, response, status) {
+            blade.isLoading = false;
+            $scope.activationError = response.message ? response.message : status;
+        };
+        blade.title = 'platform.blades.license.title-new';
+    } else {
+        $scope.currentEntity = $scope.license;
+
+        blade.toolbarCommands = [
+              {
+                  name: "platform.commands.new-license", icon: 'fa fa-check',
+                  executeMethod: function () {
+                      var newBlade = {
+                          id: 'license-activate',
+                          isNew: true,
+                          controller: blade.controller,
+                          template: blade.template
+                      };
+                      bladeNavigationService.showBlade(newBlade, blade);
+                  },
+                  canExecuteMethod: function () {
+                      return true;
+                  },
+                  permission: 'platform:module:manage'
+              }];
+
+        blade.title = 'platform.blades.license.title';
+    }
+
+    blade.headIcon = 'fa-id-card';
+    blade.isLoading = false;
+}])
+
+.config(['$stateProvider', function ($stateProvider) {
+    $stateProvider
+        .state('workspace.appLicense', {
+            url: '/appLicense',
+            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+            controller: ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
+                var blade = {
+                    id: 'appLicense',
+                    controller: 'platformWebApp.licenseDetailController',
+                    template: '$(Platform)/Scripts/app/licensing/license-detail.tpl.html',
+                    isClosingDisabled: true
+                };
+                bladeNavigationService.showBlade(blade);
+            }]
+        });
+}]);
+angular.module('platformWebApp')
+.config(['$stateProvider', function ($stateProvider) {
+    $stateProvider
+		.state('workspace.notifications', {
+		    url: '/notifications?objectId&objectTypeId',
+		    templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+		    controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+		        var blade = {
+		            id: 'notifications',
+		            title: 'platform.menu.notifications',
+		            subtitle: 'platform.blades.notifications-menu.subtitle',
+		            controller: 'platformWebApp.notificationsMenuController',
+		            template: '$(Platform)/Scripts/app/notifications/blades/notifications-menu.tpl.html',
+		            isClosingDisabled: true
+		        };
+		        bladeNavigationService.showBlade(blade);
+		    }
+		    ]
+		});
+}])
+.run(
+  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', function ($rootScope, mainMenuService, widgetService, $state) {
+      //Register module in main menu
+      var menuItem = {
+          path: 'configuration/notifications',
+          icon: 'fa fa-envelope',
+          title: 'platform.menu.notifications',
+          priority: 7,
+          action: function () { $state.go('workspace.notifications'); },
+          permission: 'platform:notification:access'
+      };
+      mainMenuService.addMenuItem(menuItem);
+  }])
+;
 angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
 	$stateProvider
@@ -18572,272 +18838,6 @@ angular.module('platformWebApp')
 
   }]);
 
-angular.module('platformWebApp')
-.controller('platformWebApp.licenseDetailController', ['$scope', '$window', 'FileUploader', '$http', 'platformWebApp.bladeNavigationService', function ($scope, $window, FileUploader, $http, bladeNavigationService) {
-    var blade = $scope.blade;
-    blade.isNew = blade.isNew || !$scope.license;
-
-    $scope.activate = function (activationCode) {
-        blade.isLoading = true;
-        $scope.activationError = null;
-        $scope.filename = null;
-
-        $http.post('api/platform/licensing/activateByCode', JSON.stringify(activationCode)).then(function (response) {
-            activationCallback(response.data, true);
-        }, function (error) {
-            $scope.activationError = error.data.message;
-        });
-    };
-
-    function activationCallback(license, isActivationByCode) {
-        blade.isLoading = false;
-        if (license) {
-            $scope.currentEntity = license;
-            if ($scope.currentEntity.expirationDate && new Date($scope.currentEntity.expirationDate) < new Date()) {
-                $scope.activationError = 'Activation failed. This license has expired.';
-            }
-        } else {
-            $scope.activationError = isActivationByCode ? 'Activation failed. Check the activation code.' : 'Activation failed. Check the license file.';
-        }
-    }
-
-    $scope.activateLicense = function () {
-        // confirmed. Activate the license
-        blade.isLoading = true;
-        $http.post('api/platform/licensing/activateLicense', $scope.currentEntity).then(function () {
-            $window.location.reload();
-        });
-    };
-
-    if (blade.isNew) {
-        // create the uploader
-        var uploader = $scope.uploader = new FileUploader({
-            scope: $scope,
-            headers: {
-                Accept: 'application/json'
-            },
-            url: 'api/platform/licensing/activateByFile',
-            method: 'POST',
-            autoUpload: true,
-            removeAfterUpload: true
-        });
-
-        // ADDING FILTERS
-        // lic only
-        uploader.filters.push({
-            name: 'licFilter',
-            fn: function (i /*{File|FileLikeObject}*/, options) {
-                return i.name.toLowerCase().endsWith('.lic');
-            }
-        });
-
-        uploader.onAfterAddingFile = function (fileItem) {
-            $scope.filename = fileItem.file.name;
-            $scope.activationError = null;
-        };
-
-        uploader.onSuccessItem = function (item, response) {
-            activationCallback(response, false);
-        };
-
-        uploader.onErrorItem = function (item, response, status) {
-            blade.isLoading = false;
-            $scope.activationError = response.message ? response.message : status;
-        };
-        blade.title = 'platform.blades.license.title-new';
-    } else {
-        $scope.currentEntity = $scope.license;
-
-        blade.toolbarCommands = [
-              {
-                  name: "platform.commands.new-license", icon: 'fa fa-check',
-                  executeMethod: function () {
-                      var newBlade = {
-                          id: 'license-activate',
-                          isNew: true,
-                          controller: blade.controller,
-                          template: blade.template
-                      };
-                      bladeNavigationService.showBlade(newBlade, blade);
-                  },
-                  canExecuteMethod: function () {
-                      return true;
-                  },
-                  permission: 'platform:module:manage'
-              }];
-
-        blade.title = 'platform.blades.license.title';
-    }
-
-    blade.headIcon = 'fa-id-card';
-    blade.isLoading = false;
-}])
-
-.config(['$stateProvider', function ($stateProvider) {
-    $stateProvider
-        .state('workspace.appLicense', {
-            url: '/appLicense',
-            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-            controller: ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
-                var blade = {
-                    id: 'appLicense',
-                    controller: 'platformWebApp.licenseDetailController',
-                    template: '$(Platform)/Scripts/app/licensing/license-detail.tpl.html',
-                    isClosingDisabled: true
-                };
-                bladeNavigationService.showBlade(blade);
-            }]
-        });
-}]);
-angular.module('platformWebApp')
-.config(['$stateProvider', function ($stateProvider) {
-	$stateProvider
-        .state('workspace.modularity', {
-        	url: '/modules',
-        	templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-        	controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-        		var blade = {
-        			id: 'modulesMain',
-        			title: 'platform.blades.modules-main.title',
-        			controller: 'platformWebApp.modulesMainController',
-        			template: '$(Platform)/Scripts/app/modularity/blades/modules-main.tpl.html',
-        			isClosingDisabled: true
-        		};
-        		bladeNavigationService.showBlade(blade);
-        	}]
-        });
-
-	$stateProvider
-	.state('setupWizard.modulesInstallation', {
-		url: '/modulesInstallation',
-		templateUrl: '$(Platform)/Scripts/app/modularity/templates/modulesInstallation.tpl.html',
-		controller: ['$scope', '$state', '$stateParams', '$window', 'platformWebApp.modules', 'platformWebApp.exportImport.resource', 'platformWebApp.setupWizard', function ($scope, $state, $stateParams, $window, modules, exportImportResourse, setupWizard) {
-			$scope.notification = {};
-			if ($stateParams.notification)
-			{
-				$scope.notification = $stateParams.notification;
-			}
-			//thats need when state direct open by url or push notification
-			var step = setupWizard.findStep($state.current.name);
-			if (!$scope.notification.created) {
-			modules.autoInstall({}, function (data) {
-				//if already installed need skip this step
-				if (data.finished) {					
-						setupWizard.showStep(step.nextStep);
-				}
-			});
-			}
-
-			$scope.restart = function () {
-				$scope.restarted = true;
-				modules.restart({}, function () {
-					setupWizard.showStep(step.nextStep);
-					$window.location.reload();
-				});
-			};		
-
-			$scope.$on("new-notification-event", function (event, notification) {
-				if (notification.notifyType == 'ModuleAutoInstallPushNotification') {
-					angular.copy(notification, $scope.notification);
-					if (notification.finished && notification.errorCount == 0) {
-						$scope.close();
-					}
-				}
-			});
-		}]
-	});
-}])
-.run(
-  ['platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.bladeNavigationService', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', '$rootScope', 'platformWebApp.modules', 'platformWebApp.setupWizard', function (pushNotificationTemplateResolver, bladeNavigationService, mainMenuService, widgetService, $state, $rootScope, modules, setupWizard) {
-  	//Register module in main menu
-  	var menuItem = {
-  		path: 'configuration/modularity',
-  		icon: 'fa fa-cubes',
-  		title: 'platform.menu.modules',
-  		priority: 6,
-  		action: function () { $state.go('workspace.modularity'); },
-  		permission: 'platform:module:access'
-  	};
-  	mainMenuService.addMenuItem(menuItem);
-
-      // Register push notification template
-      pushNotificationTemplateResolver.register({
-	   	priority: 900,
-	   	satisfy: function (notify, place) { return place == 'menu' && notify.notifyType == 'ModulePushNotification'; },
-	   	template: '$(Platform)/Scripts/app/modularity/notifications/menu.tpl.html',
-	   	action: function (notify) { $state.go('workspace.pushNotificationsHistory', notify); }
-      });
-
-  	var historyExportImportTemplate =
-	{
-		priority: 900,
-		satisfy: function (notify, place) { return place == 'history' && notify.notifyType == 'ModulePushNotification'; },
-		template: '$(Platform)/Scripts/app/modularity/notifications/history.tpl.html',
-		action: function (notify) {
-			var blade = {
-				id: 'moduleInstallProgress',
-				title: notify.title,
-				currentEntity: notify,
-				controller: 'platformWebApp.moduleInstallProgressController',
-				template: '$(Platform)/Scripts/app/modularity/wizards/newModule/module-wizard-progress-step.tpl.html'
-			};
-			bladeNavigationService.showBlade(blade);
-		}
-	};
-  	pushNotificationTemplateResolver.register(historyExportImportTemplate);
-
-  	//Switch to  setupWizard.modulesInstallation state when receive ModuleAutoInstallPushNotification push notification
-  	$rootScope.$on("new-notification-event", function (event, notification) {
-  		if (notification.notifyType == 'ModuleAutoInstallPushNotification' && $state.current && $state.current.name != 'setupWizard.modulesInstallation') {
-  			$state.go('setupWizard.modulesInstallation', { notification: notification });
-  		}
-  	});
-	//register setup wizard step - modules auto installation
-  	setupWizard.registerStep({
-  		state: "setupWizard.modulesInstallation",
-  		priority: 1
-  	});
-  
-  }])
-.factory('platformWebApp.moduleHelper', function () {
-	// semver comparison: https://gist.github.com/TheDistantSea/8021359
-	return {};
-});
-
-angular.module('platformWebApp')
-.config(['$stateProvider', function ($stateProvider) {
-    $stateProvider
-		.state('workspace.notifications', {
-		    url: '/notifications?objectId&objectTypeId',
-		    templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-		    controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-		        var blade = {
-		            id: 'notifications',
-		            title: 'platform.menu.notifications',
-		            subtitle: 'platform.blades.notifications-menu.subtitle',
-		            controller: 'platformWebApp.notificationsMenuController',
-		            template: '$(Platform)/Scripts/app/notifications/blades/notifications-menu.tpl.html',
-		            isClosingDisabled: true
-		        };
-		        bladeNavigationService.showBlade(blade);
-		    }
-		    ]
-		});
-}])
-.run(
-  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', function ($rootScope, mainMenuService, widgetService, $state) {
-      //Register module in main menu
-      var menuItem = {
-          path: 'configuration/notifications',
-          icon: 'fa fa-envelope',
-          title: 'platform.menu.notifications',
-          priority: 7,
-          action: function () { $state.go('workspace.notifications'); },
-          permission: 'platform:notification:access'
-      };
-      mainMenuService.addMenuItem(menuItem);
-  }])
-;
 angular.module('platformWebApp')
 .config(
   ['$stateProvider', function ($stateProvider) {
@@ -19268,79 +19268,6 @@ function DictionarySettingDetailBlade(settingName) {
 }
 angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
-	$stateProvider
-        .state('setupWizard', {
-        	url: '/setupWizard',
-        	templateUrl: '$(Platform)/Scripts/app/setup/templates/setupWizard.tpl.html',
-        	controller: ['$scope', '$state', '$stateParams', 'platformWebApp.setupWizard', function ($scope, $state, $stateParams, setupWizard) {
-        		setupWizard.loadStep(function (step) {
-        			if (step) {
-        				setupWizard.showStep(step);
-        			};
-        		});
-        	}]
-        });
-}])
-.factory('platformWebApp.setupWizard', ['$state', 'platformWebApp.settings', function ($state, settings) {	
-	var wizardSteps = [];
-	var wizard =
-	{
-		//switches the current step in the wizard to passed or next on the current
-		showStep : function (step) {
-			var state = step ? step.state : "workspace";
-			settings.update([{ name: 'VirtoCommerce.SetupStep', value: state }]);
-			$state.go(state);
-		},
-
-		findStep : function (state) {
-			return _.find(wizardSteps, function (x) { return x.state == state; });
-		},
-
-		//registered step in the wizard
-		registerStep : function (wizardStep) {
-			wizardSteps.push(wizardStep);
-			wizardSteps = _.sortBy(wizardSteps, function (x) { return x.priority; });
-			var nextStep = undefined;
-			for (var i = wizardSteps.length; i-- > 0;) {
-				wizardSteps[i].nextStep = nextStep;
-				nextStep = wizardSteps[i];
-			}
-		},
-
-		loadStep : function (callback) {
-			//Initial step
-			var step = wizardSteps[0];
-			//restore  saved setup step
-			settings.getValues({ id: "VirtoCommerce.SetupStep" }, function (data) {
-				if (angular.isArray(data) && data.length > 0) {
-					step = wizard.findStep(data[0]);
-				}
-				callback(step);
-			});
-		}
-	};
-	return wizard;
-}])
-.run(
-  ['$rootScope', '$state', 'platformWebApp.setupWizard', 'platformWebApp.settings', '$timeout', function ($rootScope, $state, setupWizard, settings, $timeout) {
-  	//Try to run setup wizard
-  	$rootScope.$on('loginStatusChanged', function (event, authContext) {
-  		if (authContext.isAuthenticated) {
-  			//timeout need because $state not fully loading in run method and need to wait little time
-  			$timeout(function () {
-  				setupWizard.loadStep(function (step) {
-  					if (step) {
-  						setupWizard.showStep(step);
-  					};
-  				});
-  			}, 500);
-  		}
-  	});
-
-  }]);
-
-angular.module('platformWebApp')
-.config(['$stateProvider', function ($stateProvider) {
     $stateProvider
         .state('workspace.userProfile', {
             url: '/userProfile',
@@ -19421,6 +19348,79 @@ angular.module('platformWebApp')
     };
     mainMenuService.addMenuItem(menuItem);
 }]);
+angular.module('platformWebApp')
+.config(['$stateProvider', function ($stateProvider) {
+	$stateProvider
+        .state('setupWizard', {
+        	url: '/setupWizard',
+        	templateUrl: '$(Platform)/Scripts/app/setup/templates/setupWizard.tpl.html',
+        	controller: ['$scope', '$state', '$stateParams', 'platformWebApp.setupWizard', function ($scope, $state, $stateParams, setupWizard) {
+        		setupWizard.loadStep(function (step) {
+        			if (step) {
+        				setupWizard.showStep(step);
+        			};
+        		});
+        	}]
+        });
+}])
+.factory('platformWebApp.setupWizard', ['$state', 'platformWebApp.settings', function ($state, settings) {	
+	var wizardSteps = [];
+	var wizard =
+	{
+		//switches the current step in the wizard to passed or next on the current
+		showStep : function (step) {
+			var state = step ? step.state : "workspace";
+			settings.update([{ name: 'VirtoCommerce.SetupStep', value: state }]);
+			$state.go(state);
+		},
+
+		findStep : function (state) {
+			return _.find(wizardSteps, function (x) { return x.state == state; });
+		},
+
+		//registered step in the wizard
+		registerStep : function (wizardStep) {
+			wizardSteps.push(wizardStep);
+			wizardSteps = _.sortBy(wizardSteps, function (x) { return x.priority; });
+			var nextStep = undefined;
+			for (var i = wizardSteps.length; i-- > 0;) {
+				wizardSteps[i].nextStep = nextStep;
+				nextStep = wizardSteps[i];
+			}
+		},
+
+		loadStep : function (callback) {
+			//Initial step
+			var step = wizardSteps[0];
+			//restore  saved setup step
+			settings.getValues({ id: "VirtoCommerce.SetupStep" }, function (data) {
+				if (angular.isArray(data) && data.length > 0) {
+					step = wizard.findStep(data[0]);
+				}
+				callback(step);
+			});
+		}
+	};
+	return wizard;
+}])
+.run(
+  ['$rootScope', '$state', 'platformWebApp.setupWizard', 'platformWebApp.settings', '$timeout', function ($rootScope, $state, setupWizard, settings, $timeout) {
+  	//Try to run setup wizard
+  	$rootScope.$on('loginStatusChanged', function (event, authContext) {
+  		if (authContext.isAuthenticated) {
+  			//timeout need because $state not fully loading in run method and need to wait little time
+  			$timeout(function () {
+  				setupWizard.loadStep(function (step) {
+  					if (step) {
+  						setupWizard.showStep(step);
+  					};
+  				});
+  			}, 500);
+  		}
+  	});
+
+  }]);
+
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -20160,6 +20160,1069 @@ CodeMirror.registerHelper("fold", "markdown", function(cm, start) {
   };
 });
 
+angular.module('platformWebApp')
+.controller('platformWebApp.confirmDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
+    angular.extend($scope, dialog);
+
+    $scope.yes = function () {
+        $modalInstance.close(true);
+    };
+
+    $scope.no = function () {
+        $modalInstance.close(false);
+    };
+
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
+}])
+.factory('platformWebApp.dialogService', ['$rootScope', '$modal', function ($rootScope, $modal) {
+    var dialogService = {
+        dialogs: [],
+        currentDialog: undefined
+    };
+
+    function findDialog(id) {
+        var found;
+        angular.forEach(dialogService.dialogs, function (dialog) {
+            if (dialog.id == id) {
+                found = dialog;
+            }
+        });
+
+        return found;
+    }
+
+    dialogService.showDialog = function (dialog, templateUrl, controller, cssClass) {
+        var dlg = findDialog(dialog.id);
+
+        if (angular.isUndefined(dlg)) {
+            dlg = dialog;
+
+            dlg.instance = $modal.open({
+                templateUrl: templateUrl,
+                controller: controller,
+                windowClass: cssClass ? cssClass : null,
+                resolve: {
+                    dialog: function () {
+                        return dialog;
+                    }
+                }
+            });
+
+            dlg.instance.result.then(function (result) //success
+            {
+                var idx = dialogService.dialogs.indexOf(dlg);
+                dialogService.dialogs.splice(idx, 1);
+                if (dlg.callback)
+                    dlg.callback(result);
+            }, function (reason) //dismiss
+            {
+                var idx = dialogService.dialogs.indexOf(dlg);
+                dialogService.dialogs.splice(idx, 1);
+            });
+
+            dialogService.dialogs.push(dlg);
+        }
+    };
+
+    dialogService.showConfirmationDialog = function (dialog) {
+        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/confirmDialog.tpl.html', 'platformWebApp.confirmDialogController');
+    };
+
+    dialogService.showNotificationDialog = function (dialog) {
+        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/notifyDialog.tpl.html', 'platformWebApp.confirmDialogController');
+    };
+
+    dialogService.showGalleryDialog = function (dialog) {
+        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/galleryDialog.tpl.html', 'platformWebApp.galleryDialogController', '__gallery');
+    };
+
+    return dialogService;
+
+}])
+
+angular.module('platformWebApp')
+.controller('platformWebApp.galleryDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
+    angular.extend($scope, dialog);
+
+    var imgCount = dialog.images.length;
+
+    $scope.close = function () {
+        $modalInstance.close(false);
+    }
+
+    $scope.prevImage = function (index) {
+        var i = index == -1 ? imgCount - 1 : index;
+        $scope.currentImage = dialog.images[i];
+    }
+
+    $scope.nextImage = function (index) {
+        var i = index == imgCount ? 0 : index;
+        $scope.currentImage = dialog.images[i];
+    }
+
+    $scope.openImage = function (image) {
+        $scope.currentImage = image;
+    }
+}]);
+'use strict';
+
+angular.module('platformWebApp')
+    .directive('vaAutofill', ['$timeout', function ($timeout) {
+        return {
+            require: 'ngModel',
+            link: function (scope, elem, attrs, ngModel) {
+                var origVal = elem.val();
+                $timeout(function () {
+                    var newVal = elem.val();
+                    if (ngModel.$pristine && origVal !== newVal) {
+                        ngModel.$setViewValue(newVal);
+                    }
+                }, 500);
+            }
+        }
+    }])
+;
+angular.module('platformWebApp')
+.directive('dynamic', ['$compile', function ($compile) {
+    return {
+        restrict: 'A',
+        replace: true,
+        link: function (scope, ele, attrs) {
+            scope.$watch(attrs.dynamic, function (html) {
+                ele.html(html);
+                $compile(ele.contents())(scope);
+            });
+        }
+    };
+}]);
+
+angular.module('platformWebApp')
+.directive('fallbackSrc', function () {
+    var fallbackSrc = {
+        link: function postLink(scope, iElement, iAttrs) {
+            iElement.bind('error', function () {
+                angular.element(this).attr("src", iAttrs.fallbackSrc);
+            });
+        }
+    }
+    return fallbackSrc;
+});
+angular.module('platformWebApp')
+.directive('vaGenericValueInput', ['$compile', '$templateCache', '$http', 'platformWebApp.objCompareService', 'platformWebApp.bladeNavigationService',
+function ($compile, $templateCache, $http, objComparer, bladeNavigationService) {
+
+    return {
+        restrict: 'E',
+        require: 'ngModel',
+        replace: true,
+        transclude: true,
+        scope: {
+            languages: "=",
+            getDictionaryValues: "&"
+        },
+        link: function (scope, element, attr, ngModelController, linker) {
+
+            scope.currentEntity = ngModelController.$modelValue;
+
+            scope.context = {};
+            scope.context.currentPropValues = [];
+            scope.context.allDictionaryValues = [];
+            var theEmptyValue = { value: null };
+
+            scope.$watch('context.currentPropValues', function (newValue, oldValue) {
+                //reflect only real changes
+                if (newValue !== oldValue &&
+                        !objComparer.equal(newValue, [theEmptyValue]) &&
+                        (newValue.length != scope.currentEntity.values.length || !objComparer.equal(newValue, scope.currentEntity.values))) {
+                    if (scope.currentEntity.isDictionary) {
+                        scope.currentEntity.values = _.map(newValue, function (x) { return { value: x } });
+                    }
+                    else if (scope.currentEntity.isArray && scope.currentEntity.isMultilingual && !scope.currentEntity.isDictionary) {
+                        //ungrouping values for multilingual array properties
+                        scope.currentEntity.values = [];
+                        angular.forEach(newValue, function (x) {
+                            var values = _.map(x.values, function (y) { return { locale: x.locale, value: y.value }; });
+                            scope.currentEntity.values = scope.currentEntity.values.concat(values);
+                        });
+                    }
+                    else {
+                        scope.currentEntity.values = newValue;
+                    }
+
+                    ngModelController.$setViewValue(scope.currentEntity);
+                }
+            }, true);
+
+            scope.$watch('languages', function (languages) {
+                if (scope.currentEntity.isMultilingual && !scope.currentEntity.isDictionary) {
+                    initLanguagesValuesMap(scope.currentEntity, languages);
+                }
+            });
+
+            ngModelController.$render = function () {
+                scope.currentEntity = ngModelController.$modelValue;
+
+                if (!scope.currentEntity.ngBindingModel) {
+                    scope.context.currentPropValues = angular.copy(scope.currentEntity.values);
+                    if (needAddEmptyValue(scope.currentEntity, scope.context.currentPropValues)) {
+                        scope.context.currentPropValues.push(angular.copy(theEmptyValue));
+                    }
+                }
+
+                if (scope.currentEntity.isDictionary) {
+                    scope.getDictionaryValues()(scope.currentEntity, setDictionaryValues);
+                }
+
+                //Group values for multilingual array properties
+                if (scope.currentEntity.isMultilingual && scope.currentEntity.isArray && !scope.currentEntity.isDictionary) {
+
+                    var groupByLocaleObj = _.groupBy(scope.context.currentPropValues, 'locale');
+                    scope.context.currentPropValues = [];
+                    for (var key in groupByLocaleObj) {
+                        if (groupByLocaleObj.hasOwnProperty(key)) {
+                            scope.context.currentPropValues.push({ locale: key, values: groupByLocaleObj[key] });
+                        }
+                    }
+                }
+                changeValueTemplate();
+            };
+
+            function needAddEmptyValue(property, values) {
+                return !property.isArray && !property.isDictionary && !property.isMultilingual && values.length == 0;
+            };
+
+            function initLanguagesValuesMap(property, languages) {
+                //Group values by language 
+                angular.forEach(languages, function (language) {
+                    //Currently select values
+                    var currentPropValues = _.filter(scope.context.currentPropValues, function (x) { return x.locale == language; });
+                    //need add empty value for single  value type
+                    if (currentPropValues.length == 0) {
+                        scope.context.currentPropValues.push({ value: null, locale: language });
+                    }
+                });
+            };
+
+
+            function setDictionaryValues(allDictionaryValues) {
+                var selectedValues = scope.currentEntity.values;
+                scope.context.allDictionaryValues = [];
+                scope.context.currentPropValues = [];
+
+                angular.forEach(allDictionaryValues, function (dictValue) {
+                    scope.context.allDictionaryValues.push(dictValue);
+                    //Need to select already selected values. Dictionary values have same type as standard values.
+                    if (_.any(selectedValues, function (x) { return x.value.id == dictValue.id })) {
+                        //add selected value
+                        scope.context.currentPropValues.push(dictValue);
+                    }
+                });
+            }
+
+            function getTemplateName(property) {
+                var result;
+                switch (property.valueType) {
+                    case 'Html':
+                    case 'Json':
+                        result = 'dCode';
+                        break;
+                    default:
+                        result = 'd' + property.valueType;
+                }
+
+                if (property.isDictionary) {
+                    result += '-dictionary';
+                }
+                if (property.isArray) {
+                    result += '-multivalue';
+                }
+                if (property.isMultilingual) {
+                    result += '-multilang';
+                }
+                result += '.html';
+                return result;
+            };
+
+            function changeValueTemplate() {
+                if (scope.currentEntity.valueType === 'Html' || scope.currentEntity.valueType === 'Json') {
+                    // Codemirror configuration
+                    scope.editorOptions = {
+                        lineWrapping: true,
+                        lineNumbers: true,
+                        extraKeys: { "Ctrl-Q": function (cm) { cm.foldCode(cm.getCursor()); } },
+                        foldGutter: true,
+                        gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+                        onLoad: function (_editor) {
+                            codemirrorEditor = _editor;
+                        },
+                    };
+                }
+                if (scope.currentEntity.valueType === 'Html') {
+                    scope.editorOptions['parserfile'] = 'liquid.js';
+                    scope.editorOptions['mode'] = 'htmlmixed';
+                }
+                if (scope.currentEntity.valueType === 'Json') {
+                    scope.editorOptions['parserfile'] = 'javascript.js';
+                    scope.editorOptions['mode'] = { name: 'javascript', json: true };
+                }
+
+                var templateName = getTemplateName(scope.currentEntity);
+
+                //load input template and display
+                $http.get(templateName, { cache: $templateCache }).then(function (results) {
+                    //Need to add ngForm to isolate form validation into sub form
+                    //var innerContainer = "<div id='innerContainer' />";
+
+                    //We must destroy scope of elements we are removing from DOM to avoid angular firing events
+                    var el = element.find('#valuePlaceHolder #innerContainer');
+                    if (el.length > 0) {
+                        el.scope().$destroy();
+                    }
+                    var container = angular.element("<div><div id='valuePlaceHolder'></div></div>");
+                    element.append(container);
+
+                    container = element.find('#valuePlaceHolder');
+                    var result = container.html(results.data.trim());
+
+                    if (scope.currentEntity.ngBindingModel) {
+                        $(result).find('[ng-model]').attr("ng-model", 'currentEntity.blade.currentEntity.' + scope.currentEntity.ngBindingModel);
+                    }
+
+                    //Create new scope, otherwise we would destroy our directive scope
+                    var newScope = scope.$new();
+                    $compile(result)(newScope);
+                });
+            };
+
+            /* Datepicker */
+            scope.datepickers = {
+                DateTime: false
+            }
+
+            scope.open = function ($event, which) {
+                $event.preventDefault();
+                $event.stopPropagation();
+
+                scope.datepickers[which] = true;
+            };
+
+            linker(function (clone) {
+                element.append(clone);
+            });
+
+            /* Image */
+            var originalBlade;
+            scope.uploadImage = function() {
+                var newBlade = {
+                    id: "imageUpload",
+                    currentEntityId: 'images',
+                    title: 'platform.blades.asset-upload.title',
+                    subtitle: scope.currentEntity.name,
+                    controller: 'platformWebApp.assets.assetUploadController',
+                    template: '$(Platform)/Scripts/app/assets/blades/asset-upload.tpl.html',
+                    fileUploadOptions: {
+                        singleFileMode: true,
+                        accept: "image/*",
+                        suppressParentRefresh: true
+                    }
+                };
+                newBlade.onUploadComplete = function(data) {
+                    if (data && data.length) {
+                        scope.context.currentPropValues[0].value = data[0].url;
+                        bladeNavigationService.closeBlade(newBlade);
+                    }
+                }
+
+                //saving orig blade reference (that is not imageUpload blade) for subsequent showBlade calls
+                if (!originalBlade) {
+                    originalBlade = bladeNavigationService.currentBlade.id !== "imageUpload" ? bladeNavigationService.currentBlade : bladeNavigationService.currentBlade.parentBlade;
+                }
+                bladeNavigationService.showBlade(newBlade, originalBlade);
+            }
+
+            scope.clearImage = function () {
+                scope.context.currentPropValues[0].value = undefined;
+            }
+
+            scope.openUrl = function (url) {
+                window.open(url, '_blank');
+            }
+        }
+    }
+}]);
+
+// leftClickMenu based on: ng-context-menu - v1.0.2 - An AngularJS directive to display a context menu when a right-click event is triggered
+angular
+    .module('platformWebApp')
+    .directive("leftClickMenu", ["$document", "ContextMenuService", function ($document, ContextMenuService) {
+        return {
+            restrict: 'A',
+            scope: {
+                'callback': '&leftClickMenu',
+                'disabled': '&contextMenuDisabled',
+                'closeCallback': '&contextMenuClose'
+            },
+            link: function ($scope, $element, $attrs) {
+                var opened = false;
+
+                function open(event, menuElement) {
+                    menuElement.addClass('open');
+
+                    var doc = $document[0].documentElement;
+                    var docLeft = (window.pageXOffset || doc.scrollLeft) -
+                                  (doc.clientLeft || 0),
+                        docTop = (window.pageYOffset || doc.scrollTop) -
+                                 (doc.clientTop || 0),
+                        elementWidth = menuElement[0].scrollWidth,
+                        elementHeight = menuElement[0].scrollHeight;
+                    var docWidth = doc.clientWidth + docLeft,
+                      docHeight = doc.clientHeight + docTop,
+                      totalWidth = elementWidth + event.pageX,
+                      totalHeight = elementHeight + event.pageY,
+                      left = Math.max(event.pageX - docLeft, 0),
+                      top = Math.max(event.pageY - docTop, 0);
+
+                    if (totalWidth > docWidth) {
+                        left = left - (totalWidth - docWidth);
+                    }
+
+                    if (totalHeight > docHeight) {
+                        top = top - (totalHeight - docHeight);
+                    }
+
+                    menuElement.css('top', top + 'px');
+                    menuElement.css('left', left + 'px');
+                    opened = true;
+                }
+
+                function close(menuElement) {
+                    menuElement.removeClass('open');
+
+                    if (opened) {
+                        $scope.closeCallback();
+                    }
+
+                    opened = false;
+                }
+
+                $element.bind('click', function (event) {
+                    if (!$scope.disabled()) {
+                        if (ContextMenuService.menuElement !== null) {
+                            close(ContextMenuService.menuElement);
+                        }
+                        ContextMenuService.menuElement = angular.element(
+                          document.getElementById($attrs.target)
+                        );
+                        ContextMenuService.element = event.target;
+                        //console.log('set', ContextMenuService.element);
+
+                        event.preventDefault();
+                        event.stopPropagation();
+                        $scope.$apply(function () {
+                            $scope.callback({ $event: event });
+                        });
+                        $scope.$apply(function () {
+                            open(event, ContextMenuService.menuElement);
+                        });
+                    }
+                });
+
+                function handleKeyUpEvent(event) {
+                    //console.log('keyup');
+                    if (!$scope.disabled() && opened && event.keyCode === 27) {
+                        $scope.$apply(function () {
+                            close(ContextMenuService.menuElement);
+                        });
+                    }
+                }
+
+                function handleClickEvent(event) {
+                    if (!$scope.disabled() &&
+                      opened &&
+                      (event.button !== 2 ||
+                       event.target !== ContextMenuService.element)) {
+                        $scope.$apply(function () {
+                            close(ContextMenuService.menuElement);
+                        });
+                    }
+                }
+
+                $document.bind('keyup', handleKeyUpEvent);
+                // Firefox treats a right-click as a click and a contextmenu event
+                // while other browsers just treat it as a contextmenu event
+                $document.bind('click', handleClickEvent);
+                $document.bind('contextmenu', handleClickEvent);
+
+                $scope.$on('$destroy', function () {
+                    //console.log('destroy');
+                    $document.unbind('keyup', handleKeyUpEvent);
+                    $document.unbind('click', handleClickEvent);
+                    $document.unbind('contextmenu', handleClickEvent);
+                });
+            }
+        };
+    }]);
+
+angular.module('platformWebApp')
+.factory('platformWebApp.metaFormsService', [function () {
+    var registeredMetaFields = { };
+
+    return {
+        registerMetaFields: function (metaFormName, metaFields) {
+            if (!registeredMetaFields[metaFormName]) {
+                registeredMetaFields[metaFormName] = [];
+            }
+            Array.prototype.push.apply(registeredMetaFields[metaFormName], metaFields);
+            registeredMetaFields[metaFormName] = _.sortBy(registeredMetaFields[metaFormName], 'priority');
+        },
+        getMetaFields: function(metaFormName) {
+            return registeredMetaFields[metaFormName];
+        }
+    };
+}])
+.directive('vaMetaform', [function () {
+    return {
+        restrict: 'E',
+        replace: true,
+        scope: {
+            blade: '=',
+            registeredInputs: '=',
+            columnCount: '@?'
+        },
+        templateUrl: '$(Platform)/Scripts/common/directives/metaform.tpl.html',
+        link: function (scope) {
+            var columnCount = scope.columnCount ? parseInt(scope.columnCount, 10) : 1;
+
+            var filteredInputs = _.filter(scope.registeredInputs, function (x) { return !x.isVisibleFn || x.isVisibleFn(scope.blade); });
+
+            var resultingGroups = [];
+            var isGroupStart = true, currentGroup;
+            _.each(filteredInputs, function (x) {
+                x = angular.copy(x);
+                x.ngBindingModel = x.name;
+
+                if (isGroupStart || (x.templateUrl && x.spanAllColumns)) {
+                    currentGroup = [x];
+                    resultingGroups.push(currentGroup);
+                } else {
+                    currentGroup.push(x);
+                }
+                isGroupStart = (x.templateUrl && x.spanAllColumns) || currentGroup.length == columnCount;
+            });
+
+            // generate empty columns
+            _.each(resultingGroups, function (gr) {
+                while (columnCount > gr.length) {
+                    gr.push({ templateUrl: 'emptyColumn.html' });
+                }
+            });
+            scope.bladeInputGroups = resultingGroups;
+        }
+    }
+}]);
+/**
+ * Heavily adapted from the `type="number"` directive in Angular's
+ * /src/ng/directive/input.js
+ */
+
+'use strict';
+
+angular.module('platformWebApp')
+// TODO: Replace with tested localized version (see below)
+.directive('money', ['$timeout', function ($timeout) {
+    'use strict';
+
+    var NUMBER_REGEXP = /^\s*(\-|\+)?(\d+|(\d*(\.\d*)))\s*$/;
+
+    function link(scope, el, attrs, ngModelCtrl) {
+        var min = parseFloat(attrs.min || 0);
+        var precision = parseFloat(attrs.precision || 2);
+        var lastValidValue;
+
+        function round(num) {
+            var d = Math.pow(10, precision);
+            return Math.round(num * d) / d;
+        }
+
+        function formatPrecision(value) {
+            return parseFloat(value).toFixed(precision);
+        }
+
+        function formatViewValue(value) {
+            return ngModelCtrl.$isEmpty(value) ? '' : '' + value;
+        }
+
+
+        ngModelCtrl.$parsers.push(function (value) {
+            if (angular.isUndefined(value)) {
+                value = '';
+            }
+
+            // Handle leading decimal point, like ".5"
+            if (value.indexOf('.') === 0) {
+                value = '0' + value;
+            }
+
+            // Allow "-" inputs only when min < 0
+            if (value.indexOf('-') === 0) {
+                if (min >= 0) {
+                    value = null;
+                    ngModelCtrl.$setViewValue('');
+                    ngModelCtrl.$render();
+                } else if (value === '-') {
+                    value = '';
+                }
+            }
+
+            var empty = ngModelCtrl.$isEmpty(value);
+            if (empty || NUMBER_REGEXP.test(value)) {
+                lastValidValue = (value === '')
+                  ? null
+                  : (empty ? value : parseFloat(value));
+            } else {
+                // Render the last valid input in the field
+                ngModelCtrl.$setViewValue(formatViewValue(lastValidValue));
+                ngModelCtrl.$render();
+            }
+
+            ngModelCtrl.$setValidity('number', true);
+            return lastValidValue;
+        });
+        ngModelCtrl.$formatters.push(formatViewValue);
+
+        var minValidator = function (value) {
+            if (!ngModelCtrl.$isEmpty(value) && value < min) {
+                ngModelCtrl.$setValidity('min', false);
+                return undefined;
+            } else {
+                ngModelCtrl.$setValidity('min', true);
+                return value;
+            }
+        };
+        ngModelCtrl.$parsers.push(minValidator);
+        ngModelCtrl.$formatters.push(minValidator);
+
+        if (attrs.max) {
+            var max = parseFloat(attrs.max);
+            var maxValidator = function (value) {
+                if (!ngModelCtrl.$isEmpty(value) && value > max) {
+                    ngModelCtrl.$setValidity('max', false);
+                    return undefined;
+                } else {
+                    ngModelCtrl.$setValidity('max', true);
+                    return value;
+                }
+            };
+
+            ngModelCtrl.$parsers.push(maxValidator);
+            ngModelCtrl.$formatters.push(maxValidator);
+        }
+
+        // Round off
+        if (precision > -1) {
+            ngModelCtrl.$parsers.push(function (value) {
+                return value ? round(value) : value;
+            });
+            ngModelCtrl.$formatters.push(function (value) {
+                return value ? formatPrecision(value) : value;
+            });
+        }
+
+        el.bind('blur', function () {
+            $timeout(function () {
+                var value = ngModelCtrl.$modelValue;
+                if (value) {
+                    ngModelCtrl.$viewValue = formatPrecision(value);
+                    ngModelCtrl.$render();
+                }
+            });
+        });
+    }
+
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: link
+    };
+}]);
+// Custom directive to support localized currency float number parsing & validation
+//.directive('money', ['platformWebApp.currencyFormat', function (currencyFormat) {
+//    return {
+//        restrict: 'A',
+//        require: 'ngModel',
+//        link: function (scope, elem, attrs, ctrl) {
+//            ctrl.$parsers.unshift(function(viewValue) {
+//                return currencyFormat.validate(viewValue, attrs.minExclusive, attrs.min, attrs.maxExclusive, attrs.max, attrs.fraction, ctrl.$setValidity);
+//            });
+
+//            ctrl.$formatters.unshift(function (modelValue) {
+//                return currencyFormat.format(modelValue, attrs.minExclusive, attrs.min, attrs.maxExclusive, attrs.max, attrs.fraction);
+//            });
+
+//            scope.$on('$localeChangeSuccess', function () {
+//                ctrl.$viewValue = ctrl.$formatters.reduceRight((prev, fn) => fn(prev), ctrl.$modelValue);
+//                ctrl.$render();
+//            });
+//        }
+//    };
+//}]);
+angular.module('platformWebApp')
+.directive('multipleAttr', function () {
+    return {
+        'restrict': 'A',
+        'compile': function () {
+            return {
+                'pre': function ($s, $el, attrs) {
+                    if (attrs.multipleAttr === 'true' || attrs.multipleAttr === true) {
+                        $el.attr('multiple', '');
+                    }
+                }
+            }
+        }
+    }
+})
+angular.module('platformWebApp')
+.config(['$httpProvider', function ($httpProvider) {
+    $httpProvider.interceptors.push('platformWebApp.httpInterceptor');
+}])
+.factory('platformWebApp.httpInterceptor', function () {
+	return {};
+})
+.directive('wcOverlay', ['$q', '$timeout', '$window', 'platformWebApp.httpInterceptor', function ($q, $timeout, $window, httpInterceptor) {
+	return {
+		restrict: 'EA',
+		transclude: true,
+		scope: {
+			wcOverlayDelay: "@"
+		},
+		template: '<div id="overlay-container" class="overlayContainer">' +
+						'<div id="overlay-background" class="overlayBackground"></div>' +
+						'<div id="overlay-content" class="overlayContent" data-ng-transclude>' +
+						'</div>' +
+					'</div>',
+		link: function (scope, element, attrs) {
+			var overlayContainer = null,
+				timerPromise = null,
+				timerPromiseHide = null,
+				inSession = false,
+				queue = [];
+
+			init();
+
+			function init() {
+				wireUpHttpInterceptor();
+				if (window.jQuery) wirejQueryInterceptor();
+				overlayContainer = document.getElementById('overlay-container');
+			}
+
+			//Hook into httpInterceptor factory request/response/responseError functions                
+			function wireUpHttpInterceptor() {
+
+				httpInterceptor.request = function (config) {
+					processRequest();
+					return config || $q.when(config);
+				};
+
+				httpInterceptor.response = function (response) {
+					processResponse();
+					return response || $q.when(response);
+				};
+
+				httpInterceptor.responseError = function (rejection) {
+					processResponse();
+					return $q.reject(rejection);
+				};
+			}
+
+			//Monitor jQuery Ajax calls in case it's used in an app
+			function wirejQueryInterceptor() {
+				$(document).ajaxStart(function () {
+					processRequest();
+				});
+
+				$(document).ajaxComplete(function () {
+					processResponse();
+				});
+
+				$(document).ajaxError(function () {
+					processResponse();
+				});
+			}
+
+			function processRequest() {
+				queue.push({});
+				if (queue.length == 1) {
+					timerPromise = $timeout(function () {
+						if (queue.length) showOverlay();
+					}, scope.wcOverlayDelay ? scope.wcOverlayDelay : 500); //Delay showing for 500 millis to avoid flicker
+				}
+			}
+
+			function processResponse() {
+				queue.pop();
+				if (queue.length == 0) {
+					//Since we don't know if another XHR request will be made, pause before
+					//hiding the overlay. If another XHR request comes in then the overlay
+					//will stay visible which prevents a flicker
+					timerPromiseHide = $timeout(function () {
+						//Make sure queue is still 0 since a new XHR request may have come in
+						//while timer was running
+						if (queue.length == 0) {
+							hideOverlay();
+							if (timerPromiseHide) $timeout.cancel(timerPromiseHide);
+						}
+					}, scope.wcOverlayDelay ? scope.wcOverlayDelay : 500);
+				}
+			}
+
+			function showOverlay() {
+				var w = 0;
+				var h = 0;
+				if (!$window.innerWidth) {
+					if (!(document.documentElement.clientWidth == 0)) {
+						w = document.documentElement.clientWidth;
+						h = document.documentElement.clientHeight;
+					}
+					else {
+						w = document.body.clientWidth;
+						h = document.body.clientHeight;
+					}
+				}
+				else {
+					w = $window.innerWidth;
+					h = $window.innerHeight;
+				}
+				var content = document.getElementById('overlay-content');
+				var contentWidth = parseInt(getComputedStyle(content, 'width').replace('px', ''));
+				var contentHeight = parseInt(getComputedStyle(content, 'height').replace('px', ''));
+
+				content.style.top = h / 2 - contentHeight / 2 + 'px';
+				content.style.left = w / 2 - contentWidth / 2 + 'px'
+
+				overlayContainer.style.display = 'block';
+			}
+
+			function hideOverlay() {
+				if (timerPromise) $timeout.cancel(timerPromise);
+				overlayContainer.style.display = 'none';
+			}
+
+			var getComputedStyle = function () {
+				var func = null;
+				if (document.defaultView && document.defaultView.getComputedStyle) {
+					func = document.defaultView.getComputedStyle;
+				} else if (typeof (document.body.currentStyle) !== "undefined") {
+					func = function (element, anything) {
+						return element["currentStyle"];
+					};
+				}
+
+				return function (element, style) {
+					return func(element, null)[style];
+				}
+			}();
+		}
+	}
+}]);
+
+/*@author Tushar Borole
+ * @description user has to jsut mention the percent, on completion of that percentage scroll; expression will be fired
+ * for example <div id="fixed" when-scrolled="loadMore()" percent="70">*/
+angular.module('platformWebApp')
+    .directive('whenScrolled', function () {
+        return function (scope, elm, attr) {
+            var raw = elm[0];
+            var scrollCompleted = true;
+            scope.$on('scrollCompleted', function () {
+                scrollCompleted = true;
+            });
+
+            elm.bind('scroll', function () {
+                var remainingHeight = raw.offsetHeight - raw.scrollHeight;
+                var scrollTop = raw.scrollTop;
+                var percent = Math.abs((scrollTop / remainingHeight) * 100);
+
+                var elemPercent = 70;
+                if (attr.percent)
+                    elemPercent = attr.percent;
+
+                if (percent > elemPercent) {
+                    if (scrollCompleted) {
+                        scrollCompleted = false;
+                        scope.$apply(attr.whenScrolled);
+                    }
+                }
+            });
+        };
+    });
+
+
+angular.module('platformWebApp').directive('vaShowbigimage', function () {
+    return {
+        scope: {
+        	vaShowbigimage: '='
+        },
+        link: function (scope, element, attrs) {
+            element.bind('mouseenter', function () {
+                var el = $(this),
+                    elW = el.width() + 8,
+                    elLeft = parseInt(el.offset().left) + elW,
+                    elTop  = parseInt(el.offset().top);
+
+                $('body').prepend('<div class="check-image-size"><img src="' + scope.vaShowbigimage + '" alt="" /></div>');
+                
+                var imgH = $('.check-image-size img').height(),
+                    imgW = $('.check-image-size img').width();
+
+                if(imgH >= 300 || imgW >= 300) {
+                	$('body').append('<div class="image-preview" style="left: ' + elLeft + 'px; top: ' + elTop + 'px;"><img src="' + scope.vaShowbigimage + '"></div>');
+                }
+
+                $('.check-image-size').remove();
+            });
+            element.bind('mouseleave', function () {
+                $('.image-preview').remove();
+            });
+        }
+    }
+});
+'use strict';
+
+angular.module('platformWebApp')
+// TODO: Replace with tested localized version (see below)
+.directive('smartFloat', ['$filter', '$compile', function ($filter, $compile) {
+    var INTEGER_REGEXP = /^\-?\d+$/; //Integer number
+    var FLOAT_REGEXP_1 = /^[-+]?\$?\d+.(\d{3})*(,\d*)$/; //Numbers like: 1.123,56
+    var FLOAT_REGEXP_2 = /^[-+]?\$?\d+,(\d{3})*(.\d*)$/; //Numbers like: 1,123.56
+    var FLOAT_REGEXP_3 = /^[-+]?\$?\d+(.\d*)?$/; //Numbers like: 1123.56
+    var FLOAT_REGEXP_4 = /^[-+]?\$?\d+(,\d*)?$/; //Numbers like: 1123,56
+
+    return {
+        require: 'ngModel',
+        link: function (scope, elm, attrs, ctrl) {
+            var fraction = attrs.fraction ? attrs.fraction : 2;
+            if (attrs.numType === "float") {
+                ctrl.$parsers.unshift(function (viewValue) {                    
+                    if (FLOAT_REGEXP_1.test(viewValue)) {
+                        ctrl.$setValidity('float', true);
+                        return parseFloat(viewValue.replace('.', '').replace(',', '.'));
+                    } else if (FLOAT_REGEXP_2.test(viewValue)) {
+                        ctrl.$setValidity('float', true);
+                        return parseFloat(viewValue.replace(',', ''));
+                    } else if (FLOAT_REGEXP_3.test(viewValue)) {
+                        ctrl.$setValidity('float', true);
+                        return parseFloat(viewValue);
+                    } else if (FLOAT_REGEXP_4.test(viewValue)) {
+                        ctrl.$setValidity('float', true);
+                        return parseFloat(viewValue.replace(',', '.'));
+                    } else {
+                        //Allow to use empty values
+                        ctrl.$setValidity('float', !viewValue);
+                        return viewValue;
+                    }
+                });
+
+                ctrl.$formatters.unshift(
+                    function (modelValue) {
+                        return $filter('number')(parseFloat(modelValue), fraction);
+                    }
+                );
+            }
+            else {
+                ctrl.$parsers.unshift(function (viewValue) {
+                    if (INTEGER_REGEXP.test(viewValue)) {
+                        ctrl.$setValidity('integer', true);
+                        return viewValue;
+                    }
+                    else {
+                        //Allow to use empty values
+                        ctrl.$setValidity('integer', !viewValue);
+                        return viewValue;
+                    }
+                });
+            }
+        }
+    };
+}]);
+// Custom directive to support localized integer and float number parsing & validation
+//.directive('smartFloat', ['platformWebApp.numberFormat', function (numberFormat) {
+//    return {
+//        restrict: 'A',
+//        require: 'ngModel',
+//        link: function (scope, elem, attrs, ctrl) {
+//            ctrl.$parsers.unshift(function(viewValue) {
+//                return numberFormat.validate(viewValue, attrs.numType, attrs.minExclusive, attrs.min, attrs.maxExclusive, attrs.max, attrs.fraction, ctrl.$setValidity);
+//            });
+
+//            ctrl.$formatters.unshift(function (modelValue) {
+//                return numberFormat.format(modelValue, attrs.numType, attrs.minExclusive, attrs.min, attrs.maxExclusive, attrs.max, attrs.fraction);
+//            });
+
+//            scope.$on('$localeChangeSuccess', function () {
+//                ctrl.$viewValue = ctrl.$formatters.reduceRight((prev, fn) => fn(prev), ctrl.$modelValue);
+//                ctrl.$render();
+//            });
+//        }
+//    };
+//}]);
+angular.module('platformWebApp')
+.directive('vaTooltip', [function ()
+{
+    return {
+        restrict: 'A',
+        priority: 10000,
+        compile: function (tElem, tAttrs)
+        {
+            var attributes = ["tooltip-placement", "tooltip-animation", "tooltip-popup-delay", "tooltip-trigger", "tooltip-enable", "tooltip-append-to-body", "tooltip-class"];
+            for (var i = 0; i < attributes.length; i++) {
+                var attribute = attributes[i];
+                if (!tElem.attr[attribute]) {
+                    tElem.attr(attribute, '{{' + tAttrs.$normalize(attribute) + '}}');
+                }
+            }
+        }
+    };
+}]);
+angular.module('platformWebApp')
+.directive('vaTooltipOptions', [function () {
+    return {
+        restrict: 'A',
+        scope: false,
+        compile: function () {
+            return function (scope, element, attrs) {
+                var options = ["tooltipPlacement", "tooltipAnimation", "tooltipPopupDelay", "tooltipTrigger", "tooltipEnable", "tooltipAppendToBody", "tooltipClass"];
+                var applyOption = function(option) {
+                    if (attrs[option]) {
+                        scope[option] = attrs[option];
+                        attrs.$observe(option, function() {
+                            scope[option] = attrs[option];
+                        });
+                    }
+                };
+                for (var i = 0; i < options.length; i++) {
+                    applyOption(options[i]);
+                }
+            };
+        }
+    };
+}]);
+
+angular.module('platformWebApp').directive('vaTabs', function () {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attrs) {
+            $('body').delegate('.tab-item', 'click', function () {
+                var self = $(this);
+                    index = self.index();
+
+                self.addClass('__selected').siblings().removeClass('__selected');
+                self.parents('.tabs').find('.tab-cnt').eq(index).addClass('__opened').siblings().removeClass('__opened');
+            });
+        }
+    }
+});
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var a={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["vm.","nm."],DAY:["Sondag","Maandag","Dinsdag","Woensdag","Donderdag","Vrydag","Saterdag"],ERANAMES:["voor Christus","na Christus"],ERAS:["v.C.","n.C."],FIRSTDAYOFWEEK:0,MONTH:["Januarie","Februarie","Maart","April","Mei","Junie","Julie","Augustus","September","Oktober","November","Desember"],SHORTDAY:["So","Ma","Di","Wo","Do","Vr","Sa"],SHORTMONTH:["Jan.","Feb.","Mrt.","Apr","Mei","Jun","Jul","Aug","Sep","Okt","Nov","Des"],WEEKENDRANGE:[5,6],fullDate:"EEEE d MMMM y",longDate:"d MMMM y",medium:"d MMM y HH:mm:ss",mediumDate:"d MMM y",mediumTime:"HH:mm:ss",short:"y-MM-dd HH:mm",shortDate:"y-MM-dd",shortTime:"HH:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"$",DECIMAL_SEP:",",GROUP_SEP:" ",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"af-na",pluralCat:function(e,r){return 1==e?a.ONE:a.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var a={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["vm.","nm."],DAY:["Sondag","Maandag","Dinsdag","Woensdag","Donderdag","Vrydag","Saterdag"],ERANAMES:["voor Christus","na Christus"],ERAS:["v.C.","n.C."],FIRSTDAYOFWEEK:6,MONTH:["Januarie","Februarie","Maart","April","Mei","Junie","Julie","Augustus","September","Oktober","November","Desember"],SHORTDAY:["So","Ma","Di","Wo","Do","Vr","Sa"],SHORTMONTH:["Jan.","Feb.","Mrt.","Apr","Mei","Jun","Jul","Aug","Sep","Okt","Nov","Des"],WEEKENDRANGE:[5,6],fullDate:"EEEE, dd MMMM y",longDate:"dd MMMM y",medium:"dd MMM y h:mm:ss a",mediumDate:"dd MMM y",mediumTime:"h:mm:ss a",short:"y-MM-dd h:mm a",shortDate:"y-MM-dd",shortTime:"h:mm a"},NUMBER_FORMATS:{CURRENCY_SYM:"R",DECIMAL_SEP:",",GROUP_SEP:" ",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"af-za",pluralCat:function(e,r){return 1==e?a.ONE:a.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var a={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["vm.","nm."],DAY:["Sondag","Maandag","Dinsdag","Woensdag","Donderdag","Vrydag","Saterdag"],ERANAMES:["voor Christus","na Christus"],ERAS:["v.C.","n.C."],FIRSTDAYOFWEEK:6,MONTH:["Januarie","Februarie","Maart","April","Mei","Junie","Julie","Augustus","September","Oktober","November","Desember"],SHORTDAY:["So","Ma","Di","Wo","Do","Vr","Sa"],SHORTMONTH:["Jan.","Feb.","Mrt.","Apr","Mei","Jun","Jul","Aug","Sep","Okt","Nov","Des"],WEEKENDRANGE:[5,6],fullDate:"EEEE, dd MMMM y",longDate:"dd MMMM y",medium:"dd MMM y h:mm:ss a",mediumDate:"dd MMM y",mediumTime:"h:mm:ss a",short:"y-MM-dd h:mm a",shortDate:"y-MM-dd",shortTime:"h:mm a"},NUMBER_FORMATS:{CURRENCY_SYM:"R",DECIMAL_SEP:",",GROUP_SEP:" ",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"af",pluralCat:function(e,r){return 1==e?a.ONE:a.OTHER}})}]);
@@ -21683,1069 +22746,6 @@ angular.module('platformWebApp')
     return result;
 }]);
 angular.module('platformWebApp')
-.controller('platformWebApp.confirmDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
-    angular.extend($scope, dialog);
-
-    $scope.yes = function () {
-        $modalInstance.close(true);
-    };
-
-    $scope.no = function () {
-        $modalInstance.close(false);
-    };
-
-    $scope.cancel = function () {
-        $modalInstance.dismiss('cancel');
-    };
-}])
-.factory('platformWebApp.dialogService', ['$rootScope', '$modal', function ($rootScope, $modal) {
-    var dialogService = {
-        dialogs: [],
-        currentDialog: undefined
-    };
-
-    function findDialog(id) {
-        var found;
-        angular.forEach(dialogService.dialogs, function (dialog) {
-            if (dialog.id == id) {
-                found = dialog;
-            }
-        });
-
-        return found;
-    }
-
-    dialogService.showDialog = function (dialog, templateUrl, controller, cssClass) {
-        var dlg = findDialog(dialog.id);
-
-        if (angular.isUndefined(dlg)) {
-            dlg = dialog;
-
-            dlg.instance = $modal.open({
-                templateUrl: templateUrl,
-                controller: controller,
-                windowClass: cssClass ? cssClass : null,
-                resolve: {
-                    dialog: function () {
-                        return dialog;
-                    }
-                }
-            });
-
-            dlg.instance.result.then(function (result) //success
-            {
-                var idx = dialogService.dialogs.indexOf(dlg);
-                dialogService.dialogs.splice(idx, 1);
-                if (dlg.callback)
-                    dlg.callback(result);
-            }, function (reason) //dismiss
-            {
-                var idx = dialogService.dialogs.indexOf(dlg);
-                dialogService.dialogs.splice(idx, 1);
-            });
-
-            dialogService.dialogs.push(dlg);
-        }
-    };
-
-    dialogService.showConfirmationDialog = function (dialog) {
-        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/confirmDialog.tpl.html', 'platformWebApp.confirmDialogController');
-    };
-
-    dialogService.showNotificationDialog = function (dialog) {
-        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/notifyDialog.tpl.html', 'platformWebApp.confirmDialogController');
-    };
-
-    dialogService.showGalleryDialog = function (dialog) {
-        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/galleryDialog.tpl.html', 'platformWebApp.galleryDialogController', '__gallery');
-    };
-
-    return dialogService;
-
-}])
-
-angular.module('platformWebApp')
-.controller('platformWebApp.galleryDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
-    angular.extend($scope, dialog);
-
-    var imgCount = dialog.images.length;
-
-    $scope.close = function () {
-        $modalInstance.close(false);
-    }
-
-    $scope.prevImage = function (index) {
-        var i = index == -1 ? imgCount - 1 : index;
-        $scope.currentImage = dialog.images[i];
-    }
-
-    $scope.nextImage = function (index) {
-        var i = index == imgCount ? 0 : index;
-        $scope.currentImage = dialog.images[i];
-    }
-
-    $scope.openImage = function (image) {
-        $scope.currentImage = image;
-    }
-}]);
-'use strict';
-
-angular.module('platformWebApp')
-    .directive('vaAutofill', ['$timeout', function ($timeout) {
-        return {
-            require: 'ngModel',
-            link: function (scope, elem, attrs, ngModel) {
-                var origVal = elem.val();
-                $timeout(function () {
-                    var newVal = elem.val();
-                    if (ngModel.$pristine && origVal !== newVal) {
-                        ngModel.$setViewValue(newVal);
-                    }
-                }, 500);
-            }
-        }
-    }])
-;
-angular.module('platformWebApp')
-.directive('dynamic', ['$compile', function ($compile) {
-    return {
-        restrict: 'A',
-        replace: true,
-        link: function (scope, ele, attrs) {
-            scope.$watch(attrs.dynamic, function (html) {
-                ele.html(html);
-                $compile(ele.contents())(scope);
-            });
-        }
-    };
-}]);
-
-angular.module('platformWebApp')
-.directive('fallbackSrc', function () {
-    var fallbackSrc = {
-        link: function postLink(scope, iElement, iAttrs) {
-            iElement.bind('error', function () {
-                angular.element(this).attr("src", iAttrs.fallbackSrc);
-            });
-        }
-    }
-    return fallbackSrc;
-});
-angular.module('platformWebApp')
-.directive('vaGenericValueInput', ['$compile', '$templateCache', '$http', 'platformWebApp.objCompareService', 'platformWebApp.bladeNavigationService',
-function ($compile, $templateCache, $http, objComparer, bladeNavigationService) {
-
-    return {
-        restrict: 'E',
-        require: 'ngModel',
-        replace: true,
-        transclude: true,
-        scope: {
-            languages: "=",
-            getDictionaryValues: "&"
-        },
-        link: function (scope, element, attr, ngModelController, linker) {
-
-            scope.currentEntity = ngModelController.$modelValue;
-
-            scope.context = {};
-            scope.context.currentPropValues = [];
-            scope.context.allDictionaryValues = [];
-            var theEmptyValue = { value: null };
-
-            scope.$watch('context.currentPropValues', function (newValue, oldValue) {
-                //reflect only real changes
-                if (newValue !== oldValue &&
-                        !objComparer.equal(newValue, [theEmptyValue]) &&
-                        (newValue.length != scope.currentEntity.values.length || !objComparer.equal(newValue, scope.currentEntity.values))) {
-                    if (scope.currentEntity.isDictionary) {
-                        scope.currentEntity.values = _.map(newValue, function (x) { return { value: x } });
-                    }
-                    else if (scope.currentEntity.isArray && scope.currentEntity.isMultilingual && !scope.currentEntity.isDictionary) {
-                        //ungrouping values for multilingual array properties
-                        scope.currentEntity.values = [];
-                        angular.forEach(newValue, function (x) {
-                            var values = _.map(x.values, function (y) { return { locale: x.locale, value: y.value }; });
-                            scope.currentEntity.values = scope.currentEntity.values.concat(values);
-                        });
-                    }
-                    else {
-                        scope.currentEntity.values = newValue;
-                    }
-
-                    ngModelController.$setViewValue(scope.currentEntity);
-                }
-            }, true);
-
-            scope.$watch('languages', function (languages) {
-                if (scope.currentEntity.isMultilingual && !scope.currentEntity.isDictionary) {
-                    initLanguagesValuesMap(scope.currentEntity, languages);
-                }
-            });
-
-            ngModelController.$render = function () {
-                scope.currentEntity = ngModelController.$modelValue;
-
-                if (!scope.currentEntity.ngBindingModel) {
-                    scope.context.currentPropValues = angular.copy(scope.currentEntity.values);
-                    if (needAddEmptyValue(scope.currentEntity, scope.context.currentPropValues)) {
-                        scope.context.currentPropValues.push(angular.copy(theEmptyValue));
-                    }
-                }
-
-                if (scope.currentEntity.isDictionary) {
-                    scope.getDictionaryValues()(scope.currentEntity, setDictionaryValues);
-                }
-
-                //Group values for multilingual array properties
-                if (scope.currentEntity.isMultilingual && scope.currentEntity.isArray && !scope.currentEntity.isDictionary) {
-
-                    var groupByLocaleObj = _.groupBy(scope.context.currentPropValues, 'locale');
-                    scope.context.currentPropValues = [];
-                    for (var key in groupByLocaleObj) {
-                        if (groupByLocaleObj.hasOwnProperty(key)) {
-                            scope.context.currentPropValues.push({ locale: key, values: groupByLocaleObj[key] });
-                        }
-                    }
-                }
-                changeValueTemplate();
-            };
-
-            function needAddEmptyValue(property, values) {
-                return !property.isArray && !property.isDictionary && !property.isMultilingual && values.length == 0;
-            };
-
-            function initLanguagesValuesMap(property, languages) {
-                //Group values by language 
-                angular.forEach(languages, function (language) {
-                    //Currently select values
-                    var currentPropValues = _.filter(scope.context.currentPropValues, function (x) { return x.locale == language; });
-                    //need add empty value for single  value type
-                    if (currentPropValues.length == 0) {
-                        scope.context.currentPropValues.push({ value: null, locale: language });
-                    }
-                });
-            };
-
-
-            function setDictionaryValues(allDictionaryValues) {
-                var selectedValues = scope.currentEntity.values;
-                scope.context.allDictionaryValues = [];
-                scope.context.currentPropValues = [];
-
-                angular.forEach(allDictionaryValues, function (dictValue) {
-                    scope.context.allDictionaryValues.push(dictValue);
-                    //Need to select already selected values. Dictionary values have same type as standard values.
-                    if (_.any(selectedValues, function (x) { return x.value.id == dictValue.id })) {
-                        //add selected value
-                        scope.context.currentPropValues.push(dictValue);
-                    }
-                });
-            }
-
-            function getTemplateName(property) {
-                var result;
-                switch (property.valueType) {
-                    case 'Html':
-                    case 'Json':
-                        result = 'dCode';
-                        break;
-                    default:
-                        result = 'd' + property.valueType;
-                }
-
-                if (property.isDictionary) {
-                    result += '-dictionary';
-                }
-                if (property.isArray) {
-                    result += '-multivalue';
-                }
-                if (property.isMultilingual) {
-                    result += '-multilang';
-                }
-                result += '.html';
-                return result;
-            };
-
-            function changeValueTemplate() {
-                if (scope.currentEntity.valueType === 'Html' || scope.currentEntity.valueType === 'Json') {
-                    // Codemirror configuration
-                    scope.editorOptions = {
-                        lineWrapping: true,
-                        lineNumbers: true,
-                        extraKeys: { "Ctrl-Q": function (cm) { cm.foldCode(cm.getCursor()); } },
-                        foldGutter: true,
-                        gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-                        onLoad: function (_editor) {
-                            codemirrorEditor = _editor;
-                        },
-                    };
-                }
-                if (scope.currentEntity.valueType === 'Html') {
-                    scope.editorOptions['parserfile'] = 'liquid.js';
-                    scope.editorOptions['mode'] = 'htmlmixed';
-                }
-                if (scope.currentEntity.valueType === 'Json') {
-                    scope.editorOptions['parserfile'] = 'javascript.js';
-                    scope.editorOptions['mode'] = { name: 'javascript', json: true };
-                }
-
-                var templateName = getTemplateName(scope.currentEntity);
-
-                //load input template and display
-                $http.get(templateName, { cache: $templateCache }).then(function (results) {
-                    //Need to add ngForm to isolate form validation into sub form
-                    //var innerContainer = "<div id='innerContainer' />";
-
-                    //We must destroy scope of elements we are removing from DOM to avoid angular firing events
-                    var el = element.find('#valuePlaceHolder #innerContainer');
-                    if (el.length > 0) {
-                        el.scope().$destroy();
-                    }
-                    var container = angular.element("<div><div id='valuePlaceHolder'></div></div>");
-                    element.append(container);
-
-                    container = element.find('#valuePlaceHolder');
-                    var result = container.html(results.data.trim());
-
-                    if (scope.currentEntity.ngBindingModel) {
-                        $(result).find('[ng-model]').attr("ng-model", 'currentEntity.blade.currentEntity.' + scope.currentEntity.ngBindingModel);
-                    }
-
-                    //Create new scope, otherwise we would destroy our directive scope
-                    var newScope = scope.$new();
-                    $compile(result)(newScope);
-                });
-            };
-
-            /* Datepicker */
-            scope.datepickers = {
-                DateTime: false
-            }
-
-            scope.open = function ($event, which) {
-                $event.preventDefault();
-                $event.stopPropagation();
-
-                scope.datepickers[which] = true;
-            };
-
-            linker(function (clone) {
-                element.append(clone);
-            });
-
-            /* Image */
-            var originalBlade;
-            scope.uploadImage = function() {
-                var newBlade = {
-                    id: "imageUpload",
-                    currentEntityId: 'images',
-                    title: 'platform.blades.asset-upload.title',
-                    subtitle: scope.currentEntity.name,
-                    controller: 'platformWebApp.assets.assetUploadController',
-                    template: '$(Platform)/Scripts/app/assets/blades/asset-upload.tpl.html',
-                    fileUploadOptions: {
-                        singleFileMode: true,
-                        accept: "image/*",
-                        suppressParentRefresh: true
-                    }
-                };
-                newBlade.onUploadComplete = function(data) {
-                    if (data && data.length) {
-                        scope.context.currentPropValues[0].value = data[0].url;
-                        bladeNavigationService.closeBlade(newBlade);
-                    }
-                }
-
-                //saving orig blade reference (that is not imageUpload blade) for subsequent showBlade calls
-                if (!originalBlade) {
-                    originalBlade = bladeNavigationService.currentBlade.id !== "imageUpload" ? bladeNavigationService.currentBlade : bladeNavigationService.currentBlade.parentBlade;
-                }
-                bladeNavigationService.showBlade(newBlade, originalBlade);
-            }
-
-            scope.clearImage = function () {
-                scope.context.currentPropValues[0].value = undefined;
-            }
-
-            scope.openUrl = function (url) {
-                window.open(url, '_blank');
-            }
-        }
-    }
-}]);
-
-// leftClickMenu based on: ng-context-menu - v1.0.2 - An AngularJS directive to display a context menu when a right-click event is triggered
-angular
-    .module('platformWebApp')
-    .directive("leftClickMenu", ["$document", "ContextMenuService", function ($document, ContextMenuService) {
-        return {
-            restrict: 'A',
-            scope: {
-                'callback': '&leftClickMenu',
-                'disabled': '&contextMenuDisabled',
-                'closeCallback': '&contextMenuClose'
-            },
-            link: function ($scope, $element, $attrs) {
-                var opened = false;
-
-                function open(event, menuElement) {
-                    menuElement.addClass('open');
-
-                    var doc = $document[0].documentElement;
-                    var docLeft = (window.pageXOffset || doc.scrollLeft) -
-                                  (doc.clientLeft || 0),
-                        docTop = (window.pageYOffset || doc.scrollTop) -
-                                 (doc.clientTop || 0),
-                        elementWidth = menuElement[0].scrollWidth,
-                        elementHeight = menuElement[0].scrollHeight;
-                    var docWidth = doc.clientWidth + docLeft,
-                      docHeight = doc.clientHeight + docTop,
-                      totalWidth = elementWidth + event.pageX,
-                      totalHeight = elementHeight + event.pageY,
-                      left = Math.max(event.pageX - docLeft, 0),
-                      top = Math.max(event.pageY - docTop, 0);
-
-                    if (totalWidth > docWidth) {
-                        left = left - (totalWidth - docWidth);
-                    }
-
-                    if (totalHeight > docHeight) {
-                        top = top - (totalHeight - docHeight);
-                    }
-
-                    menuElement.css('top', top + 'px');
-                    menuElement.css('left', left + 'px');
-                    opened = true;
-                }
-
-                function close(menuElement) {
-                    menuElement.removeClass('open');
-
-                    if (opened) {
-                        $scope.closeCallback();
-                    }
-
-                    opened = false;
-                }
-
-                $element.bind('click', function (event) {
-                    if (!$scope.disabled()) {
-                        if (ContextMenuService.menuElement !== null) {
-                            close(ContextMenuService.menuElement);
-                        }
-                        ContextMenuService.menuElement = angular.element(
-                          document.getElementById($attrs.target)
-                        );
-                        ContextMenuService.element = event.target;
-                        //console.log('set', ContextMenuService.element);
-
-                        event.preventDefault();
-                        event.stopPropagation();
-                        $scope.$apply(function () {
-                            $scope.callback({ $event: event });
-                        });
-                        $scope.$apply(function () {
-                            open(event, ContextMenuService.menuElement);
-                        });
-                    }
-                });
-
-                function handleKeyUpEvent(event) {
-                    //console.log('keyup');
-                    if (!$scope.disabled() && opened && event.keyCode === 27) {
-                        $scope.$apply(function () {
-                            close(ContextMenuService.menuElement);
-                        });
-                    }
-                }
-
-                function handleClickEvent(event) {
-                    if (!$scope.disabled() &&
-                      opened &&
-                      (event.button !== 2 ||
-                       event.target !== ContextMenuService.element)) {
-                        $scope.$apply(function () {
-                            close(ContextMenuService.menuElement);
-                        });
-                    }
-                }
-
-                $document.bind('keyup', handleKeyUpEvent);
-                // Firefox treats a right-click as a click and a contextmenu event
-                // while other browsers just treat it as a contextmenu event
-                $document.bind('click', handleClickEvent);
-                $document.bind('contextmenu', handleClickEvent);
-
-                $scope.$on('$destroy', function () {
-                    //console.log('destroy');
-                    $document.unbind('keyup', handleKeyUpEvent);
-                    $document.unbind('click', handleClickEvent);
-                    $document.unbind('contextmenu', handleClickEvent);
-                });
-            }
-        };
-    }]);
-
-angular.module('platformWebApp')
-.factory('platformWebApp.metaFormsService', [function () {
-    var registeredMetaFields = { };
-
-    return {
-        registerMetaFields: function (metaFormName, metaFields) {
-            if (!registeredMetaFields[metaFormName]) {
-                registeredMetaFields[metaFormName] = [];
-            }
-            Array.prototype.push.apply(registeredMetaFields[metaFormName], metaFields);
-            registeredMetaFields[metaFormName] = _.sortBy(registeredMetaFields[metaFormName], 'priority');
-        },
-        getMetaFields: function(metaFormName) {
-            return registeredMetaFields[metaFormName];
-        }
-    };
-}])
-.directive('vaMetaform', [function () {
-    return {
-        restrict: 'E',
-        replace: true,
-        scope: {
-            blade: '=',
-            registeredInputs: '=',
-            columnCount: '@?'
-        },
-        templateUrl: '$(Platform)/Scripts/common/directives/metaform.tpl.html',
-        link: function (scope) {
-            var columnCount = scope.columnCount ? parseInt(scope.columnCount, 10) : 1;
-
-            var filteredInputs = _.filter(scope.registeredInputs, function (x) { return !x.isVisibleFn || x.isVisibleFn(scope.blade); });
-
-            var resultingGroups = [];
-            var isGroupStart = true, currentGroup;
-            _.each(filteredInputs, function (x) {
-                x = angular.copy(x);
-                x.ngBindingModel = x.name;
-
-                if (isGroupStart || (x.templateUrl && x.spanAllColumns)) {
-                    currentGroup = [x];
-                    resultingGroups.push(currentGroup);
-                } else {
-                    currentGroup.push(x);
-                }
-                isGroupStart = (x.templateUrl && x.spanAllColumns) || currentGroup.length == columnCount;
-            });
-
-            // generate empty columns
-            _.each(resultingGroups, function (gr) {
-                while (columnCount > gr.length) {
-                    gr.push({ templateUrl: 'emptyColumn.html' });
-                }
-            });
-            scope.bladeInputGroups = resultingGroups;
-        }
-    }
-}]);
-/**
- * Heavily adapted from the `type="number"` directive in Angular's
- * /src/ng/directive/input.js
- */
-
-'use strict';
-
-angular.module('platformWebApp')
-// TODO: Replace with tested localized version (see below)
-.directive('money', ['$timeout', function ($timeout) {
-    'use strict';
-
-    var NUMBER_REGEXP = /^\s*(\-|\+)?(\d+|(\d*(\.\d*)))\s*$/;
-
-    function link(scope, el, attrs, ngModelCtrl) {
-        var min = parseFloat(attrs.min || 0);
-        var precision = parseFloat(attrs.precision || 2);
-        var lastValidValue;
-
-        function round(num) {
-            var d = Math.pow(10, precision);
-            return Math.round(num * d) / d;
-        }
-
-        function formatPrecision(value) {
-            return parseFloat(value).toFixed(precision);
-        }
-
-        function formatViewValue(value) {
-            return ngModelCtrl.$isEmpty(value) ? '' : '' + value;
-        }
-
-
-        ngModelCtrl.$parsers.push(function (value) {
-            if (angular.isUndefined(value)) {
-                value = '';
-            }
-
-            // Handle leading decimal point, like ".5"
-            if (value.indexOf('.') === 0) {
-                value = '0' + value;
-            }
-
-            // Allow "-" inputs only when min < 0
-            if (value.indexOf('-') === 0) {
-                if (min >= 0) {
-                    value = null;
-                    ngModelCtrl.$setViewValue('');
-                    ngModelCtrl.$render();
-                } else if (value === '-') {
-                    value = '';
-                }
-            }
-
-            var empty = ngModelCtrl.$isEmpty(value);
-            if (empty || NUMBER_REGEXP.test(value)) {
-                lastValidValue = (value === '')
-                  ? null
-                  : (empty ? value : parseFloat(value));
-            } else {
-                // Render the last valid input in the field
-                ngModelCtrl.$setViewValue(formatViewValue(lastValidValue));
-                ngModelCtrl.$render();
-            }
-
-            ngModelCtrl.$setValidity('number', true);
-            return lastValidValue;
-        });
-        ngModelCtrl.$formatters.push(formatViewValue);
-
-        var minValidator = function (value) {
-            if (!ngModelCtrl.$isEmpty(value) && value < min) {
-                ngModelCtrl.$setValidity('min', false);
-                return undefined;
-            } else {
-                ngModelCtrl.$setValidity('min', true);
-                return value;
-            }
-        };
-        ngModelCtrl.$parsers.push(minValidator);
-        ngModelCtrl.$formatters.push(minValidator);
-
-        if (attrs.max) {
-            var max = parseFloat(attrs.max);
-            var maxValidator = function (value) {
-                if (!ngModelCtrl.$isEmpty(value) && value > max) {
-                    ngModelCtrl.$setValidity('max', false);
-                    return undefined;
-                } else {
-                    ngModelCtrl.$setValidity('max', true);
-                    return value;
-                }
-            };
-
-            ngModelCtrl.$parsers.push(maxValidator);
-            ngModelCtrl.$formatters.push(maxValidator);
-        }
-
-        // Round off
-        if (precision > -1) {
-            ngModelCtrl.$parsers.push(function (value) {
-                return value ? round(value) : value;
-            });
-            ngModelCtrl.$formatters.push(function (value) {
-                return value ? formatPrecision(value) : value;
-            });
-        }
-
-        el.bind('blur', function () {
-            $timeout(function () {
-                var value = ngModelCtrl.$modelValue;
-                if (value) {
-                    ngModelCtrl.$viewValue = formatPrecision(value);
-                    ngModelCtrl.$render();
-                }
-            });
-        });
-    }
-
-    return {
-        restrict: 'A',
-        require: 'ngModel',
-        link: link
-    };
-}]);
-// Custom directive to support localized currency float number parsing & validation
-//.directive('money', ['platformWebApp.currencyFormat', function (currencyFormat) {
-//    return {
-//        restrict: 'A',
-//        require: 'ngModel',
-//        link: function (scope, elem, attrs, ctrl) {
-//            ctrl.$parsers.unshift(function(viewValue) {
-//                return currencyFormat.validate(viewValue, attrs.minExclusive, attrs.min, attrs.maxExclusive, attrs.max, attrs.fraction, ctrl.$setValidity);
-//            });
-
-//            ctrl.$formatters.unshift(function (modelValue) {
-//                return currencyFormat.format(modelValue, attrs.minExclusive, attrs.min, attrs.maxExclusive, attrs.max, attrs.fraction);
-//            });
-
-//            scope.$on('$localeChangeSuccess', function () {
-//                ctrl.$viewValue = ctrl.$formatters.reduceRight((prev, fn) => fn(prev), ctrl.$modelValue);
-//                ctrl.$render();
-//            });
-//        }
-//    };
-//}]);
-angular.module('platformWebApp')
-.directive('multipleAttr', function () {
-    return {
-        'restrict': 'A',
-        'compile': function () {
-            return {
-                'pre': function ($s, $el, attrs) {
-                    if (attrs.multipleAttr === 'true' || attrs.multipleAttr === true) {
-                        $el.attr('multiple', '');
-                    }
-                }
-            }
-        }
-    }
-})
-angular.module('platformWebApp')
-.config(['$httpProvider', function ($httpProvider) {
-    $httpProvider.interceptors.push('platformWebApp.httpInterceptor');
-}])
-.factory('platformWebApp.httpInterceptor', function () {
-	return {};
-})
-.directive('wcOverlay', ['$q', '$timeout', '$window', 'platformWebApp.httpInterceptor', function ($q, $timeout, $window, httpInterceptor) {
-	return {
-		restrict: 'EA',
-		transclude: true,
-		scope: {
-			wcOverlayDelay: "@"
-		},
-		template: '<div id="overlay-container" class="overlayContainer">' +
-						'<div id="overlay-background" class="overlayBackground"></div>' +
-						'<div id="overlay-content" class="overlayContent" data-ng-transclude>' +
-						'</div>' +
-					'</div>',
-		link: function (scope, element, attrs) {
-			var overlayContainer = null,
-				timerPromise = null,
-				timerPromiseHide = null,
-				inSession = false,
-				queue = [];
-
-			init();
-
-			function init() {
-				wireUpHttpInterceptor();
-				if (window.jQuery) wirejQueryInterceptor();
-				overlayContainer = document.getElementById('overlay-container');
-			}
-
-			//Hook into httpInterceptor factory request/response/responseError functions                
-			function wireUpHttpInterceptor() {
-
-				httpInterceptor.request = function (config) {
-					processRequest();
-					return config || $q.when(config);
-				};
-
-				httpInterceptor.response = function (response) {
-					processResponse();
-					return response || $q.when(response);
-				};
-
-				httpInterceptor.responseError = function (rejection) {
-					processResponse();
-					return $q.reject(rejection);
-				};
-			}
-
-			//Monitor jQuery Ajax calls in case it's used in an app
-			function wirejQueryInterceptor() {
-				$(document).ajaxStart(function () {
-					processRequest();
-				});
-
-				$(document).ajaxComplete(function () {
-					processResponse();
-				});
-
-				$(document).ajaxError(function () {
-					processResponse();
-				});
-			}
-
-			function processRequest() {
-				queue.push({});
-				if (queue.length == 1) {
-					timerPromise = $timeout(function () {
-						if (queue.length) showOverlay();
-					}, scope.wcOverlayDelay ? scope.wcOverlayDelay : 500); //Delay showing for 500 millis to avoid flicker
-				}
-			}
-
-			function processResponse() {
-				queue.pop();
-				if (queue.length == 0) {
-					//Since we don't know if another XHR request will be made, pause before
-					//hiding the overlay. If another XHR request comes in then the overlay
-					//will stay visible which prevents a flicker
-					timerPromiseHide = $timeout(function () {
-						//Make sure queue is still 0 since a new XHR request may have come in
-						//while timer was running
-						if (queue.length == 0) {
-							hideOverlay();
-							if (timerPromiseHide) $timeout.cancel(timerPromiseHide);
-						}
-					}, scope.wcOverlayDelay ? scope.wcOverlayDelay : 500);
-				}
-			}
-
-			function showOverlay() {
-				var w = 0;
-				var h = 0;
-				if (!$window.innerWidth) {
-					if (!(document.documentElement.clientWidth == 0)) {
-						w = document.documentElement.clientWidth;
-						h = document.documentElement.clientHeight;
-					}
-					else {
-						w = document.body.clientWidth;
-						h = document.body.clientHeight;
-					}
-				}
-				else {
-					w = $window.innerWidth;
-					h = $window.innerHeight;
-				}
-				var content = document.getElementById('overlay-content');
-				var contentWidth = parseInt(getComputedStyle(content, 'width').replace('px', ''));
-				var contentHeight = parseInt(getComputedStyle(content, 'height').replace('px', ''));
-
-				content.style.top = h / 2 - contentHeight / 2 + 'px';
-				content.style.left = w / 2 - contentWidth / 2 + 'px'
-
-				overlayContainer.style.display = 'block';
-			}
-
-			function hideOverlay() {
-				if (timerPromise) $timeout.cancel(timerPromise);
-				overlayContainer.style.display = 'none';
-			}
-
-			var getComputedStyle = function () {
-				var func = null;
-				if (document.defaultView && document.defaultView.getComputedStyle) {
-					func = document.defaultView.getComputedStyle;
-				} else if (typeof (document.body.currentStyle) !== "undefined") {
-					func = function (element, anything) {
-						return element["currentStyle"];
-					};
-				}
-
-				return function (element, style) {
-					return func(element, null)[style];
-				}
-			}();
-		}
-	}
-}]);
-
-/*@author Tushar Borole
- * @description user has to jsut mention the percent, on completion of that percentage scroll; expression will be fired
- * for example <div id="fixed" when-scrolled="loadMore()" percent="70">*/
-angular.module('platformWebApp')
-    .directive('whenScrolled', function () {
-        return function (scope, elm, attr) {
-            var raw = elm[0];
-            var scrollCompleted = true;
-            scope.$on('scrollCompleted', function () {
-                scrollCompleted = true;
-            });
-
-            elm.bind('scroll', function () {
-                var remainingHeight = raw.offsetHeight - raw.scrollHeight;
-                var scrollTop = raw.scrollTop;
-                var percent = Math.abs((scrollTop / remainingHeight) * 100);
-
-                var elemPercent = 70;
-                if (attr.percent)
-                    elemPercent = attr.percent;
-
-                if (percent > elemPercent) {
-                    if (scrollCompleted) {
-                        scrollCompleted = false;
-                        scope.$apply(attr.whenScrolled);
-                    }
-                }
-            });
-        };
-    });
-
-
-angular.module('platformWebApp').directive('vaShowbigimage', function () {
-    return {
-        scope: {
-        	vaShowbigimage: '='
-        },
-        link: function (scope, element, attrs) {
-            element.bind('mouseenter', function () {
-                var el = $(this),
-                    elW = el.width() + 8,
-                    elLeft = parseInt(el.offset().left) + elW,
-                    elTop  = parseInt(el.offset().top);
-
-                $('body').prepend('<div class="check-image-size"><img src="' + scope.vaShowbigimage + '" alt="" /></div>');
-                
-                var imgH = $('.check-image-size img').height(),
-                    imgW = $('.check-image-size img').width();
-
-                if(imgH >= 300 || imgW >= 300) {
-                	$('body').append('<div class="image-preview" style="left: ' + elLeft + 'px; top: ' + elTop + 'px;"><img src="' + scope.vaShowbigimage + '"></div>');
-                }
-
-                $('.check-image-size').remove();
-            });
-            element.bind('mouseleave', function () {
-                $('.image-preview').remove();
-            });
-        }
-    }
-});
-'use strict';
-
-angular.module('platformWebApp')
-// TODO: Replace with tested localized version (see below)
-.directive('smartFloat', ['$filter', '$compile', function ($filter, $compile) {
-    var INTEGER_REGEXP = /^\-?\d+$/; //Integer number
-    var FLOAT_REGEXP_1 = /^[-+]?\$?\d+.(\d{3})*(,\d*)$/; //Numbers like: 1.123,56
-    var FLOAT_REGEXP_2 = /^[-+]?\$?\d+,(\d{3})*(.\d*)$/; //Numbers like: 1,123.56
-    var FLOAT_REGEXP_3 = /^[-+]?\$?\d+(.\d*)?$/; //Numbers like: 1123.56
-    var FLOAT_REGEXP_4 = /^[-+]?\$?\d+(,\d*)?$/; //Numbers like: 1123,56
-
-    return {
-        require: 'ngModel',
-        link: function (scope, elm, attrs, ctrl) {
-            var fraction = attrs.fraction ? attrs.fraction : 2;
-            if (attrs.numType === "float") {
-                ctrl.$parsers.unshift(function (viewValue) {                    
-                    if (FLOAT_REGEXP_1.test(viewValue)) {
-                        ctrl.$setValidity('float', true);
-                        return parseFloat(viewValue.replace('.', '').replace(',', '.'));
-                    } else if (FLOAT_REGEXP_2.test(viewValue)) {
-                        ctrl.$setValidity('float', true);
-                        return parseFloat(viewValue.replace(',', ''));
-                    } else if (FLOAT_REGEXP_3.test(viewValue)) {
-                        ctrl.$setValidity('float', true);
-                        return parseFloat(viewValue);
-                    } else if (FLOAT_REGEXP_4.test(viewValue)) {
-                        ctrl.$setValidity('float', true);
-                        return parseFloat(viewValue.replace(',', '.'));
-                    } else {
-                        //Allow to use empty values
-                        ctrl.$setValidity('float', !viewValue);
-                        return viewValue;
-                    }
-                });
-
-                ctrl.$formatters.unshift(
-                    function (modelValue) {
-                        return $filter('number')(parseFloat(modelValue), fraction);
-                    }
-                );
-            }
-            else {
-                ctrl.$parsers.unshift(function (viewValue) {
-                    if (INTEGER_REGEXP.test(viewValue)) {
-                        ctrl.$setValidity('integer', true);
-                        return viewValue;
-                    }
-                    else {
-                        //Allow to use empty values
-                        ctrl.$setValidity('integer', !viewValue);
-                        return viewValue;
-                    }
-                });
-            }
-        }
-    };
-}]);
-// Custom directive to support localized integer and float number parsing & validation
-//.directive('smartFloat', ['platformWebApp.numberFormat', function (numberFormat) {
-//    return {
-//        restrict: 'A',
-//        require: 'ngModel',
-//        link: function (scope, elem, attrs, ctrl) {
-//            ctrl.$parsers.unshift(function(viewValue) {
-//                return numberFormat.validate(viewValue, attrs.numType, attrs.minExclusive, attrs.min, attrs.maxExclusive, attrs.max, attrs.fraction, ctrl.$setValidity);
-//            });
-
-//            ctrl.$formatters.unshift(function (modelValue) {
-//                return numberFormat.format(modelValue, attrs.numType, attrs.minExclusive, attrs.min, attrs.maxExclusive, attrs.max, attrs.fraction);
-//            });
-
-//            scope.$on('$localeChangeSuccess', function () {
-//                ctrl.$viewValue = ctrl.$formatters.reduceRight((prev, fn) => fn(prev), ctrl.$modelValue);
-//                ctrl.$render();
-//            });
-//        }
-//    };
-//}]);
-angular.module('platformWebApp')
-.directive('vaTooltip', [function ()
-{
-    return {
-        restrict: 'A',
-        priority: 10000,
-        compile: function (tElem, tAttrs)
-        {
-            var attributes = ["tooltip-placement", "tooltip-animation", "tooltip-popup-delay", "tooltip-trigger", "tooltip-enable", "tooltip-append-to-body", "tooltip-class"];
-            for (var i = 0; i < attributes.length; i++) {
-                var attribute = attributes[i];
-                if (!tElem.attr[attribute]) {
-                    tElem.attr(attribute, '{{' + tAttrs.$normalize(attribute) + '}}');
-                }
-            }
-        }
-    };
-}]);
-angular.module('platformWebApp')
-.directive('vaTooltipOptions', [function () {
-    return {
-        restrict: 'A',
-        scope: false,
-        compile: function () {
-            return function (scope, element, attrs) {
-                var options = ["tooltipPlacement", "tooltipAnimation", "tooltipPopupDelay", "tooltipTrigger", "tooltipEnable", "tooltipAppendToBody", "tooltipClass"];
-                var applyOption = function(option) {
-                    if (attrs[option]) {
-                        scope[option] = attrs[option];
-                        attrs.$observe(option, function() {
-                            scope[option] = attrs[option];
-                        });
-                    }
-                };
-                for (var i = 0; i < options.length; i++) {
-                    applyOption(options[i]);
-                }
-            };
-        }
-    };
-}]);
-
-angular.module('platformWebApp').directive('vaTabs', function () {
-    return {
-        restrict: 'A',
-        link: function (scope, element, attrs) {
-            $('body').delegate('.tab-item', 'click', function () {
-                var self = $(this);
-                    index = self.index();
-
-                self.addClass('__selected').siblings().removeClass('__selected');
-                self.parents('.tabs').find('.tab-cnt').eq(index).addClass('__opened').siblings().removeClass('__opened');
-            });
-        }
-    }
-});
-angular.module('platformWebApp')
 .controller('platformWebApp.assets.assetListController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', '$sessionStorage', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
     function ($scope, assets, bladeNavigationService, dialogService, $storage, bladeUtils, uiGridHelper) {
         var blade = $scope.blade;
@@ -23215,44 +23215,6 @@ angular.module('platformWebApp')
         blade.isLoading = false;
     }]);
 
-angular.module('platformWebApp')
-.factory('platformWebApp.assets.api', ['$resource', function ($resource) {
-    return $resource('api/platform/assets', {}, {
-        createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
-        move: { method: 'POST', url: 'api/platform/assets/move' },
-        uploadFromUrl: { method: 'POST', params: { url: '@url', folderUrl: '@folderUrl', name: '@name' }, isArray: true }
-    });
-}]);
-
-
-angular.module('platformWebApp')
-.controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    
-    $scope.blade.isLoading = false;
-    // ui-grid
-    $scope.setGridOptions = function (gridOptions) {
-        $scope.gridOptions = gridOptions;
-    };
-}]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    var blade = $scope.blade;
-
-    $scope.openBlade = function () {
-        var newBlade = {
-            id: "changesChildBlade",
-            currentEntities: blade.currentEntity.operationsLog,
-            headIcon: blade.headIcon,
-            title: blade.title,
-            subtitle: 'platform.widgets.operations.blade-subtitle',
-            isExpandable: true,
-            controller: 'platformWebApp.changeLog.operationListController',
-            template: '$(Platform)/Scripts/app/changeLog/blades/operation-list.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, blade);
-    };
-}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.dynamicObjectListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dynamicProperties.api', function ($scope, bladeNavigationService, dynamicPropertiesApi) {
 	var blade = $scope.blade;
@@ -23853,6 +23815,16 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
+.factory('platformWebApp.assets.api', ['$resource', function ($resource) {
+    return $resource('api/platform/assets', {}, {
+        createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
+        move: { method: 'POST', url: 'api/platform/assets/move' },
+        uploadFromUrl: { method: 'POST', params: { url: '@url', folderUrl: '@folderUrl', name: '@name' }, isArray: true }
+    });
+}]);
+
+
+angular.module('platformWebApp')
 .factory('platformWebApp.dynamicProperties.api', ['$resource', function ($resource) {
     return $resource('api/platform/dynamic/types/:id/properties/:propertyId', {}, {
         queryTypes: { url: 'api/platform/dynamic/types', isArray: true },
@@ -23935,233 +23907,6 @@ angular.module('platformWebApp')
 	});
 
 }]);
-angular.module('platformWebApp')
-.controller('platformWebApp.exportImport.exportMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'platformWebApp.authService', function ($scope, bladeNavigationService, exportImportResourse, authService) {
-    var blade = $scope.blade;
-    blade.headIcon = 'fa-upload';
-    blade.title = 'platform.blades.export-main.title';
-
-    $scope.exportRequest = {};
-
-    function initializeBlade() {
-        exportImportResourse.getNewExportManifest(function (data) {
-            $scope.exportRequest.exportManifest = data;
-            blade.isLoading = false;
-        });
-    };
-
-    $scope.$on("new-notification-event", function (event, notification) {
-        if (blade.notification && notification.id == blade.notification.id) {
-            angular.copy(notification, blade.notification);
-            if (notification.errorCount > 0) {
-                bladeNavigationService.setError('Export error', blade);
-            }
-        }
-    });
-
-    $scope.canStartProcess = function () {
-        return authService.checkPermission('platform:exportImport:export') && (_.any($scope.exportRequest.modules) || $scope.exportRequest.handleSecurity || $scope.exportRequest.handleSettings);
-    }
-
-    $scope.updateModuleSelection = function () {
-        var selection = _.where($scope.exportRequest.exportManifest.modules, { isChecked: true });
-        $scope.exportRequest.modules = _.pluck(selection, 'id');
-    };
-
-    $scope.startExport = function () {
-        blade.isLoading = true;
-        exportImportResourse.runExport($scope.exportRequest,
-            function (data) { blade.notification = data; blade.isLoading = false; });
-    }
-
-    blade.toolbarCommands = [
-		{
-		    name: "platform.commands.select-all", icon: 'fa fa-check-square-o',
-		    executeMethod: function () { selectAll(true) },
-		    canExecuteMethod: function () { return $scope.exportRequest.exportManifest && !blade.notification; }
-		},
-        {
-            name: "platform.commands.unselect-all", icon: 'fa fa-square-o',
-            executeMethod: function () { selectAll(false) },
-            canExecuteMethod: function () { return $scope.exportRequest.exportManifest && !blade.notification; }
-        }
-    ];
-
-    var selectAll = function (action) {
-        $scope.exportRequest.handleSecurity = action;
-        $scope.exportRequest.handleBinaryData = action;
-        $scope.exportRequest.handleSettings = action;
-        _.forEach($scope.exportRequest.exportManifest.modules, function (module) { module.isChecked = action; });
-
-        $scope.updateModuleSelection();
-    }
-
-    initializeBlade();
-}]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.exportImport.mainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.authService', function ($scope, bladeNavigationService, authService) {
-
-    $scope.export = function () {
-        $scope.selectedNodeId = 'export';
-
-        var newBlade = {
-            controller: 'platformWebApp.exportImport.exportMainController',
-            template: '$(Platform)/Scripts/app/exportImport/blades/export-main.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, $scope.blade);
-    };
-
-    $scope.import = function () {
-        if (authService.checkPermission('platform:exportImport:import')) {
-            $scope.selectedNodeId = 'import';
-
-            var newBlade = {
-                controller: 'platformWebApp.exportImport.importMainController',
-                template: '$(Platform)/Scripts/app/exportImport/blades/import-main.tpl.html'
-            };
-            bladeNavigationService.showBlade(newBlade, $scope.blade);
-        }
-    };
-
-    $scope.blade.headIcon = 'fa-database';
-    $scope.blade.isLoading = false;
-}]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.exportImport.importMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'FileUploader', function ($scope, bladeNavigationService, exportImportResourse, FileUploader) {
-    var blade = $scope.blade;
-    blade.updatePermission = 'platform:exportImport:import';
-    blade.headIcon = 'fa-download';
-    blade.title = 'platform.blades.import-main.title';
-    blade.isLoading = false;
-    $scope.importRequest = {};
-    var origManifest;
-
-    $scope.$on("new-notification-event", function (event, notification) {
-        if (blade.notification && notification.id == blade.notification.id) {
-            angular.copy(notification, blade.notification);
-            if (notification.errorCount > 0) {
-                bladeNavigationService.setError('Import error', blade);
-            }
-        }
-    });
-
-    $scope.canStartProcess = function () {
-        return blade.hasUpdatePermission() && (_.any($scope.importRequest.modules) || $scope.importRequest.handleSecurity || $scope.importRequest.handleSettings || $scope.importRequest.handleBinaryData);
-    }
-
-    $scope.startProcess = function () {
-        blade.isLoading = true;
-        exportImportResourse.runImport($scope.importRequest,
-            function (data) { blade.notification = data; blade.isLoading = false; },
-            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-    }
-
-    $scope.updateModuleSelection = function () {
-        var selection = _.where($scope.importRequest.exportManifest.modules, { isChecked: true });
-        $scope.importRequest.modules = _.pluck(selection, 'id');
-    };
-
-    if (!$scope.uploader) {
-        // create the uploader
-        var uploader = $scope.uploader = new FileUploader({
-            scope: $scope,
-            headers: { Accept: 'application/json' },
-            url: 'api/platform/assets/localstorage',
-            method: 'POST',
-            autoUpload: true,
-            removeAfterUpload: true
-        });
-
-        // ADDING FILTERS
-        // zip only
-        uploader.filters.push({
-            name: 'zipFilter',
-            fn: function (i /*{File|FileLikeObject}*/, options) {
-                return i.name.toLowerCase().endsWith('.zip');
-            }
-        });
-
-        uploader.onBeforeUploadItem = function (fileItem) {
-            blade.isLoading = true;
-            bladeNavigationService.setError(null, blade);
-        };
-
-        uploader.onErrorItem = function (item, response, status, headers) {
-            bladeNavigationService.setError(item._file.name + ' failed: ' + (response.message ? response.message : status), blade);
-        };
-
-        uploader.onSuccessItem = function (fileItem, asset, status, headers) {
-            $scope.importRequest.fileUrl = asset[0].url;
-            $scope.importRequest.fileName = asset[0].name;
-
-            exportImportResourse.loadExportManifest({ fileUrl: $scope.importRequest.fileUrl }, function (data) {
-                origManifest = angular.copy(data);
-
-                // select all available data for import
-                $scope.importRequest.handleSecurity = data.handleSecurity;
-                $scope.importRequest.handleSettings = data.handleSettings;
-                $scope.importRequest.handleBinaryData = data.handleBinaryData;
-
-                _.each(data.modules, function (x) { x.isChecked = true; });
-
-                $scope.importRequest.exportManifest = data;
-                $scope.updateModuleSelection();
-                blade.isLoading = false;
-            });
-        };
-    }
-
-
-    blade.toolbarCommands = [
-        {
-            name: "platform.commands.select-all", icon: 'fa fa-check-square-o',
-            executeMethod: function () { selectAll(true) },
-            canExecuteMethod: function () { return $scope.importRequest.exportManifest && !blade.notification; }
-        },
-        {
-            name: "platform.commands.unselect-all", icon: 'fa fa-square-o',
-            executeMethod: function () { selectAll(false) },
-            canExecuteMethod: function () { return $scope.importRequest.exportManifest && !blade.notification; }
-        }
-    ];
-
-    var selectAll = function (action) {
-        if (origManifest.handleSecurity)
-            $scope.importRequest.handleSecurity = action;
-        if (origManifest.handleBinaryData)
-            $scope.importRequest.handleBinaryData = action;
-        if (origManifest.handleSettings)
-            $scope.importRequest.handleSettings = action;
-
-        _.forEach($scope.importRequest.exportManifest.modules, function (module) { module.isChecked = action; });
-
-        $scope.updateModuleSelection();
-    }
-}]);
-
-angular.module('platformWebApp')
-.factory('platformWebApp.exportImport.resource', ['$resource', function ($resource) {
-
-    return $resource(null, null, {
-    	getNewExportManifest: { url: 'api/platform/export/manifest/new' },
-        runExport: { method: 'POST', url: 'api/platform/export' },
-
-        loadExportManifest: { url: 'api/platform/export/manifest/load' },
-        runImport: { method: 'POST', url: 'api/platform/import' },
-        sampleDataDiscover: { url: 'api/platform/sampledata/discover', isArray: true },
-        importSampleData: { method: 'POST', url: 'api/platform/sampledata/import', params: { url: '@url' } }
-    });
-}]);
-angular.module('platformWebApp')
-.factory('platformWebApp.jobs', ['$resource', function ($resource) {
-
-    return $resource('api/platform/jobs', {}, {
-        getStatus: { url: 'api/platform/jobs/:id' }
-    });
-}]);
-
 angular.module('platformWebApp')
 .controller('platformWebApp.moduleDetailController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.bladeNavigationService', 'platformWebApp.modules', 'platformWebApp.moduleHelper', 'FileUploader', 'platformWebApp.settings', function ($scope, dialogService, bladeNavigationService, modules, moduleHelper, FileUploader, settings) {
     var blade = $scope.blade;
@@ -24680,6 +24425,34 @@ angular.module('platformWebApp')
     }]);
 
 angular.module('platformWebApp')
+.controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    
+    $scope.blade.isLoading = false;
+    // ui-grid
+    $scope.setGridOptions = function (gridOptions) {
+        $scope.gridOptions = gridOptions;
+    };
+}]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    var blade = $scope.blade;
+
+    $scope.openBlade = function () {
+        var newBlade = {
+            id: "changesChildBlade",
+            currentEntities: blade.currentEntity.operationsLog,
+            headIcon: blade.headIcon,
+            title: blade.title,
+            subtitle: 'platform.widgets.operations.blade-subtitle',
+            isExpandable: true,
+            controller: 'platformWebApp.changeLog.operationListController',
+            template: '$(Platform)/Scripts/app/changeLog/blades/operation-list.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, blade);
+    };
+}]);
+angular.module('platformWebApp')
 .factory('platformWebApp.modules', ['$resource', function ($resource) {
 
     return $resource('api/platform/modules', null, {
@@ -25094,92 +24867,6 @@ angular.module('platformWebApp')
 
     return service;
 }]);
-angular.module('platformWebApp')
-    .directive('vaBreadcrumb', [
-        'platformWebApp.breadcrumbHistoryService', function (breadcrumbHistoryService) {
-            return {
-                restrict: 'E',
-                require: 'ngModel',
-                replace: true,
-                scope: {
-                    bladeId: '='
-                },
-        templateUrl: '$(Platform)/Scripts/app/navigation/breadcrumbs/breadcrumbs.tpl.html',
-                link: function (scope, element, attr, ngModelController) {
-                    scope.breadcrumbs = [];
-                    ngModelController.$render = function () {
-                        scope.breadcrumbs = ngModelController.$modelValue;
-                    };
-
-                    scope.innerNavigate = function (breadcrumb) {
-                        breadcrumb.navigate(breadcrumb);
-                    };
-
-                    scope.canNavigateBack = function () {
-                        return breadcrumbHistoryService.check(scope.bladeId);
-                    };
-
-                    scope.navigateBack = function () {
-                        if (scope.canNavigateBack()) {
-                            var breadcrumb = breadcrumbHistoryService.pop(scope.bladeId);
-                            breadcrumb.navigate(breadcrumb);
-                        }
-                    };
-                    scope.$watchCollection('breadcrumbs', function (newItems) {
-                        breadcrumbHistoryService.push(newItems, scope.bladeId);
-                    });
-                }
-            }
-        }
-    ])
-    .factory('platformWebApp.breadcrumbHistoryService', function () {
-        var map = {};
-
-        function breadcrumbsEqual(x,y) {
-            return x && y && x.id === y.id && x.name === y.name;
-        }
-
-        return {
-            push: function (breadcrumbs, id) {
-                var history = map[id];
-                if (!history) {
-                    map[id] = history = {
-                        ignoreNextAction: false,
-                        records: []
-                    };
-                }
-
-                var currentBreadcrumb = _.last(breadcrumbs);
-
-                if (history.ignoreNextAction) {
-                    history.ignoreNextAction = false;
-                } else if (history.currentBreadcrumb &&
-                            !breadcrumbsEqual(history.currentBreadcrumb, currentBreadcrumb) &&
-                            !breadcrumbsEqual(history.currentBreadcrumb, _.last(history.records))) {
-                    history.records.push(history.currentBreadcrumb);
-                }
-
-                if (currentBreadcrumb) {
-                    history.currentBreadcrumb = currentBreadcrumb;
-                }
-            },
-
-            check: function (id) {
-                return map[id] && _.any(map[id].records);
-            },
-
-            pop: function (id) {
-                var retVal = undefined;
-                var history = map[id];
-                if (_.any(history.records)) {
-                    retVal = history.records.pop();
-                    history.ignoreNextAction = true;
-                }
-
-                return retVal;
-            }
-        };
-    });
 angular.module('platformWebApp')
 .factory('platformWebApp.mainMenuService', [function () {
 
@@ -26271,6 +25958,220 @@ angular.module('platformWebApp')
 	}
 }]);
 angular.module('platformWebApp')
+.factory('platformWebApp.jobs', ['$resource', function ($resource) {
+
+    return $resource('api/platform/jobs', {}, {
+        getStatus: { url: 'api/platform/jobs/:id' }
+    });
+}]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.exportImport.exportMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'platformWebApp.authService', function ($scope, bladeNavigationService, exportImportResourse, authService) {
+    var blade = $scope.blade;
+    blade.headIcon = 'fa-upload';
+    blade.title = 'platform.blades.export-main.title';
+
+    $scope.exportRequest = {};
+
+    function initializeBlade() {
+        exportImportResourse.getNewExportManifest(function (data) {
+            $scope.exportRequest.exportManifest = data;
+            blade.isLoading = false;
+        });
+    };
+
+    $scope.$on("new-notification-event", function (event, notification) {
+        if (blade.notification && notification.id == blade.notification.id) {
+            angular.copy(notification, blade.notification);
+            if (notification.errorCount > 0) {
+                bladeNavigationService.setError('Export error', blade);
+            }
+        }
+    });
+
+    $scope.canStartProcess = function () {
+        return authService.checkPermission('platform:exportImport:export') && (_.any($scope.exportRequest.modules) || $scope.exportRequest.handleSecurity || $scope.exportRequest.handleSettings);
+    }
+
+    $scope.updateModuleSelection = function () {
+        var selection = _.where($scope.exportRequest.exportManifest.modules, { isChecked: true });
+        $scope.exportRequest.modules = _.pluck(selection, 'id');
+    };
+
+    $scope.startExport = function () {
+        blade.isLoading = true;
+        exportImportResourse.runExport($scope.exportRequest,
+            function (data) { blade.notification = data; blade.isLoading = false; });
+    }
+
+    blade.toolbarCommands = [
+		{
+		    name: "platform.commands.select-all", icon: 'fa fa-check-square-o',
+		    executeMethod: function () { selectAll(true) },
+		    canExecuteMethod: function () { return $scope.exportRequest.exportManifest && !blade.notification; }
+		},
+        {
+            name: "platform.commands.unselect-all", icon: 'fa fa-square-o',
+            executeMethod: function () { selectAll(false) },
+            canExecuteMethod: function () { return $scope.exportRequest.exportManifest && !blade.notification; }
+        }
+    ];
+
+    var selectAll = function (action) {
+        $scope.exportRequest.handleSecurity = action;
+        $scope.exportRequest.handleBinaryData = action;
+        $scope.exportRequest.handleSettings = action;
+        _.forEach($scope.exportRequest.exportManifest.modules, function (module) { module.isChecked = action; });
+
+        $scope.updateModuleSelection();
+    }
+
+    initializeBlade();
+}]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.exportImport.mainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.authService', function ($scope, bladeNavigationService, authService) {
+
+    $scope.export = function () {
+        $scope.selectedNodeId = 'export';
+
+        var newBlade = {
+            controller: 'platformWebApp.exportImport.exportMainController',
+            template: '$(Platform)/Scripts/app/exportImport/blades/export-main.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, $scope.blade);
+    };
+
+    $scope.import = function () {
+        if (authService.checkPermission('platform:exportImport:import')) {
+            $scope.selectedNodeId = 'import';
+
+            var newBlade = {
+                controller: 'platformWebApp.exportImport.importMainController',
+                template: '$(Platform)/Scripts/app/exportImport/blades/import-main.tpl.html'
+            };
+            bladeNavigationService.showBlade(newBlade, $scope.blade);
+        }
+    };
+
+    $scope.blade.headIcon = 'fa-database';
+    $scope.blade.isLoading = false;
+}]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.exportImport.importMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'FileUploader', function ($scope, bladeNavigationService, exportImportResourse, FileUploader) {
+    var blade = $scope.blade;
+    blade.updatePermission = 'platform:exportImport:import';
+    blade.headIcon = 'fa-download';
+    blade.title = 'platform.blades.import-main.title';
+    blade.isLoading = false;
+    $scope.importRequest = {};
+    var origManifest;
+
+    $scope.$on("new-notification-event", function (event, notification) {
+        if (blade.notification && notification.id == blade.notification.id) {
+            angular.copy(notification, blade.notification);
+            if (notification.errorCount > 0) {
+                bladeNavigationService.setError('Import error', blade);
+            }
+        }
+    });
+
+    $scope.canStartProcess = function () {
+        return blade.hasUpdatePermission() && (_.any($scope.importRequest.modules) || $scope.importRequest.handleSecurity || $scope.importRequest.handleSettings || $scope.importRequest.handleBinaryData);
+    }
+
+    $scope.startProcess = function () {
+        blade.isLoading = true;
+        exportImportResourse.runImport($scope.importRequest,
+            function (data) { blade.notification = data; blade.isLoading = false; },
+            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+    }
+
+    $scope.updateModuleSelection = function () {
+        var selection = _.where($scope.importRequest.exportManifest.modules, { isChecked: true });
+        $scope.importRequest.modules = _.pluck(selection, 'id');
+    };
+
+    if (!$scope.uploader) {
+        // create the uploader
+        var uploader = $scope.uploader = new FileUploader({
+            scope: $scope,
+            headers: { Accept: 'application/json' },
+            url: 'api/platform/assets/localstorage',
+            method: 'POST',
+            autoUpload: true,
+            removeAfterUpload: true
+        });
+
+        // ADDING FILTERS
+        // zip only
+        uploader.filters.push({
+            name: 'zipFilter',
+            fn: function (i /*{File|FileLikeObject}*/, options) {
+                return i.name.toLowerCase().endsWith('.zip');
+            }
+        });
+
+        uploader.onBeforeUploadItem = function (fileItem) {
+            blade.isLoading = true;
+            bladeNavigationService.setError(null, blade);
+        };
+
+        uploader.onErrorItem = function (item, response, status, headers) {
+            bladeNavigationService.setError(item._file.name + ' failed: ' + (response.message ? response.message : status), blade);
+        };
+
+        uploader.onSuccessItem = function (fileItem, asset, status, headers) {
+            $scope.importRequest.fileUrl = asset[0].url;
+            $scope.importRequest.fileName = asset[0].name;
+
+            exportImportResourse.loadExportManifest({ fileUrl: $scope.importRequest.fileUrl }, function (data) {
+                origManifest = angular.copy(data);
+
+                // select all available data for import
+                $scope.importRequest.handleSecurity = data.handleSecurity;
+                $scope.importRequest.handleSettings = data.handleSettings;
+                $scope.importRequest.handleBinaryData = data.handleBinaryData;
+
+                _.each(data.modules, function (x) { x.isChecked = true; });
+
+                $scope.importRequest.exportManifest = data;
+                $scope.updateModuleSelection();
+                blade.isLoading = false;
+            });
+        };
+    }
+
+
+    blade.toolbarCommands = [
+        {
+            name: "platform.commands.select-all", icon: 'fa fa-check-square-o',
+            executeMethod: function () { selectAll(true) },
+            canExecuteMethod: function () { return $scope.importRequest.exportManifest && !blade.notification; }
+        },
+        {
+            name: "platform.commands.unselect-all", icon: 'fa fa-square-o',
+            executeMethod: function () { selectAll(false) },
+            canExecuteMethod: function () { return $scope.importRequest.exportManifest && !blade.notification; }
+        }
+    ];
+
+    var selectAll = function (action) {
+        if (origManifest.handleSecurity)
+            $scope.importRequest.handleSecurity = action;
+        if (origManifest.handleBinaryData)
+            $scope.importRequest.handleBinaryData = action;
+        if (origManifest.handleSettings)
+            $scope.importRequest.handleSettings = action;
+
+        _.forEach($scope.importRequest.exportManifest.modules, function (module) { module.isChecked = action; });
+
+        $scope.updateModuleSelection();
+    }
+}]);
+
+angular.module('platformWebApp')
 .factory('platformWebApp.notifications', ['$resource', function ($resource) {
 
 	return $resource('api/platform/notification/:id', { id: '@Id' }, {
@@ -26364,14 +26265,18 @@ function ($scope, bladeNavigationService, eventTemplateResolver, notifications) 
 }]);
 
 angular.module('platformWebApp')
-.factory('platformWebApp.pushNotifications', ['$resource', function ($resource) {
+.factory('platformWebApp.exportImport.resource', ['$resource', function ($resource) {
 
-    return $resource('api/platform/pushnotifications/:id', { id: '@Id' }, {
-        markAllAsRead: { method: 'POST', url: 'api/platform/pushnotifications/markAllAsRead' },
-        query: { method: 'POST', url: 'api/platform/pushnotifications' }
-	});
+    return $resource(null, null, {
+    	getNewExportManifest: { url: 'api/platform/export/manifest/new' },
+        runExport: { method: 'POST', url: 'api/platform/export' },
+
+        loadExportManifest: { url: 'api/platform/export/manifest/load' },
+        runImport: { method: 'POST', url: 'api/platform/import' },
+        sampleDataDiscover: { url: 'api/platform/sampledata/discover', isArray: true },
+        importSampleData: { method: 'POST', url: 'api/platform/sampledata/import', params: { url: '@url' } }
+    });
 }]);
-
 angular.module('platformWebApp')
 .controller('platformWebApp.accountApiListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
@@ -27516,34 +27421,14 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
-.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
-	return {
-		link: function (scope, element, attrs) {
+.factory('platformWebApp.pushNotifications', ['$resource', function ($resource) {
 
-			if (attrs.vaPermission) {
-				var permissionValue = attrs.vaPermission.trim();
-			
-				//modelObject is a scope property of the parent/current scope
-				scope.$watch(attrs.securityScopes, function (value) {
-					if (value) {
-						toggleVisibilityBasedOnPermission(value);
-					}
-				});
-			
-				function toggleVisibilityBasedOnPermission(securityScopes) {
-					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
-					if (hasPermission)
-						element.show();
-					else
-						element.hide();
-				}
-
-				toggleVisibilityBasedOnPermission();
-				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
-			}
-		}
-	};
+    return $resource('api/platform/pushnotifications/:id', { id: '@Id' }, {
+        markAllAsRead: { method: 'POST', url: 'api/platform/pushnotifications/markAllAsRead' },
+        query: { method: 'POST', url: 'api/platform/pushnotifications' }
+	});
 }]);
+
 angular.module('platformWebApp')
 .directive('vaLoginToolbar', ['$document', '$timeout', '$state', 'platformWebApp.authService', function ($document, $timeout, $state, authService) {
     return {
@@ -27584,6 +27469,65 @@ angular.module('platformWebApp')
         }
     }
 }])
+angular.module('platformWebApp')
+.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
+	return {
+		link: function (scope, element, attrs) {
+
+			if (attrs.vaPermission) {
+				var permissionValue = attrs.vaPermission.trim();
+			
+				//modelObject is a scope property of the parent/current scope
+				scope.$watch(attrs.securityScopes, function (value) {
+					if (value) {
+						toggleVisibilityBasedOnPermission(value);
+					}
+				});
+			
+				function toggleVisibilityBasedOnPermission(securityScopes) {
+					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
+					if (hasPermission)
+						element.show();
+					else
+						element.hide();
+				}
+
+				toggleVisibilityBasedOnPermission();
+				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
+			}
+		}
+	};
+}]);
+angular.module('platformWebApp')
+.controller('platformWebApp.accountApiWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+
+   
+    $scope.openBlade = function () {
+        var newBlade = {
+            id: "accountChildBlade",
+            title: $scope.blade.title,
+            subtitle: 'platform.widgets.accountApi.blade-subtitle',
+            controller: 'platformWebApp.accountApiListController',
+            template: '$(Platform)/Scripts/app/security/blades/account-api-list.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, $scope.blade);
+    };
+}]);
+angular.module('platformWebApp')
+.controller('platformWebApp.accountRolesWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+
+    $scope.openBlade = function () {
+        var newBlade = {
+            id: "accountChildBlade",
+            promise: $scope.blade.promise,
+            title: $scope.blade.title,
+            subtitle: 'platform.widgets.accountRoles.blade-subtitle',
+            controller: 'platformWebApp.accountRolesListController',
+            template: '$(Platform)/Scripts/app/security/blades/account-roles-list.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, $scope.blade);
+    };
+}]);
 angular.module('platformWebApp')
 .factory('platformWebApp.accounts', ['$resource', function ($resource) {
     return $resource('api/platform/security/users/:id', { id: '@Id' }, {
@@ -27718,36 +27662,6 @@ angular.module('platformWebApp')
 		resolve: resolve
 	};
 	return retVal;
-}]);
-angular.module('platformWebApp')
-.controller('platformWebApp.accountApiWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-
-   
-    $scope.openBlade = function () {
-        var newBlade = {
-            id: "accountChildBlade",
-            title: $scope.blade.title,
-            subtitle: 'platform.widgets.accountApi.blade-subtitle',
-            controller: 'platformWebApp.accountApiListController',
-            template: '$(Platform)/Scripts/app/security/blades/account-api-list.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, $scope.blade);
-    };
-}]);
-angular.module('platformWebApp')
-.controller('platformWebApp.accountRolesWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-
-    $scope.openBlade = function () {
-        var newBlade = {
-            id: "accountChildBlade",
-            promise: $scope.blade.promise,
-            title: $scope.blade.title,
-            subtitle: 'platform.widgets.accountRoles.blade-subtitle',
-            controller: 'platformWebApp.accountRolesListController',
-            template: '$(Platform)/Scripts/app/security/blades/account-roles-list.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, $scope.blade);
-    };
 }]);
 angular.module('platformWebApp')
 .controller('platformWebApp.entitySettingListController', ['$scope', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', function ($scope, settingsHelper, bladeNavigationService) {
@@ -28299,6 +28213,13 @@ angular.module('platformWebApp')
     };
 }]);
 angular.module('platformWebApp')
+.factory('platformWebApp.userProfileApi', ['$resource', function ($resource) {
+    return $resource('api/platform/profiles/currentuser', { }, {
+        getLocales: { url: 'api/platform/localization/locales', isArray: true },
+        getRegionalFormats: { url: 'api/platform/localization/regionalformats', isArray: true }
+    }); 
+}]);
+angular.module('platformWebApp')
 .controller('platformWebApp.userProfile.userProfileController', ['$rootScope', '$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', 'platformWebApp.settings.helper',
     'platformWebApp.i18n', 'platformWebApp.userProfile', 'platformWebApp.common.languages', 'platformWebApp.common.locales', 'platformWebApp.common.timeZones', 'platformWebApp.userProfileApi',
     function ($rootScope, $scope, bladeNavigationService, settings, settingsHelper, i18n, userProfile, languages, locales, timeZones, userProfileApi) {
@@ -28405,13 +28326,6 @@ angular.module('platformWebApp')
     }
 }]);
 
-angular.module('platformWebApp')
-.factory('platformWebApp.userProfileApi', ['$resource', function ($resource) {
-    return $resource('api/platform/profiles/currentuser', { }, {
-        getLocales: { url: 'api/platform/localization/locales', isArray: true },
-        getRegionalFormats: { url: 'api/platform/localization/regionalformats', isArray: true }
-    }); 
-}]);
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -28498,6 +28412,92 @@ CodeMirror.overlayMode = function(base, overlay, combine) {
 
 });
 
+angular.module('platformWebApp')
+    .directive('vaBreadcrumb', [
+        'platformWebApp.breadcrumbHistoryService', function (breadcrumbHistoryService) {
+            return {
+                restrict: 'E',
+                require: 'ngModel',
+                replace: true,
+                scope: {
+                    bladeId: '='
+                },
+        templateUrl: '$(Platform)/Scripts/app/navigation/breadcrumbs/breadcrumbs.tpl.html',
+                link: function (scope, element, attr, ngModelController) {
+                    scope.breadcrumbs = [];
+                    ngModelController.$render = function () {
+                        scope.breadcrumbs = ngModelController.$modelValue;
+                    };
+
+                    scope.innerNavigate = function (breadcrumb) {
+                        breadcrumb.navigate(breadcrumb);
+                    };
+
+                    scope.canNavigateBack = function () {
+                        return breadcrumbHistoryService.check(scope.bladeId);
+                    };
+
+                    scope.navigateBack = function () {
+                        if (scope.canNavigateBack()) {
+                            var breadcrumb = breadcrumbHistoryService.pop(scope.bladeId);
+                            breadcrumb.navigate(breadcrumb);
+                        }
+                    };
+                    scope.$watchCollection('breadcrumbs', function (newItems) {
+                        breadcrumbHistoryService.push(newItems, scope.bladeId);
+                    });
+                }
+            }
+        }
+    ])
+    .factory('platformWebApp.breadcrumbHistoryService', function () {
+        var map = {};
+
+        function breadcrumbsEqual(x,y) {
+            return x && y && x.id === y.id && x.name === y.name;
+        }
+
+        return {
+            push: function (breadcrumbs, id) {
+                var history = map[id];
+                if (!history) {
+                    map[id] = history = {
+                        ignoreNextAction: false,
+                        records: []
+                    };
+                }
+
+                var currentBreadcrumb = _.last(breadcrumbs);
+
+                if (history.ignoreNextAction) {
+                    history.ignoreNextAction = false;
+                } else if (history.currentBreadcrumb &&
+                            !breadcrumbsEqual(history.currentBreadcrumb, currentBreadcrumb) &&
+                            !breadcrumbsEqual(history.currentBreadcrumb, _.last(history.records))) {
+                    history.records.push(history.currentBreadcrumb);
+                }
+
+                if (currentBreadcrumb) {
+                    history.currentBreadcrumb = currentBreadcrumb;
+                }
+            },
+
+            check: function (id) {
+                return map[id] && _.any(map[id].records);
+            },
+
+            pop: function (id) {
+                var retVal = undefined;
+                var history = map[id];
+                if (_.any(history.records)) {
+                    retVal = history.records.pop();
+                    history.ignoreNextAction = true;
+                }
+
+                return retVal;
+            }
+        };
+    });
 angular.module('platformWebApp')
 .controller('platformWebApp.moduleInstallProgressController', ['$scope', '$window', 'platformWebApp.bladeNavigationService', 'platformWebApp.modules', function ($scope, $window, bladeNavigationService, modules) {
     var blade = $scope.blade;

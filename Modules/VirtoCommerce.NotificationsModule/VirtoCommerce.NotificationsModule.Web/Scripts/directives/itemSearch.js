@@ -1,5 +1,5 @@
 ﻿angular.module('virtoCommerce.notificationsModule')
-.directive('vcItemSearch', ['$localStorage', 'platformWebApp.bladeNavigationService', 'virtoCommerce.notificationsModule.predefinedSearchFilters', function ($localStorage, bladeNavigationService, predefinedSearchFilters) {
+.directive('vcJournalSearch', ['$localStorage', 'platformWebApp.bladeNavigationService', 'virtoCommerce.notificationsModule.predefinedSearchFilters', function ($localStorage, bladeNavigationService, predefinedSearchFilters) {
     return {
         restrict: 'E',
         templateUrl: function (elem, attrs) {
@@ -21,7 +21,7 @@
             function showFilterDetailBlade(bladeData) {
                 var newBlade = {
                     id: 'filterDetail',
-                    controller: 'virtoCommerce.notificationsModule.filterDetailController',
+                    controller: 'virtoCommerce.notificationsModule.filterJournalDetailController',
                     template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/filter-detail.tpl.html',
                 };
                 angular.extend(newBlade, bladeData);
@@ -35,7 +35,7 @@
                     showFilterDetailBlade({ isNew: true });
                 } else {
                     if (!isDetailBladeOpen)
-                        bladeNavigationService.closeBlade({ id: 'filterDetail' });
+                        bladeNavigationService.closeBlade({ id: 'filterJournalDetail' });
                     filter.keyword = filter.current ? filter.current.keyword : '';
                     filter.criteriaChanged();
                 }
