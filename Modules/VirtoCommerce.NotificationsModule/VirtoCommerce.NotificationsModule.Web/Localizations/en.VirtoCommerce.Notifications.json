@@ -97,7 +97,11 @@
                     "error": "Error",
                     "processing": "Processing",
                     "success": "Success",
-                    "no-notifications": "No notifications yet"
+                    "no-notifications": "No notifications yet",
+                    "unnamed-filter": "Unnamed filter"
+                },
+                "placeholders": {
+                    "select-filter": "Select filter"
                 }
             },
             "notifications-list": {
@@ -115,6 +119,19 @@
                 "labels": {
                     "is-active": "Is active",
                     "name": "Notification name"
+                }
+            },
+            "filter-detail": {
+                "subtitle": "Edit filter",
+                "new-title": "New filter",
+                "new-subtitle": "Create new filter",
+                "labels": {
+                    "criteria": "Search phrase",
+                    "name": "Filter name"
+                },
+                "placeholders": {
+                    "criteria": "Enter search phrase",
+                    "name": "How will you call this filter?"
                 }
             }
         },

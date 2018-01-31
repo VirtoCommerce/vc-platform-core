@@ -3,6 +3,13 @@ angular.module('virtoCommerce.notificationsModule')
     function ($scope, notificationsService, bladeNavigationService, notifications, bladeUtils, dialogService, uiGridConstants, uiGridHelper) {
         var blade = $scope.blade;
         $scope.uiGridConstants = uiGridConstants;
+        // simple and advanced filtering
+        var filter = blade.filter = { keyword: blade.filterKeyword };
+        function transformByFilters(data) {
+            _.each(data, function (x) {
+                x.$path = _.any(x.path) ? x.path.join(" \\ ") : '\\';
+            });
+        }
 
         blade.refresh = function () {
 //            notifications.getNotificationJournalList({
@@ -17,6 +24,7 @@ angular.module('virtoCommerce.notificationsModule')
 //                blade.isLoading = false;
 //            });
             notificationsService.getNotificationJournalList().then(function(data) {
+                transformByFilters(data.listEntries);
                 blade.currentEntities = data.notifications;
                 $scope.pageSettings.totalItems = data.totalCount;
                 blade.isLoading = false;              
@@ -31,7 +39,7 @@ angular.module('virtoCommerce.notificationsModule')
                 title: 'notifications.blades.notification-journal-details.title',
                 currentNotificationId: data.id,
                 currentEntity: data,
-                controller: 'virtoCommerce.notificationsModule..notificationJournalDetailtsController',
+                controller: 'virtoCommerce.notificationsModule.notificationJournalDetailsController',
                 template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notification-journal-details.tpl.html'
             };
             bladeNavigationService.showBlade(newBlade, blade);

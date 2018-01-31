@@ -29,11 +29,12 @@ angular.module(moduleTemplateName, [])
     ])
     // define search filters to be accessible platform-wide
     .factory('virtoCommerce.notificationsModule.predefinedSearchFilters', ['$localStorage', function ($localStorage) {
-        $localStorage.notificationJournalSearchFilters = $localStorage.notificationJournalSearchFilters || [];
+        $localStorage.notificationsJournalSearchFilters = $localStorage.notificationsJournalSearchFilters || [];
+
         return {
             register: function (currentFiltersUpdateTime, currentFiltersStorageKey, newFilters) {
                 _.each(newFilters, function (newFilter) {
-                    var found = _.find($localStorage.notificationJournalSearchFilters, function (x) {
+                    var found = _.find($localStorage.notificationsJournalSearchFilters, function (x) {
                         return x.id == newFilter.id;
                     });
                     if (found) {
@@ -41,7 +42,7 @@ angular.module(moduleTemplateName, [])
                             angular.copy(newFilter, found);
                         }
                     } else if (!$localStorage[currentFiltersStorageKey] || $localStorage[currentFiltersStorageKey] < currentFiltersUpdateTime) {
-                        $localStorage.notificationJournalSearchFilters.splice(0, 0, newFilter);
+                        $localStorage.notificationsJournalSearchFilters.splice(0, 0, newFilter);
                     }
                 });
 
@@ -49,8 +50,8 @@ angular.module(moduleTemplateName, [])
             }
         };
     }])
-    .run(['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', 'virtoCommerce.notificationsModule.notificationTypesResolverService',
-        function ($rootScope, mainMenuService, widgetService, $state, notificationTypesResolverService) {
+    .run(['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', 'virtoCommerce.notificationsModule.notificationTypesResolverService', '$http', '$compile',
+        function ($rootScope, mainMenuService, widgetService, $state, notificationTypesResolverService, $http, $compile) {
             //Register module in main menu
             var menuItem = {
                 path: 'browse/notificationsModule',
@@ -80,11 +81,13 @@ angular.module(moduleTemplateName, [])
                 type: 'Email',
                 icon: 'fa fa-envelope',
                 detailBlade: {
-                  template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notifications-edit-template.tpl.html'
+                  template: 'Modules/$(VirtoCommerce.notificationsModule)/Scripts/blades/notifications-edit-template.tpl.html'
                 },
                 knownChildrenTypes: ['Email', 'Sms']
             });  
-        }
-          
-        
-    ]);
+            
+            $http.get('Modules/$(VirtoCommerce.notificationsModule)/Scripts/directives/itemSearch.tpl.html').then(function (response) {
+                // compile the response, which will put stuff into the cache
+                $compile(response.data);
+            });  
+    }]);
