@@ -1,12 +1,10 @@
 angular.module('platformWebApp')
-    .controller('platformWebApp.thumbnail.optionDetailController', ['$rootScope', '$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.thumbnail.api', function ($rootScope, $scope, bladeNavigationService, thumbnailApi) {
+    .controller('platformWebApp.thumbnail.optionDetailController', ['$rootScope', '$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.thumbnail.api', 'platformWebApp.thumbnail.resizeMethod', function ($rootScope, $scope, bladeNavigationService, thumbnailApi, resizeMethod) {
         var blade = $scope.blade;
 
-        blade.resizeMethod = resizeMethod.get();
+        blade.resizeMethodTypes = resizeMethod.get();
 
         blade.refresh = function (parentRefresh) {
-            debugger;
-
             thumbnailApi.getOptionDetail(blade.itemId).then(function (item) {
 
                 initializeBlade(item);

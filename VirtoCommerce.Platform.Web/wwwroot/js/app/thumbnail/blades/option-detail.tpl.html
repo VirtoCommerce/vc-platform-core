@@ -35,16 +35,16 @@
                                 <div class="form-group ">
                                     <div class="column">
                                         <div class="form-group __info list">
-                                            <label class="form-label">{{ 'catalog.blades.property-detail.labels.applies-to' | translate }}</label>
+                                            <label class="form-label">{{ 'platform.blades.thumbnail.blades.setting-detail.labels.resize-method' | translate }}</label>
                                             <div class="form-input">
-                                                <ui-select ng-model="blade.currentEntity.type" class="capitalizeText">
-                                                    <ui-select-match>{{$select.selected}}</ui-select-match>
-                                                    <ui-select-choices repeat="propertyType in blade.availablePropertyTypes | filter: $select.search">
-                                                        <span ng-click="blade.currentEntity.type">{{propertyType}}</span>
+                                                <ui-select ng-model="blade.item.resizeMethod">
+                                                    <ui-select-match>{{$select.selected.value}}</ui-select-match>
+                                                    <ui-select-choices repeat="x.value as x in blade.resizeMethodTypes | filter: $select.search">
+                                                        <div>{{ x.title |translate }}</div>
                                                     </ui-select-choices>
                                                 </ui-select>
                                             </div>
-                                            <div class="list-descr">{{ 'platform.blades.thumbnail.blades.setting-detail.discription.height' | translate }}</div>
+                                            <div class="list-descr">{{ 'platform.blades.thumbnail.blades.setting-detail.discription.resize-method' | translate }}</div>
                                         </div>
                                     </div>
                                 </div>

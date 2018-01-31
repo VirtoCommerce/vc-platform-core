@@ -704,7 +704,13 @@
                             "width": "Thumbnail width in pixels",
                             "height": "Thumbnail height in pixels",
                             "background-color": "Thumbnail background color i.e. #FFFFFF"
-                        }
+                        },
+                        "resize-method": {
+                            "fixed-size": "Fixed Size",
+                            "fixed-width": "Fixed Width",
+                            "fixed-height": "Fixed Height",
+                            "crop": "Crop"
+                        } 
                     } 
                 }
             }

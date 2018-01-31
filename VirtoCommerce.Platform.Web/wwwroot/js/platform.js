@@ -18372,65 +18372,6 @@ angular.module('platformWebApp')
   }]);
 angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
-    $stateProvider
-        .state('workspace.dynamicProperties', {
-            url: '/dynamicProperties',
-            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-            controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-                var blade = {
-                    id: 'dynamicPropertiesTypes',
-                    controller: 'platformWebApp.dynamicObjectListController',
-                    template: '$(Platform)/Scripts/app/dynamicProperties/blades/dynamicObject-list.tpl.html',
-                    isClosingDisabled: true
-                };
-                bladeNavigationService.showBlade(blade);
-            }
-            ]
-        });
-}]
-)
-.run(
-  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', function ($rootScope, mainMenuService, widgetService, $state) {
-      var menuItem = {
-          path: 'configuration/dynamicProperties',
-          icon: 'fa fa-pencil-square-o',
-          title: 'platform.menu.dynamic-properties',
-          priority: 2,
-          action: function () { $state.go('workspace.dynamicProperties'); },
-          permission: 'platform:dynamic_properties:access'
-      };
-      mainMenuService.addMenuItem(menuItem);
-  }])
-.filter('dynamicPropertyValueTypeToText', function () {
-    return function (input) {
-        var retVal;
-        switch (input) {
-            case 'ShortText': retVal = 'platform.properties.short-text.title'; break;
-            case 'LongText': retVal = 'platform.properties.long-text.title'; break;
-            case 'Integer': retVal = 'platform.properties.integer.title'; break;
-            case 'Decimal': retVal = 'platform.properties.decimal.title'; break;
-            case 'DateTime': retVal = 'platform.properties.date-time.title'; break;
-            case 'Boolean': retVal = 'platform.properties.boolean.title'; break;
-            case 'Html': retVal = 'platform.properties.html.title'; break;
-            default:
-                retVal = input ? input : 'platform.properties.undefined.title';
-        }
-        return retVal;
-    }
-})
-//Filter for showing localized display name in current user language
-.filter('localizeDynamicPropertyName', function () {
-    return function (input, lang) {
-        var retVal = input.name;
-        var displayName = _.find(input.displayNames, function (obj) { return obj && obj.locale.startsWith(lang); });
-        if (displayName && displayName.name)
-            retVal += ' (' + displayName.name + ')';
-
-        return retVal;
-    }
-});
-angular.module('platformWebApp')
-.config(['$stateProvider', function ($stateProvider) {
 	$stateProvider
         .state('workspace.exportImport', {
         	url: '/exportImport',
@@ -18572,6 +18513,65 @@ angular.module('platformWebApp')
 
   }]);
 
+angular.module('platformWebApp')
+.config(['$stateProvider', function ($stateProvider) {
+    $stateProvider
+        .state('workspace.dynamicProperties', {
+            url: '/dynamicProperties',
+            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+            controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+                var blade = {
+                    id: 'dynamicPropertiesTypes',
+                    controller: 'platformWebApp.dynamicObjectListController',
+                    template: '$(Platform)/Scripts/app/dynamicProperties/blades/dynamicObject-list.tpl.html',
+                    isClosingDisabled: true
+                };
+                bladeNavigationService.showBlade(blade);
+            }
+            ]
+        });
+}]
+)
+.run(
+  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', function ($rootScope, mainMenuService, widgetService, $state) {
+      var menuItem = {
+          path: 'configuration/dynamicProperties',
+          icon: 'fa fa-pencil-square-o',
+          title: 'platform.menu.dynamic-properties',
+          priority: 2,
+          action: function () { $state.go('workspace.dynamicProperties'); },
+          permission: 'platform:dynamic_properties:access'
+      };
+      mainMenuService.addMenuItem(menuItem);
+  }])
+.filter('dynamicPropertyValueTypeToText', function () {
+    return function (input) {
+        var retVal;
+        switch (input) {
+            case 'ShortText': retVal = 'platform.properties.short-text.title'; break;
+            case 'LongText': retVal = 'platform.properties.long-text.title'; break;
+            case 'Integer': retVal = 'platform.properties.integer.title'; break;
+            case 'Decimal': retVal = 'platform.properties.decimal.title'; break;
+            case 'DateTime': retVal = 'platform.properties.date-time.title'; break;
+            case 'Boolean': retVal = 'platform.properties.boolean.title'; break;
+            case 'Html': retVal = 'platform.properties.html.title'; break;
+            default:
+                retVal = input ? input : 'platform.properties.undefined.title';
+        }
+        return retVal;
+    }
+})
+//Filter for showing localized display name in current user language
+.filter('localizeDynamicPropertyName', function () {
+    return function (input, lang) {
+        var retVal = input.name;
+        var displayName = _.find(input.displayNames, function (obj) { return obj && obj.locale.startsWith(lang); });
+        if (displayName && displayName.name)
+            retVal += ' (' + displayName.name + ')';
+
+        return retVal;
+    }
+});
 angular.module('platformWebApp')
 .controller('platformWebApp.licenseDetailController', ['$scope', '$window', 'FileUploader', '$http', 'platformWebApp.bladeNavigationService', function ($scope, $window, FileUploader, $http, bladeNavigationService) {
     var blade = $scope.blade;
@@ -23286,6 +23286,225 @@ angular.module('platformWebApp')
     };
 }]);
 angular.module('platformWebApp')
+.controller('platformWebApp.exportImport.exportMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'platformWebApp.authService', function ($scope, bladeNavigationService, exportImportResourse, authService) {
+    var blade = $scope.blade;
+    blade.headIcon = 'fa-upload';
+    blade.title = 'platform.blades.export-main.title';
+
+    $scope.exportRequest = {};
+
+    function initializeBlade() {
+        exportImportResourse.getNewExportManifest(function (data) {
+            $scope.exportRequest.exportManifest = data;
+            blade.isLoading = false;
+        });
+    };
+
+    $scope.$on("new-notification-event", function (event, notification) {
+        if (blade.notification && notification.id == blade.notification.id) {
+            angular.copy(notification, blade.notification);
+            if (notification.errorCount > 0) {
+                bladeNavigationService.setError('Export error', blade);
+            }
+        }
+    });
+
+    $scope.canStartProcess = function () {
+        return authService.checkPermission('platform:exportImport:export') && (_.any($scope.exportRequest.modules) || $scope.exportRequest.handleSecurity || $scope.exportRequest.handleSettings);
+    }
+
+    $scope.updateModuleSelection = function () {
+        var selection = _.where($scope.exportRequest.exportManifest.modules, { isChecked: true });
+        $scope.exportRequest.modules = _.pluck(selection, 'id');
+    };
+
+    $scope.startExport = function () {
+        blade.isLoading = true;
+        exportImportResourse.runExport($scope.exportRequest,
+            function (data) { blade.notification = data; blade.isLoading = false; });
+    }
+
+    blade.toolbarCommands = [
+		{
+		    name: "platform.commands.select-all", icon: 'fa fa-check-square-o',
+		    executeMethod: function () { selectAll(true) },
+		    canExecuteMethod: function () { return $scope.exportRequest.exportManifest && !blade.notification; }
+		},
+        {
+            name: "platform.commands.unselect-all", icon: 'fa fa-square-o',
+            executeMethod: function () { selectAll(false) },
+            canExecuteMethod: function () { return $scope.exportRequest.exportManifest && !blade.notification; }
+        }
+    ];
+
+    var selectAll = function (action) {
+        $scope.exportRequest.handleSecurity = action;
+        $scope.exportRequest.handleBinaryData = action;
+        $scope.exportRequest.handleSettings = action;
+        _.forEach($scope.exportRequest.exportManifest.modules, function (module) { module.isChecked = action; });
+
+        $scope.updateModuleSelection();
+    }
+
+    initializeBlade();
+}]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.exportImport.mainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.authService', function ($scope, bladeNavigationService, authService) {
+
+    $scope.export = function () {
+        $scope.selectedNodeId = 'export';
+
+        var newBlade = {
+            controller: 'platformWebApp.exportImport.exportMainController',
+            template: '$(Platform)/Scripts/app/exportImport/blades/export-main.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, $scope.blade);
+    };
+
+    $scope.import = function () {
+        if (authService.checkPermission('platform:exportImport:import')) {
+            $scope.selectedNodeId = 'import';
+
+            var newBlade = {
+                controller: 'platformWebApp.exportImport.importMainController',
+                template: '$(Platform)/Scripts/app/exportImport/blades/import-main.tpl.html'
+            };
+            bladeNavigationService.showBlade(newBlade, $scope.blade);
+        }
+    };
+
+    $scope.blade.headIcon = 'fa-database';
+    $scope.blade.isLoading = false;
+}]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.exportImport.importMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'FileUploader', function ($scope, bladeNavigationService, exportImportResourse, FileUploader) {
+    var blade = $scope.blade;
+    blade.updatePermission = 'platform:exportImport:import';
+    blade.headIcon = 'fa-download';
+    blade.title = 'platform.blades.import-main.title';
+    blade.isLoading = false;
+    $scope.importRequest = {};
+    var origManifest;
+
+    $scope.$on("new-notification-event", function (event, notification) {
+        if (blade.notification && notification.id == blade.notification.id) {
+            angular.copy(notification, blade.notification);
+            if (notification.errorCount > 0) {
+                bladeNavigationService.setError('Import error', blade);
+            }
+        }
+    });
+
+    $scope.canStartProcess = function () {
+        return blade.hasUpdatePermission() && (_.any($scope.importRequest.modules) || $scope.importRequest.handleSecurity || $scope.importRequest.handleSettings || $scope.importRequest.handleBinaryData);
+    }
+
+    $scope.startProcess = function () {
+        blade.isLoading = true;
+        exportImportResourse.runImport($scope.importRequest,
+            function (data) { blade.notification = data; blade.isLoading = false; },
+            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+    }
+
+    $scope.updateModuleSelection = function () {
+        var selection = _.where($scope.importRequest.exportManifest.modules, { isChecked: true });
+        $scope.importRequest.modules = _.pluck(selection, 'id');
+    };
+
+    if (!$scope.uploader) {
+        // create the uploader
+        var uploader = $scope.uploader = new FileUploader({
+            scope: $scope,
+            headers: { Accept: 'application/json' },
+            url: 'api/platform/assets/localstorage',
+            method: 'POST',
+            autoUpload: true,
+            removeAfterUpload: true
+        });
+
+        // ADDING FILTERS
+        // zip only
+        uploader.filters.push({
+            name: 'zipFilter',
+            fn: function (i /*{File|FileLikeObject}*/, options) {
+                return i.name.toLowerCase().endsWith('.zip');
+            }
+        });
+
+        uploader.onBeforeUploadItem = function (fileItem) {
+            blade.isLoading = true;
+            bladeNavigationService.setError(null, blade);
+        };
+
+        uploader.onErrorItem = function (item, response, status, headers) {
+            bladeNavigationService.setError(item._file.name + ' failed: ' + (response.message ? response.message : status), blade);
+        };
+
+        uploader.onSuccessItem = function (fileItem, asset, status, headers) {
+            $scope.importRequest.fileUrl = asset[0].url;
+            $scope.importRequest.fileName = asset[0].name;
+
+            exportImportResourse.loadExportManifest({ fileUrl: $scope.importRequest.fileUrl }, function (data) {
+                origManifest = angular.copy(data);
+
+                // select all available data for import
+                $scope.importRequest.handleSecurity = data.handleSecurity;
+                $scope.importRequest.handleSettings = data.handleSettings;
+                $scope.importRequest.handleBinaryData = data.handleBinaryData;
+
+                _.each(data.modules, function (x) { x.isChecked = true; });
+
+                $scope.importRequest.exportManifest = data;
+                $scope.updateModuleSelection();
+                blade.isLoading = false;
+            });
+        };
+    }
+
+
+    blade.toolbarCommands = [
+        {
+            name: "platform.commands.select-all", icon: 'fa fa-check-square-o',
+            executeMethod: function () { selectAll(true) },
+            canExecuteMethod: function () { return $scope.importRequest.exportManifest && !blade.notification; }
+        },
+        {
+            name: "platform.commands.unselect-all", icon: 'fa fa-square-o',
+            executeMethod: function () { selectAll(false) },
+            canExecuteMethod: function () { return $scope.importRequest.exportManifest && !blade.notification; }
+        }
+    ];
+
+    var selectAll = function (action) {
+        if (origManifest.handleSecurity)
+            $scope.importRequest.handleSecurity = action;
+        if (origManifest.handleBinaryData)
+            $scope.importRequest.handleBinaryData = action;
+        if (origManifest.handleSettings)
+            $scope.importRequest.handleSettings = action;
+
+        _.forEach($scope.importRequest.exportManifest.modules, function (module) { module.isChecked = action; });
+
+        $scope.updateModuleSelection();
+    }
+}]);
+
+angular.module('platformWebApp')
+.factory('platformWebApp.exportImport.resource', ['$resource', function ($resource) {
+
+    return $resource(null, null, {
+    	getNewExportManifest: { url: 'api/platform/export/manifest/new' },
+        runExport: { method: 'POST', url: 'api/platform/export' },
+
+        loadExportManifest: { url: 'api/platform/export/manifest/load' },
+        runImport: { method: 'POST', url: 'api/platform/import' },
+        sampleDataDiscover: { url: 'api/platform/sampledata/discover', isArray: true },
+        importSampleData: { method: 'POST', url: 'api/platform/sampledata/import', params: { url: '@url' } }
+    });
+}]);
+angular.module('platformWebApp')
 .controller('platformWebApp.dynamicObjectListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dynamicProperties.api', function ($scope, bladeNavigationService, dynamicPropertiesApi) {
 	var blade = $scope.blade;
 
@@ -23885,6 +24104,29 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
+.controller('platformWebApp.dynamicPropertyWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+	$scope.blade = $scope.widget.blade;
+	$scope.openBlade = function () {
+        var blade = {
+        	id: "dynamicPropertiesList",
+        	currentEntity: $scope.blade.currentEntity,
+            controller: 'platformWebApp.propertyValueListController',
+            template: '$(Platform)/Scripts/app/dynamicProperties/blades/propertyValue-list.tpl.html'
+        };
+
+        bladeNavigationService.showBlade(blade, $scope.blade);
+    };
+
+
+	$scope.$watch('widget.blade.currentEntity', function (entity) {
+		if (angular.isDefined(entity)) {
+			var groupedByProperty = _.groupBy(entity.dynamicProperties, function (x) { return x.id; });
+			$scope.dynamicPropertyCount = _.keys(groupedByProperty).length;
+		}
+	});
+
+}]);
+angular.module('platformWebApp')
 .factory('platformWebApp.dynamicProperties.api', ['$resource', function ($resource) {
     return $resource('api/platform/dynamic/types/:id/properties/:propertyId', {}, {
         queryTypes: { url: 'api/platform/dynamic/types', isArray: true },
@@ -23944,248 +24186,6 @@ angular.module('platformWebApp')
         }
     };
 });
-angular.module('platformWebApp')
-.controller('platformWebApp.dynamicPropertyWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-	$scope.blade = $scope.widget.blade;
-	$scope.openBlade = function () {
-        var blade = {
-        	id: "dynamicPropertiesList",
-        	currentEntity: $scope.blade.currentEntity,
-            controller: 'platformWebApp.propertyValueListController',
-            template: '$(Platform)/Scripts/app/dynamicProperties/blades/propertyValue-list.tpl.html'
-        };
-
-        bladeNavigationService.showBlade(blade, $scope.blade);
-    };
-
-
-	$scope.$watch('widget.blade.currentEntity', function (entity) {
-		if (angular.isDefined(entity)) {
-			var groupedByProperty = _.groupBy(entity.dynamicProperties, function (x) { return x.id; });
-			$scope.dynamicPropertyCount = _.keys(groupedByProperty).length;
-		}
-	});
-
-}]);
-angular.module('platformWebApp')
-.controller('platformWebApp.exportImport.exportMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'platformWebApp.authService', function ($scope, bladeNavigationService, exportImportResourse, authService) {
-    var blade = $scope.blade;
-    blade.headIcon = 'fa-upload';
-    blade.title = 'platform.blades.export-main.title';
-
-    $scope.exportRequest = {};
-
-    function initializeBlade() {
-        exportImportResourse.getNewExportManifest(function (data) {
-            $scope.exportRequest.exportManifest = data;
-            blade.isLoading = false;
-        });
-    };
-
-    $scope.$on("new-notification-event", function (event, notification) {
-        if (blade.notification && notification.id == blade.notification.id) {
-            angular.copy(notification, blade.notification);
-            if (notification.errorCount > 0) {
-                bladeNavigationService.setError('Export error', blade);
-            }
-        }
-    });
-
-    $scope.canStartProcess = function () {
-        return authService.checkPermission('platform:exportImport:export') && (_.any($scope.exportRequest.modules) || $scope.exportRequest.handleSecurity || $scope.exportRequest.handleSettings);
-    }
-
-    $scope.updateModuleSelection = function () {
-        var selection = _.where($scope.exportRequest.exportManifest.modules, { isChecked: true });
-        $scope.exportRequest.modules = _.pluck(selection, 'id');
-    };
-
-    $scope.startExport = function () {
-        blade.isLoading = true;
-        exportImportResourse.runExport($scope.exportRequest,
-            function (data) { blade.notification = data; blade.isLoading = false; });
-    }
-
-    blade.toolbarCommands = [
-		{
-		    name: "platform.commands.select-all", icon: 'fa fa-check-square-o',
-		    executeMethod: function () { selectAll(true) },
-		    canExecuteMethod: function () { return $scope.exportRequest.exportManifest && !blade.notification; }
-		},
-        {
-            name: "platform.commands.unselect-all", icon: 'fa fa-square-o',
-            executeMethod: function () { selectAll(false) },
-            canExecuteMethod: function () { return $scope.exportRequest.exportManifest && !blade.notification; }
-        }
-    ];
-
-    var selectAll = function (action) {
-        $scope.exportRequest.handleSecurity = action;
-        $scope.exportRequest.handleBinaryData = action;
-        $scope.exportRequest.handleSettings = action;
-        _.forEach($scope.exportRequest.exportManifest.modules, function (module) { module.isChecked = action; });
-
-        $scope.updateModuleSelection();
-    }
-
-    initializeBlade();
-}]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.exportImport.mainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.authService', function ($scope, bladeNavigationService, authService) {
-
-    $scope.export = function () {
-        $scope.selectedNodeId = 'export';
-
-        var newBlade = {
-            controller: 'platformWebApp.exportImport.exportMainController',
-            template: '$(Platform)/Scripts/app/exportImport/blades/export-main.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, $scope.blade);
-    };
-
-    $scope.import = function () {
-        if (authService.checkPermission('platform:exportImport:import')) {
-            $scope.selectedNodeId = 'import';
-
-            var newBlade = {
-                controller: 'platformWebApp.exportImport.importMainController',
-                template: '$(Platform)/Scripts/app/exportImport/blades/import-main.tpl.html'
-            };
-            bladeNavigationService.showBlade(newBlade, $scope.blade);
-        }
-    };
-
-    $scope.blade.headIcon = 'fa-database';
-    $scope.blade.isLoading = false;
-}]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.exportImport.importMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'FileUploader', function ($scope, bladeNavigationService, exportImportResourse, FileUploader) {
-    var blade = $scope.blade;
-    blade.updatePermission = 'platform:exportImport:import';
-    blade.headIcon = 'fa-download';
-    blade.title = 'platform.blades.import-main.title';
-    blade.isLoading = false;
-    $scope.importRequest = {};
-    var origManifest;
-
-    $scope.$on("new-notification-event", function (event, notification) {
-        if (blade.notification && notification.id == blade.notification.id) {
-            angular.copy(notification, blade.notification);
-            if (notification.errorCount > 0) {
-                bladeNavigationService.setError('Import error', blade);
-            }
-        }
-    });
-
-    $scope.canStartProcess = function () {
-        return blade.hasUpdatePermission() && (_.any($scope.importRequest.modules) || $scope.importRequest.handleSecurity || $scope.importRequest.handleSettings || $scope.importRequest.handleBinaryData);
-    }
-
-    $scope.startProcess = function () {
-        blade.isLoading = true;
-        exportImportResourse.runImport($scope.importRequest,
-            function (data) { blade.notification = data; blade.isLoading = false; },
-            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-    }
-
-    $scope.updateModuleSelection = function () {
-        var selection = _.where($scope.importRequest.exportManifest.modules, { isChecked: true });
-        $scope.importRequest.modules = _.pluck(selection, 'id');
-    };
-
-    if (!$scope.uploader) {
-        // create the uploader
-        var uploader = $scope.uploader = new FileUploader({
-            scope: $scope,
-            headers: { Accept: 'application/json' },
-            url: 'api/platform/assets/localstorage',
-            method: 'POST',
-            autoUpload: true,
-            removeAfterUpload: true
-        });
-
-        // ADDING FILTERS
-        // zip only
-        uploader.filters.push({
-            name: 'zipFilter',
-            fn: function (i /*{File|FileLikeObject}*/, options) {
-                return i.name.toLowerCase().endsWith('.zip');
-            }
-        });
-
-        uploader.onBeforeUploadItem = function (fileItem) {
-            blade.isLoading = true;
-            bladeNavigationService.setError(null, blade);
-        };
-
-        uploader.onErrorItem = function (item, response, status, headers) {
-            bladeNavigationService.setError(item._file.name + ' failed: ' + (response.message ? response.message : status), blade);
-        };
-
-        uploader.onSuccessItem = function (fileItem, asset, status, headers) {
-            $scope.importRequest.fileUrl = asset[0].url;
-            $scope.importRequest.fileName = asset[0].name;
-
-            exportImportResourse.loadExportManifest({ fileUrl: $scope.importRequest.fileUrl }, function (data) {
-                origManifest = angular.copy(data);
-
-                // select all available data for import
-                $scope.importRequest.handleSecurity = data.handleSecurity;
-                $scope.importRequest.handleSettings = data.handleSettings;
-                $scope.importRequest.handleBinaryData = data.handleBinaryData;
-
-                _.each(data.modules, function (x) { x.isChecked = true; });
-
-                $scope.importRequest.exportManifest = data;
-                $scope.updateModuleSelection();
-                blade.isLoading = false;
-            });
-        };
-    }
-
-
-    blade.toolbarCommands = [
-        {
-            name: "platform.commands.select-all", icon: 'fa fa-check-square-o',
-            executeMethod: function () { selectAll(true) },
-            canExecuteMethod: function () { return $scope.importRequest.exportManifest && !blade.notification; }
-        },
-        {
-            name: "platform.commands.unselect-all", icon: 'fa fa-square-o',
-            executeMethod: function () { selectAll(false) },
-            canExecuteMethod: function () { return $scope.importRequest.exportManifest && !blade.notification; }
-        }
-    ];
-
-    var selectAll = function (action) {
-        if (origManifest.handleSecurity)
-            $scope.importRequest.handleSecurity = action;
-        if (origManifest.handleBinaryData)
-            $scope.importRequest.handleBinaryData = action;
-        if (origManifest.handleSettings)
-            $scope.importRequest.handleSettings = action;
-
-        _.forEach($scope.importRequest.exportManifest.modules, function (module) { module.isChecked = action; });
-
-        $scope.updateModuleSelection();
-    }
-}]);
-
-angular.module('platformWebApp')
-.factory('platformWebApp.exportImport.resource', ['$resource', function ($resource) {
-
-    return $resource(null, null, {
-    	getNewExportManifest: { url: 'api/platform/export/manifest/new' },
-        runExport: { method: 'POST', url: 'api/platform/export' },
-
-        loadExportManifest: { url: 'api/platform/export/manifest/load' },
-        runImport: { method: 'POST', url: 'api/platform/import' },
-        sampleDataDiscover: { url: 'api/platform/sampledata/discover', isArray: true },
-        importSampleData: { method: 'POST', url: 'api/platform/sampledata/import', params: { url: '@url' } }
-    });
-}]);
 angular.module('platformWebApp')
 .factory('platformWebApp.jobs', ['$resource', function ($resource) {
 
@@ -28334,19 +28334,14 @@ angular.module('platformWebApp')
     .controller('platformWebApp.thumbnail.optionDetailController', ['$rootScope', '$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.thumbnail.api', function ($rootScope, $scope, bladeNavigationService, thumbnailApi) {
         var blade = $scope.blade;
 
-        blade.refresh = function (parentRefresh) {
+        blade.resizeMethod = resizeMethod.get();
 
-            thumbnailApi.getOptionDetailByTask(blade.itemId).then(function (item) {
+        blade.refresh = function (parentRefresh) {
+            debugger;
+
+            thumbnailApi.getOptionDetail(blade.itemId).then(function (item) {
 
                 initializeBlade(item);
-
-                if (blade.childrenBlades) {
-                    _.each(blade.childrenBlades, function (x) {
-                        if (x.refresh) {
-                            x.refresh(blade.currentEntity);
-                        }
-                    });
-                }
 
                 if (parentRefresh) {
                     blade.parentBlade.refresh();
@@ -28417,18 +28412,6 @@ angular.module('platformWebApp')
             }
         ];
 
-        blade.openDictionarySettingManagement = function () {
-            var newBlade = {
-                id: 'settingDetailChild',
-                isApiSave: true,
-                currentEntityId: 'VirtoCommerce.Core.General.TaxTypes',
-                parentRefresh: function (data) { blade.taxTypes = data; },
-                controller: 'platformWebApp.settingDictionaryController',
-                template: '$(Platform)/Scripts/app/settings/blades/setting-dictionary.tpl.html'
-            };
-            bladeNavigationService.showBlade(newBlade, blade);
-        };
-
         blade.refresh();
 
     }]);
@@ -28441,7 +28424,8 @@ angular.module('platformWebApp')
             blade.refresh = function (parentRefresh) {
 
                 blade.isLoading = true;
-                thumbnailApi.getListOptionByTask(blade.id), then(function () {
+
+                thumbnailApi.getListOptionByTask(blade.id).then(function (results) {
                     blade.isLoading = false;
                     blade.currentEntities = results;
                 });
@@ -28452,22 +28436,23 @@ angular.module('platformWebApp')
                 $scope.selectedNodeId = selectedNodeId;
             };
 
-            function showDetailBlade(bladeData) {
+            function showDetailBlade(listItem) {
+                debugger;
                 var newBlade = {
-                    id: 'currencyDetail',
-                    controller: 'virtoCommerce.coreModule.currency.currencyDetailController',
-                    template: 'Modules/$(VirtoCommerce.Core)/Scripts/currency/blades/currency-detail.tpl.html'
+                    id: 'optionDetail',
+                    itemId: listItem.id,
+                    controller: 'platformWebApp.thumbnail.optionDetailController',
+                    template: '$(Platform)/Scripts/app/thumbnail/blades/option-detail.tpl.html'
                 };
-                angular.extend(newBlade, bladeData);
+                angular.extend(newBlade, listItem);
                 bladeNavigationService.showBlade(newBlade, blade);
             };
 
-            $scope.selectNode = function (node) {
-                blade.setSelectedId(node.code);
-                showDetailBlade({ data: node });
+            $scope.selectNode = function (listItem) {
+                blade.setSelectedId(listItem.id);
+                showDetailBlade(listItem);
             };
 
-            blade.headIcon = 'fa-money';
             blade.toolbarCommands = [
                 {
                     name: "platform.commands.add", icon: 'fa fa-plus',
@@ -28482,10 +28467,7 @@ angular.module('platformWebApp')
                 }
             ];
 
-            // actions on load
-            blade.title = 'core.blades.currency-list.title',
-                blade.subtitle = 'core.blades.currency-list.subtitle',
-                blade.refresh();
+            blade.refresh();
         }]);
 
 angular.module('platformWebApp')
@@ -28585,10 +28567,12 @@ angular.module('platformWebApp')
 
         blade.openSettingManagement = function () {
             var newBlade = {
-                id: 'optionDetail',
+                id: 'optionListDetail',
                 currentEntityId: blade.itemId,
-                controller: 'platformWebApp.thumbnail.optionDetailController',
-                template: '$(Platform)/Scripts/app/thumbnail/blades/option-detail.tpl.html'
+                title: 'platform.blades.thumbnail.blades.setting-managment.title',
+                subtitle: 'platform.blades.thumbnail.blades.setting-managment.subtitle',
+                controller: 'platformWebApp.thumbnail.optionListController',
+                template: '$(Platform)/Scripts/app/thumbnail/blades/option-list.tpl.html'
             };
             bladeNavigationService.showBlade(newBlade, blade);
         };
@@ -28633,10 +28617,9 @@ angular.module('platformWebApp')
                         template: '$(Platform)/Scripts/app/thumbnail/blades/task-detail.tpl.html'
                     };
                     bladeNavigationService.showBlade(newBlade, blade);
-
-                    // setting current categoryId to be globally available
-                    bladeNavigationService.catalogsSelectedCategoryId = blade.categoryId;
             };
+
+            blade.headIcon = 'fa fa-picture-o';
 
             blade.toolbarCommands = [
                 {
@@ -28693,6 +28676,51 @@ angular.module('platformWebApp')
             };
         }]);
 
+
+angular.module('virtoCommerce.catalogModule')
+    .factory('virtoCommerce.catalogModule.valueTypes', function () {
+        return {
+            get: function () {
+                return [
+                    {
+                        valueType: "ShortText",
+                        title: "platform.properties.short-text.title",
+                        description: "platform.properties.short-text.description"
+                    },
+                    {
+                        valueType: "LongText",
+                        title: "platform.properties.long-text.title",
+                        description: "platform.properties.long-text.description"
+                    },
+                    {
+                        valueType: "Number",
+                        title: "platform.properties.decimal.title",
+                        description: "platform.properties.decimal.description"
+                    },
+                    {
+                        valueType: "DateTime",
+                        title: "platform.properties.date-time.title",
+                        description: "platform.properties.date-time.description"
+                    },
+                    {
+                        valueType: "Boolean",
+                        title: "platform.properties.boolean.title",
+                        description: "platform.properties.boolean.description"
+                    },
+                    {
+                        valueType: "Integer",
+                        title: "platform.properties.integer.title",
+                        description: "platform.properties.integer.description"
+                    },
+                    {
+                        valueType: "GeoPoint",
+                        title: "catalog.properties.geoPoint.title",
+                        description: "catalog.properties.geoPoint.description"
+                    }
+                ];
+            }
+        };
+    });
 
 angular.module('platformWebApp')
     .factory('platformWebApp.thumbnail.api', ['$resource', '$timeout', function ($resource, $timeout) {
