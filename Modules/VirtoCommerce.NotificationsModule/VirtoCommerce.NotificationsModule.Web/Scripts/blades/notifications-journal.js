@@ -1,6 +1,6 @@
 angular.module('virtoCommerce.notificationsModule')
-.controller('virtoCommerce.notificationsModule.notificationsJournalController', ['$scope', 'virtoCommerce.notificationsModule.notificationsService', 'platformWebApp.bladeNavigationService', 'platformWebApp.notifications', 'platformWebApp.bladeUtils', 'platformWebApp.dialogService', 'uiGridConstants', 'platformWebApp.uiGridHelper',
-    function ($scope, notificationsService, bladeNavigationService, notifications, bladeUtils, dialogService, uiGridConstants, uiGridHelper) {
+.controller('virtoCommerce.notificationsModule.notificationsJournalController', ['$scope', '$translate', 'virtoCommerce.notificationsModule.notificationsService', 'platformWebApp.bladeNavigationService', 'platformWebApp.notifications', 'platformWebApp.bladeUtils', 'platformWebApp.dialogService', 'uiGridConstants', 'platformWebApp.uiGridHelper',
+    function ($scope, $translate, notificationsService, bladeNavigationService, notifications, bladeUtils, dialogService, uiGridConstants, uiGridHelper) {
         var blade = $scope.blade;
         $scope.uiGridConstants = uiGridConstants;
         // simple and advanced filtering
@@ -57,7 +57,9 @@ angular.module('virtoCommerce.notificationsModule')
 
             var newBlade = {
                 id: 'notificationDetails',
-                title: 'notifications.blades.notification-journal-details.title',
+                title: data.body,
+                subtitle: 'notifications.blades.notification-journal-details.subtitle',
+                subtitleValues: { displayName: $translate.instant(data.displayName) },
                 currentNotificationId: data.id,
                 currentEntity: data,
                 controller: 'virtoCommerce.notificationsModule.notificationJournalDetailsController',
@@ -76,15 +78,6 @@ angular.module('virtoCommerce.notificationsModule')
                 name: "platform.commands.refresh", icon: 'fa fa-refresh',
                 executeMethod: blade.refresh,
                 canExecuteMethod: function () { return true; }
-            },
-            {
-                name: "platform.commands.stop-sending", icon: 'fa fa-stop',
-                executeMethod: function () {
-                    $scope.stopNotifications($scope.gridApi.selection.getSelectedRows());
-                },
-                canExecuteMethod: function () {
-                    return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
-                }
             }
         ];
         

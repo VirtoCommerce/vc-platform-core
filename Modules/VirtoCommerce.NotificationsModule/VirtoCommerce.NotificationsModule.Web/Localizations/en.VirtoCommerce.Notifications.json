@@ -3,23 +3,27 @@
         "blades": {
             "notification-journal-details": {
                 "title": "Details of notification",
+                "subtitle": "{{ displayName }} - notification type",
                 "labels": {
+                    "id": "Message ID:",
                     "notification-info": "Notification Info",
                     "display-name": "Display name",
                     "source": "Source",
                     "sending-gateway": "Sending gateway",
                     "active": "Active",
                     "not-active": "Not active",
-                    "start-sending-date": "Start sending date",
+                    "created": "Created at:",
                     "sent-success": "Sent success",
                     "not-sent": "Not sent",
                     "sent": "Sent",
                     "sent-date": "Sent date",
-                    "sender": "Sender",
-                    "recipient": "Recipient",
+                    "sender": "From:",
+                    "recipient": "To:",
                     "sending-attempts-count": "Sending attempts count",
                     "last-fail-attempt-date": "Last fail attempt date",
-                    "last-fail-attempt-message": "Last fail attempt message"
+                    "last-fail-attempt-message": "Errors:",
+                    "subject": "Subject:",
+                    "body": "Body:"
                 }
             },
             "notifications-edit-template": {
@@ -102,7 +106,8 @@
                     "unnamed-filter": "Unnamed filter",
                     "filter-new": "<strong>Add new filter</strong>",
                     "filter-only-pending": "Only pending",
-                    "filter-with-errors": "With errors"
+                    "filter-with-errors": "With errors",
+                    "detail": "Show detail"
                 },
                 "placeholders": {
                     "select-filter": "Select filter"
