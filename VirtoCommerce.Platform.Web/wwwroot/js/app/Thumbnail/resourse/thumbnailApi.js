@@ -59,10 +59,9 @@ angular.module('platformWebApp')
                             id: '778810',
                             name: '50x50',
                             fileSuffix: 'thb_',
-                            resizeMethod: 'fixedWidth',
+                            resizeMethod: 'FixedSize',
                             width: '50',
-                            height: '50',
-                            backgroundColor: '#555'
+                            height: '50'
                         },
                         {
                             id: '77890',
@@ -79,16 +78,15 @@ angular.module('platformWebApp')
                 return $timeout(function() { return item; }, 1000);
             },
 
-            getListOptionByTask: function (id) {
+            getListOptions: function () {
                 var result = [
                     {
                         id: '778810',
                         name: '50x50',
                         fileSuffix: 'thb_',
-                        resizeMethod: 'fixedWidth',
+                        resizeMethod: 'FixedSize',
                         width: '50',
-                        height: '50',
-                        backgroundColor: '#555'
+                        height: '50'
                     },
                     {
                         id: '77890',
@@ -98,26 +96,38 @@ angular.module('platformWebApp')
                         width: '100',
                         height: '100',
                         backgroundColor: '#777'
+                    },
+                    {
+                        id: '7789011',
+                        name: '75x175',
+                        fileSuffix: '_',
+                        resizeMethod: 'FixedHeight',
+                        width: '175',
+                        height: '75',
+                        backgroundColor: '#888'
                     }
                 ];
 
                 return $timeout(function () { return result; }, 1000);
             },
 
-            getOptionDetail: function(id) {
-
-                var result = {
-                    id: '77890',
-                    name: '100x100',
-                    fileSuffix: 'img_',
-                    resizeMethod: 'Crop',
-                    width: '100',
-                    height: '100',
-                    backgroundColor: '#777'
-                };
-
-                return $timeout(function () { return result; }, 1000);
+            saveOption: function (data, callback, error) {
+                $timeout(function () { return {}; }, 1000).then(function () {
+                    callback(data);
+                });
             },
+
+            updateOption: function (data, callback, error) {
+                $timeout(function () { return {}; }, 1000).then(function() {
+                    callback(data);
+                });
+            },
+
+            removeOptions: function (data, callback, error) {
+                callback();
+            },
+
+            deleteTask: function () { },
 
             taskRun: function() {
                 return $timeout(function () { return {}; }, 1000);

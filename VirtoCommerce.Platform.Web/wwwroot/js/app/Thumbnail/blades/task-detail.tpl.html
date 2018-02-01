@@ -16,17 +16,17 @@
                         </div>
                     </div>
 
-                    <div class="form-group clearfix">
+                    <div class="form-group">
                         <div class="column">
                             <div class="form-group __info list">
-                                <div class="form-input __file">
-                                    <label class="form-label">{{ 'platform.blades.thumbnail.blades.task-detail.labels.path-images' | translate }}</label>
-                                    <input ng-model="blade.item.workPath" type="url" placeholder="{{ 'catalog.blades.images.placeholders.image-url' | translate }}" tabindex="-1">
-                                    <button class="btn __file" type="button" ng-click="addImageFromUrl()" title="Add image by URL">
-                                        <i class="btn-ico fa fa-folder-open-o"></i>
-                                    </button>
+                                <label class="form-label">{{ 'platform.blades.thumbnail.blades.task-detail.labels.path-images' | translate }}</label>
+                                    <div class="form-input __file">
+                                        <input ng-model="blade.item.workPath" placeholder="{{ 'catalog.blades.images.placeholders.image-url' | translate }}" tabindex="-1">
+                                        <button class="btn __file" type="button" ng-click="addImageFromUrl()" title="Add image by URL">
+                                            <i class="btn-ico fa fa-folder-open-o"></i>
+                                        </button>
+                                    </div>
                                     <div class="list-descr">{{ 'platform.blades.thumbnail.blades.task-detail.descriptions.path-images' | translate }}</div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -38,10 +38,10 @@
                                 <div class="form-input">
                                     <label class="form-label">{{ 'platform.blades.thumbnail.blades.task-detail.labels.thumbnail-settings' | translate }} <a href="" ng-click="blade.openSettingManagement()" class="form-edit" va-permission="customer:read"><i class="form-ico fa fa-pencil"></i></a></label>
                                     <div class="form-input">
-                                        <ui-select ng-model="blade.item.thumbnailOptions[0]" ng-disabled="currentEntity.isReadOnly" ng-required="currentEntity.required">
-                                            <ui-select-match placeholder="{{ 'catalog.blades.item-detail.placeholders.vendor' | translate }}">{{$select.selected.name}}</ui-select-match>
-                                            <ui-select-choices repeat="options in blade.item.thumbnailOptions | filter: {value: $select.search} | orderBy: 'value'">
-                                                <span ng-bind-html="x.name | highlight: $select.search"></span>
+                                        <ui-select multiple ng-model="blade.item.thumbnailOptions" ng-disabled="currentEntity.isReadOnly" ng-required="currentEntity.required">
+                                            <ui-select-match placeholder="Select value">{{$item.name}}</ui-select-match>
+                                            <ui-select-choices repeat="option in blade.optionList | filter: {name: $select.search} | orderBy: 'name'">
+                                                <span ng-bind-html="option.name | highlight: $select.search"></span>
                                             </ui-select-choices>
                                         </ui-select>
                                     </div>

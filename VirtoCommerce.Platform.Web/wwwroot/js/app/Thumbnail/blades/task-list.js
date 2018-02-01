@@ -24,7 +24,6 @@ angular.module('platformWebApp')
 
             $scope.selectItem = function (e, listItem) {
                 blade.setSelectedItem(listItem);
-
                     var newBlade = {
                         id: "listTaskDetail",
                         itemId: listItem.id,
@@ -79,7 +78,19 @@ angular.module('platformWebApp')
                 {
                     name: "platform.commands.add",
                     icon: 'fa fa-plus',
-                    executeMethod: blade.refresh,
+                    executeMethod: function () {
+                        $scope.selectedNodeId = undefined;
+
+                        var newBlade = {
+                            id: 'listItemChild',
+                            title: 'catalog.blades.catalog-add.title',
+                            subtitle: 'catalog.blades.catalog-add.subtitle',
+                            controller: 'virtoCommerce.catalogModule.catalogAddController',
+                            template: 'Modules/$(VirtoCommerce.Catalog)/Scripts/blades/catalog-add.tpl.html'
+                        };
+
+                        bladeNavigationService.showBlade(newBlade, blade);
+                    },
                     canExecuteMethod: function () {
                         return true;
                     }

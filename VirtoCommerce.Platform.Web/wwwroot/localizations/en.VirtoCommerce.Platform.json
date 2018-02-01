@@ -682,11 +682,14 @@
                     },
                     "setting-managment": {
                         "title": "Thumbnails settings",
-                        "subtitle": "Manage a thumbnails settings"
+                        "subtitle": "Manage a thumbnails settings",
+                        "background": "background",
+                        "height": "height",
+                        "width": "width"
                     },
                     "setting-detail": {
-                        "title": "Thumbnails settings",
-                        "subtitle": "Manage a thumbnails settings",
+                        "title": "Thumbnail option detail",
+                        "subtitle": "Manage thumbnail setting details",
                         "labels": {
                             "name": "Name",
                             "file-suffix": "Thumbnail file name suffix",
@@ -696,6 +699,11 @@
                             "background-color": "Background color"
                         },
                         "placeholders": {
+                            "name": "Enter option name",
+                            "file-suffix": "Enter name suffix",
+                            "width": "Enter width",
+                            "height": "Enter height",
+                            "background-color": " Enter background color"
                         },
                         "discription": {
                             "name": "The display setting name",
@@ -863,3 +871,4 @@
         }
     }
 }
+

@@ -19369,6 +19369,23 @@ angular.module('platformWebApp')
                 permission: 'platform:thumbnail:access'
             };
             mainMenuService.addMenuItem(menuItem);
+
+            // ToDo register notification template
+
+            //pushNotificationTemplateResolver.register({
+            //    priority: 900,
+            //    satisfy: function (notify, place) { return place == 'history' && notify.notifyType == 'IndexProgressPushNotification'; },
+            //    template: '$(Platform)/Scripts/app/pushNotifications/blade/historyDefault.tpl.html',
+            //    action: function (notify) {
+            //        var blade = {
+            //            id: 'indexProgress',
+            //            notification: notify,
+            //            controller: 'virtoCommerce.coreModule.indexProgressController',
+            //            template: 'Modules/$(VirtoCommerce.Core)/Scripts/SearchIndex/blades/index-progress.tpl.html'
+            //        };
+            //        bladeNavigationService.showBlade(blade);
+            //    }
+            //});
         }]);
 
 angular.module('platformWebApp')
@@ -28331,86 +28348,108 @@ angular.module('platformWebApp')
     };
 }]);
 angular.module('platformWebApp')
-    .controller('platformWebApp.thumbnail.optionDetailController', ['$rootScope', '$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.thumbnail.api', 'platformWebApp.thumbnail.resizeMethod', function ($rootScope, $scope, bladeNavigationService, thumbnailApi, resizeMethod) {
+    .controller('platformWebApp.thumbnail.optionDetailController', ['$rootScope', '$scope', 'platformWebApp.dialogService', 'platformWebApp.bladeNavigationService', 'platformWebApp.thumbnail.api', 'platformWebApp.thumbnail.resizeMethod', function ($rootScope, $scope, dialogService, bladeNavigationService, thumbnailApi, resizeMethod) {
         var blade = $scope.blade;
 
         blade.resizeMethodTypes = resizeMethod.get();
 
-        blade.refresh = function (parentRefresh) {
-            thumbnailApi.getOptionDetail(blade.itemId).then(function (item) {
-
-                initializeBlade(item);
-
-                if (parentRefresh) {
-                    blade.parentBlade.refresh();
-                }
-            }
-            );
-        };
-
         function initializeBlade(data) {
-            blade.item = angular.copy(data);
-            blade.currentEntity = blade.item;
+            if (blade.isNew)
+                data = { resizeMethod: 'FixedSize' };
+
+            blade.currentEntity = angular.copy(data);
             blade.origEntity = data;
             blade.isLoading = false;
+
+            blade.title = blade.isNew ? 'platform.blades.thumbnail.blades.setting-detail.title' : data.name;
+            blade.subtitle = 'platform.blades.thumbnail.blades.setting-detail.subtitle';
         };
 
-        blade.codeValidator = function (value) {
-            var pattern = /[$+;=%{}[\]|\\\/@ ~!^*&()?:'<>,]/;
-            return !pattern.test(value);
+        $scope.saveChanges = function () {
+            blade.isLoading = true;
+
+            if (blade.isNew) {
+                blade.isNew = false;
+                thumbnailApi.saveOption(blade.currentEntity, function (data) {
+                    blade.parentBlade.refresh(true);
+                    initializeBlade(data);
+                }, function (error) {
+                    bladeNavigationService.setError('Error: ' + error.status, blade);
+                });
+            } else {
+                thumbnailApi.updateOption(blade.currentEntity, function (data) {
+                    blade.parentBlade.refresh(true);
+                    initializeBlade(data);
+                }, function (error) {
+                    bladeNavigationService.setError('Error: ' + error.status, blade);
+                });
+            }
         };
+
+        function deleteEntry() {
+            var dialog = {
+                id: "confirmDelete",
+                title: "core.dialogs.currency-delete.title",
+                message: "core.dialogs.currency-delete.message",
+                callback: function (remove) {
+                    if (remove) {
+                        blade.isLoading = true;
+
+                        thumbnailApi.removeOptions({ codes: blade.currentEntity.code }, function () {
+                            angular.copy(blade.currentEntity, blade.origEntity);
+                            $scope.bladeClose();
+                            blade.parentBlade.setSelectedId(null);
+                            blade.parentBlade.refresh(true);
+                        }, function (error) {
+                            bladeNavigationService.setError('Error ' + error.status, blade);
+                        });
+                    }
+                }
+            }
+            dialogService.showConfirmationDialog(dialog);
+        }
+
+        var detailForm;
+        $scope.setForm = function (form) {
+            detailForm = form;
+        }
 
         function isDirty() {
             return !angular.equals(blade.currentEntity, blade.origEntity) && blade.hasUpdatePermission();
-        };
-
-        function canSave() {
-            return isDirty() && blade.formScope && blade.formScope.$valid;
         }
 
-        function saveChanges() {
-            blade.isLoading = true;
-            categories.update({}, blade.currentEntity, function (data, headers) {
-                blade.refresh(true);
-            },
-                function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-        };
+        function canSave() {
+            return isDirty() && detailForm && detailForm.$valid;
+        }
 
+       
         blade.onClose = function (closeCallback) {
-            bladeNavigationService.showConfirmationIfNeeded(isDirty(), canSave(), blade, saveChanges, closeCallback, "catalog.dialogs.category-save.title", "catalog.dialogs.category-save.message");
+            bladeNavigationService.showConfirmationIfNeeded(isDirty(), canSave(), blade, $scope.saveChanges, closeCallback, "core.dialogs.currency-save.title", "core.dialogs.currency-save.message");
         };
-
-        blade.formScope = null;
-        $scope.setForm = function (form) { blade.formScope = form; }
 
         blade.toolbarCommands = [
             {
-                name: "platform.commands.save",
-                icon: 'fa fa-save',
-                executeMethod: blade.refresh,
-                canExecuteMethod: function () {
-                    return true;
-                }
+                name: "platform.commands.save", icon: 'fa fa-save',
+                executeMethod: $scope.saveChanges,
+                canExecuteMethod: canSave
             },
             {
-                name: "platform.commands.reset",
-                icon: 'fa fa-undo',
-                executeMethod: blade.refresh,
-                canExecuteMethod: function () {
-                    return true;
-                }
+                name: "platform.commands.reset", icon: 'fa fa-undo',
+                executeMethod: function () {
+                    angular.copy(blade.origEntity, blade.currentEntity);
+                },
+                canExecuteMethod: isDirty
             },
             {
-                name: "platform.commands.delete",
-                icon: 'fa fa-trash-o',
-                executeMethod: blade.refresh,
+                name: "platform.commands.delete", icon: 'fa fa-trash-o',
+                executeMethod: deleteEntry,
                 canExecuteMethod: function () {
-                    return true;
+                    return !blade.origEntity.isPrimary;
                 }
             }
         ];
 
-        blade.refresh();
+        initializeBlade(blade.data);
 
     }]);
 
@@ -28423,10 +28462,14 @@ angular.module('platformWebApp')
 
                 blade.isLoading = true;
 
-                thumbnailApi.getListOptionByTask(blade.id).then(function (results) {
+                thumbnailApi.getListOptions().then(function (results) {
                     blade.isLoading = false;
                     blade.currentEntities = results;
                 });
+
+                if (parentRefresh && blade.parentRefresh) {
+                    blade.parentRefresh(results);
+                }
 
             };
 
@@ -28434,24 +28477,29 @@ angular.module('platformWebApp')
                 $scope.selectedNodeId = selectedNodeId;
             };
 
-            function showDetailBlade(listItem) {
-                debugger;
+            function showDetailBlade(bladeData) {
                 var newBlade = {
                     id: 'optionDetail',
-                    itemId: listItem.id,
                     controller: 'platformWebApp.thumbnail.optionDetailController',
                     template: '$(Platform)/Scripts/app/thumbnail/blades/option-detail.tpl.html'
                 };
-                angular.extend(newBlade, listItem);
+                angular.extend(newBlade, bladeData);
                 bladeNavigationService.showBlade(newBlade, blade);
             };
 
             $scope.selectNode = function (listItem) {
                 blade.setSelectedId(listItem.id);
-                showDetailBlade(listItem);
+                showDetailBlade({ data: listItem });
             };
 
             blade.toolbarCommands = [
+                {
+                    name: "platform.commands.refresh", icon: 'fa fa-refresh',
+                    executeMethod: blade.refresh,
+                    canExecuteMethod: function () {
+                        return true;
+                    }
+                },
                 {
                     name: "platform.commands.add", icon: 'fa fa-plus',
                     executeMethod: function () {
@@ -28460,8 +28508,7 @@ angular.module('platformWebApp')
                     },
                     canExecuteMethod: function () {
                         return true;
-                    },
-                    permission: 'core:currency:create'
+                    }
                 }
             ];
 
@@ -28473,6 +28520,10 @@ angular.module('platformWebApp')
         var blade = $scope.blade;
 
         blade.refresh = function (parentRefresh) {
+
+            thumbnailApi.getListOptions().then(function(data) {
+                blade.optionList = data;
+            });
 
             thumbnailApi.getTask(blade.itemId).then( function (item) {
 
@@ -28580,8 +28631,8 @@ angular.module('platformWebApp')
     }]);
 
 angular.module('platformWebApp')
-    .controller('platformWebApp.thumbnail.taskListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.bladeUtils', 'platformWebApp.thumbnail.api', 'platformWebApp.uiGridHelper',
-        function ($scope, bladeNavigationService, bladeUtils, thumbnailApi, uiGridHelper) {
+    .controller('platformWebApp.thumbnail.taskListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.bladeUtils', 'platformWebApp.thumbnail.api', 'platformWebApp.uiGridHelper', 'platformWebApp.dialogService',
+        function ($scope, bladeNavigationService, bladeUtils, thumbnailApi, uiGridHelper, dialogService) {
             var blade = $scope.blade;
 
             $scope.uiGridConstants = uiGridHelper.uiGridConstants;
@@ -28605,7 +28656,6 @@ angular.module('platformWebApp')
 
             $scope.selectItem = function (e, listItem) {
                 blade.setSelectedItem(listItem);
-
                     var newBlade = {
                         id: "listTaskDetail",
                         itemId: listItem.id,
@@ -28619,6 +28669,7 @@ angular.module('platformWebApp')
 
 
             $scope.taskRun = function (itemsSelect) {
+                debugger;
                 var dialog = {
                     id: "confirmTaskRun",
                     callback: function (doReindex) {
@@ -28628,20 +28679,21 @@ angular.module('platformWebApp')
                                 deleteExistingIndex: doReindex
                             };
                         });
-                        searchIndexationApi.index(options, function openProgressBlade(data) {
-                            // show indexing progress
+                        thumbnailApi.taskRun(options).then(function openProgressBlade(data) {
+                            debugger;
                             var newBlade = {
-                                id: 'indexProgress',
+                                id: 'thumbnailProgress',
                                 notification: data,
                                 parentRefresh: blade.parentRefresh,
                                 controller: 'virtoCommerce.coreModule.indexProgressController',
-                                template: 'Modules/$(VirtoCommerce.Core)/Scripts/SearchIndex/blades/index-progress.tpl.html'
+                                template: '$(Platform)/Scripts/app/thumbnail/blades/task-detail.tpl.html'
                             };
                             bladeNavigationService.showBlade(newBlade, blade.parentBlade || blade);
                         });
                     }
                 }
-                dialogService.showDialog(dialog, 'Modules/$(VirtoCommerce.Core)/Scripts/SearchIndex/dialogs/reindex-dialog.tpl.html', 'platformWebApp.confirmDialogController');
+                debugger;
+                dialogService.showDialog(dialog, '$(Platform)/Scripts/app/thumbnail/dialogs/run-dialog.tpl.html', 'platformWebApp.confirmDialogController');
             }
 
 
@@ -28658,7 +28710,19 @@ angular.module('platformWebApp')
                 {
                     name: "platform.commands.add",
                     icon: 'fa fa-plus',
-                    executeMethod: blade.refresh,
+                    executeMethod: function () {
+                        $scope.selectedNodeId = undefined;
+
+                        var newBlade = {
+                            id: 'listItemChild',
+                            title: 'catalog.blades.catalog-add.title',
+                            subtitle: 'catalog.blades.catalog-add.subtitle',
+                            controller: 'virtoCommerce.catalogModule.catalogAddController',
+                            template: 'Modules/$(VirtoCommerce.Catalog)/Scripts/blades/catalog-add.tpl.html'
+                        };
+
+                        bladeNavigationService.showBlade(newBlade, blade);
+                    },
                     canExecuteMethod: function () {
                         return true;
                     }
@@ -28698,22 +28762,21 @@ angular.module('platformWebApp')
                     $scope.gridApi = gridApi;
 
                     uiGridHelper.bindRefreshOnSortChanged($scope);
-                    $scope.gridApi.infiniteScroll.on.needLoadMoreData($scope, showMore);
+                    //$scope.gridApi.infiniteScroll.on.needLoadMoreData($scope, showMore);
                 });
 
                 blade.refresh();
             };
         }]);
 
-angular.module('virtoCommerce.coreModule.searchIndex')
-    .controller('virtoCommerce.coreModule.indexProgressController', ['$scope', 'virtoCommerce.coreModule.searchIndex.searchIndexation', function ($scope, searchIndexationApi) {
+angular.module('platformWebApp')
+    .controller('platformWebApp.thumbnail.taskRunController', ['$scope', 'platformWebApp.thumbnail.api', function ($scope, thumbnailApi) {
         var blade = $scope.blade;
 
-        $scope.$on("thumbnail-event", function (event, thumbnailNotification) {
-                angular.copy(thumbnailNotification, blade.thumbnailNotification);
-                if (thumbnailNotification.finished && blade.parentRefresh) {
-                    blade.parentRefresh();
-                }
+        $scope.$on("new-notification-event", function (event, notification) {
+            if (blade.notification && notification.id == blade.notification.id) {
+                angular.copy(notification, blade.notification);
+            }
         });
 
         blade.toolbarCommands = [{
@@ -28723,7 +28786,7 @@ angular.module('virtoCommerce.coreModule.searchIndex')
                 return blade.notification && !blade.notification.finished;
             },
             executeMethod: function () {
-                searchIndexationApi.cancel({ taskId: blade.notification.id });
+                thumbnailApi.cancel({ tasksId: [blade.notification.id] });
             }
         }];
 
@@ -28819,10 +28882,9 @@ angular.module('platformWebApp')
                             id: '778810',
                             name: '50x50',
                             fileSuffix: 'thb_',
-                            resizeMethod: 'fixedWidth',
+                            resizeMethod: 'FixedSize',
                             width: '50',
-                            height: '50',
-                            backgroundColor: '#555'
+                            height: '50'
                         },
                         {
                             id: '77890',
@@ -28839,16 +28901,15 @@ angular.module('platformWebApp')
                 return $timeout(function() { return item; }, 1000);
             },
 
-            getListOptionByTask: function (id) {
+            getListOptions: function () {
                 var result = [
                     {
                         id: '778810',
                         name: '50x50',
                         fileSuffix: 'thb_',
-                        resizeMethod: 'fixedWidth',
+                        resizeMethod: 'FixedSize',
                         width: '50',
-                        height: '50',
-                        backgroundColor: '#555'
+                        height: '50'
                     },
                     {
                         id: '77890',
@@ -28858,25 +28919,45 @@ angular.module('platformWebApp')
                         width: '100',
                         height: '100',
                         backgroundColor: '#777'
+                    },
+                    {
+                        id: '7789011',
+                        name: '75x175',
+                        fileSuffix: '_',
+                        resizeMethod: 'FixedHeight',
+                        width: '175',
+                        height: '75',
+                        backgroundColor: '#888'
                     }
                 ];
 
                 return $timeout(function () { return result; }, 1000);
             },
 
-            getOptionDetail: function(id) {
+            saveOption: function (data, callback, error) {
+                $timeout(function () { return {}; }, 1000).then(function () {
+                    callback(data);
+                });
+            },
 
-                var result = {
-                    id: '77890',
-                    name: '100x100',
-                    fileSuffix: 'img_',
-                    resizeMethod: 'Crop',
-                    width: '100',
-                    height: '100',
-                    backgroundColor: '#777'
-                };
+            updateOption: function (data, callback, error) {
+                $timeout(function () { return {}; }, 1000).then(function() {
+                    callback(data);
+                });
+            },
 
-                return $timeout(function () { return result; }, 1000);
+            removeOptions: function (data, callback, error) {
+                callback();
+            },
+
+            deleteTask: function () { },
+
+            taskRun: function() {
+                return $timeout(function () { return {}; }, 1000);
+            },
+
+            taskCancel: function () {
+                return $timeout(function () { return true; }, 1000);
             }
     }
 

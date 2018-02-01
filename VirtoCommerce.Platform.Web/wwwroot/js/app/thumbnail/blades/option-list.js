@@ -7,10 +7,14 @@ angular.module('platformWebApp')
 
                 blade.isLoading = true;
 
-                thumbnailApi.getListOptionByTask(blade.id).then(function (results) {
+                thumbnailApi.getListOptions().then(function (results) {
                     blade.isLoading = false;
                     blade.currentEntities = results;
                 });
+
+                if (parentRefresh && blade.parentRefresh) {
+                    blade.parentRefresh(results);
+                }
 
             };
 
@@ -18,24 +22,29 @@ angular.module('platformWebApp')
                 $scope.selectedNodeId = selectedNodeId;
             };
 
-            function showDetailBlade(listItem) {
-                debugger;
+            function showDetailBlade(bladeData) {
                 var newBlade = {
                     id: 'optionDetail',
-                    itemId: listItem.id,
                     controller: 'platformWebApp.thumbnail.optionDetailController',
                     template: '$(Platform)/Scripts/app/thumbnail/blades/option-detail.tpl.html'
                 };
-                angular.extend(newBlade, listItem);
+                angular.extend(newBlade, bladeData);
                 bladeNavigationService.showBlade(newBlade, blade);
             };
 
             $scope.selectNode = function (listItem) {
                 blade.setSelectedId(listItem.id);
-                showDetailBlade(listItem);
+                showDetailBlade({ data: listItem });
             };
 
             blade.toolbarCommands = [
+                {
+                    name: "platform.commands.refresh", icon: 'fa fa-refresh',
+                    executeMethod: blade.refresh,
+                    canExecuteMethod: function () {
+                        return true;
+                    }
+                },
                 {
                     name: "platform.commands.add", icon: 'fa fa-plus',
                     executeMethod: function () {
@@ -44,8 +53,7 @@ angular.module('platformWebApp')
                     },
                     canExecuteMethod: function () {
                         return true;
-                    },
-                    permission: 'core:currency:create'
+                    }
                 }
             ];
 

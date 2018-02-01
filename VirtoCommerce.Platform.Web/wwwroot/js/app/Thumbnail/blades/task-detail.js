@@ -4,6 +4,10 @@ angular.module('platformWebApp')
 
         blade.refresh = function (parentRefresh) {
 
+            thumbnailApi.getListOptions().then(function(data) {
+                blade.optionList = data;
+            });
+
             thumbnailApi.getTask(blade.itemId).then( function (item) {
 
                     initializeBlade(item);
