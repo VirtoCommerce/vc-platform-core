@@ -269,7 +269,7 @@ angular.module('virtoCommerce.notificationsModule')
             });
       }
       
-      self.getNotificationJournalList = function() {
+      self.getNotificationJournalList = function(searchCriteria) {
           return fakeHttpCall(true).then(
             function(data) {
                 return fakeJournal;
