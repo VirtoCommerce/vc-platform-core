@@ -84,8 +84,9 @@
                 }
             },
             "notifications-journal": {
-                "title": "Notification history",
-                "subtitle": "View notification history",
+                "title": "Notifications activity feed",
+                "subtitle": "The list of all notifications records in the system",
+                "subtitle-search": "Search results for \"{{keyword}}\"",
                 "labels": {
                     "display-name": "Display Name",
                     "notification": "Notification",

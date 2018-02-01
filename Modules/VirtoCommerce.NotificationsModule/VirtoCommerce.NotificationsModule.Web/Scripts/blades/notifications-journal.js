@@ -10,8 +10,29 @@ angular.module('virtoCommerce.notificationsModule')
                 x.$path = _.any(x.path) ? x.path.join(" \\ ") : '\\';
             });
         }
+        
+        filter.criteriaChanged = function () {
+            if (filter.keyword) {
+                blade.refresh();
+            }
+        };
+        
+        // Search Criteria
+        function getSearchCriteria()
+        {
+            var searchCriteria = {
+                catalogId: blade.catalogId,
+                categoryId: blade.categoryId,
+                keyword: filter.keyword ? filter.keyword : undefined,
+                sort: uiGridHelper.getSortExpression($scope),
+                skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
+                take: $scope.pageSettings.itemsPerPageCount
+            };
+            return searchCriteria;
+        }
 
         blade.refresh = function () {
+            var searchCriteria = getSearchCriteria();
 //            notifications.getNotificationJournalList({
 //                objectId: blade.objectId,
 //                objectTypeId: blade.objectTypeId,
@@ -23,7 +44,7 @@ angular.module('virtoCommerce.notificationsModule')
 //                $scope.pageSettings.totalItems = data.totalCount;
 //                blade.isLoading = false;
 //            });
-            notificationsService.getNotificationJournalList().then(function(data) {
+            notificationsService.getNotificationJournalList(searchCriteria).then(function(data) {
                 transformByFilters(data.listEntries);
                 blade.currentEntities = data.notifications;
                 $scope.pageSettings.totalItems = data.totalCount;
@@ -67,19 +88,7 @@ angular.module('virtoCommerce.notificationsModule')
             }
         ];
         
-        // Search Criteria
-        function getSearchCriteria()
-        {
-            var searchCriteria = {
-                catalogId: blade.catalogId,
-                categoryId: blade.categoryId,
-                keyword: filter.keyword ? filter.keyword : undefined,
-                sort: uiGridHelper.getSortExpression($scope),
-                skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
-                take: $scope.pageSettings.itemsPerPageCount
-            };
-            return searchCriteria;
-        }
+        
         
         // ui-grid
         $scope.setGridOptions = function (gridOptions) {
