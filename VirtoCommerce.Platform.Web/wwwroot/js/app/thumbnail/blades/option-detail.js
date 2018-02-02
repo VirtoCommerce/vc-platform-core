@@ -16,6 +16,7 @@ angular.module('platformWebApp')
             blade.subtitle = 'platform.blades.thumbnail.blades.setting-detail.subtitle';
         };
 
+
         $scope.saveChanges = function () {
             blade.isLoading = true;
 
