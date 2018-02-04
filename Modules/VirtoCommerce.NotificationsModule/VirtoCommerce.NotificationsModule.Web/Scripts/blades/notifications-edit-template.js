@@ -1,6 +1,6 @@
 ﻿angular.module('virtoCommerce.notificationsModule')
-.controller('virtoCommerce.notificationsModule.editTemplateController', ['$rootScope', '$scope', '$timeout', '$localStorage', 'FileUploader', 'virtoCommerce.notificationsModule.notificationsService', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.notifications', 
- function ($rootScope, $scope, $timeout, $localStorage, FileUploader, notificationsService, bladeNavigationService, dialogService, notifications) {
+.controller('virtoCommerce.notificationsModule.editTemplateController', ['$rootScope', '$scope', '$timeout', '$localStorage', 'virtoCommerce.notificationsModule.notificationsModuleApi', 'FileUploader', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 
+ function ($rootScope, $scope, $timeout, $localStorage, notifications, FileUploader, bladeNavigationService, dialogService) {
 	$scope.setForm = function (form) { 
         $scope.formScope = form; 
     }
@@ -43,14 +43,6 @@
         if (!blade.templateId) {
             blade.isNew = true;    
         }
-        
-//		notifications.prepareTestData({ type: blade.notificationType }, function (data) {
-//			blade.parametersForTemplate = data;
-//			blade.isLoading = false;
-//
-//		}, function (error) {
-//			bladeNavigationService.setError('Error ' + error.status, blade);
-//		});
         keyTemplateLocalStorage = blade.objectTypeId + '.' + blade.notificationType;
         var itemFromLocalStorage = $localStorage[keyTemplateLocalStorage];
         
@@ -69,30 +61,20 @@
 
 	blade.initialize = function () {
 		blade.isLoading = true;
-        //TODO
-//		if (blade.templateId) {
-//			notifications.getTemplateById({ id: blade.templateId }, function (data) {
-//				setTemplate(data);
-//			}, function (error) {
-//				bladeNavigationService.setError('Error ' + error.status, blade);
-//			});
-//		}
-//		else {
-//			notifications.getTemplate({ type: blade.notificationType, objectId: blade.objectId, objectTypeId: blade.objectTypeId, language: blade.language }, function (data) {
-//				setTemplate(data);
-//			}, function (error) {
-//				bladeNavigationService.setError('Error ' + error.status, blade);
-//			});
-//		}
         if (blade.templateId) {
-            notificationsService.getTemplateById(blade.templateId).then(
-                function(data){ setTemplate(data); }
-            );
-        }
-        else {
-            var data = { id: null, notificationType: null, objectId: null, objectTypeId: null, language: null};
-            setTemplate(data);
-        }
+			notifications.getTemplateById({ id: blade.templateId }, function (data) {
+				setTemplate(data);
+			}, function (error) {
+				bladeNavigationService.setError('Error ' + error.status, blade);
+			});
+		}
+		else {
+			notifications.getTemplate({ type: blade.notificationType, language: blade.language }, function (data) {
+				setTemplate(data);
+			}, function (error) {
+				bladeNavigationService.setError('Error ' + error.status, blade);
+			});
+		}
 	};
 
 	blade.updateTemplate = function () {

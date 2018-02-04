@@ -1,6 +1,6 @@
 angular.module('virtoCommerce.notificationsModule')
-.controller('virtoCommerce.notificationsModule.notificationTemplatesListController', ['$scope', '$translate', 'virtoCommerce.notificationsModule.notificationsService', 'virtoCommerce.notificationsModule.notificationTypesResolverService', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.notifications', 'platformWebApp.settings', 'platformWebApp.ui-grid.extension', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeUtils',
-    function ($scope, $translate, notificationsService, notificationTypesResolverService, bladeNavigationService, dialogService, notifications, settings, gridOptionExtension, uiGridHelper, bladeUtils) {
+.controller('virtoCommerce.notificationsModule.notificationTemplatesListController', ['$scope', '$translate', 'virtoCommerce.notificationsModule.notificationsModuleApi', 'virtoCommerce.notificationsModule.notificationTypesResolverService', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.settings', 'platformWebApp.ui-grid.extension', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeUtils',
+    function ($scope, $translate, notifications, notificationTypesResolverService, bladeNavigationService, dialogService, settings, gridOptionExtension, uiGridHelper, bladeUtils) {
         $scope.uiGridConstants = uiGridHelper.uiGridConstants;
 	    var blade = $scope.blade;
 	    blade.selectedLanguage = null;
@@ -14,18 +14,13 @@ angular.module('virtoCommerce.notificationsModule')
 
 	    blade.initialize = function () {
 		    blade.isLoading = true;
-            notificationsService.getTemplates({notificationType: blade.notificationType}).then(function (data) {
-                blade.isLoading = false;
-                blade.currentEntities = data;
-            })
-            //TODO use resources
-		    // notifications.getTemplates({ type: blade.notificationType, objectId: blade.objectId, objectTypeId: blade.objectTypeId }, function (data) {
-		    // 	blade.currentEntities = data;
-		    // 	if (blade.currentEntities.length < 1) {
-		    // 		bladeNavigationService.closeBlade(blade);
-		    // 	}
-		    // 	blade.isLoading = false;
-		    // });
+            notifications.getTemplates({ type: blade.notificationType }, function (data) {
+		     	blade.currentEntities = data;
+		     	if (blade.currentEntities.length < 1) {
+		     		bladeNavigationService.closeBlade(blade);
+		     	}
+		     	blade.isLoading = false;
+		     });
         }
         
         function resolveType(sendGatewayType) {

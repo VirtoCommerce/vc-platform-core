@@ -48,6 +48,32 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
 
         #endregion
 
+        #region FakeTemplates
+
+        TemplateResult[] _templateResult = new TemplateResult[]
+        {
+            new TemplateResult
+            {
+                Id = "1",
+                NotificationType = "RegistrationEmailNotification",
+                Language = "en-US",
+                IsDefault = false,
+                Created = "2018-01-01",
+                Modified = "2018-01-01",
+                DisplayName = "notifications.types.RegistrationEmailNotification.displayName",
+                SendGatewayType = "Email",
+                CcRecipients = null,
+                BccRecipients = null,
+                Recipient = "a@a.com",
+                Sender = "s@s.s",
+                Subject = "some",
+                Body = "Thank you for registration {{firstname}} {{lastname}}",
+                DynamicProperties =  "{\n \"firstname\": \"Name\",\n \"lastname\": \"Last\"\n}"
+            }
+        };
+
+        #endregion
+
         [HttpGet]
         [Produces("application/json")]
         [ProducesResponseType(typeof(NotificationSearchResult), 200)]
@@ -65,6 +91,26 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         {
             var found = _result.Results.Single(n => n.NotificationType.Equals(type));
             return Ok(found);
+        }
+
+        [HttpGet]
+        [Route("templates")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(TemplateResult[]), 200)]
+        public IActionResult GetTemplatesByNotificationType(string type)
+        {
+            var templates = _templateResult.Where(t => t.NotificationType.Equals(type)).ToArray();
+            return Ok(templates);
+        }
+
+        [HttpGet]
+        [Route("templates/{id}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(TemplateResult), 200)]
+        public IActionResult GetTemplateById(string id)
+        {
+            var template = _templateResult.Single(t => t.Id == id);
+            return Ok(template);
         }
 
     }

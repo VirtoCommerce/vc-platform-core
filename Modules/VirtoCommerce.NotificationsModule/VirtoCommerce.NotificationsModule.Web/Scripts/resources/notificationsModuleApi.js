@@ -2,10 +2,11 @@ angular.module('virtoCommerce.notificationsModule')
     .factory('virtoCommerce.notificationsModule.notificationsModuleApi', ['$resource', function ($resource) {
         return $resource('api/notifications/:id', { id: '@Id' }, {
             getNotificationList: { method: 'GET', url: 'api/notifications' },
-            getNotificationByType: { method: 'GET', url: 'api/notifications/:type', }
-//            getTemplateById: { method: 'GET', url: 'api/notifications/template/:id' },
+            getNotificationByType: { method: 'GET', url: 'api/notifications/:type', },
+            getTemplates: { method: 'GET', url: 'api/notifications/templates', isArray: true },
+            getTemplateById: { method: 'GET', url: 'api/notifications/templates/:id' }
 //            getTemplate: { method: 'GET', url: 'api/notifications/template' },
-//            getTemplates: { method: 'GET', url: 'api/notifications/templates', isArray: true },
+
 //            updateTemplate: { method: 'POST', url: 'api/notifications/template' },
 //            deleteTemplate: { method: 'DELETE', url: 'api/notifications/template/:id' },
 //            prepareTestData: { method: 'GET', url: 'api/notifications/template/:type/getTestingParameters', isArray: true },
