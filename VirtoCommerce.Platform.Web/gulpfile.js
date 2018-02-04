@@ -1,4 +1,4 @@
-/// <binding />
+/// <binding AfterBuild='min:css, min:js' />
 "use strict";
 
 var gulp = require("gulp"),

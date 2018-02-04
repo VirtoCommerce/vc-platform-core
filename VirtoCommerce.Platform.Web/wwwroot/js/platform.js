@@ -18573,123 +18573,6 @@ angular.module('platformWebApp')
   }]);
 
 angular.module('platformWebApp')
-.controller('platformWebApp.licenseDetailController', ['$scope', '$window', 'FileUploader', '$http', 'platformWebApp.bladeNavigationService', function ($scope, $window, FileUploader, $http, bladeNavigationService) {
-    var blade = $scope.blade;
-    blade.isNew = blade.isNew || !$scope.license;
-
-    $scope.activate = function (activationCode) {
-        blade.isLoading = true;
-        $scope.activationError = null;
-        $scope.filename = null;
-
-        $http.post('api/platform/licensing/activateByCode', JSON.stringify(activationCode)).then(function (response) {
-            activationCallback(response.data, true);
-        }, function (error) {
-            $scope.activationError = error.data.message;
-        });
-    };
-
-    function activationCallback(license, isActivationByCode) {
-        blade.isLoading = false;
-        if (license) {
-            $scope.currentEntity = license;
-            if ($scope.currentEntity.expirationDate && new Date($scope.currentEntity.expirationDate) < new Date()) {
-                $scope.activationError = 'Activation failed. This license has expired.';
-            }
-        } else {
-            $scope.activationError = isActivationByCode ? 'Activation failed. Check the activation code.' : 'Activation failed. Check the license file.';
-        }
-    }
-
-    $scope.activateLicense = function () {
-        // confirmed. Activate the license
-        blade.isLoading = true;
-        $http.post('api/platform/licensing/activateLicense', $scope.currentEntity).then(function () {
-            $window.location.reload();
-        });
-    };
-
-    if (blade.isNew) {
-        // create the uploader
-        var uploader = $scope.uploader = new FileUploader({
-            scope: $scope,
-            headers: {
-                Accept: 'application/json'
-            },
-            url: 'api/platform/licensing/activateByFile',
-            method: 'POST',
-            autoUpload: true,
-            removeAfterUpload: true
-        });
-
-        // ADDING FILTERS
-        // lic only
-        uploader.filters.push({
-            name: 'licFilter',
-            fn: function (i /*{File|FileLikeObject}*/, options) {
-                return i.name.toLowerCase().endsWith('.lic');
-            }
-        });
-
-        uploader.onAfterAddingFile = function (fileItem) {
-            $scope.filename = fileItem.file.name;
-            $scope.activationError = null;
-        };
-
-        uploader.onSuccessItem = function (item, response) {
-            activationCallback(response, false);
-        };
-
-        uploader.onErrorItem = function (item, response, status) {
-            blade.isLoading = false;
-            $scope.activationError = response.message ? response.message : status;
-        };
-        blade.title = 'platform.blades.license.title-new';
-    } else {
-        $scope.currentEntity = $scope.license;
-
-        blade.toolbarCommands = [
-              {
-                  name: "platform.commands.new-license", icon: 'fa fa-check',
-                  executeMethod: function () {
-                      var newBlade = {
-                          id: 'license-activate',
-                          isNew: true,
-                          controller: blade.controller,
-                          template: blade.template
-                      };
-                      bladeNavigationService.showBlade(newBlade, blade);
-                  },
-                  canExecuteMethod: function () {
-                      return true;
-                  },
-                  permission: 'platform:module:manage'
-              }];
-
-        blade.title = 'platform.blades.license.title';
-    }
-
-    blade.headIcon = 'fa-id-card';
-    blade.isLoading = false;
-}])
-
-.config(['$stateProvider', function ($stateProvider) {
-    $stateProvider
-        .state('workspace.appLicense', {
-            url: '/appLicense',
-            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-            controller: ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
-                var blade = {
-                    id: 'appLicense',
-                    controller: 'platformWebApp.licenseDetailController',
-                    template: '$(Platform)/Scripts/app/licensing/license-detail.tpl.html',
-                    isClosingDisabled: true
-                };
-                bladeNavigationService.showBlade(blade);
-            }]
-        });
-}]);
-angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
 	$stateProvider
         .state('workspace.modularity', {
@@ -19169,6 +19052,123 @@ angular.module('platformWebApp')
         }, 'accountDetail');
     }]);
 
+angular.module('platformWebApp')
+.controller('platformWebApp.licenseDetailController', ['$scope', '$window', 'FileUploader', '$http', 'platformWebApp.bladeNavigationService', function ($scope, $window, FileUploader, $http, bladeNavigationService) {
+    var blade = $scope.blade;
+    blade.isNew = blade.isNew || !$scope.license;
+
+    $scope.activate = function (activationCode) {
+        blade.isLoading = true;
+        $scope.activationError = null;
+        $scope.filename = null;
+
+        $http.post('api/platform/licensing/activateByCode', JSON.stringify(activationCode)).then(function (response) {
+            activationCallback(response.data, true);
+        }, function (error) {
+            $scope.activationError = error.data.message;
+        });
+    };
+
+    function activationCallback(license, isActivationByCode) {
+        blade.isLoading = false;
+        if (license) {
+            $scope.currentEntity = license;
+            if ($scope.currentEntity.expirationDate && new Date($scope.currentEntity.expirationDate) < new Date()) {
+                $scope.activationError = 'Activation failed. This license has expired.';
+            }
+        } else {
+            $scope.activationError = isActivationByCode ? 'Activation failed. Check the activation code.' : 'Activation failed. Check the license file.';
+        }
+    }
+
+    $scope.activateLicense = function () {
+        // confirmed. Activate the license
+        blade.isLoading = true;
+        $http.post('api/platform/licensing/activateLicense', $scope.currentEntity).then(function () {
+            $window.location.reload();
+        });
+    };
+
+    if (blade.isNew) {
+        // create the uploader
+        var uploader = $scope.uploader = new FileUploader({
+            scope: $scope,
+            headers: {
+                Accept: 'application/json'
+            },
+            url: 'api/platform/licensing/activateByFile',
+            method: 'POST',
+            autoUpload: true,
+            removeAfterUpload: true
+        });
+
+        // ADDING FILTERS
+        // lic only
+        uploader.filters.push({
+            name: 'licFilter',
+            fn: function (i /*{File|FileLikeObject}*/, options) {
+                return i.name.toLowerCase().endsWith('.lic');
+            }
+        });
+
+        uploader.onAfterAddingFile = function (fileItem) {
+            $scope.filename = fileItem.file.name;
+            $scope.activationError = null;
+        };
+
+        uploader.onSuccessItem = function (item, response) {
+            activationCallback(response, false);
+        };
+
+        uploader.onErrorItem = function (item, response, status) {
+            blade.isLoading = false;
+            $scope.activationError = response.message ? response.message : status;
+        };
+        blade.title = 'platform.blades.license.title-new';
+    } else {
+        $scope.currentEntity = $scope.license;
+
+        blade.toolbarCommands = [
+              {
+                  name: "platform.commands.new-license", icon: 'fa fa-check',
+                  executeMethod: function () {
+                      var newBlade = {
+                          id: 'license-activate',
+                          isNew: true,
+                          controller: blade.controller,
+                          template: blade.template
+                      };
+                      bladeNavigationService.showBlade(newBlade, blade);
+                  },
+                  canExecuteMethod: function () {
+                      return true;
+                  },
+                  permission: 'platform:module:manage'
+              }];
+
+        blade.title = 'platform.blades.license.title';
+    }
+
+    blade.headIcon = 'fa-id-card';
+    blade.isLoading = false;
+}])
+
+.config(['$stateProvider', function ($stateProvider) {
+    $stateProvider
+        .state('workspace.appLicense', {
+            url: '/appLicense',
+            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+            controller: ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
+                var blade = {
+                    id: 'appLicense',
+                    controller: 'platformWebApp.licenseDetailController',
+                    template: '$(Platform)/Scripts/app/licensing/license-detail.tpl.html',
+                    isClosingDisabled: true
+                };
+                bladeNavigationService.showBlade(blade);
+            }]
+        });
+}]);
 angular.module("platformWebApp")
 .config(
   ['$stateProvider', function ($stateProvider) {
@@ -20160,6 +20160,112 @@ CodeMirror.registerHelper("fold", "markdown", function(cm, start) {
   };
 });
 
+angular.module('platformWebApp')
+.controller('platformWebApp.confirmDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
+    angular.extend($scope, dialog);
+
+    $scope.yes = function () {
+        $modalInstance.close(true);
+    };
+
+    $scope.no = function () {
+        $modalInstance.close(false);
+    };
+
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
+}])
+.factory('platformWebApp.dialogService', ['$rootScope', '$modal', function ($rootScope, $modal) {
+    var dialogService = {
+        dialogs: [],
+        currentDialog: undefined
+    };
+
+    function findDialog(id) {
+        var found;
+        angular.forEach(dialogService.dialogs, function (dialog) {
+            if (dialog.id == id) {
+                found = dialog;
+            }
+        });
+
+        return found;
+    }
+
+    dialogService.showDialog = function (dialog, templateUrl, controller, cssClass) {
+        var dlg = findDialog(dialog.id);
+
+        if (angular.isUndefined(dlg)) {
+            dlg = dialog;
+
+            dlg.instance = $modal.open({
+                templateUrl: templateUrl,
+                controller: controller,
+                windowClass: cssClass ? cssClass : null,
+                resolve: {
+                    dialog: function () {
+                        return dialog;
+                    }
+                }
+            });
+
+            dlg.instance.result.then(function (result) //success
+            {
+                var idx = dialogService.dialogs.indexOf(dlg);
+                dialogService.dialogs.splice(idx, 1);
+                if (dlg.callback)
+                    dlg.callback(result);
+            }, function (reason) //dismiss
+            {
+                var idx = dialogService.dialogs.indexOf(dlg);
+                dialogService.dialogs.splice(idx, 1);
+            });
+
+            dialogService.dialogs.push(dlg);
+        }
+    };
+
+    dialogService.showConfirmationDialog = function (dialog) {
+        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/confirmDialog.tpl.html', 'platformWebApp.confirmDialogController');
+    };
+
+    dialogService.showNotificationDialog = function (dialog) {
+        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/notifyDialog.tpl.html', 'platformWebApp.confirmDialogController');
+    };
+
+    dialogService.showGalleryDialog = function (dialog) {
+        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/galleryDialog.tpl.html', 'platformWebApp.galleryDialogController', '__gallery');
+    };
+
+    return dialogService;
+
+}])
+
+angular.module('platformWebApp')
+.controller('platformWebApp.galleryDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
+    angular.extend($scope, dialog);
+
+    var imgCount = dialog.images.length;
+
+    $scope.close = function () {
+        $modalInstance.close(false);
+    }
+
+    $scope.prevImage = function (index) {
+        var i = index == -1 ? imgCount - 1 : index;
+        $scope.currentImage = dialog.images[i];
+    }
+
+    $scope.nextImage = function (index) {
+        var i = index == imgCount ? 0 : index;
+        $scope.currentImage = dialog.images[i];
+    }
+
+    $scope.openImage = function (image) {
+        $scope.currentImage = image;
+    }
+}]);
 'use strict';
 
 angular.module('platformWebApp')
@@ -21117,112 +21223,6 @@ angular.module('platformWebApp').directive('vaTabs', function () {
         }
     }
 });
-angular.module('platformWebApp')
-.controller('platformWebApp.confirmDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
-    angular.extend($scope, dialog);
-
-    $scope.yes = function () {
-        $modalInstance.close(true);
-    };
-
-    $scope.no = function () {
-        $modalInstance.close(false);
-    };
-
-    $scope.cancel = function () {
-        $modalInstance.dismiss('cancel');
-    };
-}])
-.factory('platformWebApp.dialogService', ['$rootScope', '$modal', function ($rootScope, $modal) {
-    var dialogService = {
-        dialogs: [],
-        currentDialog: undefined
-    };
-
-    function findDialog(id) {
-        var found;
-        angular.forEach(dialogService.dialogs, function (dialog) {
-            if (dialog.id == id) {
-                found = dialog;
-            }
-        });
-
-        return found;
-    }
-
-    dialogService.showDialog = function (dialog, templateUrl, controller, cssClass) {
-        var dlg = findDialog(dialog.id);
-
-        if (angular.isUndefined(dlg)) {
-            dlg = dialog;
-
-            dlg.instance = $modal.open({
-                templateUrl: templateUrl,
-                controller: controller,
-                windowClass: cssClass ? cssClass : null,
-                resolve: {
-                    dialog: function () {
-                        return dialog;
-                    }
-                }
-            });
-
-            dlg.instance.result.then(function (result) //success
-            {
-                var idx = dialogService.dialogs.indexOf(dlg);
-                dialogService.dialogs.splice(idx, 1);
-                if (dlg.callback)
-                    dlg.callback(result);
-            }, function (reason) //dismiss
-            {
-                var idx = dialogService.dialogs.indexOf(dlg);
-                dialogService.dialogs.splice(idx, 1);
-            });
-
-            dialogService.dialogs.push(dlg);
-        }
-    };
-
-    dialogService.showConfirmationDialog = function (dialog) {
-        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/confirmDialog.tpl.html', 'platformWebApp.confirmDialogController');
-    };
-
-    dialogService.showNotificationDialog = function (dialog) {
-        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/notifyDialog.tpl.html', 'platformWebApp.confirmDialogController');
-    };
-
-    dialogService.showGalleryDialog = function (dialog) {
-        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/galleryDialog.tpl.html', 'platformWebApp.galleryDialogController', '__gallery');
-    };
-
-    return dialogService;
-
-}])
-
-angular.module('platformWebApp')
-.controller('platformWebApp.galleryDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
-    angular.extend($scope, dialog);
-
-    var imgCount = dialog.images.length;
-
-    $scope.close = function () {
-        $modalInstance.close(false);
-    }
-
-    $scope.prevImage = function (index) {
-        var i = index == -1 ? imgCount - 1 : index;
-        $scope.currentImage = dialog.images[i];
-    }
-
-    $scope.nextImage = function (index) {
-        var i = index == imgCount ? 0 : index;
-        $scope.currentImage = dialog.images[i];
-    }
-
-    $scope.openImage = function (image) {
-        $scope.currentImage = image;
-    }
-}]);
 // Full list of countries defined by ISO 3166-1 alpha-3
 // based on https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
 angular.module('platformWebApp')
@@ -23226,6 +23226,24 @@ angular.module('platformWebApp')
 
 
 angular.module('platformWebApp')
+.controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    var blade = $scope.blade;
+
+    $scope.openBlade = function () {
+        var newBlade = {
+            id: "changesChildBlade",
+            currentEntities: blade.currentEntity.operationsLog,
+            headIcon: blade.headIcon,
+            title: blade.title,
+            subtitle: 'platform.widgets.operations.blade-subtitle',
+            isExpandable: true,
+            controller: 'platformWebApp.changeLog.operationListController',
+            template: '$(Platform)/Scripts/app/changeLog/blades/operation-list.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, blade);
+    };
+}]);
+angular.module('platformWebApp')
 .controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     
     $scope.blade.isLoading = false;
@@ -23834,24 +23852,6 @@ angular.module('platformWebApp')
     blade.refresh();
 }]);
 
-angular.module('platformWebApp')
-.controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    var blade = $scope.blade;
-
-    $scope.openBlade = function () {
-        var newBlade = {
-            id: "changesChildBlade",
-            currentEntities: blade.currentEntity.operationsLog,
-            headIcon: blade.headIcon,
-            title: blade.title,
-            subtitle: 'platform.widgets.operations.blade-subtitle',
-            isExpandable: true,
-            controller: 'platformWebApp.changeLog.operationListController',
-            template: '$(Platform)/Scripts/app/changeLog/blades/operation-list.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, blade);
-    };
-}]);
 angular.module('platformWebApp')
 .factory('platformWebApp.dynamicProperties.api', ['$resource', function ($resource) {
     return $resource('api/platform/dynamic/types/:id/properties/:propertyId', {}, {

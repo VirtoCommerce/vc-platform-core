@@ -62,28 +62,21 @@
 	blade.initialize = function () {
 		blade.isLoading = true;
         if (blade.templateId) {
-			notifications.getTemplateById({ id: blade.templateId }, function (data) {
+			notifications.getTemplateById({ type: blade.notificationType, id: blade.templateId }, function (data) {
 				setTemplate(data);
 			}, function (error) {
 				bladeNavigationService.setError('Error ' + error.status, blade);
 			});
 		}
-		else {
-			notifications.getTemplate({ type: blade.notificationType, language: blade.language }, function (data) {
-				setTemplate(data);
-			}, function (error) {
-				bladeNavigationService.setError('Error ' + error.status, blade);
-			});
-		}
+        else {
+            //todo
+            setTemplate({ notificationType: null, displayName: null, objectId: null, objectTypeId: null, sendGatewayType: null});
+        }
 	};
 
 	blade.updateTemplate = function () {
-		blade.isLoading = true;
-        if (!blade.currentEntity.language) {
-            blade.currentEntity.language = 'default';
-        }
-        notificationsService.updateTemplate(blade.currentEntity).then(function(data) {
-            blade.isLoading = false;
+		notifications.updateTemplate({}, blade.currentEntity, function () {
+			blade.isLoading = false;
 			blade.origEntity = _.clone(blade.currentEntity);
 			if (!blade.isNew) {
 				blade.parentBlade.initialize();
@@ -98,27 +91,9 @@
 					blade.parentBlade.openList(blade.notificationType, blade.objectId, blade.objectTypeId);
 				}
 			}
-        });
-        //TODO
-//		notifications.updateTemplate({}, blade.currentEntity, function () {
-//			blade.isLoading = false;
-//			blade.origEntity = _.clone(blade.currentEntity);
-//			if (!blade.isNew) {
-//				blade.parentBlade.initialize();
-//			}
-//			else {
-//				blade.isNew = false;
-//				if (!blade.isFirst) {
-//					blade.parentBlade.initialize();
-//					bladeNavigationService.closeBlade(blade);
-//				}
-//				else {
-//					blade.parentBlade.openList(blade.notificationType, blade.objectId, blade.objectTypeId);
-//				}
-//			}
-//		}, function (error) {
-//			bladeNavigationService.setError('Error ' + error.status, blade);
-//		});
+		}, function (error) {
+			bladeNavigationService.setError('Error ' + error.status, blade);
+		});
         $localStorage[keyTemplateLocalStorage] = blade.currentEntity.dynamicProperties;
 	};
 

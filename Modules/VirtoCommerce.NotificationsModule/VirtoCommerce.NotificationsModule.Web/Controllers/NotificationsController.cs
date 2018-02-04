@@ -94,7 +94,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         }
 
         [HttpGet]
-        [Route("templates")]
+        [Route("{type}/templates")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(TemplateResult[]), 200)]
         public IActionResult GetTemplatesByNotificationType(string type)
@@ -104,14 +104,13 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         }
 
         [HttpGet]
-        [Route("templates/{id}")]
+        [Route("{type}/templates/{id}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(TemplateResult), 200)]
-        public IActionResult GetTemplateById(string id)
+        public IActionResult GetTemplateById(string type, string id)
         {
-            var template = _templateResult.Single(t => t.Id == id);
+            var template = _templateResult.Single(t => t.NotificationType.Equals(type) && t.Id.Equals(id));
             return Ok(template);
         }
-
     }
 }

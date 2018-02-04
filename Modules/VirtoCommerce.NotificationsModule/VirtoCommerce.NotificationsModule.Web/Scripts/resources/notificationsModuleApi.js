@@ -3,9 +3,9 @@ angular.module('virtoCommerce.notificationsModule')
         return $resource('api/notifications/:id', { id: '@Id' }, {
             getNotificationList: { method: 'GET', url: 'api/notifications' },
             getNotificationByType: { method: 'GET', url: 'api/notifications/:type', },
-            getTemplates: { method: 'GET', url: 'api/notifications/templates', isArray: true },
-            getTemplateById: { method: 'GET', url: 'api/notifications/templates/:id' }
-//            getTemplate: { method: 'GET', url: 'api/notifications/template' },
+            getTemplates: { method: 'GET', url: 'api/notifications/:type/templates', isArray: true },
+            getTemplateById: { method: 'GET', url: 'api/notifications/:type/templates/:id' },
+            getTemplate: { method: 'GET', url: 'api/notifications/:type/:language/templates' },
 
 //            updateTemplate: { method: 'POST', url: 'api/notifications/template' },
 //            deleteTemplate: { method: 'DELETE', url: 'api/notifications/template/:id' },
