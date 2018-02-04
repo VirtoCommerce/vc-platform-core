@@ -1,6 +1,6 @@
 ﻿angular.module('virtoCommerce.notificationsModule')
-.controller('virtoCommerce.notificationsModule.notificationsEditController', ['$rootScope', '$scope', '$timeout', 'virtoCommerce.notificationsModule.notificationsService', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.notifications',
-function ($rootScope, $scope, $timeout, notificationsService, bladeNavigationService, dialogService, notifications) {
+.controller('virtoCommerce.notificationsModule.notificationsEditController', ['$rootScope', '$scope', '$timeout', 'virtoCommerce.notificationsModule.notificationsModuleApi', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService',
+function ($rootScope, $scope, $timeout, notifications, bladeNavigationService, dialogService) {
 	$scope.setForm = function (form) { $scope.formScope = form; }
 
 	var blade = $scope.blade;
@@ -10,12 +10,10 @@ function ($rootScope, $scope, $timeout, notificationsService, bladeNavigationSer
 
 	blade.initialize = function () {
 		blade.isLoading = true;
-		notificationsService.getNotificationByType({ type: blade.notificationType }).then( function (data) {
-			blade.isLoading = false;
-			setNotification(data);
-		}, function (error) {
-			bladeNavigationService.setError('Error ' + error.status, blade);
-		});
+        notifications.getNotificationByType({ type: blade.notificationType }, function(data) {
+            blade.isLoading = false;
+            setNotification(data);
+        })
 	};
 
 	function setNotification(data) {
@@ -23,13 +21,6 @@ function ($rootScope, $scope, $timeout, notificationsService, bladeNavigationSer
 		data.objectTypeId = blade.objectTypeId;
 		blade.origEntity = _.clone(data);
 		blade.currentEntity = data;
-		// $timeout(function () {
-		// 	if (codemirrorEditor) {
-		// 		codemirrorEditor.refresh();
-		// 		codemirrorEditor.focus();
-		// 	}
-		// 	blade.origEntity = angular.copy(blade.currentEntity);
-		// }, 1);
 	};
 
 	blade.updateTemplate = function () {

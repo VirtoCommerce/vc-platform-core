@@ -1,6 +1,6 @@
 angular.module('virtoCommerce.notificationsModule')
-.controller('virtoCommerce.notificationsModule.notificationsListController', ['$scope', '$translate', 'virtoCommerce.notificationsModule.notificationsService', 'virtoCommerce.notificationsModule.notificationTypesResolverService', 'platformWebApp.dialogService', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper', 'platformWebApp.ui-grid.extension', 'platformWebApp.settings', 'platformWebApp.i18n',
-    function ($scope, $translate, notificationsService, notificationTypesResolverService, dialogService, bladeUtils, uiGridHelper, gridOptionExtension, settings, i18n) {
+.controller('virtoCommerce.notificationsModule.notificationsListController', ['$scope', '$translate', 'virtoCommerce.notificationsModule.notificationsModuleApi', 'virtoCommerce.notificationsModule.notificationTypesResolverService', 'platformWebApp.dialogService', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper', 'platformWebApp.ui-grid.extension', 'platformWebApp.settings', 'platformWebApp.i18n',
+    function ($scope, $translate, notifications, notificationTypesResolverService, dialogService, bladeUtils, uiGridHelper, gridOptionExtension, settings, i18n) {
         $scope.uiGridConstants = uiGridHelper.uiGridConstants;
         var blade = $scope.blade;
         blade.title = 'Notifications';
@@ -11,27 +11,39 @@ angular.module('virtoCommerce.notificationsModule')
             var languages = ["default", "en-US", "de-DE"];
       		blade.languages = languages;
       	}
+        
+        // filtering
+        var filter = $scope.filter = {};
 
-        //TODO del notificationsService
-        // blade.refresh = function () {
-        //     notificationsModuleApi.getNotificationList(function (data) {
-        //         blade.data = data.result;
-        //         blade.isLoading = false;
-        //     });
-        // }
-        blade.refresh = function (parentRefresh) {
-            blade.isLoading = true;
-            var searchCriteria = getSearchCriteria();
-            notificationsService.getNotificationList(searchCriteria).then(function(data) {
-                    blade.isLoading = false;
-                    $scope.pageSettings.totalItems = data.totalCount;
-                    $scope.listEntries = data.results ? data.results : [];
-                }
-            );
-            if (parentRefresh && blade.parentRefresh) {
-                blade.parentRefresh();
+        filter.criteriaChanged = function () {
+            if (filter.keyword === null) {
+                blade.name = undefined;
+            }
+            if ($scope.pageSettings.currentPage > 1) {
+                $scope.pageSettings.currentPage = 1;
+            } else {
+                blade.refresh();
             }
         };
+        
+        function getSearchCriteria() {
+            var searchCriteria = {
+                keyword: filter.keyword ? filter.keyword : undefined,
+                sort: uiGridHelper.getSortExpression($scope),
+                skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
+                take: $scope.pageSettings.itemsPerPageCount
+            };
+            return searchCriteria;
+        }
+
+        blade.refresh = function () {
+            var searchCriteria = getSearchCriteria();
+            notifications.getNotificationList(searchCriteria, function (data) {
+                blade.isLoading = false;
+                $scope.pageSettings.totalItems = data.totalCount;
+                $scope.listEntries = data.results ? data.results : [];
+            });
+        }
 
         blade.editTemplate = function (item) {
       		var newBlade = {
@@ -58,19 +70,7 @@ angular.module('virtoCommerce.notificationsModule')
       	   blade.editTemplate(type);
         };
 
-        // filtering
-        var filter = $scope.filter = {};
-
-        filter.criteriaChanged = function () {
-            if (filter.keyword === null) {
-                blade.name = undefined;
-            }
-            if ($scope.pageSettings.currentPage > 1) {
-                $scope.pageSettings.currentPage = 1;
-            } else {
-                blade.refresh();
-            }
-        };
+        
 
         // ui-grid
         $scope.setGridOptions = function (gridId, gridOptions) {
@@ -86,17 +86,6 @@ angular.module('virtoCommerce.notificationsModule')
 
             bladeUtils.initializePagination($scope);
         };
-
-        function getSearchCriteria() {
-            var searchCriteria = {
-                searchPhrase: filter.keyword ? filter.keyword : undefined,
-                deepSearch: filter.keyword ? true : false,
-                sort: uiGridHelper.getSortExpression($scope),
-                skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
-                take: $scope.pageSettings.itemsPerPageCount
-            };
-            return searchCriteria;
-        }
 
         blade.headIcon = 'fa-list';
         //blade.refresh();

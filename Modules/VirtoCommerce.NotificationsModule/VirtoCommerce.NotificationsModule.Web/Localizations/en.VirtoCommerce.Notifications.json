@@ -167,10 +167,14 @@
                 "message": "Can't edit a template of unknown type '{{sendGatewayType}}'."
             }    
         },
-        "types" : {
-            "RegistrationEmailNotification" :  { 
+        "types": {
+            "RegistrationEmailNotification": {
                 "displayName": "Registration notification",
                 "description": "This notification is sent by email to a client when he finishes registration"
+            },
+            "TwoFactorEmailNotification": {
+                "displayName": "Two factor authentication",
+                "description": "This notification contains a security token for two factor authentication"
             }
         }
     }
