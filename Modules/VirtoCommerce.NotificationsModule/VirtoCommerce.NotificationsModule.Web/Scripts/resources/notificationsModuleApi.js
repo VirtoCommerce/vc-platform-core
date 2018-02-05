@@ -6,8 +6,7 @@ angular.module('virtoCommerce.notificationsModule')
             getTemplates: { method: 'GET', url: 'api/notifications/:type/templates', isArray: true },
             getTemplateById: { method: 'GET', url: 'api/notifications/:type/templates/:id' },
             getTemplate: { method: 'GET', url: 'api/notifications/:type/:language/templates' },
-
-//            updateTemplate: { method: 'POST', url: 'api/notifications/template' },
+            updateTemplate: { method: 'POST', url: 'api/notifications/templates' }
 //            deleteTemplate: { method: 'DELETE', url: 'api/notifications/template/:id' },
 //            prepareTestData: { method: 'GET', url: 'api/notifications/template/:type/getTestingParameters', isArray: true },
 //            resolveNotification: { method: 'POST', url: 'api/notifications/template/rendernotificationcontent' },
