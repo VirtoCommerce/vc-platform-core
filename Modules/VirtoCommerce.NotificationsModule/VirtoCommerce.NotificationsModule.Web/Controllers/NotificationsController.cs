@@ -14,37 +14,13 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
     [Route("api/notifications")]
     public class NotificationsController : Controller
     {
-        #region FakeTemplates
-
-        TemplateResult[] _templateResult = new TemplateResult[]
-        {
-            new TemplateResult
-            {
-                Id = "1",
-                NotificationType = "RegistrationEmailNotification",
-                Language = "en-US",
-                IsDefault = false,
-                Created = "2018-01-01",
-                Modified = "2018-01-01",
-                DisplayName = "notifications.types.RegistrationEmailNotification.displayName",
-                SendGatewayType = "Email",
-                CcRecipients = null,
-                BccRecipients = null,
-                Recipient = "a@a.com",
-                Sender = "s@s.s",
-                Subject = "some",
-                Body = "Thank you for registration {{firstname}} {{lastname}}",
-                DynamicProperties =  "{\n \"firstname\": \"Name\",\n \"lastname\": \"Last\"\n}"
-            }
-        };
-
-        #endregion
-
         private readonly INotificationService _notificationService;
+        private readonly INotificationTemplateService _notificationTemplateService;
 
-        public NotificationsController(INotificationService notificationService)
+        public NotificationsController(INotificationService notificationService, INotificationTemplateService notificationTemplateService)
         {
             _notificationService = notificationService;
+            _notificationTemplateService = notificationTemplateService;
         }
 
         [HttpGet]
@@ -69,20 +45,20 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         [HttpGet]
         [Route("{type}/templates")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(TemplateResult[]), 200)]
-        public IActionResult GetTemplatesByNotificationType(string type)
+        [ProducesResponseType(typeof(NotificationTemplateResult[]), 200)]
+        public IActionResult GetTemplatesByNotificationType(string type, string objectId, string objectTypeId)
         {
-            var templates = _templateResult.Where(t => t.NotificationType.Equals(type)).ToArray();
+            var templates = _notificationTemplateService.GetNotificationTemplatesByNotification(type, objectId, objectTypeId);
             return Ok(templates);
         }
 
         [HttpGet]
         [Route("{type}/templates/{id}")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(TemplateResult), 200)]
+        [ProducesResponseType(typeof(NotificationTemplateResult), 200)]
         public IActionResult GetTemplateById(string type, string id)
         {
-            var template = _templateResult.Single(t => t.NotificationType.Equals(type) && t.Id.Equals(id));
+            var template = _notificationTemplateService.GetById(type, id);
             return Ok(template);
         }
     }

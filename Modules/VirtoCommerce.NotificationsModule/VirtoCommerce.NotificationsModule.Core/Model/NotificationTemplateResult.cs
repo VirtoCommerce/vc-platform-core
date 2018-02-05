@@ -1,10 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace VirtoCommerce.NotificationsModule.Web.ViewModels
+namespace VirtoCommerce.NotificationsModule.Core.Model
 {
-    public class TemplateResult
+    public class NotificationTemplateResult
     {
         public string Id { get; set; }
         public string NotificationType { get; set; }
