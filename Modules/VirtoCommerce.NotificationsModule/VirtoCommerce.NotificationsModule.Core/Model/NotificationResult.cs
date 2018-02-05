@@ -1,4 +1,4 @@
-namespace VirtoCommerce.NotificationsModule.Web.ViewModels
+namespace VirtoCommerce.NotificationsModule.Core.Model
 {
     public class NotificationResult
     {

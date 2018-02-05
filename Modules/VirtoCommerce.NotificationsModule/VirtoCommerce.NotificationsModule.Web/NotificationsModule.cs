@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
+using VirtoCommerce.NotificationsModule.Data.Abstractions;
+using VirtoCommerce.NotificationsModule.Data.Services;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Repositories;
@@ -14,7 +16,8 @@ namespace VirtoCommerce.NotificationsModule.Web
 
         public void Initialize(IServiceCollection serviceCollection)
         {
-            //serviceCollection.AddSingleton<IMyService, MyServiceImpl>();
+            serviceCollection.AddTransient<INotificationService, NotificationServiceImpl>();
+            serviceCollection.AddTransient<INotificationTemplateService, NotificationTemplateServiceImpl>();
         }
 
         public void PostInitialize(IServiceProvider serviceProvider)

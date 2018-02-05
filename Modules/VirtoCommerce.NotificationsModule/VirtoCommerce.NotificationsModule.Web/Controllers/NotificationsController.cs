@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.NotificationsModule.Core.Model;
+using VirtoCommerce.NotificationsModule.Data.Abstractions;
 using VirtoCommerce.NotificationsModule.Web.ViewModels;
 
 namespace VirtoCommerce.NotificationsModule.Web.Controllers
@@ -12,42 +14,6 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
     [Route("api/notifications")]
     public class NotificationsController : Controller
     {
-        #region FakeNotifications
-
-        NotificationSearchResult _result = new NotificationSearchResult()
-        {
-            TotalCount = 2,
-            Results = new List<NotificationResult>()
-            {
-                new NotificationResult()
-                {
-                    Id = "1",
-                    DisplayName = "notifications.types.RegistrationEmailNotification.displayName",
-                    Description = "notifications.types.RegistrationEmailNotification.description",
-                    SendGatewayType = "Email",
-                    NotificationType = "RegistrationEmailNotification",
-                    IsActive = true,
-                    IsSuccessSend = false,
-                    AttemptCount = 0,
-                    MaxAttemptCount = 10
-                },
-                new NotificationResult()
-                {
-                    Id = "2",
-                    DisplayName = "notifications.types.TwoFactorEmailNotification.displayName",
-                    Description = "notifications.types.TwoFactorEmailNotification.description",
-                    SendGatewayType = "SMS",
-                    NotificationType = "TwoFactorEmailNotification",
-                    IsActive = true,
-                    IsSuccessSend = false,
-                    AttemptCount = 0,
-                    MaxAttemptCount = 10
-                }
-            }
-        };
-
-        #endregion
-
         #region FakeTemplates
 
         TemplateResult[] _templateResult = new TemplateResult[]
@@ -74,13 +40,20 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
 
         #endregion
 
+        private readonly INotificationService _notificationService;
+
+        public NotificationsController(INotificationService notificationService)
+        {
+            _notificationService = notificationService;
+        }
+
         [HttpGet]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(NotificationSearchResult), 200)]
+        [ProducesResponseType(typeof(GenericSearchResult<NotificationResult>), 200)]
         public IActionResult GetNotifications(NotificationsSearchCriteria searchCriteria)
         {
-            //var notifications = _notificationManager.GetNotifications();
-            return Ok(_result);
+            var notifications = _notificationService.GetNotifications();
+            return Ok(notifications);
         }
 
         [HttpGet]
@@ -89,8 +62,8 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         [ProducesResponseType(typeof(NotificationResult), 200)]
         public IActionResult GetNotificationByType(string type)
         {
-            var found = _result.Results.Single(n => n.NotificationType.Equals(type));
-            return Ok(found);
+            var notification = _notificationService.GetNotificationByTypeId(type);
+            return Ok(notification);
         }
 
         [HttpGet]

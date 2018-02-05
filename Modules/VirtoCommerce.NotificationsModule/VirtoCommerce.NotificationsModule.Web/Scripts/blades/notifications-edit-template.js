@@ -5,10 +5,6 @@
         $scope.formScope = form; 
     }
     
-    $scope.logBody = function() {
-        console.log($scope);
-    }
-
 	var blade = $scope.blade;
 	blade.updatePermission = 'platform:notification:update';
 	var codemirrorEditor;
