@@ -76,61 +76,46 @@
 	};
 
 	blade.updateTemplate = function () {
-		notifications.updateTemplate({}, blade.currentEntity, function () {
-			blade.isLoading = false;
-			blade.origEntity = _.clone(blade.currentEntity);
-			if (!blade.isNew) {
-				blade.parentBlade.initialize();
-			}
-			else {
-				blade.isNew = false;
-				if (!blade.isFirst) {
-					blade.parentBlade.initialize();
-					bladeNavigationService.closeBlade(blade);
-				}
-				else {
-					blade.parentBlade.openList(blade.notificationType, blade.objectId, blade.objectTypeId);
-				}
-			}
-		}, function (error) {
-			bladeNavigationService.setError('Error ' + error.status, blade);
-		});
+        if (blade.templateId) {
+            notifications.updateTemplate({ type: blade.notificationType, id: blade.templateId  }, blade.currentEntity, function () {
+                blade.isLoading = false;
+                blade.origEntity = _.clone(blade.currentEntity);
+                if (!blade.isNew) {
+                    blade.parentBlade.initialize();
+                }
+                else {
+                    blade.isNew = false;
+                    if (!blade.isFirst) {
+                        blade.parentBlade.initialize();
+                        bladeNavigationService.closeBlade(blade);
+                    }
+                    else {
+                        blade.parentBlade.openList(blade.notificationType, blade.objectId, blade.objectTypeId);
+                    }
+                }
+            }, function (error) {
+                bladeNavigationService.setError('Error ' + error.status, blade);
+            });
+        }
+        else {
+            notifications.createTemplate({ type: blade.notificationType }, blade.currentEntity, function (data) {
+                blade.isLoading = false;
+                blade.isNew = false;
+                blade.templateId = data.id;
+                if (!blade.isFirst) {
+                    blade.parentBlade.initialize();
+                    bladeNavigationService.closeBlade(blade);
+                }
+                else {
+                    blade.parentBlade.openList(blade.notificationType, blade.objectId, blade.objectTypeId);
+                }
+            }, function (error) {
+                bladeNavigationService.setError('Error ' + error.status, blade);
+            });
+        }
         $localStorage[keyTemplateLocalStorage] = blade.currentEntity.dynamicProperties;
 	};
 
-	blade.testResolve = function () {
-		var newBlade = {
-			id: 'testResolve',
-			title: 'notifications.blades.notifications-test-resolve.title',
-			subtitle: 'notifications.blades.notifications-test-resolve.subtitle',
-			subtitleValues: { type: blade.notificationType },
-			notificationType: blade.notificationType,
-			objectId: blade.objectId,
-			objectTypeId: blade.objectTypeId,
-			language: blade.currentEntity.language,
-			controller: 'platformWebApp.testResolveController',
-			template: '$(Platform)/Scripts/app/notifications/blades/notifications-test-resolve.tpl.html'
-		};
-
-		bladeNavigationService.showBlade(newBlade, blade);
-	}
-
-	blade.testSend = function () {
-		var newBlade = {
-			id: 'testSend',
-			title: 'platform.blades.notifications-test-send.title',
-			subtitle: 'platform.blades.notifications-test-send.subtitle',
-			subtitleValues: { type: blade.notificationType },
-			notificationType: blade.notificationType,
-			objectId: blade.objectId,
-			objectTypeId: blade.objectTypeId,
-			language: blade.currentEntity.language,
-			controller: 'platformWebApp.testSendController',
-			template: '$(Platform)/Scripts/app/notifications/blades/notifications-test-send.tpl.html'
-		};
-
-		bladeNavigationService.showBlade(newBlade, blade);
-	}
 
 	blade.delete = function () {
 		notifications.deleteTemplate({ id: blade.currentEntity.id }, function (data) {
@@ -155,24 +140,6 @@
 				},
 				canExecuteMethod: isDirty
 			},
-//			{
-//				name: "platform.commands.preview", icon: 'fa fa-eye',
-//				executeMethod: function () {
-//					blade.testResolve();
-//				},
-//				canExecuteMethod: function () {
-//					return false;
-//				},
-//				permission: blade.updatePermission
-//			},
-//			{
-//				name: "platform.commands.send", icon: 'fa fa-envelope',
-//				executeMethod: blade.testSend,
-//				canExecuteMethod: function () {
-//					return true;
-//				},
-//				permission: blade.updatePermission
-//			},
 			{
 				name: "platform.commands.set-active", icon: 'fa fa-pencil-square-o',
 				executeMethod: function () {

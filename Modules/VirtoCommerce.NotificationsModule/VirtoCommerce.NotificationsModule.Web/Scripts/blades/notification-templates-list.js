@@ -16,9 +16,9 @@ angular.module('virtoCommerce.notificationsModule')
 		    blade.isLoading = true;
             notifications.getTemplates({ type: blade.notificationType }, function (data) {
 		     	blade.currentEntities = data;
-		     	if (blade.currentEntities.length < 1) {
-		     		bladeNavigationService.closeBlade(blade);
-		     	}
+//		     	if (blade.currentEntities.length < 1) {
+//		     		bladeNavigationService.closeBlade(blade);
+//		     	}
 		     	blade.isLoading = false;
 		     });
         }
@@ -104,13 +104,13 @@ angular.module('virtoCommerce.notificationsModule')
 			    }
 	    ];
 
-      // ui-grid
-      $scope.setGridOptions = function (gridOptions) {
+        // ui-grid
+        $scope.setGridOptions = function (gridOptions) {
           uiGridHelper.initialize($scope, gridOptions, function (gridApi) {
               uiGridHelper.bindRefreshOnSortChanged($scope);
           });
           bladeUtils.initializePagination($scope);
-      };
+        };
 
-	    blade.initialize();
+        blade.initialize();
 }]);

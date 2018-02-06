@@ -12,7 +12,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
     {
         #region FakeNotifications
 
-        GenericSearchResult<NotificationResult> _result = new GenericSearchResult<NotificationResult>()
+        static GenericSearchResult<NotificationResult> _result = new GenericSearchResult<NotificationResult>()
         {
             TotalCount = 2,
             Results = new List<NotificationResult>()

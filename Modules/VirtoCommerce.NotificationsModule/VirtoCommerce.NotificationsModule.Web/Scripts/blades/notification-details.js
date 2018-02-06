@@ -23,42 +23,21 @@ function ($rootScope, $scope, $timeout, notifications, bladeNavigationService, d
 		blade.currentEntity = data;
 	};
 
-	blade.updateTemplate = function () {
+	blade.updateNotification = function () {
 		blade.isLoading = true;
-		notifications.updateTemplate({}, blade.currentEntity, function () {
+		notifications.updateNotification({ type: blade.notificationType }, blade.currentEntity, function () {
 			blade.isLoading = false;
 			blade.origEntity = _.clone(blade.currentEntity);
-			if (!blade.isNew) {
-				blade.parentBlade.initialize();
-			}
-			else {
-				blade.isNew = false;
-				if (!blade.isFirst) {
-					blade.parentBlade.initialize();
-					bladeNavigationService.closeBlade(blade);
-				}
-				else {
-					blade.parentBlade.openList(blade.notificationType, blade.objectId, blade.objectTypeId);
-				}
-			}
+			blade.parentBlade.refresh();
 		}, function (error) {
 			bladeNavigationService.setError('Error ' + error.status, blade);
 		});
 	};
 
-	blade.delete = function () {
-		notifications.deleteTemplate({ id: blade.currentEntity.id }, function (data) {
-			blade.parentBlade.initialize();
-			bladeNavigationService.closeBlade(blade);
-		}, function (error) {
-			bladeNavigationService.setError('Error ' + error.status, blade);
-		});
-	}
-
 	$scope.blade.toolbarCommands = [
 		{
 			name: "platform.commands.save", icon: 'fa fa-save',
-			executeMethod: blade.updateTemplate,
+			executeMethod: blade.updateNotification,
 			canExecuteMethod: canSave
 		},
 		{

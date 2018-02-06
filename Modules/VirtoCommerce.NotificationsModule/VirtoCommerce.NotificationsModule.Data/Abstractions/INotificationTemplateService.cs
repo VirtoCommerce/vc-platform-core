@@ -9,8 +9,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Abstractions
         NotificationTemplateResult GetById(string type, string notificationTemplateId);
         NotificationTemplateResult GetByNotification(string notificationTypeId, string objectId, string objectTypeId, string language);
         NotificationTemplateResult[] GetNotificationTemplatesByNotification(string notificationTypeId, string objectId, string objectTypeId);
-        //NotificationTemplateResult Create(NotificationTemplate notificationTemplate);
-        //void Update(NotificationTemplate[] notificationTemplates);
+        NotificationTemplateResult Create(NotificationTemplate notificationTemplate);
+        void Update(NotificationTemplate notificationTemplate);
         void Delete(string[] notificationTemplateIds);
     }
 }

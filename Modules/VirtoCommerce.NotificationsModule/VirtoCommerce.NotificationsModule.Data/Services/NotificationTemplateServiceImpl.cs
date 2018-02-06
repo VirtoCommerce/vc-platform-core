@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.NotificationsModule.Data.Abstractions;
@@ -9,7 +10,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
     {
         #region FakeTemplates
 
-        NotificationTemplateResult[] _templateResult = new NotificationTemplateResult[]
+        static List<NotificationTemplateResult> _templateResult = new List<NotificationTemplateResult>
         {
             new NotificationTemplateResult
             {
@@ -55,15 +56,22 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             return _templateResult.Where(t => t.NotificationType.Equals(notificationTypeId)).ToArray();
         }
 
-        //public NotificationTemplate Create(NotificationTemplate notificationTemplate)
-        //{
-        //    throw new System.NotImplementedException();
-        //}
+        public NotificationTemplateResult Create(NotificationTemplate notificationTemplate)
+        {
+            var template = new NotificationTemplateResult()
+            {
+                Id = Guid.NewGuid().ToString(),
+                //todo
+            };
 
-        //public void Update(NotificationTemplate[] notificationTemplates)
-        //{
-        //    throw new System.NotImplementedException();
-        //}
+            _templateResult.Add(template);
+            return template;
+        }
+
+        public void Update(NotificationTemplate notificationTemplate)
+        {
+            throw new System.NotImplementedException();
+        }
 
         public void Delete(string[] notificationTemplateIds)
         {
