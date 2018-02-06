@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Data.Abstractions;
-using VirtoCommerce.NotificationsModule.Web.ViewModels;
+using VirtoCommerce.NotificationsModule.Data.Model;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Web.Controllers
 {
@@ -26,9 +27,9 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         [HttpGet]
         [Produces("application/json")]
         [ProducesResponseType(typeof(GenericSearchResult<NotificationResult>), 200)]
-        public IActionResult GetNotifications(NotificationsSearchCriteria searchCriteria)
+        public IActionResult GetNotifications(NotificationSearchCriteria searchCriteria)
         {
-            var notifications = _notificationService.GetNotifications();
+            var notifications = _notificationService.SearchNotifications(searchCriteria);
             return Ok(notifications);
         }
 
@@ -40,6 +41,17 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         {
             var notification = _notificationService.GetNotificationByTypeId(type);
             return Ok(notification);
+        }
+
+        [HttpPost]
+        [Route("{type}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(void), 200)]
+        public IActionResult UpdateNotification([FromBody] Notification notification)
+        {
+            _notificationService.UpdateNotification(notification);
+
+            return StatusCode((int)HttpStatusCode.NoContent);
         }
 
         [HttpGet]

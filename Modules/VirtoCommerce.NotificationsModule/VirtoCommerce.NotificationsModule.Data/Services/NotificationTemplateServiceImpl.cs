@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Data.Abstractions;
+using VirtoCommerce.NotificationsModule.Data.Model;
 
 namespace VirtoCommerce.NotificationsModule.Data.Services
 {

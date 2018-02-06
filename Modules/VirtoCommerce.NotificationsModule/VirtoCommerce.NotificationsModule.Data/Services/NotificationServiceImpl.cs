@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Data.Abstractions;
+using VirtoCommerce.NotificationsModule.Data.Model;
+using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.NotificationsModule.Data.Services
 {
@@ -54,14 +56,42 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             return _result.Results.Single(n => n.NotificationType.Equals(typeId));
         }
 
-        public void UpdateNotification(NotificationResult notification)
+        public void UpdateNotification(Notification notification)
         {
-            throw new System.NotImplementedException();
+            var found = _result.Results.Single(n => n.Id.Equals(notification.Id));
+            found.IsActive = notification.IsActive;
+            //throw new System.NotImplementedException();
         }
 
         public void DeleteNotification(string id)
         {
             throw new System.NotImplementedException();
+        }
+
+        public GenericSearchResult<NotificationResult> SearchNotifications(NotificationSearchCriteria criteria)
+        {
+            var query = _result.Results.AsQueryable();
+
+            if (!string.IsNullOrEmpty(criteria.Keyword))
+            {
+                query = query.Where(n => n.NotificationType.Contains(criteria.Keyword));
+            }
+
+            var totalCount = query.Count();
+
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<NotificationResult>(x => x.NotificationType), SortDirection = SortDirection.Ascending } };
+            }
+            
+            var collection = query.OrderBySortInfos(sortInfos).Skip(criteria.Skip).Take(criteria.Take).ToList();
+            
+            return new GenericSearchResult<NotificationResult>
+            {
+                Results = collection,
+                TotalCount = totalCount
+            };
         }
     }
 }

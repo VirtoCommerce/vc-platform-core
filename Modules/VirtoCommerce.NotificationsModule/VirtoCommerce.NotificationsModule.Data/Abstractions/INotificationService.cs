@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using VirtoCommerce.NotificationsModule.Core.Model;
+using VirtoCommerce.NotificationsModule.Data.Model;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Data.Abstractions
 {
@@ -9,8 +10,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Abstractions
     {
         GenericSearchResult<NotificationResult> GetNotifications();
         NotificationResult GetNotificationByTypeId(string typeId);
-        void UpdateNotification(NotificationResult notification);
+        void UpdateNotification(Notification notification);
         void DeleteNotification(string id);
-        //SearchNotificationsResult SearchNotifications(SearchNotificationCriteria criteria);
+        GenericSearchResult<NotificationResult> SearchNotifications(NotificationSearchCriteria criteria);
     }
 }

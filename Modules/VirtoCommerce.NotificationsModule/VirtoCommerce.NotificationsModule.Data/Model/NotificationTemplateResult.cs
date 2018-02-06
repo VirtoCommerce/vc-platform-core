@@ -1,4 +1,4 @@
-namespace VirtoCommerce.NotificationsModule.Core.Model
+namespace VirtoCommerce.NotificationsModule.Data.Model
 {
     public class NotificationTemplateResult
     {
