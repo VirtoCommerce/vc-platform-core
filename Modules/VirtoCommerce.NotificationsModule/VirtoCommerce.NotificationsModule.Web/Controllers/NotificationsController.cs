@@ -36,7 +36,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         [Route("{type}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(NotificationResult), 200)]
-        public IActionResult GetNotificationByType(string type)
+        public IActionResult GetNotificationByTypeId(string type)
         {
             var notification = _notificationService.GetNotificationByTypeId(type);
 

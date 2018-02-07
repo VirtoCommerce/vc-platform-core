@@ -27,7 +27,27 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                     IsActive = true,
                     IsSuccessSend = false,
                     AttemptCount = 0,
-                    MaxAttemptCount = 10
+                    MaxAttemptCount = 10,
+                    Templates = new List<NotificationTemplateResult>()
+                    {
+                        new NotificationTemplateResult
+                        {
+                            Id = "1",
+                            NotificationType = "RegistrationEmailNotification",
+                            Language = "en-US",
+                            IsDefault = false,
+                            Created = "2018-01-01",
+                            Modified = "2018-01-01",
+                            SendGatewayType = "Email",
+                            CcRecipients = null,
+                            BccRecipients = null,
+                            Recipient = "a@a.com",
+                            Sender = "s@s.s",
+                            Subject = "some",
+                            Body = "Thank you for registration {{firstname}} {{lastname}}",
+                            DynamicProperties =  "{\n \"firstname\": \"Name\",\n \"lastname\": \"Last\"\n}"
+                        }
+                    }
                 },
                 new NotificationResult()
                 {

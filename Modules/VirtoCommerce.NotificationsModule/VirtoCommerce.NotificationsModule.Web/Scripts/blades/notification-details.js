@@ -61,13 +61,17 @@ function ($rootScope, $scope, $timeout, notifications, bladeNavigationService, d
 		},
 		mode: "liquid-html"
 	};
+    
+    $scope.$watch("blade.currentEntity", function () {
+		$scope.isValid = $scope.formScope && $scope.formScope.$valid;
+	}, true); 
 
 	function isDirty() {
 		return (!angular.equals(blade.origEntity, blade.currentEntity) || blade.isNew) && blade.hasUpdatePermission();
 	}
 
 	function canSave() {
-		return isDirty() && $scope.formScope && $scope.formScope.$valid;
+		return $scope.isValid;//isDirty() && $scope.formScope && $scope.formScope.$valid;
 	}
 
 	blade.onClose = function (closeCallback) {

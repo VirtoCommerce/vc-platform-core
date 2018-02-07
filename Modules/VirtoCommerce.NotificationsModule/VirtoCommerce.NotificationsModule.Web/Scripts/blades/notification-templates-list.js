@@ -14,13 +14,15 @@ angular.module('virtoCommerce.notificationsModule')
 
 	    blade.initialize = function () {
 		    blade.isLoading = true;
-            notifications.getTemplates({ type: blade.notificationType }, function (data) {
-		     	blade.currentEntities = data;
-//		     	if (blade.currentEntities.length < 1) {
-//		     		bladeNavigationService.closeBlade(blade);
-//		     	}
-		     	blade.isLoading = false;
-		     });
+            blade.currentEntities = blade.currentEntity.templates;
+            blade.isLoading = false;
+//            notifications.getTemplates({ type: blade.notificationType }, function (data) {
+//		     	blade.currentEntities = data;
+////		     	if (blade.currentEntities.length < 1) {
+////		     		bladeNavigationService.closeBlade(blade);
+////		     	}
+//		     	blade.isLoading = false;
+//		     });
         }
         
         function resolveType(sendGatewayType) {
@@ -44,13 +46,12 @@ angular.module('virtoCommerce.notificationsModule')
                 var newBlade = {
                     id: foundTemplate.detailBlade.id,
                     title: 'notifications.blades.notifications-edit-template.title',
-                    titleValues: { displayName: $translate.instant(template.displayName) },
-                    notificationType: blade.notificationType,
-                    templateId: template.id,
+                    titleValues: { displayName: $translate.instant(blade.currentEntity.displayName) },
+                    currentEntity: template,
+                    notification: blade.currentEntity,
                     isNew: false,
                     isFirst: false,
                     languages: blade.languages,
-                    sendGatewayType: blade.sendGatewayType,
                     objectId: blade.objectId,
                     objectTypeId: blade.objectTypeId,
                     controller: foundTemplate.detailBlade.controller,

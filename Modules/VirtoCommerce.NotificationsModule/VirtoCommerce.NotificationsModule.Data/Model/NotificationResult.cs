@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace VirtoCommerce.NotificationsModule.Data.Model
 {
     public class NotificationResult
@@ -11,5 +13,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         public bool IsSuccessSend { get; set; }
         public int AttemptCount { get; set; }
         public int MaxAttemptCount { get; set; }
+
+        public ICollection<NotificationTemplateResult> Templates { get; set; }
     }
 }
