@@ -10,8 +10,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         public string Modified { get; set; }
         public string DisplayName { get; set; }
         public string SendGatewayType { get; set; }
-        public object CcRecipients { get; set; }
-        public object BccRecipients { get; set; }
+        public string[] CcRecipients { get; set; }
+        public string[] BccRecipients { get; set; }
         public string Recipient { get; set; }
         public string Sender { get; set; }
         public string Subject { get; set; }

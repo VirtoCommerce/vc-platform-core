@@ -1,6 +1,6 @@
 angular.module('virtoCommerce.notificationsModule')
-.controller('virtoCommerce.notificationsModule.notificationTemplatesListController', ['$scope', '$translate', 'virtoCommerce.notificationsModule.notificationsModuleApi', 'virtoCommerce.notificationsModule.notificationTypesResolverService', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.settings', 'platformWebApp.ui-grid.extension', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeUtils',
-    function ($scope, $translate, notifications, notificationTypesResolverService, bladeNavigationService, dialogService, settings, gridOptionExtension, uiGridHelper, bladeUtils) {
+.controller('virtoCommerce.notificationsModule.notificationTemplatesListController', ['$scope', '$translate', 'virtoCommerce.notificationsModule.notificationTypesResolverService', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.settings', 'platformWebApp.ui-grid.extension', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeUtils',
+    function ($scope, $translate, notificationTypesResolverService, bladeNavigationService, dialogService, settings, gridOptionExtension, uiGridHelper, bladeUtils) {
         $scope.uiGridConstants = uiGridHelper.uiGridConstants;
 	    var blade = $scope.blade;
 	    blade.selectedLanguage = null;
@@ -16,13 +16,6 @@ angular.module('virtoCommerce.notificationsModule')
 		    blade.isLoading = true;
             blade.currentEntities = blade.currentEntity.templates;
             blade.isLoading = false;
-//            notifications.getTemplates({ type: blade.notificationType }, function (data) {
-//		     	blade.currentEntities = data;
-////		     	if (blade.currentEntities.length < 1) {
-////		     		bladeNavigationService.closeBlade(blade);
-////		     	}
-//		     	blade.isLoading = false;
-//		     });
         }
         
         function resolveType(sendGatewayType) {
@@ -40,14 +33,13 @@ angular.module('virtoCommerce.notificationsModule')
         }
         
         blade.openTemplate = function (template) {
-		    blade.selectedLanguage = template.language;
-            var foundTemplate = resolveType(template.sendGatewayType);
+		    var foundTemplate = resolveType(blade.currentEntity.sendGatewayType);
             if (foundTemplate) {
                 var newBlade = {
                     id: foundTemplate.detailBlade.id,
                     title: 'notifications.blades.notifications-edit-template.title',
                     titleValues: { displayName: $translate.instant(blade.currentEntity.displayName) },
-                    currentEntity: template,
+                    language: template.language,
                     notification: blade.currentEntity,
                     isNew: false,
                     isFirst: false,
@@ -73,21 +65,20 @@ angular.module('virtoCommerce.notificationsModule')
         };
                 
 	    function createTemplate(template) {
-            var foundTemplate = resolveType(template.sendGatewayType);
+            var foundTemplate = resolveType(blade.currentEntity.sendGatewayType);
             if (foundTemplate) {
                 var newBlade = {
                     id: foundTemplate.detailBlade.id,
                     title: 'notifications.blades.notifications-edit-template.title-new',
-                    titleValues: { displayName: $translate.instant(template.displayName) },
-                    notificationType: template.notificationType,
-                    displayName: template.displayName,
+                    titleValues: { displayName: $translate.instant(blade.currentEntity.displayName) },
+                    currentIndex: -1,
+                    notification: blade.currentEntity,
                     objectId: blade.objectId,
                     objectTypeId: blade.objectTypeId,
                     language: 'undefined',
                     isNew: true,
                     isFirst: false,
                     languages: blade.languages,
-                    sendGatewayType: blade.sendGatewayType,
                     controller: foundTemplate.detailBlade.controller,
                     template: foundTemplate.detailBlade.template
                 };

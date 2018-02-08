@@ -7,6 +7,7 @@ function ($rootScope, $scope, $timeout, notifications, bladeNavigationService, d
 	blade.updatePermission = 'platform:notification:update';
 	var codemirrorEditor;
 	blade.parametersForTemplate = [];
+    $scope.isValid = false;
 
 	blade.initialize = function () {
 		blade.isLoading = true;
@@ -15,19 +16,20 @@ function ($rootScope, $scope, $timeout, notifications, bladeNavigationService, d
             setNotification(data);
         })
 	};
-
+    
 	function setNotification(data) {
 		data.objectId = blade.objectId;
 		data.objectTypeId = blade.objectTypeId;
-		blade.origEntity = _.clone(data);
+		blade.origEntity = angular.copy(data);
 		blade.currentEntity = data;
+        $scope.isValid = false;
 	};
 
 	blade.updateNotification = function () {
 		blade.isLoading = true;
 		notifications.updateNotification({ type: blade.notificationType }, blade.currentEntity, function () {
 			blade.isLoading = false;
-			blade.origEntity = _.clone(blade.currentEntity);
+			blade.origEntity = angular.copy(blade.currentEntity);
 			blade.parentBlade.refresh();
 		}, function (error) {
 			bladeNavigationService.setError('Error ' + error.status, blade);
@@ -43,7 +45,7 @@ function ($rootScope, $scope, $timeout, notifications, bladeNavigationService, d
 		{
 			name: "platform.commands.undo", icon: 'fa fa-undo',
 			executeMethod: function () {
-				blade.currentEntity = _.clone(blade.origEntity);
+				blade.currentEntity = angular.copy(blade.origEntity);
 			},
 			canExecuteMethod: isDirty
 		}
@@ -67,11 +69,12 @@ function ($rootScope, $scope, $timeout, notifications, bladeNavigationService, d
 	}, true); 
 
 	function isDirty() {
-		return (!angular.equals(blade.origEntity, blade.currentEntity) || blade.isNew) && blade.hasUpdatePermission();
+        var eq = angular.equals(blade.origEntity, blade.currentEntity);
+        return (!angular.equals(blade.origEntity, blade.currentEntity) || blade.isNew) && blade.hasUpdatePermission();
 	}
 
 	function canSave() {
-		return $scope.isValid;//isDirty() && $scope.formScope && $scope.formScope.$valid;
+		return isDirty() && $scope.isValid;//$scope.formScope && $scope.formScope.$valid;
 	}
 
 	blade.onClose = function (closeCallback) {
