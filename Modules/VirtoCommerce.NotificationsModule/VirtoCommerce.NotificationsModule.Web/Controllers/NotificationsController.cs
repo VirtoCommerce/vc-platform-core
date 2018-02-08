@@ -3,6 +3,8 @@ using System.Linq;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.NotificationsModule.Core.Abstractions;
+using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Data.Abstractions;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.Platform.Core.Common;
@@ -54,48 +56,48 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
             return StatusCode((int)HttpStatusCode.NoContent);
         }
 
-        [HttpGet]
-        [Route("{type}/templates")]
-        [Produces("application/json")]
-        [ProducesResponseType(typeof(NotificationTemplateResult[]), 200)]
-        public IActionResult GetTemplatesByNotificationType(string type, string objectId, string objectTypeId)
-        {
-            var templates = _notificationTemplateService.GetNotificationTemplatesByNotification(type, objectId, objectTypeId);
+        //[HttpGet]
+        //[Route("{type}/templates")]
+        //[Produces("application/json")]
+        //[ProducesResponseType(typeof(NotificationTemplateResult[]), 200)]
+        //public IActionResult GetTemplatesByNotificationType(string type, string objectId, string objectTypeId)
+        //{
+        //    var templates = _notificationTemplateService.GetNotificationTemplatesByNotification(type, objectId, objectTypeId);
 
-            return Ok(templates);
-        }
+        //    return Ok(templates);
+        //}
 
-        [HttpGet]
-        [Route("{type}/templates/{id}")]
-        [Produces("application/json")]
-        [ProducesResponseType(typeof(NotificationTemplateResult), 200)]
-        public IActionResult GetTemplateById(string type, string id)
-        {
-            var template = _notificationTemplateService.GetById(type, id);
+        //[HttpGet]
+        //[Route("{type}/templates/{id}")]
+        //[Produces("application/json")]
+        //[ProducesResponseType(typeof(NotificationTemplateResult), 200)]
+        //public IActionResult GetTemplateById(string type, string id)
+        //{
+        //    var template = _notificationTemplateService.GetById(type, id);
 
-            return Ok(template);
-        }
+        //    return Ok(template);
+        //}
 
-        [HttpPost]
-        [Route("{type}/templates")]
-        [Produces("application/json")]
-        [ProducesResponseType(typeof(NotificationTemplateResult), 200)]
-        public IActionResult CreateTemplate(NotificationTemplate template)
-        {
-            var templateResult = _notificationTemplateService.Create(template);
+        //[HttpPost]
+        //[Route("{type}/templates")]
+        //[Produces("application/json")]
+        //[ProducesResponseType(typeof(NotificationTemplateResult), 200)]
+        //public IActionResult CreateTemplate(NotificationTemplate template)
+        //{
+        //    var templateResult = _notificationTemplateService.Create(template);
 
-            return Ok(templateResult);
-        }
+        //    return Ok(templateResult);
+        //}
 
-        [HttpPut]
-        [Route("{type}/templates/{id}")]
-        [Produces("application/json")]
-        [ProducesResponseType(typeof(void), 200)]
-        public IActionResult UpdateTemplate(NotificationTemplate template)
-        {
-            _notificationTemplateService.Update(template);
+        //[HttpPut]
+        //[Route("{type}/templates/{id}")]
+        //[Produces("application/json")]
+        //[ProducesResponseType(typeof(void), 200)]
+        //public IActionResult UpdateTemplate(NotificationTemplate template)
+        //{
+        //    _notificationTemplateService.Update(template);
 
-            return StatusCode((int)HttpStatusCode.NoContent);
-        }
+        //    return StatusCode((int)HttpStatusCode.NoContent);
+        //}
     }
 }

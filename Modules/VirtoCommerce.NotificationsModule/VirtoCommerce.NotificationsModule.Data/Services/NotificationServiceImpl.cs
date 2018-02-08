@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.NotificationsModule.Data.Abstractions;
-using VirtoCommerce.NotificationsModule.Data.Model;
+using VirtoCommerce.NotificationsModule.Core.Abstractions;
+using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.NotificationsModule.Data.Services
 {
@@ -12,68 +11,64 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
     {
         #region FakeNotifications
 
-        static GenericSearchResult<NotificationResult> _result = new GenericSearchResult<NotificationResult>()
+        static GenericSearchResult<Notification> _result = new GenericSearchResult<Notification>()
         {
             TotalCount = 2,
-            Results = new List<NotificationResult>()
+            Results = new List<Notification>()
             {
-                new NotificationResult()
+                new EmailNotification()
                 {
                     Id = "1",
-                    DisplayName = "notifications.types.RegistrationEmailNotification.displayName",
-                    Description = "notifications.types.RegistrationEmailNotification.description",
-                    SendGatewayType = "Email",
-                    NotificationType = "RegistrationEmailNotification",
+                    TenantId = "notifications.types.RegistrationEmailNotification.displayName",
+                    //Description = "notifications.types.RegistrationEmailNotification.description",
+                    TenantType = "Email",
+                    Type = "RegistrationEmailNotification",
                     IsActive = true,
-                    IsSuccessSend = false,
-                    AttemptCount = 0,
-                    MaxAttemptCount = 10,
-                    Templates = new List<NotificationTemplateResult>()
+                    CC = new string[] {},
+                    BCC = new string[] {},
+                    From = "a@a.com",
+                    To = "s@s.s",
+                    //IsSuccessSend = false,
+                    //AttemptCount = 0,
+                    //MaxAttemptCount = 10,
+                    Templates = new List<NotificationTemplate>()
                     {
-                        new NotificationTemplateResult
+                        new EmailNotificationTemplate
                         {
                             Id = "1",
-                            NotificationType = "RegistrationEmailNotification",
-                            Language = "en-US",
-                            IsDefault = false,
-                            Created = "2018-01-01",
-                            Modified = "2018-01-01",
-                            SendGatewayType = "Email",
-                            CcRecipients = new string[] {},
-                            BccRecipients = new string[] {},
-                            Recipient = "a@a.com",
-                            Sender = "s@s.s",
+                            LanguageCode = "en-US",
+                            
                             Subject = "some",
                             Body = "Thank you for registration {{firstname}} {{lastname}}",
-                            DynamicProperties =  "{\n \"firstname\": \"Name\",\n \"lastname\": \"Last\"\n}"
+                            //DynamicProperties =  "{\n \"firstname\": \"Name\",\n \"lastname\": \"Last\"\n}"
                         }
                     }
                 },
-                new NotificationResult()
+                new SmsNotification()
                 {
                     Id = "2",
-                    DisplayName = "notifications.types.TwoFactorEmailNotification.displayName",
-                    Description = "notifications.types.TwoFactorEmailNotification.description",
-                    SendGatewayType = "SMS",
-                    NotificationType = "TwoFactorEmailNotification",
+                    TenantId = "notifications.types.TwoFactorEmailNotification.displayName",
+                    //Description = "notifications.types.TwoFactorEmailNotification.description",
+                    TenantType = "SMS",
+                    Type = "TwoFactorEmailNotification",
                     IsActive = true,
-                    IsSuccessSend = false,
-                    AttemptCount = 0,
-                    MaxAttemptCount = 10
+                    //IsSuccessSend = false,
+                    //AttemptCount = 0,
+                    //MaxAttemptCount = 10
                 }
             }
         };
 
         #endregion
         
-        public GenericSearchResult<NotificationResult> GetNotifications()
+        public GenericSearchResult<Notification> GetNotifications()
         {
             return _result;
         }
 
-        public NotificationResult GetNotificationByTypeId(string typeId)
+        public Notification GetNotificationByTypeId(string typeId)
         {
-            return _result.Results.Single(n => n.NotificationType.Equals(typeId));
+            return _result.Results.Single(n => n.Type.Equals(typeId));
         }
 
         public void UpdateNotification(Notification notification)
@@ -88,13 +83,13 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             throw new System.NotImplementedException();
         }
 
-        public GenericSearchResult<NotificationResult> SearchNotifications(NotificationSearchCriteria criteria)
+        public GenericSearchResult<Notification> SearchNotifications(NotificationSearchCriteria criteria)
         {
             var query = _result.Results.AsQueryable();
 
             if (!string.IsNullOrEmpty(criteria.Keyword))
             {
-                query = query.Where(n => n.NotificationType.Contains(criteria.Keyword));
+                query = query.Where(n => n.Type.Contains(criteria.Keyword));
             }
 
             var totalCount = query.Count();
@@ -102,12 +97,12 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
             {
-                sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<NotificationResult>(x => x.NotificationType), SortDirection = SortDirection.Ascending } };
+                sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Notification>(x => x.Type), SortDirection = SortDirection.Ascending } };
             }
             
             var collection = query.OrderBySortInfos(sortInfos).Skip(criteria.Skip).Take(criteria.Take).ToList();
             
-            return new GenericSearchResult<NotificationResult>
+            return new GenericSearchResult<Notification>
             {
                 Results = collection,
                 TotalCount = totalCount
