@@ -16,7 +16,7 @@
                         <div class="form-group">
                             <label class="form-label">{{ 'notifications.blades.notification-details.labels.name' | translate }}</label>
                             <div class="form-input">
-                                <input ng-value="blade.currentEntity.displayName | translate"  ng-disabled="blade.currentEntity.displayName" focus-on required placeholder="{{ 'notifications.blades.notification-details.placeholders.notificationType' | translate }}">
+                                <input ng-value="'notificationTypes.' + blade.currentEntity.type + '.displayName' | translate"  ng-disabled="blade.currentEntity.type" focus-on required placeholder="{{ 'notifications.blades.notification-details.placeholders.notificationType' | translate }}">
                             </div>
                         </div>
                         <div class="form-group">

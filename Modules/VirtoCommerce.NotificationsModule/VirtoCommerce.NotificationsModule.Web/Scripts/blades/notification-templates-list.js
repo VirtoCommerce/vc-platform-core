@@ -18,8 +18,8 @@ angular.module('virtoCommerce.notificationsModule')
             blade.isLoading = false;
         }
         
-        function resolveType(sendGatewayType) {
-            var foundTemplate = notificationTypesResolverService.resolve(sendGatewayType);
+        function resolveType(kind) {
+            var foundTemplate = notificationTypesResolverService.resolve(kind);
             if (foundTemplate && foundTemplate.knownChildrenTypes && foundTemplate.knownChildrenTypes.length) {
                     return foundTemplate;
                 } else {
@@ -27,19 +27,19 @@ angular.module('virtoCommerce.notificationsModule')
                         id: "error",
                         title: "notifications.dialogs.unknown-sendGateway-type.title",
                         message: "notifications.dialogs.unknown-sendGateway-type.message",
-                        messageValues: { sendGatewayType: sendGatewayType },
+                        messageValues: { kind: kind },
                 });
             }
         }
         
         blade.openTemplate = function (template) {
-		    var foundTemplate = resolveType(blade.currentEntity.sendGatewayType);
+		    var foundTemplate = resolveType(blade.currentEntity.kind);
             if (foundTemplate) {
                 var newBlade = {
                     id: foundTemplate.detailBlade.id,
                     title: 'notifications.blades.notifications-edit-template.title',
-                    titleValues: { displayName: $translate.instant(blade.currentEntity.displayName) },
-                    language: template.language,
+                    titleValues: { displayName: $translate.instant('notificationTypes.' + blade.currentEntity.type + '.displayName') },
+                    languageCode: template.languageCode,
                     notification: blade.currentEntity,
                     isNew: false,
                     isFirst: false,
@@ -65,17 +65,16 @@ angular.module('virtoCommerce.notificationsModule')
         };
                 
 	    function createTemplate(template) {
-            var foundTemplate = resolveType(blade.currentEntity.sendGatewayType);
+            var foundTemplate = resolveType(blade.currentEntity.kind);
             if (foundTemplate) {
                 var newBlade = {
                     id: foundTemplate.detailBlade.id,
                     title: 'notifications.blades.notifications-edit-template.title-new',
-                    titleValues: { displayName: $translate.instant(blade.currentEntity.displayName) },
-                    currentIndex: -1,
+                    titleValues: { displayName: $translate.instant('notificationTypes.' + blade.currentEntity.type + '.displayName') },
                     notification: blade.currentEntity,
                     objectId: blade.objectId,
                     objectTypeId: blade.objectTypeId,
-                    language: 'undefined',
+                    languageCode: null,
                     isNew: true,
                     isFirst: false,
                     languages: blade.languages,

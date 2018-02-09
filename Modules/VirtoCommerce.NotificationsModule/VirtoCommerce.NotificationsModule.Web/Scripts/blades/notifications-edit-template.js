@@ -12,11 +12,12 @@
 
     var codemirrorEditor;
     var keyTemplateLocalStorage;
+    blade.dynamicProperties = '';//{"lastname": "Kostyrin"}
 
     $scope.saveChanges = function () {
         var date = new Date();
         var now = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
-        if (!blade.currentEntity.language) { blade.currentEntity.language = 'default'; }
+        if (!blade.currentEntity.languageCode) { blade.currentEntity.languageCode = 'default'; }
         if (!blade.isNew) {
             blade.currentEntity.modified = now;
             blade.origEntity = angular.copy(blade.currentEntity);
@@ -26,7 +27,7 @@
             blade.origEntity = angular.copy(blade.currentEntity);
         }
         var ind = blade.notification.templates.findIndex(function (element) {
-            return element.language === blade.currentEntity.language;
+            return element.languageCode === blade.currentEntity.languageCode;
         });
         if (ind >= 0) {
             blade.notification.templates[ind] = blade.currentEntity;
@@ -34,7 +35,9 @@
         else {
             blade.notification.templates.push(blade.currentEntity);
         }
-        $localStorage[keyTemplateLocalStorage] = blade.currentEntity.dynamicProperties;
+        if (blade.dynamicProperties) {
+            $localStorage[keyTemplateLocalStorage] = blade.dynamicProperties;    
+        }
         blade.parentBlade.initialize();
         $scope.bladeClose();
     };
@@ -62,12 +65,13 @@
     });
      
     function setTemplate(data) {
-        keyTemplateLocalStorage = blade.objectTypeId + '.' + blade.notification.notificationType;
+        
 		blade.isLoading = false;
         if (!blade.isNew) {
+            keyTemplateLocalStorage = blade.objectTypeId + '.' + blade.notification.type + '.' + blade.currentEntity.languageCode;
             var itemFromLocalStorage = $localStorage[keyTemplateLocalStorage];
             if (itemFromLocalStorage) {
-                blade.currentEntity.dynamicProperties = itemFromLocalStorage;
+                blade.dynamicProperties = itemFromLocalStorage;
             }    
         }
         
@@ -84,8 +88,8 @@
 
 	blade.initialize = function () {
 		blade.isLoading = true;
-        if (blade.language) {
-            var found = _.findWhere(blade.notification.templates, { language: blade.language });
+        if (blade.languageCode) {
+            var found = _.findWhere(blade.notification.templates, { languageCode: blade.languageCode });
             if (found){
                 blade.currentEntity = angular.copy(found);        
                 blade.origEntity = angular.copy(blade.currentEntity);
@@ -95,18 +99,18 @@
         setTemplate(blade.currentEntity);
 	};
 
-	$scope.editorOptions = {
-		lineWrapping: true,
-		lineNumbers: true,
-		parserfile: "liquid.js",
-		extraKeys: { "Ctrl-Q": function (cm) { cm.foldCode(cm.getCursor()); } },
-		foldGutter: true,
-		gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-		onLoad: function (_editor) {
-			codemirrorEditor = _editor;
-		},
-		mode: "liquid-html"
-	};
+//	$scope.editorOptions = {
+//		lineWrapping: true,
+//		lineNumbers: true,
+//		parserfile: "liquid.js",
+//		extraKeys: { "Ctrl-Q": function (cm) { cm.foldCode(cm.getCursor()); } },
+//		foldGutter: true,
+//		gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+//		onLoad: function (_editor) {
+//			codemirrorEditor = _editor;
+//		},
+//		mode: "liquid-html"
+//	};
      
     $scope.$watch("blade.currentEntity", function () {
 		$scope.isValid = formScope && formScope.$valid;

@@ -11,7 +11,7 @@ function ($rootScope, $scope, $timeout, notifications, bladeNavigationService, d
 
 	blade.initialize = function () {
 		blade.isLoading = true;
-        notifications.getNotificationByType({ type: blade.notificationType }, function(data) {
+        notifications.getNotificationByType({ type: blade.type }, function(data) {
             blade.isLoading = false;
             setNotification(data);
         })
@@ -27,7 +27,7 @@ function ($rootScope, $scope, $timeout, notifications, bladeNavigationService, d
 
 	blade.updateNotification = function () {
 		blade.isLoading = true;
-		notifications.updateNotification({ type: blade.notificationType }, blade.currentEntity, function () {
+		notifications.updateNotification({ type: blade.type }, blade.currentEntity, function () {
 			blade.isLoading = false;
 			blade.origEntity = angular.copy(blade.currentEntity);
 			blade.parentBlade.refresh();

@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
-using VirtoCommerce.NotificationsModule.Data.Abstractions;
-using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Web.Controllers
@@ -15,21 +13,21 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
     [Route("api/notifications")]
     public class NotificationsController : Controller
     {
+        private readonly INotificationSearchService _notificationSearchService;
         private readonly INotificationService _notificationService;
-        private readonly INotificationTemplateService _notificationTemplateService;
 
-        public NotificationsController(INotificationService notificationService, INotificationTemplateService notificationTemplateService)
+        public NotificationsController(INotificationSearchService notificationSearchService, INotificationService notificationService)
         {
+            _notificationSearchService = notificationSearchService;
             _notificationService = notificationService;
-            _notificationTemplateService = notificationTemplateService;
         }
 
         [HttpGet]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(GenericSearchResult<NotificationResult>), 200)]
+        [ProducesResponseType(typeof(GenericSearchResult<Notification>), 200)]
         public IActionResult GetNotifications(NotificationSearchCriteria searchCriteria)
         {
-            var notifications = _notificationService.SearchNotifications(searchCriteria);
+            var notifications = _notificationSearchService.SearchNotifications(searchCriteria);
 
             return Ok(notifications);
         }
@@ -37,10 +35,10 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         [HttpGet]
         [Route("{type}")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(NotificationResult), 200)]
+        [ProducesResponseType(typeof(Notification), 200)]
         public IActionResult GetNotificationByTypeId(string type)
         {
-            var notification = _notificationService.GetNotificationByTypeId(type);
+            var notification = _notificationService.GetNotificationByType(type);
 
             return Ok(notification);
         }
@@ -51,53 +49,9 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         [ProducesResponseType(typeof(void), 200)]
         public IActionResult UpdateNotification([FromBody] Notification notification)
         {
-            _notificationService.UpdateNotification(notification);
+            _notificationService.SaveChanges(new [] {notification});
 
             return StatusCode((int)HttpStatusCode.NoContent);
         }
-
-        //[HttpGet]
-        //[Route("{type}/templates")]
-        //[Produces("application/json")]
-        //[ProducesResponseType(typeof(NotificationTemplateResult[]), 200)]
-        //public IActionResult GetTemplatesByNotificationType(string type, string objectId, string objectTypeId)
-        //{
-        //    var templates = _notificationTemplateService.GetNotificationTemplatesByNotification(type, objectId, objectTypeId);
-
-        //    return Ok(templates);
-        //}
-
-        //[HttpGet]
-        //[Route("{type}/templates/{id}")]
-        //[Produces("application/json")]
-        //[ProducesResponseType(typeof(NotificationTemplateResult), 200)]
-        //public IActionResult GetTemplateById(string type, string id)
-        //{
-        //    var template = _notificationTemplateService.GetById(type, id);
-
-        //    return Ok(template);
-        //}
-
-        //[HttpPost]
-        //[Route("{type}/templates")]
-        //[Produces("application/json")]
-        //[ProducesResponseType(typeof(NotificationTemplateResult), 200)]
-        //public IActionResult CreateTemplate(NotificationTemplate template)
-        //{
-        //    var templateResult = _notificationTemplateService.Create(template);
-
-        //    return Ok(templateResult);
-        //}
-
-        //[HttpPut]
-        //[Route("{type}/templates/{id}")]
-        //[Produces("application/json")]
-        //[ProducesResponseType(typeof(void), 200)]
-        //public IActionResult UpdateTemplate(NotificationTemplate template)
-        //{
-        //    _notificationTemplateService.Update(template);
-
-        //    return StatusCode((int)HttpStatusCode.NoContent);
-        //}
     }
 }

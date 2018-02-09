@@ -37,10 +37,10 @@
                     "paremeter-code": "Paremeter code in template (copy this code and insert anywhere in your template)",
                     "language": "Language",
                     "blank-note": "Leave blank to use default value",
-                    "sender": "From",
-                    "recipient": "To",
-                    "cc-recipients": "CC recipients",
-                    "bcc-recipients": "BCC",
+                    "from": "From",
+                    "to": "To",
+                    "cc": "CC recipients",
+                    "bcc": "BCC",
                     "subject": "Subject",
                     "body": "Body",
                     "template": "Template",
@@ -48,10 +48,10 @@
                     "preview-data-comment": "Template context data(JSON)"
                 },
                 "descriptions": {
-                    "recipient": "Email recipient address",
-                    "cc-recipients": "CC recipients addresses",
-                    "bcc-recipients": "BCC recipient addresses",
-                    "sender": "Sender address",
+                    "to": "Email recipient address",
+                    "cc": "CC recipients addresses",
+                    "bcc": "BCC recipient addresses",
+                    "from": "Sender address",
                     "subject": "Subject of notification email"
                 },
                 "placeholders": {
@@ -162,12 +162,14 @@
             } 
         },
         "dialogs": {
-            "unknown-sendGateway-type": {
+            "unknown-kind": {
                 "title": "Error",
-                "message": "Can't edit a template of unknown type '{{sendGatewayType}}'."
+                "message": "Can't edit a template of unknown kind '{{kind}}'."
             }    
-        },
-        "types": {
+        }
+        
+    },
+    "notificationTypes": {
             "RegistrationEmailNotification": {
                 "displayName": "Registration notification",
                 "description": "This notification is sent by email to a client when he finishes registration"
@@ -177,5 +179,4 @@
                 "description": "This notification contains a security token for two factor authentication"
             }
         }
-    }
 }

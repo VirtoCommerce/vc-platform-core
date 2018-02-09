@@ -9,6 +9,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         public string TenantType { get; set; }
         public bool IsActive { get; set; }
         public string Type { get; set; }
+        public string Kind { get; set; }
         public IList<NotificationTemplate> Templates { get; set; }
     }
 }

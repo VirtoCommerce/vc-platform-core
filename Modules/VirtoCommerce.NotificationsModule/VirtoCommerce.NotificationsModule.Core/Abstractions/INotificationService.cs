@@ -5,10 +5,8 @@ namespace VirtoCommerce.NotificationsModule.Core.Abstractions
 {
     public interface INotificationService
     {
-        GenericSearchResult<Notification> GetNotifications();
-        Notification GetNotificationByTypeId(string typeId);
-        void UpdateNotification(Notification notification);
-        void DeleteNotification(string id);
-        GenericSearchResult<Notification> SearchNotifications(NotificationSearchCriteria criteria);
+        Notification GetNotificationByType(string type, string tenantId = null);
+        Notification[] GetNotificationsByIds(string ids);
+        void SaveChanges(Notification[] notifications);
     }
 }

@@ -4,6 +4,11 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
 {
     public class EmailNotification : Notification
     {
+        public EmailNotification()
+        {
+            Kind = "Email";
+        }
+
         public string From { get; set; }
         public string To { get; set; }
         public string[] CC { get; set; }

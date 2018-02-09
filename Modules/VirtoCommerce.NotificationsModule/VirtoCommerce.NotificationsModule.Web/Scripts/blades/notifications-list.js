@@ -49,8 +49,8 @@ angular.module('virtoCommerce.notificationsModule')
       		var newBlade = {
       			id: 'editNotification',
       			title: 'notifications.blades.notification-details.title',
-                titleValues: { displayName: $translate.instant(item.displayName) },
-      			notificationType: item.notificationType,
+                titleValues: { displayName: $translate.instant('notificationTypes.' + item.type + '.displayName') },
+      			type: item.type,
       			objectId: blade.objectId,
       			objectTypeId: blade.objectTypeId,
       			controller: 'virtoCommerce.notificationsModule.notificationsEditController',
