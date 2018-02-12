@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
+using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Data.Services
@@ -9,6 +11,13 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
     public class NotificationService : INotificationService
     {
+        private readonly INotificationRepository _notificationRepository;
+
+        public NotificationService(INotificationRepository notificationRepository)
+        {
+            _notificationRepository = notificationRepository;
+        }
+
         #region FakeNotifications
 
         public static GenericSearchResult<Notification> _result = new GenericSearchResult<Notification>()
@@ -48,15 +57,17 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
         #endregion
 
-        public Notification GetNotificationByType(string type, string tenantId = null)
+        public async Task<Notification> GetNotificationByType(string type, string tenantId = null)
         {
-            return _result.Results.Single(n => n.Type.Equals(type));
+            var notification = await _notificationRepository.GetNotificationEntityByType(type, tenantId, null);
+
+            return notification.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance());
         }
 
-        public Notification[] GetNotificationsByIds(string ids)
+        public async Task<Notification[]> GetNotificationsByIds(string ids)
         {
-            var arrayIds = ids.Split(';');
-            return _result.Results.Where(r => arrayIds.Any(a => a == r.Id)).ToArray();
+            var notifications = await _notificationRepository.GetNotificationByIds(ids.Split(';'));
+            return notifications.Select(n => n.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance())).ToArray();
         }
 
         public void SaveChanges(Notification[] notifications)
