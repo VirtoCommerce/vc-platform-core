@@ -7,7 +7,7 @@ using VirtoCommerce.Platform.Core.Common;
 namespace VirtoCommerce.NotificationsModule.Data.Services
 {
 
-    public class NotificationServiceImpl : INotificationService
+    public class NotificationService : INotificationService
     {
         #region FakeNotifications
 

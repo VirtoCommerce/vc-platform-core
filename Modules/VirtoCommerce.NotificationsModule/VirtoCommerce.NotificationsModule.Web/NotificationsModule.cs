@@ -16,8 +16,9 @@ namespace VirtoCommerce.NotificationsModule.Web
 
         public void Initialize(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddTransient<INotificationService, NotificationServiceImpl>();
+            serviceCollection.AddTransient<INotificationService, NotificationService>();
             serviceCollection.AddTransient<INotificationSearchService, NotificationSearchService>();
+            serviceCollection.AddTransient<INotificationMessageService, NotificationMessageService>();
 
         }
 

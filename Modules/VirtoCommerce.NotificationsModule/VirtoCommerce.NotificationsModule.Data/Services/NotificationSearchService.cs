@@ -10,7 +10,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
         public GenericSearchResult<Notification> SearchNotifications(NotificationSearchCriteria criteria)
         {
             //TODO
-            var query = NotificationServiceImpl._result.Results.AsQueryable();
+            var query = NotificationService._result.Results.AsQueryable();
 
             if (!string.IsNullOrEmpty(criteria.Keyword))
             {
