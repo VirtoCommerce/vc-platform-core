@@ -1,21 +1,71 @@
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using VirtoCommerce.NotificationsModule.Core.Model;
-using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Data.Model;
 
 namespace VirtoCommerce.NotificationsModule.Data.Model
 {
     public class NotificationEntity : AuditableEntity
     {
+        /// <summary>
+        /// Tenant id that initiate sending
+        /// </summary>
+        [StringLength(128)]
         public string TenantId { get; set; }
+
+        /// <summary>
+        /// Tenant type that initiate sending
+        /// </summary>
+        [StringLength(128)]
         public string TenantType { get; set; }
+
+        /// <summary>
+        /// Must be made sending
+        /// </summary>
         public bool IsActive { get; set; }
+
+        /// <summary>
+        /// Type of notification
+        /// </summary>
+        [StringLength(128)]
         public string Type { get; set; }
+
+        /// <summary>
+        /// Type of notification
+        /// </summary>
+        [StringLength(128)]
+        public string Kind { get; set; }
+
+        /// <summary>
+        /// Sender info (e-mail, phone number and etc.) of notification
+        /// </summary>
+        [StringLength(128)]
         public string From { get; set; }
+
+        /// <summary>
+        /// Recipient info (e-mail, phone number and etc.) of notification
+        /// </summary>
+        [StringLength(128)]
         public string To { get; set; }
+
+        /// <summary>
+        /// Copy Recipient
+        /// </summary>
+        [StringLength(128)]
         public string CC { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [StringLength(128)]
         public string BCC { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [StringLength(128)]
         public string Number { get; set; }
 
         public ObservableCollection<NotificationTemplateEntity> Templates { get; set; }
@@ -33,6 +83,20 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             notification.CreatedDate = this.CreatedDate;
             notification.ModifiedBy = this.ModifiedBy;
             notification.ModifiedDate = this.ModifiedDate;
+            notification.Kind = this.Kind;
+
+            switch (notification)
+            {
+                case EmailNotification emailNotification:
+                    emailNotification.From = this.From;
+                    emailNotification.To = this.To;
+                    //emailNotification.CC = this.CC.Split(';');
+                    //emailNotification.BCC = this.BCC.Split(';');
+                    break;
+                case SmsNotification smsNotification:
+                    smsNotification.Number = this.Number;
+                    break;
+            }
 
             return notification;
         }
@@ -50,6 +114,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             this.CreatedDate = notification.CreatedDate;
             this.ModifiedBy = notification.ModifiedBy;
             this.ModifiedDate = notification.ModifiedDate;
+            this.Kind = notification.Kind;
 
             if (notification.Templates != null)
             {
@@ -57,6 +122,19 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
                 {
                     LanguageCode = x.LanguageCode,
                 }));
+            }
+
+            switch (notification)
+            {
+                case EmailNotification emailNotification:
+                    this.From = emailNotification.From;
+                    this.To = emailNotification.To;
+                    //this.CC = string.Join(";", emailNotification.CC);
+                    //this.BCC = string.Join(";", emailNotification.BCC);
+                    break;
+                case SmsNotification smsNotification:
+                    this.Number = smsNotification.Number;
+                    break;
             }
 
             return this;

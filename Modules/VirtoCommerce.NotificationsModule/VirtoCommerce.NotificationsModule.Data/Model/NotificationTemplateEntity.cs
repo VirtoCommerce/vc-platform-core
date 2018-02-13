@@ -1,14 +1,33 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.NotificationsModule.Core.Model;
-using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Data.Model;
 
 namespace VirtoCommerce.NotificationsModule.Data.Model
 {
     public class NotificationTemplateEntity : AuditableEntity
     {
+        /// <summary>
+        /// Language
+        /// </summary>
+        [StringLength(10)]
         public string LanguageCode { get; set; }
+
+        /// <summary>
+        /// Subject of notification
+        /// </summary>
+        [StringLength(512)]
         public string Subject { get; set; }
+
+        /// <summary>
+        /// Body of notification
+        /// </summary>
         public string Body { get; set; }
+
+        /// <summary>
+        /// Message of notification
+        /// </summary>
+        [StringLength(1600)]
         public string Message { get; set; }
 
         public NotificationTemplate ToModel(NotificationTemplate message)

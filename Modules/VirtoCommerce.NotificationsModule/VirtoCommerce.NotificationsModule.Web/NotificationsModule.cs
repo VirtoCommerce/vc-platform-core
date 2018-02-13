@@ -5,8 +5,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
+using VirtoCommerce.NotificationsModule.Core.Model;
+using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Services;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 
 namespace VirtoCommerce.NotificationsModule.Web
@@ -28,18 +31,16 @@ namespace VirtoCommerce.NotificationsModule.Web
 
         public void PostInitialize(IServiceProvider serviceProvider)
         {
+            AbstractTypeFactory<Notification>.RegisterType<EmailNotification>().MapToType<NotificationEntity>();
+            AbstractTypeFactory<Notification>.RegisterType<SmsNotification>().MapToType<NotificationEntity>();
+
             //Force migrations
             using (var serviceScope = serviceProvider.CreateScope())
             {
                 var notificationDbContext = serviceScope.ServiceProvider.GetRequiredService<NotificationDbContext>();
                 notificationDbContext.Database.Migrate();
+                notificationDbContext.EnsureSeeded();
             }
-
-            
-            //using (var context = new NotificationDbContext(serviceProvider.GetRequiredService<DbContextOptions<NotificationDbContext>>()))
-            //{
-
-            //}
         }
 
         public void Uninstall()

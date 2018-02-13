@@ -18,56 +18,17 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             _notificationRepository = notificationRepository;
         }
 
-        #region FakeNotifications
-
-        public static GenericSearchResult<Notification> _result = new GenericSearchResult<Notification>()
-        {
-            TotalCount = 2,
-            Results = new List<Notification>()
-            {
-                new EmailNotification()
-                {
-                    Id = "1",
-                    Type = "RegistrationEmailNotification",
-                    IsActive = true,
-                    CC = new string[] {},
-                    BCC = new string[] {},
-                    From = "a@a.com",
-                    To = "s@s.s",
-                    Templates = new List<NotificationTemplate>()
-                    {
-                        new EmailNotificationTemplate
-                        {
-                            Id = "1",
-                            LanguageCode = "en-US",
-                            Subject = "some",
-                            Body = "Thank you for registration {{firstname}} {{lastname}}",
-                        }
-                    }
-                },
-                new SmsNotification()
-                {
-                    Id = "2",
-                    TenantType = "Notifications",
-                    Type = "TwoFactorEmailNotification",
-                    IsActive = true,
-                }
-            }
-        };
-
-        #endregion
-
         public async Task<Notification> GetNotificationByType(string type, string tenantId = null)
         {
             var notification = await _notificationRepository.GetNotificationEntityByTypeAsync(type, tenantId, null);
 
-            return notification.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance());
+            return notification.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance(notification.Kind));
         }
 
         public async Task<Notification[]> GetNotificationsByIds(string ids)
         {
             var notifications = await _notificationRepository.GetNotificationByIdsAsync(ids.Split(';'));
-            return notifications.Select(n => n.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance())).ToArray();
+            return notifications.Select(n => n.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance(n.Kind))).ToArray();
         }
 
         public void SaveChanges(Notification[] notifications)

@@ -35,7 +35,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             }
 
             var collection = await query.OrderBySortInfos(sortInfos).Skip(criteria.Skip).Take(criteria.Take).ToListAsync();
-            var list = collection.Select(c => c.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance())).ToList();
+            var list = collection.Select(c => c.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance(c.Kind))).ToList();
 
             return new GenericSearchResult<Notification>
             {

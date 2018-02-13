@@ -25,7 +25,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
 
         public Task<NotificationEntity> GetNotificationEntityByTypeAsync(string type, string tenantId, string tenantType)
         {
-            return Notifications.SingleAsync(n => n.Type.Equals(type) && n.TenantId.Equals(tenantId) && n.TenantType.Equals(tenantType));
+            return Notifications.SingleAsync(n => n.Type.Equals(type) /*&& n.TenantId.Equals(tenantId) && n.TenantType.Equals(tenantType)*/);
         }
 
         public Task<NotificationMessageEntity[]> GetNotificationMessageByIdAsync(string[] ids)
