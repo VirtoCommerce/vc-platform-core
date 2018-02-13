@@ -20,7 +20,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         public string Body { get; set; }
         public string Message { get; set; }
 
-        public Notification Notification { get; set; }
+        public NotificationEntity Notification { get; set; }
 
         public NotifcationMessage ToModel(NotifcationMessage message)
         {

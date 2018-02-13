@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
@@ -25,9 +26,9 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         [HttpGet]
         [Produces("application/json")]
         [ProducesResponseType(typeof(GenericSearchResult<Notification>), 200)]
-        public IActionResult GetNotifications(NotificationSearchCriteria searchCriteria)
+        public async Task<IActionResult> GetNotifications(NotificationSearchCriteria searchCriteria)
         {
-            var notifications = _notificationSearchService.SearchNotifications(searchCriteria);
+            var notifications = await _notificationSearchService.SearchNotificationsAsync(searchCriteria);
 
             return Ok(notifications);
         }

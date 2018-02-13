@@ -1,4 +1,6 @@
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
@@ -15,7 +17,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             _notificationRepository = notificationRepository;
         }
 
-        public GenericSearchResult<Notification> SearchNotifications(NotificationSearchCriteria criteria)
+        public async Task<GenericSearchResult<Notification>> SearchNotificationsAsync(NotificationSearchCriteria criteria)
         {
             var query = _notificationRepository.Notifications;
 
@@ -32,7 +34,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                 sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Notification>(x => x.Type), SortDirection = SortDirection.Ascending } };
             }
 
-            var collection = query.OrderBySortInfos(sortInfos).Skip(criteria.Skip).Take(criteria.Take).ToList();
+            var collection = await query.OrderBySortInfos(sortInfos).Skip(criteria.Skip).Take(criteria.Take).ToListAsync();
             var list = collection.Select(c => c.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance())).ToList();
 
             return new GenericSearchResult<Notification>

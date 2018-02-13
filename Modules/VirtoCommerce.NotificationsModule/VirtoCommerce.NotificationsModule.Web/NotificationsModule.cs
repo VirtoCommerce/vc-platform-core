@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
+using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Services;
 using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.Platform.Core.Settings;
-using VirtoCommerce.Platform.Data.Repositories;
 
 namespace VirtoCommerce.NotificationsModule.Web
 {
@@ -16,6 +17,9 @@ namespace VirtoCommerce.NotificationsModule.Web
 
         public void Initialize(IServiceCollection serviceCollection)
         {
+            var configuration = serviceCollection.BuildServiceProvider().GetService<IConfiguration>();
+            serviceCollection.AddDbContext<NotificationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce")));
+            serviceCollection.AddTransient<INotificationRepository, NotificationRepositoryImpl>();
             serviceCollection.AddTransient<INotificationService, NotificationService>();
             serviceCollection.AddTransient<INotificationSearchService, NotificationSearchService>();
             serviceCollection.AddTransient<INotificationMessageService, NotificationMessageService>();
@@ -24,8 +28,18 @@ namespace VirtoCommerce.NotificationsModule.Web
 
         public void PostInitialize(IServiceProvider serviceProvider)
         {
-            var settingsService = serviceProvider.GetRequiredService<ISettingsManager>();
-            var platformRepository = serviceProvider.GetRequiredService<IPlatformRepository>();
+            //Force migrations
+            using (var serviceScope = serviceProvider.CreateScope())
+            {
+                var notificationDbContext = serviceScope.ServiceProvider.GetRequiredService<NotificationDbContext>();
+                notificationDbContext.Database.Migrate();
+            }
+
+            
+            //using (var context = new NotificationDbContext(serviceProvider.GetRequiredService<DbContextOptions<NotificationDbContext>>()))
+            //{
+
+            //}
         }
 
         public void Uninstall()
