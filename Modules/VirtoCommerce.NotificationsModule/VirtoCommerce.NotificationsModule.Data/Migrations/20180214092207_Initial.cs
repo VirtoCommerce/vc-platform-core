@@ -40,14 +40,14 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                     Id = table.Column<string>(maxLength: 128, nullable: false),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
                     CreatedDate = table.Column<DateTime>(nullable: false),
-                    FileName = table.Column<string>(nullable: true),
+                    FileName = table.Column<string>(maxLength: 512, nullable: true),
                     LanguageCode = table.Column<string>(maxLength: 10, nullable: true),
-                    MimeType = table.Column<string>(nullable: true),
+                    MimeType = table.Column<string>(maxLength: 50, nullable: true),
                     ModifiedBy = table.Column<string>(maxLength: 64, nullable: true),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
                     NotificationEntityId = table.Column<string>(nullable: true),
-                    Size = table.Column<string>(nullable: true),
-                    Url = table.Column<string>(nullable: true)
+                    Size = table.Column<string>(maxLength: 128, nullable: true),
+                    Url = table.Column<string>(maxLength: 1000, nullable: true)
                 },
                 constraints: table =>
                 {

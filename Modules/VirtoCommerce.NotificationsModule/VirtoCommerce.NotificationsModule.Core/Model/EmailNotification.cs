@@ -7,6 +7,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         public EmailNotification()
         {
             Kind = nameof(EmailNotification);
+            Attachments = new List<EmailAttachment>();
         }
 
         public string From { get; set; }
@@ -14,7 +15,5 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         public string[] CC { get; set; }
         public string[] BCC { get; set; }
         public IList<EmailAttachment> Attachments { get; set; }
-
-        
     }
 }

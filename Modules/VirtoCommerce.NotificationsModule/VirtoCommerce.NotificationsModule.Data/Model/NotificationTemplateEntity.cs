@@ -41,6 +41,17 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             message.ModifiedBy = this.ModifiedBy;
             message.ModifiedDate = this.ModifiedDate;
 
+            switch (message)
+            {
+                case EmailNotificationTemplate emailNotificationTemplate:
+                    emailNotificationTemplate.Subject = this.Subject;
+                    emailNotificationTemplate.Body = this.Body;
+                    break;
+                case SmsNotificationTemplate smsNotificationTemplate:
+                    smsNotificationTemplate.Message = this.Message;
+                    break;
+            }
+
             return message;
         }
 
@@ -54,6 +65,17 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             this.CreatedDate = message.CreatedDate;
             this.ModifiedBy = message.ModifiedBy;
             this.ModifiedDate = message.ModifiedDate;
+
+            switch (message)
+            {
+                case EmailNotificationTemplate emailNotificationTemplate:
+                    this.Subject = emailNotificationTemplate.Subject;
+                    this.Body = emailNotificationTemplate.Body;
+                    break;
+                case SmsNotificationTemplate smsNotificationTemplate:
+                    this.Message = smsNotificationTemplate.Message;
+                    break;
+            }
 
             return this;
         }

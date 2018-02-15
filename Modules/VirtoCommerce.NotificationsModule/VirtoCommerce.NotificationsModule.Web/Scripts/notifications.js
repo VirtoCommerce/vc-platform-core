@@ -78,7 +78,7 @@ angular.module(moduleTemplateName, [])
             
             // register types
             notificationTypesResolverService.registerType({
-                type: 'Email',
+                type: 'EmailNotification',
                 icon: 'fa fa-envelope',
                 detailBlade: {
                   template: 'Modules/$(VirtoCommerce.notificationsModule)/Scripts/blades/notifications-edit-template.tpl.html'

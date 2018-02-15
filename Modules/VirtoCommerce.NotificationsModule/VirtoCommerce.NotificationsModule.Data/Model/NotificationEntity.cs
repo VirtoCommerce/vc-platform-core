@@ -3,12 +3,19 @@ using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using VirtoCommerce.NotificationsModule.Core.Model;
-using VirtoCommerce.Platform.Data.Model;
+using VirtoCommerce.Platform.Core.Common;
+using AuditableEntity = VirtoCommerce.Platform.Data.Model.AuditableEntity;
 
 namespace VirtoCommerce.NotificationsModule.Data.Model
 {
     public class NotificationEntity : AuditableEntity
     {
+        public NotificationEntity()
+        {
+            Templates = new ObservableCollection<NotificationTemplateEntity>();
+            Attachments = new ObservableCollection<EmailAttachmentEntity>();
+        }
+
         /// <summary>
         /// Tenant id that initiate sending
         /// </summary>
@@ -90,12 +97,23 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
                 case EmailNotification emailNotification:
                     emailNotification.From = this.From;
                     emailNotification.To = this.To;
-                    //emailNotification.CC = this.CC.Split(';');
-                    //emailNotification.BCC = this.BCC.Split(';');
+                    emailNotification.CC = this.CC?.Split(Environment.NewLine);
+                    emailNotification.BCC = this.BCC?.Split(Environment.NewLine);
+                    if (this.Attachments.Any())
+                    {
+                        emailNotification.Attachments = this.Attachments.Select(en =>
+                            en.ToModel(AbstractTypeFactory<EmailAttachment>.TryCreateInstance())).ToList();
+                    }
                     break;
                 case SmsNotification smsNotification:
                     smsNotification.Number = this.Number;
                     break;
+            }
+
+            if (this.Templates.Any())
+            {
+                notification.Templates = this.Templates
+                    .Select(t => t.ToModel(AbstractTypeFactory<NotificationTemplate>.TryCreateInstance($"{this.Kind}Template"))).ToList();
             }
 
             return notification;
@@ -118,10 +136,26 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 
             if (notification.Templates != null)
             {
-                this.Templates = new ObservableCollection<NotificationTemplateEntity>(notification.Templates.Select(x => new NotificationTemplateEntity
+                if (!this.Templates.Any())
                 {
-                    LanguageCode = x.LanguageCode,
-                }));
+                    this.Templates = new ObservableCollection<NotificationTemplateEntity>(notification.Templates
+                        .Select(x => AbstractTypeFactory<NotificationTemplateEntity>.TryCreateInstance().FromModel(x)));
+                }
+                else
+                {
+                    foreach (var template in notification.Templates)
+                    {
+                        var originTemplate = this.Templates.FirstOrDefault(t => t.Id.Equals(template.Id));
+                        if (originTemplate != null)
+                        {
+                            originTemplate.FromModel(template);
+                        }
+                        else
+                        {
+                            this.Templates.Add(AbstractTypeFactory<NotificationTemplateEntity>.TryCreateInstance().FromModel(template));
+                        }
+                    }
+                }
             }
 
             switch (notification)
@@ -129,8 +163,13 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
                 case EmailNotification emailNotification:
                     this.From = emailNotification.From;
                     this.To = emailNotification.To;
-                    //this.CC = string.Join(";", emailNotification.CC);
-                    //this.BCC = string.Join(";", emailNotification.BCC);
+                    this.CC = emailNotification.CC?.ToString();
+                    this.BCC = emailNotification.BCC?.ToString();
+                    if (emailNotification.Attachments != null && emailNotification.Attachments.Any())
+                    {
+                        this.Attachments = new ObservableCollection<EmailAttachmentEntity>(emailNotification.Attachments.Select(a =>
+                            AbstractTypeFactory<EmailAttachmentEntity>.TryCreateInstance().FromModel(a)));
+                    }
                     break;
                 case SmsNotification smsNotification:
                     this.Number = smsNotification.Number;

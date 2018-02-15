@@ -1,11 +1,11 @@
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
+using VirtoCommerce.NotificationsModule.Web.Infrastructure;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Web.Controllers
@@ -37,9 +37,9 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         [Route("{type}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(Notification), 200)]
-        public IActionResult GetNotificationByTypeId(string type)
+        public async Task<IActionResult> GetNotificationByTypeId(string type)
         {
-            var notification = _notificationService.GetNotificationByType(type);
+            var notification = await _notificationService.GetNotificationByTypeAsync(type);
 
             return Ok(notification);
         }
@@ -48,9 +48,9 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         [Route("{type}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(void), 200)]
-        public IActionResult UpdateNotification([FromBody] Notification notification)
+        public async Task<IActionResult> UpdateNotification([FromBody]Notification notification)
         {
-            _notificationService.SaveChanges(new [] {notification});
+            await _notificationService.SaveChangesAsync(new [] {notification});
 
             return StatusCode((int)HttpStatusCode.NoContent);
         }

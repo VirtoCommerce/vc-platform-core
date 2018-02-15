@@ -25,8 +25,8 @@ angular.module('virtoCommerce.notificationsModule')
                 } else {
                     dialogService.showNotificationDialog({
                         id: "error",
-                        title: "notifications.dialogs.unknown-sendGateway-type.title",
-                        message: "notifications.dialogs.unknown-sendGateway-type.message",
+                        title: "notifications.dialogs.unknown-kind.title",
+                        message: "notifications.dialogs.unknown-kind.message",
                         messageValues: { kind: kind },
                 });
             }

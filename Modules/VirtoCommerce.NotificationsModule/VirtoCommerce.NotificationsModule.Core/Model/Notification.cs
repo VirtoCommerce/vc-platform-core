@@ -11,7 +11,5 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         public string Type { get; set; }
         public string Kind { get; set; }
         public IList<NotificationTemplate> Templates { get; set; }
-
-        
     }
 }

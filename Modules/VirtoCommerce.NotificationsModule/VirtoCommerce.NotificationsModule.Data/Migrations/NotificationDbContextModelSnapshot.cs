@@ -31,12 +31,14 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
 
                     b.Property<DateTime>("CreatedDate");
 
-                    b.Property<string>("FileName");
+                    b.Property<string>("FileName")
+                        .HasMaxLength(512);
 
                     b.Property<string>("LanguageCode")
                         .HasMaxLength(10);
 
-                    b.Property<string>("MimeType");
+                    b.Property<string>("MimeType")
+                        .HasMaxLength(50);
 
                     b.Property<string>("ModifiedBy")
                         .HasMaxLength(64);
@@ -45,9 +47,11 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
 
                     b.Property<string>("NotificationEntityId");
 
-                    b.Property<string>("Size");
+                    b.Property<string>("Size")
+                        .HasMaxLength(128);
 
-                    b.Property<string>("Url");
+                    b.Property<string>("Url")
+                        .HasMaxLength(1000);
 
                     b.HasKey("Id");
 
