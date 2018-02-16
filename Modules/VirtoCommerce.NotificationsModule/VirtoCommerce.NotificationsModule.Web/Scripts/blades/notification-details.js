@@ -69,7 +69,6 @@ function ($rootScope, $scope, $timeout, notifications, bladeNavigationService, d
 	}, true); 
 
 	function isDirty() {
-        var eq = angular.equals(blade.origEntity, blade.currentEntity);
         return (!angular.equals(blade.origEntity, blade.currentEntity) || blade.isNew) && blade.hasUpdatePermission();
 	}
 

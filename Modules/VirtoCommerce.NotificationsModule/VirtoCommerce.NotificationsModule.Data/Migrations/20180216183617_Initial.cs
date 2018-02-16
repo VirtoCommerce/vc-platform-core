@@ -13,8 +13,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(maxLength: 128, nullable: false),
-                    BCC = table.Column<string>(maxLength: 128, nullable: true),
-                    CC = table.Column<string>(maxLength: 128, nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     From = table.Column<string>(maxLength: 128, nullable: true),
@@ -55,6 +53,32 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                     table.ForeignKey(
                         name: "FK_NotificationEmailAttachment_Notification_NotificationEntityId",
                         column: x => x.NotificationEntityId,
+                        principalTable: "Notification",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "NotificationEmailRecipient",
+                columns: table => new
+                {
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
+                    CcRecipient_NotificationId = table.Column<string>(nullable: true),
+                    EmailAddress = table.Column<string>(maxLength: 128, nullable: true),
+                    Notification_NotificationId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NotificationEmailRecipient", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_NotificationEmailRecipient_Notification_CcRecipient_NotificationId",
+                        column: x => x.CcRecipient_NotificationId,
+                        principalTable: "Notification",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_NotificationEmailRecipient_Notification_Notification_NotificationId",
+                        column: x => x.Notification_NotificationId,
                         principalTable: "Notification",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -126,6 +150,16 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                 column: "NotificationEntityId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_NotificationEmailRecipient_CcRecipient_NotificationId",
+                table: "NotificationEmailRecipient",
+                column: "CcRecipient_NotificationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_NotificationEmailRecipient_Notification_NotificationId",
+                table: "NotificationEmailRecipient",
+                column: "Notification_NotificationId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_NotificationMessage_NotificationId",
                 table: "NotificationMessage",
                 column: "NotificationId");
@@ -140,6 +174,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
         {
             migrationBuilder.DropTable(
                 name: "NotificationEmailAttachment");
+
+            migrationBuilder.DropTable(
+                name: "NotificationEmailRecipient");
 
             migrationBuilder.DropTable(
                 name: "NotificationMessage");

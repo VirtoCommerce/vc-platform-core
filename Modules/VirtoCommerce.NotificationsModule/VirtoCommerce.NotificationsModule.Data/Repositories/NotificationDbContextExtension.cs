@@ -10,10 +10,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
 
         public static void EnsureSeeded(this NotificationDbContext context)
         {
-
             if (!context.Set<NotificationEntity>().Any())
             {
-
                 var notifications = new List<NotificationEntity>()
                 {
                     new NotificationEntity
@@ -21,6 +19,16 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
                         Type = "RegistrationEmailNotification",
                         Kind = "EmailNotification",
                         IsActive = true,
+                        CcRecipients = new ObservableCollection<NotificationEmailRecipientEntity>()
+                        {
+                            new NotificationEmailRecipientEntity() { EmailAddress = "cc1@cc.com" },
+                            new NotificationEmailRecipientEntity() { EmailAddress = "cc2@cc.com" }
+                        },
+                        BccRecipients = new ObservableCollection<NotificationEmailRecipientEntity>()
+                        {
+                            new NotificationEmailRecipientEntity() { EmailAddress = "bcc1@cc.com" },
+                            new NotificationEmailRecipientEntity() { EmailAddress = "bcc2@cc.com" }
+                        },
                         Templates = new ObservableCollection<NotificationTemplateEntity>()
                         {
                             new NotificationTemplateEntity()

@@ -51,25 +51,15 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         public string To { get; set; }
 
         /// <summary>
-        /// Copy Recipient
-        /// </summary>
-        [StringLength(128)]
-        public string CC { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        [StringLength(128)]
-        public string BCC { get; set; }
-
-        /// <summary>
         /// 
         /// </summary>
         [StringLength(128)]
         public string Number { get; set; }
 
-        public ObservableCollection<NotificationTemplateEntity> Templates { get; set; } = new NullCollection<NotificationTemplateEntity>();
-        public ObservableCollection<EmailAttachmentEntity> Attachments { get; set; } = new NullCollection<EmailAttachmentEntity>();
+        public virtual ObservableCollection<NotificationTemplateEntity> Templates { get; set; } = new NullCollection<NotificationTemplateEntity>();
+        public virtual ObservableCollection<EmailAttachmentEntity> Attachments { get; set; } = new NullCollection<EmailAttachmentEntity>();
+        public virtual ObservableCollection<NotificationEmailRecipientEntity> CcRecipients { get; set; } = new NullCollection<NotificationEmailRecipientEntity>();
+        public virtual ObservableCollection<NotificationEmailRecipientEntity> BccRecipients { get; set; } = new NullCollection<NotificationEmailRecipientEntity>();
 
         public virtual Notification ToModel(Notification notification)
         {
@@ -90,8 +80,18 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
                 case EmailNotification emailNotification:
                     emailNotification.From = this.From;
                     emailNotification.To = this.To;
-                    emailNotification.CC = this.CC?.Split(Environment.NewLine).Select(cc => new EmailAddress { Value = cc}).ToArray();
-                    emailNotification.BCC = this.BCC?.Split(Environment.NewLine).Select(bcc => new EmailAddress { Value = bcc }).ToArray();
+
+                    if (!this.CcRecipients.IsNullCollection())
+                    {
+                        emailNotification.CC = this.CcRecipients
+                            .Select(cc => cc.ToModel(AbstractTypeFactory<EmailAddress>.TryCreateInstance())).ToArray();
+                    }
+                    if (!this.BccRecipients.IsNullCollection())
+                    {
+                        emailNotification.BCC = this.CcRecipients
+                            .Select(bcc => bcc.ToModel(AbstractTypeFactory<EmailAddress>.TryCreateInstance())).ToArray();
+                    }
+
                     if (!this.Attachments.IsNullCollection())
                     {
                         emailNotification.Attachments = this.Attachments.Select(en =>
@@ -137,8 +137,23 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
                 case EmailNotification emailNotification:
                     this.From = emailNotification.From;
                     this.To = emailNotification.To;
-                    this.CC = emailNotification.CC?.ToString();
-                    this.BCC = emailNotification.BCC?.ToString();
+
+                    if (emailNotification.CC != null && emailNotification.CC.Any())
+                    {
+                        this.CcRecipients = new ObservableCollection<NotificationEmailRecipientEntity>(
+                            emailNotification.CC.Select(cc =>
+                                AbstractTypeFactory<NotificationEmailRecipientEntity>.TryCreateInstance()
+                                    .FromModel(cc)));
+                    }
+
+                    if (emailNotification.BCC != null && emailNotification.BCC.Any())
+                    {
+                        this.BccRecipients = new ObservableCollection<NotificationEmailRecipientEntity>(
+                            emailNotification.BCC.Select(bcc =>
+                                AbstractTypeFactory<NotificationEmailRecipientEntity>.TryCreateInstance()
+                                    .FromModel(bcc)));
+                    }
+
                     if (emailNotification.Attachments != null && emailNotification.Attachments.Any())
                     {
                         this.Attachments = new ObservableCollection<EmailAttachmentEntity>(emailNotification.Attachments.Select(a =>
@@ -160,8 +175,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             notification.IsActive = this.IsActive;
             notification.From = this.From;
             notification.To = this.To;
-            notification.BCC = this.BCC;
-            notification.CC = this.CC;
             notification.Number = this.Number;
 
             if (!this.Templates.IsNullCollection())
@@ -172,6 +185,16 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             if (!this.Attachments.IsNullCollection())
             {
                 this.Attachments.Patch(notification.Attachments, (source, attachmentEntity) => source.Patch(attachmentEntity));
+            }
+
+            if (!this.CcRecipients.IsNullCollection())
+            {
+                this.CcRecipients.Patch(notification.CcRecipients, (source, target) => source.Patch(target));
+            }
+
+            if (!this.BccRecipients.IsNullCollection())
+            {
+                this.BccRecipients.Patch(notification.BccRecipients, (source, target) => source.Patch(target));
             }
         }
     }

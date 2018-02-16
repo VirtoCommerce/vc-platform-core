@@ -11,7 +11,7 @@ using VirtoCommerce.NotificationsModule.Data.Repositories;
 namespace VirtoCommerce.NotificationsModule.Data.Migrations
 {
     [DbContext(typeof(NotificationDbContext))]
-    [Migration("20180214092207_Initial")]
+    [Migration("20180216183617_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -61,16 +61,32 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                     b.ToTable("NotificationEmailAttachment");
                 });
 
-            modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.NotificationEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.NotificationEmailRecipientEntity", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(128);
 
-                    b.Property<string>("BCC")
+                    b.Property<string>("CcRecipient_NotificationId");
+
+                    b.Property<string>("EmailAddress")
                         .HasMaxLength(128);
 
-                    b.Property<string>("CC")
+                    b.Property<string>("Notification_NotificationId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CcRecipient_NotificationId");
+
+                    b.HasIndex("Notification_NotificationId");
+
+                    b.ToTable("NotificationEmailRecipient");
+                });
+
+            modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.NotificationEntity", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(128);
 
                     b.Property<string>("CreatedBy")
@@ -208,6 +224,19 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                     b.HasOne("VirtoCommerce.NotificationsModule.Data.Model.NotificationEntity")
                         .WithMany("Attachments")
                         .HasForeignKey("NotificationEntityId");
+                });
+
+            modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.NotificationEmailRecipientEntity", b =>
+                {
+                    b.HasOne("VirtoCommerce.NotificationsModule.Data.Model.NotificationEntity")
+                        .WithMany("CcRecipients")
+                        .HasForeignKey("CcRecipient_NotificationId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("VirtoCommerce.NotificationsModule.Data.Model.NotificationEntity")
+                        .WithMany("BccRecipients")
+                        .HasForeignKey("Notification_NotificationId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.NotificationMessageEntity", b =>

@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
 namespace VirtoCommerce.Platform.Core.Common
@@ -7,6 +8,7 @@ namespace VirtoCommerce.Platform.Core.Common
     {
         private int? _requestedHashCode;
 
+        [StringLength(128)]
         public string Id { get; set; }
 
         public bool IsTransient()

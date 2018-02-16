@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Core.Model
 {
@@ -17,7 +18,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         public IList<EmailAttachment> Attachments { get; set; }
     }
 
-    public class EmailAddress
+    public class EmailAddress : AuditableEntity
     {
         public string Value { get; set; }
     }

@@ -27,7 +27,7 @@
             blade.origEntity = angular.copy(blade.currentEntity);
         }
         var ind = blade.notification.templates.findIndex(function (element) {
-            return element.languageCode === blade.currentEntity.languageCode;
+            return element.id === blade.currentEntity.id || element.languageCode === blade.currentEntity.languageCode;
         });
         if (ind >= 0) {
             blade.notification.templates[ind] = blade.currentEntity;

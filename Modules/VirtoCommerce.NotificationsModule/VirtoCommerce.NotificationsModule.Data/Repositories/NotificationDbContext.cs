@@ -17,6 +17,21 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             modelBuilder.Entity<NotificationTemplateEntity>().ToTable("NotificationTemplate");
             modelBuilder.Entity<NotificationMessageEntity>().ToTable("NotificationMessage");
             modelBuilder.Entity<EmailAttachmentEntity>().ToTable("NotificationEmailAttachment");
+            modelBuilder.Entity<NotificationEmailRecipientEntity>().ToTable("NotificationEmailRecipient");
+
+            modelBuilder.Entity<NotificationEntity>()
+                .HasMany(n => n.CcRecipients)
+                .WithOne()
+                .HasForeignKey("CcRecipient_NotificationId")
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<NotificationEntity>()
+                .HasMany(n => n.BccRecipients)
+                .WithOne()
+                .HasForeignKey("Notification_NotificationId")
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
 
             base.OnModelCreating(modelBuilder);
         }

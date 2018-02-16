@@ -47,9 +47,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                     foreach (var notification in notifications)
                     {
                         var dataTargetNotification = existingNotificationEntities.FirstOrDefault(n => n.Id.Equals(notification.Id));
-
-                        var originalNotification = dataTargetNotification != null ? dataTargetNotification.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance()) : notification;
                         var modifiedEntity = AbstractTypeFactory<NotificationEntity>.TryCreateInstance().FromModel(notification, pkMap);
+
                         if (dataTargetNotification != null)
                         {
                             changeTracker.Attach(dataTargetNotification);
