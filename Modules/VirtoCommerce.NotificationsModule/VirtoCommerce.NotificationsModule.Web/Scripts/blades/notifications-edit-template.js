@@ -112,8 +112,13 @@
 //		mode: "liquid-html"
 //	};
      
+    function isDirty() {
+        return (!angular.equals(blade.origEntity, blade.currentEntity) || blade.isNew) && blade.hasUpdatePermission();
+	}
+ 
+     
     $scope.$watch("blade.currentEntity", function () {
-		$scope.isValid = formScope && formScope.$valid;
+		$scope.isValid = isDirty() && formScope && formScope.$valid;
 	}, true); 
 
 	blade.headIcon = 'fa-envelope';

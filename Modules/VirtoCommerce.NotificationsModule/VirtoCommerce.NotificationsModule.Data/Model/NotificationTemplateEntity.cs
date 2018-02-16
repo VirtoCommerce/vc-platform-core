@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.NotificationsModule.Core.Model;
-using VirtoCommerce.Platform.Data.Model;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Data.Model
 {
@@ -30,7 +30,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         [StringLength(1600)]
         public string Message { get; set; }
 
-        public NotificationTemplate ToModel(NotificationTemplate message)
+        public virtual NotificationTemplate ToModel(NotificationTemplate message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
@@ -55,7 +55,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             return message;
         }
 
-        public NotificationTemplateEntity FromModel(NotificationTemplate message)
+        public virtual NotificationTemplateEntity FromModel(NotificationTemplate message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
@@ -78,6 +78,14 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             }
 
             return this;
+        }
+
+        public virtual void Patch(NotificationTemplateEntity template)
+        {
+            template.LanguageCode = this.LanguageCode;
+            template.Subject = this.Subject;
+            template.Body = this.Body;
+            template.Message = this.Message;
         }
     }
 }

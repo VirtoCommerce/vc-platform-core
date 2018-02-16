@@ -4,18 +4,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
-using AuditableEntity = VirtoCommerce.Platform.Data.Model.AuditableEntity;
 
 namespace VirtoCommerce.NotificationsModule.Data.Model
 {
     public class NotificationEntity : AuditableEntity
     {
-        public NotificationEntity()
-        {
-            Templates = new ObservableCollection<NotificationTemplateEntity>();
-            Attachments = new ObservableCollection<EmailAttachmentEntity>();
-        }
-
         /// <summary>
         /// Tenant id that initiate sending
         /// </summary>
@@ -75,8 +68,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         [StringLength(128)]
         public string Number { get; set; }
 
-        public ObservableCollection<NotificationTemplateEntity> Templates { get; set; }
-        public ObservableCollection<EmailAttachmentEntity> Attachments { get; set; }
+        public ObservableCollection<NotificationTemplateEntity> Templates { get; set; } = new NullCollection<NotificationTemplateEntity>();
+        public ObservableCollection<EmailAttachmentEntity> Attachments { get; set; } = new NullCollection<EmailAttachmentEntity>();
 
         public virtual Notification ToModel(Notification notification)
         {
@@ -97,9 +90,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
                 case EmailNotification emailNotification:
                     emailNotification.From = this.From;
                     emailNotification.To = this.To;
-                    emailNotification.CC = this.CC?.Split(Environment.NewLine);
-                    emailNotification.BCC = this.BCC?.Split(Environment.NewLine);
-                    if (this.Attachments.Any())
+                    emailNotification.CC = this.CC?.Split(Environment.NewLine).Select(cc => new EmailAddress { Value = cc}).ToArray();
+                    emailNotification.BCC = this.BCC?.Split(Environment.NewLine).Select(bcc => new EmailAddress { Value = bcc }).ToArray();
+                    if (!this.Attachments.IsNullCollection())
                     {
                         emailNotification.Attachments = this.Attachments.Select(en =>
                             en.ToModel(AbstractTypeFactory<EmailAttachment>.TryCreateInstance())).ToList();
@@ -110,18 +103,17 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
                     break;
             }
 
-            if (this.Templates.Any())
-            {
-                notification.Templates = this.Templates
-                    .Select(t => t.ToModel(AbstractTypeFactory<NotificationTemplate>.TryCreateInstance($"{this.Kind}Template"))).ToList();
-            }
+            notification.Templates = this.Templates
+                .Select(t => t.ToModel(AbstractTypeFactory<NotificationTemplate>.TryCreateInstance($"{this.Kind}Template"))).ToList();
 
             return notification;
         }
 
-        public virtual NotificationEntity FromModel(Notification notification)
+        public virtual NotificationEntity FromModel(Notification notification, PrimaryKeyResolvingMap pkMap)
         {
             if (notification == null) throw new ArgumentNullException(nameof(notification));
+
+            pkMap.AddPair(notification, this);
 
             this.Id = notification.Id;
             this.TenantId = notification.TenantId;
@@ -134,28 +126,10 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             this.ModifiedDate = notification.ModifiedDate;
             this.Kind = notification.Kind;
 
-            if (notification.Templates != null)
+            if (notification.Templates != null && notification.Templates.Any())
             {
-                if (!this.Templates.Any())
-                {
-                    this.Templates = new ObservableCollection<NotificationTemplateEntity>(notification.Templates
+                this.Templates = new ObservableCollection<NotificationTemplateEntity>(notification.Templates
                         .Select(x => AbstractTypeFactory<NotificationTemplateEntity>.TryCreateInstance().FromModel(x)));
-                }
-                else
-                {
-                    foreach (var template in notification.Templates)
-                    {
-                        var originTemplate = this.Templates.FirstOrDefault(t => t.Id.Equals(template.Id));
-                        if (originTemplate != null)
-                        {
-                            originTemplate.FromModel(template);
-                        }
-                        else
-                        {
-                            this.Templates.Add(AbstractTypeFactory<NotificationTemplateEntity>.TryCreateInstance().FromModel(template));
-                        }
-                    }
-                }
             }
 
             switch (notification)
@@ -177,6 +151,28 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             }
 
             return this;
+        }
+
+        public virtual void Patch(NotificationEntity notification)
+        {
+            notification.Type = this.Type;
+            notification.Kind = this.Kind;
+            notification.IsActive = this.IsActive;
+            notification.From = this.From;
+            notification.To = this.To;
+            notification.BCC = this.BCC;
+            notification.CC = this.CC;
+            notification.Number = this.Number;
+
+            if (!this.Templates.IsNullCollection())
+            {
+                this.Templates.Patch(notification.Templates, (sourceTemplate, templateEntity) => sourceTemplate.Patch(templateEntity));
+            }
+
+            if (!this.Attachments.IsNullCollection())
+            {
+                this.Attachments.Patch(notification.Attachments, (source, attachmentEntity) => source.Patch(attachmentEntity));
+            }
         }
     }
 }

@@ -1,7 +1,8 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.NotificationsModule.Core.Model;
-using VirtoCommerce.Platform.Data.Model;
+using VirtoCommerce.Platform.Core.Common;
+
 
 namespace VirtoCommerce.NotificationsModule.Data.Model
 {
@@ -81,7 +82,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 
         public NotificationEntity Notification { get; set; }
 
-        public NotifcationMessage ToModel(NotifcationMessage message)
+        public virtual NotifcationMessage ToModel(NotifcationMessage message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
@@ -103,7 +104,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             return message;
         }
 
-        public NotificationMessageEntity FromModel(NotifcationMessage message)
+        public virtual NotificationMessageEntity FromModel(NotifcationMessage message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 

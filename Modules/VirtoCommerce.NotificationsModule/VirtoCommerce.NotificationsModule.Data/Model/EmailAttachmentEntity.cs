@@ -2,7 +2,6 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
-using AuditableEntity = VirtoCommerce.Platform.Data.Model.AuditableEntity;
 
 namespace VirtoCommerce.NotificationsModule.Data.Model
 {
@@ -60,6 +59,15 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             this.LanguageCode = emailAttachment.LanguageCode;
 
             return this;
+        }
+
+        public void Patch(EmailAttachmentEntity attachment)
+        {
+            attachment.LanguageCode = this.LanguageCode;
+            attachment.FileName = this.FileName;
+            attachment.MimeType = this.MimeType;
+            attachment.Size = this.Size;
+            attachment.Url = this.Url;
         }
     }
 }

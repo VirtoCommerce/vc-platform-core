@@ -6,11 +6,12 @@ using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.NotificationsModule.Data.Services
 {
 
-    public class NotificationService : INotificationService
+    public class NotificationService : ServiceBase, INotificationService
     {
         private readonly INotificationRepository _notificationRepository;
         private readonly Func<INotificationRepository> _repositoryFactory;
@@ -38,6 +39,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
         {
             if (notifications != null && notifications.Any())
             {
+                var pkMap = new PrimaryKeyResolvingMap();
                 using (var repository = _repositoryFactory())
                 using (var changeTracker = new ObservableChangeTracker())
                 {
@@ -46,23 +48,21 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                     {
                         var dataTargetNotification = existingNotificationEntities.FirstOrDefault(n => n.Id.Equals(notification.Id));
 
+                        var originalNotification = dataTargetNotification != null ? dataTargetNotification.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance()) : notification;
+                        var modifiedEntity = AbstractTypeFactory<NotificationEntity>.TryCreateInstance().FromModel(notification, pkMap);
                         if (dataTargetNotification != null)
                         {
-                            dataTargetNotification.FromModel(notification);
                             changeTracker.Attach(dataTargetNotification);
+                            modifiedEntity?.Patch(dataTargetNotification);
                         }
                         else
                         {
-                            var notificationEntity = AbstractTypeFactory<NotificationEntity>.TryCreateInstance();
-                            if (notificationEntity != null)
-                            {
-                                notificationEntity = notificationEntity.FromModel(notification);
-                                repository.Add(notificationEntity);
-                            }
+                            repository.Add(modifiedEntity);
                         }
                     }
 
-                    repository.UnitOfWork.Commit();
+                    CommitChanges(repository);
+                    pkMap.ResolvePrimaryKeys();
                 }
             }
         }
