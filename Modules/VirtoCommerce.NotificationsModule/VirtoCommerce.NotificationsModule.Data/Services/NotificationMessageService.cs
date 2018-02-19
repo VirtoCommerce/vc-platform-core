@@ -5,12 +5,12 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 {
     public class NotificationMessageService : INotificationMessageService
     {
-        public NotifcationMessage[] GetNotificationsMessageByIds(string[] ids)
+        public NotificationMessage[] GetNotificationsMessageByIds(string[] ids)
         {
             throw new System.NotImplementedException();
         }
 
-        public void SaveChanges(NotifcationMessage[] messages)
+        public void SaveNotificationMessages(NotificationMessage[] messages)
         {
             throw new System.NotImplementedException();
         }

@@ -4,7 +4,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Abstractions
 {
     public interface INotificationMessageService
     {
-        NotifcationMessage[] GetNotificationsMessageByIds(string[] ids);
-        void SaveChanges(NotifcationMessage[] messages);
+        NotificationMessage[] GetNotificationsMessageByIds(string[] ids);
+        void SaveNotificationMessages(NotificationMessage[] messages);
     }
 }

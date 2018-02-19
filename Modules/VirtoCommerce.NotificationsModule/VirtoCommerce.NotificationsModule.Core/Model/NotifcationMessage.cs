@@ -3,7 +3,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Core.Model
 {
-    public abstract class NotifcationMessage : AuditableEntity
+    public abstract class NotificationMessage : AuditableEntity
     {
         public string TenantId { get; set; }
         public string TenantType { get; set; }

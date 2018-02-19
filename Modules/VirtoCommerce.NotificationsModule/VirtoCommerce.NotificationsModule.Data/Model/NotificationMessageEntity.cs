@@ -82,7 +82,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 
         public NotificationEntity Notification { get; set; }
 
-        public virtual NotifcationMessage ToModel(NotifcationMessage message)
+        public virtual NotificationMessage ToModel(NotificationMessage message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
@@ -104,7 +104,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             return message;
         }
 
-        public virtual NotificationMessageEntity FromModel(NotifcationMessage message)
+        public virtual NotificationMessageEntity FromModel(NotificationMessage message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 

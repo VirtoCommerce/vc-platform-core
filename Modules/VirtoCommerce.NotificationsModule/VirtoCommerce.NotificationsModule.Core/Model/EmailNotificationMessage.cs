@@ -1,6 +1,6 @@
 namespace VirtoCommerce.NotificationsModule.Core.Model
 {
-    public class EmailNotificationMessage : NotifcationMessage
+    public class EmailNotificationMessage : NotificationMessage
     {
         public string From { get; set; }
         public string To { get; set; }
