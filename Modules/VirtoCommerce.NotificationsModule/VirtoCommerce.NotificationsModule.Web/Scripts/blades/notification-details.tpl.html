@@ -19,6 +19,52 @@
                                 <input ng-value="'notificationTypes.' + blade.currentEntity.type + '.displayName' | translate"  ng-disabled="blade.currentEntity.type" focus-on required placeholder="{{ 'notifications.blades.notification-details.placeholders.notificationType' | translate }}">
                             </div>
                         </div>
+                        <div class="form-group" style="margin:0">
+                            <label class="form-label" style="margin:0">{{'notifications.blades.notifications-edit-template.labels.from' | translate}}</label>
+                            <div class="form-group" style="margin-top:0">
+                                <div class="form-input">
+                                    <input type="email" focus-on="" class="form-control" ng-model="blade.currentEntity.from" placeholder="{{ 'notifications.blades.notifications-edit-template.placeholders.email-addresses-note' | translate }}"/>
+                                </div>
+                                <div class="table-descr">
+                                    {{ 'notifications.blades.notifications-edit-template.labels.blank-note' | translate }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin:0">
+                            <label class="form-label" style="margin:0">{{'notifications.blades.notifications-edit-template.labels.to' | translate}}</label>
+                            <div class="form-group" style="margin-top:0">
+                                <div class="form-input">
+                                    <input type="email" focus-on="" class="form-control" ng-model="blade.currentEntity.to" placeholder="{{ 'notifications.blades.notifications-edit-template.placeholders.recipient' | translate }}"/>
+                                </div>
+                                <div class="table-descr">
+                                    {{ 'notifications.blades.notifications-edit-template.descriptions.to' | translate }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin:0">
+                            <label class="form-label" style="margin:0">{{'notifications.blades.notifications-edit-template.labels.cc' | translate}}</label>
+                            <div class="form-group" style="margin-top:0">
+                                <tags-input ng-model="blade.currentEntity.cc"
+                                            display-property="value"
+                                            placeholder="{{ 'notifications.blades.notifications-edit-template.placeholders.email-addresses-note' | translate }}">
+                                </tags-input>
+                                <div class="table-descr">
+                                    {{ 'notifications.blades.notifications-edit-template.labels.blank-note' | translate }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin:0">
+                            <label class="form-label" style="margin:0">{{'notifications.blades.notifications-edit-template.labels.bcc' | translate}}</label>
+                            <div class="form-group" style="margin-top:0">
+                                <tags-input ng-model="blade.currentEntity.bcc"
+                                            display-property="value"
+                                            placeholder="{{ 'notifications.blades.notifications-edit-template.placeholders.email-addresses-note' | translate }}">
+                                </tags-input>
+                                <div class="table-descr">
+                                    {{ 'notifications.blades.notifications-edit-template.descriptions.to' | translate }}
+                                </div>
+                            </div>
+                        </div>
                         <div class="form-group">
                             <va-widget-container group="notificationsDetail" blade="blade" data="blade.currentEntity" gridster-opts="{width: 526}"></va-widget-container>
                         </div>

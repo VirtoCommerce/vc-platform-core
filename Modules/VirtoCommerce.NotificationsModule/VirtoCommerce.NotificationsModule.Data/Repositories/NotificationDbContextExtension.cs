@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using VirtoCommerce.NotificationsModule.Data.Enums;
 using VirtoCommerce.NotificationsModule.Data.Model;
 
 namespace VirtoCommerce.NotificationsModule.Data.Repositories
@@ -19,15 +20,12 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
                         Type = "RegistrationEmailNotification",
                         Kind = "EmailNotification",
                         IsActive = true,
-                        CcRecipients = new ObservableCollection<NotificationEmailRecipientEntity>()
+                        Recipients = new ObservableCollection<NotificationEmailRecipientEntity>()
                         {
-                            new NotificationEmailRecipientEntity() { EmailAddress = "cc1@cc.com" },
-                            new NotificationEmailRecipientEntity() { EmailAddress = "cc2@cc.com" }
-                        },
-                        BccRecipients = new ObservableCollection<NotificationEmailRecipientEntity>()
-                        {
-                            new NotificationEmailRecipientEntity() { EmailAddress = "bcc1@cc.com" },
-                            new NotificationEmailRecipientEntity() { EmailAddress = "bcc2@cc.com" }
+                            new NotificationEmailRecipientEntity() { EmailAddress = "cc1@cc.com", RecipientType = NotificationRecipientType.Cc},
+                            new NotificationEmailRecipientEntity() { EmailAddress = "cc2@cc.com", RecipientType = NotificationRecipientType.Cc },
+                            new NotificationEmailRecipientEntity() { EmailAddress = "bcc1@cc.com", RecipientType = NotificationRecipientType.Bcc},
+                            new NotificationEmailRecipientEntity() { EmailAddress = "bcc2@cc.com", RecipientType = NotificationRecipientType.Bcc}
                         },
                         Templates = new ObservableCollection<NotificationTemplateEntity>()
                         {

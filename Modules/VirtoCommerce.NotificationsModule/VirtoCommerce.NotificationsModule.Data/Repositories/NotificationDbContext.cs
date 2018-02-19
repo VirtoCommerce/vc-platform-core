@@ -6,11 +6,12 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
 {
     public class NotificationDbContext : DbContextWithTriggers
     {
+        //Add-Migration Initial -Context VirtoCommerce.NotificationsModule.Data.Repositories.NotificationDbContext -StartupProject VirtoCommerce.NotificationsModule.Data  -Verbose -OutputDir Migrations
         public NotificationDbContext(DbContextOptions<NotificationDbContext> options)
             : base(options)
         {
         }
-
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<NotificationEntity>().ToTable("Notification");
@@ -20,18 +21,11 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             modelBuilder.Entity<NotificationEmailRecipientEntity>().ToTable("NotificationEmailRecipient");
 
             modelBuilder.Entity<NotificationEntity>()
-                .HasMany(n => n.CcRecipients)
+                .HasMany(n => n.Recipients)
                 .WithOne()
-                .HasForeignKey("CcRecipient_NotificationId")
+                .HasForeignKey("NotificationId")
                 .IsRequired(false)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<NotificationEntity>()
-                .HasMany(n => n.BccRecipients)
-                .WithOne()
-                .HasForeignKey("Notification_NotificationId")
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             base.OnModelCreating(modelBuilder);
         }

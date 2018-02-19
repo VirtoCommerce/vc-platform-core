@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
+using VirtoCommerce.NotificationsModule.Core.NotificationTypes;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Services;
@@ -29,9 +30,11 @@ namespace VirtoCommerce.NotificationsModule.Web
             serviceCollection.AddDbContext<NotificationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce")));
             serviceCollection.AddTransient<INotificationRepository, NotificationRepositoryImpl>();
             serviceCollection.AddSingleton<Func<INotificationRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<INotificationRepository>());
-            serviceCollection.AddTransient<INotificationService, NotificationService>();
-            serviceCollection.AddTransient<INotificationSearchService, NotificationSearchService>();
-            serviceCollection.AddTransient<INotificationMessageService, NotificationMessageService>();
+            serviceCollection.AddScoped<INotificationService, NotificationService>();
+            serviceCollection.AddScoped<INotificationRegistrar, NotificationService>();
+            serviceCollection.AddScoped<INotificationSearchService, NotificationSearchService>();
+            serviceCollection.AddScoped<INotificationMessageService, NotificationMessageService>();
+            
         }
 
         public void PostInitialize(IServiceProvider serviceProvider)
@@ -52,6 +55,10 @@ namespace VirtoCommerce.NotificationsModule.Web
                 notificationDbContext.Database.Migrate();
                 notificationDbContext.EnsureSeeded();
             }
+
+            var notificationRegistrar = serviceProvider.GetService<INotificationRegistrar>();
+            notificationRegistrar.RegisterNotification<OrderSendEmailNotification>();
+            notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
         }
 
         public void Uninstall()

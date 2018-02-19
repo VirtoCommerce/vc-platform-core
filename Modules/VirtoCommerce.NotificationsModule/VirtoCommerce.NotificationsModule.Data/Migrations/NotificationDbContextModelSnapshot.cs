@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
 using System;
+using VirtoCommerce.NotificationsModule.Data.Enums;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 
 namespace VirtoCommerce.NotificationsModule.Data.Migrations
@@ -66,18 +67,16 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(128);
 
-                    b.Property<string>("CcRecipient_NotificationId");
-
                     b.Property<string>("EmailAddress")
                         .HasMaxLength(128);
 
-                    b.Property<string>("Notification_NotificationId");
+                    b.Property<string>("NotificationId");
+
+                    b.Property<int>("RecipientType");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CcRecipient_NotificationId");
-
-                    b.HasIndex("Notification_NotificationId");
+                    b.HasIndex("NotificationId");
 
                     b.ToTable("NotificationEmailRecipient");
                 });
@@ -228,14 +227,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.NotificationEmailRecipientEntity", b =>
                 {
                     b.HasOne("VirtoCommerce.NotificationsModule.Data.Model.NotificationEntity")
-                        .WithMany("CcRecipients")
-                        .HasForeignKey("CcRecipient_NotificationId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("VirtoCommerce.NotificationsModule.Data.Model.NotificationEntity")
-                        .WithMany("BccRecipients")
-                        .HasForeignKey("Notification_NotificationId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .WithMany("Recipients")
+                        .HasForeignKey("NotificationId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.NotificationMessageEntity", b =>

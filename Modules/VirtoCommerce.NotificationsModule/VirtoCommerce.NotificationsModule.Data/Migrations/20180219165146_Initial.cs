@@ -63,25 +63,19 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(maxLength: 128, nullable: false),
-                    CcRecipient_NotificationId = table.Column<string>(nullable: true),
                     EmailAddress = table.Column<string>(maxLength: 128, nullable: true),
-                    Notification_NotificationId = table.Column<string>(nullable: true)
+                    NotificationId = table.Column<string>(nullable: true),
+                    RecipientType = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_NotificationEmailRecipient", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_NotificationEmailRecipient_Notification_CcRecipient_NotificationId",
-                        column: x => x.CcRecipient_NotificationId,
+                        name: "FK_NotificationEmailRecipient_Notification_NotificationId",
+                        column: x => x.NotificationId,
                         principalTable: "Notification",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_NotificationEmailRecipient_Notification_Notification_NotificationId",
-                        column: x => x.Notification_NotificationId,
-                        principalTable: "Notification",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -150,14 +144,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                 column: "NotificationEntityId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_NotificationEmailRecipient_CcRecipient_NotificationId",
+                name: "IX_NotificationEmailRecipient_NotificationId",
                 table: "NotificationEmailRecipient",
-                column: "CcRecipient_NotificationId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_NotificationEmailRecipient_Notification_NotificationId",
-                table: "NotificationEmailRecipient",
-                column: "Notification_NotificationId");
+                column: "NotificationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_NotificationMessage_NotificationId",

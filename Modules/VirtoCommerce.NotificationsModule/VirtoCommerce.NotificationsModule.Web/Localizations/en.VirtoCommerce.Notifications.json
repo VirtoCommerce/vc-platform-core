@@ -165,7 +165,11 @@
             "unknown-kind": {
                 "title": "Error",
                 "message": "Can't edit a template of unknown kind '{{kind}}'."
-            }    
+            },
+            "notification-details-save": {
+                "title": "Save changes",
+                "message": "The notification template has been modified. Do you want to save changes?"
+            }
         }
         
     },

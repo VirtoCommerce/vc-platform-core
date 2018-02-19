@@ -10,10 +10,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Smidge;
 using Swashbuckle.AspNetCore.Swagger;
 using VirtoCommerce.Platform.Core.Common;
@@ -58,7 +61,15 @@ namespace VirtoCommerce.Platform.Web
 
             PlatformVersion.CurrentVersion = SemanticVersion.Parse(Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default.Application.ApplicationVersion);
 
-            var mvcBuilder = services.AddMvc();
+            var mvcBuilder = services.AddMvc().AddJsonOptions(options =>
+                {
+                    options.SerializerSettings.Error = (sender, args) =>
+                    {
+                        var log = services.BuildServiceProvider().GetService<ILogger<JsonSerializerSettings>>();
+                        log.LogError(args.ErrorContext.Error, args.ErrorContext.Error.Message);
+                    };
+                }
+            );
             services.AddModules(mvcBuilder, options =>
             {
                 options.DiscoveryPath = HostingEnvironment.MapPath(@"~/Modules");

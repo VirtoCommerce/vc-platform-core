@@ -18,7 +18,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
         public Task<NotificationEntity[]> GetNotificationByIdsAsync(string[] ids)
         {
             return Notifications
-                .Include(n => n.Templates).Include(n => n.Attachments)
+                .Include(n => n.Templates)
+                .Include(n => n.Attachments)
+                .Include(n => n.Recipients)
                 .Where(x => ids.Contains(x.Id))
                 .OrderBy(x => x.Type)
                 .ToArrayAsync();
@@ -29,7 +31,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             var query = Notifications;
             if (!string.IsNullOrEmpty(tenantId)) query = query.Where(q => q.TenantId.Equals(tenantId));
             if (!string.IsNullOrEmpty(tenantType)) query = query.Where(q => q.TenantType.Equals(tenantType));
-            query = query.Include(n => n.Templates).Include(n => n.Attachments);
+            query = query.Include(n => n.Templates)
+                .Include(n => n.Attachments)
+                .Include(n => n.Recipients);
             return query.SingleAsync(n => n.Type.Equals(type));
         }
 

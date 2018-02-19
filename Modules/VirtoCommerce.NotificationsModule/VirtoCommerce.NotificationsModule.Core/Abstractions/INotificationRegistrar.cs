@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using VirtoCommerce.NotificationsModule.Core.Model;
 
 namespace VirtoCommerce.NotificationsModule.Core.Abstractions
 {
-    public interface INotificationRegistrar
+    public interface INotificationRegistrar 
     {
-        void RegisterNotification<T>();
+        void RegisterNotification<T>() where T : Notification; 
     }
 }

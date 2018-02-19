@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.NotificationsModule.Core.Model;
+using VirtoCommerce.NotificationsModule.Data.Enums;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Data.Model
@@ -13,6 +14,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         [StringLength(128)]
         public string EmailAddress { get; set; }
 
+        public NotificationRecipientType RecipientType { get; set; }
+
         public virtual EmailAddress ToModel(EmailAddress emailAddress)
         {
             if (emailAddress == null) throw new ArgumentNullException(nameof(emailAddress));
@@ -23,12 +26,13 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             return emailAddress;
         }
 
-        public virtual NotificationEmailRecipientEntity FromModel(EmailAddress emailAddress)
+        public virtual NotificationEmailRecipientEntity FromModel(EmailAddress emailAddress, NotificationRecipientType recipientType)
         {
             if (emailAddress == null) throw new ArgumentNullException(nameof(emailAddress));
 
             this.EmailAddress = emailAddress.Value;
             this.Id = emailAddress.Id;
+            this.RecipientType = recipientType;
 
             return this;
         }
