@@ -13,11 +13,13 @@ namespace VirtoCommerce.NotificationsModule.Data.Sender
         private readonly INotificationMessageSender _notificationMessageSender;
 
         public NotificationSender(INotificationService notificationService, INotificationTemplateRender notificationTemplateRender
-            , INotificationMessageService notificationMessageService)
+            , INotificationMessageService notificationMessageService
+            , INotificationMessageSender notificationMessageSender)
         {
             _notificationService = notificationService;
             _notificationTemplateRender = notificationTemplateRender;
             _notificationMessageService = notificationMessageService;
+            _notificationMessageSender = notificationMessageSender;
         }
 
         public async Task SendNotificationAsync(Notification notification, string language)
@@ -36,8 +38,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Sender
                     {
                         From = emailNotification.From,
                         To = emailNotification.To,
-                        CC = emailNotification.CC.Select(cc => cc.Value).ToArray(),
-                        BCC = emailNotification.BCC.Select(bcc => bcc.Value).ToArray(),
+                        CC = emailNotification.CC?.Select(cc => cc.Value).ToArray(),
+                        BCC = emailNotification.BCC?.Select(bcc => bcc.Value).ToArray(),
                         // Attachments
                         Subject = subject,
                         Body = body,
