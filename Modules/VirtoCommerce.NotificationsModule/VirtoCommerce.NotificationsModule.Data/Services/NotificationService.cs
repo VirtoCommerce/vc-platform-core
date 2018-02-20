@@ -36,11 +36,11 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             return null;
         }
 
-        public async Task<Notification[]> GetNotificationsByIdsAsync(string ids)
+        public async Task<Notification[]> GetNotificationsByIdsAsync(string[] ids)
         {
             using (var repository = _repositoryFactory())
             {
-                var notifications = await repository.GetNotificationByIdsAsync(ids.Split(';'));
+                var notifications = await repository.GetNotificationByIdsAsync(ids);
                 return notifications.Select(n => n.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance(n.Kind))).ToArray();
             }
         }

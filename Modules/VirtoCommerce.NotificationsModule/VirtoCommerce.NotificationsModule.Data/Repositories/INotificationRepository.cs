@@ -12,7 +12,5 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
         Task<NotificationEntity> GetNotificationEntityByTypeAsync(string type, string tenantId, string tenantType);
         Task<NotificationEntity[]> GetNotificationByIdsAsync(string[] ids);
         Task<NotificationMessageEntity[]> GetNotificationMessageByIdAsync(string[] ids);
-        //Task<int> Update(NotificationEntity notification);
-        //Task<int> Add(NotificationEntity notification);
     }
 }

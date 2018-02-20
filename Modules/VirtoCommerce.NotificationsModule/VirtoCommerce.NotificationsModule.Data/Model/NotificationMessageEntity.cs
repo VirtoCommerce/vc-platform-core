@@ -125,5 +125,21 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 
             return this;
         }
+
+        public virtual void Patch(NotificationMessageEntity message)
+        {
+            message.TenantId = this.TenantId;
+            message.TenantType = this.TenantType;
+            message.Notification = this.Notification;
+            message.Body = this.Body;
+            message.LanguageCode = this.LanguageCode;
+            message.NotificationId = this.NotificationId;
+            message.NotificationType = this.NotificationType;
+            message.SendAttemptCount = this.SendAttemptCount;
+            message.MaxSendAttemptCount = this.MaxSendAttemptCount;
+            message.LastSendError = this.LastSendError;
+            message.LastSendAttemptDate = this.LastSendAttemptDate;
+            message.SendDate = this.SendDate;
+        }
     }
 }

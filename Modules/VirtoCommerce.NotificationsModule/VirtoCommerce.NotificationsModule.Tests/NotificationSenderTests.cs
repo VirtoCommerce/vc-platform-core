@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using Moq;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
-using VirtoCommerce.NotificationsModule.Core.NotificationTypes;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
-using VirtoCommerce.NotificationsModule.Data.Sender;
-using VirtoCommerce.NotificationsModule.Data.Services;
+using VirtoCommerce.NotificationsModule.Notifications.NotificationTypes;
+using VirtoCommerce.NotificationsModule.Notifications.Rendering;
+using VirtoCommerce.NotificationsModule.Notifications.Senders;
 using Xunit;
 
 namespace VirtoCommerce.NotificationsModule.Tests
@@ -19,6 +19,7 @@ namespace VirtoCommerce.NotificationsModule.Tests
         private readonly NotificationSender _sender;
         private readonly Mock<INotificationService> _serviceMock;
         private readonly Mock<INotificationTemplateRender> _templateRenderMock;
+        private readonly INotificationTemplateRender _templateRender;
         private readonly Mock<INotificationMessageService> _messageServiceMock;
         private readonly Mock<INotificationMessageSender> _messageSenderMock;
         private readonly Mock<INotificationRepository> _repositoryMock;
@@ -31,12 +32,13 @@ namespace VirtoCommerce.NotificationsModule.Tests
             _repositoryMock = new Mock<INotificationRepository>();
             Func<INotificationRepository> repositoryFactory = () => _repositoryMock.Object;
             _templateRenderMock = new Mock<INotificationTemplateRender>();
+            _templateRender = new LiquidTemplateRenderer();
             _messageServiceMock = new Mock<INotificationMessageService>();
             _messageSenderMock = new Mock<INotificationMessageSender>();
             _senderMock = new Mock<INotificationSender>();
             _registrarMock = new Mock<INotificationRegistrar>();
             _serviceMock = new Mock<INotificationService>();
-            _sender = new NotificationSender(_serviceMock.Object, _templateRenderMock.Object, _messageServiceMock.Object, _messageSenderMock.Object);
+            _sender = new NotificationSender(_serviceMock.Object, _templateRender, _messageServiceMock.Object, _messageSenderMock.Object);
         }
 
         [Fact]
@@ -44,11 +46,11 @@ namespace VirtoCommerce.NotificationsModule.Tests
         {
             //Arrange
             string language = "default";
-            string subject = "Order #{{orderId}}";
-            string body = "You have order #{{orderId}}";
-            var notification = new OrderSendEmailNotification()
+            string subject = "Order #{{order.id}}";
+            string body = "You have order #{{order.id}}";
+            var notification = new OrderSentEmailNotification()
             {
-                Order = new { OrderId = "123" },
+                Order = new CustomerOrder() { Id = "123"},
                 Templates = new List<NotificationTemplate>()
                 {
                     new EmailNotificationTemplate()
@@ -69,9 +71,9 @@ namespace VirtoCommerce.NotificationsModule.Tests
                 Body = body,
                 SendDate = date
             };
-            _serviceMock.Setup(serv => serv.GetNotificationByTypeAsync(nameof(OrderSendEmailNotification), null)).ReturnsAsync(notification);
-            _templateRenderMock.Setup(tr => tr.Render(message.Subject, notification)).Returns("Order #123");
-            _templateRenderMock.Setup(tr => tr.Render(message.Body, notification)).Returns("You have order #123");
+            _serviceMock.Setup(serv => serv.GetNotificationByTypeAsync(nameof(OrderSentEmailNotification), null)).ReturnsAsync(notification);
+            //_templateRenderMock.Setup(tr => tr.Render(message.Subject, notification.Order)).Returns("Order #123");
+            //_templateRenderMock.Setup(tr => tr.Render(message.Body, notification.Order)).Returns("You have order #123");
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessages(new NotificationMessage[] {message}));
 
             //Act

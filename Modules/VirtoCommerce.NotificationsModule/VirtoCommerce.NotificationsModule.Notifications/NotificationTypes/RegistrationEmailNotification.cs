@@ -1,6 +1,6 @@
 using VirtoCommerce.NotificationsModule.Core.Model;
 
-namespace VirtoCommerce.NotificationsModule.Core.NotificationTypes
+namespace VirtoCommerce.NotificationsModule.Notifications.NotificationTypes
 {
     public class RegistrationEmailNotification : EmailNotification
     {

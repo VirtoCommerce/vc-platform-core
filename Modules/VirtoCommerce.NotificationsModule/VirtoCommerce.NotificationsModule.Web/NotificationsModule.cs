@@ -9,10 +9,12 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
-using VirtoCommerce.NotificationsModule.Core.NotificationTypes;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Services;
+using VirtoCommerce.NotificationsModule.Notifications.NotificationTypes;
+using VirtoCommerce.NotificationsModule.Notifications.Rendering;
+using VirtoCommerce.NotificationsModule.Notifications.Senders;
 using VirtoCommerce.NotificationsModule.Web.Infrastructure;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -34,7 +36,9 @@ namespace VirtoCommerce.NotificationsModule.Web
             serviceCollection.AddScoped<INotificationRegistrar, NotificationService>();
             serviceCollection.AddScoped<INotificationSearchService, NotificationSearchService>();
             serviceCollection.AddScoped<INotificationMessageService, NotificationMessageService>();
-            
+            serviceCollection.AddTransient<INotificationSender, NotificationSender>();
+            serviceCollection.AddTransient<INotificationTemplateRender, LiquidTemplateRenderer>();
+            serviceCollection.AddTransient<INotificationMessageSender, SmtpEmailNotificationMessageSender>();
         }
 
         public void PostInitialize(IServiceProvider serviceProvider)
@@ -57,7 +61,7 @@ namespace VirtoCommerce.NotificationsModule.Web
             }
 
             var notificationRegistrar = serviceProvider.GetService<INotificationRegistrar>();
-            notificationRegistrar.RegisterNotification<OrderSendEmailNotification>();
+            notificationRegistrar.RegisterNotification<OrderSentEmailNotification>();
             notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
         }
 

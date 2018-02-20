@@ -2,8 +2,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
+using VirtoCommerce.NotificationsModule.Notifications.Rendering;
 
-namespace VirtoCommerce.NotificationsModule.Data.Sender
+namespace VirtoCommerce.NotificationsModule.Notifications.Senders
 {
     public class NotificationSender : INotificationSender
     {
@@ -30,7 +31,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Sender
             {
                 case EmailNotification emailNotification:
                     var template = (EmailNotificationTemplate)emailNotification.Templates.Single(t => t.LanguageCode.Equals(language));
-                    var subject = _notificationTemplateRender.Render(template.Subject, emailNotification);
+                    var subject = _notificationTemplateRender.Render(template.Subject, notification);
                     var body = _notificationTemplateRender.Render(template.Body, emailNotification);
 
                     //todo 
@@ -45,11 +46,12 @@ namespace VirtoCommerce.NotificationsModule.Data.Sender
                         Body = body,
 
                     };
-                    _notificationMessageService.SaveNotificationMessages(new NotificationMessage[] { message });
+                    var messages = new NotificationMessage[] {message};
+                    await _notificationMessageService.SaveNotificationMessages(messages);
 
                     await _notificationMessageSender.SendNotificationAsync(message);
 
-                    _notificationMessageService.SaveNotificationMessages(new NotificationMessage[] { message });
+                    await _notificationMessageService.SaveNotificationMessages(messages);
                     break;
                 case SmsNotification smsNotification:
                     //smsNotification.Number = this.Number;

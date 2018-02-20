@@ -19,6 +19,7 @@
     <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Data\VirtoCommerce.Platform.Data.csproj" />
     <ProjectReference Include="..\VirtoCommerce.NotificationsModule.Core\VirtoCommerce.NotificationsModule.Core.csproj" />
     <ProjectReference Include="..\VirtoCommerce.NotificationsModule.Data\VirtoCommerce.NotificationsModule.Data.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.NotificationsModule.Notifications\VirtoCommerce.NotificationsModule.Notifications.csproj" />
   </ItemGroup>
 
 </Project>
