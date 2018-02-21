@@ -11,7 +11,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
     public class NotificationSearchService : INotificationSearchService
     {
         private readonly INotificationRepository _notificationRepository;
-
+        
         public NotificationSearchService(INotificationRepository notificationRepository)
         {
             _notificationRepository = notificationRepository;
@@ -19,7 +19,12 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
         public async Task<GenericSearchResult<Notification>> SearchNotificationsAsync(NotificationSearchCriteria criteria)
         {
-            var query = _notificationRepository.Notifications;
+            var query = AbstractTypeFactory<Notification>.AllTypeInfos
+                .Where(t => t.IsAssignableTo("EmailNotification"))
+                .Select(t => AbstractTypeFactory<Notification>.TryCreateInstance(t.Type.Name))
+                .AsQueryable();
+
+            //var query = _notificationRepository.Notifications;
 
             if (!string.IsNullOrEmpty(criteria.Keyword))
             {
@@ -34,8 +39,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                 sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Notification>(x => x.Type), SortDirection = SortDirection.Ascending } };
             }
 
-            var collection = await query.OrderBySortInfos(sortInfos).Skip(criteria.Skip).Take(criteria.Take).ToListAsync();
-            var list = collection.Select(c => c.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance(c.Kind))).ToList();
+            //var collection = await query.OrderBySortInfos(sortInfos).Skip(criteria.Skip).Take(criteria.Take).ToListAsync();
+            //var list = collection.Select(c => c.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance(c.Kind))).ToList();
+            var list = query.OrderBySortInfos(sortInfos).Skip(criteria.Skip).Take(criteria.Take).ToList();
 
             return new GenericSearchResult<Notification>
             {

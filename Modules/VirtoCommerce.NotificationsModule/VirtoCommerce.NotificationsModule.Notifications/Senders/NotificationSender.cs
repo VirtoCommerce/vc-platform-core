@@ -44,9 +44,8 @@ namespace VirtoCommerce.NotificationsModule.Notifications.Senders
                         // Attachments
                         Subject = subject,
                         Body = body,
-
                     };
-                    var messages = new NotificationMessage[] {message};
+                    NotificationMessage[] messages = {message};
                     await _notificationMessageService.SaveNotificationMessages(messages);
 
                     await _notificationMessageSender.SendNotificationAsync(message);

@@ -7,6 +7,5 @@ namespace VirtoCommerce.NotificationsModule.Notifications
         public string Login { get; set; }
         public string Password { get; set; }
         public string ApiKey { get; set; }
-
     }
 }

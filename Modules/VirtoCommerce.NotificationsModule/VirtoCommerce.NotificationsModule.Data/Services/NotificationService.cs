@@ -81,5 +81,10 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
         {
             AbstractTypeFactory<Notification>.RegisterType<T>();
         }
+
+        public void RegisterNotification<T>(T type) where T : Notification
+        {
+            RegisterNotification<T>();
+        }
     }
 }

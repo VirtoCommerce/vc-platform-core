@@ -10,7 +10,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Web.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/notifications")]
     public class NotificationsController : Controller
     {

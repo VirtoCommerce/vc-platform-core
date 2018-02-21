@@ -1,11 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
@@ -61,8 +58,20 @@ namespace VirtoCommerce.NotificationsModule.Web
             }
 
             var notificationRegistrar = serviceProvider.GetService<INotificationRegistrar>();
-            notificationRegistrar.RegisterNotification<OrderSentEmailNotification>();
             notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
+            notificationRegistrar.RegisterNotification<ResetPasswordEmailNotification>();
+            notificationRegistrar.RegisterNotification<TwoFactorEmailNotification>();
+            notificationRegistrar.RegisterNotification<TwoFactorSmsNotification>();
+            notificationRegistrar.RegisterNotification<ConfirmationEmailNotification>();
+            notificationRegistrar.RegisterNotification<StoreDynamicEmailNotification>();
+            notificationRegistrar.RegisterNotification<OrderCreateEmailNotification>();
+            notificationRegistrar.RegisterNotification<OrderPaidEmailNotification>();
+            notificationRegistrar.RegisterNotification<OrderSentEmailNotification>();
+            notificationRegistrar.RegisterNotification<NewOrderStatusEmailNotification>();
+            notificationRegistrar.RegisterNotification<CancelOrderEmailNotification>();
+            notificationRegistrar.RegisterNotification<InvoiceEmailNotification>();
+            notificationRegistrar.RegisterNotification<NewSubscriptionEmailNotification>();
+            notificationRegistrar.RegisterNotification<SubscriptionCanceledEmailNotification>();
         }
 
         public void Uninstall()
