@@ -6,6 +6,6 @@ namespace VirtoCommerce.NotificationsModule.Core.Abstractions
 {
     public interface INotificationSearchService
     {
-        Task<GenericSearchResult<Notification>> SearchNotificationsAsync(NotificationSearchCriteria criteria);
+        GenericSearchResult<Notification> SearchNotificationsAsync(NotificationSearchCriteria criteria);
     }
 }

@@ -6,7 +6,7 @@ namespace VirtoCommerce.NotificationsModule.Notifications.NotificationTypes
     {
         public RegistrationEmailNotification()
         {
-            Type = nameof(RegistrationEmailNotification);
+            //Type = this.GetType().Name;
         }
     }
 }

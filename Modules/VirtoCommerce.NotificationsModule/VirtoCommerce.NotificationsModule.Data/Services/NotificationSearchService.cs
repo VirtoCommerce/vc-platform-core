@@ -17,18 +17,16 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             _notificationRepository = notificationRepository;
         }
 
-        public async Task<GenericSearchResult<Notification>> SearchNotificationsAsync(NotificationSearchCriteria criteria)
+        public  GenericSearchResult<Notification> SearchNotificationsAsync(NotificationSearchCriteria criteria)
         {
             var query = AbstractTypeFactory<Notification>.AllTypeInfos
-                .Where(t => t.IsAssignableTo("EmailNotification"))
-                .Select(t => AbstractTypeFactory<Notification>.TryCreateInstance(t.Type.Name))
+                .Where(t => t.Type.IsSubclassOf(typeof(EmailNotification)) || t.Type.IsSubclassOf(typeof(SmsNotification)))
+                .Select(n => n.Type)
                 .AsQueryable();
-
-            //var query = _notificationRepository.Notifications;
-
+            
             if (!string.IsNullOrEmpty(criteria.Keyword))
             {
-                query = query.Where(n => n.Type.Contains(criteria.Keyword));
+                query = query.Where(n => n.Name.Contains(criteria.Keyword));
             }
 
             var totalCount = query.Count();
@@ -39,9 +37,14 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                 sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Notification>(x => x.Type), SortDirection = SortDirection.Ascending } };
             }
 
-            //var collection = await query.OrderBySortInfos(sortInfos).Skip(criteria.Skip).Take(criteria.Take).ToListAsync();
-            //var list = collection.Select(c => c.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance(c.Kind))).ToList();
-            var list = query.OrderBySortInfos(sortInfos).Skip(criteria.Skip).Take(criteria.Take).ToList();
+            var collection = query.OrderBySortInfos(sortInfos).Skip(criteria.Skip).Take(criteria.Take).ToList();
+
+            var list = collection.Select(t =>
+            {
+                var result = AbstractTypeFactory<Notification>.TryCreateInstance(t.Name);
+                var notificationEntity = _notificationRepository.Notifications.FirstOrDefault(ne => ne.Type.Equals(t.Name));
+                return notificationEntity != null ? notificationEntity.ToModel(result) : result;
+            }).ToList();
 
             return new GenericSearchResult<Notification>
             {

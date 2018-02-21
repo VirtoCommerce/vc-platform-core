@@ -7,9 +7,5 @@ namespace VirtoCommerce.NotificationsModule.Notifications.NotificationTypes
 {
     public class TwoFactorEmailNotification : EmailNotification
     {
-        public TwoFactorEmailNotification()
-        {
-            Type = nameof(TwoFactorEmailNotification);
-        }
     }
 }

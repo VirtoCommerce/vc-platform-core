@@ -22,7 +22,7 @@
               columnDefs: [
               { name: 'actions', displayName: '', enableColumnResizing: false, enableSorting: false, width: 30, cellTemplate: 'list-actions.cell.html', pinnedLeft:true },
               { name: 'type', displayName: 'notifications.blades.notifications-list.labels.display-name', cellTemplate: 'notification-list-name.cell.html', width : '60%' },
-              { name: 'kind', displayName: 'notifications.blades.notifications-list.labels.type' },
+              { name: 'kind', displayName: 'notifications.blades.notifications-list.labels.type', pinnedCenter:true, cellTemplate: 'notification-list-kind.cell.html' },
               { name: 'isActive', displayName: 'notifications.blades.notifications-list.labels.active', cellTemplate: 'notification-list-active.cell.html' },
               ]})">
               <div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-save-state ui-grid-selection ui-grid-resize-columns ui-grid-move-columns ui-grid-pinning ui-grid-height></div>
@@ -56,4 +56,12 @@
 </script>
 <script type="text/ng-template" id="notification-list-active.cell.html">
     <div class='ui-grid-cell-contents'>{{row.entity.isActive ? 'Active' : 'Inactive'}}</div>
+</script>
+<script type="text/ng-template" id="notification-list-kind.cell.html">
+    <div class='ui-grid-cell-contents'>
+        <div class="inner-contents">
+            <i class="table-ico fa fa-envelope" ng-if="row.entity.kind === 'EmailNotification'"></i>
+            <i class="table-ico fa fa-mobile" ng-if="row.entity.kind === 'SmsNotification'"></i>
+        </div>
+    </div>
 </script>

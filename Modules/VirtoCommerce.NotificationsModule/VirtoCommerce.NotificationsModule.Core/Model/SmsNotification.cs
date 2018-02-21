@@ -9,6 +9,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         public SmsNotification()
         {
             Kind = nameof(SmsNotification);
+            Templates = new List<NotificationTemplate>();
         }
 
         public string Number { get; set; }

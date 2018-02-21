@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Smidge;
+using Smidge.Cache;
 using Smidge.Models;
+using Smidge.Options;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 
@@ -55,13 +57,13 @@ namespace VirtoCommerce.Platform.Modules.Extensions
             //TODO: Test minification and uglification for resulting bundles
             var options = bundles.DefaultBundleOptions;
             options.DebugOptions.FileWatchOptions.Enabled = true;
-        
+            options.DebugOptions.CacheControlOptions = new CacheControlOptions() { EnableETag = false, CacheControlMaxAge = 0};
+
             bundles.Create("vc-modules-styles", cssFiles.ToArray())
                .WithEnvironmentOptions(options);
 
             bundles.Create("vc-modules-scripts", jsFiles.ToArray())
                    .WithEnvironmentOptions(options);
-                          
 
             return appBuilder;
         }

@@ -61,7 +61,7 @@ angular.module('virtoCommerce.notificationsModule')
       	};
 
         blade.setSelectedNode = function (listItem) {
-            $scope.selectedNodeId = listItem.id;
+            $scope.selectedNodeId = listItem.type;
         };
 
         $scope.selectNode = function (type) {

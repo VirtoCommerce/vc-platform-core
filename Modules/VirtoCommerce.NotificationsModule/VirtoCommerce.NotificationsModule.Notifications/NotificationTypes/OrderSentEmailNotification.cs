@@ -4,11 +4,6 @@ namespace VirtoCommerce.NotificationsModule.Notifications.NotificationTypes
 {
     public class OrderSentEmailNotification : EmailNotification
     {
-        public OrderSentEmailNotification()
-        {
-            Type = nameof(OrderSentEmailNotification);
-        }
-
         public CustomerOrder Order { get; set; }
     }
 

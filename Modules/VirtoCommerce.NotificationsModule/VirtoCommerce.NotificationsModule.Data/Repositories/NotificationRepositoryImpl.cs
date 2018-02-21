@@ -34,7 +34,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             query = query.Include(n => n.Templates)
                 .Include(n => n.Attachments)
                 .Include(n => n.Recipients);
-            return query.SingleAsync(n => n.Type.Equals(type));
+            return query.FirstOrDefaultAsync(n => n.Type.Equals(type));
         }
 
         public Task<NotificationMessageEntity[]> GetNotificationMessageByIdAsync(string[] ids)

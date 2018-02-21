@@ -18,6 +18,8 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Smidge;
+using Smidge.Cache;
+using Smidge.Options;
 using Swashbuckle.AspNetCore.Swagger;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Jobs;
@@ -193,6 +195,7 @@ namespace VirtoCommerce.Platform.Web
             services.AddMemoryCache();
             //Add Smidge runtime bundling library configuration
             services.AddSmidge(Configuration.GetSection("smidge"));
+
             // Register the Swagger generator
             services.AddSwaggerGen(c =>
             {
