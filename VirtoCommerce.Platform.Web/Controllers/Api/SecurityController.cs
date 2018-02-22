@@ -323,7 +323,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <summary>
         /// Create new user
         /// </summary>
-        /// <param name="user">User details.</param>
+        /// <param name="newUserRequest"></param>
         [HttpPost]
         [Route("users/create")]
         [ProducesResponseType(typeof(IdentityResult), 200)]

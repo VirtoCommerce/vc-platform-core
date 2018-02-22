@@ -1,0 +1,377 @@
+﻿<div>
+
+    <div id='valuePlaceHolder'></div>
+
+    <script type="text/ng-template" id="ShortText.html">
+        <div class="form-input">
+            <input ng-disabled="currentEntity.isReadOnly"
+                   ng-required="currentEntity.required && !currentEntity.isReadOnly"
+                   ng-model="context.currentPropValues[0].value"
+                   name="{{currentEntity.name}}"
+                   ng-maxlength="currentEntity.validationRule.charCountMax"
+                   ng-minlength="currentEntity.validationRule.charCountMin"
+                   ng-pattern="currentEntity.validationRule.regExp"
+                   placeholder="Please enter short text"
+                   type="text">
+        </div>
+        <va-property-messages></va-property-messages>
+    </script>
+
+    <script type="text/ng-template" id="LongText.html">
+        <div class="form-input">
+            <textarea ng-disabled="currentEntity.isReadOnly"
+                      ng-required="currentEntity.required && !currentEntity.isReadOnly"
+                      ng-model="context.currentPropValues[0].value"
+                      name="{{currentEntity.name}}"
+                      ng-maxlength="currentEntity.validationRule.charCountMax"
+                      ng-minlength="currentEntity.validationRule.charCountMin"
+                      ng-pattern="currentEntity.validationRule.regExp"
+                      placeholder="Please enter long text"></textarea>
+        </div>
+        <va-property-messages></va-property-messages>
+    </script>
+
+    <script type="text/ng-template" id="Number.html">
+        <!--<a href="#" editable-number="val.value">{{val.value || "N/A" }}</a>-->
+        <div class="form-input">
+            <input smart-float num-type="float"
+                   ng-disabled="currentEntity.isReadOnly"
+                   ng-required="currentEntity.required && !currentEntity.isReadOnly"
+                   ng-model="context.currentPropValues[0].value"
+                   ng-class="{'error': context.currentEntity.valueType.$error.pattern}"
+                   placeholder="Please enter number">
+        </div>
+    </script>
+
+    <script type="text/ng-template" id="Integer.html">
+        <div class="form-input __number">
+            <input smart-float num-type="integer"
+                   ng-disabled="currentEntity.isReadOnly"
+                   ng-required="currentEntity.required && !currentEntity.isReadOnly"
+                   ng-model="context.currentPropValues[0].value"
+                   ng-class="{'error': context.currentEntity.valueType.$error.pattern}"
+                   placeholder="Please enter integer"
+                   type="text">
+        </div>
+    </script>
+
+    <script type="text/ng-template" id="DateTime.html">
+        <div class="form-input __calendar">
+            <input is-open="datepickers.DateTime"
+                   datepicker-popup
+                   ng-required="currentEntity.required && !currentEntity.isReadOnly"
+                   placeholder="{{ 'platform.genericValueInput.placeholders.date-time' | translate}}"
+                   ng-model="context.currentPropValues[0].value">
+            <button ng-click="open($event, 'DateTime')" type="button" class="btn">
+                <i class="btn-ico fa fa-calendar"></i>
+            </button>
+        </div>
+    </script>
+
+    <script type="text/ng-template" id="Boolean.html">
+        <label class="form-label __switch">
+            <input type="checkbox" ng-model="context.currentPropValues[0].value">
+            <span class="switch"></span>
+        </label>
+    </script>
+
+    <script type="text/ng-template" id="ShortText-multivalue.html">
+        <tags-input ng-model="context.currentPropValues"
+                    ng-disabled="currentEntity.isReadOnly"
+                    ng-required="currentEntity.required && !currentEntity.isReadOnly"
+                    name="{{currentEntity.name}}"
+                    display-property="value"
+                    placeholder="Add value"
+                    max-length="{{currentEntity.validationRule.charCountMax}}"
+                    min-length="{{currentEntity.validationRule.charCountMin}}"
+                    allowed-tags-pattern="{{currentEntity.validationRule.regExp}}"
+                    on-tag-added="tagsAdded($tag, currentEntity.name)"
+                    on-tag-removed="tagsDeleted($tag, currentEntity.name, currentEntity.required)"
+                    on-invalid-tag="addederror($tag, currentEntity.name, currentEntity.validationRule.charCountMin, currentEntity.validationRule.charCountMax, currentEntity.validationRule.regExp)">
+        </tags-input>
+        <va-property-messages></va-property-messages>
+    </script>
+    <script type="text/ng-template" id="LongText-multivalue.html">
+        <div class="form-group" ng-repeat="val in context.currentPropValues track by $index">
+            <div class="form-input">
+                <textarea ng-disabled="currentEntity.isReadOnly"
+                          ng-required="currentEntity.required && !currentEntity.isReadOnly"
+                          ng-model="val.value"
+                          name="{{currentEntity.name}}"
+                          ng-maxlength="currentEntity.validationRule.charCountMax"
+                          ng-minlength="currentEntity.validationRule.charCountMin"
+                          ng-pattern="currentEntity.validationRule.regExp" />
+                <va-property-messages></va-property-messages>
+                <a ng-if="!currentEntity.isReadOnly" ng-click="context.currentPropValues.splice(context.currentPropValues.indexOf(val),1)">remove</a>
+            </div>
+            <a ng-if="!currentEntity.isReadOnly" ng-click="context.currentPropValues.push({value:''})" style="cursor:pointer;">add value</a>
+        </div>
+
+
+
+    </script>
+    <script type="text/ng-template" id="Integer-multivalue.html">
+        <tags-input ng-model="context.currentPropValues"
+                    ng-disabled="currentEntity.isReadOnly"
+                    min-tags="{{(currentEntity.required && !currentEntity.isReadOnly) ? 1 : undefined}}"
+                    tags-number num-type="integer"
+                    min-length="1"
+                    name="{{currentEntity.valueType}}"
+                    display-property="value"
+                    placeholder="Add number">
+        </tags-input>
+    </script>
+    <script type="text/ng-template" id="Number-multivalue.html">
+        <tags-input ng-model="context.currentPropValues"
+                    ng-disabled="currentEntity.isReadOnly"
+                    min-tags="{{(currentEntity.required && !currentEntity.isReadOnly) ? 1 : undefined}}"
+                    tags-number num-type="float"
+                    min-length="1"
+                    name="{{currentEntity.valueType}}"
+                    display-property="value"
+                    placeholder="Add number">
+        </tags-input>
+    </script>
+
+    <script type="text/ng-template" id="ShortText-dictionary.html">
+        <div class="form-input">
+            <ui-select ng-model="context.currentPropValues[0]" ng-disabled="currentEntity.isReadOnly" ng-required="currentEntity.required">
+                <ui-select-match placeholder="Select value">{{$select.selected.value}}</ui-select-match>
+                <ui-select-choices repeat="propValue in context.allDictionaryValues | filter: {value: $select.search} | orderBy: 'value'">
+                    <span ng-bind-html="propValue.value | highlight: $select.search"></span>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+    </script>
+    <script type="text/ng-template" id="Number-dictionary.html">
+        <div class="form-input">
+            <ui-select ng-model="context.currentPropValues[0]" ng-disabled="currentEntity.isReadOnly" ng-required="currentEntity.required">
+                <ui-select-match placeholder="Select value">{{$select.selected.value}}</ui-select-match>
+                <ui-select-choices repeat="propValue in context.allDictionaryValues | filter: {value: $select.search} | orderBy: 'value'">
+                    <span ng-bind-html="propValue.value | highlight: $select.search"></span>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+    </script>
+
+
+    <script type="text/ng-template" id="ShortText-dictionary-multivalue.html">
+        <div class="form-input">
+            <ui-select multiple ng-model="context.currentPropValues" ng-disabled="currentEntity.isReadOnly" ng-required="currentEntity.required">
+                <ui-select-match placeholder="Select value">{{$item.value}}</ui-select-match>
+                <ui-select-choices repeat="propValue in context.allDictionaryValues | filter: {value: $select.search} | orderBy: 'value'">
+                    <span ng-bind-html="propValue.value | highlight: $select.search"></span>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+    </script>
+    <script type="text/ng-template" id="Number-dictionary-multivalue.html">
+        <div class="form-input">
+            <ui-select multiple ng-model="context.currentPropValues[0]" ng-disabled="currentEntity.isReadOnly" ng-required="currentEntity.required">
+                <ui-select-match placeholder="Select value">{{$item.value}}</ui-select-match>
+                <ui-select-choices repeat="propValue in context.allDictionaryValues | filter: {value: $select.search} | orderBy: 'value'">
+                    <span ng-bind-html="propValue.value | highlight: $select.search"></span>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+    </script>
+
+
+    <script type="text/ng-template" id="ShortText-multilang.html">
+        <div class="form-group" ng-repeat="(language, langValuesGroup) in context.langValuesMap">
+            <div class="form-input __langs">
+                <span ng-if="language.length>2" class="flag flag-{{language.substr(3).toLowerCase()}}"></span>
+                <span ng-if="language.length<=2" class="langCode">{{language.toUpperCase()}}</span>
+                <input ng-disabled="currentEntity.isReadOnly"
+                       ng-required="currentEntity.required && !currentEntity.isReadOnly"
+                       ng-model="langValuesGroup.currentPropValues[0].value"
+                       name="{{currentEntity.name}}"
+                       placeholder="Please enter value"
+                       type="text"
+                       ng-maxlength="currentEntity.validationRule.charCountMax"
+                       ng-minlength="currentEntity.validationRule.charCountMin"
+                       ng-pattern="currentEntity.validationRule.regExp">
+            </div>
+            <va-property-messages></va-property-messages>
+        </div>
+    </script>
+
+    <script type="text/ng-template" id="LongText-multilang.html">
+        <div class="form-group" ng-repeat="(language, langValuesGroup) in context.langValuesMap">
+            <div class="form-input __langs">
+                <span ng-if="language.length>2" class="flag flag-{{language.substr(3).toLowerCase()}}"></span>
+                <span ng-if="language.length<=2" class="langCode">{{language.toUpperCase()}}</span>
+                <textarea ng-disabled="currentEntity.isReadOnly"
+                          ng-required="currentEntity.required && !currentEntity.isReadOnly"
+                          ng-model="langValuesGroup.currentPropValues[0].value"
+                          name="{{currentEntity.name}}"
+                          ng-maxlength="currentEntity.validationRule.charCountMax"
+                          ng-minlength="currentEntity.validationRule.charCountMin"
+                          ng-pattern="currentEntity.validationRule.regExp" />
+            </div>
+            <va-property-messages></va-property-messages>
+        </div>
+    </script>
+    <script type="text/ng-template" id="Number-multilang.html">
+        <div class="form-group" ng-repeat="(language, langValuesGroup) in context.langValuesMap">
+            <div class="form-input __number">
+                <input ng-disabled="currentEntity.isReadOnly"
+                       ng-required="currentEntity.required && !currentEntity.isReadOnly"
+                       ng-model="langValuesGroup.currentPropValues[0].value"
+                       name="{{currentEntity.valueType}}"
+                       placeholder="Please enter number value"
+                       type="text">
+            </div>
+        </div>
+    </script>
+    <script type="text/ng-template" id="DateTime-multilang.html">
+        <div class="form-group" ng-repeat="(language, langValuesGroup) in context.langValuesMap">
+            <div class="form-input __langs __calendar">
+                <span ng-if="language.length>2" class="flag flag-{{language.substr(3).toLowerCase()}}"></span>
+                <span ng-if="language.length<=2" class="langCode">{{language.toUpperCase()}}</span>
+                <input ng-disabled="currentEntity.isReadOnly"
+                       ng-required="currentEntity.required && !currentEntity.isReadOnly"
+                       datepicker-popup is-open="datepickers[language]"
+                       placeholder="{{ 'platform.genericValueInput.placeholders.date-time' | translate}}"
+                       ng-model="langValuesGroup.currentPropValues[0].value">
+                <button ng-click="open($event, language)" type="button" class="btn">
+                    <i class="btn-ico fa fa-calendar"></i>
+                </button>
+            </div>
+        </div>
+    </script>
+
+
+    <script type="text/ng-template" id="ShortText-multivalue-multilang.html">
+        <div class="form-group" ng-repeat="(language, langValuesGroup) in context.langValuesMap">
+            <div class="form-input __langs">
+                <span ng-if="language.length>2" class="flag flag-{{language.substr(3).toLowerCase()}}"></span>
+                <span ng-if="language.length<=2" class="langCode">{{language.toUpperCase()}}</span>
+                <tags-input ng-model="langValuesGroup.currentPropValues"
+                            ng-disabled="currentEntity.isReadOnly"
+                            ng-required="currentEntity.required && !currentEntity.isReadOnly"
+                            name="{{currentEntity.name}}"
+                            display-property="value"
+                            placeholder="Add value"
+                            ng-maxlength="currentEntity.validationRule.charCountMax"
+                            ng-minlength="currentEntity.validationRule.charCountMin"
+                            ng-pattern="currentEntity.validationRule.regExp"
+                            on-tag-added="tagsAdded($tag, currentEntity.name)"
+                            on-tag-removed="tagsDeleted($tag, currentEntity.name, currentEntity.required)"
+                            on-invalid-tag="addederror($tag, currentEntity.name, currentEntity.validationRule.charCountMin, currentEntity.validationRule.charCountMax, currentEntity.validationRule.regExp)">
+                </tags-input>
+                <va-property-messages></va-property-messages>
+            </div>
+        </div>
+    </script>
+    <script type="text/ng-template" id="LongText-multivalue-multilang.html">
+        <div class="form-group" ng-repeat="(language, langValuesGroup) in context.langValuesMap">
+            <div class="form-input __langs" ng-repeat="val in langValuesGroup.currentPropValues track by $index">
+                <span ng-if="language.length>2" class="flag flag-{{language.substr(3).toLowerCase()}}"></span>
+                <span ng-if="language.length<=2" class="langCode">{{language.toUpperCase()}}</span>
+                <textarea ng-disabled="currentEntity.isReadOnly"
+                          ng-required="currentEntity.required && !currentEntity.isReadOnly"
+                          ng-model="val.value"
+                          name="{{currentEntity.name}}"
+                          ng-maxlength="currentEntity.validationRule.charCountMax"
+                          ng-minlength="currentEntity.validationRule.charCountMin"
+                          ng-pattern="currentEntity.validationRule.regExp" />
+                <va-property-messages></va-property-messages>
+                <a ng-if="!currentEntity.isReadOnly" ng-click="langValuesGroup.currentPropValues.splice(langValuesGroup.currentPropValues.indexOf(val),1)">remove</a>
+            </div>
+            <a ng-if="!currentEntity.isReadOnly" ng-click="langValuesGroup.currentPropValues.push({value:'', languageCode:language})" style="cursor:pointer;">add value</a>
+        </div>
+    </script>
+    <script type="text/ng-template" id="Number-multivalue-multilang.html">
+        <div class="form-group" ng-repeat="(language, langValuesGroup) in context.langValuesMap">
+            <div class="form-input __langs">
+                <span ng-if="language.length>2" class="flag flag-{{language.substr(3).toLowerCase()}}"></span>
+                <span ng-if="language.length<=2" class="langCode">{{language.toUpperCase()}}</span>
+                <tags-input ng-model="langValuesGroup.currentPropValues"
+                            ng-disabled="currentEntity.isReadOnly"
+                            min-tags="{{(currentEntity.required && !currentEntity.isReadOnly) ? 1 : undefined}}"
+                            allowed-tags-pattern="^[-]?[0-9]+[\.]?[0-9]*$"
+                            min-length="1"
+                            name="{{currentEntity.valueType}}"
+                            display-property="value"
+                            placeholder="Add number">
+                </tags-input>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/ng-template" id="ShortText-dictionary-multilang.html">
+        <div class="form-input" data-role="input-control">
+            <ui-select ng-model="context.langValuesMap[defaultLanguage].currentPropValues[0]" ng-disabled="currentEntity.isReadOnly" ng-required="currentEntity.required">
+                <ui-select-match placeholder="Select value">{{$select.selected.value}}</ui-select-match>
+                <ui-select-choices repeat="propValue in context.langValuesMap[defaultLanguage].allValues | filter: {value: $select.search}">
+                    <span ng-bind-html="propValue.value | highlight: $select.search"></span>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+    </script>
+
+    <script type="text/ng-template" id="Number-dictionary-multilang.html">
+        <div class="form-input" data-role="input-control">
+            <ui-select ng-model="context.langValuesMap[defaultLanguage].currentPropValues[0]" ng-disabled="currentEntity.isReadOnly" ng-required="currentEntity.required">
+                <ui-select-match placeholder="Select value">{{$select.selected.value}}</ui-select-match>
+                <ui-select-choices repeat="propValue in context.langValuesMap[defaultLanguage].allValues | filter: {value: $select.search}">
+                    <span ng-bind-html="propValue.value | highlight: $select.search"></span>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+    </script>
+
+    <script type="text/ng-template" id="ShortText-dictionary-multivalue-multilang.html">
+        <div class="form-input" data-role="input-control">
+            <ui-select multiple ng-model="context.langValuesMap[defaultLanguage].currentPropValues" ng-disabled="currentEntity.isReadOnly" ng-required="currentEntity.required">
+                <ui-select-match placeholder="Select value">{{$item.value}}</ui-select-match>
+                <ui-select-choices repeat="propValue in context.langValuesMap[defaultLanguage].allValues | filter: {value: $select.search}">
+                    <span ng-bind-html="propValue.value | highlight: $select.search"></span>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+    </script>
+
+    <script type="text/ng-template" id="Number-dictionary-multivalue-multilang.html">
+        <div class="form-input" data-role="input-control">
+            <ui-select multiple ng-model="context.langValuesMap[defaultLanguage].currentPropValues[0]" ng-disabled="currentEntity.isReadOnly" ng-required="currentEntity.required">
+                <ui-select-match placeholder="Select value">{{$item.value}}</ui-select-match>
+                <ui-select-choices repeat="propValue in context.langValuesMap[defaultLanguage].allValues | filter: {value: $select.search}">
+                    <span ng-bind-html="propValue.value | highlight: $select.search"></span>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+    </script>
+    <!--GeoPoint-->
+    <script type="text/ng-template" id="GeoPoint.html">
+        <div class="form-input">
+            <input ng-disabled="currentEntity.isReadOnly"
+                   ng-required="currentEntity.required && !currentEntity.isReadOnly"
+                   ng-model="context.currentPropValues[0].value"
+                   name="{{currentEntity.name}}"
+                   ng-class="{'error': context.currentEntity.valueType.$error.pattern, 'error': propertiesForm.name.$valid }"
+                   placeholder="{{ 'catalog.properties.geoPoint.placeholder' | translate }}"
+                   ng-pattern="currentEntity.validationRule.regExp"
+                   type="text">
+            <div class="list-descr">{{ 'catalog.properties.geoPoint.description' | translate }}</div>
+        </div>
+        <va-property-messages></va-property-messages>
+    </script>
+
+    <script type="text/ng-template" id="GeoPoint-multivalue.html">
+        <tags-input ng-model="context.currentPropValues"
+                    ng-disabled="currentEntity.isReadOnly"
+                    ng-required="currentEntity.required && !currentEntity.isReadOnly"
+                    name="{{currentEntity.name}}"
+                    display-property="value"
+                    placeholder="Add geo point"
+                    allowed-tags-pattern="{{currentEntity.validationRule.regExp}}"
+                    on-tag-added="tagsAdded($tag, currentEntity.name)"
+                    on-tag-removed="tagsDeleted($tag, currentEntity.name, currentEntity.required)"
+                    on-invalid-tag="addederror($tag, currentEntity.name, currentEntity.validationRule.charCountMin, currentEntity.validationRule.charCountMax, currentEntity.validationRule.regExp)">
+        </tags-input>
+        <va-property-messages></va-property-messages>
+    </script>
+
+</div>

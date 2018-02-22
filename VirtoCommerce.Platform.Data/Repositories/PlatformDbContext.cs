@@ -1,4 +1,4 @@
-﻿using EntityFrameworkCore.Triggers;
+using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.Platform.Data.Model;
 
@@ -14,19 +14,28 @@ namespace VirtoCommerce.Platform.Data.Repositories
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             #region Change logging
-            modelBuilder.Entity<OperationLogEntity>().ToTable("PlatformOperationLog");
+            modelBuilder.Entity<OperationLogEntity>().ToTable("PlatformOperationLog").HasKey(x => x.Id);
+            modelBuilder.Entity<OperationLogEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<OperationLogEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
+            modelBuilder.Entity<OperationLogEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
             modelBuilder.Entity<OperationLogEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
                         .IsUnique(false)
                         .HasName("IX_ObjectType_ObjectId");
             #endregion
 
             #region Settings
-            modelBuilder.Entity<SettingEntity>().ToTable("PlatformSetting");
+            modelBuilder.Entity<SettingEntity>().ToTable("PlatformSetting").HasKey(x => x.Id);
+            modelBuilder.Entity<SettingEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<SettingEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
+            modelBuilder.Entity<SettingEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
             modelBuilder.Entity<SettingEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
                         .IsUnique(false)
                         .HasName("IX_ObjectType_ObjectId");
 
-            modelBuilder.Entity<SettingValueEntity>().ToTable("PlatformSettingValue");
+            modelBuilder.Entity<SettingValueEntity>().ToTable("PlatformSettingValue").HasKey(x => x.Id);
+            modelBuilder.Entity<SettingValueEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<SettingValueEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
+            modelBuilder.Entity<SettingValueEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
 
             modelBuilder.Entity<SettingValueEntity>().HasOne(x => x.Setting)
                         .WithMany(x => x.SettingValues)
@@ -37,12 +46,18 @@ namespace VirtoCommerce.Platform.Data.Repositories
 
             #region Dynamic Properties
 
-            modelBuilder.Entity<DynamicPropertyEntity>().ToTable("PlatformDynamicProperty");
+            modelBuilder.Entity<DynamicPropertyEntity>().ToTable("PlatformDynamicProperty").HasKey(x => x.Id);
+            modelBuilder.Entity<DynamicPropertyEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<DynamicPropertyEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
+            modelBuilder.Entity<DynamicPropertyEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
             modelBuilder.Entity<DynamicPropertyEntity>().HasIndex(x => new { x.ObjectType, x.Name })
                         .HasName("IX_PlatformDynamicProperty_ObjectType_Name")
                         .IsUnique(true);               
 
-            modelBuilder.Entity<DynamicPropertyNameEntity>().ToTable("PlatformDynamicPropertyName");
+            modelBuilder.Entity<DynamicPropertyNameEntity>().ToTable("PlatformDynamicPropertyName").HasKey(x => x.Id);
+            modelBuilder.Entity<DynamicPropertyNameEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<DynamicPropertyNameEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
+            modelBuilder.Entity<DynamicPropertyNameEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
             modelBuilder.Entity<DynamicPropertyNameEntity>().HasOne(x => x.Property)
                         .WithMany(x => x.DisplayNames)
                         .HasForeignKey(x => x.PropertyId)
@@ -53,7 +68,10 @@ namespace VirtoCommerce.Platform.Data.Repositories
                         .IsUnique(true);
 
 
-            modelBuilder.Entity<DynamicPropertyDictionaryItemEntity>().ToTable("PlatformDynamicPropertyDictionaryItem");
+            modelBuilder.Entity<DynamicPropertyDictionaryItemEntity>().ToTable("PlatformDynamicPropertyDictionaryItem").HasKey(x => x.Id);
+            modelBuilder.Entity<DynamicPropertyDictionaryItemEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<DynamicPropertyDictionaryItemEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
+            modelBuilder.Entity<DynamicPropertyDictionaryItemEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
             modelBuilder.Entity<DynamicPropertyDictionaryItemEntity>().HasOne(x => x.Property)
                         .WithMany(x => x.DictionaryItems)
                         .HasForeignKey(x => x.PropertyId)
@@ -64,7 +82,10 @@ namespace VirtoCommerce.Platform.Data.Repositories
                         .IsUnique(true);
 
 
-            modelBuilder.Entity<DynamicPropertyDictionaryItemNameEntity>().ToTable("PlatformDynamicPropertyDictionaryItemName");
+            modelBuilder.Entity<DynamicPropertyDictionaryItemNameEntity>().ToTable("PlatformDynamicPropertyDictionaryItemName").HasKey(x => x.Id);
+            modelBuilder.Entity<DynamicPropertyDictionaryItemNameEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<DynamicPropertyDictionaryItemNameEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
+            modelBuilder.Entity<DynamicPropertyDictionaryItemNameEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
             modelBuilder.Entity<DynamicPropertyDictionaryItemNameEntity>().HasOne(x => x.DictionaryItem)
                         .WithMany(x => x.DisplayNames)
                         .HasForeignKey(x => x.DictionaryItemId)
@@ -74,7 +95,10 @@ namespace VirtoCommerce.Platform.Data.Repositories
                         .HasName("IX_PlatformDynamicPropertyDictionaryItemName_DictionaryItemId_Locale_Name")
                         .IsUnique(true);
 
-            modelBuilder.Entity<DynamicPropertyObjectValueEntity>().ToTable("PlatformDynamicPropertyObjectValue");
+            modelBuilder.Entity<DynamicPropertyObjectValueEntity>().ToTable("PlatformDynamicPropertyObjectValue").HasKey(x => x.Id);
+            modelBuilder.Entity<DynamicPropertyObjectValueEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<DynamicPropertyObjectValueEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
+            modelBuilder.Entity<DynamicPropertyObjectValueEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
             modelBuilder.Entity<DynamicPropertyObjectValueEntity>().HasOne(x => x.Property)
                         .WithMany(x => x.ObjectValues)
                         .HasForeignKey(x => x.PropertyId)

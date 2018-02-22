@@ -1,0 +1,44 @@
+﻿<div class="blade-content __medium-wide">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <div class="sub-t">Pick Catalog properties eligible for filtering in this Store</div>
+            <div class="columns" ng-if="blade.currentEntities.length">
+                <div class="column">
+                    <div class="form-group">
+                        <p class="note">Available properties.<br><i>Click to select.<br><br></i></p>
+                        <ul class="list __items">
+                            <li class="list-item" ng-click='blade.select(data)' ng-repeat="data in blade.currentEntities | filter: {isSelected: false} | orderBy: 'name'">
+                                <div class="list-t">{{data.name}}</div>
+                                <div class="list-descr">{{data.type}}</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="form-group">
+                        <p class="note">Selected properties.<br><i>Click to unselect.<br>Drag and drop to change the order.</i></p>
+                        <div class="table-wrapper">
+                            <ul class="list __items __reverse" ui-sortable="sortableOptions" ng-model="blade.selectedEntities">
+                                <li class="list-item" ng-repeat="data in blade.selectedEntities" ng-click='blade.unselect(data)'>
+                                    <div class="list-t">
+                                        <span>{{data.name}}</span>
+                                        <a href="" ng-click="blade.edit(data); $event.stopPropagation();" class="form-edit">
+                                            <i class="form-ico fa fa-pencil"></i>
+                                        </a>
+                                    </div>
+                                    <div class="list-descr">
+                                        <span>{{data.type}}</span>
+                                        <span ng-if="data.values">, values: {{data.valuesCount}}</span>
+                                        <span ng-if="data.size !== undefined && data.size !== null">, size: {{data.size}}</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="text" ng-if="!blade.currentEntities.length">No Catalog properties found.</p>
+        </div>
+    </div>
+</div>

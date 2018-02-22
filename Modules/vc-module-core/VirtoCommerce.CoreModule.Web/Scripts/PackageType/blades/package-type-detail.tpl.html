@@ -1,0 +1,48 @@
+﻿<div class="blade-static __bottom" ng-include="'$(Platform)/Scripts/common/templates/create.tpl.html'" ng-if="blade.isNew"></div>
+<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block clearfix">
+            <form class="form" name="formScope">
+                <ul class="list __info" ng-init="setForm(formScope)">
+                    <div class="form-group">
+                        <label class="form-label">{{ 'core.blades.package-type-detail.labels.name' | translate }}</label>
+                        <div class="form-input">
+                            <input ng-model="blade.currentEntity.name" required placeholder="{{ 'core.blades.package-type-detail.labels.name-placeholder' | translate}}" />
+                        </div>
+                        <div class="list-descr">{{ 'core.blades.package-type-detail.labels.name-description' | translate}}</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">{{ 'core.blades.package-type-detail.labels.measureUnit' | translate }}<a href="" ng-click="openMeasureUnitsDictionarySettingManagement()" class="form-edit" va-permission="platform:setting:update"><i class="form-ico fa fa-pencil"></i></a></label>
+                        <div class="form-input">
+                            <ui-select  required  ng-model="blade.currentEntity.measureUnit">
+                                <ui-select-match allow-clear="true" placeholder="N/A">{{$select.selected}}</ui-select-match>
+                                <ui-select-choices repeat="x in measureUnits | filter: $select.search">
+                                    <span ng-bind-html="x | highlight: $select.search"></span>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                        <div class="list-descr">{{ 'core.blades.package-type-detail.labels.measureUnit-description' | translate}}</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">{{ 'core.blades.package-type-detail.labels.height' | translate}}</label>
+                        <div class="form-input __number">
+                            <input placeholder="height" smart-float required num-type="float" fraction="3" ng-model="blade.currentEntity.height" min="0.001">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">{{ 'core.blades.package-type-detail.labels.width' | translate}}</label>
+                        <div class="form-input __number">
+                            <input placeholder="width" smart-float required num-type="float" fraction="3" ng-model="blade.currentEntity.width" min="0.001">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">{{ 'core.blades.package-type-detail.labels.length' | translate}}</label>
+                        <div class="form-input __number">
+                            <input placeholder="length" smart-float required num-type="float" fraction="3" ng-model="blade.currentEntity.length" min="0.001">
+                        </div>
+                    </div>
+                </ul>
+            </form>
+        </div>
+    </div>
+</div>

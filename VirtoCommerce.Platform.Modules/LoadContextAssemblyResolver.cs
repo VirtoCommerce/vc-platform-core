@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using Microsoft.Extensions.Logging;
@@ -9,6 +10,8 @@ namespace VirtoCommerce.Platform.Modules
 {
     public class LoadContextAssemblyResolver : IAssemblyResolver
     {
+        private static string[] _systemAssembliesPrefixes = new [] { "System.", "Microsoft.", "System.", "Newtonsoft.", "runtime.", "NETStandard.Library", "Libuv.", "Remotion.Linq" };
+
         private readonly ILogger<LoadContextAssemblyResolver> _logger;
         public LoadContextAssemblyResolver(ILogger<LoadContextAssemblyResolver> logger)
         {
@@ -33,13 +36,23 @@ namespace VirtoCommerce.Platform.Modules
                 throw new FileNotFoundException(assemblyUri.LocalPath);
             }
 
-            var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyUri.LocalPath);
-            foreach (var referencedAssembly in assembly.GetReferencedAssemblies())
+           var assembly = LoadWithAllReferencedAssebliesRecusrive(assemblyUri.LocalPath);
+            return assembly;
+        }
+
+        private Assembly LoadWithAllReferencedAssebliesRecusrive(string assemblyPath)
+        {
+            Assembly assembly = null;
+            if (File.Exists(assemblyPath))
             {
-                var referencedAssemblyPath = Path.Combine(Path.GetDirectoryName(assemblyUri.LocalPath), referencedAssembly.Name + ".dll");
-                if (File.Exists(referencedAssemblyPath))
+                assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
+                foreach (var referencedAssemblyName in assembly.GetReferencedAssemblies())
                 {
-                    AssemblyLoadContext.Default.LoadFromAssemblyPath(referencedAssemblyPath);
+                    if (!_systemAssembliesPrefixes.Any(x => referencedAssemblyName.Name.StartsWith(x, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        var referencedAssemblyPath = Path.Combine(Path.GetDirectoryName(assemblyPath), referencedAssemblyName.Name + ".dll");
+                        LoadWithAllReferencedAssebliesRecusrive(referencedAssemblyPath);
+                    }
                 }
             }
             return assembly;

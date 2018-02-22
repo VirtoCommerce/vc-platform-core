@@ -78,7 +78,6 @@ namespace VirtoCommerce.Platform.Web.ExportImport
                 {
                     Id = x.Id,
                     Version = x.Version.ToString(),
-                    Description = ((ISupportExportImportModule)x.ModuleInstance).ExportDescription
                 }).ToArray()
             };
 
@@ -293,7 +292,7 @@ namespace VirtoCommerce.Platform.Web.ExportImport
                         };
                         try
                         {
-                            ((ISupportExportImportModule)moduleDescriptor.ModuleInstance).DoImport(modulePartStream, manifest, modulePorgressCallback);
+                            ((ISupportExportImportModule)moduleDescriptor.ModuleInstance).DoImport(modulePartStream, manifest, modulePorgressCallback, CancellationToken.None);
                         }
                         catch (Exception ex)
                         {
@@ -330,7 +329,7 @@ namespace VirtoCommerce.Platform.Web.ExportImport
 
                     try
                     {
-                        ((ISupportExportImportModule)moduleDescriptor.ModuleInstance).DoExport(zipEntry.Open(), manifest, modulePorgressCallback);
+                        ((ISupportExportImportModule)moduleDescriptor.ModuleInstance).DoExport(zipEntry.Open(), manifest, modulePorgressCallback, CancellationToken.None);
                     }
                     catch (Exception ex)
                     {

@@ -1,0 +1,42 @@
+﻿<div class="blade-static __bottom" ng-include="'Modules/$(VirtoCommerce.Catalog)/Scripts/blades/common/templates/ok-cancel.tpl.html'"></div>
+<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <div class="form-group">
+                <label class="form-label">{{ 'catalog.wizards.association.labels.group-name' | translate }} <a href="" ng-click="openDictionarySettingManagement()" class="form-edit" va-permission="platform:setting:update"><i class="form-ico fa fa-pencil"></i></a></label>
+                <div class="form-input">
+                    <ui-select ng-model="blade.groupName" required>
+                        <ui-select-match placeholder="{{ 'catalog.wizards.association.placeholders.group-name' | translate }}">{{$select.selected}}</ui-select-match>
+                        <ui-select-choices repeat="x in associationGroups | filter: $select.search">
+                            <span ng-bind-html="x | highlight: $select.search"></span>
+                        </ui-select-choices>
+                    </ui-select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">{{ 'catalog.wizards.association.labels.tags' | translate }}</label>
+                <tags-input ng-model="blade.tags"
+                            display-property="value"
+                            placeholder="{{ 'catalog.wizards.association.labels.tags-placeholder' | translate }}">
+                </tags-input>
+            </div>
+            <div class="form-group">
+                <label class="form-label">{{ 'catalog.wizards.association.labels.quantity' | translate }}</label>
+                <div class="form-input __number">
+                    <input smart-float num-type="integer" ng-model="blade.quantity"
+                            placeholder="{{ 'catalog.wizards.association.placeholders.quantity' | translate }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <ul class="list __items">
+                    <li class="list-item" ng-click="openBlade()">
+                        <i class="list-ico fa fa-cubes"></i>
+                        <span class="list-t">{{ 'catalog.wizards.association.labels.items' | translate }}</span>
+                        <span class="list-descr">{{selectedCount('product')}} {{ 'catalog.wizards.association.labels.products-selected' | translate }}</span>
+                        <span class="list-descr">{{selectedCount('category')}} {{ 'catalog.wizards.association.labels.categories-selected' | translate }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
