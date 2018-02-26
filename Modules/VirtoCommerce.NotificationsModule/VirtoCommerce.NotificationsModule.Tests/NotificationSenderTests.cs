@@ -81,5 +81,44 @@ namespace VirtoCommerce.NotificationsModule.Tests
 
             //Assert
         }
+
+        [Fact]
+        public async Task InvoiceEmailNotification_SentNotification()
+        {
+            //Arrange
+            string language = "default";
+            string subject = "Invoice for order - {{ order.number }} {{ order.created_date }}";
+            string body = "total: {{ order.shipping_total | math.format 'C' }}";
+            var notification = new InvoiceEmailNotification()
+            {
+                Order = new CustomerOrder() { Id = "adsffads", Number = "123", ShippingTotal = 123456.789m, CreatedDate = DateTime.Now },
+                Templates = new List<NotificationTemplate>()
+                {
+                    new EmailNotificationTemplate()
+                    {
+                        Subject = subject,
+                        Body = body,
+                        LanguageCode = language
+                    }
+                }
+            };
+            var date = new DateTime(2018, 02, 20, 10, 00, 00);
+            var message = new EmailNotificationMessage()
+            {
+                Id = "1",
+                From = "from@from.com",
+                To = "to@to.com",
+                Subject = subject,
+                Body = body,
+                SendDate = date
+            };
+            _serviceMock.Setup(serv => serv.GetNotificationByTypeAsync(nameof(InvoiceEmailNotification), null)).ReturnsAsync(notification);
+            _messageServiceMock.Setup(ms => ms.SaveNotificationMessages(new NotificationMessage[] { message }));
+
+            //Act
+            await _sender.SendNotificationAsync(notification, language);
+
+            //Assert
+        }
     }
 }
