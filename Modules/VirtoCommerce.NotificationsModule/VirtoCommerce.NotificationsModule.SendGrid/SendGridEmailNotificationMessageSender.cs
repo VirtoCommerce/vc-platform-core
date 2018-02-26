@@ -1,17 +1,17 @@
 using System;
-using System.Net.Mail;
 using System.Threading.Tasks;
 using SendGrid;
 using SendGrid.Helpers.Mail;
+using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
 
-namespace VirtoCommerce.NotificationsModule.Notifications.Senders
+namespace VirtoCommerce.NotificationsModule.SendGrid
 {
     public class SendGridEmailNotificationMessageSender : INotificationMessageSender
     {
-        private readonly EmailSettings _emailSettings;
+        private readonly EmailSendingOptions _emailSettings;
 
-        public SendGridEmailNotificationMessageSender(EmailSettings emailSettings)
+        public SendGridEmailNotificationMessageSender(EmailSendingOptions emailSettings)
         {
             _emailSettings = emailSettings;
         }
@@ -26,7 +26,7 @@ namespace VirtoCommerce.NotificationsModule.Notifications.Senders
             {
                 var client = new SendGridClient(_emailSettings.ApiKey);
                 var mailMsg = new SendGridMessage();
-                mailMsg.From = new SendGrid.Helpers.Mail.EmailAddress(emailNotificationMessage.From);
+                mailMsg.From = new EmailAddress(emailNotificationMessage.From);
 
                 mailMsg.Subject = emailNotificationMessage.Subject;
                 mailMsg.HtmlContent = emailNotificationMessage.Body;

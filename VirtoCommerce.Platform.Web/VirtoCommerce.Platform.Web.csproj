@@ -36,7 +36,7 @@
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Modules\VirtoCommerce.NotificationsModule\VirtoCommerce.NotificationsModule.Web\VirtoCommerce.NotificationsModule.Web.csproj" />
+    <!--<ProjectReference Include="..\Modules\VirtoCommerce.NotificationsModule\VirtoCommerce.NotificationsModule.Web\VirtoCommerce.NotificationsModule.Web.csproj" />-->
     <ProjectReference Include="..\VirtoCommerce.Platform.Data\VirtoCommerce.Platform.Data.csproj" />
     <ProjectReference Include="..\VirtoCommerce.Platform.Modules\VirtoCommerce.Platform.Modules.csproj" />
     <ProjectReference Include="..\VirtoCommerce.Platform.Security\VirtoCommerce.Platform.Security.csproj" />

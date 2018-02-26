@@ -14,13 +14,8 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
 
         public string From { get; set; }
         public string To { get; set; }
-        public EmailAddress[] CC { get; set; }
-        public EmailAddress[] BCC { get; set; }
+        public string[] CC { get; set; }
+        public string[] BCC { get; set; }
         public IList<EmailAttachment> Attachments { get; set; }
-    }
-
-    public class EmailAddress : AuditableEntity
-    {
-        public string Value { get; set; }
     }
 }

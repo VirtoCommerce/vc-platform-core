@@ -23,7 +23,21 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             modelBuilder.Entity<NotificationEntity>()
                 .HasMany(n => n.Recipients)
                 .WithOne()
-                .HasForeignKey("NotificationId")
+                .HasForeignKey(n => n.NotificationId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<NotificationEntity>()
+                .HasMany(n => n.Templates)
+                .WithOne()
+                .HasForeignKey(n => n.NotificationId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<NotificationEntity>()
+                .HasMany(n => n.Attachments)
+                .WithOne()
+                .HasForeignKey(n => n.NotificationId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
 

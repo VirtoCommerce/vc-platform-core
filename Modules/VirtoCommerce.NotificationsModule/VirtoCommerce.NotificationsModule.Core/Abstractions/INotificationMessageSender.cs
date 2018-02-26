@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using VirtoCommerce.NotificationsModule.Core.Model;
 
-namespace VirtoCommerce.NotificationsModule.Notifications.Senders
+namespace VirtoCommerce.NotificationsModule.Core.Abstractions
 {
     public interface INotificationMessageSender
     {

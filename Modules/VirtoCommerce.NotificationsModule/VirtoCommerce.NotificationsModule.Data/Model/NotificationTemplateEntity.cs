@@ -30,6 +30,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         [StringLength(1600)]
         public string Message { get; set; }
 
+        [StringLength(128)]
+        public string NotificationId { get; set; }
+
         public virtual NotificationTemplate ToModel(NotificationTemplate message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));

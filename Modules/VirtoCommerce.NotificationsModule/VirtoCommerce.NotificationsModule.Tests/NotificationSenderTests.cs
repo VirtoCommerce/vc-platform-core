@@ -6,9 +6,9 @@ using Moq;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
-using VirtoCommerce.NotificationsModule.Notifications.NotificationTypes;
-using VirtoCommerce.NotificationsModule.Notifications.Rendering;
-using VirtoCommerce.NotificationsModule.Notifications.Senders;
+using VirtoCommerce.NotificationsModule.Data.Senders;
+using VirtoCommerce.NotificationsModule.LiguidRenderer;
+using VirtoCommerce.NotificationsModule.Tests.NotificationTypes;
 using Xunit;
 
 namespace VirtoCommerce.NotificationsModule.Tests

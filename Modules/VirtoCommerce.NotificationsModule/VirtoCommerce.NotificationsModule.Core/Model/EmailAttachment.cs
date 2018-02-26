@@ -1,6 +1,8 @@
+using VirtoCommerce.Platform.Core.Common;
+
 namespace VirtoCommerce.NotificationsModule.Core.Model
 {
-    public class EmailAttachment
+    public class EmailAttachment : ValueObject
     {
         public string FileName { get; set; }
         public string Url { get; set; }

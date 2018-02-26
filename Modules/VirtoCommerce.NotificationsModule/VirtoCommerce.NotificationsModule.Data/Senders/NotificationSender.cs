@@ -2,9 +2,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
-using VirtoCommerce.NotificationsModule.Notifications.Rendering;
 
-namespace VirtoCommerce.NotificationsModule.Notifications.Senders
+namespace VirtoCommerce.NotificationsModule.Data.Senders
 {
     public class NotificationSender : INotificationSender
     {
@@ -39,8 +38,8 @@ namespace VirtoCommerce.NotificationsModule.Notifications.Senders
                     {
                         From = emailNotification.From,
                         To = emailNotification.To,
-                        CC = emailNotification.CC?.Select(cc => cc.Value).ToArray(),
-                        BCC = emailNotification.BCC?.Select(bcc => bcc.Value).ToArray(),
+                        CC = emailNotification.CC,
+                        BCC = emailNotification.BCC,
                         // Attachments
                         Subject = subject,
                         Body = body,

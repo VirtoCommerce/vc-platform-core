@@ -12,7 +12,7 @@ using VirtoCommerce.NotificationsModule.Data.Repositories;
 namespace VirtoCommerce.NotificationsModule.Data.Migrations
 {
     [DbContext(typeof(NotificationDbContext))]
-    [Migration("20180219165146_Initial")]
+    [Migration("20180226165110_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -47,17 +47,18 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
 
                     b.Property<DateTime?>("ModifiedDate");
 
-                    b.Property<string>("NotificationEntityId");
+                    b.Property<string>("NotificationId")
+                        .HasMaxLength(128);
 
                     b.Property<string>("Size")
                         .HasMaxLength(128);
 
                     b.Property<string>("Url")
-                        .HasMaxLength(1000);
+                        .HasMaxLength(2048);
 
                     b.HasKey("Id");
 
-                    b.HasIndex("NotificationEntityId");
+                    b.HasIndex("NotificationId");
 
                     b.ToTable("NotificationEmailAttachment");
                 });
@@ -71,7 +72,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                     b.Property<string>("EmailAddress")
                         .HasMaxLength(128);
 
-                    b.Property<string>("NotificationId");
+                    b.Property<string>("NotificationId")
+                        .HasMaxLength(128);
 
                     b.Property<int>("RecipientType");
 
@@ -206,14 +208,15 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
 
                     b.Property<DateTime?>("ModifiedDate");
 
-                    b.Property<string>("NotificationEntityId");
+                    b.Property<string>("NotificationId")
+                        .HasMaxLength(128);
 
                     b.Property<string>("Subject")
                         .HasMaxLength(512);
 
                     b.HasKey("Id");
 
-                    b.HasIndex("NotificationEntityId");
+                    b.HasIndex("NotificationId");
 
                     b.ToTable("NotificationTemplate");
                 });
@@ -222,7 +225,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                 {
                     b.HasOne("VirtoCommerce.NotificationsModule.Data.Model.NotificationEntity")
                         .WithMany("Attachments")
-                        .HasForeignKey("NotificationEntityId");
+                        .HasForeignKey("NotificationId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.NotificationEmailRecipientEntity", b =>
@@ -244,7 +248,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                 {
                     b.HasOne("VirtoCommerce.NotificationsModule.Data.Model.NotificationEntity")
                         .WithMany("Templates")
-                        .HasForeignKey("NotificationEntityId");
+                        .HasForeignKey("NotificationId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

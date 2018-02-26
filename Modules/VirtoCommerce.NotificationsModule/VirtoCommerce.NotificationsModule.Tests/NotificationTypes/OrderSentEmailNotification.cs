@@ -1,7 +1,7 @@
 using System;
 using VirtoCommerce.NotificationsModule.Core.Model;
 
-namespace VirtoCommerce.NotificationsModule.Notifications.NotificationTypes
+namespace VirtoCommerce.NotificationsModule.Tests.NotificationTypes
 {
     public class OrderSentEmailNotification : EmailNotification
     {

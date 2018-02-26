@@ -84,9 +84,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
                     if (!this.Recipients.IsNullOrEmpty())
                     {
                         emailNotification.CC = this.Recipients.Where(r => r.RecipientType == NotificationRecipientType.Cc)
-                            .Select(cc => cc.ToModel(AbstractTypeFactory<EmailAddress>.TryCreateInstance())).ToArray();
+                            .Select(cc => cc.EmailAddress).ToArray();
                         emailNotification.BCC = this.Recipients.Where(r => r.RecipientType == NotificationRecipientType.Bcc)
-                            .Select(bcc => bcc.ToModel(AbstractTypeFactory<EmailAddress>.TryCreateInstance())).ToArray();
+                            .Select(bcc => bcc.EmailAddress).ToArray();
                     }
 
                     if (!this.Attachments.IsNullOrEmpty())
@@ -138,16 +138,14 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
                     if (emailNotification.CC != null && emailNotification.CC.Any())
                     {
                         if (this.Recipients.IsNullCollection()) this.Recipients = new ObservableCollection<NotificationEmailRecipientEntity>();
-                        this.Recipients.AddRange(emailNotification.CC.Select(cc =>
-                            AbstractTypeFactory<NotificationEmailRecipientEntity>.TryCreateInstance()
+                        this.Recipients.AddRange(emailNotification.CC.Select(cc => AbstractTypeFactory<NotificationEmailRecipientEntity>.TryCreateInstance()
                                 .FromModel(cc, NotificationRecipientType.Cc)));
                     }
 
                     if (emailNotification.BCC != null && emailNotification.BCC.Any())
                     {
                         if (this.Recipients.IsNullCollection()) this.Recipients = new ObservableCollection<NotificationEmailRecipientEntity>();
-                        this.Recipients.AddRange(emailNotification.BCC.Select(bcc =>
-                            AbstractTypeFactory<NotificationEmailRecipientEntity>.TryCreateInstance()
+                        this.Recipients.AddRange(emailNotification.BCC.Select(bcc => AbstractTypeFactory<NotificationEmailRecipientEntity>.TryCreateInstance()
                                 .FromModel(bcc, NotificationRecipientType.Bcc)));
                     }
 

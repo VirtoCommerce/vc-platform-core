@@ -43,19 +43,19 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                     MimeType = table.Column<string>(maxLength: 50, nullable: true),
                     ModifiedBy = table.Column<string>(maxLength: 64, nullable: true),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
-                    NotificationEntityId = table.Column<string>(nullable: true),
+                    NotificationId = table.Column<string>(maxLength: 128, nullable: true),
                     Size = table.Column<string>(maxLength: 128, nullable: true),
-                    Url = table.Column<string>(maxLength: 1000, nullable: true)
+                    Url = table.Column<string>(maxLength: 2048, nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_NotificationEmailAttachment", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_NotificationEmailAttachment_Notification_NotificationEntityId",
-                        column: x => x.NotificationEntityId,
+                        name: "FK_NotificationEmailAttachment_Notification_NotificationId",
+                        column: x => x.NotificationId,
                         principalTable: "Notification",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -64,7 +64,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                 {
                     Id = table.Column<string>(maxLength: 128, nullable: false),
                     EmailAddress = table.Column<string>(maxLength: 128, nullable: true),
-                    NotificationId = table.Column<string>(nullable: true),
+                    NotificationId = table.Column<string>(maxLength: 128, nullable: true),
                     RecipientType = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
@@ -124,24 +124,24 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                     Message = table.Column<string>(maxLength: 1600, nullable: true),
                     ModifiedBy = table.Column<string>(maxLength: 64, nullable: true),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
-                    NotificationEntityId = table.Column<string>(nullable: true),
+                    NotificationId = table.Column<string>(maxLength: 128, nullable: true),
                     Subject = table.Column<string>(maxLength: 512, nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_NotificationTemplate", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_NotificationTemplate_Notification_NotificationEntityId",
-                        column: x => x.NotificationEntityId,
+                        name: "FK_NotificationTemplate_Notification_NotificationId",
+                        column: x => x.NotificationId,
                         principalTable: "Notification",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_NotificationEmailAttachment_NotificationEntityId",
+                name: "IX_NotificationEmailAttachment_NotificationId",
                 table: "NotificationEmailAttachment",
-                column: "NotificationEntityId");
+                column: "NotificationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_NotificationEmailRecipient_NotificationId",
@@ -154,9 +154,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                 column: "NotificationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_NotificationTemplate_NotificationEntityId",
+                name: "IX_NotificationTemplate_NotificationId",
                 table: "NotificationTemplate",
-                column: "NotificationEntityId");
+                column: "NotificationId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

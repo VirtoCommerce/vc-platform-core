@@ -1,6 +1,6 @@
-namespace VirtoCommerce.NotificationsModule.Notifications
+namespace VirtoCommerce.NotificationsModule.Core.Model
 {
-    public class EmailSettings
+    public class EmailSendingOptions
     {
         public string SmtpServer { get; set; }
         public int Port { get; set; }

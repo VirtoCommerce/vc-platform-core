@@ -1,6 +1,7 @@
 using Scriban;
+using VirtoCommerce.NotificationsModule.Core.Abstractions;
 
-namespace VirtoCommerce.NotificationsModule.Notifications.Rendering
+namespace VirtoCommerce.NotificationsModule.LiguidRenderer
 {
     public class LiquidTemplateRenderer : INotificationTemplateRender
     {

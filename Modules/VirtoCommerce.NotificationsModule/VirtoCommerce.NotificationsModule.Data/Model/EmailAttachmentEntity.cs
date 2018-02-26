@@ -16,7 +16,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         /// <summary>
         /// 
         /// </summary>
-        [StringLength(1000)]
+        [StringLength(2048)]
         public string Url { get; set; }
 
         /// <summary>
@@ -36,6 +36,12 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         /// </summary>
         [StringLength(10)]
         public string LanguageCode { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [StringLength(128)]
+        public string NotificationId { get; set; }
 
         public virtual EmailAttachment ToModel(EmailAttachment emailAttachment)
         {

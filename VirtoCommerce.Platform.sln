@@ -31,7 +31,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Notifications
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.Tests", "Modules\VirtoCommerce.NotificationsModule\VirtoCommerce.NotificationsModule.Tests\VirtoCommerce.NotificationsModule.Tests.csproj", "{DD805428-3567-457D-B1C5-CB6BD93DB70F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.NotificationsModule.Notifications", "Modules\VirtoCommerce.NotificationsModule\VirtoCommerce.NotificationsModule.Notifications\VirtoCommerce.NotificationsModule.Notifications.csproj", "{3CFF37B2-288E-4A6C-93C6-0BE7D9F0AC82}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.NotificationsModule.LiguidRenderer", "Modules\VirtoCommerce.NotificationsModule\VirtoCommerce.NotificationsModule.LiguidRenderer\VirtoCommerce.NotificationsModule.LiguidRenderer.csproj", "{FB63C950-D3AB-458C-BBCE-99BDC34CD619}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.NotificationsModule.Smtp", "Modules\VirtoCommerce.NotificationsModule\VirtoCommerce.NotificationsModule.Smtp\VirtoCommerce.NotificationsModule.Smtp.csproj", "{46B56C6C-B20D-44FA-AD3B-3DD8D8E9D18F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.NotificationsModule.SendGrid", "Modules\VirtoCommerce.NotificationsModule\VirtoCommerce.NotificationsModule.SendGrid\VirtoCommerce.NotificationsModule.SendGrid.csproj", "{BFE3327C-D8A5-4746-98CE-C7D30A078A62}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,10 +87,18 @@ Global
 		{DD805428-3567-457D-B1C5-CB6BD93DB70F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD805428-3567-457D-B1C5-CB6BD93DB70F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD805428-3567-457D-B1C5-CB6BD93DB70F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3CFF37B2-288E-4A6C-93C6-0BE7D9F0AC82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3CFF37B2-288E-4A6C-93C6-0BE7D9F0AC82}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3CFF37B2-288E-4A6C-93C6-0BE7D9F0AC82}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3CFF37B2-288E-4A6C-93C6-0BE7D9F0AC82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB63C950-D3AB-458C-BBCE-99BDC34CD619}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB63C950-D3AB-458C-BBCE-99BDC34CD619}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB63C950-D3AB-458C-BBCE-99BDC34CD619}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB63C950-D3AB-458C-BBCE-99BDC34CD619}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46B56C6C-B20D-44FA-AD3B-3DD8D8E9D18F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46B56C6C-B20D-44FA-AD3B-3DD8D8E9D18F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46B56C6C-B20D-44FA-AD3B-3DD8D8E9D18F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46B56C6C-B20D-44FA-AD3B-3DD8D8E9D18F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFE3327C-D8A5-4746-98CE-C7D30A078A62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFE3327C-D8A5-4746-98CE-C7D30A078A62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFE3327C-D8A5-4746-98CE-C7D30A078A62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFE3327C-D8A5-4746-98CE-C7D30A078A62}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -100,7 +112,9 @@ Global
 		{9956C644-63F7-4A56-83A4-83A203E6B608} = {AFB12010-1866-4A31-865E-5D2DF65FB521}
 		{EBA867D6-6F8E-4625-B70E-BB24D26A5F2E} = {AFB12010-1866-4A31-865E-5D2DF65FB521}
 		{DD805428-3567-457D-B1C5-CB6BD93DB70F} = {AFB12010-1866-4A31-865E-5D2DF65FB521}
-		{3CFF37B2-288E-4A6C-93C6-0BE7D9F0AC82} = {AFB12010-1866-4A31-865E-5D2DF65FB521}
+		{FB63C950-D3AB-458C-BBCE-99BDC34CD619} = {AFB12010-1866-4A31-865E-5D2DF65FB521}
+		{46B56C6C-B20D-44FA-AD3B-3DD8D8E9D18F} = {AFB12010-1866-4A31-865E-5D2DF65FB521}
+		{BFE3327C-D8A5-4746-98CE-C7D30A078A62} = {AFB12010-1866-4A31-865E-5D2DF65FB521}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {80F99D88-A3B2-4ED2-9148-43D43EBFFFC3}

@@ -1,4 +1,4 @@
-namespace VirtoCommerce.NotificationsModule.Notifications.Rendering
+namespace VirtoCommerce.NotificationsModule.Core.Abstractions
 {
     public interface INotificationTemplateRender
     {

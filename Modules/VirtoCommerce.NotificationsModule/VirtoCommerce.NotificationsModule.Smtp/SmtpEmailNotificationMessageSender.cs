@@ -1,15 +1,16 @@
 using System;
-using System.Threading.Tasks;
 using System.Net.Mail;
+using System.Threading.Tasks;
+using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
 
-namespace VirtoCommerce.NotificationsModule.Notifications.Senders
+namespace VirtoCommerce.NotificationsModule.Smtp
 {
     public class SmtpEmailNotificationMessageSender : INotificationMessageSender
     {
-        private readonly EmailSettings _emailSettings;
+        private readonly EmailSendingOptions _emailSettings;
 
-        public SmtpEmailNotificationMessageSender(EmailSettings emailSettings)
+        public SmtpEmailNotificationMessageSender(EmailSendingOptions emailSettings)
         {
             _emailSettings = emailSettings;
         }

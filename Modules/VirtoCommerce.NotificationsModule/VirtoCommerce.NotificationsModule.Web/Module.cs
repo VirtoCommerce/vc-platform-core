@@ -8,17 +8,17 @@ using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
+using VirtoCommerce.NotificationsModule.Data.Senders;
 using VirtoCommerce.NotificationsModule.Data.Services;
-using VirtoCommerce.NotificationsModule.Notifications.NotificationTypes;
-using VirtoCommerce.NotificationsModule.Notifications.Rendering;
-using VirtoCommerce.NotificationsModule.Notifications.Senders;
+using VirtoCommerce.NotificationsModule.LiguidRenderer;
+using VirtoCommerce.NotificationsModule.Smtp;
 using VirtoCommerce.NotificationsModule.Web.Infrastructure;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 
 namespace VirtoCommerce.NotificationsModule.Web
 {
-    public class NotificationsModule : IModule
+    public class Module : IModule
     {
         public ManifestModuleInfo ModuleInfo { get; set; }
 
@@ -54,24 +54,7 @@ namespace VirtoCommerce.NotificationsModule.Web
             {
                 var notificationDbContext = serviceScope.ServiceProvider.GetRequiredService<NotificationDbContext>();
                 notificationDbContext.Database.Migrate();
-                notificationDbContext.EnsureSeeded();
             }
-
-            var notificationRegistrar = serviceProvider.GetService<INotificationRegistrar>();
-            notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
-            notificationRegistrar.RegisterNotification<ResetPasswordEmailNotification>();
-            notificationRegistrar.RegisterNotification<TwoFactorEmailNotification>();
-            notificationRegistrar.RegisterNotification<TwoFactorSmsNotification>();
-            notificationRegistrar.RegisterNotification<ConfirmationEmailNotification>();
-            notificationRegistrar.RegisterNotification<StoreDynamicEmailNotification>();
-            notificationRegistrar.RegisterNotification<OrderCreateEmailNotification>();
-            notificationRegistrar.RegisterNotification<OrderPaidEmailNotification>();
-            notificationRegistrar.RegisterNotification<OrderSentEmailNotification>();
-            notificationRegistrar.RegisterNotification<NewOrderStatusEmailNotification>();
-            notificationRegistrar.RegisterNotification<CancelOrderEmailNotification>();
-            notificationRegistrar.RegisterNotification<InvoiceEmailNotification>();
-            notificationRegistrar.RegisterNotification<NewSubscriptionEmailNotification>();
-            notificationRegistrar.RegisterNotification<SubscriptionCanceledEmailNotification>();
         }
 
         public void Uninstall()

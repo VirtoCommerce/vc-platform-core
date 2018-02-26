@@ -16,22 +16,12 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 
         public NotificationRecipientType RecipientType { get; set; }
 
-        public virtual EmailAddress ToModel(EmailAddress emailAddress)
+        [StringLength(128)]
+        public string NotificationId { get; set; }
+
+        public virtual NotificationEmailRecipientEntity FromModel(string emailAddress, NotificationRecipientType recipientType)
         {
-            if (emailAddress == null) throw new ArgumentNullException(nameof(emailAddress));
-
-            emailAddress.Value = EmailAddress;
-            emailAddress.Id = this.Id;
-
-            return emailAddress;
-        }
-
-        public virtual NotificationEmailRecipientEntity FromModel(EmailAddress emailAddress, NotificationRecipientType recipientType)
-        {
-            if (emailAddress == null) throw new ArgumentNullException(nameof(emailAddress));
-
-            this.EmailAddress = emailAddress.Value;
-            this.Id = emailAddress.Id;
+            this.EmailAddress = emailAddress;
             this.RecipientType = recipientType;
 
             return this;
