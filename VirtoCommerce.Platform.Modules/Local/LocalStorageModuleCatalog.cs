@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -15,11 +15,7 @@ namespace VirtoCommerce.Platform.Modules
         private readonly LocalStorageModuleCatalogOptions _options;
         public LocalStorageModuleCatalog(IOptions<LocalStorageModuleCatalogOptions> options)
         {
-            _options = options.Value;
-            if (_options.VirtualPath != null)
-            {
-                _options.VirtualPath = _options.VirtualPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-            }
+            _options = options.Value;            
         }
 
         protected override void InnerLoad()
@@ -28,8 +24,6 @@ namespace VirtoCommerce.Platform.Modules
 
             if (string.IsNullOrEmpty(_options.ProbingPath))
                 throw new InvalidOperationException("The ProbingPath cannot contain a null value or be empty");
-            if (string.IsNullOrEmpty(_options.VirtualPath))
-                throw new InvalidOperationException("The VirtualPath cannot contain a null value or be empty");
             if (string.IsNullOrEmpty(_options.DiscoveryPath))
                 throw new InvalidOperationException("The DiscoveryPath cannot contain a null value or be empty");
 
@@ -215,16 +209,13 @@ namespace VirtoCommerce.Platform.Modules
 
         private bool IsAssemblyFile(string path)
         {
-            var fileExtension = Path.GetExtension(path);
-            return fileExtension != null &&  _options.AssemblyFileExtensions.Contains(fileExtension, StringComparer.OrdinalIgnoreCase);
+            return _options.AssemblyFileExtensions.Any(x => path.EndsWith(x, StringComparison.OrdinalIgnoreCase));
         }
 
         private string GetModuleVirtualPath(Uri rootUri, string modulePath)
         {
             var moduleRelativePath = MakeRelativePath(rootUri, modulePath);
-            var moduleVirtualPath = string.Join("/", _options.VirtualPath, moduleRelativePath);
-
-            return moduleVirtualPath;
+            return moduleRelativePath;
         }
 
         private static string MakeRelativePath(Uri rootUri, string fullPath)

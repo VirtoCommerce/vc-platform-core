@@ -9,9 +9,13 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Modules\**" />
     <Compile Remove="wwwroot\Scripts\**" />
+    <Content Remove="Modules\**" />
     <Content Remove="wwwroot\Scripts\**" />
+    <EmbeddedResource Remove="Modules\**" />
     <EmbeddedResource Remove="wwwroot\Scripts\**" />
+    <None Remove="Modules\**" />
     <None Remove="wwwroot\Scripts\**" />
   </ItemGroup>
   <ItemGroup>

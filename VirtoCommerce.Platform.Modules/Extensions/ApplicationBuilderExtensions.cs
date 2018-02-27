@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -6,6 +6,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Smidge;
 using Smidge.Models;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -36,19 +37,18 @@ namespace VirtoCommerce.Platform.Modules.Extensions
 
         public static IApplicationBuilder UseModulesContent(this IApplicationBuilder appBuilder, IBundleManager bundles)
         {
-            var hostingEnv = appBuilder.ApplicationServices.GetRequiredService<IHostingEnvironment>();
             var modules = GetInstalledModules(appBuilder.ApplicationServices);
-
+            var modulesOptions = appBuilder.ApplicationServices.GetRequiredService<IOptions<LocalStorageModuleCatalogOptions>>().Value;
             var cssBundleItems = modules.SelectMany(m => m.Styles).ToArray();
             
             var cssFiles = cssBundleItems.OfType<ManifestBundleFile>().Select(x => new CssFile(x.VirtualPath));
 
-            cssFiles = cssFiles.Concat(cssBundleItems.OfType<ManifestBundleDirectory>().SelectMany(x => new WebFileFolder(hostingEnv, x.VirtualPath)
+            cssFiles = cssFiles.Concat(cssBundleItems.OfType<ManifestBundleDirectory>().SelectMany(x => new WebFileFolder(modulesOptions.DiscoveryPath, x.VirtualPath)
                                                                                 .AllWebFiles<CssFile>(x.SearchPattern, x.SearchSubdirectories ?  SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)));
 
             var scriptBundleItems = modules.SelectMany(m => m.Scripts).ToArray();
             var jsFiles = scriptBundleItems.OfType<ManifestBundleFile>().Select(x => new JavaScriptFile(x.VirtualPath));
-            jsFiles = jsFiles.Concat(scriptBundleItems.OfType<ManifestBundleDirectory>().SelectMany(x => new WebFileFolder(hostingEnv, x.VirtualPath)
+            jsFiles = jsFiles.Concat(scriptBundleItems.OfType<ManifestBundleDirectory>().SelectMany(x => new WebFileFolder(modulesOptions.DiscoveryPath, x.VirtualPath)
                                                                                 .AllWebFiles<JavaScriptFile>(x.SearchPattern, x.SearchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)));
 
 
@@ -83,23 +83,23 @@ namespace VirtoCommerce.Platform.Modules.Extensions
     /// </summary>
     internal class WebFileFolder
     {
-        private readonly IHostingEnvironment _env;
+        private readonly string _rootPath;
         private readonly string _path;
 
-        public WebFileFolder(IHostingEnvironment env, string path)
+        public WebFileFolder(string rootPath, string path)
         {
-            _env = env;
+            _rootPath = rootPath;
             _path = path;
         }
 
         public T[] AllWebFiles<T>(string pattern, SearchOption search) where T : IWebFile, new()
         {
-            var fsPath = _path.Replace("~", _env.WebRootPath);
-            return Directory.GetFiles(fsPath, pattern, search)
+           var result =  Directory.GetFiles(Path.Combine(_rootPath, _path), pattern, search)
                 .Select(f => new T
                 {
-                    FilePath = f.Replace(_env.WebRootPath, "~").Replace("\\", "/")
+                    FilePath = f.Replace(_rootPath, "~").Replace("\\", "/")
                 }).ToArray();
+            return result;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.Extensions.DependencyInjection;
 using Module1.Abstractions;
 using Module1.Services;
@@ -14,6 +14,7 @@ namespace Module1.Web
 
         public void Initialize(IServiceCollection serviceCollection)
         {
+            var mode = FluentValidation.CascadeMode.Continue;
             serviceCollection.AddSingleton<IMyService, MyServiceImpl>();
         }
 

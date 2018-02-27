@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Options;
 using Smidge;
 using Swashbuckle.AspNetCore.Swagger;
 using VirtoCommerce.Platform.Core.Common;
@@ -59,17 +60,17 @@ namespace VirtoCommerce.Platform.Web
             PlatformVersion.CurrentVersion = SemanticVersion.Parse(Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default.Application.ApplicationVersion);
 
             var mvcBuilder = services.AddMvc();
+            var modulesDiscoveryPath = Path.GetFullPath("Modules");
             services.AddModules(mvcBuilder, options =>
             {
-                options.DiscoveryPath = HostingEnvironment.MapPath(@"~/Modules");
-                options.ProbingPath = HostingEnvironment.MapPath("~/App_Data/Modules");
-                options.VirtualPath = "~/Modules";
+                options.DiscoveryPath = modulesDiscoveryPath;
+                options.ProbingPath = "App_Data/Modules";
             });
             services.AddExternalModules(options =>
             {
                 options.ModulesManifestUrl = new Uri(@"https://raw.githubusercontent.com/VirtoCommerce/vc-modules/master/modules.json");
             });
-
+           
             services.AddDbContext<SecurityDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("VirtoCommerce"));
@@ -181,7 +182,7 @@ namespace VirtoCommerce.Platform.Web
             // Add memory cache services
             services.AddMemoryCache();
             //Add Smidge runtime bundling library configuration
-            services.AddSmidge(Configuration.GetSection("smidge"));
+            services.AddSmidge(Configuration.GetSection("smidge"), new PhysicalFileProvider(modulesDiscoveryPath));
             // Register the Swagger generator
             services.AddSwaggerGen(c =>
             {
@@ -220,7 +221,7 @@ namespace VirtoCommerce.Platform.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-         
+       
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -235,18 +236,27 @@ namespace VirtoCommerce.Platform.Web
             //Return all errors as Json response
             app.UseMiddleware<ApiErrorWrappingMiddleware>();
 
-            app.UseVirtualFolders(folderOptions =>
-            {
-                folderOptions.Items.Add(PathString.FromUriComponent("/$(Platform)/Scripts"), "/js");
-                var localModules = app.ApplicationServices.GetRequiredService<ILocalModuleCatalog>().Modules;
-                foreach (var module in localModules.OfType<ManifestModuleInfo>())
-                {
-                    folderOptions.Items.Add(PathString.FromUriComponent($"/Modules/$({ module.ModuleName })"), HostingEnvironment.GetRelativePath("~/Modules", module.FullPhysicalPath));
-                }
-            });
-
-            app.UseDefaultFiles();
             app.UseStaticFiles();
+
+            //Handle all requests like a $(Platform) and Modules/$({ module.ModuleName }) as static files in correspond folder
+            app.UseStaticFiles(new StaticFileOptions()
+            {
+                FileProvider = new PhysicalFileProvider(env.MapPath("~/js")),
+                RequestPath = new PathString($"/$(Platform)/Scripts")
+            });
+            var localModules = app.ApplicationServices.GetRequiredService<ILocalModuleCatalog>().Modules;
+            foreach (var module in localModules.OfType<ManifestModuleInfo>())
+            {
+                app.UseStaticFiles(new StaticFileOptions()
+                {
+                    FileProvider = new PhysicalFileProvider(module.FullPhysicalPath),
+                    RequestPath = new PathString($"/Modules/$({ module.ModuleName })")
+                });
+            }
+
+         
+            app.UseDefaultFiles();
+
 
             //register swagger content
             app.UseFileServer(new FileServerOptions
@@ -312,7 +322,7 @@ namespace VirtoCommerce.Platform.Web
                 // Normal equals 'default', because Hangfire depends on it.
                 Queues = new[] { JobPriority.High, JobPriority.Normal, JobPriority.Low }
             });
-
+            
         }
     }
 }

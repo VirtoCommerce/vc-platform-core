@@ -14,21 +14,6 @@ namespace VirtoCommerce.Platform.Web.Extensions
 {
     public static class ApplicationBuilderExtensions
     {
-    
-        public static IApplicationBuilder UseVirtualFolders(this IApplicationBuilder appBuilder, Action<VirtualFolderOptions> configureVirtualFolders)
-        {
-            if (configureVirtualFolders != null)
-            {
-                var virtualFolderOptions = appBuilder.ApplicationServices.GetRequiredService<IOptions<VirtualFolderOptions>>().Value;
-                configureVirtualFolders(virtualFolderOptions);
-
-                var rewriteOptions = new RewriteOptions().Add(new VirtualFoldersUrlRewriteRule(virtualFolderOptions));
-                appBuilder.UseRewriter(rewriteOptions);
-            }
-           
-            return appBuilder;
-        }
-
         public static IApplicationBuilder UsePlatformSettings(this IApplicationBuilder appBuilder)
         {
             var moduleCatalog = appBuilder.ApplicationServices.GetRequiredService<ILocalModuleCatalog>();
