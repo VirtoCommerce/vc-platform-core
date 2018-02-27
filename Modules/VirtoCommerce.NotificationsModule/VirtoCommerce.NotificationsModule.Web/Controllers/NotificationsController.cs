@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -15,11 +16,16 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
     {
         private readonly INotificationSearchService _notificationSearchService;
         private readonly INotificationService _notificationService;
+        private readonly INotificationTemplateRender _notificationTemplateRender;
 
-        public NotificationsController(INotificationSearchService notificationSearchService, INotificationService notificationService)
+        public NotificationsController(INotificationSearchService notificationSearchService
+            , INotificationService notificationService
+            , INotificationTemplateRender notificationTemplateRender
+            )
         {
             _notificationSearchService = notificationSearchService;
             _notificationService = notificationService;
+            _notificationTemplateRender = notificationTemplateRender;
         }
 
         [HttpPost]
@@ -49,6 +55,16 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
             await _notificationService.SaveChangesAsync(new [] {notification});
 
             return StatusCode((int)HttpStatusCode.NoContent);
+        }
+
+        [HttpPost]
+        [Route("{type}/template-render")]
+        [ProducesResponseType(typeof(string), 200)]
+        public IActionResult RenderingTemplate(string body, [FromBody]Notification notification)
+        {
+            var result = _notificationTemplateRender.Render(body, notification);
+
+            return Ok(result);
         }
     }
 }

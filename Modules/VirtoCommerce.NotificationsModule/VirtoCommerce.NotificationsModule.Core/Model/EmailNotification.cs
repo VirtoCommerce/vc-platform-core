@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Core.Model
@@ -19,15 +20,15 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         public string[] BCC { get; set; }
         public IList<EmailAttachment> Attachments { get; set; }
 
-        public override NotificationMessage ToMessage(NotificationMessage message)
+        public override NotificationMessage ToMessage(NotificationMessage message, INotificationTemplateRender render)
         {
             var emailMessage = (EmailNotificationMessage) message;
             
             var template = (EmailNotificationTemplate)Templates.FirstOrDefault(t => t.LanguageCode.Equals(message.LanguageCode));
             if (template != null)
             {
-                emailMessage.Body = template.Body;
-                emailMessage.Subject = template.Subject;
+                emailMessage.Subject = render.Render(template.Subject, this);
+                emailMessage.Body = render.Render(template.Body, this);
                 emailMessage.From = From;
                 emailMessage.To = To;
                 emailMessage.CC = CC;
@@ -35,7 +36,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
             }
             
 
-            return base.ToMessage(message);
+            return base.ToMessage(message, render);
         }
     }
 }

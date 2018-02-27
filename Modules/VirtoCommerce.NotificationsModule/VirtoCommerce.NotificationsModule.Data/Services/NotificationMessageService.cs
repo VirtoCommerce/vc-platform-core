@@ -25,7 +25,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             {
                 var messages = await repository.GetNotificationMessageByIdAsync(ids);
                 return messages.Select(n => n.ToModel(AbstractTypeFactory<NotificationMessage>.TryCreateInstance())).ToArray();
-
             }
         }
 

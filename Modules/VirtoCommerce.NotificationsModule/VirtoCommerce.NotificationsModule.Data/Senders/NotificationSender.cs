@@ -29,7 +29,11 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
 
             var message = AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{activeNotification.Kind}Message");
             message.LanguageCode = language;
-            activeNotification.ToMessage(message);
+            activeNotification.ToMessage(message, _notificationTemplateRender);
+
+            //todo
+            //var subject = _notificationTemplateRender.Render(((EmailNotificationMessage)message).Subject, notification);
+            //var body = _notificationTemplateRender.Render(((EmailNotificationMessage)message).Body, notification);
 
             NotificationMessage[] messages = { message };
 
@@ -38,38 +42,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
             var result = await _notificationMessageSender.SendNotificationAsync(message);
 
             await _notificationMessageService.SaveNotificationMessages(messages);
-
-
-            //switch (activeNotification)
-            //{
-            //    case EmailNotification emailNotification:
-            //        var template = (EmailNotificationTemplate)emailNotification.Templates.Single(t => t.LanguageCode.Equals(language));
-            //        var subject = _notificationTemplateRender.Render(template.Subject, notification);
-            //        var body = _notificationTemplateRender.Render(template.Body, emailNotification);
-
-            //        //todo 
-            //        var message = new EmailNotificationMessage()
-            //        {
-            //            From = emailNotification.From,
-            //            To = emailNotification.To,
-            //            CC = emailNotification.CC,
-            //            BCC = emailNotification.BCC,
-            //            // Attachments
-            //            Subject = subject,
-            //            Body = body,
-            //        };
-            //        NotificationMessage[] messages = { message };
-            //        await _notificationMessageService.SaveNotificationMessages(messages);
-
-            //        var result = await _notificationMessageSender.SendNotificationAsync(message);
-
-            //        await _notificationMessageService.SaveNotificationMessages(messages);
-            //        break;
-            //    case SmsNotification smsNotification:
-            //        //smsNotification.Number = this.Number;
-            //        break;
-            //}
-
 
         }
     }

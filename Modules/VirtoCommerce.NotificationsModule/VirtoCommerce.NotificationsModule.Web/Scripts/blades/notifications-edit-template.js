@@ -112,6 +112,38 @@
 //		mode: "liquid-html"
 //	};
      
+     blade.renderTemplate = function () {
+		var newBlade = {
+			id: 'renderTemplate',
+			title: 'platform.blades.notifications-test-resolve.title',
+			subtitle: 'platform.blades.notifications-test-resolve.subtitle',
+			subtitleValues: { type: blade.notificationType },
+			notificationType: blade.notificationType,
+			tenantId: blade.tenantId,
+			tenantType: blade.tenantType,
+            currentEntity: blade.notification,
+			language: blade.currentEntity.language,
+			controller: 'virtoCommerce.notificationsModule.templateRenderController',
+			template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notifications-template-render.tpl.html'
+		};
+
+		bladeNavigationService.showBlade(newBlade, blade);
+	}
+     
+    $scope.blade.toolbarCommands = [
+        {
+            name: "platform.commands.preview", icon: 'fa fa-eye',
+            executeMethod: function () {
+                blade.renderTemplate();
+            },
+            canExecuteMethod: function () {
+                return true;
+            },
+            permission: blade.updatePermission
+        }
+    ];
+	 
+     
     function isDirty() {
         return (!angular.equals(blade.origEntity, blade.currentEntity) || blade.isNew) && blade.hasUpdatePermission();
 	}

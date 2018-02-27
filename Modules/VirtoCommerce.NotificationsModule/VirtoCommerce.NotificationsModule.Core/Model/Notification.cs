@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Core.Model
@@ -19,7 +20,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         public string Kind { get; set; }
         public IList<NotificationTemplate> Templates { get; set; }
 
-        public virtual NotificationMessage ToMessage(NotificationMessage message)
+        public virtual NotificationMessage ToMessage(NotificationMessage message, INotificationTemplateRender render)
         {
             message.TenantId = TenantId;
             message.TenantType = TenantType;
