@@ -16,13 +16,13 @@ angular.module('virtoCommerce.notificationsModule')
 
         $scope.selectedNodeId = data.id;
 
-        var objectId = $stateParams.objectId;
-        var objectTypeId = $stateParams.objectTypeId;
+        var tenantId = $stateParams.tenantId;
+        var tenantType = $stateParams.tenantType;
         var newBlade = {
-            id: 'marketingMainListChildren',
+            id: 'notificationsList',
             title: data.name,
-            objectId: objectId,
-            objectTypeId: objectTypeId,
+            tenantId: tenantId,
+            tenantType: tenantType,
             subtitle: data.subtitle,
             controller: 'virtoCommerce.notificationsModule.' + data.controllerName,
             template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/' + data.templateName + '.tpl.html'

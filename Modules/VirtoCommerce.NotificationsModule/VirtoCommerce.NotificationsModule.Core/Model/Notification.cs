@@ -18,5 +18,14 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
 
         public string Kind { get; set; }
         public IList<NotificationTemplate> Templates { get; set; }
+
+        public virtual NotificationMessage ToMessage(NotificationMessage message)
+        {
+            message.TenantId = TenantId;
+            message.TenantType = TenantType;
+            message.NotificationType = Type;
+
+            return message;
+        }
     }
 }

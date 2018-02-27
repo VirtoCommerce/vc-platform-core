@@ -5,10 +5,12 @@ using System.Threading.Tasks;
 using Moq;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
+using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Senders;
 using VirtoCommerce.NotificationsModule.LiguidRenderer;
 using VirtoCommerce.NotificationsModule.Tests.NotificationTypes;
+using VirtoCommerce.Platform.Core.Common;
 using Xunit;
 
 namespace VirtoCommerce.NotificationsModule.Tests
@@ -39,6 +41,13 @@ namespace VirtoCommerce.NotificationsModule.Tests
             _registrarMock = new Mock<INotificationRegistrar>();
             _serviceMock = new Mock<INotificationService>();
             _sender = new NotificationSender(_serviceMock.Object, _templateRender, _messageServiceMock.Object, _messageSenderMock.Object);
+
+            AbstractTypeFactory<Notification>.RegisterType<EmailNotification>().MapToType<NotificationEntity>();
+            AbstractTypeFactory<Notification>.RegisterType<SmsNotification>().MapToType<NotificationEntity>();
+            AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>().MapToType<NotificationTemplateEntity>();
+            AbstractTypeFactory<NotificationTemplate>.RegisterType<SmsNotificationTemplate>().MapToType<NotificationTemplateEntity>();
+            AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>();
+            AbstractTypeFactory<NotificationMessage>.RegisterType<SmsNotificationMessage>();
         }
 
         [Fact]
@@ -71,7 +80,7 @@ namespace VirtoCommerce.NotificationsModule.Tests
                 Body = body,
                 SendDate = date
             };
-            _serviceMock.Setup(serv => serv.GetNotificationByTypeAsync(nameof(OrderSentEmailNotification), null)).ReturnsAsync(notification);
+            _serviceMock.Setup(serv => serv.GetNotificationByTypeAsync(nameof(OrderSentEmailNotification), null, null)).ReturnsAsync(notification);
             //_templateRenderMock.Setup(tr => tr.Render(message.Subject, notification.Order)).Returns("Order #123");
             //_templateRenderMock.Setup(tr => tr.Render(message.Body, notification.Order)).Returns("You have order #123");
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessages(new NotificationMessage[] {message}));
@@ -112,7 +121,7 @@ namespace VirtoCommerce.NotificationsModule.Tests
                 Body = body,
                 SendDate = date
             };
-            _serviceMock.Setup(serv => serv.GetNotificationByTypeAsync(nameof(InvoiceEmailNotification), null)).ReturnsAsync(notification);
+            _serviceMock.Setup(serv => serv.GetNotificationByTypeAsync(nameof(InvoiceEmailNotification), null, null)).ReturnsAsync(notification);
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessages(new NotificationMessage[] { message }));
 
             //Act

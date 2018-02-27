@@ -44,10 +44,11 @@ namespace VirtoCommerce.NotificationsModule.Web
             AbstractTypeFactory<Notification>.RegisterType<SmsNotification>().MapToType<NotificationEntity>();
             AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>().MapToType<NotificationTemplateEntity>();
             AbstractTypeFactory<NotificationTemplate>.RegisterType<SmsNotificationTemplate>().MapToType<NotificationTemplateEntity>();
+            AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>();
+            AbstractTypeFactory<NotificationMessage>.RegisterType<SmsNotificationMessage>();
 
             var mvcJsonOptions = serviceProvider.GetService<IOptions<MvcJsonOptions>>();
-            mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicNotificationJsonConverter());
-            mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicNotificationTemplateJsonConverter());
+            mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicJsonConverter());
 
             //Force migrations
             using (var serviceScope = serviceProvider.CreateScope())
@@ -55,10 +56,18 @@ namespace VirtoCommerce.NotificationsModule.Web
                 var notificationDbContext = serviceScope.ServiceProvider.GetRequiredService<NotificationDbContext>();
                 notificationDbContext.Database.Migrate();
             }
+
+            //todo for tests
+            var registrar = serviceProvider.GetService<INotificationRegistrar>();
+            registrar.RegisterNotification<RegistrationEmailNotification>();
         }
 
         public void Uninstall()
         {
         }
+    }
+
+    public class RegistrationEmailNotification : EmailNotification
+    {
     }
 }

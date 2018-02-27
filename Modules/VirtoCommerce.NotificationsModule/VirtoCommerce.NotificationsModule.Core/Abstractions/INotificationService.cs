@@ -6,7 +6,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Abstractions
 {
     public interface INotificationService
     {
-        Task<Notification> GetNotificationByTypeAsync(string type, string tenantId = null);
+        Task<Notification> GetNotificationByTypeAsync(string type, string tenantId = null, string tenantType = null);
         Task<Notification[]> GetNotificationsByIdsAsync(string[] ids);
         Task SaveChangesAsync(Notification[] notifications);
     }

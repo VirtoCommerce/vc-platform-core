@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -15,15 +16,22 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
         public IQueryable<NotificationEntity> Notifications => DbContext.Set<NotificationEntity>();
         public IQueryable<NotificationMessageEntity> NotifcationMessages => DbContext.Set<NotificationMessageEntity>();
 
-        public Task<NotificationEntity[]> GetNotificationByIdsAsync(string[] ids)
+        public async Task<NotificationEntity[]> GetNotificationByIdsAsync(string[] ids)
         {
-            return Notifications
-                .Include(n => n.Templates)
-                .Include(n => n.Attachments)
-                .Include(n => n.Recipients)
+            var notifications = await Notifications
                 .Where(x => ids.Contains(x.Id))
                 .OrderBy(x => x.Type)
                 .ToArrayAsync();
+
+            foreach (var notification in notifications)
+            {
+                var templatesTask = DbContext.Set<NotificationTemplateEntity>().Where(t => t.NotificationId.Equals(notification.Id)).ToListAsync();
+                var attachmentsTask = DbContext.Set<EmailAttachmentEntity>().Where(t => t.NotificationId.Equals(notification.Id)).ToListAsync();
+                var recipientsTask = DbContext.Set<NotificationEmailRecipientEntity>().Where(t => t.NotificationId.Equals(notification.Id)).ToListAsync();
+                await Task.WhenAll(templatesTask, attachmentsTask, recipientsTask);
+            }
+
+            return notifications;
         }
 
         public Task<NotificationEntity> GetNotificationEntityByTypeAsync(string type, string tenantId, string tenantType)

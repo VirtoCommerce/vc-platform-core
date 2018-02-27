@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Data.Senders
 {
@@ -26,37 +27,50 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
         {
             var activeNotification = await _notificationService.GetNotificationByTypeAsync(notification.Type);
 
-            switch (activeNotification)
-            {
-                case EmailNotification emailNotification:
-                    var template = (EmailNotificationTemplate)emailNotification.Templates.Single(t => t.LanguageCode.Equals(language));
-                    var subject = _notificationTemplateRender.Render(template.Subject, notification);
-                    var body = _notificationTemplateRender.Render(template.Body, emailNotification);
+            var message = AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{activeNotification.Kind}Message");
+            message.LanguageCode = language;
+            activeNotification.ToMessage(message);
 
-                    //todo 
-                    var message = new EmailNotificationMessage()
-                    {
-                        From = emailNotification.From,
-                        To = emailNotification.To,
-                        CC = emailNotification.CC,
-                        BCC = emailNotification.BCC,
-                        // Attachments
-                        Subject = subject,
-                        Body = body,
-                    };
-                    NotificationMessage[] messages = {message};
-                    await _notificationMessageService.SaveNotificationMessages(messages);
+            NotificationMessage[] messages = { message };
 
-                    await _notificationMessageSender.SendNotificationAsync(message);
+            await _notificationMessageService.SaveNotificationMessages(messages);
 
-                    await _notificationMessageService.SaveNotificationMessages(messages);
-                    break;
-                case SmsNotification smsNotification:
-                    //smsNotification.Number = this.Number;
-                    break;
-            }
+            var result = await _notificationMessageSender.SendNotificationAsync(message);
 
-            
+            await _notificationMessageService.SaveNotificationMessages(messages);
+
+
+            //switch (activeNotification)
+            //{
+            //    case EmailNotification emailNotification:
+            //        var template = (EmailNotificationTemplate)emailNotification.Templates.Single(t => t.LanguageCode.Equals(language));
+            //        var subject = _notificationTemplateRender.Render(template.Subject, notification);
+            //        var body = _notificationTemplateRender.Render(template.Body, emailNotification);
+
+            //        //todo 
+            //        var message = new EmailNotificationMessage()
+            //        {
+            //            From = emailNotification.From,
+            //            To = emailNotification.To,
+            //            CC = emailNotification.CC,
+            //            BCC = emailNotification.BCC,
+            //            // Attachments
+            //            Subject = subject,
+            //            Body = body,
+            //        };
+            //        NotificationMessage[] messages = { message };
+            //        await _notificationMessageService.SaveNotificationMessages(messages);
+
+            //        var result = await _notificationMessageSender.SendNotificationAsync(message);
+
+            //        await _notificationMessageService.SaveNotificationMessages(messages);
+            //        break;
+            //    case SmsNotification smsNotification:
+            //        //smsNotification.Number = this.Number;
+            //        break;
+            //}
+
+
         }
     }
 }

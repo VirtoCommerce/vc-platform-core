@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -8,8 +7,10 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Web.Infrastructure
 {
-    public class PolymorphicNotificationJsonConverter : JsonConverter
+    public class PolymorphicJsonConverter : JsonConverter
     {
+        private static readonly Type[] _knowTypes = { typeof(Notification), typeof(NotificationTemplate), typeof(NotificationSearchCriteria) };
+
         public override bool CanWrite => false;
         public override bool CanRead => true;
 
@@ -22,7 +23,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Infrastructure
         {
             object retVal = null;
             var obj = JObject.Load(reader);
-            if (typeof(Notification).IsAssignableFrom(objectType))
+            if (objectType == typeof(Notification) || objectType == typeof(NotificationTemplate))
             {
                 var notificationType = objectType.Name;
                 var pt = obj["kind"];
@@ -30,7 +31,14 @@ namespace VirtoCommerce.NotificationsModule.Web.Infrastructure
                 {
                     notificationType = pt.Value<string>();
                 }
-                retVal = AbstractTypeFactory<Notification>.TryCreateInstance(notificationType);
+                if (objectType == typeof(Notification))
+                {
+                    retVal = AbstractTypeFactory<Notification>.TryCreateInstance(notificationType);
+                }
+                if (objectType == typeof(NotificationTemplate))
+                {
+                    retVal = AbstractTypeFactory<NotificationTemplate>.TryCreateInstance(notificationType);
+                }
                 if (retVal == null)
                 {
                     throw new NotSupportedException("Unknown kind: " + notificationType);
@@ -48,7 +56,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Infrastructure
 
         public override bool CanConvert(Type objectType)
         {
-            return typeof(Notification).IsAssignableFrom(objectType) || objectType == typeof(NotificationSearchCriteria);
+            return _knowTypes.Any(x => x.IsAssignableFrom(objectType));
         }
     }
 }

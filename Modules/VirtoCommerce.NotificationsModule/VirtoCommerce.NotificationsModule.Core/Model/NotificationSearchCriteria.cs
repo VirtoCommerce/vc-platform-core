@@ -5,5 +5,6 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
     public class NotificationSearchCriteria : SearchCriteriaBase
     {
         public string TenantId { get; set; }
+        public string TenantType { get; set; }
     }
 }

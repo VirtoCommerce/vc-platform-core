@@ -51,8 +51,8 @@ angular.module('virtoCommerce.notificationsModule')
       			title: 'notifications.blades.notification-details.title',
                 titleValues: { displayName: $translate.instant('notificationTypes.' + item.type + '.displayName') },
       			type: item.type,
-      			objectId: blade.objectId,
-      			objectTypeId: blade.objectTypeId,
+      			tenantId: blade.tenantId,
+      			tenantType: blade.tenantType,
       			controller: 'virtoCommerce.notificationsModule.notificationsEditController',
       			template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notification-details.tpl.html'
       		};

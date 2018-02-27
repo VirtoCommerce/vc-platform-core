@@ -1,5 +1,7 @@
 using System;
+using System.Net.Mail;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
@@ -9,35 +11,40 @@ namespace VirtoCommerce.NotificationsModule.SendGrid
 {
     public class SendGridEmailNotificationMessageSender : INotificationMessageSender
     {
-        private readonly EmailSendingOptions _emailSettings;
+        private readonly EmailSendingOptions _emailSendingOptions;
 
-        public SendGridEmailNotificationMessageSender(EmailSendingOptions emailSettings)
+        public SendGridEmailNotificationMessageSender(IOptions<EmailSendingOptions> emailSendingOptions)
         {
-            _emailSettings = emailSettings;
+            _emailSendingOptions = emailSendingOptions.Value;
         }
 
-        public async Task SendNotificationAsync(NotificationMessage message)
+        public async Task<NotificationSendResult> SendNotificationAsync(NotificationMessage message)
         {
+            var result = new NotificationSendResult();
+
             var emailNotificationMessage = message as EmailNotificationMessage;
 
             if (emailNotificationMessage == null) throw new ArgumentNullException(nameof(emailNotificationMessage));
 
             try
             {
-                var client = new SendGridClient(_emailSettings.ApiKey);
-                var mailMsg = new SendGridMessage();
-                mailMsg.From = new EmailAddress(emailNotificationMessage.From);
-
-                mailMsg.Subject = emailNotificationMessage.Subject;
-                mailMsg.HtmlContent = emailNotificationMessage.Body;
+                var client = new SendGridClient(_emailSendingOptions.ApiKey);
+                var mailMsg = new SendGridMessage
+                {
+                    From = new EmailAddress(emailNotificationMessage.From),
+                    Subject = emailNotificationMessage.Subject,
+                    HtmlContent = emailNotificationMessage.Body
+                };
 
                 var response = await client.SendEmailAsync(mailMsg);
+                result.IsSuccess = true;
             }
-            catch (Exception e)
+            catch (SmtpException ex)
             {
-                Console.WriteLine(e);
-                throw;
+                result.ErrorMessage = ex.Message + ex.InnerException;
             }
+
+            return result;
         }
     }
 }

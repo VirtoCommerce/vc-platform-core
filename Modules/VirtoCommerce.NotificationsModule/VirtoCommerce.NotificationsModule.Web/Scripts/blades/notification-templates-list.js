@@ -44,8 +44,8 @@ angular.module('virtoCommerce.notificationsModule')
                     isNew: false,
                     isFirst: false,
                     languages: blade.languages,
-                    objectId: blade.objectId,
-                    objectTypeId: blade.objectTypeId,
+                    tenantId: blade.tenantId,
+                    tenantType: blade.tenantType,
                     controller: foundTemplate.detailBlade.controller,
                     template: foundTemplate.detailBlade.template
                 };
@@ -72,8 +72,8 @@ angular.module('virtoCommerce.notificationsModule')
                     title: 'notifications.blades.notifications-edit-template.title-new',
                     titleValues: { displayName: $translate.instant('notificationTypes.' + blade.currentEntity.type + '.displayName') },
                     notification: blade.currentEntity,
-                    objectId: blade.objectId,
-                    objectTypeId: blade.objectTypeId,
+                    tenantId: blade.tenantId,
+                    tenantType: blade.tenantType,
                     languageCode: null,
                     isNew: true,
                     isFirst: false,

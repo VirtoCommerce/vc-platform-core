@@ -1,6 +1,7 @@
 using System;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
 
@@ -8,15 +9,17 @@ namespace VirtoCommerce.NotificationsModule.Smtp
 {
     public class SmtpEmailNotificationMessageSender : INotificationMessageSender
     {
-        private readonly EmailSendingOptions _emailSettings;
+        private readonly EmailSendingOptions _emailSendingOptions;
 
-        public SmtpEmailNotificationMessageSender(EmailSendingOptions emailSettings)
+        public SmtpEmailNotificationMessageSender(IOptions<EmailSendingOptions> emailSendingOptions)
         {
-            _emailSettings = emailSettings;
+            _emailSendingOptions = emailSendingOptions.Value;
         }
 
-        public async Task SendNotificationAsync(NotificationMessage message)
+        public async Task<NotificationSendResult> SendNotificationAsync(NotificationMessage message)
         {
+            var result = new NotificationSendResult();
+
             var emailNotificationMessage = message as EmailNotificationMessage;
 
             if (emailNotificationMessage == null) throw new ArgumentNullException(nameof(emailNotificationMessage));
@@ -38,22 +41,23 @@ namespace VirtoCommerce.NotificationsModule.Smtp
                     }
                 };
 
-                
+                result.IsSuccess = true;
             }
-            catch (Exception e)
+            catch (SmtpException ex)
             {
-                Console.WriteLine(e);
-                throw;
+                result.ErrorMessage = ex.Message + ex.InnerException;
             }
+
+            return result;
         }
 
         private SmtpClient CreateClient()
         {
-            return new SmtpClient(_emailSettings.SmtpServer, _emailSettings.Port)
+            return new SmtpClient(_emailSendingOptions.SmtpServer, _emailSendingOptions.Port)
             {
                 EnableSsl = true,
                 UseDefaultCredentials = false,
-                Credentials = new System.Net.NetworkCredential(_emailSettings.Login, _emailSettings.Password)
+                Credentials = new System.Net.NetworkCredential(_emailSendingOptions.Login, _emailSendingOptions.Password)
             };
         }
     }

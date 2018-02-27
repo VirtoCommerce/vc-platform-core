@@ -9,6 +9,7 @@ using VirtoCommerce.Platform.Core.Common;
 namespace VirtoCommerce.NotificationsModule.Web.Controllers
 {
     [Authorize]
+    [Produces("application/json")]
     [Route("api/notifications")]
     public class NotificationsController : Controller
     {
@@ -21,8 +22,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
             _notificationService = notificationService;
         }
 
-        [HttpGet]
-        [Produces("application/json")]
+        [HttpPost]
         [ProducesResponseType(typeof(GenericSearchResult<Notification>), 200)]
         public IActionResult GetNotifications(NotificationSearchCriteria searchCriteria)
         {
@@ -33,18 +33,16 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
 
         [HttpGet]
         [Route("{type}")]
-        [Produces("application/json")]
         [ProducesResponseType(typeof(Notification), 200)]
-        public async Task<IActionResult> GetNotificationByTypeId(string type)
+        public async Task<IActionResult> GetNotificationByTypeId(string type, string tenantId = null, string tenantType = null)
         {
-            var notification = await _notificationService.GetNotificationByTypeAsync(type);
+            var notification = await _notificationService.GetNotificationByTypeAsync(type, tenantId, tenantType);
 
             return Ok(notification);
         }
 
         [HttpPut]
         [Route("{type}")]
-        [Produces("application/json")]
         [ProducesResponseType(typeof(void), 200)]
         public async Task<IActionResult> UpdateNotification([FromBody]Notification notification)
         {

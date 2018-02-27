@@ -18,8 +18,8 @@ function ($rootScope, $scope, $timeout, notifications, bladeNavigationService, d
 	};
     
 	function setNotification(data) {
-		data.objectId = blade.objectId;
-		data.objectTypeId = blade.objectTypeId;
+		data.tenantId = blade.tenantId;
+		data.tenantType = blade.tenantType;
 		blade.origEntity = angular.copy(data);
 		blade.currentEntity = data;
         $scope.isValid = false;
@@ -27,6 +27,10 @@ function ($rootScope, $scope, $timeout, notifications, bladeNavigationService, d
 
 	blade.updateNotification = function () {
 		blade.isLoading = true;
+        if (blade.currentEntity.cc) {
+            var result = _(blade.currentEntity.cc).pluck('value');
+            blade.currentEntity.cc = result;
+        }
 		notifications.updateNotification({ type: blade.type }, blade.currentEntity, function () {
 			blade.isLoading = false;
 			blade.origEntity = angular.copy(blade.currentEntity);

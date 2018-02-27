@@ -5,6 +5,6 @@ namespace VirtoCommerce.NotificationsModule.Core.Abstractions
 {
     public interface INotificationMessageSender
     {
-        Task SendNotificationAsync(NotificationMessage message);
+        Task<NotificationSendResult> SendNotificationAsync(NotificationMessage message);
     }
 }
