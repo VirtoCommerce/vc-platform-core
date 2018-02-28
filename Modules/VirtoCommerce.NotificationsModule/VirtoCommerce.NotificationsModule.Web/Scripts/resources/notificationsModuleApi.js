@@ -9,7 +9,7 @@ angular.module('virtoCommerce.notificationsModule')
             getTemplate: { method: 'GET', url: 'api/notifications/:type/:language/templates' },
             createTemplate: { method: 'POST', url: 'api/notifications/:type/templates' },
             updateTemplate: { method: 'PUT', url: 'api/notifications/:type/templates/:id' },
-            renderTemplate: { method: 'POST', url: 'api/notifications/:type/template-render' },
+            renderTemplate: { method: 'POST', url: 'api/notifications/template-render' }
 //            deleteTemplate: { method: 'DELETE', url: 'api/notifications/template/:id' },
 //            prepareTestData: { method: 'GET', url: 'api/notifications/template/:type/getTestingParameters', isArray: true },
 

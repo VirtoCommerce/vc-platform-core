@@ -1,9 +1,10 @@
 using System;
+using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Core.Model
 {
-    public abstract class NotificationMessage : AuditableEntity
+    public abstract class NotificationMessage : AuditableEntity, IHasLanguageCode
     {
         public string TenantId { get; set; }
         public string TenantType { get; set; }

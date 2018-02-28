@@ -121,18 +121,6 @@ angular.module('virtoCommerce.notificationsModule')
                 return 'image_' + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDay() + '_' + date.getHours() + '-' + date.getMinutes() + '-' + date.getSeconds();
             }
             
-            $('.uk-htmleditor-button-preview').click(function(e){
-                var dataHtml = $('div.uk-htmleditor-preview div').html();
-                var dataText = previewData.value;
-                if (dataText && dataHtml) {
-                    var dataObj = $.parseJSON(dataText);
-                    for (var key in dataObj) {
-                        dataHtml = dataHtml.replace(new RegExp("{{" + key + "}}","g"), dataObj[key]);
-                    }
-                    $('div.uk-htmleditor-preview div').html(dataHtml);    
-                }
-            });
-            
             codeMirror.setValue(scope.ngModel || '');
         }
     }

@@ -18,8 +18,8 @@ function ($rootScope, $scope, $timeout, notifications, bladeNavigationService, d
 	};
     
 	function setNotification(data) {
-		data.tenantId = blade.tenantId;
-		data.tenantType = blade.tenantType;
+		blade.tenantId = data.tenantId;
+		blade.tenantType = data.tenantType;
 		blade.origEntity = angular.copy(data);
 		blade.currentEntity = data;
         $scope.isValid = false;

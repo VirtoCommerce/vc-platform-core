@@ -1,9 +1,30 @@
-﻿<div class="blade-static __bottom">
-	<button class="btn" ng-click="blade.test()" ng-disabled="formScope.$invalid">
-		<span>{{ 'platform.blades.notifications-test-resolve.labels.test' | translate }}</span>
-	</button>
+﻿<div class="blade-content __medium-wide">
+	<div class="blade-inner">
+		<div class="inner-block">
+            <div class="form-group">
+                <label class="form-label">{{ 'notifications.blades.notifications-edit-template.labels.preview-data-comment' | translate }}</label>
+                <div class="form-input">
+                    <textarea id="previewData" class="form-control" ng-model="blade.dynamicProperties" placeholder="{{ 'notifications.blades.notifications-edit-template.labels.preview-data-comment' | translate }}"></textarea>
+                </div>
+            </div>
+        </div>
+        
+        <div class="inner-block">
+            <div class="form-group">
+                <div>
+                    <button class="btn" ng-click="blade.render()" ng-disabled="formScope.$invalid">
+                        <span>{{ 'notifications.blades.notifications-template-render.labels.render' | translate }}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div text-angular ng-model="blade.originHtml"></div>
+    </div>
 </div>
 
+
+<!--
 <div class="blade-content __medium-wide">
 	<div class="blade-inner">
 		<div class="inner-block">
@@ -121,3 +142,4 @@
 		</div>
 	</div>
 </div>
+-->

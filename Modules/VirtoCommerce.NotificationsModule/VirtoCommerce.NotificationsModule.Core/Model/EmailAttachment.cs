@@ -1,8 +1,9 @@
+using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Core.Model
 {
-    public class EmailAttachment : ValueObject
+    public class EmailAttachment : ValueObject, IHasLanguageCode
     {
         public string FileName { get; set; }
         public string Url { get; set; }

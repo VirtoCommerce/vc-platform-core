@@ -12,7 +12,7 @@
 
     var codemirrorEditor;
     var keyTemplateLocalStorage;
-    blade.dynamicProperties = '';//{"lastname": "Kostyrin"}
+    blade.dynamicProperties = '';
 
     $scope.saveChanges = function () {
         var date = new Date();
@@ -68,7 +68,7 @@
         
 		blade.isLoading = false;
         if (!blade.isNew) {
-            keyTemplateLocalStorage = blade.objectTypeId + '.' + blade.notification.type + '.' + blade.currentEntity.languageCode;
+            keyTemplateLocalStorage = blade.tenantType + '.' + blade.notification.type + '.' + blade.currentEntity.languageCode;
             var itemFromLocalStorage = $localStorage[keyTemplateLocalStorage];
             if (itemFromLocalStorage) {
                 blade.dynamicProperties = itemFromLocalStorage;
@@ -93,6 +93,7 @@
             if (found){
                 blade.currentEntity = angular.copy(found);        
                 blade.origEntity = angular.copy(blade.currentEntity);
+                blade.orightml = blade.currentEntity.body;
             }
             
         }
@@ -118,11 +119,11 @@
 			title: 'platform.blades.notifications-test-resolve.title',
 			subtitle: 'platform.blades.notifications-test-resolve.subtitle',
 			subtitleValues: { type: blade.notificationType },
-			notificationType: blade.notificationType,
+			notification: blade.notification,
 			tenantId: blade.tenantId,
 			tenantType: blade.tenantType,
-            currentEntity: blade.notification,
-			language: blade.currentEntity.language,
+            currentEntity: blade.currentEntity,
+            language: blade.currentEntity.language,
 			controller: 'virtoCommerce.notificationsModule.templateRenderController',
 			template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notifications-template-render.tpl.html'
 		};

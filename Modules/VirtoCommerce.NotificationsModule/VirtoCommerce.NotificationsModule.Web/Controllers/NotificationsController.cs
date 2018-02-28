@@ -9,7 +9,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Web.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Produces("application/json")]
     [Route("api/notifications")]
     public class NotificationsController : Controller
@@ -58,11 +58,11 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         }
 
         [HttpPost]
-        [Route("{type}/template-render")]
+        [Route("template-render")]
         [ProducesResponseType(typeof(string), 200)]
-        public IActionResult RenderingTemplate(string body, [FromBody]Notification notification)
+        public IActionResult RenderingTemplate([FromBody]NotificationTemplateRequest request)
         {
-            var result = _notificationTemplateRender.Render(body, notification);
+            var result = _notificationTemplateRender.Render(request.Text, request.Data);
 
             return Ok(result);
         }
