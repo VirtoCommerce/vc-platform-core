@@ -17,8 +17,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using NUglify.Css;
 using Smidge;
 using Smidge.Cache;
+using Smidge.Nuglify;
 using Smidge.Options;
 using Swashbuckle.AspNetCore.Swagger;
 using VirtoCommerce.Platform.Core.Common;
@@ -72,11 +74,11 @@ namespace VirtoCommerce.Platform.Web
                     };
                 }
             );
+            var modulesDiscoveryPath = Path.GetFullPath("Modules");
             services.AddModules(mvcBuilder, options =>
             {
-                options.DiscoveryPath = HostingEnvironment.MapPath(@"~/Modules");
-                options.ProbingPath = HostingEnvironment.MapPath("~/App_Data/Modules");
-                options.VirtualPath = "~/Modules";
+                options.DiscoveryPath = modulesDiscoveryPath;
+                options.ProbingPath = "App_Data/Modules";
             });
             services.AddExternalModules(options =>
             {
@@ -194,7 +196,11 @@ namespace VirtoCommerce.Platform.Web
             // Add memory cache services
             services.AddMemoryCache();
             //Add Smidge runtime bundling library configuration
-            services.AddSmidge(Configuration.GetSection("smidge"));
+            services.AddSmidge(Configuration.GetSection("smidge"), new PhysicalFileProvider(modulesDiscoveryPath));
+            //services.AddSmidgeNuglify(/*new NuglifySettings(new NuglifyCodeSettings()
+            //{
+            //    SourceMapType = SourceMapType.Default,
+            //}, new CssSettings())*/);
 
             // Register the Swagger generator
             services.AddSwaggerGen(c =>
@@ -249,18 +255,25 @@ namespace VirtoCommerce.Platform.Web
             //Return all errors as Json response
             app.UseMiddleware<ApiErrorWrappingMiddleware>();
 
-            app.UseVirtualFolders(folderOptions =>
+            app.UseStaticFiles();
+
+            //Handle all requests like a $(Platform) and Modules/$({ module.ModuleName }) as static files in correspond folder
+            app.UseStaticFiles(new StaticFileOptions()
             {
-                folderOptions.Items.Add(PathString.FromUriComponent("/$(Platform)/Scripts"), "/js");
-                var localModules = app.ApplicationServices.GetRequiredService<ILocalModuleCatalog>().Modules;
-                foreach (var module in localModules.OfType<ManifestModuleInfo>())
-                {
-                    folderOptions.Items.Add(PathString.FromUriComponent($"/Modules/$({ module.ModuleName })"), HostingEnvironment.GetRelativePath("~/Modules", module.FullPhysicalPath));
-                }
+                FileProvider = new PhysicalFileProvider(env.MapPath("~/js")),
+                RequestPath = new PathString($"/$(Platform)/Scripts")
             });
+            var localModules = app.ApplicationServices.GetRequiredService<ILocalModuleCatalog>().Modules;
+            foreach (var module in localModules.OfType<ManifestModuleInfo>())
+            {
+                app.UseStaticFiles(new StaticFileOptions()
+                {
+                    FileProvider = new PhysicalFileProvider(module.FullPhysicalPath),
+                    RequestPath = new PathString($"/Modules/$({ module.ModuleName })")
+                });
+            }
 
             app.UseDefaultFiles();
-            app.UseStaticFiles();
 
             //register swagger content
             app.UseFileServer(new FileServerOptions
@@ -293,6 +306,8 @@ namespace VirtoCommerce.Platform.Web
             {
                 app.UseModulesContent(bundles);
             });
+
+            //app.UseSmidgeNuglify();
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger(c => c.RouteTemplate = "docs/{documentName}/docs.json");
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.

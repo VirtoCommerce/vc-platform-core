@@ -12,16 +12,18 @@
 	blade.initialize = function () {
 		blade.isLoading = true;
 		blade.isRender = false;
+        console.log(blade.notification);
         keyTemplateLocalStorage = blade.tenantType + '.' + blade.notification.type + '.' + blade.currentEntity.languageCode;
         var itemFromLocalStorage = $localStorage[keyTemplateLocalStorage];
         if (itemFromLocalStorage) {
-            blade.dynamicProperties = itemFromLocalStorage;
+            blade.notification.previewData = itemFromLocalStorage;
         } 
 		blade.isLoading = false;
 	};
     
     blade.render = function() {
-        notifications.renderTemplate({},{ text: blade.currentEntity.body, data: blade.dynamicProperties }, function (data) {
+        console.log(blade.notification);
+        notifications.renderTemplate({},{ text: blade.currentEntity.body, data: blade.notification }, function (data) {
             blade.originHtml = data;
         });
     }

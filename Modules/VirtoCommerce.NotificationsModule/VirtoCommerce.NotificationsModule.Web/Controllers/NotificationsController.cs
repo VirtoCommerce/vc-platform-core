@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
+using VirtoCommerce.NotificationsModule.Web.Infrastructure;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Web.Controllers
@@ -62,7 +63,8 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         [ProducesResponseType(typeof(string), 200)]
         public IActionResult RenderingTemplate([FromBody]NotificationTemplateRequest request)
         {
-            var result = _notificationTemplateRender.Render(request.Text, request.Data);
+            var notification = Newtonsoft.Json.JsonConvert.DeserializeObject<Notification>(request.Data, new PolymorphicJsonConverter());
+            var result = _notificationTemplateRender.Render(request.Text, notification);
 
             return Ok(result);
         }

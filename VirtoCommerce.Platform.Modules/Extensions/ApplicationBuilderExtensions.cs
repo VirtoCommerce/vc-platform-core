@@ -6,8 +6,8 @@ using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Smidge;
-using Smidge.Cache;
 using Smidge.Models;
 using Smidge.Options;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -18,7 +18,7 @@ namespace VirtoCommerce.Platform.Modules.Extensions
     public static class ApplicationBuilderExtensions
     {
         public static IApplicationBuilder UseModules(this IApplicationBuilder appBuilder)
-        {         
+        {
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
                 var moduleManager = serviceScope.ServiceProvider.GetRequiredService<IModuleManager>();
@@ -27,7 +27,7 @@ namespace VirtoCommerce.Platform.Modules.Extensions
                 foreach (var module in modules)
                 {
                     //Register modules permissions defined in the module manifest
-                    var modulePermissions = module.Permissions.SelectMany(x => x.Permissions).Select(x=> new Permission { Name = x.Name }).ToArray();
+                    var modulePermissions = module.Permissions.SelectMany(x => x.Permissions).Select(x => new Permission { Name = x.Name }).ToArray();
                     permissionsProvider.RegisterPermissions(modulePermissions);
 
                     moduleManager.PostInitializeModule(module, serviceScope.ServiceProvider);
@@ -38,32 +38,32 @@ namespace VirtoCommerce.Platform.Modules.Extensions
 
         public static IApplicationBuilder UseModulesContent(this IApplicationBuilder appBuilder, IBundleManager bundles)
         {
-            var hostingEnv = appBuilder.ApplicationServices.GetRequiredService<IHostingEnvironment>();
             var modules = GetInstalledModules(appBuilder.ApplicationServices);
-
+            var modulesOptions = appBuilder.ApplicationServices.GetRequiredService<IOptions<LocalStorageModuleCatalogOptions>>().Value;
             var cssBundleItems = modules.SelectMany(m => m.Styles).ToArray();
-            
+
             var cssFiles = cssBundleItems.OfType<ManifestBundleFile>().Select(x => new CssFile(x.VirtualPath));
 
-            cssFiles = cssFiles.Concat(cssBundleItems.OfType<ManifestBundleDirectory>().SelectMany(x => new WebFileFolder(hostingEnv, x.VirtualPath)
-                                                                                .AllWebFiles<CssFile>(x.SearchPattern, x.SearchSubdirectories ?  SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)));
+            cssFiles = cssFiles.Concat(cssBundleItems.OfType<ManifestBundleDirectory>().SelectMany(x => new WebFileFolder(modulesOptions.DiscoveryPath, x.VirtualPath)
+                                                                                .AllWebFiles<CssFile>(x.SearchPattern, x.SearchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)));
 
             var scriptBundleItems = modules.SelectMany(m => m.Scripts).ToArray();
             var jsFiles = scriptBundleItems.OfType<ManifestBundleFile>().Select(x => new JavaScriptFile(x.VirtualPath));
-            jsFiles = jsFiles.Concat(scriptBundleItems.OfType<ManifestBundleDirectory>().SelectMany(x => new WebFileFolder(hostingEnv, x.VirtualPath)
+            jsFiles = jsFiles.Concat(scriptBundleItems.OfType<ManifestBundleDirectory>().SelectMany(x => new WebFileFolder(modulesOptions.DiscoveryPath, x.VirtualPath)
                                                                                 .AllWebFiles<JavaScriptFile>(x.SearchPattern, x.SearchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)));
 
 
             //TODO: Test minification and uglification for resulting bundles
             var options = bundles.DefaultBundleOptions;
             options.DebugOptions.FileWatchOptions.Enabled = true;
-            options.DebugOptions.CacheControlOptions = new CacheControlOptions() { EnableETag = false, CacheControlMaxAge = 0};
+            options.DebugOptions.CacheControlOptions = new CacheControlOptions() { EnableETag = false, CacheControlMaxAge = 0 };
 
             bundles.Create("vc-modules-styles", cssFiles.ToArray())
                .WithEnvironmentOptions(options);
 
             bundles.Create("vc-modules-scripts", jsFiles.ToArray())
                    .WithEnvironmentOptions(options);
+
 
             return appBuilder;
         }
@@ -85,23 +85,23 @@ namespace VirtoCommerce.Platform.Modules.Extensions
     /// </summary>
     internal class WebFileFolder
     {
-        private readonly IHostingEnvironment _env;
+        private readonly string _rootPath;
         private readonly string _path;
 
-        public WebFileFolder(IHostingEnvironment env, string path)
+        public WebFileFolder(string rootPath, string path)
         {
-            _env = env;
+            _rootPath = rootPath;
             _path = path;
         }
 
         public T[] AllWebFiles<T>(string pattern, SearchOption search) where T : IWebFile, new()
         {
-            var fsPath = _path.Replace("~", _env.WebRootPath);
-            return Directory.GetFiles(fsPath, pattern, search)
-                .Select(f => new T
-                {
-                    FilePath = f.Replace(_env.WebRootPath, "~").Replace("\\", "/")
-                }).ToArray();
+            var result = Directory.GetFiles(Path.Combine(_rootPath, _path), pattern, search)
+                 .Select(f => new T
+                 {
+                     FilePath = f.Replace(_rootPath, "~").Replace("\\", "/")
+                 }).ToArray();
+            return result;
         }
     }
 }
