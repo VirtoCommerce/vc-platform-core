@@ -4,6 +4,9 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Core.Abstractions
 {
+    /// <summary>
+    /// The service is for to make a query to Database and get a list of notifications
+    /// </summary>
     public interface INotificationSearchService
     {
         GenericSearchResult<Notification> SearchNotificationsAsync(NotificationSearchCriteria criteria);

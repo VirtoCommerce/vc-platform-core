@@ -21,13 +21,13 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         public string TenantType { get; set; }
 
         /// <summary>
-        /// 
+        /// Id of notification
         /// </summary>
         [StringLength(128)]
         public string NotificationId { get; set; }
 
         /// <summary>
-        /// 
+        /// Type of notification
         /// </summary>
         [StringLength(128)]
         public string NotificationType { get; set; }

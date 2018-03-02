@@ -8,28 +8,31 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
     public class NotificationTemplateEntity : AuditableEntity
     {
         /// <summary>
-        /// Language
+        /// Language of template
         /// </summary>
         [StringLength(10)]
         public string LanguageCode { get; set; }
 
         /// <summary>
-        /// Subject of notification
+        /// Subject of template
         /// </summary>
         [StringLength(512)]
         public string Subject { get; set; }
 
         /// <summary>
-        /// Body of notification
+        /// Body of template
         /// </summary>
         public string Body { get; set; }
 
         /// <summary>
-        /// Message of notification
+        /// Message of template
         /// </summary>
         [StringLength(1600)]
         public string Message { get; set; }
 
+        /// <summary>
+        /// Id of notification
+        /// </summary>
         [StringLength(128)]
         public string NotificationId { get; set; }
 

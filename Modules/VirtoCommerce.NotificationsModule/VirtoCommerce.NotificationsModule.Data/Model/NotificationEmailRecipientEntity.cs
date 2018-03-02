@@ -9,11 +9,14 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
     public class NotificationEmailRecipientEntity : Entity
     {
         /// <summary>
-        /// Recipient info (e-mail, phone number and etc.) of notification
+        /// Recipient info (e-mail and etc.) of notification
         /// </summary>
         [StringLength(128)]
         public string EmailAddress { get; set; }
 
+        /// <summary>
+        /// Type of recipient (CC, BCC and etc.)
+        /// </summary>
         public NotificationRecipientType RecipientType { get; set; }
 
         [StringLength(128)]

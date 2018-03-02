@@ -8,37 +8,37 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
     public class EmailAttachmentEntity : AuditableEntity
     {
         /// <summary>
-        /// 
+        /// Name of Attachment
         /// </summary>
         [StringLength(512)]
         public string FileName { get; set; }
 
         /// <summary>
-        /// 
+        /// Url of Attachment
         /// </summary>
         [StringLength(2048)]
         public string Url { get; set; }
 
         /// <summary>
-        /// 
+        /// MimeType of Attachment
         /// </summary>
         [StringLength(50)]
         public string MimeType { get; set; }
 
         /// <summary>
-        /// 
+        /// Size of Attachment
         /// </summary>
         [StringLength(128)]
         public string Size { get; set; }
 
         /// <summary>
-        /// Language
+        /// Language of Attachment
         /// </summary>
         [StringLength(10)]
         public string LanguageCode { get; set; }
 
         /// <summary>
-        /// 
+        /// Id of notification
         /// </summary>
         [StringLength(128)]
         public string NotificationId { get; set; }

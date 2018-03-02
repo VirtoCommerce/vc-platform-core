@@ -52,7 +52,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         public string To { get; set; }
 
         /// <summary>
-        /// 
+        /// Number for sms
         /// </summary>
         [StringLength(128)]
         public string Number { get; set; }

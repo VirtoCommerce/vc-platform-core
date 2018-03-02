@@ -4,6 +4,9 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Core.Abstractions
 {
+    /// <summary>
+    /// The service has a logic query/save of notification to Database
+    /// </summary>
     public interface INotificationService
     {
         Task<Notification> GetNotificationByTypeAsync(string type, string tenantId = null, string tenantType = null);
