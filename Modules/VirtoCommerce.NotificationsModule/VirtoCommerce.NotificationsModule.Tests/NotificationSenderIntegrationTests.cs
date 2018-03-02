@@ -111,7 +111,7 @@ namespace VirtoCommerce.NotificationsModule.Tests
         }
 
         [Fact]
-        public async Task SmtpEmailNotificationMessageSender_FailSentMessage()
+        public async Task SmtpEmailNotificationMessageSender_FailSendMessage()
         {
             //Arrange
             string language = "default";
@@ -145,7 +145,7 @@ namespace VirtoCommerce.NotificationsModule.Tests
             var result = await _notificationSender.SendNotificationAsync(notification, language);
 
             //Assert
-            Assert.True(!result.IsSuccess);
+            Assert.False(result.IsSuccess);
         }
     }
 }

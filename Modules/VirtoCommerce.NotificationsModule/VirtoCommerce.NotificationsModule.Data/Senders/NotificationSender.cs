@@ -37,7 +37,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
 
             var activeNotification = await _notificationService.GetNotificationByTypeAsync(notification.Type);
 
-            var message = AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{activeNotification.Kind}Message");
+            var message = AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{activeNotification.Type}Message");
             message.LanguageCode = language;
             message.MaxSendAttemptCount = _maxRetryAttempts + 1;
             activeNotification.ToMessage(message, _notificationTemplateRender);
