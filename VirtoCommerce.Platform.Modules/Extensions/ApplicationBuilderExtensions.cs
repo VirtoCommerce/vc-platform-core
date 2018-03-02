@@ -55,7 +55,7 @@ namespace VirtoCommerce.Platform.Modules.Extensions
 
             //TODO: Test minification and uglification for resulting bundles
             var options = bundles.DefaultBundleOptions;
-            options.DebugOptions.FileWatchOptions.Enabled = true;
+            //options.DebugOptions.FileWatchOptions.Enabled = true;
             options.DebugOptions.CacheControlOptions = new CacheControlOptions() { EnableETag = false, CacheControlMaxAge = 0 };
 
             bundles.Create("vc-modules-styles", cssFiles.ToArray())

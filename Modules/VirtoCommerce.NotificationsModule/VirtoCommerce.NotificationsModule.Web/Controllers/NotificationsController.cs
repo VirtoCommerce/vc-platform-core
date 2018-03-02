@@ -63,8 +63,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         [ProducesResponseType(typeof(string), 200)]
         public IActionResult RenderingTemplate([FromBody]NotificationTemplateRequest request)
         {
-            var notification = Newtonsoft.Json.JsonConvert.DeserializeObject<Notification>(request.Data, new PolymorphicJsonConverter());
-            var result = _notificationTemplateRender.Render(request.Text, notification);
+            var result = _notificationTemplateRender.Render(request.Text, request.Data);
 
             return Ok(result);
         }

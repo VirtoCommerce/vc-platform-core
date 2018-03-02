@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Moq;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
@@ -15,39 +17,40 @@ using Xunit;
 
 namespace VirtoCommerce.NotificationsModule.Tests
 {
-    public class NotificationSenderTests
+    public class NotificationSenderUnitTests
     {
         
         private readonly NotificationSender _sender;
         private readonly Mock<INotificationService> _serviceMock;
-        private readonly Mock<INotificationTemplateRender> _templateRenderMock;
         private readonly INotificationTemplateRender _templateRender;
         private readonly Mock<INotificationMessageService> _messageServiceMock;
         private readonly Mock<INotificationMessageSender> _messageSenderMock;
-        private readonly Mock<INotificationRepository> _repositoryMock;
-        private readonly Mock<INotificationSender> _senderMock;
-        private readonly Mock<INotificationRegistrar> _registrarMock;
+        private readonly Mock<ILogger<NotificationSender>> _logNotificationSenderMock;
 
-
-        public NotificationSenderTests()
+        public NotificationSenderUnitTests()
         {
-            _repositoryMock = new Mock<INotificationRepository>();
-            Func<INotificationRepository> repositoryFactory = () => _repositoryMock.Object;
-            _templateRenderMock = new Mock<INotificationTemplateRender>();
             _templateRender = new LiquidTemplateRenderer();
             _messageServiceMock = new Mock<INotificationMessageService>();
             _messageSenderMock = new Mock<INotificationMessageSender>();
-            _senderMock = new Mock<INotificationSender>();
-            _registrarMock = new Mock<INotificationRegistrar>();
             _serviceMock = new Mock<INotificationService>();
-            _sender = new NotificationSender(_serviceMock.Object, _templateRender, _messageServiceMock.Object, _messageSenderMock.Object);
+            _logNotificationSenderMock = new Mock<ILogger<NotificationSender>>();
+            _sender = new NotificationSender(_serviceMock.Object, _templateRender, _messageServiceMock.Object, _messageSenderMock.Object, _logNotificationSenderMock.Object);
 
-            AbstractTypeFactory<Notification>.RegisterType<EmailNotification>().MapToType<NotificationEntity>();
-            AbstractTypeFactory<Notification>.RegisterType<SmsNotification>().MapToType<NotificationEntity>();
-            AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>().MapToType<NotificationTemplateEntity>();
-            AbstractTypeFactory<NotificationTemplate>.RegisterType<SmsNotificationTemplate>().MapToType<NotificationTemplateEntity>();
-            AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>().MapToType<NotificationMessageEntity>();
-            AbstractTypeFactory<NotificationMessage>.RegisterType<SmsNotificationMessage>().MapToType<NotificationMessageEntity>();
+            //todo
+            if (!AbstractTypeFactory<Notification>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotification))))
+            {
+                AbstractTypeFactory<Notification>.RegisterType<EmailNotification>().MapToType<NotificationEntity>();
+            }
+
+            if (!AbstractTypeFactory<NotificationTemplate>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotificationTemplate))))
+            {
+                AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>().MapToType<NotificationTemplateEntity>();
+            }
+
+            if (!AbstractTypeFactory<NotificationMessage>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotificationMessage))))
+            {
+                AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>().MapToType<NotificationMessageEntity>();
+            }
         }
 
         [Fact]
@@ -81,14 +84,13 @@ namespace VirtoCommerce.NotificationsModule.Tests
                 SendDate = date
             };
             _serviceMock.Setup(serv => serv.GetNotificationByTypeAsync(nameof(OrderSentEmailNotification), null, null)).ReturnsAsync(notification);
-            //_templateRenderMock.Setup(tr => tr.Render(message.Subject, notification.Order)).Returns("Order #123");
-            //_templateRenderMock.Setup(tr => tr.Render(message.Body, notification.Order)).Returns("You have order #123");
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessages(new NotificationMessage[] {message}));
 
             //Act
-            await _sender.SendNotificationAsync(notification, language);
+            var result = await _sender.SendNotificationAsync(notification, language);
 
             //Assert
+            Assert.True(result.IsSuccess);
         }
 
         [Fact]

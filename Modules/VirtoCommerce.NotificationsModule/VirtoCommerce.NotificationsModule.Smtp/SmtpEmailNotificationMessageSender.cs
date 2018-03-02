@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
@@ -16,48 +17,39 @@ namespace VirtoCommerce.NotificationsModule.Smtp
             _emailSendingOptions = emailSendingOptions.Value;
         }
 
-        public async Task<NotificationSendResult> SendNotificationAsync(NotificationMessage message)
+        public async Task SendNotificationAsync(NotificationMessage message)
         {
-            var result = new NotificationSendResult();
-
             var emailNotificationMessage = message as EmailNotificationMessage;
 
             if (emailNotificationMessage == null) throw new ArgumentNullException(nameof(emailNotificationMessage));
 
-            try
+            using (MailMessage mailMsg = new MailMessage())
             {
-                using (MailMessage mailMsg = new MailMessage())
+                mailMsg.From = new MailAddress(emailNotificationMessage.From);
+                mailMsg.To.Add(new MailAddress(emailNotificationMessage.To));
+                mailMsg.ReplyToList.Add(mailMsg.From);
+
+                mailMsg.Subject = emailNotificationMessage.Subject;
+                mailMsg.Body = emailNotificationMessage.Body;
+                mailMsg.IsBodyHtml = true;
+
+                //todo Attachments
+                //mailMsg.Attachments.Add(new Attachment());
+
+                using (var client = CreateClient())
                 {
-                    mailMsg.From = new MailAddress(emailNotificationMessage.From);
-                    mailMsg.ReplyToList.Add(mailMsg.From);
+                    await client.SendMailAsync(mailMsg);
+                }
+            };
 
-                    mailMsg.Subject = emailNotificationMessage.Subject;
-                    mailMsg.Body = emailNotificationMessage.Body;
-                    mailMsg.IsBodyHtml = true;
-
-                    using (var client = CreateClient())
-                    {
-                        await client.SendMailAsync(mailMsg);
-                    }
-                };
-
-                result.IsSuccess = true;
-            }
-            catch (SmtpException ex)
-            {
-                result.ErrorMessage = ex.Message + ex.InnerException;
-            }
-
-            return result;
         }
 
         private SmtpClient CreateClient()
         {
-            return new SmtpClient(_emailSendingOptions.SmtpServer, _emailSendingOptions.Port)
+            return new SmtpClient(_emailSendingOptions.SmtpOptions.SmtpServer, _emailSendingOptions.SmtpOptions.Port)
             {
                 EnableSsl = true,
-                UseDefaultCredentials = false,
-                Credentials = new System.Net.NetworkCredential(_emailSendingOptions.Login, _emailSendingOptions.Password)
+                Credentials = new NetworkCredential(_emailSendingOptions.SmtpOptions.Login, _emailSendingOptions.SmtpOptions.Password)
             };
         }
     }

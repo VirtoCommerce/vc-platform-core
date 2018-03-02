@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
+using VirtoCommerce.NotificationsModule.Core.Extensions;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Core.Model
@@ -24,7 +25,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         {
             var emailMessage = (EmailNotificationMessage) message;
             
-            var template = (EmailNotificationTemplate)Templates.FirstOrDefault(t => t.LanguageCode.Equals(message.LanguageCode));
+            var template = (EmailNotificationTemplate)Templates.FindWithLanguage(message.LanguageCode);
             if (template != null)
             {
                 emailMessage.Subject = render.Render(template.Subject, this);

@@ -26,10 +26,15 @@ namespace VirtoCommerce.NotificationsModule.Web.Infrastructure
             if (objectType == typeof(Notification) || objectType == typeof(NotificationTemplate))
             {
                 var notificationType = objectType.Name;
-                var pt = obj["kind"];
+                var pt = obj["type"];
                 if (pt != null)
                 {
                     notificationType = pt.Value<string>();
+                }
+                if (pt == null)
+                {
+                    pt = obj["kind"];
+                    if (pt != null) notificationType = pt.Value<string>();
                 }
                 if (objectType == typeof(Notification))
                 {
@@ -41,7 +46,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Infrastructure
                 }
                 if (retVal == null)
                 {
-                    throw new NotSupportedException("Unknown kind: " + notificationType);
+                    throw new NotSupportedException("Unknown type: " + notificationType);
                 }
             }
             else if (objectType == typeof(NotificationSearchCriteria))

@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
+using VirtoCommerce.NotificationsModule.Core.Extensions;
 
 namespace VirtoCommerce.NotificationsModule.Core.Model
 {
@@ -19,7 +17,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         public override NotificationMessage ToMessage(NotificationMessage message, INotificationTemplateRender render)
         {
             var smsNotificationMessage = (SmsNotificationMessage) message;
-            var template = (SmsNotificationTemplate)Templates.FirstOrDefault(t => t.LanguageCode.Equals(message.LanguageCode));
+            var template = (SmsNotificationTemplate)Templates.FindWithLanguage(message.LanguageCode);
             if (template != null)
             {
                 smsNotificationMessage.Number = Number;

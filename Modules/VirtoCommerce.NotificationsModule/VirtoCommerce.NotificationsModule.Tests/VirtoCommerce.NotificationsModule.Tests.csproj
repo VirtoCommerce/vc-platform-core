@@ -9,10 +9,10 @@
     <PackageReference Include="Moq" Version="4.8.1" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.1.18" />
     <PackageReference Include="MSTest.TestFramework" Version="1.1.18" />
-    <PackageReference Include="xunit" Version="2.2.0" />
-    <PackageReference Include="xunit.runner.console" Version="2.2.0" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
-    <DotNetCliToolReference Include="dotnet-xunit" Version="2.2.0" />
+    <PackageReference Include="xunit" Version="2.3.1" />
+    <PackageReference Include="xunit.runner.console" Version="2.3.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.0" />
+    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,6 +20,8 @@
     <ProjectReference Include="..\VirtoCommerce.NotificationsModule.Core\VirtoCommerce.NotificationsModule.Core.csproj" />
     <ProjectReference Include="..\VirtoCommerce.NotificationsModule.Data\VirtoCommerce.NotificationsModule.Data.csproj" />
     <ProjectReference Include="..\VirtoCommerce.NotificationsModule.LiguidRenderer\VirtoCommerce.NotificationsModule.LiguidRenderer.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.NotificationsModule.SendGrid\VirtoCommerce.NotificationsModule.SendGrid.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.NotificationsModule.Smtp\VirtoCommerce.NotificationsModule.Smtp.csproj" />
   </ItemGroup>
 
 </Project>

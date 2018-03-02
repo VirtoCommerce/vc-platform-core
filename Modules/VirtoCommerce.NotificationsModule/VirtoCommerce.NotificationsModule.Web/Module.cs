@@ -69,5 +69,11 @@ namespace VirtoCommerce.NotificationsModule.Web
 
     public class RegistrationEmailNotification : EmailNotification
     {
+        public CustomerOrder Context { get; set; }
+    }
+
+    public class CustomerOrder
+    {
+        public string Number { get; set; }
     }
 }

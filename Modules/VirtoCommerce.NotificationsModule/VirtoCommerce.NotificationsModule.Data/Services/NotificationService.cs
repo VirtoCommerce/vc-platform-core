@@ -79,7 +79,10 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
         public void RegisterNotification<T>() where T : Notification
         {
-            AbstractTypeFactory<Notification>.RegisterType<T>();
+            if (AbstractTypeFactory<T>.AllTypeInfos.Any(t => t.Type != typeof(T)))
+            {
+                AbstractTypeFactory<Notification>.RegisterType<T>();
+            }
         }
 
         public void RegisterNotification<T>(T type) where T : Notification

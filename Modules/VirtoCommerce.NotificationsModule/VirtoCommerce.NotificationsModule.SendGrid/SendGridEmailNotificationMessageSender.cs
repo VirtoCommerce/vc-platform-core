@@ -18,33 +18,21 @@ namespace VirtoCommerce.NotificationsModule.SendGrid
             _emailSendingOptions = emailSendingOptions.Value;
         }
 
-        public async Task<NotificationSendResult> SendNotificationAsync(NotificationMessage message)
+        public async Task SendNotificationAsync(NotificationMessage message)
         {
-            var result = new NotificationSendResult();
-
             var emailNotificationMessage = message as EmailNotificationMessage;
 
             if (emailNotificationMessage == null) throw new ArgumentNullException(nameof(emailNotificationMessage));
 
-            try
+            var client = new SendGridClient(_emailSendingOptions.SendGridOptions.ApiKey);
+            var mailMsg = new SendGridMessage
             {
-                var client = new SendGridClient(_emailSendingOptions.ApiKey);
-                var mailMsg = new SendGridMessage
-                {
-                    From = new EmailAddress(emailNotificationMessage.From),
-                    Subject = emailNotificationMessage.Subject,
-                    HtmlContent = emailNotificationMessage.Body
-                };
+                From = new EmailAddress(emailNotificationMessage.From),
+                Subject = emailNotificationMessage.Subject,
+                HtmlContent = emailNotificationMessage.Body
+            };
 
-                var response = await client.SendEmailAsync(mailMsg);
-                result.IsSuccess = true;
-            }
-            catch (SmtpException ex)
-            {
-                result.ErrorMessage = ex.Message + ex.InnerException;
-            }
-
-            return result;
+            await client.SendEmailAsync(mailMsg);
         }
     }
 }
