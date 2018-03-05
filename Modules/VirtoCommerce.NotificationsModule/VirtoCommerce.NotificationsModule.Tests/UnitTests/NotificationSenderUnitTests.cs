@@ -85,7 +85,7 @@ namespace VirtoCommerce.NotificationsModule.Tests
                 SendDate = date
             };
             _serviceMock.Setup(serv => serv.GetNotificationByTypeAsync(nameof(OrderSentEmailNotification), null, null)).ReturnsAsync(notification);
-            _messageServiceMock.Setup(ms => ms.SaveNotificationMessages(new NotificationMessage[] {message}));
+            _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] {message}));
 
             //Act
             var result = await _sender.SendNotificationAsync(notification, language);
@@ -125,7 +125,7 @@ namespace VirtoCommerce.NotificationsModule.Tests
                 SendDate = date
             };
             _serviceMock.Setup(serv => serv.GetNotificationByTypeAsync(nameof(InvoiceEmailNotification), null, null)).ReturnsAsync(notification);
-            _messageServiceMock.Setup(ms => ms.SaveNotificationMessages(new NotificationMessage[] { message }));
+            _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
 
             //Act
             var result = await _sender.SendNotificationAsync(notification, language);
@@ -165,7 +165,7 @@ namespace VirtoCommerce.NotificationsModule.Tests
             };
             _serviceMock.Setup(serv => serv.GetNotificationByTypeAsync(nameof(EmailNotification), null, null)).ReturnsAsync(notification);
 
-            _messageServiceMock.Setup(ms => ms.SaveNotificationMessages(new NotificationMessage[] { message }));
+            _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
 
             //Act
             var result = await _sender.SendNotificationAsync(notification, language);
@@ -204,7 +204,7 @@ namespace VirtoCommerce.NotificationsModule.Tests
                 SendDate = DateTime.Now
             };
             _serviceMock.Setup(serv => serv.GetNotificationByTypeAsync(nameof(EmailNotification), null, null)).ReturnsAsync(notification);
-            _messageServiceMock.Setup(ms => ms.SaveNotificationMessages(new NotificationMessage[] { message }));
+            _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
             _messageSenderMock.Setup(ms => ms.SendNotificationAsync(It.IsAny<NotificationMessage>())).Throws(new SmtpException());
 
             //Act
@@ -235,7 +235,7 @@ namespace VirtoCommerce.NotificationsModule.Tests
             };
 
             NotificationMessage message = null;
-            _messageServiceMock.Setup(ms => ms.SaveNotificationMessages(new [] { message }));
+            _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new [] { message }));
 
             //Act
             await Assert.ThrowsAsync<NullReferenceException>(() => _sender.SendNotificationAsync(notification, language));
@@ -247,7 +247,7 @@ namespace VirtoCommerce.NotificationsModule.Tests
             //Arrange
             string language = "default";
             NotificationMessage message = null;
-            _messageServiceMock.Setup(ms => ms.SaveNotificationMessages(new[] { message }));
+            _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new[] { message }));
 
             //Act
             await Assert.ThrowsAsync<ArgumentNullException>(() => _sender.SendNotificationAsync(null, language));

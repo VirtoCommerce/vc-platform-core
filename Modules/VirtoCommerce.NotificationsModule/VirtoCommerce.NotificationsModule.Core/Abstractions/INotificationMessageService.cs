@@ -9,6 +9,6 @@ namespace VirtoCommerce.NotificationsModule.Core.Abstractions
     public interface INotificationMessageService
     {
         Task<NotificationMessage[]> GetNotificationsMessageByIds(string[] ids);
-        Task SaveNotificationMessages(NotificationMessage[] messages);
+        Task SaveNotificationMessagesAsync(NotificationMessage[] messages);
     }
 }

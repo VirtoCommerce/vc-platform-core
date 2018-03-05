@@ -1,8 +1,10 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
+using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -10,11 +12,11 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 {
     public class NotificationSearchService : INotificationSearchService
     {
-        private readonly INotificationRepository _notificationRepository;
-        
-        public NotificationSearchService(INotificationRepository notificationRepository)
+        private readonly INotificationRepository _repository;
+
+        public NotificationSearchService(INotificationRepository repository)
         {
-            _notificationRepository = notificationRepository;
+            _repository = repository;
         }
 
         public  GenericSearchResult<Notification> SearchNotifications(NotificationSearchCriteria criteria)
@@ -42,7 +44,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             var list = collection.Select(t =>
             {
                 var result = AbstractTypeFactory<Notification>.TryCreateInstance(t.Name);
-                var notificationEntity = _notificationRepository.Notifications.FirstOrDefault(ne => ne.Type.Equals(t.Name));
+                var notificationEntity = _repository.GetNotificationEntityForListByType(t.Name, criteria.TenantId, criteria.TenantType);
                 return notificationEntity != null ? notificationEntity.ToModel(result) : result;
             }).ToList();
 

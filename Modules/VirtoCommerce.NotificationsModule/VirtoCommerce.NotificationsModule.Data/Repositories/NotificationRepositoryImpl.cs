@@ -45,6 +45,14 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             return query.FirstOrDefaultAsync(n => n.Type.Equals(type));
         }
 
+        public NotificationEntity GetNotificationEntityForListByType(string type, string tenantId, string tenantType)
+        {
+            var query = Notifications;
+            if (!string.IsNullOrEmpty(tenantId)) query = query.Where(q => q.TenantId.Equals(tenantId));
+            if (!string.IsNullOrEmpty(tenantType)) query = query.Where(q => q.TenantType.Equals(tenantType));
+            return query.FirstOrDefault(n => n.Type.Equals(type));
+        }
+
         public Task<NotificationMessageEntity[]> GetNotificationMessageByIdAsync(string[] ids)
         {
             return NotifcationMessages.Where(x => ids.Contains(x.Id)).ToArrayAsync();

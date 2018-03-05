@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Moq;
@@ -13,14 +14,15 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
     public class NotificationSearchServiceUnitTests
     {
         private readonly Mock<INotificationRepository> _repositoryMock;
+        private readonly Mock<Func<INotificationRepository>> _repositoryFactoryMock;
         private readonly INotificationRegistrar _notificationRegistrar;
         private readonly NotificationSearchService _notificationSearchService;
 
         public NotificationSearchServiceUnitTests()
         {
             _repositoryMock = new Mock<INotificationRepository>();
-            INotificationRepository RepositoryFactory() => _repositoryMock.Object;
-            _notificationRegistrar = new NotificationService(RepositoryFactory);
+            _repositoryFactoryMock = new Mock<Func<INotificationRepository>>();
+            _notificationRegistrar = new NotificationService(_repositoryFactoryMock.Object);
             _notificationSearchService = new NotificationSearchService(_repositoryMock.Object);
         }
 
@@ -80,13 +82,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
             _notificationRegistrar.RegisterNotification<InvoiceEmailNotification>();
             _notificationRegistrar.RegisterNotification<OrderSentEmailNotification>();
-            var searchCriteria = new NotificationSearchCriteria
-            {
-                Take = 2,
-                Skip = 0
-            };
-            //todo
-            _repositoryMock.Setup(n => n.Notifications.FirstOrDefault(not => not.Type.Equals(nameof(OrderSentEmailNotification))))
+            var searchCriteria = new NotificationSearchCriteria();
+            _repositoryMock.Setup(n => n.GetNotificationEntityForListByType(nameof(OrderSentEmailNotification), null, null))
                 .Returns(new Data.Model.NotificationEntity() { IsActive = true });
 
             //Act

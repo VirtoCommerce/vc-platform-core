@@ -45,7 +45,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
             activeNotification.ToMessage(message, _notificationTemplateRender);
 
             NotificationMessage[] messages = { message };
-            await _notificationMessageService.SaveNotificationMessages(messages);
+            await _notificationMessageService.SaveNotificationMessagesAsync(messages);
 
             var policy = Policy.Handle<SmtpException>().WaitAndRetryAsync(_maxRetryAttempts, retryAttempt =>
                     TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))
@@ -71,7 +71,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
                 result.ErrorMessage = policyResult.FinalException?.Message;
             }
 
-            await _notificationMessageService.SaveNotificationMessages(messages);
+            await _notificationMessageService.SaveNotificationMessagesAsync(messages);
 
             return result;
         }

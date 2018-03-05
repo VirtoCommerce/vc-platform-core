@@ -28,7 +28,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             }
         }
 
-        public async Task SaveNotificationMessages(NotificationMessage[] messages)
+        public async Task SaveNotificationMessagesAsync(NotificationMessage[] messages)
         {
             using (var repository = _repositoryFactory())
             using (var changeTracker = new ObservableChangeTracker())
