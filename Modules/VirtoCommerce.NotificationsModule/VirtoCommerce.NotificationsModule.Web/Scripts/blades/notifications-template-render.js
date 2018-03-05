@@ -18,18 +18,14 @@
         if (itemFromLocalStorage) {
             blade.notification.context = itemFromLocalStorage;
         } 
+        
+        notifications.renderTemplate({},{ text: blade.currentEntity.body, data: blade.notification }, function (data) {
+            blade.originHtml = data.html;
+        });
 		blade.isLoading = false;
 	};
-    
-    blade.render = function() {
-        console.log(blade.notification);
-        notifications.renderTemplate({},{ text: blade.currentEntity.body, data: blade.notification.previewData }, function (data) {
-            console.log(data);
-            blade.originHtml = data;
-        });
-    }
 
-	blade.headIcon = 'fa-play';
+	blade.headIcon = 'fa-eye';
 
 	blade.initialize();
 }]);

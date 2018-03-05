@@ -65,7 +65,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         {
             var result = _notificationTemplateRender.Render(request.Text, request.Data);
 
-            return Ok(result);
+            return Ok(new { html = result });
         }
     }
 }

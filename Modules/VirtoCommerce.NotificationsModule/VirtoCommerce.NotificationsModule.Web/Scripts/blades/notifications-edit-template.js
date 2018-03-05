@@ -116,8 +116,8 @@
      blade.renderTemplate = function () {
 		var newBlade = {
 			id: 'renderTemplate',
-			title: 'platform.blades.notifications-test-resolve.title',
-			subtitle: 'platform.blades.notifications-test-resolve.subtitle',
+			title: 'notifications.blades.notifications-template-render.title',
+			subtitle: 'notifications.blades.notifications-template-render.subtitle',
 			subtitleValues: { type: blade.notificationType },
 			notification: blade.notification,
 			tenantId: blade.tenantId,

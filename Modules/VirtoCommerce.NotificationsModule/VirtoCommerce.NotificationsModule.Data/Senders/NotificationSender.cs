@@ -12,7 +12,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
 {
     public class NotificationSender : INotificationSender
     {
-        readonly int _maxRetryAttempts = 3;
+        private readonly int _maxRetryAttempts = 3;
         private readonly INotificationService _notificationService;
         private readonly INotificationTemplateRender _notificationTemplateRender;
         private readonly INotificationMessageService _notificationMessageService;
@@ -33,11 +33,13 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
 
         public async Task<NotificationSendResult> SendNotificationAsync(Notification notification, string language)
         {
+            if (notification == null) throw new ArgumentNullException(nameof(notification));
+
             NotificationSendResult result = new NotificationSendResult();
 
             var activeNotification = await _notificationService.GetNotificationByTypeAsync(notification.Type);
 
-            var message = AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{activeNotification.Type}Message");
+            var message = AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{activeNotification.Kind}Message");
             message.LanguageCode = language;
             message.MaxSendAttemptCount = _maxRetryAttempts + 1;
             activeNotification.ToMessage(message, _notificationTemplateRender);
@@ -50,7 +52,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
                 , (exception, timeSpan, retryCount, context) => {
                     _logger.LogError(exception, $"Retry {retryCount} of {context.PolicyKey}, due to: {exception}.");
                     message.LastSendError = exception?.Message;
-                    
                 });
             
             var policyResult = await policy.ExecuteAndCaptureAsync(() =>

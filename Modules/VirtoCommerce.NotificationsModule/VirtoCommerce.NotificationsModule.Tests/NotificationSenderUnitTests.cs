@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -204,14 +205,52 @@ namespace VirtoCommerce.NotificationsModule.Tests
             };
             _serviceMock.Setup(serv => serv.GetNotificationByTypeAsync(nameof(EmailNotification), null, null)).ReturnsAsync(notification);
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessages(new NotificationMessage[] { message }));
-            //todo
-            //_messageSenderMock.Setup(m => m.SendNotificationAsync(message)).Returns(Task.FromResult(0));
+            _messageSenderMock.Setup(ms => ms.SendNotificationAsync(It.IsAny<NotificationMessage>())).Throws(new SmtpException());
 
             //Act
             var result = await _sender.SendNotificationAsync(notification, language);
 
             //Assert
             Assert.False(result.IsSuccess);
+        }
+
+        [Fact]
+        public async Task EmailNotification_NullReferenceException()
+        {
+            //Arrange
+            string language = "default";
+            string subject = "some subject";
+            string body = "some body";
+            var notification = new EmailNotification()
+            {
+                Templates = new List<NotificationTemplate>()
+                {
+                    new EmailNotificationTemplate()
+                    {
+                        Subject = subject,
+                        Body = body,
+                        LanguageCode = language
+                    }
+                }
+            };
+
+            NotificationMessage message = null;
+            _messageServiceMock.Setup(ms => ms.SaveNotificationMessages(new [] { message }));
+
+            //Act
+            await Assert.ThrowsAsync<NullReferenceException>(() => _sender.SendNotificationAsync(notification, language));
+        }
+
+        [Fact]
+        public async Task EmailNotification_ArgumentNullException()
+        {
+            //Arrange
+            string language = "default";
+            NotificationMessage message = null;
+            _messageServiceMock.Setup(ms => ms.SaveNotificationMessages(new[] { message }));
+
+            //Act
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _sender.SendNotificationAsync(null, language));
         }
     }
 }

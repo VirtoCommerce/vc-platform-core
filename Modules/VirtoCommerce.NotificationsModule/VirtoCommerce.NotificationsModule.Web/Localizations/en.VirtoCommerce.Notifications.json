@@ -142,6 +142,10 @@
                     "criteria": "Enter search phrase",
                     "name": "How will you call this filter?"
                 }
+            },
+            "notifications-template-render":{
+                "title": "Preview form",
+                "subtitle": "The form renders a template",
             }
         },
         "widgets": {
