@@ -33,7 +33,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         [ProducesResponseType(typeof(GenericSearchResult<Notification>), 200)]
         public IActionResult GetNotifications(NotificationSearchCriteria searchCriteria)
         {
-            var notifications = _notificationSearchService.SearchNotificationsAsync(searchCriteria);
+            var notifications = _notificationSearchService.SearchNotifications(searchCriteria);
 
             return Ok(notifications);
         }

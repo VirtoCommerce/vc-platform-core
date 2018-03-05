@@ -17,7 +17,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             _notificationRepository = notificationRepository;
         }
 
-        public  GenericSearchResult<Notification> SearchNotificationsAsync(NotificationSearchCriteria criteria)
+        public  GenericSearchResult<Notification> SearchNotifications(NotificationSearchCriteria criteria)
         {
             var query = AbstractTypeFactory<Notification>.AllTypeInfos
                 .Where(t => t.Type.IsSubclassOf(typeof(EmailNotification)) || t.Type.IsSubclassOf(typeof(SmsNotification)))
