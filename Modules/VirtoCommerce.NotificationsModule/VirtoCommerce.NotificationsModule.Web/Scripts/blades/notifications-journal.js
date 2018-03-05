@@ -1,5 +1,5 @@
 angular.module('virtoCommerce.notificationsModule')
-.controller('virtoCommerce.notificationsModule.notificationsJournalController', ['$scope', '$translate', 'virtoCommerce.notificationsModule.notificationsService', 'platformWebApp.bladeNavigationService', 'platformWebApp.notifications', 'platformWebApp.bladeUtils', 'platformWebApp.dialogService', 'uiGridConstants', 'platformWebApp.uiGridHelper',
+.controller('virtoCommerce.notificationsModule.notificationsJournalController', ['$scope', '$translate', 'virtoCommerce.notificationsModule.notificationsService', 'platformWebApp.bladeNavigationService', 'virtoCommerce.notificationsModule.notificationsModuleApi', 'platformWebApp.bladeUtils', 'platformWebApp.dialogService', 'uiGridConstants', 'platformWebApp.uiGridHelper',
     function ($scope, $translate, notificationsService, bladeNavigationService, notifications, bladeUtils, dialogService, uiGridConstants, uiGridHelper) {
         var blade = $scope.blade;
         $scope.uiGridConstants = uiGridConstants;
@@ -33,22 +33,16 @@ angular.module('virtoCommerce.notificationsModule')
 
         blade.refresh = function () {
             var searchCriteria = getSearchCriteria();
-//            notifications.getNotificationJournalList({
-//                objectId: blade.objectId,
-//                objectTypeId: blade.objectTypeId,
-//                start: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
-//                count: $scope.pageSettings.itemsPerPageCount,
-//                sort: uiGridHelper.getSortExpression($scope)
-//            }, function (data) {
-//                blade.currentEntities = data.notifications;
-//                $scope.pageSettings.totalItems = data.totalCount;
-//                blade.isLoading = false;
-//            });
-            notificationsService.getNotificationJournalList(searchCriteria).then(function(data) {
-                transformByFilters(data.listEntries);
+            notifications.getNotificationJournalList({
+                objectId: blade.objectId,
+                objectTypeId: blade.objectTypeId,
+                start: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
+                count: $scope.pageSettings.itemsPerPageCount,
+                sort: uiGridHelper.getSortExpression($scope)
+            }, function (data) {
                 blade.currentEntities = data.notifications;
                 $scope.pageSettings.totalItems = data.totalCount;
-                blade.isLoading = false;              
+                blade.isLoading = false;
             });
         };
 
