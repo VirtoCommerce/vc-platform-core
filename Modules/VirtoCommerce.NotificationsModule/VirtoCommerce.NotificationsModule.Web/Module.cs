@@ -56,24 +56,10 @@ namespace VirtoCommerce.NotificationsModule.Web
                 var notificationDbContext = serviceScope.ServiceProvider.GetRequiredService<NotificationDbContext>();
                 notificationDbContext.Database.Migrate();
             }
-
-            //todo for tests
-            var registrar = serviceProvider.GetService<INotificationRegistrar>();
-            registrar.RegisterNotification<RegistrationEmailNotification>();
         }
 
         public void Uninstall()
         {
         }
-    }
-
-    public class RegistrationEmailNotification : EmailNotification
-    {
-        public CustomerOrder Context { get; set; }
-    }
-
-    public class CustomerOrder
-    {
-        public string Number { get; set; }
     }
 }
