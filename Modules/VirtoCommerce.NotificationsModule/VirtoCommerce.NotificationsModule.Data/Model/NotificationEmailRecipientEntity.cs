@@ -19,6 +19,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         /// </summary>
         public NotificationRecipientType RecipientType { get; set; }
 
+        /// <summary>
+        /// Id of notification
+        /// </summary>
         [StringLength(128)]
         public string NotificationId { get; set; }
 

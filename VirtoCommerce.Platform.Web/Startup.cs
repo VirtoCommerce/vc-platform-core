@@ -17,10 +17,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using NUglify.Css;
 using Smidge;
 using Smidge.Cache;
-using Smidge.Nuglify;
 using Smidge.Options;
 using Swashbuckle.AspNetCore.Swagger;
 using VirtoCommerce.Platform.Core.Common;
@@ -197,10 +195,6 @@ namespace VirtoCommerce.Platform.Web
             services.AddMemoryCache();
             //Add Smidge runtime bundling library configuration
             services.AddSmidge(Configuration.GetSection("smidge"), new PhysicalFileProvider(modulesDiscoveryPath));
-            services.AddSmidgeNuglify(/*new NuglifySettings(new NuglifyCodeSettings()
-            {
-                SourceMapType = SourceMapType.Default,
-            }, new CssSettings())*/);
 
             // Register the Swagger generator
             services.AddSwaggerGen(c =>
@@ -307,7 +301,6 @@ namespace VirtoCommerce.Platform.Web
                 app.UseModulesContent(bundles);
             });
 
-            app.UseSmidgeNuglify();
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger(c => c.RouteTemplate = "docs/{documentName}/docs.json");
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.

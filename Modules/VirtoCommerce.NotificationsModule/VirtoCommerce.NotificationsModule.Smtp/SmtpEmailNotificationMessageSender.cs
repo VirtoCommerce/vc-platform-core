@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
@@ -33,8 +34,10 @@ namespace VirtoCommerce.NotificationsModule.Smtp
                 mailMsg.Body = emailNotificationMessage.Body;
                 mailMsg.IsBodyHtml = true;
 
-                //todo Attachments
-                //mailMsg.Attachments.Add(new Attachment());
+                foreach (var attachment in emailNotificationMessage.Attachments)
+                {
+                    mailMsg.Attachments.Add(new Attachment(attachment.FileName, attachment.MimeType));
+                }
 
                 using (var client = CreateClient())
                 {

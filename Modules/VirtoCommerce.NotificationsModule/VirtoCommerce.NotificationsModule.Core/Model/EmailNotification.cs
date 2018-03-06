@@ -34,8 +34,8 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
                 emailMessage.To = To;
                 emailMessage.CC = CC;
                 emailMessage.BCC = BCC;
+                emailMessage.Attachments = Attachments;
             }
-            
 
             return base.ToMessage(message, render);
         }

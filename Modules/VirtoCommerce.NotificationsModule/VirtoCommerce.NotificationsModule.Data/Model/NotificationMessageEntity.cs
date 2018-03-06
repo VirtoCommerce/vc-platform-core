@@ -80,6 +80,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         [StringLength(1600)]
         public string Message { get; set; }
 
+        /// <summary>
+        /// Notification property
+        /// </summary>
         public NotificationEntity Notification { get; set; }
 
         public virtual NotificationMessage ToModel(NotificationMessage message)
@@ -87,8 +90,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             if (message == null) throw new ArgumentNullException(nameof(message));
 
             message.Id = this.Id;
-            message.TenantId = this.TenantId;
-            message.TenantType = this.TenantType;
+            message.Tenant.Id = this.TenantId;
+            message.Tenant.Type = this.TenantType;
             message.NotificationId = this.NotificationId;
             message.NotificationType = this.NotificationType;
             message.SendAttemptCount = this.SendAttemptCount;
@@ -109,8 +112,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             if (message == null) throw new ArgumentNullException(nameof(message));
 
             this.Id = message.Id;
-            this.TenantId = message.TenantId;
-            this.TenantType = message.TenantType;
+            this.TenantId = message.Tenant.Id;
+            this.TenantType = message.Tenant.Type;
             this.NotificationId = message.NotificationId;
             this.NotificationType = message.NotificationType;
             this.SendAttemptCount = message.SendAttemptCount;

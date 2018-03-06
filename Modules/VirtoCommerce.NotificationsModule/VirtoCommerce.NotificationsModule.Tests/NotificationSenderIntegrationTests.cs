@@ -70,6 +70,7 @@ namespace VirtoCommerce.NotificationsModule.Tests
             }
 
             _notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
+            _notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
         }
 
         [Fact]

@@ -1,7 +1,7 @@
 namespace VirtoCommerce.NotificationsModule.Data.Enums
 {
     /// <summary>
-    /// Type of recapient
+    /// Type of recipient
     /// </summary>
     public enum NotificationRecipientType
     {

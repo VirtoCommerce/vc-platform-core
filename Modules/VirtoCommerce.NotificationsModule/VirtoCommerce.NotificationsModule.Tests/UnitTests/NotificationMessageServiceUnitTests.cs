@@ -27,6 +27,21 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _repositoryMock.Setup(ss => ss.UnitOfWork).Returns(_mockUnitOfWork.Object);
             _notificationMessageService = new NotificationMessageService(factory);
+            //todo
+            if (!AbstractTypeFactory<Notification>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotification))))
+            {
+                AbstractTypeFactory<Notification>.RegisterType<EmailNotification>().MapToType<NotificationEntity>();
+            }
+
+            if (!AbstractTypeFactory<NotificationTemplate>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotificationTemplate))))
+            {
+                AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>().MapToType<NotificationTemplateEntity>();
+            }
+
+            if (!AbstractTypeFactory<NotificationMessage>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotificationMessage))))
+            {
+                AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>().MapToType<NotificationMessageEntity>();
+            }
         }
 
         [Fact]
@@ -34,7 +49,6 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         {
             //Arrange
             string id = Guid.NewGuid().ToString();
-            AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>().MapToType<NotificationMessageEntity>();
             var message = new NotificationMessageEntity { Id = id, NotificationType = nameof(EmailNotificationMessage)};
             var messages = new List<NotificationMessageEntity> {message};
             _repositoryMock.Setup(n => n.GetNotificationMessageByIdAsync(new []{ id })).ReturnsAsync(messages.ToArray());
@@ -52,7 +66,6 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         {
             //Arrange
             string id = Guid.NewGuid().ToString();
-            AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>().MapToType<NotificationMessageEntity>();
             var messages = new List<EmailNotificationMessage> { new EmailNotificationMessage() { Id = id } };
             var messageEntity = new NotificationMessageEntity() { Id = id, NotificationType = nameof(EmailNotificationMessage) };
             var messageEntities = new List<NotificationMessageEntity> { messageEntity };

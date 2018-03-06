@@ -1,4 +1,4 @@
-namespace VirtoCommerce.NotificationsModule.Core.Abstractions
+namespace VirtoCommerce.Platform.Core.Common
 {
     /// <summary>
     /// Checks if has language code
