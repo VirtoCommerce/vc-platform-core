@@ -10,12 +10,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Modules\**" />
+    <Compile Remove="wwwroot\App_Data\**" />
     <Compile Remove="wwwroot\Scripts\**" />
     <Content Remove="Modules\**" />
+    <Content Remove="wwwroot\App_Data\**" />
     <Content Remove="wwwroot\Scripts\**" />
     <EmbeddedResource Remove="Modules\**" />
+    <EmbeddedResource Remove="wwwroot\App_Data\**" />
     <EmbeddedResource Remove="wwwroot\Scripts\**" />
     <None Remove="Modules\**" />
+    <None Remove="wwwroot\App_Data\**" />
     <None Remove="wwwroot\Scripts\**" />
   </ItemGroup>
   <ItemGroup>
@@ -47,6 +51,5 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="TagHelpers\" />
-    <Folder Include="wwwroot\App_Data\" />
   </ItemGroup>
 </Project>
