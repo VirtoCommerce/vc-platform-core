@@ -13,7 +13,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Events\" />
     <Folder Include="Modularity\" />
+    <Folder Include="Messages\" />
+    <Folder Include="Specifications\" />
   </ItemGroup>
 
 </Project>
