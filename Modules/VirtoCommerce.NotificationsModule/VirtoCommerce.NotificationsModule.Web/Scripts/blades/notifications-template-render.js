@@ -19,7 +19,7 @@
             blade.notification.context = itemFromLocalStorage;
         } 
         
-        notifications.renderTemplate({},{ text: blade.currentEntity.body, data: blade.notification }, function (data) {
+        notifications.renderTemplate({type: blade.notification.type, language: blade.currentEntity.languageCode},{ text: blade.currentEntity.body, data: blade.notification }, function (data) {
             blade.originHtml = data.html;
         });
 		blade.isLoading = false;

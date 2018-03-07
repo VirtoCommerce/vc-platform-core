@@ -8,7 +8,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Smidge;
+using Smidge.FileProcessors;
 using Smidge.Models;
+using Smidge.Nuglify;
 using Smidge.Options;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
@@ -55,8 +57,13 @@ namespace VirtoCommerce.Platform.Modules.Extensions
 
             //TODO: Test minification and uglification for resulting bundles
             var options = bundles.DefaultBundleOptions;
-            //options.DebugOptions.FileWatchOptions.Enabled = true;
+            options.DebugOptions.FileWatchOptions.Enabled = true;
+            options.DebugOptions.ProcessAsCompositeFile = true;
             options.DebugOptions.CacheControlOptions = new CacheControlOptions() { EnableETag = false, CacheControlMaxAge = 0 };
+            options.ProductionOptions.ProcessAsCompositeFile = true;
+            options.ProductionOptions.FileWatchOptions.Enabled = true;
+            options.ProductionOptions.CacheControlOptions = new CacheControlOptions() { EnableETag = false, CacheControlMaxAge = 0 };
+            bundles.PipelineFactory.OnCreateDefault = (type, pipeline) => pipeline.Replace<JsMinifier, NuglifyJs>(bundles.PipelineFactory);
 
             bundles.Create("vc-modules-styles", cssFiles.ToArray())
                .WithEnvironmentOptions(options);

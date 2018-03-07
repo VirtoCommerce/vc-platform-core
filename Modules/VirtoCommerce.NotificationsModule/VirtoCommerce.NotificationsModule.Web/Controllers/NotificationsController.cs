@@ -60,7 +60,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         }
 
         [HttpPost]
-        [Route("template-render")]
+        [Route("{type}/templates/{language}/rendercontent")]
         [ProducesResponseType(typeof(string), 200)]
         public IActionResult RenderingTemplate([FromBody]NotificationTemplateRequest request)
         {

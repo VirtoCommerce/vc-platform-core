@@ -9,7 +9,7 @@ angular.module('virtoCommerce.notificationsModule')
             getTemplate: { method: 'GET', url: 'api/notifications/:type/:language/templates' },
             createTemplate: { method: 'POST', url: 'api/notifications/:type/templates' },
             updateTemplate: { method: 'PUT', url: 'api/notifications/:type/templates/:id' },
-            renderTemplate: { method: 'POST', url: 'api/notifications/template-render' },
+            renderTemplate: { method: 'POST', url: 'api/notifications/:type/templates/:language/rendercontent' },
             getNotificationJournalList: { method: 'GET', url: 'api/notifications/journal/:objectId/:objectTypeId' },
             getNotificationJournalDetails: { method: 'GET', url: 'api/notifications/journal/:id' }
         })
