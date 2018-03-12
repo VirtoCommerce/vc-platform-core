@@ -13,6 +13,7 @@ using VirtoCommerce.NotificationsModule.Data.Senders;
 using VirtoCommerce.NotificationsModule.Data.Services;
 using VirtoCommerce.NotificationsModule.LiguidRenderer;
 using VirtoCommerce.NotificationsModule.Smtp;
+using VirtoCommerce.NotificationsModule.Tests.Model;
 using VirtoCommerce.NotificationsModule.Tests.NotificationTypes;
 using VirtoCommerce.Platform.Core.Common;
 using Xunit;
@@ -79,11 +80,11 @@ namespace VirtoCommerce.NotificationsModule.Tests
             //Arrange
             string language = "default";
             string number = Guid.NewGuid().ToString();
-            string subject = "Order #{{order.number}}";
-            string body = "You have order #{{order.number}}";
+            string subject = "Order #{{customer_order.number}}";
+            string body = "You have order #{{customer_order.number}}";
             var notification = new OrderSentEmailNotification()
             {
-                Order = new CustomerOrder() { Number = number },
+                CustomerOrder = new CustomerOrder() { Number = number },
                 From = "tasker.for.test@gmail.com",
                 To = "tasker.for.test@gmail.com",
                 Templates = new List<NotificationTemplate>()
@@ -92,7 +93,6 @@ namespace VirtoCommerce.NotificationsModule.Tests
                     {
                         Subject = subject,
                         Body = body,
-                        LanguageCode = language
                     }
                 }
             };
@@ -117,11 +117,11 @@ namespace VirtoCommerce.NotificationsModule.Tests
             //Arrange
             string language = "default";
             string number = Guid.NewGuid().ToString();
-            string subject = "Order #{{order.number}}";
-            string body = "You have order #{{order.number}}";
+            string subject = "Order #{{customer_order.number}}";
+            string body = "You have order #{{customer_order.number}}";
             var notification = new OrderSentEmailNotification()
             {
-                Order = new CustomerOrder() { Number = number },
+                CustomerOrder = new CustomerOrder() { Number = number },
                 From = "tasker.for.test@gmail.com",
                 To = "tasker.for.test@gmail.com",
                 Templates = new List<NotificationTemplate>()
@@ -130,7 +130,6 @@ namespace VirtoCommerce.NotificationsModule.Tests
                     {
                         Subject = subject,
                         Body = body,
-                        LanguageCode = language
                     }
                 }
             };

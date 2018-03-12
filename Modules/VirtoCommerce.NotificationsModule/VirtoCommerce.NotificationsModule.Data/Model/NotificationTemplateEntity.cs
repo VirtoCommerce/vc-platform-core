@@ -5,6 +5,9 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Data.Model
 {
+    /// <summary>
+    /// Entity is template of Notification
+    /// </summary>
     public class NotificationTemplateEntity : AuditableEntity
     {
         /// <summary>

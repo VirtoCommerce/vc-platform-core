@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
@@ -11,6 +12,7 @@ using VirtoCommerce.NotificationsModule.Data.Services;
 using VirtoCommerce.NotificationsModule.Tests.NotificationTypes;
 using VirtoCommerce.Platform.Core.Common;
 using Xunit;
+using Assert = Xunit.Assert;
 
 namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
 {
@@ -63,22 +65,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             Assert.NotNull(result);
             Assert.Equal(type, result.Type);
         }
-
-        [Fact]
-        public async Task GetNotificationByTypeAsync_ReturnNull()
-        {
-            //Arrange
-            string type = nameof(RegistrationEmailNotification);
-            _repositoryMock.Setup(n => n.GetNotificationEntityForListByType(nameof(RegistrationEmailNotification), null, null))
-                .Returns(new NotificationEntity() { IsActive = true, Type = type });
-
-            //Act
-            var result = await _notificationService.GetNotificationByTypeAsync(type, null, null);
-
-            //Assert
-            Assert.Null(result);
-        }
-
+        
         [Fact]
         public async Task GetNotificationsByIdsAsync_ReturnNotifications()
         {

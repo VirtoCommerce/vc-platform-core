@@ -7,6 +7,7 @@ using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Services;
 using VirtoCommerce.NotificationsModule.Tests.NotificationTypes;
+using VirtoCommerce.Platform.Core.Common;
 using Xunit;
 
 namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
@@ -40,19 +41,6 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
 
             //Assert
             Assert.NotEmpty(result.Results);
-        }
-
-        [Fact]
-        public void SearchNotificationsAsync_GetEmptyList()
-        {
-            //Arrange
-            var searchCriteria = new NotificationSearchCriteria();
-
-            //Act
-            var result = _notificationSearchService.SearchNotifications(searchCriteria);
-
-            //Assert
-            Assert.Empty(result.Results);
         }
 
         [Fact]

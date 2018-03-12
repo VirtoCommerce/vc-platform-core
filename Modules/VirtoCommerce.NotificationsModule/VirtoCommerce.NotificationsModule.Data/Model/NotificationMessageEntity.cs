@@ -3,9 +3,11 @@ using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
-
 namespace VirtoCommerce.NotificationsModule.Data.Model
 {
+    /// <summary>
+    /// Entity is message of notification
+    /// </summary>
     public class NotificationMessageEntity : AuditableEntity
     {
         /// <summary>

@@ -9,7 +9,7 @@ using VirtoCommerce.Platform.Core.Common;
 namespace VirtoCommerce.NotificationsModule.Data.Model
 {
     /// <summary>
-    /// Model of 
+    /// Entity is Notification
     /// </summary>
     public class NotificationEntity : AuditableEntity
     {

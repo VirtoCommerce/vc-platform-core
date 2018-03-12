@@ -36,17 +36,20 @@ namespace VirtoCommerce.NotificationsModule.Web.Infrastructure
                     pt = obj["kind"];
                     if (pt != null) notificationType = pt.Value<string>();
                 }
+                
                 if (objectType == typeof(Notification))
                 {
                     retVal = AbstractTypeFactory<Notification>.TryCreateInstance(notificationType);
                 }
-                if (objectType == typeof(NotificationTemplate))
+                else if (objectType == typeof(NotificationTemplate))
                 {
                     retVal = AbstractTypeFactory<NotificationTemplate>.TryCreateInstance(notificationType);
                 }
-                if (retVal == null)
+                else
                 {
-                    throw new NotSupportedException("Unknown type: " + notificationType);
+                    var tryCreateInstance = typeof(AbstractTypeFactory<>).MakeGenericType(objectType).GetMethods()
+                        .FirstOrDefault(x => x.Name.EqualsInvariant("TryCreateInstance") && x.GetParameters().Length == 0);
+                    retVal = tryCreateInstance?.Invoke(null, null);
                 }
             }
             else if (objectType == typeof(NotificationSearchCriteria))

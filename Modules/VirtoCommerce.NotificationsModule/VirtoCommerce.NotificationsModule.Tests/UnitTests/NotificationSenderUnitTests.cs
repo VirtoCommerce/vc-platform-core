@@ -2,21 +2,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Moq;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Data.Model;
-using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Senders;
 using VirtoCommerce.NotificationsModule.LiguidRenderer;
+using VirtoCommerce.NotificationsModule.Tests.Common;
+using VirtoCommerce.NotificationsModule.Tests.Model;
 using VirtoCommerce.NotificationsModule.Tests.NotificationTypes;
 using VirtoCommerce.Platform.Core.Common;
 using Xunit;
 
-namespace VirtoCommerce.NotificationsModule.Tests
+namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
 {
     public class NotificationSenderUnitTests
     {
@@ -59,18 +59,23 @@ namespace VirtoCommerce.NotificationsModule.Tests
         {
             //Arrange
             string language = "default";
-            string subject = "Order #{{order.id}}";
-            string body = "You have order #{{order.id}}";
+            string subject = "Your order was sent";
+            string body = "Your order <strong>{{ customer_order.number}}</strong> was sent.<br> Number of sent parcels - " +
+                          "<strong>{{ customer_order.shipments | size}}</strong>.<br> Parcels tracking numbers:<br> {% for shipment in customer_order.shipments %} " +
+                          "<br><strong>{{ shipment.number}}</strong> {% endfor %}<br><br>Sent date - <strong>{{ customer_order.modified_date }}</strong>.";
             var notification = new OrderSentEmailNotification()
             {
-                Order = new CustomerOrder() { Id = "123"},
+                CustomerOrder = new CustomerOrder() {
+                    Number = "123"
+                    , Shipments = new []{ new Shipment(){Number = "some_number"} }
+                    , ModifiedDate = DateTime.Now
+                },
                 Templates = new List<NotificationTemplate>()
                 {
                     new EmailNotificationTemplate()
                     {
                         Subject = subject,
                         Body = body,
-                        LanguageCode = language
                     }
                 }
             };
@@ -99,18 +104,30 @@ namespace VirtoCommerce.NotificationsModule.Tests
         {
             //Arrange
             string language = "default";
-            string subject = "Invoice for order - {{ order.number }} {{ order.created_date }}";
-            string body = "total: {{ order.shipping_total | math.format 'C' }}";
+            string subject = "Invoice for order - <strong>{{ customer_order.number }}</strong>";
+            string body = TestUtility.GetStringByPath($"Content\\{nameof(InvoiceEmailNotification)}.html");
             var notification = new InvoiceEmailNotification()
             {
-                Order = new CustomerOrder() { Id = "adsffads", Number = "123", ShippingTotal = 123456.789m, CreatedDate = DateTime.Now },
+                CustomerOrder = new CustomerOrder()
+                {
+                    Id = "adsffads", Number = "123", ShippingTotal = 123456.789m, CreatedDate = DateTime.Now, Status = "Paid",
+                    Total = 123456.789m, FeeTotal = 123456.789m, SubTotal = 123456.789m, TaxTotal = 123456.789m,
+                    Currency = "USD",
+                    Items = new []{ new LineItem
+                    {
+                        Name = "some",
+                        Sku = "sku",
+                        PlacedPrice = 12345.6789m,
+                        Quantity = 1,
+                        ExtendedPrice = 12345.6789m,
+                    } }
+                },
                 Templates = new List<NotificationTemplate>()
                 {
                     new EmailNotificationTemplate()
                     {
                         Subject = subject,
                         Body = body,
-                        LanguageCode = language
                     }
                 }
             };
@@ -135,6 +152,91 @@ namespace VirtoCommerce.NotificationsModule.Tests
         }
 
         [Fact]
+        public async Task RegistrationEmailNotification_SentNotification()
+        {
+            //Arrange
+            string language = "default";
+            string subject = "Your login - {{ login }}.";
+            string body = "Thank you for registration {{ firstname }} {{ lastname }}!!!";
+            var notification = new RegistrationEmailNotification()
+            {
+                FirstName = "First Name",
+                LastName = "Last Name",
+                Login = "Test login",
+                Templates = new List<NotificationTemplate>()
+                {
+                    new EmailNotificationTemplate()
+                    {
+                        Subject = subject,
+                        Body = body,
+                    }
+                }
+            };
+            var date = new DateTime(2018, 02, 20, 10, 00, 00);
+            var message = new EmailNotificationMessage()
+            {
+                Id = "1",
+                From = "from@from.com",
+                To = "to@to.com",
+                Subject = subject,
+                Body = body,
+                SendDate = date
+            };
+            _serviceMock.Setup(serv => serv.GetNotificationByTypeAsync(nameof(RegistrationEmailNotification), null, null)).ReturnsAsync(notification);
+            _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
+
+            //Act
+            var result = await _sender.SendNotificationAsync(notification, language);
+
+            //Assert
+            Assert.True(result.IsSuccess);
+        }
+
+        [Fact]
+        public async Task OrderPaidEmailNotification_SentNotification()
+        {
+            //Arrange
+            string language = "default";
+            string subject = "Your order was fully paid";
+            string body = "Thank you for paying <strong>{{ customer_order.number }}</strong> order.<br> " +
+                          "You had paid <strong>{{ customer_order.total | math.format 'N'}} {{ customer_order.currency }}</strong>.<br>" +
+                          " Paid date - <strong>{{ customer_order.modified_date }}</strong>.";
+            var notification = new OrderPaidEmailNotification()
+            {
+                CustomerOrder = new CustomerOrder()
+                {
+                    Number = "123", Total = 1234.56m, Currency = "USD", ModifiedDate = DateTime.Now
+                },
+                Templates = new List<NotificationTemplate>()
+                {
+                    new EmailNotificationTemplate()
+                    {
+                        Subject = subject,
+                        Body = body,
+                    }
+                }
+            };
+            var date = new DateTime(2018, 02, 20, 10, 00, 00);
+            var message = new EmailNotificationMessage()
+            {
+                Id = "1",
+                From = "from@from.com",
+                To = "to@to.com",
+                Subject = subject,
+                Body = body,
+                SendDate = date
+            };
+            _serviceMock.Setup(serv => serv.GetNotificationByTypeAsync(nameof(OrderPaidEmailNotification), null, null)).ReturnsAsync(notification);
+            _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
+
+            //Act
+            var result = await _sender.SendNotificationAsync(notification, language);
+
+            //Assert
+            Assert.True(result.IsSuccess);
+        }
+
+        [Fact]
         public async Task EmailNotification_SuccessSend()
         {
             //Arrange
@@ -149,7 +251,6 @@ namespace VirtoCommerce.NotificationsModule.Tests
                     {
                         Subject = subject,
                         Body = body,
-                        LanguageCode = language
                     }
                 }
             };
@@ -189,7 +290,6 @@ namespace VirtoCommerce.NotificationsModule.Tests
                     {
                         Subject = subject,
                         Body = body,
-                        LanguageCode = language
                     }
                 }
             };
@@ -229,7 +329,6 @@ namespace VirtoCommerce.NotificationsModule.Tests
                     {
                         Subject = subject,
                         Body = body,
-                        LanguageCode = language
                     }
                 }
             };

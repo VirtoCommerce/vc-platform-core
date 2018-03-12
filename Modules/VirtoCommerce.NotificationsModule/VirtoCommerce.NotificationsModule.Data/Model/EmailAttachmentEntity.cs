@@ -5,6 +5,9 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Data.Model
 {
+    /// <summary>
+    /// Entity is attachment of email
+    /// </summary>
     public class EmailAttachmentEntity : AuditableEntity
     {
         /// <summary>

@@ -1,0 +1,78 @@
+<html>
+<head>
+</head>
+<body style="font-family: Arial, Helvetica, sans-serif;">
+    <div style="border: 1px solid #E0DCDA;">
+        <div style="background-color: #E0DCDA; margin: 2px; padding: 10px;">
+            <span style="width: 400px;">Invoice Details {{ customer_order.number }}</span>
+            <span style="width: 400px;">Status: {{ customer_order.status }}</span>
+        </div>
+        <img src="http://www.startupguys.net/wp-content/uploads/2016/03/virto-commerce-logo.png" width="150" />
+        <div style="font-size: 12px; padding: 10px;">
+            <div style="display: inline-block;">
+                <span style="width: 150px;"><strong>Order Date</strong></span>
+                <span style="width: 150px;"><strong>Order Number</strong></span>
+            </div>
+            <div>
+                <span style="width: 150px;">{{ customer_order.created_date }}</span>
+                <span style="width: 150px;">{{ customer_order.number }}</span>
+            </div>
+        </div>
+        <div style="padding: 10px;">
+            <p><strong>Details:</strong></p>
+        </div>
+        <div style="background-color: #E0DCDA; margin: 2px; padding: 10px;">
+            <span style="text-align: center; width: 30px;"><strong>#</strong></span>
+            <span style="width: 200px;"><strong>Item Description</strong></span>
+            <span style="width: 100px;"><strong>Unit Price</strong></span>
+            <span style="width: 100px;"><strong>Invoice Qty</strong></span>
+            <span style="width: 100px;"><strong>Line Price</strong></span>
+        </div>
+        <table style="font-size: 12px;">
+            {% for line_item in customer_order.items %}
+            <tr>
+                <td style="text-align: center; vertical-align: top; width: 30px;"><p>{{ forloop.index }}</p></td>
+                <td style="vertical-align: top; width: 200px;"><p>{{ line_item.name }}</p><p style="color: #999; font-size: 11px;">SKU: {{ line_item.sku }}</p></td>
+                <td style="text-align: center; vertical-align: top; width: 100px;"><p>${{ line_item.placed_price | math.format 'N' }}</p></td>
+                <td style="text-align: center; vertical-align: top; width: 100px;"><p>{{ line_item.quantity }}</p></td>
+                <td style="text-align: center; vertical-align: top; width: 100px;"><p>${{ line_item.extended_price | math.format 'N' }}</p></td>
+            </tr>
+            {% endfor %}
+        </table>
+        <div style="background-color: #F9F9F9; font-size: 12px; margin: 2px; padding: 10px;">
+            <div>
+                <span style="width: 300px;"></span>
+                <span style="width: 100px;">Shipping:</span>
+                <span style="width: 100px;">${{ customer_order.shipping_total | math.format 'N' }}</span>
+            </div>
+            <div>
+                <span style="width: 300px;"></span>
+                <span style="width: 100px;">Total Fees:</span>
+                <span style="width: 100px;">${{ customer_order.fee_total | math.format 'N' }}</span>
+            </div>
+            <br />
+            <div>
+                <span style="width: 300px;"></span>
+                <span style="width: 100px;">Order Subtotal:</span>
+                <span style="width: 100px;">${{ customer_order.sub_total | math.format 'N' }}</span>
+            </div>
+            <div>
+                <span style="width: 300px;"></span>
+                <span style="width: 100px;">GST:</span>
+                <span style="width: 100px;">${{ customer_order.tax_total | math.format 'N' }}</span>
+            </div>
+            <br />
+            <div>
+                <span style="width: 300px;"></span>
+                <span style="font-size: 14px; width: 100px;"><strong>Total:</strong></span>
+                <span style="font-size: 14px; width: 100px;"><strong>${{ customer_order.total | math.format 'N' }}</strong></span>
+            </div>
+            <div>
+                <span style="width: 300px;"></span>
+                <span style="width: 100px;">Currency:</span>
+                <span style="width: 100px;">{{ customer_order.currency }}</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
