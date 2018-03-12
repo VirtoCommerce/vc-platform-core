@@ -1,8 +1,7 @@
-﻿using System;
-using VirtoCommerce.Domain.Commerce.Model;
+using System;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.Domain.Catalog.Model
+namespace VirtoCommerce.CatalogModule.Core.Model
 {
     /// <summary>
     /// Represents property validation rules definition

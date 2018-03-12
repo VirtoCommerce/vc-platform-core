@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using VirtoCommerce.Domain.Catalog.Model;
+using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
-using coreModel = VirtoCommerce.Domain.Catalog.Model;
+using coreModel = VirtoCommerce.CatalogModule.Core.Model;
 using dataModel = VirtoCommerce.CatalogModule.Data.Model;
 
 namespace VirtoCommerce.CatalogModule.Data.Repositories
@@ -52,7 +52,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
             return retVal;
         }
 
-        public dataModel.CategoryEntity[] GetCategoriesByIds(string[] categoriesIds, coreModel.CategoryResponseGroup respGroup)
+        public dataModel.CategoryEntity[] GetCategoriesByIds(string[] categoriesIds, string respGroup = null)
         {
             if (categoriesIds == null)
             {
@@ -63,27 +63,28 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
             {
                 return new dataModel.CategoryEntity[] { };
             }
+            var categoryRespGroup = EnumUtility.SafeParse(respGroup, coreModel.CategoryResponseGroup.Full);
 
-            if (respGroup.HasFlag(coreModel.CategoryResponseGroup.WithOutlines))
+            if (categoryRespGroup.HasFlag(coreModel.CategoryResponseGroup.WithOutlines))
             {
-                respGroup |= coreModel.CategoryResponseGroup.WithLinks | coreModel.CategoryResponseGroup.WithParents;
+                categoryRespGroup |= coreModel.CategoryResponseGroup.WithLinks | coreModel.CategoryResponseGroup.WithParents;
             }
 
             var result = Categories.Where(x => categoriesIds.Contains(x.Id)).ToArray();
 
-            if (respGroup.HasFlag(coreModel.CategoryResponseGroup.WithLinks))
+            if (categoryRespGroup.HasFlag(coreModel.CategoryResponseGroup.WithLinks))
             {
                 var incommingLinks = CategoryLinks.Where(x => categoriesIds.Contains(x.TargetCategoryId)).ToArray();
                 var outgoingLinks = CategoryLinks.Where(x => categoriesIds.Contains(x.SourceCategoryId)).ToArray();
             }
 
-            if (respGroup.HasFlag(coreModel.CategoryResponseGroup.WithImages))
+            if (categoryRespGroup.HasFlag(coreModel.CategoryResponseGroup.WithImages))
             {
                 var images = Images.Where(x => categoriesIds.Contains(x.CategoryId)).ToArray();
             }
 
             //Load all properties meta information and information for inheritance
-            if (respGroup.HasFlag(coreModel.CategoryResponseGroup.WithProperties))
+            if (categoryRespGroup.HasFlag(coreModel.CategoryResponseGroup.WithProperties))
             {
                 //Load category property values by separate query
                 var propertyValues = PropertyValues.Where(x => categoriesIds.Contains(x.CategoryId)).ToArray();
@@ -165,7 +166,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
                 var assosiatedItems = GetItemByIds(assosiatedProductIds, coreModel.ItemResponseGroup.ItemInfo | coreModel.ItemResponseGroup.ItemAssets);
 
                 var assosiatedCategoryIdsIds = assosiations.Where(x => x.AssociatedCategoryId != null).Select(x => x.AssociatedCategoryId).Distinct().ToArray();
-                var associatedCategories = GetCategoriesByIds(assosiatedCategoryIdsIds, coreModel.CategoryResponseGroup.Info);
+                var associatedCategories = GetCategoriesByIds(assosiatedCategoryIdsIds, coreModel.CategoryResponseGroup.Info.ToString());
             }
 
             if (respGroup.HasFlag(coreModel.ItemResponseGroup.ReferencedAssociations))

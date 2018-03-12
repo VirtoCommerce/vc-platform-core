@@ -1,7 +1,7 @@
-﻿using VirtoCommerce.Domain.Catalog.Model;
-namespace VirtoCommerce.Domain.Catalog.Services
+using VirtoCommerce.CatalogModule.Core.Model;
+namespace VirtoCommerce.CatalogModule.Core.Services
 {
-	public interface IPropertyService
+    public interface IPropertyService
 	{
 
 		Property GetById(string propertyId);

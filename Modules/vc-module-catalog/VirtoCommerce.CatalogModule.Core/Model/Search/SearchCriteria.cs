@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.Domain.Catalog.Model
+namespace VirtoCommerce.CatalogModule.Core.Model
 {
     public class SearchCriteria
     {

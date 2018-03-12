@@ -1,6 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using VirtoCommerce.Domain.Catalog.Model;
+using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
@@ -46,7 +46,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             image.LanguageCode = LanguageCode;         
             image.Name = Name;
             image.SortOrder = SortOrder;
-            image.Url = Url;
+            image.RelativeUrl = Url;
 
             return image;
         }
@@ -68,7 +68,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             LanguageCode = image.LanguageCode;
             Name = image.Name;
             SortOrder = image.SortOrder;
-            Url = image.Url;
+            Url = image.RelativeUrl;
 
             return this;
         }

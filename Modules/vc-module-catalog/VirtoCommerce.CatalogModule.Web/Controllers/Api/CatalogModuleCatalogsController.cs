@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Security;
-using VirtoCommerce.Domain.Catalog.Model;
-using VirtoCommerce.Domain.Catalog.Services;
+using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
@@ -126,7 +125,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("")]
         [ProducesResponseType(typeof(Catalog), 200)]
         [Authorize(SecurityConstants.Permissions.Create)]
-        public ActionResult Create(Catalog catalog)
+        public ActionResult Create([FromBody] Catalog catalog)
         {
             _catalogService.SaveChanges(new [] { catalog });
             //TODO:
@@ -142,7 +141,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [HttpPut]
         [Route("")]
         [ProducesResponseType(typeof(void), 200)]
-        public ActionResult Update(Catalog catalog)
+        public ActionResult Update([FromBody] Catalog catalog)
         {
             _catalogService.SaveChanges(new[] { catalog });
             //TODO:

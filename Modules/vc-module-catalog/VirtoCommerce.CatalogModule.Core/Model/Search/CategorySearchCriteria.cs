@@ -1,6 +1,6 @@
-﻿using VirtoCommerce.Domain.Search;
+using VirtoCommerce.Domain.Search;
 
-namespace VirtoCommerce.Domain.Catalog.Model.Search
+namespace VirtoCommerce.CatalogModule.Core.Model
 {
     public class CategorySearchCriteria : CatalogSearchCriteriaBase
     {

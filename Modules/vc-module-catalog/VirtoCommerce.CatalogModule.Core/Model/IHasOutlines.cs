@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
-namespace VirtoCommerce.Domain.Catalog.Model
+namespace VirtoCommerce.CatalogModule.Core.Model
 {
     public interface IHasOutlines
     {
-        ICollection<Outline> Outlines { get; set; }
+        IList<Outline> Outlines { get; set; }
     }
 }

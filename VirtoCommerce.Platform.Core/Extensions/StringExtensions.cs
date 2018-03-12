@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
@@ -23,13 +23,13 @@ namespace VirtoCommerce.Platform.Core.Common
             return retVal;
         }
 
-        public static Decimal TryParse(this string u, Decimal defaultValue)
+        public static decimal TryParse(this string u, Decimal defaultValue)
 		{
 			var retVal = defaultValue;
 
 			if (!string.IsNullOrEmpty(u))
 			{
-				Decimal.TryParse(u, NumberStyles.Any, CultureInfo.InvariantCulture, out retVal);
+                decimal.TryParse(u, NumberStyles.Any, CultureInfo.InvariantCulture, out retVal);
 			}
 
 			return retVal;
@@ -42,7 +42,7 @@ namespace VirtoCommerce.Platform.Core.Common
 
 			if (!string.IsNullOrEmpty(u))
 			{
-				Boolean.TryParse(u, out retVal);
+                bool.TryParse(u, out retVal);
 			}
 
 			return retVal;
@@ -97,7 +97,7 @@ namespace VirtoCommerce.Platform.Core.Common
 		/// <returns></returns>
 		public static bool EqualsOrNullEmpty(this string str1, string str2, StringComparison comparisonType)
 		{
-			return String.Compare(str1 ?? "", str2 ?? "", comparisonType) == 0;
+			return string.Compare(str1 ?? "", str2 ?? "", comparisonType) == 0;
 		}
 
         /// <summary>

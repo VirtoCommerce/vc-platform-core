@@ -1,6 +1,6 @@
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.Domain.Catalog.Model.Search
+namespace VirtoCommerce.CatalogModule.Core.Model
 {
     public class ProductAssociationSearchCriteria : SearchCriteriaBase
     {

@@ -1,13 +1,9 @@
-﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace VirtoCommerce.Domain.Catalog.Model
+namespace VirtoCommerce.CatalogModule.Core.Model
 {
     public interface IHasImages
     {
-        ICollection<Image> Images { get; set; }
+        IList<Image> Images { get; }
     }
 }

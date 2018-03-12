@@ -1,56 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using VirtoCommerce.Domain.Commerce.Model;
 using VirtoCommerce.Platform.Core.Common;
-using System.Linq;
 
-namespace VirtoCommerce.Domain.Catalog.Model
+namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class Image : AuditableEntity, ISeoSupport, IHasLanguage, ICloneable, IInheritable
-    {
-        public string Name { get; set; }
-        public string Url { get; set; }
-        public string Group { get; set; }
+    public class Image : AssetBase
+    {       
         public int SortOrder { get; set; }
-
         public byte[] BinaryData { get; set; }
 
-        #region IInheritable Members
-        public bool IsInherited { get; set; }
-        #endregion
-
-
-        #region ISeoSupport Members
-        public string SeoObjectType { get { return GetType().Name; } }
-        public ICollection<SeoInfo> SeoInfos { get; set; }
-        #endregion
-
-        #region ILanguageSupport Members
-        public string LanguageCode { get; set; }
-        #endregion
-
-        #region ICloneable members
-        public object Clone()
+        public override void TryInheritFrom(IEntity parent)
         {
-            var retVal = new Image();
-            retVal.Id = Id;
-            retVal.CreatedBy = CreatedBy;
-            retVal.CreatedDate = CreatedDate;
-            retVal.ModifiedBy = ModifiedBy;
-            retVal.ModifiedDate = ModifiedDate;
-
-            retVal.Name = Name;
-            retVal.Url = Url;
-            retVal.Group = Group;
-            retVal.SortOrder = SortOrder;
-            retVal.LanguageCode = LanguageCode;
-            retVal.IsInherited = IsInherited;
-            if (SeoInfos != null)
+            if (parent is Image parentImage)
             {
-                retVal.SeoInfos = SeoInfos.Select(x => x.Clone()).OfType<SeoInfo>().ToList();
+                SortOrder = parentImage.SortOrder;
             }
-            return retVal;
+            base.TryInheritFrom(parent);
         }
-        #endregion
     }
 }

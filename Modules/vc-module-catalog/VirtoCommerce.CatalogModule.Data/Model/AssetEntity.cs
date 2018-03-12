@@ -1,6 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using VirtoCommerce.Domain.Catalog.Model;
+using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
@@ -44,7 +44,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             asset.LanguageCode = LanguageCode;
             asset.Name = Name;
             asset.MimeType = MimeType;
-            asset.Url = Url;
+            asset.RelativeUrl = Url;
             asset.Size = Size;
 
             return asset;
@@ -66,7 +66,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             LanguageCode = asset.LanguageCode;
             Name = asset.Name;
             MimeType = asset.MimeType;
-            Url = asset.Url;
+            Url = asset.RelativeUrl;
             Size = asset.Size;
 
             return this;

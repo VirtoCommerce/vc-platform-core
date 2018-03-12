@@ -1,10 +1,11 @@
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Domain.Catalog.Model;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
@@ -99,9 +100,22 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
             category.Links = OutgoingLinks.Select(x => x.ToModel(new CategoryLink())).ToList();
             category.Images = Images.OrderBy(x => x.SortOrder).Select(x => x.ToModel(AbstractTypeFactory<Image>.TryCreateInstance())).ToList();
-            category.PropertyValues = CategoryPropertyValues.Select(x => x.ToModel(AbstractTypeFactory<PropertyValue>.TryCreateInstance())).ToList();
             category.Properties = Properties.Select(x => x.ToModel(AbstractTypeFactory<Property>.TryCreateInstance())).ToList();
-          
+            foreach (var propValueEntities in CategoryPropertyValues.GroupBy(x => x.Name))
+            {
+                var propValues = propValueEntities.OrderBy(x => x.Id).Select(x => x.ToModel(AbstractTypeFactory<PropertyValue>.TryCreateInstance())).ToList();
+                var property = category.Properties.Where(x => x.Type == PropertyType.Category)
+                                                              .FirstOrDefault(x => x.IsSuitableForValue(propValues.First()));
+                if(property == null)
+                {
+                    //Need add transient  property (without meta information) for each values group with the same property name
+                    property = AbstractTypeFactory<Property>.TryCreateInstance();
+                    property.Name = propValueEntities.Key;
+                    property.Type = PropertyType.Category;                    
+                    category.Properties.Add(property);
+                }
+                property.Values = propValues;
+            }
             return category;
         }
 
@@ -129,10 +143,10 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             StartDate = DateTime.UtcNow;
             IsActive = category.IsActive ?? true;
 
-            if (category.PropertyValues != null)
+            if (category.Properties != null)
             {
                 CategoryPropertyValues = new ObservableCollection<PropertyValueEntity>();
-                foreach (var propertyValue in category.PropertyValues)
+                foreach (var propertyValue in category.Properties.SelectMany(x => x.Values))
                 {
                     if (!propertyValue.IsInherited && propertyValue.Value != null && !string.IsNullOrEmpty(propertyValue.Value.ToString()))
                     {

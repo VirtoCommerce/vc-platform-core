@@ -1,7 +1,7 @@
 using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
 using dataModel = VirtoCommerce.CatalogModule.Data.Model;
-using moduleModel = VirtoCommerce.Domain.Catalog.Model;
+using moduleModel = VirtoCommerce.CatalogModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Data.Repositories
 {
@@ -22,7 +22,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
 
         string[] GetAllChildrenCategoriesIds(string[] categoryIds);
         dataModel.CatalogEntity[] GetCatalogsByIds(string[] catalogIds);
-        dataModel.CategoryEntity[] GetCategoriesByIds(string[] categoryIds, moduleModel.CategoryResponseGroup respGroup);
+        dataModel.CategoryEntity[] GetCategoriesByIds(string[] categoryIds, string respGroup = null);
         dataModel.ItemEntity[] GetItemByIds(string[] itemIds, moduleModel.ItemResponseGroup respGroup);
         dataModel.PropertyEntity[] GetAllCatalogProperties(string catalogId);
         dataModel.PropertyEntity[] GetPropertiesByIds(string[] propIds);

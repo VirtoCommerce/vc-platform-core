@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace VirtoCommerce.Domain.Catalog.Services
+namespace VirtoCommerce.CatalogModule.Core.Services
 {
-	/// <summary>
-	/// XXX(leter)-XXXXXXXX(number).
-	/// </summary>
-	public class DefaultSkuGenerator : ISkuGenerator
+    /// <summary>
+    /// XXX(leter)-XXXXXXXX(number).
+    /// </summary>
+    public class DefaultSkuGenerator : ISkuGenerator
 	{
         private static readonly Random _random = new Random();
         private static readonly object _lockObject = new object();

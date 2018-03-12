@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using VirtoCommerce.Domain.Catalog.Model;
+using VirtoCommerce.CatalogModule.Core.Model;
 
-namespace VirtoCommerce.Domain.Catalog.Services
+namespace VirtoCommerce.CatalogModule.Core.Services
 {
-	public interface ISkuGenerator
+    public interface ISkuGenerator
 	{
 		string GenerateSku(CatalogProduct product);
 	}

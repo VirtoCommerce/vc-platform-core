@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using VirtoCommerce.Domain.Catalog.Model;
+using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
@@ -173,9 +172,17 @@ namespace VirtoCommerce.CatalogModule.Data.Model
                 product.ReferencedAssociations = ReferencedAssociations.Select(x => x.ToReferencedAssociationModel(AbstractTypeFactory<ProductAssociation>.TryCreateInstance())).OrderBy(x => x.Priority).ToList();
             }
 
-            //Self item property values
-            product.PropertyValues = ItemPropertyValues.OrderBy(x => x.Name).Select(x => x.ToModel(AbstractTypeFactory<PropertyValue>.TryCreateInstance())).ToList();
-
+            product.Properties = new List<Property>();
+            foreach (var propValues in ItemPropertyValues.GroupBy(x => x.Name))
+            {   
+                //Need add property (without meta information) for each values group with the same property name
+                var property = AbstractTypeFactory<Property>.TryCreateInstance();
+                property.Name = propValues.Key;
+                property.Type = PropertyType.Product;
+                property.Values = propValues.OrderBy(x => x.Id).Select(x => x.ToModel(AbstractTypeFactory<PropertyValue>.TryCreateInstance())).ToList();
+                product.Properties.Add(property);
+            }
+          
             if (Parent != null)
             {
                 product.MainProduct = Parent.ToModel(AbstractTypeFactory<CatalogProduct>.TryCreateInstance(), false, convertAssociations);
@@ -184,10 +191,10 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             if (convertChildrens)
             {
                 // Variations
-                product.Variations = new List<CatalogProduct>();
+                product.Variations = new List<Variation>();
                 foreach (var variation in Childrens)
                 {
-                    var productVariation = variation.ToModel(AbstractTypeFactory<CatalogProduct>.TryCreateInstance());
+                    var productVariation = variation.ToModel(AbstractTypeFactory<Variation>.TryCreateInstance()) as Variation;
                     productVariation.MainProduct = product;
                     productVariation.MainProductId = product.Id;
                     product.Variations.Add(productVariation);
@@ -244,16 +251,16 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
             //Constant fields
             //Only for main product
-            AvailabilityRule = (int)VirtoCommerce.Domain.Catalog.Model.AvailabilityRule.Always;
+            AvailabilityRule = (int)Core.Model.AvailabilityRule.Always;
 
             CatalogId = product.CatalogId;
             CategoryId = string.IsNullOrEmpty(product.CategoryId) ? null : product.CategoryId;
 
             #region ItemPropertyValues
-            if (product.PropertyValues != null)
+            if (product.Properties != null)
             {
                 ItemPropertyValues = new ObservableCollection<PropertyValueEntity>();
-                foreach (var propertyValue in product.PropertyValues)
+                foreach (var propertyValue in product.Properties.SelectMany(x => x.Values))
                 {
                     if (!propertyValue.IsInherited && propertyValue.Value != null && !string.IsNullOrEmpty(propertyValue.Value.ToString()))
                     {

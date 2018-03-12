@@ -17,6 +17,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using Smidge;
 using Swashbuckle.AspNetCore.Swagger;
+using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Jobs;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -205,7 +206,31 @@ namespace VirtoCommerce.Platform.Web
 
             services.AddPlatformServices(Configuration);
             services.AddSecurityServices();
-            
+
+            var assetConnectionString = BlobConnectionString.Parse(Configuration.GetConnectionString("AssetsConnectionString"));
+            //TODO: Azure blob storage
+            if (assetConnectionString.Provider.EqualsInvariant("AzureBlobStorage"))
+            {
+                //var azureBlobOptions = new AzureBlobContentOptions();
+                //Configuration.GetSection("VirtoCommerce:AzureBlobStorage").Bind(azureBlobOptions);
+
+                //services.AddAzureBlobContent(options =>
+                //{
+                //    options.Container = contentConnectionString.RootPath;
+                //    options.ConnectionString = contentConnectionString.ConnectionString;
+                //    options.PollForChanges = azureBlobOptions.PollForChanges;
+                //    options.ChangesPoolingInterval = azureBlobOptions.ChangesPoolingInterval;
+                //});
+            }
+            else
+            {
+                services.AddFileSystemBlobProvider(options =>
+                {
+                    options.StoragePath = HostingEnvironment.MapPath(assetConnectionString.RootPath);
+                    options.BasePublicUrl = assetConnectionString.PublicUrl;
+                });
+            }
+
             var hangfireOptions = new HangfireOptions();
             Configuration.GetSection("VirtoCommerce:Hangfire").Bind(hangfireOptions);
             if (hangfireOptions.JobStorageType == HangfireJobStorageType.SqlServer)

@@ -1,14 +1,9 @@
-﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace VirtoCommerce.Domain.Catalog.Model
+namespace VirtoCommerce.CatalogModule.Core.Model
 {
     public interface IHasProperties
     {
-        ICollection<Property> Properties { get; set; }
-        ICollection<PropertyValue> PropertyValues { get; set; }
+        IList<Property> Properties { get; set; }
     }
 }

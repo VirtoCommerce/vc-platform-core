@@ -5,7 +5,7 @@ using VirtoCommerce.Domain.Commerce.Model.Search;
 using VirtoCommerce.Domain.Search;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.Domain.Catalog.Model.Search
+namespace VirtoCommerce.CatalogModule.Core.Model
 {
     public class ProductSearchCriteria : CatalogSearchCriteriaBase
     {

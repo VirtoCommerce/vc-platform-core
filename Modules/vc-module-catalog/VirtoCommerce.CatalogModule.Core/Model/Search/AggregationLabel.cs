@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace VirtoCommerce.Domain.Catalog.Model
+namespace VirtoCommerce.CatalogModule.Core.Model
 {
     public class AggregationLabel
     {

@@ -1,9 +1,7 @@
-using VirtoCommerce.Domain.Catalog.Model;
-using VirtoCommerce.Domain.Catalog.Model.Search;
-using VirtoCommerce.Domain.Commerce.Model.Search;
+using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.Domain.Catalog.Services
+namespace VirtoCommerce.CatalogModule.Core.Services
 {
     public interface IProductAssociationSearchService
     {

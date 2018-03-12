@@ -1,4 +1,4 @@
-namespace VirtoCommerce.Domain.Catalog.Services
+namespace VirtoCommerce.CatalogModule.Core.Services
 {
     public interface ICatalogService
 	{

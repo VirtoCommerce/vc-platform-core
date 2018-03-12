@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using FluentValidation;
 using FluentValidation.Results;
-using VirtoCommerce.Domain.Catalog.Model;
-using PropertyValidationRule = VirtoCommerce.Domain.Catalog.Model.PropertyValidationRule;
+using VirtoCommerce.CatalogModule.Core.Model;
+using PropertyValidationRule = VirtoCommerce.CatalogModule.Core.Model.PropertyValidationRule;
 
 namespace VirtoCommerce.CatalogModule.Data.Validation
 {
@@ -23,24 +23,19 @@ namespace VirtoCommerce.CatalogModule.Data.Validation
         public override ValidationResult Validate(ValidationContext<IHasProperties> context)
         {
             var validationResults = new List<ValidationResult>();
-            var propertyValues = context.InstanceToValidate.PropertyValues;
-            if (propertyValues != null)
+
+            foreach (var property in context.InstanceToValidate?.Properties ?? Enumerable.Empty<Property>())
             {
-                foreach (var propertyValue in propertyValues)
+                foreach (var rule in property?.ValidationRules ?? Enumerable.Empty<PropertyValidationRule>())
                 {
-                    var rules = propertyValue?.Property?.ValidationRules;
-                    if (rules != null)
+                    var ruleValidator = _propertyValidatorFactory(rule);
+                    foreach (var value in property?.Values ?? Enumerable.Empty<PropertyValue>())
                     {
-                        foreach (var rule in rules)
-                        {
-                            var ruleValidator = _propertyValidatorFactory(rule);
-                            var validationResult = ruleValidator.Validate(propertyValue);
-                            validationResults.Add(validationResult);
-                        }
+                        var validationResult = ruleValidator.Validate(value);
+                        validationResults.Add(validationResult);
                     }
                 }
             }
-
             var errors = validationResults.SelectMany(x => x.Errors);
             return new ValidationResult(errors);
         }

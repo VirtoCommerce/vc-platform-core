@@ -1,15 +1,11 @@
-﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Domain.Commerce.Model
 {
-    public interface ISeoSupport
+    public interface ISeoSupport : IEntity
     {
-        string Id { get; }
         string SeoObjectType { get; }
-        ICollection<SeoInfo> SeoInfos { get; set; }
+        IList<SeoInfo> SeoInfos { get; set; }
     }
 }

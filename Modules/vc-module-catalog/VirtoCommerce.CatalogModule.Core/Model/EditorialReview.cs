@@ -1,8 +1,10 @@
-﻿
+
 using System;
 using VirtoCommerce.Domain.Commerce.Model;
 using VirtoCommerce.Platform.Core.Common;
-namespace VirtoCommerce.Domain.Catalog.Model
+using VirtoCommerce.Platform.Core.Domain;
+
+namespace VirtoCommerce.CatalogModule.Core.Model
 {
 	public class EditorialReview : AuditableEntity, IHasLanguage, ICloneable, IInheritable
 	{
@@ -14,24 +16,24 @@ namespace VirtoCommerce.Domain.Catalog.Model
         #endregion
 
         #region IInheritable Members
-        public bool IsInherited { get; set; }
+        public bool IsInherited { get; private set; }
+        public virtual void TryInheritFrom(IEntity parent)
+        {
+            if (parent is EditorialReview parentReview)
+            {
+                Id = null;
+                IsInherited = true;
+                LanguageCode = parentReview.LanguageCode;
+                Content = parentReview.Content;
+                ReviewType = parentReview.ReviewType;
+            }
+        }
         #endregion
 
         #region ICloneable members
         public object Clone()
         {
-            var retVal = new EditorialReview();
-            retVal.Id = Id;
-            retVal.CreatedBy = CreatedBy;
-            retVal.CreatedDate = CreatedDate;
-            retVal.ModifiedBy = ModifiedBy;
-            retVal.ModifiedDate = ModifiedDate;
-
-            retVal.Content = Content;
-            retVal.ReviewType = ReviewType;
-            retVal.LanguageCode = LanguageCode;
-            retVal.IsInherited = IsInherited;
-            return retVal;
+            return MemberwiseClone();
         }
         #endregion
     }

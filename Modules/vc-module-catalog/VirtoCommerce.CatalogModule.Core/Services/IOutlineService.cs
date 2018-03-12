@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using VirtoCommerce.Domain.Catalog.Model;
+using System.Collections.Generic;
+using VirtoCommerce.CatalogModule.Core.Model;
 
-namespace VirtoCommerce.Domain.Catalog.Services
+namespace VirtoCommerce.CatalogModule.Core.Services
 {
     /// <summary>
     /// Constructs outlines for objects

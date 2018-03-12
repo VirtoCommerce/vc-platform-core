@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using VirtoCommerce.Domain.Catalog.Model;
+using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
@@ -58,12 +58,27 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             {
                 catalog.Languages.Add(additionalLanguage);
             }
-            catalog.PropertyValues = CatalogPropertyValues.Select(x => x.ToModel(AbstractTypeFactory<PropertyValue>.TryCreateInstance())).ToList();
+           
             //Self properties
             catalog.Properties = Properties.Where(x => x.CategoryId == null)
                                                 .OrderBy(x => x.Name)
                                                 .Select(x => x.ToModel(AbstractTypeFactory<Property>.TryCreateInstance())).ToList();
-            
+            foreach (var propValueEntities in CatalogPropertyValues.GroupBy(x => x.Name))
+            {
+                var propValues = propValueEntities.OrderBy(x => x.Id).Select(x => x.ToModel(AbstractTypeFactory<PropertyValue>.TryCreateInstance())).ToList();
+                var property = catalog.Properties.Where(x => x.Type == PropertyType.Category)
+                                                             .FirstOrDefault(x => x.IsSuitableForValue(propValues.First()));
+                if (property == null)
+                {
+                    //Need add transient  property (without meta information) for each values group with the same property name
+                    property = AbstractTypeFactory<Property>.TryCreateInstance();
+                    property.Name = propValueEntities.Key;
+                    property.Type = PropertyType.Catalog;
+                    catalog.Properties.Add(property);
+                }
+                property.Values = propValues;
+            }
+
             return catalog;
         }
 
@@ -82,12 +97,12 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             Virtual = catalog.IsVirtual;
             DefaultLanguage = catalog.DefaultLanguage.LanguageCode;
 
-            if (catalog.PropertyValues != null)
+            if (catalog.Properties != null)
             {
                 CatalogPropertyValues = new ObservableCollection<PropertyValueEntity>();
-                foreach (var propertyValue in catalog.PropertyValues)
+                foreach (var propertyValue in catalog.Properties.SelectMany(x => x.Values))
                 {
-                    if (!propertyValue.IsInherited && propertyValue.Value != null && !string.IsNullOrEmpty(propertyValue.Value.ToString()))
+                    if (propertyValue.Value != null && !string.IsNullOrEmpty(propertyValue.Value.ToString()))
                     {
                        CatalogPropertyValues.Add(AbstractTypeFactory<PropertyValueEntity>.TryCreateInstance().FromModel(propertyValue, pkMap));
                     }

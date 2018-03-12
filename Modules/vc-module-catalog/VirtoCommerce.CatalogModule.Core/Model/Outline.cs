@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
-namespace VirtoCommerce.Domain.Catalog.Model
+namespace VirtoCommerce.CatalogModule.Core.Model
 {
     /// <summary>
     /// Represents the path from the catalog to one of the child objects (product or category):
@@ -11,7 +11,7 @@ namespace VirtoCommerce.Domain.Catalog.Model
         /// <summary>
         /// Outline parts
         /// </summary>
-        public ICollection<OutlineItem> Items { get; set; }
+        public IList<OutlineItem> Items { get; set; }
 
         public override string ToString()
         {

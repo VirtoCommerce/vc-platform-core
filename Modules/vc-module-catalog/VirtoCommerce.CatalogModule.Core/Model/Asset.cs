@@ -1,57 +1,29 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using VirtoCommerce.Domain.Commerce.Model;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.Domain.Catalog.Model
+namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class Asset : AuditableEntity, ISeoSupport, IHasLanguage, IInheritable, ICloneable
-    {
-        public string Name { get; set; }
-        public string Url { get; set; }
-        public string Group { get; set; }
+    public class Asset : AssetBase
+    {     
         public string MimeType { get; set; }
         public long Size { get; set; }
+        public string ReadableSize
+        {
+            get
+            {
+                return Size.ToHumanReadableSize();
+            }
+        }
+
         public byte[] BinaryData { get; set; }
 
-
-        #region ISeoSupport Members
-        public string SeoObjectType { get { return GetType().Name; } }
-        public ICollection<SeoInfo> SeoInfos { get; set; }
-        #endregion
-
-        #region ILanguageSupport Members
-        public string LanguageCode { get; set; }
-        #endregion
-
-        #region IInheritable Members
-        public bool IsInherited { get; set; }
-        #endregion
-
-        #region ICloneable members
-        public object Clone()
+        public override void TryInheritFrom(IEntity parent)
         {
-            var retVal = new Asset();
-            retVal.CreatedBy = CreatedBy;
-            retVal.CreatedDate = CreatedDate;
-            retVal.ModifiedBy = ModifiedBy;
-            retVal.ModifiedDate = ModifiedDate;
-
-            retVal.Name = Name;
-            retVal.Url = Url;
-            retVal.Group = Group;
-            retVal.LanguageCode = LanguageCode;
-            retVal.MimeType = MimeType;
-            retVal.Size = Size;
-
-            retVal.IsInherited = IsInherited;
-            if (SeoInfos != null)
+            if (parent is Asset parentAsset)
             {
-                retVal.SeoInfos = SeoInfos.Select(x => x.Clone()).OfType<SeoInfo>().ToList();
+                MimeType = parentAsset.MimeType;
+                Size = parentAsset.Size;
             }
-            return retVal;
+            base.TryInheritFrom(parent);
         }
-        #endregion
     }
 }

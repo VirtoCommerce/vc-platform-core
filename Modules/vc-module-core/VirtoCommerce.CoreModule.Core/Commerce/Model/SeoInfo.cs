@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Domain;
 
 namespace VirtoCommerce.Domain.Commerce.Model
 {
@@ -52,24 +52,7 @@ namespace VirtoCommerce.Domain.Commerce.Model
         #region ICloneable members
         public object Clone()
         {
-            var retVal = new SeoInfo();
-
-            retVal.CreatedBy = CreatedBy;
-            retVal.CreatedDate = CreatedDate;
-            retVal.ModifiedBy = ModifiedBy;
-            retVal.ModifiedDate = ModifiedDate;
-
-            retVal.StoreId = StoreId;
-            retVal.SemanticUrl = SemanticUrl;
-            retVal.PageTitle = PageTitle;
-            retVal.MetaDescription = MetaDescription;
-            retVal.ImageAltDescription = ImageAltDescription;
-            retVal.MetaKeywords = MetaKeywords;
-            retVal.ObjectId = ObjectId;
-            retVal.ObjectType = ObjectType;
-            retVal.IsActive = IsActive;
-            retVal.LanguageCode = LanguageCode;
-            return retVal;
+            return MemberwiseClone();
         }
         #endregion
     }

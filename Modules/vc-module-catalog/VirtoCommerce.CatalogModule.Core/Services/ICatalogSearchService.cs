@@ -1,7 +1,8 @@
-﻿using VirtoCommerce.Domain.Catalog.Model;
-namespace VirtoCommerce.Domain.Catalog.Services
+using VirtoCommerce.CatalogModule.Core.Model;
+
+namespace VirtoCommerce.CatalogModule.Core.Services
 {
-	public interface ICatalogSearchService
+    public interface ICatalogSearchService
 	{
 		SearchResult Search(SearchCriteria criteria);
 	}

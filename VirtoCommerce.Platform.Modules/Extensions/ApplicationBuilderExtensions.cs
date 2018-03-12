@@ -26,7 +26,7 @@ namespace VirtoCommerce.Platform.Modules.Extensions
                 foreach (var module in modules)
                 {
                     //Register modules permissions defined in the module manifest
-                    var modulePermissions = module.Permissions.SelectMany(x => x.Permissions).Select(x=> new Permission { Name = x.Name }).ToArray();
+                    var modulePermissions = module.Permissions.SelectMany(x => x.Permissions).Select(x=> new Permission { Name = x.Id }).ToArray();
                     permissionsProvider.RegisterPermissions(modulePermissions);
 
                     moduleManager.PostInitializeModule(module, serviceScope.ServiceProvider);
