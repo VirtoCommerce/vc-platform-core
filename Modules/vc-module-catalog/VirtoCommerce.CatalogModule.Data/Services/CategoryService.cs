@@ -46,7 +46,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         }
 
         #region ICategoryService Members
-        public virtual Category[] GetByIds(string[] categoryIds, string responseGroup = null, string catalogId = null)
+        public virtual IEnumerable<Category> GetByIds(IEnumerable<string> categoryIds, string responseGroup = null, string catalogId = null)
         {
             var result = new List<Category>();
             var preloadedCategoriesMap = PreloadCategories(catalogId);
@@ -68,7 +68,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         }
 
 
-        public virtual void SaveChanges(Category[] categories)
+        public virtual void SaveChanges(IEnumerable<Category> categories)
         {
             var pkMap = new PrimaryKeyResolvingMap();
             var changedEntries = new List<ChangedEntry<Category>>();
@@ -110,12 +110,12 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         }
 
 
-        public virtual void Delete(string[] categoryIds)
+        public virtual void Delete(IEnumerable<string> categoryIds)
         {
             using (var repository = _repositoryFactory())
             {
                 //TODO: raise events on categories deletion
-                repository.RemoveCategories(categoryIds);
+                repository.RemoveCategories(categoryIds.ToArray());
                 CommitChanges(repository);
                 //Reset catalog cache
                 CatalogCacheRegion.ExpireRegion();
@@ -202,7 +202,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     }
                 }
                 //Resolve relative urls for category assets
-                if(category.AllAssets != null)
+                if (category.AllAssets != null)
                 {
                     foreach(var asset in category.AllAssets)
                     {
@@ -217,14 +217,11 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         {
             foreach (var category in categories)
             {
-                if (category.Parent != null)
-                    category.TryInheritFrom(category.Parent);
-                else
-                    category.TryInheritFrom(category.Catalog);
+                category.TryInheritFrom(category.Parent ?? (IEntity)category.Catalog);
             }
         }
 
-        private void ValidateCategoryProperties(Category[] categories)
+        private void ValidateCategoryProperties(IEnumerable<Category> categories)
         {
             if (categories == null)
             {

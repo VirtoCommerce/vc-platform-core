@@ -14,8 +14,8 @@ namespace VirtoCommerce.Platform.Core.Common
         /// </summary>
         public virtual string ObjectType { get; set; }
 
-        private string[] _objectTypes;
-        public virtual string[] ObjectTypes
+        private IList<string> _objectTypes;
+        public virtual IList<string> ObjectTypes
         {
             get
             {
@@ -45,7 +45,7 @@ namespace VirtoCommerce.Platform.Core.Common
 
         public string Sort { get; set; }
 
-        public virtual SortInfo[] SortInfos => SortInfo.Parse(Sort).ToArray();
+        public virtual IList<SortInfo> SortInfos => SortInfo.Parse(Sort).ToArray();
 
 
         public int Skip { get; set; }

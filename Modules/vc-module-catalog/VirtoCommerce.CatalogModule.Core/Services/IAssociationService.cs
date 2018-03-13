@@ -1,11 +1,11 @@
+using System.Collections.Generic;
 using VirtoCommerce.CatalogModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Core.Services
 {
     public interface IAssociationService
     {
-        void LoadAssociations(IHasAssociations[] owners);
-
-        void SaveChanges(IHasAssociations[] owners);
+        void LoadAssociations(IEnumerable<IHasAssociations> owners);
+        void SaveChanges(IEnumerable<IHasAssociations> owners);
     }
 }

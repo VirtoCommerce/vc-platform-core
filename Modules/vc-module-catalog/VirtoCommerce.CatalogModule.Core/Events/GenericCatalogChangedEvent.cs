@@ -7,7 +7,7 @@ namespace VirtoCommerce.CatalogModule.Core.Events
     /// <summary>
     /// Event generated after catalogs entities were change
     /// </summary>
-    public class GenericCatalogChangedEvent<T> : ChangedEntryEvent<T>
+    public class GenericCatalogChangedEvent<T> : ChangeEntryEvent<T>
     {
         public GenericCatalogChangedEvent(IEnumerable<ChangedEntry<T>> changedEntries)
             : base(changedEntries)

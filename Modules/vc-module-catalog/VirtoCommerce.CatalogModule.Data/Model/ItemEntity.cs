@@ -375,8 +375,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             #region Links
             if (!CategoryLinks.IsNullCollection())
             {
-                CategoryLinks.Patch(target.CategoryLinks, new CategoryItemRelationComparer(),
-                                         (sourcePropValue, targetPropValue) => sourcePropValue.Patch(targetPropValue));
+                CategoryLinks.Patch(target.CategoryLinks, (sourcePropValue, targetPropValue) => sourcePropValue.Patch(targetPropValue));
             }
             #endregion
 

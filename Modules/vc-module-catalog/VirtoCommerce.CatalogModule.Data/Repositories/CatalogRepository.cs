@@ -4,10 +4,9 @@ using System.Data.SqlClient;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Data.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
-using coreModel = VirtoCommerce.CatalogModule.Core.Model;
-using dataModel = VirtoCommerce.CatalogModule.Data.Model;
 
 namespace VirtoCommerce.CatalogModule.Data.Repositories
 {
@@ -20,23 +19,23 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
 
         #region ICatalogRepository Members
 
-        public IQueryable<dataModel.CategoryEntity> Categories => DbContext.Set<dataModel.CategoryEntity>();
-        public IQueryable<dataModel.CatalogEntity> Catalogs => DbContext.Set<dataModel.CatalogEntity>();
-        public IQueryable<dataModel.PropertyValueEntity> PropertyValues => DbContext.Set<dataModel.PropertyValueEntity>();
-        public IQueryable<dataModel.ImageEntity> Images => DbContext.Set<dataModel.ImageEntity>();
-        public IQueryable<dataModel.AssetEntity> Assets => DbContext.Set<dataModel.AssetEntity>();
-        public IQueryable<dataModel.ItemEntity> Items => DbContext.Set<dataModel.ItemEntity>();
-        public IQueryable<dataModel.EditorialReviewEntity> EditorialReviews => DbContext.Set<dataModel.EditorialReviewEntity>();
-        public IQueryable<dataModel.PropertyEntity> Properties => DbContext.Set<dataModel.PropertyEntity>();
-        public IQueryable<dataModel.PropertyDictionaryValueEntity> PropertyDictionaryValues => DbContext.Set<dataModel.PropertyDictionaryValueEntity>();
-        public IQueryable<dataModel.PropertyDisplayNameEntity> PropertyDisplayNames => DbContext.Set<dataModel.PropertyDisplayNameEntity>();
-        public IQueryable<dataModel.PropertyAttributeEntity> PropertyAttributes => DbContext.Set<dataModel.PropertyAttributeEntity>();
-        public IQueryable<dataModel.CategoryItemRelationEntity> CategoryItemRelations => DbContext.Set<dataModel.CategoryItemRelationEntity>();
-        public IQueryable<dataModel.AssociationEntity> Associations => DbContext.Set<dataModel.AssociationEntity>();
-        public IQueryable<dataModel.CategoryRelationEntity> CategoryLinks => DbContext.Set<dataModel.CategoryRelationEntity>();
-        public IQueryable<dataModel.PropertyValidationRuleEntity> PropertyValidationRules => DbContext.Set<dataModel.PropertyValidationRuleEntity>();
+        public IQueryable<CategoryEntity> Categories => DbContext.Set<CategoryEntity>();
+        public IQueryable<CatalogEntity> Catalogs => DbContext.Set<CatalogEntity>();
+        public IQueryable<PropertyValueEntity> PropertyValues => DbContext.Set<PropertyValueEntity>();
+        public IQueryable<ImageEntity> Images => DbContext.Set<ImageEntity>();
+        public IQueryable<AssetEntity> Assets => DbContext.Set<AssetEntity>();
+        public IQueryable<ItemEntity> Items => DbContext.Set<ItemEntity>();
+        public IQueryable<EditorialReviewEntity> EditorialReviews => DbContext.Set<EditorialReviewEntity>();
+        public IQueryable<PropertyEntity> Properties => DbContext.Set<PropertyEntity>();
+        public IQueryable<PropertyDictionaryValueEntity> PropertyDictionaryValues => DbContext.Set<PropertyDictionaryValueEntity>();
+        public IQueryable<PropertyDisplayNameEntity> PropertyDisplayNames => DbContext.Set<PropertyDisplayNameEntity>();
+        public IQueryable<PropertyAttributeEntity> PropertyAttributes => DbContext.Set<PropertyAttributeEntity>();
+        public IQueryable<CategoryItemRelationEntity> CategoryItemRelations => DbContext.Set<CategoryItemRelationEntity>();
+        public IQueryable<AssociationEntity> Associations => DbContext.Set<AssociationEntity>();
+        public IQueryable<CategoryRelationEntity> CategoryLinks => DbContext.Set<CategoryRelationEntity>();
+        public IQueryable<PropertyValidationRuleEntity> PropertyValidationRules => DbContext.Set<PropertyValidationRuleEntity>();
 
-        public dataModel.CatalogEntity[] GetCatalogsByIds(string[] catalogIds)
+        public CatalogEntity[] GetCatalogsByIds(string[] catalogIds)
         {
             var retVal = Catalogs.Include(x => x.CatalogLanguages)
                                  .Include(x => x.IncommingLinks)
@@ -52,7 +51,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
             return retVal;
         }
 
-        public dataModel.CategoryEntity[] GetCategoriesByIds(string[] categoriesIds, string respGroup = null)
+        public CategoryEntity[] GetCategoriesByIds(string[] categoriesIds, string respGroup = null)
         {
             if (categoriesIds == null)
             {
@@ -61,30 +60,30 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
 
             if (!categoriesIds.Any())
             {
-                return new dataModel.CategoryEntity[] { };
+                return new CategoryEntity[] { };
             }
-            var categoryRespGroup = EnumUtility.SafeParse(respGroup, coreModel.CategoryResponseGroup.Full);
+            var categoryRespGroup = EnumUtility.SafeParse(respGroup, CategoryResponseGroup.Full);
 
-            if (categoryRespGroup.HasFlag(coreModel.CategoryResponseGroup.WithOutlines))
+            if (categoryRespGroup.HasFlag(CategoryResponseGroup.WithOutlines))
             {
-                categoryRespGroup |= coreModel.CategoryResponseGroup.WithLinks | coreModel.CategoryResponseGroup.WithParents;
+                categoryRespGroup |= CategoryResponseGroup.WithLinks | CategoryResponseGroup.WithParents;
             }
 
             var result = Categories.Where(x => categoriesIds.Contains(x.Id)).ToArray();
 
-            if (categoryRespGroup.HasFlag(coreModel.CategoryResponseGroup.WithLinks))
+            if (categoryRespGroup.HasFlag(CategoryResponseGroup.WithLinks))
             {
                 var incommingLinks = CategoryLinks.Where(x => categoriesIds.Contains(x.TargetCategoryId)).ToArray();
                 var outgoingLinks = CategoryLinks.Where(x => categoriesIds.Contains(x.SourceCategoryId)).ToArray();
             }
 
-            if (categoryRespGroup.HasFlag(coreModel.CategoryResponseGroup.WithImages))
+            if (categoryRespGroup.HasFlag(CategoryResponseGroup.WithImages))
             {
                 var images = Images.Where(x => categoriesIds.Contains(x.CategoryId)).ToArray();
             }
 
             //Load all properties meta information and information for inheritance
-            if (categoryRespGroup.HasFlag(coreModel.CategoryResponseGroup.WithProperties))
+            if (categoryRespGroup.HasFlag(CategoryResponseGroup.WithProperties))
             {
                 //Load category property values by separate query
                 var propertyValues = PropertyValues.Where(x => categoriesIds.Contains(x.CategoryId)).ToArray();
@@ -96,7 +95,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
             return result;
         }
 
-        public dataModel.ItemEntity[] GetItemByIds(string[] itemIds, coreModel.ItemResponseGroup respGroup = coreModel.ItemResponseGroup.ItemLarge)
+        public ItemEntity[] GetItemByIds(string[] itemIds, ItemResponseGroup respGroup = ItemResponseGroup.ItemLarge)
         {
             if (itemIds == null)
             {
@@ -105,38 +104,38 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
 
             if (!itemIds.Any())
             {
-                return new dataModel.ItemEntity[] { };
+                return new ItemEntity[] { };
             }
 
             // Use breaking query EF performance concept https://msdn.microsoft.com/en-us/data/hh949853.aspx#8
             var retVal = Items.Include(x => x.Images).Where(x => itemIds.Contains(x.Id)).ToArray();            
 
-            if (respGroup.HasFlag(coreModel.ItemResponseGroup.Outlines))
+            if (respGroup.HasFlag(ItemResponseGroup.Outlines))
             {
-                respGroup |= coreModel.ItemResponseGroup.Links;
+                respGroup |= ItemResponseGroup.Links;
             }
 
-            if(respGroup.HasFlag(coreModel.ItemResponseGroup.ItemProperties))
+            if(respGroup.HasFlag(ItemResponseGroup.ItemProperties))
             {
                 var propertyValues = PropertyValues.Where(x => itemIds.Contains(x.ItemId)).ToArray();
             }
 
-            if (respGroup.HasFlag(coreModel.ItemResponseGroup.Links))
+            if (respGroup.HasFlag(ItemResponseGroup.Links))
             {
                 var relations = CategoryItemRelations.Where(x => itemIds.Contains(x.ItemId)).ToArray();
             }
 
-            if (respGroup.HasFlag(coreModel.ItemResponseGroup.ItemAssets))
+            if (respGroup.HasFlag(ItemResponseGroup.ItemAssets))
             {
                 var assets = Assets.Where(x => itemIds.Contains(x.ItemId)).ToArray();
             }
 
-            if (respGroup.HasFlag(coreModel.ItemResponseGroup.ItemEditorialReviews))
+            if (respGroup.HasFlag(ItemResponseGroup.ItemEditorialReviews))
             {
                 var editorialReviews = EditorialReviews.Where(x => itemIds.Contains(x.ItemId)).ToArray();
             }
 
-            if (respGroup.HasFlag(coreModel.ItemResponseGroup.Variations))
+            if (respGroup.HasFlag(ItemResponseGroup.Variations))
             {
                 // TODO: Call GetItemByIds for variations recursively (need to measure performance and data amount first)
 
@@ -146,34 +145,34 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
                 var variations = Items.Include(x => x.Images).Where(x => variationIds.Contains(x.Id)).ToArray();
                 var variationPropertyValues = PropertyValues.Where(x => variationIds.Contains(x.ItemId)).ToArray();
 
-                if (respGroup.HasFlag(coreModel.ItemResponseGroup.ItemAssets))
+                if (respGroup.HasFlag(ItemResponseGroup.ItemAssets))
                 {
                     var variationAssets = Assets.Where(x => variationIds.Contains(x.ItemId)).ToArray();
                 }
 
-                if (respGroup.HasFlag(coreModel.ItemResponseGroup.ItemEditorialReviews))
+                if (respGroup.HasFlag(ItemResponseGroup.ItemEditorialReviews))
                 {
                     var variationEditorialReviews = EditorialReviews.Where(x => variationIds.Contains(x.ItemId)).ToArray();
                 }
             }
 
-            if (respGroup.HasFlag(coreModel.ItemResponseGroup.ItemAssociations))
+            if (respGroup.HasFlag(ItemResponseGroup.ItemAssociations))
             {
                 var assosiations = Associations.Where(x => itemIds.Contains(x.ItemId)).ToArray();
                 var assosiatedProductIds = assosiations.Where(x => x.AssociatedItemId != null)
                                                        .Select(x => x.AssociatedItemId).Distinct().ToArray();
 
-                var assosiatedItems = GetItemByIds(assosiatedProductIds, coreModel.ItemResponseGroup.ItemInfo | coreModel.ItemResponseGroup.ItemAssets);
+                var assosiatedItems = GetItemByIds(assosiatedProductIds, ItemResponseGroup.ItemInfo | ItemResponseGroup.ItemAssets);
 
                 var assosiatedCategoryIdsIds = assosiations.Where(x => x.AssociatedCategoryId != null).Select(x => x.AssociatedCategoryId).Distinct().ToArray();
-                var associatedCategories = GetCategoriesByIds(assosiatedCategoryIdsIds, coreModel.CategoryResponseGroup.Info.ToString());
+                var associatedCategories = GetCategoriesByIds(assosiatedCategoryIdsIds, CategoryResponseGroup.Info.ToString());
             }
 
-            if (respGroup.HasFlag(coreModel.ItemResponseGroup.ReferencedAssociations))
+            if (respGroup.HasFlag(ItemResponseGroup.ReferencedAssociations))
             {
                 var referencedAssociations = Associations.Where(x => itemIds.Contains(x.AssociatedItemId)).ToArray();
                 var referencedProductIds = referencedAssociations.Select(x => x.ItemId).Distinct().ToArray();
-                var referencedProducts = GetItemByIds(referencedProductIds, coreModel.ItemResponseGroup.ItemInfo);
+                var referencedProducts = GetItemByIds(referencedProductIds, ItemResponseGroup.ItemInfo);
             }
 
             // Load parents
@@ -183,7 +182,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
             return retVal;
         }
 
-        public dataModel.PropertyEntity[] GetPropertiesByIds(string[] propIds)
+        public PropertyEntity[] GetPropertiesByIds(string[] propIds)
         {
             //Used breaking query EF performance concept https://msdn.microsoft.com/en-us/data/hh949853.aspx#8
             var retVal = Properties.Where(x => propIds.Contains(x.Id)).ToArray();
@@ -208,9 +207,9 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
         /// </summary>
         /// <param name="catalogId"></param>
         /// <returns></returns>
-        public dataModel.PropertyEntity[] GetAllCatalogProperties(string catalogId)
+        public PropertyEntity[] GetAllCatalogProperties(string catalogId)
         {
-            var retVal = new List<dataModel.PropertyEntity>();
+            var retVal = new List<PropertyEntity>();
 
             var catalog = Catalogs.FirstOrDefault(x => x.Id == catalogId);
             if (catalog != null)

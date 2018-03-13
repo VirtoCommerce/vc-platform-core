@@ -189,7 +189,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
             if (!OutgoingLinks.IsNullCollection())
             {
-                OutgoingLinks.Patch(target.OutgoingLinks, new LinkedCategoryComparer(), (sourceLink, targetLink) => sourceLink.Patch(targetLink));
+                OutgoingLinks.Patch(target.OutgoingLinks, (sourceLink, targetLink) => sourceLink.Patch(targetLink));
             }
 
             if (!Images.IsNullCollection())

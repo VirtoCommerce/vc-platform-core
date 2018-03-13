@@ -34,13 +34,13 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
         #region ICatalogService Members
 
-        public virtual Catalog[] GetAllCatalogs()
+        public virtual IEnumerable<Catalog> GetAllCatalogs()
         {
             return PreloadCatalogs().Select(x => x.Value.Clone() as Catalog)
                                           .ToArray();
         }
 
-        public virtual Catalog[] GetByIds(string[] catalogIds)
+        public virtual IEnumerable<Catalog> GetByIds(IEnumerable<string> catalogIds)
         {
             //Clone required because client code may change resulting objects
             var result = PreloadCatalogs().Join(catalogIds, pair => pair.Key, id => id, (pair, id) => pair.Value)
@@ -49,7 +49,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             return result;
         }
 
-        public virtual void SaveChanges(Catalog[] catalogs)
+        public virtual void SaveChanges(IEnumerable<Catalog> catalogs)
         {
             var pkMap = new PrimaryKeyResolvingMap();
             var changedEntries = new List<ChangedEntry<Catalog>>();
@@ -87,12 +87,12 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
         }
 
-        public void Delete(string[] catalogIds)
+        public void Delete(IEnumerable<string> catalogIds)
         {
             using (var repository = _repositoryFactory())
             {
                 //TODO:  raise events on catalog deletion
-                repository.RemoveCatalogs(catalogIds);
+                repository.RemoveCatalogs(catalogIds.ToArray());
                 repository.UnitOfWork.Commit();
                 //Reset cached catalogs and catalogs
                 CatalogCacheRegion.ExpireRegion();
@@ -142,7 +142,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
         }
 
-        private void ValidateCatalogProperties(Catalog[] catalogs)
+        private void ValidateCatalogProperties(IEnumerable<Catalog> catalogs)
         {
             LoadDependencies(catalogs, PreloadCatalogs());
             foreach (var catalog in catalogs)

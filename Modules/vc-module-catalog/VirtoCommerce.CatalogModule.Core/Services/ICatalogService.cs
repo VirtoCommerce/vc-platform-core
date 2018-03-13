@@ -1,10 +1,12 @@
+using System.Collections.Generic;
+
 namespace VirtoCommerce.CatalogModule.Core.Services
 {
     public interface ICatalogService
 	{
-        Model.Catalog[] GetAllCatalogs();
-        Model.Catalog[] GetByIds(string[] catalogIds);
-		void SaveChanges(Model.Catalog[] catalogs);
-		void Delete(string[] catalogIds);
+        IEnumerable<Model.Catalog> GetAllCatalogs();
+        IEnumerable<Model.Catalog> GetByIds(IEnumerable<string> catalogIds);
+		void SaveChanges(IEnumerable<Model.Catalog> catalogs);
+		void Delete(IEnumerable<string> catalogIds);
 	}
 }

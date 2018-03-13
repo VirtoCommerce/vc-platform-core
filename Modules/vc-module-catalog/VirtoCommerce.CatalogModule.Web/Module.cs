@@ -25,6 +25,8 @@ namespace VirtoCommerce.CatalogModule.Web
             serviceCollection.AddSingleton<ICatalogService, CatalogService>();
             serviceCollection.AddSingleton<ICategoryService, CategoryService>();
             serviceCollection.AddSingleton<IOutlineService, OutlineService>();
+            serviceCollection.AddSingleton<IItemService, ItemService>();
+            serviceCollection.AddSingleton<IListEntrySearchService, ListEntrySearchService>();
             Func<PropertyValidationRule, PropertyValueValidator> propertyValueValidatorFactory =
               rule => new PropertyValueValidator(rule);
 

@@ -10,7 +10,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
     public class OutlineItem : Entity, ISeoSupport
     {
         #region ISeoSupport Members
-     
+
         /// <summary>
         /// Object type
         /// </summary>
@@ -22,7 +22,10 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         public IList<SeoInfo> SeoInfos { get; set; }
 
         #endregion
-
+        /// <summary>
+        /// The name of current item
+        /// </summary>
+        public string Name { get; set; }
         /// <summary>
         /// True when this object is linked to the virtual parent.
         /// </summary>

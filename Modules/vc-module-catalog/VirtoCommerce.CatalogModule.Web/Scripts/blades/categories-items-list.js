@@ -1,4 +1,4 @@
-﻿angular.module('virtoCommerce.catalogModule')
+angular.module('virtoCommerce.catalogModule')
     .controller('virtoCommerce.catalogModule.categoriesItemsListController', [
         '$sessionStorage', '$localStorage', '$timeout', '$scope', 'virtoCommerce.catalogModule.categories', 'virtoCommerce.catalogModule.items', 'virtoCommerce.catalogModule.listEntries', 'platformWebApp.bladeUtils', 'platformWebApp.dialogService', 'platformWebApp.authService', 'platformWebApp.uiGridHelper', 'virtoCommerce.catalogModule.catalogs',
         function ($sessionStorage, $localStorage, $timeout, $scope, categories, items, listEntries, bladeUtils, dialogService, authService, uiGridHelper, catalogs) {
@@ -27,8 +27,8 @@
                         transformByFilters(data.listEntries);
                         blade.isLoading = false;
                         $scope.pageSettings.totalItems = data.totalCount;
-                        $scope.items = data.listEntries;
-                        $scope.hasMore = data.listEntries.length === $scope.pageSettings.itemsPerPageCount;
+                        $scope.items = data.results;
+                        $scope.hasMore = data.results.length === $scope.pageSettings.itemsPerPageCount;
 
                         //Set navigation breadcrumbs
                         setBreadcrumbs();
@@ -54,8 +54,8 @@
                             transformByFilters(data.listEntries);
                             blade.isLoading = false;
                             $scope.pageSettings.totalItems = data.totalCount;
-                            $scope.items = $scope.items.concat(data.listEntries);
-                            $scope.hasMore = data.listEntries.length === $scope.pageSettings.itemsPerPageCount;
+                            $scope.items = $scope.items.concat(data.results);
+                            $scope.hasMore = data.results.length === $scope.pageSettings.itemsPerPageCount;
                             $scope.gridApi.infiniteScroll.dataLoaded();
 
                             $timeout(function () {

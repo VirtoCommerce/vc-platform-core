@@ -2,10 +2,11 @@ using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Common;
 using System.Linq;
 using System;
+using VirtoCommerce.Platform.Core.Domain;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class Catalog : Entity, IHasProperties, ICloneable
+    public class Catalog : AuditableEntity, IAggregateRoot, IHasProperties, ICloneable
     {
         public string Name { get; set; }
         public bool IsVirtual { get; set; }

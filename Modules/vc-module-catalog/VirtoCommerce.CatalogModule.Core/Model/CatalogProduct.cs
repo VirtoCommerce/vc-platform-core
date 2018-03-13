@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.Domain.Commerce.Model;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Domain;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class CatalogProduct : AuditableEntity, ILinkSupport, ISeoSupport, IHasOutlines, IHaveDimension, IHasAssociations, IHasProperties, IHasImages, IHasAssets, IInheritable, IHasTaxType
+    public class CatalogProduct : AuditableEntity, IAggregateRoot, IHasLinks, ISeoSupport, IHasOutlines, IHaveDimension, IHasAssociations, IHasProperties, IHasImages, IHasAssets, IInheritable, IHasTaxType
     {
         /// <summary>
         /// SKU code
@@ -79,6 +80,8 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         public IList<Property> Properties { get; set; }
         #endregion
 
+        #region IHasImages members
+
         /// <summary>
         /// Gets the default image for the product.
         /// </summary>
@@ -98,7 +101,6 @@ namespace VirtoCommerce.CatalogModule.Core.Model
             }
         }
 
-        #region IHasImages members
         public IList<Image> Images { get; set; }
         #endregion
 
@@ -250,6 +252,16 @@ namespace VirtoCommerce.CatalogModule.Core.Model
             }
         }
         #endregion
+        public virtual void Move(string catalogId, string categoryId)
+        {
+            CatalogId = catalogId;
+            CategoryId = categoryId;
+            foreach (var variation in Variations)
+            {
+                variation.CatalogId = catalogId;
+                variation.CategoryId = categoryId;
+            }
+        }
 
         public virtual void ReduceDetails(string responseGroup)
         {

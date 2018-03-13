@@ -3,9 +3,9 @@ using VirtoCommerce.Platform.Core.Domain;
 
 namespace VirtoCommerce.Platform.Core.Events
 {
-    public class ChangedEntryEvent<T> : DomainEvent, IChangedEntryEvent<T>
+    public class ChangeEntryEvent<T> : DomainEvent, IChangeEntryEvent<T>
     {
-        public ChangedEntryEvent(IEnumerable<ChangedEntry<T>> changedEntries)
+        public ChangeEntryEvent(IEnumerable<ChangedEntry<T>> changedEntries)
         {
             ChangedEntries = changedEntries;
         }

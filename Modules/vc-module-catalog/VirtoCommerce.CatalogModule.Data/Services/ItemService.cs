@@ -18,7 +18,7 @@ using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CatalogModule.Data.Services
 {
-    public class ItemServiceImpl : ServiceBase, IItemService
+    public class ItemService : ServiceBase, IItemService
     {
         private readonly ICategoryService _categoryService;
         private readonly ICatalogService _catalogService;
@@ -29,7 +29,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         private readonly IEventPublisher _eventPublisher;
         private readonly IBlobUrlResolver _blobUrlResolver;
 
-        public ItemServiceImpl(Func<ICatalogRepository> catalogRepositoryFactory, ICommerceService commerceService, IOutlineService outlineService, ICatalogService catalogService,
+        public ItemService(Func<ICatalogRepository> catalogRepositoryFactory, ICommerceService commerceService, IOutlineService outlineService, ICatalogService catalogService,
                                ICategoryService categoryService, AbstractValidator<IHasProperties> hasPropertyValidator, IEventPublisher eventPublisher, IBlobUrlResolver blobUrlResolver)
         {
             _catalogService = catalogService;
@@ -44,7 +44,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
         #region IItemService Members
       
-        public virtual CatalogProduct[] GetByIds(string[] itemIds, string respGroup = null, string catalogId = null)
+        public virtual IEnumerable<CatalogProduct> GetByIds(IEnumerable<string> itemIds, string respGroup = null, string catalogId = null)
         {
             CatalogProduct[] result;
             var itemRespGroup = EnumUtility.SafeParse(respGroup, ItemResponseGroup.ItemLarge);
@@ -53,7 +53,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 //Optimize performance and CPU usage
                 repository.DisableChangesTracking();
 
-                result = repository.GetItemByIds(itemIds, itemRespGroup)
+                result = repository.GetItemByIds(itemIds.ToArray(), itemRespGroup)
                                    .Select(x => x.ToModel(AbstractTypeFactory<CatalogProduct>.TryCreateInstance()))
                                    .ToArray();
             }
@@ -88,17 +88,17 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             return result;
         }
 
-        public virtual void SaveChanges(CatalogProduct[] products)
+        public virtual void SaveChanges(IEnumerable<CatalogProduct> products)
         {
             InnerSaveChanges(products);
         }
 
-        public virtual void Delete(string[] itemIds)
+        public virtual void Delete(IEnumerable<string> itemIds)
         {
             //var items = GetByIds(itemIds, ItemResponseGroup.Seo | ItemResponseGroup.Variations);
             using (var repository = _repositoryFactory())
             {
-                repository.RemoveItems(itemIds);
+                repository.RemoveItems(itemIds.ToArray());
                 CommitChanges(repository);
             }
         }
@@ -106,7 +106,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         #endregion
 
 
-        protected virtual void InnerSaveChanges(CatalogProduct[] products, bool disableValidation = false)
+        protected virtual void InnerSaveChanges(IEnumerable<CatalogProduct> products, bool disableValidation = false)
         {
             var pkMap = new PrimaryKeyResolvingMap();
             var changedEntries = new List<ChangedEntry<CatalogProduct>>();
@@ -148,7 +148,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             _commerceService.UpsertSeoForObjects(productsWithVariations);
         }
 
-        protected virtual void LoadDependencies(CatalogProduct[] products, bool processVariations = true)
+        protected virtual void LoadDependencies(IEnumerable<CatalogProduct> products, bool processVariations = true)
         {
             var catalogsMap = _catalogService.GetAllCatalogs().ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
             var allCategoriesIds = products.Select(x => x.CategoryId).Where(x => x != null).Distinct().ToArray();
@@ -190,15 +190,11 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
         }
 
-        protected virtual void ApplyInheritanceRules(CatalogProduct[] products)
+        protected virtual void ApplyInheritanceRules(IEnumerable<CatalogProduct> products)
         {
             foreach (var product in products)
             {
-                if (product.Category != null)
-                    product.TryInheritFrom(product.Category);
-                else
-                    product.TryInheritFrom(product.Catalog);
-
+                product.TryInheritFrom(product.Category ?? (IEntity)product.Catalog);              
                 if (product.MainProduct != null)
                 {  
                     product.TryInheritFrom(product.MainProduct);                 
@@ -206,7 +202,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
         }
 
-        protected virtual void ValidateProducts(CatalogProduct[] products)
+        protected virtual void ValidateProducts(IEnumerable<CatalogProduct> products)
         {
             if (products == null)
             {

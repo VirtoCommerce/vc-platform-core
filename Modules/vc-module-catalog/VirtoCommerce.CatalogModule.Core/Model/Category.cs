@@ -1,32 +1,28 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
+using VirtoCommerce.CatalogModule.Core.Exceptions;
 using VirtoCommerce.Domain.Commerce.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class Category : AuditableEntity, ILinkSupport, ISeoSupport, IHasOutlines, IHasImages, IHasProperties, ICloneable, IHasAssets, IHasTaxType, IInheritable
+    public class Category : AuditableEntity, IHasLinks, ISeoSupport, IHasOutlines, IHasImages, IHasProperties, ICloneable, IHasAssets, IHasTaxType, IInheritable
     {
         public Category()
         {
             IsActive = true;
         }
         public string CatalogId { get; set; }
-        [JsonIgnore]
         public Catalog Catalog { get; set; }
 
         public string ParentId { get; set; }
-        [JsonIgnore]
         public Category Parent { get; set; }
         public string Code { get; set; }
         public string TaxType { get; set; }
-        public string Name { get; set; }
-        public string Path { get; set; }
+        public string Name { get; set; }       
         public bool IsVirtual { get; set; }
         public int Level { get; set; }
-        [JsonIgnore]
         public IList<Category> Parents { get; set; }
 
         //Type of product package (set of package types with their specific dimensions) can be inherited by nested products and categories
@@ -36,7 +32,6 @@ namespace VirtoCommerce.CatalogModule.Core.Model
 
         public bool? IsActive { get; set; }
 
-        [JsonIgnore]
         public IList<Category> Children { get; set; }
 
         #region IHasProperties members
@@ -51,6 +46,25 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         public IList<SeoInfo> SeoInfos { get; set; }
 
         #region IHasImages members
+        /// <summary>
+        /// Gets the default image for the product.
+        /// </summary>
+        /// <value>
+        /// The image source URL.
+        /// </value>
+        public string ImgSrc
+        {
+            get
+            {
+                string result = null;
+                if (Images != null && Images.Any())
+                {
+                    result = Images.OrderBy(x => x.SortOrder).FirstOrDefault()?.Url;
+                }
+                return result;
+            }
+        }
+
         public IList<Image> Images { get; set; }
         #endregion
 
@@ -66,7 +80,6 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         #endregion
 
         #region IHasAssets members
-        [JsonIgnore]
         public IEnumerable<AssetBase> AllAssets
         {
             get
@@ -112,6 +125,12 @@ namespace VirtoCommerce.CatalogModule.Core.Model
             }
         }
         #endregion
+
+        public virtual void Move(string catalogId, string categoryId)
+        {
+            CatalogId = catalogId;
+            ParentId = categoryId;          
+        }
 
         public virtual void ReduceDetails(string responseGroup)
         {

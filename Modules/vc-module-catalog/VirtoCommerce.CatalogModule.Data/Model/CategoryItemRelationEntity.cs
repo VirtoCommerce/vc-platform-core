@@ -5,8 +5,10 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class CategoryItemRelationEntity : Entity
+    public class CategoryItemRelationEntity : ValueObject
     {
+        public string Id { get; set; }
+
         public int Priority { get; set; }
 
         #region Navigation Properties
@@ -26,6 +28,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             if (link == null)
                 throw new ArgumentNullException(nameof(link));
 
+            link.EntryId = ItemId;
             link.CategoryId = CategoryId;
             link.CatalogId = CatalogId;
             link.Priority = Priority;
@@ -37,7 +40,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         {
             if (link == null)
                 throw new ArgumentNullException(nameof(link));
-
+            
             CategoryId = link.CategoryId;
             CatalogId = link.CatalogId;
             Priority = link.Priority;
@@ -50,29 +53,12 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             //Nothing todo. Because we not support change  link
         }
 
-    }
-
-    public class CategoryItemRelationComparer : IEqualityComparer<CategoryItemRelationEntity>
-    {
-        #region IEqualityComparer<CategoryItemRelation> Members
-
-        public bool Equals(CategoryItemRelationEntity x, CategoryItemRelationEntity y)
+        protected override IEnumerable<object> GetEqualityComponents()
         {
-            return GetHashCode(x) == GetHashCode(y);
+            yield return CategoryId;
+            yield return CatalogId;
         }
 
-        public int GetHashCode(CategoryItemRelationEntity obj)
-        {
-            int hash = 17;
-            hash = hash * 23 + obj.CatalogId.GetHashCode();
-            hash = hash * 23 + obj.Priority.GetHashCode();
-            if (obj.CategoryId != null)
-            {
-                hash = hash * 23 + obj.CategoryId.GetHashCode();
-            }
-            return hash;
-        }
-
-        #endregion
-    }
+    } 
+    
 }
