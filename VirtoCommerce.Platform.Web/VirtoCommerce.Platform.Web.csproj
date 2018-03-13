@@ -2,20 +2,24 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
-    <AssemblyVersion>2.13.18.0</AssemblyVersion>
-    <Version>2.13.18</Version>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <Version>3.0.0</Version>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Modules\**" />
+    <Compile Remove="wwwroot\App_Data\**" />
     <Compile Remove="wwwroot\Scripts\**" />
     <Content Remove="Modules\**" />
+    <Content Remove="wwwroot\App_Data\**" />
     <Content Remove="wwwroot\Scripts\**" />
     <EmbeddedResource Remove="Modules\**" />
+    <EmbeddedResource Remove="wwwroot\App_Data\**" />
     <EmbeddedResource Remove="wwwroot\Scripts\**" />
     <None Remove="Modules\**" />
+    <None Remove="wwwroot\App_Data\**" />
     <None Remove="wwwroot\Scripts\**" />
   </ItemGroup>
   <ItemGroup>
@@ -25,6 +29,7 @@
     <PackageReference Include="HangFire.SqlServer" Version="1.6.17" />
     <PackageReference Include="Microsoft.ApplicationInsights.Web" Version="2.5.0-beta2" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.0.0-alpha2-final" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="1.0.0-alpha2-final" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.1" />
@@ -48,6 +53,5 @@
   <ItemGroup>
     <Folder Include="RewriteRules\" />
     <Folder Include="TagHelpers\" />
-    <Folder Include="wwwroot\App_Data\" />
   </ItemGroup>
 </Project>

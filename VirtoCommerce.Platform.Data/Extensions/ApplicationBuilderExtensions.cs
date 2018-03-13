@@ -2,6 +2,7 @@ using System;
 using EntityFrameworkCore.Triggers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Data.Model;
 using VirtoCommerce.Platform.Data.PushNotifications;

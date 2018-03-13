@@ -1,0 +1,1 @@
+ Add-Migration Initial -Context VirtoCommerce.CatalogModule.Data.Repositories.CatalogDbContext  -Verbose -OutputDir Migrations -Project VirtoCommerce.CatalogModule.Data -StartupProject  VirtoCommerce.CatalogModule.Data  -Debug

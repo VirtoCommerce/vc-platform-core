@@ -7,10 +7,13 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.1" />
     <PackageReference Include="OpenIddict.Mvc" Version="2.0.0-rc1-final" />
     <ProjectReference Include="..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
     <ProjectReference Include="..\VirtoCommerce.Platform.Data\VirtoCommerce.Platform.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>

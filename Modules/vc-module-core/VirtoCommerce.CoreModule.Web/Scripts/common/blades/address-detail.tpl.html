@@ -1,0 +1,42 @@
+﻿<div class="blade-static __bottom" ng-include="'$(Platform)/Scripts/common/templates/ok-cancel.tpl.html'"></div>
+<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form class="form" name="detailForm">
+                <va-metaform blade="blade" registered-inputs="blade.metaFields" column-count="1" ng-init="setForm(detailForm)"></va-metaform>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script id="addressTypeSelector.html" type="text/ng-template">
+    <label class="form-label">{{ 'core.blades.address-detail.labels.address-type' | translate }}</label>
+    <div class="form-input">
+        <ui-select ng-model="blade.currentEntity.addressType">
+            <ui-select-match placeholder="{{ 'core.blades.address-detail.placeholders.address-type' | translate }}">{{$select.selected}}</ui-select-match>
+            <ui-select-choices repeat="x as x in blade.addressTypes | filter: $select.search ">
+                <span ng-bind-html="x | highlight: $select.search"></span>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+</script>
+<script id="countrySelector.html" type="text/ng-template">
+    <label class="form-label">{{ 'core.blades.address-detail.labels.country' | translate }}</label>
+    <div class="form-input">
+        <ui-select ng-model="blade.currentEntity.countryCode" required>
+            <ui-select-match placeholder="{{ 'core.blades.address-detail.placeholders.country' | translate }}">{{$select.selected.name}}</ui-select-match>
+            <ui-select-choices repeat="x.id as x in blade.countries | filter: $select.search ">
+                <span ng-bind-html="x.name | highlight: $select.search"></span>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+</script>
+<!--duplicates template from platform version after 2.13.15. Remove this after platform version dependency increases -->
+<script type="text/ng-template" id="dEmail.html">
+    <div class="form-input">
+        <input ng-required="currentEntity.isRequired"
+               ng-model="context.currentPropValues[0].value"
+               placeholder="Enter email"
+               type="email" />
+    </div>
+</script>

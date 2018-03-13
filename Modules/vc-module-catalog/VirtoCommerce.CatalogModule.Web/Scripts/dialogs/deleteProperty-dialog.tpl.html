@@ -1,0 +1,21 @@
+﻿<div class="modal-header">
+    <h3 class="modal-title">{{ 'platform.dialogs.delete.title' | translate }}</h3>
+</div>
+<div class="modal-body">
+    <p>{{ 'catalog.dialogs.property-delete.message' | translate: messageValues }}</p>
+    <div class="form-group">
+        <div class="form-error">{{ 'catalog.dialogs.property-delete.warning' | translate }}</div>
+    </div>
+    <p class="text">{{ 'catalog.dialogs.property-delete.msg1' | translate }}</p>
+    <div class="form-group">
+        <ul>
+            <li>{{ 'catalog.dialogs.property-delete.msg2' | translate }}</li>
+            <li>{{ 'catalog.dialogs.property-delete.msg3' | translate }}</li>
+        </ul>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn" ng-click="no()">{{ 'catalog.dialogs.property-delete.shallow' | translate }}</button>
+    <button class="btn __cancel" ng-click="yes()">{{ 'catalog.dialogs.property-delete.full' | translate}}</button>
+    <button class="btn" ng-click="cancel()">{{ 'platform.commands.cancel' | translate }}</button>
+</div>

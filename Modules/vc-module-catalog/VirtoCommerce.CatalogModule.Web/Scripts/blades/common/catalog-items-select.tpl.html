@@ -1,0 +1,64 @@
+﻿<div class="blade-static" ng-class="{'__expanded': !isCatalogSelectMode()}">
+    <style>
+        .breadcrumbs .menu .menu-item .menu-link {
+            max-width: 131px;
+        }
+    </style>
+    <va-breadcrumb ng-model="blade.breadcrumbs" blade-id="blade.id" ng-if="!isCatalogSelectMode()"></va-breadcrumb>
+    <div class="form-group">
+        <vc-item-search blade="blade"></vc-item-search>
+        <p class="form-count">{{'platform.list.count' | translate}}: <span class="count">{{pageSettings.totalItems}}</span></p>
+    </div>
+</div>
+<div class="blade-content __medium-wide" ng-show="!isCatalogSelectMode()">
+    <div class="blade-inner">
+        <div class="inner-block" ng-init="setGridOptions('catalog-item-select-grid', {
+                data: 'items',
+                rowTemplate: 'item-list.row.html',
+                rowHeight: 61,
+                enableSelectionBatchEvent: false,
+                columnDefs: [
+                        {
+                            name: 'imageUrl', displayName: 'catalog.blades.catalog-items-select.labels.picture',
+                            enableColumnResizing: false, enableSorting: false, width: 60,
+                            cellTemplate: 'item-list-icon.cell.html'
+                        },
+                        { name: 'name', displayName: 'catalog.blades.catalog-items-select.labels.name' },
+                        { name: 'code', displayName: 'catalog.blades.catalog-items-select.labels.sku', width: 170, cellTemplate: 'item-list-SKU.cell.html' }
+                 ]})">
+            <div class="table-wrapper">
+                <div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-save-state ui-grid-selection ui-grid-resize-columns ui-grid-move-columns ui-grid-height></div>
+            </div>
+        </div>
+    </div>
+    <div class="blade-static __bottom" ng-if="pageSettings.itemsPerPageCount < pageSettings.totalItems" ng-include="'pagerTemplate.html'"></div>
+</div>
+
+<div class="blade-content" ng-show="isCatalogSelectMode()">
+    <div class="blade-inner">
+        <div class="inner-block clearfix">
+            <ul class="list __items">
+                <li class="list-item" ng-repeat="data in items track by data.id" ng-class="{'__selected': data.id === selectedNodeId}" ng-click='selectItem($event, data)'>
+                    <i class="list-ico fa" ng-class="data.isVirtual ? 'fa-cloud' : 'fa-folder'"></i>
+                    <span class="list-name" ng-show="data.isVirtual">{{ 'catalog.blades.catalog-items-select.labels.virtual' | translate:{ name: data.name } }}</span>
+                    <span class="list-name" ng-hide="data.isVirtual">{{data.name}}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script type="text/ng-template" id="item-list.row.html">
+    <div ng-click='grid.appScope.selectItem($event, row.entity)' ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" ui-grid-one-bind-id-grid="rowRenderIndex + '-' + col.uid + '-cell'" class="ui-grid-cell" ng-class="{'ui-grid-row-header-cell': col.isRowHeader, '__selected': row.entity.id===grid.appScope.selectedNodeId }" role="{{col.isRowHeader ? 'rowheader' : 'gridcell' }}" ui-grid-cell></div>
+</script>
+<script type="text/ng-template" id="item-list-icon.cell.html">
+    <div class="ui-grid-cell-contents">
+        <div class="product-img">
+            <img class="image" ng-src="{{COL_FIELD}}" ng-if="row.entity.type!=='category' && COL_FIELD">
+            <i class="table-ico fa" ng-class="row.entity.type == 'category' ? 'fa-folder' : 'fa-image'" ng-if="row.entity.type ==='category' || !COL_FIELD"></i>
+        </div>
+    </div>
+</script>
+<script type="text/ng-template" id="item-list-SKU.cell.html">
+    <div class="ui-grid-cell-contents">{{row.entity.type!=='category'?COL_FIELD:''}}</div>
+</script>

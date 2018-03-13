@@ -23,6 +23,7 @@ using Smidge.FileProcessors;
 using Smidge.Nuglify;
 using Smidge.Options;
 using Swashbuckle.AspNetCore.Swagger;
+using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Jobs;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -85,7 +86,7 @@ namespace VirtoCommerce.Platform.Web
             {
                 options.ModulesManifestUrl = new Uri(@"https://raw.githubusercontent.com/VirtoCommerce/vc-modules/master/modules.json");
             });
-
+           
             services.AddDbContext<SecurityDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("VirtoCommerce"));
@@ -223,7 +224,31 @@ namespace VirtoCommerce.Platform.Web
 
             services.AddPlatformServices(Configuration);
             services.AddSecurityServices();
-            
+
+            var assetConnectionString = BlobConnectionString.Parse(Configuration.GetConnectionString("AssetsConnectionString"));
+            //TODO: Azure blob storage
+            if (assetConnectionString.Provider.EqualsInvariant("AzureBlobStorage"))
+            {
+                //var azureBlobOptions = new AzureBlobContentOptions();
+                //Configuration.GetSection("VirtoCommerce:AzureBlobStorage").Bind(azureBlobOptions);
+
+                //services.AddAzureBlobContent(options =>
+                //{
+                //    options.Container = contentConnectionString.RootPath;
+                //    options.ConnectionString = contentConnectionString.ConnectionString;
+                //    options.PollForChanges = azureBlobOptions.PollForChanges;
+                //    options.ChangesPoolingInterval = azureBlobOptions.ChangesPoolingInterval;
+                //});
+            }
+            else
+            {
+                services.AddFileSystemBlobProvider(options =>
+                {
+                    options.StoragePath = HostingEnvironment.MapPath(assetConnectionString.RootPath);
+                    options.BasePublicUrl = assetConnectionString.PublicUrl;
+                });
+            }
+
             var hangfireOptions = new HangfireOptions();
             Configuration.GetSection("VirtoCommerce:Hangfire").Bind(hangfireOptions);
             if (hangfireOptions.JobStorageType == HangfireJobStorageType.SqlServer)
@@ -239,7 +264,7 @@ namespace VirtoCommerce.Platform.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-         
+       
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -272,7 +297,9 @@ namespace VirtoCommerce.Platform.Web
                 });
             }
 
+         
             app.UseDefaultFiles();
+
 
             //register swagger content
             app.UseFileServer(new FileServerOptions
@@ -340,7 +367,7 @@ namespace VirtoCommerce.Platform.Web
                 // Normal equals 'default', because Hangfire depends on it.
                 Queues = new[] { JobPriority.High, JobPriority.Normal, JobPriority.Low }
             });
-
+            
         }
     }
 }

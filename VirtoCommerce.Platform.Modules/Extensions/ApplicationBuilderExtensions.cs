@@ -32,7 +32,7 @@ namespace VirtoCommerce.Platform.Modules.Extensions
                 foreach (var module in modules)
                 {
                     //Register modules permissions defined in the module manifest
-                    var modulePermissions = module.Permissions.SelectMany(x => x.Permissions).Select(x => new Permission { Name = x.Name }).ToArray();
+                    var modulePermissions = module.Permissions.SelectMany(x => x.Permissions).Select(x=> new Permission { Name = x.Id }).ToArray();
                     permissionsProvider.RegisterPermissions(modulePermissions);
 
                     moduleManager.PostInitializeModule(module, serviceScope.ServiceProvider);
@@ -46,7 +46,6 @@ namespace VirtoCommerce.Platform.Modules.Extensions
             var modules = GetInstalledModules(appBuilder.ApplicationServices);
             var modulesOptions = appBuilder.ApplicationServices.GetRequiredService<IOptions<LocalStorageModuleCatalogOptions>>().Value;
             var cssBundleItems = modules.SelectMany(m => m.Styles).ToArray();
-
             var cssFiles = cssBundleItems.OfType<ManifestBundleFile>().Select(x => new CssFile(x.VirtualPath));
 
             cssFiles = cssFiles.Concat(cssBundleItems.OfType<ManifestBundleDirectory>().SelectMany(x => new WebFileFolder(modulesOptions.DiscoveryPath, x.VirtualPath)

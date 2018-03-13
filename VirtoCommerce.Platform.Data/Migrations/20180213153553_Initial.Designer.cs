@@ -11,7 +11,7 @@ using VirtoCommerce.Platform.Data.Repositories;
 namespace VirtoCommerce.Platform.Data.Migrations
 {
     [DbContext(typeof(PlatformDbContext))]
-    [Migration("20180101143134_Initial")]
+    [Migration("20180213153553_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

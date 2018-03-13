@@ -1,0 +1,35 @@
+﻿<div class="blade-content __xxlarge-wide">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form class="form" name="editorialReviewsForm">
+                <div class="form-group" ng-init="setForm(editorialReviewsForm)">
+                    <label class="form-label">{{ 'catalog.blades.editorialReview-detail.labels.type' | translate }} <a href="" ng-click="openDictionarySettingManagement()" class="form-edit" va-permission="platform:setting:update"><i class="form-ico fa fa-pencil"></i></a></label>
+                    <div class="form-input">
+                        <ui-select ng-model="blade.currentEntity.reviewType" ng-disabled="disabled">
+                            <ui-select-match placeholder="{{'catalog.blades.editorialReview-detail.placeholders.type' | translate}}">{{$select.selected}}</ui-select-match>
+                            <ui-select-choices repeat="x in types | filter: $select.search">
+                                <span ng-bind-html="x | highlight: $select.search"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ 'catalog.blades.editorialReview-detail.labels.language' | translate }}</label>
+                    <div class="form-input">
+                        <ui-select ng-model="blade.currentEntity.languageCode" ng-disabled="disabled">
+                            <ui-select-match placeholder="{{'catalog.blades.editorialReview-detail.placeholders.language' | translate}}">{{$select.selected.displayName}}</ui-select-match>
+                            <ui-select-choices repeat="lang.languageCode as lang in blade.languages | filter: {displayName: $select.search}">
+                                <span ng-bind-html="lang.displayName | highlight: $select.search"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ 'catalog.blades.editorialReview-detail.labels.content' | translate }}</label>
+                    <input id="fileUploader" type="file" multiple style="display: none;" uploader="fileUploader" nv-file-select />
+                    <textarea vc-uk-htmleditor ng-model="blade.currentEntity.content" file-uploader="fileUploader"></textarea>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

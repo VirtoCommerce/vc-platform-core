@@ -38,14 +38,14 @@ namespace VirtoCommerce.Platform.Modules
                 throw new FileNotFoundException(assemblyUri.LocalPath);
             }
 
-            var assembly = LoadWithAllReferencedAssebliesRecursive(assemblyUri.LocalPath);
+           var assembly = LoadWithAllReferencedAssebliesRecursive(assemblyUri.LocalPath);
             return assembly;
         }
 
         private Assembly LoadWithAllReferencedAssebliesRecursive(string assemblyPath)
-        {
+        {         
             Assembly assembly = null;
-
+  
             if (File.Exists(assemblyPath))
             {
                 // assembly = new AssemblyResolver(assemblyPath, _logger).Assembly;
@@ -106,10 +106,10 @@ namespace VirtoCommerce.Platform.Modules
                     }
                     return null;
                 };
-            }
+            }      
             return assembly;
         }
-
+        
         private static Uri GetFileUri(string filePath)
         {
             if (String.IsNullOrEmpty(filePath))

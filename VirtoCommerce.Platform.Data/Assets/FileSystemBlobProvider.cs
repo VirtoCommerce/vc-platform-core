@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.IO;
+using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Exceptions;
@@ -12,17 +13,19 @@ namespace VirtoCommerce.Platform.Data.Assets
 
         private readonly string _storagePath;
         private readonly string _basePublicUrl;
+        private readonly FileSystemBlobContentOptions _options;
 
-        public FileSystemBlobProvider(string storagePath, string publicUrl = "")
+        public FileSystemBlobProvider(IOptions<FileSystemBlobContentOptions> options)
         {
-            if (storagePath == null)
+            _options = options.Value;
+            if (_options.StoragePath == null)
             {
-                throw new ArgumentNullException("storagePath");
+                throw new PlatformException($"{ nameof(_options.StoragePath) } must be set");
             }
 
-            _storagePath = storagePath.TrimEnd('\\');
+            _storagePath = _options.StoragePath.TrimEnd('\\');
 
-            _basePublicUrl = publicUrl;
+            _basePublicUrl = _options.BasePublicUrl;
             if (_basePublicUrl != null)
             {
                 _basePublicUrl = _basePublicUrl.TrimEnd('/');
