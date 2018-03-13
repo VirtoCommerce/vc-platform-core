@@ -39,18 +39,18 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         [StringLength(128)]
         public string NotificationId { get; set; }
 
-        public virtual NotificationTemplate ToModel(NotificationTemplate message)
+        public virtual NotificationTemplate ToModel(NotificationTemplate template)
         {
-            if (message == null) throw new ArgumentNullException(nameof(message));
+            if (template == null) throw new ArgumentNullException(nameof(template));
 
-            message.Id = this.Id;
-            message.LanguageCode = this.LanguageCode;
-            message.CreatedBy = this.CreatedBy;
-            message.CreatedDate = this.CreatedDate;
-            message.ModifiedBy = this.ModifiedBy;
-            message.ModifiedDate = this.ModifiedDate;
+            template.Id = this.Id;
+            template.LanguageCode = this.LanguageCode;
+            template.CreatedBy = this.CreatedBy;
+            template.CreatedDate = this.CreatedDate;
+            template.ModifiedBy = this.ModifiedBy;
+            template.ModifiedDate = this.ModifiedDate;
 
-            switch (message)
+            switch (template)
             {
                 case EmailNotificationTemplate emailNotificationTemplate:
                     emailNotificationTemplate.Subject = this.Subject;
@@ -61,21 +61,21 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
                     break;
             }
 
-            return message;
+            return template;
         }
 
-        public virtual NotificationTemplateEntity FromModel(NotificationTemplate message)
+        public virtual NotificationTemplateEntity FromModel(NotificationTemplate template)
         {
-            if (message == null) throw new ArgumentNullException(nameof(message));
+            if (template == null) throw new ArgumentNullException(nameof(template));
 
-            this.Id = message.Id;
-            this.LanguageCode = message.LanguageCode;
-            this.CreatedBy = message.CreatedBy;
-            this.CreatedDate = message.CreatedDate;
-            this.ModifiedBy = message.ModifiedBy;
-            this.ModifiedDate = message.ModifiedDate;
+            this.Id = template.Id;
+            this.LanguageCode = template.LanguageCode;
+            this.CreatedBy = template.CreatedBy;
+            this.CreatedDate = template.CreatedDate;
+            this.ModifiedBy = template.ModifiedBy;
+            this.ModifiedDate = template.ModifiedDate;
 
-            switch (message)
+            switch (template)
             {
                 case EmailNotificationTemplate emailNotificationTemplate:
                     this.Subject = emailNotificationTemplate.Subject;

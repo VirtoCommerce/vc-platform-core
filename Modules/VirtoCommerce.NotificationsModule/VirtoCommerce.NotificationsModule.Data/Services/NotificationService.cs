@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.NotificationsModule.Core.Abstractions;
+using VirtoCommerce.NotificationsModule.Core.Events;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Domain;
+using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.NotificationsModule.Data.Services
@@ -15,10 +18,12 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
     public class NotificationService : ServiceBase, INotificationService, INotificationRegistrar
     {
         private readonly Func<INotificationRepository> _repositoryFactory;
+        private readonly IEventPublisher _eventPublisher;
 
-        public NotificationService(Func<INotificationRepository> repositoryFactory)
+        public NotificationService(Func<INotificationRepository> repositoryFactory, IEventPublisher eventPublisher)
         {
             _repositoryFactory = repositoryFactory;
+            _eventPublisher = eventPublisher;
         }
 
         public async Task<Notification> GetNotificationByTypeAsync(string type, string tenantId = null, string tenantType = null)
@@ -50,9 +55,11 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             if (notifications != null && notifications.Any())
             {
                 var pkMap = new PrimaryKeyResolvingMap();
+                var changedEntries = new List<ChangedEntry<Notification>>();
                 using (var repository = _repositoryFactory())
                 using (var changeTracker = new ObservableChangeTracker())
                 {
+                    
                     var existingNotificationEntities = await repository.GetNotificationByIdsAsync(notifications.Select(m => m.Id).ToArray());
                     foreach (var notification in notifications)
                     {
@@ -63,15 +70,19 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                         {
                             changeTracker.Attach(dataTargetNotification);
                             modifiedEntity?.Patch(dataTargetNotification);
+                            changedEntries.Add(new ChangedEntry<Notification>(notification, EntryState.Modified));
                         }
                         else
                         {
                             repository.Add(modifiedEntity);
+                            changedEntries.Add(new ChangedEntry<Notification>(notification, EntryState.Added));
                         }
                     }
 
+                    await _eventPublisher.Publish(new GenericNotificationChangingEvent<Notification>(changedEntries));
                     CommitChanges(repository);
                     pkMap.ResolvePrimaryKeys();
+                    await _eventPublisher.Publish(new GenericNotificationChangedEvent<Notification>(changedEntries));
                 }
             }
         }
