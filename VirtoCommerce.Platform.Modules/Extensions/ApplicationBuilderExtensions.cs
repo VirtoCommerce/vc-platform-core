@@ -5,7 +5,9 @@ using System.IO;
 using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using Smidge;
 using Smidge.FileProcessors;
@@ -14,6 +16,7 @@ using Smidge.Nuglify;
 using Smidge.Options;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Modules.Smidge;
 
 namespace VirtoCommerce.Platform.Modules.Extensions
 {
@@ -51,8 +54,30 @@ namespace VirtoCommerce.Platform.Modules.Extensions
 
             var scriptBundleItems = modules.SelectMany(m => m.Scripts).ToArray();
             var jsFiles = scriptBundleItems.OfType<ManifestBundleFile>().Select(x => new JavaScriptFile(x.VirtualPath));
-            jsFiles = jsFiles.Concat(scriptBundleItems.OfType<ManifestBundleDirectory>().SelectMany(x => new WebFileFolder(modulesOptions.DiscoveryPath, x.VirtualPath)
-                                                                                .AllWebFiles<JavaScriptFile>(x.SearchPattern, x.SearchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)));
+            //jsFiles = jsFiles.Concat(scriptBundleItems.OfType<ManifestBundleDirectory>().SelectMany(x => new WebFileFolder(modulesOptions.DiscoveryPath, x.VirtualPath)
+            //                                                                    .AllWebFiles<JavaScriptFile>(x.SearchPattern, x.SearchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)));
+            foreach (var module in modules)
+            {
+                jsFiles = jsFiles.Concat((IEnumerable<JavaScriptFile>)module.Scripts.OfType<ManifestBundleDirectory>().SelectMany((Func<ManifestBundleDirectory, IEnumerable<JavaScriptFileVirtoCommerce>>)(s =>
+                {
+                    var result = new WebFileFolder(modulesOptions.DiscoveryPath, s.VirtualPath)
+                                    .AllWebFiles<JavaScriptFileVirtoCommerce>(s.SearchPattern, s.SearchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+                    foreach (var script in result)
+                    {
+                        script.RequestPath = script.FilePath
+                                                    .Replace("~","")
+                                                    .Replace($"{module.ModuleName}.Web/", "")
+                                                    .Replace($"{module.ModuleName}", $"$({module.ModuleName})");
+                    }
+                    return result;
+                })));
+
+                appBuilder.UseStaticFiles(new StaticFileOptions()
+                {
+                    FileProvider = new PhysicalFileProvider(module.FullPhysicalPath),
+                    RequestPath = new PathString($"/sb/maps/$({ module.ModuleName })")
+                });
+            }
 
 
             //TODO: Test minification and uglification for resulting bundles
@@ -68,7 +93,7 @@ namespace VirtoCommerce.Platform.Modules.Extensions
             bundles.Create("vc-modules-styles", cssFiles.ToArray())
                .WithEnvironmentOptions(options);
 
-            bundles.Create("vc-modules-scripts", jsFiles.ToArray())
+            bundles.Create("vc-modules-scripts", bundles.PipelineFactory.Create<NuglifyJsVirtoCommerce>(), jsFiles.ToArray())
                    .WithEnvironmentOptions(options);
 
 
