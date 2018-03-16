@@ -50,7 +50,6 @@ namespace VirtoCommerce.Platform.Modules.Smidge
                     fileProcessContext.BundleContext.GetSourceMapFromContext(nuglifyJsCodeSettings.SourceMapType);
 
                 codeSettings.SymbolsMap = sourceMap;
-                codeSettings.MinifyCode = false;
 
                 //These are a couple of options that could be needed for V3 source maps
 
@@ -83,7 +82,7 @@ namespace VirtoCommerce.Platform.Modules.Smidge
             }
 
             //no do the processing
-            var result = Uglify.Js(fileProcessContext.FileContent, file.RequestPath, codeSettings);
+            var result = Uglify.Js(fileProcessContext.FileContent, file.FilePath, codeSettings);
 
             if (result.HasErrors)
             {

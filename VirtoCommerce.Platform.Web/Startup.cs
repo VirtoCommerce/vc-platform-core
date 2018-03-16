@@ -17,6 +17,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using NUglify.Css;
+using NUglify.JavaScript;
 using Smidge;
 using Smidge.Cache;
 using Smidge.FileProcessors;
@@ -199,7 +201,10 @@ namespace VirtoCommerce.Platform.Web
             services.AddMemoryCache();
             //Add Smidge runtime bundling library configuration
             services.AddSmidge(Configuration.GetSection("smidge"), new PhysicalFileProvider(modulesDiscoveryPath));
-            services.AddSmidgeNuglify();
+            services.AddSmidgeNuglify(new NuglifySettings(new NuglifyCodeSettings(new CodeSettings()
+            {
+                MinifyCode = false, PreserveFunctionNames = false, ReorderScopeDeclarations = false, InlineSafeStrings = false
+            }), new CssSettings()));
             services.AddSingleton<IPreProcessor, NuglifyJsVirtoCommerce>();
 
             // Register the Swagger generator

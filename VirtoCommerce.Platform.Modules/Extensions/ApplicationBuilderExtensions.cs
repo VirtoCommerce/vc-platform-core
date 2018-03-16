@@ -57,10 +57,11 @@ namespace VirtoCommerce.Platform.Modules.Extensions
             //                                                                    .AllWebFiles<JavaScriptFile>(x.SearchPattern, x.SearchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)));
             foreach (var module in modules)
             {
-                jsFiles = jsFiles.Concat((IEnumerable<JavaScriptFile>)module.Scripts.OfType<ManifestBundleDirectory>().SelectMany((Func<ManifestBundleDirectory, IEnumerable<JavaScriptFileVirtoCommerce>>)(s =>
+                jsFiles = jsFiles.Concat(module.Scripts.OfType<ManifestBundleDirectory>().SelectMany((s =>
                 {
                     var result = new WebFileFolder(modulesOptions.DiscoveryPath, s.VirtualPath)
-                                    .AllWebFiles<JavaScriptFileVirtoCommerce>(s.SearchPattern, s.SearchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+                                    .AllWebFiles<JavaScriptFileVirtoCommerce>(s.SearchPattern
+                                        , s.SearchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
                     foreach (var script in result)
                     {
                         script.RequestPath = script.FilePath
