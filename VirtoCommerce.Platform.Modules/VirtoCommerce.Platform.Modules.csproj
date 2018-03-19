@@ -12,8 +12,8 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="2.0.0" />
     <PackageReference Include="ChinhDo.Transactions.FileManager" Version="1.2.0" />
     <PackageReference Include="NUglify" Version="1.5.9" />
-    <PackageReference Include="Smidge" Version="3.0.0" />
     <PackageReference Include="Smidge.Nuglify" Version="2.0.0" />
+    <PackageReference Include="VirtoCommerce.Smidge" Version="3.0.0-beta002" />
   </ItemGroup>
 
   <ItemGroup>

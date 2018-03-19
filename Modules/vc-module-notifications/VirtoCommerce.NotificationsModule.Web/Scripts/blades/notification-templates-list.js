@@ -1,6 +1,6 @@
 angular.module('virtoCommerce.notificationsModule')
-.controller('virtoCommerce.notificationsModule.notificationTemplatesListController', ['$scope', '$translate', 'virtoCommerce.notificationsModule.notificationTypesResolverService', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.settings', 'platformWebApp.ui-grid.extension', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeUtils',
-    function ($scope, $translate, notificationTypesResolverService, bladeNavigationService, dialogService, settings, gridOptionExtension, uiGridHelper, bladeUtils) {
+.controller('virtoCommerce.notificationsModule.notificationTemplatesListController', ['$scope', '$translate', '$filter', 'virtoCommerce.notificationsModule.notificationTypesResolverService', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.settings', 'platformWebApp.ui-grid.extension', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeUtils',
+    function ($scope, $translate, $filter, notificationTypesResolverService, bladeNavigationService, dialogService, settings, gridOptionExtension, uiGridHelper, bladeUtils) {
         $scope.uiGridConstants = uiGridHelper.uiGridConstants;
 	    var blade = $scope.blade;
 	    blade.selectedLanguage = null;
@@ -15,6 +15,11 @@ angular.module('virtoCommerce.notificationsModule')
 	    blade.initialize = function () {
 		    blade.isLoading = true;
             blade.currentEntities = blade.currentEntity.templates;
+            _.map(blade.currentEntities, function (item) {
+                item.createdDateAsString = $filter('date')(item.createdDate, "yyyy-MM-dd"); 
+                item.modifiedDateAsString = $filter('date')(item.modifiedDate, "yyyy-MM-dd"); 
+                return item;
+            });
             blade.isLoading = false;
         }
         
