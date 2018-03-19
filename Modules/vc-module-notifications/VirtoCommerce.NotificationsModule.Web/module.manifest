@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <module>
-    <id>VirtoCommerce.NotificationsModule</id>
+    <id>VirtoCommerce.Notifications</id>
     <version>1.0.0</version>
     <platformVersion>2.0.0</platformVersion>
     <title>Notifications module</title>

@@ -201,11 +201,8 @@ namespace VirtoCommerce.Platform.Web
             services.AddMemoryCache();
             //Add Smidge runtime bundling library configuration
             services.AddSmidge(Configuration.GetSection("smidge"), new PhysicalFileProvider(modulesDiscoveryPath));
-            services.AddSmidgeNuglify(new NuglifySettings(new NuglifyCodeSettings(new CodeSettings()
-            {
-                MinifyCode = false, PreserveFunctionNames = false, ReorderScopeDeclarations = false, InlineSafeStrings = false
-            }), new CssSettings()));
-            services.AddSingleton<IPreProcessor, NuglifyJsVirtoCommerce>();
+            //services.AddSmidgeNuglify();
+            //services.AddSingleton<IPreProcessor, NuglifyJsVirtoCommerce>();
 
             // Register the Swagger generator
             services.AddSwaggerGen(c =>
@@ -337,7 +334,7 @@ namespace VirtoCommerce.Platform.Web
             {
                 app.UseModulesContent(bundles);
             });
-            app.UseSmidgeNuglify();
+            //app.UseSmidgeNuglify();
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger(c => c.RouteTemplate = "docs/{documentName}/docs.json");

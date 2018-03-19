@@ -35,21 +35,21 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CatalogModule
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CoreModule.Web", "Modules\vc-module-core\VirtoCommerce.CoreModule.Web\VirtoCommerce.CoreModule.Web.csproj", "{091EFD2C-37DD-4790-A5EE-B0B221862C50}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VirtoCommerce.NotificationsModule", "VirtoCommerce.NotificationsModule", "{AFB12010-1866-4A31-865E-5D2DF65FB521}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vc-module-notifications", "vc-module-notifications", "{AFB12010-1866-4A31-865E-5D2DF65FB521}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.Web", "Modules\VirtoCommerce.NotificationsModule\VirtoCommerce.NotificationsModule.Web\VirtoCommerce.NotificationsModule.Web.csproj", "{22084C21-0A6A-4465-B975-9E9FFA78179B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.Web", "Modules\vc-module-notifications\VirtoCommerce.NotificationsModule.Web\VirtoCommerce.NotificationsModule.Web.csproj", "{22084C21-0A6A-4465-B975-9E9FFA78179B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.Core", "Modules\VirtoCommerce.NotificationsModule\VirtoCommerce.NotificationsModule.Core\VirtoCommerce.NotificationsModule.Core.csproj", "{9956C644-63F7-4A56-83A4-83A203E6B608}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.Core", "Modules\vc-module-notifications\VirtoCommerce.NotificationsModule.Core\VirtoCommerce.NotificationsModule.Core.csproj", "{9956C644-63F7-4A56-83A4-83A203E6B608}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.Data", "Modules\VirtoCommerce.NotificationsModule\VirtoCommerce.NotificationsModule.Data\VirtoCommerce.NotificationsModule.Data.csproj", "{EBA867D6-6F8E-4625-B70E-BB24D26A5F2E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.Data", "Modules\vc-module-notifications\VirtoCommerce.NotificationsModule.Data\VirtoCommerce.NotificationsModule.Data.csproj", "{EBA867D6-6F8E-4625-B70E-BB24D26A5F2E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.Tests", "Modules\VirtoCommerce.NotificationsModule\VirtoCommerce.NotificationsModule.Tests\VirtoCommerce.NotificationsModule.Tests.csproj", "{DD805428-3567-457D-B1C5-CB6BD93DB70F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.Tests", "Modules\vc-module-notifications\VirtoCommerce.NotificationsModule.Tests\VirtoCommerce.NotificationsModule.Tests.csproj", "{DD805428-3567-457D-B1C5-CB6BD93DB70F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.NotificationsModule.LiguidRenderer", "Modules\VirtoCommerce.NotificationsModule\VirtoCommerce.NotificationsModule.LiguidRenderer\VirtoCommerce.NotificationsModule.LiguidRenderer.csproj", "{FB63C950-D3AB-458C-BBCE-99BDC34CD619}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.LiguidRenderer", "Modules\vc-module-notifications\VirtoCommerce.NotificationsModule.LiguidRenderer\VirtoCommerce.NotificationsModule.LiguidRenderer.csproj", "{FB63C950-D3AB-458C-BBCE-99BDC34CD619}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.NotificationsModule.Smtp", "Modules\VirtoCommerce.NotificationsModule\VirtoCommerce.NotificationsModule.Smtp\VirtoCommerce.NotificationsModule.Smtp.csproj", "{46B56C6C-B20D-44FA-AD3B-3DD8D8E9D18F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.Smtp", "Modules\vc-module-notifications\VirtoCommerce.NotificationsModule.Smtp\VirtoCommerce.NotificationsModule.Smtp.csproj", "{46B56C6C-B20D-44FA-AD3B-3DD8D8E9D18F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.NotificationsModule.SendGrid", "Modules\VirtoCommerce.NotificationsModule\VirtoCommerce.NotificationsModule.SendGrid\VirtoCommerce.NotificationsModule.SendGrid.csproj", "{BFE3327C-D8A5-4746-98CE-C7D30A078A62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.SendGrid", "Modules\vc-module-notifications\VirtoCommerce.NotificationsModule.SendGrid\VirtoCommerce.NotificationsModule.SendGrid.csproj", "{BFE3327C-D8A5-4746-98CE-C7D30A078A62}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
