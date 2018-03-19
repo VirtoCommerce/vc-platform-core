@@ -1,16 +1,12 @@
+using System.Collections.Generic;
 using VirtoCommerce.CatalogModule.Core.Model;
+
 namespace VirtoCommerce.CatalogModule.Core.Services
 {
     public interface IPropertyService
 	{
-
-		Property GetById(string propertyId);
-        Property[] GetByIds(string[] propertyIds);
-    	Property Create(Property property);
-		void Update(Property[] properties);
-		void Delete(string[] propertyIds);
-        Property[] GetAllCatalogProperties(string catalogId);
-        Property[] GetAllProperties();
-        PropertyDictionaryValue[] SearchDictionaryValues(string propertyId, string keyword);
-	}
+        IEnumerable<Property> GetByIds(IEnumerable<string> ids);
+    	void SaveChanges(IEnumerable<Property> properties);
+		void Delete(IEnumerable<string> ids, bool doDeleteValues = false);
+  	}
 }

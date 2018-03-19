@@ -20,10 +20,6 @@
     <ProjectReference Include="..\..\vc-module-core\VirtoCommerce.CoreModule.Core\VirtoCommerce.CoreModule.Core.csproj" />
     <ProjectReference Include="..\VirtoCommerce.CatalogModule.Core\VirtoCommerce.CatalogModule.Core.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Validation\" />
-  </ItemGroup>
   
 
 </Project>

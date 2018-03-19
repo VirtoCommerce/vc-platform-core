@@ -1,8 +1,9 @@
+using System;
 using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Common;
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-	public class CategoryLink : ValueObject
+	public class CategoryLink : ValueObject, ICloneable
     {
         /// <summary>
         /// Entry identifier which this link belongs to
@@ -22,6 +23,13 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         /// </summary>
         public string CategoryId { get; set; }
 		public Category Category { get; set; }
+
+        #region ICloneable members
+        public virtual object Clone()
+        {
+            return MemberwiseClone();
+        } 
+        #endregion
 
         protected override IEnumerable<object> GetEqualityComponents()
         {

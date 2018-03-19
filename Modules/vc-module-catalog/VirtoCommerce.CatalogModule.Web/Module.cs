@@ -26,7 +26,11 @@ namespace VirtoCommerce.CatalogModule.Web
             serviceCollection.AddSingleton<ICategoryService, CategoryService>();
             serviceCollection.AddSingleton<IOutlineService, OutlineService>();
             serviceCollection.AddSingleton<IItemService, ItemService>();
+            serviceCollection.AddSingleton<IPropertyService, PropertyService>();
+            serviceCollection.AddSingleton<IPropertySearchService, PropertySearchService>();
+            serviceCollection.AddSingleton<ISkuGenerator, DefaultSkuGenerator>();
             serviceCollection.AddSingleton<IListEntrySearchService, ListEntrySearchService>();
+
             Func<PropertyValidationRule, PropertyValueValidator> propertyValueValidatorFactory =
               rule => new PropertyValueValidator(rule);
 

@@ -20,7 +20,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
 
         public override string ToString()
         {
-            return (PropertyName ?? "unknown") + ":" + (Value ?? "undefined");
+            return (PropertyName ?? "unknown") + "-" + (Value ?? "undefined");
         }
 
         #region IInheritable Members

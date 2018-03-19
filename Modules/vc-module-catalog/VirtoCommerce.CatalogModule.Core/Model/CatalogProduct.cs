@@ -7,7 +7,7 @@ using VirtoCommerce.Platform.Core.Domain;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class CatalogProduct : AuditableEntity, IAggregateRoot, IHasLinks, ISeoSupport, IHasOutlines, IHaveDimension, IHasAssociations, IHasProperties, IHasImages, IHasAssets, IInheritable, IHasTaxType
+    public class CatalogProduct : AuditableEntity, IAggregateRoot, IHasLinks, ISeoSupport, IHasOutlines, IHaveDimension, IHasAssociations, IHasProperties, IHasImages, IHasAssets, IInheritable, IHasTaxType, ICloneable
     {
         /// <summary>
         /// SKU code
@@ -252,6 +252,25 @@ namespace VirtoCommerce.CatalogModule.Core.Model
             }
         }
         #endregion
+ 
+        public virtual CatalogProduct GetCopy()
+        {
+            var result = Clone() as CatalogProduct;
+   
+            // Clear ID for all related entities except properties
+            var allEntities = this.GetFlatObjectsListWithInterface<ISeoSupport>();
+            foreach (var entity in allEntities)
+            {
+                var property = entity as Property;
+                if (property is  null)
+                {
+                    entity.SeoInfos.Clear();
+                    entity.Id = null;
+                }
+            }
+            return result;
+        }
+
         public virtual void Move(string catalogId, string categoryId)
         {
             CatalogId = catalogId;
@@ -305,5 +324,49 @@ namespace VirtoCommerce.CatalogModule.Core.Model
                 Variations = null;
             }
         }
+
+        #region ICloneable members
+        public virtual object Clone()
+        {
+            var result = base.MemberwiseClone() as CatalogProduct;
+            if (SeoInfos != null)
+            {
+                result.SeoInfos = SeoInfos.Select(x => x.Clone()).OfType<SeoInfo>().ToList();
+            }
+            if (Images != null)
+            {
+                result.Images = Images.Select(x => x.Clone()).OfType<Image>().ToList();
+            }
+            if (Assets != null)
+            {
+                result.Assets = Assets.Select(x => x.Clone()).OfType<Asset>().ToList();
+            }
+            if (Properties != null)
+            {
+                result.Properties = Properties.Select(x => x.Clone()).OfType<Property>().ToList();
+            }
+            if (Associations != null)
+            {
+                result.Associations = Associations.Select(x => x.Clone()).OfType<ProductAssociation>().ToList();
+            }
+            if (ReferencedAssociations != null)
+            {
+                result.ReferencedAssociations = ReferencedAssociations.Select(x => x.Clone()).OfType<ProductAssociation>().ToList();
+            }
+            if (Reviews != null)
+            {
+                result.Reviews = Reviews.Select(x => x.Clone()).OfType<EditorialReview>().ToList();
+            }
+            if (Links != null)
+            {
+                result.Links = Links.Select(x => x.Clone()).OfType<CategoryLink>().ToList();
+            }
+            if (Variations != null)
+            {
+                result.Variations = Variations.Select(x => x.Clone()).OfType<Variation>().ToList();
+            }
+            return result;
+        }
+        #endregion
     }
 }

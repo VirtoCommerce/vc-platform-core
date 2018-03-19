@@ -120,15 +120,44 @@ namespace VirtoCommerce.CatalogModule.Core.Model
                         Values.Add(propValue);
                     }
                 }
+            }
 
+            if(parent is Catalog catalog)
+            {
+                var displayNamesForCatalogLanguages = catalog.Languages.Select(x => new PropertyDisplayName { LanguageCode = x.LanguageCode }).ToList();
+                //Leave display names only with catalog languages
+                DisplayNames = DisplayNames.Intersect(displayNamesForCatalogLanguages).ToList();
+                //Add missed
+                DisplayNames.AddRange(displayNamesForCatalogLanguages.Except(DisplayNames));
             }
         }
         #endregion
 
         #region ICloneable members
-        public object Clone()
+        public virtual object Clone()
         {
-            return base.MemberwiseClone();
+            var result = MemberwiseClone() as Property;
+            if(Attributes != null)
+            {
+                result.Attributes = Attributes.Select(x => x.Clone()).OfType<PropertyAttribute>().ToList();
+            }
+            if (DictionaryValues != null)
+            {
+                result.DictionaryValues = DictionaryValues.Select(x => x.Clone()).OfType<PropertyDictionaryValue>().ToList();
+            }
+            if (DisplayNames != null)
+            {
+                result.DisplayNames = DisplayNames.Select(x => x.Clone()).OfType<PropertyDisplayName>().ToList();
+            }
+            if (ValidationRules != null)
+            {
+                result.ValidationRules = ValidationRules.Select(x => x.Clone()).OfType<PropertyValidationRule>().ToList();
+            }
+            if (Values != null)
+            {
+                result.Values = Values.Select(x => x.Clone()).OfType<PropertyValue>().ToList();
+            }
+            return result;
         }
         #endregion
     }
