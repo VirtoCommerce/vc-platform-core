@@ -14,7 +14,7 @@ angular.module('virtoCommerce.notificationsModule')
 			languages: blade.currentEntity.languages,
             subtitle: 'notifications.widgets.notificationsLogWidget.blade-subtitle',
             controller: 'virtoCommerce.notificationsModule.notificationsJournalController',
-			template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notifications-journal.tpl.html'
+			template: 'Modules/$(VirtoCommerce.Notifications)/Scripts/blades/notifications-journal.tpl.html'
 		};
 		bladeNavigationService.showBlade(newBlade, blade);
 	};

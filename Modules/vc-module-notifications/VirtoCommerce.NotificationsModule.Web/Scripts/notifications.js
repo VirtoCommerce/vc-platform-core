@@ -18,7 +18,7 @@ angular.module(moduleTemplateName, ['textAngular'])
                                 title: 'platform.menu.notifications',
                                 subtitle: 'platform.blades.notifications-menu.subtitle',
                                 controller: 'virtoCommerce.notificationsModule.notificationsMenuController',
-                                template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notifications-menu.tpl.html',
+                                template: 'Modules/$(virtoCommerce.Notifications)/Scripts/blades/notifications-menu.tpl.html',
                                 isClosingDisabled: true
                             };
                             bladeNavigationService.showBlade(blade);
@@ -65,15 +65,15 @@ angular.module(moduleTemplateName, ['textAngular'])
 
             widgetService.registerWidget({
       	        controller: 'virtoCommerce.notificationsModule.notificationsTemplatesWidgetController',
-      	        template: 'Modules/$(VirtoCommerce.notificationsModule)/Scripts/widgets/notificationsTemplatesWidget.tpl.html'
+      	        template: 'Modules/$(VirtoCommerce.Notifications)/Scripts/widgets/notificationsTemplatesWidget.tpl.html'
       	    }, 'notificationsDetail');
             widgetService.registerWidget({
       	        controller: 'virtoCommerce.notificationsModule.notificationsLogWidgetController',
-      	        template: 'Modules/$(VirtoCommerce.notificationsModule)/Scripts/widgets/notificationsLogWidget.tpl.html'
+      	        template: 'Modules/$(VirtoCommerce.Notifications)/Scripts/widgets/notificationsLogWidget.tpl.html'
       	    }, 'notificationsDetail');
             widgetService.registerWidget({
       	        controller: 'virtoCommerce.notificationsModule.notificationsAttachmentsWidgetController',
-      	        template: 'Modules/$(VirtoCommerce.notificationsModule)/Scripts/widgets/notificationsAttachmentsWidget.tpl.html'
+      	        template: 'Modules/$(VirtoCommerce.Notifications)/Scripts/widgets/notificationsAttachmentsWidget.tpl.html'
       	    }, 'notificationsDetail');
             
             // register types
@@ -81,7 +81,7 @@ angular.module(moduleTemplateName, ['textAngular'])
                 type: 'EmailNotification',
                 icon: 'fa fa-envelope',
                 detailBlade: {
-                  template: 'Modules/$(VirtoCommerce.notificationsModule)/Scripts/blades/notifications-edit-template.tpl.html'
+                  template: 'Modules/$(VirtoCommerce.Notifications)/Scripts/blades/notifications-edit-template.tpl.html'
                 },
                 knownChildrenTypes: ['Email', 'Sms']
             }); 
@@ -94,7 +94,7 @@ angular.module(moduleTemplateName, ['textAngular'])
                 
             ]);
             
-            $http.get('Modules/$(VirtoCommerce.notificationsModule)/Scripts/directives/itemSearch.tpl.html').then(function (response) {
+            $http.get('Modules/$(VirtoCommerce.Notifications/Scripts/directives/itemSearch.tpl.html').then(function (response) {
                 // compile the response, which will put stuff into the cache
                 $compile(response.data);
             });  

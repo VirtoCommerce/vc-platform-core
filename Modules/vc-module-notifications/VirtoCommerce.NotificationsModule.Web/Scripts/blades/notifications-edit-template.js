@@ -125,7 +125,7 @@
             currentEntity: blade.currentEntity,
             language: blade.currentEntity.language,
 			controller: 'virtoCommerce.notificationsModule.templateRenderController',
-			template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notifications-template-render.tpl.html'
+			template: 'Modules/$(VirtoCommerce.Notifications)/Scripts/blades/notifications-template-render.tpl.html'
 		};
 
 		bladeNavigationService.showBlade(newBlade, blade);

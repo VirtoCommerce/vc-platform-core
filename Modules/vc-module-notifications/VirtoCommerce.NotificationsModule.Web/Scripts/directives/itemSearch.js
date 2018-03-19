@@ -22,7 +22,7 @@
                 var newBlade = {
                     id: 'filterDetail',
                     controller: 'virtoCommerce.notificationsModule.filterJournalDetailController',
-                    template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/filter-detail.tpl.html',
+                    template: 'Modules/$(VirtoCommerce.Notifications)/Scripts/blades/filter-detail.tpl.html',
                 };
                 angular.extend(newBlade, bladeData);
                 bladeNavigationService.showBlade(newBlade, blade);

@@ -20,7 +20,7 @@ angular.module('virtoCommerce.notificationsModule')
             currentEntity : blade.currentEntity,
             subtitle: 'notifications.widgets.notificationsTemplatesWidget.blade-subtitle',
 			controller: 'virtoCommerce.notificationsModule.notificationTemplatesListController',
-			template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/notification-templates-list.tpl.html'
+			template: 'Modules/$(VirtoCommerce.Notifications)/Scripts/blades/notification-templates-list.tpl.html'
 		};
 		bladeNavigationService.showBlade(newBlade, blade);
 	};

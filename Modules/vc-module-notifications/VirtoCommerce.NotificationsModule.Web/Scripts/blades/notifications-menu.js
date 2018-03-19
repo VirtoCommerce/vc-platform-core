@@ -25,7 +25,7 @@ angular.module('virtoCommerce.notificationsModule')
             tenantType: tenantType,
             subtitle: data.subtitle,
             controller: 'virtoCommerce.notificationsModule.' + data.controllerName,
-            template: 'Modules/$(virtoCommerce.notificationsModule)/Scripts/blades/' + data.templateName + '.tpl.html'
+            template: 'Modules/$(VirtoCommerce.Notifications)/Scripts/blades/' + data.templateName + '.tpl.html'
         };
         bladeNavigationService.showBlade(newBlade, blade);
     }
