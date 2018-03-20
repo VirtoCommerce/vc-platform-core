@@ -16,7 +16,6 @@ using Smidge.Nuglify;
 using Smidge.Options;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.Platform.Modules.Smidge;
 
 namespace VirtoCommerce.Platform.Modules.Extensions
 {
@@ -54,70 +53,35 @@ namespace VirtoCommerce.Platform.Modules.Extensions
 
             var scriptBundleItems = modules.SelectMany(m => m.Scripts).ToArray();
             var jsFiles = scriptBundleItems.OfType<ManifestBundleFile>().Select(x => new JavaScriptFile(x.VirtualPath));
-            //jsFiles = jsFiles.Concat(scriptBundleItems.OfType<ManifestBundleDirectory>().SelectMany(x => new WebFileFolder(modulesOptions.DiscoveryPath, x.VirtualPath)
-            //                                                                    .AllWebFiles<JavaScriptFile>(x.SearchPattern, x.SearchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)));
-            foreach (var module in modules)
+
+            jsFiles = modules.Aggregate(jsFiles, (current, module) =>
             {
-                jsFiles = jsFiles.Concat(module.Scripts.OfType<ManifestBundleDirectory>().SelectMany((s =>
-                {
-                    var result = new WebFileFolder(modulesOptions.DiscoveryPath, s.VirtualPath)
-                                    .AllWebFiles<JavaScriptFileVirtoCommerce>(s.SearchPattern
-                                        , s.SearchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
-                    if (env.IsDevelopment())
-                    {
-                        foreach (var script in result)
-                        {
-                            script.FilePath = script.FilePath.Replace("~/", "");
-                            string root = GetRootFolder(script.FilePath);
-                            var requestPath = script.FilePath
-                                .Replace(root, "Modules")
-                                .Replace($"{module.ModuleName}Module.Web", $"$({module.ModuleName})");
-                            script.FilePath = $"{requestPath}";
-                        }
-                    }
-                    
-                    return result;
-                })));
+                return current.Concat(module.Scripts
+                    .OfType<ManifestBundleDirectory>()
+                    .SelectMany(s =>
+                        env.IsDevelopment() ?
+                            new WebFileFolder(modulesOptions.DiscoveryPath, s.VirtualPath, module.ModuleName)
+                                .AllWebFilesForDevelopment<JavaScriptFile>(s.SearchPattern,
+                                    s.SearchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly) :
+                        new WebFileFolder(modulesOptions.DiscoveryPath, s.VirtualPath, module.ModuleName)
+                            .AllWebFilesWithRequestRoot<JavaScriptFile>(s.SearchPattern,
+                                s.SearchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)));
+            });
 
-                //appBuilder.UseStaticFiles(new StaticFileOptions()
-                //{
-                //    FileProvider = new PhysicalFileProvider(module.FullPhysicalPath),
-                //    RequestPath = new PathString($"/sb/maps/$({ module.ModuleName })")
-                //});
-            }
-
-
-            //TODO: Test minification and uglification for resulting bundles
             var options = bundles.DefaultBundleOptions;
             options.DebugOptions.FileWatchOptions.Enabled = true;
             options.DebugOptions.ProcessAsCompositeFile = false;
             options.DebugOptions.CompressResult = false;
             options.DebugOptions.CacheControlOptions = new CacheControlOptions() { EnableETag = false, CacheControlMaxAge = 0 };
-            //options.ProductionOptions.ProcessAsCompositeFile = true;
-            //options.ProductionOptions.FileWatchOptions.Enabled = true;
-            //options.ProductionOptions.CacheControlOptions = new CacheControlOptions() { EnableETag = false, CacheControlMaxAge = 0 };
-            //bundles.PipelineFactory.OnCreateDefault = (type, pipeline) => pipeline.Replace<JsMinifier, NuglifyJs>(bundles.PipelineFactory);
 
             bundles.Create("vc-modules-styles", cssFiles.ToArray())
                .WithEnvironmentOptions(options);
 
-            bundles.Create("vc-modules-scripts"/*, bundles.PipelineFactory.Create<NuglifyJsVirtoCommerce>()*/, jsFiles.ToArray())
+            bundles.Create("vc-modules-scripts", bundles.PipelineFactory.Create<NuglifyJs>(), jsFiles.ToArray())
                    .WithEnvironmentOptions(options);
 
 
             return appBuilder;
-        }
-
-        static string GetRootFolder(string path)
-        {
-            while (true)
-            {
-                string temp = Path.GetDirectoryName(path);
-                if (String.IsNullOrEmpty(temp))
-                    break;
-                path = temp;
-            }
-            return path;
         }
 
         private static IEnumerable<ManifestModuleInfo> GetInstalledModules(IServiceProvider serviceProvider)
@@ -139,11 +103,19 @@ namespace VirtoCommerce.Platform.Modules.Extensions
     {
         private readonly string _rootPath;
         private readonly string _path;
+        private readonly string _moduleName;
 
         public WebFileFolder(string rootPath, string path)
         {
             _rootPath = rootPath;
             _path = path;
+        }
+
+        public WebFileFolder(string rootPath, string path, string moduleName)
+        {
+            _rootPath = rootPath;
+            _path = path;
+            _moduleName = moduleName;
         }
 
         public T[] AllWebFiles<T>(string pattern, SearchOption search) where T : IWebFile, new()
@@ -156,14 +128,51 @@ namespace VirtoCommerce.Platform.Modules.Extensions
             return result;
         }
 
+        public T[] AllWebFilesForDevelopment<T>(string pattern, SearchOption search) where T : IWebFile, new()
+        {
+            return Directory.GetFiles(Path.Combine(_rootPath, _path), pattern, search)
+                .Select(f =>
+                {
+                    var result = new T
+                    {
+                        FilePath = GetRelativePath(f, GetRootFolder(_path))
+                    };
+                    return result;
+                }).ToArray();
+        }
+
         public T[] AllWebFilesWithRequestRoot<T>(string pattern, SearchOption search) where T : IWebFile, new()
         {
-            var fsPath = _path.Replace("~", _rootPath);
-            return Directory.GetFiles(fsPath, pattern, search)
-                .Select(f => new T
+            return Directory.GetFiles(Path.Combine(_rootPath, _path), pattern, search)
+                .Select(f =>
                 {
-                    FilePath = f.Replace(_rootPath, "~").Replace("\\", "/")
+                    var result = new T
+                    {
+                        FilePath = f.Replace(_rootPath, "~").Replace("\\", "/"),
+                        RequestPath = GetRelativePath(f, GetRootFolder(_path))
+                    };
+                    return result;
                 }).ToArray();
+        }
+
+        string GetRelativePath(string fullPath, string moduleFolder)
+        {
+            return fullPath.Replace(_rootPath, "")
+                .Replace(moduleFolder, "Modules")
+                .Replace("\\", "/")
+                .Replace($"{_moduleName}Module.Web", $"$({_moduleName})");
+        }
+
+        string GetRootFolder(string path)
+        {
+            while (true)
+            {
+                string temp = Path.GetDirectoryName(path);
+                if (String.IsNullOrEmpty(temp))
+                    break;
+                path = temp;
+            }
+            return path;
         }
     }
 }

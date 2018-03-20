@@ -38,9 +38,9 @@
     <PackageReference Include="OpenIddict" Version="2.0.0-rc1-final" />
     <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="2.0.0-rc1-final" />
     <PackageReference Include="OpenIddict.Mvc" Version="2.0.0-rc1-final" />
-    <PackageReference Include="Smidge.Nuglify" Version="2.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="1.1.0" />
     <PackageReference Include="VirtoCommerce.Smidge" Version="3.0.0-beta002" />
+    <PackageReference Include="VirtoCommerce.Smidge.Nuglify" Version="2.0.0-beta002" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.1" />

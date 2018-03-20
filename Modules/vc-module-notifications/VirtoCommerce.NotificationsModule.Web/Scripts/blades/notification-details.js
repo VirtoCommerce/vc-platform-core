@@ -1,7 +1,9 @@
 ﻿angular.module('virtoCommerce.notificationsModule')
 .controller('virtoCommerce.notificationsModule.notificationsEditController', ['$rootScope', '$scope', '$timeout', 'virtoCommerce.notificationsModule.notificationsModuleApi', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService',
 function ($rootScope, $scope, $timeout, notifications, bladeNavigationService, dialogService) {
-	$scope.setForm = function (form) { $scope.formScope = form; }
+	$scope.setForm = function (form) { 
+        $scope.formScope = form; 
+    }
 
 	var blade = $scope.blade;
 	blade.updatePermission = 'platform:notification:update';
@@ -20,8 +22,8 @@ function ($rootScope, $scope, $timeout, notifications, bladeNavigationService, d
 	function setNotification(data) {
 		blade.tenantId = data.tenantId;
 		blade.tenantType = data.tenantType;
-		blade.origEntity = angular.copy(data);
-		blade.currentEntity = data;
+        blade.currentEntity = angular.copy(data);
+		blade.origEntity = angular.copy(blade.currentEntity);
         $scope.isValid = false;
 	};
 
@@ -73,11 +75,13 @@ function ($rootScope, $scope, $timeout, notifications, bladeNavigationService, d
 	}, true); 
 
 	function isDirty() {
+        var noteq = !angular.equals(blade.origEntity, blade.currentEntity);
+        console.log("not equals - " + noteq);
         return (!angular.equals(blade.origEntity, blade.currentEntity) || blade.isNew) && blade.hasUpdatePermission();
 	}
 
 	function canSave() {
-		return isDirty() && $scope.isValid;//$scope.formScope && $scope.formScope.$valid;
+        return isDirty() && $scope.isValid;
 	}
 
 	blade.onClose = function (closeCallback) {

@@ -94,7 +94,7 @@ angular.module(moduleTemplateName, ['textAngular'])
                 
             ]);
             
-            $http.get('Modules/$(VirtoCommerce.Notifications/Scripts/directives/itemSearch.tpl.html').then(function (response) {
+            $http.get('Modules/$(VirtoCommerce.Notifications)/Scripts/directives/itemSearch.tpl.html').then(function (response) {
                 // compile the response, which will put stuff into the cache
                 $compile(response.data);
             });  
