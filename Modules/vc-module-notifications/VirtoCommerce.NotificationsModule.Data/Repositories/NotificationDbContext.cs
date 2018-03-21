@@ -14,10 +14,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            
-            
-            modelBuilder.Entity<NotificationEmailRecipientEntity>().ToTable("NotificationEmailRecipient");
-
             #region Notification
 
             modelBuilder.Entity<NotificationEntity>().ToTable("Notification").HasKey(x => x.Id);
@@ -80,7 +76,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             modelBuilder.Entity<NotificationEmailRecipientEntity>().Property(x => x.Id).HasMaxLength(128);
 
             #endregion
-
 
             base.OnModelCreating(modelBuilder);
         }

@@ -17,13 +17,12 @@
     $scope.saveChanges = function () {
         var date = new Date();
         var now = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
-        if (!blade.currentEntity.languageCode) { blade.currentEntity.languageCode = null; }
         if (!blade.isNew) {
-            blade.currentEntity.modified = now;
+            blade.currentEntity.modifiedDate = now;
             blade.origEntity = angular.copy(blade.currentEntity);
         }
         else {
-            blade.currentEntity.created = now;
+            blade.currentEntity.createdDate = now;
             blade.origEntity = angular.copy(blade.currentEntity);
         }
         var ind = blade.notification.templates.findIndex(function (element) {
@@ -34,9 +33,6 @@
         }
         else {
             blade.notification.templates.push(blade.currentEntity);
-        }
-        if (blade.dynamicProperties) {
-            $localStorage[keyTemplateLocalStorage] = blade.dynamicProperties;    
         }
         blade.parentBlade.initialize();
         $scope.bladeClose();
@@ -67,12 +63,8 @@
     function setTemplate(data) {
         
 		blade.isLoading = false;
-        if (!blade.isNew) {
-            keyTemplateLocalStorage = blade.tenantType + '.' + blade.notification.type + '.' + blade.currentEntity.languageCode;
-            var itemFromLocalStorage = $localStorage[keyTemplateLocalStorage];
-            if (itemFromLocalStorage) {
-                blade.dynamicProperties = itemFromLocalStorage;
-            }    
+        if (blade.currentEntity && blade.currentEntity.languageCode === undefined) { 
+            blade.currentEntity.languageCode = null; 
         }
         
 		$timeout(function () {
@@ -88,31 +80,18 @@
 
 	blade.initialize = function () {
 		blade.isLoading = true;
-        if (blade.languageCode != 'undefined') {
+        if (blade.languageCode || blade.languageCode === null) {
             var found = _.findWhere(blade.notification.templates, { languageCode: blade.languageCode });
             if (found){
                 blade.currentEntity = angular.copy(found);        
                 blade.origEntity = angular.copy(blade.currentEntity);
                 blade.orightml = blade.currentEntity.body;
             }
-            
         }
+            
         setTemplate(blade.currentEntity);
 	};
 
-//	$scope.editorOptions = {
-//		lineWrapping: true,
-//		lineNumbers: true,
-//		parserfile: "liquid.js",
-//		extraKeys: { "Ctrl-Q": function (cm) { cm.foldCode(cm.getCursor()); } },
-//		foldGutter: true,
-//		gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-//		onLoad: function (_editor) {
-//			codemirrorEditor = _editor;
-//		},
-//		mode: "liquid-html"
-//	};
-     
      blade.renderTemplate = function () {
 		var newBlade = {
 			id: 'renderTemplate',

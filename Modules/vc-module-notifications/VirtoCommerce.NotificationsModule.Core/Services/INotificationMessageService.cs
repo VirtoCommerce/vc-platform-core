@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using VirtoCommerce.NotificationsModule.Core.Model;
 
-namespace VirtoCommerce.NotificationsModule.Core.Abstractions
+namespace VirtoCommerce.NotificationsModule.Core.Services
 {
     /// <summary>
     /// The service has a logic query/save of message to Database

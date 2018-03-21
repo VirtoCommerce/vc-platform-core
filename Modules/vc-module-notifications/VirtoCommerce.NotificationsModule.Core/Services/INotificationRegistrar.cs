@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using VirtoCommerce.NotificationsModule.Core.Model;
 
-namespace VirtoCommerce.NotificationsModule.Core.Abstractions
+namespace VirtoCommerce.NotificationsModule.Core.Services
 {
     /// <summary>
     /// The registrar is for registration a type in the AbstractTypeFactory

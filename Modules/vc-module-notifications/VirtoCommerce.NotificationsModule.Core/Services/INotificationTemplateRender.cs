@@ -1,4 +1,4 @@
-namespace VirtoCommerce.NotificationsModule.Core.Abstractions
+namespace VirtoCommerce.NotificationsModule.Core.Services
 {
     /// <summary>
     /// Rendering text by Liquid Templates 

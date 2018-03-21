@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.NotificationsModule.Core.Model;
+using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Senders;
@@ -56,10 +56,19 @@ namespace VirtoCommerce.NotificationsModule.Web
                 var notificationDbContext = serviceScope.ServiceProvider.GetRequiredService<NotificationDbContext>();
                 notificationDbContext.Database.Migrate();
             }
+
+            //for test
+            var registrar = serviceProvider.GetService<INotificationRegistrar>();
+            registrar.RegisterNotification<RegistrationEmailNotification>();
         }
 
         public void Uninstall()
         {
         }
+    }
+
+    public class RegistrationEmailNotification : EmailNotification
+    {
+        
     }
 }

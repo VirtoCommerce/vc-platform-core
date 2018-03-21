@@ -1,5 +1,5 @@
 using Scriban;
-using VirtoCommerce.NotificationsModule.Core.Abstractions;
+using VirtoCommerce.NotificationsModule.Core.Services;
 
 namespace VirtoCommerce.NotificationsModule.LiguidRenderer
 {

@@ -1,5 +1,4 @@
 using System;
-using VirtoCommerce.NotificationsModule.Core.Abstractions;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Core.Model
