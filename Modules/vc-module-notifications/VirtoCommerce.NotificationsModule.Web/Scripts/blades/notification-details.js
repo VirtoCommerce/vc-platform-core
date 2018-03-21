@@ -27,12 +27,17 @@ function ($rootScope, $scope, $timeout, notifications, bladeNavigationService, d
         $scope.isValid = false;
 	};
 
+	function pluckAddress(address) {
+		if (address) {
+			return _(address).pluck('value');	
+		}
+		return address;
+	}
+
 	blade.updateNotification = function () {
 		blade.isLoading = true;
-        if (blade.currentEntity.cc) {
-            var result = _(blade.currentEntity.cc).pluck('value');
-            blade.currentEntity.cc = result;
-        }
+        blade.currentEntity.cc = pluckAddress(blade.currentEntity.cc);
+        blade.currentEntity.bcc = pluckAddress(blade.currentEntity.bcc);
 		notifications.updateNotification({ type: blade.type }, blade.currentEntity, function () {
 			blade.isLoading = false;
 			blade.origEntity = angular.copy(blade.currentEntity);
@@ -75,8 +80,6 @@ function ($rootScope, $scope, $timeout, notifications, bladeNavigationService, d
 	}, true); 
 
 	function isDirty() {
-        var noteq = !angular.equals(blade.origEntity, blade.currentEntity);
-        console.log("not equals - " + noteq);
         return (!angular.equals(blade.origEntity, blade.currentEntity) || blade.isNew) && blade.hasUpdatePermission();
 	}
 
