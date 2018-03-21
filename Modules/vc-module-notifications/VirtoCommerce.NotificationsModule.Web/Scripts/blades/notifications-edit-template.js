@@ -4,7 +4,7 @@
     var blade = $scope.blade;    
     blade.updatePermission = 'platform:notification:update';
     $scope.isValid = false;
-     
+
     var formScope; 
     $scope.setForm = function (form) { 
         formScope = form; 
@@ -17,7 +17,7 @@
     $scope.saveChanges = function () {
         var date = new Date();
         var now = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
-        if (!blade.currentEntity.languageCode) { blade.currentEntity.languageCode = 'default'; }
+        if (!blade.currentEntity.languageCode) { blade.currentEntity.languageCode = null; }
         if (!blade.isNew) {
             blade.currentEntity.modified = now;
             blade.origEntity = angular.copy(blade.currentEntity);
@@ -88,7 +88,7 @@
 
 	blade.initialize = function () {
 		blade.isLoading = true;
-        if (blade.languageCode) {
+        if (blade.languageCode != 'undefined') {
             var found = _.findWhere(blade.notification.templates, { languageCode: blade.languageCode });
             if (found){
                 blade.currentEntity = angular.copy(found);        

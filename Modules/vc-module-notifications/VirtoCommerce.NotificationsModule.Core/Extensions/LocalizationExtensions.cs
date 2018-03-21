@@ -11,7 +11,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Extensions
     {
         public static T FindWithLanguage<T>(this IEnumerable<T> items, string language) where T : IHasLanguageCode
         {
-            if (language.Equals("default")) language = null;
+            if (string.IsNullOrEmpty(language)) language = null;
 
             var result = items.FirstOrDefault(i => i.LanguageCode == language);
             

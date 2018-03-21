@@ -6,10 +6,11 @@ angular.module('virtoCommerce.notificationsModule')
         blade.title = 'Notifications';
         blade.selectedType = null;
         blade.currentLanguage = i18n.getLanguage();
+        var promise = settings.getValues({ id: 'VirtoCommerce.Core.General.Languages' }).$promise;
         var bladeNavigationService = bladeUtils.bladeNavigationService;
         if (!blade.languages) {
-            var languages = ["default", "en-US", "de-DE"];
-      		blade.languages = languages;
+            var languages = ["en-US", "de-DE"];
+      		  blade.languages = languages;
       	}
         
         // filtering

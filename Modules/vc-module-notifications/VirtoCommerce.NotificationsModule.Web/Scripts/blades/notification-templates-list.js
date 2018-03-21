@@ -6,7 +6,7 @@ angular.module('virtoCommerce.notificationsModule')
 	    blade.selectedLanguage = null;
 
 	    if (!blade.languages) {
-            var languages = ["default", "en-US", "de-DE"];
+            var languages = ["en-US", "de-DE"];
             blade.languages = languages;
             //TODO
 		    //blade.languages = settings.getValues({ id: 'VirtoCommerce.Core.General.Languages' });

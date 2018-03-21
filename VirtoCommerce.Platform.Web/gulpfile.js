@@ -106,7 +106,7 @@ gulp.task('translateSass', function () {
         .pipe(gulp.dest('wwwroot/css'));
 });
 
-var cssStream = gulp.src(['wwwroot/css/custom/*.css', 'wwwroot/css/themes/main/css/**/*.css', 'wwwroot/js/codemirror/**/*.css', '!wwwroot/css/themes/main/css/allPackages.css'])
+var cssStream = gulp.src(['wwwroot/css/themes/main/css/**/*.css', 'wwwroot/js/codemirror/**/*.css', '!wwwroot/css/themes/main/css/allPackages.css'])
     .pipe(concat('css-files.css'));
 
 gulp.task("min:css", function () {

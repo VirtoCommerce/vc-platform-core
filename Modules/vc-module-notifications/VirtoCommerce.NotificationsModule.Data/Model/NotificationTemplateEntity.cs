@@ -44,7 +44,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             if (template == null) throw new ArgumentNullException(nameof(template));
 
             template.Id = this.Id;
-            template.LanguageCode = string.IsNullOrEmpty(this.LanguageCode) ? "default" : this.LanguageCode;
+            template.LanguageCode = this.LanguageCode;
             template.CreatedBy = this.CreatedBy;
             template.CreatedDate = this.CreatedDate;
             template.ModifiedBy = this.ModifiedBy;
@@ -69,8 +69,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             if (template == null) throw new ArgumentNullException(nameof(template));
 
             this.Id = template.Id;
-            //todo
-            this.LanguageCode = template.LanguageCode.Equals("default") ? null : template.LanguageCode;
+            this.LanguageCode = template.LanguageCode;
             this.CreatedBy = template.CreatedBy;
             this.CreatedDate = template.CreatedDate;
             this.ModifiedBy = template.ModifiedBy;

@@ -9,7 +9,7 @@
                         <div class="form-group" style="margin:0 200px 0 0">
                             <label class="form-label" style="margin:0">{{'notifications.blades.notifications-edit-template.labels.language' | translate}}</label>
                             <div class="form-input" style="margin-top:0">
-                                <ui-select ng-model="blade.currentEntity.languageCode">
+                                <ui-select ng-model="blade.languageCode">
                                     <ui-select-match allow-clear placeholder="{{ 'notifications.blades.notifications-edit-template.placeholders.language' | translate }}">{{$select.selected}}</ui-select-match>
                                     <ui-select-choices repeat="x in blade.languages">
                                         <span ng-bind-html="x"></span>

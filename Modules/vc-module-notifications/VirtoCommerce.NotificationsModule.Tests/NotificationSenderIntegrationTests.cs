@@ -16,6 +16,7 @@ using VirtoCommerce.NotificationsModule.Smtp;
 using VirtoCommerce.NotificationsModule.Tests.Model;
 using VirtoCommerce.NotificationsModule.Tests.NotificationTypes;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Events;
 using Xunit;
 
 namespace VirtoCommerce.NotificationsModule.Tests
@@ -31,6 +32,7 @@ namespace VirtoCommerce.NotificationsModule.Tests
         private readonly INotificationRegistrar _notificationRegistrar;
         private readonly Mock<INotificationRepository> _repositoryMock;
         private readonly Mock<ILogger<NotificationSender>> _logNotificationSenderMock;
+        private readonly Mock<IEventPublisher> _eventPulisherMock;
         private readonly EmailSendingOptions _emailSendingOptions;
 
         public NotificationSenderIntegrationTests()
@@ -51,8 +53,9 @@ namespace VirtoCommerce.NotificationsModule.Tests
             _serviceMock = new Mock<INotificationService>();
             _repositoryMock = new Mock<INotificationRepository>();
             _logNotificationSenderMock = new Mock<ILogger<NotificationSender>>();
+            _eventPulisherMock = new Mock<IEventPublisher>();
             INotificationRepository RepositoryFactory() => _repositoryMock.Object;
-            _notificationRegistrar = new NotificationService(RepositoryFactory);
+            _notificationRegistrar = new NotificationService(RepositoryFactory, _eventPulisherMock.Object);
 
             //todo
             if (!AbstractTypeFactory<Notification>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotification))))
@@ -78,7 +81,6 @@ namespace VirtoCommerce.NotificationsModule.Tests
         public async Task SmtpEmailNotificationMessageSender_SuccessSentMessage()
         {
             //Arrange
-            string language = "default";
             string number = Guid.NewGuid().ToString();
             string subject = "Order #{{customer_order.number}}";
             string body = "You have order #{{customer_order.number}}";
@@ -105,7 +107,7 @@ namespace VirtoCommerce.NotificationsModule.Tests
             _notificationSender = new NotificationSender(_serviceMock.Object, _templateRender, _messageServiceMock.Object, _messageSender, _logNotificationSenderMock.Object);
 
             //Act
-            var result = await _notificationSender.SendNotificationAsync(notification, language);
+            var result = await _notificationSender.SendNotificationAsync(notification, null);
 
             //Assert
             Assert.True(result.IsSuccess);

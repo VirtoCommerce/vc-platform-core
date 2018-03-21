@@ -14,12 +14,14 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<NotificationEntity>().ToTable("Notification");
-            modelBuilder.Entity<NotificationTemplateEntity>().ToTable("NotificationTemplate");
-            modelBuilder.Entity<NotificationMessageEntity>().ToTable("NotificationMessage");
-            modelBuilder.Entity<EmailAttachmentEntity>().ToTable("NotificationEmailAttachment");
+            
+            
             modelBuilder.Entity<NotificationEmailRecipientEntity>().ToTable("NotificationEmailRecipient");
 
+            #region Notification
+
+            modelBuilder.Entity<NotificationEntity>().ToTable("Notification").HasKey(x => x.Id);
+            modelBuilder.Entity<NotificationEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<NotificationEntity>()
                 .HasMany(n => n.Recipients)
                 .WithOne()
@@ -40,6 +42,45 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
                 .HasForeignKey(n => n.NotificationId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<NotificationEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
+            modelBuilder.Entity<NotificationEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
+
+            #endregion
+
+            #region NotificationTemplate
+
+            modelBuilder.Entity<NotificationTemplateEntity>().ToTable("NotificationTemplate").HasKey(x => x.Id);
+            modelBuilder.Entity<NotificationTemplateEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<NotificationTemplateEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
+            modelBuilder.Entity<NotificationTemplateEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
+
+            #endregion
+
+            #region NotificationMessage
+
+            modelBuilder.Entity<NotificationMessageEntity>().ToTable("NotificationMessage").HasKey(x => x.Id);
+            modelBuilder.Entity<NotificationMessageEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<NotificationMessageEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
+            modelBuilder.Entity<NotificationMessageEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
+
+            #endregion
+
+            #region EmailAttachment
+
+            modelBuilder.Entity<EmailAttachmentEntity>().ToTable("NotificationEmailAttachment").HasKey(x => x.Id);
+            modelBuilder.Entity<EmailAttachmentEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<EmailAttachmentEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
+            modelBuilder.Entity<EmailAttachmentEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
+
+            #endregion
+
+            #region NotificationEmailRecipient
+
+            modelBuilder.Entity<NotificationEmailRecipientEntity>().ToTable("NotificationEmailRecipient").HasKey(x => x.Id);
+            modelBuilder.Entity<NotificationEmailRecipientEntity>().Property(x => x.Id).HasMaxLength(128);
+
+            #endregion
+
 
             base.OnModelCreating(modelBuilder);
         }
