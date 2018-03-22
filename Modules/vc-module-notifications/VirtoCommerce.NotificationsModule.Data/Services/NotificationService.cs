@@ -17,14 +17,15 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
     public class NotificationService : ServiceBase, INotificationService, INotificationRegistrar
     {
-        private readonly Func<INotificationRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
 
         public NotificationService(Func<INotificationRepository> repositoryFactory, IEventPublisher eventPublisher)
         {
-            _repositoryFactory = repositoryFactory;
+            RepositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
         }
+
+        protected Func<INotificationRepository> RepositoryFactory { get; }
 
         public async Task<Notification> GetNotificationByTypeAsync(string type, string tenantId = null, string tenantType = null)
         {
@@ -32,22 +33,17 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             if (notificationType == null) return null;
 
             var result = AbstractTypeFactory<Notification>.TryCreateInstance(notificationType.Name);
-            using (var repository = _repositoryFactory())
-            {
-                var notification = await repository.GetNotificationEntityByTypeAsync(notificationType.Name, tenantId, tenantType);
-                if (notification != null)
-                    return notification.ToModel(result);
-            }
+            var repository = RepositoryFactory();
+            var notification = await repository.GetByTypeAsync(notificationType.Name, tenantId, tenantType);
+            if (notification != null) return notification.ToModel(result);
             return result;
         }
 
         public async Task<Notification[]> GetNotificationsByIdsAsync(string[] ids)
         {
-            using (var repository = _repositoryFactory())
-            {
-                var notifications = await repository.GetNotificationByIdsAsync(ids);
-                return notifications.Select(n => n.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance(n.Type))).ToArray();
-            }
+            var repository = RepositoryFactory();
+            var notifications = await repository.GetByIdsAsync(ids);
+            return notifications.Select(n => n.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance(n.Type))).ToArray();
         }
 
         public async Task SaveChangesAsync(Notification[] notifications)
@@ -56,15 +52,15 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             {
                 var pkMap = new PrimaryKeyResolvingMap();
                 var changedEntries = new List<ChangedEntry<Notification>>();
-                using (var repository = _repositoryFactory())
+                var repository = RepositoryFactory();
                 using (var changeTracker = new ObservableChangeTracker())
                 {
                     
-                    var existingNotificationEntities = await repository.GetNotificationByIdsAsync(notifications.Select(m => m.Id).ToArray());
+                    var existingNotificationEntities = await repository.GetByIdsAsync(notifications.Select(m => m.Id).ToArray());
                     foreach (var notification in notifications)
                     {
                         var dataTargetNotification = existingNotificationEntities.FirstOrDefault(n => n.Id.Equals(notification.Id));
-                        var modifiedEntity = AbstractTypeFactory<NotificationEntity>.TryCreateInstance($"{notification.Type}Entity").FromModel(notification, pkMap);
+                        var modifiedEntity = AbstractTypeFactory<NotificationEntity>.TryCreateInstance($"{notification.Kind}Entity").FromModel(notification, pkMap);
 
                         if (dataTargetNotification != null)
                         {

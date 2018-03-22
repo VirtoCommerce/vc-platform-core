@@ -15,6 +15,8 @@ using VirtoCommerce.NotificationsModule.Smtp;
 using VirtoCommerce.NotificationsModule.Web.Infrastructure;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Data.Repositories;
 
 namespace VirtoCommerce.NotificationsModule.Web
 {
@@ -27,8 +29,9 @@ namespace VirtoCommerce.NotificationsModule.Web
             var snapshot = serviceCollection.BuildServiceProvider();
             var configuration = snapshot.GetService<IConfiguration>();
             serviceCollection.AddDbContext<NotificationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce")));
-            serviceCollection.AddTransient<INotificationRepository, NotificationRepositoryImpl>();
-            serviceCollection.AddSingleton<Func<INotificationRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<INotificationRepository>());
+            //serviceCollection.AddTransient<INotificationRepository, NotificationRepositoryBase>();
+            serviceCollection.AddScoped<Func<IEmailNotificationRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IEmailNotificationRepository>());
+            serviceCollection.AddScoped<Func<INotificationRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<INotificationRepository>());
             serviceCollection.AddScoped<INotificationService, NotificationService>();
             serviceCollection.AddScoped<INotificationRegistrar, NotificationService>();
             serviceCollection.AddScoped<INotificationSearchService, NotificationSearchService>();
@@ -36,6 +39,16 @@ namespace VirtoCommerce.NotificationsModule.Web
             serviceCollection.AddTransient<INotificationSender, NotificationSender>();
             serviceCollection.AddTransient<INotificationTemplateRender, LiquidTemplateRenderer>();
             serviceCollection.AddTransient<INotificationMessageSender, SmtpEmailNotificationMessageSender>();
+
+            var snapshotDbContext = serviceCollection.BuildServiceProvider();
+            using (var dbContext = snapshotDbContext.GetRequiredService<NotificationDbContext>())
+            {
+                EmailNotificationRepositoryImpl EmailNotificationRepositoryFactory() => new EmailNotificationRepositoryImpl(dbContext);
+                serviceCollection.AddSingleton<Func<IEmailNotificationRepository>>(EmailNotificationRepositoryFactory);
+                serviceCollection.AddSingleton<Func<INotificationRepository>>(EmailNotificationRepositoryFactory);
+            }
+
+
         }
 
         public void PostInitialize(IServiceProvider serviceProvider)
@@ -52,12 +65,13 @@ namespace VirtoCommerce.NotificationsModule.Web
             var mvcJsonOptions = serviceProvider.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicJsonConverter());
 
-            //Force migrations
-            using (var serviceScope = serviceProvider.CreateScope())
+            using (var notificationDbContext = serviceProvider.GetRequiredService<NotificationDbContext>())
             {
-                var notificationDbContext = serviceScope.ServiceProvider.GetRequiredService<NotificationDbContext>();
+                notificationDbContext.Database.EnsureCreated();
                 notificationDbContext.Database.Migrate();
             }
+            
+            
 
             //for test
             var registrar = serviceProvider.GetService<INotificationRegistrar>();
