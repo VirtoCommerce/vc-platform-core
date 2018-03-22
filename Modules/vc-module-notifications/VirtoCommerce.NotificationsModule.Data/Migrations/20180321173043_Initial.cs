@@ -12,19 +12,20 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                 name: "Notification",
                 columns: table => new
                 {
+                    From = table.Column<string>(maxLength: 128, nullable: true),
+                    To = table.Column<string>(maxLength: 128, nullable: true),
                     Id = table.Column<string>(maxLength: 128, nullable: false),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
                     CreatedDate = table.Column<DateTime>(nullable: false),
-                    From = table.Column<string>(maxLength: 128, nullable: true),
+                    Discriminator = table.Column<string>(nullable: false),
                     IsActive = table.Column<bool>(nullable: false),
                     Kind = table.Column<string>(maxLength: 128, nullable: true),
                     ModifiedBy = table.Column<string>(maxLength: 64, nullable: true),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
-                    Number = table.Column<string>(maxLength: 128, nullable: true),
                     TenantId = table.Column<string>(maxLength: 128, nullable: true),
                     TenantType = table.Column<string>(maxLength: 128, nullable: true),
-                    To = table.Column<string>(maxLength: 128, nullable: true),
-                    Type = table.Column<string>(maxLength: 128, nullable: true)
+                    Type = table.Column<string>(maxLength: 128, nullable: true),
+                    Number = table.Column<string>(maxLength: 128, nullable: true)
                 },
                 constraints: table =>
                 {

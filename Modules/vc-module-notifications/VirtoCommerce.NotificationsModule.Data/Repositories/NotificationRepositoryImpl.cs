@@ -14,6 +14,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
         }
 
         public IQueryable<NotificationEntity> Notifications => DbContext.Set<NotificationEntity>();
+        public IQueryable<EmailNotificationEntity> EmailNotifications => DbContext.Set<EmailNotificationEntity>();
         public IQueryable<NotificationMessageEntity> NotifcationMessages => DbContext.Set<NotificationMessageEntity>();
 
         public async Task<NotificationEntity[]> GetNotificationByIdsAsync(string[] ids)
@@ -40,8 +41,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             if (!string.IsNullOrEmpty(tenantId)) query = query.Where(q => q.TenantId.Equals(tenantId));
             if (!string.IsNullOrEmpty(tenantType)) query = query.Where(q => q.TenantType.Equals(tenantType));
             query = query.Include(n => n.Templates)
-                .Include(n => n.Attachments)
-                .Include(n => n.Recipients);
+                .Include(n => n.Attachments);
+                //.Include(n => n.Recipients);
             return query.FirstOrDefaultAsync(n => n.Type.Equals(type));
         }
 

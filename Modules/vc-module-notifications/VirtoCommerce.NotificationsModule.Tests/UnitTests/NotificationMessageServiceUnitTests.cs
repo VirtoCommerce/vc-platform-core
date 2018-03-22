@@ -9,6 +9,7 @@ using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Services;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Events;
 using Xunit;
 
 namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
@@ -18,6 +19,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         private readonly Mock<INotificationRepository> _repositoryMock;
         private readonly INotificationRegistrar _notificationRegistrar;
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
+        private readonly Mock<IEventPublisher> _eventPublisherMock;
         private readonly NotificationMessageService _notificationMessageService;
 
         public NotificationMessageServiceUnitTests()
@@ -26,7 +28,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             Func<INotificationRepository> factory = () => _repositoryMock.Object;
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _repositoryMock.Setup(ss => ss.UnitOfWork).Returns(_mockUnitOfWork.Object);
-            _notificationMessageService = new NotificationMessageService(factory);
+            _eventPublisherMock = new Mock<IEventPublisher>();
+            _notificationMessageService = new NotificationMessageService(factory, _eventPublisherMock.Object);
             //todo
             if (!AbstractTypeFactory<Notification>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotification))))
             {

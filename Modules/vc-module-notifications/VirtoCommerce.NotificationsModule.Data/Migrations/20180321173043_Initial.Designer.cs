@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
+using Microsoft.EntityFrameworkCore.ValueGeneration;
 using System;
 using VirtoCommerce.NotificationsModule.Data.Enums;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
@@ -12,7 +13,7 @@ using VirtoCommerce.NotificationsModule.Data.Repositories;
 namespace VirtoCommerce.NotificationsModule.Data.Migrations
 {
     [DbContext(typeof(NotificationDbContext))]
-    [Migration("20180321104911_Initial")]
+    [Migration("20180321173043_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -95,8 +96,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
 
                     b.Property<DateTime>("CreatedDate");
 
-                    b.Property<string>("From")
-                        .HasMaxLength(128);
+                    b.Property<string>("Discriminator")
+                        .IsRequired();
 
                     b.Property<bool>("IsActive");
 
@@ -108,16 +109,10 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
 
                     b.Property<DateTime?>("ModifiedDate");
 
-                    b.Property<string>("Number")
-                        .HasMaxLength(128);
-
                     b.Property<string>("TenantId")
                         .HasMaxLength(128);
 
                     b.Property<string>("TenantType")
-                        .HasMaxLength(128);
-
-                    b.Property<string>("To")
                         .HasMaxLength(128);
 
                     b.Property<string>("Type")
@@ -126,6 +121,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Notification");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("NotificationEntity");
                 });
 
             modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.NotificationMessageEntity", b =>
@@ -221,6 +218,33 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                     b.ToTable("NotificationTemplate");
                 });
 
+            modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.EmailNotificationEntity", b =>
+                {
+                    b.HasBaseType("VirtoCommerce.NotificationsModule.Data.Model.NotificationEntity");
+
+                    b.Property<string>("From")
+                        .HasMaxLength(128);
+
+                    b.Property<string>("To")
+                        .HasMaxLength(128);
+
+                    b.ToTable("NotificationEmail");
+
+                    b.HasDiscriminator().HasValue("EmailNotificationEntity");
+                });
+
+            modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.SmsNotificationEntity", b =>
+                {
+                    b.HasBaseType("VirtoCommerce.NotificationsModule.Data.Model.NotificationEntity");
+
+                    b.Property<string>("Number")
+                        .HasMaxLength(128);
+
+                    b.ToTable("NotificationSms");
+
+                    b.HasDiscriminator().HasValue("SmsNotificationEntity");
+                });
+
             modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.EmailAttachmentEntity", b =>
                 {
                     b.HasOne("VirtoCommerce.NotificationsModule.Data.Model.NotificationEntity")
@@ -231,7 +255,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
 
             modelBuilder.Entity("VirtoCommerce.NotificationsModule.Data.Model.NotificationEmailRecipientEntity", b =>
                 {
-                    b.HasOne("VirtoCommerce.NotificationsModule.Data.Model.NotificationEntity")
+                    b.HasOne("VirtoCommerce.NotificationsModule.Data.Model.EmailNotificationEntity")
                         .WithMany("Recipients")
                         .HasForeignKey("NotificationId")
                         .OnDelete(DeleteBehavior.Cascade);

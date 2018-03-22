@@ -50,6 +50,11 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             {
                 AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>().MapToType<NotificationMessageEntity>();
             }
+
+            if (!AbstractTypeFactory<NotificationEntity>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotificationEntity))))
+            {
+                AbstractTypeFactory<NotificationEntity>.RegisterType<EmailNotificationEntity>();
+            }
         }
 
         [Fact]
@@ -58,7 +63,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             //Arrange
             string type = nameof(RegistrationEmailNotification);
             _repositoryMock.Setup(n => n.GetNotificationEntityForListByType(nameof(RegistrationEmailNotification), null, null))
-                .Returns(new Data.Model.NotificationEntity() { IsActive = true });
+                .Returns(new EmailNotificationEntity() { IsActive = true });
             _notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
 
             //Act
@@ -74,7 +79,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         {
             //Arrange
             string id = Guid.NewGuid().ToString();
-            var notifications = new List<NotificationEntity> { new NotificationEntity(){ Id = id, Type = nameof(EmailNotification)}};
+            var notifications = new List<NotificationEntity> { new EmailNotificationEntity(){ Id = id, Type = nameof(EmailNotification)}};
             _repositoryMock.Setup(n => n.GetNotificationByIdsAsync(new[] { id }))
                 .ReturnsAsync(notifications.ToArray());
             _notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
@@ -92,7 +97,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         {
             //Arrange
             string id = Guid.NewGuid().ToString();
-            var notificationEntities = new List<NotificationEntity> { new NotificationEntity() { Id = id, Type = nameof(EmailNotification) } };
+            var notificationEntities = new List<NotificationEntity> { new EmailNotificationEntity() { Id = id, Type = nameof(EmailNotification) } };
             _repositoryMock.Setup(n => n.GetNotificationByIdsAsync(new[] { id }))
                 .ReturnsAsync(notificationEntities.ToArray());
             var notifications = notificationEntities.Select(n => n.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance(n.Type)));

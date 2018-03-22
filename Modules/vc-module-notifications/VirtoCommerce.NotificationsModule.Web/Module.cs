@@ -46,6 +46,8 @@ namespace VirtoCommerce.NotificationsModule.Web
             AbstractTypeFactory<NotificationTemplate>.RegisterType<SmsNotificationTemplate>().MapToType<NotificationTemplateEntity>();
             AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>().MapToType<NotificationMessageEntity>();
             AbstractTypeFactory<NotificationMessage>.RegisterType<SmsNotificationMessage>().MapToType<NotificationMessageEntity>();
+            AbstractTypeFactory<NotificationEntity>.RegisterType<EmailNotificationEntity>();
+            AbstractTypeFactory<NotificationEntity>.RegisterType<SmsNotificationEntity>();
 
             var mvcJsonOptions = serviceProvider.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicJsonConverter());

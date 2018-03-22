@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Moq;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
+using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Services;
 using VirtoCommerce.NotificationsModule.Tests.NotificationTypes;
@@ -75,7 +76,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _notificationRegistrar.RegisterNotification<OrderSentEmailNotification>();
             var searchCriteria = new NotificationSearchCriteria();
             _repositoryMock.Setup(n => n.GetNotificationEntityForListByType(nameof(OrderSentEmailNotification), null, null))
-                .Returns(new Data.Model.NotificationEntity() { IsActive = true });
+                .Returns(new EmailNotificationEntity { IsActive = true });
 
             //Act
             var result = _notificationSearchService.SearchNotifications(searchCriteria);
