@@ -6,7 +6,7 @@ function ($rootScope, $scope, $timeout, notifications, bladeNavigationService, d
     }
 
 	var blade = $scope.blade;
-	blade.updatePermission = 'platform:notification:update';
+	blade.updatePermission = 'notiications:notification:update';
 	var codemirrorEditor;
 	blade.parametersForTemplate = [];
     $scope.isValid = false;
@@ -51,14 +51,16 @@ function ($rootScope, $scope, $timeout, notifications, bladeNavigationService, d
 		{
 			name: "platform.commands.save", icon: 'fa fa-save',
 			executeMethod: blade.updateNotification,
-			canExecuteMethod: canSave
+			canExecuteMethod: canSave,
+			permission: blade.updatePermission
 		},
 		{
 			name: "platform.commands.undo", icon: 'fa fa-undo',
 			executeMethod: function () {
 				blade.currentEntity = angular.copy(blade.origEntity);
 			},
-			canExecuteMethod: isDirty
+			canExecuteMethod: isDirty,
+			permission: blade.updatePermission
 		}
 	];
 

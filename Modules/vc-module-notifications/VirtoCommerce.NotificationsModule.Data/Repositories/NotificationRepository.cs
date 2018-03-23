@@ -7,12 +7,14 @@ using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.NotificationsModule.Data.Repositories
 {
-    public abstract class NotificationRepositoryBase : DbContextRepositoryBase<NotificationDbContext>, INotificationRepository
+    public class NotificationRepository : DbContextRepositoryBase<NotificationDbContext>, INotificationRepository
     {
-        protected NotificationRepositoryBase(NotificationDbContext dbContext) : base(dbContext)
+        public NotificationRepository(NotificationDbContext dbContext) : base(dbContext)
         {
         }
 
+        public IQueryable<EmailNotificationEntity> EmailNotifications => DbContext.Set<EmailNotificationEntity>();
+        public IQueryable<SmsNotificationEntity> SmsNotifications => DbContext.Set<SmsNotificationEntity>();
         public IQueryable<NotificationEntity> Notifications => DbContext.Set<NotificationEntity>();
         public IQueryable<NotificationMessageEntity> NotifcationMessages => DbContext.Set<NotificationMessageEntity>();
 
@@ -27,22 +29,27 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             {
                 var templatesTask = DbContext.Set<NotificationTemplateEntity>().Where(t => t.NotificationId.Equals(notification.Id)).ToListAsync();
                 var attachmentsTask = DbContext.Set<EmailAttachmentEntity>().Where(t => t.NotificationId.Equals(notification.Id)).ToListAsync();
-                //var recipientsTask = DbContext.Set<NotificationEmailRecipientEntity>().Where(t => t.NotificationId.Equals(notification.Id)).ToListAsync();
+                var recipientsTask = DbContext.Set<NotificationEmailRecipientEntity>().Where(t => t.NotificationId.Equals(notification.Id)).ToListAsync();
                 await Task.WhenAll(templatesTask, attachmentsTask);
             }
 
             return notifications;
         }
 
-        public virtual Task<NotificationEntity> GetByTypeAsync(string type, string tenantId, string tenantType)
+        public virtual async Task<NotificationEntity> GetByTypeAsync(string type, string tenantId, string tenantType)
         {
             var query = Notifications;
             if (!string.IsNullOrEmpty(tenantId)) query = query.Where(q => q.TenantId.Equals(tenantId));
             if (!string.IsNullOrEmpty(tenantType)) query = query.Where(q => q.TenantType.Equals(tenantType));
-            query = query.Include(n => n.Templates)
-                .Include(n => n.Attachments);
-                //.Include(n => n.Recipients);
-            return query.FirstOrDefaultAsync(n => n.Type.Equals(type));
+            query = query.Include(n => n.Templates);
+            var result = await query.FirstOrDefaultAsync(n => n.Type.Equals(type));
+
+            var templatesTask = DbContext.Set<NotificationTemplateEntity>().Where(t => t.NotificationId.Equals(result.Id)).ToListAsync();
+            var attachmentsTask = DbContext.Set<EmailAttachmentEntity>().Where(t => t.NotificationId.Equals(result.Id)).ToListAsync();
+            var recipientsTask = DbContext.Set<NotificationEmailRecipientEntity>().Where(t => t.NotificationId.Equals(result.Id)).ToListAsync();
+            await Task.WhenAll(templatesTask, attachmentsTask);
+
+            return result;
         }
 
         public NotificationEntity GetNotificationEntityForListByType(string type, string tenantId, string tenantType)

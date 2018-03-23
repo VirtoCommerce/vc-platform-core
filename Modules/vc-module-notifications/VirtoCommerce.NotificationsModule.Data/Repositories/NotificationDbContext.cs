@@ -25,16 +25,17 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
                 .HasForeignKey(n => n.NotificationId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
+                        
+            modelBuilder.Entity<NotificationEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
+            modelBuilder.Entity<NotificationEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
 
-            modelBuilder.Entity<NotificationEntity>()
+            modelBuilder.Entity<EmailNotificationEntity>()
                 .HasMany(n => n.Attachments)
                 .WithOne()
                 .HasForeignKey(n => n.NotificationId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<NotificationEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
-            modelBuilder.Entity<NotificationEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
-            
+
             modelBuilder.Entity<EmailNotificationEntity>()
                 .HasMany(n => n.Recipients)
                 .WithOne()

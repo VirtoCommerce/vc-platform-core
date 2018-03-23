@@ -2,7 +2,6 @@
 .controller('virtoCommerce.notificationsModule.editTemplateController', ['$rootScope', '$scope', '$timeout', '$localStorage', 'virtoCommerce.notificationsModule.notificationsModuleApi', 'FileUploader', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 
  function ($rootScope, $scope, $timeout, $localStorage, notifications, FileUploader, bladeNavigationService, dialogService) {
     var blade = $scope.blade;    
-    blade.updatePermission = 'platform:notification:update';
     $scope.isValid = false;
 
     var formScope; 
@@ -119,7 +118,7 @@
             canExecuteMethod: function () {
                 return true;
             },
-            permission: blade.updatePermission
+			permission: 'notications:template:create'
         }
     ];
 	 

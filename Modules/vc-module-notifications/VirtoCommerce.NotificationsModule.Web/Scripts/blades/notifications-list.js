@@ -1,6 +1,6 @@
 angular.module('virtoCommerce.notificationsModule')
-.controller('virtoCommerce.notificationsModule.notificationsListController', ['$scope', '$translate', 'virtoCommerce.notificationsModule.notificationsModuleApi', 'virtoCommerce.notificationsModule.notificationTypesResolverService', 'platformWebApp.dialogService', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper', 'platformWebApp.ui-grid.extension', 'platformWebApp.settings', 'platformWebApp.i18n',
-    function ($scope, $translate, notifications, notificationTypesResolverService, dialogService, bladeUtils, uiGridHelper, gridOptionExtension, settings, i18n) {
+.controller('virtoCommerce.notificationsModule.notificationsListController', ['$scope', '$translate', 'virtoCommerce.notificationsModule.notificationsModuleApi', 'virtoCommerce.notificationsModule.notificationTypesResolverService', 'platformWebApp.dialogService', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper', 'platformWebApp.ui-grid.extension', 'platformWebApp.settings', 'platformWebApp.i18n', 'platformWebApp.authService',
+    function ($scope, $translate, notifications, notificationTypesResolverService, dialogService, bladeUtils, uiGridHelper, gridOptionExtension, settings, i18n, authService) {
         $scope.uiGridConstants = uiGridHelper.uiGridConstants;
         var blade = $scope.blade;
         blade.title = 'Notifications';
@@ -46,20 +46,22 @@ angular.module('virtoCommerce.notificationsModule')
             });
         }
 
-        blade.editTemplate = function (item) {
-      		var newBlade = {
-      			id: 'editNotification',
-      			title: 'notifications.blades.notification-details.title',
-                titleValues: { displayName: $translate.instant('notificationTypes.' + item.type + '.displayName') },
-      			type: item.type,
-      			tenantId: blade.tenantId,
-      			tenantType: blade.tenantType,
-      			controller: 'virtoCommerce.notificationsModule.notificationsEditController',
-      			template: 'Modules/$(VirtoCommerce.Notifications)/Scripts/blades/notification-details.tpl.html'
-      		};
+		if (authService.checkPermission('notifications:notification:review')) {
+			blade.editTemplate = function (item) {
+				var newBlade = {
+					id: 'editNotification',
+					title: 'notifications.blades.notification-details.title',
+					titleValues: { displayName: $translate.instant('notificationTypes.' + item.type + '.displayName') },
+					type: item.type,
+					tenantId: blade.tenantId,
+					tenantType: blade.tenantType,
+					controller: 'virtoCommerce.notificationsModule.notificationsEditController',
+					template: 'Modules/$(VirtoCommerce.Notifications)/Scripts/blades/notification-details.tpl.html'
+				};
 
-      		bladeNavigationService.showBlade(newBlade, blade);
-      	};
+				bladeNavigationService.showBlade(newBlade, blade);
+			};
+		};
 
         blade.setSelectedNode = function (listItem) {
             $scope.selectedNodeId = listItem.type;
@@ -70,8 +72,6 @@ angular.module('virtoCommerce.notificationsModule')
            blade.selectedType = type;
       	   blade.editTemplate(type);
         };
-
-        
 
         // ui-grid
         $scope.setGridOptions = function (gridId, gridOptions) {

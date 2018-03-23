@@ -12,12 +12,13 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 {
     public class NotificationSearchService : INotificationSearchService
     {
+        private readonly Func<INotificationRepository> _repositoryFactory;
         public NotificationSearchService(Func<INotificationRepository> repositoryFactory)
         {
-            RepositoryFactory = repositoryFactory;
+            _repositoryFactory = repositoryFactory;
         }
 
-        protected Func<INotificationRepository> RepositoryFactory { get; }
+        
 
         public  GenericSearchResult<Notification> SearchNotifications(NotificationSearchCriteria criteria)
         {
@@ -45,7 +46,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             {
                 var result = AbstractTypeFactory<Notification>.TryCreateInstance(t.Name);
                 NotificationEntity notificationEntity;
-                using (var repository = RepositoryFactory())
+                using (var repository = _repositoryFactory())
                 {
                     notificationEntity = repository.GetNotificationEntityForListByType(t.Name, criteria.TenantId, criteria.TenantType);
                 }

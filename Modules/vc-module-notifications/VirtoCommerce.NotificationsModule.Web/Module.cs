@@ -29,8 +29,7 @@ namespace VirtoCommerce.NotificationsModule.Web
             var snapshot = serviceCollection.BuildServiceProvider();
             var configuration = snapshot.GetService<IConfiguration>();
             serviceCollection.AddDbContext<NotificationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce")));
-            //serviceCollection.AddTransient<INotificationRepository, NotificationRepositoryBase>();
-            serviceCollection.AddScoped<Func<IEmailNotificationRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IEmailNotificationRepository>());
+            serviceCollection.AddScoped<INotificationRepository, NotificationRepository>();
             serviceCollection.AddScoped<Func<INotificationRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<INotificationRepository>());
             serviceCollection.AddScoped<INotificationService, NotificationService>();
             serviceCollection.AddScoped<INotificationRegistrar, NotificationService>();
@@ -39,16 +38,6 @@ namespace VirtoCommerce.NotificationsModule.Web
             serviceCollection.AddTransient<INotificationSender, NotificationSender>();
             serviceCollection.AddTransient<INotificationTemplateRender, LiquidTemplateRenderer>();
             serviceCollection.AddTransient<INotificationMessageSender, SmtpEmailNotificationMessageSender>();
-
-            var snapshotDbContext = serviceCollection.BuildServiceProvider();
-            using (var dbContext = snapshotDbContext.GetRequiredService<NotificationDbContext>())
-            {
-                EmailNotificationRepositoryImpl EmailNotificationRepositoryFactory() => new EmailNotificationRepositoryImpl(dbContext);
-                serviceCollection.AddSingleton<Func<IEmailNotificationRepository>>(EmailNotificationRepositoryFactory);
-                serviceCollection.AddSingleton<Func<INotificationRepository>>(EmailNotificationRepositoryFactory);
-            }
-
-
         }
 
         public void PostInitialize(IServiceProvider serviceProvider)

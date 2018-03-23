@@ -22,6 +22,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         public string To { get; set; }
 
         public virtual ObservableCollection<NotificationEmailRecipientEntity> Recipients { get; set; } = new NullCollection<NotificationEmailRecipientEntity>();
+        public virtual ObservableCollection<EmailAttachmentEntity> Attachments { get; set; } = new NullCollection<EmailAttachmentEntity>();
+
 
         public override Notification ToModel(Notification notification)
         {
@@ -92,6 +94,11 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
                 if (!this.Recipients.IsNullCollection())
                 {
                     this.Recipients.Patch(emailNotification.Recipients, (source, target) => source.Patch(target));
+                }
+
+                if (!this.Attachments.IsNullCollection())
+                {
+                    this.Attachments.Patch(emailNotification.Attachments, (source, attachmentEntity) => source.Patch(attachmentEntity));
                 }
             }
 

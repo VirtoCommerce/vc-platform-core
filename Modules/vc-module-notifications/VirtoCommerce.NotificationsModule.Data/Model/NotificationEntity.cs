@@ -43,9 +43,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         public string Kind { get; set; }
 
         public virtual ObservableCollection<NotificationTemplateEntity> Templates { get; set; } = new NullCollection<NotificationTemplateEntity>();
-        public virtual ObservableCollection<EmailAttachmentEntity> Attachments { get; set; } = new NullCollection<EmailAttachmentEntity>();
         
-
         public virtual Notification ToModel(Notification notification)
         {
             if (notification == null) throw new ArgumentNullException(nameof(notification));
@@ -103,10 +101,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
                 this.Templates.Patch(notification.Templates, (sourceTemplate, templateEntity) => sourceTemplate.Patch(templateEntity));
             }
 
-            if (!this.Attachments.IsNullCollection())
-            {
-                this.Attachments.Patch(notification.Attachments, (source, attachmentEntity) => source.Patch(attachmentEntity));
-            }
+            
         }
     }
 }

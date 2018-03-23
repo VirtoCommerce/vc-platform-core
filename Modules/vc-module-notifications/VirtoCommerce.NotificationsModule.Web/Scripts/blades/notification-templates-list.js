@@ -95,7 +95,7 @@ angular.module('virtoCommerce.notificationsModule')
 				    name: "platform.commands.add", icon: 'fa fa-plus',
 				    executeMethod: createTemplate,
 				    canExecuteMethod: function () { return true; },
-				    permission: 'platform:notification:create'
+				    permission: 'notications:notification:create'
 			    }
 	    ];
 
