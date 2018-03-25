@@ -30,7 +30,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
                 var templatesTask = DbContext.Set<NotificationTemplateEntity>().Where(t => t.NotificationId.Equals(notification.Id)).ToListAsync();
                 var attachmentsTask = DbContext.Set<EmailAttachmentEntity>().Where(t => t.NotificationId.Equals(notification.Id)).ToListAsync();
                 var recipientsTask = DbContext.Set<NotificationEmailRecipientEntity>().Where(t => t.NotificationId.Equals(notification.Id)).ToListAsync();
-                await Task.WhenAll(templatesTask, attachmentsTask);
+                await Task.WhenAll(templatesTask, attachmentsTask, recipientsTask);
             }
 
             return notifications;
@@ -44,10 +44,13 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             query = query.Include(n => n.Templates);
             var result = await query.FirstOrDefaultAsync(n => n.Type.Equals(type));
 
-            var templatesTask = DbContext.Set<NotificationTemplateEntity>().Where(t => t.NotificationId.Equals(result.Id)).ToListAsync();
-            var attachmentsTask = DbContext.Set<EmailAttachmentEntity>().Where(t => t.NotificationId.Equals(result.Id)).ToListAsync();
-            var recipientsTask = DbContext.Set<NotificationEmailRecipientEntity>().Where(t => t.NotificationId.Equals(result.Id)).ToListAsync();
-            await Task.WhenAll(templatesTask, attachmentsTask);
+            if (result != null)
+            {
+                var templatesTask = DbContext.Set<NotificationTemplateEntity>().Where(t => t.NotificationId.Equals(result.Id)).ToListAsync();
+                var attachmentsTask = DbContext.Set<EmailAttachmentEntity>().Where(t => t.NotificationId.Equals(result.Id)).ToListAsync();
+                var recipientsTask = DbContext.Set<NotificationEmailRecipientEntity>().Where(t => t.NotificationId.Equals(result.Id)).ToListAsync();
+                await Task.WhenAll(templatesTask, attachmentsTask, recipientsTask);
+            }
 
             return result;
         }

@@ -59,8 +59,6 @@ namespace VirtoCommerce.NotificationsModule.Web
                 notificationDbContext.Database.EnsureCreated();
                 notificationDbContext.Database.Migrate();
             }
-            
-            
 
             //for test
             var registrar = serviceProvider.GetService<INotificationRegistrar>();

@@ -100,8 +100,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             {
                 this.Templates.Patch(notification.Templates, (sourceTemplate, templateEntity) => sourceTemplate.Patch(templateEntity));
             }
-
-            
         }
     }
 }
