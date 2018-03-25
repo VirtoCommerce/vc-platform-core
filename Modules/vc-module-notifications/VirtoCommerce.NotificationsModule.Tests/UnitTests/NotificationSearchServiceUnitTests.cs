@@ -18,6 +18,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
     {
         private readonly Mock<INotificationRepository> _repositoryMock;
         private readonly Mock<Func<INotificationRepository>> _repositoryFactoryMock;
+        private readonly Func<INotificationRepository> _repositoryFactory;
         private readonly INotificationRegistrar _notificationRegistrar;
         private readonly Mock<IEventPublisher> _eventPublisherMock;
         private readonly NotificationSearchService _notificationSearchService;
@@ -28,7 +29,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _repositoryFactoryMock = new Mock<Func<INotificationRepository>>();
             _eventPublisherMock = new Mock<IEventPublisher>();
             _notificationRegistrar = new NotificationService(_repositoryFactoryMock.Object, _eventPublisherMock.Object);
-            _notificationSearchService = new NotificationSearchService(_repositoryMock.Object);
+            _repositoryFactory = () => _repositoryMock.Object;
+            _notificationSearchService = new NotificationSearchService(_repositoryFactory);
         }
 
         [Fact]

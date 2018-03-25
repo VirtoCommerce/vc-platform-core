@@ -97,7 +97,15 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         {
             //Arrange
             string id = Guid.NewGuid().ToString();
-            var notificationEntities = new List<NotificationEntity> { new EmailNotificationEntity() { Id = id, Type = nameof(EmailNotification) } };
+            var notificationEntities = new List<NotificationEntity>
+            {
+                new EmailNotificationEntity()
+                {
+                    Id = id,
+                    Type = nameof(EmailNotification),
+                    Kind = nameof(EmailNotification)
+                }
+            };
             _repositoryMock.Setup(n => n.GetByIdsAsync(new[] { id }))
                 .ReturnsAsync(notificationEntities.ToArray());
             var notifications = notificationEntities.Select(n => n.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance(n.Type)));

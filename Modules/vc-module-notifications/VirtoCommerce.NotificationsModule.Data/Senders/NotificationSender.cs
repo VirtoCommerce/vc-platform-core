@@ -4,6 +4,7 @@ using System.Net.Mail;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Polly;
+using VirtoCommerce.NotificationsModule.Core;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
@@ -47,7 +48,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
             NotificationMessage[] messages = { message };
             await _notificationMessageService.SaveNotificationMessagesAsync(messages);
 
-            var policy = Policy.Handle<SmtpException>().WaitAndRetryAsync(_maxRetryAttempts, retryAttempt =>
+            var policy = Policy.Handle<SentNotificationException>().WaitAndRetryAsync(_maxRetryAttempts, retryAttempt =>
                     TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))
                 , (exception, timeSpan, retryCount, context) => {
                     _logger.LogError(exception, $"Retry {retryCount} of {context.PolicyKey}, due to: {exception}.");

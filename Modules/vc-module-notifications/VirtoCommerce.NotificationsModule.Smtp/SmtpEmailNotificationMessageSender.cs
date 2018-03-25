@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
+using VirtoCommerce.NotificationsModule.Core;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 
@@ -24,26 +25,35 @@ namespace VirtoCommerce.NotificationsModule.Smtp
 
             if (emailNotificationMessage == null) throw new ArgumentNullException(nameof(emailNotificationMessage));
 
-            using (MailMessage mailMsg = new MailMessage())
+            try
             {
-                mailMsg.From = new MailAddress(emailNotificationMessage.From);
-                mailMsg.To.Add(new MailAddress(emailNotificationMessage.To));
-                mailMsg.ReplyToList.Add(mailMsg.From);
-
-                mailMsg.Subject = emailNotificationMessage.Subject;
-                mailMsg.Body = emailNotificationMessage.Body;
-                mailMsg.IsBodyHtml = true;
-
-                foreach (var attachment in emailNotificationMessage.Attachments)
+                using (MailMessage mailMsg = new MailMessage())
                 {
-                    mailMsg.Attachments.Add(new Attachment(attachment.FileName, attachment.MimeType));
-                }
+                    mailMsg.From = new MailAddress(emailNotificationMessage.From);
+                    mailMsg.To.Add(new MailAddress(emailNotificationMessage.To));
+                    mailMsg.ReplyToList.Add(mailMsg.From);
 
-                using (var client = CreateClient())
-                {
-                    await client.SendMailAsync(mailMsg);
-                }
-            };
+                    mailMsg.Subject = emailNotificationMessage.Subject;
+                    mailMsg.Body = emailNotificationMessage.Body;
+                    mailMsg.IsBodyHtml = true;
+
+                    foreach (var attachment in emailNotificationMessage.Attachments)
+                    {
+                        mailMsg.Attachments.Add(new Attachment(attachment.FileName, attachment.MimeType));
+                    }
+
+                    using (var client = CreateClient())
+                    {
+                        await client.SendMailAsync(mailMsg);
+                    }
+                };
+            }
+            catch (SmtpException ex)
+            {
+                throw new SentNotificationException(ex.Message, ex);
+            }
+
+            
 
         }
 
