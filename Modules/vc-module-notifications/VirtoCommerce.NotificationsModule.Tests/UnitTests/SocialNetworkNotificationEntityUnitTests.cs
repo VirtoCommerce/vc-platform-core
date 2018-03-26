@@ -153,7 +153,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                 {
                     Id = id,
                     Type = nameof(RegistrationSocialNetworkNotification),
-                    Kind = nameof(SocialNetworkNotification)
+                    Kind = nameof(SocialNetworkNotification),
+                    Token = Guid.NewGuid().ToString()
                 }
             };
             _repositoryMock.Setup(n => n.GetByIdsAsync(new[] { id }))

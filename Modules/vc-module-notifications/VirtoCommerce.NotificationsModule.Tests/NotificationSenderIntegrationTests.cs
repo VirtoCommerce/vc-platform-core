@@ -117,7 +117,7 @@ namespace VirtoCommerce.NotificationsModule.Tests
         public async Task SmtpEmailNotificationMessageSender_FailSendMessage()
         {
             //Arrange
-            string language = "default";
+            string language = null;
             string number = Guid.NewGuid().ToString();
             string subject = "Order #{{customer_order.number}}";
             string body = "You have order #{{customer_order.number}}";
