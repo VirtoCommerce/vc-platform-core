@@ -118,7 +118,7 @@
             canExecuteMethod: function () {
                 return true;
             },
-			permission: 'notications:template:create'
+			permission: 'notifications:templates:read'
         }
     ];
 	 

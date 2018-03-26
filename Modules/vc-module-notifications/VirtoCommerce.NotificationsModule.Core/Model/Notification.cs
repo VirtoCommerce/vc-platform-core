@@ -6,11 +6,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
 {
     public abstract class Notification : AuditableEntity
     {
-        public Notification()
-        {
-            Tenant = new Tenant();
-        }
-        public Tenant Tenant { get; set; }
+        public TenantIdentity TenantIdentity { get; set; }
         public bool IsActive { get; set; }
 
         private string _type;
@@ -25,8 +21,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
 
         public virtual NotificationMessage ToMessage(NotificationMessage message, INotificationTemplateRender render)
         {
-            message.Tenant.Id = Tenant.Id;
-            message.Tenant.Type = Tenant.Type;
+            message.TenantIdentity = new TenantIdentity(message.TenantIdentity?.Id, message.TenantIdentity?.Type);
             message.NotificationType = Type;
 
             return message;

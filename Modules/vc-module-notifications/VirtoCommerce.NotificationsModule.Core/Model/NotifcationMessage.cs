@@ -5,12 +5,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
 {
     public abstract class NotificationMessage : AuditableEntity, IHasLanguageCode
     {
-        public NotificationMessage()
-        {
-            Tenant = new Tenant();
-        }
-
-        public Tenant Tenant { get; set; }
+        public TenantIdentity TenantIdentity { get; set; }
         public string NotificationId { get; set; }
         public string NotificationType { get; set; }
         public int SendAttemptCount { get; set; }

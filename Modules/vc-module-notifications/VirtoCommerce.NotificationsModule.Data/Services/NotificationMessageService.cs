@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentValidation;
 using VirtoCommerce.NotificationsModule.Core.Events;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
+using VirtoCommerce.NotificationsModule.Data.Validation;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.Events;
@@ -36,6 +38,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
         public async Task SaveNotificationMessagesAsync(NotificationMessage[] messages)
         {
+            ValidateMessageProperties(messages);
+
             var changedEntries = new List<ChangedEntry<NotificationMessage>>();
 
             using (var repository = _repositoryFactory())
@@ -63,6 +67,20 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                 await _eventPublisher.Publish(new GenericNotificationMessageChangingEvent<NotificationMessage>(changedEntries));
                 CommitChanges(repository);
                 await _eventPublisher.Publish(new GenericNotificationMessageChangedEvent<NotificationMessage>(changedEntries));
+            }
+        }
+
+        private void ValidateMessageProperties(IEnumerable<NotificationMessage> messages)
+        {
+            if (messages == null)
+            {
+                throw new ArgumentNullException(nameof(messages));
+            }
+
+            var validator = new NotificationMessageValidator();
+            foreach (var notification in messages)
+            {
+                validator.ValidateAndThrow(notification);
             }
         }
     }

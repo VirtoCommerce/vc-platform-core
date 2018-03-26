@@ -240,7 +240,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         public async Task EmailNotification_SuccessSend()
         {
             //Arrange
-            string language = "default";
+            string language = null;
             string subject = "some subject";
             string body = "some body";
             var notification = new EmailNotification()
@@ -252,7 +252,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                         Subject = subject,
                         Body = body,
                     }
-                }
+                },
+                TenantIdentity = new TenantIdentity(null, null)
             };
             
             var message = new EmailNotificationMessage()
@@ -262,7 +263,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                 To = "to@to.com",
                 Subject = subject,
                 Body = body,
-                SendDate = DateTime.Now
+                SendDate = DateTime.Now,
+                TenantIdentity = new TenantIdentity(null, null)
             };
             _serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(EmailNotification), null, null)).ReturnsAsync(notification);
 

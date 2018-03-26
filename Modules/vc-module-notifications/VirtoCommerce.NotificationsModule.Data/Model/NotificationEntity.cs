@@ -48,8 +48,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         {
             if (notification == null) throw new ArgumentNullException(nameof(notification));
             notification.Id = this.Id;
-            notification.Tenant.Id = this.TenantId;
-            notification.Tenant.Type = this.TenantType;
+            notification.TenantIdentity = new TenantIdentity(this.TenantId, this.TenantType);
             notification.IsActive = this.IsActive;
             notification.Type = this.Type;
             notification.CreatedBy = this.CreatedBy;
@@ -71,8 +70,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             pkMap.AddPair(notification, this);
 
             this.Id = notification.Id;
-            this.TenantId = notification.Tenant.Id;
-            this.TenantType = notification.Tenant.Type;
+            this.TenantId = notification.TenantIdentity.Id;
+            this.TenantType = notification.TenantIdentity.Type;
             this.Type = notification.Type;
             this.IsActive = notification.IsActive;
             this.CreatedBy = notification.CreatedBy;

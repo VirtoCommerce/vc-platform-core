@@ -6,7 +6,7 @@ function ($rootScope, $scope, $timeout, notifications, bladeNavigationService, d
     }
 
 	var blade = $scope.blade;
-	blade.updatePermission = 'notiications:notification:update';
+	blade.updatePermission = 'notiications:update';
 	var codemirrorEditor;
 	blade.parametersForTemplate = [];
     $scope.isValid = false;

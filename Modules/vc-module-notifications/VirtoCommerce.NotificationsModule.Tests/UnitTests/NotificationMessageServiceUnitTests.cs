@@ -69,7 +69,15 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         {
             //Arrange
             string id = Guid.NewGuid().ToString();
-            var messages = new List<EmailNotificationMessage> { new EmailNotificationMessage() { Id = id } };
+            var messages = new List<EmailNotificationMessage>
+            {
+                new EmailNotificationMessage()
+                {
+                    Id = id,
+                    NotificationId = Guid.NewGuid().ToString(),
+                    NotificationType = nameof(EmailNotification)
+                }
+            };
             var messageEntity = new NotificationMessageEntity() { Id = id, NotificationType = nameof(EmailNotificationMessage) };
             var messageEntities = new List<NotificationMessageEntity> { messageEntity };
             _repositoryMock.Setup(n => n.GetMessageByIdAsync(new[] { id })).ReturnsAsync(messageEntities.ToArray());

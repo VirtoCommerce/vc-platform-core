@@ -96,7 +96,8 @@ namespace VirtoCommerce.NotificationsModule.Tests
                         Subject = subject,
                         Body = body,
                     }
-                }
+                },
+                TenantIdentity = new TenantIdentity(null, null)
             };
 
             _serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(OrderSentEmailNotification), null, null)).ReturnsAsync(notification);

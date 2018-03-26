@@ -46,7 +46,7 @@ angular.module('virtoCommerce.notificationsModule')
             });
         }
 
-		if (authService.checkPermission('notifications:notification:review')) {
+		if (authService.checkPermission('notifications:access')) {
 			blade.editTemplate = function (item) {
 				var newBlade = {
 					id: 'editNotification',

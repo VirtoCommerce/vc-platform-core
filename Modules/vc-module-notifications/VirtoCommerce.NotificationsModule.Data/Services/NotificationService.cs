@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentValidation;
 using VirtoCommerce.NotificationsModule.Core.Events;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
+using VirtoCommerce.NotificationsModule.Data.Validation;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.Events;
@@ -53,6 +55,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
         {
             if (notifications != null && notifications.Any())
             {
+                ValidateNotificationProperties(notifications);
+
                 var pkMap = new PrimaryKeyResolvingMap();
                 var changedEntries = new List<ChangedEntry<Notification>>();
                 using (var repository = _repositoryFactory())
@@ -91,6 +95,20 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             if (AbstractTypeFactory<Notification>.AllTypeInfos.All(t => t.Type != typeof(T)))
             {
                 AbstractTypeFactory<Notification>.RegisterType<T>();
+            }
+        }
+
+        private void ValidateNotificationProperties(IEnumerable<Notification> notifications)
+        {
+            if (notifications == null)
+            {
+                throw new ArgumentNullException(nameof(notifications));
+            }
+
+            var validator = new NotificationValidator();
+            foreach (var notification in notifications)
+            {
+                validator.ValidateAndThrow(notification);
             }
         }
     }

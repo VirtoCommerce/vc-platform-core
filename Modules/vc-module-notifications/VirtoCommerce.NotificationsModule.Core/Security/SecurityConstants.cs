@@ -12,9 +12,9 @@ namespace VirtoCommerce.NotificationsModule.Core.Security
             public const string Export = "notifications:export";
             public const string Import = "notifications:import";
             public const string ReadTemplates = "notifications:templates:read";
-            public const string UpdateTemplate = "notifications:template:update";
+            public const string CreateTemplate = "notifications:template:create";
 
-            public static string[] AllPermissions = new[] { Read, Create, Access, Update, Delete, Export, Import, ReadTemplates, UpdateTemplate };
+            public static string[] AllPermissions = new[] { Read, Create, Access, Update, Delete, Export, Import, ReadTemplates, CreateTemplate };
         }
     }
 }
