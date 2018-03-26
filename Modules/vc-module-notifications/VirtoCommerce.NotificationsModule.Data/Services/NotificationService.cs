@@ -26,7 +26,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             _eventPublisher = eventPublisher;
         }
 
-        public async Task<Notification> GetNotificationByTypeAsync(string type, string tenantId = null, string tenantType = null)
+        public async Task<Notification> GetByTypeAsync(string type, string tenantId = null, string tenantType = null)
         {
             var notificationType = AbstractTypeFactory<Notification>.AllTypeInfos.FirstOrDefault(t => t.Type.Name.Equals(type))?.Type;
             if (notificationType == null) return null;
@@ -40,7 +40,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             return result;
         }
 
-        public async Task<Notification[]> GetNotificationsByIdsAsync(string[] ids)
+        public async Task<Notification[]> GetByIdsAsync(string[] ids)
         {
             using (var repository = _repositoryFactory())
             {

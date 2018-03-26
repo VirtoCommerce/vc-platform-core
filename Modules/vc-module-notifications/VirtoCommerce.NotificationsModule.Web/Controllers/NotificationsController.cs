@@ -44,7 +44,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         [ProducesResponseType(typeof(Notification), 200)]
         public async Task<IActionResult> GetNotificationByTypeId(string type, string tenantId = null, string tenantType = null)
         {
-            var notification = await _notificationService.GetNotificationByTypeAsync(type, tenantId, tenantType);
+            var notification = await _notificationService.GetByTypeAsync(type, tenantId, tenantType);
 
             return Ok(notification);
         }

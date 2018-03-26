@@ -62,12 +62,12 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         {
             //Arrange
             string type = nameof(RegistrationEmailNotification);
-            _repositoryMock.Setup(n => n.GetNotificationEntityForListByType(nameof(RegistrationEmailNotification), null, null))
-                .Returns(new EmailNotificationEntity() { IsActive = true });
+            _repositoryMock.Setup(n => n.GetByTypeAsync(nameof(RegistrationEmailNotification), null, null))
+                .ReturnsAsync(new EmailNotificationEntity() { IsActive = true });
             _notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
 
             //Act
-            var result = await _notificationService.GetNotificationByTypeAsync(type, null, null);
+            var result = await _notificationService.GetByTypeAsync(type, null, null);
 
             //Assert
             Assert.NotNull(result);
@@ -85,7 +85,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
 
             //Act
-            var result = await _notificationService.GetNotificationsByIdsAsync(new [] { id });
+            var result = await _notificationService.GetByIdsAsync(new [] { id });
 
             //Assert
             Assert.NotNull(result);

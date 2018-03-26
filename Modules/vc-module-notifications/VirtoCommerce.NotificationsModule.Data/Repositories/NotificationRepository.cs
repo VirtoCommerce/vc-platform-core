@@ -55,7 +55,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             return result;
         }
 
-        public NotificationEntity GetNotificationEntityForListByType(string type, string tenantId, string tenantType)
+        public NotificationEntity GetEntityForListByType(string type, string tenantId, string tenantType)
         {
             var query = Notifications;
             if (!string.IsNullOrEmpty(tenantId)) query = query.Where(q => q.TenantId.Equals(tenantId));
@@ -63,7 +63,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             return query.FirstOrDefault(n => n.Type.Equals(type));
         }
 
-        public Task<NotificationMessageEntity[]> GetNotificationMessageByIdAsync(string[] ids)
+        public Task<NotificationMessageEntity[]> GetMessageByIdAsync(string[] ids)
         {
             return NotifcationMessages.Where(x => ids.Contains(x.Id)).ToArrayAsync();
         }

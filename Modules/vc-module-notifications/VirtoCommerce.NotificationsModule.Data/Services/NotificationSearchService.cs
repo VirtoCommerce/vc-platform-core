@@ -48,7 +48,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                 NotificationEntity notificationEntity;
                 using (var repository = _repositoryFactory())
                 {
-                    notificationEntity = repository.GetNotificationEntityForListByType(t.Name, criteria.TenantId, criteria.TenantType);
+                    notificationEntity = repository.GetEntityForListByType(t.Name, criteria.TenantId, criteria.TenantType);
                 }
                 return notificationEntity != null ? notificationEntity.ToModel(result) : result;
             }).ToList();
