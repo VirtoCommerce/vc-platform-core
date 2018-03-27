@@ -24,7 +24,7 @@ namespace VirtoCommerce.Platform.Modules.Extensions
             {
                 var moduleManager = serviceScope.ServiceProvider.GetRequiredService<IModuleManager>();
                 var modules = GetInstalledModules(serviceScope.ServiceProvider);
-                var permissionsProvider = serviceScope.ServiceProvider.GetRequiredService<IPermissionsProvider>();
+                var permissionsProvider = serviceScope.ServiceProvider.GetRequiredService<IKnownPermissionsProvider>();
                 foreach (var module in modules)
                 {
                     //Register modules permissions defined in the module manifest

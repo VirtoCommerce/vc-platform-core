@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace VirtoCommerce.Platform.Core.Security
 {
-    public interface IPermissionsProvider
+    public interface IKnownPermissionsProvider
     {
         void RegisterPermissions(Permission[] permissions);
         IEnumerable<Permission> GetAllPermissions();

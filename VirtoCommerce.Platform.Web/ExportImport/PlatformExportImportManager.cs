@@ -52,9 +52,9 @@ namespace VirtoCommerce.Platform.Web.ExportImport
         private readonly ISettingsManager _settingsManager;
         private readonly IDynamicPropertyService _dynamicPropertyService;
         private readonly IMemoryCache _memoryCache;
-        private readonly IPermissionsProvider _permissionsProvider;
+        private readonly IKnownPermissionsProvider _permissionsProvider;
 
-        public PlatformExportImportManager(UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager, IPermissionsProvider permissionsProvider, ISettingsManager settingsManager,
+        public PlatformExportImportManager(UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager, IKnownPermissionsProvider permissionsProvider, ISettingsManager settingsManager,
                 IDynamicPropertyService dynamicPropertyService, IModuleCatalog moduleCatalog, IMemoryCache memoryCache)
         {
             _dynamicPropertyService = dynamicPropertyService;
