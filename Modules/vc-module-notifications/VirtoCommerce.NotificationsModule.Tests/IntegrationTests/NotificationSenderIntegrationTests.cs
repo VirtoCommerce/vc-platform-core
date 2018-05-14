@@ -19,7 +19,7 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using Xunit;
 
-namespace VirtoCommerce.NotificationsModule.Tests
+namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
 {
     public class NotificationSenderIntegrationTests
     {
@@ -73,7 +73,6 @@ namespace VirtoCommerce.NotificationsModule.Tests
                 AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>().MapToType<NotificationMessageEntity>();
             }
 
-            _notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
             _notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
         }
 
