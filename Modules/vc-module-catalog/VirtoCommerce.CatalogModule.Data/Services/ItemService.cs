@@ -28,9 +28,9 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         private readonly AbstractValidator<IHasProperties> _hasPropertyValidator;
         private readonly IEventPublisher _eventPublisher;
         private readonly IBlobUrlResolver _blobUrlResolver;
-
+        private readonly ISkuGenerator _skuGenerator;
         public ItemService(Func<ICatalogRepository> catalogRepositoryFactory, ICommerceService commerceService, IOutlineService outlineService, ICatalogService catalogService,
-                               ICategoryService categoryService, AbstractValidator<IHasProperties> hasPropertyValidator, IEventPublisher eventPublisher, IBlobUrlResolver blobUrlResolver)
+                               ICategoryService categoryService, AbstractValidator<IHasProperties> hasPropertyValidator, IEventPublisher eventPublisher, IBlobUrlResolver blobUrlResolver, ISkuGenerator skuGenerator)
         {
             _catalogService = catalogService;
             _categoryService = categoryService;
@@ -40,6 +40,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             _hasPropertyValidator = hasPropertyValidator;
             _eventPublisher = eventPublisher;
             _blobUrlResolver = blobUrlResolver;
+            _skuGenerator = skuGenerator;
         }
 
         #region IItemService Members
@@ -58,7 +59,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                                    .ToArray();
             }
 
-            LoadDependencies(result);
+            InnerLoadDependencies(result);
             ApplyInheritanceRules(result);
 
             var productsWithVariationsList = result.Concat(result.Where(p => p.Variations != null)
@@ -148,7 +149,12 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             _commerceService.UpsertSeoForObjects(productsWithVariations);
         }
 
-        protected virtual void LoadDependencies(IEnumerable<CatalogProduct> products, bool processVariations = true)
+        public virtual void LoadDependencies(IEnumerable<CatalogProduct> products)
+        {
+            InnerLoadDependencies(products);
+        }
+
+        protected virtual void InnerLoadDependencies(IEnumerable<CatalogProduct> products, bool processVariations = true)
         {
             var catalogsMap = _catalogService.GetAllCatalogs().ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
             var allCategoriesIds = products.Select(x => x.CategoryId).Where(x => x != null).Distinct().ToArray();
@@ -156,6 +162,10 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
             foreach (var product in products)
             {
+                if (string.IsNullOrEmpty(product.Code))
+                {
+                    product.Code = _skuGenerator.GenerateSku(product);
+                }
                 product.Catalog = catalogsMap.GetValueOrThrow(product.CatalogId, $"catalog with key {product.CatalogId} doesn't exist");
                 if (product.CategoryId != null)
                 {
@@ -173,11 +183,11 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
                 if (product.MainProduct != null)
                 {
-                    LoadDependencies(new[] { product.MainProduct }, false);
+                    InnerLoadDependencies(new[] { product.MainProduct }, false);
                 }
                 if (processVariations && !product.Variations.IsNullOrEmpty())
                 {
-                    LoadDependencies(product.Variations.ToArray());
+                    InnerLoadDependencies(product.Variations.ToArray());
                 }
                 //Resolve relative urls for all product assets
                 if (product.AllAssets != null)
@@ -210,12 +220,12 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
 
             //Validate products
-            var validator = new ProductValidator();
+            var validator = AbstractTypeFactory<ProductValidator>.TryCreateInstance();
             foreach (var product in products)
             {
                 validator.ValidateAndThrow(product);
             }
-            LoadDependencies(products, false);
+            InnerLoadDependencies(products, false);
             ApplyInheritanceRules(products);
 
             var targets = products.OfType<IHasProperties>();

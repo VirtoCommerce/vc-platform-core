@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Domain;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
     /// <summary>
     /// Represent dictionary property values 
     /// </summary>
-	public class PropertyDictionaryValue : Entity
+	public class PropertyDictionaryValue : Entity, IHasLanguage, ICloneable
 	{
         /// <summary>
         /// Property identifier
@@ -25,5 +26,12 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         /// </summary>
 		public string LanguageCode { get; set; }
 		public string Value { get; set; }
-	}
+
+        #region ICloneable members
+        public virtual object Clone()
+        {
+            return MemberwiseClone();
+        } 
+        #endregion
+    }
 }

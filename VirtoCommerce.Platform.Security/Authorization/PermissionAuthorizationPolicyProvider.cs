@@ -15,9 +15,9 @@ namespace VirtoCommerce.Platform.Security.Authorization
     public class PermissionAuthorizationPolicyProvider : DefaultAuthorizationPolicyProvider
     {
         private readonly IConfiguration _configuration;
-        private readonly IPermissionsProvider _permissionsProvider;
+        private readonly IKnownPermissionsProvider _permissionsProvider;
         private readonly IMemoryCache _memoryCache;
-        public PermissionAuthorizationPolicyProvider(IOptions<AuthorizationOptions> options, IConfiguration configuration, IPermissionsProvider permissionsProvider, IMemoryCache memoryCache)
+        public PermissionAuthorizationPolicyProvider(IOptions<AuthorizationOptions> options, IConfiguration configuration, IKnownPermissionsProvider permissionsProvider, IMemoryCache memoryCache)
             : base(options)
         {
             _configuration = configuration;
