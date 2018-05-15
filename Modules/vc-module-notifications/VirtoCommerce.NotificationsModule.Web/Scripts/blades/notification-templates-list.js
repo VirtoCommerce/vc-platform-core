@@ -9,7 +9,9 @@ angular.module('virtoCommerce.notificationsModule')
             var languages = ["en-US", "de-DE"];
             blade.languages = languages;
             //TODO
-		    //blade.languages = settings.getValues({ id: 'VirtoCommerce.Core.General.Languages' });
+            // settings.getSettings({ id: 'VirtoCommerce.Core.General.Languages' }, function (data) {
+            //     blade.languages = data;
+            // });
 	    }
 
 	    blade.initialize = function () {

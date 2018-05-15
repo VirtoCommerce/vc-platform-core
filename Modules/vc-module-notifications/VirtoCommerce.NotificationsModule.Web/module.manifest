@@ -40,5 +40,22 @@
 			<permission id="notifications:template:create" name="Create template related data" description=""/>
         </group>
     </permissions>
+    <settings>
+        <group name="Commerce|General">
+            <setting>
+                <name>VirtoCommerce.Core.General.Languages</name>
+                <valueType>string</valueType>
+                <defaultValue>en-US</defaultValue>
+                <title>Languages</title>
+                <description>Languages available in the platform</description>
+                <isArray>true</isArray>
+                <arrayValues>
+                    <value>en-US</value>
+                    <value>de-DE</value>
+                </arrayValues>
+            </setting>
+            
+        </group>
+    </settings>
     
 </module>

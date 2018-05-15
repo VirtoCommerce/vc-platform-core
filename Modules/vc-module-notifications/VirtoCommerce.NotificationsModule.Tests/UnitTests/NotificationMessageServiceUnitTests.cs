@@ -17,7 +17,6 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
     public class NotificationMessageServiceUnitTests
     {
         private readonly Mock<INotificationRepository> _repositoryMock;
-        private readonly INotificationRegistrar _notificationRegistrar;
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
         private readonly Mock<IEventPublisher> _eventPublisherMock;
         private readonly NotificationMessageService _notificationMessageService;

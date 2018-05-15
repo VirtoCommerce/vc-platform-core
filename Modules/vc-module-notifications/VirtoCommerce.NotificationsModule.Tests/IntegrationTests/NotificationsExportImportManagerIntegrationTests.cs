@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -70,12 +71,22 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             //Arrange
             var manifest = new PlatformExportManifest();
             var fileStream = new FileStream("c:\\vc\\export_test.json", FileMode.Create);
-            var entities = AbstractTypeFactory<EmailNotificationEntity>.TryCreateInstance(nameof(EmailNotificationEntity));
-            entities.Id = Guid.NewGuid().ToString();
-            entities.Type = nameof(EmailNotification);
-            entities.Kind = nameof(EmailNotification);
-            _repositoryMock.Setup(r => r.GetEntityForListByType(nameof(RegistrationEmailNotification), null, null)).Returns(entities);
-            
+            var entityForList = AbstractTypeFactory<EmailNotificationEntity>.TryCreateInstance(nameof(EmailNotificationEntity));
+            entityForList.Id = Guid.NewGuid().ToString();
+            entityForList.Type = nameof(EmailNotification);
+            entityForList.Kind = nameof(EmailNotification);
+            _repositoryMock.Setup(r => r.GetEntityForListByType(nameof(RegistrationEmailNotification), null, null)).Returns(entityForList);
+
+            var entity = AbstractTypeFactory<EmailNotificationEntity>.TryCreateInstance(nameof(EmailNotificationEntity));
+            entity.Id = entityForList.Id;
+            entity.Type = nameof(EmailNotification);
+            entity.Kind = nameof(EmailNotification);
+            entity.Templates = new ObservableCollection<NotificationTemplateEntity>()
+            {
+                new NotificationTemplateEntity() { Body = "test", LanguageCode = "en-US" }
+            };
+            _repositoryMock.Setup(r => r.GetByIdsAsync(new [] { entity.Id })).ReturnsAsync(new EmailNotificationEntity[] { entity });
+
             //Act
             _notificationsExportImportManager.DoExport(fileStream, manifest, exportImportProgressInfo => {}, CancellationToken.None);
 

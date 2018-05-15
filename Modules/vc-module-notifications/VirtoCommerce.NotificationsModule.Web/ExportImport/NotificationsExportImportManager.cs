@@ -52,6 +52,11 @@ namespace VirtoCommerce.NotificationsModule.Web.ExportImport
                 throw new ArgumentNullException("manifest");
             }
 
+            if (cancellationToken.IsCancellationRequested)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+
             var progressInfo = new ExportImportProgressInfo { Description = "loading data..." };
             progressCallback(progressInfo);
 
@@ -67,12 +72,19 @@ namespace VirtoCommerce.NotificationsModule.Web.ExportImport
                 writer.WritePropertyName("NotificationsTotalCount");
                 writer.WriteValue(notificationsResult.TotalCount);
 
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                }
+
                 writer.WritePropertyName("Notifications");
                 writer.WriteStartArray();
                 for (var i = 0; i < notificationsResult.TotalCount; i += _batchSize)
                 {
                     var searchResponse = _notificationSearchService.SearchNotifications(new NotificationSearchCriteria { Skip = i, Take = _batchSize });
-                    foreach (var notification in searchResponse.Results)
+
+                    var notifications = _notificationService.GetByIdsAsync(searchResponse.Results.Select(n => n.Id).ToArray()).GetAwaiter().GetResult();
+                    foreach (var notification in notifications)
                     {
                         GetJsonSerializer().Serialize(writer, notification);
                     }
@@ -90,6 +102,11 @@ namespace VirtoCommerce.NotificationsModule.Web.ExportImport
         public void DoImport(Stream inputStream, PlatformExportManifest manifest, Action<ExportImportProgressInfo> progressCallback,
             CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+
             var progressInfo = new ExportImportProgressInfo();
             var notificationsTotalCount = 0;
 
@@ -103,6 +120,11 @@ namespace VirtoCommerce.NotificationsModule.Web.ExportImport
                         if (reader.Value.ToString() == "NotificationsTotalCount")
                         {
                             notificationsTotalCount = reader.ReadAsInt32() ?? 0;
+
+                            if (cancellationToken.IsCancellationRequested)
+                            {
+                                cancellationToken.ThrowIfCancellationRequested();
+                            }
                         }
                         else if (reader.Value.ToString() == "Notifications")
                         {
@@ -121,6 +143,11 @@ namespace VirtoCommerce.NotificationsModule.Web.ExportImport
                                     notificationsCount++;
 
                                     reader.Read();
+                                }
+
+                                if (cancellationToken.IsCancellationRequested)
+                                {
+                                    cancellationToken.ThrowIfCancellationRequested();
                                 }
 
                                 if (notificationsCount % _batchSize == 0 || reader.TokenType == JsonToken.EndArray)
