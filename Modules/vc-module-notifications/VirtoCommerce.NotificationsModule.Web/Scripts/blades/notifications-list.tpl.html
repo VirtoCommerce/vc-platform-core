@@ -60,8 +60,7 @@
 <script type="text/ng-template" id="notification-list-kind.cell.html">
     <div class='ui-grid-cell-contents'>
         <div class="inner-contents">
-            <i class="table-ico fa fa-envelope" ng-if="row.entity.kind === 'EmailNotification'"></i>
-            <i class="table-ico fa fa-mobile" ng-if="row.entity.kind === 'SmsNotification'"></i>
+            <i class="table-ico" ng-class="row.entity.icon"></i>
         </div>
     </div>
 </script>

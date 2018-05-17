@@ -91,6 +91,7 @@ namespace VirtoCommerce.Platform.Modules.Extensions
             return moduleCatalog.CompleteListWithDependencies(allModules)
                 .Where(x => x.State == ModuleState.Initialized)
                 .OfType<ManifestModuleInfo>()
+                .OrderBy(m => m.Id)
                 .ToArray();
         }
     }

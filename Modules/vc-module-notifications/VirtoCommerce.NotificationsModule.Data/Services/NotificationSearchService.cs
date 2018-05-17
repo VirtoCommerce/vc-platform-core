@@ -23,7 +23,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
         public  GenericSearchResult<Notification> SearchNotifications(NotificationSearchCriteria criteria)
         {
             var query = AbstractTypeFactory<Notification>.AllTypeInfos
-                .Where(t => t.Type.IsSubclassOf(typeof(EmailNotification)) || t.Type.IsSubclassOf(typeof(SmsNotification)))
+                .Where(t => t.AllSubclasses.Any(s => s != t.Type && s.IsSubclassOf(typeof(Notification))))
                 .Select(n => n.Type)
                 .AsQueryable();
             

@@ -1,0 +1,41 @@
+<div class="blade-content __medium-wide">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form class="form" name="detailForm">
+                <div class="form-group clearfix" ng-init="setForm(detailForm)">
+                    <div class="column">
+                        <div class="form-group">
+                            <div class="form-input">
+                                <label class="form-label __switch">
+                                    <input type="checkbox" ng-model="blade.currentEntity.isActive">
+                                    <span class="switch"></span>
+                                </label>
+                            </div>
+                            <label class="form-label">{{'notifications.blades.notification-details.labels.is-active' | translate}}</label>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">{{ 'notifications.blades.notification-details.labels.name' | translate }}</label>
+                            <div class="form-input">
+                                <input ng-value="'notificationTypes.' + blade.currentEntity.type + '.displayName' | translate"  ng-disabled="blade.currentEntity.type" focus-on required placeholder="{{ 'notifications.blades.notification-details.placeholders.notificationType' | translate }}">
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin:0">
+                            <label class="form-label" style="margin:0">{{'notifications.blades.notifications-edit-template.labels.from' | translate}}</label>
+                            <div class="form-group" style="margin-top:0">
+                                <div class="form-input">
+                                    <input type="email" focus-on="" class="form-control" ng-model="blade.currentEntity.from" placeholder="Enter name of account"/>
+                                </div>
+                                <div class="table-descr">
+                                    {{ 'notifications.blades.notifications-edit-template.labels.blank-note' | translate }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <va-widget-container group="notificationsDetail" blade="blade" data="blade.currentEntity" gridster-opts="{width: 526}"></va-widget-container>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

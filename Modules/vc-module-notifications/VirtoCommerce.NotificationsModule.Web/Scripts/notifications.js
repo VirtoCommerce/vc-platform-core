@@ -50,8 +50,8 @@ angular.module(moduleTemplateName, ['textAngular'])
             }
         };
     }])
-    .run(['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', 'virtoCommerce.notificationsModule.notificationTypesResolverService', '$http', '$compile', 'virtoCommerce.notificationsModule.predefinedSearchFilters',
-        function ($rootScope, mainMenuService, widgetService, $state, notificationTypesResolverService, $http, $compile, predefinedSearchFilters) {
+    .run(['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', 'virtoCommerce.notificationsModule.notificationTypesResolverService', 'virtoCommerce.notificationsModule.notificationTemplatesResolverService', '$http', '$compile', 'virtoCommerce.notificationsModule.predefinedSearchFilters',
+        function ($rootScope, mainMenuService, widgetService, $state, notificationTypesResolverService, notificationTemplatesResolverService, $http, $compile, predefinedSearchFilters) {
             //Register module in main menu
             var menuItem = {
                 path: 'browse/notificationsModule',
@@ -81,7 +81,18 @@ angular.module(moduleTemplateName, ['textAngular'])
                 type: 'EmailNotification',
                 icon: 'fa fa-envelope',
                 detailBlade: {
-                  template: 'Modules/$(VirtoCommerce.Notifications)/Scripts/blades/notifications-edit-template.tpl.html'
+                  template: 'Modules/$(VirtoCommerce.Notifications)/Scripts/blades/notification-details.tpl.html',
+                  controller: 'virtoCommerce.notificationsModule.notificationsEditController'
+                },
+                knownChildrenTypes: ['Email', 'Sms']
+            }); 
+
+            // register templates
+            notificationTemplatesResolverService.registerTemplate({
+                type: 'EmailNotification',
+                icon: 'fa fa-envelope',
+                detailBlade: {
+                  template: 'Modules/$(VirtoCommerce.Notifications)/Scripts/blades/notifications-edit-template.tpl.html',
                 },
                 knownChildrenTypes: ['Email', 'Sms']
             }); 

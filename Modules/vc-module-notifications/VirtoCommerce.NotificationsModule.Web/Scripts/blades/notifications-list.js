@@ -38,11 +38,33 @@ angular.module('virtoCommerce.notificationsModule')
                 blade.isLoading = false;
                 $scope.pageSettings.totalItems = data.totalCount;
                 $scope.listEntries = data.results ? data.results : [];
+                _.map($scope.listEntries, function(entity) {
+                    var foundNotification = notificationTypesResolverService.resolve(entity.kind); 
+                    if (foundNotification) {
+                        entity.icon = foundNotification.icon;
+                    }
+                    return entity; 
+                });
             });
+        }
+
+        function resolveType(kind) {
+            var foundNotification = notificationTypesResolverService.resolve(kind);
+            if (foundNotification && foundNotification.knownChildrenTypes && foundNotification.knownChildrenTypes.length) {
+                    return foundNotification;
+                } else {
+                    dialogService.showNotificationDialog({
+                        id: "error",
+                        title: "notifications.dialogs.unknown-kind.title",
+                        message: "notifications.dialogs.unknown-kind.message",
+                        messageValues: { kind: kind },
+                });
+            }
         }
 
 		if (authService.checkPermission('notifications:access')) {
 			blade.editTemplate = function (item) {
+                var foundNotification = resolveType(item.kind);
 				var newBlade = {
 					id: 'editNotification',
 					title: 'notifications.blades.notification-details.title',
@@ -50,8 +72,8 @@ angular.module('virtoCommerce.notificationsModule')
 					type: item.type,
 					tenantId: blade.tenantId,
 					tenantType: blade.tenantType,
-					controller: 'virtoCommerce.notificationsModule.notificationsEditController',
-					template: 'Modules/$(VirtoCommerce.Notifications)/Scripts/blades/notification-details.tpl.html'
+					controller: foundNotification.detailBlade.controller,
+                    template: foundNotification.detailBlade.template
 				};
 
 				bladeNavigationService.showBlade(newBlade, blade);
