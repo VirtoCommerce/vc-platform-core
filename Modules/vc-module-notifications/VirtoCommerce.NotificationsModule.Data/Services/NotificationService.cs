@@ -31,13 +31,19 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
         public async Task<Notification> GetByTypeAsync(string type, string tenantId = null, string tenantType = null)
         {
             var notificationType = AbstractTypeFactory<Notification>.AllTypeInfos.FirstOrDefault(t => t.Type.Name.Equals(type))?.Type;
-            if (notificationType == null) return null;
+            if (notificationType == null)
+            {
+                return null;
+            }
 
             var result = AbstractTypeFactory<Notification>.TryCreateInstance(notificationType.Name);
             using (var repository = _repositoryFactory())
             {
                 var notification = await repository.GetByTypeAsync(notificationType.Name, tenantId, tenantType);
-                if (notification != null) return notification.ToModel(result);
+                if (notification != null)
+                {
+                    return notification.ToModel(result);
+                }
             }
             return result;
         }

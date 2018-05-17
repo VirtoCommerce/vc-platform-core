@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using VirtoCommerce.NotificationsModule.Core.Model;
-using VirtoCommerce.NotificationsModule.Data.Enums;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Data.Model
@@ -47,18 +46,18 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         public virtual Notification ToModel(Notification notification)
         {
             if (notification == null) throw new ArgumentNullException(nameof(notification));
-            notification.Id = this.Id;
-            notification.TenantIdentity = new TenantIdentity(this.TenantId, this.TenantType);
-            notification.IsActive = this.IsActive;
-            notification.Type = this.Type;
-            notification.CreatedBy = this.CreatedBy;
-            notification.CreatedDate = this.CreatedDate;
-            notification.ModifiedBy = this.ModifiedBy;
-            notification.ModifiedDate = this.ModifiedDate;
-            notification.Kind = this.Kind;
+            notification.Id = Id;
+            notification.TenantIdentity = new TenantIdentity(TenantId, TenantType);
+            notification.IsActive = IsActive;
+            notification.Type = Type;
+            notification.CreatedBy = CreatedBy;
+            notification.CreatedDate = CreatedDate;
+            notification.ModifiedBy = ModifiedBy;
+            notification.ModifiedDate = ModifiedDate;
+            notification.Kind = Kind;
 
-            notification.Templates = this.Templates
-                .Select(t => t.ToModel(AbstractTypeFactory<NotificationTemplate>.TryCreateInstance($"{this.Kind}Template"))).ToList();
+            notification.Templates = Templates
+                .Select(t => t.ToModel(AbstractTypeFactory<NotificationTemplate>.TryCreateInstance($"{Kind}Template"))).ToList();
 
             return notification;
         }
@@ -69,20 +68,20 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 
             pkMap.AddPair(notification, this);
 
-            this.Id = notification.Id;
-            this.TenantId = notification.TenantIdentity.Id;
-            this.TenantType = notification.TenantIdentity.Type;
-            this.Type = notification.Type;
-            this.IsActive = notification.IsActive;
-            this.CreatedBy = notification.CreatedBy;
-            this.CreatedDate = notification.CreatedDate;
-            this.ModifiedBy = notification.ModifiedBy;
-            this.ModifiedDate = notification.ModifiedDate;
-            this.Kind = notification.Kind;
+            Id = notification.Id;
+            TenantId = notification.TenantIdentity.Id;
+            TenantType = notification.TenantIdentity.Type;
+            Type = notification.Type;
+            IsActive = notification.IsActive;
+            CreatedBy = notification.CreatedBy;
+            CreatedDate = notification.CreatedDate;
+            ModifiedBy = notification.ModifiedBy;
+            ModifiedDate = notification.ModifiedDate;
+            Kind = notification.Kind;
 
             if (notification.Templates != null && notification.Templates.Any())
             {
-                this.Templates = new ObservableCollection<NotificationTemplateEntity>(notification.Templates
+                Templates = new ObservableCollection<NotificationTemplateEntity>(notification.Templates
                         .Select(x => AbstractTypeFactory<NotificationTemplateEntity>.TryCreateInstance().FromModel(x)));
             }
 
@@ -91,13 +90,13 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 
         public virtual void Patch(NotificationEntity notification)
         {
-            notification.Type = this.Type;
-            notification.Kind = this.Kind;
-            notification.IsActive = this.IsActive;
+            notification.Type = Type;
+            notification.Kind = Kind;
+            notification.IsActive = IsActive;
             
-            if (!this.Templates.IsNullCollection())
+            if (!Templates.IsNullCollection())
             {
-                this.Templates.Patch(notification.Templates, (sourceTemplate, templateEntity) => sourceTemplate.Patch(templateEntity));
+                Templates.Patch(notification.Templates, (sourceTemplate, templateEntity) => sourceTemplate.Patch(templateEntity));
             }
         }
     }

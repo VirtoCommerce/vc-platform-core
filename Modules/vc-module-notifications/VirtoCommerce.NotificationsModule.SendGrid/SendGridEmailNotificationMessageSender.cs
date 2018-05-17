@@ -26,7 +26,10 @@ namespace VirtoCommerce.NotificationsModule.SendGrid
             {
                 var emailNotificationMessage = message as EmailNotificationMessage;
 
-                if (emailNotificationMessage == null) throw new ArgumentNullException(nameof(emailNotificationMessage));
+                if (emailNotificationMessage == null)
+                {
+                    throw new ArgumentNullException(nameof(emailNotificationMessage));
+                }
 
                 var client = new SendGridClient(_emailSendingOptions.SendGridOptions.ApiKey);
                 var mailMsg = new SendGridMessage

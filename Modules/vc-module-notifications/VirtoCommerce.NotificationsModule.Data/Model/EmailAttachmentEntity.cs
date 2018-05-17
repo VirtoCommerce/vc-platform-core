@@ -49,11 +49,11 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         public virtual EmailAttachment ToModel(EmailAttachment emailAttachment)
         {
             if (emailAttachment == null) throw new ArgumentNullException(nameof(emailAttachment));
-            emailAttachment.FileName = this.FileName;
-            emailAttachment.Url = this.Url;
-            emailAttachment.MimeType = this.MimeType;
-            emailAttachment.Size = this.Size;
-            emailAttachment.LanguageCode = this.LanguageCode;
+            emailAttachment.FileName = FileName;
+            emailAttachment.Url = Url;
+            emailAttachment.MimeType = MimeType;
+            emailAttachment.Size = Size;
+            emailAttachment.LanguageCode = LanguageCode;
 
             return emailAttachment;
         }
@@ -61,22 +61,22 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         public virtual EmailAttachmentEntity FromModel(EmailAttachment emailAttachment)
         {
             if (emailAttachment == null) throw new ArgumentNullException(nameof(emailAttachment));
-            this.FileName = emailAttachment.FileName;
-            this.Url = emailAttachment.Url;
-            this.MimeType = emailAttachment.MimeType;
-            this.Size = emailAttachment.Size;
-            this.LanguageCode = emailAttachment.LanguageCode;
+            FileName = emailAttachment.FileName;
+            Url = emailAttachment.Url;
+            MimeType = emailAttachment.MimeType;
+            Size = emailAttachment.Size;
+            LanguageCode = emailAttachment.LanguageCode;
 
             return this;
         }
 
         public void Patch(EmailAttachmentEntity attachment)
         {
-            attachment.LanguageCode = this.LanguageCode;
-            attachment.FileName = this.FileName;
-            attachment.MimeType = this.MimeType;
-            attachment.Size = this.Size;
-            attachment.Url = this.Url;
+            attachment.LanguageCode = LanguageCode;
+            attachment.FileName = FileName;
+            attachment.MimeType = MimeType;
+            attachment.Size = Size;
+            attachment.Url = Url;
         }
     }
 }

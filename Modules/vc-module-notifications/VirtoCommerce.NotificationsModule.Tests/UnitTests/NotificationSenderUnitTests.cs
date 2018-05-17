@@ -9,7 +9,7 @@ using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Senders;
-using VirtoCommerce.NotificationsModule.LiguidRenderer;
+using VirtoCommerce.NotificationsModule.LiquidRenderer;
 using VirtoCommerce.NotificationsModule.Tests.Common;
 using VirtoCommerce.NotificationsModule.Tests.Model;
 using VirtoCommerce.NotificationsModule.Tests.NotificationTypes;
@@ -58,7 +58,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         public async Task OrderSendEmailNotification_SentNotification()
         {
             //Arrange
-            string language = "default";
+            string language = "en-US";
             string subject = "Your order was sent";
             string body = "Your order <strong>{{ customer_order.number}}</strong> was sent.<br> Number of sent parcels - " +
                           "<strong>{{ customer_order.shipments | size}}</strong>.<br> Parcels tracking numbers:<br> {% for shipment in customer_order.shipments %} " +
@@ -76,6 +76,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                     {
                         Subject = subject,
                         Body = body,
+                        LanguageCode = "en-US"
                     }
                 }
             };

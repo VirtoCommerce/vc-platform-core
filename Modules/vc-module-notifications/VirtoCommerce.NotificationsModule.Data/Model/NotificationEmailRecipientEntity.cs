@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using VirtoCommerce.NotificationsModule.Data.Enums;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Data.Model
@@ -28,15 +27,15 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 
         public virtual NotificationEmailRecipientEntity FromModel(string emailAddress, NotificationRecipientType recipientType)
         {
-            this.EmailAddress = emailAddress;
-            this.RecipientType = recipientType;
+            EmailAddress = emailAddress;
+            RecipientType = recipientType;
 
             return this;
         }
 
         public virtual void Patch(NotificationEmailRecipientEntity emailAddress)
         {
-            emailAddress.EmailAddress = this.EmailAddress;
+            emailAddress.EmailAddress = EmailAddress;
         }
     }
 }

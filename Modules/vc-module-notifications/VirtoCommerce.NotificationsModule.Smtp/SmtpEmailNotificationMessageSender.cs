@@ -24,7 +24,10 @@ namespace VirtoCommerce.NotificationsModule.Smtp
         {
             var emailNotificationMessage = message as EmailNotificationMessage;
 
-            if (emailNotificationMessage == null) throw new ArgumentNullException(nameof(emailNotificationMessage));
+            if (emailNotificationMessage == null)
+            {
+                throw new ArgumentNullException(nameof(emailNotificationMessage));
+            }
 
             try
             {
@@ -53,9 +56,6 @@ namespace VirtoCommerce.NotificationsModule.Smtp
             {
                 throw new SentNotificationException(ex.Message, ex);
             }
-
-            
-
         }
 
         private SmtpClient CreateClient()

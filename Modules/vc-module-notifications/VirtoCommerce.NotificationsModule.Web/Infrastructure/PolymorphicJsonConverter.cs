@@ -25,32 +25,9 @@ namespace VirtoCommerce.NotificationsModule.Web.Infrastructure
             var obj = JObject.Load(reader);
             if (objectType == typeof(Notification) || objectType == typeof(NotificationTemplate))
             {
-                var notificationType = objectType.Name;
-                var pt = obj["type"];
-                if (pt != null)
-                {
-                    notificationType = pt.Value<string>();
-                }
-                if (pt == null)
-                {
-                    pt = obj["kind"];
-                    if (pt != null) notificationType = pt.Value<string>();
-                }
-                
-                if (objectType == typeof(Notification))
-                {
-                    retVal = AbstractTypeFactory<Notification>.TryCreateInstance(notificationType);
-                }
-                else if (objectType == typeof(NotificationTemplate))
-                {
-                    retVal = AbstractTypeFactory<NotificationTemplate>.TryCreateInstance(notificationType);
-                }
-                else
-                {
-                    var tryCreateInstance = typeof(AbstractTypeFactory<>).MakeGenericType(objectType).GetMethods()
-                        .FirstOrDefault(x => x.Name.EqualsInvariant("TryCreateInstance") && x.GetParameters().Length == 0);
-                    retVal = tryCreateInstance?.Invoke(null, null);
-                }
+                var tryCreateInstance = typeof(AbstractTypeFactory<>).MakeGenericType(objectType).GetMethods()
+                    .FirstOrDefault(x => x.Name.EqualsInvariant("TryCreateInstance") && x.GetParameters().Length == 0);
+                retVal = tryCreateInstance?.Invoke(null, null);
             }
             else if (objectType == typeof(NotificationSearchCriteria))
             {

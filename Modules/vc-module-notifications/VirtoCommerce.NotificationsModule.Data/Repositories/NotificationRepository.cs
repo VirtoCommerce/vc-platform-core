@@ -39,8 +39,14 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
         public virtual async Task<NotificationEntity> GetByTypeAsync(string type, string tenantId, string tenantType)
         {
             var query = Notifications;
-            if (!string.IsNullOrEmpty(tenantId)) query = query.Where(q => q.TenantId.Equals(tenantId));
-            if (!string.IsNullOrEmpty(tenantType)) query = query.Where(q => q.TenantType.Equals(tenantType));
+            if (!string.IsNullOrEmpty(tenantId))
+            {
+                query = query.Where(q => q.TenantId.Equals(tenantId));
+            }
+            if (!string.IsNullOrEmpty(tenantType))
+            {
+                query = query.Where(q => q.TenantType.Equals(tenantType));
+            }
             query = query.Include(n => n.Templates);
             var result = await query.FirstOrDefaultAsync(n => n.Type.Equals(type));
 
@@ -58,8 +64,14 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
         public NotificationEntity GetEntityForListByType(string type, string tenantId, string tenantType)
         {
             var query = Notifications;
-            if (!string.IsNullOrEmpty(tenantId)) query = query.Where(q => q.TenantId.Equals(tenantId));
-            if (!string.IsNullOrEmpty(tenantType)) query = query.Where(q => q.TenantType.Equals(tenantType));
+            if (!string.IsNullOrEmpty(tenantId))
+            {
+                query = query.Where(q => q.TenantId.Equals(tenantId));
+            }
+            if (!string.IsNullOrEmpty(tenantType))
+            {
+                query = query.Where(q => q.TenantType.Equals(tenantType));
+            }
             return query.FirstOrDefault(n => n.Type.Equals(type));
         }
 

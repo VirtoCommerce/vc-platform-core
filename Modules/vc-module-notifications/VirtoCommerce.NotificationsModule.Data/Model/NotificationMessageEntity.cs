@@ -91,19 +91,19 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            message.Id = this.Id;
-            message.TenantIdentity = new TenantIdentity(this.TenantId, this.TenantType);
-            message.NotificationId = this.NotificationId;
-            message.NotificationType = this.NotificationType;
-            message.SendAttemptCount = this.SendAttemptCount;
-            message.MaxSendAttemptCount = this.MaxSendAttemptCount;
-            message.LastSendError = this.LastSendError;
-            message.LastSendAttemptDate = this.LastSendAttemptDate;
-            message.SendDate = this.SendDate;
-            message.CreatedBy = this.CreatedBy;
-            message.CreatedDate = this.CreatedDate;
-            message.ModifiedBy = this.ModifiedBy;
-            message.ModifiedDate = this.ModifiedDate;
+            message.Id = Id;
+            message.TenantIdentity = new TenantIdentity(TenantId, TenantType);
+            message.NotificationId = NotificationId;
+            message.NotificationType = NotificationType;
+            message.SendAttemptCount = SendAttemptCount;
+            message.MaxSendAttemptCount = MaxSendAttemptCount;
+            message.LastSendError = LastSendError;
+            message.LastSendAttemptDate = LastSendAttemptDate;
+            message.SendDate = SendDate;
+            message.CreatedBy = CreatedBy;
+            message.CreatedDate = CreatedDate;
+            message.ModifiedBy = ModifiedBy;
+            message.ModifiedDate = ModifiedDate;
 
             return message;
         }
@@ -112,38 +112,38 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            this.Id = message.Id;
-            this.TenantId = message.TenantIdentity?.Id;
-            this.TenantType = message.TenantIdentity?.Type;
-            this.NotificationId = message.NotificationId;
-            this.NotificationType = message.NotificationType;
-            this.SendAttemptCount = message.SendAttemptCount;
-            this.MaxSendAttemptCount = message.MaxSendAttemptCount;
-            this.LastSendError = message.LastSendError;
-            this.LastSendAttemptDate = message.LastSendAttemptDate;
-            this.SendDate = message.SendDate;
-            this.CreatedBy = message.CreatedBy;
-            this.CreatedDate = message.CreatedDate;
-            this.ModifiedBy = message.ModifiedBy;
-            this.ModifiedDate = message.ModifiedDate;
+            Id = message.Id;
+            TenantId = message.TenantIdentity?.Id;
+            TenantType = message.TenantIdentity?.Type;
+            NotificationId = message.NotificationId;
+            NotificationType = message.NotificationType;
+            SendAttemptCount = message.SendAttemptCount;
+            MaxSendAttemptCount = message.MaxSendAttemptCount;
+            LastSendError = message.LastSendError;
+            LastSendAttemptDate = message.LastSendAttemptDate;
+            SendDate = message.SendDate;
+            CreatedBy = message.CreatedBy;
+            CreatedDate = message.CreatedDate;
+            ModifiedBy = message.ModifiedBy;
+            ModifiedDate = message.ModifiedDate;
 
             return this;
         }
 
         public virtual void Patch(NotificationMessageEntity message)
         {
-            message.TenantId = this.TenantId;
-            message.TenantType = this.TenantType;
-            message.Notification = this.Notification;
-            message.Body = this.Body;
-            message.LanguageCode = this.LanguageCode;
-            message.NotificationId = this.NotificationId;
-            message.NotificationType = this.NotificationType;
-            message.SendAttemptCount = this.SendAttemptCount;
-            message.MaxSendAttemptCount = this.MaxSendAttemptCount;
-            message.LastSendError = this.LastSendError;
-            message.LastSendAttemptDate = this.LastSendAttemptDate;
-            message.SendDate = this.SendDate;
+            message.TenantId = TenantId;
+            message.TenantType = TenantType;
+            message.Notification = Notification;
+            message.Body = Body;
+            message.LanguageCode = LanguageCode;
+            message.NotificationId = NotificationId;
+            message.NotificationType = NotificationType;
+            message.SendAttemptCount = SendAttemptCount;
+            message.MaxSendAttemptCount = MaxSendAttemptCount;
+            message.LastSendError = LastSendError;
+            message.LastSendAttemptDate = LastSendAttemptDate;
+            message.SendDate = SendDate;
         }
     }
 }

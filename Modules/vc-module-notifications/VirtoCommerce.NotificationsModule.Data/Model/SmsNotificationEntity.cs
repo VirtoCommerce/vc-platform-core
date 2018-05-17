@@ -18,7 +18,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 
             if (smsNotification != null)
             {
-                smsNotification.Number = this.Number;
+                smsNotification.Number = Number;
             }
 
             return base.ToModel(notification);
@@ -30,7 +30,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 
             if (smsNotification != null)
             {
-                this.Number = smsNotification.Number;
+                Number = smsNotification.Number;
             }
 
             return base.FromModel(notification, pkMap);
@@ -42,7 +42,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 
             if (smsNotification != null)
             {
-                smsNotification.Number = this.Number;
+                smsNotification.Number = Number;
             }
 
             base.Patch(notification);

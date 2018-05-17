@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using VirtoCommerce.NotificationsModule.Core.Model;
-using VirtoCommerce.NotificationsModule.Data.Enums;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Data.Model
@@ -31,19 +30,19 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 
             if (emailNotification != null)
             {
-                emailNotification.From = this.From;
-                emailNotification.To = this.To;
-                if (!this.Recipients.IsNullOrEmpty())
+                emailNotification.From = From;
+                emailNotification.To = To;
+                if (!Recipients.IsNullOrEmpty())
                 {
-                    emailNotification.CC = this.Recipients.Where(r => r.RecipientType == NotificationRecipientType.Cc)
+                    emailNotification.CC = Recipients.Where(r => r.RecipientType == NotificationRecipientType.Cc)
                         .Select(cc => cc.EmailAddress).ToArray();
-                    emailNotification.BCC = this.Recipients.Where(r => r.RecipientType == NotificationRecipientType.Bcc)
+                    emailNotification.BCC = Recipients.Where(r => r.RecipientType == NotificationRecipientType.Bcc)
                         .Select(bcc => bcc.EmailAddress).ToArray();
                 }
 
-                if (!this.Attachments.IsNullOrEmpty())
+                if (!Attachments.IsNullOrEmpty())
                 {
-                    emailNotification.Attachments = this.Attachments.Select(en =>
+                    emailNotification.Attachments = Attachments.Select(en =>
                         en.ToModel(AbstractTypeFactory<EmailAttachment>.TryCreateInstance())).ToList();
                 }
             }
@@ -56,26 +55,26 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             var emailNotification = notification as EmailNotification;
             if (emailNotification != null)
             {
-                this.From = emailNotification.From;
-                this.To = emailNotification.To;
+                From = emailNotification.From;
+                To = emailNotification.To;
 
                 if (emailNotification.CC != null && emailNotification.CC.Any())
                 {
-                    if (this.Recipients.IsNullCollection()) this.Recipients = new ObservableCollection<NotificationEmailRecipientEntity>();
-                    this.Recipients.AddRange(emailNotification.CC.Select(cc => AbstractTypeFactory<NotificationEmailRecipientEntity>.TryCreateInstance()
+                    if (Recipients.IsNullCollection()) Recipients = new ObservableCollection<NotificationEmailRecipientEntity>();
+                    Recipients.AddRange(emailNotification.CC.Select(cc => AbstractTypeFactory<NotificationEmailRecipientEntity>.TryCreateInstance()
                         .FromModel(cc, NotificationRecipientType.Cc)));
                 }
 
                 if (emailNotification.BCC != null && emailNotification.BCC.Any())
                 {
-                    if (this.Recipients.IsNullCollection()) this.Recipients = new ObservableCollection<NotificationEmailRecipientEntity>();
-                    this.Recipients.AddRange(emailNotification.BCC.Select(bcc => AbstractTypeFactory<NotificationEmailRecipientEntity>.TryCreateInstance()
+                    if (Recipients.IsNullCollection()) Recipients = new ObservableCollection<NotificationEmailRecipientEntity>();
+                    Recipients.AddRange(emailNotification.BCC.Select(bcc => AbstractTypeFactory<NotificationEmailRecipientEntity>.TryCreateInstance()
                         .FromModel(bcc, NotificationRecipientType.Bcc)));
                 }
 
                 if (emailNotification.Attachments != null && emailNotification.Attachments.Any())
                 {
-                    this.Attachments = new ObservableCollection<EmailAttachmentEntity>(emailNotification.Attachments.Select(a =>
+                    Attachments = new ObservableCollection<EmailAttachmentEntity>(emailNotification.Attachments.Select(a =>
                         AbstractTypeFactory<EmailAttachmentEntity>.TryCreateInstance().FromModel(a)));
                 }
             }
@@ -88,21 +87,30 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             var emailNotification = notification as EmailNotificationEntity;
             if (emailNotification != null)
             {
-                emailNotification.From = this.From;
-                emailNotification.To = this.To;
+                emailNotification.From = From;
+                emailNotification.To = To;
 
-                if (!this.Recipients.IsNullCollection())
+                if (!Recipients.IsNullCollection())
                 {
-                    this.Recipients.Patch(emailNotification.Recipients, (source, target) => source.Patch(target));
+                    Recipients.Patch(emailNotification.Recipients, (source, target) => source.Patch(target));
                 }
 
-                if (!this.Attachments.IsNullCollection())
+                if (!Attachments.IsNullCollection())
                 {
-                    this.Attachments.Patch(emailNotification.Attachments, (source, attachmentEntity) => source.Patch(attachmentEntity));
+                    Attachments.Patch(emailNotification.Attachments, (source, attachmentEntity) => source.Patch(attachmentEntity));
                 }
             }
 
             base.Patch(notification);
         }
+    }
+
+    /// <summary>
+    /// Type of recipient
+    /// </summary>
+    public enum NotificationRecipientType
+    {
+        Cc = 1,
+        Bcc
     }
 }

@@ -35,7 +35,10 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
 
         public async Task<NotificationSendResult> SendNotificationAsync(Notification notification, string language)
         {
-            if (notification == null) throw new ArgumentNullException(nameof(notification));
+            if (notification == null)
+            {
+                throw new ArgumentNullException(nameof(notification));
+            }
 
             NotificationSendResult result = new NotificationSendResult();
 

@@ -43,21 +43,21 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         {
             if (template == null) throw new ArgumentNullException(nameof(template));
 
-            template.Id = this.Id;
-            template.LanguageCode = this.LanguageCode;
-            template.CreatedBy = this.CreatedBy;
-            template.CreatedDate = this.CreatedDate;
-            template.ModifiedBy = this.ModifiedBy;
-            template.ModifiedDate = this.ModifiedDate;
+            template.Id = Id;
+            template.LanguageCode = LanguageCode;
+            template.CreatedBy = CreatedBy;
+            template.CreatedDate = CreatedDate;
+            template.ModifiedBy = ModifiedBy;
+            template.ModifiedDate = ModifiedDate;
 
             switch (template)
             {
                 case EmailNotificationTemplate emailNotificationTemplate:
-                    emailNotificationTemplate.Subject = this.Subject;
-                    emailNotificationTemplate.Body = this.Body;
+                    emailNotificationTemplate.Subject = Subject;
+                    emailNotificationTemplate.Body = Body;
                     break;
                 case SmsNotificationTemplate smsNotificationTemplate:
-                    smsNotificationTemplate.Message = this.Message;
+                    smsNotificationTemplate.Message = Message;
                     break;
             }
 
@@ -68,21 +68,21 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
         {
             if (template == null) throw new ArgumentNullException(nameof(template));
 
-            this.Id = template.Id;
-            this.LanguageCode = template.LanguageCode;
-            this.CreatedBy = template.CreatedBy;
-            this.CreatedDate = template.CreatedDate;
-            this.ModifiedBy = template.ModifiedBy;
-            this.ModifiedDate = template.ModifiedDate;
+            Id = template.Id;
+            LanguageCode = template.LanguageCode;
+            CreatedBy = template.CreatedBy;
+            CreatedDate = template.CreatedDate;
+            ModifiedBy = template.ModifiedBy;
+            ModifiedDate = template.ModifiedDate;
 
             switch (template)
             {
                 case EmailNotificationTemplate emailNotificationTemplate:
-                    this.Subject = emailNotificationTemplate.Subject;
-                    this.Body = emailNotificationTemplate.Body;
+                    Subject = emailNotificationTemplate.Subject;
+                    Body = emailNotificationTemplate.Body;
                     break;
                 case SmsNotificationTemplate smsNotificationTemplate:
-                    this.Message = smsNotificationTemplate.Message;
+                    Message = smsNotificationTemplate.Message;
                     break;
             }
 
@@ -91,10 +91,10 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 
         public virtual void Patch(NotificationTemplateEntity template)
         {
-            template.LanguageCode = this.LanguageCode;
-            template.Subject = this.Subject;
-            template.Body = this.Body;
-            template.Message = this.Message;
+            template.LanguageCode = LanguageCode;
+            template.Subject = Subject;
+            template.Body = Body;
+            template.Message = Message;
         }
     }
 }
