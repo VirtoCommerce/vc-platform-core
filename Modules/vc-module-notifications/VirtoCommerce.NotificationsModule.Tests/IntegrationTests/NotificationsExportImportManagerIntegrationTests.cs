@@ -71,21 +71,21 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             //Arrange
             var manifest = new PlatformExportManifest();
             var fileStream = new FileStream("c:\\vc\\export_test.json", FileMode.Create);
-            var entityForList = AbstractTypeFactory<EmailNotificationEntity>.TryCreateInstance(nameof(EmailNotificationEntity));
-            entityForList.Id = Guid.NewGuid().ToString();
-            entityForList.Type = nameof(EmailNotification);
-            entityForList.Kind = nameof(EmailNotification);
-            _repositoryMock.Setup(r => r.GetEntityForListByType(nameof(RegistrationEmailNotification), null, null)).Returns(entityForList);
+            var entityForCount = AbstractTypeFactory<NotificationEntity>.TryCreateInstance(nameof(EmailNotificationEntity));
+            entityForCount.Id = Guid.NewGuid().ToString();
+            entityForCount.Type = nameof(EmailNotification);
+            entityForCount.Kind = nameof(EmailNotification);
+            _repositoryMock.Setup(r => r.GetByTypeAsync(nameof(RegistrationEmailNotification), null, null, NotificationResponseGroup.Default)).ReturnsAsync(entityForCount);
 
-            var entity = AbstractTypeFactory<EmailNotificationEntity>.TryCreateInstance(nameof(EmailNotificationEntity));
-            entity.Id = entityForList.Id;
+            var entity = AbstractTypeFactory<NotificationEntity>.TryCreateInstance(nameof(EmailNotificationEntity));
+            entity.Id = entityForCount.Id;
             entity.Type = nameof(EmailNotification);
             entity.Kind = nameof(EmailNotification);
             entity.Templates = new ObservableCollection<NotificationTemplateEntity>()
             {
                 new NotificationTemplateEntity() { Body = "test", LanguageCode = "en-US" }
             };
-            _repositoryMock.Setup(r => r.GetByIdsAsync(new [] { entity.Id })).ReturnsAsync(new EmailNotificationEntity[] { entity });
+            _repositoryMock.Setup(r => r.GetByTypeAsync(nameof(RegistrationEmailNotification), null, null, NotificationResponseGroup.Full)).ReturnsAsync(entity);
 
             //Act
             _notificationsExportImportManager.DoExport(fileStream, manifest, exportImportProgressInfo => {}, CancellationToken.None);

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
@@ -26,5 +27,15 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
 
             return message;
         }
+    }
+
+    [Flags]
+    public enum NotificationResponseGroup
+    {
+        Default = 0,
+        WithTemplates = 1,
+        WithAttachments = 2,
+        WithRecipients = 4,
+        Full = 7
     }
 }

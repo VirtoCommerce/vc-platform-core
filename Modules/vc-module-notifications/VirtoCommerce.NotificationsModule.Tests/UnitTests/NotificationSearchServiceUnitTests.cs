@@ -77,8 +77,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _notificationRegistrar.RegisterNotification<InvoiceEmailNotification>();
             _notificationRegistrar.RegisterNotification<OrderSentEmailNotification>();
             var searchCriteria = new NotificationSearchCriteria();
-            _repositoryMock.Setup(n => n.GetEntityForListByType(nameof(OrderSentEmailNotification), null, null))
-                .Returns(new EmailNotificationEntity { IsActive = true });
+            _repositoryMock.Setup(n => n.GetByTypeAsync(nameof(OrderSentEmailNotification), null, null, NotificationResponseGroup.Default))
+                .ReturnsAsync(new EmailNotificationEntity { IsActive = true });
 
             //Act
             var result = _notificationSearchService.SearchNotifications(searchCriteria);

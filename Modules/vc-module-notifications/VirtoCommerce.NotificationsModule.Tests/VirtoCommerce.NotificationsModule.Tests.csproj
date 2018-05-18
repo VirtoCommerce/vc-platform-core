@@ -26,9 +26,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="module.manifest">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
+    <Compile Remove="..\VirtoCommerce.NotificationsModule.Web\module.manifest" />
+    <Content Remove="..\VirtoCommerce.NotificationsModule.Web\module.manifest" />
+    <None Remove="..\VirtoCommerce.NotificationsModule.Web\module.manifest" />
   </ItemGroup>
 
 </Project>

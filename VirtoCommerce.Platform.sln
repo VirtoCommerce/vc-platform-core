@@ -45,13 +45,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Notifications
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.Tests", "Modules\vc-module-notifications\VirtoCommerce.NotificationsModule.Tests\VirtoCommerce.NotificationsModule.Tests.csproj", "{DD805428-3567-457D-B1C5-CB6BD93DB70F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.LiguidRenderer", "Modules\vc-module-notifications\VirtoCommerce.NotificationsModule.LiguidRenderer\VirtoCommerce.NotificationsModule.LiguidRenderer.csproj", "{FB63C950-D3AB-458C-BBCE-99BDC34CD619}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.LiquidRenderer", "Modules\vc-module-notifications\VirtoCommerce.NotificationsModule.LiquidRenderer\VirtoCommerce.NotificationsModule.LiquidRenderer.csproj", "{FB63C950-D3AB-458C-BBCE-99BDC34CD619}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.Smtp", "Modules\vc-module-notifications\VirtoCommerce.NotificationsModule.Smtp\VirtoCommerce.NotificationsModule.Smtp.csproj", "{46B56C6C-B20D-44FA-AD3B-3DD8D8E9D18F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.SendGrid", "Modules\vc-module-notifications\VirtoCommerce.NotificationsModule.SendGrid\VirtoCommerce.NotificationsModule.SendGrid.csproj", "{BFE3327C-D8A5-4746-98CE-C7D30A078A62}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.NotificationsSampleModule.Web", "Modules\vc-module-notifications\VirtoCommerce.NotificationsSampleModule.Web\VirtoCommerce.NotificationsSampleModule.Web.csproj", "{97309EC4-1D4E-40E3-A3E3-FC239C78E5C2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsSampleModule.Web", "Modules\vc-module-notifications\VirtoCommerce.NotificationsSampleModule.Web\VirtoCommerce.NotificationsSampleModule.Web.csproj", "{97309EC4-1D4E-40E3-A3E3-FC239C78E5C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

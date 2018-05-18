@@ -68,7 +68,7 @@ namespace VirtoCommerce.NotificationsModule.Web.ExportImport
                 progressInfo.Description = "Notifications exporting...";
                 progressCallback(progressInfo);
 
-                var notificationsResult = _notificationSearchService.SearchNotifications(new NotificationSearchCriteria { Take = Int32.MaxValue });
+                var notificationsResult = _notificationSearchService.SearchNotifications(new NotificationSearchCriteria { Take = Int32.MaxValue, ResponseGroup = NotificationResponseGroup.Default.ToString()});
                 writer.WritePropertyName("NotificationsTotalCount");
                 writer.WriteValue(notificationsResult.TotalCount);
 
@@ -81,10 +81,9 @@ namespace VirtoCommerce.NotificationsModule.Web.ExportImport
                 writer.WriteStartArray();
                 for (var i = 0; i < notificationsResult.TotalCount; i += _batchSize)
                 {
-                    var searchResponse = _notificationSearchService.SearchNotifications(new NotificationSearchCriteria { Skip = i, Take = _batchSize });
+                    var searchResponse = _notificationSearchService.SearchNotifications(new NotificationSearchCriteria { Skip = i, Take = _batchSize, ResponseGroup = NotificationResponseGroup.Full.ToString() });
 
-                    var notifications = _notificationService.GetByIdsAsync(searchResponse.Results.Select(n => n.Id).ToArray()).GetAwaiter().GetResult();
-                    foreach (var notification in notifications)
+                    foreach (var notification in searchResponse.Results)
                     {
                         GetJsonSerializer().Serialize(writer, notification);
                     }

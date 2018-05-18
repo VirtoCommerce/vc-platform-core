@@ -42,13 +42,15 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
             var collection = query.OrderBySortInfos(sortInfos).Skip(criteria.Skip).Take(criteria.Take).ToList();
 
+            var notificaionResponseGroup = EnumUtility.SafeParse(criteria.ResponseGroup, NotificationResponseGroup.Full);
+
             var list = collection.Select(t =>
             {
                 var result = AbstractTypeFactory<Notification>.TryCreateInstance(t.Name);
                 NotificationEntity notificationEntity;
                 using (var repository = _repositoryFactory())
                 {
-                    notificationEntity = repository.GetEntityForListByType(t.Name, criteria.TenantId, criteria.TenantType);
+                    notificationEntity = repository.GetByTypeAsync(t.Name, criteria.TenantId, criteria.TenantType, notificaionResponseGroup).GetAwaiter().GetResult();
                 }
                 return notificationEntity != null ? notificationEntity.ToModel(result) : result;
             }).ToList();

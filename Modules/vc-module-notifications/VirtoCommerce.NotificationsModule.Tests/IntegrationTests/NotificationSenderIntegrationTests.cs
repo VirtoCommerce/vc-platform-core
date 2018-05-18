@@ -99,7 +99,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
                 TenantIdentity = new TenantIdentity(null, null)
             };
 
-            _serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(OrderSentEmailNotification), null, null)).ReturnsAsync(notification);
+            _serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(OrderSentEmailNotification), null, null, null)).ReturnsAsync(notification);
 
             
             _emailSendingOptionsMock.Setup(opt => opt.Value).Returns(_emailSendingOptions);
@@ -136,7 +136,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
                 }
             };
 
-            _serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(OrderSentEmailNotification), null, null)).ReturnsAsync(notification);
+            _serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(OrderSentEmailNotification), null, null, null)).ReturnsAsync(notification);
 
             _emailSendingOptions.SmtpOptions.Password = "wrong_password";
             _emailSendingOptionsMock.Setup(opt => opt.Value).Returns(_emailSendingOptions);
