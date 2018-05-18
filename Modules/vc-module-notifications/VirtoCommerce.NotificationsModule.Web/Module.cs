@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -11,6 +12,7 @@ using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Senders;
 using VirtoCommerce.NotificationsModule.Data.Services;
 using VirtoCommerce.NotificationsModule.LiquidRenderer;
+using VirtoCommerce.NotificationsModule.SendGrid;
 using VirtoCommerce.NotificationsModule.Smtp;
 using VirtoCommerce.NotificationsModule.Web.Infrastructure;
 using VirtoCommerce.Platform.Core.Common;
@@ -37,7 +39,20 @@ namespace VirtoCommerce.NotificationsModule.Web
             serviceCollection.AddScoped<INotificationMessageService, NotificationMessageService>();
             serviceCollection.AddTransient<INotificationSender, NotificationSender>();
             serviceCollection.AddTransient<INotificationTemplateRender, LiquidTemplateRenderer>();
-            serviceCollection.AddTransient<INotificationMessageSender, SmtpEmailNotificationMessageSender>();
+            serviceCollection.AddTransient<SmtpEmailNotificationMessageSender>();
+            serviceCollection.AddTransient<Func<string, INotificationMessageSender>>(serviceProvider => key =>
+            {
+                switch (key)
+                {
+                    case nameof(EmailNotification):
+                        return serviceProvider.GetService<SmtpEmailNotificationMessageSender>();
+                    case nameof(SmsNotification):
+                        // TODO Sms
+                        //return serviceProvider.GetService<SmsNotificationMessageSender>();
+                    default:
+                        throw new KeyNotFoundException();
+                }
+            });
         }
 
         public void PostInitialize(IServiceProvider serviceProvider)

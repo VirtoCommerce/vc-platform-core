@@ -35,7 +35,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _messageSenderMock = new Mock<INotificationMessageSender>();
             _serviceMock = new Mock<INotificationService>();
             _logNotificationSenderMock = new Mock<ILogger<NotificationSender>>();
-            _sender = new NotificationSender(_serviceMock.Object, _templateRender, _messageServiceMock.Object, _messageSenderMock.Object, _logNotificationSenderMock.Object);
+            _sender = new NotificationSender(_serviceMock.Object, _templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object, key => _messageSenderMock.Object);
 
             //todo
             if (!AbstractTypeFactory<Notification>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotification))))

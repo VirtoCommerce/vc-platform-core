@@ -18,18 +18,18 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
         private readonly INotificationService _notificationService;
         private readonly INotificationTemplateRender _notificationTemplateRender;
         private readonly INotificationMessageService _notificationMessageService;
-        private readonly INotificationMessageSender _notificationMessageSender;
+        private readonly Func<string, INotificationMessageSender> _notificationMessageAccessor;
         private readonly ILogger<NotificationSender> _logger;
 
         public NotificationSender(INotificationService notificationService, INotificationTemplateRender notificationTemplateRender
             , INotificationMessageService notificationMessageService
-            , INotificationMessageSender notificationMessageSender
-            , ILogger<NotificationSender> logger)
+            , ILogger<NotificationSender> logger
+            , Func<string, INotificationMessageSender> notificationMessageAccessor)
         {
             _notificationService = notificationService;
             _notificationTemplateRender = notificationTemplateRender;
             _notificationMessageService = notificationMessageService;
-            _notificationMessageSender = notificationMessageSender;
+            _notificationMessageAccessor = notificationMessageAccessor;
             _logger = logger;
         }
 
@@ -63,7 +63,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
             {
                 message.LastSendAttemptDate = DateTime.Now;
                 message.SendAttemptCount++;
-                return _notificationMessageSender.SendNotificationAsync(message);
+                return _notificationMessageAccessor(activeNotification.Kind).SendNotificationAsync(message);
             });
 
             if (policyResult.Outcome == OutcomeType.Successful)

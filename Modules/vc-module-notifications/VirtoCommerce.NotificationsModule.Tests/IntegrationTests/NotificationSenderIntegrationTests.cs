@@ -104,7 +104,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             
             _emailSendingOptionsMock.Setup(opt => opt.Value).Returns(_emailSendingOptions);
             _messageSender = new SmtpEmailNotificationMessageSender(_emailSendingOptionsMock.Object);
-            _notificationSender = new NotificationSender(_serviceMock.Object, _templateRender, _messageServiceMock.Object, _messageSender, _logNotificationSenderMock.Object);
+            _notificationSender = new NotificationSender(_serviceMock.Object, _templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object, key => _messageSender);
 
             //Act
             var result = await _notificationSender.SendNotificationAsync(notification, null);
@@ -141,7 +141,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             _emailSendingOptions.SmtpOptions.Password = "wrong_password";
             _emailSendingOptionsMock.Setup(opt => opt.Value).Returns(_emailSendingOptions);
             _messageSender = new SmtpEmailNotificationMessageSender(_emailSendingOptionsMock.Object);
-            _notificationSender = new NotificationSender(_serviceMock.Object, _templateRender, _messageServiceMock.Object, _messageSender, _logNotificationSenderMock.Object);
+            _notificationSender = new NotificationSender(_serviceMock.Object, _templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object,
+                key => _messageSender);
 
             //Act
             var result = await _notificationSender.SendNotificationAsync(notification, language);
