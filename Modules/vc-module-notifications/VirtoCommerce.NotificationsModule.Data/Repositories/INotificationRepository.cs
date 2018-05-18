@@ -10,8 +10,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
     {
         IQueryable<NotificationEntity> Notifications { get; }
         IQueryable<NotificationMessageEntity> NotifcationMessages { get; }
-        Task<NotificationEntity> GetByTypeAsync(string type, string tenantId, string tenantType, NotificationResponseGroup responseGroup);
-        Task<NotificationEntity[]> GetByIdsAsync(string[] ids, NotificationResponseGroup responseGroup);
+        Task<NotificationEntity> GetByTypeAsync(string type, string tenantId, string tenantType, string responseGroup);
+        Task<NotificationEntity[]> GetByIdsAsync(string[] ids, string responseGroup);
         Task<NotificationMessageEntity[]> GetMessageByIdAsync(string[] ids);
     }
 }

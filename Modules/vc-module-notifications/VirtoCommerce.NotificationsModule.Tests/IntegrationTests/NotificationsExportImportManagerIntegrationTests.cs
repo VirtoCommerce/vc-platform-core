@@ -75,7 +75,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             entityForCount.Id = Guid.NewGuid().ToString();
             entityForCount.Type = nameof(EmailNotification);
             entityForCount.Kind = nameof(EmailNotification);
-            _repositoryMock.Setup(r => r.GetByTypeAsync(nameof(RegistrationEmailNotification), null, null, NotificationResponseGroup.Default)).ReturnsAsync(entityForCount);
+            _repositoryMock.Setup(r => r.GetByTypeAsync(nameof(RegistrationEmailNotification), null, null, NotificationResponseGroup.Default.ToString())).ReturnsAsync(entityForCount);
 
             var entity = AbstractTypeFactory<NotificationEntity>.TryCreateInstance(nameof(EmailNotificationEntity));
             entity.Id = entityForCount.Id;
@@ -85,7 +85,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             {
                 new NotificationTemplateEntity() { Body = "test", LanguageCode = "en-US" }
             };
-            _repositoryMock.Setup(r => r.GetByTypeAsync(nameof(RegistrationEmailNotification), null, null, NotificationResponseGroup.Full)).ReturnsAsync(entity);
+            _repositoryMock.Setup(r => r.GetByTypeAsync(nameof(RegistrationEmailNotification), null, null, NotificationResponseGroup.Full.ToString())).ReturnsAsync(entity);
 
             //Act
             _notificationsExportImportManager.DoExport(fileStream, manifest, exportImportProgressInfo => {}, CancellationToken.None);

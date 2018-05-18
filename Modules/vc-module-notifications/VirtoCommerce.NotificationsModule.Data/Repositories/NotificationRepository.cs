@@ -4,8 +4,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Data.Model;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.NotificationsModule.Data.Repositories
@@ -21,26 +21,28 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
         public IQueryable<NotificationEntity> Notifications => DbContext.Set<NotificationEntity>();
         public IQueryable<NotificationMessageEntity> NotifcationMessages => DbContext.Set<NotificationMessageEntity>();
 
-        public async Task<NotificationEntity[]> GetByIdsAsync(string[] ids, NotificationResponseGroup responseGroup)
+        public async Task<NotificationEntity[]> GetByIdsAsync(string[] ids, string responseGroup)
         {
             var notifications = await Notifications
                 .Where(x => ids.Contains(x.Id))
                 .OrderBy(x => x.Type)
                 .ToArrayAsync();
 
+            var notificaionResponseGroup = EnumUtility.SafeParse(responseGroup, NotificationResponseGroup.Full);
+
             foreach (var notification in notifications)
             {
-                if ((responseGroup & NotificationResponseGroup.WithTemplates) == NotificationResponseGroup.WithTemplates)
+                if ((notificaionResponseGroup & NotificationResponseGroup.WithTemplates) == NotificationResponseGroup.WithTemplates)
                 {
                     var templates = await DbContext.Set<NotificationTemplateEntity>().Where(t => t.NotificationId.Equals(notification.Id)).ToListAsync();
                 }
 
-                if ((responseGroup & NotificationResponseGroup.WithAttachments) == NotificationResponseGroup.WithAttachments)
+                if ((notificaionResponseGroup & NotificationResponseGroup.WithAttachments) == NotificationResponseGroup.WithAttachments)
                 {
                     var attachments = await DbContext.Set<EmailAttachmentEntity>().Where(t => t.NotificationId.Equals(notification.Id)).ToListAsync();
                 }
 
-                if ((responseGroup & NotificationResponseGroup.WithRecipients) == NotificationResponseGroup.WithRecipients)
+                if ((notificaionResponseGroup & NotificationResponseGroup.WithRecipients) == NotificationResponseGroup.WithRecipients)
                 {
                     var recipients = await DbContext.Set<NotificationEmailRecipientEntity>().Where(t => t.NotificationId.Equals(notification.Id)).ToListAsync();
                 }
@@ -49,7 +51,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             return notifications;
         }
 
-        public virtual async Task<NotificationEntity> GetByTypeAsync(string type, string tenantId, string tenantType, NotificationResponseGroup responseGroup)
+        public virtual async Task<NotificationEntity> GetByTypeAsync(string type, string tenantId, string tenantType, string responseGroup)
         {
             var query = Notifications;
 
@@ -69,17 +71,19 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
 
             if (result != null)
             {
-                if ((responseGroup & NotificationResponseGroup.WithTemplates) == NotificationResponseGroup.WithTemplates)
+                var notificaionResponseGroup = EnumUtility.SafeParse(responseGroup, NotificationResponseGroup.Full);
+
+                if ((notificaionResponseGroup & NotificationResponseGroup.WithTemplates) == NotificationResponseGroup.WithTemplates)
                 {
                     var templates = await DbContext.Set<NotificationTemplateEntity>().Where(t => t.NotificationId.Equals(result.Id)).ToListAsync();
                 }
 
-                if ((responseGroup & NotificationResponseGroup.WithAttachments) == NotificationResponseGroup.WithAttachments)
+                if ((notificaionResponseGroup & NotificationResponseGroup.WithAttachments) == NotificationResponseGroup.WithAttachments)
                 {
                     var attachments = await DbContext.Set<EmailAttachmentEntity>().Where(t => t.NotificationId.Equals(result.Id)).ToListAsync();
                 }
 
-                if ((responseGroup & NotificationResponseGroup.WithRecipients) == NotificationResponseGroup.WithRecipients)
+                if ((notificaionResponseGroup & NotificationResponseGroup.WithRecipients) == NotificationResponseGroup.WithRecipients)
                 {
                     var recipients = await DbContext.Set<NotificationEmailRecipientEntity>().Where(t => t.NotificationId.Equals(result.Id)).ToListAsync();
                 }

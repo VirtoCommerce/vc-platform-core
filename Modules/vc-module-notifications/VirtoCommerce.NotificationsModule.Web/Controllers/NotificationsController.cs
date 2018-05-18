@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Security;
 using VirtoCommerce.NotificationsModule.Core.Services;
+using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Web.Infrastructure;
 using VirtoCommerce.NotificationsModule.Web.Model;
 using VirtoCommerce.Platform.Core.Common;

@@ -111,7 +111,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         {
             //Arrange
             string type = nameof(RegistrationSocialNetworkNotification);
-            _repositoryMock.Setup(n => n.GetByTypeAsync(nameof(RegistrationSocialNetworkNotification), null, null, NotificationResponseGroup.Default))
+            _repositoryMock.Setup(n => n.GetByTypeAsync(nameof(RegistrationSocialNetworkNotification), null, null, NotificationResponseGroup.Default.ToString()))
                 .ReturnsAsync(new SocialNetworkNotificationEntity() { IsActive = true });
             _notificationRegistrar.RegisterNotification<RegistrationSocialNetworkNotification>();
 
@@ -130,7 +130,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             //Arrange
             string id = Guid.NewGuid().ToString();
             var notifications = new List<NotificationEntity> { new SocialNetworkNotificationEntity() { Id = id, Type = nameof(SocialNetworkNotification) } };
-            _repositoryMock.Setup(n => n.GetByIdsAsync(new[] { id }, NotificationResponseGroup.Default)).ReturnsAsync(notifications.ToArray());
+            _repositoryMock.Setup(n => n.GetByIdsAsync(new[] { id }, NotificationResponseGroup.Default.ToString())).ReturnsAsync(notifications.ToArray());
             _notificationRegistrar.RegisterNotification<RegistrationSocialNetworkNotification>();
 
             //Act
@@ -157,7 +157,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                     Token = Guid.NewGuid().ToString()
                 }
             };
-            _repositoryMock.Setup(n => n.GetByIdsAsync(new[] { id }, NotificationResponseGroup.Full))
+            _repositoryMock.Setup(n => n.GetByIdsAsync(new[] { id }, NotificationResponseGroup.Full.ToString()))
                 .ReturnsAsync(notificationEntities.ToArray());
             var notifications = notificationEntities.Select(n => n.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance(n.Type)));
 

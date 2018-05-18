@@ -36,12 +36,10 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                 return null;
             }
 
-            var notificaionResponseGroup = EnumUtility.SafeParse(responseGroup, NotificationResponseGroup.Full);
-
             var result = AbstractTypeFactory<Notification>.TryCreateInstance(notificationType.Name);
             using (var repository = _repositoryFactory())
             {
-                var notification = await repository.GetByTypeAsync(notificationType.Name, tenantId, tenantType, notificaionResponseGroup);
+                var notification = await repository.GetByTypeAsync(notificationType.Name, tenantId, tenantType, responseGroup);
                 if (notification != null)
                 {
                     return notification.ToModel(result);
@@ -52,11 +50,9 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
         public async Task<Notification[]> GetByIdsAsync(string[] ids, string responseGroup = null)
         {
-            var notificaionResponseGroup = EnumUtility.SafeParse(responseGroup, NotificationResponseGroup.Full);
-
             using (var repository = _repositoryFactory())
             {
-                var notifications = await repository.GetByIdsAsync(ids, notificaionResponseGroup);
+                var notifications = await repository.GetByIdsAsync(ids, responseGroup);
                 return notifications.Select(n => n.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance(n.Type))).ToArray();
             }
         }
@@ -72,7 +68,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                 using (var repository = _repositoryFactory())
                 using (var changeTracker = new ObservableChangeTracker())
                 {
-                    var existingNotificationEntities = await repository.GetByIdsAsync(notifications.Select(m => m.Id).ToArray(), NotificationResponseGroup.Full);
+                    var existingNotificationEntities = await repository.GetByIdsAsync(notifications.Select(m => m.Id).ToArray(), NotificationResponseGroup.Full.ToString());
                     foreach (var notification in notifications)
                     {
                         var dataTargetNotification = existingNotificationEntities.FirstOrDefault(n => n.Id.Equals(notification.Id));
