@@ -1,0 +1,117 @@
+{
+    "notifications": {
+        "blades": {
+            "notification-journal-details": {
+                "title": "Einzelheiten der Anmeldung",
+                "labels": {
+                    "notification-info": "Benachrichtigung Info",
+                    "display-name": "Anzeigename",
+                    "source": "Quelle",
+                    "sending-gateway": "Senden Gateway",
+                    "active": "Aktiv",
+                    "not-active": "Nicht aktiv",
+                    "start-sending-date": "Startdatum senden",
+                    "sent-success": "Gesendet Erfolg",
+                    "not-sent": "Nicht gesendet",
+                    "sent": "Gesendet",
+                    "sent-date": "Sendedatum",
+                    "sender": "Absender",
+                    "recipient": "Empfänger",
+                    "sending-attempts-count": "Senden versucht count",
+                    "last-fail-attempt-date": "Letzte fehlschlagen versuchen, Datum",
+                    "last-fail-attempt-message": "Letzte Scheitern einer Nachricht"
+                }
+            },
+            "notifications-edit-template": {
+                "title": "{{ displayName }} - vorlage",
+                "title-new": "Benachrichtigung Vorlage erstellen",
+                "labels": {
+                    "note": "Dies ist eine Liste der Benachrichtigungsparameter. Sie können diesen Code einfügen und der Wert der Parameter wird in Ihre Vorlage eingefügt",
+                    "parameter-name": "Parameter name",
+                    "parameter-description": "Parameter Beschreibung",
+                    "paremeter-code": "Paremeter Code im Template (kopieren Sie diesen Code, und fügen Sie überall in Ihrer Vorlage)",
+                    "language": "Sprache",
+                    "blank-note": "Leer lassen Standardwert verwendet",
+                    "sender": "Absender",
+                    "recipient": "Empfänger",
+                    "subject": "Betreff",
+                    "body": "Körper",
+                    "template": "Vorlage",
+                    "preview-data": "Vorschau der Daten"
+                },
+                "placeholders": {
+                    "language": "Wählen Sie aus..."
+                }
+            },
+            "notification-templates-list": {
+                "title": "Benachrichtigungsvorlagen",
+                "labels": {
+                    "subject": "Betreff",
+                    "body": "Körper",
+                    "language": "Sprache"
+                }
+            },
+            "notifications-test-resolve": {
+                "title": "Vorschau der Mitteilung",
+                "subtitle": "Prüfdaten für {{Typ}} eingeben",
+                "labels": {
+                    "test": "Test",
+                    "enter-test-data": "Test Daten eingeben"
+                }
+            },
+            "notifications-test-send": {
+                "title": "Benachrichtigung senden",
+                "subtitle": "Prüfdaten für {{Typ}} eingeben",
+                "labels": {
+                    "send": "Senden",
+                    "enter-test-data": "Test Daten eingeben"
+                }
+            },
+            "notifications-journal": {
+                "title": "Journal senden",
+                "subtitle": "Marketing Service",
+                "labels": {
+                    "display-name": "Anzeigename",
+                    "recipient": "Empfänger",
+                    "sent-date": "Sendedatum",
+                    "channel": "Kanal",
+                    "error": "Fehler",
+                    "processing": "Verarbeitung",
+                    "success": "Erfolg",
+                    "no-notifications": "Keine Benachrichtigungen noch"
+                }
+            },
+            "notifications-list": {
+                "title": "Benachrichtigungen",
+                "subtitle": "Marketing Service",
+                "labels": {
+                    "no-notifications": "Benachrichtigungen noch nicht registriert"
+                }
+            },
+            "notifications-details": {
+                "title": "{{displayName}} - detail",
+                "labels": {
+                    "is-active": "Ist aktiv",
+                    "name": "Name der Benachrichtigung"
+                }
+            }
+        },
+        "widgets": {
+            "notificationsTemplatesWidget": {
+                "title": "Vorlagen",
+                "blade-title": "{{displayName}} - Benachrichtigungsvorlagen",
+                "blade-subtitle": "Vorlagen"
+            },
+            "notificationsLogWidget": {
+                "title": "Sende Protokoll",
+                "blade-title": "Sende Protokoll",
+                "blade-subtitle": "Sende Protokoll"
+            },
+            "notificationsAttachmentsWidget": {
+                "title": "Anlagen",
+                "blade-title": "Anlagen",
+                "blade-subtitle": "Anlagen"
+            }
+        }
+    }
+}

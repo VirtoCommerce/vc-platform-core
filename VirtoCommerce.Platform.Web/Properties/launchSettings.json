@@ -2,8 +2,12 @@
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
+    "iis": {
+      "applicationUrl": "http://localhost/VirtoCommerce.Platform.Web",
+      "sslPort": 0
+    },
     "iisExpress": {
-      "applicationUrl": "http://localhost:10646/",
+      "applicationUrl": "http://localhost:10645/",
       "sslPort": 0
     }
   },
@@ -19,6 +23,7 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
+        "ASPNETCORE_preventHostingStartup": "True",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:10647/"

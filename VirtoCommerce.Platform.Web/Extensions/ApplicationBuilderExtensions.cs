@@ -24,7 +24,7 @@ namespace VirtoCommerce.Platform.Web.Extensions
                 Version = PlatformVersion.CurrentVersion.ToString(),
                 PlatformVersion = PlatformVersion.CurrentVersion.ToString(),
                 Settings = new[]
-               {                 
+               {
                     new ModuleSettingsGroup
                     {
                         Name = "Platform|User Profile",

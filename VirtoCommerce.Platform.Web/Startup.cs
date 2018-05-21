@@ -10,12 +10,20 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using NUglify.Css;
+using NUglify.JavaScript;
 using Smidge;
+using Smidge.Cache;
+using Smidge.FileProcessors;
+using Smidge.Nuglify;
+using Smidge.Options;
 using Swashbuckle.AspNetCore.Swagger;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
@@ -60,7 +68,15 @@ namespace VirtoCommerce.Platform.Web
 
             PlatformVersion.CurrentVersion = SemanticVersion.Parse(Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default.Application.ApplicationVersion);
 
-            var mvcBuilder = services.AddMvc();
+            var mvcBuilder = services.AddMvc().AddJsonOptions(options =>
+                {
+                    options.SerializerSettings.Error = (sender, args) =>
+                    {
+                        var log = services.BuildServiceProvider().GetService<ILogger<JsonSerializerSettings>>();
+                        log.LogError(args.ErrorContext.Error, args.ErrorContext.Error.Message);
+                    };
+                }
+            );
             var modulesDiscoveryPath = Path.GetFullPath("Modules");
             services.AddModules(mvcBuilder, options =>
             {
@@ -184,6 +200,8 @@ namespace VirtoCommerce.Platform.Web
             services.AddMemoryCache();
             //Add Smidge runtime bundling library configuration
             services.AddSmidge(Configuration.GetSection("smidge"), new PhysicalFileProvider(modulesDiscoveryPath));
+            services.AddSmidgeNuglify();
+
             // Register the Swagger generator
             services.AddSwaggerGen(c =>
             {
@@ -314,6 +332,8 @@ namespace VirtoCommerce.Platform.Web
             {
                 app.UseModulesContent(bundles);
             });
+            app.UseSmidgeNuglify();
+
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger(c => c.RouteTemplate = "docs/{documentName}/docs.json");
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.

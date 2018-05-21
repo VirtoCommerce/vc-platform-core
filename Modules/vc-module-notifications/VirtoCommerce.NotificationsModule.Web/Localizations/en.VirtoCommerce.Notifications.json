@@ -1,0 +1,238 @@
+{
+    "notifications": {
+        "blades": {
+            "notification-journal-details": {
+                "title": "Details of notification",
+                "subtitle": "{{ displayName }} - notification type",
+                "labels": {
+                    "id": "Message ID:",
+                    "notification-info": "Notification Info",
+                    "display-name": "Display name",
+                    "source": "Source",
+                    "sending-gateway": "Sending gateway",
+                    "active": "Active",
+                    "not-active": "Not active",
+                    "created": "Created at:",
+                    "sent-success": "Sent success",
+                    "not-sent": "Not sent",
+                    "sent": "Sent",
+                    "sent-date": "Sent date",
+                    "sender": "From:",
+                    "recipient": "To:",
+                    "sending-attempts-count": "Sending attempts count",
+                    "last-fail-attempt-date": "Last fail attempt date",
+                    "last-fail-attempt-message": "Errors:",
+                    "subject": "Subject:",
+                    "body": "Body:"
+                }
+            },
+            "notifications-edit-template": {
+                "title": "{{ displayName }} - template",
+                "subtitle": "Edit notification template",
+                "title-new": "{{ displayName }} - create template",
+                "labels": {
+                    "note": "This is list of notification parameters. You can paste this code and value of parameters will be inserted in your template",
+                    "parameter-name": "Parameter name",
+                    "parameter-description": "Parameter description",
+                    "paremeter-code": "Paremeter code in template (copy this code and insert anywhere in your template)",
+                    "language": "Language",
+                    "blank-note": "Leave blank to use default value",
+                    "from": "From",
+                    "to": "To",
+                    "cc": "CC recipients",
+                    "bcc": "BCC",
+                    "subject": "Subject",
+                    "body": "Body",
+                    "template": "Template",
+                    "preview-data": "Preview Data",
+                    "preview-data-comment": "Template context data(JSON)"
+                },
+                "descriptions": {
+                    "to": "Email recipient address",
+                    "cc": "CC recipients addresses",
+                    "bcc": "BCC recipient addresses",
+                    "from": "Sender address",
+                    "subject": "Subject of notification email"
+                },
+                "placeholders": {
+                    "language": "Select...",
+                    "recipient": "Recipient address",
+                    "email-addresses-note": "Enter email addresses",
+                    "subject": "Enter email subject"
+                }
+            },
+            "notification-templates-list": {
+                "title": "Notification templates",
+                "labels": {
+                    "subject": "Subject",
+                    "body": "Body",
+                    "language": "Language",
+                    "created": "Created",
+                    "modified": "Modified"
+                }
+            },
+            "notifications-test-resolve": {
+                "title": "Preview notification",
+                "subtitle": "Enter test data for {{type}}",
+                "labels": {
+                    "test": "Test",
+                    "enter-test-data": "Enter test data"
+                }
+            },
+            "notifications-test-send": {
+                "title": "Send notification",
+                "subtitle": "Enter test data for {{type}}",
+                "labels": {
+                    "send": "Send",
+                    "enter-test-data": "Enter test data"
+                }
+            },
+            "notifications-journal": {
+                "title": "Notifications activity feed",
+                "subtitle": "The list of all notifications records in the system",
+                "subtitle-search": "Search results for \"{{keyword}}\"",
+                "labels": {
+                    "display-name": "Display Name",
+                    "notification": "Notification",
+                    "created": "Created",
+                    "status": "Status",
+                    "recipient": "Recipient",
+                    "sent-date": "Sent Date",
+                    "channel": "Channel",
+                    "error": "Error",
+                    "processing": "Processing",
+                    "success": "Success",
+                    "no-notifications": "No notifications yet",
+                    "unnamed-filter": "Unnamed filter",
+                    "filter-new": "<strong>Add new filter</strong>",
+                    "filter-only-pending": "Only pending",
+                    "filter-with-errors": "With errors",
+                    "detail": "Show detail"
+                },
+                "placeholders": {
+                    "select-filter": "Select filter"
+                }
+            },
+            "notifications-list": {
+                "title": "Notifications list",
+                "subtitle": "List of all registered notifications in the system",
+                "labels": {
+                    "no-notifications": "No registered notifications yet",
+                    "display-name": "Display Name",
+                    "type": "Type",
+                    "active": "Active"
+                }
+            },
+            "notification-details": {
+                "title": "{{displayName}} - detail",
+                "labels": {
+                    "is-active": "Is active",
+                    "name": "Notification name"
+                }
+            },
+            "filter-detail": {
+                "subtitle": "Edit filter",
+                "new-title": "New filter",
+                "new-subtitle": "Create new filter",
+                "labels": {
+                    "criteria": "Search phrase",
+                    "name": "Filter name"
+                },
+                "placeholders": {
+                    "criteria": "Enter search phrase",
+                    "name": "How will you call this filter?"
+                }
+            },
+            "notifications-template-render":{
+                "title": "Preview form",
+                "subtitle": "The form renders a template",
+            }
+        },
+        "widgets": {
+            "notificationsTemplatesWidget": {
+                "title": "Templates",
+                "blade-title": "{{displayName}} - templates list",
+                "blade-subtitle": "Manage notification templates"
+            },
+            "notificationsLogWidget": {
+                "title": "Send log",
+                "blade-title": "Notification sending log",
+                "blade-subtitle": "View notification sending log"
+            },
+            "notificationsAttachmentsWidget": {
+                "title": "Attachments",
+                "blade-title": "Attachments",
+                "blade-subtitle": "Attachments"
+            } 
+        },
+        "dialogs": {
+            "unknown-kind": {
+                "title": "Error",
+                "message": "Can't edit a template of unknown kind '{{kind}}'."
+            },
+            "notification-details-save": {
+                "title": "Save changes",
+                "message": "The notification template has been modified. Do you want to save changes?"
+            }
+        }
+        
+    },
+    "notificationTypes": {
+            "RegistrationEmailNotification": {
+                "displayName": "Registration notification",
+                "description": "This notification is sent by email to a client when he finishes registration"
+            },
+            "ResetPasswordEmailNotification" : {
+                "displayName": "Reset password notification",
+                "description": "This notification is sent by email to a client upon reset password request"
+            },
+            "TwoFactorEmailNotification": {
+                "displayName": "Two factor authentication",
+                "description": "This notification contains a security token for two factor authentication"
+            },
+            "TwoFactorSmsNotification": {
+                "displayName": "Two factor authentication",
+                "description": "This notification contains a security token for two factor authentication"
+            },
+            "ConfirmationEmailNotification": {
+                "displayName": "Email confirmation notification",
+                "description": "This e-mail notification is for confirmation a new registered user e-mail"
+            },
+            "StoreDynamicEmailNotification": {
+                "displayName": "Sending custom form from storefront",
+                "description": "This notification sends by email to client when he complite some form on storefront, for example contact us form"
+            },
+            "OrderCreateEmailNotification": {
+                "displayName": "Create order notification",
+                "description": "This notification sends by email to client when he complite some form on storefront, for example contact us form"
+            },
+            "OrderPaidEmailNotification": {
+                "displayName": "Order paid notification",
+                "description": "This notification sends by email to client when all payments of order has status paid"
+            },
+            "OrderSentEmailNotification": {
+                "displayName": "Order sent notification",
+                "description": "This notification sends by email to client when all shipments gets status sent"
+            },
+            "NewOrderStatusEmailNotification": {
+                "displayName": "New order status notification",
+                "description": "This notification sends by email to client when status of orders has been changed"
+            },
+            "CancelOrderEmailNotification": {
+                "displayName": "Cancel order notification",
+                "description": "This notification sends by email to client when order canceled"
+            },
+            "InvoiceEmailNotification": {
+                "displayName": "The invoice for customer order",
+                "description": "The template for for customer order invoice (used for PDF generation)"
+            },
+            "NewSubscriptionEmailNotification": {
+                "displayName": "New subscription notification",
+                "description": "This notification sends by email to client when created new subscription"
+            },
+            "SubscriptionCanceledEmailNotification": {
+                "displayName": "Subscription canceled notification",
+                "description": "This notification sends by email to client when subscription was canceled"
+            }
+        }
+}
