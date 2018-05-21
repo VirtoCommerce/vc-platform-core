@@ -33,6 +33,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
         private readonly Mock<INotificationRepository> _repositoryMock;
         private readonly Mock<ILogger<NotificationSender>> _logNotificationSenderMock;
         private readonly Mock<IEventPublisher> _eventPulisherMock;
+        private INotificationMessageSenderProviderFactory _notificationMessageSenderProviderFactory;
         private readonly EmailSendingOptions _emailSendingOptions;
 
         public NotificationSenderIntegrationTests()
@@ -56,6 +57,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             _eventPulisherMock = new Mock<IEventPublisher>();
             INotificationRepository RepositoryFactory() => _repositoryMock.Object;
             _notificationRegistrar = new NotificationService(RepositoryFactory, _eventPulisherMock.Object);
+            
+            
 
             //todo
             if (!AbstractTypeFactory<Notification>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotification))))
@@ -104,7 +107,9 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             
             _emailSendingOptionsMock.Setup(opt => opt.Value).Returns(_emailSendingOptions);
             _messageSender = new SmtpEmailNotificationMessageSender(_emailSendingOptionsMock.Object);
-            _notificationSender = new NotificationSender(_serviceMock.Object, _templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object, key => _messageSender);
+            _notificationMessageSenderProviderFactory = new NotificationMessageSenderProviderFactory(new List<INotificationMessageSender>() { _messageSender });
+            _notificationMessageSenderProviderFactory.RegisterSenderForType<EmailNotification, SmtpEmailNotificationMessageSender>();
+            _notificationSender = new NotificationSender(_serviceMock.Object, _templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object, _notificationMessageSenderProviderFactory);
 
             //Act
             var result = await _notificationSender.SendNotificationAsync(notification, null);
@@ -142,7 +147,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             _emailSendingOptionsMock.Setup(opt => opt.Value).Returns(_emailSendingOptions);
             _messageSender = new SmtpEmailNotificationMessageSender(_emailSendingOptionsMock.Object);
             _notificationSender = new NotificationSender(_serviceMock.Object, _templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object,
-                key => _messageSender);
+                _notificationMessageSenderProviderFactory);
 
             //Act
             var result = await _notificationSender.SendNotificationAsync(notification, language);

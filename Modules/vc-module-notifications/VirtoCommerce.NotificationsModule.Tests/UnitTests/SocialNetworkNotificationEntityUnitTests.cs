@@ -111,12 +111,13 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         {
             //Arrange
             string type = nameof(RegistrationSocialNetworkNotification);
-            _repositoryMock.Setup(n => n.GetByTypeAsync(nameof(RegistrationSocialNetworkNotification), null, null, NotificationResponseGroup.Default.ToString()))
+            var responseGroup = NotificationResponseGroup.Default.ToString();
+            _repositoryMock.Setup(n => n.GetByTypeAsync(nameof(RegistrationSocialNetworkNotification), null, null, responseGroup))
                 .ReturnsAsync(new SocialNetworkNotificationEntity() { IsActive = true });
             _notificationRegistrar.RegisterNotification<RegistrationSocialNetworkNotification>();
 
             //Act
-            var result = await _notificationService.GetByTypeAsync(type, null, null);
+            var result = await _notificationService.GetByTypeAsync(type, null, null, responseGroup);
 
             //Assert
             Assert.NotNull(result);
@@ -130,11 +131,12 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             //Arrange
             string id = Guid.NewGuid().ToString();
             var notifications = new List<NotificationEntity> { new SocialNetworkNotificationEntity() { Id = id, Type = nameof(SocialNetworkNotification) } };
-            _repositoryMock.Setup(n => n.GetByIdsAsync(new[] { id }, NotificationResponseGroup.Default.ToString())).ReturnsAsync(notifications.ToArray());
+            var responseGroup = NotificationResponseGroup.Default.ToString();
+            _repositoryMock.Setup(n => n.GetByIdsAsync(new[] { id }, responseGroup)).ReturnsAsync(notifications.ToArray());
             _notificationRegistrar.RegisterNotification<RegistrationSocialNetworkNotification>();
 
             //Act
-            var result = await _notificationService.GetByIdsAsync(new[] { id });
+            var result = await _notificationService.GetByIdsAsync(new[] { id }, responseGroup);
 
             //Assert
             Assert.NotNull(result);

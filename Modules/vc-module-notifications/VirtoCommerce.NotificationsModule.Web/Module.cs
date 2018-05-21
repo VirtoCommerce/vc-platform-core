@@ -39,20 +39,8 @@ namespace VirtoCommerce.NotificationsModule.Web
             serviceCollection.AddScoped<INotificationMessageService, NotificationMessageService>();
             serviceCollection.AddTransient<INotificationSender, NotificationSender>();
             serviceCollection.AddTransient<INotificationTemplateRender, LiquidTemplateRenderer>();
-            serviceCollection.AddTransient<SmtpEmailNotificationMessageSender>();
-            serviceCollection.AddTransient<Func<string, INotificationMessageSender>>(serviceProvider => key =>
-            {
-                switch (key)
-                {
-                    case nameof(EmailNotification):
-                        return serviceProvider.GetService<SmtpEmailNotificationMessageSender>();
-                    case nameof(SmsNotification):
-                        // TODO Sms
-                        //return serviceProvider.GetService<SmsNotificationMessageSender>();
-                    default:
-                        throw new KeyNotFoundException();
-                }
-            });
+            serviceCollection.AddSingleton<INotificationMessageSenderProviderFactory, NotificationMessageSenderProviderFactory>();
+            serviceCollection.AddTransient<INotificationMessageSender, SmtpEmailNotificationMessageSender>();
         }
 
         public void PostInitialize(IServiceProvider serviceProvider)
@@ -74,6 +62,9 @@ namespace VirtoCommerce.NotificationsModule.Web
                 notificationDbContext.Database.EnsureCreated();
                 notificationDbContext.Database.Migrate();
             }
+
+            var notificationMessageSenderProviderFactory = serviceProvider.GetService<INotificationMessageSenderProviderFactory>();
+            notificationMessageSenderProviderFactory.RegisterSenderForType<EmailNotification, SmtpEmailNotificationMessageSender>();
         }
 
         public void Uninstall()

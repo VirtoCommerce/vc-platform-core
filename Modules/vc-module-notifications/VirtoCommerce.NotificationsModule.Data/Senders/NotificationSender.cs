@@ -18,13 +18,13 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
         private readonly INotificationService _notificationService;
         private readonly INotificationTemplateRender _notificationTemplateRender;
         private readonly INotificationMessageService _notificationMessageService;
-        private readonly Func<string, INotificationMessageSender> _notificationMessageAccessor;
+        private readonly INotificationMessageSenderProviderFactory _notificationMessageAccessor;
         private readonly ILogger<NotificationSender> _logger;
 
         public NotificationSender(INotificationService notificationService, INotificationTemplateRender notificationTemplateRender
             , INotificationMessageService notificationMessageService
             , ILogger<NotificationSender> logger
-            , Func<string, INotificationMessageSender> notificationMessageAccessor)
+            , INotificationMessageSenderProviderFactory notificationMessageAccessor)
         {
             _notificationService = notificationService;
             _notificationTemplateRender = notificationTemplateRender;
@@ -43,7 +43,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
             NotificationSendResult result = new NotificationSendResult();
 
             var activeNotification = await _notificationService.GetByTypeAsync(notification.Type);
-
             var message = AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{activeNotification.Kind}Message");
             message.LanguageCode = language;
             message.MaxSendAttemptCount = _maxRetryAttempts + 1;
@@ -52,8 +51,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
             NotificationMessage[] messages = { message };
             await _notificationMessageService.SaveNotificationMessagesAsync(messages);
 
-            var policy = Policy.Handle<SentNotificationException>().WaitAndRetryAsync(_maxRetryAttempts, retryAttempt =>
-                    TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))
+            var policy = Policy.Handle<SentNotificationException>().WaitAndRetryAsync(_maxRetryAttempts, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))
                 , (exception, timeSpan, retryCount, context) => {
                     _logger.LogError(exception, $"Retry {retryCount} of {context.PolicyKey}, due to: {exception}.");
                     message.LastSendError = exception?.Message;
@@ -63,7 +61,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
             {
                 message.LastSendAttemptDate = DateTime.Now;
                 message.SendAttemptCount++;
-                return _notificationMessageAccessor(activeNotification.Kind).SendNotificationAsync(message);
+                return _notificationMessageAccessor.GetSenderForNotificationType(notification.Kind).SendNotificationAsync(message);
             });
 
             if (policyResult.Outcome == OutcomeType.Successful)
