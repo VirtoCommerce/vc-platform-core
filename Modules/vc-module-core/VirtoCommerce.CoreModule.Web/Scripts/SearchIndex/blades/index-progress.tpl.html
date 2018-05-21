@@ -1,0 +1,23 @@
+﻿<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <div class="sub-t">{{blade.notification.description}}</div>
+            <div class="block" ng-if="blade.notification.created || blade.notification.finished">
+                <p ng-if="blade.notification.created" class="text no-data">
+                    {{ 'core.blades.index-progress.labels.start' | translate }} — <i class="fa fa-clock-o"></i><span am-time-ago="blade.notification.created"></span>
+                </p>
+                <p ng-if="!blade.notification.finished" class="dropdown-content">
+                    <span class="list-bar progress-bar" data-role="progress-bar" data-value="30" style="margin-left: 0"></span>
+                </p>
+                <p ng-if="blade.notification.finished" class="text no-data">{{ 'core.blades.index-progress.labels.end' | translate }} — <i class="fa fa-clock-o"></i> <span am-time-ago="blade.notification.finished"></span></p>
+                <p ng-if="blade.notification.finished" class="text no-data">{{ 'core.blades.index-progress.labels.stats' | translate:blade.notification }}</p>
+            </div>
+            <div class="block" ng-if="!blade.notification.finished || blade.notification.errorCount">
+                <span class="sub-t">{{ 'core.blades.index-progress.labels.errors' | translate }}: <span class="count">{{blade.notification.errorCount}}</span></span>
+                <div class="log" ng-if="blade.notification.errorCount">
+                    <p ng-repeat="error in blade.notification.errors track by $index" class="error">{{error}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -18,6 +18,7 @@ namespace VirtoCommerce.Platform.Web
         }
 
         public static IWebHost BuildWebHost(string[] args) =>
+
             WebHost.CreateDefaultBuilder(args)
                .ConfigureLogging((hostingContext, logging) =>
                {

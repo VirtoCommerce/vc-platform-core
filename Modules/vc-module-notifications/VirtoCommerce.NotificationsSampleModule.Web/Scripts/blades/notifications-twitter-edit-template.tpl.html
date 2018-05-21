@@ -1,0 +1,42 @@
+<div class="blade-static __bottom" ng-include="'Modules/$(VirtoCommerce.Notifications)/Scripts/blades/common/templates/ok-cancel.tpl.html'"></div>
+
+<div class="blade-content __xlarge-wide">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form class="form" name="formScope">
+                <div class="columns clearfix">
+                    <div class="column" ng-init="setForm(formScope)">
+                        <div class="form-group" style="margin:0 200px 0 0">
+                            <label class="form-label" style="margin:0">{{'notifications.blades.notifications-edit-template.labels.language' | translate}}</label>
+                            <div class="form-input" style="margin-top:0">
+                                <ui-select ng-model="blade.currentEntity.languageCode">
+                                    <ui-select-match allow-clear placeholder="{{ 'notifications.blades.notifications-edit-template.placeholders.language' | translate }}">{{$select.selected}}</ui-select-match>
+                                    <ui-select-choices repeat="x in blade.languages">
+                                        <span ng-bind-html="x"></span>
+                                    </ui-select-choices>
+                                </ui-select>
+                                <div class="table-descr">
+                                    {{ 'notifications.blades.notifications-edit-template.labels.blank-note' | translate }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="inner-block">
+                    <div class="column">
+                        <div class="form-group" style="margin:0">
+                            <label class="form-label" style="margin:0">{{'notifications.blades.notifications-edit-template.labels.template' | translate}}</label>
+                            <div class="form-group" style="margin:0">
+                                <input id="fileUploader" type="file" multiple style="display: none;" uploader="fileUploader" nv-file-select />
+                                <textarea vc-uk-htmleditor ng-model="blade.currentEntity.message" file-uploader="fileUploader"></textarea>
+                            </div>
+
+                        </div>
+                    </div>        
+                </div>
+            </form>
+        </div>
+
+        
+    </div>
+</div>

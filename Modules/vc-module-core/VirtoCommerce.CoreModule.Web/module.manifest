@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<module>
+    <id>VirtoCommerce.Core</id>
+    <version>3.0.0</version>
+    <platformVersion>3.0.0</platformVersion>
+    <title>Commerce core module</title>
+    <description>Common e-commerce domain functionality</description>
+    <authors>
+        <author>Eugeny Tatarincev</author>
+        <author>Artem Dudarev</author>
+    </authors>
+    <owners>
+        <owner>Virto Commerce</owner>
+    </owners>
+    <projectUrl>https://virtocommerce.com/apps/extensions/virto-core-module</projectUrl>
+    <iconUrl>Modules/$(VirtoCommerce.Core)/Content/logoVC.png</iconUrl>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright © 2011-2018 Virto Commerce. All rights reserved</copyright>
+    <tags>security core</tags>
+
+    <assemblyFile>VirtoCommerce.CoreModule.Web.dll</assemblyFile>
+    <moduleType>VirtoCommerce.CoreModule.Web.Module, VirtoCommerce.CoreModule.Web</moduleType>
+
+    <styles>
+        <directory virtualPath="$/Content" searchPattern="*.css" searchSubdirectories="true" />
+    </styles>
+    <scripts>
+        <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
+    </scripts>
+    
+    <incompatibilities>
+    </incompatibilities>
+    
+    <settings>
+        <group name="Commerce|General">
+            <setting>
+                <name>VirtoCommerce.Core.General.TaxTypes</name>
+                <valueType>string</valueType>
+                <defaultValue>Default</defaultValue>
+                <title>Tax types</title>
+                <description>Tax types available in system</description>
+                <isArray>true</isArray>
+                <arrayValues>
+                </arrayValues>
+            </setting>
+            <setting>
+                <name>VirtoCommerce.Core.General.WeightUnits</name>
+                <valueType>string</valueType>
+                <defaultValue>gram</defaultValue>
+                <title>Mass units</title>
+                <description>Mass units available for physical goods weighting</description>
+                <isArray>true</isArray>
+                <arrayValues>
+                    <value>gram</value>
+                    <value>ounce</value>
+                    <value>pound</value>
+                </arrayValues>
+            </setting>
+			<setting>
+				<name>VirtoCommerce.Core.General.MeasureUnits</name>
+				<valueType>string</valueType>
+				<defaultValue>mm</defaultValue>
+				<title>Units of length</title>
+				<description>Measure units available for measuring length</description>
+				<isArray>true</isArray>
+				<arrayValues>
+					<value>m</value>
+					<value>mm</value>
+					<value>ft</value>
+					<value>in</value>
+				</arrayValues>
+			</setting>
+            <setting>
+                <name>VirtoCommerce.Core.General.Languages</name>
+                <valueType>string</valueType>
+                <defaultValue>en-US</defaultValue>
+                <title>Languages</title>
+                <description>Languages available in the platform</description>
+                <isArray>true</isArray>
+                <arrayValues>
+                    <value>en-US</value>
+                    <value>fr-FR</value>
+                    <value>de-DE</value>
+                    <value>ja-JP</value>
+                </arrayValues>
+            </setting>
+            <setting>
+                <name>VirtoCommerce.Core.ExportImport.Description</name>
+                <valueType>string</valueType>
+                <defaultValue>Export/Import fulfillment centers</defaultValue>
+                <title>Export/Import description</title>
+                <description>Module description in platform export/import wizard</description>
+            </setting>
+            <setting>
+                <name>VirtoCommerce.Core.FixedRateShippingMethod.Ground.Rate</name>
+                <valueType>decimal</valueType>
+                <defaultValue>0.00</defaultValue>
+                <title>Ground shipping rate</title>
+                <description>Fixed Ground shipping rate</description>
+            </setting>
+			<setting>
+				<name>VirtoCommerce.Core.FixedRateShippingMethod.Air.Rate</name>
+				<valueType>decimal</valueType>
+				<defaultValue>0.00</defaultValue>
+				<title>Air shipping rate</title>
+				<description>Fixed Air shipping rate</description>
+			</setting>
+            <setting>
+                <name>VirtoCommerce.Core.FixedTaxRateProvider.Rate</name>
+                <valueType>decimal</valueType>
+                <defaultValue>0.00</defaultValue>
+                <title>Fixed tax rate %</title>
+                <description>Fixed tax rate</description>
+            </setting>
+        </group>
+        <group name="Search|General">
+            <setting>
+                <name>VirtoCommerce.Search.SearchConnectionString</name>
+                <valueType>string</valueType>
+                <defaultValue>provider=Lucene;server=~/App_Data/Lucene;scope=default</defaultValue>
+                <title>Search configuration string (requires restart)</title>
+                <description>
+                    <![CDATA[ 
+                    provider=AzureSearch;server=ServiceName;key=AccessKey;scope=default
+                    provider=Elasticsearch;server=localhost:9200;scope=default
+                    provider=Lucene;server=~/App_Data/Lucene;scope=default
+                    ]]>
+                </description>
+            </setting>
+            <setting>
+                <name>VirtoCommerce.Search.IndexingJobs.Enable</name>
+                <valueType>boolean</valueType>
+                <defaultValue>true</defaultValue>
+                <title>Schedule indexing jobs (requires restart)</title>
+                <description>Enable or disable periodic search index builders</description>
+            </setting>
+            <setting>
+                <name>VirtoCommerce.Search.IndexingJobs.CronExpression</name>
+                <valueType>string</valueType>
+                <defaultValue>0/5 * * * *</defaultValue>
+                <title>Indexing jobs cron expression (requires restart)</title>
+                <description>
+                    <![CDATA[ 
+                    x minutes use "0/x * * * *"
+                    x hourse use "0 */x * * *" you can set minutes also "15 */x * * *"
+                    x days "0 0 */x * *"   
+                    ]]>
+                </description>
+            </setting>
+            <setting>
+                <name>VirtoCommerce.Search.IndexPartitionSize</name>
+                <valueType>integer</valueType>
+                <defaultValue>50</defaultValue>
+                <title>The maximum items count per indexing partition</title>
+                <description>High value may will cause slow performance</description>
+            </setting>
+            <setting>
+                <name>VirtoCommerce.Search.IndexingJobs.ScaleOut</name>
+                <valueType>boolean</valueType>
+                <defaultValue>false</defaultValue>
+                <title>Enable scale out indexing (requires restart)</title>
+                <description>Scale out indexing partitions through job scheduler for parallel indexation</description>
+            </setting>
+            <setting>
+                <name>VirtoCommerce.Search.IndexingJobs.MaxQueueSize</name>
+                <valueType>integer</valueType>
+                <defaultValue>25</defaultValue>
+                <title>The maximum number queued indexing jobs (requires restart)</title>
+                <description>Limits indexation job progress to run too far ahead</description>
+            </setting>
+        </group>
+    </settings>
+
+    <permissions>
+        <group name="Core">
+			<permission id="core:packageType:create" name="Create package type" />
+			<permission id="core:packageType:update" name="Update package type" />
+			<permission id="core:packageType:delete" name="Delete package type" />
+			
+            <permission id="core:currency:create" name="Create currency" />
+            <permission id="core:currency:update" name="Update currency" />
+            <permission id="core:currency:delete" name="Delete currency" />
+
+            <permission id="core:fulfillment:create" name="Create fulfillment center"/>
+            <permission id="core:fulfillment:update" name="Update fulfillment center"/>
+            <permission id="core:fulfillment:delete" name="Delete fulfillment center"/>
+            <permission id="core:search:index:rebuild" name="Rebuild Index" description="Allows to delete search index and build it again."/>
+        </group>
+    </permissions>
+</module>

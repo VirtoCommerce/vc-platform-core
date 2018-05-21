@@ -1,0 +1,31 @@
+<div class="blade-content ">
+    <div class="blade-inner">
+      <div class="inner-block" ng-init="setGridOptions({
+               rowTemplate: 'list.row.html',
+               rowHeight: 61,
+               columnDefs: [
+                          { name: 'languageCode', displayName: 'Language', cellTemplate:'template-list-language.cell.html' },
+                          { name: 'createdDateAsString', displayName: 'Created' },
+                          { name: 'modifiedDateAsString', displayName: 'Modified' }
+              ]})">
+              <div class="table-wrapper" ng-if="blade.currentEntity.templates.length">
+                  <div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-save-state ui-grid-selection ui-grid-resize-columns ui-grid-move-columns ui-grid-pinning ui-grid-height></div>
+              </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/ng-template" id="template-list-language.cell.html">
+   <div class='ui-grid-cell-contents'>
+          <span class="list-name ng-binding">{{COL_FIELD || "default"}}</span>
+    </div>
+</script>
+
+<script type="text/ng-template" id="list.row.html">
+    <div ng-click='grid.appScope.selectNode(row.entity)' ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" ui-grid-one-bind-id-grid="rowRenderIndex + '-' + col.uid + '-cell'" class="ui-grid-cell" ng-class="{'ui-grid-row-header-cell': col.isRowHeader, '__hovered': grid.appScope.contextMenuEntity === row.entity, '__selected': row.entity.id===grid.appScope.selectedNodeId}" role="{{col.isRowHeader ? 'rowheader' : 'gridcell' }}" ui-grid-cell context-menu="grid.appScope.contextMenuEntity = row.entity" data-target="njo_menu"></div>
+</script>
+<script type="text/ng-template" id="list-actions.cell.html">
+    <div class="ui-grid-actions" left-click-menu="grid.appScope.contextMenuEntity = row.entity" data-target="cml_menu">
+        <i class="fa fa-ellipsis-v"></i>
+    </div>
+</script>

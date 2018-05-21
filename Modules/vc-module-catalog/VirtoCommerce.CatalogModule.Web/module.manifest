@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<module>
+    <id>VirtoCommerce.Catalog</id>
+    <version>3.0.0</version>
+    <platformVersion>3.0.0</platformVersion>
+    <dependencies>
+        <dependency id="VirtoCommerce.Core" version="3.0.0" />
+    </dependencies>
+
+    <title>Catalog module</title>
+    <description>Catalog, categories, products, variations, properties management</description>
+    <authors>
+        <author>Virto Commerce</author>
+    </authors>
+    <owners>
+        <owner>Virto Commerce</owner>
+    </owners>
+    <projectUrl>https://virtocommerce.com/apps/extensions/virto-catalog-module</projectUrl>
+    <iconUrl>https://github.com/VirtoCommerce/vc-module-catalog/raw/master/VirtoCommerce.CatalogModule.Web/Content/logo.png</iconUrl>
+    <releaseNotes>First version.</releaseNotes>
+    <copyright>Copyright © 2011-2018 Virto Commerce. All rights reserved</copyright>
+    <tags>catalog</tags>
+
+    <assemblyFile>VirtoCommerce.CatalogModule.Web.dll</assemblyFile>
+    <moduleType>VirtoCommerce.CatalogModule.Web.Module, VirtoCommerce.CatalogModule.Web</moduleType>
+
+    <styles>
+        <directory virtualPath="$/Content/css" searchPattern="*.css" searchSubdirectories="true" />
+    </styles>
+    <scripts>
+        <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
+    </scripts>
+
+    <settings>
+        <group name="Catalog|General">
+            <setting>
+                <name>Catalog.ExportImport.Description</name>
+                <valueType>string</valueType>
+                <defaultValue>Export/Import catalogs, categories, products, properties with images binary if you check binary flag</defaultValue>
+                <title>Export/Import description</title>
+                <description>Module description in platform export/import wizard</description>
+            </setting>
+            <setting>
+                <name>Catalog.AssociationGroups</name>
+                <valueType>string</valueType>
+                <defaultValue></defaultValue>
+                <title>Association Group names</title>
+                <description>Catalog product association groups</description>
+                <isArray>true</isArray>
+                <arrayValues>
+                    <value>Accessories</value>
+                    <value>Related Items</value>
+                </arrayValues>
+            </setting>
+            <setting>
+                <name>Catalog.EditorialReviewTypes</name>
+                <valueType>string</valueType>
+                <defaultValue>QuickReview</defaultValue>
+                <title>Item description types</title>
+                <description>Dictionary of possible types that item's Descriptions can have</description>
+                <isArray>true</isArray>
+                <arrayValues>
+                    <value>QuickReview</value>
+                    <value>FullReview</value>
+                </arrayValues>
+            </setting>
+            <setting>
+                <name>Catalog.CodesInOutline</name>
+                <valueType>boolean</valueType>
+                <defaultValue>false</defaultValue>
+                <title>Use catalog and product codes in outlines</title>
+                <description>Enable or disable using codes instead of ids in outlines</description>
+            </setting>
+        </group>
+        <group name="Catalog|Images">
+            <setting>
+                <name>Catalog.ImageCategories</name>
+                <valueType>string</valueType>
+                <title>Image categories</title>
+                <description>Dictionary of possible categories that item's Images can have</description>
+                <isArray>true</isArray>
+                <arrayValues>
+                </arrayValues>
+            </setting>
+        </group>
+        <group name="Catalog|Dictionaries">
+            <setting>
+                <name>Catalog.ExposeAliasInDictionary</name>
+                <valueType>boolean</valueType>
+                <defaultValue>false</defaultValue>
+                <title>Expose Alias In Dictionary</title>
+                <description>Enable or disable exposing the Alias for dictionary values</description>
+            </setting>
+        </group>
+        <group name="Search|Catalog">
+            <setting>
+                <name>Catalog.Search.UseCatalogIndexedSearchInManager</name>
+                <valueType>boolean</valueType>
+                <defaultValue>true</defaultValue>
+                <title>Use indexed search for catalog</title>
+                <description>Enable or disable indexed search for catalog module with advanced syntax</description>
+            </setting>
+            <setting>
+                <name>Catalog.Search.UseFullObjectIndexStoring</name>
+                <valueType>boolean</valueType>
+                <defaultValue>false</defaultValue>
+                <title>Store serialized catalog objects in the index</title>
+                <description>Store serialized catalog objects in the index and return them in search results</description>
+            </setting>
+        </group>
+    </settings>
+
+    <permissions>
+        <group name="Catalog">
+            <permission id="catalog:access" name="Open catalogs menu" description=""/>
+            <permission id="catalog:create" name="Create catalog related data" description=""/>
+            <permission id="catalog:read" name="View catalog related data" description=""/>
+            <permission id="catalog:update" name="Update catalog related data" description=""/>
+            <permission id="catalog:delete" name="Delete catalog related data" description=""/>
+            <permission id="catalog:export" name="Export catalog data" description=""/>
+            <permission id="catalog:import" name="Import catalog data" description=""/>
+            <permission id="catalog:imagetypes" name="Manage image types" description=""/>
+        </group>
+    </permissions>
+</module>

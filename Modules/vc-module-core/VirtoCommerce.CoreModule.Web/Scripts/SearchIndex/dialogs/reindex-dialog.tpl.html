@@ -1,0 +1,17 @@
+﻿<div class="modal-header">
+    <h3 class="modal-title">{{ 'core.dialogs.reindex.title' | translate }}</h3>
+</div>
+<div class="modal-body">
+    <p class="text">{{ 'core.dialogs.reindex.msg1' | translate }}</p>
+    <div class="form-group">
+        <ul>
+            <li>{{ 'core.dialogs.reindex.msg2' | translate }}</li>
+            <li>{{ 'core.dialogs.reindex.msg3' | translate }}</li>
+        </ul>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn" ng-click="no()">{{ 'core.dialogs.reindex.index' | translate }}</button>
+    <button class="btn __cancel" ng-click="yes()" va-permission="VirtoCommerce.Search:Index:Rebuild">{{ 'core.dialogs.reindex.reindex' | translate}}</button>
+    <button class="btn" ng-click="cancel()">{{ 'platform.commands.cancel' | translate }}</button>
+</div>

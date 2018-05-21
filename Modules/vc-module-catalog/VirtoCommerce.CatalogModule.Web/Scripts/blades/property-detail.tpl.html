@@ -1,0 +1,99 @@
+﻿<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form name="pdForm" class="form">
+                <div class="form-group" ng-init="setForm(pdForm);">
+                    <label class="form-label" for="">{{ 'catalog.blades.property-detail.labels.property-name' | translate }}</label>
+                    <div class="form-input">
+                        <input focus-on="" required class="form-control" ng-model="blade.currentEntity.name" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="">{{ 'catalog.blades.property-detail.labels.display-name' | translate }}</label>
+                    <div class="form-input __langs" ng-repeat="data in blade.currentEntity.displayNames">
+                        <span ng-if="data.languageCode.length>2" class="flag flag-{{data.languageCode.substr(3).toLowerCase()}}"></span>
+                        <span ng-if="data.languageCode.length<=2" class="langCode">{{data.languageCode.toUpperCase()}}</span>
+                        <input ng-model="data.name" placeholder="{{ 'catalog.blades.property-detail.placeholders.display-name' | translate }}" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="columns clearfix">
+                    <div class="column">
+                        <div class="form-group">
+                            <label class="form-label">{{ 'catalog.blades.property-detail.labels.dictionary' | translate }}</label>
+                            <div class="form-input">
+                                <label class="form-label __switch">
+                                    <input type="checkbox" ng-model="blade.currentEntity.dictionary" />
+                                    <span class="switch"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="form-group">
+                            <label class="form-label">{{ 'catalog.blades.property-detail.labels.multivalue' | translate }}</label>
+                            <div class="form-input">
+                                <label class="form-label __switch">
+                                    <input type="checkbox" ng-model="blade.currentEntity.multivalue" />
+                                    <span class="switch"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="form-group">
+                            <label class="form-label">{{ 'catalog.blades.property-detail.labels.multi-language' | translate }}</label>
+                            <div class="form-input">
+                                <label class="form-label __switch">
+                                    <input type="checkbox" ng-model="blade.currentEntity.multilanguage" />
+                                    <span class="switch"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">{{ 'catalog.blades.property-detail.labels.applies-to' | translate }}</label>
+                    <div class="form-input">
+                        <ui-select ng-model="blade.currentEntity.type" class="capitalizeText">
+                            <ui-select-match>{{$select.selected}}</ui-select-match>
+                            <ui-select-choices repeat="propertyType in blade.availablePropertyTypes | filter: $select.search">
+                                <span ng-click="blade.currentEntity.type">{{propertyType}}</span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">{{ 'catalog.blades.property-detail.labels.value-type' | translate }}</label>
+                    <div class="form-input">
+                        <ui-select ng-model="blade.currentEntity.valueType">
+                            <ui-select-match placeholder="">{{ $select.selected.title |translate}}</ui-select-match>
+                            <ui-select-choices repeat="x.valueType as x in blade.availableValueTypes | filter: $select.search">
+                                <div>{{ x.title |translate }}</div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+
+            </form>
+
+            <ul class="list __items">
+                <li class="list-item" ng-class="{'__selected': currentChild === 'va'}" ng-click='openChild("rules")'>
+                    <span class="list-t">{{ 'catalog.blades.property-validationRule.title'|translate }}</span>
+                    <span class="list-descr">{{ 'catalog.blades.property-validationRule.subtitle'|translate }}</span>
+                </li>
+                <li class="list-item" ng-class="{'__selected': currentChild === 'dict', '__disabled': !blade.currentEntity.dictionary }" ng-click='openChild("dict")'>
+                    <span class="list-t">{{ 'catalog.blades.property-detail.labels.dictionary' | translate }}</span>
+                    <span class="list-descr">{{ 'catalog.blades.property-detail.labels.manage-dictionary' | translate }}</span>
+                </li>
+                <li class="list-item" ng-class="{'__selected': currentChild === 'attr'}" ng-click='openChild("attr")'>
+                    <span class="list-t">{{ 'catalog.blades.property-detail.labels.attributes' | translate }}</span>
+                    <span class="list-descr">{{ 'catalog.blades.property-detail.labels.manage-attributes' | translate }}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

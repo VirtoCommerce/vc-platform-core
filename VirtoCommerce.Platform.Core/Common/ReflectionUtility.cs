@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -132,7 +132,7 @@ namespace VirtoCommerce.Platform.Core.Common
                 //Handle collection and arrays
                 var collections = properties.Where(p => p.GetIndexParameters().Length == 0)
                                             .Select(x => x.GetValue(obj, null))
-                                            .Where(x => x is IEnumerable && !(x is String))
+                                            .Where(x => x is IEnumerable && !(x is string))
                                             .Cast<IEnumerable>();
 
                 foreach (var collection in collections)

@@ -1,0 +1,8 @@
+﻿<div class="gridster-cnt" ng-click="openBlade()">
+    <ul class="list __stats">
+        <li class="list-item">{{'catalog.widgets.itemDimensions.height' | translate}} <span class="list-price">{{blade.item.height ? (blade.item.height | number) : 'N/A' }} {{blade.item.measureUnit}}</span></li>
+        <li class="list-item">{{'catalog.widgets.itemDimensions.width' | translate}} <span class="list-price">{{blade.item.width ? (blade.item.width | number) : 'N/A' }} {{blade.item.measureUnit}}</span></li>
+        <li class="list-item">{{'catalog.widgets.itemDimensions.length' | translate}} <span class="list-price">{{blade.item.length ? (blade.item.length | number) : 'N/A' }} {{blade.item.measureUnit}}</span></li>
+        <li class="list-item">{{'catalog.widgets.itemDimensions.weight' | translate }} <span class="list-price">{{blade.item.weight ? (blade.item.weight | number) : 'N/A'}} {{blade.item.weightUnit}} </span></li>
+    </ul>
+</div>

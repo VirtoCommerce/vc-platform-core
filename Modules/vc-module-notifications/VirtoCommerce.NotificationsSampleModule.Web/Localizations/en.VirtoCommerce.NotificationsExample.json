@@ -1,0 +1,8 @@
+{
+    "notificationTypes": {
+        "PostTwitterNotification": {
+            "displayName": "Post Twitter notification",
+            "description": "This notification sends by a tweet to the Twitter"
+        }
+    }
+}

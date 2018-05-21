@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,7 +28,7 @@ namespace VirtoCommerce.Platform.Core.Common
 		}
 
       
-        public static IOrderedQueryable<T> OrderBySortInfos<T>(this IQueryable<T> source, SortInfo[] sortInfos)
+        public static IOrderedQueryable<T> OrderBySortInfos<T>(this IQueryable<T> source, IEnumerable<SortInfo> sortInfos)
         {
             if(sortInfos.IsNullOrEmpty())
             {

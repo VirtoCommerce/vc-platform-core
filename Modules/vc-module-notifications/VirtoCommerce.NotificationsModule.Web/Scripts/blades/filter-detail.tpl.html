@@ -1,0 +1,36 @@
+﻿<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form name="formScope">
+                <div class="form-group" ng-init="setForm(formScope)">
+                    <label class="form-label">{{ 'notifications.blades.filter-detail.labels.name' | translate }}</label>
+                    <div class="form-input">
+                        <input ng-model="blade.currentEntity.name" required placeholder="{{ 'notifications.blades.filter-detail.placeholders.name' | translate }}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ 'notifications.blades.filter-detail.labels.criteria' | translate }}</label>
+                    <div class="form-input">
+                        <input ng-model="blade.currentEntity.keyword" required placeholder="{{ 'notifications.blades.filter-detail.placeholders.criteria' | translate }}" />
+                    </div>
+                </div>
+            </form>
+            <div class="form-group">
+                <div class="list __info">
+                    <div class="list-t">isActive:false, isSuccessSend:false</div>
+                    <div class="list-descr">where all notifications with errors</div>
+                </div>
+                <div class="list __info">
+                    <div class="list-t">isActive:true, isSuccessSend:false</div>
+                    <div class="list-descr">where the status is 'Only pending'</div>
+                </div>
+                
+                <div class="list __info">
+                    <div class="list-item">
+                        <a ng-href="https://github.com/VirtoCommerce/vc-module-search#search-phrase-syntax" target="_blank">Search phrase syntax reference</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

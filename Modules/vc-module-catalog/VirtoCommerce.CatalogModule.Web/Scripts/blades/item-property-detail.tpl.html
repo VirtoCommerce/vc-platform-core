@@ -1,0 +1,26 @@
+﻿<div class="blade-static __bottom" ng-include="'Modules/$(VirtoCommerce.Catalog)/Scripts/blades/common/templates/ok-cancel.tpl.html'"></div>
+<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form name="formScope" class="form">
+                <div class="form-group" ng-init="setForm(formScope);">
+                    <label class="form-label" for="">{{ 'catalog.blades.item-property-detail.labels.property-name' | translate }}</label>
+                    <div class="form-input">
+                        <input focus-on="" required class="form-control" ng-model="blade.currentEntity.name"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ 'catalog.blades.property-detail.labels.value-type' | translate }}</label>
+                    <div class="form-input">
+                        <ui-select ng-model="blade.currentEntity.valueType">
+                            <ui-select-match placeholder="">{{ $select.selected.title |translate}}</ui-select-match>
+                            <ui-select-choices repeat="x.valueType as x in blade.availableValueTypes | filter: $select.search">
+                                <div>{{ x.title |translate }}</div>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

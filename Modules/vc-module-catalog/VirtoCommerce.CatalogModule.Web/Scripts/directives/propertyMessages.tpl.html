@@ -1,0 +1,17 @@
+﻿<div>
+    <div class="form-error" ng-show="context.form[currentEntity.name].$error.minTags">
+        {{ 'catalog.blades.property-list.validations.required' | translate }}
+    </div>
+    <div class="form-error" ng-show="context.form[currentEntity.name].$error.required">
+        {{ 'catalog.blades.property-list.validations.required' | translate }}
+    </div>
+    <div class="form-error" ng-show="context.form[currentEntity.name].$error.maxlength">
+        {{ 'catalog.blades.property-list.validations.maxLength' | translate: { max: currentEntity.validationRule.charCountMax } }}
+    </div>
+    <div class="form-error" ng-show="context.form[currentEntity.name].$error.minlength">
+        {{ 'catalog.blades.property-list.validations.minLenght' | translate: { min: currentEntity.validationRule.charCountMin } }}
+    </div>
+    <div class="form-error" ng-if="context.form[currentEntity.name].$error.pattern">
+        {{ 'catalog.blades.property-list.validations.pattern' | translate }}
+    </div>
+</div>

@@ -1,11 +1,9 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace VirtoCommerce.Platform.Core.Common
 {
@@ -31,20 +29,14 @@ namespace VirtoCommerce.Platform.Core.Common
                     {
                         foreach (var newItem in args.NewItems)
                         {
-                            if (AddAction != null)
-                            {
-                                AddAction(newItem);
-                            }
+                            AddAction?.Invoke(newItem);
                         }
                     }
                     else if (args.Action == NotifyCollectionChangedAction.Remove)
                     {
                         foreach (var oldItem in args.OldItems)
                         {
-                            if (RemoveAction != null)
-                            {
-                                RemoveAction(oldItem);
-                            }
+                            RemoveAction?.Invoke(oldItem);
                         }
                     }
                 };

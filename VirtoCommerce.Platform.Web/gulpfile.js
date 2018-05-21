@@ -1,4 +1,4 @@
-/// <binding AfterBuild='min:js, min:css' />
+/// <binding />
 "use strict";
 
 var gulp = require("gulp"),
@@ -17,7 +17,7 @@ var gulp = require("gulp"),
     gulpsync = require('gulp-sync')(gulp);
 
 
-gulp.task("min", gulpsync.sync(["min:bowerPackages:js", "min:bowerPackages:css", "translateSass", "min:js", "min:css", 'min:allPackages:cs']));
+gulp.task("min", gulpsync.sync(["min:bowerPackages:js", "min:bowerPackages:css", "translateSass", "min:js", "min:css", 'min:allPackages:css']));
 
 
 // concatenate all css files
@@ -106,6 +106,8 @@ gulp.task('translateSass', function () {
         .pipe(gulp.dest('wwwroot/css'));
 });
 
+var cssStream = gulp.src(['wwwroot/css/themes/main/css/**/*.css', 'wwwroot/js/codemirror/**/*.css', '!wwwroot/css/themes/main/css/allPackages.css'])
+    .pipe(concat('css-files.css'));
 
 gulp.task("min:css", function () {
 
@@ -120,7 +122,7 @@ gulp.task("min:css", function () {
 });
 
 gulp.task("clean", function () {
-    var files = ['wwwroot/css/allPackages.css', 'wwwroot/css/platform.css', 'wwwroot/css/main.css', 'wwwroot/css/main.css.map', 'wwwroot/js/allPackages.(min.js|js)', 'wwwroot/js/platform.(min.js|js'];
+    var files = ['wwwroot/css/allPackages.css', 'wwwroot/css/platform.css', 'wwwroot/css/main.css', 'wwwroot/css/main.css.map', 'wwwroot/js/allPackages.js', 'wwwroot/js/allPackages.min.js', 'wwwroot/js/platform.js', 'wwwroot/js/platform.min.js'];
     return del(files);
 });
 

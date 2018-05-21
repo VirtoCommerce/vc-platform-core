@@ -15,7 +15,7 @@ namespace VirtoCommerce.Platform.Security
     {
         public static IApplicationBuilder UsePlatformPermissions(this IApplicationBuilder appBuilder)
         {
-            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsProvider>();
+            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IKnownPermissionsProvider>();
             permissionsProvider.RegisterPermissions(SecurityConstants.Permissions.AllPermissions.Select(x => new Permission() { Name = x }).ToArray());
             return appBuilder;
         }
