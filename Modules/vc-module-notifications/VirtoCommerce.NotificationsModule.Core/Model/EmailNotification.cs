@@ -6,6 +6,9 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Core.Model
 {
+    /// <summary>
+    /// Type of Notification for the Email
+    /// </summary>
     public class EmailNotification : Notification
     {
         public EmailNotification()
@@ -15,9 +18,24 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
             Attachments = new List<EmailAttachment>();
         }
 
+        /// <summary>
+        /// Sender
+        /// </summary>
         public string From { get; set; }
+
+        /// <summary>
+        /// Recipient
+        /// </summary>
         public string To { get; set; }
+
+        /// <summary>
+        /// Array of CC recipients
+        /// </summary>
         public string[] CC { get; set; }
+
+        /// <summary>
+        /// Array of BCC recipients
+        /// </summary>
         public string[] BCC { get; set; }
         public IList<EmailAttachment> Attachments { get; set; }
 

@@ -1,8 +1,18 @@
 namespace VirtoCommerce.NotificationsModule.Core.Model
 {
+    /// <summary>
+    /// Settings of Email Protocol
+    /// </summary>
     public class EmailSendingOptions
     {
+        /// <summary>
+        /// Default smtp sending
+        /// </summary>
         public SmtpOptions SmtpOptions { get; set; }
+
+        /// <summary>
+        /// SendGrid settings
+        /// </summary>
         public SendGridOptions SendGridOptions { get; set; }
     }
 

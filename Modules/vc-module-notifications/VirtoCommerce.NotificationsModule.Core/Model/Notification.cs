@@ -4,11 +4,20 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Core.Model
 {
+    /// <summary>
+    /// A parent class for Notification
+    /// </summary>
     public abstract class Notification : AuditableEntity
     {
+        /// <summary>
+        /// For detecting owner
+        /// </summary>
         public TenantIdentity TenantIdentity { get; set; }
         public bool IsActive { get; set; }
 
+        /// <summary>
+        /// Type of notifications, like Identifier
+        /// </summary>
         private string _type;
         public string Type
         {
@@ -16,6 +25,9 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
             set => _type = value;
         }
 
+        /// <summary>
+        /// For detecting kind of notifications (email, sms and etc.)
+        /// </summary>
         public string Kind { get; set; }
         public IList<NotificationTemplate> Templates { get; set; }
 

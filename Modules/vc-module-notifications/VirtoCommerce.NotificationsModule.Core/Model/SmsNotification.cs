@@ -4,6 +4,9 @@ using VirtoCommerce.NotificationsModule.Core.Services;
 
 namespace VirtoCommerce.NotificationsModule.Core.Model
 {
+    /// <summary>
+    /// Sms - Kind of Notification
+    /// </summary>
     public class SmsNotification : Notification
     {
         public SmsNotification()
@@ -12,6 +15,9 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
             Templates = new List<NotificationTemplate>();
         }
 
+        /// <summary>
+        /// Number for sms notification
+        /// </summary>
         public string Number { get; set; }
 
         public override NotificationMessage ToMessage(NotificationMessage message, INotificationTemplateRender render)
