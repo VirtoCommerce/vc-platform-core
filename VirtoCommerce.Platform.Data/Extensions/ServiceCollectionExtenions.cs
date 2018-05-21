@@ -13,6 +13,7 @@ using VirtoCommerce.Platform.Data.PushNotifications;
 using VirtoCommerce.Platform.Data.Repositories;
 using VirtoCommerce.Platform.Data.Settings;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Notifications;
 
 namespace VirtoCommerce.Platform.Data.Extensions
 {
@@ -27,6 +28,7 @@ namespace VirtoCommerce.Platform.Data.Extensions
             services.AddSingleton<ISettingsManager, SettingsManager>();
             services.AddSingleton<IPushNotificationManager, PushNotificationManager>();
             services.AddSingleton<IEventPublisher, InProcessBus>();
+            services.AddTransient<IEmailSender, EmailSender>();
             return services;
 
         }

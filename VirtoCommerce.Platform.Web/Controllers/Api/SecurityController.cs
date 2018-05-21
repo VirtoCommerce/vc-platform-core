@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using OpenIddict.Core;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Notifications;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Security.Search;
 using VirtoCommerce.Platform.Web.Model.Security;
@@ -28,10 +29,11 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         private readonly IKnownPermissionsProvider _permissionsProvider;
         private readonly IUserSearchService _userSearchService;
         private readonly IRoleSearchService _roleSearchService;
+        private readonly IEmailSender _emailSender;
 
         public SecurityController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager,
                 IKnownPermissionsProvider permissionsProvider, IUserSearchService userSearchService, IRoleSearchService roleSearchService,
-                IOptions<SecurityOptions> securityOptions)
+                IOptions<SecurityOptions> securityOptions, IEmailSender emailSender)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -40,6 +42,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             _roleManager = roleManager;
             _userSearchService = userSearchService;
             _roleSearchService = roleSearchService;
+            _emailSender = emailSender;
         }
 
         /// <summary>
@@ -414,6 +417,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var callbackUrl = $"{Request.Scheme}{Request.Host}/api/platform/security/#/resetpassword/{user.Id}/{token}";
 
+                await _emailSender.SendEmailAsync(user.Email, "", "");
                 //TODO: Generate Domain Event and implement the sending password reset email to user in event handler
 
                 //var notification = _notificationManager.GetNewNotification<ResetPasswordEmailNotification>("Platform", typeof(ResetPasswordEmailNotification).Name, "en");
