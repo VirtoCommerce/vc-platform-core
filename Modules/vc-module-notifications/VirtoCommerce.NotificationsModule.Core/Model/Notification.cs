@@ -35,6 +35,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         {
             message.TenantIdentity = new TenantIdentity(message.TenantIdentity?.Id, message.TenantIdentity?.Type);
             message.NotificationType = Type;
+            message.NotificationId = Id;
 
             return message;
         }

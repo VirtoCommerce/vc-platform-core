@@ -42,11 +42,12 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
 
             NotificationSendResult result = new NotificationSendResult();
 
-            var activeNotification = await _notificationService.GetByTypeAsync(notification.Type);
-            var message = AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{activeNotification.Kind}Message");
+            //var activeNotification = await _notificationService.GetByTypeAsync(notification.Type);
+            
+            var message = AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{notification.Kind}Message");
             message.LanguageCode = language;
             message.MaxSendAttemptCount = _maxRetryAttempts + 1;
-            activeNotification.ToMessage(message, _notificationTemplateRender);
+            notification.ToMessage(message, _notificationTemplateRender);
 
             NotificationMessage[] messages = { message };
             await _notificationMessageService.SaveNotificationMessagesAsync(messages);

@@ -29,7 +29,6 @@ using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Jobs;
 using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.Platform.Core.Notifications;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.Platform.Data.PushNotifications;
@@ -68,6 +67,8 @@ namespace VirtoCommerce.Platform.Web
             services.Configure<HangfireOptions>(Configuration.GetSection("VirtoCommerce:Jobs"));
 
             PlatformVersion.CurrentVersion = SemanticVersion.Parse(Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default.Application.ApplicationVersion);
+
+            services.AddPlatformServices(Configuration);
 
             var mvcBuilder = services.AddMvc().AddJsonOptions(options =>
                 {
@@ -223,7 +224,7 @@ namespace VirtoCommerce.Platform.Web
             //Add SignalR for push notifications
             services.AddSignalR();
 
-            services.AddPlatformServices(Configuration);
+            
             services.AddSecurityServices();
 
             var assetConnectionString = BlobConnectionString.Parse(Configuration.GetConnectionString("AssetsConnectionString"));

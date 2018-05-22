@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -417,7 +418,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var callbackUrl = $"{Request.Scheme}{Request.Host}/api/platform/security/#/resetpassword/{user.Id}/{token}";
 
-                await _emailSender.SendEmailAsync(user.Email, "", "");
+                await _emailSender.SendEmailAsync(user.Email, "ResetPasswordEmailNotification", "en-US", new Dictionary<string, object> { { "Url", callbackUrl } });
                 //TODO: Generate Domain Event and implement the sending password reset email to user in event handler
 
                 //var notification = _notificationManager.GetNewNotification<ResetPasswordEmailNotification>("Platform", typeof(ResetPasswordEmailNotification).Name, "en");
