@@ -28,7 +28,7 @@ namespace VirtoCommerce.Platform.Data.Extensions
             services.AddSingleton<ISettingsManager, SettingsManager>();
             services.AddSingleton<IPushNotificationManager, PushNotificationManager>();
             services.AddSingleton<IEventPublisher, InProcessBus>();
-            services.AddTransient<IEmailSender, EmailSender>();
+            services.AddTransient<IEmailSender, PlatformEmailSender>();
             return services;
 
         }
