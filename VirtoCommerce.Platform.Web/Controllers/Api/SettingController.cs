@@ -2,6 +2,7 @@ using System.Linq;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api
@@ -41,6 +42,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpGet]
         [Route("modules/{id}")]
         [ProducesResponseType(typeof(SettingEntry[]), 200)]
+        //[Authorize(SecurityConstants.Permissions.SettingQuery)]
         public IActionResult GetModuleSettings(string id)
         {
             var retVal = _settingsManager.GetModuleSettings(id);
@@ -55,6 +57,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpGet]
         [Route("{name}")]
         [ProducesResponseType(typeof(SettingEntry), 200)]
+        //[Authorize(SecurityConstants.Permissions.SettingAccess)]
         public IActionResult GetSetting(string name)
         {
             var retVal = _settingsManager.GetSettingByName(name);
@@ -72,7 +75,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("")]
         [ProducesResponseType(typeof(void), 200)]
-        //[CheckPermission(Permission = PredefinedPermissions.SettingUpdate)]
+        //[Authorize(SecurityConstants.Permissions.SettingUpdate)]
         public IActionResult Update([FromBody]SettingEntry[] settings)
         {
             lock (_lock)
