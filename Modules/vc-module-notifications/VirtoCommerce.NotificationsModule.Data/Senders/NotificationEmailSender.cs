@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.Platform.Core.Notifications;
@@ -9,40 +11,27 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
 {
     public class NotificationEmailSender : IEmailSender
     {
-        private readonly INotificationSender _notificationSender;
-        private readonly INotificationService _notificationService;
+        private readonly INotificationMessageSenderProviderFactory _notificationMessageSenderProviderFactory;
+        private readonly EmailSendingOptions _emailSendingOptions;
 
-        public NotificationEmailSender(INotificationSender notificationSender, INotificationService notificationService)
+        public NotificationEmailSender(INotificationMessageSenderProviderFactory notificationMessageSenderProviderFactory, IOptions<EmailSendingOptions> emailSendingOptions/*, IConfiguration configuration*/)
         {
-            _notificationSender = notificationSender;
-            _notificationService = notificationService;
+            _notificationMessageSenderProviderFactory = notificationMessageSenderProviderFactory;
+            _emailSendingOptions = emailSendingOptions.Value;
         }
 
-        public async Task SendEmailAsync(string to, string type, string languageCode, Dictionary<string, object> parameters)
+        public async Task SendEmailAsync(string email, string subject, string message)
         {
-            var notification = await _notificationService.GetByTypeAsync(type);
-
-            if (notification is EmailNotification emailNotification)
+            var notificationMessage = new EmailNotificationMessage()
             {
-                emailNotification.To = to;    
-            }
-
-            ParametersResolver(notification, parameters);
-
-            await _notificationSender.SendNotificationAsync(notification, languageCode);
+                From = _emailSendingOptions.Sender,
+                To = email,
+                Subject = subject,
+                Body = message
+            };
+            await _notificationMessageSenderProviderFactory.GetSenderForNotificationType(nameof(EmailNotification)).SendNotificationAsync(notificationMessage);
         }
 
-        private void ParametersResolver(Notification notification, Dictionary<string, object> parameters)
-        {
-            if (parameters.Any())
-            {
-                var properties = notification.GetType().GetProperties().Where(p => p.GetCustomAttributes(typeof(NotificationParameterAttribute), true).Any());
-                foreach (var property in properties)
-                {
-                    parameters.TryGetValue(property.Name, out object value);
-                    property.SetValue(notification, value, null);
-                }
-            }
-        }
+        
     }
 }

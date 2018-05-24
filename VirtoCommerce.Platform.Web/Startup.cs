@@ -17,18 +17,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using NUglify.Css;
-using NUglify.JavaScript;
 using Smidge;
-using Smidge.Cache;
-using Smidge.FileProcessors;
 using Smidge.Nuglify;
-using Smidge.Options;
 using Swashbuckle.AspNetCore.Swagger;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Jobs;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Notifications;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.Platform.Data.PushNotifications;
@@ -65,6 +61,7 @@ namespace VirtoCommerce.Platform.Web
 
             services.Configure<DemoOptions>(Configuration.GetSection("VirtoCommerce"));
             services.Configure<HangfireOptions>(Configuration.GetSection("VirtoCommerce:Jobs"));
+            services.Configure<EmailSendingOptions>(Configuration.GetSection("EmailSendingOptions"));
 
             PlatformVersion.CurrentVersion = SemanticVersion.Parse(Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default.Application.ApplicationVersion);
 
@@ -223,8 +220,9 @@ namespace VirtoCommerce.Platform.Web
 
             //Add SignalR for push notifications
             services.AddSignalR();
-
             
+            
+
             services.AddSecurityServices();
 
             var assetConnectionString = BlobConnectionString.Parse(Configuration.GetConnectionString("AssetsConnectionString"));

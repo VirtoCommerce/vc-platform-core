@@ -17,6 +17,7 @@ using VirtoCommerce.NotificationsModule.Tests.Model;
 using VirtoCommerce.NotificationsModule.Tests.NotificationTypes;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
+using VirtoCommerce.Platform.Core.Notifications;
 using Xunit;
 
 namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests

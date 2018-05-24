@@ -6,7 +6,7 @@ namespace VirtoCommerce.Platform.Core.Notifications
 {
     public class PlatformEmailSender : IEmailSender
     {
-        public Task SendEmailAsync(string to, string type, string languageCode, Dictionary<string, object> parameters)
+        public Task SendEmailAsync(string email, string subject, string message)
         {
             throw new NotImplementedException();
         }
