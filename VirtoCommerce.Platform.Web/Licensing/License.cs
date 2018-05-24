@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -10,7 +10,6 @@ namespace VirtoCommerce.Platform.Web.Licensing
     public sealed class License
     {
         private static readonly string _hashAlgorithmName = HashAlgorithmName.SHA256.Name;
-        private static readonly HashAlgorithm _hashAlgorithm = HashAlgorithm.Create(_hashAlgorithmName);
         private static readonly AsymmetricSignatureDeformatter _signatureDeformatter = CreateSignatureDeformatter(_hashAlgorithmName);
 
         public string Type { get; set; }
@@ -49,9 +48,13 @@ namespace VirtoCommerce.Platform.Web.Licensing
         private static bool ValidateSignature(string data, string signature)
         {
             bool result;
+            byte[] dataHash;
 
             var dataBytes = Encoding.UTF8.GetBytes(data);
-            var dataHash = _hashAlgorithm.ComputeHash(dataBytes);
+            using (var algorithm = SHA256.Create())
+            {
+                dataHash = algorithm.ComputeHash(dataBytes);
+            }
 
             try
             {

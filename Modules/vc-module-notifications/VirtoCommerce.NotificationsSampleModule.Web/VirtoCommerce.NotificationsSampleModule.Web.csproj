@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Content\" />
+    <Folder Include="Content\css\" />
   </ItemGroup>
 
 </Project>
