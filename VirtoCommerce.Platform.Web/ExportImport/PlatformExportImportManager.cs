@@ -106,7 +106,7 @@ namespace VirtoCommerce.Platform.Web.ExportImport
                 throw new ArgumentNullException("manifest");
             }
 
-            using (var zipArchive = new ZipArchive(outStream))
+            using (var zipArchive = new ZipArchive(outStream, ZipArchiveMode.Create, true))
             {
                 //Export all selected platform entries
                await ExportPlatformEntriesInternalAsync(zipArchive, manifest, progressCallback, cancellationToken);
