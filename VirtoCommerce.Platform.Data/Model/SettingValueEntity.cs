@@ -84,7 +84,7 @@ namespace VirtoCommerce.Platform.Data.Model
             }
             else
             {
-                LongTextValue = value;
+                ShortTextValue = value;
             }
             return this;
         }
