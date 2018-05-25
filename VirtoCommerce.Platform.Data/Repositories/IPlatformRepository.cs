@@ -1,12 +1,15 @@
-﻿using System.Linq;
+using System.Collections.Generic;
+using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Data.Assets;
 using VirtoCommerce.Platform.Data.Model;
 
 namespace VirtoCommerce.Platform.Data.Repositories
 {
     public interface IPlatformRepository : IRepository
 	{
-		IQueryable<SettingEntity> Settings { get; }
+	    IQueryable<AssetEntryEntity> AssetEntries { get; }
+        IQueryable<SettingEntity> Settings { get; }
 
         IQueryable<DynamicPropertyEntity> DynamicProperties { get; }
         IQueryable<DynamicPropertyDictionaryItemEntity> DynamicPropertyDictionaryItems { get; }
@@ -20,5 +23,7 @@ namespace VirtoCommerce.Platform.Data.Repositories
 
         SettingEntity GetSettingByName(string name);
         SettingEntity[] GetAllObjectSettings(string objectType, string objectId);
-	}
+
+	    AssetEntryEntity[] GetAssetsByIds(IEnumerable<string> ids);
+    }
 }

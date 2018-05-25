@@ -11,9 +11,10 @@ using VirtoCommerce.Platform.Data.Repositories;
 namespace VirtoCommerce.Platform.Data.Migrations
 {
     [DbContext(typeof(PlatformDbContext))]
-    partial class PlatformDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180525101112_AssetsEntity")]
+    partial class AssetsEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

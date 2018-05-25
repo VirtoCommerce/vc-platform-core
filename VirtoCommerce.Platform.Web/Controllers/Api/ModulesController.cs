@@ -168,7 +168,10 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 {
                     if (MultipartRequestHelper.HasFileContentDisposition(contentDisposition))
                     {
-                        targetFilePath = Path.Combine(_hostingEnv.MapPath(_uploadsUrl), contentDisposition.FileName.Value);
+                        //ToDo After update to core 2.1 make beautiful https://github.com/aspnet/HttpAbstractions/issues/446
+                        var fileName = contentDisposition.FileName.Value.TrimStart('\"').TrimEnd('\"');
+
+                        targetFilePath = Path.Combine(_hostingEnv.MapPath(_uploadsUrl), fileName);
                         using (var targetStream = System.IO.File.Create(targetFilePath))
                         {
                             await section.Body.CopyToAsync(targetStream);

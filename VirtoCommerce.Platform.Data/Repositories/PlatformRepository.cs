@@ -1,6 +1,8 @@
-﻿using System.Linq;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Data.Assets;
 using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.Platform.Data.Model;
 
@@ -77,7 +79,13 @@ namespace VirtoCommerce.Platform.Data.Repositories
             return result;
         }
 
-    
+        public IQueryable<AssetEntryEntity> AssetEntries => DbContext.Set<AssetEntryEntity>();
+
+        public AssetEntryEntity[] GetAssetsByIds(IEnumerable<string> ids)
+        {
+            return AssetEntries.Where(x => ids.Contains(x.Id)).ToArray();
+        }
+
 
         #endregion
 

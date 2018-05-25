@@ -1,4 +1,5 @@
-﻿using System.IO;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace VirtoCommerce.Platform.Core.Assets
 {
@@ -33,7 +34,7 @@ namespace VirtoCommerce.Platform.Core.Assets
         /// </summary>
         /// <param name="blobUrl">Realative or absolute blob url (tmp/blob.txt) </param>
         /// <returns></returns>
-        Stream OpenRead(string blobUrl);
+        Task OpenRead(string blobUrl);
 
         /// <summary>
         /// Open blob for writing

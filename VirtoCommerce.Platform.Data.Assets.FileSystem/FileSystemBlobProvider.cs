@@ -1,11 +1,14 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Exceptions;
 
-namespace VirtoCommerce.Platform.Data.Assets
+namespace VirtoCommerce.Platform.Data.Assets.FileSystem
 {
     public class FileSystemBlobProvider : IBlobStorageProvider, IBlobUrlResolver
     {
@@ -70,7 +73,7 @@ namespace VirtoCommerce.Platform.Data.Assets
         /// </summary>
         /// <param name="url"></param>
         /// <returns>blob stream</returns>
-        public virtual Stream OpenRead(string url)
+        public virtual Task<Stream> OpenRead(string url)
         {
             var filePath = GetStoragePathFromUrl(url);
 
@@ -255,7 +258,7 @@ namespace VirtoCommerce.Platform.Data.Assets
                 }
                 retVal += url;
                 retVal = retVal.Replace("/", "\\").Replace("\\\\", "\\");
-            }       
+            }
             return Uri.UnescapeDataString(retVal);
         }
 
