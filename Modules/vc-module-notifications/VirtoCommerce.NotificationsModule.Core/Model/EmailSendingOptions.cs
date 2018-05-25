@@ -1,4 +1,4 @@
-namespace VirtoCommerce.Platform.Core.Notifications
+namespace VirtoCommerce.NotificationsModule.Core.Model
 {
     /// <summary>
     /// Settings of Email Protocol
