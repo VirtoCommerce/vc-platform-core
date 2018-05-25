@@ -24,7 +24,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
         {
             var notificationMessage = new EmailNotificationMessage()
             {
-                From = _emailSendingOptions.Sender,
+                From = _emailSendingOptions.DefaultSender,
                 To = email,
                 Subject = subject,
                 Body = message

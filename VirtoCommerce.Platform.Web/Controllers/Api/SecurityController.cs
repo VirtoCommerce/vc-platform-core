@@ -413,33 +413,13 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             }
             
             //Do not permit rejected users and customers
-            if (user != null && user.Email != null /*&& IsUserEditable(user.UserName) && !(await _userManager.IsInRoleAsync(user, SecurityConstants.Roles.Customer))*/)
+            if (user != null && user.Email != null && IsUserEditable(user.UserName) && !(await _userManager.IsInRoleAsync(user, SecurityConstants.Roles.Customer)))
             {
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var callbackUrl = $"{Request.Scheme}{Request.Host}/api/platform/security/#/resetpassword/{user.Id}/{token}";
 
                 await _emailSender.SendEmailAsync(user.Email, "Reset password",  callbackUrl );
-                //TODO: Generate Domain Event and implement the sending password reset email to user in event handler
-
-                //var notification = _notificationManager.GetNewNotification<ResetPasswordEmailNotification>("Platform", typeof(ResetPasswordEmailNotification).Name, "en");
-                //notification.Url = $"{uri}/#/resetpassword/{user.Id}/{token}";
-                //notification.Recipient = user.Email;
-                //notification.Sender = "noreply@" + Request.RequestUri.Host;
-                //try
-                //{
-                //    var result = _notificationManager.SendNotification(notification);
-                //    retVal.Succeeded = result.IsSuccess;
-                //    if (!retVal.Succeeded)
-                //    {
-                //        retVal.Errors = new string[] { result.ErrorMessage };
-                //    }
-                //}
-                //catch (Exception ex)
-                //{
-                //    //Display errors only when sending notifications fail
-                //    retVal.Errors = new string[] { ex.Message };
-                //    retVal.Succeeded = false;
-                //}
+                
                 return Ok(callbackUrl);
             }
 

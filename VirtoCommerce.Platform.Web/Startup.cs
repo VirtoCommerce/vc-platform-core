@@ -61,8 +61,7 @@ namespace VirtoCommerce.Platform.Web
 
             services.Configure<DemoOptions>(Configuration.GetSection("VirtoCommerce"));
             services.Configure<HangfireOptions>(Configuration.GetSection("VirtoCommerce:Jobs"));
-            services.Configure<EmailSendingOptions>(Configuration.GetSection("EmailSendingOptions"));
-
+            
             PlatformVersion.CurrentVersion = SemanticVersion.Parse(Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default.Application.ApplicationVersion);
 
             services.AddPlatformServices(Configuration);

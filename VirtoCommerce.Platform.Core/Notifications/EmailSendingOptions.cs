@@ -8,7 +8,7 @@ namespace VirtoCommerce.Platform.Core.Notifications
         /// <summary>
         /// Email address of The Sender
         /// </summary>
-        public string Sender { get; set; }
+        public string DefaultSender { get; set; }
 
         /// <summary>
         /// Default smtp sending

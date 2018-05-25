@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
-using VirtoCommerce.NotificationsModule.Core.Types;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Senders;
@@ -45,6 +44,7 @@ namespace VirtoCommerce.NotificationsModule.Web
             serviceCollection.AddSingleton<INotificationMessageSenderProviderFactory, NotificationMessageSenderProviderFactory>();
             serviceCollection.AddTransient<INotificationMessageSender, SmtpEmailNotificationMessageSender>();
             serviceCollection.Replace<IEmailSender, NotificationEmailSender>(ServiceLifetime.Transient);
+            serviceCollection.Configure<EmailSendingOptions>(configuration.GetSection("Notifications:EmailSendingOptions"));
         }
 
         public void PostInitialize(IServiceProvider serviceProvider)
@@ -69,9 +69,6 @@ namespace VirtoCommerce.NotificationsModule.Web
 
             var notificationMessageSenderProviderFactory = serviceProvider.GetService<INotificationMessageSenderProviderFactory>();
             notificationMessageSenderProviderFactory.RegisterSenderForType<EmailNotification, SmtpEmailNotificationMessageSender>();
-
-            var registrar = serviceProvider.GetService<INotificationRegistrar>();
-            registrar.RegisterNotification<ResetPasswordEmailNotification>();
         }
 
         public void Uninstall()
