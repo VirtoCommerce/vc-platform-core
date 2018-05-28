@@ -73,7 +73,7 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
         /// </summary>
         /// <param name="url"></param>
         /// <returns>blob stream</returns>
-        public virtual Task<Stream> OpenRead(string url)
+        public virtual Stream OpenRead(string url)
         {
             var filePath = GetStoragePathFromUrl(url);
 

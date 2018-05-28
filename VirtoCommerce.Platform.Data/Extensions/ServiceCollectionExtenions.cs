@@ -1,5 +1,4 @@
 using System;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,11 +7,10 @@ using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Settings;
-using VirtoCommerce.Platform.Data.Assets;
+using VirtoCommerce.Platform.Data.Assets.FileSystem;
 using VirtoCommerce.Platform.Data.PushNotifications;
 using VirtoCommerce.Platform.Data.Repositories;
 using VirtoCommerce.Platform.Data.Settings;
-using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Data.Extensions
 {

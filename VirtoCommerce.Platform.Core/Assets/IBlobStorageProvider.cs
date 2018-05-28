@@ -34,7 +34,7 @@ namespace VirtoCommerce.Platform.Core.Assets
         /// </summary>
         /// <param name="blobUrl">Realative or absolute blob url (tmp/blob.txt) </param>
         /// <returns></returns>
-        Task OpenRead(string blobUrl);
+        Stream OpenRead(string blobUrl);
 
         /// <summary>
         /// Open blob for writing
