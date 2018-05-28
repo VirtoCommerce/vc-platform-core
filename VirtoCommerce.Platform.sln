@@ -55,6 +55,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Notifications
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Data.Assets.FileSystem", "VirtoCommerce.Platform.Data.Assets.FileSystem\VirtoCommerce.Platform.Data.Assets.FileSystem.csproj", "{1AC7B40D-B86E-4E5F-B40A-8142D1639A62}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.Platform.Data.Assets.AzureBlobStorage", "VirtoCommerce.Platform.Data.Assets.AzureBlobStorage\VirtoCommerce.Platform.Data.Assets.AzureBlobStorage.csproj", "{576C8563-7105-4C2C-B4F2-8A1DB28D31C7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -145,6 +147,10 @@ Global
 		{1AC7B40D-B86E-4E5F-B40A-8142D1639A62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1AC7B40D-B86E-4E5F-B40A-8142D1639A62}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1AC7B40D-B86E-4E5F-B40A-8142D1639A62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{576C8563-7105-4C2C-B4F2-8A1DB28D31C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{576C8563-7105-4C2C-B4F2-8A1DB28D31C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{576C8563-7105-4C2C-B4F2-8A1DB28D31C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{576C8563-7105-4C2C-B4F2-8A1DB28D31C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
