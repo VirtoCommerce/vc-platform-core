@@ -315,7 +315,7 @@ namespace VirtoCommerce.Platform.Web
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller}/{action=Index}/{id?}");
+                    template: "{controller=Home}/{action=Index}/{id?}");
             });
 
             //Force migrations
