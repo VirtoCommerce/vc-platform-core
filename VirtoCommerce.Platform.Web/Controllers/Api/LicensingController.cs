@@ -12,9 +12,11 @@ using Microsoft.AspNetCore.Hosting.Internal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Web.Extensions;
+using VirtoCommerce.Platform.Web.Infrastructure;
 using VirtoCommerce.Platform.Web.Licensing;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api
@@ -26,9 +28,11 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
     public class LicensingController : Controller
     {
         private readonly IHostingEnvironment _hostingEnv;
-        public LicensingController(IHostingEnvironment hostingEnv)
+        private readonly PlatformOptions _platformOptions;
+        public LicensingController(IHostingEnvironment hostingEnv, IOptions<PlatformOptions> platformOptions)
         {
             _hostingEnv = hostingEnv;
+            _platformOptions = platformOptions.Value;
         }
 
         [HttpPost]
@@ -40,7 +44,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
             using (var httpClient = new HttpClient())
             {
-                var activationUrl = new Uri("https://virtocommerce.com/admin/api/licenses/activate/" + activationCode);
+                var activationUrl = new Uri(_platformOptions.ActivationUrl + activationCode);
                 var httpResponse = await httpClient.GetAsync(activationUrl);
                 if (httpResponse.IsSuccessStatusCode)
                 {
@@ -82,9 +86,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             if (license != null)
             {
 
-                //var licenseFilePath = HostingEnvironment.MapPath(Startup.VirtualRoot + "/App_Data/VirtoCommerce.lic");
-                var licenseFilePath = _hostingEnv.MapPath("~/App_Data/VirtoCommerce.lic");
-                //File.WriteAllText(licenseFilePath, license.RawLicense);
+                var licenseFilePath = _hostingEnv.MapPath(_platformOptions.LicenseFilePath);
                 File(licenseFilePath, license.RawLicense);
             }
 
