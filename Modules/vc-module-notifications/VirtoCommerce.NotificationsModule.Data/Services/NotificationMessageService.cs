@@ -40,7 +40,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
         {
             ValidateMessageProperties(messages);
 
-            var changedEntries = new List<ChangedEntry<NotificationMessage>>();
+            var changedEntries = new List<GenericChangedEntry<NotificationMessage>>();
 
             using (var repository = _repositoryFactory())
             using (var changeTracker = new ObservableChangeTracker())
@@ -48,25 +48,25 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                 var existingMessageEntities = await repository.GetMessageByIdAsync(messages.Select(m => m.Id).ToArray());
                 foreach (var message in messages)
                 {
-                    var dataTargetNotification = existingMessageEntities.FirstOrDefault(n => n.Id.Equals(message.Id));
+                    var originalEntity = existingMessageEntities.FirstOrDefault(n => n.Id.Equals(message.Id));
                     var modifiedEntity = AbstractTypeFactory<NotificationMessageEntity>.TryCreateInstance().FromModel(message);
 
-                    if (dataTargetNotification != null)
+                    if (originalEntity != null)
                     {
-                        changeTracker.Attach(dataTargetNotification);
-                        modifiedEntity?.Patch(dataTargetNotification);
-                        changedEntries.Add(new ChangedEntry<NotificationMessage>(message, EntryState.Modified));
+                        changeTracker.Attach(originalEntity);
+                        changedEntries.Add(new GenericChangedEntry<NotificationMessage>(message, originalEntity.ToModel(AbstractTypeFactory<NotificationMessage>.TryCreateInstance()), EntryState.Modified));
+                        modifiedEntity?.Patch(originalEntity);
                     }
                     else
                     {
                         repository.Add(modifiedEntity);
-                        changedEntries.Add(new ChangedEntry<NotificationMessage>(message, EntryState.Added));
+                        changedEntries.Add(new GenericChangedEntry<NotificationMessage>(message, EntryState.Added));
                     }
                 }
 
-                await _eventPublisher.Publish(new GenericNotificationMessageChangingEvent<NotificationMessage>(changedEntries));
+                await _eventPublisher.Publish(new NotificationMessageChangingEvent(changedEntries));
                 CommitChanges(repository);
-                await _eventPublisher.Publish(new GenericNotificationMessageChangedEvent<NotificationMessage>(changedEntries));
+                await _eventPublisher.Publish(new NotificationMessageChangedEvent(changedEntries));
             }
         }
 
