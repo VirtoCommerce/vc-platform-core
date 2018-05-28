@@ -9,7 +9,6 @@ namespace VirtoCommerce.Platform.Web.Licensing
     public sealed class License
     {
         private static readonly string _hashAlgorithmName = HashAlgorithmName.SHA256.Name;
-        private static readonly AsymmetricSignatureDeformatter _signatureDeformatter = CreateSignatureDeformatter(_hashAlgorithmName);
 
         public string Type { get; set; }
         public string CustomerName { get; set; }
@@ -55,10 +54,29 @@ namespace VirtoCommerce.Platform.Web.Licensing
                 dataHash = algorithm.ComputeHash(dataBytes);
             }
 
+            var signatureBytes = Convert.FromBase64String(signature);
+
             try
             {
-                var signatureBytes = Convert.FromBase64String(signature);
-                result = _signatureDeformatter.VerifySignature(dataHash, signatureBytes);
+                var rsaParam = new RSAParameters()
+                {
+                    Modulus = Convert.FromBase64String("uYgtG8GG6fZ4jZdaL6LF4f2vmmTHNr0H/m+Bfo4vNhOYDlUTOv89FVQ3xE0DPhZ2uQ6Q/AN9KausQz2VbdfUn0Ge/jcHNsdE+9SBdllzgvCr/2sUlCKcpiEIBC9AXnAd7lKFSHiS61cVLo24+8aowoeGsAAO3djqN2xP+4Co9CMywKscLSPUMOJWHMuXAr3+pjamYaqwe3/iv5VA/8ff0evVyqhE/8fIixm9Ti7OhPNwYRDmTKP+t4DRZlp4R46g4v43tg4Q9FYaGKRCuxAdbbEsTYhFzHzv/CcUoFzYF0x3lyW5mfqad5y+LhsWPiHGDrd+xWXq9Nho1glNZ0sGYQ=="),
+                    Exponent = Convert.FromBase64String("AQAB")
+                };
+
+                using (var rsa = new RSACryptoServiceProvider())
+                {
+                    // Import public key
+                    rsa.ImportParameters(rsaParam);
+
+                    // Create signature verifier with the rsa key
+                    var signatureDeformatter = new RSAPKCS1SignatureDeformatter(rsa);
+
+                    // Set the hash algorithm to SHA256.
+                    signatureDeformatter.SetHashAlgorithm(_hashAlgorithmName);
+
+                    result = signatureDeformatter.VerifySignature(dataHash, signatureBytes);
+                }
             }
             catch (FormatException)
             {
@@ -68,17 +86,6 @@ namespace VirtoCommerce.Platform.Web.Licensing
             return result;
         }
 
-        private static RSAPKCS1SignatureDeformatter CreateSignatureDeformatter(string hashAlgorithmName)
-        {
-            var rsa = new RSACryptoServiceProvider();
-
-            // Import public key
-            rsa.FromXml("<RSAKeyValue><Modulus>uYgtG8GG6fZ4jZdaL6LF4f2vmmTHNr0H/m+Bfo4vNhOYDlUTOv89FVQ3xE0DPhZ2uQ6Q/AN9KausQz2VbdfUn0Ge/jcHNsdE+9SBdllzgvCr/2sUlCKcpiEIBC9AXnAd7lKFSHiS61cVLo24+8aowoeGsAAO3djqN2xP+4Co9CMywKscLSPUMOJWHMuXAr3+pjamYaqwe3/iv5VA/8ff0evVyqhE/8fIixm9Ti7OhPNwYRDmTKP+t4DRZlp4R46g4v43tg4Q9FYaGKRCuxAdbbEsTYhFzHzv/CcUoFzYF0x3lyW5mfqad5y+LhsWPiHGDrd+xWXq9Nho1glNZ0sGYQ==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>");
-            
-            var signatureDeformatter = new RSAPKCS1SignatureDeformatter(rsa);
-            signatureDeformatter.SetHashAlgorithm(hashAlgorithmName);
-
-            return signatureDeformatter;
-        }
+        
     }
 }
