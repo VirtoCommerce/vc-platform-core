@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -55,7 +55,6 @@ namespace VirtoCommerce.Platform.Core.Settings
             yield return Name;
             yield return ObjectId;
             yield return ObjectType;
-            yield return ValueType;
         }
     }
 }

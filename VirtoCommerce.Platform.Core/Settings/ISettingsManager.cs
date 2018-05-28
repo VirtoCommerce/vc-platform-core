@@ -1,4 +1,3 @@
-﻿using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 
 namespace VirtoCommerce.Platform.Core.Settings
@@ -10,20 +9,20 @@ namespace VirtoCommerce.Platform.Core.Settings
         /// Deep load and populate settings values for entity and all nested objects 
         /// </summary>
         /// <param name="entity"></param>
-		void LoadEntitySettingsValues(Entity entity);
+		void LoadEntitySettingsValues(IHaveSettings entity);
         /// <summary>
         /// Deep save entity and all nested objects settings values
         /// </summary>
         /// <param name="entity"></param>
-        void SaveEntitySettingsValues(Entity entity);
+        void SaveEntitySettingsValues(IHaveSettings entity);
         /// <summary>
         /// Deep remove entity and all nested objects settings values
         /// </summary>
         /// <param name="entity"></param>
-		void RemoveEntitySettings(Entity entity);
-		SettingEntry GetSettingByName(string name);
-		SettingEntry[] GetModuleSettings(string moduleId);
-		void SaveSettings(SettingEntry[] settings);
+		void RemoveEntitySettings(IHaveSettings entity);
+        SettingEntry GetSettingByName(string name);
+        SettingEntry[] GetModuleSettings(string moduleId);
+        void SaveSettings(SettingEntry[] settings);
         /// <summary>
         /// Used to runtime settings registration
         /// </summary>

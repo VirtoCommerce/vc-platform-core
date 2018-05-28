@@ -6,7 +6,7 @@ namespace VirtoCommerce.Platform.Web.Model.Profiles
 {
     public class UserProfile : Entity, IHaveSettings
     {
-       
-        public ICollection<SettingEntry> Settings { get; set; }
+        public virtual ICollection<SettingEntry> Settings { get; set; }
+        public virtual string TypeName => GetType().Name;
     }
 }
