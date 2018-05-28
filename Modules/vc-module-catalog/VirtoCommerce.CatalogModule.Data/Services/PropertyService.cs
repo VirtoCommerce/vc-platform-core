@@ -50,7 +50,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         public void SaveChanges(IEnumerable<Property> properties)
         {
             var pkMap = new PrimaryKeyResolvingMap();
-            var changedEntries = new List<ChangedEntry<Property>>();
+            var changedEntries = new List<GenericChangedEntry<Property>>();
 
             ValidateProperties(properties);
 
@@ -68,6 +68,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     if (originalEntity != null)
                     {
                         changeTracker.Attach(originalEntity);
+                        changedEntries.Add(new GenericChangedEntry<Property>(property, originalEntity.ToModel(AbstractTypeFactory<Property>.TryCreateInstance()), EntryState.Modified));
                         modifiedEntity.Patch(originalEntity);
                         //Force set ModifiedDate property to mark a product changed. Special for  partial update cases when product table not have changes
                         originalEntity.ModifiedDate = DateTime.UtcNow;
@@ -75,15 +76,16 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     else
                     {
                         repository.Add(modifiedEntity);
+                        changedEntries.Add(new GenericChangedEntry<Property>(property, EntryState.Added));
                     }
                 }
 
                 //Raise domain events
-                _eventPublisher.Publish(new GenericCatalogChangingEvent<Property>(changedEntries));
+                _eventPublisher.Publish(new PropertyChangingEvent(changedEntries));
                 //Save changes in database
                 repository.UnitOfWork.Commit();
                 pkMap.ResolvePrimaryKeys();
-                _eventPublisher.Publish(new GenericCatalogChangedEvent<Property>(changedEntries));
+                _eventPublisher.Publish(new PropertyChangedEvent(changedEntries));
 
                 //Reset catalog cache
                 CatalogCacheRegion.ExpireRegion();
@@ -95,6 +97,11 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             using (var repository = _repositoryFactory())
             {
                 var entities = repository.GetPropertiesByIds(ids.ToArray());
+                //Raise domain events before deletion
+                var changedEntries = entities.Select(x => new GenericChangedEntry<Property>(x.ToModel(AbstractTypeFactory<Property>.TryCreateInstance()), EntryState.Deleted));
+
+                _eventPublisher.Publish(new PropertyChangingEvent(changedEntries));
+
                 foreach (var entity in entities)
                 {
                     repository.Remove(entity);
@@ -104,13 +111,14 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     }
                 }
                 repository.UnitOfWork.Commit();
+                _eventPublisher.Publish(new PropertyChangedEvent(changedEntries));
                 //Reset catalog cache
                 CatalogCacheRegion.ExpireRegion();
             }
         }
         #endregion
 
-    
+
         protected virtual void LoadDependencies(Property[] properties)
         {
             foreach (var property in properties)
@@ -146,7 +154,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
         }
 
-      
+
         protected virtual IDictionary<string, Property> PreloadAllProperties()
         {
             var cacheKey = CacheKey.With(GetType(), "PreloadAllProperties");
@@ -180,7 +188,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             foreach (var property in properties)
             {
                 validator.ValidateAndThrow(property);
-            }       
+            }
         }
 
     }

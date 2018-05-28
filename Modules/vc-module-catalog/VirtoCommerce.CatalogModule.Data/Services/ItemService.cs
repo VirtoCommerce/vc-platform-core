@@ -44,7 +44,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         }
 
         #region IItemService Members
-      
+
         public virtual IEnumerable<CatalogProduct> GetByIds(IEnumerable<string> itemIds, string respGroup = null, string catalogId = null)
         {
             CatalogProduct[] result;
@@ -96,12 +96,19 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
         public virtual void Delete(IEnumerable<string> itemIds)
         {
-            //var items = GetByIds(itemIds, ItemResponseGroup.Seo | ItemResponseGroup.Variations);
+            var products = GetByIds(itemIds, ItemResponseGroup.ItemInfo.ToString());
+            //Raise domain events before deletion
+            var changedEntries = products.Select(x => new GenericChangedEntry<CatalogProduct>(x, EntryState.Deleted));
+
+            _eventPublisher.Publish(new ProductChangingEvent(changedEntries));
+
             using (var repository = _repositoryFactory())
             {
                 repository.RemoveItems(itemIds.ToArray());
                 CommitChanges(repository);
             }
+
+            _eventPublisher.Publish(new ProductChangedEvent(changedEntries));
         }
 
         #endregion
@@ -110,7 +117,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         protected virtual void InnerSaveChanges(IEnumerable<CatalogProduct> products, bool disableValidation = false)
         {
             var pkMap = new PrimaryKeyResolvingMap();
-            var changedEntries = new List<ChangedEntry<CatalogProduct>>();
+            var changedEntries = new List<GenericChangedEntry<CatalogProduct>>();
 
             ValidateProducts(products);
 
@@ -126,6 +133,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     if (originalEntity != null)
                     {
                         changeTracker.Attach(originalEntity);
+                        changedEntries.Add(new GenericChangedEntry<CatalogProduct>(product, originalEntity.ToModel(AbstractTypeFactory<CatalogProduct>.TryCreateInstance()), EntryState.Modified));
                         modifiedEntity.Patch(originalEntity);
                         //Force set ModifiedDate property to mark a product changed. Special for  partial update cases when product table not have changes
                         originalEntity.ModifiedDate = DateTime.UtcNow;
@@ -133,15 +141,16 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     else
                     {
                         repository.Add(modifiedEntity);
+                        changedEntries.Add(new GenericChangedEntry<CatalogProduct>(product, EntryState.Added));
                     }
                 }
 
                 //Raise domain events
-                _eventPublisher.Publish(new GenericCatalogChangingEvent<CatalogProduct>(changedEntries));
+                _eventPublisher.Publish(new ProductChangingEvent(changedEntries));
                 //Save changes in database
                 repository.UnitOfWork.Commit();
                 pkMap.ResolvePrimaryKeys();
-                _eventPublisher.Publish(new GenericCatalogChangedEvent<CatalogProduct>(changedEntries));
+                _eventPublisher.Publish(new ProductChangedEvent(changedEntries));
             }
 
             //Update SEO 
@@ -204,11 +213,11 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         {
             foreach (var product in products)
             {
-                product.TryInheritFrom(product.Category ?? (IEntity)product.Catalog);              
+                product.TryInheritFrom(product.Category ?? (IEntity)product.Catalog);
                 if (product.MainProduct != null)
-                {  
-                    product.TryInheritFrom(product.MainProduct);                 
-                } 
+                {
+                    product.TryInheritFrom(product.MainProduct);
+                }
             }
         }
 
