@@ -16,8 +16,4 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Content\css\" />
-  </ItemGroup>
-
 </Project>

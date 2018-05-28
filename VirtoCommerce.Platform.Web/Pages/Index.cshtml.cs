@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
@@ -12,11 +12,11 @@ namespace VirtoCommerce.Platform.Web.Pages
 {
     public class IndexModel : PageModel
     {
-        private readonly DemoOptions _demoOptions;
+        private readonly PlatformOptions _platformOptions;
         private readonly IHostingEnvironment _hostEnv;
-        public IndexModel(IOptions<DemoOptions> demoOptions, IOptions<WebAnalyticsOptions> webAnalyticsOptions, IHostingEnvironment hostEnv)
+        public IndexModel(IOptions<PlatformOptions> demoOptions, IOptions<WebAnalyticsOptions> webAnalyticsOptions, IHostingEnvironment hostEnv)
         {
-            _demoOptions = demoOptions.Value;
+            _platformOptions = demoOptions.Value;
             WebAnalyticsOptions = webAnalyticsOptions.Value;
             _hostEnv = hostEnv;
         
@@ -32,8 +32,8 @@ namespace VirtoCommerce.Platform.Web.Pages
         public void OnGet()
         {
             PlatformVersion = Core.Common.PlatformVersion.CurrentVersion.ToString();
-            DemoCredentials = _demoOptions.DemoCredentials;
-            DemoResetTime = _demoOptions.DemoResetTime;
+            DemoCredentials = _platformOptions.DemoCredentials;
+            DemoResetTime = _platformOptions.DemoResetTime;
 
             var license = LoadLicense();
             if (license != null)
