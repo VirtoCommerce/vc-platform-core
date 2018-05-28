@@ -4,5 +4,7 @@ namespace VirtoCommerce.Platform.Web.Infrastructure
     {
         public string DemoCredentials { get; set; }
         public string DemoResetTime { get; set; }
+        public string ActivationUrl { get; set; }
+        public string LicenseFilePath { get; set; }
     }
 }
