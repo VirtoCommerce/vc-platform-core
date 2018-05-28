@@ -32,7 +32,7 @@ namespace VirtoCommerce.NotificationsModule.SendGrid
                     throw new ArgumentNullException(nameof(emailNotificationMessage));
                 }
 
-                var client = new SendGridClient(_emailSendingOptions.SendGridOptions.ApiKey);
+                var client = new SendGridClient(_emailSendingOptions.ApiKey);
                 var mailMsg = new SendGridMessage
                 {
                     From = new EmailAddress(emailNotificationMessage.From),

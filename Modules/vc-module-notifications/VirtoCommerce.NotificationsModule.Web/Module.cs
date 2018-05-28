@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -12,15 +11,11 @@ using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Senders;
 using VirtoCommerce.NotificationsModule.Data.Services;
 using VirtoCommerce.NotificationsModule.LiquidRenderer;
-using VirtoCommerce.NotificationsModule.SendGrid;
 using VirtoCommerce.NotificationsModule.Smtp;
 using VirtoCommerce.NotificationsModule.Web.Infrastructure;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Extensions;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Notifications;
-using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.Platform.Data.Repositories;
 
 namespace VirtoCommerce.NotificationsModule.Web
 {
@@ -43,8 +38,10 @@ namespace VirtoCommerce.NotificationsModule.Web
             serviceCollection.AddTransient<INotificationTemplateRender, LiquidTemplateRenderer>();
             serviceCollection.AddSingleton<INotificationMessageSenderProviderFactory, NotificationMessageSenderProviderFactory>();
             serviceCollection.AddTransient<INotificationMessageSender, SmtpEmailNotificationMessageSender>();
-            serviceCollection.Replace<IEmailSender, NotificationEmailSender>(ServiceLifetime.Transient);
-            serviceCollection.Configure<EmailSendingOptions>(configuration.GetSection("Notifications:EmailSendingOptions"));
+            serviceCollection.AddTransient<IEmailSender, EmailNotificationMessageSender>();
+
+            var notificationGateway = configuration.GetSection("Notifications:Gateway").Value;
+            serviceCollection.Configure<EmailSendingOptions>(configuration.GetSection($"Notifications:{notificationGateway}:EmailSendingOptions"));
         }
 
         public void PostInitialize(IServiceProvider serviceProvider)

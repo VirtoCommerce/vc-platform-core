@@ -41,13 +41,10 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
         {
             _emailSendingOptions = new EmailSendingOptions()
             {
-                SmtpOptions = new SmtpOptions()
-                {
                     SmtpServer = "smtp.gmail.com",
                     Port = 587,
                     Login = "tasker.for.test@gmail.com",
                     Password = "FLGxiJQc"
-                }
             };
             _templateRender = new LiquidTemplateRenderer();
             _messageServiceMock = new Mock<INotificationMessageService>();
@@ -110,7 +107,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             _messageSender = new SmtpEmailNotificationMessageSender(_emailSendingOptionsMock.Object);
             _notificationMessageSenderProviderFactory = new NotificationMessageSenderProviderFactory(new List<INotificationMessageSender>() { _messageSender });
             _notificationMessageSenderProviderFactory.RegisterSenderForType<EmailNotification, SmtpEmailNotificationMessageSender>();
-            _notificationSender = new NotificationSender(_serviceMock.Object, _templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object, _notificationMessageSenderProviderFactory);
+            _notificationSender = new NotificationSender(_templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object, _notificationMessageSenderProviderFactory);
 
             //Act
             var result = await _notificationSender.SendNotificationAsync(notification, null);
@@ -144,10 +141,10 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
 
             _serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(OrderSentEmailNotification), null, null, null)).ReturnsAsync(notification);
 
-            _emailSendingOptions.SmtpOptions.Password = "wrong_password";
+            _emailSendingOptions.Password = "wrong_password";
             _emailSendingOptionsMock.Setup(opt => opt.Value).Returns(_emailSendingOptions);
             _messageSender = new SmtpEmailNotificationMessageSender(_emailSendingOptionsMock.Object);
-            _notificationSender = new NotificationSender(_serviceMock.Object, _templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object,
+            _notificationSender = new NotificationSender(_templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object,
                 _notificationMessageSenderProviderFactory);
 
             //Act

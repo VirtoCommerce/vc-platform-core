@@ -48,7 +48,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _smtpEmailNotificationMessageSenderMock = new Mock<SmtpEmailNotificationMessageSender>(_emailSendingOptionsMock.Object);
             _senderFactoryMock.Setup(s => s.GetSenderForNotificationType(nameof(EmailNotification))).Returns(_messageSenderMock.Object);
 
-            _sender = new NotificationSender(_serviceMock.Object, _templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object, _senderFactoryMock.Object);
+            _sender = new NotificationSender(_templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object, _senderFactoryMock.Object);
 
             //todo
             if (!AbstractTypeFactory<Notification>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotification))))
@@ -401,7 +401,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
             _messageSenderMock.Setup(ms => ms.SendNotificationAsync(It.IsAny<NotificationMessage>())).Throws(new SmtpException());
             
-            var sender = new NotificationSender(_serviceMock.Object, _templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object, _senderFactory);
+            var sender = new NotificationSender(_templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object, _senderFactory);
 
             //Act
             var result = await sender.SendNotificationAsync(notification, language);
