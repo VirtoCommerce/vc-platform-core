@@ -43,7 +43,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             var changedEntries = new List<GenericChangedEntry<NotificationMessage>>();
 
             using (var repository = _repositoryFactory())
-            using (var changeTracker = new ObservableChangeTracker())
             {
                 var existingMessageEntities = await repository.GetMessageByIdAsync(messages.Select(m => m.Id).ToArray());
                 foreach (var message in messages)
@@ -53,7 +52,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
                     if (originalEntity != null)
                     {
-                        changeTracker.Attach(originalEntity);
                         changedEntries.Add(new GenericChangedEntry<NotificationMessage>(message, originalEntity.ToModel(AbstractTypeFactory<NotificationMessage>.TryCreateInstance()), EntryState.Modified));
                         modifiedEntity?.Patch(originalEntity);
                     }

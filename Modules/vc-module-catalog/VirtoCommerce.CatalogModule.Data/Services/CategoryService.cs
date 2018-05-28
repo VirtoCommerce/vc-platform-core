@@ -76,7 +76,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             ValidateCategoryProperties(categories);
 
             using (var repository = _repositoryFactory())
-            using (var changeTracker = GetChangeTracker(repository))
             {
                 var dbExistCategories = repository.GetCategoriesByIds(categories.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var category in categories)
@@ -85,7 +84,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     var modifiedEntity = AbstractTypeFactory<CategoryEntity>.TryCreateInstance().FromModel(category, pkMap);
                     if (originalEntity != null)
                     {
-                        changeTracker.Attach(originalEntity);
                         changedEntries.Add(new GenericChangedEntry<Category>(category, originalEntity.ToModel(AbstractTypeFactory<Category>.TryCreateInstance()), EntryState.Modified));
                         modifiedEntity.Patch(originalEntity);
                         //Force set ModifiedDate property to mark a product changed. Special for  partial update cases when product table not have changes

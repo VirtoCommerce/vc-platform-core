@@ -66,7 +66,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                 var pkMap = new PrimaryKeyResolvingMap();
                 var changedEntries = new List<GenericChangedEntry<Notification>>();
                 using (var repository = _repositoryFactory())
-                using (var changeTracker = new ObservableChangeTracker())
                 {
                     var existingNotificationEntities = await repository.GetByIdsAsync(notifications.Select(m => m.Id).ToArray(), NotificationResponseGroup.Full.ToString());
                     foreach (var notification in notifications)
@@ -76,7 +75,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
                         if (originalEntity != null)
                         {
-                            changeTracker.Attach(originalEntity);
                             changedEntries.Add(new GenericChangedEntry<Notification>(notification, originalEntity.ToModel(AbstractTypeFactory<Notification>.TryCreateInstance()), EntryState.Modified));
                             modifiedEntity?.Patch(originalEntity);
                         }

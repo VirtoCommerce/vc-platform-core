@@ -50,7 +50,7 @@ namespace VirtoCommerce.Platform.Data.Settings
 
             var cacheKey = CacheKey.With(GetType(), "GetSettingByName", name);
             var result = _memoryCache.GetOrCreateExclusive(cacheKey, (cacheEntry) =>
-            {            
+            {
                 SettingEntry setting = null;
                 //Get setting definition from module manifest first
                 var moduleSetting = GetModuleSettingByName(name);
@@ -67,46 +67,49 @@ namespace VirtoCommerce.Platform.Data.Settings
                         setting = settingEntity.ToModel(setting ?? AbstractTypeFactory<SettingEntry>.TryCreateInstance());
                     }
                 }
-                //Add cache  expiration token for setting
-                if (setting != null)
+                //Create new setting for unregistered setting name
+                if (setting == null)
                 {
-                    cacheEntry.AddExpirationToken(SettingsCacheRegion.CreateChangeToken(setting));
+                    setting = AbstractTypeFactory<SettingEntry>.TryCreateInstance();
+                    setting.Name = name;
                 }
+                //Add cache  expiration token for setting
+                cacheEntry.AddExpirationToken(SettingsCacheRegion.CreateChangeToken(setting));
 
                 return setting;
             });
             return result;
         }
 
-        public void LoadEntitySettingsValues(Entity entity)
+        public void LoadEntitySettingsValues(IHaveSettings entity)
         {
             if (entity == null)
-               throw new ArgumentNullException(nameof(entity));
+                throw new ArgumentNullException(nameof(entity));
 
-            if (entity.IsTransient())
+            if (string.IsNullOrEmpty(entity.Id))
                 throw new ArgumentException("entity must have Id");
-
-            var entityType = entity.GetType().Name;
-            var cacheKey = CacheKey.With(GetType(), "LoadEntitySettingsValues", entityType, entity.Id);
-            var storedSettings =  _memoryCache.GetOrCreateExclusive(cacheKey, (cacheEntry) =>
-            {
-                var settingEntries = new List<SettingEntry>();
-                using (var repository = _repositoryFactory())
-                {
-                    foreach(var settingEntry in repository.GetAllObjectSettings(entityType, entity.Id).Select(x => x.ToModel(AbstractTypeFactory<SettingEntry>.TryCreateInstance())))
-                     { 
-                        //Add cache  expiration token for setting
-                        cacheEntry.AddExpirationToken(SettingsCacheRegion.CreateChangeToken(settingEntry));
-                        settingEntries.Add(settingEntry);
-                    }
-                    return settingEntries;
-                }
-            });
 
             //Deep load settings values for all object contains settings
             var haveSettingsObjects = entity.GetFlatObjectsListWithInterface<IHaveSettings>();
+
             foreach (var haveSettingsObject in haveSettingsObjects)
             {
+                var cacheKey = CacheKey.With(GetType(), "LoadEntitySettingsValues", entity.TypeName, entity.Id);
+                var storedSettings = _memoryCache.GetOrCreateExclusive(cacheKey, (cacheEntry) =>
+               {
+                   var settingEntries = new List<SettingEntry>();
+                   using (var repository = _repositoryFactory())
+                   {
+                       foreach (var settingEntry in repository.GetAllObjectSettings(entity.TypeName, entity.Id).Select(x => x.ToModel(AbstractTypeFactory<SettingEntry>.TryCreateInstance())))
+                       {
+                           //Add cache  expiration token for setting
+                           cacheEntry.AddExpirationToken(SettingsCacheRegion.CreateChangeToken(settingEntry));
+                           settingEntries.Add(settingEntry);
+                       }
+                       return settingEntries;
+                   }
+               });
+
                 // Replace settings values with stored in database
                 if (haveSettingsObject.Settings != null)
                 {
@@ -115,7 +118,7 @@ namespace VirtoCommerce.Platform.Data.Settings
 
                     foreach (var setting in haveSettingsObject.Settings)
                     {
-                        var storedSetting = storedSettings.FirstOrDefault(x => x.Name.EqualsInvariant(setting.Name));
+                        var storedSetting = storedSettings.Find(x => x == setting);
                         //First try to used stored object setting values
                         if (storedSetting != null)
                         {
@@ -142,15 +145,13 @@ namespace VirtoCommerce.Platform.Data.Settings
             }
         }
 
-        public void SaveEntitySettingsValues(Entity entity)
+        public void SaveEntitySettingsValues(IHaveSettings entity)
         {
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
 
-            if (entity.IsTransient())
+            if (string.IsNullOrEmpty(entity.Id))
                 throw new ArgumentException("entity must have Id");
-
-            var objectType = entity.GetType().Name;
 
             var haveSettingsObjects = entity.GetFlatObjectsListWithInterface<IHaveSettings>();
 
@@ -163,8 +164,8 @@ namespace VirtoCommerce.Platform.Data.Settings
                     //Save settings
                     foreach (var setting in haveSettingsObject.Settings)
                     {
-                        setting.ObjectId = entity.Id;
-                        setting.ObjectType = objectType;
+                        setting.ObjectId = haveSettingsObject.Id;
+                        setting.ObjectType = haveSettingsObject.TypeName;
                         settings.Add(setting);
                     }
                 }
@@ -172,18 +173,17 @@ namespace VirtoCommerce.Platform.Data.Settings
             }
         }
 
-        public void RemoveEntitySettings(Entity entity)
+        public void RemoveEntitySettings(IHaveSettings entity)
         {
             if (entity == null)
                 throw new ArgumentNullException("entity");
 
-            if (entity.IsTransient())
+            if (string.IsNullOrEmpty(entity.Id))
                 throw new ArgumentException("entity must have Id");
 
-            var objectType = entity.GetType().Name;
             using (var repository = _repositoryFactory())
             {
-                var settings = repository.GetAllObjectSettings(objectType, entity.Id).ToArray();
+                var settings = repository.GetAllObjectSettings(entity.TypeName, entity.Id).ToArray();
                 foreach (var setting in settings)
                 {
                     repository.Remove(setting);
@@ -218,8 +218,7 @@ namespace VirtoCommerce.Platform.Data.Settings
                 //Try add runtime defined settings for requested module
                 if (!string.IsNullOrEmpty(moduleId))
                 {
-                    List<SettingEntry> runtimeSettings;
-                    if (_runtimeModuleSettingsMap.TryGetValue(moduleId, out runtimeSettings))
+                    if (_runtimeModuleSettingsMap.TryGetValue(moduleId, out var runtimeSettings))
                     {
                         result.AddRange(runtimeSettings);
                     }
@@ -236,12 +235,12 @@ namespace VirtoCommerce.Platform.Data.Settings
         public void RegisterModuleSettings(string moduleId, params SettingEntry[] settings)
         {
             //check module exist
-            if(!GetModules().Any(x=>x.Id == moduleId))
+            if (!GetModules().Any(x => x.Id == moduleId))
             {
                 throw new ArgumentException(moduleId + " not exist");
             }
             List<SettingEntry> moduleSettings;
-            if(!_runtimeModuleSettingsMap.TryGetValue(moduleId, out moduleSettings))
+            if (!_runtimeModuleSettingsMap.TryGetValue(moduleId, out moduleSettings))
             {
                 moduleSettings = new List<SettingEntry>();
                 _runtimeModuleSettingsMap[moduleId] = moduleSettings;
@@ -258,25 +257,23 @@ namespace VirtoCommerce.Platform.Data.Settings
         {
             if (settings != null && settings.Any())
             {
-                var settingKeys = settings.Select(x => string.Join("-", x.Name, x.ObjectType, x.ObjectId)).Distinct().ToArray();
-
                 using (var repository = _repositoryFactory())
-                using (var changeTracker = new ObservableChangeTracker())
                 {
+                    var settingNames = settings.Select(x => x.Name).Distinct().ToArray();
                     var alreadyExistSettings = repository.Settings
                         .Include(s => s.SettingValues)
-                        .Where(x => settingKeys.Contains(x.Name + "-" + x.ObjectType + "-" + x.ObjectId))
+                        //We need to find settings DB records matched for given settings by several properties and not only the Id
+                        //to do that we use filtration only by name (due to performance reasons)
+                        .Where(x => settingNames.Contains(x.Name))
+                        .ToList()
+                        //then we need convert resulting DB entities to model for compare with given settings 
+                        .Where(x => settings.Contains(x.ToModel(AbstractTypeFactory<SettingEntry>.TryCreateInstance())))
                         .ToList();
 
-                    changeTracker.AddAction = x => repository.Add(x);
-                    //Need for real remove object from nested collection (because EF default remove references only)
-                    changeTracker.RemoveAction = x => repository.Remove(x);
-
                     var target = new { Settings = new ObservableCollection<SettingEntity>(alreadyExistSettings) };
-                    var source = new { Settings = new ObservableCollection<SettingEntity>(settings.Select(x => AbstractTypeFactory<SettingEntity>.TryCreateInstance().FromModel(x) )) };
+                    var source = new { Settings = new ObservableCollection<SettingEntity>(settings.Select(x => AbstractTypeFactory<SettingEntity>.TryCreateInstance().FromModel(x))) };
 
-                    changeTracker.Attach(target);
-                    var settingComparer = AnonymousComparer.Create((SettingEntity x) => String.Join("-", x.Name, x.ObjectType, x.ObjectId));
+                    var settingComparer = AnonymousComparer.Create((SettingEntity x) => string.Join("-", x.Name, x.ObjectType, x.ObjectId));
                     source.Settings.Patch(target.Settings, settingComparer, (sourceSetting, targetSetting) => sourceSetting.Patch(targetSetting));
 
                     repository.UnitOfWork.Commit();
@@ -306,7 +303,7 @@ namespace VirtoCommerce.Platform.Data.Settings
                 {
                     result = new[] { (T)setting.RawDefaultValue };
                 }
-            }          
+            }
 
             return result;
         }
@@ -355,7 +352,7 @@ namespace VirtoCommerce.Platform.Data.Settings
         private void ClearCache(SettingEntry[] settings)
         {
             //Clear setting from cache
-            foreach(var setting in settings)
+            foreach (var setting in settings)
             {
                 SettingsCacheRegion.ExpireSetting(setting);
             }
@@ -376,6 +373,6 @@ namespace VirtoCommerce.Platform.Data.Settings
         {
             return GetModulesWithSettings().SelectMany(m => m.Settings)
                 .Where(g => g.Settings != null).SelectMany(g => g.Settings);
-        }          
+        }
     }
 }

@@ -55,7 +55,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             var changedEntries = new List<GenericChangedEntry<Catalog>>();
 
             using (var repository = _repositoryFactory())
-            using (var changeTracker = new ObservableChangeTracker())
             {
                 ValidateCatalogProperties(catalogs);
                 var dbExistEntities = repository.GetCatalogsByIds(catalogs.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
@@ -65,7 +64,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     var modifiedEntity = AbstractTypeFactory<CatalogEntity>.TryCreateInstance().FromModel(catalog, pkMap);
                     if (originalEntity != null)
                     {
-                        changeTracker.Attach(originalEntity);
                         changedEntries.Add(new GenericChangedEntry<Catalog>(catalog, originalEntity.ToModel(AbstractTypeFactory<Catalog>.TryCreateInstance()), EntryState.Modified));
                         modifiedEntity.Patch(originalEntity);
                     }
