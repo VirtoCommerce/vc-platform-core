@@ -40,10 +40,11 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         private static readonly FormOptions _defaultFormOptions = new FormOptions();
         private readonly ExternalModuleCatalogOptions _extModuleOptions;
         private static readonly object _lockObject = new object();
+        private IApplicationLifetime ApplicationLifetime { get; set; }
 
         public ModulesController(IExternalModuleCatalog moduleCatalog, IModuleInstaller moduleInstaller, IPushNotificationManager pushNotifier,
             IUserNameResolver userNameResolver, IHostingEnvironment hostingEnv, Core.Settings.ISettingsManager settingsManager,
-            IOptions<ExternalModuleCatalogOptions> extModuleOptions)
+            IOptions<ExternalModuleCatalogOptions> extModuleOptions, IApplicationLifetime appLifetime)
         {
             _moduleCatalog = moduleCatalog;
             _moduleInstaller = moduleInstaller;
@@ -52,6 +53,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             _settingsManager = settingsManager;
             _hostingEnv = hostingEnv;
             _extModuleOptions = extModuleOptions.Value;
+            ApplicationLifetime = appLifetime;
         }
 
         /// <summary>
@@ -258,8 +260,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Authorize(SecurityConstants.Permissions.ModuleManage)]
         public ActionResult Restart()
         {
-            //TODO:
-            throw new NotImplementedException();
+            ApplicationLifetime.StopApplication();
+            return Ok();
         }
 
         /// <summary>
