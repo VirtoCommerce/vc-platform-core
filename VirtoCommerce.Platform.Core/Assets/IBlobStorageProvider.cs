@@ -1,4 +1,5 @@
 using System.IO;
+using System.Threading.Tasks;
 
 namespace VirtoCommerce.Platform.Core.Assets
 {
@@ -13,7 +14,7 @@ namespace VirtoCommerce.Platform.Core.Assets
         /// <param name="folderUrl"></param>
         /// <param name="keyword"></param>
         /// <returns></returns>
-        BlobSearchResult Search(string folderUrl, string keyword);
+        Task<BlobSearchResult> Search(string folderUrl, string keyword);
 
         /// <summary>
         /// Get blog info by url

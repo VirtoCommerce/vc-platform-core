@@ -199,14 +199,14 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// </summary>
         /// <param name="folderUrl"></param>
         /// <param name="keyword"></param>
-        /// <returns></returns>
+        /// <returns></returns> 
         [HttpGet]
         [ProducesResponseType(typeof(webModel.AssetListItem[]), 200)]
         [Route("")]
         [Authorize(SecurityConstants.Permissions.AssetRead)]
-        public IActionResult SearchAssetItems(string folderUrl = null, string keyword = null)
+        public async Task<IActionResult> SearchAssetItems(string folderUrl = null, string keyword = null)
         {
-            var result = _blobProvider.Search(folderUrl, keyword);
+            var result = await _blobProvider.Search(folderUrl, keyword);
             return Ok(result.ToWebModel());
         }
 

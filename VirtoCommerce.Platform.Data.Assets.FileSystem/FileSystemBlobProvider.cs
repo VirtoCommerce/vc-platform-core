@@ -108,8 +108,9 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
         /// <param name="folderUrl">absolute or relative path</param>
         /// <param name="keyword"></param>
         /// <returns></returns>
-        public virtual BlobSearchResult Search(string folderUrl, string keyword)
+        public virtual Task<BlobSearchResult> Search(string folderUrl, string keyword)
         {
+            var taskResult = new TaskCompletionSource<BlobSearchResult>();
             var retVal = new BlobSearchResult();
             folderUrl = folderUrl ?? _basePublicUrl;
 
@@ -119,9 +120,14 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
 
             if (!Directory.Exists(storageFolderPath))
             {
-                return retVal;
+                Task.Run(() => { taskResult.SetResult(retVal); });
+
+                return taskResult.Task;
             }
-            var directories = String.IsNullOrEmpty(keyword) ? Directory.GetDirectories(storageFolderPath) : Directory.GetDirectories(storageFolderPath, "*" + keyword + "*", SearchOption.AllDirectories);
+
+            var directories = String.IsNullOrEmpty(keyword)
+                ? Directory.GetDirectories(storageFolderPath)
+                : Directory.GetDirectories(storageFolderPath, "*" + keyword + "*", SearchOption.AllDirectories);
             foreach (var directory in directories)
             {
                 var directoryInfo = new DirectoryInfo(directory);
@@ -135,7 +141,9 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
                 retVal.Folders.Add(folder);
             }
 
-            var files = String.IsNullOrEmpty(keyword) ? Directory.GetFiles(storageFolderPath) : Directory.GetFiles(storageFolderPath, "*" + keyword + "*.*", SearchOption.AllDirectories);
+            var files = String.IsNullOrEmpty(keyword)
+                ? Directory.GetFiles(storageFolderPath)
+                : Directory.GetFiles(storageFolderPath, "*" + keyword + "*.*", SearchOption.AllDirectories);
             foreach (var file in files)
             {
                 var fileInfo = new FileInfo(file);
@@ -150,7 +158,10 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
                 blobInfo.RelativeUrl = GetRelativeUrl(blobInfo.Url);
                 retVal.Items.Add(blobInfo);
             }
-            return retVal;
+
+            Task.Run(() => { taskResult.SetResult(retVal); });
+
+            return taskResult.Task;
         }
 
         /// <summary>

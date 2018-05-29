@@ -7,6 +7,7 @@ using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Data.Assets.AzureBlobStorage;
 using VirtoCommerce.Platform.Data.Assets.FileSystem;
 using VirtoCommerce.Platform.Data.PushNotifications;
 using VirtoCommerce.Platform.Data.Repositories;
@@ -38,6 +39,17 @@ namespace VirtoCommerce.Platform.Data.Extensions
                 services.Configure(setupAction);
             }
         }
+
+        public static void AddAzureBlobProvider(this IServiceCollection services, Action<AzureBlobContentOptions> setupAction = null)
+        {
+            services.AddSingleton<IBlobStorageProvider, AzureBlobProvider>();
+            services.AddSingleton<IBlobUrlResolver, AzureBlobProvider>();
+            if (setupAction != null)
+            {
+                services.Configure(setupAction);
+            }
+        }
+
 
     }
 }
