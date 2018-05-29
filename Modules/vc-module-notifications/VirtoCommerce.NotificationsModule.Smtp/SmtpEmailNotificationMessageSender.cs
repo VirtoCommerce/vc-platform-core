@@ -12,9 +12,9 @@ namespace VirtoCommerce.NotificationsModule.Smtp
 {
     public class SmtpEmailNotificationMessageSender : INotificationMessageSender
     {
-        private readonly EmailSendingOptions _emailSendingOptions;
+        private readonly SmtpSenderOptions _emailSendingOptions;
 
-        public SmtpEmailNotificationMessageSender(IOptions<EmailSendingOptions> emailSendingOptions)
+        public SmtpEmailNotificationMessageSender(IOptions<SmtpSenderOptions> emailSendingOptions)
         {
             _emailSendingOptions = emailSendingOptions.Value;
         }

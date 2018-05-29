@@ -11,6 +11,7 @@ using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Senders;
 using VirtoCommerce.NotificationsModule.Data.Services;
 using VirtoCommerce.NotificationsModule.LiquidRenderer;
+using VirtoCommerce.NotificationsModule.SendGrid;
 using VirtoCommerce.NotificationsModule.Smtp;
 using VirtoCommerce.NotificationsModule.Web.Infrastructure;
 using VirtoCommerce.Platform.Core.Common;
@@ -38,10 +39,12 @@ namespace VirtoCommerce.NotificationsModule.Web
             serviceCollection.AddTransient<INotificationTemplateRender, LiquidTemplateRenderer>();
             serviceCollection.AddSingleton<INotificationMessageSenderProviderFactory, NotificationMessageSenderProviderFactory>();
             serviceCollection.AddTransient<INotificationMessageSender, SmtpEmailNotificationMessageSender>();
+            serviceCollection.AddTransient<INotificationMessageSender, SendGridEmailNotificationMessageSender>();
             serviceCollection.AddTransient<IEmailSender, EmailNotificationMessageSender>();
 
-            var notificationGateway = configuration.GetSection("Notifications:Gateway").Value;
-            serviceCollection.Configure<EmailSendingOptions>(configuration.GetSection($"Notifications:{notificationGateway}:EmailSendingOptions"));
+            serviceCollection.Configure<EmailSendingOptions>(configuration.GetSection("Notifications"));
+            serviceCollection.Configure<SmtpSenderOptions>(configuration.GetSection("Notifications:Smtp"));
+            serviceCollection.Configure<SendGridSenderOptions>(configuration.GetSection("Notifications:SendGrid"));
         }
 
         public void PostInitialize(IServiceProvider serviceProvider)
@@ -64,8 +67,19 @@ namespace VirtoCommerce.NotificationsModule.Web
                 notificationDbContext.Database.Migrate();
             }
 
+            var configuration = serviceProvider.GetService<IConfiguration>();
+            var notificationGateway = configuration.GetSection("Notifications:Gateway").Value;
             var notificationMessageSenderProviderFactory = serviceProvider.GetService<INotificationMessageSenderProviderFactory>();
-            notificationMessageSenderProviderFactory.RegisterSenderForType<EmailNotification, SmtpEmailNotificationMessageSender>();
+            switch (notificationGateway)
+            {
+                case "SendGrid":
+                    notificationMessageSenderProviderFactory.RegisterSenderForType<EmailNotification, SendGridEmailNotificationMessageSender>();
+                    break;
+                default:
+                    notificationMessageSenderProviderFactory.RegisterSenderForType<EmailNotification, SmtpEmailNotificationMessageSender>();
+                    break;
+            }
+            
         }
 
         public void Uninstall()
