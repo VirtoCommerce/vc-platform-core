@@ -4,11 +4,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using SendGrid;
 using SendGrid.Helpers.Mail;
-using VirtoCommerce.NotificationsModule.Core;
 using VirtoCommerce.NotificationsModule.Core.Exceptions;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
-using VirtoCommerce.Platform.Core.Notifications;
 
 namespace VirtoCommerce.NotificationsModule.SendGrid
 {

@@ -26,7 +26,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         
         private readonly NotificationSender _sender;
         private readonly Mock<INotificationService> _serviceMock;
-        private readonly INotificationTemplateRender _templateRender;
+        private readonly INotificationTemplateRenderer _templateRender;
         private readonly Mock<INotificationMessageService> _messageServiceMock;
         private readonly Mock<INotificationMessageSender> _messageSenderMock;
         private readonly Mock<ILogger<NotificationSender>> _logNotificationSenderMock;
@@ -330,33 +330,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             //Assert
             Assert.False(result.IsSuccess);
         }
-
-        [Fact]
-        public async Task EmailNotification_NullReferenceException()
-        {
-            //Arrange
-            string language = "default";
-            string subject = "some subject";
-            string body = "some body";
-            var notification = new EmailNotification()
-            {
-                Templates = new List<NotificationTemplate>()
-                {
-                    new EmailNotificationTemplate()
-                    {
-                        Subject = subject,
-                        Body = body,
-                    }
-                }
-            };
-
-            NotificationMessage message = null;
-            _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new [] { message }));
-
-            //Act
-            await Assert.ThrowsAsync<NullReferenceException>(() => _sender.SendNotificationAsync(notification, language));
-        }
-
+        
         [Fact]
         public async Task EmailNotification_ArgumentNullException()
         {

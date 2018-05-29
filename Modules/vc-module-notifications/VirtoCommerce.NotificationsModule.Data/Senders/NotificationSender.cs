@@ -12,12 +12,12 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
     public class NotificationSender : INotificationSender
     {
         private readonly int _maxRetryAttempts = 3;
-        private readonly INotificationTemplateRender _notificationTemplateRender;
+        private readonly INotificationTemplateRenderer _notificationTemplateRender;
         private readonly INotificationMessageService _notificationMessageService;
         private readonly INotificationMessageSenderProviderFactory _notificationMessageAccessor;
         private readonly ILogger<NotificationSender> _logger;
 
-        public NotificationSender(INotificationTemplateRender notificationTemplateRender
+        public NotificationSender(INotificationTemplateRenderer notificationTemplateRender
             , INotificationMessageService notificationMessageService
             , ILogger<NotificationSender> logger
             , INotificationMessageSenderProviderFactory notificationMessageAccessor)

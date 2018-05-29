@@ -1,9 +1,9 @@
 namespace VirtoCommerce.NotificationsModule.Core.Services
 {
     /// <summary>
-    /// Rendering text by Liquid Templates 
+    /// Rendering text by Templates 
     /// </summary>
-    public interface INotificationTemplateRender
+    public interface INotificationTemplateRenderer
     {
         string Render(string template, object data);
     }

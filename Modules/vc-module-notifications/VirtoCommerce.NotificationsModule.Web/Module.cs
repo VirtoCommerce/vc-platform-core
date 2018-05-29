@@ -36,7 +36,7 @@ namespace VirtoCommerce.NotificationsModule.Web
             serviceCollection.AddScoped<INotificationSearchService, NotificationSearchService>();
             serviceCollection.AddScoped<INotificationMessageService, NotificationMessageService>();
             serviceCollection.AddTransient<INotificationSender, NotificationSender>();
-            serviceCollection.AddTransient<INotificationTemplateRender, LiquidTemplateRenderer>();
+            serviceCollection.AddTransient<INotificationTemplateRenderer, LiquidTemplateRenderer>();
             serviceCollection.AddSingleton<INotificationMessageSenderProviderFactory, NotificationMessageSenderProviderFactory>();
             serviceCollection.AddTransient<INotificationMessageSender, SmtpEmailNotificationMessageSender>();
             serviceCollection.AddTransient<INotificationMessageSender, SendGridEmailNotificationMessageSender>();
