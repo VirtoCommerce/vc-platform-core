@@ -84,7 +84,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 property.ObjectType = typeName;
 
             _service.SaveProperties(new[] { property });
-            return StatusCode((int)HttpStatusCode.NoContent);
+            return Ok();
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         public IActionResult DeleteProperty(string typeName, string propertyId)
         {
             _service.DeleteProperties(new[] { propertyId });
-            return StatusCode((int)HttpStatusCode.NoContent);
+            return Ok();
         }
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         public IActionResult SaveDictionaryItems(string typeName, string propertyId, [FromBody]DynamicPropertyDictionaryItem[] items)
         {
             _service.SaveDictionaryItems(propertyId, items);
-            return StatusCode((int)HttpStatusCode.NoContent);
+            return Ok();
         }
 
         /// <summary>
@@ -145,7 +145,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         public IActionResult DeleteDictionaryItem(string typeName, string propertyId, [FromBody] string[] ids)
         {
             _service.DeleteDictionaryItems(ids);
-            return StatusCode((int)HttpStatusCode.NoContent);
+            return Ok();
         }
     }
 }
