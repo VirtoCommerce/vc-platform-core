@@ -57,7 +57,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Route("types/{typeName}/properties")]
         [ProducesResponseType(typeof(DynamicProperty), 200)]
         //[Authorize(SecurityConstants.Permissions.DynamicPropertiesCreate)]
-        public IActionResult CreateProperty(string typeName, DynamicProperty property)
+        public IActionResult CreateProperty(string typeName, [FromBody]DynamicProperty property)
         {
             property.Id = null;
 
@@ -76,7 +76,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Route("types/{typeName}/properties/{propertyId}")]
         [ProducesResponseType(typeof(void), 200)]
         //[Authorize(SecurityConstants.Permissions.DynamicPropertiesUpdate)]
-        public IActionResult UpdateProperty(string typeName, string propertyId, DynamicProperty property)
+        public IActionResult UpdateProperty(string typeName, string propertyId, [FromBody]DynamicProperty property)
         {
             property.Id = propertyId;
 
@@ -125,7 +125,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Route("types/{typeName}/properties/{propertyId}/dictionaryitems")]
         [ProducesResponseType(typeof(void), 200)]
         //[Authorize(SecurityConstants.Permissions.DynamicPropertiesUpdate)]
-        public IActionResult SaveDictionaryItems(string typeName, string propertyId, DynamicPropertyDictionaryItem[] items)
+        public IActionResult SaveDictionaryItems(string typeName, string propertyId, [FromBody]DynamicPropertyDictionaryItem[] items)
         {
             _service.SaveDictionaryItems(propertyId, items);
             return StatusCode((int)HttpStatusCode.NoContent);
@@ -142,7 +142,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Route("types/{typeName}/properties/{propertyId}/dictionaryitems")]
         [ProducesResponseType(typeof(void), 200)]
         //[Authorize(SecurityConstants.Permissions.DynamicPropertiesUpdate)]
-        public IActionResult DeleteDictionaryItem(string typeName, string propertyId, [FromRoute] string[] ids)
+        public IActionResult DeleteDictionaryItem(string typeName, string propertyId, [FromBody] string[] ids)
         {
             _service.DeleteDictionaryItems(ids);
             return StatusCode((int)HttpStatusCode.NoContent);
