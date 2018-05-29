@@ -80,7 +80,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         public IActionResult Delete([FromQuery] string[] ids)
         {
             _assetService.Delete(ids);
-            return NoContent();
+            return Ok();
         }
     }
 }

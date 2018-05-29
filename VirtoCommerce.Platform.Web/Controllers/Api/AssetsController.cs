@@ -190,8 +190,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         public IActionResult DeleteBlobs([FromQuery] string[] urls)
         {
             _blobProvider.Remove(urls);
-
-            return NoContent();
+            return Ok();
         }
 
         /// <summary>
@@ -222,7 +221,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         public IActionResult CreateBlobFolder([FromBody]BlobFolder folder)
         {
             _blobProvider.CreateFolder(folder);
-            return NoContent();
+            return Ok();
         }
     }
 }
