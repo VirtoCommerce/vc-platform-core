@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using CacheManager.Core;
+using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.Platform.Core.Assets;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Data.Caching;
 using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.Platform.Data.Repositories;
 
@@ -14,19 +15,20 @@ namespace VirtoCommerce.Platform.Data.Assets
     {
         private readonly Func<IPlatformRepository> _platformRepository;
         private readonly IBlobUrlResolver _blobUrlResolver;
-        private readonly ICacheManager<object> _cacheManager;
+        private readonly IMemoryCache _memoryCache;
 
-        public AssetEntryService(Func<IPlatformRepository> repositoryFactory, IBlobUrlResolver blobUrlResolver, ICacheManager<object> cacheManager)
+        public AssetEntryService(Func<IPlatformRepository> repositoryFactory, IBlobUrlResolver blobUrlResolver, IMemoryCache memoryCache)
         {
             _platformRepository = repositoryFactory;
             _blobUrlResolver = blobUrlResolver;
-            _cacheManager = cacheManager;
+            _memoryCache = memoryCache;
         }
 
         public AssetEntrySearchResult SearchAssetEntries(AssetEntrySearchCriteria criteria)
         {
             var cacheKey = $"Search:{criteria?.GetHashCode()}";
-            return _cacheManager.Get(cacheKey, nameof(AssetEntry), () =>
+
+            return _memoryCache.GetOrCreateExclusive(cacheKey, (cacheEntry) =>
             {
                 criteria = criteria ?? new AssetEntrySearchCriteria();
 
@@ -80,6 +82,9 @@ namespace VirtoCommerce.Platform.Data.Assets
                         .Select(x => x.ToModel(AbstractTypeFactory<AssetEntry>.TryCreateInstance(), _blobUrlResolver))
                         .OrderBy(x => ids.IndexOf(x.Id))
                         .ToList();
+
+                    cacheEntry.AddExpirationToken(AssetCacheRegion.CreateChangeToken());
+
                     return result;
                 }
             });
@@ -97,7 +102,6 @@ namespace VirtoCommerce.Platform.Data.Assets
         public void SaveChanges(IEnumerable<AssetEntry> entries)
         {
             using (var repository = _platformRepository())
-            using (var changeTracker = GetChangeTracker(repository))
             {
                 var nonTransientEntryIds = entries.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray();
                 var originalDataEntities = repository.AssetEntries.Where(x => nonTransientEntryIds.Contains(x.Id)).ToList();
@@ -107,7 +111,6 @@ namespace VirtoCommerce.Platform.Data.Assets
                     var modifiedEntity = AbstractTypeFactory<AssetEntryEntity>.TryCreateInstance().FromModel(entry);
                     if (originalEntity != null)
                     {
-                        changeTracker.Attach(originalEntity);
                         modifiedEntity.Patch(originalEntity);
                     }
                     else
@@ -118,7 +121,7 @@ namespace VirtoCommerce.Platform.Data.Assets
                 CommitChanges(repository);
 
                 //Reset cached items
-                ResetCache();
+                AssetCacheRegion.ExpireRegion();
             }
         }
 
@@ -139,13 +142,9 @@ namespace VirtoCommerce.Platform.Data.Assets
                 }
 
                 repository.UnitOfWork.Commit();
-                ResetCache();
-            }
-        }
 
-        protected virtual void ResetCache()
-        {
-            _cacheManager.ClearRegion(nameof(AssetEntry));
+                AssetCacheRegion.ExpireRegion();
+            }
         }
     }
 }
