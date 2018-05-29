@@ -1,20 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Hosting.Internal;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Microsoft.Net.Http.Headers;
-using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Infrastructure;
 using VirtoCommerce.Platform.Web.Licensing;
@@ -65,14 +56,14 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             var rawLicense = string.Empty;
             using (var reader = new StreamReader(file.OpenReadStream()))
             {
-                rawLicense = reader.ReadToEnd();
+                rawLicense = await reader.ReadToEndAsync();
             }
 
             if (!string.IsNullOrEmpty(rawLicense))
             {
                 license = License.Parse(rawLicense);
             }
-            
+
             return Ok(license);
         }
 
