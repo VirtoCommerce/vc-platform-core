@@ -24,21 +24,21 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.Validation" Version="2.0.0-rc1-final" />
-    <PackageReference Include="Hangfire.AspNetCore" Version="1.6.17" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.6.19" />
     <PackageReference Include="Hangfire.MemoryStorage" Version="1.5.2" />
-    <PackageReference Include="HangFire.SqlServer" Version="1.6.17" />
-    <PackageReference Include="Microsoft.ApplicationInsights.Web" Version="2.5.0-beta2" />
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.0.2" />
+    <PackageReference Include="HangFire.SqlServer" Version="1.6.19" />
+    <PackageReference Include="Microsoft.ApplicationInsights.Web" Version="2.6.4" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.0.0-alpha2-final" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="1.0.0-alpha2-final" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.1" />
-    <PackageReference Include="Microsoft.Net.Http.Headers" Version="2.0.1" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.3" />
+    <PackageReference Include="Microsoft.Net.Http.Headers" Version="2.0.3" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.4" />
     <PackageReference Include="OpenIddict" Version="2.0.0-rc1-final" />
     <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="2.0.0-rc1-final" />
     <PackageReference Include="OpenIddict.Mvc" Version="2.0.0-rc1-final" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="1.1.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="2.4.0" />
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
     <PackageReference Include="VirtoCommerce.Smidge" Version="3.0.0-beta002" />
     <PackageReference Include="VirtoCommerce.Smidge.Nuglify" Version="2.0.0-beta002" />

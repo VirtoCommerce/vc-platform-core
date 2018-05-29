@@ -23218,16 +23218,6 @@ angular.module('platformWebApp')
     }]);
 
 angular.module('platformWebApp')
-.controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    
-    $scope.blade.isLoading = false;
-    // ui-grid
-    $scope.setGridOptions = function (gridOptions) {
-        $scope.gridOptions = gridOptions;
-    };
-}]);
-
-angular.module('platformWebApp')
 .factory('platformWebApp.assets.api', ['$resource', function ($resource) {
     return $resource('api/platform/assets', {}, {
         createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
@@ -23236,6 +23226,16 @@ angular.module('platformWebApp')
     });
 }]);
 
+
+angular.module('platformWebApp')
+.controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    
+    $scope.blade.isLoading = false;
+    // ui-grid
+    $scope.setGridOptions = function (gridOptions) {
+        $scope.gridOptions = gridOptions;
+    };
+}]);
 
 angular.module('platformWebApp')
 .controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
@@ -23915,6 +23915,29 @@ angular.module('platformWebApp')
     };
 });
 angular.module('platformWebApp')
+.controller('platformWebApp.dynamicPropertyWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+	$scope.blade = $scope.widget.blade;
+	$scope.openBlade = function () {
+        var blade = {
+        	id: "dynamicPropertiesList",
+        	currentEntity: $scope.blade.currentEntity,
+            controller: 'platformWebApp.propertyValueListController',
+            template: '$(Platform)/Scripts/app/dynamicProperties/blades/propertyValue-list.tpl.html'
+        };
+
+        bladeNavigationService.showBlade(blade, $scope.blade);
+    };
+
+
+	$scope.$watch('widget.blade.currentEntity', function (entity) {
+		if (angular.isDefined(entity)) {
+			var groupedByProperty = _.groupBy(entity.dynamicProperties, function (x) { return x.id; });
+			$scope.dynamicPropertyCount = _.keys(groupedByProperty).length;
+		}
+	});
+
+}]);
+angular.module('platformWebApp')
 .controller('platformWebApp.exportImport.exportMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'platformWebApp.authService', function ($scope, bladeNavigationService, exportImportResourse, authService) {
     var blade = $scope.blade;
     blade.headIcon = 'fa-upload';
@@ -24120,29 +24143,6 @@ angular.module('platformWebApp')
     }
 }]);
 
-angular.module('platformWebApp')
-.controller('platformWebApp.dynamicPropertyWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-	$scope.blade = $scope.widget.blade;
-	$scope.openBlade = function () {
-        var blade = {
-        	id: "dynamicPropertiesList",
-        	currentEntity: $scope.blade.currentEntity,
-            controller: 'platformWebApp.propertyValueListController',
-            template: '$(Platform)/Scripts/app/dynamicProperties/blades/propertyValue-list.tpl.html'
-        };
-
-        bladeNavigationService.showBlade(blade, $scope.blade);
-    };
-
-
-	$scope.$watch('widget.blade.currentEntity', function (entity) {
-		if (angular.isDefined(entity)) {
-			var groupedByProperty = _.groupBy(entity.dynamicProperties, function (x) { return x.id; });
-			$scope.dynamicPropertyCount = _.keys(groupedByProperty).length;
-		}
-	});
-
-}]);
 angular.module('platformWebApp')
 .factory('platformWebApp.exportImport.resource', ['$resource', function ($resource) {
 
@@ -26375,35 +26375,6 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
-.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
-	return {
-		link: function (scope, element, attrs) {
-
-			if (attrs.vaPermission) {
-				var permissionValue = attrs.vaPermission.trim();
-			
-				//modelObject is a scope property of the parent/current scope
-				scope.$watch(attrs.securityScopes, function (value) {
-					if (value) {
-						toggleVisibilityBasedOnPermission(value);
-					}
-				});
-			
-				function toggleVisibilityBasedOnPermission(securityScopes) {
-					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
-					if (hasPermission)
-						element.show();
-					else
-						element.hide();
-				}
-
-				toggleVisibilityBasedOnPermission();
-				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
-			}
-		}
-	};
-}]);
-angular.module('platformWebApp')
 .controller('platformWebApp.accountApiListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
     blade.updatePermission = 'platform:security:update';
@@ -27547,6 +27518,35 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
+.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
+	return {
+		link: function (scope, element, attrs) {
+
+			if (attrs.vaPermission) {
+				var permissionValue = attrs.vaPermission.trim();
+			
+				//modelObject is a scope property of the parent/current scope
+				scope.$watch(attrs.securityScopes, function (value) {
+					if (value) {
+						toggleVisibilityBasedOnPermission(value);
+					}
+				});
+			
+				function toggleVisibilityBasedOnPermission(securityScopes) {
+					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
+					if (hasPermission)
+						element.show();
+					else
+						element.hide();
+				}
+
+				toggleVisibilityBasedOnPermission();
+				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
+			}
+		}
+	};
+}]);
+angular.module('platformWebApp')
 .directive('vaLoginToolbar', ['$document', '$timeout', '$state', 'platformWebApp.authService', function ($document, $timeout, $state, authService) {
     return {
         templateUrl: '$(Platform)/Scripts/app/security/login/loginToolbar.tpl.html',
@@ -27750,15 +27750,6 @@ angular.module('platformWebApp')
         };
         bladeNavigationService.showBlade(newBlade, $scope.blade);
     };
-}]);
-angular.module('platformWebApp')
-.factory('platformWebApp.settings', ['$resource', function ($resource) {
-    return $resource('api/platform/settings/:id', { id: '@Id' }, {
-        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
-      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
-      	update: { method: 'POST', url: 'api/platform/settings' },
-        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
-    });
 }]);
 angular.module('platformWebApp')
 .controller('platformWebApp.entitySettingListController', ['$scope', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', function ($scope, settingsHelper, bladeNavigationService) {
@@ -28286,6 +28277,15 @@ angular.module('platformWebApp')
     blade.refresh();
 }]);
 
+angular.module('platformWebApp')
+.factory('platformWebApp.settings', ['$resource', function ($resource) {
+    return $resource('api/platform/settings/:id', { id: '@Id' }, {
+        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
+      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
+      	update: { method: 'POST', url: 'api/platform/settings' },
+        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
+    });
+}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.entitySettingsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
