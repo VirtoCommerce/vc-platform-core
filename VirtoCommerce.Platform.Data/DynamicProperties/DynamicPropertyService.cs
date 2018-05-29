@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
@@ -18,7 +18,7 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
         {
             _repositoryFactory = repositoryFactory;
         }
-      
+
         #region IDynamicPropertyService Members
 
         public void RegisterType(string typeName)
@@ -61,7 +61,6 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
 
             var pkMap = new PrimaryKeyResolvingMap();
             using (var repository = _repositoryFactory())
-            using (var changeTracker = GetChangeTracker(repository))
             {
                 var dbExistProperties = repository.GetDynamicPropertiesByIds(properties.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var property in properties)
@@ -70,8 +69,7 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                     var modifiedEntity = AbstractTypeFactory<DynamicPropertyEntity>.TryCreateInstance().FromModel(property, pkMap);
                     if (originalEntity != null)
                     {
-                        changeTracker.Attach(originalEntity);
-                        modifiedEntity.Patch(originalEntity);                      
+                        modifiedEntity.Patch(originalEntity);
                     }
                     else
                     {
@@ -79,7 +77,7 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                     }
                 }
                 CommitChanges(repository);
-                pkMap.ResolvePrimaryKeys();              
+                pkMap.ResolvePrimaryKeys();
             }
             return properties;
         }
@@ -113,7 +111,7 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
             using (var repository = _repositoryFactory())
             {
                 var items = repository.GetDynamicPropertyDictionaryItems(propertyId);
-                var result = items.OrderBy(x => x.Name).Select(x => x.ToModel(AbstractTypeFactory< DynamicPropertyDictionaryItem>.TryCreateInstance())).ToArray();
+                var result = items.OrderBy(x => x.Name).Select(x => x.ToModel(AbstractTypeFactory<DynamicPropertyDictionaryItem>.TryCreateInstance())).ToArray();
                 return result;
             }
         }
@@ -126,7 +124,6 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                 throw new ArgumentNullException("items");
 
             using (var repository = _repositoryFactory())
-            using (var changeTracker = GetChangeTracker(repository))
             {
                 var dbExistItems = repository.GetDynamicPropertyDictionaryItems(propertyId).ToList();
                 foreach (var item in items)
@@ -135,7 +132,6 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                     var modifiedEntity = AbstractTypeFactory<DynamicPropertyDictionaryItemEntity>.TryCreateInstance().FromModel(item);
                     if (originalEntity != null)
                     {
-                        changeTracker.Attach(originalEntity);
                         modifiedEntity.Patch(originalEntity);
                     }
                     else
@@ -144,7 +140,7 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                     }
                 }
                 CommitChanges(repository);
-            }          
+            }
         }
 
         public void DeleteDictionaryItems(string[] itemIds)
@@ -197,7 +193,7 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                                                                     .Select(x => x.Clone())
                                                                     .OfType<DynamicObjectProperty>()
                                                                     .ToList();
-                    foreach(var prop in propOwner.DynamicProperties)
+                    foreach (var prop in propOwner.DynamicProperties)
                     {
                         //Leave only self object values 
                         if (prop.Values != null)
@@ -209,8 +205,8 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                 }
             }
         }
-     
-      
+
+
         public void SaveDynamicPropertyValues(IHasDynamicProperties owner)
         {
             if (owner == null)
@@ -223,7 +219,6 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
             foreach (var objectHasDynamicProps in objectsHaveDynamicProps)
             {
                 using (var repository = _repositoryFactory())
-                using (var changeTracker = GetChangeTracker(repository))
                 {
                     var pkMap = new PrimaryKeyResolvingMap();
                     if (objectHasDynamicProps.Id != null && !objectHasDynamicProps.DynamicProperties.IsNullOrEmpty())
@@ -239,7 +234,6 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                             var modifiedEntity = AbstractTypeFactory<DynamicPropertyEntity>.TryCreateInstance().FromModel(dynamicProp, pkMap);
                             if (originalEntity != null)
                             {
-                                changeTracker.Attach(originalEntity);
                                 modifiedEntity.Patch(originalEntity);
                             }
                         }
@@ -250,7 +244,7 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                 }
             }
         }
-      
+
         public void DeleteDynamicPropertyValues(IHasDynamicProperties owner)
         {
             var objectsWithDynamicProperties = owner.GetFlatObjectsListWithInterface<IHasDynamicProperties>();

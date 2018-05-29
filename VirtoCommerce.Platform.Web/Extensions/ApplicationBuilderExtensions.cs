@@ -1,14 +1,7 @@
-using System;
-using System.Linq;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.Platform.Web.Infrastructure;
-using VirtoCommerce.Platform.Web.Middelware;
 
 namespace VirtoCommerce.Platform.Web.Extensions
 {
@@ -109,8 +102,8 @@ namespace VirtoCommerce.Platform.Web.Extensions
                                 Description = "JSON contains personalization settings of manager UI",
                                 DefaultValue = "{\n" +
                                                "  \"title\": \"Virto Commerce\",\n" +
-                                               "  \"logo\": \"Content/themes/main/images/logo.png\",\n" +
-                                               "  \"contrast_logo\": \"Content/themes/main/images/contrast-logo.png\"\n" +
+                                               "  \"logo\": \"/images/logo.png\",\n" +
+                                               "  \"contrast_logo\": \"/images/contrast-logo.png\"\n" +
                                                "}"
                             }
                         }

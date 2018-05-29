@@ -7,7 +7,7 @@ using VirtoCommerce.Platform.Core.Settings;
 namespace VirtoCommerce.Platform.Data.Model
 {
     public class SettingValueEntity : AuditableEntity
-    {     
+    {
         [Required]
         [StringLength(64)]
         public string ValueType { get; set; }
@@ -28,10 +28,10 @@ namespace VirtoCommerce.Platform.Data.Model
 
         public string SettingId { get; set; }
         public virtual SettingEntity Setting { get; set; }
-        
-         
+
+
         public virtual object GetValue(SettingValueType valueType)
-        {         
+        {
             switch (valueType)
             {
                 case SettingValueType.Boolean:
@@ -84,7 +84,7 @@ namespace VirtoCommerce.Platform.Data.Model
             }
             else
             {
-                LongTextValue = value;
+                ShortTextValue = value;
             }
             return this;
         }

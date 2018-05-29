@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.Platform.Core.ChangeLog;
@@ -42,7 +42,6 @@ namespace VirtoCommerce.Platform.Data.ChangeLog
             var pkMap = new PrimaryKeyResolvingMap();
 
             using (var repository = _platformRepositoryFactory())
-            using (var changeTracker = GetChangeTracker(repository))
             {
                 var ids = operationLogs.Where(x => x.Id != null).Select(x => x.Id).Distinct().ToArray();
                 var origDbOperations = repository.OperationLogs.Where(x => ids.Contains(x.Id));
@@ -52,7 +51,6 @@ namespace VirtoCommerce.Platform.Data.ChangeLog
                     var modifiedEntity = AbstractTypeFactory<OperationLogEntity>.TryCreateInstance().FromModel(operation, pkMap);
                     if (originalEntity != null)
                     {
-                        changeTracker.Attach(originalEntity);
                         modifiedEntity.Patch(originalEntity);
                     }
                     else

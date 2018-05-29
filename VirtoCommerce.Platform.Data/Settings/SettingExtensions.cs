@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Settings;
@@ -41,7 +38,7 @@ namespace VirtoCommerce.Platform.Data.Settings
             {
                 retVal = SettingValueType.Boolean;
             }
-            else if (valueType == typeof(Int32))
+            else if (valueType == typeof(int))
             {
                 retVal = SettingValueType.Integer;
             }

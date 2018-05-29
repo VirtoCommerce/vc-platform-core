@@ -63,7 +63,7 @@ namespace VirtoCommerce.Platform.Web
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-            services.Configure<DemoOptions>(Configuration.GetSection("VirtoCommerce"));
+            services.Configure<PlatformOptions>(Configuration.GetSection("VirtoCommerce"));
             services.Configure<HangfireOptions>(Configuration.GetSection("VirtoCommerce:Jobs"));
 
             PlatformVersion.CurrentVersion = SemanticVersion.Parse(Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default.Application.ApplicationVersion);
@@ -315,7 +315,7 @@ namespace VirtoCommerce.Platform.Web
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller}/{action=Index}/{id?}");
+                    template: "{controller=Home}/{action=Index}/{id?}");
             });
 
             //Force migrations
