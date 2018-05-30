@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Bus;
+using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Settings;
@@ -26,6 +27,9 @@ namespace VirtoCommerce.Platform.Data.Extensions
             services.AddSingleton<ISettingsManager, SettingsManager>();
             services.AddSingleton<IPushNotificationManager, PushNotificationManager>();
             services.AddSingleton<IEventPublisher, InProcessBus>();
+            services.AddSingleton<IDynamicPropertyService, DynamicPropertyService>();
+            services.AddSingleton<IDynamicPropertySearchService, DynamicPropertySearchService>();
+            services.AddSingleton<IDynamicPropertyRegistrar, DynamicPropertyService>();
             return services;
 
         }

@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -23,7 +20,6 @@ namespace VirtoCommerce.Platform.Web.Swagger
         }
 
 
-        [CLSCompliant(false)]
         public void Apply(SwaggerDocument swaggerDoc, DocumentFilterContext context)
         {
             var defaultApiKey = _settingManager.GetValue("Swashbuckle.DefaultApiKey", string.Empty);
@@ -61,7 +57,6 @@ namespace VirtoCommerce.Platform.Web.Swagger
             swaggerDoc.Tags = tags;
         }
 
-        [CLSCompliant(false)]
         public void Apply(Operation operation, OperationFilterContext context)
         {
             var controllerTypeInfo = ((ControllerActionDescriptor)context.ApiDescription.ActionDescriptor).ControllerTypeInfo;

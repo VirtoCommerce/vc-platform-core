@@ -21,7 +21,7 @@ using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CatalogModule.Data.Services
 {
-    public class CategoryService : ServiceBase, ICategoryService
+    public class CategoryService : ICategoryService
     {
         private readonly ICommerceService _commerceService;
         private readonly IOutlineService _outlineService;
@@ -120,7 +120,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             {
                 //TODO: raise events on categories deletion
                 repository.RemoveCategories(categoryIds.ToArray());
-                CommitChanges(repository);
+                repository.UnitOfWork.Commit();
                 //Reset catalog cache
                 CatalogCacheRegion.ExpireRegion();
             }

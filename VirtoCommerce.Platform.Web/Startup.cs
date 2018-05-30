@@ -10,20 +10,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using NUglify.Css;
-using NUglify.JavaScript;
 using Smidge;
-using Smidge.Cache;
-using Smidge.FileProcessors;
 using Smidge.Nuglify;
-using Smidge.Options;
 using Swashbuckle.AspNetCore.Swagger;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
@@ -58,7 +52,7 @@ namespace VirtoCommerce.Platform.Web
 
         public IConfiguration Configuration { get; }
         public IHostingEnvironment HostingEnvironment { get; }
-        
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -88,7 +82,7 @@ namespace VirtoCommerce.Platform.Web
             {
                 options.ModulesManifestUrl = new Uri(@"https://raw.githubusercontent.com/VirtoCommerce/vc-modules/master/modules.json");
             });
-           
+
             services.AddDbContext<SecurityDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("VirtoCommerce"));
@@ -112,8 +106,8 @@ namespace VirtoCommerce.Platform.Web
                 options.ClaimsIdentity.RoleClaimType = OpenIdConnectConstants.Claims.Role;
             });
 
-        
-           // Register the OAuth2 validation handler.
+
+            // Register the OAuth2 validation handler.
             services.AddAuthentication().AddOAuthValidation();
 
             // Register the OpenIddict services.
@@ -256,14 +250,14 @@ namespace VirtoCommerce.Platform.Web
             }
             else
             {
-                services.AddHangfire(config => config.UseMemoryStorage() );
+                services.AddHangfire(config => config.UseMemoryStorage());
             }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-       
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -296,7 +290,7 @@ namespace VirtoCommerce.Platform.Web
                 });
             }
 
-         
+
             app.UseDefaultFiles();
 
 
@@ -340,7 +334,7 @@ namespace VirtoCommerce.Platform.Web
             {
                 c.SwaggerEndpoint("/docs/v1/docs.json", "Explore");
                 c.RoutePrefix = "docs";
-                c.EnabledValidator();
+                c.EnableValidator();
             });
 
             app.UseDbTriggers();
@@ -359,14 +353,14 @@ namespace VirtoCommerce.Platform.Web
             //Seed default users
             app.UseDefaultUsersAsync().GetAwaiter().GetResult();
 
-            app.UseHangfireDashboard("/hangfire", new DashboardOptions { Authorization = new [] { new HangfireAuthorizationHandler() }});
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions { Authorization = new[] { new HangfireAuthorizationHandler() } });
             app.UseHangfireServer(new BackgroundJobServerOptions
             {
                 // Create some queues for job prioritization.
                 // Normal equals 'default', because Hangfire depends on it.
                 Queues = new[] { JobPriority.High, JobPriority.Normal, JobPriority.Low }
             });
-            
+
         }
     }
 }

@@ -22748,6 +22748,16 @@ angular.module('platformWebApp')
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["公元前","公元"],ERAS:["BC","AD"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"d/M/yy ah:mm",shortDate:"d/M/yy",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-hk",pluralCat:function(e,m){return E.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["西元前","西元"],ERAS:["西元前","西元"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日 EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"y/M/d ah:mm",shortDate:"y/M/d",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"NT$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-tw",pluralCat:function(e,m){return E.OTHER}})}]);
 angular.module('platformWebApp')
+.factory('platformWebApp.assets.api', ['$resource', function ($resource) {
+    return $resource('api/platform/assets', {}, {
+        createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
+        move: { method: 'POST', url: 'api/platform/assets/move' },
+        uploadFromUrl: { method: 'POST', params: { url: '@url', folderUrl: '@folderUrl', name: '@name' }, isArray: true }
+    });
+}]);
+
+
+angular.module('platformWebApp')
 .controller('platformWebApp.assets.assetListController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', '$sessionStorage', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
     function ($scope, assets, bladeNavigationService, dialogService, $storage, bladeUtils, uiGridHelper) {
         var blade = $scope.blade;
@@ -23228,16 +23238,6 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
-.factory('platformWebApp.assets.api', ['$resource', function ($resource) {
-    return $resource('api/platform/assets', {}, {
-        createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
-        move: { method: 'POST', url: 'api/platform/assets/move' },
-        uploadFromUrl: { method: 'POST', params: { url: '@url', folderUrl: '@folderUrl', name: '@name' }, isArray: true }
-    });
-}]);
-
-
-angular.module('platformWebApp')
 .controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
 
@@ -23356,7 +23356,7 @@ angular.module('platformWebApp')
 
     $scope.saveChanges = function () {
         if (blade.isNew) {
-            dynamicPropertiesApi.save({ id: blade.objectType }, blade.currentEntity,
+            dynamicPropertiesApi.save(blade.currentEntity,
                 function (data) {
                     blade.onChangesConfirmedFn(data);
                     // save dictionary items for new entity
@@ -23375,7 +23375,7 @@ angular.module('platformWebApp')
                 },
                 function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
         } else {
-            dynamicPropertiesApi.update({ id: blade.objectType, propertyId: blade.currentEntity.id }, blade.currentEntity,
+            dynamicPropertiesApi.update(blade.currentEntity,
                 function () {
                     blade.refresh();
                     blade.parentBlade.refresh(true);
@@ -23439,6 +23439,7 @@ angular.module('platformWebApp')
     // on load: 
     blade.refresh();
 }]);
+
 angular.module('platformWebApp')
 .controller('platformWebApp.dynamicPropertyListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dynamicProperties.api', function ($scope, bladeNavigationService, dynamicPropertiesApi) {
     var blade = $scope.blade;
@@ -23447,7 +23448,7 @@ angular.module('platformWebApp')
     blade.subtitle = 'platform.blades.dynamicProperty-list.subtitle';
 
     blade.refresh = function (parentRefresh) {
-        dynamicPropertiesApi.query({ id: blade.objectType }, function (results) {
+        dynamicPropertiesApi.getPropertiesForType({ typeName: blade.objectType }, function (results) {
             if (parentRefresh && blade.parentRefresh) {
                 blade.parentRefresh(results);
             }
@@ -23856,13 +23857,14 @@ angular.module('platformWebApp')
 
 angular.module('platformWebApp')
 .factory('platformWebApp.dynamicProperties.api', ['$resource', function ($resource) {
-    return $resource('api/platform/dynamic/types/:id/properties/:propertyId', {}, {
+    return $resource('api/platform/dynamic/properties', {}, {
         queryTypes: { url: 'api/platform/dynamic/types', isArray: true },
+        getPropertiesForType: { url: 'api/platform/dynamic/types/:typeName/properties', isArray: true },
         update: { method: 'PUT' }
     });
 }])
 .factory('platformWebApp.dynamicProperties.dictionaryItemsApi', ['$resource', function ($resource) {
-    return $resource('api/platform/dynamic/types/:id/properties/:propertyId/dictionaryitems');
+    return $resource('api/platform/dynamic/dictionaryitems');
 }])
 .factory('platformWebApp.dynamicProperties.valueTypesService', function () {
     var propertyTypes = [
@@ -23914,6 +23916,30 @@ angular.module('platformWebApp')
         }
     };
 });
+
+angular.module('platformWebApp')
+.controller('platformWebApp.dynamicPropertyWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+	$scope.blade = $scope.widget.blade;
+	$scope.openBlade = function () {
+        var blade = {
+        	id: "dynamicPropertiesList",
+        	currentEntity: $scope.blade.currentEntity,
+            controller: 'platformWebApp.propertyValueListController',
+            template: '$(Platform)/Scripts/app/dynamicProperties/blades/propertyValue-list.tpl.html'
+        };
+
+        bladeNavigationService.showBlade(blade, $scope.blade);
+    };
+
+
+	$scope.$watch('widget.blade.currentEntity', function (entity) {
+		if (angular.isDefined(entity)) {
+			var groupedByProperty = _.groupBy(entity.dynamicProperties, function (x) { return x.id; });
+			$scope.dynamicPropertyCount = _.keys(groupedByProperty).length;
+		}
+	});
+
+}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.exportImport.exportMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'platformWebApp.authService', function ($scope, bladeNavigationService, exportImportResourse, authService) {
     var blade = $scope.blade;
@@ -24120,29 +24146,6 @@ angular.module('platformWebApp')
     }
 }]);
 
-angular.module('platformWebApp')
-.controller('platformWebApp.dynamicPropertyWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-	$scope.blade = $scope.widget.blade;
-	$scope.openBlade = function () {
-        var blade = {
-        	id: "dynamicPropertiesList",
-        	currentEntity: $scope.blade.currentEntity,
-            controller: 'platformWebApp.propertyValueListController',
-            template: '$(Platform)/Scripts/app/dynamicProperties/blades/propertyValue-list.tpl.html'
-        };
-
-        bladeNavigationService.showBlade(blade, $scope.blade);
-    };
-
-
-	$scope.$watch('widget.blade.currentEntity', function (entity) {
-		if (angular.isDefined(entity)) {
-			var groupedByProperty = _.groupBy(entity.dynamicProperties, function (x) { return x.id; });
-			$scope.dynamicPropertyCount = _.keys(groupedByProperty).length;
-		}
-	});
-
-}]);
 angular.module('platformWebApp')
 .factory('platformWebApp.exportImport.resource', ['$resource', function ($resource) {
 
@@ -27752,15 +27755,6 @@ angular.module('platformWebApp')
     };
 }]);
 angular.module('platformWebApp')
-.factory('platformWebApp.settings', ['$resource', function ($resource) {
-    return $resource('api/platform/settings/:id', { id: '@Id' }, {
-        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
-      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
-      	update: { method: 'POST', url: 'api/platform/settings' },
-        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
-    });
-}]);
-angular.module('platformWebApp')
 .controller('platformWebApp.entitySettingListController', ['$scope', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', function ($scope, settingsHelper, bladeNavigationService) {
     var blade = $scope.blade;
     // blade.updatePermission = // Use predefined (parent) permission
@@ -28286,6 +28280,15 @@ angular.module('platformWebApp')
     blade.refresh();
 }]);
 
+angular.module('platformWebApp')
+.factory('platformWebApp.settings', ['$resource', function ($resource) {
+    return $resource('api/platform/settings/:id', { id: '@Id' }, {
+        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
+      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
+      	update: { method: 'POST', url: 'api/platform/settings' },
+        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
+    });
+}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.entitySettingsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
