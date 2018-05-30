@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.Platform.Data.Model;
 using VirtoCommerce.Platform.Data.Repositories;
 
 namespace VirtoCommerce.Platform.Data.ChangeLog
 {
-    public class ChangeLogService : ServiceBase, IChangeLogService
+    public class ChangeLogService : IChangeLogService
     {
         private readonly Func<IPlatformRepository> _platformRepositoryFactory;
 
