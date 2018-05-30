@@ -29,9 +29,7 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
         {
             get
             {
-                return AbstractTypeFactory<IHasDynamicProperties>.AllTypeInfos
-                                  .Where(t => t.AllSubclasses.Any(s => s != t.Type && s.IsSubclassOf(typeof(IHasDynamicProperties))))
-                                  .Select(n => n.Type.FullName);
+                return AbstractTypeFactory<IHasDynamicProperties>.AllTypeInfos.Select(n => n.Type.FullName);
             }
         }
 

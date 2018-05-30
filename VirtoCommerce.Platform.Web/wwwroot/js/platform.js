@@ -23356,7 +23356,7 @@ angular.module('platformWebApp')
 
     $scope.saveChanges = function () {
         if (blade.isNew) {
-            dynamicPropertiesApi.save({ id: blade.objectType }, blade.currentEntity,
+            dynamicPropertiesApi.save(blade.currentEntity,
                 function (data) {
                     blade.onChangesConfirmedFn(data);
                     // save dictionary items for new entity
@@ -23375,7 +23375,7 @@ angular.module('platformWebApp')
                 },
                 function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
         } else {
-            dynamicPropertiesApi.update({ id: blade.objectType, propertyId: blade.currentEntity.id }, blade.currentEntity,
+            dynamicPropertiesApi.update(blade.currentEntity,
                 function () {
                     blade.refresh();
                     blade.parentBlade.refresh(true);
@@ -23439,6 +23439,7 @@ angular.module('platformWebApp')
     // on load: 
     blade.refresh();
 }]);
+
 angular.module('platformWebApp')
 .controller('platformWebApp.dynamicPropertyListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dynamicProperties.api', function ($scope, bladeNavigationService, dynamicPropertiesApi) {
     var blade = $scope.blade;
@@ -23447,7 +23448,7 @@ angular.module('platformWebApp')
     blade.subtitle = 'platform.blades.dynamicProperty-list.subtitle';
 
     blade.refresh = function (parentRefresh) {
-        dynamicPropertiesApi.query({ id: blade.objectType }, function (results) {
+        dynamicPropertiesApi.getPropertiesForType({ typeName: blade.objectType }, function (results) {
             if (parentRefresh && blade.parentRefresh) {
                 blade.parentRefresh(results);
             }
@@ -23856,13 +23857,14 @@ angular.module('platformWebApp')
 
 angular.module('platformWebApp')
 .factory('platformWebApp.dynamicProperties.api', ['$resource', function ($resource) {
-    return $resource('api/platform/dynamic/types/:id/properties/:propertyId', {}, {
+    return $resource('api/platform/dynamic/properties', {}, {
         queryTypes: { url: 'api/platform/dynamic/types', isArray: true },
+        getPropertiesForType: { url: 'api/platform/dynamic/types/:typeName/properties', isArray: true },
         update: { method: 'PUT' }
     });
 }])
 .factory('platformWebApp.dynamicProperties.dictionaryItemsApi', ['$resource', function ($resource) {
-    return $resource('api/platform/dynamic/types/:id/properties/:propertyId/dictionaryitems');
+    return $resource('api/platform/dynamic/dictionaryitems');
 }])
 .factory('platformWebApp.dynamicProperties.valueTypesService', function () {
     var propertyTypes = [
@@ -23914,6 +23916,7 @@ angular.module('platformWebApp')
         }
     };
 });
+
 angular.module('platformWebApp')
 .controller('platformWebApp.dynamicPropertyWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
 	$scope.blade = $scope.widget.blade;
@@ -26375,6 +26378,35 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
+.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
+	return {
+		link: function (scope, element, attrs) {
+
+			if (attrs.vaPermission) {
+				var permissionValue = attrs.vaPermission.trim();
+			
+				//modelObject is a scope property of the parent/current scope
+				scope.$watch(attrs.securityScopes, function (value) {
+					if (value) {
+						toggleVisibilityBasedOnPermission(value);
+					}
+				});
+			
+				function toggleVisibilityBasedOnPermission(securityScopes) {
+					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
+					if (hasPermission)
+						element.show();
+					else
+						element.hide();
+				}
+
+				toggleVisibilityBasedOnPermission();
+				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
+			}
+		}
+	};
+}]);
+angular.module('platformWebApp')
 .controller('platformWebApp.accountApiListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
     blade.updatePermission = 'platform:security:update';
@@ -27517,35 +27549,6 @@ angular.module('platformWebApp')
     initializeBlade();
 }]);
 
-angular.module('platformWebApp')
-.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
-	return {
-		link: function (scope, element, attrs) {
-
-			if (attrs.vaPermission) {
-				var permissionValue = attrs.vaPermission.trim();
-			
-				//modelObject is a scope property of the parent/current scope
-				scope.$watch(attrs.securityScopes, function (value) {
-					if (value) {
-						toggleVisibilityBasedOnPermission(value);
-					}
-				});
-			
-				function toggleVisibilityBasedOnPermission(securityScopes) {
-					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
-					if (hasPermission)
-						element.show();
-					else
-						element.hide();
-				}
-
-				toggleVisibilityBasedOnPermission();
-				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
-			}
-		}
-	};
-}]);
 angular.module('platformWebApp')
 .directive('vaLoginToolbar', ['$document', '$timeout', '$state', 'platformWebApp.authService', function ($document, $timeout, $state, authService) {
     return {
