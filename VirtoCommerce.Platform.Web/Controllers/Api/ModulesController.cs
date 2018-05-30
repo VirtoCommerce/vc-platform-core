@@ -155,7 +155,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
             string targetFilePath = null;
 
-            var boundary = MultipartRequestHelper.GetBoundary(MediaTypeHeaderValue.Parse(Request.ContentType),  _defaultFormOptions.MultipartBoundaryLengthLimit);
+            var boundary = MultipartRequestHelper.GetBoundary(MediaTypeHeaderValue.Parse(Request.ContentType), _defaultFormOptions.MultipartBoundaryLengthLimit);
             var reader = new MultipartReader(boundary, HttpContext.Request.Body);
 
             var section = await reader.ReadNextSectionAsync();
@@ -269,7 +269,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("autoinstall")]
         [Authorize(SecurityConstants.Permissions.PlatformImport)]
-        public ActionResult TryToAutoInstallModules()
+        public async Task<ActionResult> TryToAutoInstallModulesAsync()
         {
             var notification = new ModuleAutoInstallPushNotification(User.Identity.Name)
             {
@@ -279,16 +279,16 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             };
 
 
-            if (!_settingsManager.GetValue("VirtoCommerce.ModulesAutoInstalled", false))
+            if (!(await _settingsManager.GetValueAsync("VirtoCommerce.ModulesAutoInstalled", false)))
             {
-                lock (_lockObject)
+                using (await AsyncLock.GetLockByKey("autoinstall").LockAsync())
                 {
-                    if (!_settingsManager.GetValue("VirtoCommerce.ModulesAutoInstalled", false))
+                    if (!(await _settingsManager.GetValueAsync("VirtoCommerce.ModulesAutoInstalled", false)))
                     {
                         var moduleBundles = _extModuleOptions.AutoInstallModuleBundles;
                         if (!moduleBundles.IsNullOrEmpty())
                         {
-                            _settingsManager.SetValue("VirtoCommerce.ModulesAutoInstalled", true);
+                            await _settingsManager.SetValueAsync("VirtoCommerce.ModulesAutoInstalled", true);
 
                             EnsureModulesCatalogInitialized();
 

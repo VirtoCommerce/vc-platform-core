@@ -19,7 +19,7 @@ using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CatalogModule.Data.Services
 {
-    public class PropertyService : ServiceBase, IPropertyService
+    public class PropertyService : IPropertyService
     {
         private readonly Func<ICatalogRepository> _repositoryFactory;
         private readonly IMemoryCache _memoryCache;

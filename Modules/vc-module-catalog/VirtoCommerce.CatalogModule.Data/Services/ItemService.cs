@@ -18,7 +18,7 @@ using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CatalogModule.Data.Services
 {
-    public class ItemService : ServiceBase, IItemService
+    public class ItemService : IItemService
     {
         private readonly ICategoryService _categoryService;
         private readonly ICatalogService _catalogService;
@@ -105,7 +105,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             using (var repository = _repositoryFactory())
             {
                 repository.RemoveItems(itemIds.ToArray());
-                CommitChanges(repository);
+                repository.UnitOfWork.Commit();
             }
 
             _eventPublisher.Publish(new ProductChangedEvent(changedEntries));

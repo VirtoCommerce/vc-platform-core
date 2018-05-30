@@ -12,11 +12,10 @@ using VirtoCommerce.NotificationsModule.Data.Validation;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.Events;
-using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.NotificationsModule.Data.Services
 {
-    public class NotificationMessageService : ServiceBase, INotificationMessageService
+    public class NotificationMessageService : INotificationMessageService
     {
         private readonly Func<INotificationRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
@@ -63,7 +62,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                 }
 
                 await _eventPublisher.Publish(new NotificationMessageChangingEvent(changedEntries));
-                CommitChanges(repository);
+                await repository.UnitOfWork.CommitAsync();
                 await _eventPublisher.Publish(new NotificationMessageChangedEvent(changedEntries));
             }
         }
