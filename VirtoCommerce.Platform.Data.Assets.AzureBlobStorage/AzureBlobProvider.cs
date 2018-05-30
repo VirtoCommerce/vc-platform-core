@@ -15,7 +15,6 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
 {
     public class AzureBlobProvider : IBlobStorageProvider, IBlobUrlResolver
     {
-        //ToDo refactoring this provider as there was pagination
 
         public const string ProviderName = "AzureBlobStorage";
         public const string DefaultBlobContainerName = "default-container";
@@ -46,7 +45,7 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public virtual BlobInfo GetBlobInfo(string url)
+        public virtual async Task<BlobInfo> GetBlobInfo(string url)
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
@@ -55,11 +54,12 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
             BlobInfo retVal = null;
             try
             {
-                var cloudBlob = _cloudBlobClient.GetBlobReferenceFromServerAsync(uri).Result;
+                var cloudBlob = await _cloudBlobClient.GetBlobReferenceFromServerAsync(uri);
+
                 retVal = new BlobInfo
                 {
                     Url = Uri.EscapeUriString(cloudBlob.Uri.ToString()),
-                    FileName = Path.GetFileName(Uri.UnescapeDataString(cloudBlob.Uri.ToString())),
+                    Name = Path.GetFileName(Uri.UnescapeDataString(cloudBlob.Uri.ToString())),
                     ContentType = cloudBlob.Properties.ContentType,
                     Size = cloudBlob.Properties.Length,
                     ModifiedDate = cloudBlob.Properties.LastModified?.DateTime,
@@ -122,7 +122,7 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
             return blob.OpenWriteAsync().Result;
         }
 
-        public virtual void Remove(string[] urls)
+        public virtual async Task Remove(string[] urls)
         {
             foreach (var url in urls)
             {
@@ -133,7 +133,7 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
                 var directoryPath = GetDirectoryPathFromUrl(absoluteUri.ToString());
                 if (string.IsNullOrEmpty(directoryPath))
                 {
-                    blobContainer.DeleteIfExistsAsync();
+                    await blobContainer.DeleteIfExistsAsync();
                 }
                 else
                 {
@@ -141,7 +141,7 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
                     //Remove all nested directory blobs
                     foreach (var directoryBlob in blobDirectory.ListBlobsSegmentedAsync(null).Result.Results)
                     {
-                        directoryBlob.Container.DeleteIfExistsAsync();
+                        await directoryBlob.Container.DeleteIfExistsAsync();
                     }
 
                     //Remove blockBlobs if url not directory
@@ -149,12 +149,12 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
                      * In Azure Storage Client Library 4.0, we changed Get*Reference methods to accept relative addresses only. */
                     var filePath = GetFilePathFromUrl(url);
                     var blobBlock = blobContainer.GetBlockBlobReference(filePath);
-                    blobBlock.DeleteIfExistsAsync();
+                    await blobBlock.DeleteIfExistsAsync();
                 }
             }
         }
 
-        public virtual async Task<BlobSearchResult> Search(string folderUrl, string keyword)
+        public virtual async Task<BlobSearchResult> SearchAsync(string folderUrl, string keyword)
         {
             var retVal = new BlobSearchResult();
 
@@ -195,7 +195,7 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
                             var blobInfo = new BlobInfo
                             {
                                 Url = Uri.EscapeUriString(block.Uri.ToString()),
-                                FileName = Path.GetFileName(Uri.UnescapeDataString(block.Uri.ToString())),
+                                Name = Path.GetFileName(Uri.UnescapeDataString(block.Uri.ToString())),
                                 ContentType = block.Properties.ContentType,
                                 Size = block.Properties.Length,
                                 ModifiedDate = block.Properties.LastModified?.DateTime
@@ -203,7 +203,7 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
                             blobInfo.RelativeUrl =
                                 blobInfo.Url.Replace(_cloudBlobClient.BaseUri.ToString(), string.Empty);
                             //Do not return empty blob (created with directory because azure blob not support direct directory creation)
-                            if (!string.IsNullOrEmpty(blobInfo.FileName))
+                            if (!string.IsNullOrEmpty(blobInfo.Name))
                             {
                                 retVal.Items.Add(blobInfo);
                             }
@@ -241,7 +241,8 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
                         var folder = new BlobFolder
                         {
                             Name = item.Uri.AbsolutePath.Split('/').Last(),
-                            Url = Uri.EscapeUriString(item.Uri.ToString())
+                            Url = Uri.EscapeUriString(item.Uri.ToString()),
+                            
                         };
                         retVal.Folders.Add(folder);
                     }
@@ -251,13 +252,21 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
             return retVal;
         }
 
-        public virtual void CreateFolder(BlobFolder folder)
+        public virtual async Task CreateFolder(BlobFolder folder)
         {
             var path = (folder.ParentUrl != null ? folder.ParentUrl + "/" : string.Empty) + folder.Name;
 
             var containerName = GetContainerNameFromUrl(path);
             var blobContainer = _cloudBlobClient.GetContainerReference(containerName);
-            blobContainer.CreateIfNotExistsAsync(BlobContainerPublicAccessType.Blob, null, null);
+            await blobContainer.CreateIfNotExistsAsync(BlobContainerPublicAccessType.Blob, null, null);
+
+            var directoryPath = GetDirectoryPathFromUrl(path);
+            if (!string.IsNullOrEmpty(directoryPath))
+            {
+                //Need upload empty blob because azure blob storage not support direct directory creation
+                await blobContainer.GetBlockBlobReference(directoryPath).UploadFromByteArrayAsync(new byte[0], 0, 0);
+            }
+
         }
 
         public virtual void Move(string oldUrl, string newUrl)

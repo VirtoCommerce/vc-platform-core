@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace VirtoCommerce.Platform.Web.Model.Asset
+namespace VirtoCommerce.Platform.Core.Assets
 {
     public class AssetListItem
     {
@@ -16,5 +14,6 @@ namespace VirtoCommerce.Platform.Web.Model.Asset
         public string RelativeUrl { get; set; }
         public DateTime? ModifiedDate { get; set; }
         public DateTime? CreatedDate { get; set; }
+
     }
 }

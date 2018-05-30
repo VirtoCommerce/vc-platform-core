@@ -41,7 +41,7 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public virtual BlobInfo GetBlobInfo(string url)
+        public virtual Task<BlobInfo> GetBlobInfo(string url)
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException("url");
@@ -59,13 +59,14 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
                     Url = GetAbsoluteUrlFromPath(filePath),
                     ContentType = MimeTypeResolver.ResolveContentType(fileInfo.Name),
                     Size = fileInfo.Length,
-                    FileName = fileInfo.Name,
+                    Name = fileInfo.Name,
                     ModifiedDate = fileInfo.LastWriteTimeUtc
                 };
                 retVal.RelativeUrl = GetRelativeUrl(retVal.Url);
 
             }
-            return retVal;
+
+            return Task.FromResult(retVal);
         }
 
         /// <summary>
@@ -98,19 +99,19 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
             {
                 Directory.CreateDirectory(folderPath);
             }
+
             return File.Open(filePath, FileMode.Create);
         }
 
 
         /// <summary>
-        /// Search folders and blobs in folder
+        /// SearchAsync folders and blobs in folder
         /// </summary>
         /// <param name="folderUrl">absolute or relative path</param>
         /// <param name="keyword"></param>
         /// <returns></returns>
-        public virtual Task<BlobSearchResult> Search(string folderUrl, string keyword)
+        public virtual Task<BlobSearchResult> SearchAsync(string folderUrl, string keyword)
         {
-            var taskResult = new TaskCompletionSource<BlobSearchResult>();
             var retVal = new BlobSearchResult();
             folderUrl = folderUrl ?? _basePublicUrl;
 
@@ -120,14 +121,9 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
 
             if (!Directory.Exists(storageFolderPath))
             {
-                Task.Run(() => { taskResult.SetResult(retVal); });
-
-                return taskResult.Task;
+                return Task.FromResult(retVal);
             }
-
-            var directories = String.IsNullOrEmpty(keyword)
-                ? Directory.GetDirectories(storageFolderPath)
-                : Directory.GetDirectories(storageFolderPath, "*" + keyword + "*", SearchOption.AllDirectories);
+            var directories = String.IsNullOrEmpty(keyword) ? Directory.GetDirectories(storageFolderPath) : Directory.GetDirectories(storageFolderPath, "*" + keyword + "*", SearchOption.AllDirectories);
             foreach (var directory in directories)
             {
                 var directoryInfo = new DirectoryInfo(directory);
@@ -141,9 +137,7 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
                 retVal.Folders.Add(folder);
             }
 
-            var files = String.IsNullOrEmpty(keyword)
-                ? Directory.GetFiles(storageFolderPath)
-                : Directory.GetFiles(storageFolderPath, "*" + keyword + "*.*", SearchOption.AllDirectories);
+            var files = String.IsNullOrEmpty(keyword) ? Directory.GetFiles(storageFolderPath) : Directory.GetFiles(storageFolderPath, "*" + keyword + "*.*", SearchOption.AllDirectories);
             foreach (var file in files)
             {
                 var fileInfo = new FileInfo(file);
@@ -152,73 +146,75 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
                     Url = GetAbsoluteUrlFromPath(file),
                     ContentType = MimeTypeResolver.ResolveContentType(fileInfo.Name),
                     Size = fileInfo.Length,
-                    FileName = fileInfo.Name,
+                    Name = fileInfo.Name,
                     ModifiedDate = fileInfo.LastWriteTimeUtc
                 };
                 blobInfo.RelativeUrl = GetRelativeUrl(blobInfo.Url);
                 retVal.Items.Add(blobInfo);
             }
-
-            Task.Run(() => { taskResult.SetResult(retVal); });
-
-            return taskResult.Task;
+            return Task.FromResult(retVal);
         }
 
         /// <summary>
         /// Create folder in file system within to base directory
         /// </summary>
         /// <param name="folder"></param>
-        public virtual void CreateFolder(BlobFolder folder)
+        public virtual async Task CreateFolder(BlobFolder folder)
         {
-            if (folder == null)
+            await Task.Factory.StartNew(() =>
             {
-                throw new ArgumentNullException("folder");
-            }
-            var path = _storagePath;
-            if (folder.ParentUrl != null)
-            {
-                path = GetStoragePathFromUrl(folder.ParentUrl);
-            }
-            path = Path.Combine(path, folder.Name);
+                if (folder == null)
+                {
+                    throw new ArgumentNullException("folder");
+                }
+                var path = _storagePath;
+                if (folder.ParentUrl != null)
+                {
+                    path = GetStoragePathFromUrl(folder.ParentUrl);
+                }
+                path = Path.Combine(path, folder.Name);
 
-            ValidatePath(path);
+                ValidatePath(path);
 
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+            });
         }
 
         /// <summary>
         /// Remove folders and blobs by absolute or relative urls
         /// </summary>
         /// <param name="urls"></param>
-        public virtual void Remove(string[] urls)
+        public virtual async Task Remove(string[] urls)
         {
-            if (urls == null)
-            {
-                throw new ArgumentNullException("urls");
-            }
-            foreach (var url in urls)
-            {
-                var path = GetStoragePathFromUrl(url);
+            await Task.Factory.StartNew(() => {
 
-                ValidatePath(path);
-
-                // get the file attributes for file or directory
-                var attr = File.GetAttributes(path);
-
-                //detect whether its a directory or file
-                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                if (urls == null)
                 {
-                    Directory.Delete(path, true);
+                    throw new ArgumentNullException("urls");
                 }
-                else
+                foreach (var url in urls)
                 {
-                    File.Delete(path);
+                    var path = GetStoragePathFromUrl(url);
+
+                    ValidatePath(path);
+
+                    // get the file attributes for file or directory
+                    var attr = File.GetAttributes(path);
+
+                    //detect whether its a directory or file
+                    if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                    {
+                        Directory.Delete(path, true);
+                    }
+                    else
+                    {
+                        File.Delete(path);
+                    }
                 }
-            }
+            });
         }
 
         #endregion

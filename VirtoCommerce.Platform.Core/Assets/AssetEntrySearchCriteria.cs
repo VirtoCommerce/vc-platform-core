@@ -6,7 +6,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Core.Assets
 {
-    public class AssetEntrySearchCriteria : ValueObject
+    public class AssetEntrySearchCriteria : SearchCriteriaBase
     {
         /// <summary>
         /// Phrase to search in Name and RelativeUrl
@@ -15,20 +15,7 @@ namespace VirtoCommerce.Platform.Core.Assets
 
         public TenantIdentity[] Tenants { get; set; }
 
-        /// <summary>
-        /// Asset language
-        /// </summary>
-        public string LanguageCode { get; set; }
 
         public string Group { get; set; }
-
-        /// <summary>
-        /// Sorting expression property1:asc;property2:desc
-        /// </summary>
-        public string Sort { get; set; }
-        public virtual SortInfo[] SortInfos => SortInfo.Parse(Sort).ToArray();
-
-        public int Skip { get; set; }
-        public int Take { get; set; } = 20;
     }
 }

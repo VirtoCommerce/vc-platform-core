@@ -11,7 +11,7 @@ using VirtoCommerce.Platform.Data.Repositories;
 
 namespace VirtoCommerce.Platform.Data.Assets
 {
-    public class AssetEntryService : ServiceBase, IAssetEntryService, IAssetEntrySearchService
+    public class AssetEntryService: ServiceBase, IAssetEntryService, IAssetEntrySearchService
     {
         private readonly Func<IPlatformRepository> _platformRepository;
         private readonly IBlobUrlResolver _blobUrlResolver;
@@ -24,7 +24,7 @@ namespace VirtoCommerce.Platform.Data.Assets
             _memoryCache = memoryCache;
         }
 
-        public AssetEntrySearchResult SearchAssetEntries(AssetEntrySearchCriteria criteria)
+        public GenericSearchResult<AssetEntry> SearchAssetEntries(AssetEntrySearchCriteria criteria)
         {
             var cacheKey = $"Search:{criteria?.GetHashCode()}";
 
@@ -61,7 +61,7 @@ namespace VirtoCommerce.Platform.Data.Assets
                         }
                     }
 
-                    var result = new AssetEntrySearchResult
+                    var result = new GenericSearchResult<AssetEntry>()
                     {
                         TotalCount = query.Count()
                     };

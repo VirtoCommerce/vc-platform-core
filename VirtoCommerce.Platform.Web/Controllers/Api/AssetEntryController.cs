@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.Platform.Core.Assets;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api
@@ -23,13 +24,13 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         }
 
         /// <summary>
-        /// Search for AssetEntries by AssetEntrySearchCriteria
+        /// SearchAsync for AssetEntries by AssetEntrySearchCriteria
         /// </summary>
         /// <param name="criteria"></param>
         /// <returns></returns>
         [HttpPost]
         [Route("search")]
-        [ProducesResponseType(typeof(AssetEntrySearchResult), 200)]
+        [ProducesResponseType(typeof(GenericSearchResult<AssetEntry>), 200)]
         // [CheckPermission(Permission = PredefinedPermissions.AssetAccess)]
         public IActionResult Search(AssetEntrySearchCriteria criteria)
         {

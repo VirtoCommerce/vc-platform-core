@@ -1,45 +1,47 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Hosting.Internal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Exceptions;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Data.Helpers;
-using VirtoCommerce.Platform.Web.Converters.Asset;
 using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Helpers;
+using VirtoCommerce.Platform.Web.Infrastructure;
 using VirtoCommerce.Platform.Web.Swagger;
-using webModel = VirtoCommerce.Platform.Web.Model.Asset;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api
 {
     [Route("api/platform/assets")]
     public class AssetsController : Controller
     {
-        private const string _uploadsUrl = "~/App_Data/Uploads/";
-
+        private readonly string _uploadsUrl;
         private readonly IBlobStorageProvider _blobProvider;
         private readonly IBlobUrlResolver _urlResolver;
         private readonly IHostingEnvironment _hostingEnv;
         private static readonly FormOptions _defaultFormOptions = new FormOptions();
 
-        public AssetsController(IBlobStorageProvider blobProvider, IBlobUrlResolver urlResolver, IHostingEnvironment hostingEnv)
+        public AssetsController(IBlobStorageProvider blobProvider, IBlobUrlResolver urlResolver, IHostingEnvironment hostingEnv, IOptions<PlatformOptions> option)
         {
             _blobProvider = blobProvider;
             _urlResolver = urlResolver;
             _hostingEnv = hostingEnv;
+
+            _uploadsUrl = option?.Value?.UploadUrl;
+
+            if (_uploadsUrl == null)
+                throw new PlatformException($"{nameof(option.Value.UploadUrl)} must be set");
         }
 
         /// <summary>
@@ -86,7 +88,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                         }
 
                         var blobInfo = AbstractTypeFactory<BlobInfo>.TryCreateInstance();
-                        blobInfo.FileName = fileName;
+                        blobInfo.Name = fileName;
                         blobInfo.Url = _uploadsUrl + fileName;
                         blobInfo.ContentType = MimeTypeResolver.ResolveContentType(fileName);
                         retVal.Add(blobInfo);
@@ -131,7 +133,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 {
                     remoteStream.CopyTo(blobStream);
                     var blobInfo = AbstractTypeFactory<BlobInfo>.TryCreateInstance();
-                    blobInfo.FileName = fileName;
+                    blobInfo.Name = fileName;
                     blobInfo.RelativeUrl = fileUrl;
                     blobInfo.Url = _urlResolver.GetAbsoluteUrl(fileUrl);
                     retVal.Add(blobInfo);
@@ -165,7 +167,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                             }
 
                             var blobInfo = AbstractTypeFactory<BlobInfo>.TryCreateInstance();
-                            blobInfo.FileName = fileName;
+                            blobInfo.Name = fileName;
                             blobInfo.Url = _uploadsUrl + fileName;
                             blobInfo.ContentType = MimeTypeResolver.ResolveContentType(fileName);
                             retVal.Add(blobInfo);
@@ -187,26 +189,26 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 200)]
         [Route("")]
         [Authorize(SecurityConstants.Permissions.AssetDelete)]
-        public IActionResult DeleteBlobs([FromQuery] string[] urls)
+        public async Task<IActionResult> DeleteBlobs([FromQuery] string[] urls)
         {
-            _blobProvider.Remove(urls);
+            await _blobProvider.Remove(urls);
             return Ok();
         }
 
         /// <summary>
-        /// Search asset folders and blobs
+        /// SearchAsync asset folders and blobs
         /// </summary>
         /// <param name="folderUrl"></param>
         /// <param name="keyword"></param>
         /// <returns></returns> 
         [HttpGet]
-        [ProducesResponseType(typeof(webModel.AssetListItem[]), 200)]
+        [ProducesResponseType(typeof(AssetListItem[]), 200)]
         [Route("")]
         [Authorize(SecurityConstants.Permissions.AssetRead)]
         public async Task<IActionResult> SearchAssetItems(string folderUrl = null, string keyword = null)
         {
-            var result = await _blobProvider.Search(folderUrl, keyword);
-            return Ok(result.ToWebModel());
+            var result = await _blobProvider.SearchAsync(folderUrl, keyword);
+            return Ok(result.Result.ToArray());
         }
 
         /// <summary>
@@ -218,9 +220,9 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 200)]
         [Route("folder")]
         [Authorize(SecurityConstants.Permissions.AssetCreate)]
-        public IActionResult CreateBlobFolder([FromBody]BlobFolder folder)
+        public async Task<IActionResult> CreateBlobFolder([FromBody]BlobFolder folder)
         {
-            _blobProvider.CreateFolder(folder);
+            await _blobProvider.CreateFolder(folder);
             return Ok();
         }
     }

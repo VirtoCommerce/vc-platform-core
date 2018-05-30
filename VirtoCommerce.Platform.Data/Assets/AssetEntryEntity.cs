@@ -49,7 +49,7 @@ namespace VirtoCommerce.Platform.Data.Assets
                 throw new ArgumentNullException(nameof(asset));
 
             LanguageCode = asset.LanguageCode;
-            Name = asset.BlobInfo.FileName;
+            Name = asset.BlobInfo.Name;
             MimeType = asset.BlobInfo.ContentType;
             RelativeUrl = asset.BlobInfo.RelativeUrl;
             Size = asset.BlobInfo.Size;
@@ -78,7 +78,7 @@ namespace VirtoCommerce.Platform.Data.Assets
             {
                 asset.BlobInfo = AbstractTypeFactory<BlobInfo>.TryCreateInstance();
             }
-            asset.BlobInfo.FileName = Name;
+            asset.BlobInfo.Name = Name;
             asset.BlobInfo.ContentType = MimeType;
             asset.BlobInfo.RelativeUrl = RelativeUrl;
             asset.BlobInfo.Url = blobUrlResolver.GetAbsoluteUrl(RelativeUrl);
