@@ -140,7 +140,10 @@
     $scope.saveChanges = function () {
         if (blade.isApiSave) {
             blade.isLoading = true;
-
+            blade.currentEntities = _.map(blade.currentEntities, function (item) {
+                item.propertyId = blade.currentEntity.id;
+                return item;
+            });
             dictionaryItemsApi.save({ id: blade.currentEntity.objectType, propertyId: blade.currentEntity.id },
                 blade.currentEntities,
                 function () {

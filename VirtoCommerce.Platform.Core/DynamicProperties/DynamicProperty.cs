@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -31,6 +31,7 @@ namespace VirtoCommerce.Platform.Core.DynamicProperties
         /// <summary>
         /// The storage property type 
         /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
         public DynamicPropertyValueType ValueType { get; set; }
         /// <summary>
         /// Property names for different languages.

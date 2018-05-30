@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Primitives;
 using System.Threading;
+using Microsoft.Extensions.Primitives;
 
-namespace VirtoCommerce.Storefront.Model.Common.Caching
+namespace VirtoCommerce.Platform.Core.Caching
 {
     public class CancellableCacheRegion<T>
     {
