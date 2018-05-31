@@ -2,6 +2,7 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using Module1.Abstractions;
 using Module1.Services;
+using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Repositories;
@@ -21,7 +22,9 @@ namespace Module1.Web
         public void PostInitialize(IServiceProvider serviceProvider)
         {
             var settingsService = serviceProvider.GetRequiredService<ISettingsManager>();
-            var platformRepository = serviceProvider.GetRequiredService<IPlatformRepository>();       
+            var platformRepository = serviceProvider.GetRequiredService<IPlatformRepository>();
+            var dynamicPropertyRegistrar = serviceProvider.GetRequiredService<IDynamicPropertyRegistrar>();
+            dynamicPropertyRegistrar.RegisterType<TestClass>();
         }
 
         public void Uninstall()

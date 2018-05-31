@@ -1,4 +1,4 @@
-﻿angular.module('platformWebApp')
+angular.module('platformWebApp')
 .controller('platformWebApp.dynamicPropertyListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dynamicProperties.api', function ($scope, bladeNavigationService, dynamicPropertiesApi) {
     var blade = $scope.blade;
     blade.headIcon = 'fa-plus-square-o';
@@ -6,7 +6,7 @@
     blade.subtitle = 'platform.blades.dynamicProperty-list.subtitle';
 
     blade.refresh = function (parentRefresh) {
-        dynamicPropertiesApi.query({ id: blade.objectType }, function (results) {
+        dynamicPropertiesApi.getPropertiesForType({ typeName: blade.objectType }, function (results) {
             if (parentRefresh && blade.parentRefresh) {
                 blade.parentRefresh(results);
             }
