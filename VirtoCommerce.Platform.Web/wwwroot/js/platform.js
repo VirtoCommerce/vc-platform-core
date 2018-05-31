@@ -18344,35 +18344,6 @@ angular.module('platformWebApp')
 angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
     $stateProvider
-        .state('workspace.assets', {
-            url: '/assets',
-            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-            controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-                var blade = {
-                    id: 'assetList',
-                    controller: 'platformWebApp.assets.assetListController',
-                    template: '$(Platform)/Scripts/app/assets/blades/asset-list.tpl.html',
-                    isClosingDisabled: true
-                };
-                bladeNavigationService.showBlade(blade);
-            }]
-        });
-}])
-.run(
-  ['platformWebApp.mainMenuService', '$state', function (mainMenuService, $state) {
-      var menuItem = {
-          path: 'browse/assets',
-          icon: 'fa fa-folder-o',
-          title: 'platform.menu.assets',
-          priority: 130,
-          action: function () { $state.go('workspace.assets'); },
-          permission: 'platform:asset:access'
-      };
-      mainMenuService.addMenuItem(menuItem);
-  }]);
-angular.module('platformWebApp')
-.config(['$stateProvider', function ($stateProvider) {
-    $stateProvider
         .state('workspace.dynamicProperties', {
             url: '/dynamicProperties',
             templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
@@ -18572,6 +18543,35 @@ angular.module('platformWebApp')
 
   }]);
 
+angular.module('platformWebApp')
+.config(['$stateProvider', function ($stateProvider) {
+    $stateProvider
+        .state('workspace.assets', {
+            url: '/assets',
+            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+            controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+                var blade = {
+                    id: 'assetList',
+                    controller: 'platformWebApp.assets.assetListController',
+                    template: '$(Platform)/Scripts/app/assets/blades/asset-list.tpl.html',
+                    isClosingDisabled: true
+                };
+                bladeNavigationService.showBlade(blade);
+            }]
+        });
+}])
+.run(
+  ['platformWebApp.mainMenuService', '$state', function (mainMenuService, $state) {
+      var menuItem = {
+          path: 'browse/assets',
+          icon: 'fa fa-folder-o',
+          title: 'platform.menu.assets',
+          priority: 130,
+          action: function () { $state.go('workspace.assets'); },
+          permission: 'platform:asset:access'
+      };
+      mainMenuService.addMenuItem(menuItem);
+  }]);
 angular.module('platformWebApp')
 .controller('platformWebApp.licenseDetailController', ['$scope', '$window', 'FileUploader', '$http', 'platformWebApp.bladeNavigationService', function ($scope, $window, FileUploader, $http, bladeNavigationService) {
     var blade = $scope.blade;
@@ -22748,14 +22748,960 @@ angular.module('platformWebApp')
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["公元前","公元"],ERAS:["BC","AD"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"d/M/yy ah:mm",shortDate:"d/M/yy",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-hk",pluralCat:function(e,m){return E.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["西元前","西元"],ERAS:["西元前","西元"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日 EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"y/M/d ah:mm",shortDate:"y/M/d",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"NT$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-tw",pluralCat:function(e,m){return E.OTHER}})}]);
 angular.module('platformWebApp')
-.factory('platformWebApp.assets.api', ['$resource', function ($resource) {
-    return $resource('api/platform/assets', {}, {
-        createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
-        move: { method: 'POST', url: 'api/platform/assets/move' },
-        uploadFromUrl: { method: 'POST', params: { url: '@url', folderUrl: '@folderUrl', name: '@name' }, isArray: true }
-    });
+.controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    
+    $scope.blade.isLoading = false;
+    // ui-grid
+    $scope.setGridOptions = function (gridOptions) {
+        $scope.gridOptions = gridOptions;
+    };
 }]);
 
+angular.module('platformWebApp')
+.controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    var blade = $scope.blade;
+
+    $scope.openBlade = function () {
+        var newBlade = {
+            id: "changesChildBlade",
+            currentEntities: blade.currentEntity.operationsLog,
+            headIcon: blade.headIcon,
+            title: blade.title,
+            subtitle: 'platform.widgets.operations.blade-subtitle',
+            isExpandable: true,
+            controller: 'platformWebApp.changeLog.operationListController',
+            template: '$(Platform)/Scripts/app/changeLog/blades/operation-list.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, blade);
+    };
+}]);
+angular.module('platformWebApp')
+.controller('platformWebApp.dynamicObjectListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dynamicProperties.api', function ($scope, bladeNavigationService, dynamicPropertiesApi) {
+	var blade = $scope.blade;
+
+	blade.refresh = function () {
+		dynamicPropertiesApi.queryTypes(function (results) {
+			results = _.map(results, function (x) { return { name: x }; });
+			blade.currentEntities = results;
+			blade.isLoading = false;
+		}, function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+	};
+
+	$scope.selectNode = function (node) {
+		$scope.selectedNodeId = node.name;
+
+		var newBlade = {
+			id: 'dynamicPropertyList',
+			objectType: node.name,
+			controller: 'platformWebApp.dynamicPropertyListController',
+			template: '$(Platform)/Scripts/app/dynamicProperties/blades/dynamicProperty-list.tpl.html'
+		};
+
+		bladeNavigationService.showBlade(newBlade, blade);
+	}
+
+	blade.headIcon = 'fa-plus-square-o';
+    blade.title = 'platform.blades.dynamicObject-list.title',
+    blade.subtitle = 'platform.blades.dynamicObject-list.subtitle',
+	blade.refresh();
+}]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.dynamicPropertyDetailController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.settings', 'platformWebApp.dynamicProperties.api', 'platformWebApp.dynamicProperties.dictionaryItemsApi', 'platformWebApp.dynamicProperties.valueTypesService', function ($scope, bladeNavigationService, dialogService, settings, dynamicPropertiesApi, dictionaryItemsApi, valueTypesService) {
+    var blade = $scope.blade;
+    blade.updatePermission = 'platform:dynamic_properties:update';
+    blade.headIcon = 'fa-plus-square-o';
+    blade.title = 'platform.blades.dynamicProperty-detail.title';
+    var localDictionaryValues = [];
+
+    blade.refresh = function () {
+        //Actualize displayed names to correspond to system languages
+        settings.getValues({ id: 'VirtoCommerce.Core.General.Languages' }, function (languages) {
+            blade.currentEntity = blade.isNew ? { valueType: 'ShortText', displayNames: [] } : blade.currentEntity;
+            blade.currentEntity.displayNames = _.map(languages, function (x) {
+                var retVal = { locale: x };
+                var existName = _.find(blade.currentEntity.displayNames, function (y) { return y.locale.toLowerCase() == x.toLowerCase(); });
+                if (angular.isDefined(existName)) {
+                    retVal = existName;
+                }
+                return retVal;
+            });
+            blade.currentEntity.objectType = blade.objectType;
+            blade.origEntity = blade.currentEntity;
+            blade.currentEntity = angular.copy(blade.origEntity);
+            blade.isLoading = false;
+        });
+    };
+
+
+    $scope.arrayFlagValidator = function (value) {
+        return !value || blade.currentEntity.valueType === 'ShortText' || blade.currentEntity.valueType === 'Integer' || blade.currentEntity.valueType === 'Decimal';
+    };
+
+    $scope.multilingualFlagValidator = function (value) {
+        return !value || blade.currentEntity.valueType === 'ShortText' || blade.currentEntity.valueType === 'LongText' || blade.currentEntity.valueType === 'Html';
+    };
+
+    $scope.dictionaryFlagValidator = function (value) {
+        return !value || blade.currentEntity.valueType === 'ShortText';
+    };
+
+    $scope.openChild = function (childType) {
+        var newBlade = {
+            id: "propertyChild",
+            currentEntity: blade.currentEntity
+        };
+
+        switch (childType) {
+            case 'dict':
+                newBlade.isApiSave = !blade.isNew;
+                newBlade.controller = 'platformWebApp.propertyDictionaryController';
+                newBlade.template = '$(Platform)/Scripts/app/dynamicProperties/blades/property-dictionary.tpl.html';
+                if (blade.isNew) {
+                    newBlade.data = localDictionaryValues;
+                    newBlade.onChangesConfirmedFn = function (data) {
+                        localDictionaryValues = data;
+                    }
+                }
+                break;
+        }
+        bladeNavigationService.showBlade(newBlade, blade);
+        $scope.currentChild = childType;
+    }
+
+    $scope.setForm = function (form) { $scope.formScope = form; }
+
+    function isDirty() {
+        return !angular.equals(blade.currentEntity, blade.origEntity) && blade.hasUpdatePermission();
+    };
+
+    $scope.saveChanges = function () {
+        if (blade.isNew) {
+            dynamicPropertiesApi.save(blade.currentEntity,
+                function (data) {
+                    blade.onChangesConfirmedFn(data);
+                    // save dictionary items for new entity
+                    if (data.isDictionary) {
+                        localDictionaryValues = _.map(localDictionaryValues, function (item) {
+                            item.propertyId = data.id;
+                            return item;
+                        });
+                        dictionaryItemsApi.save({ id: blade.objectType, propertyId: data.id },
+                            localDictionaryValues,
+                            function () {
+                                $scope.bladeClose();
+                                blade.parentBlade.refresh(true);
+                            },
+                            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+                    } else {
+                        $scope.bladeClose();
+                        blade.parentBlade.refresh(true);
+                    }
+                },
+                function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+        } else {
+            dynamicPropertiesApi.update(blade.currentEntity,
+                function () {
+                    blade.refresh();
+                    blade.parentBlade.refresh(true);
+                },
+                function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+        }
+    };
+
+    function deleteEntry() {
+        var dialog = {
+            id: "confirmDelete",
+            title: "platform.dialogs.dynamic-property-delete.title",
+            message: "platform.dialogs.dynamic-property-delete.message",
+            callback: function (remove) {
+                if (remove) {
+                    dynamicPropertiesApi.delete({ id: blade.objectType, propertyId: blade.currentEntity.id },
+                        function () {
+                            $scope.bladeClose();
+                            blade.parentBlade.refresh(true);
+                        },
+                        function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+                }
+            }
+        }
+        dialogService.showConfirmationDialog(dialog);
+    }
+
+    if (!blade.isNew) {
+        blade.toolbarCommands = [
+        {
+            name: "platform.commands.save", icon: 'fa fa-save',
+            executeMethod: function () {
+                $scope.saveChanges();
+            },
+            canExecuteMethod: function () {
+                return isDirty() && $scope.formScope && $scope.formScope.$valid;
+            },
+            permission: blade.updatePermission
+        },
+        {
+            name: "platform.commands.reset", icon: 'fa fa-undo',
+            executeMethod: function () {
+                angular.copy(blade.origEntity, blade.currentEntity);
+            },
+            canExecuteMethod: isDirty,
+            permission: blade.updatePermission
+        },
+        {
+            name: "platform.commands.delete", icon: 'fa fa-trash-o',
+            executeMethod: deleteEntry,
+            canExecuteMethod: function () {
+                return !blade.isNew;
+            },
+            permission: 'platform:dynamic_properties:delete'
+        }
+        ];
+    }
+
+    blade.valueTypes = valueTypesService.query();
+
+    // on load: 
+    blade.refresh();
+}]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.dynamicPropertyListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dynamicProperties.api', function ($scope, bladeNavigationService, dynamicPropertiesApi) {
+    var blade = $scope.blade;
+    blade.headIcon = 'fa-plus-square-o';
+    blade.title = blade.objectType;
+    blade.subtitle = 'platform.blades.dynamicProperty-list.subtitle';
+    $scope.pageSettings = {};
+    $scope.pageSettings.totalItems = 0;
+    $scope.pageSettings.currentPage = 1;
+    $scope.pageSettings.numPages = 5;
+    $scope.pageSettings.itemsPerPageCount = 999;
+
+    blade.refresh = function (parentRefresh) {
+        var start = $scope.pageSettings.currentPage * $scope.pageSettings.itemsPerPageCount - $scope.pageSettings.itemsPerPageCount;
+        dynamicPropertiesApi.getPropertiesForType({ typeName: blade.objectType }, { skip: start, take: $scope.pageSettings.itemsPerPageCount }, function (results) {
+            if (parentRefresh && blade.parentRefresh) {
+                blade.parentRefresh(results);
+            }
+
+            blade.currentEntities = results;
+            blade.isLoading = false;
+        }, function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+    };
+
+    $scope.selectNode = function (node) {
+        $scope.selectedNodeId = node.id;
+
+        var newBlade = {
+            subtitle: 'platform.blades.dynamicProperty-detail.subtitle',
+            currentEntity: node
+        };
+        openDetailsBlade(newBlade);
+    };
+
+    function openDetailsBlade(node) {
+        var newBlade = {
+            id: "dynamicPropertyDetail",
+            objectType: blade.objectType,
+            controller: 'platformWebApp.dynamicPropertyDetailController',
+            template: '$(Platform)/Scripts/app/dynamicProperties/blades/dynamicProperty-detail.tpl.html'
+        };
+        angular.extend(newBlade, node);
+
+        bladeNavigationService.showBlade(newBlade, blade);
+    }
+
+    blade.toolbarCommands = [
+       //{
+       //    name: "Refresh", icon: 'fa fa-refresh',
+       //    executeMethod: blade.refresh,
+       //    canExecuteMethod: function () {
+       //        return true;
+       //    }
+       //},
+       {
+           name: "platform.commands.add-new-property", icon: 'fa fa-plus',
+           executeMethod: function () {
+               $scope.selectedNodeId = undefined;
+               var newBlade = {
+                   subtitle: 'platform.blades.dynamicProperty-detail.subtitle-new',
+                   isNew: true,
+                   onChangesConfirmedFn: function (entry) {
+                       $scope.selectedNodeId = entry.id;
+                   }
+               };
+               openDetailsBlade(newBlade);
+           },
+           canExecuteMethod: function () {
+               return true;
+           },
+           permission: 'platform:dynamic_properties:create'
+       }
+    ];
+
+    blade.refresh();
+}]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.propertyDictionaryController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', 'platformWebApp.dynamicProperties.dictionaryItemsApi', function ($scope, dialogService, bladeNavigationService, settings, dictionaryItemsApi) {
+    var blade = $scope.blade;
+    blade.updatePermission = 'platform:dynamic_properties:update';
+    blade.headIcon = 'fa-plus-square-o';
+    blade.title = 'platform.blades.property-dictionary.title';
+    blade.subtitle = 'platform.blades.property-dictionary.subtitle';
+
+    var availableLanguages;
+
+    function refresh() {
+        blade.isLoading = true;
+        blade.selectedAll = false;
+
+        if (blade.isApiSave) {
+            dictionaryItemsApi.getDictionaryItems({}, { id: blade.currentEntity.objectType, dynamicPropertyId: blade.currentEntity.id, take: 999 },
+                initializeBlade,
+                function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+        } else {
+            initializeBlade(blade.data);
+        }
+    }
+
+    function initializeBlade(data) {
+        blade.origEntity = data;
+        blade.currentEntities = angular.copy(data);
+
+        if (blade.currentEntity.isMultilingual && !availableLanguages) {
+            settings.getValues({ id: 'VirtoCommerce.Core.General.Languages' }, function (promiseData) {
+                availableLanguages = _.map(promiseData.sort(), function (x) { return { locale: x }; });
+                resetNewValue();
+                blade.isLoading = false;
+            },
+            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+        } else {
+            resetNewValue();
+            blade.isLoading = false;
+        }
+    }
+
+    $scope.dictItemNameValidator = function (value) {
+        if (blade.isLoading) {
+            return false;
+        } else if (blade.currentEntity.isMultilingual) {
+            var testEntity = angular.copy($scope.newValue);
+            testEntity.name = value;
+            return _.all(blade.currentEntities, function (item) {
+                return item.name !== value || $scope.selectedItem === item;
+            });
+        } else {
+            return _.all(blade.currentEntities, function (item) { return item.name !== value; });
+        }
+    };
+
+    $scope.dictValueValidator = function (value, editEntity) {
+        if (blade.currentEntity.isMultilingual) {
+            var testEntity = angular.copy(editEntity);
+            testEntity.value = value;
+            return _.all(blade.currentEntities, function (item) {
+                return item.value !== value || item.locale !== testEntity.locale || ($scope.selectedItem && _.some($scope.selectedItem.displayNames, function (x) {
+                    return angular.equals(x, testEntity);
+                }));
+            });
+        } else {
+            return _.all(blade.currentEntities, function (item) { return item.name !== value; });
+        }
+    };
+
+    $scope.selectItem = function (listItem) {
+        $scope.selectedItem = listItem;
+
+        if (blade.currentEntity.isMultilingual) {
+            resetNewValue();
+        }
+    };
+
+    function resetNewValue() {
+        if (blade.currentEntity.isMultilingual) {
+            // generate input fields for ALL languages
+            var newValue = { displayNames: angular.copy(availableLanguages) };
+
+            // add current values
+            if ($scope.selectedItem) {
+                _.each($scope.selectedItem.displayNames, function (value) {
+                    var foundValue = _.findWhere(newValue.displayNames, { locale: value.locale });
+                    if (foundValue) {
+                        angular.extend(foundValue, value);
+                    }
+                });
+                newValue.id = $scope.selectedItem.id;
+                newValue.name = $scope.selectedItem.name;
+            }
+
+            $scope.newValue = newValue;
+        } else {
+            $scope.newValue = {};
+        }
+    }
+
+    $scope.cancel = function () {
+        $scope.selectedItem = undefined;
+        resetNewValue();
+    }
+
+    $scope.add = function (form) {
+        if (form.$valid) {
+            if ($scope.newValue.displayNames) {
+                $scope.newValue.displayNames = _.filter($scope.newValue.displayNames, function (x) { return x.name; });
+
+                if ($scope.selectedItem) { // editing existing value
+                    angular.copy($scope.newValue, $scope.selectedItem);
+                    $scope.selectedItem = undefined;
+                } else { // adding new value
+                    blade.currentEntities.push($scope.newValue);
+                }
+            } else {
+                blade.currentEntities.push($scope.newValue);
+            }
+            resetNewValue();
+            form.$setPristine();
+        }
+    };
+
+    $scope.delete = function (index) {
+        blade.selectedAll = false;
+        $scope.toggleAll();
+
+        blade.currentEntities[index].$selected = true;
+        deleteChecked();
+    };
+
+    $scope.setForm = function (form) {
+        $scope.formScope = form;
+    }
+
+    function isDirty() {
+        return !angular.equals(blade.currentEntities, blade.origEntity) && blade.hasUpdatePermission();
+    };
+
+    $scope.saveChanges = function () {
+        if (blade.isApiSave) {
+            blade.isLoading = true;
+            blade.currentEntities = _.map(blade.currentEntities, function (item) {
+                item.propertyId = blade.currentEntity.id;
+                return item;
+            });
+            dictionaryItemsApi.save({ id: blade.currentEntity.objectType, propertyId: blade.currentEntity.id },
+                blade.currentEntities,
+                function () {
+                    refresh();
+                    if (blade.onChangesConfirmedFn)
+                        blade.onChangesConfirmedFn();
+                },
+                function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+        } else {
+            blade.onChangesConfirmedFn(blade.currentEntities);
+            $scope.bladeClose();
+        }
+    };
+
+    blade.toolbarCommands = [
+        {
+            name: "platform.commands.save", icon: 'fa fa-save',
+            executeMethod: function () {
+                $scope.saveChanges();
+            },
+            canExecuteMethod: function () {
+                return isDirty() && $scope.formScope && $scope.formScope.$valid;
+            },
+            permission: blade.updatePermission
+        },
+        {
+            name: "platform.commands.reset", icon: 'fa fa-undo',
+            executeMethod: function () {
+                angular.copy(blade.origEntity, blade.currentEntities);
+            },
+            canExecuteMethod: isDirty,
+            permission: blade.updatePermission
+        },
+        {
+            name: "platform.commands.delete", icon: 'fa fa-trash-o',
+            executeMethod: function () {
+                deleteChecked();
+            },
+            canExecuteMethod: function () {
+                return isItemsChecked();
+            },
+            permission: blade.updatePermission
+        }
+    ];
+
+    if (!blade.isApiSave) {
+        $scope.blade.toolbarCommands.splice(0, 1); // remove save button
+    }
+
+    $scope.toggleAll = function () {
+        angular.forEach(blade.currentEntities, function (item) {
+            item.$selected = blade.selectedAll;
+        });
+    };
+
+    function isItemsChecked() {
+        return _.any(blade.currentEntities, function (x) { return x.$selected; });
+    }
+
+    function deleteChecked() {
+        var selection = _.where(blade.currentEntities, { $selected: true });
+        var ids = _.pluck(selection, 'id');
+        var dialog = {
+            id: "confirmDeleteItem",
+            title: "platform.dialogs.dictionary-items-delete.title",
+            message: "platform.dialogs.dictionary-items-delete.message",
+            messageValues: { quantity: ids.length },
+            callback: function (remove) {
+                if (remove) {
+                    blade.isLoading = true;
+                    dictionaryItemsApi.delete({ id: blade.currentEntity.objectType, propertyId: blade.currentEntity.id, ids: ids }, null,
+                        function () {
+                            refresh();
+                            if (blade.onChangesConfirmedFn)
+                                blade.onChangesConfirmedFn();
+                        },
+                        function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+                }
+            }
+        }
+        dialogService.showConfirmationDialog(dialog);
+    }
+
+    // on load
+    refresh();
+}]);
+angular.module('platformWebApp')
+.controller('platformWebApp.propertyValueListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.settings', 'platformWebApp.dynamicProperties.dictionaryItemsApi', 'platformWebApp.i18n', '$timeout', function ($scope, bladeNavigationService, dialogService, settings, dictionaryItemsApi, i18n, $timeout) {
+    var blade = $scope.blade;
+    blade.updatePermission = 'platform:dynamic_properties:update';
+    blade.headIcon = 'fa-plus-square-o';
+    blade.title = "platform.blades.propertyValue-list.title";
+    blade.subtitle = "platform.blades.propertyValue-list.subtitle";
+    blade.currentLanguage = i18n.getLanguage();
+
+    blade.refresh = function () {
+        blade.data = blade.currentEntity;
+        var rawProperties = angular.copy(blade.currentEntity.dynamicProperties);
+
+        _.each(rawProperties, function (x) {
+            x.values.sort(function (a, b) {
+                return a.value && b.value
+                    ? (a.value.name
+                        ? a.value.name.localeCompare(b.value.name)
+                        : angular.isString(a.value) && angular.isString(b.value)
+                            ? a.value.localeCompare(b.value)
+                            : a.value < b.value ? -1 : a.value > b.value ? 1 : 0)
+                    : -1;
+            });
+        });
+
+        if (_.any(rawProperties, function (x) { return x.isMultilingual; })) {
+            settings.getValues({ id: 'VirtoCommerce.Core.General.Languages' }, function (data) {
+                $scope.languages = data;
+
+                // wait for va-generic-value-input to initialize empty values and repeat init
+                $timeout(function () {
+                    blade.origEntity = angular.copy(blade.currentEntities);
+                });
+            });
+        }
+
+        blade.origEntity = rawProperties;
+        blade.currentEntities = angular.copy(rawProperties);
+        blade.isLoading = false;
+    };
+
+    function isDirty() {
+        return !angular.equals(blade.currentEntities, blade.origEntity) && blade.hasUpdatePermission();
+    }
+
+    function canSave() {
+        return isDirty() && formScope && formScope.$valid;
+    }
+
+    $scope.cancelChanges = function () {
+        angular.copy(blade.origEntity, blade.currentEntities);
+        $scope.bladeClose();
+    };
+
+    $scope.saveChanges = function () {
+        if (isDirty()) {
+            angular.copy(blade.currentEntities, blade.data.dynamicProperties);
+            angular.copy(blade.currentEntities, blade.origEntity);
+        }
+        $scope.bladeClose();
+    };
+
+    var formScope;
+    $scope.setForm = function (form) { formScope = form; }
+
+    $scope.editDictionary = function (property) {
+        var newBlade = {
+            id: "propertyDictionary",
+            isApiSave: true,
+            currentEntity: property,
+            controller: 'platformWebApp.propertyDictionaryController',
+            template: '$(Platform)/Scripts/app/dynamicProperties/blades/property-dictionary.tpl.html',
+            onChangesConfirmedFn: function () {
+                blade.currentEntities = angular.copy(blade.currentEntities);
+            }
+        };
+        bladeNavigationService.showBlade(newBlade, blade);
+    };
+
+    blade.onClose = function (closeCallback) {
+        bladeNavigationService.showConfirmationIfNeeded(isDirty(), canSave(), blade, $scope.saveChanges, closeCallback, "platform.dialogs.properties-save.title", "platform.dialogs.properties-save.message");
+    };
+
+    blade.toolbarCommands = [
+        {
+            name: "platform.commands.reset", icon: 'fa fa-undo',
+            executeMethod: function () {
+                angular.copy(blade.origEntity, blade.currentEntities);
+            },
+            canExecuteMethod: isDirty
+        },
+		{
+		    name: "platform.commands.manage-type-properties", icon: 'fa fa-edit',
+		    executeMethod: function () {
+		        var newBlade = {
+		            id: 'dynamicPropertyList',
+		            objectType: blade.data.objectType,
+		            controller: 'platformWebApp.dynamicPropertyListController',
+		            template: '$(Platform)/Scripts/app/dynamicProperties/blades/dynamicProperty-list.tpl.html'
+		        };
+		        bladeNavigationService.showBlade(newBlade, blade);
+		    },
+		    canExecuteMethod: function () {
+		        return angular.isDefined(blade.data.objectType);
+		    }
+		}
+    ];
+
+    $scope.getDictionaryValues = function (property, callback) {
+        dictionaryItemsApi.query({ id: property.objectType, propertyId: property.id }, callback);
+    }
+
+    blade.refresh();
+}]);
+
+angular.module('platformWebApp')
+.factory('platformWebApp.dynamicProperties.api', ['$resource', function ($resource) {
+    return $resource('api/platform/dynamic/properties', {}, {
+        queryTypes: { url: 'api/platform/dynamic/types', isArray: true },
+        getPropertiesForType: { url: 'api/platform/dynamic/types/:typeName/properties', method: 'POST', isArray: true },
+        update: { method: 'PUT' }
+    });
+}])
+.factory('platformWebApp.dynamicProperties.dictionaryItemsApi', ['$resource', function ($resource) {
+    return $resource('api/platform/dynamic/dictionaryitems', {}, {
+        getDictionaryItems: { url: 'api/platform/dynamic/dictionaryitems/search', method: 'POST', isArray: true },
+    });
+}])
+.factory('platformWebApp.dynamicProperties.valueTypesService', function () {
+    var propertyTypes = [
+        {
+            valueType: "ShortText",
+            title: "platform.properties.short-text.title",
+            description: "platform.properties.short-text.description"
+        },
+        {
+            valueType: "LongText",
+            title: "platform.properties.long-text.title",
+            description: "platform.properties.long-text.description"
+        },
+        {
+            valueType: "Integer",
+            title: "platform.properties.integer.title",
+            description: "platform.properties.integer.description"
+        },
+        {
+            valueType: "Decimal",
+            title: "platform.properties.decimal.title",
+            description: "platform.properties.decimal.description"
+        },
+        {
+            valueType: "DateTime",
+            title: "platform.properties.date-time.title",
+            description: "platform.properties.date-time.description"
+        },
+        {
+            valueType: "Boolean",
+            title: "platform.properties.boolean.title",
+            description: "platform.properties.boolean.description"
+        },
+        {
+            valueType: "Html",
+            title: "platform.properties.html.title",
+            description: "platform.properties.html.description"
+        },
+        {
+            valueType: "Image",
+            title: "platform.properties.image.title",
+            description: "platform.properties.image.description"
+        }
+    ];
+
+    return {
+        query: function() {
+            return propertyTypes;
+        }
+    };
+});
+
+angular.module('platformWebApp')
+.controller('platformWebApp.dynamicPropertyWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+	$scope.blade = $scope.widget.blade;
+	$scope.openBlade = function () {
+        var blade = {
+        	id: "dynamicPropertiesList",
+        	currentEntity: $scope.blade.currentEntity,
+            controller: 'platformWebApp.propertyValueListController',
+            template: '$(Platform)/Scripts/app/dynamicProperties/blades/propertyValue-list.tpl.html'
+        };
+
+        bladeNavigationService.showBlade(blade, $scope.blade);
+    };
+
+
+	$scope.$watch('widget.blade.currentEntity', function (entity) {
+		if (angular.isDefined(entity)) {
+			var groupedByProperty = _.groupBy(entity.dynamicProperties, function (x) { return x.id; });
+			$scope.dynamicPropertyCount = _.keys(groupedByProperty).length;
+		}
+	});
+
+}]);
+angular.module('platformWebApp')
+.controller('platformWebApp.exportImport.exportMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'platformWebApp.authService', function ($scope, bladeNavigationService, exportImportResourse, authService) {
+    var blade = $scope.blade;
+    blade.headIcon = 'fa-upload';
+    blade.title = 'platform.blades.export-main.title';
+
+    $scope.exportRequest = {};
+
+    function initializeBlade() {
+        exportImportResourse.getNewExportManifest(function (data) {
+            $scope.exportRequest.exportManifest = data;
+            blade.isLoading = false;
+        });
+    };
+
+    $scope.$on("new-notification-event", function (event, notification) {
+        if (blade.notification && notification.id == blade.notification.id) {
+            angular.copy(notification, blade.notification);
+            if (notification.errorCount > 0) {
+                bladeNavigationService.setError('Export error', blade);
+            }
+        }
+    });
+
+    $scope.canStartProcess = function () {
+        return authService.checkPermission('platform:exportImport:export') && (_.any($scope.exportRequest.modules) || $scope.exportRequest.handleSecurity || $scope.exportRequest.handleSettings);
+    }
+
+    $scope.updateModuleSelection = function () {
+        var selection = _.where($scope.exportRequest.exportManifest.modules, { isChecked: true });
+        $scope.exportRequest.modules = _.pluck(selection, 'id');
+    };
+
+    $scope.startExport = function () {
+        blade.isLoading = true;
+        exportImportResourse.runExport($scope.exportRequest,
+            function (data) { blade.notification = data; blade.isLoading = false; });
+    }
+
+    blade.toolbarCommands = [
+		{
+		    name: "platform.commands.select-all", icon: 'fa fa-check-square-o',
+		    executeMethod: function () { selectAll(true) },
+		    canExecuteMethod: function () { return $scope.exportRequest.exportManifest && !blade.notification; }
+		},
+        {
+            name: "platform.commands.unselect-all", icon: 'fa fa-square-o',
+            executeMethod: function () { selectAll(false) },
+            canExecuteMethod: function () { return $scope.exportRequest.exportManifest && !blade.notification; }
+        }
+    ];
+
+    var selectAll = function (action) {
+        $scope.exportRequest.handleSecurity = action;
+        $scope.exportRequest.handleBinaryData = action;
+        $scope.exportRequest.handleSettings = action;
+        _.forEach($scope.exportRequest.exportManifest.modules, function (module) { module.isChecked = action; });
+
+        $scope.updateModuleSelection();
+    }
+
+    initializeBlade();
+}]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.exportImport.mainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.authService', function ($scope, bladeNavigationService, authService) {
+
+    $scope.export = function () {
+        $scope.selectedNodeId = 'export';
+
+        var newBlade = {
+            controller: 'platformWebApp.exportImport.exportMainController',
+            template: '$(Platform)/Scripts/app/exportImport/blades/export-main.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, $scope.blade);
+    };
+
+    $scope.import = function () {
+        if (authService.checkPermission('platform:exportImport:import')) {
+            $scope.selectedNodeId = 'import';
+
+            var newBlade = {
+                controller: 'platformWebApp.exportImport.importMainController',
+                template: '$(Platform)/Scripts/app/exportImport/blades/import-main.tpl.html'
+            };
+            bladeNavigationService.showBlade(newBlade, $scope.blade);
+        }
+    };
+
+    $scope.blade.headIcon = 'fa-database';
+    $scope.blade.isLoading = false;
+}]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.exportImport.importMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'FileUploader', function ($scope, bladeNavigationService, exportImportResourse, FileUploader) {
+    var blade = $scope.blade;
+    blade.updatePermission = 'platform:exportImport:import';
+    blade.headIcon = 'fa-download';
+    blade.title = 'platform.blades.import-main.title';
+    blade.isLoading = false;
+    $scope.importRequest = {};
+    var origManifest;
+
+    $scope.$on("new-notification-event", function (event, notification) {
+        if (blade.notification && notification.id == blade.notification.id) {
+            angular.copy(notification, blade.notification);
+            if (notification.errorCount > 0) {
+                bladeNavigationService.setError('Import error', blade);
+            }
+        }
+    });
+
+    $scope.canStartProcess = function () {
+        return blade.hasUpdatePermission() && (_.any($scope.importRequest.modules) || $scope.importRequest.handleSecurity || $scope.importRequest.handleSettings || $scope.importRequest.handleBinaryData);
+    }
+
+    $scope.startProcess = function () {
+        blade.isLoading = true;
+        exportImportResourse.runImport($scope.importRequest,
+            function (data) { blade.notification = data; blade.isLoading = false; },
+            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+    }
+
+    $scope.updateModuleSelection = function () {
+        var selection = _.where($scope.importRequest.exportManifest.modules, { isChecked: true });
+        $scope.importRequest.modules = _.pluck(selection, 'id');
+    };
+
+    if (!$scope.uploader) {
+        // create the uploader
+        var uploader = $scope.uploader = new FileUploader({
+            scope: $scope,
+            headers: { Accept: 'application/json' },
+            url: 'api/platform/assets/localstorage',
+            method: 'POST',
+            autoUpload: true,
+            removeAfterUpload: true
+        });
+
+        // ADDING FILTERS
+        // zip only
+        uploader.filters.push({
+            name: 'zipFilter',
+            fn: function (i /*{File|FileLikeObject}*/, options) {
+                return i.name.toLowerCase().endsWith('.zip');
+            }
+        });
+
+        uploader.onBeforeUploadItem = function (fileItem) {
+            blade.isLoading = true;
+            bladeNavigationService.setError(null, blade);
+        };
+
+        uploader.onErrorItem = function (item, response, status, headers) {
+            bladeNavigationService.setError(item._file.name + ' failed: ' + (response.message ? response.message : status), blade);
+        };
+
+        uploader.onSuccessItem = function (fileItem, asset, status, headers) {
+            $scope.importRequest.fileUrl = asset[0].url;
+            $scope.importRequest.fileName = asset[0].name;
+
+            exportImportResourse.loadExportManifest({ fileUrl: $scope.importRequest.fileUrl }, function (data) {
+                origManifest = angular.copy(data);
+
+                // select all available data for import
+                $scope.importRequest.handleSecurity = data.handleSecurity;
+                $scope.importRequest.handleSettings = data.handleSettings;
+                $scope.importRequest.handleBinaryData = data.handleBinaryData;
+
+                _.each(data.modules, function (x) { x.isChecked = true; });
+
+                $scope.importRequest.exportManifest = data;
+                $scope.updateModuleSelection();
+                blade.isLoading = false;
+            });
+        };
+    }
+
+
+    blade.toolbarCommands = [
+        {
+            name: "platform.commands.select-all", icon: 'fa fa-check-square-o',
+            executeMethod: function () { selectAll(true) },
+            canExecuteMethod: function () { return $scope.importRequest.exportManifest && !blade.notification; }
+        },
+        {
+            name: "platform.commands.unselect-all", icon: 'fa fa-square-o',
+            executeMethod: function () { selectAll(false) },
+            canExecuteMethod: function () { return $scope.importRequest.exportManifest && !blade.notification; }
+        }
+    ];
+
+    var selectAll = function (action) {
+        if (origManifest.handleSecurity)
+            $scope.importRequest.handleSecurity = action;
+        if (origManifest.handleBinaryData)
+            $scope.importRequest.handleBinaryData = action;
+        if (origManifest.handleSettings)
+            $scope.importRequest.handleSettings = action;
+
+        _.forEach($scope.importRequest.exportManifest.modules, function (module) { module.isChecked = action; });
+
+        $scope.updateModuleSelection();
+    }
+}]);
+
+angular.module('platformWebApp')
+.factory('platformWebApp.exportImport.resource', ['$resource', function ($resource) {
+
+    return $resource(null, null, {
+    	getNewExportManifest: { url: 'api/platform/export/manifest/new' },
+        runExport: { method: 'POST', url: 'api/platform/export' },
+
+        loadExportManifest: { url: 'api/platform/export/manifest/load' },
+        runImport: { method: 'POST', url: 'api/platform/import' },
+        sampleDataDiscover: { url: 'api/platform/sampledata/discover', isArray: true },
+        importSampleData: { method: 'POST', url: 'api/platform/sampledata/import', params: { url: '@url' } }
+    });
+}]);
+angular.module('platformWebApp')
+.factory('platformWebApp.jobs', ['$resource', function ($resource) {
+
+    return $resource('api/platform/jobs', {}, {
+        getStatus: { url: 'api/platform/jobs/:id' }
+    });
+}]);
 
 angular.module('platformWebApp')
 .controller('platformWebApp.assets.assetListController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', '$sessionStorage', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
@@ -23228,944 +24174,14 @@ angular.module('platformWebApp')
     }]);
 
 angular.module('platformWebApp')
-.controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    
-    $scope.blade.isLoading = false;
-    // ui-grid
-    $scope.setGridOptions = function (gridOptions) {
-        $scope.gridOptions = gridOptions;
-    };
-}]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    var blade = $scope.blade;
-
-    $scope.openBlade = function () {
-        var newBlade = {
-            id: "changesChildBlade",
-            currentEntities: blade.currentEntity.operationsLog,
-            headIcon: blade.headIcon,
-            title: blade.title,
-            subtitle: 'platform.widgets.operations.blade-subtitle',
-            isExpandable: true,
-            controller: 'platformWebApp.changeLog.operationListController',
-            template: '$(Platform)/Scripts/app/changeLog/blades/operation-list.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, blade);
-    };
-}]);
-angular.module('platformWebApp')
-.controller('platformWebApp.dynamicObjectListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dynamicProperties.api', function ($scope, bladeNavigationService, dynamicPropertiesApi) {
-	var blade = $scope.blade;
-
-	blade.refresh = function () {
-		dynamicPropertiesApi.queryTypes(function (results) {
-			results = _.map(results, function (x) { return { name: x }; });
-			blade.currentEntities = results;
-			blade.isLoading = false;
-		}, function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-	};
-
-	$scope.selectNode = function (node) {
-		$scope.selectedNodeId = node.name;
-
-		var newBlade = {
-			id: 'dynamicPropertyList',
-			objectType: node.name,
-			controller: 'platformWebApp.dynamicPropertyListController',
-			template: '$(Platform)/Scripts/app/dynamicProperties/blades/dynamicProperty-list.tpl.html'
-		};
-
-		bladeNavigationService.showBlade(newBlade, blade);
-	}
-
-	blade.headIcon = 'fa-plus-square-o';
-    blade.title = 'platform.blades.dynamicObject-list.title',
-    blade.subtitle = 'platform.blades.dynamicObject-list.subtitle',
-	blade.refresh();
-}]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.dynamicPropertyDetailController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.settings', 'platformWebApp.dynamicProperties.api', 'platformWebApp.dynamicProperties.dictionaryItemsApi', 'platformWebApp.dynamicProperties.valueTypesService', function ($scope, bladeNavigationService, dialogService, settings, dynamicPropertiesApi, dictionaryItemsApi, valueTypesService) {
-    var blade = $scope.blade;
-    blade.updatePermission = 'platform:dynamic_properties:update';
-    blade.headIcon = 'fa-plus-square-o';
-    blade.title = 'platform.blades.dynamicProperty-detail.title';
-    var localDictionaryValues = [];
-
-    blade.refresh = function () {
-        //Actualize displayed names to correspond to system languages
-        settings.getValues({ id: 'VirtoCommerce.Core.General.Languages' }, function (languages) {
-            blade.currentEntity = blade.isNew ? { valueType: 'ShortText', displayNames: [] } : blade.currentEntity;
-            blade.currentEntity.displayNames = _.map(languages, function (x) {
-                var retVal = { locale: x };
-                var existName = _.find(blade.currentEntity.displayNames, function (y) { return y.locale.toLowerCase() == x.toLowerCase(); });
-                if (angular.isDefined(existName)) {
-                    retVal = existName;
-                }
-                return retVal;
-            });
-            blade.origEntity = blade.currentEntity;
-            blade.currentEntity = angular.copy(blade.origEntity);
-            blade.isLoading = false;
-        });
-    };
-
-
-    $scope.arrayFlagValidator = function (value) {
-        return !value || blade.currentEntity.valueType === 'ShortText' || blade.currentEntity.valueType === 'Integer' || blade.currentEntity.valueType === 'Decimal';
-    };
-
-    $scope.multilingualFlagValidator = function (value) {
-        return !value || blade.currentEntity.valueType === 'ShortText' || blade.currentEntity.valueType === 'LongText' || blade.currentEntity.valueType === 'Html';
-    };
-
-    $scope.dictionaryFlagValidator = function (value) {
-        return !value || blade.currentEntity.valueType === 'ShortText';
-    };
-
-    $scope.openChild = function (childType) {
-        var newBlade = {
-            id: "propertyChild",
-            currentEntity: blade.currentEntity
-        };
-
-        switch (childType) {
-            case 'dict':
-                newBlade.isApiSave = !blade.isNew;
-                newBlade.controller = 'platformWebApp.propertyDictionaryController';
-                newBlade.template = '$(Platform)/Scripts/app/dynamicProperties/blades/property-dictionary.tpl.html';
-                if (blade.isNew) {
-                    newBlade.data = localDictionaryValues;
-                    newBlade.onChangesConfirmedFn = function (data) {
-                        localDictionaryValues = data;
-                    }
-                }
-                break;
-        }
-        bladeNavigationService.showBlade(newBlade, blade);
-        $scope.currentChild = childType;
-    }
-
-    $scope.setForm = function (form) { $scope.formScope = form; }
-
-    function isDirty() {
-        return !angular.equals(blade.currentEntity, blade.origEntity) && blade.hasUpdatePermission();
-    };
-
-    $scope.saveChanges = function () {
-        if (blade.isNew) {
-            dynamicPropertiesApi.save(blade.currentEntity,
-                function (data) {
-                    blade.onChangesConfirmedFn(data);
-                    // save dictionary items for new entity
-                    if (data.isDictionary) {
-                        dictionaryItemsApi.save({ id: blade.objectType, propertyId: data.id },
-                            localDictionaryValues,
-                            function () {
-                                $scope.bladeClose();
-                                blade.parentBlade.refresh(true);
-                            },
-                            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-                    } else {
-                        $scope.bladeClose();
-                        blade.parentBlade.refresh(true);
-                    }
-                },
-                function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-        } else {
-            dynamicPropertiesApi.update(blade.currentEntity,
-                function () {
-                    blade.refresh();
-                    blade.parentBlade.refresh(true);
-                },
-                function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-        }
-    };
-
-    function deleteEntry() {
-        var dialog = {
-            id: "confirmDelete",
-            title: "platform.dialogs.dynamic-property-delete.title",
-            message: "platform.dialogs.dynamic-property-delete.message",
-            callback: function (remove) {
-                if (remove) {
-                    dynamicPropertiesApi.delete({ id: blade.objectType, propertyId: blade.currentEntity.id },
-                        function () {
-                            $scope.bladeClose();
-                            blade.parentBlade.refresh(true);
-                        },
-                        function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-                }
-            }
-        }
-        dialogService.showConfirmationDialog(dialog);
-    }
-
-    if (!blade.isNew) {
-        blade.toolbarCommands = [
-        {
-            name: "platform.commands.save", icon: 'fa fa-save',
-            executeMethod: function () {
-                $scope.saveChanges();
-            },
-            canExecuteMethod: function () {
-                return isDirty() && $scope.formScope && $scope.formScope.$valid;
-            },
-            permission: blade.updatePermission
-        },
-        {
-            name: "platform.commands.reset", icon: 'fa fa-undo',
-            executeMethod: function () {
-                angular.copy(blade.origEntity, blade.currentEntity);
-            },
-            canExecuteMethod: isDirty,
-            permission: blade.updatePermission
-        },
-        {
-            name: "platform.commands.delete", icon: 'fa fa-trash-o',
-            executeMethod: deleteEntry,
-            canExecuteMethod: function () {
-                return !blade.isNew;
-            },
-            permission: 'platform:dynamic_properties:delete'
-        }
-        ];
-    }
-
-    blade.valueTypes = valueTypesService.query();
-
-    // on load: 
-    blade.refresh();
-}]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.dynamicPropertyListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dynamicProperties.api', function ($scope, bladeNavigationService, dynamicPropertiesApi) {
-    var blade = $scope.blade;
-    blade.headIcon = 'fa-plus-square-o';
-    blade.title = blade.objectType;
-    blade.subtitle = 'platform.blades.dynamicProperty-list.subtitle';
-
-    blade.refresh = function (parentRefresh) {
-        dynamicPropertiesApi.getPropertiesForType({ typeName: blade.objectType }, function (results) {
-            if (parentRefresh && blade.parentRefresh) {
-                blade.parentRefresh(results);
-            }
-
-            blade.currentEntities = results;
-            blade.isLoading = false;
-        }, function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-    };
-
-    $scope.selectNode = function (node) {
-        $scope.selectedNodeId = node.id;
-
-        var newBlade = {
-            subtitle: 'platform.blades.dynamicProperty-detail.subtitle',
-            currentEntity: node
-        };
-        openDetailsBlade(newBlade);
-    };
-
-    function openDetailsBlade(node) {
-        var newBlade = {
-            id: "dynamicPropertyDetail",
-            objectType: blade.objectType,
-            controller: 'platformWebApp.dynamicPropertyDetailController',
-            template: '$(Platform)/Scripts/app/dynamicProperties/blades/dynamicProperty-detail.tpl.html'
-        };
-        angular.extend(newBlade, node);
-
-        bladeNavigationService.showBlade(newBlade, blade);
-    }
-
-    blade.toolbarCommands = [
-       //{
-       //    name: "Refresh", icon: 'fa fa-refresh',
-       //    executeMethod: blade.refresh,
-       //    canExecuteMethod: function () {
-       //        return true;
-       //    }
-       //},
-       {
-           name: "platform.commands.add-new-property", icon: 'fa fa-plus',
-           executeMethod: function () {
-               $scope.selectedNodeId = undefined;
-               var newBlade = {
-                   subtitle: 'platform.blades.dynamicProperty-detail.subtitle-new',
-                   isNew: true,
-                   onChangesConfirmedFn: function (entry) {
-                       $scope.selectedNodeId = entry.id;
-                   }
-               };
-               openDetailsBlade(newBlade);
-           },
-           canExecuteMethod: function () {
-               return true;
-           },
-           permission: 'platform:dynamic_properties:create'
-       }
-    ];
-
-    blade.refresh();
-}]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.propertyDictionaryController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', 'platformWebApp.dynamicProperties.dictionaryItemsApi', function ($scope, dialogService, bladeNavigationService, settings, dictionaryItemsApi) {
-    var blade = $scope.blade;
-    blade.updatePermission = 'platform:dynamic_properties:update';
-    blade.headIcon = 'fa-plus-square-o';
-    blade.title = 'platform.blades.property-dictionary.title';
-    blade.subtitle = 'platform.blades.property-dictionary.subtitle';
-
-    var availableLanguages;
-
-    function refresh() {
-        blade.isLoading = true;
-        blade.selectedAll = false;
-
-        if (blade.isApiSave) {
-            dictionaryItemsApi.query({ id: blade.currentEntity.objectType, propertyId: blade.currentEntity.id },
-                initializeBlade,
-                function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-        } else {
-            initializeBlade(blade.data);
-        }
-    }
-
-    function initializeBlade(data) {
-        blade.origEntity = data;
-        blade.currentEntities = angular.copy(data);
-
-        if (blade.currentEntity.isMultilingual && !availableLanguages) {
-            settings.getValues({ id: 'VirtoCommerce.Core.General.Languages' }, function (promiseData) {
-                availableLanguages = _.map(promiseData.sort(), function (x) { return { locale: x }; });
-                resetNewValue();
-                blade.isLoading = false;
-            },
-            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-        } else {
-            resetNewValue();
-            blade.isLoading = false;
-        }
-    }
-
-    $scope.dictItemNameValidator = function (value) {
-        if (blade.isLoading) {
-            return false;
-        } else if (blade.currentEntity.isMultilingual) {
-            var testEntity = angular.copy($scope.newValue);
-            testEntity.name = value;
-            return _.all(blade.currentEntities, function (item) {
-                return item.name !== value || $scope.selectedItem === item;
-            });
-        } else {
-            return _.all(blade.currentEntities, function (item) { return item.name !== value; });
-        }
-    };
-
-    $scope.dictValueValidator = function (value, editEntity) {
-        if (blade.currentEntity.isMultilingual) {
-            var testEntity = angular.copy(editEntity);
-            testEntity.value = value;
-            return _.all(blade.currentEntities, function (item) {
-                return item.value !== value || item.locale !== testEntity.locale || ($scope.selectedItem && _.some($scope.selectedItem.displayNames, function (x) {
-                    return angular.equals(x, testEntity);
-                }));
-            });
-        } else {
-            return _.all(blade.currentEntities, function (item) { return item.name !== value; });
-        }
-    };
-
-    $scope.selectItem = function (listItem) {
-        $scope.selectedItem = listItem;
-
-        if (blade.currentEntity.isMultilingual) {
-            resetNewValue();
-        }
-    };
-
-    function resetNewValue() {
-        if (blade.currentEntity.isMultilingual) {
-            // generate input fields for ALL languages
-            var newValue = { displayNames: angular.copy(availableLanguages) };
-
-            // add current values
-            if ($scope.selectedItem) {
-                _.each($scope.selectedItem.displayNames, function (value) {
-                    var foundValue = _.findWhere(newValue.displayNames, { locale: value.locale });
-                    if (foundValue) {
-                        angular.extend(foundValue, value);
-                    }
-                });
-                newValue.id = $scope.selectedItem.id;
-                newValue.name = $scope.selectedItem.name;
-            }
-
-            $scope.newValue = newValue;
-        } else {
-            $scope.newValue = {};
-        }
-    }
-
-    $scope.cancel = function () {
-        $scope.selectedItem = undefined;
-        resetNewValue();
-    }
-
-    $scope.add = function (form) {
-        if (form.$valid) {
-            if ($scope.newValue.displayNames) {
-                $scope.newValue.displayNames = _.filter($scope.newValue.displayNames, function (x) { return x.name; });
-
-                if ($scope.selectedItem) { // editing existing value
-                    angular.copy($scope.newValue, $scope.selectedItem);
-                    $scope.selectedItem = undefined;
-                } else { // adding new value
-                    blade.currentEntities.push($scope.newValue);
-                }
-            } else {
-                blade.currentEntities.push($scope.newValue);
-            }
-            resetNewValue();
-            form.$setPristine();
-        }
-    };
-
-    $scope.delete = function (index) {
-        blade.selectedAll = false;
-        $scope.toggleAll();
-
-        blade.currentEntities[index].$selected = true;
-        deleteChecked();
-    };
-
-    $scope.setForm = function (form) {
-        $scope.formScope = form;
-    }
-
-    function isDirty() {
-        return !angular.equals(blade.currentEntities, blade.origEntity) && blade.hasUpdatePermission();
-    };
-
-    $scope.saveChanges = function () {
-        if (blade.isApiSave) {
-            blade.isLoading = true;
-
-            dictionaryItemsApi.save({ id: blade.currentEntity.objectType, propertyId: blade.currentEntity.id },
-                blade.currentEntities,
-                function () {
-                    refresh();
-                    if (blade.onChangesConfirmedFn)
-                        blade.onChangesConfirmedFn();
-                },
-                function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-        } else {
-            blade.onChangesConfirmedFn(blade.currentEntities);
-            $scope.bladeClose();
-        }
-    };
-
-    blade.toolbarCommands = [
-        {
-            name: "platform.commands.save", icon: 'fa fa-save',
-            executeMethod: function () {
-                $scope.saveChanges();
-            },
-            canExecuteMethod: function () {
-                return isDirty() && $scope.formScope && $scope.formScope.$valid;
-            },
-            permission: blade.updatePermission
-        },
-        {
-            name: "platform.commands.reset", icon: 'fa fa-undo',
-            executeMethod: function () {
-                angular.copy(blade.origEntity, blade.currentEntities);
-            },
-            canExecuteMethod: isDirty,
-            permission: blade.updatePermission
-        },
-        {
-            name: "platform.commands.delete", icon: 'fa fa-trash-o',
-            executeMethod: function () {
-                deleteChecked();
-            },
-            canExecuteMethod: function () {
-                return isItemsChecked();
-            },
-            permission: blade.updatePermission
-        }
-    ];
-
-    if (!blade.isApiSave) {
-        $scope.blade.toolbarCommands.splice(0, 1); // remove save button
-    }
-
-    $scope.toggleAll = function () {
-        angular.forEach(blade.currentEntities, function (item) {
-            item.$selected = blade.selectedAll;
-        });
-    };
-
-    function isItemsChecked() {
-        return _.any(blade.currentEntities, function (x) { return x.$selected; });
-    }
-
-    function deleteChecked() {
-        var selection = _.where(blade.currentEntities, { $selected: true });
-        var ids = _.pluck(selection, 'id');
-        var dialog = {
-            id: "confirmDeleteItem",
-            title: "platform.dialogs.dictionary-items-delete.title",
-            message: "platform.dialogs.dictionary-items-delete.message",
-            messageValues: { quantity: ids.length },
-            callback: function (remove) {
-                if (remove) {
-                    blade.isLoading = true;
-                    dictionaryItemsApi.delete({ id: blade.currentEntity.objectType, propertyId: blade.currentEntity.id, ids: ids }, null,
-                        function () {
-                            refresh();
-                            if (blade.onChangesConfirmedFn)
-                                blade.onChangesConfirmedFn();
-                        },
-                        function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-                }
-            }
-        }
-        dialogService.showConfirmationDialog(dialog);
-    }
-
-    // on load
-    refresh();
-}]);
-angular.module('platformWebApp')
-.controller('platformWebApp.propertyValueListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.settings', 'platformWebApp.dynamicProperties.dictionaryItemsApi', 'platformWebApp.i18n', '$timeout', function ($scope, bladeNavigationService, dialogService, settings, dictionaryItemsApi, i18n, $timeout) {
-    var blade = $scope.blade;
-    blade.updatePermission = 'platform:dynamic_properties:update';
-    blade.headIcon = 'fa-plus-square-o';
-    blade.title = "platform.blades.propertyValue-list.title";
-    blade.subtitle = "platform.blades.propertyValue-list.subtitle";
-    blade.currentLanguage = i18n.getLanguage();
-
-    blade.refresh = function () {
-        blade.data = blade.currentEntity;
-        var rawProperties = angular.copy(blade.currentEntity.dynamicProperties);
-
-        _.each(rawProperties, function (x) {
-            x.values.sort(function (a, b) {
-                return a.value && b.value
-                    ? (a.value.name
-                        ? a.value.name.localeCompare(b.value.name)
-                        : angular.isString(a.value) && angular.isString(b.value)
-                            ? a.value.localeCompare(b.value)
-                            : a.value < b.value ? -1 : a.value > b.value ? 1 : 0)
-                    : -1;
-            });
-        });
-
-        if (_.any(rawProperties, function (x) { return x.isMultilingual; })) {
-            settings.getValues({ id: 'VirtoCommerce.Core.General.Languages' }, function (data) {
-                $scope.languages = data;
-
-                // wait for va-generic-value-input to initialize empty values and repeat init
-                $timeout(function () {
-                    blade.origEntity = angular.copy(blade.currentEntities);
-                });
-            });
-        }
-
-        blade.origEntity = rawProperties;
-        blade.currentEntities = angular.copy(rawProperties);
-        blade.isLoading = false;
-    };
-
-    function isDirty() {
-        return !angular.equals(blade.currentEntities, blade.origEntity) && blade.hasUpdatePermission();
-    }
-
-    function canSave() {
-        return isDirty() && formScope && formScope.$valid;
-    }
-
-    $scope.cancelChanges = function () {
-        angular.copy(blade.origEntity, blade.currentEntities);
-        $scope.bladeClose();
-    };
-
-    $scope.saveChanges = function () {
-        if (isDirty()) {
-            angular.copy(blade.currentEntities, blade.data.dynamicProperties);
-            angular.copy(blade.currentEntities, blade.origEntity);
-        }
-        $scope.bladeClose();
-    };
-
-    var formScope;
-    $scope.setForm = function (form) { formScope = form; }
-
-    $scope.editDictionary = function (property) {
-        var newBlade = {
-            id: "propertyDictionary",
-            isApiSave: true,
-            currentEntity: property,
-            controller: 'platformWebApp.propertyDictionaryController',
-            template: '$(Platform)/Scripts/app/dynamicProperties/blades/property-dictionary.tpl.html',
-            onChangesConfirmedFn: function () {
-                blade.currentEntities = angular.copy(blade.currentEntities);
-            }
-        };
-        bladeNavigationService.showBlade(newBlade, blade);
-    };
-
-    blade.onClose = function (closeCallback) {
-        bladeNavigationService.showConfirmationIfNeeded(isDirty(), canSave(), blade, $scope.saveChanges, closeCallback, "platform.dialogs.properties-save.title", "platform.dialogs.properties-save.message");
-    };
-
-    blade.toolbarCommands = [
-        {
-            name: "platform.commands.reset", icon: 'fa fa-undo',
-            executeMethod: function () {
-                angular.copy(blade.origEntity, blade.currentEntities);
-            },
-            canExecuteMethod: isDirty
-        },
-		{
-		    name: "platform.commands.manage-type-properties", icon: 'fa fa-edit',
-		    executeMethod: function () {
-		        var newBlade = {
-		            id: 'dynamicPropertyList',
-		            objectType: blade.data.objectType,
-		            controller: 'platformWebApp.dynamicPropertyListController',
-		            template: '$(Platform)/Scripts/app/dynamicProperties/blades/dynamicProperty-list.tpl.html'
-		        };
-		        bladeNavigationService.showBlade(newBlade, blade);
-		    },
-		    canExecuteMethod: function () {
-		        return angular.isDefined(blade.data.objectType);
-		    }
-		}
-    ];
-
-    $scope.getDictionaryValues = function (property, callback) {
-        dictionaryItemsApi.query({ id: property.objectType, propertyId: property.id }, callback);
-    }
-
-    blade.refresh();
-}]);
-
-angular.module('platformWebApp')
-.factory('platformWebApp.dynamicProperties.api', ['$resource', function ($resource) {
-    return $resource('api/platform/dynamic/properties', {}, {
-        queryTypes: { url: 'api/platform/dynamic/types', isArray: true },
-        getPropertiesForType: { url: 'api/platform/dynamic/types/:typeName/properties', isArray: true },
-        update: { method: 'PUT' }
-    });
-}])
-.factory('platformWebApp.dynamicProperties.dictionaryItemsApi', ['$resource', function ($resource) {
-    return $resource('api/platform/dynamic/dictionaryitems');
-}])
-.factory('platformWebApp.dynamicProperties.valueTypesService', function () {
-    var propertyTypes = [
-        {
-            valueType: "ShortText",
-            title: "platform.properties.short-text.title",
-            description: "platform.properties.short-text.description"
-        },
-        {
-            valueType: "LongText",
-            title: "platform.properties.long-text.title",
-            description: "platform.properties.long-text.description"
-        },
-        {
-            valueType: "Integer",
-            title: "platform.properties.integer.title",
-            description: "platform.properties.integer.description"
-        },
-        {
-            valueType: "Decimal",
-            title: "platform.properties.decimal.title",
-            description: "platform.properties.decimal.description"
-        },
-        {
-            valueType: "DateTime",
-            title: "platform.properties.date-time.title",
-            description: "platform.properties.date-time.description"
-        },
-        {
-            valueType: "Boolean",
-            title: "platform.properties.boolean.title",
-            description: "platform.properties.boolean.description"
-        },
-        {
-            valueType: "Html",
-            title: "platform.properties.html.title",
-            description: "platform.properties.html.description"
-        },
-        {
-            valueType: "Image",
-            title: "platform.properties.image.title",
-            description: "platform.properties.image.description"
-        }
-    ];
-
-    return {
-        query: function() {
-            return propertyTypes;
-        }
-    };
-});
-
-angular.module('platformWebApp')
-.controller('platformWebApp.dynamicPropertyWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-	$scope.blade = $scope.widget.blade;
-	$scope.openBlade = function () {
-        var blade = {
-        	id: "dynamicPropertiesList",
-        	currentEntity: $scope.blade.currentEntity,
-            controller: 'platformWebApp.propertyValueListController',
-            template: '$(Platform)/Scripts/app/dynamicProperties/blades/propertyValue-list.tpl.html'
-        };
-
-        bladeNavigationService.showBlade(blade, $scope.blade);
-    };
-
-
-	$scope.$watch('widget.blade.currentEntity', function (entity) {
-		if (angular.isDefined(entity)) {
-			var groupedByProperty = _.groupBy(entity.dynamicProperties, function (x) { return x.id; });
-			$scope.dynamicPropertyCount = _.keys(groupedByProperty).length;
-		}
-	});
-
-}]);
-angular.module('platformWebApp')
-.controller('platformWebApp.exportImport.exportMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'platformWebApp.authService', function ($scope, bladeNavigationService, exportImportResourse, authService) {
-    var blade = $scope.blade;
-    blade.headIcon = 'fa-upload';
-    blade.title = 'platform.blades.export-main.title';
-
-    $scope.exportRequest = {};
-
-    function initializeBlade() {
-        exportImportResourse.getNewExportManifest(function (data) {
-            $scope.exportRequest.exportManifest = data;
-            blade.isLoading = false;
-        });
-    };
-
-    $scope.$on("new-notification-event", function (event, notification) {
-        if (blade.notification && notification.id == blade.notification.id) {
-            angular.copy(notification, blade.notification);
-            if (notification.errorCount > 0) {
-                bladeNavigationService.setError('Export error', blade);
-            }
-        }
-    });
-
-    $scope.canStartProcess = function () {
-        return authService.checkPermission('platform:exportImport:export') && (_.any($scope.exportRequest.modules) || $scope.exportRequest.handleSecurity || $scope.exportRequest.handleSettings);
-    }
-
-    $scope.updateModuleSelection = function () {
-        var selection = _.where($scope.exportRequest.exportManifest.modules, { isChecked: true });
-        $scope.exportRequest.modules = _.pluck(selection, 'id');
-    };
-
-    $scope.startExport = function () {
-        blade.isLoading = true;
-        exportImportResourse.runExport($scope.exportRequest,
-            function (data) { blade.notification = data; blade.isLoading = false; });
-    }
-
-    blade.toolbarCommands = [
-		{
-		    name: "platform.commands.select-all", icon: 'fa fa-check-square-o',
-		    executeMethod: function () { selectAll(true) },
-		    canExecuteMethod: function () { return $scope.exportRequest.exportManifest && !blade.notification; }
-		},
-        {
-            name: "platform.commands.unselect-all", icon: 'fa fa-square-o',
-            executeMethod: function () { selectAll(false) },
-            canExecuteMethod: function () { return $scope.exportRequest.exportManifest && !blade.notification; }
-        }
-    ];
-
-    var selectAll = function (action) {
-        $scope.exportRequest.handleSecurity = action;
-        $scope.exportRequest.handleBinaryData = action;
-        $scope.exportRequest.handleSettings = action;
-        _.forEach($scope.exportRequest.exportManifest.modules, function (module) { module.isChecked = action; });
-
-        $scope.updateModuleSelection();
-    }
-
-    initializeBlade();
-}]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.exportImport.mainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.authService', function ($scope, bladeNavigationService, authService) {
-
-    $scope.export = function () {
-        $scope.selectedNodeId = 'export';
-
-        var newBlade = {
-            controller: 'platformWebApp.exportImport.exportMainController',
-            template: '$(Platform)/Scripts/app/exportImport/blades/export-main.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, $scope.blade);
-    };
-
-    $scope.import = function () {
-        if (authService.checkPermission('platform:exportImport:import')) {
-            $scope.selectedNodeId = 'import';
-
-            var newBlade = {
-                controller: 'platformWebApp.exportImport.importMainController',
-                template: '$(Platform)/Scripts/app/exportImport/blades/import-main.tpl.html'
-            };
-            bladeNavigationService.showBlade(newBlade, $scope.blade);
-        }
-    };
-
-    $scope.blade.headIcon = 'fa-database';
-    $scope.blade.isLoading = false;
-}]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.exportImport.importMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'FileUploader', function ($scope, bladeNavigationService, exportImportResourse, FileUploader) {
-    var blade = $scope.blade;
-    blade.updatePermission = 'platform:exportImport:import';
-    blade.headIcon = 'fa-download';
-    blade.title = 'platform.blades.import-main.title';
-    blade.isLoading = false;
-    $scope.importRequest = {};
-    var origManifest;
-
-    $scope.$on("new-notification-event", function (event, notification) {
-        if (blade.notification && notification.id == blade.notification.id) {
-            angular.copy(notification, blade.notification);
-            if (notification.errorCount > 0) {
-                bladeNavigationService.setError('Import error', blade);
-            }
-        }
-    });
-
-    $scope.canStartProcess = function () {
-        return blade.hasUpdatePermission() && (_.any($scope.importRequest.modules) || $scope.importRequest.handleSecurity || $scope.importRequest.handleSettings || $scope.importRequest.handleBinaryData);
-    }
-
-    $scope.startProcess = function () {
-        blade.isLoading = true;
-        exportImportResourse.runImport($scope.importRequest,
-            function (data) { blade.notification = data; blade.isLoading = false; },
-            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-    }
-
-    $scope.updateModuleSelection = function () {
-        var selection = _.where($scope.importRequest.exportManifest.modules, { isChecked: true });
-        $scope.importRequest.modules = _.pluck(selection, 'id');
-    };
-
-    if (!$scope.uploader) {
-        // create the uploader
-        var uploader = $scope.uploader = new FileUploader({
-            scope: $scope,
-            headers: { Accept: 'application/json' },
-            url: 'api/platform/assets/localstorage',
-            method: 'POST',
-            autoUpload: true,
-            removeAfterUpload: true
-        });
-
-        // ADDING FILTERS
-        // zip only
-        uploader.filters.push({
-            name: 'zipFilter',
-            fn: function (i /*{File|FileLikeObject}*/, options) {
-                return i.name.toLowerCase().endsWith('.zip');
-            }
-        });
-
-        uploader.onBeforeUploadItem = function (fileItem) {
-            blade.isLoading = true;
-            bladeNavigationService.setError(null, blade);
-        };
-
-        uploader.onErrorItem = function (item, response, status, headers) {
-            bladeNavigationService.setError(item._file.name + ' failed: ' + (response.message ? response.message : status), blade);
-        };
-
-        uploader.onSuccessItem = function (fileItem, asset, status, headers) {
-            $scope.importRequest.fileUrl = asset[0].url;
-            $scope.importRequest.fileName = asset[0].name;
-
-            exportImportResourse.loadExportManifest({ fileUrl: $scope.importRequest.fileUrl }, function (data) {
-                origManifest = angular.copy(data);
-
-                // select all available data for import
-                $scope.importRequest.handleSecurity = data.handleSecurity;
-                $scope.importRequest.handleSettings = data.handleSettings;
-                $scope.importRequest.handleBinaryData = data.handleBinaryData;
-
-                _.each(data.modules, function (x) { x.isChecked = true; });
-
-                $scope.importRequest.exportManifest = data;
-                $scope.updateModuleSelection();
-                blade.isLoading = false;
-            });
-        };
-    }
-
-
-    blade.toolbarCommands = [
-        {
-            name: "platform.commands.select-all", icon: 'fa fa-check-square-o',
-            executeMethod: function () { selectAll(true) },
-            canExecuteMethod: function () { return $scope.importRequest.exportManifest && !blade.notification; }
-        },
-        {
-            name: "platform.commands.unselect-all", icon: 'fa fa-square-o',
-            executeMethod: function () { selectAll(false) },
-            canExecuteMethod: function () { return $scope.importRequest.exportManifest && !blade.notification; }
-        }
-    ];
-
-    var selectAll = function (action) {
-        if (origManifest.handleSecurity)
-            $scope.importRequest.handleSecurity = action;
-        if (origManifest.handleBinaryData)
-            $scope.importRequest.handleBinaryData = action;
-        if (origManifest.handleSettings)
-            $scope.importRequest.handleSettings = action;
-
-        _.forEach($scope.importRequest.exportManifest.modules, function (module) { module.isChecked = action; });
-
-        $scope.updateModuleSelection();
-    }
-}]);
-
-angular.module('platformWebApp')
-.factory('platformWebApp.exportImport.resource', ['$resource', function ($resource) {
-
-    return $resource(null, null, {
-    	getNewExportManifest: { url: 'api/platform/export/manifest/new' },
-        runExport: { method: 'POST', url: 'api/platform/export' },
-
-        loadExportManifest: { url: 'api/platform/export/manifest/load' },
-        runImport: { method: 'POST', url: 'api/platform/import' },
-        sampleDataDiscover: { url: 'api/platform/sampledata/discover', isArray: true },
-        importSampleData: { method: 'POST', url: 'api/platform/sampledata/import', params: { url: '@url' } }
+.factory('platformWebApp.assets.api', ['$resource', function ($resource) {
+    return $resource('api/platform/assets', {}, {
+        createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
+        move: { method: 'POST', url: 'api/platform/assets/move' },
+        uploadFromUrl: { method: 'POST', params: { url: '@url', folderUrl: '@folderUrl', name: '@name' }, isArray: true }
     });
 }]);
-angular.module('platformWebApp')
-.factory('platformWebApp.jobs', ['$resource', function ($resource) {
 
-    return $resource('api/platform/jobs', {}, {
-        getStatus: { url: 'api/platform/jobs/:id' }
-    });
-}]);
 
 angular.module('platformWebApp')
 .controller('platformWebApp.moduleDetailController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.bladeNavigationService', 'platformWebApp.modules', 'platformWebApp.moduleHelper', 'FileUploader', 'platformWebApp.settings', function ($scope, dialogService, bladeNavigationService, modules, moduleHelper, FileUploader, settings) {
@@ -26378,35 +26394,6 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
-.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
-	return {
-		link: function (scope, element, attrs) {
-
-			if (attrs.vaPermission) {
-				var permissionValue = attrs.vaPermission.trim();
-			
-				//modelObject is a scope property of the parent/current scope
-				scope.$watch(attrs.securityScopes, function (value) {
-					if (value) {
-						toggleVisibilityBasedOnPermission(value);
-					}
-				});
-			
-				function toggleVisibilityBasedOnPermission(securityScopes) {
-					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
-					if (hasPermission)
-						element.show();
-					else
-						element.hide();
-				}
-
-				toggleVisibilityBasedOnPermission();
-				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
-			}
-		}
-	};
-}]);
-angular.module('platformWebApp')
 .controller('platformWebApp.accountApiListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
     blade.updatePermission = 'platform:security:update';
@@ -27550,6 +27537,35 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
+.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
+	return {
+		link: function (scope, element, attrs) {
+
+			if (attrs.vaPermission) {
+				var permissionValue = attrs.vaPermission.trim();
+			
+				//modelObject is a scope property of the parent/current scope
+				scope.$watch(attrs.securityScopes, function (value) {
+					if (value) {
+						toggleVisibilityBasedOnPermission(value);
+					}
+				});
+			
+				function toggleVisibilityBasedOnPermission(securityScopes) {
+					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
+					if (hasPermission)
+						element.show();
+					else
+						element.hide();
+				}
+
+				toggleVisibilityBasedOnPermission();
+				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
+			}
+		}
+	};
+}]);
+angular.module('platformWebApp')
 .directive('vaLoginToolbar', ['$document', '$timeout', '$state', 'platformWebApp.authService', function ($document, $timeout, $state, authService) {
     return {
         templateUrl: '$(Platform)/Scripts/app/security/login/loginToolbar.tpl.html',
@@ -27610,6 +27626,36 @@ angular.module('platformWebApp')
         queryPermissions: { url: 'api/platform/security/permissions', isArray: true },
         update: { method: 'PUT' }
     });
+}]);
+angular.module('platformWebApp')
+.controller('platformWebApp.accountApiWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+
+   
+    $scope.openBlade = function () {
+        var newBlade = {
+            id: "accountChildBlade",
+            title: $scope.blade.title,
+            subtitle: 'platform.widgets.accountApi.blade-subtitle',
+            controller: 'platformWebApp.accountApiListController',
+            template: '$(Platform)/Scripts/app/security/blades/account-api-list.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, $scope.blade);
+    };
+}]);
+angular.module('platformWebApp')
+.controller('platformWebApp.accountRolesWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+
+    $scope.openBlade = function () {
+        var newBlade = {
+            id: "accountChildBlade",
+            promise: $scope.blade.promise,
+            title: $scope.blade.title,
+            subtitle: 'platform.widgets.accountRoles.blade-subtitle',
+            controller: 'platformWebApp.accountRolesListController',
+            template: '$(Platform)/Scripts/app/security/blades/account-roles-list.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, $scope.blade);
+    };
 }]);
 angular.module('platformWebApp')
     .factory('platformWebApp.authService', ['$http', '$rootScope', '$cookieStore', '$state', '$interpolate', function ($http, $rootScope, $cookieStore, $state, $interpolate) {
@@ -27723,36 +27769,6 @@ angular.module('platformWebApp')
 		resolve: resolve
 	};
 	return retVal;
-}]);
-angular.module('platformWebApp')
-.controller('platformWebApp.accountApiWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-
-   
-    $scope.openBlade = function () {
-        var newBlade = {
-            id: "accountChildBlade",
-            title: $scope.blade.title,
-            subtitle: 'platform.widgets.accountApi.blade-subtitle',
-            controller: 'platformWebApp.accountApiListController',
-            template: '$(Platform)/Scripts/app/security/blades/account-api-list.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, $scope.blade);
-    };
-}]);
-angular.module('platformWebApp')
-.controller('platformWebApp.accountRolesWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-
-    $scope.openBlade = function () {
-        var newBlade = {
-            id: "accountChildBlade",
-            promise: $scope.blade.promise,
-            title: $scope.blade.title,
-            subtitle: 'platform.widgets.accountRoles.blade-subtitle',
-            controller: 'platformWebApp.accountRolesListController',
-            template: '$(Platform)/Scripts/app/security/blades/account-roles-list.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, $scope.blade);
-    };
 }]);
 angular.module('platformWebApp')
 .controller('platformWebApp.entitySettingListController', ['$scope', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', function ($scope, settingsHelper, bladeNavigationService) {

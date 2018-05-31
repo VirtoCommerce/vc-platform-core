@@ -13,7 +13,7 @@
         blade.selectedAll = false;
 
         if (blade.isApiSave) {
-            dictionaryItemsApi.query({ id: blade.currentEntity.objectType, propertyId: blade.currentEntity.id },
+            dictionaryItemsApi.getDictionaryItems({}, { id: blade.currentEntity.objectType, dynamicPropertyId: blade.currentEntity.id, take: 999 },
                 initializeBlade,
                 function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
         } else {
