@@ -16,6 +16,7 @@ using VirtoCommerce.NotificationsModule.Tests.Common;
 using VirtoCommerce.NotificationsModule.Tests.Model;
 using VirtoCommerce.NotificationsModule.Tests.NotificationTypes;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Notifications;
 using Xunit;
 
 namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
@@ -25,7 +26,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         
         private readonly NotificationSender _sender;
         private readonly Mock<INotificationService> _serviceMock;
-        private readonly INotificationTemplateRender _templateRender;
+        private readonly INotificationTemplateRenderer _templateRender;
         private readonly Mock<INotificationMessageService> _messageServiceMock;
         private readonly Mock<INotificationMessageSender> _messageSenderMock;
         private readonly Mock<ILogger<NotificationSender>> _logNotificationSenderMock;
@@ -47,7 +48,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _smtpEmailNotificationMessageSenderMock = new Mock<SmtpEmailNotificationMessageSender>(_emailSendingOptionsMock.Object);
             _senderFactoryMock.Setup(s => s.GetSenderForNotificationType(nameof(EmailNotification))).Returns(_messageSenderMock.Object);
 
-            _sender = new NotificationSender(_serviceMock.Object, _templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object, _senderFactoryMock.Object);
+            _sender = new NotificationSender(_templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object, _senderFactoryMock.Object);
 
             //todo
             if (!AbstractTypeFactory<Notification>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotification))))
@@ -329,33 +330,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             //Assert
             Assert.False(result.IsSuccess);
         }
-
-        [Fact]
-        public async Task EmailNotification_NullReferenceException()
-        {
-            //Arrange
-            string language = "default";
-            string subject = "some subject";
-            string body = "some body";
-            var notification = new EmailNotification()
-            {
-                Templates = new List<NotificationTemplate>()
-                {
-                    new EmailNotificationTemplate()
-                    {
-                        Subject = subject,
-                        Body = body,
-                    }
-                }
-            };
-
-            NotificationMessage message = null;
-            _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new [] { message }));
-
-            //Act
-            await Assert.ThrowsAsync<NullReferenceException>(() => _sender.SendNotificationAsync(notification, language));
-        }
-
+        
         [Fact]
         public async Task EmailNotification_ArgumentNullException()
         {
@@ -400,7 +375,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
             _messageSenderMock.Setup(ms => ms.SendNotificationAsync(It.IsAny<NotificationMessage>())).Throws(new SmtpException());
             
-            var sender = new NotificationSender(_serviceMock.Object, _templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object, _senderFactory);
+            var sender = new NotificationSender(_templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object, _senderFactory);
 
             //Act
             var result = await sender.SendNotificationAsync(notification, language);
