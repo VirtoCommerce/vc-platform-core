@@ -22,12 +22,7 @@
     <ProjectReference Include="..\VirtoCommerce.NotificationsModule.LiquidRenderer\VirtoCommerce.NotificationsModule.LiquidRenderer.csproj" />
     <ProjectReference Include="..\VirtoCommerce.NotificationsModule.SendGrid\VirtoCommerce.NotificationsModule.SendGrid.csproj" />
     <ProjectReference Include="..\VirtoCommerce.NotificationsModule.Smtp\VirtoCommerce.NotificationsModule.Smtp.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="..\VirtoCommerce.NotificationsModule.Web\module.manifest" />
-    <Content Remove="..\VirtoCommerce.NotificationsModule.Web\module.manifest" />
-    <None Remove="..\VirtoCommerce.NotificationsModule.Web\module.manifest" />
+    <ProjectReference Include="..\VirtoCommerce.NotificationsModule.Web\VirtoCommerce.NotificationsModule.Web.csproj" />
   </ItemGroup>
 
 </Project>
