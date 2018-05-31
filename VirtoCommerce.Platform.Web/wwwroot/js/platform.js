@@ -18344,6 +18344,35 @@ angular.module('platformWebApp')
 angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
     $stateProvider
+        .state('workspace.assets', {
+            url: '/assets',
+            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+            controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+                var blade = {
+                    id: 'assetList',
+                    controller: 'platformWebApp.assets.assetListController',
+                    template: '$(Platform)/Scripts/app/assets/blades/asset-list.tpl.html',
+                    isClosingDisabled: true
+                };
+                bladeNavigationService.showBlade(blade);
+            }]
+        });
+}])
+.run(
+  ['platformWebApp.mainMenuService', '$state', function (mainMenuService, $state) {
+      var menuItem = {
+          path: 'browse/assets',
+          icon: 'fa fa-folder-o',
+          title: 'platform.menu.assets',
+          priority: 130,
+          action: function () { $state.go('workspace.assets'); },
+          permission: 'platform:asset:access'
+      };
+      mainMenuService.addMenuItem(menuItem);
+  }]);
+angular.module('platformWebApp')
+.config(['$stateProvider', function ($stateProvider) {
+    $stateProvider
         .state('workspace.dynamicProperties', {
             url: '/dynamicProperties',
             templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
@@ -18543,35 +18572,6 @@ angular.module('platformWebApp')
 
   }]);
 
-angular.module('platformWebApp')
-.config(['$stateProvider', function ($stateProvider) {
-    $stateProvider
-        .state('workspace.assets', {
-            url: '/assets',
-            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-            controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-                var blade = {
-                    id: 'assetList',
-                    controller: 'platformWebApp.assets.assetListController',
-                    template: '$(Platform)/Scripts/app/assets/blades/asset-list.tpl.html',
-                    isClosingDisabled: true
-                };
-                bladeNavigationService.showBlade(blade);
-            }]
-        });
-}])
-.run(
-  ['platformWebApp.mainMenuService', '$state', function (mainMenuService, $state) {
-      var menuItem = {
-          path: 'browse/assets',
-          icon: 'fa fa-folder-o',
-          title: 'platform.menu.assets',
-          priority: 130,
-          action: function () { $state.go('workspace.assets'); },
-          permission: 'platform:asset:access'
-      };
-      mainMenuService.addMenuItem(menuItem);
-  }]);
 angular.module('platformWebApp')
 .controller('platformWebApp.licenseDetailController', ['$scope', '$window', 'FileUploader', '$http', 'platformWebApp.bladeNavigationService', function ($scope, $window, FileUploader, $http, bladeNavigationService) {
     var blade = $scope.blade;
@@ -22748,6 +22748,486 @@ angular.module('platformWebApp')
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["公元前","公元"],ERAS:["BC","AD"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"d/M/yy ah:mm",shortDate:"d/M/yy",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-hk",pluralCat:function(e,m){return E.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["西元前","西元"],ERAS:["西元前","西元"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日 EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"y/M/d ah:mm",shortDate:"y/M/d",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"NT$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-tw",pluralCat:function(e,m){return E.OTHER}})}]);
 angular.module('platformWebApp')
+.controller('platformWebApp.assets.assetListController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', '$sessionStorage', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
+    function ($scope, assets, bladeNavigationService, dialogService, $storage, bladeUtils, uiGridHelper) {
+        var blade = $scope.blade;
+        blade.title = 'platform.blades.asset-list.title';
+        if (!blade.currentEntity) {
+            blade.currentEntity = {};
+        }
+
+        blade.refresh = function () {
+            blade.isLoading = true;
+            assets.query(
+                {
+                    keyword: blade.searchKeyword,
+                    folderUrl: blade.currentEntity.url
+                },
+            function (data) {
+                $scope.pageSettings.totalItems = data.length;
+                _.each(data, function (x) {
+                    x.isImage = x.contentType && x.contentType.startsWith('image/');
+                    if (x.isImage) {
+                        x.noCacheUrl = x.url + '?t=' + x.modifiedDate;
+                    }
+                });
+                $scope.listEntries = data;
+                blade.isLoading = false;
+
+                //Set navigation breadcrumbs
+                setBreadcrumbs();
+            }, function (error) {
+                bladeNavigationService.setError('Error ' + error.status, blade);
+            });
+        };
+
+        //Breadcrumbs
+        function setBreadcrumbs() {
+            if (blade.breadcrumbs) {
+                //Clone array (angular.copy leaves the same reference)
+                var breadcrumbs = blade.breadcrumbs.slice(0);
+
+                //prevent duplicate items
+                if (blade.currentEntity.url && _.all(breadcrumbs, function (x) { return x.id !== blade.currentEntity.url; })) {
+                    var breadCrumb = generateBreadcrumb(blade.currentEntity.url, blade.currentEntity.name);
+                    breadcrumbs.push(breadCrumb);
+                }
+                blade.breadcrumbs = breadcrumbs;
+            } else {
+                blade.breadcrumbs = [generateBreadcrumb(blade.currentEntity.url, 'all')];
+            }
+        }
+
+        function generateBreadcrumb(id, name) {
+            return {
+                id: id,
+                name: name,
+                blade: blade,
+                navigate: function (breadcrumb) {
+                    breadcrumb.blade.searchKeyword = null;
+                    breadcrumb.blade.disableOpenAnimation = true;
+                    bladeNavigationService.showBlade(breadcrumb.blade, breadcrumb.blade.parentBlade);
+                    // breadcrumb.blade.refresh();
+                }
+            }
+        }
+
+        function newFolder(value, prefix) {
+            var result = prompt(prefix ? prefix + "\n\nEnter folder name:" : "Enter folder name:", value);
+            if (result != null) {
+                if (blade.currentEntity.url) {
+                    assets.createFolder({ name: result, parentUrl: blade.currentEntity.url },
+                            blade.refresh,
+                            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+                } else {
+                    if (result.length < 3 || result.length > 63 || !result.match(/^[a-z0-9]+(-[a-z0-9]+)*$/)) {
+                        newFolder(result, "A folder name must conform to the following naming rules:\n  Folder name must be from 3 through 63 characters long.\n  Folder name must start with a letter or number, and can contain only letters, numbers, and the dash (-) character.\n  Every dash (-) character must be immediately preceded and followed by a letter or number; consecutive dashes are not permitted.\n  All letters in a folder name must be lowercase.");
+                    } else {
+                        assets.createFolder({ name: result, parentUrl: blade.currentEntity.url },
+                            blade.refresh,
+                            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+                    }
+                }
+            }
+        }
+
+        $scope.copyUrl = function (data) {
+            window.prompt("Copy to clipboard: Ctrl+C, Enter", data.url);
+        };
+
+        $scope.downloadUrl = function (data) {
+            window.open(data.url, '_blank');
+        };
+
+        //$scope.rename = function (listItem) {
+        //    rename(listItem);
+        //};
+
+        //function rename(listItem) {
+        //    var result = prompt("Enter new name", listItem.name);
+        //    if (result) {
+        //        listItem.name = result;
+        //    }
+        //}
+
+        function isItemsChecked() {
+            return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
+        }
+
+        $scope.delete = function (data) {
+            deleteList([data]);
+        };
+
+        function deleteList(selection) {
+            bladeNavigationService.closeChildrenBlades(blade, function () {
+                var dialog = {
+                    id: "confirmDeleteItem",
+                    title: "platform.dialogs.folders-delete.title",
+                    message: "platform.dialogs.folders-delete.message",
+                    callback: function (remove) {
+                        if (remove) {
+                            var listEntryIds = _.pluck(selection, 'url');
+                            assets.remove({ urls: listEntryIds },
+                                blade.refresh,
+                                function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+                        }
+                    }
+                }
+                dialogService.showConfirmationDialog(dialog);
+            });
+        }
+
+        $scope.selectNode = function (listItem) {
+            if (listItem.type === 'folder') {
+                var newBlade = {
+                    id: blade.id,
+                    breadcrumbs: blade.breadcrumbs,
+                    currentEntity: listItem,
+                    disableOpenAnimation: true,
+                    controller: blade.controller,
+                    template: blade.template,
+                    isClosingDisabled: blade.isClosingDisabled
+                };
+
+                bladeNavigationService.showBlade(newBlade, blade.parentBlade);
+            }
+        };
+
+        blade.headIcon = 'fa-folder-o';
+
+        blade.toolbarCommands = [
+            {
+                name: "platform.commands.refresh", icon: 'fa fa-refresh',
+                executeMethod: blade.refresh,
+                canExecuteMethod: function () {
+                    return true;
+                }
+            },
+            {
+                name: "platform.commands.new-folder", icon: 'fa fa-folder-o',
+                executeMethod: function () { newFolder(); },
+                canExecuteMethod: function () {
+                    return true;
+                },
+                permission: 'platform:asset:create'
+            },
+            {
+                name: "platform.commands.upload", icon: 'fa fa-upload',
+                executeMethod: function () {
+                    var newBlade = {
+                        id: "assetUpload",
+                        currentEntityId: blade.currentEntity.url,
+                        title: 'platform.blades.asset-upload.title',
+                        controller: 'platformWebApp.assets.assetUploadController',
+                        template: '$(Platform)/Scripts/app/assets/blades/asset-upload.tpl.html'
+                    };
+                    bladeNavigationService.showBlade(newBlade, blade);
+                },
+                canExecuteMethod: function () {
+                    return true;
+                },
+                permission: 'platform:asset:create'
+            },
+            //{
+            //    name: "Rename", icon: 'fa fa-font',
+            //    executeMethod: function () {
+            //        rename(getFirstChecked())
+            //    },
+            //    canExecuteMethod: isSingleChecked,
+            //    permission: 'platform:asset:update'
+            //},
+            {
+                name: "platform.commands.delete", icon: 'fa fa-trash-o',
+                executeMethod: function () { deleteList($scope.gridApi.selection.getSelectedRows()); },
+                canExecuteMethod: isItemsChecked,
+                permission: 'platform:asset:delete'
+            }
+            //{
+            //    name: "Cut",
+            //    icon: 'fa fa-cut',
+            //    executeMethod: function () {
+            //    },
+            //    canExecuteMethod: isItemsChecked,
+            //    permission: 'asset:delete'
+            //},
+            //{
+            //    name: "Paste",
+            //    icon: 'fa fa-clipboard',
+            //    executeMethod: function () {
+            //        blade.isLoading = true;
+            //        assets.move({
+            //            folder: blade.currentEntity.url,
+            //            listEntries: $storage.catalogClipboardContent
+            //        }, function () {
+            //            delete $storage.catalogClipboardContent;
+            //            blade.refresh();
+            //        }, function (error) {
+            //            bladeNavigationService.setError('Error ' + error.status, blade);
+            //        });
+            //    },
+            //    canExecuteMethod: function () {
+            //        return $storage.catalogClipboardContent;
+            //    },
+            //    permission: 'asset:delete'
+            //}
+        ];
+
+        // ui-grid
+        $scope.setGridOptions = function (gridOptions) {
+            uiGridHelper.initialize($scope, gridOptions,
+            function (gridApi) {
+                $scope.$watch('pageSettings.currentPage', gridApi.pagination.seek);
+            });
+        };
+        bladeUtils.initializePagination($scope, true);
+
+        blade.refresh();
+    }]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.assets.assetSelectController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
+    function ($scope, assetsApi, bladeNavigationService, bladeUtils, uiGridHelper) {
+        var blade = $scope.blade;
+        blade.template = '$(Platform)/Scripts/app/assets/blades/asset-select.tpl.html';
+
+        blade.headIcon = 'fa-folder-o';
+
+        if (!blade.currentEntity) {
+            blade.currentEntity = {};
+        }
+        if (blade.folder) {
+            blade.currentEntity.url = '/' + blade.folder;
+        }
+
+        blade.refresh = function () {
+            blade.isLoading = true;
+            assetsApi.query(
+                {
+                    keyword: blade.searchKeyword,
+                    folderUrl: blade.currentEntity.url
+                },
+            function (data) {
+                $scope.pageSettings.totalItems = data.length;
+                _.each(data, function (x) { x.isImage = x.contentType && x.contentType.startsWith('image/'); });
+                $scope.listEntries = data;
+                blade.isLoading = false;
+
+                //Set navigation breadcrumbs
+                setBreadcrumbs();
+            }, function (error) {
+                bladeNavigationService.setError('Error ' + error.status, blade);
+            });
+        };
+
+        //Breadcrumbs
+        function setBreadcrumbs() {
+            if (blade.breadcrumbs) {
+                //Clone array (angular.copy leaves the same reference)
+                var breadcrumbs = blade.breadcrumbs.slice(0);
+
+                //prevent duplicate items
+                if (blade.currentEntity.url && _.all(breadcrumbs, function (x) { return x.id !== blade.currentEntity.url; })) {
+                    var breadCrumb = generateBreadcrumb(blade.currentEntity.url, blade.currentEntity.name);
+                    breadcrumbs.push(breadCrumb);
+                }
+                blade.breadcrumbs = breadcrumbs;
+            } else {
+                var name = "all";
+                if (blade.folder)
+                    name = blade.folder;
+
+                blade.breadcrumbs = [generateBreadcrumb(blade.currentEntity.url, name)];
+            }
+        }
+
+        function generateBreadcrumb(id, name) {
+            return {
+                id: id,
+                name: name,
+                blade: blade,
+                navigate: function (breadcrumb) {
+                    breadcrumb.blade.searchKeyword = null;
+                    breadcrumb.blade.disableOpenAnimation = true;
+                    bladeNavigationService.showBlade(breadcrumb.blade, breadcrumb.blade.parentBlade);
+                }
+            }
+        }
+
+        function isItemsChecked() {
+            return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
+        }
+
+        function getSelectedAssets() {
+            return $scope.gridApi.selection.getSelectedRows();
+        }
+
+        $scope.selectNode = function (listItem) {
+            if (listItem.type === 'folder') {
+                var newBlade = {
+                    id: blade.id,
+                    title: blade.title,
+                    breadcrumbs: blade.breadcrumbs,
+                    currentEntity: listItem,
+                    disableOpenAnimation: true,
+                    controller: blade.controller,
+                    template: blade.template,
+                    isClosingDisabled: blade.isClosingDisabled,
+                    onSelect: blade.onSelect
+                };
+
+                bladeNavigationService.showBlade(newBlade, blade.parentBlade);
+            }
+        };
+
+        blade.toolbarCommands = [
+            {
+                name: 'platform.commands.confirm',
+                icon: 'fa fa-check',
+                executeMethod: function () { $scope.saveChanges(); },
+                canExecuteMethod: function() {
+                    return isItemsChecked();;
+                }
+            }
+        ];
+
+        $scope.saveChanges = function() {
+            if (blade.onSelect)
+                blade.onSelect(getSelectedAssets());
+
+            $scope.bladeClose();
+        };
+
+        // ui-grid
+        $scope.setGridOptions = function (gridOptions) {
+            uiGridHelper.initialize($scope, gridOptions,
+            function (gridApi) {
+                $scope.$watch('pageSettings.currentPage', gridApi.pagination.seek);
+            });
+        };
+        bladeUtils.initializePagination($scope, true);
+
+        blade.refresh();
+    }]);
+
+angular.module('platformWebApp')
+    .controller('platformWebApp.assets.assetUploadController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'FileUploader', function ($scope, assets, bladeNavigationService, FileUploader) {
+        var blade = $scope.blade;
+        var currentEntities;
+        if (!blade.fileUploadOptions) {
+            blade.fileUploadOptions = {};
+        }
+
+        function initialize() {
+            if (!$scope.uploader) {
+                // Create the uploader
+                var uploader = $scope.uploader = new FileUploader({
+                    scope: $scope,
+                    headers: { Accept: 'application/json' },
+                    url: 'api/platform/assets?folderUrl=' + blade.currentEntityId,
+                    method: 'POST',
+                    //autoUpload: true,
+                    removeAfterUpload: true
+                });
+
+                if (blade.fileUploadOptions.accept && blade.fileUploadOptions.accept.contains('image')) {
+                    uploader.filters.push({
+                        name: 'imageFilter',
+                        fn: function(item) {
+                            var type = '|' + item.type.slice(item.type.lastIndexOf('/') + 1) + '|';
+                            return '|jpg|png|jpeg|bmp|gif|'.indexOf(type) !== -1;
+                        }
+                    });
+                }
+
+                uploader.onAfterAddingAll = function (addedItems) {
+                    blade.isLoading = true;
+                    blade.uploadCompleted = false;
+                    bladeNavigationService.setError(null, blade);
+
+                    // check for asset duplicates
+                    assets.query({ folderUrl: blade.currentEntityId },
+                        function (data) {
+                            blade.isLoading = false;
+                            currentEntities = data;
+
+                            _.each(addedItems, promptUserDecision);
+                            uploader.uploadAll();
+                        }, function (error) {
+                            bladeNavigationService.setError('Error ' + error.status, blade);
+                        });
+                };
+
+                uploader.onErrorItem = function (item, response, status, headers) {
+                    bladeNavigationService.setError(item._file.name + ' failed: ' + (response.message ? response.message : status), blade);
+                };
+
+                uploader.onCompleteAll = function () {
+                    refreshParentBlade();
+                    blade.uploadCompleted = true;
+                };
+
+                uploader.onSuccessItem = function (fileItem, images) {
+                    if (blade.onUploadComplete) {
+                        blade.onUploadComplete(images);
+                    }
+                };
+            }
+        }
+
+        function refreshParentBlade() {
+            if (blade.parentBlade.refresh && !blade.fileUploadOptions.suppressParentRefresh) {
+                blade.parentBlade.refresh();
+            }
+        }
+
+        function promptUserDecision(item) {
+            if (_.any(currentEntities, function (x) { return x.type === 'blob' && x.name.toLowerCase() === item.file.name.toLowerCase() })) {
+                var result = prompt("File \"" + item.file.name + "\" already exists!\n- Change name / press [OK] to overwrite.\n- Press [Cancel] to skip this file.\nFile name:", item.file.name);
+                if (result == null) {
+                    item.remove();
+                } else if (!result) {
+                    promptUserDecision(item);
+                } else if (result !== item.file.name) {
+                    item.file.name = result;
+                    promptUserDecision(item);
+                } else {
+                    item.url += "&forceFileOverwrite=true";
+                }
+            }
+        }
+
+        $scope.addImageFromUrl = function () {
+            if (blade.newExternalImageUrl) {
+                blade.uploadCompleted = false;
+
+                assets.uploadFromUrl({ folderUrl: blade.currentEntityId, url: blade.newExternalImageUrl }, function (data) {
+                    refreshParentBlade();
+                    if (blade.onUploadComplete) {
+                        blade.onUploadComplete(data);
+                    }
+                    blade.newExternalImageUrl = undefined;
+                    blade.uploadCompleted = true;
+                });
+            }
+        };
+
+        blade.headIcon = 'fa-file-o';
+
+        initialize();
+        blade.isLoading = false;
+    }]);
+
+angular.module('platformWebApp')
+.factory('platformWebApp.assets.api', ['$resource', function ($resource) {
+    return $resource('api/platform/assets', {}, {
+        createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
+        move: { method: 'POST', url: 'api/platform/assets/move' },
+        uploadFromUrl: { method: 'POST', params: { url: '@url', folderUrl: '@folderUrl', name: '@name' }, isArray: true }
+    });
+}]);
+
+
+angular.module('platformWebApp')
 .controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     
     $scope.blade.isLoading = false;
@@ -23702,486 +24182,6 @@ angular.module('platformWebApp')
         getStatus: { url: 'api/platform/jobs/:id' }
     });
 }]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.assets.assetListController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', '$sessionStorage', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
-    function ($scope, assets, bladeNavigationService, dialogService, $storage, bladeUtils, uiGridHelper) {
-        var blade = $scope.blade;
-        blade.title = 'platform.blades.asset-list.title';
-        if (!blade.currentEntity) {
-            blade.currentEntity = {};
-        }
-
-        blade.refresh = function () {
-            blade.isLoading = true;
-            assets.query(
-                {
-                    keyword: blade.searchKeyword,
-                    folderUrl: blade.currentEntity.url
-                },
-            function (data) {
-                $scope.pageSettings.totalItems = data.length;
-                _.each(data, function (x) {
-                    x.isImage = x.contentType && x.contentType.startsWith('image/');
-                    if (x.isImage) {
-                        x.noCacheUrl = x.url + '?t=' + x.modifiedDate;
-                    }
-                });
-                $scope.listEntries = data;
-                blade.isLoading = false;
-
-                //Set navigation breadcrumbs
-                setBreadcrumbs();
-            }, function (error) {
-                bladeNavigationService.setError('Error ' + error.status, blade);
-            });
-        };
-
-        //Breadcrumbs
-        function setBreadcrumbs() {
-            if (blade.breadcrumbs) {
-                //Clone array (angular.copy leaves the same reference)
-                var breadcrumbs = blade.breadcrumbs.slice(0);
-
-                //prevent duplicate items
-                if (blade.currentEntity.url && _.all(breadcrumbs, function (x) { return x.id !== blade.currentEntity.url; })) {
-                    var breadCrumb = generateBreadcrumb(blade.currentEntity.url, blade.currentEntity.name);
-                    breadcrumbs.push(breadCrumb);
-                }
-                blade.breadcrumbs = breadcrumbs;
-            } else {
-                blade.breadcrumbs = [generateBreadcrumb(blade.currentEntity.url, 'all')];
-            }
-        }
-
-        function generateBreadcrumb(id, name) {
-            return {
-                id: id,
-                name: name,
-                blade: blade,
-                navigate: function (breadcrumb) {
-                    breadcrumb.blade.searchKeyword = null;
-                    breadcrumb.blade.disableOpenAnimation = true;
-                    bladeNavigationService.showBlade(breadcrumb.blade, breadcrumb.blade.parentBlade);
-                    // breadcrumb.blade.refresh();
-                }
-            }
-        }
-
-        function newFolder(value, prefix) {
-            var result = prompt(prefix ? prefix + "\n\nEnter folder name:" : "Enter folder name:", value);
-            if (result != null) {
-                if (blade.currentEntity.url) {
-                    assets.createFolder({ name: result, parentUrl: blade.currentEntity.url },
-                            blade.refresh,
-                            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-                } else {
-                    if (result.length < 3 || result.length > 63 || !result.match(/^[a-z0-9]+(-[a-z0-9]+)*$/)) {
-                        newFolder(result, "A folder name must conform to the following naming rules:\n  Folder name must be from 3 through 63 characters long.\n  Folder name must start with a letter or number, and can contain only letters, numbers, and the dash (-) character.\n  Every dash (-) character must be immediately preceded and followed by a letter or number; consecutive dashes are not permitted.\n  All letters in a folder name must be lowercase.");
-                    } else {
-                        assets.createFolder({ name: result, parentUrl: blade.currentEntity.url },
-                            blade.refresh,
-                            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-                    }
-                }
-            }
-        }
-
-        $scope.copyUrl = function (data) {
-            window.prompt("Copy to clipboard: Ctrl+C, Enter", data.url);
-        };
-
-        $scope.downloadUrl = function (data) {
-            window.open(data.url, '_blank');
-        };
-
-        //$scope.rename = function (listItem) {
-        //    rename(listItem);
-        //};
-
-        //function rename(listItem) {
-        //    var result = prompt("Enter new name", listItem.name);
-        //    if (result) {
-        //        listItem.name = result;
-        //    }
-        //}
-
-        function isItemsChecked() {
-            return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
-        }
-
-        $scope.delete = function (data) {
-            deleteList([data]);
-        };
-
-        function deleteList(selection) {
-            bladeNavigationService.closeChildrenBlades(blade, function () {
-                var dialog = {
-                    id: "confirmDeleteItem",
-                    title: "platform.dialogs.folders-delete.title",
-                    message: "platform.dialogs.folders-delete.message",
-                    callback: function (remove) {
-                        if (remove) {
-                            var listEntryIds = _.pluck(selection, 'url');
-                            assets.remove({ urls: listEntryIds },
-                                blade.refresh,
-                                function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-                        }
-                    }
-                }
-                dialogService.showConfirmationDialog(dialog);
-            });
-        }
-
-        $scope.selectNode = function (listItem) {
-            if (listItem.type === 'folder') {
-                var newBlade = {
-                    id: blade.id,
-                    breadcrumbs: blade.breadcrumbs,
-                    currentEntity: listItem,
-                    disableOpenAnimation: true,
-                    controller: blade.controller,
-                    template: blade.template,
-                    isClosingDisabled: blade.isClosingDisabled
-                };
-
-                bladeNavigationService.showBlade(newBlade, blade.parentBlade);
-            }
-        };
-
-        blade.headIcon = 'fa-folder-o';
-
-        blade.toolbarCommands = [
-            {
-                name: "platform.commands.refresh", icon: 'fa fa-refresh',
-                executeMethod: blade.refresh,
-                canExecuteMethod: function () {
-                    return true;
-                }
-            },
-            {
-                name: "platform.commands.new-folder", icon: 'fa fa-folder-o',
-                executeMethod: function () { newFolder(); },
-                canExecuteMethod: function () {
-                    return true;
-                },
-                permission: 'platform:asset:create'
-            },
-            {
-                name: "platform.commands.upload", icon: 'fa fa-upload',
-                executeMethod: function () {
-                    var newBlade = {
-                        id: "assetUpload",
-                        currentEntityId: blade.currentEntity.url,
-                        title: 'platform.blades.asset-upload.title',
-                        controller: 'platformWebApp.assets.assetUploadController',
-                        template: '$(Platform)/Scripts/app/assets/blades/asset-upload.tpl.html'
-                    };
-                    bladeNavigationService.showBlade(newBlade, blade);
-                },
-                canExecuteMethod: function () {
-                    return true;
-                },
-                permission: 'platform:asset:create'
-            },
-            //{
-            //    name: "Rename", icon: 'fa fa-font',
-            //    executeMethod: function () {
-            //        rename(getFirstChecked())
-            //    },
-            //    canExecuteMethod: isSingleChecked,
-            //    permission: 'platform:asset:update'
-            //},
-            {
-                name: "platform.commands.delete", icon: 'fa fa-trash-o',
-                executeMethod: function () { deleteList($scope.gridApi.selection.getSelectedRows()); },
-                canExecuteMethod: isItemsChecked,
-                permission: 'platform:asset:delete'
-            }
-            //{
-            //    name: "Cut",
-            //    icon: 'fa fa-cut',
-            //    executeMethod: function () {
-            //    },
-            //    canExecuteMethod: isItemsChecked,
-            //    permission: 'asset:delete'
-            //},
-            //{
-            //    name: "Paste",
-            //    icon: 'fa fa-clipboard',
-            //    executeMethod: function () {
-            //        blade.isLoading = true;
-            //        assets.move({
-            //            folder: blade.currentEntity.url,
-            //            listEntries: $storage.catalogClipboardContent
-            //        }, function () {
-            //            delete $storage.catalogClipboardContent;
-            //            blade.refresh();
-            //        }, function (error) {
-            //            bladeNavigationService.setError('Error ' + error.status, blade);
-            //        });
-            //    },
-            //    canExecuteMethod: function () {
-            //        return $storage.catalogClipboardContent;
-            //    },
-            //    permission: 'asset:delete'
-            //}
-        ];
-
-        // ui-grid
-        $scope.setGridOptions = function (gridOptions) {
-            uiGridHelper.initialize($scope, gridOptions,
-            function (gridApi) {
-                $scope.$watch('pageSettings.currentPage', gridApi.pagination.seek);
-            });
-        };
-        bladeUtils.initializePagination($scope, true);
-
-        blade.refresh();
-    }]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.assets.assetSelectController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
-    function ($scope, assetsApi, bladeNavigationService, bladeUtils, uiGridHelper) {
-        var blade = $scope.blade;
-        blade.template = '$(Platform)/Scripts/app/assets/blades/asset-select.tpl.html';
-
-        blade.headIcon = 'fa-folder-o';
-
-        if (!blade.currentEntity) {
-            blade.currentEntity = {};
-        }
-        if (blade.folder) {
-            blade.currentEntity.url = '/' + blade.folder;
-        }
-
-        blade.refresh = function () {
-            blade.isLoading = true;
-            assetsApi.query(
-                {
-                    keyword: blade.searchKeyword,
-                    folderUrl: blade.currentEntity.url
-                },
-            function (data) {
-                $scope.pageSettings.totalItems = data.length;
-                _.each(data, function (x) { x.isImage = x.contentType && x.contentType.startsWith('image/'); });
-                $scope.listEntries = data;
-                blade.isLoading = false;
-
-                //Set navigation breadcrumbs
-                setBreadcrumbs();
-            }, function (error) {
-                bladeNavigationService.setError('Error ' + error.status, blade);
-            });
-        };
-
-        //Breadcrumbs
-        function setBreadcrumbs() {
-            if (blade.breadcrumbs) {
-                //Clone array (angular.copy leaves the same reference)
-                var breadcrumbs = blade.breadcrumbs.slice(0);
-
-                //prevent duplicate items
-                if (blade.currentEntity.url && _.all(breadcrumbs, function (x) { return x.id !== blade.currentEntity.url; })) {
-                    var breadCrumb = generateBreadcrumb(blade.currentEntity.url, blade.currentEntity.name);
-                    breadcrumbs.push(breadCrumb);
-                }
-                blade.breadcrumbs = breadcrumbs;
-            } else {
-                var name = "all";
-                if (blade.folder)
-                    name = blade.folder;
-
-                blade.breadcrumbs = [generateBreadcrumb(blade.currentEntity.url, name)];
-            }
-        }
-
-        function generateBreadcrumb(id, name) {
-            return {
-                id: id,
-                name: name,
-                blade: blade,
-                navigate: function (breadcrumb) {
-                    breadcrumb.blade.searchKeyword = null;
-                    breadcrumb.blade.disableOpenAnimation = true;
-                    bladeNavigationService.showBlade(breadcrumb.blade, breadcrumb.blade.parentBlade);
-                }
-            }
-        }
-
-        function isItemsChecked() {
-            return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
-        }
-
-        function getSelectedAssets() {
-            return $scope.gridApi.selection.getSelectedRows();
-        }
-
-        $scope.selectNode = function (listItem) {
-            if (listItem.type === 'folder') {
-                var newBlade = {
-                    id: blade.id,
-                    title: blade.title,
-                    breadcrumbs: blade.breadcrumbs,
-                    currentEntity: listItem,
-                    disableOpenAnimation: true,
-                    controller: blade.controller,
-                    template: blade.template,
-                    isClosingDisabled: blade.isClosingDisabled,
-                    onSelect: blade.onSelect
-                };
-
-                bladeNavigationService.showBlade(newBlade, blade.parentBlade);
-            }
-        };
-
-        blade.toolbarCommands = [
-            {
-                name: 'platform.commands.confirm',
-                icon: 'fa fa-check',
-                executeMethod: function () { $scope.saveChanges(); },
-                canExecuteMethod: function() {
-                    return isItemsChecked();;
-                }
-            }
-        ];
-
-        $scope.saveChanges = function() {
-            if (blade.onSelect)
-                blade.onSelect(getSelectedAssets());
-
-            $scope.bladeClose();
-        };
-
-        // ui-grid
-        $scope.setGridOptions = function (gridOptions) {
-            uiGridHelper.initialize($scope, gridOptions,
-            function (gridApi) {
-                $scope.$watch('pageSettings.currentPage', gridApi.pagination.seek);
-            });
-        };
-        bladeUtils.initializePagination($scope, true);
-
-        blade.refresh();
-    }]);
-
-angular.module('platformWebApp')
-    .controller('platformWebApp.assets.assetUploadController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'FileUploader', function ($scope, assets, bladeNavigationService, FileUploader) {
-        var blade = $scope.blade;
-        var currentEntities;
-        if (!blade.fileUploadOptions) {
-            blade.fileUploadOptions = {};
-        }
-
-        function initialize() {
-            if (!$scope.uploader) {
-                // Create the uploader
-                var uploader = $scope.uploader = new FileUploader({
-                    scope: $scope,
-                    headers: { Accept: 'application/json' },
-                    url: 'api/platform/assets?folderUrl=' + blade.currentEntityId,
-                    method: 'POST',
-                    //autoUpload: true,
-                    removeAfterUpload: true
-                });
-
-                if (blade.fileUploadOptions.accept && blade.fileUploadOptions.accept.contains('image')) {
-                    uploader.filters.push({
-                        name: 'imageFilter',
-                        fn: function(item) {
-                            var type = '|' + item.type.slice(item.type.lastIndexOf('/') + 1) + '|';
-                            return '|jpg|png|jpeg|bmp|gif|'.indexOf(type) !== -1;
-                        }
-                    });
-                }
-
-                uploader.onAfterAddingAll = function (addedItems) {
-                    blade.isLoading = true;
-                    blade.uploadCompleted = false;
-                    bladeNavigationService.setError(null, blade);
-
-                    // check for asset duplicates
-                    assets.query({ folderUrl: blade.currentEntityId },
-                        function (data) {
-                            blade.isLoading = false;
-                            currentEntities = data;
-
-                            _.each(addedItems, promptUserDecision);
-                            uploader.uploadAll();
-                        }, function (error) {
-                            bladeNavigationService.setError('Error ' + error.status, blade);
-                        });
-                };
-
-                uploader.onErrorItem = function (item, response, status, headers) {
-                    bladeNavigationService.setError(item._file.name + ' failed: ' + (response.message ? response.message : status), blade);
-                };
-
-                uploader.onCompleteAll = function () {
-                    refreshParentBlade();
-                    blade.uploadCompleted = true;
-                };
-
-                uploader.onSuccessItem = function (fileItem, images) {
-                    if (blade.onUploadComplete) {
-                        blade.onUploadComplete(images);
-                    }
-                };
-            }
-        }
-
-        function refreshParentBlade() {
-            if (blade.parentBlade.refresh && !blade.fileUploadOptions.suppressParentRefresh) {
-                blade.parentBlade.refresh();
-            }
-        }
-
-        function promptUserDecision(item) {
-            if (_.any(currentEntities, function (x) { return x.type === 'blob' && x.name.toLowerCase() === item.file.name.toLowerCase() })) {
-                var result = prompt("File \"" + item.file.name + "\" already exists!\n- Change name / press [OK] to overwrite.\n- Press [Cancel] to skip this file.\nFile name:", item.file.name);
-                if (result == null) {
-                    item.remove();
-                } else if (!result) {
-                    promptUserDecision(item);
-                } else if (result !== item.file.name) {
-                    item.file.name = result;
-                    promptUserDecision(item);
-                } else {
-                    item.url += "&forceFileOverwrite=true";
-                }
-            }
-        }
-
-        $scope.addImageFromUrl = function () {
-            if (blade.newExternalImageUrl) {
-                blade.uploadCompleted = false;
-
-                assets.uploadFromUrl({ folderUrl: blade.currentEntityId, url: blade.newExternalImageUrl }, function (data) {
-                    refreshParentBlade();
-                    if (blade.onUploadComplete) {
-                        blade.onUploadComplete(data);
-                    }
-                    blade.newExternalImageUrl = undefined;
-                    blade.uploadCompleted = true;
-                });
-            }
-        };
-
-        blade.headIcon = 'fa-file-o';
-
-        initialize();
-        blade.isLoading = false;
-    }]);
-
-angular.module('platformWebApp')
-.factory('platformWebApp.assets.api', ['$resource', function ($resource) {
-    return $resource('api/platform/assets', {}, {
-        createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
-        move: { method: 'POST', url: 'api/platform/assets/move' },
-        uploadFromUrl: { method: 'POST', params: { url: '@url', folderUrl: '@folderUrl', name: '@name' }, isArray: true }
-    });
-}]);
-
 
 angular.module('platformWebApp')
 .controller('platformWebApp.moduleDetailController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.bladeNavigationService', 'platformWebApp.modules', 'platformWebApp.moduleHelper', 'FileUploader', 'platformWebApp.settings', function ($scope, dialogService, bladeNavigationService, modules, moduleHelper, FileUploader, settings) {
@@ -27628,36 +27628,6 @@ angular.module('platformWebApp')
     });
 }]);
 angular.module('platformWebApp')
-.controller('platformWebApp.accountApiWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-
-   
-    $scope.openBlade = function () {
-        var newBlade = {
-            id: "accountChildBlade",
-            title: $scope.blade.title,
-            subtitle: 'platform.widgets.accountApi.blade-subtitle',
-            controller: 'platformWebApp.accountApiListController',
-            template: '$(Platform)/Scripts/app/security/blades/account-api-list.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, $scope.blade);
-    };
-}]);
-angular.module('platformWebApp')
-.controller('platformWebApp.accountRolesWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-
-    $scope.openBlade = function () {
-        var newBlade = {
-            id: "accountChildBlade",
-            promise: $scope.blade.promise,
-            title: $scope.blade.title,
-            subtitle: 'platform.widgets.accountRoles.blade-subtitle',
-            controller: 'platformWebApp.accountRolesListController',
-            template: '$(Platform)/Scripts/app/security/blades/account-roles-list.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, $scope.blade);
-    };
-}]);
-angular.module('platformWebApp')
     .factory('platformWebApp.authService', ['$http', '$rootScope', '$cookieStore', '$state', '$interpolate', function ($http, $rootScope, $cookieStore, $state, $interpolate) {
     var serviceBase = 'api/platform/security/';
     var authContext = {
@@ -27769,6 +27739,45 @@ angular.module('platformWebApp')
 		resolve: resolve
 	};
 	return retVal;
+}]);
+angular.module('platformWebApp')
+.controller('platformWebApp.accountApiWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+
+   
+    $scope.openBlade = function () {
+        var newBlade = {
+            id: "accountChildBlade",
+            title: $scope.blade.title,
+            subtitle: 'platform.widgets.accountApi.blade-subtitle',
+            controller: 'platformWebApp.accountApiListController',
+            template: '$(Platform)/Scripts/app/security/blades/account-api-list.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, $scope.blade);
+    };
+}]);
+angular.module('platformWebApp')
+.controller('platformWebApp.accountRolesWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+
+    $scope.openBlade = function () {
+        var newBlade = {
+            id: "accountChildBlade",
+            promise: $scope.blade.promise,
+            title: $scope.blade.title,
+            subtitle: 'platform.widgets.accountRoles.blade-subtitle',
+            controller: 'platformWebApp.accountRolesListController',
+            template: '$(Platform)/Scripts/app/security/blades/account-roles-list.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, $scope.blade);
+    };
+}]);
+angular.module('platformWebApp')
+.factory('platformWebApp.settings', ['$resource', function ($resource) {
+    return $resource('api/platform/settings/:id', { id: '@Id' }, {
+        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
+      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
+      	update: { method: 'POST', url: 'api/platform/settings' },
+        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
+    });
 }]);
 angular.module('platformWebApp')
 .controller('platformWebApp.entitySettingListController', ['$scope', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', function ($scope, settingsHelper, bladeNavigationService) {
@@ -28296,15 +28305,6 @@ angular.module('platformWebApp')
     blade.refresh();
 }]);
 
-angular.module('platformWebApp')
-.factory('platformWebApp.settings', ['$resource', function ($resource) {
-    return $resource('api/platform/settings/:id', { id: '@Id' }, {
-        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
-      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
-      	update: { method: 'POST', url: 'api/platform/settings' },
-        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
-    });
-}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.entitySettingsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;

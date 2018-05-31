@@ -69,6 +69,8 @@ namespace VirtoCommerce.Platform.Web
                         var log = services.BuildServiceProvider().GetService<ILogger<JsonSerializerSettings>>();
                         log.LogError(args.ErrorContext.Error, args.ErrorContext.Error.Message);
                     };
+                    options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+                    options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                 }
             );
             var modulesDiscoveryPath = Path.GetFullPath("Modules");
