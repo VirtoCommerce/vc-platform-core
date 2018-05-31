@@ -17852,40 +17852,29 @@ angular.module('platformWebApp')
         };
         return $delegate;
     }]);
-    // Fix support of first day week for datepicker
-    $provide.decorator('datepickerDirective', ['$delegate', '$locale', function ($delegate, $locale) {
-        var directive = $delegate[0];
-        directive.compile = function () {
-            return function (scope, element, attrs, ctrls) {
-                var controller = ctrls[0];
-                // 0 is Sunday in angular-js and Monday in angular-ui datepicker
-                var firstDayOfWeek = $locale.DATETIME_FORMATS.FIRSTDAYOFWEEK + 1;
-                firstDayOfWeek = firstDayOfWeek === 7 ? 0 : firstDayOfWeek;
-                controller.startingDay = firstDayOfWeek;
-                directive.link.apply(this, arguments);
-            }
-        };
-        return $delegate;
-    }]);
+
     // Fix bugs & add features for datepicker popup
-    $provide.decorator('datepickerPopupDirective', ['$delegate', 'platformWebApp.angularToMomentFormatConverter', 'datepickerPopupConfig', '$filter', '$locale',
-    function ($delegate, formatConverter, datepickerPopupConfig, $filter, $locale) {
+    $provide.decorator('datepickerPopupDirective', ['$delegate', 'platformWebApp.angularToMomentFormatConverter', 'uiDatetimePickerConfig', 'timepickerConfig', '$filter', '$locale',
+        function ($delegate, formatConverter, datepickerPopupConfig, timepickerConfig, $filter, $locale) {
+        //delete bootstrap directive
+        $delegate.shift();
+
+         //use custom date time picker directive
         var directive = $delegate[0];
+
         directive.compile = function (tElem, tAttrs) {
             tElem.attr("datepicker-popup-original", tAttrs.datepickerPopup);
-            return function (scope, element, attrs, ngModelCtrl) {
-                // Automatic localization support for buttons in popup
-                attrs.currentText = attrs.currentText || $filter('translate')('platform.commands.today');
-                attrs.clearText = attrs.clearText || $filter('translate')('platform.commands.clear');
-                attrs.closeText = attrs.closeText || $filter('translate')('platform.commands.close');
-
+            return function (scope, element, attrs, ctrls) {
+                var ngModelCtrl = ctrls[0];
                 // datepicker has some bugs and limitations to support date & time formats,
                 // also, it doesn't support localized input,
                 // so limit format number & convert to date via moment to prevent random occurence of errors
                 var applyFormat = function (newFormat, oldFormat) {
                     if (newFormat !== oldFormat) {
-                        var format = newFormat || datepickerPopupConfig.datepickerPopup;
+
+                        var format = newFormat || datepickerPopupConfig.dateFormat;;
                         formatConverter.validate(format, formatConverter.isInvalidDate);
+
                         if (formatConverter.additionalFormats.includes(format)) {
                             format = $locale.DATETIME_FORMATS[format];
                         }
@@ -17905,6 +17894,7 @@ angular.module('platformWebApp')
                     scope.date = value;
                     return ngModelCtrl.$isEmpty(value) ? value : $filter('date')(moment(value), format);
                 });
+
                 ngModelCtrl.$parsers.unshift(function (value) {
                     if (value) {
                         var format = formatConverter.convert(attrs.datepickerPopup);
@@ -17920,8 +17910,43 @@ angular.module('platformWebApp')
             }
         };
         return $delegate;
-    }]);
+        }]);
+
+    $provide.decorator('timepickerDirective', ['$delegate', 'timepickerConfig', '$locale', 'platformWebApp.settings.helper', 'platformWebApp.i18n', 'platformWebApp.userProfile',
+        function ($delegate, timepickerConfig, $locale, settings, i18n, userProfile) {
+
+        $delegate.shift();
+        var directive = $delegate[0];
+
+        var timeSettings = userProfile.timeSettings;
+        timepickerConfig.showMeridian = timeSettings.showMeridian;
+
+        var compile = directive.compile;
+            directive.compile = function (tElem, tAttrs) {
+                var link = compile.apply(this, arguments);
+                return function (scope, element, attrs, ctrls) {
+
+                    //set 24 hour format
+                    timeSettings = i18n.getTimeSettings();
+                    scope.showMeridian = timeSettings.showMeridian;
+
+                    function cnahgeTimeSettings(showMeridian) {
+                        timeSettings.showMeridian = showMeridian;
+                        i18n.changeTimeSettings(timeSettings);
+                        userProfile.save();
+                    }
+
+                    scope.$watch('showMeridian', function (showMeridian) {
+                            cnahgeTimeSettings(showMeridian);
+                    });
+
+                    link.apply(this, arguments);
+                };
+            };
+            return $delegate;
+        }]);
 }]);
+
 angular.module('platformWebApp')
 // Service provide functions for currency convertion and validation with localization support
 .factory('platformWebApp.currencyFormat', ['platformWebApp.numberFormat', '$filter', '$locale', function (numberFormat, $filter, $locale) {
@@ -18211,9 +18236,10 @@ angular.module('platformWebApp')
 .constant("platformWebApp.fallbackRegionalFormat", "en")
 .constant("platformWebApp.fallbackTimeZone", "Etc/Utc")
 .constant("platformWebApp.fallbackTimeAgoSettings", { useTimeAgo: true, thresholdUnit: 'Never', threshold: null })
+.constant("platformWebApp.fallbackTimeFormat", { showMeridian: true})
 // Service provider get/set function pairs for language, regional format, time zone and time ago settings
-.factory('platformWebApp.i18n', ['platformWebApp.fallbackLanguage', 'platformWebApp.fallbackRegionalFormat', 'platformWebApp.fallbackTimeAgoSettings', 'platformWebApp.common.languages', 'platformWebApp.common.locales', 'platformWebApp.common.timeZones', 'platformWebApp.userProfileApi', '$translate', 'tmhDynamicLocale', 'moment', 'amMoment', 'angularMomentConfig', 'amTimeAgoConfig',
-    function (fallbackLanguage, fallbackRegionalFormat, fallbackTimeAgoSettings, languages, locales, timeZones, userProfileApi, $translate, dynamicLocale, moment, momentService, momentConfig, timeAgoConfig) {
+    .factory('platformWebApp.i18n', ['platformWebApp.fallbackLanguage', 'platformWebApp.fallbackRegionalFormat', 'platformWebApp.fallbackTimeAgoSettings', 'platformWebApp.common.languages', 'platformWebApp.common.locales', 'platformWebApp.common.timeZones', 'platformWebApp.userProfileApi', '$translate', 'tmhDynamicLocale', 'moment', 'amMoment', 'angularMomentConfig', 'amTimeAgoConfig', 'platformWebApp.fallbackTimeFormat',
+        function (fallbackLanguage, fallbackRegionalFormat, fallbackTimeAgoSettings, languages, locales, timeZones, userProfileApi, $translate, dynamicLocale, moment, momentService, momentConfig, timeAgoConfig, fallbackTimeFormat) {
         var changeLanguage = function (language) {
             userProfileApi.getLocales(function(availableLanguages) {
                 availableLanguages.sort();
@@ -18268,8 +18294,11 @@ angular.module('platformWebApp')
                 timeAgoConfig.fullDateThreshold = timeAgoSettings.thresholdUnit && timeAgoSettings.thresholdUnit !== 'Never' ? timeAgoSettings.threshold || 1 : null;
             }
         }
-
-        return {
+        var changeTimeSettings = function (timeSettings) {
+            if (timeSettings)
+                fallbackTimeFormat = timeSettings;
+        }
+            return {
             getLanguage: function() { return languages.normalize($translate.use()) },
             getRegionalFormat: function () { return locales.normalize(dynamicLocale.get()) },
             getTimeZone: function () { return momentConfig.timezone },
@@ -18283,16 +18312,22 @@ angular.module('platformWebApp')
                 result.threshold = result.useTimeAgo && result.thresholdUnit !== 'Never' ? timeAgoConfig.fullDateThreshold : null;
                 return result;
             },
+            getTimeSettings: function () {
+                var result = {};
+                result.showMeridian = fallbackTimeFormat.showMeridian;
+                return result;
+            },
             changeLanguage: changeLanguage,
             changeRegionalFormat: changeRegionalFormat,
             changeTimeZone: changeTimeZone,
-            changeTimeAgoSettings: changeTimeAgoSettings
+            changeTimeAgoSettings: changeTimeAgoSettings,
+            changeTimeSettings: changeTimeSettings
         }
     }
 ])
 // Configure fallbacks for language, regional format, time zone and time ago settings
-.config(['$provide', 'platformWebApp.fallbackLanguage', 'platformWebApp.fallbackRegionalFormat', 'platformWebApp.fallbackTimeZone', 'platformWebApp.fallbackTimeAgoSettings', 'tmhDynamicLocaleProvider', '$translateProvider', 'angularMomentConfig', 'amTimeAgoConfig',
-        function ($provide, fallbackLanguage, fallbackRegionalFormat, fallbackTimeZone, fallbackTimeAgoSettings, dynamicLocaleProvider, $translateProvider, momentConfig, timeAgoConfig) {
+    .config(['$provide', 'platformWebApp.fallbackLanguage', 'platformWebApp.fallbackRegionalFormat', 'platformWebApp.fallbackTimeZone', 'platformWebApp.fallbackTimeAgoSettings', 'tmhDynamicLocaleProvider', '$translateProvider', 'angularMomentConfig', 'amTimeAgoConfig', 'platformWebApp.fallbackTimeFormat',
+        function ($provide, fallbackLanguage, fallbackRegionalFormat, fallbackTimeZone, fallbackTimeAgoSettings, dynamicLocaleProvider, $translateProvider, momentConfig, timeAgoConfig, fallbackTimeFormat) {
 
     // https://angular-translate.github.io/docs/#/guide
     $translateProvider.useUrlLoader('api/platform/localization')
@@ -18340,7 +18375,9 @@ angular.module('platformWebApp')
     i18n.changeRegionalFormat();
     i18n.changeTimeZone();
     i18n.changeTimeAgoSettings();
+    i18n.changeTimeSettings();
 }]);
+
 angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
     $stateProvider
@@ -18841,179 +18878,6 @@ angular.module('platformWebApp')
   }])
 ;
 angular.module('platformWebApp')
-.config(
-  ['$stateProvider', function ($stateProvider) {
-      $stateProvider
-          .state('workspace.pushNotificationsHistory', {
-              url: '/events',
-              templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-              controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-                  var blade = {
-                      id: 'events',
-                      title: 'platform.blades.history.title',
-                      breadcrumbs: [],
-                      subtitle: 'platform.blades.history.subtitle',
-                      controller: 'platformWebApp.pushNotificationsHistoryController',
-                      template: '$(Platform)/Scripts/app/pushNotifications/blade/history.tpl.html',
-                      isClosingDisabled: true
-                  };
-                  bladeNavigationService.showBlade(blade);
-              }
-              ]
-          });
-  }])
-.factory('platformWebApp.pushNotificationTemplateResolver', ['platformWebApp.bladeNavigationService', '$state', function (bladeNavigationService, $state) {
-    var notificationTemplates = [];
-
-    function register(template) {
-        notificationTemplates.push(template);
-        notificationTemplates.sort(function (a, b) { return a.priority - b.priority; });
-    };
-    function resolve(notification, place) {
-        return _.find(notificationTemplates, function (x) { return x.satisfy(notification, place); });
-    };
-    var retVal = {
-        register: register,
-        resolve: resolve,
-    };
-
-    //Recent events notification template (error, info, debug) 
-    var menuDefaultTemplate =
-        {
-            priority: 1000,
-            satisfy: function (notification, place) { return place == 'menu'; },
-            //template for display that notification in menu and list
-            template: '$(Platform)/Scripts/app/pushNotifications/menuDefault.tpl.html',
-            //action executed when notification selected
-            action: function (notify) { $state.go('workspace.pushNotificationsHistory', notify) }
-        };
-
-    //In history list notification template (error, info, debug)
-    var historyDefaultTemplate =
-        {
-            priority: 1000,
-            satisfy: function (notification, place) { return place == 'history'; },
-            //template for display that notification in menu and list
-            template: '$(Platform)/Scripts/app/pushNotifications/blade/historyDefault.tpl.html',
-            //action executed in event detail
-            action: function (notify) {
-                var blade = {
-                    id: 'notifyDetail',
-                    title: 'platform.blades.historyDetailDefault.title',
-                    subtitle: 'platform.blades.historyDetailDefault.subtitle',
-                    template: '$(Platform)/Scripts/app/pushNotifications/blade/historyDetailDefault.tpl.html',
-                    isClosingDisabled: false,
-                    notify: notify
-                };
-                bladeNavigationService.showBlade(blade);
-            }
-        };
-
-    retVal.register(menuDefaultTemplate);
-    retVal.register(historyDefaultTemplate);
-
-    return retVal;
-}])
-.factory('platformWebApp.pushNotificationService', ['$rootScope', '$timeout', '$interval', '$state', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
-    function ($rootScope, $timeout, $interval, $state, mainMenuService, eventTemplateResolver, notifications) {
-
-        //SignalR setup connection
-         var transportType = signalR.TransportType.WebSockets;
-         var http = new signalR.HttpConnection('/pushNotificationHub', { transport: transportType });
-         var connection = new signalR.HubConnection(http);
-         connection.start();
-
-
-        connection.on('Send', function (data) {
-            var notifyMenu = mainMenuService.findByPath('pushNotifications');
-            var notificationTemplate = eventTemplateResolver.resolve(data, 'menu');
-            //broadcast event
-            $rootScope.$broadcast("new-notification-event", data);
-
-            var menuItem = {
-                path: 'pushNotifications/notifications',
-                icon: 'fa fa-bell-o',
-                title: data.title,
-                priority: 2,
-                permission: '',
-                children: [],
-                action: notificationTemplate.action,
-                template: notificationTemplate.template,
-                notify: data
-            };
-
-            var alreadyExitstItem = _.find(notifyMenu.children, function (x) { return x.notify.id == menuItem.notify.id; });
-            if (alreadyExitstItem) {
-                angular.copy(menuItem, alreadyExitstItem);
-            }
-            else {
-                menuItem.parent = notifyMenu;
-                notifyMenu.children.push(menuItem);
-                notifyMenu.newCount++;
-
-                if (angular.isDefined(notifyMenu.intervalPromise)) {
-                    $interval.cancel(notifyMenu.intervalPromise);
-                }
-                animateNotify();
-                notifyMenu.intervalPromise = $interval(animateNotify, 30000);
-            }
-        });
-
-        function animateNotify() {
-            var notifyMenu = mainMenuService.findByPath('pushNotifications');
-            notifyMenu.isAnimated = true;
-
-            $timeout(function () {
-                notifyMenu.isAnimated = false;
-            }, 1500);
-        }
-
-        function markAllAsRead() {
-            var notifyMenu = mainMenuService.findByPath('pushNotifications');
-            if (angular.isDefined(notifyMenu.intervalPromise)) {
-                $interval.cancel(notifyMenu.intervalPromise);
-            }
-
-            notifications.markAllAsRead(null, function (data, status, headers, config) {
-                notifyMenu.isAnimated = false;
-                notifyMenu.newCount = 0;
-            }, function (error) {
-                //bladeNavigationService.setError('Error ' + error.status, blade);
-            });
-        }
-
-        var retVal = {
-            run: function () {
-                if (!this.running) {
-                    var notifyMenu = mainMenuService.findByPath('pushNotifications');
-                    if (!angular.isDefined(notifyMenu)) {
-                        notifyMenu = {
-                            path: 'pushNotifications',
-                            icon: 'fa fa-bell-o',
-                            title: 'platform.menu.notifications',
-                            priority: 2,
-                            isAlwaysOnBar: true,
-                            permission: '',
-                            headerTemplate: '$(Platform)/Scripts/app/pushNotifications/menuHeader.tpl.html',
-                            template: '$(Platform)/Scripts/app/pushNotifications/menu.tpl.html',
-                            action: function () { markAllAsRead(); if (this.children.length == 0) { this.showHistory(); } },
-                            showHistory: function () { $state.go('workspace.pushNotificationsHistory'); },
-                            clearRecent: function () { notifyMenu.children.splice(0, notifyMenu.children.length); },
-                            children: [],
-                            newCount: 0
-                        };
-                        mainMenuService.addMenuItem(notifyMenu);
-                    }
-                    this.running = true;
-                };
-            },
-            running: false
-        };
-        return retVal;
-
-    }]);
-
-angular.module('platformWebApp')
     .config(['$stateProvider', '$httpProvider', function ($stateProvider, $httpProvider) {
         $stateProvider.state('loginDialog', {
 	        url: '/login',
@@ -19342,6 +19206,179 @@ angular.module('platformWebApp')
   }]);
 
 angular.module('platformWebApp')
+.config(
+  ['$stateProvider', function ($stateProvider) {
+      $stateProvider
+          .state('workspace.pushNotificationsHistory', {
+              url: '/events',
+              templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+              controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+                  var blade = {
+                      id: 'events',
+                      title: 'platform.blades.history.title',
+                      breadcrumbs: [],
+                      subtitle: 'platform.blades.history.subtitle',
+                      controller: 'platformWebApp.pushNotificationsHistoryController',
+                      template: '$(Platform)/Scripts/app/pushNotifications/blade/history.tpl.html',
+                      isClosingDisabled: true
+                  };
+                  bladeNavigationService.showBlade(blade);
+              }
+              ]
+          });
+  }])
+.factory('platformWebApp.pushNotificationTemplateResolver', ['platformWebApp.bladeNavigationService', '$state', function (bladeNavigationService, $state) {
+    var notificationTemplates = [];
+
+    function register(template) {
+        notificationTemplates.push(template);
+        notificationTemplates.sort(function (a, b) { return a.priority - b.priority; });
+    };
+    function resolve(notification, place) {
+        return _.find(notificationTemplates, function (x) { return x.satisfy(notification, place); });
+    };
+    var retVal = {
+        register: register,
+        resolve: resolve,
+    };
+
+    //Recent events notification template (error, info, debug) 
+    var menuDefaultTemplate =
+        {
+            priority: 1000,
+            satisfy: function (notification, place) { return place == 'menu'; },
+            //template for display that notification in menu and list
+            template: '$(Platform)/Scripts/app/pushNotifications/menuDefault.tpl.html',
+            //action executed when notification selected
+            action: function (notify) { $state.go('workspace.pushNotificationsHistory', notify) }
+        };
+
+    //In history list notification template (error, info, debug)
+    var historyDefaultTemplate =
+        {
+            priority: 1000,
+            satisfy: function (notification, place) { return place == 'history'; },
+            //template for display that notification in menu and list
+            template: '$(Platform)/Scripts/app/pushNotifications/blade/historyDefault.tpl.html',
+            //action executed in event detail
+            action: function (notify) {
+                var blade = {
+                    id: 'notifyDetail',
+                    title: 'platform.blades.historyDetailDefault.title',
+                    subtitle: 'platform.blades.historyDetailDefault.subtitle',
+                    template: '$(Platform)/Scripts/app/pushNotifications/blade/historyDetailDefault.tpl.html',
+                    isClosingDisabled: false,
+                    notify: notify
+                };
+                bladeNavigationService.showBlade(blade);
+            }
+        };
+
+    retVal.register(menuDefaultTemplate);
+    retVal.register(historyDefaultTemplate);
+
+    return retVal;
+}])
+.factory('platformWebApp.pushNotificationService', ['$rootScope', '$timeout', '$interval', '$state', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
+    function ($rootScope, $timeout, $interval, $state, mainMenuService, eventTemplateResolver, notifications) {
+
+        //SignalR setup connection
+         var transportType = signalR.TransportType.WebSockets;
+         var http = new signalR.HttpConnection('/pushNotificationHub', { transport: transportType });
+         var connection = new signalR.HubConnection(http);
+         connection.start();
+
+
+        connection.on('Send', function (data) {
+            var notifyMenu = mainMenuService.findByPath('pushNotifications');
+            var notificationTemplate = eventTemplateResolver.resolve(data, 'menu');
+            //broadcast event
+            $rootScope.$broadcast("new-notification-event", data);
+
+            var menuItem = {
+                path: 'pushNotifications/notifications',
+                icon: 'fa fa-bell-o',
+                title: data.title,
+                priority: 2,
+                permission: '',
+                children: [],
+                action: notificationTemplate.action,
+                template: notificationTemplate.template,
+                notify: data
+            };
+
+            var alreadyExitstItem = _.find(notifyMenu.children, function (x) { return x.notify.id == menuItem.notify.id; });
+            if (alreadyExitstItem) {
+                angular.copy(menuItem, alreadyExitstItem);
+            }
+            else {
+                menuItem.parent = notifyMenu;
+                notifyMenu.children.push(menuItem);
+                notifyMenu.newCount++;
+
+                if (angular.isDefined(notifyMenu.intervalPromise)) {
+                    $interval.cancel(notifyMenu.intervalPromise);
+                }
+                animateNotify();
+                notifyMenu.intervalPromise = $interval(animateNotify, 30000);
+            }
+        });
+
+        function animateNotify() {
+            var notifyMenu = mainMenuService.findByPath('pushNotifications');
+            notifyMenu.isAnimated = true;
+
+            $timeout(function () {
+                notifyMenu.isAnimated = false;
+            }, 1500);
+        }
+
+        function markAllAsRead() {
+            var notifyMenu = mainMenuService.findByPath('pushNotifications');
+            if (angular.isDefined(notifyMenu.intervalPromise)) {
+                $interval.cancel(notifyMenu.intervalPromise);
+            }
+
+            notifications.markAllAsRead(null, function (data, status, headers, config) {
+                notifyMenu.isAnimated = false;
+                notifyMenu.newCount = 0;
+            }, function (error) {
+                //bladeNavigationService.setError('Error ' + error.status, blade);
+            });
+        }
+
+        var retVal = {
+            run: function () {
+                if (!this.running) {
+                    var notifyMenu = mainMenuService.findByPath('pushNotifications');
+                    if (!angular.isDefined(notifyMenu)) {
+                        notifyMenu = {
+                            path: 'pushNotifications',
+                            icon: 'fa fa-bell-o',
+                            title: 'platform.menu.notifications',
+                            priority: 2,
+                            isAlwaysOnBar: true,
+                            permission: '',
+                            headerTemplate: '$(Platform)/Scripts/app/pushNotifications/menuHeader.tpl.html',
+                            template: '$(Platform)/Scripts/app/pushNotifications/menu.tpl.html',
+                            action: function () { markAllAsRead(); if (this.children.length == 0) { this.showHistory(); } },
+                            showHistory: function () { $state.go('workspace.pushNotificationsHistory'); },
+                            clearRecent: function () { notifyMenu.children.splice(0, notifyMenu.children.length); },
+                            children: [],
+                            newCount: 0
+                        };
+                        mainMenuService.addMenuItem(notifyMenu);
+                    }
+                    this.running = true;
+                };
+            },
+            running: false
+        };
+        return retVal;
+
+    }]);
+
+angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
     $stateProvider
         .state('workspace.userProfile', {
@@ -19371,6 +19408,9 @@ angular.module('platformWebApp')
             thresholdUnit: undefined,
             thresholdUnits: undefined
         },
+        timeSettings: {
+            showMeridian: undefined
+        },
         mainMenuState: {},
         load: function () {
             return userProfileApi.get(function (profile) {
@@ -19378,7 +19418,9 @@ angular.module('platformWebApp')
                 profile.language = languages.normalize(settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.Language").value);
                 profile.regionalFormat = locales.normalize(settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.RegionalFormat").value);
                 profile.timeZone = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.TimeZone").value;
-                profile.timeAgoSettings = { };
+                profile.timeSettings = {};
+                profile.timeSettings.showMeridian = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.ShowMeridian").value;
+                profile.timeAgoSettings = {};
                 profile.timeAgoSettings.useTimeAgo = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.UseTimeAgo").value;
                 profile.timeAgoSettings.threshold = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.FullDateThreshold").value;
                 var fullDateThresholdUnitSetting = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.FullDateThresholdUnit");
@@ -19398,6 +19440,7 @@ angular.module('platformWebApp')
             settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.Language").value = languages.normalize(result.language);
             settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.RegionalFormat").value = locales.normalize(result.regionalFormat);
             settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.TimeZone").value = result.timeZone;
+            settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.ShowMeridian").value = result.timeSettings.showMeridian;
             settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.UseTimeAgo").value = result.timeAgoSettings.useTimeAgo;
             settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.FullDateThreshold").value = result.timeAgoSettings.threshold;
             settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.FullDateThresholdUnit").value = result.timeAgoSettings.thresholdUnit;
@@ -19423,6 +19466,7 @@ angular.module('platformWebApp')
     };
     mainMenuService.addMenuItem(menuItem);
 }]);
+
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -20286,6 +20330,1053 @@ angular.module('platformWebApp')
         }
     }])
 ;
+//replace datetimeDirective
+angular.module('platformWebApp')
+    .constant('uiDatetimePickerConfig',
+        {
+            dateFormat: 'medium',
+            defaultTime: '00:00:00',
+            html5Types: {
+                date: 'yyyy-MM-dd',
+                'datetime-local': 'yyyy-MM-ddTHH:mm:ss.sss',
+                'month': 'yyyy-MM'
+            },
+            initialPicker: 'date',
+            reOpenDefault: false,
+            enableDate: true,
+            enableTime: true,
+            buttonBar: {
+                show: true,
+                now: {
+                    show: true
+                },
+                today: {
+                    show: true
+                },
+                clear: {
+                    show: true
+                },
+                date: {
+                    show: true
+                },
+                time: {
+                    show: true
+                },
+                close: {
+                    show: true
+                }
+            },
+            closeOnDateSelection: false,
+            appendToBody: false,
+            altInputFormats: [],
+            ngModelOptions: {},
+            showMeridian: false
+        })
+    .controller('DateTimePickerController',
+        [
+            '$scope', '$element', '$attrs', '$compile', '$parse', '$document', '$timeout', '$position', 'dateFilter',
+            'dateParser', 'uiDatetimePickerConfig', '$rootScope', 'timepickerConfig',
+            function (scope, element, attrs, $compile, $parse, $document, $timeout, $uibPosition, dateFilter, uibDateParser, uiDatetimePickerConfig, $rootScope, timepickerConfig) {
+                var dateFormat = uiDatetimePickerConfig.dateFormat, ngModel, ngModelOptions, $popup,
+                    cache = {},
+                    watchListeners = [],
+                    closeOnDateSelection = angular.isDefined(attrs.closeOnDateSelection)
+                        ? scope.$parent.$eval(attrs.closeOnDateSelection)
+                        : uiDatetimePickerConfig.closeOnDateSelection,
+                    appendToBody = angular.isDefined(attrs.datepickerAppendToBody)
+                        ? scope.$parent.$eval(attrs.datepickerAppendToBody)
+                        : uiDatetimePickerConfig.appendToBody,
+                    altInputFormats = angular.isDefined(attrs.altInputFormats)
+                        ? scope.$parent.$eval(attrs.altInputFormats)
+                        : uiDatetimePickerConfig.altInputFormats;
+
+                // taken from UI Bootstrap 2.5.0
+                uibDateParser.fromTimezone = function fromTimezone(date, timezone) {
+                    return date && timezone ? convertTimezoneToLocal(date, timezone, true) : date;
+                }
+
+                uibDateParser.toTimezone = function toTimezone(date, timezone) {
+                    return date && timezone ? convertTimezoneToLocal(date, timezone) : date;
+                }
+
+                function timezoneToOffset(timezone, fallback) {
+                    timezone = timezone.replace(/:/g, '');
+                    var requestedTimezoneOffset = Date.parse('Jan 01, 1970 00:00:00 ' + timezone) / 60000;
+                    return isNaN(requestedTimezoneOffset) ? fallback : requestedTimezoneOffset;
+                }
+
+                function addDateMinutes(date, minutes) {
+                    date = new Date(date.getTime());
+                    date.setMinutes(date.getMinutes() + minutes);
+                    return date;
+                }
+
+                function convertTimezoneToLocal(date, timezone, reverse) {
+                    reverse = reverse ? -1 : 1;
+                    var dateTimezoneOffset = date.getTimezoneOffset();
+                    var timezoneOffset = timezoneToOffset(timezone, dateTimezoneOffset);
+                    return addDateMinutes(date, reverse * (timezoneOffset - dateTimezoneOffset));
+                }
+
+
+                this.init = function (_ngModel) {
+                    ngModel = _ngModel;
+                    ngModelOptions = ngModel.$options || uiDatetimePickerConfig.ngModelOptions;
+
+                    scope.watchData = {};
+                    scope.buttonBar = angular.isDefined(attrs.buttonBar)
+                        ? scope.$parent.$eval(attrs.buttonBar)
+                        : uiDatetimePickerConfig.buttonBar;
+
+                    // determine which pickers should be available. Defaults to date and time
+                    scope.enableDate = angular.isDefined(scope.enableDate)
+                        ? scope.enableDate
+                        : uiDatetimePickerConfig.enableDate;
+                    scope.enableTime = angular.isDefined(scope.enableTime)
+                        ? scope.enableTime
+                        : uiDatetimePickerConfig.enableTime;
+
+                    // determine default picker
+                    scope.initialPicker = angular.isDefined(attrs.initialPicker)
+                        ? attrs.initialPicker
+                        : (scope.enableDate ? uiDatetimePickerConfig.initialPicker : 'time');
+
+                    // determine the picker to open when control is re-opened
+                    scope.reOpenDefault = angular.isDefined(attrs.reOpenDefault)
+                        ? attrs.reOpenDefault
+                        : uiDatetimePickerConfig.reOpenDefault;
+
+                    // check if an illegal combination of options exists
+                    if (scope.initialPicker == 'date' && !scope.enableDate) {
+                        throw new Error(
+                            "datetimePicker can't have initialPicker set to date and have enableDate set to false.");
+                    }
+
+                    // default picker view
+                    scope.showPicker = !scope.enableDate ? 'time' : scope.initialPicker;
+
+                    var isHtml5DateInput = false;
+
+                    if (uiDatetimePickerConfig.html5Types[attrs.type]) {
+                        dateFormat = uiDatetimePickerConfig.html5Types[attrs.type];
+                        isHtml5DateInput = true;
+                    } else {
+                        dateFormat = attrs.datepickerPopup || uiDatetimePickerConfig.dateFormat;
+                        attrs.$observe('datetimePicker',
+                            function(value) {
+                                var newDateFormat = value || uiDatetimePickerConfig.dateFormat;
+
+                                if (newDateFormat !== dateFormat) {
+                                    dateFormat = newDateFormat;
+                                    ngModel.$modelValue = null;
+
+                                    if (!dateFormat) {
+                                        throw new Error('datetimePicker must have a date format specified.');
+                                    }
+                                }
+                            });
+                    }
+
+                    // popup element used to display calendar
+                    var popupEl = angular.element('' +
+                        '<div date-picker-wrap>' +
+                        '<div datepicker></div>' +
+                        '</div>' +
+                        '<div time-picker-wrap>' +
+                        '<div timepicker style="margin:0 auto"></div>' +
+                        '</div>');
+
+                    scope.ngModelOptions = angular.copy(ngModelOptions);
+                    scope.ngModelOptions.timezone = null;
+
+                    // get attributes from directive
+                    popupEl.attr({
+                        'ng-model': 'date',
+                        'ng-model-options': 'ngModelOptions',
+                        'ng-change': 'dateSelection(date)'
+                    });
+
+                    // datepicker element
+                    var datepickerEl = angular.element(popupEl.children()[0]);
+
+                    if (isHtml5DateInput) {
+                        if (attrs.type === 'month') {
+                            datepickerEl.attr('datepicker-mode', '"month"');
+                            datepickerEl.attr('min-mode', 'month');
+                        }
+                    }
+
+                    if (attrs.datepickerOptions) {
+                        var options = scope.$parent.$eval(attrs.datepickerOptions);
+
+                        if (options && options.initDate) {
+                            scope.initDate = uibDateParser.fromTimezone(options.initDate, ngModelOptions.timezone);
+                            datepickerEl.attr('init-date', 'initDate');
+                            delete options.initDate;
+                        }
+
+                        angular.forEach(options,
+                            function(value, option) {
+                                datepickerEl.attr(cameltoDash(option), value);
+                            });
+                    }
+
+                    // set datepickerMode to day by default as need to create watch
+                    // else disabled cannot pass in mode
+                    if (!angular.isDefined(attrs['datepickerMode'])) {
+                        attrs['datepickerMode'] = 'day';
+                    }
+
+                    if (attrs.dateDisabled) {
+                        datepickerEl.attr('date-disabled', 'dateDisabled({ date: date, mode: mode })');
+                    }
+
+                    angular.forEach([
+                            'formatDay', 'formatMonth', 'formatYear', 'formatDayHeader', 'formatDayTitle',
+                            'formatMonthTitle', 'showWeeks', 'startingDay', 'yearRows', 'yearColumns'
+                        ],
+                        function(key) {
+                            if (angular.isDefined(attrs[key])) {
+                                datepickerEl.attr(cameltoDash(key), attrs[key]);
+                            }
+                        });
+
+                    if (attrs.customClass) {
+                        datepickerEl.attr('custom-class', 'customClass({ date: date, mode: mode })');
+                    }
+
+                    angular.forEach(['minMode', 'maxMode', 'datepickerMode', 'shortcutPropagation'],
+                        function(key) {
+                            if (attrs[key]) {
+                                var getAttribute = $parse(attrs[key]);
+
+                                watchListeners.push(scope.$parent.$watch(getAttribute,
+                                    function(value) {
+                                        scope.watchData[key] = value;
+                                    }));
+                                datepickerEl.attr(cameltoDash(key), 'watchData.' + key);
+
+                                // Propagate changes from datepicker to outside
+                                if (key === 'datepickerMode') {
+                                    var setAttribute = getAttribute.assign;
+                                    watchListeners.push(scope.$watch('watchData.' + key,
+                                        function(value, oldvalue) {
+                                            if (angular.isFunction(setAttribute) && value !== oldvalue) {
+                                                setAttribute(scope.$parent, value);
+                                            }
+                                        }));
+                                }
+                            }
+                        });
+
+                    // timepicker element
+                    var timepickerEl = angular.element(popupEl.children()[1]);
+
+                    if (attrs.timepickerOptions) {
+                        var options = scope.$parent.$eval(attrs.timepickerOptions);
+                        angular.forEach(options,
+                            function(value, option) {
+                                scope.watchData[option] = value;
+                                timepickerEl.attr(cameltoDash(option), 'watchData.' + option);
+                            });
+                    }
+
+                    // watch attrs - NOTE: minDate and maxDate are used with datePicker and timePicker.  By using the minDate and maxDate
+                    // with the timePicker, you can dynamically set the min and max time values.  This cannot be done using the min and max values
+                    // with the timePickerOptions
+                    angular.forEach(['minDate', 'maxDate', 'initDate'],
+                        function(key) {
+                            if (attrs[key]) {
+                                var getAttribute = $parse(attrs[key]);
+
+                                watchListeners.push(scope.$parent.$watch(getAttribute,
+                                    function(value) {
+                                        scope.watchData[key] = value;
+                                    }));
+                                datepickerEl.attr(cameltoDash(key), 'watchData.' + key);
+
+                                if (key == 'minDate') {
+                                    timepickerEl.attr('min', 'watchData.minDate');
+                                } else if (key == 'maxDate')
+                                    timepickerEl.attr('max', 'watchData.maxDate');
+                            }
+                        });
+
+                    // do not check showWeeks attr, as should be used via datePickerOptions
+
+                    if (!isHtml5DateInput) {
+                        // Internal API to maintain the correct ng-invalid-[key] class
+                        ngModel.$$parserName = 'datetime';
+                        ngModel.$validators.datetime = validator;
+                        ngModel.$parsers.unshift(parseDate);
+                        ngModel.$formatters.push(function(value) {
+                            if (ngModel.$isEmpty(value)) {
+                                scope.date = value;
+                                return value;
+                            }
+                            scope.date = uibDateParser.fromTimezone(value, ngModelOptions.timezone);
+                            dateFormat = dateFormat.replace(/M!/, 'MM')
+                                .replace(/d!/, 'dd');
+
+                            return dateFilter(scope.date, dateFormat);
+                        });
+                    } else {
+                        ngModel.$formatters.push(function(value) {
+                            scope.date = uibDateParser.fromTimezone(value, ngModelOptions.timezone);;
+                            return value;
+                        });
+                    }
+
+                    // Detect changes in the view from the text box
+                    ngModel.$viewChangeListeners.push(function() {
+                        scope.date = parseDateString(ngModel.$viewValue);
+                    });
+
+                    element.bind('keydown', inputKeydownBind);
+
+                    $popup = $compile(popupEl)(scope);
+                    // Prevent jQuery cache memory leak (template is now redundant after linking)
+                    popupEl.remove();
+
+                    if (appendToBody) {
+                        $document.find('body').append($popup);
+                    } else {
+                        element.after($popup);
+                    }
+
+                };
+
+                // get text
+                scope.getText = function(key) {
+                    return scope.buttonBar[key].text || uiDatetimePickerConfig.buttonBar[key].text;
+                };
+
+                // determine if button is to be shown or not
+                scope.doShow = function(key) {
+                    if (angular.isDefined(scope.buttonBar[key].show))
+                        return scope.buttonBar[key].show;
+                    else
+                        return uiDatetimePickerConfig.buttonBar[key].show;
+                };
+
+                // Inner change
+                scope.dateSelection = function (dt) {
+                    // check if timePicker is being shown and merge dates, so that the date
+                    // part is never changed, only the time
+
+                    //set date whis this time (00:00:00:0000)
+                    if (scope.enableTime && scope.showPicker === 'date') {
+                        var defaultTimeForDate = 0;
+
+                        // only proceed if dt is a date
+                        if (dt || dt != null) {
+                            // check if our scope.date is null, and if so, set to todays date
+                            if (!angular.isDefined(scope.date) || scope.date == null) {
+                                scope.date = new Date();
+                            }
+
+                            // dt will not be undefined if the now or today button is pressed
+                            if (dt && dt != null) {
+                                // get the existing date and update the time
+                                var date = new Date(dt);
+                                date.setHours(defaultTimeForDate);
+                                date.setMinutes(defaultTimeForDate);
+                                date.setSeconds(defaultTimeForDate);
+                                date.setMilliseconds(defaultTimeForDate);
+                                dt = date;
+                            }
+                        }
+                    }
+
+                    if (scope.enableTime && scope.showPicker === 'time') {
+                        // only proceed if dt is a date
+                        if (dt || dt != null) {
+                            // check if our scope.date is null, and if so, set to todays date
+                            if (!angular.isDefined(scope.date) || scope.date == null) {
+                                scope.date = new Date();
+                            }
+
+                            // dt will not be undefined if the now or today button is pressed
+                            if (dt && dt != null) {
+                                // get the existing date and update the time
+                                var date = new Date(scope.date);
+                                date.setHours(dt.getHours());
+                                date.setMinutes(dt.getMinutes());
+                                date.setSeconds(dt.getSeconds());
+                                date.setMilliseconds(dt.getMilliseconds());
+                                dt = date;
+                            }
+                        }
+                    }
+
+                    if (angular.isDefined(dt)) {
+                        if (!scope.date) {
+                            var defaultTime = angular.isDefined(attrs.defaultTime)
+                                ? attrs.defaultTime
+                                : uiDatetimePickerConfig.defaultTime;
+                            var t = new Date('2001-01-01 ' + defaultTime);
+
+                            if (!isNaN(t) && dt != null) {
+                                dt.setHours(t.getHours());
+                                dt.setMinutes(t.getMinutes());
+                                dt.setSeconds(t.getSeconds());
+                                dt.setMilliseconds(t.getMilliseconds());
+                            }
+                        }
+                        scope.date = dt;
+                    }
+
+                    var newDate = scope.date ? dateFilter(scope.date, dateFormat, ngModelOptions.timezone) : null;
+
+                    element.val(newDate);
+                    ngModel.$setViewValue(scope.date);
+
+                    if (closeOnDateSelection) {
+                        // do not close when using timePicker as make impossible to choose a time
+                        if (scope.showPicker != 'time' && date != null) {
+                            // if time is enabled, swap to timePicker
+                            if (scope.enableTime) {
+                                scope.open('time');
+                            } else {
+                                scope.close(false);
+                            }
+                        }
+                    }
+
+                };
+
+                scope.keydown = function(evt) {
+                    if (evt.which === 27) {
+                        scope.close(false);
+                        element[0].focus();
+                    }
+                };
+
+                scope.$watch('isOpen',
+                    function(value) {
+                        scope.dropdownStyle = {
+                            display: value ? 'block' : 'none'
+                        };
+
+                        if (value) {
+                            cache['openDate'] = scope.date;
+
+                            var position = appendToBody ? $uibPosition.offset(element) : $uibPosition.position(element);
+
+                            if (appendToBody) {
+                                scope.dropdownStyle.top = (position.top + element.prop('offsetHeight')) + 'px';
+                            } else {
+                                scope.dropdownStyle.top = undefined;
+                            }
+
+                            scope.dropdownStyle.left = position.left + 'px';
+
+                            $timeout(function () { scope.$broadcast('datepicker.focus'); $document.bind('click', documentClickBind); }, 0, false);                            scope.open(scope.showPicker);
+                        } else {
+                            $document.unbind('click', documentClickBind);
+                        }
+                    });
+
+                scope.isDisabled = function(date) {
+                    if (date === 'today' || date === 'now') {
+                        date = new Date();
+                    }
+
+                    return scope.watchData.minDate && scope.compare(date, scope.watchData.minDate) < 0 ||
+                        scope.watchData.maxDate && scope.compare(date, scope.watchData.maxDate) > 0;
+                };
+
+                scope.compare = function(date1, date2) {
+                    return new Date(date1.getFullYear(), date1.getMonth(), date1.getDate()) -
+                        new Date(date2.getFullYear(), date2.getMonth(), date2.getDate());
+                };
+
+                scope.select = function(opt) {
+
+                    var date = null;
+                    if (opt === 'today' || opt == 'now') {
+                        var now = new Date();
+                        if (angular.isDate(scope.date)) {
+                            date = new Date(scope.date);
+                            date.setFullYear(now.getFullYear(), now.getMonth(), now.getDate());
+                            date.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+                        } else {
+                            date = now;
+                        }
+                    }
+
+                    scope.dateSelection(date);
+
+                    if (opt == 'clear')
+                        scope.close();
+                };
+
+                scope.open = function(picker, evt) {
+                    if (angular.isDefined(evt)) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+                    }
+
+                    // need to delay this, else timePicker never shown
+                    $timeout(function() {
+                            scope.showPicker = picker;
+                        },
+                        0);
+
+                    // in order to update the timePicker, we need to update the model reference!
+                    // as found here https://angular-ui.github.io/bootstrap/#/timepicker
+                    $timeout(function () {
+                        if (scope.date == null) {
+                            scope.date = new Date();
+                            } else {
+                                scope.date = new Date(scope.date);
+                            }
+                            
+                        },
+                        50);
+                };
+
+                scope.close = function(closePressed) {
+                    scope.isOpen = false;
+
+                    // if enableDate and enableTime are true, reopen the picker in date mode first
+                    if (scope.enableDate && scope.enableTime)
+                        scope.showPicker = scope.reOpenDefault === false ? 'date' : scope.reOpenDefault;
+
+                    // if a on-close-fn has been defined, lets call it
+                    // we only call this if closePressed is defined!
+                    if (angular.isDefined(closePressed))
+                        scope.whenClosed({
+                            args: {
+                                closePressed: closePressed,
+                                openDate: cache['openDate'] || null,
+                                closeDate: scope.date
+                            }
+                        });
+
+                    element[0].focus();
+                };
+
+                scope.$on('$destroy',
+                    function() {
+                        if (scope.isOpen === true) {
+                            if (!$rootScope.$$phase) {
+                                scope.$apply(function() {
+                                    scope.close();
+                                });
+                            }
+                        }
+
+                        watchListeners.forEach(function(a) { a(); });
+                        $popup.remove();
+                        element.unbind('keydown', inputKeydownBind);
+                        $document.unbind('click', documentClickBind);
+                    });
+
+                function documentClickBind(evt) {
+                    var popup = $popup[0];
+                    var dpContainsTarget = element[0].contains(evt.target);
+
+                    // The popup node may not be an element node
+                    // In some browsers (IE only) element nodes have the 'contains' function
+                    var popupContainsTarget = popup.contains !== undefined && popup.contains(evt.target);
+
+                    if (scope.isOpen && !(dpContainsTarget || popupContainsTarget)) {
+                        scope.$apply(function() {
+                            scope.close(false);
+                        });
+                    }
+                }
+
+                function inputKeydownBind(evt) {
+                    if (evt.which === 27 && scope.isOpen) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+                        scope.$apply(function() {
+                            scope.close(false);
+                        });
+                        element[0].focus();
+                    } else if (evt.which === 40 && !scope.isOpen) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+                        scope.$apply(function() {
+                            scope.isOpen = true;
+                        });
+                    }
+                }
+
+                function cameltoDash(string) {
+                    return string.replace(/([A-Z])/g, function($1) { return '-' + $1.toLowerCase(); });
+                }
+
+                function parseDateString(viewValue) {
+                    var date = uibDateParser.parse(viewValue, dateFormat, scope.date);
+                    if (isNaN(date)) {
+                        for (var i = 0; i < altInputFormats.length; i++) {
+                            date = uibDateParser.parse(viewValue, altInputFormats[i], scope.date);
+                            if (!isNaN(date)) {
+                                return date;
+                            }
+                        }
+                    }
+                    return date;
+                }
+
+                function parseDate(viewValue) {
+                    if (angular.isNumber(viewValue)) {
+                        // presumably timestamp to date object
+                        viewValue = new Date(viewValue);
+                    }
+
+                    if (!viewValue) {
+                        return null;
+                    } else if (angular.isDate(viewValue) && !isNaN(viewValue)) {
+                        return viewValue;
+                    } else if (angular.isString(viewValue)) {
+                        var date = parseDateString(viewValue);
+                        if (!isNaN(date)) {
+                            return uibDateParser.toTimezone(date, ngModelOptions.timezone);
+                        }
+
+                        return undefined;
+                    } else {
+                        return undefined;
+                    }
+                }
+
+                function validator(modelValue, viewValue) {
+                    var value = modelValue || viewValue;
+
+                    if (!(attrs.ngRequired || attrs.required) && !value) {
+                        return true;
+                    }
+
+                    if (angular.isNumber(value)) {
+                        value = new Date(value);
+                    }
+
+                    if (!value) {
+                        return true;
+                    } else if (angular.isDate(value) && !isNaN(value)) {
+                        return true;
+                    } else if (angular.isDate(new Date(value)) && !isNaN(new Date(value).valueOf())) {
+                        return true;
+                    } else if (angular.isString(value)) {
+                        return !isNaN(parseDateString(viewValue));
+                    } else {
+                        return false;
+                    }
+                }
+
+            }
+        ])
+    .directive('datepickerPopup',
+        function() {
+            return {
+                restrict: 'A',
+                require: ['ngModel', 'datepickerPopup'],
+                controller: 'DateTimePickerController',
+                scope: {
+                    isOpen: '=?',
+                    enableDate: '=?',
+                    enableTime: '=?',
+                    initialPicker: '=?',
+                    reOpenDefault: '=?',
+                    dateDisabled: '&',
+                    customClass: '&',
+                    whenClosed: '&'
+                },
+                link: function(scope, element, attrs, ctrls) {
+                    var ngModel = ctrls[0],
+                        ctrl = ctrls[1];
+
+                    ctrl.init(ngModel);
+                }
+            };
+        })
+    .directive('datePickerWrap',
+        function() {
+            return {
+                restrict: 'EA',
+                replace: true,
+                transclude: true,
+                templateUrl: 'template/date-picker.html'
+            };
+        })
+    .directive('timePickerWrap',
+        function() {
+            return {
+                restrict: 'EA',
+                replace: true,
+                transclude: true,
+                templateUrl: 'template/time-picker.html'
+            };
+    });
+
+//replace timeDirective
+angular.module('platformWebApp')
+    .constant('timepickerConfig', {
+        hourStep: 1,
+        minuteStep: 1,
+        showMeridian: true,
+        meridians: null,
+        readonlyInput: false,
+        mousewheel: true,
+        arrowkeys: true,
+        showSpinners: true
+    })
+
+    .controller('TimepickerController', ['$scope', '$attrs', '$parse', '$log', '$locale', 'timepickerConfig', function ($scope, $attrs, $parse, $log, $locale, timepickerConfig) {
+        var selected = new Date(),
+            ngModelCtrl = { $setViewValue: angular.noop }, // nullModelCtrl
+            meridians = angular.isDefined($attrs.meridians) ? $scope.$parent.$eval($attrs.meridians) : timepickerConfig.meridians || $locale.DATETIME_FORMATS.AMPMS;
+            
+        var _24Hour = '24 Hrs';
+
+        this.init = function (ngModelCtrl_, inputs) {
+            ngModelCtrl = ngModelCtrl_;
+            ngModelCtrl.$render = this.render;
+
+            ngModelCtrl.$formatters.unshift(function (modelValue) {
+                return modelValue ? new Date(modelValue) : null;
+            });
+
+            var hoursInputEl = inputs.eq(0),
+                minutesInputEl = inputs.eq(1);
+
+            var mousewheel = angular.isDefined($attrs.mousewheel) ? $scope.$parent.$eval($attrs.mousewheel) : timepickerConfig.mousewheel;
+            if (mousewheel) {
+                this.setupMousewheelEvents(hoursInputEl, minutesInputEl);
+            }
+
+            var arrowkeys = angular.isDefined($attrs.arrowkeys) ? $scope.$parent.$eval($attrs.arrowkeys) : timepickerConfig.arrowkeys;
+            if (arrowkeys) {
+                this.setupArrowkeyEvents(hoursInputEl, minutesInputEl);
+            }
+
+            $scope.readonlyInput = angular.isDefined($attrs.readonlyInput) ? $scope.$parent.$eval($attrs.readonlyInput) : timepickerConfig.readonlyInput;
+            this.setupInputEvents(hoursInputEl, minutesInputEl);
+        };
+
+        var hourStep = timepickerConfig.hourStep;
+        if ($attrs.hourStep) {
+            $scope.$parent.$watch($parse($attrs.hourStep), function (value) {
+                hourStep = parseInt(value, 10);
+            });
+        }
+
+        var minuteStep = timepickerConfig.minuteStep;
+        if ($attrs.minuteStep) {
+            $scope.$parent.$watch($parse($attrs.minuteStep), function (value) {
+                minuteStep = parseInt(value, 10);
+            });
+        }
+
+        // 12H / 24H mode
+        $scope.showMeridian = timepickerConfig.showMeridian;
+        if ($attrs.showMeridian) {
+            $scope.$parent.$watch($parse($attrs.showMeridian), function (value) {
+                $scope.showMeridian = !!value;
+
+                if (ngModelCtrl.$error.time) {
+                    // Evaluate from template
+                    var hours = getHoursFromTemplate(), minutes = getMinutesFromTemplate();
+                    if (angular.isDefined(hours) && angular.isDefined(minutes)) {
+                        selected.setHours(hours);
+                        refresh();
+                    }
+                } else {
+                    updateTemplate();
+                }
+            });
+        }
+
+        // Get $scope.hours in 24H mode if valid
+        function getHoursFromTemplate() {
+            var hours = parseInt($scope.hours, 10);
+            var valid = ($scope.showMeridian) ? (hours > 0 && hours < 13) : (hours >= 0 && hours < 24);
+            if (!valid) {
+                return undefined;
+            }
+
+            if ($scope.showMeridian) {
+                if (hours === 12) {
+                    hours = 0;
+                }
+                if ($scope.meridian === meridians[1]) {
+                    hours = hours + 12;
+                }
+            }
+            return hours;
+        }
+
+        function getMinutesFromTemplate() {
+            var minutes = parseInt($scope.minutes, 10);
+            return (minutes >= 0 && minutes < 60) ? minutes : undefined;
+        }
+
+        function pad(value) {
+            return (angular.isDefined(value) && value.toString().length < 2) ? '0' + value : value.toString();
+        }
+
+        // Respond on mousewheel spin
+        this.setupMousewheelEvents = function (hoursInputEl, minutesInputEl) {
+            var isScrollingUp = function (e) {
+                if (e.originalEvent) {
+                    e = e.originalEvent;
+                }
+                //pick correct delta variable depending on event
+                var delta = (e.wheelDelta) ? e.wheelDelta : -e.deltaY;
+                return (e.detail || delta > 0);
+            };
+
+            hoursInputEl.bind('mousewheel wheel', function (e) {
+                $scope.$apply((isScrollingUp(e)) ? $scope.incrementHours() : $scope.decrementHours());
+                e.preventDefault();
+            });
+
+            minutesInputEl.bind('mousewheel wheel', function (e) {
+                $scope.$apply((isScrollingUp(e)) ? $scope.incrementMinutes() : $scope.decrementMinutes());
+                e.preventDefault();
+            });
+
+        };
+
+        // Respond on up/down arrowkeys
+        this.setupArrowkeyEvents = function (hoursInputEl, minutesInputEl) {
+            hoursInputEl.bind('keydown', function (e) {
+                if (e.which === 38) { // up
+                    e.preventDefault();
+                    $scope.incrementHours();
+                    $scope.$apply();
+                }
+                else if (e.which === 40) { // down
+                    e.preventDefault();
+                    $scope.decrementHours();
+                    $scope.$apply();
+                }
+            });
+
+            minutesInputEl.bind('keydown', function (e) {
+                if (e.which === 38) { // up
+                    e.preventDefault();
+                    $scope.incrementMinutes();
+                    $scope.$apply();
+                }
+                else if (e.which === 40) { // down
+                    e.preventDefault();
+                    $scope.decrementMinutes();
+                    $scope.$apply();
+                }
+            });
+        };
+
+        this.setupInputEvents = function (hoursInputEl, minutesInputEl) {
+            if ($scope.readonlyInput) {
+                $scope.updateHours = angular.noop;
+                $scope.updateMinutes = angular.noop;
+                return;
+            }
+
+            var invalidate = function (invalidHours, invalidMinutes) {
+                ngModelCtrl.$setViewValue(null);
+                ngModelCtrl.$setValidity('time', false);
+                if (angular.isDefined(invalidHours)) {
+                    $scope.invalidHours = invalidHours;
+                }
+                if (angular.isDefined(invalidMinutes)) {
+                    $scope.invalidMinutes = invalidMinutes;
+                }
+            };
+
+            $scope.updateHours = function () {
+                var hours = getHoursFromTemplate();
+
+                if (angular.isDefined(hours)) {
+                    selected.setHours(hours);
+                    refresh('h');
+                } else {
+                    invalidate(true);
+                }
+            };
+
+            hoursInputEl.bind('blur', function (e) {
+                if (!$scope.invalidHours && $scope.hours < 10) {
+                    $scope.$apply(function () {
+                        $scope.hours = pad($scope.hours);
+                    });
+                }
+            });
+
+            $scope.updateMinutes = function () {
+                var minutes = getMinutesFromTemplate();
+
+                if (angular.isDefined(minutes)) {
+                    selected.setMinutes(minutes);
+                    refresh('m');
+                } else {
+                    invalidate(undefined, true);
+                }
+            };
+
+            minutesInputEl.bind('blur', function (e) {
+                if (!$scope.invalidMinutes && $scope.minutes < 10) {
+                    $scope.$apply(function () {
+                        $scope.minutes = pad($scope.minutes);
+                    });
+                }
+            });
+
+        };
+
+        this.render = function () {
+            var date = ngModelCtrl.$viewValue;
+
+            if (isNaN(date)) {
+                ngModelCtrl.$setValidity('time', false);
+                $log.error('Timepicker directive: "ng-model" value must be a Date object, a number of milliseconds since 01.01.1970 or a string representing an RFC2822 or ISO 8601 date.');
+            } else {
+                if (date) {
+                    selected = date;
+                }
+                makeValid();
+                updateTemplate();
+            }
+        };
+
+        // Call internally when we know that model is valid.
+        function refresh(keyboardChange) {
+            makeValid();
+            ngModelCtrl.$setViewValue(new Date(selected));
+            updateTemplate(keyboardChange);
+        }
+
+        function makeValid() {
+            ngModelCtrl.$setValidity('time', true);
+            $scope.invalidHours = false;
+            $scope.invalidMinutes = false;
+        }
+
+        function updateTemplate(keyboardChange) {
+            var hours = selected.getHours(), minutes = selected.getMinutes();
+
+            if ($scope.showMeridian) {
+                hours = (hours === 0 || hours === 12) ? 12 : hours % 12; // Convert 24 to 12 hour system
+            }
+
+            $scope.hours = keyboardChange === 'h' ? hours : pad(hours);
+            if (keyboardChange !== 'm') {
+                $scope.minutes = pad(minutes);
+            }
+             if (!$scope.showMeridian) {
+                 $scope.meridian = _24Hour;
+            }
+            else if ($scope.showMeridian) {
+                $scope.meridian = selected.getHours() < 12 ? meridians[0] : meridians[1];
+            }
+        }
+
+        function addMinutes(minutes) {
+            var dt = new Date(selected.getTime() + minutes * 60000);
+            selected.setHours(dt.getHours(), dt.getMinutes());
+            refresh();
+        }
+
+        $scope.showSpinners = angular.isDefined($attrs.showSpinners) ?
+            $scope.$parent.$eval($attrs.showSpinners) : timepickerConfig.showSpinners;
+
+        $scope.incrementHours = function () {
+            addMinutes(hourStep * 60);
+        };
+        $scope.decrementHours = function () {
+            addMinutes(- hourStep * 60);
+        };
+        $scope.incrementMinutes = function () {
+            addMinutes(minuteStep);
+        };
+        $scope.decrementMinutes = function () {
+            addMinutes(- minuteStep);
+        };
+
+        //fix change am/pm/24 jump through 12:00
+        $scope.toggleMeridian = function () {
+            if ($scope.meridian === meridians[0]) {
+                $scope.showMeridian = true;
+                addMinutes(12 * 60 * ((selected.getHours() < 12) ? 1 : -1));
+                return true;
+            }
+            if ($scope.meridian === meridians[1]) {
+                $scope.showMeridian = false;
+                addMinutes(12 * 60 * ((selected.getHours() < 12) ? 1 : -1));
+                return true;
+            }
+            if ($scope.meridian === _24Hour) {
+                $scope.showMeridian = true;
+                addMinutes(selected.getHours() <= 12 ? 0 : 12 * 60 * ((selected.getHours() >= 12) ? 1 : -1));
+                return true;
+            }
+        };
+    }])
+
+    .directive('timepicker', function () {
+        return {
+            restrict: 'EA',
+            require: ['timepicker', '?^ngModel'],
+            controller: 'TimepickerController',
+            replace: true,
+            scope: {},
+            templateUrl: 'template/timepicker.html',
+            link: function (scope, element, attrs, ctrls) {
+                var timepickerCtrl = ctrls[0], ngModelCtrl = ctrls[1];
+
+                if (ngModelCtrl) {
+                    timepickerCtrl.init(ngModelCtrl, element.find('input'));
+                }
+            }
+        };
+    });
+
+angular.module('platformWebApp').run(['$templateCache', function ($templateCache) {
+    'use strict';
+
+    $templateCache.put('template/date-picker.html',
+        "<ul class=\"dropdown-menu dropdown-menu-left datetime-picker-dropdown\" ng-if=\"isOpen && showPicker == 'date'\" ng-style=dropdownStyle style=left:inherit ng-keydown=keydown($event) ng-click=$event.stopPropagation()><li style=\"padding:0 5px 5px 5px\" class=date-picker-menu><div ng-transclude></div></li><li style=padding:5px ng-if=buttonBar.show><span class=\"btn-group pull-left\" style=margin-right:5px ng-if=\"doShow('today') || doShow('clear')\"><button type=button class=\"btn btn-sm btn-info\" ng-if=\"doShow('today')\" ng-click=\"select('today')\" ng-disabled=\"isDisabled('today')\">{{ 'platform.commands.today' | translate }}</button> <button type=button class=\"btn btn-sm btn-danger\" ng-if=\"doShow('clear')\" ng-click=\"select('clear')\">{{ 'platform.commands.clear' | translate }}</button></span> <span class=\"btn-group pull-right\" ng-if=\"(doShow('time') && enableTime) || doShow('close')\"><button type=button class=\"btn btn-sm btn-default\" ng-if=\"doShow('time') && enableTime\" ng-click=\"open('time', $event)\">{{ 'platform.commands.time' | translate}}</button> <button type=button class=\"btn btn-sm btn-success\" ng-if=\"doShow('close')\" ng-click=close(true)>{{ 'platform.commands.close' | translate}}</button></span></li></ul>"
+    );
+    
+    $templateCache.put('template/time-picker.html',
+        "<ul class=\"dropdown-menu dropdown-menu-left datetime-picker-dropdown\" ng-if=\"isOpen && showPicker == 'time'\" ng-style=dropdownStyle style=left:inherit ng-keydown=keydown($event) ng-click=$event.stopPropagation()><li style=\"padding:0 5px 5px 5px\" class=time-picker-menu><div ng-transclude></div></li><li style=padding:5px ng-if=buttonBar.show><span class=\"btn-group pull-left\" style=margin-right:5px ng-if=\"doShow('now') || doShow('clear')\"><button type=button class=\"btn btn-sm btn-info\" ng-if=\"doShow('now')\" ng-click=\"select('now')\" ng-disabled=\"isDisabled('now')\">{{ 'platform.commands.now' | translate}}</button> <button type=button class=\"btn btn-sm btn-danger\" ng-if=\"doShow('clear')\" ng-click=\"select('clear')\">{{ 'platform.commands.clear' | translate}}</button></span> <span class=\"btn-group pull-right\" ng-if=\"(doShow('date') && enableDate) || doShow('close')\"><button type=button class=\"btn btn-sm btn-default\" ng-if=\"doShow('date') && enableDate\" ng-click=\"open('date', $event)\">{{ 'platform.commands.date' | translate}}</button> <button type=button class=\"btn btn-sm btn-success\" ng-if=\"doShow('close')\" ng-click=close(true)>{{ 'platform.commands.close' | translate }}</button></span></li></ul>"
+    );
+
+    $templateCache.put("template/timepicker.html",
+        "<table>\n" +
+        "  <tbody>\n" +
+        "    <tr class=\"text-center\" ng-show=\"::showSpinners\">\n" +
+        "      <td><a ng-click=\"incrementHours()\" class=\"btn btn-link\"><span class=\"glyphicon glyphicon-chevron-up\"></span></a></td>\n" +
+        "      <td>&nbsp;</td>\n" +
+        "      <td><a ng-click=\"incrementMinutes()\" class=\"btn btn-link\"><span class=\"glyphicon glyphicon-chevron-up\"></span></a></td>\n" +
+        "      <td></td>\n" +
+        "    </tr>\n" +
+        "    <tr>\n" +
+        "      <td class=\"form-group\" ng-class=\"{'has-error': invalidHours}\">\n" +
+        "        <input style=\"width:50px;\" type=\"text\" ng-model=\"hours\" ng-change=\"updateHours()\" class=\"form-control text-center\" ng-readonly=\"::readonlyInput\" maxlength=\"2\">\n" +
+        "      </td>\n" +
+        "      <td>:</td>\n" +
+        "      <td class=\"form-group\" ng-class=\"{'has-error': invalidMinutes}\">\n" +
+        "        <input style=\"width:50px;\" type=\"text\" ng-model=\"minutes\" ng-change=\"updateMinutes()\" class=\"form-control text-center\" ng-readonly=\"::readonlyInput\" maxlength=\"2\">\n" +
+        "      </td>\n" +
+        "      <td><button type=\"button\" class=\"btn btn-default text-center\" ng-click=\"toggleMeridian()\">{{meridian}}</button></td>\n" +
+        "    </tr>\n" +
+        "    <tr class=\"text-center\" ng-show=\"::showSpinners\">\n" +
+        "      <td><a ng-click=\"decrementHours()\" class=\"btn btn-link\"><span class=\"glyphicon glyphicon-chevron-down\"></span></a></td>\n" +
+        "      <td>&nbsp;</td>\n" +
+        "      <td><a ng-click=\"decrementMinutes()\" class=\"btn btn-link\"><span class=\"glyphicon glyphicon-chevron-down\"></span></a></td>\n" +
+        "      <td></td>\n" +
+        "    </tr>\n" +
+        "  </tbody>\n" +
+        "</table>\n" +
+        "");
+}]);
+
 angular.module('platformWebApp')
 .directive('dynamic', ['$compile', function ($compile) {
     return {
@@ -22748,16 +23839,6 @@ angular.module('platformWebApp')
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["公元前","公元"],ERAS:["BC","AD"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"d/M/yy ah:mm",shortDate:"d/M/yy",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-hk",pluralCat:function(e,m){return E.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["西元前","西元"],ERAS:["西元前","西元"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日 EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"y/M/d ah:mm",shortDate:"y/M/d",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"NT$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-tw",pluralCat:function(e,m){return E.OTHER}})}]);
 angular.module('platformWebApp')
-.factory('platformWebApp.assets.api', ['$resource', function ($resource) {
-    return $resource('api/platform/assets', {}, {
-        createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
-        move: { method: 'POST', url: 'api/platform/assets/move' },
-        uploadFromUrl: { method: 'POST', params: { url: '@url', folderUrl: '@folderUrl', name: '@name' }, isArray: true }
-    });
-}]);
-
-
-angular.module('platformWebApp')
 .controller('platformWebApp.assets.assetListController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', '$sessionStorage', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
     function ($scope, assets, bladeNavigationService, dialogService, $storage, bladeUtils, uiGridHelper) {
         var blade = $scope.blade;
@@ -23226,6 +24307,16 @@ angular.module('platformWebApp')
         initialize();
         blade.isLoading = false;
     }]);
+
+angular.module('platformWebApp')
+.factory('platformWebApp.assets.api', ['$resource', function ($resource) {
+    return $resource('api/platform/assets', {}, {
+        createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
+        move: { method: 'POST', url: 'api/platform/assets/move' },
+        uploadFromUrl: { method: 'POST', params: { url: '@url', folderUrl: '@folderUrl', name: '@name' }, isArray: true }
+    });
+}]);
+
 
 angular.module('platformWebApp')
 .controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
@@ -24743,7 +25834,7 @@ angular.module('platformWebApp')
         }
     }
 }])
-.directive('vaBlade', ['$compile', 'platformWebApp.bladeNavigationService', 'platformWebApp.toolbarService', '$timeout', '$document', function ($compile, bladeNavigationService, toolbarService, $timeout, $document) {
+.directive('vaBlade', ['$compile', 'platformWebApp.bladeNavigationService', 'platformWebApp.toolbarService', '$timeout', '$document', 'platformWebApp.dialogService', function ($compile, bladeNavigationService, toolbarService, $timeout, $document, dialogService) {
     return {
         terminal: true,
         priority: 100,
@@ -24762,7 +25853,7 @@ angular.module('platformWebApp')
             if (!scope.blade.disableOpenAnimation) {
                 scope.blade.animated = true;
                 $timeout(function () {
-                   scope.blade.animated = false;
+                    scope.blade.animated = false;
                 }, 250);
             }
 
@@ -24779,7 +25870,7 @@ angular.module('platformWebApp')
                 // instead, we need to use sum of width of all blades
                 var previousBlades = scrollToElement.prevAll();
                 var previousBladesWidthSum = 0;
-                previousBlades.each(function() {
+                previousBlades.each(function () {
                     previousBladesWidthSum += $(this).outerWidth();
                 });
                 var scrollLeft = previousBladesWidthSum + scrollToElement.outerWidth(!(scrollToBlade.isExpanded || scrollToBlade.isMaximized)) - mainContent.width();
@@ -24891,8 +25982,15 @@ angular.module('platformWebApp')
                 event.stopPropagation();
                 $document.bind('click', handleClickEvent);
             };
+
+            scope.showErrorDetails = function () {
+                var dialog = { id: "errorDetails" };
+                if (scope.blade.errorBody != undefined)
+                    dialog.message = scope.blade.errorBody;
+                dialogService.showDialog(dialog, '$(Platform)/Scripts/app/modularity/dialogs/errorDetails-dialog.tpl.html', 'platformWebApp.confirmDialogController');
+            };
         }
-    };
+    }
 }])
 .factory('platformWebApp.bladeNavigationService', ['platformWebApp.authService', '$timeout', '$state', 'platformWebApp.dialogService', function (authService, $timeout, $state, dialogService) {
 
@@ -25018,7 +26116,7 @@ angular.module('platformWebApp')
             //    service.currentBlade = firstStateBlade;
             //    return;
             //}
-
+            blade.errorBody = "";
             blade.isLoading = true;
             blade.parentBlade = parentBlade;
             blade.childrenBlades = [];
@@ -25089,16 +26187,18 @@ angular.module('platformWebApp')
             };
         },
         checkPermission: authService.checkPermission,
-        setError: function (msg, blade) {
-            if (blade) {
+        setError: function (error, blade) {
+            if (blade && error) {
                 blade.isLoading = false;
-                blade.error = msg;
+                blade.error = error.status && error.statusText ? error.status + ': ' + error.statusText : error;
+                blade.errorBody = error.data ? error.data.exceptionMessage : blade.errorBody;
             }
         }
     };
 
     return service;
 }]);
+
 angular.module('platformWebApp')
     .directive('vaBreadcrumb', [
         'platformWebApp.breadcrumbHistoryService', function (breadcrumbHistoryService) {
@@ -26294,119 +27394,6 @@ angular.module('platformWebApp')
 	});
 }]);
 angular.module('platformWebApp')
-.controller('platformWebApp.pushNotificationsHistoryController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
-function ($scope, bladeNavigationService, eventTemplateResolver, notifications) {
-    var blade = $scope.blade;
-
-    $scope.pageSettings = {};
-    $scope.pageSettings.totalItems = 0;
-    $scope.pageSettings.currentPage = 1;
-    $scope.pageSettings.numPages = 5;
-    $scope.pageSettings.itemsPerPageCount = 10;
-    $scope.notifications = [];
-
-    $scope.columns = [
-    	{ title: "platform.blades.history.labels.type", orderBy: "NotifyType" },
-		{ title: "platform.blades.history.labels.title", orderBy: "Title" },
-		{ title: "platform.blades.history.labels.created", orderBy: "Created", checked: true, reverse: true }
-
-    ];
-
-    blade.refresh = function () {
-        blade.isLoading = true;
-        var start = $scope.pageSettings.currentPage * $scope.pageSettings.itemsPerPageCount - $scope.pageSettings.itemsPerPageCount;
-        notifications.query({ skip: start, take: $scope.pageSettings.itemsPerPageCount, sort: getOrderByExpression() }, function (data, status, headers, config) {
-            angular.forEach(data.notifyEvents, function (x) {
-                notificationTemplate = eventTemplateResolver.resolve(x, 'history');
-                x.template = notificationTemplate.template;
-                x.action = notificationTemplate.action;
-            });
-            $scope.notifications = data.notifyEvents;
-            $scope.pageSettings.totalItems = data.totalCount;
-            blade.isLoading = false;
-        }, function (error) {
-            bladeNavigationService.setError('Error ' + error.status, blade);
-        });
-    };
-
-    function getOrderByExpression() {
-        var retVal = '';
-        var column = _.find($scope.columns, function (x) { return x.checked; });
-        if (angular.isDefined(column)) {
-            retVal = column.orderBy;
-            if (column.reverse) {
-                retVal += ":desc";
-            }
-        }
-        return retVal;
-    };
-
-    $scope.setOrder = function (column) {
-        //reset prev selection may be commented if need support multiple order clauses
-        _.each($scope.columns, function (x) { x.checked = false });
-        column.checked = true;
-        column.reverse = !column.reverse;
-        $scope.pageSettings.currentPage = 1;
-
-        blade.refresh();
-    }
-
-    blade.toolbarCommands = [
-			{
-			    name: "platform.commands.refresh",
-			    icon: 'fa fa-refresh',
-			    executeMethod: blade.refresh,
-			    canExecuteMethod: function () {
-			        return true;
-			    }
-			}];
-
-    $scope.$watch('pageSettings.currentPage', blade.refresh);
-
-    // actions on load
-    //No need to call this because page 'pageSettings.currentPage' is watched!!! It would trigger subsequent duplicated req...
-    //blade.refresh();
-}]);
-
-angular.module('platformWebApp')
-.factory('platformWebApp.pushNotifications', ['$resource', function ($resource) {
-
-    return $resource('api/platform/pushnotifications/:id', { id: '@Id' }, {
-        markAllAsRead: { method: 'POST', url: 'api/platform/pushnotifications/markAllAsRead' },
-        query: { method: 'POST', url: 'api/platform/pushnotifications' }
-	});
-}]);
-
-angular.module('platformWebApp')
-.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
-	return {
-		link: function (scope, element, attrs) {
-
-			if (attrs.vaPermission) {
-				var permissionValue = attrs.vaPermission.trim();
-			
-				//modelObject is a scope property of the parent/current scope
-				scope.$watch(attrs.securityScopes, function (value) {
-					if (value) {
-						toggleVisibilityBasedOnPermission(value);
-					}
-				});
-			
-				function toggleVisibilityBasedOnPermission(securityScopes) {
-					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
-					if (hasPermission)
-						element.show();
-					else
-						element.hide();
-				}
-
-				toggleVisibilityBasedOnPermission();
-				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
-			}
-		}
-	};
-}]);
-angular.module('platformWebApp')
 .controller('platformWebApp.accountApiListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
     blade.updatePermission = 'platform:security:update';
@@ -27550,6 +28537,35 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
+.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
+	return {
+		link: function (scope, element, attrs) {
+
+			if (attrs.vaPermission) {
+				var permissionValue = attrs.vaPermission.trim();
+			
+				//modelObject is a scope property of the parent/current scope
+				scope.$watch(attrs.securityScopes, function (value) {
+					if (value) {
+						toggleVisibilityBasedOnPermission(value);
+					}
+				});
+			
+				function toggleVisibilityBasedOnPermission(securityScopes) {
+					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
+					if (hasPermission)
+						element.show();
+					else
+						element.hide();
+				}
+
+				toggleVisibilityBasedOnPermission();
+				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
+			}
+		}
+	};
+}]);
+angular.module('platformWebApp')
 .directive('vaLoginToolbar', ['$document', '$timeout', '$state', 'platformWebApp.authService', function ($document, $timeout, $state, authService) {
     return {
         templateUrl: '$(Platform)/Scripts/app/security/login/loginToolbar.tpl.html',
@@ -27753,6 +28769,15 @@ angular.module('platformWebApp')
         };
         bladeNavigationService.showBlade(newBlade, $scope.blade);
     };
+}]);
+angular.module('platformWebApp')
+.factory('platformWebApp.settings', ['$resource', function ($resource) {
+    return $resource('api/platform/settings/:id', { id: '@Id' }, {
+        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
+      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
+      	update: { method: 'POST', url: 'api/platform/settings' },
+        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
+    });
 }]);
 angular.module('platformWebApp')
 .controller('platformWebApp.entitySettingListController', ['$scope', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', function ($scope, settingsHelper, bladeNavigationService) {
@@ -28281,15 +29306,6 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
-.factory('platformWebApp.settings', ['$resource', function ($resource) {
-    return $resource('api/platform/settings/:id', { id: '@Id' }, {
-        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
-      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
-      	update: { method: 'POST', url: 'api/platform/settings' },
-        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
-    });
-}]);
-angular.module('platformWebApp')
 .controller('platformWebApp.entitySettingsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
 
@@ -28304,6 +29320,90 @@ angular.module('platformWebApp')
     };
 }]);
 angular.module('platformWebApp')
+.controller('platformWebApp.pushNotificationsHistoryController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
+function ($scope, bladeNavigationService, eventTemplateResolver, notifications) {
+    var blade = $scope.blade;
+
+    $scope.pageSettings = {};
+    $scope.pageSettings.totalItems = 0;
+    $scope.pageSettings.currentPage = 1;
+    $scope.pageSettings.numPages = 5;
+    $scope.pageSettings.itemsPerPageCount = 10;
+    $scope.notifications = [];
+
+    $scope.columns = [
+    	{ title: "platform.blades.history.labels.type", orderBy: "NotifyType" },
+		{ title: "platform.blades.history.labels.title", orderBy: "Title" },
+		{ title: "platform.blades.history.labels.created", orderBy: "Created", checked: true, reverse: true }
+
+    ];
+
+    blade.refresh = function () {
+        blade.isLoading = true;
+        var start = $scope.pageSettings.currentPage * $scope.pageSettings.itemsPerPageCount - $scope.pageSettings.itemsPerPageCount;
+        notifications.query({ skip: start, take: $scope.pageSettings.itemsPerPageCount, sort: getOrderByExpression() }, function (data, status, headers, config) {
+            angular.forEach(data.notifyEvents, function (x) {
+                notificationTemplate = eventTemplateResolver.resolve(x, 'history');
+                x.template = notificationTemplate.template;
+                x.action = notificationTemplate.action;
+            });
+            $scope.notifications = data.notifyEvents;
+            $scope.pageSettings.totalItems = data.totalCount;
+            blade.isLoading = false;
+        }, function (error) {
+            bladeNavigationService.setError('Error ' + error.status, blade);
+        });
+    };
+
+    function getOrderByExpression() {
+        var retVal = '';
+        var column = _.find($scope.columns, function (x) { return x.checked; });
+        if (angular.isDefined(column)) {
+            retVal = column.orderBy;
+            if (column.reverse) {
+                retVal += ":desc";
+            }
+        }
+        return retVal;
+    };
+
+    $scope.setOrder = function (column) {
+        //reset prev selection may be commented if need support multiple order clauses
+        _.each($scope.columns, function (x) { x.checked = false });
+        column.checked = true;
+        column.reverse = !column.reverse;
+        $scope.pageSettings.currentPage = 1;
+
+        blade.refresh();
+    }
+
+    blade.toolbarCommands = [
+			{
+			    name: "platform.commands.refresh",
+			    icon: 'fa fa-refresh',
+			    executeMethod: blade.refresh,
+			    canExecuteMethod: function () {
+			        return true;
+			    }
+			}];
+
+    $scope.$watch('pageSettings.currentPage', blade.refresh);
+
+    // actions on load
+    //No need to call this because page 'pageSettings.currentPage' is watched!!! It would trigger subsequent duplicated req...
+    //blade.refresh();
+}]);
+
+angular.module('platformWebApp')
+.factory('platformWebApp.pushNotifications', ['$resource', function ($resource) {
+
+    return $resource('api/platform/pushnotifications/:id', { id: '@Id' }, {
+        markAllAsRead: { method: 'POST', url: 'api/platform/pushnotifications/markAllAsRead' },
+        query: { method: 'POST', url: 'api/platform/pushnotifications' }
+	});
+}]);
+
+angular.module('platformWebApp')
 .controller('platformWebApp.userProfile.userProfileController', ['$rootScope', '$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', 'platformWebApp.settings.helper',
     'platformWebApp.i18n', 'platformWebApp.userProfile', 'platformWebApp.common.languages', 'platformWebApp.common.locales', 'platformWebApp.common.timeZones', 'platformWebApp.userProfileApi',
     function ($rootScope, $scope, bladeNavigationService, settings, settingsHelper, i18n, userProfile, languages, locales, timeZones, userProfileApi) {
@@ -28316,6 +29416,7 @@ angular.module('platformWebApp')
     blade.currentRegionalFormat = i18n.getRegionalFormat();
     blade.currentTimeZone = i18n.getTimeZone();
     blade.currentTimeAgoSettings = i18n.getTimeAgoSettings();
+    blade.currentTimeSettings = i18n.getTimeSettings();
 
     userProfile.load().then(function () {     
          initializeBlade();
@@ -28357,6 +29458,7 @@ angular.module('platformWebApp')
         $scope.timeZones = timeZones.query();
         blade.currentTimeZone = getNameByCode($scope.timeZones, blade.currentTimeZone);
         blade.currentTimeAgoSettings = userProfile.timeAgoSettings;
+        blade.currentTimeSettings = userProfile.timeSettings;
     };
 
     function isLoading() {
@@ -28408,6 +29510,14 @@ angular.module('platformWebApp')
             userProfile.save();
         }
     }
+    $scope.setTimeSettings = function () {
+            if (!isLoading()) {
+                i18n.changeTimeSettings(blade.currentTimeSettings);
+                angular.extend(blade.currentTimeSettings, i18n.getTimeSettings());
+                angular.extend(userProfile.timeSettings, blade.currentTimeSettings);
+                userProfile.save();
+            }
+        }
 }]);
 
 angular.module('platformWebApp')

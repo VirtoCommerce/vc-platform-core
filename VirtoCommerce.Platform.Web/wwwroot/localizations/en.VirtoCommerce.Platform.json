@@ -705,7 +705,10 @@
             "app-restart": {
                 "title": "Application restart",
                 "message": "Are you sure you want to restart the application?"
-            }
+            },
+			"error-details": {
+			  "title": "The error details"
+			}
         }
     }
 }
