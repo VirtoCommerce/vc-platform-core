@@ -1,4 +1,4 @@
-﻿angular.module('platformWebApp')
+angular.module('platformWebApp')
 .controller('platformWebApp.roleDetailController', ['$q', '$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.roles', 'platformWebApp.dialogService', function ($q, $scope, bladeNavigationService, roles, dialogService) {
     var blade = $scope.blade;
     blade.updatePermission = 'platform:security:update';
@@ -8,7 +8,7 @@
         if (blade.isNew) {
             initializeBlade({});
         } else {
-            roles.get({ id: blade.data.id }, function (data) {
+            roles.get({ roleName: blade.data.name }, function (data) {
                 initializeBlade(data);
                 if (parentRefresh && blade.parentBlade.refresh) {
                     blade.parentBlade.refresh();
@@ -50,17 +50,18 @@
         }
 
         angular.copy(blade.currentEntity, blade.origEntity);
-
-        roles.update(blade.currentEntity, function (data) {
-            if (blade.isNew) {
-                blade.parentBlade.refresh();
-                blade.parentBlade.selectNode(data);
-            } else {
+        var action = blade.isNew ? roles.create : roles.update;
+        action(blade.currentEntity, function (result) {
+            if (result.succeeded) {
+                if (blade.isNew) {
+                    blade.parentBlade.refresh();
+                    blade.parentBlade.selectNode(blade.currentEntity);
+                }
                 blade.refresh(true);
             }
-            blade.refresh(true);
-        }, function (error) {
-            bladeNavigationService.setError('Error ' + error.status, blade);
+            else {
+                bladeNavigationService.setError(_.pluck(result.errors, 'description').join(), blade);
+            }
         });
     };
 

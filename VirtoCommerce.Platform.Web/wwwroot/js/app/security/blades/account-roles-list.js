@@ -1,4 +1,4 @@
-﻿angular.module('platformWebApp')
+angular.module('platformWebApp')
 .controller('platformWebApp.accountRolesListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', function ($scope, bladeNavigationService, dialogService) {
     var blade = $scope.blade;
     blade.updatePermission = 'platform:security:update';
@@ -58,7 +58,6 @@
                executeMethod: function () {
                    var newBlade = {
                        id: "accountChildBladeChild",
-                       promise: blade.promise,
                        title: blade.title,
                        subtitle: 'platform.blades.account-roles.subtitle',
                        controller: 'platformWebApp.accountRolesController',

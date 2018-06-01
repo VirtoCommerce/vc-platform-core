@@ -48,7 +48,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <remarks>
         /// Verifies provided credentials and if succeeded returns full user details, otherwise returns 401 Unauthorized.
         /// </remarks>
-        /// <param name="model">User credentials.</param>
+        /// <param name="request">Login request.</param>
         [HttpPost]
         [Route("login")]
         [ProducesResponseType(typeof(Microsoft.AspNetCore.Identity.SignInResult), 200)]
@@ -104,10 +104,13 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
             };
             var roleNames = await _userManager.GetRolesAsync(user);
-            foreach(var roleName in roleNames)
+            foreach (var roleName in roleNames)
             {
                 var role = await _roleManager.FindByNameAsync(roleName);
-                result.Permissions.AddRange((await _roleManager.GetClaimsAsync(role)).Where(x=>x.Type.EqualsInvariant(SecurityConstants.Claims.PermissionClaimType)).Select(x => x.Value));
+                if (!role.Permissions.IsNullOrEmpty())
+                {
+                    result.Permissions.AddRange(role.Permissions.Select(x => x.Name));
+                }
             }
             return Ok(result);
         }
@@ -176,10 +179,10 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// </summary>
         /// <param name="request">Search parameters.</param>
         [HttpPost]
-        [Route("roles")]
+        [Route("roles/search")]
         [ProducesResponseType(typeof(GenericSearchResult<Role>), 200)]
         [Authorize(SecurityConstants.Permissions.SecurityQuery)]
-        public async Task<ActionResult> SearchRoles(RoleSearchCriteria request)
+        public async Task<ActionResult> SearchRoles([FromBody] RoleSearchCriteria request)
         {
             var result = await _roleSearchService.SearchRolesAsync(request);
             return Ok(result);
@@ -188,14 +191,14 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <summary>
         /// Get role by ID
         /// </summary>
-        /// <param name="roleId"></param>
+        /// <param name="roleName"></param>
         [HttpGet]
-        [Route("roles/{roleId}")]
+        [Route("roles/{roleName}")]
         [ProducesResponseType(typeof(Role), 200)]
         [Authorize(SecurityConstants.Permissions.SecurityQuery)]
-        public async Task<ActionResult> GetRoleAsync(string roleId)
+        public async Task<ActionResult> GetRoleAsync([FromRoute] string roleName)
         {
-            var result = await _roleManager.FindByIdAsync(roleId);
+            var result = await _roleManager.FindByNameAsync(roleName);
             return Ok(result);
         }
 
@@ -207,7 +210,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Route("roles")]
         [ProducesResponseType(200)]
         [Authorize(SecurityConstants.Permissions.SecurityDelete)]
-        public async Task<ActionResult> DeleteRolesASync([FromQuery(Name = "ids")] string[] roleIds)
+        public async Task<ActionResult> DeleteRolesAsync([FromQuery(Name = "ids")] string[] roleIds)
         {
             if (roleIds != null)
             {
@@ -224,14 +227,28 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         }
 
         /// <summary>
-        /// Add a new role or update an existing role
+        /// Add a new role role
+        /// </summary>
+        /// <param name="role"></param>
+        [HttpPost]
+        [Route("roles")]
+        [ProducesResponseType(typeof(IdentityResult), 200)]
+        [Authorize(SecurityConstants.Permissions.SecurityUpdate)]
+        public async Task<ActionResult> CreateRoleAsync([FromBody] Role role)
+        {
+            var result = await _roleManager.CreateAsync(role);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Update an existing role
         /// </summary>
         /// <param name="role"></param>
         [HttpPut]
         [Route("roles")]
         [ProducesResponseType(typeof(IdentityResult), 200)]
         [Authorize(SecurityConstants.Permissions.SecurityUpdate)]
-        public async Task<ActionResult> UpdateRoleAsync(Role role)
+        public async Task<ActionResult> UpdateRoleAsync([FromBody] Role role)
         {
             var result = await _roleManager.UpdateAsync(role);
             return Ok(result);
@@ -280,12 +297,12 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <summary>
         /// Search users by keyword
         /// </summary>
-        /// <param name="request">Search parameters.</param>
+        /// <param name="criteria">Search criteria.</param>
         [HttpPost]
         [Route("users")]
         [ProducesResponseType(typeof(GenericSearchResult<ApplicationUser>), 200)]
         [Authorize(SecurityConstants.Permissions.SecurityQuery)]
-        public async Task<ActionResult> SearchUsersAsync(UserSearchCriteria criteria)
+        public async Task<ActionResult> SearchUsersAsync([FromBody] UserSearchCriteria criteria)
         {
             var result = await _userSearchService.SearchUsersAsync(criteria);
             return Ok(result);
@@ -299,12 +316,12 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Route("users/{userName}")]
         [ProducesResponseType(typeof(ApplicationUser), 200)]
         [Authorize(SecurityConstants.Permissions.SecurityQuery)]
-        public async Task<ActionResult> GetUserByNameAsync(string userName)
+        public async Task<ActionResult> GetUserByNameAsync([FromRoute] string userName)
         {
             var retVal = await _userManager.FindByNameAsync(userName);
             return Ok(retVal);
         }
-       
+
 
         /// <summary>
         /// Get user details by user ID
@@ -314,7 +331,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Route("users/id/{id}")]
         [ProducesResponseType(typeof(ApplicationUser), 200)]
         [Authorize(SecurityConstants.Permissions.SecurityQuery)]
-        public async Task<ActionResult> GetUserByIdAsync(string id)
+        public async Task<ActionResult> GetUserByIdAsync([FromRoute] string id)
         {
             var retVal = await _userManager.FindByIdAsync(id);
             return Ok(retVal);
@@ -323,18 +340,14 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <summary>
         /// Create new user
         /// </summary>
-        /// <param name="newUserRequest"></param>
+        /// <param name="newUser"></param>
         [HttpPost]
         [Route("users/create")]
         [ProducesResponseType(typeof(IdentityResult), 200)]
         [Authorize(SecurityConstants.Permissions.SecurityCreate)]
-        public async Task<ActionResult> CreateAsync(RegisterUserRequest newUserRequest)
+        public async Task<ActionResult> CreateAsync([FromBody] ApplicationUser newUser)
         {
-            var user = new ApplicationUser
-            {
-                UserName = newUserRequest.UserName
-            };
-            var result = await _userManager.CreateAsync(user, newUserRequest.Password);
+            var result = await _userManager.CreateAsync(newUser, newUser.Password);
             return Ok(result);
         }
 
@@ -348,16 +361,16 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [ProducesResponseType(400)]
         [ProducesResponseType(typeof(IdentityResult), 200)]
         [Authorize(SecurityConstants.Permissions.SecurityUpdate)]
-        public async Task<ActionResult> ChangePasswordAsync(string userName, [FromBody] ChangePasswordRequest changePassword)
+        public async Task<ActionResult> ChangePasswordAsync([FromRoute] string userName, [FromBody] ChangePasswordRequest changePassword)
         {
-            if(!IsUserEditable(userName))
+            if (!IsUserEditable(userName))
             {
                 return BadRequest(new IdentityError() { Description = "It is forbidden to edit this user." });
             }
             var user = await _userManager.FindByNameAsync(userName);
-            if(user == null)
+            if (user == null)
             {
-                return BadRequest(IdentityResult.Failed(new IdentityError() { Description = "User not found" }));             
+                return BadRequest(IdentityResult.Failed(new IdentityError() { Description = "User not found" }));
             }
 
             var result = await _signInManager.UserManager.ChangePasswordAsync(user, changePassword.OldPassword, changePassword.NewPassword);
@@ -374,7 +387,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [ProducesResponseType(400)]
         [ProducesResponseType(typeof(IdentityResult), 200)]
         [Authorize(SecurityConstants.Permissions.SecurityUpdate)]
-        public async Task<ActionResult> ResetPassword(string userId, [FromBody] ResetPasswordConfirmRequest resetPasswordConfirm)
+        public async Task<ActionResult> ResetPassword([FromRoute] string userId, [FromBody] ResetPasswordConfirmRequest resetPasswordConfirm)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
@@ -389,7 +402,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             return Ok(result);
         }
 
-    
+
         /// <summary>
         /// Send email with instructions on how to reset user password.
         /// </summary>
@@ -407,7 +420,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             {
                 user = await _userManager.FindByEmailAsync(loginOrEmail);
             }
-            
+
             //Do not permit rejected users and customers
             if (user != null && user.Email != null && IsUserEditable(user.UserName) && !(await _userManager.IsInRoleAsync(user, SecurityConstants.Roles.Customer)))
             {
@@ -447,20 +460,21 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <param name="user">User details.</param>
         [HttpPut]
         [Route("users")]
-        [ProducesResponseType(400)]
         [ProducesResponseType(typeof(IdentityResult), 200)]
         [Authorize(SecurityConstants.Permissions.SecurityUpdate)]
-        public async Task<ActionResult> UpdateAsync(ApplicationUser user)
+        public async Task<ActionResult> UpdateAsync([FromBody] ApplicationUser user)
         {
-            if(user == null)
+            if (user == null)
             {
                 throw new ArgumentNullException(nameof(user));
             }
             if (!IsUserEditable(user.UserName))
             {
-                return BadRequest(new IdentityError() { Description = "It is forbidden to edit this user." });
+                return Ok(IdentityResult.Failed(new IdentityError { Description = "It is forbidden to edit this user." }));
             }
             var result = await _userManager.UpdateAsync(user);
+
+
             return Ok(result);
         }
 
@@ -478,7 +492,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             {
                 throw new ArgumentNullException(nameof(names));
             }
-            if (names.Any(x=> !IsUserEditable(x)))
+            if (names.Any(x => !IsUserEditable(x)))
             {
                 return BadRequest(new IdentityError() { Description = "It is forbidden to edit these users." });
             }
@@ -506,14 +520,14 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Route("users/{id}/locked")]
         [ProducesResponseType(typeof(UserLockedResult), 200)]
         [Authorize(SecurityConstants.Permissions.SecurityQuery)]
-        public async Task<ActionResult> IsUserLockedAsync(string id)
+        public async Task<ActionResult> IsUserLockedAsync([FromRoute] string id)
         {
             var result = new UserLockedResult(false);
             var user = await _userManager.FindByIdAsync(id);
-            if(user != null)
+            if (user != null)
             {
                 result.Locked = await _userManager.IsLockedOutAsync(user);
-            }         
+            }
             return Ok(result);
         }
 
@@ -526,7 +540,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Route("users/{id}/unlock")]
         [ProducesResponseType(typeof(IdentityResult), 200)]
         [Authorize(SecurityConstants.Permissions.SecurityUpdate)]
-        public async Task<ActionResult> UnlockUserAsync(string id)
+        public async Task<ActionResult> UnlockUserAsync([FromRoute] string id)
         {
             var user = await _userManager.FindByIdAsync(id);
             if (user != null)
@@ -541,9 +555,9 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
         private bool IsUserEditable(string userName)
         {
-            return _securityOptions.NonEditableUsers?.FirstOrDefault(x => x.EqualsInvariant(userName)) != null;
+            return _securityOptions.NonEditableUsers?.FirstOrDefault(x => x.EqualsInvariant(userName)) == null;
         }
 
-     
+
     }
 }

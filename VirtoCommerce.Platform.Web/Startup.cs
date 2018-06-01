@@ -91,6 +91,11 @@ namespace VirtoCommerce.Platform.Web
                 options.UseOpenIddict();
             });
 
+            services.AddSecurityServices(options =>
+            {
+                options.NonEditableUsers = new[] { "admin" };
+            });
+
             services.AddIdentity<ApplicationUser, Role>()
                     .AddEntityFrameworkStores<SecurityDbContext>()
                     .AddDefaultTokenProviders();
@@ -154,24 +159,7 @@ namespace VirtoCommerce.Platform.Web
                 options.AddEphemeralSigningKey();
             });
 
-            services.Configure<IdentityOptions>(options =>
-            {
-                // Password settings
-                options.Password.RequireDigit = true;
-                options.Password.RequiredLength = 8;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireLowercase = false;
-                options.Password.RequiredUniqueChars = 6;
-
-                // Lockout settings
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
-                options.Lockout.MaxFailedAccessAttempts = 10;
-                options.Lockout.AllowedForNewUsers = true;
-
-                // User settings
-                options.User.RequireUniqueEmail = true;
-            });
+            services.Configure<IdentityOptions>(Configuration.GetSection("IdentityOptions"));
 
             //always  return 401 instead of 302 for unauthorized  requests
             services.ConfigureApplicationCookie(options =>
@@ -217,7 +205,6 @@ namespace VirtoCommerce.Platform.Web
             services.AddSignalR();
 
             services.AddPlatformServices(Configuration);
-            services.AddSecurityServices();
 
             var assetConnectionString = BlobConnectionString.Parse(Configuration.GetConnectionString("AssetsConnectionString"));
             //TODO: Azure blob storage

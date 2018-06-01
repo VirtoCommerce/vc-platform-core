@@ -1,4 +1,4 @@
-﻿<div class="blade-content">
+<div class="blade-content">
     <div class="blade-inner">
         <div class="inner-block">
             <form class="form" name="formScope">
@@ -32,7 +32,7 @@
                             </th>
                             <th class="table-col">{{ 'platform.blades.role-detail.labels.permission-name' | translate }}</th>
                         </tr>
-                        <tr class="table-item" ng-repeat="data in blade.currentEntity.permissions | orderBy:'id' track by data.id " ng-class="{'__selected': data.id === selectedNodeId}" context-menu data-target="rd_menu_{{$index}}">
+                        <tr class="table-item" ng-repeat="data in blade.currentEntity.permissions | orderBy:'name' track by data.name " ng-class="{'__selected': data.name === selectedNodeId}" context-menu data-target="rd_menu_{{$index}}">
                             <td class="table-col">
                                 <label class="form-control __checkbox">
                                     <input type="checkbox" ng-model="data.$selected">
@@ -40,8 +40,8 @@
                                 </label>
                             </td>
                             <td class="table-col" ng-click='selectNode(data)'>
-                                <span class="table-t">{{data.id}}</span>
-                                <span class="table-descr">{{data.name}}</span>
+                                <span class="table-t">{{data.name}}</span>
+                                <span class="table-descr">{{data.name | translate }}</span>
                                 <span class="table-descr alt-description" ng-if="data.availableScopes.length">{{ 'platform.blades.role-detail.labels.assigned-scopes' | translate }}: {{(data.assignedScopes.length ? data.assignedScopes.length : 0) | number:0 }}</span>
                                 <ul role="menu" class="menu __context" id="rd_menu_{{$index}}">
                                     <li class="menu-item" ng-click='delete($index)'>
