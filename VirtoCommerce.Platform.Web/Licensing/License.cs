@@ -17,7 +17,7 @@ namespace VirtoCommerce.Platform.Web.Licensing
         public string RawLicense { get; set; }
       
 
-        public static License Parse(string rawLicense)
+        public static License Parse(string rawLicense, string publicKeyPath)
         {
             License result = null;
 
@@ -30,7 +30,7 @@ namespace VirtoCommerce.Platform.Web.Licensing
 
                     if (data != null && signature != null)
                     {
-                        if (ValidateSignature(data, signature))
+                        if (ValidateSignature(data, signature, publicKeyPath))
                         {
                             result = JsonConvert.DeserializeObject<License>(data);
                             result.RawLicense = rawLicense;
@@ -43,7 +43,7 @@ namespace VirtoCommerce.Platform.Web.Licensing
         }
 
 
-        private static bool ValidateSignature(string data, string signature)
+        private static bool ValidateSignature(string data, string signature, string publicKeyPath)
         {
             bool result;
             byte[] dataHash;
@@ -60,7 +60,7 @@ namespace VirtoCommerce.Platform.Web.Licensing
             {
                 var rsaParam = new RSAParameters()
                 {
-                    Modulus = Convert.FromBase64String("uYgtG8GG6fZ4jZdaL6LF4f2vmmTHNr0H/m+Bfo4vNhOYDlUTOv89FVQ3xE0DPhZ2uQ6Q/AN9KausQz2VbdfUn0Ge/jcHNsdE+9SBdllzgvCr/2sUlCKcpiEIBC9AXnAd7lKFSHiS61cVLo24+8aowoeGsAAO3djqN2xP+4Co9CMywKscLSPUMOJWHMuXAr3+pjamYaqwe3/iv5VA/8ff0evVyqhE/8fIixm9Ti7OhPNwYRDmTKP+t4DRZlp4R46g4v43tg4Q9FYaGKRCuxAdbbEsTYhFzHzv/CcUoFzYF0x3lyW5mfqad5y+LhsWPiHGDrd+xWXq9Nho1glNZ0sGYQ=="),
+                    Modulus = Convert.FromBase64String(ReadFileWithKey(publicKeyPath)),
                     Exponent = Convert.FromBase64String("AQAB")
                 };
 
@@ -84,6 +84,18 @@ namespace VirtoCommerce.Platform.Web.Licensing
             }
 
             return result;
+        }
+
+        private static string ReadFileWithKey(string path)
+        {
+            string fileContent;
+
+            using (var streamReader = File.OpenText(path))
+            {
+                fileContent = streamReader.ReadToEnd();
+            }
+
+            return fileContent;
         }
 
         
