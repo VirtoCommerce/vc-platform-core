@@ -33,6 +33,9 @@ function ($rootScope, $scope, $timeout, $filter, notifications, bladeNavigationS
 			return template;
 		});
 		if (!blade.currentEntity.templates) blade.currentEntity.templates = [];
+		if (!blade.currentEntity.tenantIdentity) {
+			blade.currentEntity.tenantIdentity = { tenantId: blade.tenantId, tenantType: blade.tenantType };
+		}
 		blade.origEntity = angular.copy(blade.currentEntity);
         $scope.isValid = false;
 	};
@@ -52,6 +55,7 @@ function ($rootScope, $scope, $timeout, $filter, notifications, bladeNavigationS
 			blade.isLoading = false;
 			blade.origEntity = angular.copy(blade.currentEntity);
 			blade.parentBlade.refresh();
+			bladeNavigationService.closeBlade(blade);
 		}, function (error) {
 			bladeNavigationService.setError('Error ' + error.status, blade);
 		});
