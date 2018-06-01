@@ -23256,91 +23256,6 @@ angular.module('platformWebApp')
     };
 }]);
 angular.module('platformWebApp')
-.controller('platformWebApp.dynamicPropertyWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-	$scope.blade = $scope.widget.blade;
-	$scope.openBlade = function () {
-        var blade = {
-        	id: "dynamicPropertiesList",
-        	currentEntity: $scope.blade.currentEntity,
-            controller: 'platformWebApp.propertyValueListController',
-            template: '$(Platform)/Scripts/app/dynamicProperties/blades/propertyValue-list.tpl.html'
-        };
-
-        bladeNavigationService.showBlade(blade, $scope.blade);
-    };
-
-
-	$scope.$watch('widget.blade.currentEntity', function (entity) {
-		if (angular.isDefined(entity)) {
-			var groupedByProperty = _.groupBy(entity.dynamicProperties, function (x) { return x.id; });
-			$scope.dynamicPropertyCount = _.keys(groupedByProperty).length;
-		}
-	});
-
-}]);
-angular.module('platformWebApp')
-.factory('platformWebApp.dynamicProperties.api', ['$resource', function ($resource) {
-    return $resource('api/platform/dynamic/properties', {}, {
-        queryTypes: { url: 'api/platform/dynamic/types', isArray: true },
-        getPropertiesForType: { url: 'api/platform/dynamic/types/:typeName/properties', isArray: true },
-        update: { method: 'PUT' }
-    });
-}])
-.factory('platformWebApp.dynamicProperties.dictionaryItemsApi', ['$resource', function ($resource) {
-    return $resource('api/platform/dynamic/dictionaryitems');
-}])
-.factory('platformWebApp.dynamicProperties.valueTypesService', function () {
-    var propertyTypes = [
-        {
-            valueType: "ShortText",
-            title: "platform.properties.short-text.title",
-            description: "platform.properties.short-text.description"
-        },
-        {
-            valueType: "LongText",
-            title: "platform.properties.long-text.title",
-            description: "platform.properties.long-text.description"
-        },
-        {
-            valueType: "Integer",
-            title: "platform.properties.integer.title",
-            description: "platform.properties.integer.description"
-        },
-        {
-            valueType: "Decimal",
-            title: "platform.properties.decimal.title",
-            description: "platform.properties.decimal.description"
-        },
-        {
-            valueType: "DateTime",
-            title: "platform.properties.date-time.title",
-            description: "platform.properties.date-time.description"
-        },
-        {
-            valueType: "Boolean",
-            title: "platform.properties.boolean.title",
-            description: "platform.properties.boolean.description"
-        },
-        {
-            valueType: "Html",
-            title: "platform.properties.html.title",
-            description: "platform.properties.html.description"
-        },
-        {
-            valueType: "Image",
-            title: "platform.properties.image.title",
-            description: "platform.properties.image.description"
-        }
-    ];
-
-    return {
-        query: function() {
-            return propertyTypes;
-        }
-    };
-});
-
-angular.module('platformWebApp')
 .controller('platformWebApp.dynamicObjectListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dynamicProperties.api', function ($scope, bladeNavigationService, dynamicPropertiesApi) {
 	var blade = $scope.blade;
 
@@ -23940,6 +23855,91 @@ angular.module('platformWebApp')
     blade.refresh();
 }]);
 
+angular.module('platformWebApp')
+.factory('platformWebApp.dynamicProperties.api', ['$resource', function ($resource) {
+    return $resource('api/platform/dynamic/properties', {}, {
+        queryTypes: { url: 'api/platform/dynamic/types', isArray: true },
+        getPropertiesForType: { url: 'api/platform/dynamic/types/:typeName/properties', isArray: true },
+        update: { method: 'PUT' }
+    });
+}])
+.factory('platformWebApp.dynamicProperties.dictionaryItemsApi', ['$resource', function ($resource) {
+    return $resource('api/platform/dynamic/dictionaryitems');
+}])
+.factory('platformWebApp.dynamicProperties.valueTypesService', function () {
+    var propertyTypes = [
+        {
+            valueType: "ShortText",
+            title: "platform.properties.short-text.title",
+            description: "platform.properties.short-text.description"
+        },
+        {
+            valueType: "LongText",
+            title: "platform.properties.long-text.title",
+            description: "platform.properties.long-text.description"
+        },
+        {
+            valueType: "Integer",
+            title: "platform.properties.integer.title",
+            description: "platform.properties.integer.description"
+        },
+        {
+            valueType: "Decimal",
+            title: "platform.properties.decimal.title",
+            description: "platform.properties.decimal.description"
+        },
+        {
+            valueType: "DateTime",
+            title: "platform.properties.date-time.title",
+            description: "platform.properties.date-time.description"
+        },
+        {
+            valueType: "Boolean",
+            title: "platform.properties.boolean.title",
+            description: "platform.properties.boolean.description"
+        },
+        {
+            valueType: "Html",
+            title: "platform.properties.html.title",
+            description: "platform.properties.html.description"
+        },
+        {
+            valueType: "Image",
+            title: "platform.properties.image.title",
+            description: "platform.properties.image.description"
+        }
+    ];
+
+    return {
+        query: function() {
+            return propertyTypes;
+        }
+    };
+});
+
+angular.module('platformWebApp')
+.controller('platformWebApp.dynamicPropertyWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+	$scope.blade = $scope.widget.blade;
+	$scope.openBlade = function () {
+        var blade = {
+        	id: "dynamicPropertiesList",
+        	currentEntity: $scope.blade.currentEntity,
+            controller: 'platformWebApp.propertyValueListController',
+            template: '$(Platform)/Scripts/app/dynamicProperties/blades/propertyValue-list.tpl.html'
+        };
+
+        bladeNavigationService.showBlade(blade, $scope.blade);
+    };
+
+
+	$scope.$watch('widget.blade.currentEntity', function (entity) {
+		if (angular.isDefined(entity)) {
+			var groupedByProperty = _.groupBy(entity.dynamicProperties, function (x) { return x.id; });
+			$scope.dynamicPropertyCount = _.keys(groupedByProperty).length;
+		}
+	});
+
+}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.exportImport.exportMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'platformWebApp.authService', function ($scope, bladeNavigationService, exportImportResourse, authService) {
     var blade = $scope.blade;
@@ -25100,6 +25100,92 @@ angular.module('platformWebApp')
     return service;
 }]);
 angular.module('platformWebApp')
+    .directive('vaBreadcrumb', [
+        'platformWebApp.breadcrumbHistoryService', function (breadcrumbHistoryService) {
+            return {
+                restrict: 'E',
+                require: 'ngModel',
+                replace: true,
+                scope: {
+                    bladeId: '='
+                },
+        templateUrl: '$(Platform)/Scripts/app/navigation/breadcrumbs/breadcrumbs.tpl.html',
+                link: function (scope, element, attr, ngModelController) {
+                    scope.breadcrumbs = [];
+                    ngModelController.$render = function () {
+                        scope.breadcrumbs = ngModelController.$modelValue;
+                    };
+
+                    scope.innerNavigate = function (breadcrumb) {
+                        breadcrumb.navigate(breadcrumb);
+                    };
+
+                    scope.canNavigateBack = function () {
+                        return breadcrumbHistoryService.check(scope.bladeId);
+                    };
+
+                    scope.navigateBack = function () {
+                        if (scope.canNavigateBack()) {
+                            var breadcrumb = breadcrumbHistoryService.pop(scope.bladeId);
+                            breadcrumb.navigate(breadcrumb);
+                        }
+                    };
+                    scope.$watchCollection('breadcrumbs', function (newItems) {
+                        breadcrumbHistoryService.push(newItems, scope.bladeId);
+                    });
+                }
+            }
+        }
+    ])
+    .factory('platformWebApp.breadcrumbHistoryService', function () {
+        var map = {};
+
+        function breadcrumbsEqual(x,y) {
+            return x && y && x.id === y.id && x.name === y.name;
+        }
+
+        return {
+            push: function (breadcrumbs, id) {
+                var history = map[id];
+                if (!history) {
+                    map[id] = history = {
+                        ignoreNextAction: false,
+                        records: []
+                    };
+                }
+
+                var currentBreadcrumb = _.last(breadcrumbs);
+
+                if (history.ignoreNextAction) {
+                    history.ignoreNextAction = false;
+                } else if (history.currentBreadcrumb &&
+                            !breadcrumbsEqual(history.currentBreadcrumb, currentBreadcrumb) &&
+                            !breadcrumbsEqual(history.currentBreadcrumb, _.last(history.records))) {
+                    history.records.push(history.currentBreadcrumb);
+                }
+
+                if (currentBreadcrumb) {
+                    history.currentBreadcrumb = currentBreadcrumb;
+                }
+            },
+
+            check: function (id) {
+                return map[id] && _.any(map[id].records);
+            },
+
+            pop: function (id) {
+                var retVal = undefined;
+                var history = map[id];
+                if (_.any(history.records)) {
+                    retVal = history.records.pop();
+                    history.ignoreNextAction = true;
+                }
+
+                return retVal;
+            }
+        };
+    });
+angular.module('platformWebApp')
 .factory('platformWebApp.mainMenuService', [function () {
 
     var menuItems = [];
@@ -25303,92 +25389,6 @@ angular.module('platformWebApp')
     }
 });
 
-angular.module('platformWebApp')
-    .directive('vaBreadcrumb', [
-        'platformWebApp.breadcrumbHistoryService', function (breadcrumbHistoryService) {
-            return {
-                restrict: 'E',
-                require: 'ngModel',
-                replace: true,
-                scope: {
-                    bladeId: '='
-                },
-        templateUrl: '$(Platform)/Scripts/app/navigation/breadcrumbs/breadcrumbs.tpl.html',
-                link: function (scope, element, attr, ngModelController) {
-                    scope.breadcrumbs = [];
-                    ngModelController.$render = function () {
-                        scope.breadcrumbs = ngModelController.$modelValue;
-                    };
-
-                    scope.innerNavigate = function (breadcrumb) {
-                        breadcrumb.navigate(breadcrumb);
-                    };
-
-                    scope.canNavigateBack = function () {
-                        return breadcrumbHistoryService.check(scope.bladeId);
-                    };
-
-                    scope.navigateBack = function () {
-                        if (scope.canNavigateBack()) {
-                            var breadcrumb = breadcrumbHistoryService.pop(scope.bladeId);
-                            breadcrumb.navigate(breadcrumb);
-                        }
-                    };
-                    scope.$watchCollection('breadcrumbs', function (newItems) {
-                        breadcrumbHistoryService.push(newItems, scope.bladeId);
-                    });
-                }
-            }
-        }
-    ])
-    .factory('platformWebApp.breadcrumbHistoryService', function () {
-        var map = {};
-
-        function breadcrumbsEqual(x,y) {
-            return x && y && x.id === y.id && x.name === y.name;
-        }
-
-        return {
-            push: function (breadcrumbs, id) {
-                var history = map[id];
-                if (!history) {
-                    map[id] = history = {
-                        ignoreNextAction: false,
-                        records: []
-                    };
-                }
-
-                var currentBreadcrumb = _.last(breadcrumbs);
-
-                if (history.ignoreNextAction) {
-                    history.ignoreNextAction = false;
-                } else if (history.currentBreadcrumb &&
-                            !breadcrumbsEqual(history.currentBreadcrumb, currentBreadcrumb) &&
-                            !breadcrumbsEqual(history.currentBreadcrumb, _.last(history.records))) {
-                    history.records.push(history.currentBreadcrumb);
-                }
-
-                if (currentBreadcrumb) {
-                    history.currentBreadcrumb = currentBreadcrumb;
-                }
-            },
-
-            check: function (id) {
-                return map[id] && _.any(map[id].records);
-            },
-
-            pop: function (id) {
-                var retVal = undefined;
-                var history = map[id];
-                if (_.any(history.records)) {
-                    retVal = history.records.pop();
-                    history.ignoreNextAction = true;
-                }
-
-                return retVal;
-            }
-        };
-    });
 angular.module('platformWebApp')
 .factory('platformWebApp.widgetService', function () {
 
@@ -26276,6 +26276,24 @@ angular.module('platformWebApp')
 	}
 }]);
 angular.module('platformWebApp')
+.factory('platformWebApp.notifications', ['$resource', function ($resource) {
+
+	return $resource('api/platform/notification/:id', { id: '@Id' }, {
+		getNotificationList: { method: 'GET', url: 'api/platform/notification', isArray: true },
+		getTemplateById: { method: 'GET', url: 'api/platform/notification/template/:id' },
+		getTemplate: { method: 'GET', url: 'api/platform/notification/template' },
+		getTemplates: { method: 'GET', url: 'api/platform/notification/templates', isArray: true },
+		updateTemplate: { method: 'POST', url: 'api/platform/notification/template' },
+		deleteTemplate: { method: 'DELETE', url: 'api/platform/notification/template/:id' },
+		prepareTestData: { method: 'GET', url: 'api/platform/notification/template/:type/getTestingParameters', isArray: true },
+		resolveNotification: { method: 'POST', url: 'api/platform/notification/template/rendernotificationcontent' },
+		sendNotification: { method: 'POST', url: 'api/platform/notification/template/sendnotification' },
+		getNotificationJournalList: { method: 'GET', url: 'api/platform/notification/journal/:objectId/:objectTypeId' },
+		getNotificationJournalDetails: { method: 'GET', url: 'api/platform/notification/notification/:id' },
+		stopSendingNotifications: { method: 'POST', url: 'api/platform/notification/stopnotifications' }
+	});
+}]);
+angular.module('platformWebApp')
 .controller('platformWebApp.pushNotificationsHistoryController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
 function ($scope, bladeNavigationService, eventTemplateResolver, notifications) {
     var blade = $scope.blade;
@@ -26351,24 +26369,6 @@ function ($scope, bladeNavigationService, eventTemplateResolver, notifications) 
 }]);
 
 angular.module('platformWebApp')
-.factory('platformWebApp.notifications', ['$resource', function ($resource) {
-
-	return $resource('api/platform/notification/:id', { id: '@Id' }, {
-		getNotificationList: { method: 'GET', url: 'api/platform/notification', isArray: true },
-		getTemplateById: { method: 'GET', url: 'api/platform/notification/template/:id' },
-		getTemplate: { method: 'GET', url: 'api/platform/notification/template' },
-		getTemplates: { method: 'GET', url: 'api/platform/notification/templates', isArray: true },
-		updateTemplate: { method: 'POST', url: 'api/platform/notification/template' },
-		deleteTemplate: { method: 'DELETE', url: 'api/platform/notification/template/:id' },
-		prepareTestData: { method: 'GET', url: 'api/platform/notification/template/:type/getTestingParameters', isArray: true },
-		resolveNotification: { method: 'POST', url: 'api/platform/notification/template/rendernotificationcontent' },
-		sendNotification: { method: 'POST', url: 'api/platform/notification/template/sendnotification' },
-		getNotificationJournalList: { method: 'GET', url: 'api/platform/notification/journal/:objectId/:objectTypeId' },
-		getNotificationJournalDetails: { method: 'GET', url: 'api/platform/notification/notification/:id' },
-		stopSendingNotifications: { method: 'POST', url: 'api/platform/notification/stopnotifications' }
-	});
-}]);
-angular.module('platformWebApp')
 .factory('platformWebApp.pushNotifications', ['$resource', function ($resource) {
 
     return $resource('api/platform/pushnotifications/:id', { id: '@Id' }, {
@@ -26377,188 +26377,6 @@ angular.module('platformWebApp')
 	});
 }]);
 
-angular.module('platformWebApp')
-.directive('vaLoginToolbar', ['$document', '$timeout', '$state', 'platformWebApp.authService', function ($document, $timeout, $state, authService) {
-    return {
-        templateUrl: '$(Platform)/Scripts/app/security/login/loginToolbar.tpl.html',
-        restrict: 'E',
-        replace: true,
-        scope: true,
-        link: function ($scope, $element, $attrs, $controller) {
-            $scope.openProfile = function () {
-                $state.go('workspace.userProfile');
-            };
-
-            //$scope.isAuthenticated = authService.isAuthenticated;
-            $scope.logout = authService.logout;
-            $scope.$watch(function () {
-                return authService.userLogin;
-            }, function (userLogin) {
-                $scope.userLogin = userLogin;
-                $scope.fullName = authService.fullName;
-            });
-
-            // menu stuff
-            var onDocumentClick = function (event) {
-                //$scope.isMenuVisible = false;
-                $scope.$apply("isMenuVisible = false");
-                $document.off("click", onDocumentClick);
-            };
-
-            $scope.showMenu = function () {
-                $document.off("click", onDocumentClick);
-                $scope.isMenuVisible = !$scope.isMenuVisible;
-                if ($scope.isMenuVisible) {
-                    $timeout(function () {
-                        $document.on("click", onDocumentClick);
-                    });
-                }
-            }
-        }
-    }
-}])
-angular.module('platformWebApp')
-.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
-	return {
-		link: function (scope, element, attrs) {
-
-			if (attrs.vaPermission) {
-				var permissionValue = attrs.vaPermission.trim();
-			
-				//modelObject is a scope property of the parent/current scope
-				scope.$watch(attrs.securityScopes, function (value) {
-					if (value) {
-						toggleVisibilityBasedOnPermission(value);
-					}
-				});
-			
-				function toggleVisibilityBasedOnPermission(securityScopes) {
-					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
-					if (hasPermission)
-						element.show();
-					else
-						element.hide();
-				}
-
-				toggleVisibilityBasedOnPermission();
-				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
-			}
-		}
-	};
-}]);
-angular.module('platformWebApp')
-    .factory('platformWebApp.authService', ['$http', '$rootScope', '$cookieStore', '$state', '$interpolate', function ($http, $rootScope, $cookieStore, $state, $interpolate) {
-    var serviceBase = 'api/platform/security/';
-    var authContext = {
-        userId: null,
-        userLogin: null,
-        fullName: null,
-        permissions: null,
-        isAuthenticated: false
-    };
-
-    authContext.fillAuthData = function () {
-        return $http.get(serviceBase + 'currentuser').then(
-			function (results) {
-			    changeAuth(results.data);
-			});
-    };
-
-    authContext.login = function (email, password, remember) {       
-        return $http.post(serviceBase + 'login/', { userName: email, password: password, rememberMe: remember }).then(
-            function (results) {
-                if (results.data.succeeded) {
-                    return authContext.fillAuthData().then(function () { return authContext.isAuthenticated; })
-                }
-                return false;
-			});
-    };
-
-    authContext.requestpasswordreset = function (data) {
-        return $http.post(serviceBase + 'users/' + data.userName + '/requestpasswordreset/').then(
-			function (results) {
-			    return results.data;
-			});
-    };
-
-    authContext.resetpassword = function (data) {
-        return $http.post(serviceBase + 'users/' + data.userId + '/resetpasswordconfirm', { token: data.code, newPassword: data.newPassword }).then(
-			function (results) {
-			    return results.data;
-			});
-    };
-
-    authContext.logout = function () {
-        changeAuth({});
-
-        $http.get(serviceBase + 'logout/').then(function (result) {
-        });
-    };
-
-    authContext.checkPermission = function (permission, securityScopes) {
-        //first check admin permission
-        // var hasPermission = $.inArray('admin', authContext.permissions) > -1;
-        var hasPermission = authContext.isAdministrator;
-        if (!hasPermission && permission) {
-            permission = permission.trim();
-            //first check global permissions
-            hasPermission = $.inArray(permission, authContext.permissions) > -1;
-            if (!hasPermission && securityScopes) {
-                if (typeof securityScopes === 'string' || angular.isArray(securityScopes)) {
-                    securityScopes = angular.isArray(securityScopes) ? securityScopes : securityScopes.split(',');
-                    //Check permissions in scope
-                    hasPermission = _.some(securityScopes, function (x) {
-                        var permissionWithScope = permission + ":" + x;
-                        var retVal = $.inArray(permissionWithScope, authContext.permissions) > -1;
-                        //console.log(permissionWithScope + "=" + retVal);
-                        return retVal;
-                    });
-                }
-            }
-        }
-        return hasPermission;
-    };
-
-    function changeAuth(user) {
-        authContext.userId = user.id;
-        authContext.permissions = user.permissions;
-        authContext.userLogin = user.userName;
-        authContext.fullName = user.userLogin;
-        authContext.isAuthenticated = user.userName != null;
-        authContext.userType = user.userType;
-        authContext.isAdministrator = user.isAdministrator;
-        //Interpolate permissions to replace some template to real value
-        if (authContext.permissions) {
-            authContext.permissions = _.map(authContext.permissions, function (x) {
-                return $interpolate(x)(authContext);
-            });
-        }
-        $rootScope.$broadcast('loginStatusChanged', authContext);
-    }
-    return authContext;
-}]);
-
-angular.module('platformWebApp')
-.factory('platformWebApp.permissionScopeResolver', [ function () {
-	var scopes = [];
-	//type - permission scope type
-	//title - scope display name
-	//permission - original permission object returned from api
-	//selectFn - function called when user select scope in UI
-	function register(scope) {
-		scopes.push(scope);
-	}
-
-	function resolve(type) {
-	    return angular.copy(_.find(scopes, function (x) { return x.type.toUpperCase() == type.toUpperCase(); }));
-	}
-
-	var retVal = {
-		register: register,
-		resolve: resolve
-	};
-	return retVal;
-}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.accountApiListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
@@ -27336,20 +27154,19 @@ angular.module('platformWebApp')
         if (blade.isNew) {
             initializeBlade({});
         } else {
-            roles.get({ roleName: blade.data.name }, function (data) {
-                initializeBlade(data);
+            roles.get({ roleName: blade.data.name }, function (role) {
+                initializeBlade(role);
                 if (parentRefresh && blade.parentBlade.refresh) {
                     blade.parentBlade.refresh();
                 }
-            },
-            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+            });
         }
     }
 
-    function initializeBlade(data) {
+    function initializeBlade(role) {
         blade.selectedAll = false;
-        blade.currentEntity = angular.copy(data);
-        blade.origEntity = data;
+        blade.currentEntity = angular.copy(role);
+        blade.origEntity = role;
 
         if (blade.isNew) {
             promise.then(function (promiseData) {
@@ -27385,6 +27202,7 @@ angular.module('platformWebApp')
                     blade.parentBlade.refresh();
                     blade.parentBlade.selectNode(blade.currentEntity);
                 }
+                blade.data.name = blade.currentEntity.name;
                 blade.refresh(true);
             }
             else {
@@ -27709,6 +27527,75 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
+.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
+	return {
+		link: function (scope, element, attrs) {
+
+			if (attrs.vaPermission) {
+				var permissionValue = attrs.vaPermission.trim();
+			
+				//modelObject is a scope property of the parent/current scope
+				scope.$watch(attrs.securityScopes, function (value) {
+					if (value) {
+						toggleVisibilityBasedOnPermission(value);
+					}
+				});
+			
+				function toggleVisibilityBasedOnPermission(securityScopes) {
+					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
+					if (hasPermission)
+						element.show();
+					else
+						element.hide();
+				}
+
+				toggleVisibilityBasedOnPermission();
+				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
+			}
+		}
+	};
+}]);
+angular.module('platformWebApp')
+.directive('vaLoginToolbar', ['$document', '$timeout', '$state', 'platformWebApp.authService', function ($document, $timeout, $state, authService) {
+    return {
+        templateUrl: '$(Platform)/Scripts/app/security/login/loginToolbar.tpl.html',
+        restrict: 'E',
+        replace: true,
+        scope: true,
+        link: function ($scope, $element, $attrs, $controller) {
+            $scope.openProfile = function () {
+                $state.go('workspace.userProfile');
+            };
+
+            //$scope.isAuthenticated = authService.isAuthenticated;
+            $scope.logout = authService.logout;
+            $scope.$watch(function () {
+                return authService.userLogin;
+            }, function (userLogin) {
+                $scope.userLogin = userLogin;
+                $scope.fullName = authService.fullName;
+            });
+
+            // menu stuff
+            var onDocumentClick = function (event) {
+                //$scope.isMenuVisible = false;
+                $scope.$apply("isMenuVisible = false");
+                $document.off("click", onDocumentClick);
+            };
+
+            $scope.showMenu = function () {
+                $document.off("click", onDocumentClick);
+                $scope.isMenuVisible = !$scope.isMenuVisible;
+                if ($scope.isMenuVisible) {
+                    $timeout(function () {
+                        $document.on("click", onDocumentClick);
+                    });
+                }
+            }
+        }
+    }
+}])
+angular.module('platformWebApp')
 .factory('platformWebApp.accounts', ['$resource', function ($resource) {
     return $resource('api/platform/security/users/:id', { id: '@Id' }, {
         search: { method: 'POST' },
@@ -27733,6 +27620,119 @@ angular.module('platformWebApp')
     });
 }]);
 
+angular.module('platformWebApp')
+    .factory('platformWebApp.authService', ['$http', '$rootScope', '$cookieStore', '$state', '$interpolate', function ($http, $rootScope, $cookieStore, $state, $interpolate) {
+    var serviceBase = 'api/platform/security/';
+    var authContext = {
+        userId: null,
+        userLogin: null,
+        fullName: null,
+        permissions: null,
+        isAuthenticated: false
+    };
+
+    authContext.fillAuthData = function () {
+        return $http.get(serviceBase + 'currentuser').then(
+			function (results) {
+			    changeAuth(results.data);
+			});
+    };
+
+    authContext.login = function (email, password, remember) {       
+        return $http.post(serviceBase + 'login/', { userName: email, password: password, rememberMe: remember }).then(
+            function (results) {
+                if (results.data.succeeded) {
+                    return authContext.fillAuthData().then(function () { return authContext.isAuthenticated; })
+                }
+                return false;
+			});
+    };
+
+    authContext.requestpasswordreset = function (data) {
+        return $http.post(serviceBase + 'users/' + data.userName + '/requestpasswordreset/').then(
+			function (results) {
+			    return results.data;
+			});
+    };
+
+    authContext.resetpassword = function (data) {
+        return $http.post(serviceBase + 'users/' + data.userId + '/resetpasswordconfirm', { token: data.code, newPassword: data.newPassword }).then(
+			function (results) {
+			    return results.data;
+			});
+    };
+
+    authContext.logout = function () {
+        changeAuth({});
+
+        $http.get(serviceBase + 'logout/').then(function (result) {
+        });
+    };
+
+    authContext.checkPermission = function (permission, securityScopes) {
+        //first check admin permission
+        // var hasPermission = $.inArray('admin', authContext.permissions) > -1;
+        var hasPermission = authContext.isAdministrator;
+        if (!hasPermission && permission) {
+            permission = permission.trim();
+            //first check global permissions
+            hasPermission = $.inArray(permission, authContext.permissions) > -1;
+            if (!hasPermission && securityScopes) {
+                if (typeof securityScopes === 'string' || angular.isArray(securityScopes)) {
+                    securityScopes = angular.isArray(securityScopes) ? securityScopes : securityScopes.split(',');
+                    //Check permissions in scope
+                    hasPermission = _.some(securityScopes, function (x) {
+                        var permissionWithScope = permission + ":" + x;
+                        var retVal = $.inArray(permissionWithScope, authContext.permissions) > -1;
+                        //console.log(permissionWithScope + "=" + retVal);
+                        return retVal;
+                    });
+                }
+            }
+        }
+        return hasPermission;
+    };
+
+    function changeAuth(user) {
+        authContext.userId = user.id;
+        authContext.permissions = user.permissions;
+        authContext.userLogin = user.userName;
+        authContext.fullName = user.userLogin;
+        authContext.isAuthenticated = user.userName != null;
+        authContext.userType = user.userType;
+        authContext.isAdministrator = user.isAdministrator;
+        //Interpolate permissions to replace some template to real value
+        if (authContext.permissions) {
+            authContext.permissions = _.map(authContext.permissions, function (x) {
+                return $interpolate(x)(authContext);
+            });
+        }
+        $rootScope.$broadcast('loginStatusChanged', authContext);
+    }
+    return authContext;
+}]);
+
+angular.module('platformWebApp')
+.factory('platformWebApp.permissionScopeResolver', [ function () {
+	var scopes = [];
+	//type - permission scope type
+	//title - scope display name
+	//permission - original permission object returned from api
+	//selectFn - function called when user select scope in UI
+	function register(scope) {
+		scopes.push(scope);
+	}
+
+	function resolve(type) {
+	    return angular.copy(_.find(scopes, function (x) { return x.type.toUpperCase() == type.toUpperCase(); }));
+	}
+
+	var retVal = {
+		register: register,
+		resolve: resolve
+	};
+	return retVal;
+}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.accountApiWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
 

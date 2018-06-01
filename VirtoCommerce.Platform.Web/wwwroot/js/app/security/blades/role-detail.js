@@ -8,20 +8,19 @@ angular.module('platformWebApp')
         if (blade.isNew) {
             initializeBlade({});
         } else {
-            roles.get({ roleName: blade.data.name }, function (data) {
-                initializeBlade(data);
+            roles.get({ roleName: blade.data.name }, function (role) {
+                initializeBlade(role);
                 if (parentRefresh && blade.parentBlade.refresh) {
                     blade.parentBlade.refresh();
                 }
-            },
-            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+            });
         }
     }
 
-    function initializeBlade(data) {
+    function initializeBlade(role) {
         blade.selectedAll = false;
-        blade.currentEntity = angular.copy(data);
-        blade.origEntity = data;
+        blade.currentEntity = angular.copy(role);
+        blade.origEntity = role;
 
         if (blade.isNew) {
             promise.then(function (promiseData) {
@@ -57,6 +56,7 @@ angular.module('platformWebApp')
                     blade.parentBlade.refresh();
                     blade.parentBlade.selectNode(blade.currentEntity);
                 }
+                blade.data.name = blade.currentEntity.name;
                 blade.refresh(true);
             }
             else {

@@ -281,16 +281,16 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             };
 
 
-            if (!(await _settingsManager.GetValueAsync("VirtoCommerce.ModulesAutoInstalled", false)))
+            if (!(await _settingsManager.GetValueAsync(PlatformConstants.Settings.Setup.ModulesAutoInstalled.Name, false)))
             {
                 using (await AsyncLock.GetLockByKey("autoinstall").LockAsync())
                 {
-                    if (!(await _settingsManager.GetValueAsync("VirtoCommerce.ModulesAutoInstalled", false)))
+                    if (!(await _settingsManager.GetValueAsync(PlatformConstants.Settings.Setup.ModulesAutoInstalled.Name, false)))
                     {
                         var moduleBundles = _extModuleOptions.AutoInstallModuleBundles;
                         if (!moduleBundles.IsNullOrEmpty())
                         {
-                            await _settingsManager.SetValueAsync("VirtoCommerce.ModulesAutoInstalled", true);
+                            await _settingsManager.SetValueAsync(PlatformConstants.Settings.Setup.ModulesAutoInstalled.Name, true);
 
                             EnsureModulesCatalogInitialized();
 

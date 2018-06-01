@@ -708,31 +708,75 @@
             }
         }
     },
-    //Permissions
-    "platform:asset:access": "Allows to see Assets in the main menu",
-    "platform:asset:delete": "Allows to delete platform assets",
-    "platform:asset:update": "Allows to change platform assets",
-    "platform:asset:create": "Allows to upload new platform assets",
-    "platform:asset:read": "Allows to download platform assets",
-    "platform:module:read": "Allows to view module details",
-    "platform:module:access": "Allows to see Modules in the main menu",
-    "platform:module:manage": "Allows to install/uninstall modules",
-    "platform:setting:read": "Allows to read platform settings",
-    "platform:setting:access": "Allows to see Settings in the main menu",
-    "platform:setting:update": "Allows to change platform settings",
-    "platform:dynamic_properties:read": "Allows to view dynamic property details",
-    "platform:dynamic_properties:create": "Allows to create new dynamic properties",
-    "platform:dynamic_properties:access": "Allows to see Dynamic Properties in the main menu",
-    "platform:dynamic_properties:update": "Allows to change dynamic properties",
-    "platform:dynamic_properties:delete": "Allows to delete dynamic properties",
-    "platform:security:read": "Allows to view user and roles details",
-    "platform:security:create": "Allows to create a new users and roles",
-    "platform:security:access": "Allows to see Security in the main menu",
-    "platform:security:update": "Allows to change an users and roles",
-    "platform:security:delete": "Allows to delete an users and roles",
-    "security:call_api": "Allows to call platform API",
-    "background_jobs:manage": "Allows to access to  the Hangfire console",
-    "platform:exportImport:access": "Allows to see Export/Import in the main menu",
-    "platform:import": "Allows to import platform and modules data",
-    "platform:export": "Allows to export platform and modules data"
+    "permissions": {
+        "platform:asset:access": "Allows to see Assets in the main menu",
+        "platform:asset:delete": "Allows to delete platform assets",
+        "platform:asset:update": "Allows to change platform assets",
+        "platform:asset:create": "Allows to upload new platform assets",
+        "platform:asset:read": "Allows to download platform assets",
+        "platform:module:read": "Allows to view module details",
+        "platform:module:access": "Allows to see Modules in the main menu",
+        "platform:module:manage": "Allows to install/uninstall modules",
+        "platform:setting:read": "Allows to read platform settings",
+        "platform:setting:access": "Allows to see Settings in the main menu",
+        "platform:setting:update": "Allows to change platform settings",
+        "platform:dynamic_properties:read": "Allows to view dynamic property details",
+        "platform:dynamic_properties:create": "Allows to create new dynamic properties",
+        "platform:dynamic_properties:access": "Allows to see Dynamic Properties in the main menu",
+        "platform:dynamic_properties:update": "Allows to change dynamic properties",
+        "platform:dynamic_properties:delete": "Allows to delete dynamic properties",
+        "platform:security:read": "Allows to view user and roles details",
+        "platform:security:create": "Allows to create a new users and roles",
+        "platform:security:access": "Allows to see Security in the main menu",
+        "platform:security:update": "Allows to change an users and roles",
+        "platform:security:delete": "Allows to delete an users and roles",
+        "security:call_api": "Allows to call platform API",
+        "background_jobs:manage": "Allows to access to  the Hangfire console",
+        "platform:exportImport:access": "Allows to see Export/Import in the main menu",
+        "platform:import": "Allows to import platform and modules data",
+        "platform:export": "Allows to export platform and modules data"
+    },
+    "settings": {
+        "VirtoCommerce.Platform.Security.AccountTypes": {
+            "description": "Dictionary for possible user types",
+            "title": "User types"
+        },
+        "VirtoCommerce.ModulesAutoInstalled": {
+            "description": "The flag indicates that the modules are automatically installed",
+            "title": "Modules installed"
+        },
+        "VirtoCommerce.Platform.UI.MainMenu.State": {
+            "description": "Persisted state of main menu",
+            "title": "Persisted state of main menu"
+        },
+        "VirtoCommerce.Platform.UI.Language": {
+            "description": "Default language (two letter code from ISO 639-1, case-insensitive). Example: en, de",
+            "title": "Language"
+        },
+        "VirtoCommerce.Platform.UI.RegionalFormat": {
+            "description": "Default regional format (CLDR locale code, with dash or underscore as delimiter, case-insensitive). Example: en, en_US, sr_Cyrl, sr_Cyrl_RS",
+            "title": "Regional format"
+        },
+        "VirtoCommerce.Platform.UI.TimeZone": {
+            "description": "Default time zone (IANA time zone name [tz database], exactly as in database, case-sensitive). Examples: America/New_York, Europe/Moscow",
+            "title": "Time zone"
+        },
+        "VirtoCommerce.Platform.UI.UseTimeAgo": {
+            "description": "When set to true (by default), system will display date in format like 'a few seconds ago' when possible",
+            "title": "Use time ago format when is possible"
+        },
+        "VirtoCommerce.Platform.UI.FullDateThreshold": {
+            "description": "Number of units after time ago format will be switched to full date format",
+            "title": "Full date threshold"
+        },
+        "VirtoCommerce.Platform.UI.FullDateThresholdUnit": {
+            "description": "Unit of full date threshold",
+            "title": "Full date threshold unit"
+        },
+        "VirtoCommerce.Platform.UI.Customization": {
+            "description": "JSON contains personalization settings of manager UI",
+            "title": "The manager UI customization"
+        }
+    }
+
 }

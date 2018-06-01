@@ -41,7 +41,7 @@
                             </td>
                             <td class="table-col" ng-click='selectNode(data)'>
                                 <span class="table-t">{{data.name}}</span>
-                                <span class="table-descr">{{data.name | translate }}</span>
+                                <span class="table-descr">{{'permissions.' + data.name | translate }}</span>
                                 <span class="table-descr alt-description" ng-if="data.availableScopes.length">{{ 'platform.blades.role-detail.labels.assigned-scopes' | translate }}: {{(data.assignedScopes.length ? data.assignedScopes.length : 0) | number:0 }}</span>
                                 <ul role="menu" class="menu __context" id="rd_menu_{{$index}}">
                                     <li class="menu-item" ng-click='delete($index)'>
