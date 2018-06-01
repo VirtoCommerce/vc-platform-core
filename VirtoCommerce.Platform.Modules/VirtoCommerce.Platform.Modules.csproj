@@ -13,7 +13,6 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.0.2" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="2.0.2" />
-    <PackageReference Include="ChinhDo.Transactions.FileManager" Version="1.2.0" />
     <PackageReference Include="NUglify" Version="1.5.11" />
     <PackageReference Include="VirtoCommerce.Smidge" Version="3.0.0-beta002" />
     <PackageReference Include="VirtoCommerce.Smidge.Nuglify" Version="2.0.0-beta002" />
