@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
@@ -16,7 +16,7 @@ namespace VirtoCommerce.Platform.Data.Model
             SettingValues = new NullCollection<SettingValueEntity>();
         }
 
-        [StringLength(128)]      
+        [StringLength(128)]
         public string ObjectType { get; set; }
 
         [StringLength(128)]
@@ -76,7 +76,7 @@ namespace VirtoCommerce.Platform.Data.Model
             }
             return settingEntry;
         }
-     
+
         public virtual SettingEntity FromModel(SettingEntry settingEntry)
         {
             if (settingEntry == null)
@@ -85,7 +85,7 @@ namespace VirtoCommerce.Platform.Data.Model
             ObjectType = settingEntry.ObjectType;
             ObjectId = settingEntry.ObjectId;
             Name = settingEntry.Name;
-            Description = settingEntry.Description;           
+            Description = settingEntry.Description;
             SettingValueType = settingEntry.ValueType.ToString();
             IsEnum = settingEntry.IsArray;
 
@@ -111,7 +111,7 @@ namespace VirtoCommerce.Platform.Data.Model
 
             if (!SettingValues.IsNullCollection())
             {
-                var comparer = AnonymousComparer.Create((SettingValueEntity x) => x.ToString(EnumUtility.SafeParse(x.ValueType, Core.Settings.SettingValueType.LongText),  CultureInfo.InvariantCulture));
+                var comparer = AnonymousComparer.Create((SettingValueEntity x) => x.ToString(EnumUtility.SafeParse(x.ValueType, Core.Settings.SettingValueType.LongText), CultureInfo.InvariantCulture) ?? string.Empty);
                 SettingValues.Patch(target.SettingValues, comparer, (sourceSetting, targetSetting) => { });
             }
         }

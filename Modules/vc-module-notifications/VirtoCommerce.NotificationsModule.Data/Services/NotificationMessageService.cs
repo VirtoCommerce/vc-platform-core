@@ -12,11 +12,10 @@ using VirtoCommerce.NotificationsModule.Data.Validation;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.Events;
-using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.NotificationsModule.Data.Services
 {
-    public class NotificationMessageService : ServiceBase, INotificationMessageService
+    public class NotificationMessageService : INotificationMessageService
     {
         private readonly Func<INotificationRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
@@ -43,7 +42,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             var changedEntries = new List<GenericChangedEntry<NotificationMessage>>();
 
             using (var repository = _repositoryFactory())
-            using (var changeTracker = new ObservableChangeTracker())
             {
                 var existingMessageEntities = await repository.GetMessageByIdAsync(messages.Select(m => m.Id).ToArray());
                 foreach (var message in messages)
@@ -53,7 +51,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
                     if (originalEntity != null)
                     {
-                        changeTracker.Attach(originalEntity);
                         changedEntries.Add(new GenericChangedEntry<NotificationMessage>(message, originalEntity.ToModel(AbstractTypeFactory<NotificationMessage>.TryCreateInstance()), EntryState.Modified));
                         modifiedEntity?.Patch(originalEntity);
                     }
@@ -65,7 +62,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                 }
 
                 await _eventPublisher.Publish(new NotificationMessageChangingEvent(changedEntries));
-                CommitChanges(repository);
+                await repository.UnitOfWork.CommitAsync();
                 await _eventPublisher.Publish(new NotificationMessageChangedEvent(changedEntries));
             }
         }

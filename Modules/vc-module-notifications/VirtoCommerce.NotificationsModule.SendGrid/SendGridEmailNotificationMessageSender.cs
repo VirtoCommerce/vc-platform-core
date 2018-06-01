@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using SendGrid;
 using SendGrid.Helpers.Mail;
-using VirtoCommerce.NotificationsModule.Core;
 using VirtoCommerce.NotificationsModule.Core.Exceptions;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
@@ -13,9 +12,9 @@ namespace VirtoCommerce.NotificationsModule.SendGrid
 {
     public class SendGridEmailNotificationMessageSender : INotificationMessageSender
     {
-        private readonly EmailSendingOptions _emailSendingOptions;
+        private readonly SendGridSenderOptions _emailSendingOptions;
 
-        public SendGridEmailNotificationMessageSender(IOptions<EmailSendingOptions> emailSendingOptions)
+        public SendGridEmailNotificationMessageSender(IOptions<SendGridSenderOptions> emailSendingOptions)
         {
             _emailSendingOptions = emailSendingOptions.Value;
         }
@@ -31,7 +30,7 @@ namespace VirtoCommerce.NotificationsModule.SendGrid
                     throw new ArgumentNullException(nameof(emailNotificationMessage));
                 }
 
-                var client = new SendGridClient(_emailSendingOptions.SendGridOptions.ApiKey);
+                var client = new SendGridClient(_emailSendingOptions.ApiKey);
                 var mailMsg = new SendGridMessage
                 {
                     From = new EmailAddress(emailNotificationMessage.From),

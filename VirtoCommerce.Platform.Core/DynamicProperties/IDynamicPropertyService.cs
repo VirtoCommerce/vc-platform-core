@@ -1,4 +1,4 @@
-﻿using System;
+using System.Threading.Tasks;
 
 namespace VirtoCommerce.Platform.Core.DynamicProperties
 {
@@ -7,56 +7,29 @@ namespace VirtoCommerce.Platform.Core.DynamicProperties
     /// </summary>
     public interface IDynamicPropertyService
     {
-        /// <summary>
-        /// Register new type name which can support dynamic properties
-        /// </summary>
-        /// <param name="typeName"></param>
-        void RegisterType(string typeName);
-        /// <summary>
-        /// Return all available types names supported dynamic properties
-        /// </summary>
-        /// <returns></returns>
-        string[] GetAvailableObjectTypeNames();
-        /// <summary>
-        /// Return string type name
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        string GetObjectTypeName(Type type);
-
-        /// <summary>
-        /// Return all dynamic properties defined for type
-        /// </summary>
-        /// <param name="objectType"></param>
-        /// <returns></returns>
-        DynamicProperty[] GetProperties(string objectType);
+        Task<DynamicProperty[]> GetDynamicPropertiesAsync(string[] ids);
         /// <summary>
         /// Update or create dynamic properties 
         /// </summary>
         /// <param name="properties"></param>
         /// <returns></returns>
-        DynamicProperty[] SaveProperties(DynamicProperty[] properties);
-        void DeleteProperties(string[] propertyIds);
+        Task<DynamicProperty[]> SaveDynamicPropertiesAsync(DynamicProperty[] properties);
+        Task DeleteDynamicPropertiesAsync(string[] propertyIds);
 
-        DynamicPropertyDictionaryItem[] GetDictionaryItems(string propertyId);
-        void SaveDictionaryItems(string propertyId, DynamicPropertyDictionaryItem[] items);
-        void DeleteDictionaryItems(string[] itemIds);
+        Task<DynamicPropertyDictionaryItem[]> GetDynamicPropertyDictionaryItemsAsync(string[] ids);
+        Task SaveDictionaryItemsAsync(DynamicPropertyDictionaryItem[] items);
+        Task DeleteDictionaryItemsAsync(string[] itemIds);
 
-        /// <summary>
-        /// Deep loads and populate dynamic properties values for object
-        /// </summary>
-        /// <param name="owner"></param>
-        void LoadDynamicPropertyValues(IHasDynamicProperties owner);
         /// <summary>
         /// Deep loads and populate dynamic properties values for objects
         /// </summary>
         /// <param name="owner"></param>
-        void LoadDynamicPropertyValues(params IHasDynamicProperties[] owner);
+        Task LoadDynamicPropertyValuesAsync(params IHasDynamicProperties[] owner);
         /// <summary>
         /// Deep save dynamic properties values for object
         /// </summary>
         /// <param name="owner"></param>
-        void SaveDynamicPropertyValues(IHasDynamicProperties owner);
-        void DeleteDynamicPropertyValues(IHasDynamicProperties owner);
+        Task SaveDynamicPropertyValuesAsync(IHasDynamicProperties owner);
+        Task DeleteDynamicPropertyValuesAsync(IHasDynamicProperties owner);
     }
 }

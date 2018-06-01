@@ -63,7 +63,7 @@ angular.module('virtoCommerce.notificationsModule')
         }
 
 		if (authService.checkPermission('notifications:access')) {
-			blade.editTemplate = function (item) {
+			blade.editNotification = function (item) {
                 var foundNotification = resolveType(item.kind);
 				var newBlade = {
 					id: 'editNotification',
@@ -87,7 +87,7 @@ angular.module('virtoCommerce.notificationsModule')
         $scope.selectNode = function (type) {
            blade.setSelectedNode(type);
            blade.selectedType = type;
-      	   blade.editTemplate(type);
+      	   blade.editNotification(type);
         };
 
         // ui-grid

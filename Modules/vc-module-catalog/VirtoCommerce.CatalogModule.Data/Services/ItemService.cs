@@ -18,7 +18,7 @@ using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CatalogModule.Data.Services
 {
-    public class ItemService : ServiceBase, IItemService
+    public class ItemService : IItemService
     {
         private readonly ICategoryService _categoryService;
         private readonly ICatalogService _catalogService;
@@ -105,7 +105,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             using (var repository = _repositoryFactory())
             {
                 repository.RemoveItems(itemIds.ToArray());
-                CommitChanges(repository);
+                repository.UnitOfWork.Commit();
             }
 
             _eventPublisher.Publish(new ProductChangedEvent(changedEntries));
@@ -122,7 +122,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             ValidateProducts(products);
 
             using (var repository = _repositoryFactory())
-            using (var changeTracker = GetChangeTracker(repository))
             {
                 var dbExistProducts = repository.GetItemByIds(products.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray(), ItemResponseGroup.ItemLarge);
                 foreach (var product in products)
@@ -132,7 +131,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
                     if (originalEntity != null)
                     {
-                        changeTracker.Attach(originalEntity);
                         changedEntries.Add(new GenericChangedEntry<CatalogProduct>(product, originalEntity.ToModel(AbstractTypeFactory<CatalogProduct>.TryCreateInstance()), EntryState.Modified));
                         modifiedEntity.Patch(originalEntity);
                         //Force set ModifiedDate property to mark a product changed. Special for  partial update cases when product table not have changes

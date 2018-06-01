@@ -3,7 +3,7 @@ using VirtoCommerce.NotificationsModule.Core.Services;
 
 namespace VirtoCommerce.NotificationsModule.LiquidRenderer
 {
-    public class LiquidTemplateRenderer : INotificationTemplateRender
+    public class LiquidTemplateRenderer : INotificationTemplateRenderer
     {
         public string Render(string stringTemplate, object context)
         {

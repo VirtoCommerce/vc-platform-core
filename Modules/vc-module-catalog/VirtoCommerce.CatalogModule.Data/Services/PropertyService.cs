@@ -19,7 +19,7 @@ using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CatalogModule.Data.Services
 {
-    public class PropertyService : ServiceBase, IPropertyService
+    public class PropertyService : IPropertyService
     {
         private readonly Func<ICatalogRepository> _repositoryFactory;
         private readonly IMemoryCache _memoryCache;
@@ -55,7 +55,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             ValidateProperties(properties);
 
             using (var repository = _repositoryFactory())
-            using (var changeTracker = GetChangeTracker(repository))
             {
                 TryAddPredefinedValidationRules(properties);
 
@@ -67,7 +66,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
                     if (originalEntity != null)
                     {
-                        changeTracker.Attach(originalEntity);
                         changedEntries.Add(new GenericChangedEntry<Property>(property, originalEntity.ToModel(AbstractTypeFactory<Property>.TryCreateInstance()), EntryState.Modified));
                         modifiedEntity.Patch(originalEntity);
                         //Force set ModifiedDate property to mark a product changed. Special for  partial update cases when product table not have changes

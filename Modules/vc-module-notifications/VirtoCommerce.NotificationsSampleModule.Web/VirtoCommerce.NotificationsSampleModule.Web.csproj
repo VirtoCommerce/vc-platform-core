@@ -10,10 +10,4 @@
     <ProjectReference Include="..\VirtoCommerce.NotificationsModule.Data\VirtoCommerce.NotificationsModule.Data.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="module.manifest">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>

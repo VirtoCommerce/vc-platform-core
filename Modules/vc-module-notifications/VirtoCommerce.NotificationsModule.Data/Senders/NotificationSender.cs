@@ -1,10 +1,7 @@
 using System;
-using System.Linq;
-using System.Net.Mail;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Polly;
-using VirtoCommerce.NotificationsModule.Core;
 using VirtoCommerce.NotificationsModule.Core.Exceptions;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
@@ -15,18 +12,16 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
     public class NotificationSender : INotificationSender
     {
         private readonly int _maxRetryAttempts = 3;
-        private readonly INotificationService _notificationService;
-        private readonly INotificationTemplateRender _notificationTemplateRender;
+        private readonly INotificationTemplateRenderer _notificationTemplateRender;
         private readonly INotificationMessageService _notificationMessageService;
         private readonly INotificationMessageSenderProviderFactory _notificationMessageAccessor;
         private readonly ILogger<NotificationSender> _logger;
 
-        public NotificationSender(INotificationService notificationService, INotificationTemplateRender notificationTemplateRender
+        public NotificationSender(INotificationTemplateRenderer notificationTemplateRender
             , INotificationMessageService notificationMessageService
             , ILogger<NotificationSender> logger
             , INotificationMessageSenderProviderFactory notificationMessageAccessor)
         {
-            _notificationService = notificationService;
             _notificationTemplateRender = notificationTemplateRender;
             _notificationMessageService = notificationMessageService;
             _notificationMessageAccessor = notificationMessageAccessor;
@@ -42,11 +37,10 @@ namespace VirtoCommerce.NotificationsModule.Data.Senders
 
             NotificationSendResult result = new NotificationSendResult();
 
-            var activeNotification = await _notificationService.GetByTypeAsync(notification.Type);
-            var message = AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{activeNotification.Kind}Message");
+            var message = AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{notification.Kind}Message");
             message.LanguageCode = language;
             message.MaxSendAttemptCount = _maxRetryAttempts + 1;
-            activeNotification.ToMessage(message, _notificationTemplateRender);
+            notification.ToMessage(message, _notificationTemplateRender);
 
             NotificationMessage[] messages = { message };
             await _notificationMessageService.SaveNotificationMessagesAsync(messages);

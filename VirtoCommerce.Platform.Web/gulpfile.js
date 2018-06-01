@@ -1,4 +1,4 @@
-/// <binding />
+/// <binding AfterBuild='min:js, min:css' />
 "use strict";
 
 var gulp = require("gulp"),
@@ -13,19 +13,10 @@ var gulp = require("gulp"),
     mainBowerFiles = require('main-bower-files'),
     sass = require('gulp-sass'),
     rename = require('gulp-rename'),
-    sourcemaps = require('gulp-sourcemaps'),
-    gulpsync = require('gulp-sync')(gulp);
+    sourcemaps = require('gulp-sourcemaps');
 
 
-gulp.task("min", gulpsync.sync(["min:bowerPackages:js", "min:bowerPackages:css", "translateSass", "min:js", "min:css", 'min:allPackages:css']));
-
-
-// concatenate all css files
-gulp.task('min:allPackages:css', function () {
-    return gulp.src(['wwwroot/css/*.css', '!wwwroot/css/allPackages.css', '!wwwroot/css/platform.css', '!wwwroot/css/main.css'])
-        .pipe(concat('allPackages.css'))
-        .pipe(gulp.dest('wwwroot/css/'));
-});
+gulp.task("min", ["min:bowerPackages:js", "min:bowerPackages:css", "min:js", "min:css"]);
 
 // concatenate all css files from bower packages to single file
 gulp.task('min:bowerPackages:css', function () {
@@ -33,7 +24,7 @@ gulp.task('min:bowerPackages:css', function () {
         // Only the CSS files
         filter: /.*\.css$/i
     }))
-        .pipe(concat('bowerPackages.css'))
+        .pipe(concat('allPackages.css'))
         .pipe(gulp.dest('wwwroot/css/'));
 });
 
@@ -79,9 +70,9 @@ gulp.task("min:js", function () {
     return merge(plainStream, minStream);
 });
 
-// translate sass to css
-gulp.task('translateSass', function () {
-    return gulp.src(['wwwroot/css/themes/main/sass/**/*.sass'])
+gulp.task("min:css", function () {
+
+    var scssStream = gulp.src(['wwwroot/css/themes/main/sass/**/*.sass'])
         // must be executed straigh after source
         .pipe(sourcemaps.init())
         .pipe(sass({
@@ -102,18 +93,10 @@ gulp.task('translateSass', function () {
             ]
         }))
         // must be executed straight before output
-        .pipe(sourcemaps.write('.', { includeContent: false, sourceRoot: '../sass' }))
-        .pipe(gulp.dest('wwwroot/css'));
-});
+        .pipe(sourcemaps.write('.', { includeContent: false, sourceRoot: '../sass' }));
 
-var cssStream = gulp.src(['wwwroot/css/themes/main/css/**/*.css', 'wwwroot/js/codemirror/**/*.css', '!wwwroot/css/themes/main/css/allPackages.css'])
-    .pipe(concat('css-files.css'));
-
-gulp.task("min:css", function () {
-
-    var scssStream = gulp.src(['wwwroot/css/main.css']);
-
-    var cssStream = gulp.src(['wwwroot/css/themes/main/css/**/*.css', 'wwwroot/js/codemirror/**/*.css', '!wwwroot/css/themes/main/css/allPackages.css']);
+    var cssStream = gulp.src(['wwwroot/css/themes/main/css/**/*.css', 'wwwroot/js/codemirror/**/*.css', '!wwwroot/css/themes/main/css/allPackages.css'])
+        .pipe(concat('css-files.css'));
 
     return merge(scssStream, cssStream)
         .pipe(concat('platform.css'))
@@ -122,7 +105,7 @@ gulp.task("min:css", function () {
 });
 
 gulp.task("clean", function () {
-    var files = ['wwwroot/css/allPackages.css', 'wwwroot/css/platform.css', 'wwwroot/css/main.css', 'wwwroot/css/main.css.map', 'wwwroot/js/allPackages.js', 'wwwroot/js/allPackages.min.js', 'wwwroot/js/platform.js', 'wwwroot/js/platform.min.js'];
+    var files = ['wwwroot/css/allPackages.css', 'wwwroot/css/platform.css', 'wwwroot/js/allPackages.min.js', 'wwwroot/js/allPackages.js', 'wwwroot/js/platform.min.js', 'wwwroot/js/platform.js'];
     return del(files);
 });
 
