@@ -159,23 +159,23 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
         /// <param name="folder"></param>
         public virtual Task CreateFolderAsync(BlobFolder folder)
         {
-                if (folder == null)
-                {
-                    throw new ArgumentNullException("folder");
-                }
-                var path = _storagePath;
-                if (folder.ParentUrl != null)
-                {
-                    path = GetStoragePathFromUrl(folder.ParentUrl);
-                }
-                path = Path.Combine(path, folder.Name);
+            if (folder == null)
+            {
+                throw new ArgumentNullException("folder");
+            }
+            var path = _storagePath;
+            if (folder.ParentUrl != null)
+            {
+                path = GetStoragePathFromUrl(folder.ParentUrl);
+            }
+            path = Path.Combine(path, folder.Name);
 
-                ValidatePath(path);
+            ValidatePath(path);
 
-                if (!Directory.Exists(path))
-                {
-                    Directory.CreateDirectory(path);
-                }
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
 
             return Task.CompletedTask;
         }
