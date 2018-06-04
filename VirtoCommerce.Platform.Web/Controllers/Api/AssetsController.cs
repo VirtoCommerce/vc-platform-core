@@ -191,7 +191,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Authorize(SecurityConstants.Permissions.AssetDelete)]
         public async Task<IActionResult> DeleteBlobsAsync([FromQuery] string[] urls)
         {
-            await _blobProvider.Remove(urls);
+            await _blobProvider.RemoveAsync(urls);
             return Ok();
         }
 
@@ -222,7 +222,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Authorize(SecurityConstants.Permissions.AssetCreate)]
         public async Task<IActionResult> CreateBlobFolderAsync([FromBody]BlobFolder folder)
         {
-            await _blobProvider.CreateFolder(folder);
+            await _blobProvider.CreateFolderAsync(folder);
             return Ok();
         }
     }

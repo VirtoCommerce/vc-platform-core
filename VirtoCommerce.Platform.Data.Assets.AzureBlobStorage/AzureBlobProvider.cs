@@ -45,7 +45,7 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public virtual async Task<BlobInfo> GetBlobInfo(string url)
+        public virtual async Task<BlobInfo> GetBlobInfoAsync(string url)
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
@@ -122,7 +122,7 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
             return blob.OpenWriteAsync().Result;
         }
 
-        public virtual async Task Remove(string[] urls)
+        public virtual async Task RemoveAsync(string[] urls)
         {
             foreach (var url in urls)
             {
@@ -255,7 +255,7 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
             return retVal;
         }
 
-        public virtual async Task CreateFolder(BlobFolder folder)
+        public virtual async Task CreateFolderAsync(BlobFolder folder)
         {
             var path = (folder.ParentUrl != null ? folder.ParentUrl + "/" : string.Empty) + folder.Name;
 

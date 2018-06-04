@@ -42,7 +42,7 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public virtual Task<BlobInfo> GetBlobInfo(string url)
+        public virtual Task<BlobInfo> GetBlobInfoAsync(string url)
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException("url");
@@ -162,7 +162,7 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
         /// Create folder in file system within to base directory
         /// </summary>
         /// <param name="folder"></param>
-        public virtual async Task CreateFolder(BlobFolder folder)
+        public virtual async Task CreateFolderAsync(BlobFolder folder)
         {
             await Task.Factory.StartNew(() =>
             {
@@ -190,7 +190,7 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
         /// Remove folders and blobs by absolute or relative urls
         /// </summary>
         /// <param name="urls"></param>
-        public virtual async Task Remove(string[] urls)
+        public virtual async Task RemoveAsync(string[] urls)
         {
             await Task.Factory.StartNew(() => {
 

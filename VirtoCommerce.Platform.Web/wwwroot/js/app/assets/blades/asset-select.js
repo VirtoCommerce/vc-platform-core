@@ -22,7 +22,7 @@ angular.module('platformWebApp')
                     },
                     function (data) {
                         $scope.pageSettings.totalItems = data.totalCount;
-                        _.each(data, function (x) { x.isImage = x.contentType && x.contentType.startsWith('image/'); });
+                        _.each(data.results, function (x) { x.isImage = x.contentType && x.contentType.startsWith('image/'); });
                         $scope.listEntries = data.results;
                         blade.isLoading = false;
 
@@ -99,7 +99,7 @@ angular.module('platformWebApp')
                     icon: 'fa fa-check',
                     executeMethod: function () { $scope.saveChanges(); },
                     canExecuteMethod: function () {
-                        return isItemsChecked();;
+                        return isItemsChecked();
                     }
                 }
             ];

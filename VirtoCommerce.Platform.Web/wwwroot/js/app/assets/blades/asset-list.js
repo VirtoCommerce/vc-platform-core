@@ -15,9 +15,8 @@ angular.module('platformWebApp')
                         folderUrl: blade.currentEntity.url
                     },
                     function (data) {
-                        debugger;
                         $scope.pageSettings.totalItems = data.totalCount;
-                        _.each(data, function (x) {
+                        _.each(data.results, function (x) {
                             x.isImage = x.contentType && x.contentType.startsWith('image/');
                             if (x.isImage) {
                                 x.noCacheUrl = x.url + '?t=' + x.modifiedDate;

@@ -21,13 +21,13 @@ namespace VirtoCommerce.Platform.Core.Assets
         /// </summary>
         /// <param name="blobUrl"></param>
         /// <returns></returns>
-        Task<BlobInfo> GetBlobInfo(string blobUrl);
+        Task<BlobInfo> GetBlobInfoAsync(string blobUrl);
 
         /// <summary>
         /// Create blob folder in specified provider
         /// </summary>
         /// <param name="folder"></param>
-        Task CreateFolder(BlobFolder folder);
+        Task CreateFolderAsync (BlobFolder folder);
 
         /// <summary>
         /// Open blob for reading
@@ -47,6 +47,6 @@ namespace VirtoCommerce.Platform.Core.Assets
         /// Remove secified blobs
         /// </summary>
         /// <param name="urls"></param>
-        Task Remove(string[] urls);
+        Task RemoveAsync (string[] urls);
     }
 }
