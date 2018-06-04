@@ -90,7 +90,7 @@ namespace VirtoCommerce.Platform.Web.Controllers
         {
             License license = null;
 
-            var licenseFilePath = _hostEnv.MapPath(_platformOptions.LicenseFilePath);
+            var licenseFilePath = Path.GetFullPath(_platformOptions.LicenseFilePath);
             if (System.IO.File.Exists(licenseFilePath))
             {
                 var rawLicense = System.IO.File.ReadAllText(licenseFilePath);

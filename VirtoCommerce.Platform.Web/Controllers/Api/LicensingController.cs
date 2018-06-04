@@ -77,7 +77,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             if (license != null)
             {
 
-                var licenseFilePath = _hostingEnv.MapPath(_platformOptions.LicenseFilePath);
+                var licenseFilePath = Path.GetFullPath(_platformOptions.LicenseFilePath);
                 File(licenseFilePath, license.RawLicense);
             }
 
