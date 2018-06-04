@@ -2,10 +2,12 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Infrastructure;
 using VirtoCommerce.Platform.Web.Licensing;
@@ -14,7 +16,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 {
     [Produces("application/json")]
     [Route("api/platform/licensing")]
-    //[Authorize(SecurityConstants.Permissions.ModuleManage)]
+    [Authorize(SecurityConstants.Permissions.ModuleManage)]
     [ApiExplorerSettings(IgnoreApi = true)]
     public class LicensingController : Controller
     {
