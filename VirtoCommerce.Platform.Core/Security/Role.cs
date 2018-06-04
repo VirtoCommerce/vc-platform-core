@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Security.Claims;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 namespace VirtoCommerce.Platform.Core.Security
 {
@@ -7,5 +6,30 @@ namespace VirtoCommerce.Platform.Core.Security
     {
         public string Description { get; set; }
         public IList<Permission> Permissions { get; set; }
+
+        //This override methods required to correct working of the Identity DB context updates.
+        //DbContext throws out an "object of an already tracked object" when attempting to update a user on an object that wasn't retrieved from the DbContext
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Role otherUser))
+                return false;
+
+            if (ReferenceEquals(this, obj))
+                return true;
+
+            if (string.IsNullOrEmpty(Id))
+                return false;
+
+            return otherUser.Id == Id;
+        }
+
+        public override int GetHashCode()
+        {
+            if (!string.IsNullOrEmpty(Id))
+            {
+                return Id.GetHashCode();
+            }
+            return base.GetHashCode();
+        }
     }
 }

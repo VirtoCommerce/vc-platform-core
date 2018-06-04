@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.Platform.Core.Security;
 
@@ -18,6 +18,10 @@ namespace VirtoCommerce.Platform.Security.Repositories
             // For example, you can rename the ASP.NET Identity table names and more.
             // Add your customizations after calling base.OnModelCreating(builder);
             builder.Entity<Role>().Ignore(x => x.Permissions);
+            builder.Entity<ApplicationUser>().Ignore(x => x.Password);
+            builder.Entity<ApplicationUser>().Ignore(x => x.Roles);
+            builder.Entity<ApplicationUser>().Property(x => x.UserType).HasMaxLength(64);
+            builder.Entity<ApplicationUser>().Property(x => x.PhotoUrl).HasMaxLength(2048);
         }
     }
 }

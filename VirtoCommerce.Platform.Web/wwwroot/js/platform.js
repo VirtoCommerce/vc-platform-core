@@ -26648,8 +26648,7 @@ angular.module('platformWebApp')
     function ($scope, bladeNavigationService, metaFormsService, accounts, roles, dialogService, settings) {
         var blade = $scope.blade;
         blade.updatePermission = 'platform:security:update';
-        blade.promise = roles.search({ takeCount: 10000 }).$promise;
-        blade.accountTypes = [];
+        blade.accountTypes = [];      
 
         blade.refresh = function (parentRefresh) {
             var entity = parentRefresh ? blade.currentEntity : blade.data;
@@ -26706,10 +26705,13 @@ angular.module('platformWebApp')
         $scope.saveChanges = function () {
             blade.isLoading = true;
 
-            accounts.update({}, blade.currentEntity, function (data) {
-                blade.refresh(true);
-            }, function (error) {
-                bladeNavigationService.setError('Error ' + error.status, blade);
+            accounts.update({}, blade.currentEntity, function (result) {
+                if (result.succeeded) {
+                    blade.refresh(true);
+                }
+                else {
+                    bladeNavigationService.setError(_.pluck(result.errors, 'description').join(), blade);
+                }
             });
         };
 
@@ -26806,6 +26808,7 @@ angular.module('platformWebApp')
         // actions on load
         blade.refresh(false);
     }]);
+
 angular.module('platformWebApp')
 .controller('platformWebApp.accountListController', ['$scope', 'platformWebApp.accounts', 'platformWebApp.dialogService', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeNavigationService', 'platformWebApp.bladeUtils',
 function ($scope, accounts, dialogService, uiGridHelper, bladeNavigationService, bladeUtils) {
@@ -27023,7 +27026,6 @@ angular.module('platformWebApp')
                executeMethod: function () {
                    var newBlade = {
                        id: "accountChildBladeChild",
-                       promise: blade.promise,
                        title: blade.title,
                        subtitle: 'platform.blades.account-roles.subtitle',
                        controller: 'platformWebApp.accountRolesController',
@@ -27058,18 +27060,18 @@ angular.module('platformWebApp')
     // on load: 
     // $scope.$watch('blade.parentBlade.currentEntity' gets fired
 }]);
+
 angular.module('platformWebApp')
-.controller('platformWebApp.accountRolesController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', function ($scope, bladeNavigationService, dialogService) {
+    .controller('platformWebApp.accountRolesController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.roles', function ($scope, bladeNavigationService, dialogService, roles) {
     var blade = $scope.blade;
 
     function initializeBlade(data) {
         blade.data = data;
-        blade.promise.then(function (promiseData) {
-            var allRoles = angular.copy(promiseData.roles);
+        roles.search({ take: 10000 }, function (result) {
+            var allRoles = angular.copy(result.results);
             blade.currentEntities = _.filter(allRoles, function (x) {
                 return _.all(data.roles, function (curr) { return curr.id !== x.id; });
             });
-
             blade.isLoading = false;
         });
     };
@@ -27095,6 +27097,7 @@ angular.module('platformWebApp')
     // on load: 
     // $scope.$watch('blade.parentBlade.currentEntity' gets fired
 }]);
+
 angular.module('platformWebApp')
 .controller('platformWebApp.permissionScopesController', ['$q', '$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.permissionScopeResolver', function ($q, $scope, bladeNavigationService, dialogService, permissionScopeResolver) {
     var blade = $scope.blade;
@@ -27167,20 +27170,19 @@ angular.module('platformWebApp')
         if (blade.isNew) {
             initializeBlade({});
         } else {
-            roles.get({ id: blade.data.id }, function (data) {
-                initializeBlade(data);
+            roles.get({ roleName: blade.data.name }, function (role) {
+                initializeBlade(role);
                 if (parentRefresh && blade.parentBlade.refresh) {
                     blade.parentBlade.refresh();
                 }
-            },
-            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+            });
         }
     }
 
-    function initializeBlade(data) {
+    function initializeBlade(role) {
         blade.selectedAll = false;
-        blade.currentEntity = angular.copy(data);
-        blade.origEntity = data;
+        blade.currentEntity = angular.copy(role);
+        blade.origEntity = role;
 
         if (blade.isNew) {
             promise.then(function (promiseData) {
@@ -27209,17 +27211,19 @@ angular.module('platformWebApp')
         }
 
         angular.copy(blade.currentEntity, blade.origEntity);
-
-        roles.update(blade.currentEntity, function (data) {
-            if (blade.isNew) {
-                blade.parentBlade.refresh();
-                blade.parentBlade.selectNode(data);
-            } else {
+        var action = blade.isNew ? roles.create : roles.update;
+        action(blade.currentEntity, function (result) {
+            if (result.succeeded) {
+                if (blade.isNew) {
+                    blade.parentBlade.refresh();
+                    blade.parentBlade.selectNode(blade.currentEntity);
+                }
+                blade.data.name = blade.currentEntity.name;
                 blade.refresh(true);
             }
-            blade.refresh(true);
-        }, function (error) {
-            bladeNavigationService.setError('Error ' + error.status, blade);
+            else {
+                bladeNavigationService.setError(_.pluck(result.errors, 'description').join(), blade);
+            }
         });
     };
 
@@ -27329,6 +27333,7 @@ angular.module('platformWebApp')
     initializeToolbar();
     blade.refresh(false);
 }]);
+
 angular.module('platformWebApp')
 .controller('platformWebApp.roleListController', ['$scope', 'platformWebApp.roles', 'platformWebApp.bladeUtils', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.uiGridHelper',
 function ($scope, roles, bladeUtils, bladeNavigationService, dialogService, uiGridHelper) {
@@ -27338,7 +27343,7 @@ function ($scope, roles, bladeUtils, bladeNavigationService, dialogService, uiGr
     blade.refresh = function () {
         blade.isLoading = true;
 
-        roles.search({
+         roles.search({
             keyword: filter.keyword,
             sort: uiGridHelper.getSortExpression($scope),
             skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
@@ -27354,7 +27359,7 @@ function ($scope, roles, bladeUtils, bladeNavigationService, dialogService, uiGr
     };
 
     blade.selectNode = function (node) {
-        $scope.selectedNodeId = node.id;
+        $scope.selectedNodeName = node.name;
 
         var newBlade = {
             id: 'listItemChild',
@@ -27464,15 +27469,15 @@ function ($scope, roles, bladeUtils, bladeNavigationService, dialogService, uiGr
 }]);
 
 angular.module('platformWebApp')
-.controller('platformWebApp.rolePermissionsController', ['$scope', 'platformWebApp.dialogService', function ($scope, dialogService) {
+    .controller('platformWebApp.rolePermissionsController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.roles', function ($scope, dialogService, roles) {
     var blade = $scope.blade;
     var allPermissions;
 
     function initializeBlade(data) {
         blade.data = data;
-        blade.promise.then(function (promiseData) {
-            allPermissions = _.filter(angular.copy(promiseData), function (x) {
-                return _.all(data.permissions, function (curr) { return curr.id !== x.id; });
+        roles.queryPermissions({ take: 10000 }, function (result)  {
+            allPermissions = _.filter(angular.copy(result), function (x) {
+                return _.all(data.permissions, function (curr) { return curr.name !== x.name; });
             });
             
             blade.currentEntities = _.groupBy(allPermissions, 'groupName');
@@ -27503,6 +27508,7 @@ angular.module('platformWebApp')
     // on load: 
     // $scope.$watch('blade.parentBlade.currentEntity' gets fired
 }]);
+
 angular.module('platformWebApp')
 .controller('platformWebApp.securityMainController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     $scope.selectedNodeId = null;
@@ -27621,12 +27627,15 @@ angular.module('platformWebApp')
 }]);
 angular.module('platformWebApp')
 .factory('platformWebApp.roles', ['$resource', function ($resource) {
-    return $resource('api/platform/security/roles/:id', { id: '@Id' }, {
-        search: { method: 'POST' },
+    return $resource('api/platform/security/roles/:roleName', { roleName: '@roleName' }, {
+        search: { url: 'api/platform/security/roles/search', method: 'POST' },
         queryPermissions: { url: 'api/platform/security/permissions', isArray: true },
-        update: { method: 'PUT' }
+        update: { method: 'PUT' },
+        create: { method: 'POST' },
+
     });
 }]);
+
 angular.module('platformWebApp')
     .factory('platformWebApp.authService', ['$http', '$rootScope', '$cookieStore', '$state', '$interpolate', function ($http, $rootScope, $cookieStore, $state, $interpolate) {
     var serviceBase = 'api/platform/security/';
@@ -28626,15 +28635,15 @@ angular.module('platformWebApp')
         postData.newPassword2 = undefined;
         postData.roles = _.where(blade.currentEntities, { $selected: true });
 
-        accounts.save(postData, function () {
-            blade.parentBlade.refresh();
-            blade.parentBlade.selectNode(postData);
-        }, function (error) {
-            var errText = 'Error ' + error.status;
-            if (error.data && error.data.message) {
-                errText = errText + ": " + error.data.message;
+        accounts.save(postData, function (result) {
+            if (result.succeeded) {
+                blade.parentBlade.refresh();
+                blade.parentBlade.selectNode(postData);
             }
-            bladeNavigationService.setError(errText, $scope.blade);
+            else {
+                bladeNavigationService.setError(_.pluck(result.errors, 'description').join(), blade);
+            }
+        
         });
     };
 

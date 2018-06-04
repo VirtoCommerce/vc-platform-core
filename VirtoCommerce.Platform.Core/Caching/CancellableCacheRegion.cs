@@ -3,19 +3,23 @@ using Microsoft.Extensions.Primitives;
 
 namespace VirtoCommerce.Platform.Core.Caching
 {
+    /// <summary>
+    /// Represents strongly typed cache region contains cancellation token for a concrete cache region type
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class CancellableCacheRegion<T>
     {
         private static CancellationTokenSource _regionTokenSource;
         private static CancellationChangeToken _regionChangeToken;
         private static object _lock = new object();
-       
+
         public static IChangeToken CreateChangeToken()
         {
-            if(_regionTokenSource == null)
+            if (_regionChangeToken == null)
             {
                 lock (_lock)
                 {
-                    if (_regionTokenSource == null)
+                    if (_regionChangeToken == null)
                     {
                         _regionTokenSource = new CancellationTokenSource();
                         _regionChangeToken = new CancellationChangeToken(_regionTokenSource.Token);
@@ -24,7 +28,6 @@ namespace VirtoCommerce.Platform.Core.Caching
             }
             return _regionChangeToken;
         }
-
 
         public static void ExpireRegion()
         {
@@ -39,8 +42,6 @@ namespace VirtoCommerce.Platform.Core.Caching
                     _regionChangeToken = null;
                 }
             }
-
         }
-
     }
 }

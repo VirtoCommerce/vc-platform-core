@@ -20,7 +20,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         /// </summary>
         public string Number { get; set; }
 
-        public override NotificationMessage ToMessage(NotificationMessage message, INotificationTemplateRender render)
+        public override NotificationMessage ToMessage(NotificationMessage message, INotificationTemplateRenderer render)
         {
             var smsNotificationMessage = (SmsNotificationMessage) message;
             var template = (SmsNotificationTemplate)Templates.FindWithLanguage(message.LanguageCode);

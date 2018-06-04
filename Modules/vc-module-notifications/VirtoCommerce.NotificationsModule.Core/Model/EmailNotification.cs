@@ -39,7 +39,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         public string[] BCC { get; set; }
         public IList<EmailAttachment> Attachments { get; set; }
 
-        public override NotificationMessage ToMessage(NotificationMessage message, INotificationTemplateRender render)
+        public override NotificationMessage ToMessage(NotificationMessage message, INotificationTemplateRenderer render)
         {
             var emailMessage = (EmailNotificationMessage) message;
             

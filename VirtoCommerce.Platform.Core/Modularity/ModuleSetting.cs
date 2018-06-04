@@ -23,12 +23,6 @@ namespace VirtoCommerce.Platform.Core.Modularity
         [XmlElement("defaultValue")]
         public string DefaultValue { get; set; }
 
-        [XmlElement("title")]
-        public string Title { get; set; }
-
-        [XmlElement("description")]
-        public string Description { get; set; }
-
         [XmlArray("allowedValues")]
         [XmlArrayItem("value")]
         public string[] AllowedValues { get; set; }

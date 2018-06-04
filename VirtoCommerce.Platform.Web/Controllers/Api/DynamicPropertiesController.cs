@@ -121,8 +121,6 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <summary>
         /// Delete dictionary items
         /// </summary>
-        /// <param name="typeName"></param>
-        /// <param name="propertyId"></param>
         /// <param name="ids">IDs of dictionary items to delete.</param>
         /// <returns></returns>
         [HttpDelete]

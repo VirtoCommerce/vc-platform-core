@@ -31,10 +31,11 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         public string Kind { get; set; }
         public IList<NotificationTemplate> Templates { get; set; }
 
-        public virtual NotificationMessage ToMessage(NotificationMessage message, INotificationTemplateRender render)
+        public virtual NotificationMessage ToMessage(NotificationMessage message, INotificationTemplateRenderer render)
         {
             message.TenantIdentity = new TenantIdentity(message.TenantIdentity?.Id, message.TenantIdentity?.Type);
             message.NotificationType = Type;
+            message.NotificationId = Id;
 
             return message;
         }
