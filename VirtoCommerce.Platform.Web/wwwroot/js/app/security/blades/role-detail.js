@@ -1,4 +1,4 @@
-﻿angular.module('platformWebApp')
+angular.module('platformWebApp')
 .controller('platformWebApp.roleDetailController', ['$q', '$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.roles', 'platformWebApp.dialogService', function ($q, $scope, bladeNavigationService, roles, dialogService) {
     var blade = $scope.blade;
     blade.updatePermission = 'platform:security:update';
@@ -8,20 +8,19 @@
         if (blade.isNew) {
             initializeBlade({});
         } else {
-            roles.get({ id: blade.data.id }, function (data) {
-                initializeBlade(data);
+            roles.get({ roleName: blade.data.name }, function (role) {
+                initializeBlade(role);
                 if (parentRefresh && blade.parentBlade.refresh) {
                     blade.parentBlade.refresh();
                 }
-            },
-            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+            });
         }
     }
 
-    function initializeBlade(data) {
+    function initializeBlade(role) {
         blade.selectedAll = false;
-        blade.currentEntity = angular.copy(data);
-        blade.origEntity = data;
+        blade.currentEntity = angular.copy(role);
+        blade.origEntity = role;
 
         if (blade.isNew) {
             promise.then(function (promiseData) {
@@ -50,17 +49,19 @@
         }
 
         angular.copy(blade.currentEntity, blade.origEntity);
-
-        roles.update(blade.currentEntity, function (data) {
-            if (blade.isNew) {
-                blade.parentBlade.refresh();
-                blade.parentBlade.selectNode(data);
-            } else {
+        var action = blade.isNew ? roles.create : roles.update;
+        action(blade.currentEntity, function (result) {
+            if (result.succeeded) {
+                if (blade.isNew) {
+                    blade.parentBlade.refresh();
+                    blade.parentBlade.selectNode(blade.currentEntity);
+                }
+                blade.data.name = blade.currentEntity.name;
                 blade.refresh(true);
             }
-            blade.refresh(true);
-        }, function (error) {
-            bladeNavigationService.setError('Error ' + error.status, blade);
+            else {
+                bladeNavigationService.setError(_.pluck(result.errors, 'description').join(), blade);
+            }
         });
     };
 

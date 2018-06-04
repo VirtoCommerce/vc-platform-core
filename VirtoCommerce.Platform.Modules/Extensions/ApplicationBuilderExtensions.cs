@@ -1,13 +1,10 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using Smidge;
 using Smidge.FileProcessors;
@@ -31,8 +28,11 @@ namespace VirtoCommerce.Platform.Modules.Extensions
                 foreach (var module in modules)
                 {
                     //Register modules permissions defined in the module manifest
-                    var modulePermissions = module.Permissions.SelectMany(x => x.Permissions).Select(x=> new Permission { Name = x.Id }).ToArray();
-                    permissionsProvider.RegisterPermissions(modulePermissions);
+                    foreach (var modulePermissionGroup in module.Permissions)
+                    {
+                        var groupPermissions = modulePermissionGroup.Permissions.Select(x => new Permission { Name = x.Id, ModuleId = module.Id, GroupName = modulePermissionGroup.Name }).ToArray();
+                        permissionsProvider.RegisterPermissions(groupPermissions);
+                    }
 
                     moduleManager.PostInitializeModule(module, serviceScope.ServiceProvider);
                 }

@@ -7,7 +7,7 @@ function ($scope, roles, bladeUtils, bladeNavigationService, dialogService, uiGr
     blade.refresh = function () {
         blade.isLoading = true;
 
-        roles.search({
+         roles.search({
             keyword: filter.keyword,
             sort: uiGridHelper.getSortExpression($scope),
             skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
@@ -23,7 +23,7 @@ function ($scope, roles, bladeUtils, bladeNavigationService, dialogService, uiGr
     };
 
     blade.selectNode = function (node) {
-        $scope.selectedNodeId = node.id;
+        $scope.selectedNodeName = node.name;
 
         var newBlade = {
             id: 'listItemChild',

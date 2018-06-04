@@ -15,7 +15,7 @@ namespace Module1.Web
 
         public void Initialize(IServiceCollection serviceCollection)
         {
-            var mode = FluentValidation.CascadeMode.Continue;
+            //var mode = FluentValidation.CascadeMode.Continue;
             serviceCollection.AddSingleton<IMyService, MyServiceImpl>();
         }
 

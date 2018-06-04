@@ -1,15 +1,14 @@
-﻿angular.module('platformWebApp')
-.controller('platformWebApp.accountRolesController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', function ($scope, bladeNavigationService, dialogService) {
+angular.module('platformWebApp')
+    .controller('platformWebApp.accountRolesController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.roles', function ($scope, bladeNavigationService, dialogService, roles) {
     var blade = $scope.blade;
 
     function initializeBlade(data) {
         blade.data = data;
-        blade.promise.then(function (promiseData) {
-            var allRoles = angular.copy(promiseData.roles);
+        roles.search({ take: 10000 }, function (result) {
+            var allRoles = angular.copy(result.results);
             blade.currentEntities = _.filter(allRoles, function (x) {
                 return _.all(data.roles, function (curr) { return curr.id !== x.id; });
             });
-
             blade.isLoading = false;
         });
     };
