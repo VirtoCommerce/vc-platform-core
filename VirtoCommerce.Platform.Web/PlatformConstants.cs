@@ -79,6 +79,13 @@ namespace VirtoCommerce.Platform.Web
                                 }
                 };
 
+                public static ModuleSetting ShowMeridian = new ModuleSetting
+                {
+                    Name = "VirtoCommerce.Platform.UI.ShowMeridian",
+                    ValueType = ModuleSetting.TypeBoolean,
+                    DefaultValue = true.ToString()
+                };
+
                 public static IEnumerable<ModuleSetting> AllSettings
                 {
                     get
@@ -90,6 +97,7 @@ namespace VirtoCommerce.Platform.Web
                         yield return UseTimeAgo;
                         yield return FullDateThreshold;
                         yield return FullDateThresholdUnit;
+                        yield return ShowMeridian;
                     }
                 }
             }

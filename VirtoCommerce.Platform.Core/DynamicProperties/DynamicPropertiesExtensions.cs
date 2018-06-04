@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Globalization;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 using VirtoCommerce.Platform.Core.Common;
@@ -11,29 +12,22 @@ namespace VirtoCommerce.Platform.Core.DynamicProperties
         {
             var result = defaultValue;
 
-            if (owner != null && owner.DynamicProperties != null)
-            {
-                var propValue = owner.DynamicProperties.Where(v => v.Name == propertyName && v.Values != null)
-                                                       .SelectMany(v => v.Values)
-                                                       .FirstOrDefault();
+            var propValue = owner?.DynamicProperties?.Where(p => p.Name == propertyName && p.Values != null)
+                .SelectMany(p => p.Values)
+                .FirstOrDefault();
 
-                if (propValue != null && propValue.Value != null)
+            if (propValue?.Value != null)
+            {
+                var jObject = propValue.Value as JObject;
+                var dictItem = propValue.Value as DynamicPropertyDictionaryItem;
+
+                if (jObject != null)
                 {
-                    var jObject = propValue.Value as JObject;
-                    var dictItem = propValue.Value as DynamicPropertyDictionaryItem;
-                    if (jObject != null)
-                    {
-                        dictItem = jObject.ToObject<DynamicPropertyDictionaryItem>();
-                    }
-                    if (dictItem != null)
-                    {
-                        result = (T)(object)dictItem.Name;
-                    }
-                    else
-                    {
-                        result = (T)propValue.Value;
-                    }
+                    dictItem = jObject.ToObject<DynamicPropertyDictionaryItem>();
                 }
+
+                var value = dictItem != null ? dictItem.Name : propValue.Value;
+                result = (T)Convert.ChangeType(value, typeof(T), CultureInfo.InvariantCulture);
             }
 
             return result;
@@ -46,7 +40,7 @@ namespace VirtoCommerce.Platform.Core.DynamicProperties
         /// <param name="targetOwner"></param>
         public static void CopyPropertyValuesFrom(this IHasDynamicProperties targetOwner, IHasDynamicProperties sourceOwner)
         {
-            if(sourceOwner == null)
+            if (sourceOwner == null)
             {
                 throw new ArgumentNullException("sourceOwner");
             }
