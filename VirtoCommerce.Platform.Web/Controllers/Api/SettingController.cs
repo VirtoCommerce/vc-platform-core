@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api
@@ -49,7 +50,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpGet]
         [Route("modules/{id}")]
         [ProducesResponseType(typeof(SettingEntry[]), 200)]
-        //[Authorize(SecurityConstants.Permissions.SettingQuery)]
+        [Authorize(SecurityConstants.Permissions.SettingQuery)]
         public async Task<IActionResult> GetModuleSettingsAsync(string id)
         {
             var result = await _settingsManager.GetModuleSettingsAsync(id);
@@ -64,7 +65,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpGet]
         [Route("{name}")]
         [ProducesResponseType(typeof(SettingEntry), 200)]
-        //[Authorize(SecurityConstants.Permissions.SettingAccess)]
+        [Authorize(SecurityConstants.Permissions.SettingAccess)]
         public async Task<IActionResult> GetSettingAsync(string name)
         {
             var result = await _settingsManager.GetSettingByNameAsync(name);
@@ -78,7 +79,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("")]
         [ProducesResponseType(typeof(void), 200)]
-        //[Authorize(SecurityConstants.Permissions.SettingUpdate)]
+        [Authorize(SecurityConstants.Permissions.SettingUpdate)]
         public async Task<IActionResult> UpdateAsync([FromBody] SettingEntry[] settings)
         {
             using (await AsyncLock.GetLockByKey("settings").LockAsync())
