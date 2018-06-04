@@ -79,9 +79,9 @@ namespace VirtoCommerce.Platform.Data.Repositories
 
         public IQueryable<AssetEntryEntity> AssetEntries => DbContext.Set<AssetEntryEntity>();
 
-        public AssetEntryEntity[] GetAssetsByIds(IEnumerable<string> ids)
+        public async Task<AssetEntryEntity[]> GetAssetsByIdsAsync(IEnumerable<string> ids)
         {
-            return AssetEntries.Where(x => ids.Contains(x.Id)).ToArray();
+            return await AssetEntries.Where(x => ids.Contains(x.Id)).ToArrayAsync();
         }
 
 

@@ -1,100 +1,101 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.Platform.Core.Assets;
-using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Caching;
 using VirtoCommerce.Platform.Data.Repositories;
 
 namespace VirtoCommerce.Platform.Data.Assets
 {
-    public class AssetEntryService:  IAssetEntryService, IAssetEntrySearchService
+    public class AssetEntryService : IAssetEntryService, IAssetEntrySearchService
     {
         private readonly Func<IPlatformRepository> _platformRepository;
         private readonly IBlobUrlResolver _blobUrlResolver;
-        private readonly IMemoryCache _memoryCache;
 
-        public AssetEntryService(Func<IPlatformRepository> repositoryFactory, IBlobUrlResolver blobUrlResolver, IMemoryCache memoryCache)
+        public AssetEntryService(Func<IPlatformRepository> repositoryFactory, IBlobUrlResolver blobUrlResolver)
         {
             _platformRepository = repositoryFactory;
             _blobUrlResolver = blobUrlResolver;
-            _memoryCache = memoryCache;
         }
 
-        public  GenericSearchResult<AssetEntry> SearchAssetEntries(AssetEntrySearchCriteria criteria)
+        public async Task<GenericSearchResult<AssetEntry>> SearchAssetEntriesAsync(AssetEntrySearchCriteria criteria)
         {
-            var cacheKey = CacheKey.With(GetType(), "SearchAssetEntries", criteria.GetHashCode().ToString());
+            criteria = criteria ?? AbstractTypeFactory<AssetEntrySearchCriteria>.TryCreateInstance();
 
-            return _memoryCache.GetOrCreateExclusive(cacheKey, (cacheEntry) =>
+            using (var repository = _platformRepository())
             {
-                criteria = criteria ?? new AssetEntrySearchCriteria();
+                var query =  repository.AssetEntries;
 
-                using (var repository = _platformRepository())
+                if (!string.IsNullOrEmpty(criteria.SearchPhrase))
                 {
-
-                    cacheEntry.AddExpirationToken(AssetCacheRegion.CreateChangeToken());
-
-                    var query = repository.AssetEntries;
-
-                    if (!string.IsNullOrEmpty(criteria.SearchPhrase))
-                    {
-                        query = query.Where(x => x.Name.Contains(criteria.SearchPhrase) || x.RelativeUrl.Contains(criteria.SearchPhrase));
-                    }
-
-                    if (!string.IsNullOrEmpty(criteria.LanguageCode))
-                    {
-                        query = query.Where(x => x.LanguageCode == criteria.LanguageCode);
-                    }
-
-                    if (!string.IsNullOrEmpty(criteria.Group))
-                    {
-                        query = query.Where(x => x.Group == criteria.Group);
-                    }
-
-                    if (!criteria.Tenants.IsNullOrEmpty())
-                    {
-                        var tenants = criteria.Tenants.Where(x => x.IsValid).ToArray();
-                        if (tenants.Any())
-                        {
-                            var tenantsStrings = tenants.Select(x => x.ToString());
-                            query = query.Where(x => tenantsStrings.Contains(x.TenantId + "_" + x.TenantType));
-                        }
-                    }
-
-                    var result = new GenericSearchResult<AssetEntry>()
-                    {
-                        TotalCount = query.Count()
-                    };
-
-                    var sortInfos = criteria.SortInfos;
-                    if (sortInfos.IsNullOrEmpty())
-                    {
-                        sortInfos = new[] { new SortInfo { SortColumn = "CreatedDate", SortDirection = SortDirection.Descending } };
-                    }
-                    query = query.OrderBySortInfos(sortInfos);
-
-                    var ids = query
-                        .Skip(criteria.Skip)
-                        .Take(criteria.Take)
-                        .Select(x => x.Id).ToList();
-
-                    result.Results = repository.GetAssetsByIds(ids)
-                        .Select(x => x.ToModel(AbstractTypeFactory<AssetEntry>.TryCreateInstance(), _blobUrlResolver))
-                        .OrderBy(x => ids.IndexOf(x.Id))
-                        .ToList();
-
-                    return result;
+                    query = query.Where(x =>
+                        x.Name.Contains(criteria.SearchPhrase) || x.RelativeUrl.Contains(criteria.SearchPhrase));
                 }
-            });
+
+                if (!string.IsNullOrEmpty(criteria.LanguageCode))
+                {
+                    query = query.Where(x => x.LanguageCode == criteria.LanguageCode);
+                }
+
+                if (!string.IsNullOrEmpty(criteria.Group))
+                {
+                    query = query.Where(x => x.Group == criteria.Group);
+                }
+
+                if (!criteria.Tenants.IsNullOrEmpty())
+                {
+                    var tenants = criteria.Tenants.Where(x => x.IsValid).ToArray();
+                    if (tenants.Any())
+                    {
+                        var tenantsStrings = tenants.Select(x => x.ToString());
+                        query = query.Where(x => tenantsStrings.Contains(x.TenantId + "_" + x.TenantType));
+                    }
+                }
+
+                var result = new GenericSearchResult<AssetEntry>()
+                {
+                    TotalCount = query.Count()
+                };
+
+                var sortInfos = criteria.SortInfos;
+                if (sortInfos.IsNullOrEmpty())
+                {
+                    sortInfos = new[]
+                    {
+                        new SortInfo
+                        {
+                            SortColumn = "CreatedDate",
+                            SortDirection = SortDirection.Descending
+                        }
+                    };
+                }
+
+                query = query.OrderBySortInfos(sortInfos);
+
+                var ids = query
+                    .Skip(criteria.Skip)
+                    .Take(criteria.Take)
+                    .Select(x => x.Id).ToList();
+
+                var asetsResult = await repository.GetAssetsByIdsAsync(ids);
+
+                result.Results = asetsResult
+                    .Select(x => x.ToModel(AbstractTypeFactory<AssetEntry>.TryCreateInstance(), _blobUrlResolver))
+                    .OrderBy(x => ids.IndexOf(x.Id))
+                    .ToList();
+
+                return result;
+            }
         }
 
-        public IEnumerable<AssetEntry> GetByIds(IEnumerable<string> ids)
+        public async Task<IEnumerable<AssetEntry>> GetByIdsAsync(IEnumerable<string> ids)
         {
             using (var repository = _platformRepository())
             {
-                var entities = repository.GetAssetsByIds(ids);
+                var entities = await repository.GetAssetsByIdsAsync(ids);
                 return entities.Select(x => x.ToModel(AbstractTypeFactory<AssetEntry>.TryCreateInstance(), _blobUrlResolver));
             }
         }

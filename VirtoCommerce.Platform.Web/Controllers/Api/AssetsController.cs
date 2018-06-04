@@ -202,7 +202,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <param name="keyword"></param>
         /// <returns></returns> 
         [HttpGet]
-        [ProducesResponseType(typeof(BlobSearchResult), 200)]
+        [ProducesResponseType(typeof(GenericSearchResult<BlobEntry>), 200)]
         [Route("")]
         [Authorize(SecurityConstants.Permissions.AssetRead)]
         public async Task<IActionResult> SearchAssetItemsAsync([FromQuery]string folderUrl = null,[FromQuery] string keyword = null)

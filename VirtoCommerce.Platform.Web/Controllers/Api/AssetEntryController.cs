@@ -32,9 +32,9 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Route("search")]
         [ProducesResponseType(typeof(GenericSearchResult<AssetEntry>), 200)]
         [Authorize(SecurityConstants.Permissions.AssetAccess)]
-        public IActionResult Search([FromBody]AssetEntrySearchCriteria criteria)
+        public async Task<IActionResult> Search([FromBody]AssetEntrySearchCriteria criteria)
         {
-            var result = _assetSearchService.SearchAssetEntries(criteria);
+            var result = await _assetSearchService.SearchAssetEntriesAsync(criteria);
             return Ok(result);
         }
 
@@ -45,9 +45,9 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Route("{id}")]
         [ProducesResponseType(typeof(AssetEntry), 200)]
         [Authorize(SecurityConstants.Permissions.AssetRead)]
-        public IActionResult Get([FromQuery]string id)
+        public async Task<IActionResult> Get([FromQuery]string id)
         {
-            var retVal = _assetService.GetByIds(new[] { id });
+            var retVal = await _assetService.GetByIdsAsync(new[] { id });
             if (retVal?.Any() == true)
             {
                 return Ok(retVal.Single());

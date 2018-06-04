@@ -24,6 +24,6 @@ namespace VirtoCommerce.Platform.Data.Repositories
 	    Task<SettingEntity> GetSettingByNameAsync(string name);
 	    Task<SettingEntity[]> GetAllObjectSettingsAsync(string objectType, string objectId);
 
-	    AssetEntryEntity[] GetAssetsByIds(IEnumerable<string> ids);
+	    Task<AssetEntryEntity[]> GetAssetsByIdsAsync(IEnumerable<string> ids);
     }
 }

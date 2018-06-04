@@ -56,15 +56,14 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
             {
                 var cloudBlob = await _cloudBlobClient.GetBlobReferenceFromServerAsync(uri);
 
-                retVal = new BlobInfo
-                {
-                    Url = Uri.EscapeUriString(cloudBlob.Uri.ToString()),
-                    Name = Path.GetFileName(Uri.UnescapeDataString(cloudBlob.Uri.ToString())),
-                    ContentType = cloudBlob.Properties.ContentType,
-                    Size = cloudBlob.Properties.Length,
-                    ModifiedDate = cloudBlob.Properties.LastModified?.DateTime,
-                    RelativeUrl = cloudBlob.Uri.LocalPath
-                };
+                retVal = AbstractTypeFactory<BlobInfo>.TryCreateInstance();
+
+                retVal.Url = Uri.EscapeUriString(cloudBlob.Uri.ToString());
+                retVal.Name = Path.GetFileName(Uri.UnescapeDataString(cloudBlob.Uri.ToString()));
+                retVal.ContentType = cloudBlob.Properties.ContentType;
+                retVal.Size = cloudBlob.Properties.Length;
+                retVal.ModifiedDate = cloudBlob.Properties.LastModified?.DateTime;
+                retVal.RelativeUrl = cloudBlob.Uri.LocalPath;
             }
             catch (Exception)
             {
@@ -154,9 +153,9 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
             }
         }
 
-        public virtual async Task<BlobSearchResult> SearchAsync(string folderUrl, string keyword)
+        public virtual async Task<GenericSearchResult<BlobEntry>> SearchAsync(string folderUrl, string keyword)
         {
-            var retVal = new BlobSearchResult();
+            var retVal = new GenericSearchResult<BlobEntry>();
 
             if (!string.IsNullOrEmpty(folderUrl))
             {
@@ -192,16 +191,14 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
                         var directory = item as CloudBlobDirectory;
                         if (block != null)
                         {
-                            var blobInfo = new BlobInfo
-                            {
-                                Url = Uri.EscapeUriString(block.Uri.ToString()),
-                                Name = Path.GetFileName(Uri.UnescapeDataString(block.Uri.ToString())),
-                                ContentType = block.Properties.ContentType,
-                                Size = block.Properties.Length,
-                                ModifiedDate = block.Properties.LastModified?.DateTime
-                            };
-                            blobInfo.RelativeUrl =
-                                blobInfo.Url.Replace(_cloudBlobClient.BaseUri.ToString(), string.Empty);
+                            var blobInfo = AbstractTypeFactory<BlobInfo>.TryCreateInstance();
+
+                            blobInfo.Url = Uri.EscapeUriString(block.Uri.ToString());
+                            blobInfo.Name = Path.GetFileName(Uri.UnescapeDataString(block.Uri.ToString()));
+                            blobInfo.ContentType = block.Properties.ContentType;
+                            blobInfo.Size = block.Properties.Length;
+                            blobInfo.ModifiedDate = block.Properties.LastModified?.DateTime;
+                            blobInfo.RelativeUrl = blobInfo.Url.Replace(_cloudBlobClient.BaseUri.ToString(), string.Empty);
                             //Do not return empty blob (created with directory because azure blob not support direct directory creation)
                             if (!string.IsNullOrEmpty(blobInfo.Name))
                             {
@@ -211,16 +208,15 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
 
                         if (directory != null)
                         {
-                            var folder = new BlobFolder
-                            {
-                                Name = Uri.UnescapeDataString(directory.Uri.AbsolutePath)
-                                    .Split(new[] {_cloudBlobClient.DefaultDelimiter},
-                                        StringSplitOptions.RemoveEmptyEntries).Last(),
-                                Url = Uri.EscapeUriString(directory.Uri.ToString()),
-                                ParentUrl = directory.Parent != null
-                                    ? Uri.EscapeUriString(directory.Parent.Uri.ToString())
-                                    : null
-                            };
+                            var folder = AbstractTypeFactory<BlobFolder>.TryCreateInstance();
+
+                            folder.Name = Uri.UnescapeDataString(directory.Uri.AbsolutePath)
+                                .Split(new[] { _cloudBlobClient.DefaultDelimiter },
+                                    StringSplitOptions.RemoveEmptyEntries).Last();
+                            folder.Url = Uri.EscapeUriString(directory.Uri.ToString());
+                            folder.ParentUrl = directory.Parent != null
+                                ? Uri.EscapeUriString(directory.Parent.Uri.ToString())
+                                : null;
                             folder.RelativeUrl = folder.Url.Replace(_cloudBlobClient.BaseUri.ToString(), string.Empty);
                             retVal.Results.Add(folder);
                         }
@@ -238,12 +234,11 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
                     listbContinuationToken = results.ContinuationToken;
                     foreach (var item in results.Results)
                     {
-                        var folder = new BlobFolder
-                        {
-                            Name = item.Uri.AbsolutePath.Split('/').Last(),
-                            Url = Uri.EscapeUriString(item.Uri.ToString()),
-                            
-                        };
+                        var folder = AbstractTypeFactory<BlobFolder>.TryCreateInstance();
+
+                        folder.Name = item.Uri.AbsolutePath.Split('/').Last();
+                        folder.Url = Uri.EscapeUriString(item.Uri.ToString());
+
                         retVal.Results.Add(folder);
                     }
                 } while (listbContinuationToken != null);
@@ -391,7 +386,7 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
                 relativeUrl = Uri.UnescapeDataString(new Uri(url).AbsolutePath);
             }
 
-            return relativeUrl.Split(new[] {"/", "\\", _cloudBlobClient.DefaultDelimiter},
+            return relativeUrl.Split(new[] { "/", "\\", _cloudBlobClient.DefaultDelimiter },
                 StringSplitOptions.RemoveEmptyEntries);
         }
 

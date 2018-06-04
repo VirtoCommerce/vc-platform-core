@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Assets;
@@ -55,14 +53,13 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
             if (File.Exists(filePath))
             {
                 var fileInfo = new FileInfo(filePath);
-                retVal = new BlobInfo
-                {
-                    Url = GetAbsoluteUrlFromPath(filePath),
-                    ContentType = MimeTypeResolver.ResolveContentType(fileInfo.Name),
-                    Size = fileInfo.Length,
-                    Name = fileInfo.Name,
-                    ModifiedDate = fileInfo.LastWriteTimeUtc
-                };
+
+                retVal = AbstractTypeFactory<BlobInfo>.TryCreateInstance();
+                retVal.Url = GetAbsoluteUrlFromPath(filePath);
+                retVal.ContentType = MimeTypeResolver.ResolveContentType(fileInfo.Name);
+                retVal.Size = fileInfo.Length;
+                retVal.Name = fileInfo.Name;
+                retVal.ModifiedDate = fileInfo.LastWriteTimeUtc;
                 retVal.RelativeUrl = GetRelativeUrl(retVal.Url);
 
             }
@@ -111,9 +108,9 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
         /// <param name="folderUrl">absolute or relative path</param>
         /// <param name="keyword"></param>
         /// <returns></returns>
-        public virtual Task<BlobSearchResult> SearchAsync(string folderUrl, string keyword)
+        public virtual Task<GenericSearchResult<BlobEntry>> SearchAsync(string folderUrl, string keyword)
         {
-            var retVal = new BlobSearchResult();
+            var retVal = new GenericSearchResult<BlobEntry>();
             folderUrl = folderUrl ?? _basePublicUrl;
 
             var storageFolderPath = GetStoragePathFromUrl(folderUrl);
@@ -128,12 +125,11 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
             foreach (var directory in directories)
             {
                 var directoryInfo = new DirectoryInfo(directory);
-                var folder = new BlobFolder
-                {
-                    Name = Path.GetFileName(directory),
-                    Url = GetAbsoluteUrlFromPath(directory),
-                    ParentUrl = GetAbsoluteUrlFromPath(directoryInfo.Parent.FullName)
-                };
+
+                var folder = AbstractTypeFactory<BlobFolder>.TryCreateInstance();
+                folder.Name = Path.GetFileName(directory);
+                folder.Url = GetAbsoluteUrlFromPath(directory);
+                folder.ParentUrl = GetAbsoluteUrlFromPath(directoryInfo.Parent.FullName);
                 folder.RelativeUrl = GetRelativeUrl(folder.Url);
                 retVal.Results.Add(folder);
             }
@@ -142,14 +138,13 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
             foreach (var file in files)
             {
                 var fileInfo = new FileInfo(file);
-                var blobInfo = new BlobInfo
-                {
-                    Url = GetAbsoluteUrlFromPath(file),
-                    ContentType = MimeTypeResolver.ResolveContentType(fileInfo.Name),
-                    Size = fileInfo.Length,
-                    Name = fileInfo.Name,
-                    ModifiedDate = fileInfo.LastWriteTimeUtc
-                };
+
+                var blobInfo = AbstractTypeFactory<BlobInfo>.TryCreateInstance();
+                blobInfo.Url = GetAbsoluteUrlFromPath(file);
+                blobInfo.ContentType = MimeTypeResolver.ResolveContentType(fileInfo.Name);
+                blobInfo.Size = fileInfo.Length;
+                blobInfo.Name = fileInfo.Name;
+                blobInfo.ModifiedDate = fileInfo.LastWriteTimeUtc;
                 blobInfo.RelativeUrl = GetRelativeUrl(blobInfo.Url);
                 retVal.Results.Add(blobInfo);
             }
@@ -190,34 +185,32 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
         /// Remove folders and blobs by absolute or relative urls
         /// </summary>
         /// <param name="urls"></param>
-        public virtual async Task RemoveAsync(string[] urls)
+        public virtual Task RemoveAsync(string[] urls)
         {
-            await Task.Factory.StartNew(() => {
+            if (urls == null)
+                throw new ArgumentNullException("urls");
 
-                if (urls == null)
+            foreach (var url in urls)
+            {
+                var path = GetStoragePathFromUrl(url);
+
+                ValidatePath(path);
+
+                // get the file attributes for file or directory
+                var attr = File.GetAttributes(path);
+
+                //detect whether its a directory or file
+                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
                 {
-                    throw new ArgumentNullException("urls");
+                    Directory.Delete(path, true);
                 }
-                foreach (var url in urls)
+                else
                 {
-                    var path = GetStoragePathFromUrl(url);
-
-                    ValidatePath(path);
-
-                    // get the file attributes for file or directory
-                    var attr = File.GetAttributes(path);
-
-                    //detect whether its a directory or file
-                    if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-                    {
-                        Directory.Delete(path, true);
-                    }
-                    else
-                    {
-                        File.Delete(path);
-                    }
+                    File.Delete(path);
                 }
-            });
+            }
+
+            return Task.CompletedTask;
         }
 
         #endregion
