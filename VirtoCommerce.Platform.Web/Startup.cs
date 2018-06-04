@@ -25,6 +25,7 @@ using VirtoCommerce.Platform.Core.Jobs;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Data.Assets.AzureBlobStorage;
+using VirtoCommerce.Platform.Data.Assets.FileSystem;
 using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.Platform.Data.PushNotifications;
 using VirtoCommerce.Platform.Data.Repositories;
@@ -227,12 +228,12 @@ namespace VirtoCommerce.Platform.Web
 
             services.AddSecurityServices();
 
-            var assetConnectionString = BlobConnectionString.Parse(Configuration.GetConnectionString("AssetsConnectionString"));
+            var assetsProvider = Configuration.GetSection("Assets:Provider").Value;
 
-            if (assetConnectionString.Provider.EqualsInvariant("AzureBlobStorage"))
+            if (assetsProvider.EqualsInvariant("AzureBlobStorage"))
             {
                 var azureBlobOptions = new AzureBlobContentOptions();
-                Configuration.GetSection("VirtoCommerce:AzureBlobStorage").Bind(azureBlobOptions);
+                Configuration.GetSection("Assets:AzureBlobStorage").Bind(azureBlobOptions);
 
                 services.AddAzureBlobProvider(options =>
                 {
@@ -242,10 +243,13 @@ namespace VirtoCommerce.Platform.Web
             }
             else
             {
+                var fileSystemBlobOptions = new FileSystemBlobContentOptions();
+                Configuration.GetSection("Assets:FileSystem").Bind(fileSystemBlobOptions);
+
                 services.AddFileSystemBlobProvider(options =>
                 {
-                    options.StoragePath = HostingEnvironment.MapPath(assetConnectionString.RootPath);
-                    options.BasePublicUrl = assetConnectionString.PublicUrl;
+                    options.RootPath = HostingEnvironment.MapPath(fileSystemBlobOptions.RootPath);
+                    options.PublicUrl = fileSystemBlobOptions.PublicUrl;
                 });
             }
 

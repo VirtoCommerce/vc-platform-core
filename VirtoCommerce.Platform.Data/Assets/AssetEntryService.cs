@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Memory;
+
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Caching;
 using VirtoCommerce.Platform.Data.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace VirtoCommerce.Platform.Data.Assets
 {
@@ -57,7 +58,7 @@ namespace VirtoCommerce.Platform.Data.Assets
 
                 var result = new GenericSearchResult<AssetEntry>()
                 {
-                    TotalCount = query.Count()
+                    TotalCount = await query.CountAsync()
                 };
 
                 var sortInfos = criteria.SortInfos;
@@ -75,10 +76,11 @@ namespace VirtoCommerce.Platform.Data.Assets
 
                 query = query.OrderBySortInfos(sortInfos);
 
-                var ids = query
+                var ids = await query
                     .Skip(criteria.Skip)
                     .Take(criteria.Take)
-                    .Select(x => x.Id).ToList();
+                    .Select(x => x.Id)
+                    .ToListAsync();
 
                 var asetsResult = await repository.GetAssetsByIdsAsync(ids);
 
@@ -100,7 +102,7 @@ namespace VirtoCommerce.Platform.Data.Assets
             }
         }
 
-        public void SaveChanges(IEnumerable<AssetEntry> entries)
+        public async Task SaveChangesAsync(IEnumerable<AssetEntry> entries)
         {
             using (var repository = _platformRepository())
             {
@@ -120,30 +122,30 @@ namespace VirtoCommerce.Platform.Data.Assets
                     }
                 }
 
-                repository.UnitOfWork.CommitAsync();
+                await repository.UnitOfWork.CommitAsync();
 
                 //Reset cached items
                 AssetCacheRegion.ExpireRegion();
             }
         }
 
-        public void Delete(IEnumerable<string> ids)
+        public async Task DeleteAsync(IEnumerable<string> ids)
         {
             if (ids == null)
                 throw new ArgumentNullException(nameof(ids));
 
             using (var repository = _platformRepository())
             {
-                var items = repository.AssetEntries
+                var items = await repository.AssetEntries
                     .Where(p => ids.Contains(p.Id))
-                    .ToList();
+                    .ToListAsync();
 
                 foreach (var item in items)
                 {
                     repository.Remove(item);
                 }
 
-                repository.UnitOfWork.Commit();
+                await repository.UnitOfWork.CommitAsync();
 
                 AssetCacheRegion.ExpireRegion();
             }

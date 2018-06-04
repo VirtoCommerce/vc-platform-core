@@ -6,7 +6,7 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
 {
     public class FileSystemBlobContentOptions
     {
-        public string StoragePath { get; set; }
-        public string BasePublicUrl { get; set; } = "";
+        public string RootPath { get; set; }
+        public string PublicUrl { get; set; }
     }
 }

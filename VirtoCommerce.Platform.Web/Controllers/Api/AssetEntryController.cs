@@ -63,9 +63,9 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Route("")]
         [ProducesResponseType(typeof(void), 200)]
         [Authorize(SecurityConstants.Permissions.AssetUpdate)]
-        public IActionResult Update([FromBody]AssetEntry item)
+        public async Task<IActionResult> Update([FromBody]AssetEntry item)
         {
-            _assetService.SaveChanges(new[] { item });
+            await _assetService.SaveChangesAsync(new[] { item });
             return Ok();
         }
 
@@ -78,9 +78,9 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 200)]
         [Route("")]
         [Authorize(SecurityConstants.Permissions.AssetDelete)]
-        public IActionResult Delete([FromQuery] string[] ids)
+        public async Task<IActionResult> Delete([FromQuery] string[] ids)
         {
-            _assetService.Delete(ids);
+            await _assetService.DeleteAsync(ids);
             return Ok();
         }
     }

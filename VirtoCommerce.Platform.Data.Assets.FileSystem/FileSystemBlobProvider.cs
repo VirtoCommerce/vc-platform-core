@@ -20,14 +20,13 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
         public FileSystemBlobProvider(IOptions<FileSystemBlobContentOptions> options)
         {
             _options = options.Value;
-            if (_options.StoragePath == null)
+            if (_options.RootPath == null)
             {
-                throw new PlatformException($"{ nameof(_options.StoragePath) } must be set");
+                throw new PlatformException($"{ nameof(_options.RootPath) } must be set");
             }
+            _storagePath = _options.RootPath.TrimEnd('\\');
 
-            _storagePath = _options.StoragePath.TrimEnd('\\');
-
-            _basePublicUrl = _options.BasePublicUrl;
+            _basePublicUrl = _options.PublicUrl;
             if (_basePublicUrl != null)
             {
                 _basePublicUrl = _basePublicUrl.TrimEnd('/');
