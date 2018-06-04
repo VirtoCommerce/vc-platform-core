@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -89,11 +90,11 @@ namespace VirtoCommerce.Platform.Web.Controllers
         {
             License license = null;
 
-            var licenseFilePath = _hostEnv.MapPath(_platformOptions.LicenseFilePath);
+            var licenseFilePath = Path.GetFullPath(_platformOptions.LicenseFilePath);
             if (System.IO.File.Exists(licenseFilePath))
             {
                 var rawLicense = System.IO.File.ReadAllText(licenseFilePath);
-                license = License.Parse(rawLicense);
+                license = License.Parse(rawLicense, Path.GetFullPath(_platformOptions.LicensePublicKeyPath));
 
                 if (license != null)
                 {
