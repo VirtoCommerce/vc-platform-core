@@ -53,6 +53,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Notifications
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsSampleModule.Web", "Modules\vc-module-notifications\VirtoCommerce.NotificationsSampleModule.Web\VirtoCommerce.NotificationsSampleModule.Web.csproj", "{97309EC4-1D4E-40E3-A3E3-FC239C78E5C2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.Platform.Tests", "VirtoCommerce.Platform.Tests\VirtoCommerce.Platform.Tests.csproj", "{27CFFA2B-5AE4-4C6D-B762-8C9B4D5CDB2F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -139,6 +141,10 @@ Global
 		{97309EC4-1D4E-40E3-A3E3-FC239C78E5C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{97309EC4-1D4E-40E3-A3E3-FC239C78E5C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{97309EC4-1D4E-40E3-A3E3-FC239C78E5C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27CFFA2B-5AE4-4C6D-B762-8C9B4D5CDB2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27CFFA2B-5AE4-4C6D-B762-8C9B4D5CDB2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27CFFA2B-5AE4-4C6D-B762-8C9B4D5CDB2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27CFFA2B-5AE4-4C6D-B762-8C9B4D5CDB2F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

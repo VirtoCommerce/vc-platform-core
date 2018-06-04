@@ -18,6 +18,7 @@ angular.module('platformWebApp')
                 }
                 return retVal;
             });
+            blade.currentEntity.objectType = blade.objectType;
             blade.origEntity = blade.currentEntity;
             blade.currentEntity = angular.copy(blade.origEntity);
             blade.isLoading = false;
@@ -73,6 +74,10 @@ angular.module('platformWebApp')
                     blade.onChangesConfirmedFn(data);
                     // save dictionary items for new entity
                     if (data.isDictionary) {
+                        localDictionaryValues = _.map(localDictionaryValues, function (item) {
+                            item.propertyId = data.id;
+                            return item;
+                        });
                         dictionaryItemsApi.save({ id: blade.objectType, propertyId: data.id },
                             localDictionaryValues,
                             function () {

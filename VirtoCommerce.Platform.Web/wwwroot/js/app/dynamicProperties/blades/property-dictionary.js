@@ -13,7 +13,7 @@
         blade.selectedAll = false;
 
         if (blade.isApiSave) {
-            dictionaryItemsApi.query({ id: blade.currentEntity.objectType, propertyId: blade.currentEntity.id },
+            dictionaryItemsApi.getDictionaryItems({}, { id: blade.currentEntity.objectType, dynamicPropertyId: blade.currentEntity.id, take: 999 },
                 initializeBlade,
                 function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
         } else {
@@ -140,7 +140,10 @@
     $scope.saveChanges = function () {
         if (blade.isApiSave) {
             blade.isLoading = true;
-
+            blade.currentEntities = _.map(blade.currentEntities, function (item) {
+                item.propertyId = blade.currentEntity.id;
+                return item;
+            });
             dictionaryItemsApi.save({ id: blade.currentEntity.objectType, propertyId: blade.currentEntity.id },
                 blade.currentEntities,
                 function () {
