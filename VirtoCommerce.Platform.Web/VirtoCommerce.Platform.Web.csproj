@@ -41,7 +41,6 @@
     <PackageReference Include="OpenIddict.Mvc" Version="2.0.0-rc1-final" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="2.4.0" />
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
-    <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
     <PackageReference Include="VirtoCommerce.Smidge" Version="3.0.0-beta002" />
     <PackageReference Include="VirtoCommerce.Smidge.Nuglify" Version="2.0.0-beta002" />
   </ItemGroup>

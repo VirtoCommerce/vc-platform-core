@@ -28,21 +28,5 @@ namespace VirtoCommerce.Platform.Web.Extensions
 
             return result;
         }
-
-        public static string MapContentPath(this IHostingEnvironment hostEnv, string path)
-        {
-            var result = hostEnv.ContentRootPath;
-
-            if (path.StartsWith("~/"))
-            {
-                result = Path.Combine(result, path.Replace("~/", string.Empty));
-            }
-            else if (Path.IsPathRooted(path))
-            {
-                result = path;
-            }
-
-            return result;
-        }
     }
 }

@@ -1,8 +1,10 @@
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
+using VirtoCommerce.Platform.Core.Exceptions;
 
 namespace VirtoCommerce.Platform.Web.Licensing
 {
@@ -89,6 +91,11 @@ namespace VirtoCommerce.Platform.Web.Licensing
         private static string ReadFileWithKey(string path)
         {
             string fileContent;
+
+            if (!File.Exists(path))
+            {
+                throw new LicenseOrKeyNotFoundException(path);
+            }
 
             using (var streamReader = File.OpenText(path))
             {

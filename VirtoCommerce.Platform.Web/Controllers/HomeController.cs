@@ -94,7 +94,7 @@ namespace VirtoCommerce.Platform.Web.Controllers
             if (System.IO.File.Exists(licenseFilePath))
             {
                 var rawLicense = System.IO.File.ReadAllText(licenseFilePath);
-                license = License.Parse(rawLicense, _hostEnv.MapContentPath(_platformOptions.PublicKeyPath));
+                license = License.Parse(rawLicense, Path.GetFullPath(_platformOptions.PublicKeyPath));
 
                 if (license != null)
                 {

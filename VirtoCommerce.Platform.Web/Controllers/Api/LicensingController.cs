@@ -40,7 +40,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 if (httpResponse.IsSuccessStatusCode)
                 {
                     var rawLicense = await httpResponse.Content.ReadAsStringAsync();
-                    license = License.Parse(rawLicense, _hostingEnv.MapContentPath(_platformOptions.PublicKeyPath));
+                    license = License.Parse(rawLicense, Path.GetFullPath(_platformOptions.PublicKeyPath));
                 }
             }
 
@@ -61,7 +61,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
             if (!string.IsNullOrEmpty(rawLicense))
             {
-                license = License.Parse(rawLicense, _hostingEnv.MapContentPath(_platformOptions.PublicKeyPath));
+                license = License.Parse(rawLicense, Path.GetFullPath(_platformOptions.PublicKeyPath));
             }
 
             return Ok(license);
@@ -72,7 +72,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [ProducesResponseType(typeof(License), 200)]
         public IActionResult ActivateLicense(License license)
         {
-            license = License.Parse(license?.RawLicense, _hostingEnv.MapContentPath(_platformOptions.PublicKeyPath));
+            license = License.Parse(license?.RawLicense, Path.GetFullPath(_platformOptions.PublicKeyPath));
 
             if (license != null)
             {
