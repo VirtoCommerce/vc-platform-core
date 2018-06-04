@@ -42,6 +42,10 @@ namespace VirtoCommerce.Platform.Data.Repositories
                         .HasForeignKey(x => x.SettingId)
                         .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<SettingValueEntity>()
+                .Property(x => x.DecimalValue)
+                .HasColumnType("decimal(18,5)");
+
             #endregion
 
             #region Dynamic Properties
@@ -108,7 +112,11 @@ namespace VirtoCommerce.Platform.Data.Repositories
                         .HasForeignKey(x => x.DictionaryItemId);
             modelBuilder.Entity<DynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
                         .IsUnique(false)
-                        .HasName("IX_ObjectType_ObjectId");        
+                        .HasName("IX_ObjectType_ObjectId");
+
+            modelBuilder.Entity<DynamicPropertyObjectValueEntity>()
+                .Property(x => x.DecimalValue)
+                .HasColumnType("decimal(18,5)");
             #endregion
 
             base.OnModelCreating(modelBuilder);
