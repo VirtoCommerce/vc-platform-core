@@ -17290,6 +17290,647 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/html"))
 });
 
 angular.module('platformWebApp')
+.config(['$provide', function ($provide) {
+    // Provide default format
+    $provide.decorator('currencyFilter', ['$delegate', function ($delegate) {
+        var filter = function (currency, symbol, fractionSize) {
+            currency = $delegate.apply(this, [currency, "¤", fractionSize]);
+            var result = currency ? currency.replace(/\s*¤\s*/g, "") : currency;
+            if (result && symbol) {
+                result += "\u00a0" + symbol;
+            }
+            return result;
+        };
+        return filter;
+    }]);
+    // Add support for moment
+    $provide.decorator('dateFilter', ['$delegate', 'moment', 'platformWebApp.i18n', 'platformWebApp.common.timeZones', function ($delegate, moment, i18n, timeZones) {
+        var filter = function (date, format, timeZone) {
+            if (moment.isMoment(date)) {
+                timeZone = timeZones.get(i18n.getTimeZone()).utcOffset.formatted.replace(':', '');
+                date = date.toDate();
+            }
+            return $delegate.apply(this, [date, format, timeZone]);
+        };
+        return filter;
+    }]);
+    // Add support for tag type 'number'
+    $provide.decorator('tagsInputDirective', ['$delegate', 'platformWebApp.numberFormat', 'tiUtil', function ($delegate, numberFormat, tiUtil) {
+        var directive = $delegate[0];
+        directive.compile = function () {
+            return function (scope, element, attrs) {
+
+                /* Copy-paste, because there is no extension point */
+
+                var options = scope.options;
+                var events = scope.events;
+                var onTagAdding = tiUtil.handleUndefinedResult(scope.onTagAdding, true);
+
+                var getTagValue = function (tag) {
+                    return tiUtil.safeToString(tag[options.displayProperty]);
+                };
+                var setTagValue = function (tag, text) {
+                    tag[options.displayProperty] = text;
+                };
+
+                var tagIsValid = function (tag) {
+                    var tagText = getTagValue(tag);
+
+                    // Validate tag
+                    var isNumber = angular.isDefined(attrs.tagsNumber);
+                    var value = undefined;
+                    if (isNumber) {
+                        value = numberFormat.validate(tagText, attrs.numType, attrs.min, attrs.max, attrs.fraction);
+                        if (angular.isDefined(value)) {
+                            setTagValue(tag, value);
+                        }
+                    }
+                    return tagText &&
+                        tagText.length >= options.minLength &&
+                        tagText.length <= options.maxLength &&
+                        options.allowedTagsPattern.test(tagText) &&
+                        !tiUtil.findInObjectArray(scope.tagList.items, tag, options.keyProperty || options.displayProperty) &&
+                        (!isNumber || angular.isDefined(value)) &&
+                        onTagAdding({ $tag: tag });
+                };
+
+                scope.tagList.add = function (tag) {
+                    var tagText = getTagValue(tag);
+
+                    if (options.replaceSpacesWithDashes) {
+                        tagText = tiUtil.replaceSpacesWithDashes(tagText);
+                    }
+
+                    setTagValue(tag, tagText);
+
+                    if (tagIsValid(tag)) {
+                        scope.tagList.items.push(tag);
+                        events.trigger('tag-added', { $tag: tag });
+                    }
+                    else if (tagText) {
+                        events.trigger('invalid-tag', { $tag: tag });
+                    }
+
+                    return tag;
+                };
+
+                if (angular.isDefined(attrs.tagsNumber)) {
+                    angular.extend(scope.options, { tagsNumber: attrs.tagsNumber, numType: attrs.numType, min: attrs.min, max: attrs.max, fraction: attrs.fraction });
+                }
+
+                directive.link.apply(this, arguments);
+            };
+        };
+        return $delegate;
+    }]);
+    $provide.decorator('tiTagItemDirective', ['$delegate', 'platformWebApp.numberFormat', function ($delegate, numberFormat) {
+        var directive = $delegate[0];
+        var compile = directive.compile;
+        directive.compile = function () {
+            var link = compile.apply(this, arguments);
+            return function (scope, element, attrs, tagsInputCtrl) {
+                link.apply(this, arguments);
+
+                // Format tag
+                // Not real double-registration, this method just return object with needed methods
+                var tagsInput = tagsInputCtrl.registerTagItem();
+                var options = tagsInput.getOptions();
+                if (angular.isDefined(options.tagsNumber)) {
+                    scope.$getDisplayText = function () {
+                        return numberFormat.format(scope.data[options.displayProperty], options.numType, options.min, options.max, options.fraction);
+                    }
+                }
+            };
+        };
+        return $delegate;
+    }]);
+
+    // Fix bugs & add features for datepicker popup
+    $provide.decorator('datepickerPopupDirective', ['$delegate', 'platformWebApp.angularToMomentFormatConverter', 'uiDatetimePickerConfig', 'timepickerConfig', '$filter', '$locale',
+        function ($delegate, formatConverter, datepickerPopupConfig, timepickerConfig, $filter, $locale) {
+        //delete bootstrap directive
+        $delegate.shift();
+
+         //use custom date time picker directive
+        var directive = $delegate[0];
+
+        directive.compile = function (tElem, tAttrs) {
+            tElem.attr("datepicker-popup-original", tAttrs.datepickerPopup);
+            return function (scope, element, attrs, ctrls) {
+                var ngModelCtrl = ctrls[0];
+                // datepicker has some bugs and limitations to support date & time formats,
+                // also, it doesn't support localized input,
+                // so limit format number & convert to date via moment to prevent random occurence of errors
+                var applyFormat = function (newFormat, oldFormat) {
+                    if (newFormat !== oldFormat) {
+
+                        var format = newFormat || datepickerPopupConfig.dateFormat;;
+                        formatConverter.validate(format, formatConverter.isInvalidDate);
+
+                        if (formatConverter.additionalFormats.includes(format)) {
+                            format = $locale.DATETIME_FORMATS[format];
+                        }
+                        attrs.datepickerPopup = format;
+                    }
+                };
+                attrs.$observe('datepickerPopupOriginal', function (value, oldValue) {
+                    applyFormat(value, oldValue);
+                });
+                applyFormat(attrs.datepickerPopup, undefined);
+
+                directive.link.apply(this, arguments);
+
+                // convert localized date to javascript date object for correct validation
+                ngModelCtrl.$formatters.splice(1, 1, function (value) {
+                    var format = attrs.datepickerPopup;
+                    scope.date = value;
+                    return ngModelCtrl.$isEmpty(value) ? value : $filter('date')(moment(value), format);
+                });
+
+                ngModelCtrl.$parsers.unshift(function (value) {
+                    if (value) {
+                        var format = formatConverter.convert(attrs.datepickerPopup);
+                        var date = moment(value, format, moment.locale(), true);
+                        return date.isValid() ? date.toDate() : undefined;
+                    }
+                    else
+                    {
+                        //Allow to enter empty value
+                        return value;
+                    }
+                });
+            }
+        };
+        return $delegate;
+        }]);
+
+    $provide.decorator('timepickerDirective', ['$delegate', 'timepickerConfig', '$locale', 'platformWebApp.settings.helper', 'platformWebApp.i18n', 'platformWebApp.userProfile',
+        function ($delegate, timepickerConfig, $locale, settings, i18n, userProfile) {
+
+        $delegate.shift();
+        var directive = $delegate[0];
+
+        var timeSettings = userProfile.timeSettings;
+        timepickerConfig.showMeridian = timeSettings.showMeridian;
+
+        var compile = directive.compile;
+            directive.compile = function (tElem, tAttrs) {
+                var link = compile.apply(this, arguments);
+                return function (scope, element, attrs, ctrls) {
+
+                    //set 24 hour format
+                    timeSettings = i18n.getTimeSettings();
+                    scope.showMeridian = timeSettings.showMeridian;
+
+                    function cnahgeTimeSettings(showMeridian) {
+                        timeSettings.showMeridian = showMeridian;
+                        i18n.changeTimeSettings(timeSettings);
+                        userProfile.save();
+                    }
+
+                    scope.$watch('showMeridian', function (showMeridian) {
+                            cnahgeTimeSettings(showMeridian);
+                    });
+
+                    link.apply(this, arguments);
+                };
+            };
+            return $delegate;
+        }]);
+}]);
+
+angular.module('platformWebApp')
+// Service provide functions for currency convertion and validation with localization support
+.factory('platformWebApp.currencyFormat', ['platformWebApp.numberFormat', '$filter', '$locale', function (numberFormat, $filter, $locale) {
+    // Remove currency symbol from validation regular expression: we want only value in input
+    var getPattern = function () {
+        var pattern = $locale.NUMBER_FORMATS.PATTERNS[1];
+        angular.forEach(pattern, function (patternPart, patternPartKey) {
+            if (angular.isString(patternPart)) {
+                patternPart = patternPart.replace(/\s*¤\s*/g, "");
+                pattern[patternPartKey] = patternPart;
+            }
+        });
+        return pattern;
+    };
+
+    var result = {
+        validate: function (viewValue, minExclusive, min, maxExclusive, max, fraction, setValidity) {
+            var negativeMatches;
+            var value;
+            var pattern = getPattern();
+            var vars = numberFormat.getVariables(pattern, minExclusive, min, maxExclusive, max, fraction || pattern.maxFrac);
+            var regexp = new RegExp(vars.regexpFloat);
+            var isValid = regexp.test(viewValue);
+            if (isValid) {
+                negativeMatches = viewValue.match(vars.negativeRegExp);
+                value = parseFloat(viewValue
+                    .replace(negativeMatches && negativeMatches.length > 1 ? vars.negativePrefix : null, '-')
+                    .replace(vars.positivePrefix, '')
+                    .replace(new RegExp(vars.escapedGroupSeparator, "g"), '')
+                    .replace(vars.decimalSeparator, '.')
+                    .replace(vars.negativeSuffix, '')
+                    .replace(vars.positiveSuffix, ''));
+                if (setValidity)
+                    setValidity('number', true);
+                return numberFormat.inRange(value, minExclusive, min, maxExclusive, max, setValidity);
+            }
+            if (setValidity)
+                setValidity('number', false);
+            return undefined;
+        },
+        format: function (modelValue, minExclusive, min, maxExclusive, max, fraction) {
+            var pattern = getPattern();
+            return $filter('currency')(parseFloat(modelValue), '', numberFormat.getVariables(pattern, minExclusive, min, maxExclusive, max, fraction || pattern.maxFrac).maximumFraction);
+        }
+    };
+    return result;
+}])
+// Service provide variables and functions for number (float & integer) convertion and validation with localization support
+.factory('platformWebApp.numberFormat', ['$filter', '$locale', function ($filter, $locale) {
+    var escape = function (str) {
+        // escape string, replace any explicit spaces with spaces group
+        return RegExp.escape(str).replace(/\s/g, "\\s");
+    };
+    var formatRegExp = function (str) {
+        // \u221e = ∞ (infinity)
+        return "^(" + str + "|\u221e)$";
+    };
+    var result = {
+        // based on https://github.com/angular/angular.js/blob/e812b9fa9ec7086ab8d64a32d86f6e991f84bc55/src/ng/filter/filters.js#L289
+        getVariables: function (pattern, minExclusive, min, maxExclusive, max, fraction) {
+            var result = {};
+
+            result.isNegativeAllowed = angular.isDefined(minExclusive) ? minExclusive <= 0 : angular.isDefined(min) ? min < 0 : true;
+            result.isPositiveAllowed = angular.isDefined(maxExclusive) ? maxExclusive >= 0 : angular.isDefined(max) ? max > 0 : true;
+
+            // Negative (like "-") and positive (like "+") prefixies
+            result.negativePrefix = pattern.negPre;
+            result.positivePrefix = pattern.posPre;
+            result.isPrefixExists = result.negativePrefix == result.positivePrefix == "";
+            result.escapedNegativePrefix = escape(result.negativePrefix);
+            result.escapedPositivePrefix = escape(result.positivePrefix);
+
+            // Group separator, i.e. 111,111 or 111 111
+            result.escapedGroupSeparator = escape($locale.NUMBER_FORMATS.GROUP_SEP);
+            result.groupSize = pattern.gSize;
+            result.lastGroupSize = pattern.lgSize;
+
+            // Decimal separator, i.e. 111.00 or 111,00
+            result.decimalSeparator = $locale.NUMBER_FORMATS.DECIMAL_SEP;
+            result.escapedDecimalSeparator = escape(result.decimalSeparator);
+            result.minimalFraction = fraction || pattern.minFrac;
+            result.maximumFraction = fraction || pattern.maxFrac || 21; // ECMA 262
+
+            // Negative (like "-") and positive (like "+") suffixies
+            result.negativeSuffix = pattern.negSuf;
+            result.positiveSuffix = pattern.posSuf;
+            result.isSuffixExists = result.negativeSuffix == result.positiveSuffix == "";
+            result.escapedNegativeSuffix = escape(result.negativeSuffix);
+            result.escapedPositiveSuffix = escape(result.positiveSuffix);
+
+            // Select prefexies, like [-+]
+            result.regexpPrefix = (result.isPrefixExists ? "(" + (result.isNegativeAllowed ? result.escapedNegativePrefix : "") + "|" + (result.isPositiveAllowed ? result.escapedPositivePrefix : "") + ")" : "");
+
+            // Select value. There is three groups: start (without leading zeroes), middle (size of both defined in groupSize) and end (size defined in lastGroupSize)
+            var startGroup = "([1-9][0-9]{0," + (result.groupSize > 0 ? result.groupSize - 1 : 0) + "}" + ")";
+            var middleGroup = "(" + result.escapedGroupSeparator + "\\d{" + result.groupSize + "}" + ")";
+            var endGroup = "(" + result.escapedGroupSeparator + "\\d{" + result.lastGroupSize + "})";
+            // Number may have or start group (sss), start group + last group (sss,lll) or start group, multiple middle groups and end group (sss,mmm,mmm,lll)
+            result.regexpValue = "((" + startGroup + ("(" + middleGroup + endGroup + "|" + endGroup + ")?") + "|[1-9][0-9]*)|0)";
+
+            // Select fraction. May not exists and have maximum size defined by maximumFraction.
+            // Minimum size ignored - we want to allow use type just 111 instead of 111.000
+            result.regexpFraction = "(" + result.escapedDecimalSeparator + "\\d{1," + result.maximumFraction + "}" + ")?";
+
+            // Select suffixies, like [-+]. This required because, for example, in some locales negative numbers may be defined as (111) instead of -111
+            result.regexpSuffix = (result.isSuffixExists ? "[" + (result.isNegativeAllowed ? result.escapedNegativeSuffix : "") + (result.isPositiveAllowed ? result.escapedPositiveSuffix : "") + "]?" : "");
+
+            result.regexpFloat = formatRegExp(result.regexpPrefix + result.regexpValue + result.regexpFraction + result.regexpSuffix);
+            result.regexpInteger = formatRegExp(result.regexpPrefix + result.regexpValue + result.regexpSuffix);
+
+            // Check is value a negative. Be careful! This regular expression does not check value for validity (see above), only for negativity
+            result.negativeRegExp = new RegExp("^(" + result.escapedNegativePrefix + ")[^" + result.escapedNegativePrefix + result.escapedNegativeSuffix + "](" + result.escapedNegativeSuffix + ")$");
+
+            return result;
+        },
+        // Check if number in specified range
+        inRange: function (value, minExclusive, min, maxExclusive, max, setValidity) {
+            var notLessThanMin = true;
+            var notGreaterThanMax = true;
+            if (minExclusive || min) {
+                notLessThanMin = minExclusive < value || min <= value;
+                if (setValidity)
+                    setValidity('min', notLessThanMin);
+            }
+            if (maxExclusive || max) {
+                notGreaterThanMax = value < maxExclusive || value <= max;
+                if (setValidity)
+                    setValidity('max', notGreaterThanMax);
+            }
+            if (!notLessThanMin || !notGreaterThanMax) {
+                return undefined;
+            }
+            return value;
+        },
+        validate: function (viewValue, numType, minExclusive, min, maxExclusive, max, fraction, setValidity) {
+            var vars;
+            var regexp;
+            var isValid;
+            var negativeMatches;
+            var value;
+            if (numType === "float") {
+                vars = this.getVariables($locale.NUMBER_FORMATS.PATTERNS[0], minExclusive, min, maxExclusive, max, fraction);
+                regexp = new RegExp(vars.regexpFloat);
+                isValid = regexp.test(viewValue);
+                if (isValid) {
+                    negativeMatches = viewValue.match(vars.negativeRegExp);
+                    value = parseFloat(viewValue
+                        .replace(negativeMatches && negativeMatches.length > 1 ? vars.negativePrefix : null, '-')
+                        .replace(vars.positivePrefix, '')
+                        .replace(new RegExp(vars.escapedGroupSeparator, "g"), '')
+                        .replace(vars.decimalSeparator, '.')
+                        .replace(vars.negativeSuffix, '')
+                        .replace(vars.positiveSuffix, ''));
+                    if (setValidity)
+                        setValidity('float', true);
+                    return this.inRange(value, minExclusive, min, maxExclusive, max, setValidity);
+                }
+                if (setValidity)
+                    setValidity('float', false);
+                return undefined;
+            } else {
+                vars = this.getVariables($locale.NUMBER_FORMATS.PATTERNS[0]);
+                regexp = new RegExp(vars.regexpInteger);
+                isValid = regexp.test(viewValue);
+                if (isValid) {
+                    negativeMatches = viewValue.match(vars.negativeRegExp);
+                    value = parseFloat(viewValue
+                        .replace(negativeMatches && negativeMatches.length > 1 ? vars.negativePrefix : null, '-')
+                        .replace(vars.positivePrefix, '')
+                        .replace(new RegExp(vars.escapedGroupSeparator, "g"), '')
+                        .replace(vars.negativeSuffix, '')
+                        .replace(vars.positiveSuffix, ''));
+                    if (setValidity)
+                        setValidity('integer', true);
+                    return this.inRange(value, minExclusive, min, maxExclusive, max, setValidity);
+                }
+                if (setValidity)
+                    setValidity('integer', false);
+                return undefined;
+            }
+        },
+        format: function (modelValue, numType, minExclusive, min, maxExclusive, max, fraction) {
+            if (numType === "float") {
+                return $filter('number')(parseFloat(modelValue), this.getVariables($locale.NUMBER_FORMATS.PATTERNS[0], minExclusive, min, maxExclusive, max, fraction).maximumFraction);
+            } else {
+                return $filter('number')(parseFloat(modelValue), 0);
+            }
+        }
+    };
+    return result;
+}])
+// Service provide variables and functions for angular to moment convertion and validation
+.factory('platformWebApp.angularToMomentFormatConverter', ['$locale', '$log', function ($locale, $log) {
+    var result = {
+        pairs: [
+            { 'yyyy': 'YYYY' }, { 'yy': 'YY' }, { 'y': 'Y' },
+            { 'dd': 'DD' }, { 'd': 'D' },
+            { 'eee': 'ddd' }, { 'EEEE': 'dddd' },
+            { 'sss': 'SSS' },
+            { 'Z': 'ZZ' }
+        ],
+        valid: ["yyyy', 'yy', 'y', 'MMMM', 'MMM', 'MM', 'M', 'dd', 'd', 'EEEE', 'EEE', , 'ww', 'w"],
+        invalid: ['G', 'GG', 'GGG', 'GGGG'],
+        validDate: ["yyyy', 'yy', 'y', 'MMMM', 'MMM', 'MM', 'M', 'dd', 'd', 'EEEE', 'EEE', 'ww', 'w"],
+        validTime: ['HH', 'H', 'hh', 'h', 'mm', 'm', 'ss', 's', 'sss', 'a', 'Z'],
+        additionalFormats: ['medium', 'short', 'mediumTime', 'shortTime', 'fullDate', 'longDate', 'mediumDate', 'shortDate'],
+        additionalDateFormats: ['fullDate', 'longDate', 'mediumDate', 'shortDate'],
+        additionalTimeFormats: ['mediumTime', 'shortTime'],
+        additionalMixedFormats: ['medium', 'short'],
+        isInvalid: function (originalFormat) {
+            return !this.additionalFormats.includes(originalFormat) && !this.invalid.includes(originalFormat);
+        },
+        isInvalidDate: function (originalFormat) {
+            return _.every([this.additionalTimeFormats, this.additionalMixedFormats, this.validTime, this.invalid].forEach(function (formats) {
+                return _.every(formats, function (format) {
+                    return originalFormat.indexOf(format) < 0;
+                });
+            }));
+        },
+        isInvalidTime: function (originalFormat) {
+            return _.every([this.additionalDateFormats, this.additionalMixedFormats, this.validDate, this.invalid].forEach(function (formats) {
+                return _.all(formats, function (format) {
+                    return originalFormat.indexOf(format) < 0;
+                });
+            }));
+        },
+        isInvalidMixed: function (originalFormat) {
+            var result = _.every([this.additionalTimeFormats, this.additionalDateFormats, this.invalid].forEach(function (formats) {
+                return _.every(formats, function (format) {
+                    return originalFormat.indexOf(format) < 0;
+                });
+            }));
+            if (result) {
+                result |= !_.some(this.additionalMixedFormas, function (mixedFormat) {
+                    return originalFormat.indexOf(mixedFormat) >= 0;
+                });
+                if (result) {
+                    result |= _.every([
+                        _.some(this.validDate, function (format) {
+                            return originalFormat.indexOf(format) >= 0;
+                        }), _.some(this.validTime, function (format) {
+                            return originalFormat.indexOf(format) >= 0;
+                        })
+                    ]);
+                    return result;
+                }
+            }
+            return false;
+        },
+        validate: function (originalFormat, validator) {
+            var formatParts = originalFormat.split("'");
+            if (_.some(formatParts.forEach(function (formatPart) {
+                return validator(formatPart);
+            }))) {
+                $log.error("Invalid date format");
+                return false;
+            }
+            return true;
+        },
+        convert: function (originalFormat) {
+            var format = originalFormat;
+            if (this.additionalFormats.includes(format)) {
+                format = $locale.DATETIME_FORMATS[format];
+            }
+            var formatParts = format.split("'");
+            for (var i = 0; i < formatParts.length; i++) {
+                if (!_.every(this.invalid, function (token) { return formatParts.indexOf(token) < 0 })) {
+                    $log.error("Moment doesn't support one of used formats");
+                    return undefined;
+                }
+                var replace = function (formatPart) {
+                    this.pairs.forEach(function (token) {
+                        var key = Object.keys(token)[0];
+                        formatPart = formatPart.replace(new RegExp(RegExp.escape(key), "g"), token[key]);
+                    });
+                    return formatPart;
+                };
+                formatParts[i] = replace.apply(this, [formatParts[i]]);
+            }
+            return formatParts.join('');
+        }
+    };
+    return result;
+}]);
+angular.module('platformWebApp')
+.constant("platformWebApp.fallbackLanguage", "en")
+.constant("platformWebApp.fallbackRegionalFormat", "en")
+.constant("platformWebApp.fallbackTimeZone", "Etc/Utc")
+.constant("platformWebApp.fallbackTimeAgoSettings", { useTimeAgo: true, thresholdUnit: 'Never', threshold: null })
+.constant("platformWebApp.fallbackTimeFormat", { showMeridian: true})
+// Service provider get/set function pairs for language, regional format, time zone and time ago settings
+    .factory('platformWebApp.i18n', ['platformWebApp.fallbackLanguage', 'platformWebApp.fallbackRegionalFormat', 'platformWebApp.fallbackTimeAgoSettings', 'platformWebApp.common.languages', 'platformWebApp.common.locales', 'platformWebApp.common.timeZones', 'platformWebApp.userProfileApi', '$translate', 'tmhDynamicLocale', 'moment', 'amMoment', 'angularMomentConfig', 'amTimeAgoConfig', 'platformWebApp.fallbackTimeFormat',
+        function (fallbackLanguage, fallbackRegionalFormat, fallbackTimeAgoSettings, languages, locales, timeZones, userProfileApi, $translate, dynamicLocale, moment, momentService, momentConfig, timeAgoConfig, fallbackTimeFormat) {
+        var changeLanguage = function (language) {
+            userProfileApi.getLocales(function(availableLanguages) {
+                availableLanguages.sort();
+                if (!language) {
+                    // Use current browser language, if no language specified
+                    language = $translate.resolveClientLocale(); //.match(/^[a-zA-Z]{2}/)[0];
+                }
+                if (!languages.contains(language)) {
+                    language = fallbackLanguage;
+                }
+                language = languages.normalize(language);
+                $translate.use(language);
+            });
+        }
+
+        var changeRegionalFormat = function(locale) {
+            userProfileApi.getRegionalFormats(function(availableLocales) {
+                availableLocales.sort();
+                if (!locale) {
+                    // Get regional format from current browser locale, if no regional format specified
+                    locale = $translate.resolveClientLocale();
+                }
+                if (!locales.contains(locale)) {
+                    locale = fallbackRegionalFormat;
+                }
+                locale = locales.normalize(locale);
+                // angular locale
+                dynamicLocale.set(locale.replace(/_/g, "-").toLowerCase());
+                momentService.changeLocale(locale);
+            });
+        }
+
+        var changeTimeZone = function (timeZone) {
+            if (!timeZone) {
+                timeZone = moment.tz.guess();
+            }
+            momentService.changeTimezone(timeZone);
+        }
+
+        var changeTimeAgoSettings = function (timeAgoSettings) {
+            if (timeAgoSettings == null || timeAgoSettings.useTimeAgo == null) {
+                timeAgoSettings = fallbackTimeAgoSettings;
+            }
+            if (!timeAgoSettings.useTimeAgo) {
+                // We can't just 'turn off' time ago, so (and it's default behavior) set it to 1 millisecond
+                timeAgoConfig.fullDateThresholdUnit = null;
+                timeAgoConfig.fullDateThreshold = 1;
+            } else {
+                // see above
+                timeAgoConfig.fullDateThresholdUnit = timeAgoSettings.thresholdUnit && timeAgoSettings.thresholdUnit !== 'Never' ? timeAgoSettings.thresholdUnit.toLowerCase() : null;
+                // To avoid situation when settings set threshold unit, but threshold value is undefined, set threshold value to 1 if it's not specified
+                timeAgoConfig.fullDateThreshold = timeAgoSettings.thresholdUnit && timeAgoSettings.thresholdUnit !== 'Never' ? timeAgoSettings.threshold || 1 : null;
+            }
+        }
+        var changeTimeSettings = function (timeSettings) {
+            if (timeSettings)
+                fallbackTimeFormat = timeSettings;
+        }
+            return {
+            getLanguage: function() { return languages.normalize($translate.use()) },
+            getRegionalFormat: function () { return locales.normalize(dynamicLocale.get()) },
+            getTimeZone: function () { return momentConfig.timezone },
+            getTimeAgoSettings: function () {
+                var result = {};
+                // Always use time ago:          threshold unit = null, threshold value = null                           | null
+                // Never use time ago:           threshold unit = null, threshold value = positive number (1 by default) | x milliseconds
+                // Use time ago after threshold: threshold unit = y,    threshold value = x                              | x of y
+                result.useTimeAgo = !(timeAgoConfig.fullDateThresholdUnit == null && timeAgoConfig.fullDateThreshold != null);
+                result.thresholdUnit = timeAgoConfig.fullDateThresholdUnit ? timeAgoConfig.fullDateThresholdUnit.capitalize() : (result.useTimeAgo ? 'Never' : null);
+                result.threshold = result.useTimeAgo && result.thresholdUnit !== 'Never' ? timeAgoConfig.fullDateThreshold : null;
+                return result;
+            },
+            getTimeSettings: function () {
+                var result = {};
+                result.showMeridian = fallbackTimeFormat.showMeridian;
+                return result;
+            },
+            changeLanguage: changeLanguage,
+            changeRegionalFormat: changeRegionalFormat,
+            changeTimeZone: changeTimeZone,
+            changeTimeAgoSettings: changeTimeAgoSettings,
+            changeTimeSettings: changeTimeSettings
+        }
+    }
+])
+// Configure fallbacks for language, regional format, time zone and time ago settings
+    .config(['$provide', 'platformWebApp.fallbackLanguage', 'platformWebApp.fallbackRegionalFormat', 'platformWebApp.fallbackTimeZone', 'platformWebApp.fallbackTimeAgoSettings', 'tmhDynamicLocaleProvider', '$translateProvider', 'angularMomentConfig', 'amTimeAgoConfig', 'platformWebApp.fallbackTimeFormat',
+        function ($provide, fallbackLanguage, fallbackRegionalFormat, fallbackTimeZone, fallbackTimeAgoSettings, dynamicLocaleProvider, $translateProvider, momentConfig, timeAgoConfig, fallbackTimeFormat) {
+
+    // https://angular-translate.github.io/docs/#/guide
+    $translateProvider.useUrlLoader('api/platform/localization')
+        .useLoaderCache(true)
+        .useSanitizeValueStrategy('escapeParameters')
+        .preferredLanguage(fallbackLanguage)
+        .fallbackLanguage(fallbackLanguage)
+        .useLocalStorage();
+
+
+    // https://github.com/lgalfaso/angular-dynamic-locale/#usage
+    dynamicLocaleProvider.localeLocationPattern('$(Platform)/Scripts/i18n/angular/angular-locale_{{locale}}.js');
+    dynamicLocaleProvider.defaultLocale(fallbackRegionalFormat);
+    dynamicLocaleProvider.useCookieStorage();
+
+    momentConfig.timeZone = fallbackTimeZone;
+
+    if (!fallbackTimeAgoSettings.useTimeAgo) {
+        timeAgoConfig.fullDateThresholdUnit = null;
+        timeAgoConfig.fullDateThreshold = 1;
+    } else {
+        timeAgoConfig.fullDateThresholdUnit = fallbackTimeAgoSettings.thresholdUnit;
+        timeAgoConfig.fullDateThreshold = fallbackTimeAgoSettings.threshold;
+    }
+    
+    $provide.decorator('tmhDynamicLocale', ['$delegate', '$rootScope', '$translate', 'platformWebApp.fallbackRegionalFormat', 'platformWebApp.angularToMomentFormatConverter', function ($delegate, $rootScope, $translate, fallbackRegionalFormat, dateFormatConverter) {
+        var service = $delegate;
+        // Change time ago full date format when regional formatting changed
+        $rootScope.$on('$localeChangeSuccess', function () {
+            timeAgoConfig.fullDateFormat = dateFormatConverter.convert('short');
+        });
+        // There is no option to set fallback regional format and use it when we can't use specified.
+        // This decorator subscribes to angular dynamic locale change error and tries to use fallback regional format
+        $rootScope.$on('$localeChangeError', function(locale) {
+            if (locale !== fallbackRegionalFormat) {
+                service.set(fallbackRegionalFormat);
+            }
+        });
+        return service;
+    }]);
+}])
+// Configure defaults for language, regional format, time zone and time ago settings. Values from browser will be used if it's possible.
+.run(['platformWebApp.i18n', function(i18n) {
+    i18n.changeLanguage();
+    i18n.changeRegionalFormat();
+    i18n.changeTimeZone();
+    i18n.changeTimeAgoSettings();
+    i18n.changeTimeSettings();
+}]);
+
+angular.module('platformWebApp')
  .factory('platformWebApp.bladeUtils', ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
      function initializePagination($scope, skipDefaultWatch) {
          //pagination settings
@@ -17737,610 +18378,6 @@ angular.module('platformWebApp')
      };
  }]);
 
-angular.module('platformWebApp')
-.config(['$provide', function ($provide) {
-    // Provide default format
-    $provide.decorator('currencyFilter', ['$delegate', function ($delegate) {
-        var filter = function (currency, symbol, fractionSize) {
-            currency = $delegate.apply(this, [currency, "¤", fractionSize]);
-            var result = currency ? currency.replace(/\s*¤\s*/g, "") : currency;
-            if (result && symbol) {
-                result += "\u00a0" + symbol;
-            }
-            return result;
-        };
-        return filter;
-    }]);
-    // Add support for moment
-    $provide.decorator('dateFilter', ['$delegate', 'moment', 'platformWebApp.i18n', 'platformWebApp.common.timeZones', function ($delegate, moment, i18n, timeZones) {
-        var filter = function (date, format, timeZone) {
-            if (moment.isMoment(date)) {
-                timeZone = timeZones.get(i18n.getTimeZone()).utcOffset.formatted.replace(':', '');
-                date = date.toDate();
-            }
-            return $delegate.apply(this, [date, format, timeZone]);
-        };
-        return filter;
-    }]);
-    // Add support for tag type 'number'
-    $provide.decorator('tagsInputDirective', ['$delegate', 'platformWebApp.numberFormat', 'tiUtil', function ($delegate, numberFormat, tiUtil) {
-        var directive = $delegate[0];
-        directive.compile = function () {
-            return function (scope, element, attrs) {
-
-                /* Copy-paste, because there is no extension point */
-
-                var options = scope.options;
-                var events = scope.events;
-                var onTagAdding = tiUtil.handleUndefinedResult(scope.onTagAdding, true);
-
-                var getTagValue = function (tag) {
-                    return tiUtil.safeToString(tag[options.displayProperty]);
-                };
-                var setTagValue = function (tag, text) {
-                    tag[options.displayProperty] = text;
-                };
-
-                var tagIsValid = function (tag) {
-                    var tagText = getTagValue(tag);
-
-                    // Validate tag
-                    var isNumber = angular.isDefined(attrs.tagsNumber);
-                    var value = undefined;
-                    if (isNumber) {
-                        value = numberFormat.validate(tagText, attrs.numType, attrs.min, attrs.max, attrs.fraction);
-                        if (angular.isDefined(value)) {
-                            setTagValue(tag, value);
-                        }
-                    }
-                    return tagText &&
-                        tagText.length >= options.minLength &&
-                        tagText.length <= options.maxLength &&
-                        options.allowedTagsPattern.test(tagText) &&
-                        !tiUtil.findInObjectArray(scope.tagList.items, tag, options.keyProperty || options.displayProperty) &&
-                        (!isNumber || angular.isDefined(value)) &&
-                        onTagAdding({ $tag: tag });
-                };
-
-                scope.tagList.add = function (tag) {
-                    var tagText = getTagValue(tag);
-
-                    if (options.replaceSpacesWithDashes) {
-                        tagText = tiUtil.replaceSpacesWithDashes(tagText);
-                    }
-
-                    setTagValue(tag, tagText);
-
-                    if (tagIsValid(tag)) {
-                        scope.tagList.items.push(tag);
-                        events.trigger('tag-added', { $tag: tag });
-                    }
-                    else if (tagText) {
-                        events.trigger('invalid-tag', { $tag: tag });
-                    }
-
-                    return tag;
-                };
-
-                if (angular.isDefined(attrs.tagsNumber)) {
-                    angular.extend(scope.options, { tagsNumber: attrs.tagsNumber, numType: attrs.numType, min: attrs.min, max: attrs.max, fraction: attrs.fraction });
-                }
-
-                directive.link.apply(this, arguments);
-            };
-        };
-        return $delegate;
-    }]);
-    $provide.decorator('tiTagItemDirective', ['$delegate', 'platformWebApp.numberFormat', function ($delegate, numberFormat) {
-        var directive = $delegate[0];
-        var compile = directive.compile;
-        directive.compile = function () {
-            var link = compile.apply(this, arguments);
-            return function (scope, element, attrs, tagsInputCtrl) {
-                link.apply(this, arguments);
-
-                // Format tag
-                // Not real double-registration, this method just return object with needed methods
-                var tagsInput = tagsInputCtrl.registerTagItem();
-                var options = tagsInput.getOptions();
-                if (angular.isDefined(options.tagsNumber)) {
-                    scope.$getDisplayText = function () {
-                        return numberFormat.format(scope.data[options.displayProperty], options.numType, options.min, options.max, options.fraction);
-                    }
-                }
-            };
-        };
-        return $delegate;
-    }]);
-    // Fix support of first day week for datepicker
-    $provide.decorator('datepickerDirective', ['$delegate', '$locale', function ($delegate, $locale) {
-        var directive = $delegate[0];
-        directive.compile = function () {
-            return function (scope, element, attrs, ctrls) {
-                var controller = ctrls[0];
-                // 0 is Sunday in angular-js and Monday in angular-ui datepicker
-                var firstDayOfWeek = $locale.DATETIME_FORMATS.FIRSTDAYOFWEEK + 1;
-                firstDayOfWeek = firstDayOfWeek === 7 ? 0 : firstDayOfWeek;
-                controller.startingDay = firstDayOfWeek;
-                directive.link.apply(this, arguments);
-            }
-        };
-        return $delegate;
-    }]);
-    // Fix bugs & add features for datepicker popup
-    $provide.decorator('datepickerPopupDirective', ['$delegate', 'platformWebApp.angularToMomentFormatConverter', 'datepickerPopupConfig', '$filter', '$locale',
-    function ($delegate, formatConverter, datepickerPopupConfig, $filter, $locale) {
-        var directive = $delegate[0];
-        directive.compile = function (tElem, tAttrs) {
-            tElem.attr("datepicker-popup-original", tAttrs.datepickerPopup);
-            return function (scope, element, attrs, ngModelCtrl) {
-                // Automatic localization support for buttons in popup
-                attrs.currentText = attrs.currentText || $filter('translate')('platform.commands.today');
-                attrs.clearText = attrs.clearText || $filter('translate')('platform.commands.clear');
-                attrs.closeText = attrs.closeText || $filter('translate')('platform.commands.close');
-
-                // datepicker has some bugs and limitations to support date & time formats,
-                // also, it doesn't support localized input,
-                // so limit format number & convert to date via moment to prevent random occurence of errors
-                var applyFormat = function (newFormat, oldFormat) {
-                    if (newFormat !== oldFormat) {
-                        var format = newFormat || datepickerPopupConfig.datepickerPopup;
-                        formatConverter.validate(format, formatConverter.isInvalidDate);
-                        if (formatConverter.additionalFormats.includes(format)) {
-                            format = $locale.DATETIME_FORMATS[format];
-                        }
-                        attrs.datepickerPopup = format;
-                    }
-                };
-                attrs.$observe('datepickerPopupOriginal', function (value, oldValue) {
-                    applyFormat(value, oldValue);
-                });
-                applyFormat(attrs.datepickerPopup, undefined);
-
-                directive.link.apply(this, arguments);
-
-                // convert localized date to javascript date object for correct validation
-                ngModelCtrl.$formatters.splice(1, 1, function (value) {
-                    var format = attrs.datepickerPopup;
-                    scope.date = value;
-                    return ngModelCtrl.$isEmpty(value) ? value : $filter('date')(moment(value), format);
-                });
-                ngModelCtrl.$parsers.unshift(function (value) {
-                    if (value) {
-                        var format = formatConverter.convert(attrs.datepickerPopup);
-                        var date = moment(value, format, moment.locale(), true);
-                        return date.isValid() ? date.toDate() : undefined;
-                    }
-                    else
-                    {
-                        //Allow to enter empty value
-                        return value;
-                    }
-                });
-            }
-        };
-        return $delegate;
-    }]);
-}]);
-angular.module('platformWebApp')
-// Service provide functions for currency convertion and validation with localization support
-.factory('platformWebApp.currencyFormat', ['platformWebApp.numberFormat', '$filter', '$locale', function (numberFormat, $filter, $locale) {
-    // Remove currency symbol from validation regular expression: we want only value in input
-    var getPattern = function () {
-        var pattern = $locale.NUMBER_FORMATS.PATTERNS[1];
-        angular.forEach(pattern, function (patternPart, patternPartKey) {
-            if (angular.isString(patternPart)) {
-                patternPart = patternPart.replace(/\s*¤\s*/g, "");
-                pattern[patternPartKey] = patternPart;
-            }
-        });
-        return pattern;
-    };
-
-    var result = {
-        validate: function (viewValue, minExclusive, min, maxExclusive, max, fraction, setValidity) {
-            var negativeMatches;
-            var value;
-            var pattern = getPattern();
-            var vars = numberFormat.getVariables(pattern, minExclusive, min, maxExclusive, max, fraction || pattern.maxFrac);
-            var regexp = new RegExp(vars.regexpFloat);
-            var isValid = regexp.test(viewValue);
-            if (isValid) {
-                negativeMatches = viewValue.match(vars.negativeRegExp);
-                value = parseFloat(viewValue
-                    .replace(negativeMatches && negativeMatches.length > 1 ? vars.negativePrefix : null, '-')
-                    .replace(vars.positivePrefix, '')
-                    .replace(new RegExp(vars.escapedGroupSeparator, "g"), '')
-                    .replace(vars.decimalSeparator, '.')
-                    .replace(vars.negativeSuffix, '')
-                    .replace(vars.positiveSuffix, ''));
-                if (setValidity)
-                    setValidity('number', true);
-                return numberFormat.inRange(value, minExclusive, min, maxExclusive, max, setValidity);
-            }
-            if (setValidity)
-                setValidity('number', false);
-            return undefined;
-        },
-        format: function (modelValue, minExclusive, min, maxExclusive, max, fraction) {
-            var pattern = getPattern();
-            return $filter('currency')(parseFloat(modelValue), '', numberFormat.getVariables(pattern, minExclusive, min, maxExclusive, max, fraction || pattern.maxFrac).maximumFraction);
-        }
-    };
-    return result;
-}])
-// Service provide variables and functions for number (float & integer) convertion and validation with localization support
-.factory('platformWebApp.numberFormat', ['$filter', '$locale', function ($filter, $locale) {
-    var escape = function (str) {
-        // escape string, replace any explicit spaces with spaces group
-        return RegExp.escape(str).replace(/\s/g, "\\s");
-    };
-    var formatRegExp = function (str) {
-        // \u221e = ∞ (infinity)
-        return "^(" + str + "|\u221e)$";
-    };
-    var result = {
-        // based on https://github.com/angular/angular.js/blob/e812b9fa9ec7086ab8d64a32d86f6e991f84bc55/src/ng/filter/filters.js#L289
-        getVariables: function (pattern, minExclusive, min, maxExclusive, max, fraction) {
-            var result = {};
-
-            result.isNegativeAllowed = angular.isDefined(minExclusive) ? minExclusive <= 0 : angular.isDefined(min) ? min < 0 : true;
-            result.isPositiveAllowed = angular.isDefined(maxExclusive) ? maxExclusive >= 0 : angular.isDefined(max) ? max > 0 : true;
-
-            // Negative (like "-") and positive (like "+") prefixies
-            result.negativePrefix = pattern.negPre;
-            result.positivePrefix = pattern.posPre;
-            result.isPrefixExists = result.negativePrefix == result.positivePrefix == "";
-            result.escapedNegativePrefix = escape(result.negativePrefix);
-            result.escapedPositivePrefix = escape(result.positivePrefix);
-
-            // Group separator, i.e. 111,111 or 111 111
-            result.escapedGroupSeparator = escape($locale.NUMBER_FORMATS.GROUP_SEP);
-            result.groupSize = pattern.gSize;
-            result.lastGroupSize = pattern.lgSize;
-
-            // Decimal separator, i.e. 111.00 or 111,00
-            result.decimalSeparator = $locale.NUMBER_FORMATS.DECIMAL_SEP;
-            result.escapedDecimalSeparator = escape(result.decimalSeparator);
-            result.minimalFraction = fraction || pattern.minFrac;
-            result.maximumFraction = fraction || pattern.maxFrac || 21; // ECMA 262
-
-            // Negative (like "-") and positive (like "+") suffixies
-            result.negativeSuffix = pattern.negSuf;
-            result.positiveSuffix = pattern.posSuf;
-            result.isSuffixExists = result.negativeSuffix == result.positiveSuffix == "";
-            result.escapedNegativeSuffix = escape(result.negativeSuffix);
-            result.escapedPositiveSuffix = escape(result.positiveSuffix);
-
-            // Select prefexies, like [-+]
-            result.regexpPrefix = (result.isPrefixExists ? "(" + (result.isNegativeAllowed ? result.escapedNegativePrefix : "") + "|" + (result.isPositiveAllowed ? result.escapedPositivePrefix : "") + ")" : "");
-
-            // Select value. There is three groups: start (without leading zeroes), middle (size of both defined in groupSize) and end (size defined in lastGroupSize)
-            var startGroup = "([1-9][0-9]{0," + (result.groupSize > 0 ? result.groupSize - 1 : 0) + "}" + ")";
-            var middleGroup = "(" + result.escapedGroupSeparator + "\\d{" + result.groupSize + "}" + ")";
-            var endGroup = "(" + result.escapedGroupSeparator + "\\d{" + result.lastGroupSize + "})";
-            // Number may have or start group (sss), start group + last group (sss,lll) or start group, multiple middle groups and end group (sss,mmm,mmm,lll)
-            result.regexpValue = "((" + startGroup + ("(" + middleGroup + endGroup + "|" + endGroup + ")?") + "|[1-9][0-9]*)|0)";
-
-            // Select fraction. May not exists and have maximum size defined by maximumFraction.
-            // Minimum size ignored - we want to allow use type just 111 instead of 111.000
-            result.regexpFraction = "(" + result.escapedDecimalSeparator + "\\d{1," + result.maximumFraction + "}" + ")?";
-
-            // Select suffixies, like [-+]. This required because, for example, in some locales negative numbers may be defined as (111) instead of -111
-            result.regexpSuffix = (result.isSuffixExists ? "[" + (result.isNegativeAllowed ? result.escapedNegativeSuffix : "") + (result.isPositiveAllowed ? result.escapedPositiveSuffix : "") + "]?" : "");
-
-            result.regexpFloat = formatRegExp(result.regexpPrefix + result.regexpValue + result.regexpFraction + result.regexpSuffix);
-            result.regexpInteger = formatRegExp(result.regexpPrefix + result.regexpValue + result.regexpSuffix);
-
-            // Check is value a negative. Be careful! This regular expression does not check value for validity (see above), only for negativity
-            result.negativeRegExp = new RegExp("^(" + result.escapedNegativePrefix + ")[^" + result.escapedNegativePrefix + result.escapedNegativeSuffix + "](" + result.escapedNegativeSuffix + ")$");
-
-            return result;
-        },
-        // Check if number in specified range
-        inRange: function (value, minExclusive, min, maxExclusive, max, setValidity) {
-            var notLessThanMin = true;
-            var notGreaterThanMax = true;
-            if (minExclusive || min) {
-                notLessThanMin = minExclusive < value || min <= value;
-                if (setValidity)
-                    setValidity('min', notLessThanMin);
-            }
-            if (maxExclusive || max) {
-                notGreaterThanMax = value < maxExclusive || value <= max;
-                if (setValidity)
-                    setValidity('max', notGreaterThanMax);
-            }
-            if (!notLessThanMin || !notGreaterThanMax) {
-                return undefined;
-            }
-            return value;
-        },
-        validate: function (viewValue, numType, minExclusive, min, maxExclusive, max, fraction, setValidity) {
-            var vars;
-            var regexp;
-            var isValid;
-            var negativeMatches;
-            var value;
-            if (numType === "float") {
-                vars = this.getVariables($locale.NUMBER_FORMATS.PATTERNS[0], minExclusive, min, maxExclusive, max, fraction);
-                regexp = new RegExp(vars.regexpFloat);
-                isValid = regexp.test(viewValue);
-                if (isValid) {
-                    negativeMatches = viewValue.match(vars.negativeRegExp);
-                    value = parseFloat(viewValue
-                        .replace(negativeMatches && negativeMatches.length > 1 ? vars.negativePrefix : null, '-')
-                        .replace(vars.positivePrefix, '')
-                        .replace(new RegExp(vars.escapedGroupSeparator, "g"), '')
-                        .replace(vars.decimalSeparator, '.')
-                        .replace(vars.negativeSuffix, '')
-                        .replace(vars.positiveSuffix, ''));
-                    if (setValidity)
-                        setValidity('float', true);
-                    return this.inRange(value, minExclusive, min, maxExclusive, max, setValidity);
-                }
-                if (setValidity)
-                    setValidity('float', false);
-                return undefined;
-            } else {
-                vars = this.getVariables($locale.NUMBER_FORMATS.PATTERNS[0]);
-                regexp = new RegExp(vars.regexpInteger);
-                isValid = regexp.test(viewValue);
-                if (isValid) {
-                    negativeMatches = viewValue.match(vars.negativeRegExp);
-                    value = parseFloat(viewValue
-                        .replace(negativeMatches && negativeMatches.length > 1 ? vars.negativePrefix : null, '-')
-                        .replace(vars.positivePrefix, '')
-                        .replace(new RegExp(vars.escapedGroupSeparator, "g"), '')
-                        .replace(vars.negativeSuffix, '')
-                        .replace(vars.positiveSuffix, ''));
-                    if (setValidity)
-                        setValidity('integer', true);
-                    return this.inRange(value, minExclusive, min, maxExclusive, max, setValidity);
-                }
-                if (setValidity)
-                    setValidity('integer', false);
-                return undefined;
-            }
-        },
-        format: function (modelValue, numType, minExclusive, min, maxExclusive, max, fraction) {
-            if (numType === "float") {
-                return $filter('number')(parseFloat(modelValue), this.getVariables($locale.NUMBER_FORMATS.PATTERNS[0], minExclusive, min, maxExclusive, max, fraction).maximumFraction);
-            } else {
-                return $filter('number')(parseFloat(modelValue), 0);
-            }
-        }
-    };
-    return result;
-}])
-// Service provide variables and functions for angular to moment convertion and validation
-.factory('platformWebApp.angularToMomentFormatConverter', ['$locale', '$log', function ($locale, $log) {
-    var result = {
-        pairs: [
-            { 'yyyy': 'YYYY' }, { 'yy': 'YY' }, { 'y': 'Y' },
-            { 'dd': 'DD' }, { 'd': 'D' },
-            { 'eee': 'ddd' }, { 'EEEE': 'dddd' },
-            { 'sss': 'SSS' },
-            { 'Z': 'ZZ' }
-        ],
-        valid: ["yyyy', 'yy', 'y', 'MMMM', 'MMM', 'MM', 'M', 'dd', 'd', 'EEEE', 'EEE', , 'ww', 'w"],
-        invalid: ['G', 'GG', 'GGG', 'GGGG'],
-        validDate: ["yyyy', 'yy', 'y', 'MMMM', 'MMM', 'MM', 'M', 'dd', 'd', 'EEEE', 'EEE', 'ww', 'w"],
-        validTime: ['HH', 'H', 'hh', 'h', 'mm', 'm', 'ss', 's', 'sss', 'a', 'Z'],
-        additionalFormats: ['medium', 'short', 'mediumTime', 'shortTime', 'fullDate', 'longDate', 'mediumDate', 'shortDate'],
-        additionalDateFormats: ['fullDate', 'longDate', 'mediumDate', 'shortDate'],
-        additionalTimeFormats: ['mediumTime', 'shortTime'],
-        additionalMixedFormats: ['medium', 'short'],
-        isInvalid: function (originalFormat) {
-            return !this.additionalFormats.includes(originalFormat) && !this.invalid.includes(originalFormat);
-        },
-        isInvalidDate: function (originalFormat) {
-            return _.every([this.additionalTimeFormats, this.additionalMixedFormats, this.validTime, this.invalid].forEach(function (formats) {
-                return _.every(formats, function (format) {
-                    return originalFormat.indexOf(format) < 0;
-                });
-            }));
-        },
-        isInvalidTime: function (originalFormat) {
-            return _.every([this.additionalDateFormats, this.additionalMixedFormats, this.validDate, this.invalid].forEach(function (formats) {
-                return _.all(formats, function (format) {
-                    return originalFormat.indexOf(format) < 0;
-                });
-            }));
-        },
-        isInvalidMixed: function (originalFormat) {
-            var result = _.every([this.additionalTimeFormats, this.additionalDateFormats, this.invalid].forEach(function (formats) {
-                return _.every(formats, function (format) {
-                    return originalFormat.indexOf(format) < 0;
-                });
-            }));
-            if (result) {
-                result |= !_.some(this.additionalMixedFormas, function (mixedFormat) {
-                    return originalFormat.indexOf(mixedFormat) >= 0;
-                });
-                if (result) {
-                    result |= _.every([
-                        _.some(this.validDate, function (format) {
-                            return originalFormat.indexOf(format) >= 0;
-                        }), _.some(this.validTime, function (format) {
-                            return originalFormat.indexOf(format) >= 0;
-                        })
-                    ]);
-                    return result;
-                }
-            }
-            return false;
-        },
-        validate: function (originalFormat, validator) {
-            var formatParts = originalFormat.split("'");
-            if (_.some(formatParts.forEach(function (formatPart) {
-                return validator(formatPart);
-            }))) {
-                $log.error("Invalid date format");
-                return false;
-            }
-            return true;
-        },
-        convert: function (originalFormat) {
-            var format = originalFormat;
-            if (this.additionalFormats.includes(format)) {
-                format = $locale.DATETIME_FORMATS[format];
-            }
-            var formatParts = format.split("'");
-            for (var i = 0; i < formatParts.length; i++) {
-                if (!_.every(this.invalid, function (token) { return formatParts.indexOf(token) < 0 })) {
-                    $log.error("Moment doesn't support one of used formats");
-                    return undefined;
-                }
-                var replace = function (formatPart) {
-                    this.pairs.forEach(function (token) {
-                        var key = Object.keys(token)[0];
-                        formatPart = formatPart.replace(new RegExp(RegExp.escape(key), "g"), token[key]);
-                    });
-                    return formatPart;
-                };
-                formatParts[i] = replace.apply(this, [formatParts[i]]);
-            }
-            return formatParts.join('');
-        }
-    };
-    return result;
-}]);
-angular.module('platformWebApp')
-.constant("platformWebApp.fallbackLanguage", "en")
-.constant("platformWebApp.fallbackRegionalFormat", "en")
-.constant("platformWebApp.fallbackTimeZone", "Etc/Utc")
-.constant("platformWebApp.fallbackTimeAgoSettings", { useTimeAgo: true, thresholdUnit: 'Never', threshold: null })
-// Service provider get/set function pairs for language, regional format, time zone and time ago settings
-.factory('platformWebApp.i18n', ['platformWebApp.fallbackLanguage', 'platformWebApp.fallbackRegionalFormat', 'platformWebApp.fallbackTimeAgoSettings', 'platformWebApp.common.languages', 'platformWebApp.common.locales', 'platformWebApp.common.timeZones', 'platformWebApp.userProfileApi', '$translate', 'tmhDynamicLocale', 'moment', 'amMoment', 'angularMomentConfig', 'amTimeAgoConfig',
-    function (fallbackLanguage, fallbackRegionalFormat, fallbackTimeAgoSettings, languages, locales, timeZones, userProfileApi, $translate, dynamicLocale, moment, momentService, momentConfig, timeAgoConfig) {
-        var changeLanguage = function (language) {
-            userProfileApi.getLocales(function(availableLanguages) {
-                availableLanguages.sort();
-                if (!language) {
-                    // Use current browser language, if no language specified
-                    language = $translate.resolveClientLocale(); //.match(/^[a-zA-Z]{2}/)[0];
-                }
-                if (!languages.contains(language)) {
-                    language = fallbackLanguage;
-                }
-                language = languages.normalize(language);
-                $translate.use(language);
-            });
-        }
-
-        var changeRegionalFormat = function(locale) {
-            userProfileApi.getRegionalFormats(function(availableLocales) {
-                availableLocales.sort();
-                if (!locale) {
-                    // Get regional format from current browser locale, if no regional format specified
-                    locale = $translate.resolveClientLocale();
-                }
-                if (!locales.contains(locale)) {
-                    locale = fallbackRegionalFormat;
-                }
-                locale = locales.normalize(locale);
-                // angular locale
-                dynamicLocale.set(locale.replace(/_/g, "-").toLowerCase());
-                momentService.changeLocale(locale);
-            });
-        }
-
-        var changeTimeZone = function (timeZone) {
-            if (!timeZone) {
-                timeZone = moment.tz.guess();
-            }
-            momentService.changeTimezone(timeZone);
-        }
-
-        var changeTimeAgoSettings = function (timeAgoSettings) {
-            if (timeAgoSettings == null || timeAgoSettings.useTimeAgo == null) {
-                timeAgoSettings = fallbackTimeAgoSettings;
-            }
-            if (!timeAgoSettings.useTimeAgo) {
-                // We can't just 'turn off' time ago, so (and it's default behavior) set it to 1 millisecond
-                timeAgoConfig.fullDateThresholdUnit = null;
-                timeAgoConfig.fullDateThreshold = 1;
-            } else {
-                // see above
-                timeAgoConfig.fullDateThresholdUnit = timeAgoSettings.thresholdUnit && timeAgoSettings.thresholdUnit !== 'Never' ? timeAgoSettings.thresholdUnit.toLowerCase() : null;
-                // To avoid situation when settings set threshold unit, but threshold value is undefined, set threshold value to 1 if it's not specified
-                timeAgoConfig.fullDateThreshold = timeAgoSettings.thresholdUnit && timeAgoSettings.thresholdUnit !== 'Never' ? timeAgoSettings.threshold || 1 : null;
-            }
-        }
-
-        return {
-            getLanguage: function() { return languages.normalize($translate.use()) },
-            getRegionalFormat: function () { return locales.normalize(dynamicLocale.get()) },
-            getTimeZone: function () { return momentConfig.timezone },
-            getTimeAgoSettings: function () {
-                var result = {};
-                // Always use time ago:          threshold unit = null, threshold value = null                           | null
-                // Never use time ago:           threshold unit = null, threshold value = positive number (1 by default) | x milliseconds
-                // Use time ago after threshold: threshold unit = y,    threshold value = x                              | x of y
-                result.useTimeAgo = !(timeAgoConfig.fullDateThresholdUnit == null && timeAgoConfig.fullDateThreshold != null);
-                result.thresholdUnit = timeAgoConfig.fullDateThresholdUnit ? timeAgoConfig.fullDateThresholdUnit.capitalize() : (result.useTimeAgo ? 'Never' : null);
-                result.threshold = result.useTimeAgo && result.thresholdUnit !== 'Never' ? timeAgoConfig.fullDateThreshold : null;
-                return result;
-            },
-            changeLanguage: changeLanguage,
-            changeRegionalFormat: changeRegionalFormat,
-            changeTimeZone: changeTimeZone,
-            changeTimeAgoSettings: changeTimeAgoSettings
-        }
-    }
-])
-// Configure fallbacks for language, regional format, time zone and time ago settings
-.config(['$provide', 'platformWebApp.fallbackLanguage', 'platformWebApp.fallbackRegionalFormat', 'platformWebApp.fallbackTimeZone', 'platformWebApp.fallbackTimeAgoSettings', 'tmhDynamicLocaleProvider', '$translateProvider', 'angularMomentConfig', 'amTimeAgoConfig',
-        function ($provide, fallbackLanguage, fallbackRegionalFormat, fallbackTimeZone, fallbackTimeAgoSettings, dynamicLocaleProvider, $translateProvider, momentConfig, timeAgoConfig) {
-
-    // https://angular-translate.github.io/docs/#/guide
-    $translateProvider.useUrlLoader('api/platform/localization')
-        .useLoaderCache(true)
-        .useSanitizeValueStrategy('escapeParameters')
-        .preferredLanguage(fallbackLanguage)
-        .fallbackLanguage(fallbackLanguage)
-        .useLocalStorage();
-
-
-    // https://github.com/lgalfaso/angular-dynamic-locale/#usage
-    dynamicLocaleProvider.localeLocationPattern('$(Platform)/Scripts/i18n/angular/angular-locale_{{locale}}.js');
-    dynamicLocaleProvider.defaultLocale(fallbackRegionalFormat);
-    dynamicLocaleProvider.useCookieStorage();
-
-    momentConfig.timeZone = fallbackTimeZone;
-
-    if (!fallbackTimeAgoSettings.useTimeAgo) {
-        timeAgoConfig.fullDateThresholdUnit = null;
-        timeAgoConfig.fullDateThreshold = 1;
-    } else {
-        timeAgoConfig.fullDateThresholdUnit = fallbackTimeAgoSettings.thresholdUnit;
-        timeAgoConfig.fullDateThreshold = fallbackTimeAgoSettings.threshold;
-    }
-    
-    $provide.decorator('tmhDynamicLocale', ['$delegate', '$rootScope', '$translate', 'platformWebApp.fallbackRegionalFormat', 'platformWebApp.angularToMomentFormatConverter', function ($delegate, $rootScope, $translate, fallbackRegionalFormat, dateFormatConverter) {
-        var service = $delegate;
-        // Change time ago full date format when regional formatting changed
-        $rootScope.$on('$localeChangeSuccess', function () {
-            timeAgoConfig.fullDateFormat = dateFormatConverter.convert('short');
-        });
-        // There is no option to set fallback regional format and use it when we can't use specified.
-        // This decorator subscribes to angular dynamic locale change error and tries to use fallback regional format
-        $rootScope.$on('$localeChangeError', function(locale) {
-            if (locale !== fallbackRegionalFormat) {
-                service.set(fallbackRegionalFormat);
-            }
-        });
-        return service;
-    }]);
-}])
-// Configure defaults for language, regional format, time zone and time ago settings. Values from browser will be used if it's possible.
-.run(['platformWebApp.i18n', function(i18n) {
-    i18n.changeLanguage();
-    i18n.changeRegionalFormat();
-    i18n.changeTimeZone();
-    i18n.changeTimeAgoSettings();
-}]);
 angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
     $stateProvider
@@ -19371,6 +19408,9 @@ angular.module('platformWebApp')
             thresholdUnit: undefined,
             thresholdUnits: undefined
         },
+        timeSettings: {
+            showMeridian: undefined
+        },
         mainMenuState: {},
         load: function () {
             return userProfileApi.get(function (profile) {
@@ -19378,7 +19418,9 @@ angular.module('platformWebApp')
                 profile.language = languages.normalize(settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.Language").value);
                 profile.regionalFormat = locales.normalize(settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.RegionalFormat").value);
                 profile.timeZone = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.TimeZone").value;
-                profile.timeAgoSettings = { };
+                profile.timeSettings = {};
+                profile.timeSettings.showMeridian = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.ShowMeridian").value;
+                profile.timeAgoSettings = {};
                 profile.timeAgoSettings.useTimeAgo = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.UseTimeAgo").value;
                 profile.timeAgoSettings.threshold = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.FullDateThreshold").value;
                 var fullDateThresholdUnitSetting = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.FullDateThresholdUnit");
@@ -19398,6 +19440,7 @@ angular.module('platformWebApp')
             settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.Language").value = languages.normalize(result.language);
             settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.RegionalFormat").value = locales.normalize(result.regionalFormat);
             settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.TimeZone").value = result.timeZone;
+            settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.ShowMeridian").value = result.timeSettings.showMeridian;
             settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.UseTimeAgo").value = result.timeAgoSettings.useTimeAgo;
             settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.FullDateThreshold").value = result.timeAgoSettings.threshold;
             settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.FullDateThresholdUnit").value = result.timeAgoSettings.thresholdUnit;
@@ -19423,6 +19466,7 @@ angular.module('platformWebApp')
     };
     mainMenuService.addMenuItem(menuItem);
 }]);
+
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -20162,1069 +20206,6 @@ CodeMirror.registerHelper("fold", "markdown", function(cm, start) {
   };
 });
 
-angular.module('platformWebApp')
-.controller('platformWebApp.confirmDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
-    angular.extend($scope, dialog);
-
-    $scope.yes = function () {
-        $modalInstance.close(true);
-    };
-
-    $scope.no = function () {
-        $modalInstance.close(false);
-    };
-
-    $scope.cancel = function () {
-        $modalInstance.dismiss('cancel');
-    };
-}])
-.factory('platformWebApp.dialogService', ['$rootScope', '$modal', function ($rootScope, $modal) {
-    var dialogService = {
-        dialogs: [],
-        currentDialog: undefined
-    };
-
-    function findDialog(id) {
-        var found;
-        angular.forEach(dialogService.dialogs, function (dialog) {
-            if (dialog.id == id) {
-                found = dialog;
-            }
-        });
-
-        return found;
-    }
-
-    dialogService.showDialog = function (dialog, templateUrl, controller, cssClass) {
-        var dlg = findDialog(dialog.id);
-
-        if (angular.isUndefined(dlg)) {
-            dlg = dialog;
-
-            dlg.instance = $modal.open({
-                templateUrl: templateUrl,
-                controller: controller,
-                windowClass: cssClass ? cssClass : null,
-                resolve: {
-                    dialog: function () {
-                        return dialog;
-                    }
-                }
-            });
-
-            dlg.instance.result.then(function (result) //success
-            {
-                var idx = dialogService.dialogs.indexOf(dlg);
-                dialogService.dialogs.splice(idx, 1);
-                if (dlg.callback)
-                    dlg.callback(result);
-            }, function (reason) //dismiss
-            {
-                var idx = dialogService.dialogs.indexOf(dlg);
-                dialogService.dialogs.splice(idx, 1);
-            });
-
-            dialogService.dialogs.push(dlg);
-        }
-    };
-
-    dialogService.showConfirmationDialog = function (dialog) {
-        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/confirmDialog.tpl.html', 'platformWebApp.confirmDialogController');
-    };
-
-    dialogService.showNotificationDialog = function (dialog) {
-        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/notifyDialog.tpl.html', 'platformWebApp.confirmDialogController');
-    };
-
-    dialogService.showGalleryDialog = function (dialog) {
-        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/galleryDialog.tpl.html', 'platformWebApp.galleryDialogController', '__gallery');
-    };
-
-    return dialogService;
-
-}])
-
-angular.module('platformWebApp')
-.controller('platformWebApp.galleryDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
-    angular.extend($scope, dialog);
-
-    var imgCount = dialog.images.length;
-
-    $scope.close = function () {
-        $modalInstance.close(false);
-    }
-
-    $scope.prevImage = function (index) {
-        var i = index == -1 ? imgCount - 1 : index;
-        $scope.currentImage = dialog.images[i];
-    }
-
-    $scope.nextImage = function (index) {
-        var i = index == imgCount ? 0 : index;
-        $scope.currentImage = dialog.images[i];
-    }
-
-    $scope.openImage = function (image) {
-        $scope.currentImage = image;
-    }
-}]);
-'use strict';
-
-angular.module('platformWebApp')
-    .directive('vaAutofill', ['$timeout', function ($timeout) {
-        return {
-            require: 'ngModel',
-            link: function (scope, elem, attrs, ngModel) {
-                var origVal = elem.val();
-                $timeout(function () {
-                    var newVal = elem.val();
-                    if (ngModel.$pristine && origVal !== newVal) {
-                        ngModel.$setViewValue(newVal);
-                    }
-                }, 500);
-            }
-        }
-    }])
-;
-angular.module('platformWebApp')
-.directive('dynamic', ['$compile', function ($compile) {
-    return {
-        restrict: 'A',
-        replace: true,
-        link: function (scope, ele, attrs) {
-            scope.$watch(attrs.dynamic, function (html) {
-                ele.html(html);
-                $compile(ele.contents())(scope);
-            });
-        }
-    };
-}]);
-
-angular.module('platformWebApp')
-.directive('fallbackSrc', function () {
-    var fallbackSrc = {
-        link: function postLink(scope, iElement, iAttrs) {
-            iElement.bind('error', function () {
-                angular.element(this).attr("src", iAttrs.fallbackSrc);
-            });
-        }
-    }
-    return fallbackSrc;
-});
-angular.module('platformWebApp')
-.directive('vaGenericValueInput', ['$compile', '$templateCache', '$http', 'platformWebApp.objCompareService', 'platformWebApp.bladeNavigationService',
-function ($compile, $templateCache, $http, objComparer, bladeNavigationService) {
-
-    return {
-        restrict: 'E',
-        require: 'ngModel',
-        replace: true,
-        transclude: true,
-        scope: {
-            languages: "=",
-            getDictionaryValues: "&"
-        },
-        link: function (scope, element, attr, ngModelController, linker) {
-
-            scope.currentEntity = ngModelController.$modelValue;
-
-            scope.context = {};
-            scope.context.currentPropValues = [];
-            scope.context.allDictionaryValues = [];
-            var theEmptyValue = { value: null };
-
-            scope.$watch('context.currentPropValues', function (newValue, oldValue) {
-                //reflect only real changes
-                if (newValue !== oldValue &&
-                        !objComparer.equal(newValue, [theEmptyValue]) &&
-                        (newValue.length != scope.currentEntity.values.length || !objComparer.equal(newValue, scope.currentEntity.values))) {
-                    if (scope.currentEntity.isDictionary) {
-                        scope.currentEntity.values = _.map(newValue, function (x) { return { value: x } });
-                    }
-                    else if (scope.currentEntity.isArray && scope.currentEntity.isMultilingual && !scope.currentEntity.isDictionary) {
-                        //ungrouping values for multilingual array properties
-                        scope.currentEntity.values = [];
-                        angular.forEach(newValue, function (x) {
-                            var values = _.map(x.values, function (y) { return { locale: x.locale, value: y.value }; });
-                            scope.currentEntity.values = scope.currentEntity.values.concat(values);
-                        });
-                    }
-                    else {
-                        scope.currentEntity.values = newValue;
-                    }
-
-                    ngModelController.$setViewValue(scope.currentEntity);
-                }
-            }, true);
-
-            scope.$watch('languages', function (languages) {
-                if (scope.currentEntity.isMultilingual && !scope.currentEntity.isDictionary) {
-                    initLanguagesValuesMap(scope.currentEntity, languages);
-                }
-            });
-
-            ngModelController.$render = function () {
-                scope.currentEntity = ngModelController.$modelValue;
-
-                if (!scope.currentEntity.ngBindingModel) {
-                    scope.context.currentPropValues = angular.copy(scope.currentEntity.values);
-                    if (needAddEmptyValue(scope.currentEntity, scope.context.currentPropValues)) {
-                        scope.context.currentPropValues.push(angular.copy(theEmptyValue));
-                    }
-                }
-
-                if (scope.currentEntity.isDictionary) {
-                    scope.getDictionaryValues()(scope.currentEntity, setDictionaryValues);
-                }
-
-                //Group values for multilingual array properties
-                if (scope.currentEntity.isMultilingual && scope.currentEntity.isArray && !scope.currentEntity.isDictionary) {
-
-                    var groupByLocaleObj = _.groupBy(scope.context.currentPropValues, 'locale');
-                    scope.context.currentPropValues = [];
-                    for (var key in groupByLocaleObj) {
-                        if (groupByLocaleObj.hasOwnProperty(key)) {
-                            scope.context.currentPropValues.push({ locale: key, values: groupByLocaleObj[key] });
-                        }
-                    }
-                }
-                changeValueTemplate();
-            };
-
-            function needAddEmptyValue(property, values) {
-                return !property.isArray && !property.isDictionary && !property.isMultilingual && values.length == 0;
-            };
-
-            function initLanguagesValuesMap(property, languages) {
-                //Group values by language 
-                angular.forEach(languages, function (language) {
-                    //Currently select values
-                    var currentPropValues = _.filter(scope.context.currentPropValues, function (x) { return x.locale == language; });
-                    //need add empty value for single  value type
-                    if (currentPropValues.length == 0) {
-                        scope.context.currentPropValues.push({ value: null, locale: language });
-                    }
-                });
-            };
-
-
-            function setDictionaryValues(allDictionaryValues) {
-                var selectedValues = scope.currentEntity.values;
-                scope.context.allDictionaryValues = [];
-                scope.context.currentPropValues = [];
-
-                angular.forEach(allDictionaryValues, function (dictValue) {
-                    scope.context.allDictionaryValues.push(dictValue);
-                    //Need to select already selected values. Dictionary values have same type as standard values.
-                    if (_.any(selectedValues, function (x) { return x.value.id == dictValue.id })) {
-                        //add selected value
-                        scope.context.currentPropValues.push(dictValue);
-                    }
-                });
-            }
-
-            function getTemplateName(property) {
-                var result;
-                switch (property.valueType) {
-                    case 'Html':
-                    case 'Json':
-                        result = 'dCode';
-                        break;
-                    default:
-                        result = 'd' + property.valueType;
-                }
-
-                if (property.isDictionary) {
-                    result += '-dictionary';
-                }
-                if (property.isArray) {
-                    result += '-multivalue';
-                }
-                if (property.isMultilingual) {
-                    result += '-multilang';
-                }
-                result += '.html';
-                return result;
-            };
-
-            function changeValueTemplate() {
-                if (scope.currentEntity.valueType === 'Html' || scope.currentEntity.valueType === 'Json') {
-                    // Codemirror configuration
-                    scope.editorOptions = {
-                        lineWrapping: true,
-                        lineNumbers: true,
-                        extraKeys: { "Ctrl-Q": function (cm) { cm.foldCode(cm.getCursor()); } },
-                        foldGutter: true,
-                        gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-                        onLoad: function (_editor) {
-                            codemirrorEditor = _editor;
-                        },
-                    };
-                }
-                if (scope.currentEntity.valueType === 'Html') {
-                    scope.editorOptions['parserfile'] = 'liquid.js';
-                    scope.editorOptions['mode'] = 'htmlmixed';
-                }
-                if (scope.currentEntity.valueType === 'Json') {
-                    scope.editorOptions['parserfile'] = 'javascript.js';
-                    scope.editorOptions['mode'] = { name: 'javascript', json: true };
-                }
-
-                var templateName = getTemplateName(scope.currentEntity);
-
-                //load input template and display
-                $http.get(templateName, { cache: $templateCache }).then(function (results) {
-                    //Need to add ngForm to isolate form validation into sub form
-                    //var innerContainer = "<div id='innerContainer' />";
-
-                    //We must destroy scope of elements we are removing from DOM to avoid angular firing events
-                    var el = element.find('#valuePlaceHolder #innerContainer');
-                    if (el.length > 0) {
-                        el.scope().$destroy();
-                    }
-                    var container = angular.element("<div><div id='valuePlaceHolder'></div></div>");
-                    element.append(container);
-
-                    container = element.find('#valuePlaceHolder');
-                    var result = container.html(results.data.trim());
-
-                    if (scope.currentEntity.ngBindingModel) {
-                        $(result).find('[ng-model]').attr("ng-model", 'currentEntity.blade.currentEntity.' + scope.currentEntity.ngBindingModel);
-                    }
-
-                    //Create new scope, otherwise we would destroy our directive scope
-                    var newScope = scope.$new();
-                    $compile(result)(newScope);
-                });
-            };
-
-            /* Datepicker */
-            scope.datepickers = {
-                DateTime: false
-            }
-
-            scope.open = function ($event, which) {
-                $event.preventDefault();
-                $event.stopPropagation();
-
-                scope.datepickers[which] = true;
-            };
-
-            linker(function (clone) {
-                element.append(clone);
-            });
-
-            /* Image */
-            var originalBlade;
-            scope.uploadImage = function() {
-                var newBlade = {
-                    id: "imageUpload",
-                    currentEntityId: 'images',
-                    title: 'platform.blades.asset-upload.title',
-                    subtitle: scope.currentEntity.name,
-                    controller: 'platformWebApp.assets.assetUploadController',
-                    template: '$(Platform)/Scripts/app/assets/blades/asset-upload.tpl.html',
-                    fileUploadOptions: {
-                        singleFileMode: true,
-                        accept: "image/*",
-                        suppressParentRefresh: true
-                    }
-                };
-                newBlade.onUploadComplete = function(data) {
-                    if (data && data.length) {
-                        scope.context.currentPropValues[0].value = data[0].url;
-                        bladeNavigationService.closeBlade(newBlade);
-                    }
-                }
-
-                //saving orig blade reference (that is not imageUpload blade) for subsequent showBlade calls
-                if (!originalBlade) {
-                    originalBlade = bladeNavigationService.currentBlade.id !== "imageUpload" ? bladeNavigationService.currentBlade : bladeNavigationService.currentBlade.parentBlade;
-                }
-                bladeNavigationService.showBlade(newBlade, originalBlade);
-            }
-
-            scope.clearImage = function () {
-                scope.context.currentPropValues[0].value = undefined;
-            }
-
-            scope.openUrl = function (url) {
-                window.open(url, '_blank');
-            }
-        }
-    }
-}]);
-
-// leftClickMenu based on: ng-context-menu - v1.0.2 - An AngularJS directive to display a context menu when a right-click event is triggered
-angular
-    .module('platformWebApp')
-    .directive("leftClickMenu", ["$document", "ContextMenuService", function ($document, ContextMenuService) {
-        return {
-            restrict: 'A',
-            scope: {
-                'callback': '&leftClickMenu',
-                'disabled': '&contextMenuDisabled',
-                'closeCallback': '&contextMenuClose'
-            },
-            link: function ($scope, $element, $attrs) {
-                var opened = false;
-
-                function open(event, menuElement) {
-                    menuElement.addClass('open');
-
-                    var doc = $document[0].documentElement;
-                    var docLeft = (window.pageXOffset || doc.scrollLeft) -
-                                  (doc.clientLeft || 0),
-                        docTop = (window.pageYOffset || doc.scrollTop) -
-                                 (doc.clientTop || 0),
-                        elementWidth = menuElement[0].scrollWidth,
-                        elementHeight = menuElement[0].scrollHeight;
-                    var docWidth = doc.clientWidth + docLeft,
-                      docHeight = doc.clientHeight + docTop,
-                      totalWidth = elementWidth + event.pageX,
-                      totalHeight = elementHeight + event.pageY,
-                      left = Math.max(event.pageX - docLeft, 0),
-                      top = Math.max(event.pageY - docTop, 0);
-
-                    if (totalWidth > docWidth) {
-                        left = left - (totalWidth - docWidth);
-                    }
-
-                    if (totalHeight > docHeight) {
-                        top = top - (totalHeight - docHeight);
-                    }
-
-                    menuElement.css('top', top + 'px');
-                    menuElement.css('left', left + 'px');
-                    opened = true;
-                }
-
-                function close(menuElement) {
-                    menuElement.removeClass('open');
-
-                    if (opened) {
-                        $scope.closeCallback();
-                    }
-
-                    opened = false;
-                }
-
-                $element.bind('click', function (event) {
-                    if (!$scope.disabled()) {
-                        if (ContextMenuService.menuElement !== null) {
-                            close(ContextMenuService.menuElement);
-                        }
-                        ContextMenuService.menuElement = angular.element(
-                          document.getElementById($attrs.target)
-                        );
-                        ContextMenuService.element = event.target;
-                        //console.log('set', ContextMenuService.element);
-
-                        event.preventDefault();
-                        event.stopPropagation();
-                        $scope.$apply(function () {
-                            $scope.callback({ $event: event });
-                        });
-                        $scope.$apply(function () {
-                            open(event, ContextMenuService.menuElement);
-                        });
-                    }
-                });
-
-                function handleKeyUpEvent(event) {
-                    //console.log('keyup');
-                    if (!$scope.disabled() && opened && event.keyCode === 27) {
-                        $scope.$apply(function () {
-                            close(ContextMenuService.menuElement);
-                        });
-                    }
-                }
-
-                function handleClickEvent(event) {
-                    if (!$scope.disabled() &&
-                      opened &&
-                      (event.button !== 2 ||
-                       event.target !== ContextMenuService.element)) {
-                        $scope.$apply(function () {
-                            close(ContextMenuService.menuElement);
-                        });
-                    }
-                }
-
-                $document.bind('keyup', handleKeyUpEvent);
-                // Firefox treats a right-click as a click and a contextmenu event
-                // while other browsers just treat it as a contextmenu event
-                $document.bind('click', handleClickEvent);
-                $document.bind('contextmenu', handleClickEvent);
-
-                $scope.$on('$destroy', function () {
-                    //console.log('destroy');
-                    $document.unbind('keyup', handleKeyUpEvent);
-                    $document.unbind('click', handleClickEvent);
-                    $document.unbind('contextmenu', handleClickEvent);
-                });
-            }
-        };
-    }]);
-
-angular.module('platformWebApp')
-.factory('platformWebApp.metaFormsService', [function () {
-    var registeredMetaFields = { };
-
-    return {
-        registerMetaFields: function (metaFormName, metaFields) {
-            if (!registeredMetaFields[metaFormName]) {
-                registeredMetaFields[metaFormName] = [];
-            }
-            Array.prototype.push.apply(registeredMetaFields[metaFormName], metaFields);
-            registeredMetaFields[metaFormName] = _.sortBy(registeredMetaFields[metaFormName], 'priority');
-        },
-        getMetaFields: function(metaFormName) {
-            return registeredMetaFields[metaFormName];
-        }
-    };
-}])
-.directive('vaMetaform', [function () {
-    return {
-        restrict: 'E',
-        replace: true,
-        scope: {
-            blade: '=',
-            registeredInputs: '=',
-            columnCount: '@?'
-        },
-        templateUrl: '$(Platform)/Scripts/common/directives/metaform.tpl.html',
-        link: function (scope) {
-            var columnCount = scope.columnCount ? parseInt(scope.columnCount, 10) : 1;
-
-            var filteredInputs = _.filter(scope.registeredInputs, function (x) { return !x.isVisibleFn || x.isVisibleFn(scope.blade); });
-
-            var resultingGroups = [];
-            var isGroupStart = true, currentGroup;
-            _.each(filteredInputs, function (x) {
-                x = angular.copy(x);
-                x.ngBindingModel = x.name;
-
-                if (isGroupStart || (x.templateUrl && x.spanAllColumns)) {
-                    currentGroup = [x];
-                    resultingGroups.push(currentGroup);
-                } else {
-                    currentGroup.push(x);
-                }
-                isGroupStart = (x.templateUrl && x.spanAllColumns) || currentGroup.length == columnCount;
-            });
-
-            // generate empty columns
-            _.each(resultingGroups, function (gr) {
-                while (columnCount > gr.length) {
-                    gr.push({ templateUrl: 'emptyColumn.html' });
-                }
-            });
-            scope.bladeInputGroups = resultingGroups;
-        }
-    }
-}]);
-/**
- * Heavily adapted from the `type="number"` directive in Angular's
- * /src/ng/directive/input.js
- */
-
-'use strict';
-
-angular.module('platformWebApp')
-// TODO: Replace with tested localized version (see below)
-.directive('money', ['$timeout', function ($timeout) {
-    'use strict';
-
-    var NUMBER_REGEXP = /^\s*(\-|\+)?(\d+|(\d*(\.\d*)))\s*$/;
-
-    function link(scope, el, attrs, ngModelCtrl) {
-        var min = parseFloat(attrs.min || 0);
-        var precision = parseFloat(attrs.precision || 2);
-        var lastValidValue;
-
-        function round(num) {
-            var d = Math.pow(10, precision);
-            return Math.round(num * d) / d;
-        }
-
-        function formatPrecision(value) {
-            return parseFloat(value).toFixed(precision);
-        }
-
-        function formatViewValue(value) {
-            return ngModelCtrl.$isEmpty(value) ? '' : '' + value;
-        }
-
-
-        ngModelCtrl.$parsers.push(function (value) {
-            if (angular.isUndefined(value)) {
-                value = '';
-            }
-
-            // Handle leading decimal point, like ".5"
-            if (value.indexOf('.') === 0) {
-                value = '0' + value;
-            }
-
-            // Allow "-" inputs only when min < 0
-            if (value.indexOf('-') === 0) {
-                if (min >= 0) {
-                    value = null;
-                    ngModelCtrl.$setViewValue('');
-                    ngModelCtrl.$render();
-                } else if (value === '-') {
-                    value = '';
-                }
-            }
-
-            var empty = ngModelCtrl.$isEmpty(value);
-            if (empty || NUMBER_REGEXP.test(value)) {
-                lastValidValue = (value === '')
-                  ? null
-                  : (empty ? value : parseFloat(value));
-            } else {
-                // Render the last valid input in the field
-                ngModelCtrl.$setViewValue(formatViewValue(lastValidValue));
-                ngModelCtrl.$render();
-            }
-
-            ngModelCtrl.$setValidity('number', true);
-            return lastValidValue;
-        });
-        ngModelCtrl.$formatters.push(formatViewValue);
-
-        var minValidator = function (value) {
-            if (!ngModelCtrl.$isEmpty(value) && value < min) {
-                ngModelCtrl.$setValidity('min', false);
-                return undefined;
-            } else {
-                ngModelCtrl.$setValidity('min', true);
-                return value;
-            }
-        };
-        ngModelCtrl.$parsers.push(minValidator);
-        ngModelCtrl.$formatters.push(minValidator);
-
-        if (attrs.max) {
-            var max = parseFloat(attrs.max);
-            var maxValidator = function (value) {
-                if (!ngModelCtrl.$isEmpty(value) && value > max) {
-                    ngModelCtrl.$setValidity('max', false);
-                    return undefined;
-                } else {
-                    ngModelCtrl.$setValidity('max', true);
-                    return value;
-                }
-            };
-
-            ngModelCtrl.$parsers.push(maxValidator);
-            ngModelCtrl.$formatters.push(maxValidator);
-        }
-
-        // Round off
-        if (precision > -1) {
-            ngModelCtrl.$parsers.push(function (value) {
-                return value ? round(value) : value;
-            });
-            ngModelCtrl.$formatters.push(function (value) {
-                return value ? formatPrecision(value) : value;
-            });
-        }
-
-        el.bind('blur', function () {
-            $timeout(function () {
-                var value = ngModelCtrl.$modelValue;
-                if (value) {
-                    ngModelCtrl.$viewValue = formatPrecision(value);
-                    ngModelCtrl.$render();
-                }
-            });
-        });
-    }
-
-    return {
-        restrict: 'A',
-        require: 'ngModel',
-        link: link
-    };
-}]);
-// Custom directive to support localized currency float number parsing & validation
-//.directive('money', ['platformWebApp.currencyFormat', function (currencyFormat) {
-//    return {
-//        restrict: 'A',
-//        require: 'ngModel',
-//        link: function (scope, elem, attrs, ctrl) {
-//            ctrl.$parsers.unshift(function(viewValue) {
-//                return currencyFormat.validate(viewValue, attrs.minExclusive, attrs.min, attrs.maxExclusive, attrs.max, attrs.fraction, ctrl.$setValidity);
-//            });
-
-//            ctrl.$formatters.unshift(function (modelValue) {
-//                return currencyFormat.format(modelValue, attrs.minExclusive, attrs.min, attrs.maxExclusive, attrs.max, attrs.fraction);
-//            });
-
-//            scope.$on('$localeChangeSuccess', function () {
-//                ctrl.$viewValue = ctrl.$formatters.reduceRight((prev, fn) => fn(prev), ctrl.$modelValue);
-//                ctrl.$render();
-//            });
-//        }
-//    };
-//}]);
-angular.module('platformWebApp')
-.directive('multipleAttr', function () {
-    return {
-        'restrict': 'A',
-        'compile': function () {
-            return {
-                'pre': function ($s, $el, attrs) {
-                    if (attrs.multipleAttr === 'true' || attrs.multipleAttr === true) {
-                        $el.attr('multiple', '');
-                    }
-                }
-            }
-        }
-    }
-})
-angular.module('platformWebApp')
-.config(['$httpProvider', function ($httpProvider) {
-    $httpProvider.interceptors.push('platformWebApp.httpInterceptor');
-}])
-.factory('platformWebApp.httpInterceptor', function () {
-	return {};
-})
-.directive('wcOverlay', ['$q', '$timeout', '$window', 'platformWebApp.httpInterceptor', function ($q, $timeout, $window, httpInterceptor) {
-	return {
-		restrict: 'EA',
-		transclude: true,
-		scope: {
-			wcOverlayDelay: "@"
-		},
-		template: '<div id="overlay-container" class="overlayContainer">' +
-						'<div id="overlay-background" class="overlayBackground"></div>' +
-						'<div id="overlay-content" class="overlayContent" data-ng-transclude>' +
-						'</div>' +
-					'</div>',
-		link: function (scope, element, attrs) {
-			var overlayContainer = null,
-				timerPromise = null,
-				timerPromiseHide = null,
-				inSession = false,
-				queue = [];
-
-			init();
-
-			function init() {
-				wireUpHttpInterceptor();
-				if (window.jQuery) wirejQueryInterceptor();
-				overlayContainer = document.getElementById('overlay-container');
-			}
-
-			//Hook into httpInterceptor factory request/response/responseError functions                
-			function wireUpHttpInterceptor() {
-
-				httpInterceptor.request = function (config) {
-					processRequest();
-					return config || $q.when(config);
-				};
-
-				httpInterceptor.response = function (response) {
-					processResponse();
-					return response || $q.when(response);
-				};
-
-				httpInterceptor.responseError = function (rejection) {
-					processResponse();
-					return $q.reject(rejection);
-				};
-			}
-
-			//Monitor jQuery Ajax calls in case it's used in an app
-			function wirejQueryInterceptor() {
-				$(document).ajaxStart(function () {
-					processRequest();
-				});
-
-				$(document).ajaxComplete(function () {
-					processResponse();
-				});
-
-				$(document).ajaxError(function () {
-					processResponse();
-				});
-			}
-
-			function processRequest() {
-				queue.push({});
-				if (queue.length == 1) {
-					timerPromise = $timeout(function () {
-						if (queue.length) showOverlay();
-					}, scope.wcOverlayDelay ? scope.wcOverlayDelay : 500); //Delay showing for 500 millis to avoid flicker
-				}
-			}
-
-			function processResponse() {
-				queue.pop();
-				if (queue.length == 0) {
-					//Since we don't know if another XHR request will be made, pause before
-					//hiding the overlay. If another XHR request comes in then the overlay
-					//will stay visible which prevents a flicker
-					timerPromiseHide = $timeout(function () {
-						//Make sure queue is still 0 since a new XHR request may have come in
-						//while timer was running
-						if (queue.length == 0) {
-							hideOverlay();
-							if (timerPromiseHide) $timeout.cancel(timerPromiseHide);
-						}
-					}, scope.wcOverlayDelay ? scope.wcOverlayDelay : 500);
-				}
-			}
-
-			function showOverlay() {
-				var w = 0;
-				var h = 0;
-				if (!$window.innerWidth) {
-					if (!(document.documentElement.clientWidth == 0)) {
-						w = document.documentElement.clientWidth;
-						h = document.documentElement.clientHeight;
-					}
-					else {
-						w = document.body.clientWidth;
-						h = document.body.clientHeight;
-					}
-				}
-				else {
-					w = $window.innerWidth;
-					h = $window.innerHeight;
-				}
-				var content = document.getElementById('overlay-content');
-				var contentWidth = parseInt(getComputedStyle(content, 'width').replace('px', ''));
-				var contentHeight = parseInt(getComputedStyle(content, 'height').replace('px', ''));
-
-				content.style.top = h / 2 - contentHeight / 2 + 'px';
-				content.style.left = w / 2 - contentWidth / 2 + 'px'
-
-				overlayContainer.style.display = 'block';
-			}
-
-			function hideOverlay() {
-				if (timerPromise) $timeout.cancel(timerPromise);
-				overlayContainer.style.display = 'none';
-			}
-
-			var getComputedStyle = function () {
-				var func = null;
-				if (document.defaultView && document.defaultView.getComputedStyle) {
-					func = document.defaultView.getComputedStyle;
-				} else if (typeof (document.body.currentStyle) !== "undefined") {
-					func = function (element, anything) {
-						return element["currentStyle"];
-					};
-				}
-
-				return function (element, style) {
-					return func(element, null)[style];
-				}
-			}();
-		}
-	}
-}]);
-
-/*@author Tushar Borole
- * @description user has to jsut mention the percent, on completion of that percentage scroll; expression will be fired
- * for example <div id="fixed" when-scrolled="loadMore()" percent="70">*/
-angular.module('platformWebApp')
-    .directive('whenScrolled', function () {
-        return function (scope, elm, attr) {
-            var raw = elm[0];
-            var scrollCompleted = true;
-            scope.$on('scrollCompleted', function () {
-                scrollCompleted = true;
-            });
-
-            elm.bind('scroll', function () {
-                var remainingHeight = raw.offsetHeight - raw.scrollHeight;
-                var scrollTop = raw.scrollTop;
-                var percent = Math.abs((scrollTop / remainingHeight) * 100);
-
-                var elemPercent = 70;
-                if (attr.percent)
-                    elemPercent = attr.percent;
-
-                if (percent > elemPercent) {
-                    if (scrollCompleted) {
-                        scrollCompleted = false;
-                        scope.$apply(attr.whenScrolled);
-                    }
-                }
-            });
-        };
-    });
-
-
-angular.module('platformWebApp').directive('vaShowbigimage', function () {
-    return {
-        scope: {
-        	vaShowbigimage: '='
-        },
-        link: function (scope, element, attrs) {
-            element.bind('mouseenter', function () {
-                var el = $(this),
-                    elW = el.width() + 8,
-                    elLeft = parseInt(el.offset().left) + elW,
-                    elTop  = parseInt(el.offset().top);
-
-                $('body').prepend('<div class="check-image-size"><img src="' + scope.vaShowbigimage + '" alt="" /></div>');
-                
-                var imgH = $('.check-image-size img').height(),
-                    imgW = $('.check-image-size img').width();
-
-                if(imgH >= 300 || imgW >= 300) {
-                	$('body').append('<div class="image-preview" style="left: ' + elLeft + 'px; top: ' + elTop + 'px;"><img src="' + scope.vaShowbigimage + '"></div>');
-                }
-
-                $('.check-image-size').remove();
-            });
-            element.bind('mouseleave', function () {
-                $('.image-preview').remove();
-            });
-        }
-    }
-});
-'use strict';
-
-angular.module('platformWebApp')
-// TODO: Replace with tested localized version (see below)
-.directive('smartFloat', ['$filter', '$compile', function ($filter, $compile) {
-    var INTEGER_REGEXP = /^\-?\d+$/; //Integer number
-    var FLOAT_REGEXP_1 = /^[-+]?\$?\d+.(\d{3})*(,\d*)$/; //Numbers like: 1.123,56
-    var FLOAT_REGEXP_2 = /^[-+]?\$?\d+,(\d{3})*(.\d*)$/; //Numbers like: 1,123.56
-    var FLOAT_REGEXP_3 = /^[-+]?\$?\d+(.\d*)?$/; //Numbers like: 1123.56
-    var FLOAT_REGEXP_4 = /^[-+]?\$?\d+(,\d*)?$/; //Numbers like: 1123,56
-
-    return {
-        require: 'ngModel',
-        link: function (scope, elm, attrs, ctrl) {
-            var fraction = attrs.fraction ? attrs.fraction : 2;
-            if (attrs.numType === "float") {
-                ctrl.$parsers.unshift(function (viewValue) {                    
-                    if (FLOAT_REGEXP_1.test(viewValue)) {
-                        ctrl.$setValidity('float', true);
-                        return parseFloat(viewValue.replace('.', '').replace(',', '.'));
-                    } else if (FLOAT_REGEXP_2.test(viewValue)) {
-                        ctrl.$setValidity('float', true);
-                        return parseFloat(viewValue.replace(',', ''));
-                    } else if (FLOAT_REGEXP_3.test(viewValue)) {
-                        ctrl.$setValidity('float', true);
-                        return parseFloat(viewValue);
-                    } else if (FLOAT_REGEXP_4.test(viewValue)) {
-                        ctrl.$setValidity('float', true);
-                        return parseFloat(viewValue.replace(',', '.'));
-                    } else {
-                        //Allow to use empty values
-                        ctrl.$setValidity('float', !viewValue);
-                        return viewValue;
-                    }
-                });
-
-                ctrl.$formatters.unshift(
-                    function (modelValue) {
-                        return $filter('number')(parseFloat(modelValue), fraction);
-                    }
-                );
-            }
-            else {
-                ctrl.$parsers.unshift(function (viewValue) {
-                    if (INTEGER_REGEXP.test(viewValue)) {
-                        ctrl.$setValidity('integer', true);
-                        return viewValue;
-                    }
-                    else {
-                        //Allow to use empty values
-                        ctrl.$setValidity('integer', !viewValue);
-                        return viewValue;
-                    }
-                });
-            }
-        }
-    };
-}]);
-// Custom directive to support localized integer and float number parsing & validation
-//.directive('smartFloat', ['platformWebApp.numberFormat', function (numberFormat) {
-//    return {
-//        restrict: 'A',
-//        require: 'ngModel',
-//        link: function (scope, elem, attrs, ctrl) {
-//            ctrl.$parsers.unshift(function(viewValue) {
-//                return numberFormat.validate(viewValue, attrs.numType, attrs.minExclusive, attrs.min, attrs.maxExclusive, attrs.max, attrs.fraction, ctrl.$setValidity);
-//            });
-
-//            ctrl.$formatters.unshift(function (modelValue) {
-//                return numberFormat.format(modelValue, attrs.numType, attrs.minExclusive, attrs.min, attrs.maxExclusive, attrs.max, attrs.fraction);
-//            });
-
-//            scope.$on('$localeChangeSuccess', function () {
-//                ctrl.$viewValue = ctrl.$formatters.reduceRight((prev, fn) => fn(prev), ctrl.$modelValue);
-//                ctrl.$render();
-//            });
-//        }
-//    };
-//}]);
-angular.module('platformWebApp')
-.directive('vaTooltip', [function ()
-{
-    return {
-        restrict: 'A',
-        priority: 10000,
-        compile: function (tElem, tAttrs)
-        {
-            var attributes = ["tooltip-placement", "tooltip-animation", "tooltip-popup-delay", "tooltip-trigger", "tooltip-enable", "tooltip-append-to-body", "tooltip-class"];
-            for (var i = 0; i < attributes.length; i++) {
-                var attribute = attributes[i];
-                if (!tElem.attr[attribute]) {
-                    tElem.attr(attribute, '{{' + tAttrs.$normalize(attribute) + '}}');
-                }
-            }
-        }
-    };
-}]);
-angular.module('platformWebApp')
-.directive('vaTooltipOptions', [function () {
-    return {
-        restrict: 'A',
-        scope: false,
-        compile: function () {
-            return function (scope, element, attrs) {
-                var options = ["tooltipPlacement", "tooltipAnimation", "tooltipPopupDelay", "tooltipTrigger", "tooltipEnable", "tooltipAppendToBody", "tooltipClass"];
-                var applyOption = function(option) {
-                    if (attrs[option]) {
-                        scope[option] = attrs[option];
-                        attrs.$observe(option, function() {
-                            scope[option] = attrs[option];
-                        });
-                    }
-                };
-                for (var i = 0; i < options.length; i++) {
-                    applyOption(options[i]);
-                }
-            };
-        }
-    };
-}]);
-
-angular.module('platformWebApp').directive('vaTabs', function () {
-    return {
-        restrict: 'A',
-        link: function (scope, element, attrs) {
-            $('body').delegate('.tab-item', 'click', function () {
-                var self = $(this);
-                    index = self.index();
-
-                self.addClass('__selected').siblings().removeClass('__selected');
-                self.parents('.tabs').find('.tab-cnt').eq(index).addClass('__opened').siblings().removeClass('__opened');
-            });
-        }
-    }
-});
 // Full list of countries defined by ISO 3166-1 alpha-3
 // based on https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
 angular.module('platformWebApp')
@@ -22349,6 +21330,2116 @@ angular.module('platformWebApp')
     };
     return result;
 }]);
+angular.module('platformWebApp')
+.controller('platformWebApp.confirmDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
+    angular.extend($scope, dialog);
+
+    $scope.yes = function () {
+        $modalInstance.close(true);
+    };
+
+    $scope.no = function () {
+        $modalInstance.close(false);
+    };
+
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
+}])
+.factory('platformWebApp.dialogService', ['$rootScope', '$modal', function ($rootScope, $modal) {
+    var dialogService = {
+        dialogs: [],
+        currentDialog: undefined
+    };
+
+    function findDialog(id) {
+        var found;
+        angular.forEach(dialogService.dialogs, function (dialog) {
+            if (dialog.id == id) {
+                found = dialog;
+            }
+        });
+
+        return found;
+    }
+
+    dialogService.showDialog = function (dialog, templateUrl, controller, cssClass) {
+        var dlg = findDialog(dialog.id);
+
+        if (angular.isUndefined(dlg)) {
+            dlg = dialog;
+
+            dlg.instance = $modal.open({
+                templateUrl: templateUrl,
+                controller: controller,
+                windowClass: cssClass ? cssClass : null,
+                resolve: {
+                    dialog: function () {
+                        return dialog;
+                    }
+                }
+            });
+
+            dlg.instance.result.then(function (result) //success
+            {
+                var idx = dialogService.dialogs.indexOf(dlg);
+                dialogService.dialogs.splice(idx, 1);
+                if (dlg.callback)
+                    dlg.callback(result);
+            }, function (reason) //dismiss
+            {
+                var idx = dialogService.dialogs.indexOf(dlg);
+                dialogService.dialogs.splice(idx, 1);
+            });
+
+            dialogService.dialogs.push(dlg);
+        }
+    };
+
+    dialogService.showConfirmationDialog = function (dialog) {
+        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/confirmDialog.tpl.html', 'platformWebApp.confirmDialogController');
+    };
+
+    dialogService.showNotificationDialog = function (dialog) {
+        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/notifyDialog.tpl.html', 'platformWebApp.confirmDialogController');
+    };
+
+    dialogService.showGalleryDialog = function (dialog) {
+        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/galleryDialog.tpl.html', 'platformWebApp.galleryDialogController', '__gallery');
+    };
+
+    return dialogService;
+
+}])
+
+angular.module('platformWebApp')
+.controller('platformWebApp.galleryDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
+    angular.extend($scope, dialog);
+
+    var imgCount = dialog.images.length;
+
+    $scope.close = function () {
+        $modalInstance.close(false);
+    }
+
+    $scope.prevImage = function (index) {
+        var i = index == -1 ? imgCount - 1 : index;
+        $scope.currentImage = dialog.images[i];
+    }
+
+    $scope.nextImage = function (index) {
+        var i = index == imgCount ? 0 : index;
+        $scope.currentImage = dialog.images[i];
+    }
+
+    $scope.openImage = function (image) {
+        $scope.currentImage = image;
+    }
+}]);
+'use strict';
+
+angular.module('platformWebApp')
+    .directive('vaAutofill', ['$timeout', function ($timeout) {
+        return {
+            require: 'ngModel',
+            link: function (scope, elem, attrs, ngModel) {
+                var origVal = elem.val();
+                $timeout(function () {
+                    var newVal = elem.val();
+                    if (ngModel.$pristine && origVal !== newVal) {
+                        ngModel.$setViewValue(newVal);
+                    }
+                }, 500);
+            }
+        }
+    }])
+;
+//replace datetimeDirective
+angular.module('platformWebApp')
+    .constant('uiDatetimePickerConfig',
+        {
+            dateFormat: 'medium',
+            defaultTime: '00:00:00',
+            html5Types: {
+                date: 'yyyy-MM-dd',
+                'datetime-local': 'yyyy-MM-ddTHH:mm:ss.sss',
+                'month': 'yyyy-MM'
+            },
+            initialPicker: 'date',
+            reOpenDefault: false,
+            enableDate: true,
+            enableTime: true,
+            buttonBar: {
+                show: true,
+                now: {
+                    show: true
+                },
+                today: {
+                    show: true
+                },
+                clear: {
+                    show: true
+                },
+                date: {
+                    show: true
+                },
+                time: {
+                    show: true
+                },
+                close: {
+                    show: true
+                }
+            },
+            closeOnDateSelection: false,
+            appendToBody: false,
+            altInputFormats: [],
+            ngModelOptions: {},
+            showMeridian: false
+        })
+    .controller('DateTimePickerController',
+        [
+            '$scope', '$element', '$attrs', '$compile', '$parse', '$document', '$timeout', '$position', 'dateFilter',
+            'dateParser', 'uiDatetimePickerConfig', '$rootScope', 'timepickerConfig',
+            function (scope, element, attrs, $compile, $parse, $document, $timeout, $uibPosition, dateFilter, uibDateParser, uiDatetimePickerConfig, $rootScope, timepickerConfig) {
+                var dateFormat = uiDatetimePickerConfig.dateFormat, ngModel, ngModelOptions, $popup,
+                    cache = {},
+                    watchListeners = [],
+                    closeOnDateSelection = angular.isDefined(attrs.closeOnDateSelection)
+                        ? scope.$parent.$eval(attrs.closeOnDateSelection)
+                        : uiDatetimePickerConfig.closeOnDateSelection,
+                    appendToBody = angular.isDefined(attrs.datepickerAppendToBody)
+                        ? scope.$parent.$eval(attrs.datepickerAppendToBody)
+                        : uiDatetimePickerConfig.appendToBody,
+                    altInputFormats = angular.isDefined(attrs.altInputFormats)
+                        ? scope.$parent.$eval(attrs.altInputFormats)
+                        : uiDatetimePickerConfig.altInputFormats;
+
+                // taken from UI Bootstrap 2.5.0
+                uibDateParser.fromTimezone = function fromTimezone(date, timezone) {
+                    return date && timezone ? convertTimezoneToLocal(date, timezone, true) : date;
+                }
+
+                uibDateParser.toTimezone = function toTimezone(date, timezone) {
+                    return date && timezone ? convertTimezoneToLocal(date, timezone) : date;
+                }
+
+                function timezoneToOffset(timezone, fallback) {
+                    timezone = timezone.replace(/:/g, '');
+                    var requestedTimezoneOffset = Date.parse('Jan 01, 1970 00:00:00 ' + timezone) / 60000;
+                    return isNaN(requestedTimezoneOffset) ? fallback : requestedTimezoneOffset;
+                }
+
+                function addDateMinutes(date, minutes) {
+                    date = new Date(date.getTime());
+                    date.setMinutes(date.getMinutes() + minutes);
+                    return date;
+                }
+
+                function convertTimezoneToLocal(date, timezone, reverse) {
+                    reverse = reverse ? -1 : 1;
+                    var dateTimezoneOffset = date.getTimezoneOffset();
+                    var timezoneOffset = timezoneToOffset(timezone, dateTimezoneOffset);
+                    return addDateMinutes(date, reverse * (timezoneOffset - dateTimezoneOffset));
+                }
+
+
+                this.init = function (_ngModel) {
+                    ngModel = _ngModel;
+                    ngModelOptions = ngModel.$options || uiDatetimePickerConfig.ngModelOptions;
+
+                    scope.watchData = {};
+                    scope.buttonBar = angular.isDefined(attrs.buttonBar)
+                        ? scope.$parent.$eval(attrs.buttonBar)
+                        : uiDatetimePickerConfig.buttonBar;
+
+                    // determine which pickers should be available. Defaults to date and time
+                    scope.enableDate = angular.isDefined(scope.enableDate)
+                        ? scope.enableDate
+                        : uiDatetimePickerConfig.enableDate;
+                    scope.enableTime = angular.isDefined(scope.enableTime)
+                        ? scope.enableTime
+                        : uiDatetimePickerConfig.enableTime;
+
+                    // determine default picker
+                    scope.initialPicker = angular.isDefined(attrs.initialPicker)
+                        ? attrs.initialPicker
+                        : (scope.enableDate ? uiDatetimePickerConfig.initialPicker : 'time');
+
+                    // determine the picker to open when control is re-opened
+                    scope.reOpenDefault = angular.isDefined(attrs.reOpenDefault)
+                        ? attrs.reOpenDefault
+                        : uiDatetimePickerConfig.reOpenDefault;
+
+                    // check if an illegal combination of options exists
+                    if (scope.initialPicker == 'date' && !scope.enableDate) {
+                        throw new Error(
+                            "datetimePicker can't have initialPicker set to date and have enableDate set to false.");
+                    }
+
+                    // default picker view
+                    scope.showPicker = !scope.enableDate ? 'time' : scope.initialPicker;
+
+                    var isHtml5DateInput = false;
+
+                    if (uiDatetimePickerConfig.html5Types[attrs.type]) {
+                        dateFormat = uiDatetimePickerConfig.html5Types[attrs.type];
+                        isHtml5DateInput = true;
+                    } else {
+                        dateFormat = attrs.datepickerPopup || uiDatetimePickerConfig.dateFormat;
+                        attrs.$observe('datetimePicker',
+                            function(value) {
+                                var newDateFormat = value || uiDatetimePickerConfig.dateFormat;
+
+                                if (newDateFormat !== dateFormat) {
+                                    dateFormat = newDateFormat;
+                                    ngModel.$modelValue = null;
+
+                                    if (!dateFormat) {
+                                        throw new Error('datetimePicker must have a date format specified.');
+                                    }
+                                }
+                            });
+                    }
+
+                    // popup element used to display calendar
+                    var popupEl = angular.element('' +
+                        '<div date-picker-wrap>' +
+                        '<div datepicker></div>' +
+                        '</div>' +
+                        '<div time-picker-wrap>' +
+                        '<div timepicker style="margin:0 auto"></div>' +
+                        '</div>');
+
+                    scope.ngModelOptions = angular.copy(ngModelOptions);
+                    scope.ngModelOptions.timezone = null;
+
+                    // get attributes from directive
+                    popupEl.attr({
+                        'ng-model': 'date',
+                        'ng-model-options': 'ngModelOptions',
+                        'ng-change': 'dateSelection(date)'
+                    });
+
+                    // datepicker element
+                    var datepickerEl = angular.element(popupEl.children()[0]);
+
+                    if (isHtml5DateInput) {
+                        if (attrs.type === 'month') {
+                            datepickerEl.attr('datepicker-mode', '"month"');
+                            datepickerEl.attr('min-mode', 'month');
+                        }
+                    }
+
+                    if (attrs.datepickerOptions) {
+                        var options = scope.$parent.$eval(attrs.datepickerOptions);
+
+                        if (options && options.initDate) {
+                            scope.initDate = uibDateParser.fromTimezone(options.initDate, ngModelOptions.timezone);
+                            datepickerEl.attr('init-date', 'initDate');
+                            delete options.initDate;
+                        }
+
+                        angular.forEach(options,
+                            function(value, option) {
+                                datepickerEl.attr(cameltoDash(option), value);
+                            });
+                    }
+
+                    // set datepickerMode to day by default as need to create watch
+                    // else disabled cannot pass in mode
+                    if (!angular.isDefined(attrs['datepickerMode'])) {
+                        attrs['datepickerMode'] = 'day';
+                    }
+
+                    if (attrs.dateDisabled) {
+                        datepickerEl.attr('date-disabled', 'dateDisabled({ date: date, mode: mode })');
+                    }
+
+                    angular.forEach([
+                            'formatDay', 'formatMonth', 'formatYear', 'formatDayHeader', 'formatDayTitle',
+                            'formatMonthTitle', 'showWeeks', 'startingDay', 'yearRows', 'yearColumns'
+                        ],
+                        function(key) {
+                            if (angular.isDefined(attrs[key])) {
+                                datepickerEl.attr(cameltoDash(key), attrs[key]);
+                            }
+                        });
+
+                    if (attrs.customClass) {
+                        datepickerEl.attr('custom-class', 'customClass({ date: date, mode: mode })');
+                    }
+
+                    angular.forEach(['minMode', 'maxMode', 'datepickerMode', 'shortcutPropagation'],
+                        function(key) {
+                            if (attrs[key]) {
+                                var getAttribute = $parse(attrs[key]);
+
+                                watchListeners.push(scope.$parent.$watch(getAttribute,
+                                    function(value) {
+                                        scope.watchData[key] = value;
+                                    }));
+                                datepickerEl.attr(cameltoDash(key), 'watchData.' + key);
+
+                                // Propagate changes from datepicker to outside
+                                if (key === 'datepickerMode') {
+                                    var setAttribute = getAttribute.assign;
+                                    watchListeners.push(scope.$watch('watchData.' + key,
+                                        function(value, oldvalue) {
+                                            if (angular.isFunction(setAttribute) && value !== oldvalue) {
+                                                setAttribute(scope.$parent, value);
+                                            }
+                                        }));
+                                }
+                            }
+                        });
+
+                    // timepicker element
+                    var timepickerEl = angular.element(popupEl.children()[1]);
+
+                    if (attrs.timepickerOptions) {
+                        var options = scope.$parent.$eval(attrs.timepickerOptions);
+                        angular.forEach(options,
+                            function(value, option) {
+                                scope.watchData[option] = value;
+                                timepickerEl.attr(cameltoDash(option), 'watchData.' + option);
+                            });
+                    }
+
+                    // watch attrs - NOTE: minDate and maxDate are used with datePicker and timePicker.  By using the minDate and maxDate
+                    // with the timePicker, you can dynamically set the min and max time values.  This cannot be done using the min and max values
+                    // with the timePickerOptions
+                    angular.forEach(['minDate', 'maxDate', 'initDate'],
+                        function(key) {
+                            if (attrs[key]) {
+                                var getAttribute = $parse(attrs[key]);
+
+                                watchListeners.push(scope.$parent.$watch(getAttribute,
+                                    function(value) {
+                                        scope.watchData[key] = value;
+                                    }));
+                                datepickerEl.attr(cameltoDash(key), 'watchData.' + key);
+
+                                if (key == 'minDate') {
+                                    timepickerEl.attr('min', 'watchData.minDate');
+                                } else if (key == 'maxDate')
+                                    timepickerEl.attr('max', 'watchData.maxDate');
+                            }
+                        });
+
+                    // do not check showWeeks attr, as should be used via datePickerOptions
+
+                    if (!isHtml5DateInput) {
+                        // Internal API to maintain the correct ng-invalid-[key] class
+                        ngModel.$$parserName = 'datetime';
+                        ngModel.$validators.datetime = validator;
+                        ngModel.$parsers.unshift(parseDate);
+                        ngModel.$formatters.push(function(value) {
+                            if (ngModel.$isEmpty(value)) {
+                                scope.date = value;
+                                return value;
+                            }
+                            scope.date = uibDateParser.fromTimezone(value, ngModelOptions.timezone);
+                            dateFormat = dateFormat.replace(/M!/, 'MM')
+                                .replace(/d!/, 'dd');
+
+                            return dateFilter(scope.date, dateFormat);
+                        });
+                    } else {
+                        ngModel.$formatters.push(function(value) {
+                            scope.date = uibDateParser.fromTimezone(value, ngModelOptions.timezone);;
+                            return value;
+                        });
+                    }
+
+                    // Detect changes in the view from the text box
+                    ngModel.$viewChangeListeners.push(function() {
+                        scope.date = parseDateString(ngModel.$viewValue);
+                    });
+
+                    element.bind('keydown', inputKeydownBind);
+
+                    $popup = $compile(popupEl)(scope);
+                    // Prevent jQuery cache memory leak (template is now redundant after linking)
+                    popupEl.remove();
+
+                    if (appendToBody) {
+                        $document.find('body').append($popup);
+                    } else {
+                        element.after($popup);
+                    }
+
+                };
+
+                // get text
+                scope.getText = function(key) {
+                    return scope.buttonBar[key].text || uiDatetimePickerConfig.buttonBar[key].text;
+                };
+
+                // determine if button is to be shown or not
+                scope.doShow = function(key) {
+                    if (angular.isDefined(scope.buttonBar[key].show))
+                        return scope.buttonBar[key].show;
+                    else
+                        return uiDatetimePickerConfig.buttonBar[key].show;
+                };
+
+                // Inner change
+                scope.dateSelection = function (dt) {
+                    // check if timePicker is being shown and merge dates, so that the date
+                    // part is never changed, only the time
+
+                    //set date whis this time (00:00:00:0000)
+                    if (scope.enableTime && scope.showPicker === 'date') {
+                        var defaultTimeForDate = 0;
+
+                        // only proceed if dt is a date
+                        if (dt || dt != null) {
+                            // check if our scope.date is null, and if so, set to todays date
+                            if (!angular.isDefined(scope.date) || scope.date == null) {
+                                scope.date = new Date();
+                            }
+
+                            // dt will not be undefined if the now or today button is pressed
+                            if (dt && dt != null) {
+                                // get the existing date and update the time
+                                var date = new Date(dt);
+                                date.setHours(defaultTimeForDate);
+                                date.setMinutes(defaultTimeForDate);
+                                date.setSeconds(defaultTimeForDate);
+                                date.setMilliseconds(defaultTimeForDate);
+                                dt = date;
+                            }
+                        }
+                    }
+
+                    if (scope.enableTime && scope.showPicker === 'time') {
+                        // only proceed if dt is a date
+                        if (dt || dt != null) {
+                            // check if our scope.date is null, and if so, set to todays date
+                            if (!angular.isDefined(scope.date) || scope.date == null) {
+                                scope.date = new Date();
+                            }
+
+                            // dt will not be undefined if the now or today button is pressed
+                            if (dt && dt != null) {
+                                // get the existing date and update the time
+                                var date = new Date(scope.date);
+                                date.setHours(dt.getHours());
+                                date.setMinutes(dt.getMinutes());
+                                date.setSeconds(dt.getSeconds());
+                                date.setMilliseconds(dt.getMilliseconds());
+                                dt = date;
+                            }
+                        }
+                    }
+
+                    if (angular.isDefined(dt)) {
+                        if (!scope.date) {
+                            var defaultTime = angular.isDefined(attrs.defaultTime)
+                                ? attrs.defaultTime
+                                : uiDatetimePickerConfig.defaultTime;
+                            var t = new Date('2001-01-01 ' + defaultTime);
+
+                            if (!isNaN(t) && dt != null) {
+                                dt.setHours(t.getHours());
+                                dt.setMinutes(t.getMinutes());
+                                dt.setSeconds(t.getSeconds());
+                                dt.setMilliseconds(t.getMilliseconds());
+                            }
+                        }
+                        scope.date = dt;
+                    }
+
+                    var newDate = scope.date ? dateFilter(scope.date, dateFormat, ngModelOptions.timezone) : null;
+
+                    element.val(newDate);
+                    ngModel.$setViewValue(scope.date);
+
+                    if (closeOnDateSelection) {
+                        // do not close when using timePicker as make impossible to choose a time
+                        if (scope.showPicker != 'time' && date != null) {
+                            // if time is enabled, swap to timePicker
+                            if (scope.enableTime) {
+                                scope.open('time');
+                            } else {
+                                scope.close(false);
+                            }
+                        }
+                    }
+
+                };
+
+                scope.keydown = function(evt) {
+                    if (evt.which === 27) {
+                        scope.close(false);
+                        element[0].focus();
+                    }
+                };
+
+                scope.$watch('isOpen',
+                    function(value) {
+                        scope.dropdownStyle = {
+                            display: value ? 'block' : 'none'
+                        };
+
+                        if (value) {
+                            cache['openDate'] = scope.date;
+
+                            var position = appendToBody ? $uibPosition.offset(element) : $uibPosition.position(element);
+
+                            if (appendToBody) {
+                                scope.dropdownStyle.top = (position.top + element.prop('offsetHeight')) + 'px';
+                            } else {
+                                scope.dropdownStyle.top = undefined;
+                            }
+
+                            scope.dropdownStyle.left = position.left + 'px';
+
+                            $timeout(function () { scope.$broadcast('datepicker.focus'); $document.bind('click', documentClickBind); }, 0, false);                            scope.open(scope.showPicker);
+                        } else {
+                            $document.unbind('click', documentClickBind);
+                        }
+                    });
+
+                scope.isDisabled = function(date) {
+                    if (date === 'today' || date === 'now') {
+                        date = new Date();
+                    }
+
+                    return scope.watchData.minDate && scope.compare(date, scope.watchData.minDate) < 0 ||
+                        scope.watchData.maxDate && scope.compare(date, scope.watchData.maxDate) > 0;
+                };
+
+                scope.compare = function(date1, date2) {
+                    return new Date(date1.getFullYear(), date1.getMonth(), date1.getDate()) -
+                        new Date(date2.getFullYear(), date2.getMonth(), date2.getDate());
+                };
+
+                scope.select = function(opt) {
+
+                    var date = null;
+                    if (opt === 'today' || opt == 'now') {
+                        var now = new Date();
+                        if (angular.isDate(scope.date)) {
+                            date = new Date(scope.date);
+                            date.setFullYear(now.getFullYear(), now.getMonth(), now.getDate());
+                            date.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+                        } else {
+                            date = now;
+                        }
+                    }
+
+                    scope.dateSelection(date);
+
+                    if (opt == 'clear')
+                        scope.close();
+                };
+
+                scope.open = function(picker, evt) {
+                    if (angular.isDefined(evt)) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+                    }
+
+                    // need to delay this, else timePicker never shown
+                    $timeout(function() {
+                            scope.showPicker = picker;
+                        },
+                        0);
+
+                    // in order to update the timePicker, we need to update the model reference!
+                    // as found here https://angular-ui.github.io/bootstrap/#/timepicker
+                    $timeout(function () {
+                        if (scope.date == null) {
+                            scope.date = new Date();
+                            } else {
+                                scope.date = new Date(scope.date);
+                            }
+                            
+                        },
+                        50);
+                };
+
+                scope.close = function(closePressed) {
+                    scope.isOpen = false;
+
+                    // if enableDate and enableTime are true, reopen the picker in date mode first
+                    if (scope.enableDate && scope.enableTime)
+                        scope.showPicker = scope.reOpenDefault === false ? 'date' : scope.reOpenDefault;
+
+                    // if a on-close-fn has been defined, lets call it
+                    // we only call this if closePressed is defined!
+                    if (angular.isDefined(closePressed))
+                        scope.whenClosed({
+                            args: {
+                                closePressed: closePressed,
+                                openDate: cache['openDate'] || null,
+                                closeDate: scope.date
+                            }
+                        });
+
+                    element[0].focus();
+                };
+
+                scope.$on('$destroy',
+                    function() {
+                        if (scope.isOpen === true) {
+                            if (!$rootScope.$$phase) {
+                                scope.$apply(function() {
+                                    scope.close();
+                                });
+                            }
+                        }
+
+                        watchListeners.forEach(function(a) { a(); });
+                        $popup.remove();
+                        element.unbind('keydown', inputKeydownBind);
+                        $document.unbind('click', documentClickBind);
+                    });
+
+                function documentClickBind(evt) {
+                    var popup = $popup[0];
+                    var dpContainsTarget = element[0].contains(evt.target);
+
+                    // The popup node may not be an element node
+                    // In some browsers (IE only) element nodes have the 'contains' function
+                    var popupContainsTarget = popup.contains !== undefined && popup.contains(evt.target);
+
+                    if (scope.isOpen && !(dpContainsTarget || popupContainsTarget)) {
+                        scope.$apply(function() {
+                            scope.close(false);
+                        });
+                    }
+                }
+
+                function inputKeydownBind(evt) {
+                    if (evt.which === 27 && scope.isOpen) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+                        scope.$apply(function() {
+                            scope.close(false);
+                        });
+                        element[0].focus();
+                    } else if (evt.which === 40 && !scope.isOpen) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+                        scope.$apply(function() {
+                            scope.isOpen = true;
+                        });
+                    }
+                }
+
+                function cameltoDash(string) {
+                    return string.replace(/([A-Z])/g, function($1) { return '-' + $1.toLowerCase(); });
+                }
+
+                function parseDateString(viewValue) {
+                    var date = uibDateParser.parse(viewValue, dateFormat, scope.date);
+                    if (isNaN(date)) {
+                        for (var i = 0; i < altInputFormats.length; i++) {
+                            date = uibDateParser.parse(viewValue, altInputFormats[i], scope.date);
+                            if (!isNaN(date)) {
+                                return date;
+                            }
+                        }
+                    }
+                    return date;
+                }
+
+                function parseDate(viewValue) {
+                    if (angular.isNumber(viewValue)) {
+                        // presumably timestamp to date object
+                        viewValue = new Date(viewValue);
+                    }
+
+                    if (!viewValue) {
+                        return null;
+                    } else if (angular.isDate(viewValue) && !isNaN(viewValue)) {
+                        return viewValue;
+                    } else if (angular.isString(viewValue)) {
+                        var date = parseDateString(viewValue);
+                        if (!isNaN(date)) {
+                            return uibDateParser.toTimezone(date, ngModelOptions.timezone);
+                        }
+
+                        return undefined;
+                    } else {
+                        return undefined;
+                    }
+                }
+
+                function validator(modelValue, viewValue) {
+                    var value = modelValue || viewValue;
+
+                    if (!(attrs.ngRequired || attrs.required) && !value) {
+                        return true;
+                    }
+
+                    if (angular.isNumber(value)) {
+                        value = new Date(value);
+                    }
+
+                    if (!value) {
+                        return true;
+                    } else if (angular.isDate(value) && !isNaN(value)) {
+                        return true;
+                    } else if (angular.isDate(new Date(value)) && !isNaN(new Date(value).valueOf())) {
+                        return true;
+                    } else if (angular.isString(value)) {
+                        return !isNaN(parseDateString(viewValue));
+                    } else {
+                        return false;
+                    }
+                }
+
+            }
+        ])
+    .directive('datepickerPopup',
+        function() {
+            return {
+                restrict: 'A',
+                require: ['ngModel', 'datepickerPopup'],
+                controller: 'DateTimePickerController',
+                scope: {
+                    isOpen: '=?',
+                    enableDate: '=?',
+                    enableTime: '=?',
+                    initialPicker: '=?',
+                    reOpenDefault: '=?',
+                    dateDisabled: '&',
+                    customClass: '&',
+                    whenClosed: '&'
+                },
+                link: function(scope, element, attrs, ctrls) {
+                    var ngModel = ctrls[0],
+                        ctrl = ctrls[1];
+
+                    ctrl.init(ngModel);
+                }
+            };
+        })
+    .directive('datePickerWrap',
+        function() {
+            return {
+                restrict: 'EA',
+                replace: true,
+                transclude: true,
+                templateUrl: 'template/date-picker.html'
+            };
+        })
+    .directive('timePickerWrap',
+        function() {
+            return {
+                restrict: 'EA',
+                replace: true,
+                transclude: true,
+                templateUrl: 'template/time-picker.html'
+            };
+    });
+
+//replace timeDirective
+angular.module('platformWebApp')
+    .constant('timepickerConfig', {
+        hourStep: 1,
+        minuteStep: 1,
+        showMeridian: true,
+        meridians: null,
+        readonlyInput: false,
+        mousewheel: true,
+        arrowkeys: true,
+        showSpinners: true
+    })
+
+    .controller('TimepickerController', ['$scope', '$attrs', '$parse', '$log', '$locale', 'timepickerConfig', function ($scope, $attrs, $parse, $log, $locale, timepickerConfig) {
+        var selected = new Date(),
+            ngModelCtrl = { $setViewValue: angular.noop }, // nullModelCtrl
+            meridians = angular.isDefined($attrs.meridians) ? $scope.$parent.$eval($attrs.meridians) : timepickerConfig.meridians || $locale.DATETIME_FORMATS.AMPMS;
+            
+        var _24Hour = '24 Hrs';
+
+        this.init = function (ngModelCtrl_, inputs) {
+            ngModelCtrl = ngModelCtrl_;
+            ngModelCtrl.$render = this.render;
+
+            ngModelCtrl.$formatters.unshift(function (modelValue) {
+                return modelValue ? new Date(modelValue) : null;
+            });
+
+            var hoursInputEl = inputs.eq(0),
+                minutesInputEl = inputs.eq(1);
+
+            var mousewheel = angular.isDefined($attrs.mousewheel) ? $scope.$parent.$eval($attrs.mousewheel) : timepickerConfig.mousewheel;
+            if (mousewheel) {
+                this.setupMousewheelEvents(hoursInputEl, minutesInputEl);
+            }
+
+            var arrowkeys = angular.isDefined($attrs.arrowkeys) ? $scope.$parent.$eval($attrs.arrowkeys) : timepickerConfig.arrowkeys;
+            if (arrowkeys) {
+                this.setupArrowkeyEvents(hoursInputEl, minutesInputEl);
+            }
+
+            $scope.readonlyInput = angular.isDefined($attrs.readonlyInput) ? $scope.$parent.$eval($attrs.readonlyInput) : timepickerConfig.readonlyInput;
+            this.setupInputEvents(hoursInputEl, minutesInputEl);
+        };
+
+        var hourStep = timepickerConfig.hourStep;
+        if ($attrs.hourStep) {
+            $scope.$parent.$watch($parse($attrs.hourStep), function (value) {
+                hourStep = parseInt(value, 10);
+            });
+        }
+
+        var minuteStep = timepickerConfig.minuteStep;
+        if ($attrs.minuteStep) {
+            $scope.$parent.$watch($parse($attrs.minuteStep), function (value) {
+                minuteStep = parseInt(value, 10);
+            });
+        }
+
+        // 12H / 24H mode
+        $scope.showMeridian = timepickerConfig.showMeridian;
+        if ($attrs.showMeridian) {
+            $scope.$parent.$watch($parse($attrs.showMeridian), function (value) {
+                $scope.showMeridian = !!value;
+
+                if (ngModelCtrl.$error.time) {
+                    // Evaluate from template
+                    var hours = getHoursFromTemplate(), minutes = getMinutesFromTemplate();
+                    if (angular.isDefined(hours) && angular.isDefined(minutes)) {
+                        selected.setHours(hours);
+                        refresh();
+                    }
+                } else {
+                    updateTemplate();
+                }
+            });
+        }
+
+        // Get $scope.hours in 24H mode if valid
+        function getHoursFromTemplate() {
+            var hours = parseInt($scope.hours, 10);
+            var valid = ($scope.showMeridian) ? (hours > 0 && hours < 13) : (hours >= 0 && hours < 24);
+            if (!valid) {
+                return undefined;
+            }
+
+            if ($scope.showMeridian) {
+                if (hours === 12) {
+                    hours = 0;
+                }
+                if ($scope.meridian === meridians[1]) {
+                    hours = hours + 12;
+                }
+            }
+            return hours;
+        }
+
+        function getMinutesFromTemplate() {
+            var minutes = parseInt($scope.minutes, 10);
+            return (minutes >= 0 && minutes < 60) ? minutes : undefined;
+        }
+
+        function pad(value) {
+            return (angular.isDefined(value) && value.toString().length < 2) ? '0' + value : value.toString();
+        }
+
+        // Respond on mousewheel spin
+        this.setupMousewheelEvents = function (hoursInputEl, minutesInputEl) {
+            var isScrollingUp = function (e) {
+                if (e.originalEvent) {
+                    e = e.originalEvent;
+                }
+                //pick correct delta variable depending on event
+                var delta = (e.wheelDelta) ? e.wheelDelta : -e.deltaY;
+                return (e.detail || delta > 0);
+            };
+
+            hoursInputEl.bind('mousewheel wheel', function (e) {
+                $scope.$apply((isScrollingUp(e)) ? $scope.incrementHours() : $scope.decrementHours());
+                e.preventDefault();
+            });
+
+            minutesInputEl.bind('mousewheel wheel', function (e) {
+                $scope.$apply((isScrollingUp(e)) ? $scope.incrementMinutes() : $scope.decrementMinutes());
+                e.preventDefault();
+            });
+
+        };
+
+        // Respond on up/down arrowkeys
+        this.setupArrowkeyEvents = function (hoursInputEl, minutesInputEl) {
+            hoursInputEl.bind('keydown', function (e) {
+                if (e.which === 38) { // up
+                    e.preventDefault();
+                    $scope.incrementHours();
+                    $scope.$apply();
+                }
+                else if (e.which === 40) { // down
+                    e.preventDefault();
+                    $scope.decrementHours();
+                    $scope.$apply();
+                }
+            });
+
+            minutesInputEl.bind('keydown', function (e) {
+                if (e.which === 38) { // up
+                    e.preventDefault();
+                    $scope.incrementMinutes();
+                    $scope.$apply();
+                }
+                else if (e.which === 40) { // down
+                    e.preventDefault();
+                    $scope.decrementMinutes();
+                    $scope.$apply();
+                }
+            });
+        };
+
+        this.setupInputEvents = function (hoursInputEl, minutesInputEl) {
+            if ($scope.readonlyInput) {
+                $scope.updateHours = angular.noop;
+                $scope.updateMinutes = angular.noop;
+                return;
+            }
+
+            var invalidate = function (invalidHours, invalidMinutes) {
+                ngModelCtrl.$setViewValue(null);
+                ngModelCtrl.$setValidity('time', false);
+                if (angular.isDefined(invalidHours)) {
+                    $scope.invalidHours = invalidHours;
+                }
+                if (angular.isDefined(invalidMinutes)) {
+                    $scope.invalidMinutes = invalidMinutes;
+                }
+            };
+
+            $scope.updateHours = function () {
+                var hours = getHoursFromTemplate();
+
+                if (angular.isDefined(hours)) {
+                    selected.setHours(hours);
+                    refresh('h');
+                } else {
+                    invalidate(true);
+                }
+            };
+
+            hoursInputEl.bind('blur', function (e) {
+                if (!$scope.invalidHours && $scope.hours < 10) {
+                    $scope.$apply(function () {
+                        $scope.hours = pad($scope.hours);
+                    });
+                }
+            });
+
+            $scope.updateMinutes = function () {
+                var minutes = getMinutesFromTemplate();
+
+                if (angular.isDefined(minutes)) {
+                    selected.setMinutes(minutes);
+                    refresh('m');
+                } else {
+                    invalidate(undefined, true);
+                }
+            };
+
+            minutesInputEl.bind('blur', function (e) {
+                if (!$scope.invalidMinutes && $scope.minutes < 10) {
+                    $scope.$apply(function () {
+                        $scope.minutes = pad($scope.minutes);
+                    });
+                }
+            });
+
+        };
+
+        this.render = function () {
+            var date = ngModelCtrl.$viewValue;
+
+            if (isNaN(date)) {
+                ngModelCtrl.$setValidity('time', false);
+                $log.error('Timepicker directive: "ng-model" value must be a Date object, a number of milliseconds since 01.01.1970 or a string representing an RFC2822 or ISO 8601 date.');
+            } else {
+                if (date) {
+                    selected = date;
+                }
+                makeValid();
+                updateTemplate();
+            }
+        };
+
+        // Call internally when we know that model is valid.
+        function refresh(keyboardChange) {
+            makeValid();
+            ngModelCtrl.$setViewValue(new Date(selected));
+            updateTemplate(keyboardChange);
+        }
+
+        function makeValid() {
+            ngModelCtrl.$setValidity('time', true);
+            $scope.invalidHours = false;
+            $scope.invalidMinutes = false;
+        }
+
+        function updateTemplate(keyboardChange) {
+            var hours = selected.getHours(), minutes = selected.getMinutes();
+
+            if ($scope.showMeridian) {
+                hours = (hours === 0 || hours === 12) ? 12 : hours % 12; // Convert 24 to 12 hour system
+            }
+
+            $scope.hours = keyboardChange === 'h' ? hours : pad(hours);
+            if (keyboardChange !== 'm') {
+                $scope.minutes = pad(minutes);
+            }
+             if (!$scope.showMeridian) {
+                 $scope.meridian = _24Hour;
+            }
+            else if ($scope.showMeridian) {
+                $scope.meridian = selected.getHours() < 12 ? meridians[0] : meridians[1];
+            }
+        }
+
+        function addMinutes(minutes) {
+            var dt = new Date(selected.getTime() + minutes * 60000);
+            selected.setHours(dt.getHours(), dt.getMinutes());
+            refresh();
+        }
+
+        $scope.showSpinners = angular.isDefined($attrs.showSpinners) ?
+            $scope.$parent.$eval($attrs.showSpinners) : timepickerConfig.showSpinners;
+
+        $scope.incrementHours = function () {
+            addMinutes(hourStep * 60);
+        };
+        $scope.decrementHours = function () {
+            addMinutes(- hourStep * 60);
+        };
+        $scope.incrementMinutes = function () {
+            addMinutes(minuteStep);
+        };
+        $scope.decrementMinutes = function () {
+            addMinutes(- minuteStep);
+        };
+
+        //fix change am/pm/24 jump through 12:00
+        $scope.toggleMeridian = function () {
+            if ($scope.meridian === meridians[0]) {
+                $scope.showMeridian = true;
+                addMinutes(12 * 60 * ((selected.getHours() < 12) ? 1 : -1));
+                return true;
+            }
+            if ($scope.meridian === meridians[1]) {
+                $scope.showMeridian = false;
+                addMinutes(12 * 60 * ((selected.getHours() < 12) ? 1 : -1));
+                return true;
+            }
+            if ($scope.meridian === _24Hour) {
+                $scope.showMeridian = true;
+                addMinutes(selected.getHours() <= 12 ? 0 : 12 * 60 * ((selected.getHours() >= 12) ? 1 : -1));
+                return true;
+            }
+        };
+    }])
+
+    .directive('timepicker', function () {
+        return {
+            restrict: 'EA',
+            require: ['timepicker', '?^ngModel'],
+            controller: 'TimepickerController',
+            replace: true,
+            scope: {},
+            templateUrl: 'template/timepicker.html',
+            link: function (scope, element, attrs, ctrls) {
+                var timepickerCtrl = ctrls[0], ngModelCtrl = ctrls[1];
+
+                if (ngModelCtrl) {
+                    timepickerCtrl.init(ngModelCtrl, element.find('input'));
+                }
+            }
+        };
+    });
+
+angular.module('platformWebApp').run(['$templateCache', function ($templateCache) {
+    'use strict';
+
+    $templateCache.put('template/date-picker.html',
+        "<ul class=\"dropdown-menu dropdown-menu-left datetime-picker-dropdown\" ng-if=\"isOpen && showPicker == 'date'\" ng-style=dropdownStyle style=left:inherit ng-keydown=keydown($event) ng-click=$event.stopPropagation()><li style=\"padding:0 5px 5px 5px\" class=date-picker-menu><div ng-transclude></div></li><li style=padding:5px ng-if=buttonBar.show><span class=\"btn-group pull-left\" style=margin-right:5px ng-if=\"doShow('today') || doShow('clear')\"><button type=button class=\"btn btn-sm btn-info\" ng-if=\"doShow('today')\" ng-click=\"select('today')\" ng-disabled=\"isDisabled('today')\">{{ 'platform.commands.today' | translate }}</button> <button type=button class=\"btn btn-sm btn-danger\" ng-if=\"doShow('clear')\" ng-click=\"select('clear')\">{{ 'platform.commands.clear' | translate }}</button></span> <span class=\"btn-group pull-right\" ng-if=\"(doShow('time') && enableTime) || doShow('close')\"><button type=button class=\"btn btn-sm btn-default\" ng-if=\"doShow('time') && enableTime\" ng-click=\"open('time', $event)\">{{ 'platform.commands.time' | translate}}</button> <button type=button class=\"btn btn-sm btn-success\" ng-if=\"doShow('close')\" ng-click=close(true)>{{ 'platform.commands.close' | translate}}</button></span></li></ul>"
+    );
+    
+    $templateCache.put('template/time-picker.html',
+        "<ul class=\"dropdown-menu dropdown-menu-left datetime-picker-dropdown\" ng-if=\"isOpen && showPicker == 'time'\" ng-style=dropdownStyle style=left:inherit ng-keydown=keydown($event) ng-click=$event.stopPropagation()><li style=\"padding:0 5px 5px 5px\" class=time-picker-menu><div ng-transclude></div></li><li style=padding:5px ng-if=buttonBar.show><span class=\"btn-group pull-left\" style=margin-right:5px ng-if=\"doShow('now') || doShow('clear')\"><button type=button class=\"btn btn-sm btn-info\" ng-if=\"doShow('now')\" ng-click=\"select('now')\" ng-disabled=\"isDisabled('now')\">{{ 'platform.commands.now' | translate}}</button> <button type=button class=\"btn btn-sm btn-danger\" ng-if=\"doShow('clear')\" ng-click=\"select('clear')\">{{ 'platform.commands.clear' | translate}}</button></span> <span class=\"btn-group pull-right\" ng-if=\"(doShow('date') && enableDate) || doShow('close')\"><button type=button class=\"btn btn-sm btn-default\" ng-if=\"doShow('date') && enableDate\" ng-click=\"open('date', $event)\">{{ 'platform.commands.date' | translate}}</button> <button type=button class=\"btn btn-sm btn-success\" ng-if=\"doShow('close')\" ng-click=close(true)>{{ 'platform.commands.close' | translate }}</button></span></li></ul>"
+    );
+
+    $templateCache.put("template/timepicker.html",
+        "<table>\n" +
+        "  <tbody>\n" +
+        "    <tr class=\"text-center\" ng-show=\"::showSpinners\">\n" +
+        "      <td><a ng-click=\"incrementHours()\" class=\"btn btn-link\"><span class=\"glyphicon glyphicon-chevron-up\"></span></a></td>\n" +
+        "      <td>&nbsp;</td>\n" +
+        "      <td><a ng-click=\"incrementMinutes()\" class=\"btn btn-link\"><span class=\"glyphicon glyphicon-chevron-up\"></span></a></td>\n" +
+        "      <td></td>\n" +
+        "    </tr>\n" +
+        "    <tr>\n" +
+        "      <td class=\"form-group\" ng-class=\"{'has-error': invalidHours}\">\n" +
+        "        <input style=\"width:50px;\" type=\"text\" ng-model=\"hours\" ng-change=\"updateHours()\" class=\"form-control text-center\" ng-readonly=\"::readonlyInput\" maxlength=\"2\">\n" +
+        "      </td>\n" +
+        "      <td>:</td>\n" +
+        "      <td class=\"form-group\" ng-class=\"{'has-error': invalidMinutes}\">\n" +
+        "        <input style=\"width:50px;\" type=\"text\" ng-model=\"minutes\" ng-change=\"updateMinutes()\" class=\"form-control text-center\" ng-readonly=\"::readonlyInput\" maxlength=\"2\">\n" +
+        "      </td>\n" +
+        "      <td><button type=\"button\" class=\"btn btn-default text-center\" ng-click=\"toggleMeridian()\">{{meridian}}</button></td>\n" +
+        "    </tr>\n" +
+        "    <tr class=\"text-center\" ng-show=\"::showSpinners\">\n" +
+        "      <td><a ng-click=\"decrementHours()\" class=\"btn btn-link\"><span class=\"glyphicon glyphicon-chevron-down\"></span></a></td>\n" +
+        "      <td>&nbsp;</td>\n" +
+        "      <td><a ng-click=\"decrementMinutes()\" class=\"btn btn-link\"><span class=\"glyphicon glyphicon-chevron-down\"></span></a></td>\n" +
+        "      <td></td>\n" +
+        "    </tr>\n" +
+        "  </tbody>\n" +
+        "</table>\n" +
+        "");
+}]);
+
+angular.module('platformWebApp')
+.directive('dynamic', ['$compile', function ($compile) {
+    return {
+        restrict: 'A',
+        replace: true,
+        link: function (scope, ele, attrs) {
+            scope.$watch(attrs.dynamic, function (html) {
+                ele.html(html);
+                $compile(ele.contents())(scope);
+            });
+        }
+    };
+}]);
+
+angular.module('platformWebApp')
+.directive('fallbackSrc', function () {
+    var fallbackSrc = {
+        link: function postLink(scope, iElement, iAttrs) {
+            iElement.bind('error', function () {
+                angular.element(this).attr("src", iAttrs.fallbackSrc);
+            });
+        }
+    }
+    return fallbackSrc;
+});
+angular.module('platformWebApp')
+.directive('vaGenericValueInput', ['$compile', '$templateCache', '$http', 'platformWebApp.objCompareService', 'platformWebApp.bladeNavigationService',
+function ($compile, $templateCache, $http, objComparer, bladeNavigationService) {
+
+    return {
+        restrict: 'E',
+        require: 'ngModel',
+        replace: true,
+        transclude: true,
+        scope: {
+            languages: "=",
+            getDictionaryValues: "&"
+        },
+        link: function (scope, element, attr, ngModelController, linker) {
+
+            scope.currentEntity = ngModelController.$modelValue;
+
+            scope.context = {};
+            scope.context.currentPropValues = [];
+            scope.context.allDictionaryValues = [];
+            var theEmptyValue = { value: null };
+
+            scope.$watch('context.currentPropValues', function (newValue, oldValue) {
+                //reflect only real changes
+                if (newValue !== oldValue &&
+                        !objComparer.equal(newValue, [theEmptyValue]) &&
+                        (newValue.length != scope.currentEntity.values.length || !objComparer.equal(newValue, scope.currentEntity.values))) {
+                    if (scope.currentEntity.isDictionary) {
+                        scope.currentEntity.values = _.map(newValue, function (x) { return { value: x } });
+                    }
+                    else if (scope.currentEntity.isArray && scope.currentEntity.isMultilingual && !scope.currentEntity.isDictionary) {
+                        //ungrouping values for multilingual array properties
+                        scope.currentEntity.values = [];
+                        angular.forEach(newValue, function (x) {
+                            var values = _.map(x.values, function (y) { return { locale: x.locale, value: y.value }; });
+                            scope.currentEntity.values = scope.currentEntity.values.concat(values);
+                        });
+                    }
+                    else {
+                        scope.currentEntity.values = newValue;
+                    }
+
+                    ngModelController.$setViewValue(scope.currentEntity);
+                }
+            }, true);
+
+            scope.$watch('languages', function (languages) {
+                if (scope.currentEntity.isMultilingual && !scope.currentEntity.isDictionary) {
+                    initLanguagesValuesMap(scope.currentEntity, languages);
+                }
+            });
+
+            ngModelController.$render = function () {
+                scope.currentEntity = ngModelController.$modelValue;
+
+                if (!scope.currentEntity.ngBindingModel) {
+                    scope.context.currentPropValues = angular.copy(scope.currentEntity.values);
+                    if (needAddEmptyValue(scope.currentEntity, scope.context.currentPropValues)) {
+                        scope.context.currentPropValues.push(angular.copy(theEmptyValue));
+                    }
+                }
+
+                if (scope.currentEntity.isDictionary) {
+                    scope.getDictionaryValues()(scope.currentEntity, setDictionaryValues);
+                }
+
+                //Group values for multilingual array properties
+                if (scope.currentEntity.isMultilingual && scope.currentEntity.isArray && !scope.currentEntity.isDictionary) {
+
+                    var groupByLocaleObj = _.groupBy(scope.context.currentPropValues, 'locale');
+                    scope.context.currentPropValues = [];
+                    for (var key in groupByLocaleObj) {
+                        if (groupByLocaleObj.hasOwnProperty(key)) {
+                            scope.context.currentPropValues.push({ locale: key, values: groupByLocaleObj[key] });
+                        }
+                    }
+                }
+                changeValueTemplate();
+            };
+
+            function needAddEmptyValue(property, values) {
+                return !property.isArray && !property.isDictionary && !property.isMultilingual && values.length == 0;
+            };
+
+            function initLanguagesValuesMap(property, languages) {
+                //Group values by language 
+                angular.forEach(languages, function (language) {
+                    //Currently select values
+                    var currentPropValues = _.filter(scope.context.currentPropValues, function (x) { return x.locale == language; });
+                    //need add empty value for single  value type
+                    if (currentPropValues.length == 0) {
+                        scope.context.currentPropValues.push({ value: null, locale: language });
+                    }
+                });
+            };
+
+
+            function setDictionaryValues(allDictionaryValues) {
+                var selectedValues = scope.currentEntity.values;
+                scope.context.allDictionaryValues = [];
+                scope.context.currentPropValues = [];
+
+                angular.forEach(allDictionaryValues, function (dictValue) {
+                    scope.context.allDictionaryValues.push(dictValue);
+                    //Need to select already selected values. Dictionary values have same type as standard values.
+                    if (_.any(selectedValues, function (x) { return x.value.id == dictValue.id })) {
+                        //add selected value
+                        scope.context.currentPropValues.push(dictValue);
+                    }
+                });
+            }
+
+            function getTemplateName(property) {
+                var result;
+                switch (property.valueType) {
+                    case 'Html':
+                    case 'Json':
+                        result = 'dCode';
+                        break;
+                    default:
+                        result = 'd' + property.valueType;
+                }
+
+                if (property.isDictionary) {
+                    result += '-dictionary';
+                }
+                if (property.isArray) {
+                    result += '-multivalue';
+                }
+                if (property.isMultilingual) {
+                    result += '-multilang';
+                }
+                result += '.html';
+                return result;
+            };
+
+            function changeValueTemplate() {
+                if (scope.currentEntity.valueType === 'Html' || scope.currentEntity.valueType === 'Json') {
+                    // Codemirror configuration
+                    scope.editorOptions = {
+                        lineWrapping: true,
+                        lineNumbers: true,
+                        extraKeys: { "Ctrl-Q": function (cm) { cm.foldCode(cm.getCursor()); } },
+                        foldGutter: true,
+                        gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+                        onLoad: function (_editor) {
+                            codemirrorEditor = _editor;
+                        },
+                    };
+                }
+                if (scope.currentEntity.valueType === 'Html') {
+                    scope.editorOptions['parserfile'] = 'liquid.js';
+                    scope.editorOptions['mode'] = 'htmlmixed';
+                }
+                if (scope.currentEntity.valueType === 'Json') {
+                    scope.editorOptions['parserfile'] = 'javascript.js';
+                    scope.editorOptions['mode'] = { name: 'javascript', json: true };
+                }
+
+                var templateName = getTemplateName(scope.currentEntity);
+
+                //load input template and display
+                $http.get(templateName, { cache: $templateCache }).then(function (results) {
+                    //Need to add ngForm to isolate form validation into sub form
+                    //var innerContainer = "<div id='innerContainer' />";
+
+                    //We must destroy scope of elements we are removing from DOM to avoid angular firing events
+                    var el = element.find('#valuePlaceHolder #innerContainer');
+                    if (el.length > 0) {
+                        el.scope().$destroy();
+                    }
+                    var container = angular.element("<div><div id='valuePlaceHolder'></div></div>");
+                    element.append(container);
+
+                    container = element.find('#valuePlaceHolder');
+                    var result = container.html(results.data.trim());
+
+                    if (scope.currentEntity.ngBindingModel) {
+                        $(result).find('[ng-model]').attr("ng-model", 'currentEntity.blade.currentEntity.' + scope.currentEntity.ngBindingModel);
+                    }
+
+                    //Create new scope, otherwise we would destroy our directive scope
+                    var newScope = scope.$new();
+                    $compile(result)(newScope);
+                });
+            };
+
+            /* Datepicker */
+            scope.datepickers = {
+                DateTime: false
+            }
+
+            scope.open = function ($event, which) {
+                $event.preventDefault();
+                $event.stopPropagation();
+
+                scope.datepickers[which] = true;
+            };
+
+            linker(function (clone) {
+                element.append(clone);
+            });
+
+            /* Image */
+            var originalBlade;
+            scope.uploadImage = function() {
+                var newBlade = {
+                    id: "imageUpload",
+                    currentEntityId: 'images',
+                    title: 'platform.blades.asset-upload.title',
+                    subtitle: scope.currentEntity.name,
+                    controller: 'platformWebApp.assets.assetUploadController',
+                    template: '$(Platform)/Scripts/app/assets/blades/asset-upload.tpl.html',
+                    fileUploadOptions: {
+                        singleFileMode: true,
+                        accept: "image/*",
+                        suppressParentRefresh: true
+                    }
+                };
+                newBlade.onUploadComplete = function(data) {
+                    if (data && data.length) {
+                        scope.context.currentPropValues[0].value = data[0].url;
+                        bladeNavigationService.closeBlade(newBlade);
+                    }
+                }
+
+                //saving orig blade reference (that is not imageUpload blade) for subsequent showBlade calls
+                if (!originalBlade) {
+                    originalBlade = bladeNavigationService.currentBlade.id !== "imageUpload" ? bladeNavigationService.currentBlade : bladeNavigationService.currentBlade.parentBlade;
+                }
+                bladeNavigationService.showBlade(newBlade, originalBlade);
+            }
+
+            scope.clearImage = function () {
+                scope.context.currentPropValues[0].value = undefined;
+            }
+
+            scope.openUrl = function (url) {
+                window.open(url, '_blank');
+            }
+        }
+    }
+}]);
+
+// leftClickMenu based on: ng-context-menu - v1.0.2 - An AngularJS directive to display a context menu when a right-click event is triggered
+angular
+    .module('platformWebApp')
+    .directive("leftClickMenu", ["$document", "ContextMenuService", function ($document, ContextMenuService) {
+        return {
+            restrict: 'A',
+            scope: {
+                'callback': '&leftClickMenu',
+                'disabled': '&contextMenuDisabled',
+                'closeCallback': '&contextMenuClose'
+            },
+            link: function ($scope, $element, $attrs) {
+                var opened = false;
+
+                function open(event, menuElement) {
+                    menuElement.addClass('open');
+
+                    var doc = $document[0].documentElement;
+                    var docLeft = (window.pageXOffset || doc.scrollLeft) -
+                                  (doc.clientLeft || 0),
+                        docTop = (window.pageYOffset || doc.scrollTop) -
+                                 (doc.clientTop || 0),
+                        elementWidth = menuElement[0].scrollWidth,
+                        elementHeight = menuElement[0].scrollHeight;
+                    var docWidth = doc.clientWidth + docLeft,
+                      docHeight = doc.clientHeight + docTop,
+                      totalWidth = elementWidth + event.pageX,
+                      totalHeight = elementHeight + event.pageY,
+                      left = Math.max(event.pageX - docLeft, 0),
+                      top = Math.max(event.pageY - docTop, 0);
+
+                    if (totalWidth > docWidth) {
+                        left = left - (totalWidth - docWidth);
+                    }
+
+                    if (totalHeight > docHeight) {
+                        top = top - (totalHeight - docHeight);
+                    }
+
+                    menuElement.css('top', top + 'px');
+                    menuElement.css('left', left + 'px');
+                    opened = true;
+                }
+
+                function close(menuElement) {
+                    menuElement.removeClass('open');
+
+                    if (opened) {
+                        $scope.closeCallback();
+                    }
+
+                    opened = false;
+                }
+
+                $element.bind('click', function (event) {
+                    if (!$scope.disabled()) {
+                        if (ContextMenuService.menuElement !== null) {
+                            close(ContextMenuService.menuElement);
+                        }
+                        ContextMenuService.menuElement = angular.element(
+                          document.getElementById($attrs.target)
+                        );
+                        ContextMenuService.element = event.target;
+                        //console.log('set', ContextMenuService.element);
+
+                        event.preventDefault();
+                        event.stopPropagation();
+                        $scope.$apply(function () {
+                            $scope.callback({ $event: event });
+                        });
+                        $scope.$apply(function () {
+                            open(event, ContextMenuService.menuElement);
+                        });
+                    }
+                });
+
+                function handleKeyUpEvent(event) {
+                    //console.log('keyup');
+                    if (!$scope.disabled() && opened && event.keyCode === 27) {
+                        $scope.$apply(function () {
+                            close(ContextMenuService.menuElement);
+                        });
+                    }
+                }
+
+                function handleClickEvent(event) {
+                    if (!$scope.disabled() &&
+                      opened &&
+                      (event.button !== 2 ||
+                       event.target !== ContextMenuService.element)) {
+                        $scope.$apply(function () {
+                            close(ContextMenuService.menuElement);
+                        });
+                    }
+                }
+
+                $document.bind('keyup', handleKeyUpEvent);
+                // Firefox treats a right-click as a click and a contextmenu event
+                // while other browsers just treat it as a contextmenu event
+                $document.bind('click', handleClickEvent);
+                $document.bind('contextmenu', handleClickEvent);
+
+                $scope.$on('$destroy', function () {
+                    //console.log('destroy');
+                    $document.unbind('keyup', handleKeyUpEvent);
+                    $document.unbind('click', handleClickEvent);
+                    $document.unbind('contextmenu', handleClickEvent);
+                });
+            }
+        };
+    }]);
+
+angular.module('platformWebApp')
+.factory('platformWebApp.metaFormsService', [function () {
+    var registeredMetaFields = { };
+
+    return {
+        registerMetaFields: function (metaFormName, metaFields) {
+            if (!registeredMetaFields[metaFormName]) {
+                registeredMetaFields[metaFormName] = [];
+            }
+            Array.prototype.push.apply(registeredMetaFields[metaFormName], metaFields);
+            registeredMetaFields[metaFormName] = _.sortBy(registeredMetaFields[metaFormName], 'priority');
+        },
+        getMetaFields: function(metaFormName) {
+            return registeredMetaFields[metaFormName];
+        }
+    };
+}])
+.directive('vaMetaform', [function () {
+    return {
+        restrict: 'E',
+        replace: true,
+        scope: {
+            blade: '=',
+            registeredInputs: '=',
+            columnCount: '@?'
+        },
+        templateUrl: '$(Platform)/Scripts/common/directives/metaform.tpl.html',
+        link: function (scope) {
+            var columnCount = scope.columnCount ? parseInt(scope.columnCount, 10) : 1;
+
+            var filteredInputs = _.filter(scope.registeredInputs, function (x) { return !x.isVisibleFn || x.isVisibleFn(scope.blade); });
+
+            var resultingGroups = [];
+            var isGroupStart = true, currentGroup;
+            _.each(filteredInputs, function (x) {
+                x = angular.copy(x);
+                x.ngBindingModel = x.name;
+
+                if (isGroupStart || (x.templateUrl && x.spanAllColumns)) {
+                    currentGroup = [x];
+                    resultingGroups.push(currentGroup);
+                } else {
+                    currentGroup.push(x);
+                }
+                isGroupStart = (x.templateUrl && x.spanAllColumns) || currentGroup.length == columnCount;
+            });
+
+            // generate empty columns
+            _.each(resultingGroups, function (gr) {
+                while (columnCount > gr.length) {
+                    gr.push({ templateUrl: 'emptyColumn.html' });
+                }
+            });
+            scope.bladeInputGroups = resultingGroups;
+        }
+    }
+}]);
+/**
+ * Heavily adapted from the `type="number"` directive in Angular's
+ * /src/ng/directive/input.js
+ */
+
+'use strict';
+
+angular.module('platformWebApp')
+// TODO: Replace with tested localized version (see below)
+.directive('money', ['$timeout', function ($timeout) {
+    'use strict';
+
+    var NUMBER_REGEXP = /^\s*(\-|\+)?(\d+|(\d*(\.\d*)))\s*$/;
+
+    function link(scope, el, attrs, ngModelCtrl) {
+        var min = parseFloat(attrs.min || 0);
+        var precision = parseFloat(attrs.precision || 2);
+        var lastValidValue;
+
+        function round(num) {
+            var d = Math.pow(10, precision);
+            return Math.round(num * d) / d;
+        }
+
+        function formatPrecision(value) {
+            return parseFloat(value).toFixed(precision);
+        }
+
+        function formatViewValue(value) {
+            return ngModelCtrl.$isEmpty(value) ? '' : '' + value;
+        }
+
+
+        ngModelCtrl.$parsers.push(function (value) {
+            if (angular.isUndefined(value)) {
+                value = '';
+            }
+
+            // Handle leading decimal point, like ".5"
+            if (value.indexOf('.') === 0) {
+                value = '0' + value;
+            }
+
+            // Allow "-" inputs only when min < 0
+            if (value.indexOf('-') === 0) {
+                if (min >= 0) {
+                    value = null;
+                    ngModelCtrl.$setViewValue('');
+                    ngModelCtrl.$render();
+                } else if (value === '-') {
+                    value = '';
+                }
+            }
+
+            var empty = ngModelCtrl.$isEmpty(value);
+            if (empty || NUMBER_REGEXP.test(value)) {
+                lastValidValue = (value === '')
+                  ? null
+                  : (empty ? value : parseFloat(value));
+            } else {
+                // Render the last valid input in the field
+                ngModelCtrl.$setViewValue(formatViewValue(lastValidValue));
+                ngModelCtrl.$render();
+            }
+
+            ngModelCtrl.$setValidity('number', true);
+            return lastValidValue;
+        });
+        ngModelCtrl.$formatters.push(formatViewValue);
+
+        var minValidator = function (value) {
+            if (!ngModelCtrl.$isEmpty(value) && value < min) {
+                ngModelCtrl.$setValidity('min', false);
+                return undefined;
+            } else {
+                ngModelCtrl.$setValidity('min', true);
+                return value;
+            }
+        };
+        ngModelCtrl.$parsers.push(minValidator);
+        ngModelCtrl.$formatters.push(minValidator);
+
+        if (attrs.max) {
+            var max = parseFloat(attrs.max);
+            var maxValidator = function (value) {
+                if (!ngModelCtrl.$isEmpty(value) && value > max) {
+                    ngModelCtrl.$setValidity('max', false);
+                    return undefined;
+                } else {
+                    ngModelCtrl.$setValidity('max', true);
+                    return value;
+                }
+            };
+
+            ngModelCtrl.$parsers.push(maxValidator);
+            ngModelCtrl.$formatters.push(maxValidator);
+        }
+
+        // Round off
+        if (precision > -1) {
+            ngModelCtrl.$parsers.push(function (value) {
+                return value ? round(value) : value;
+            });
+            ngModelCtrl.$formatters.push(function (value) {
+                return value ? formatPrecision(value) : value;
+            });
+        }
+
+        el.bind('blur', function () {
+            $timeout(function () {
+                var value = ngModelCtrl.$modelValue;
+                if (value) {
+                    ngModelCtrl.$viewValue = formatPrecision(value);
+                    ngModelCtrl.$render();
+                }
+            });
+        });
+    }
+
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: link
+    };
+}]);
+// Custom directive to support localized currency float number parsing & validation
+//.directive('money', ['platformWebApp.currencyFormat', function (currencyFormat) {
+//    return {
+//        restrict: 'A',
+//        require: 'ngModel',
+//        link: function (scope, elem, attrs, ctrl) {
+//            ctrl.$parsers.unshift(function(viewValue) {
+//                return currencyFormat.validate(viewValue, attrs.minExclusive, attrs.min, attrs.maxExclusive, attrs.max, attrs.fraction, ctrl.$setValidity);
+//            });
+
+//            ctrl.$formatters.unshift(function (modelValue) {
+//                return currencyFormat.format(modelValue, attrs.minExclusive, attrs.min, attrs.maxExclusive, attrs.max, attrs.fraction);
+//            });
+
+//            scope.$on('$localeChangeSuccess', function () {
+//                ctrl.$viewValue = ctrl.$formatters.reduceRight((prev, fn) => fn(prev), ctrl.$modelValue);
+//                ctrl.$render();
+//            });
+//        }
+//    };
+//}]);
+angular.module('platformWebApp')
+.directive('multipleAttr', function () {
+    return {
+        'restrict': 'A',
+        'compile': function () {
+            return {
+                'pre': function ($s, $el, attrs) {
+                    if (attrs.multipleAttr === 'true' || attrs.multipleAttr === true) {
+                        $el.attr('multiple', '');
+                    }
+                }
+            }
+        }
+    }
+})
+angular.module('platformWebApp')
+.config(['$httpProvider', function ($httpProvider) {
+    $httpProvider.interceptors.push('platformWebApp.httpInterceptor');
+}])
+.factory('platformWebApp.httpInterceptor', function () {
+	return {};
+})
+.directive('wcOverlay', ['$q', '$timeout', '$window', 'platformWebApp.httpInterceptor', function ($q, $timeout, $window, httpInterceptor) {
+	return {
+		restrict: 'EA',
+		transclude: true,
+		scope: {
+			wcOverlayDelay: "@"
+		},
+		template: '<div id="overlay-container" class="overlayContainer">' +
+						'<div id="overlay-background" class="overlayBackground"></div>' +
+						'<div id="overlay-content" class="overlayContent" data-ng-transclude>' +
+						'</div>' +
+					'</div>',
+		link: function (scope, element, attrs) {
+			var overlayContainer = null,
+				timerPromise = null,
+				timerPromiseHide = null,
+				inSession = false,
+				queue = [];
+
+			init();
+
+			function init() {
+				wireUpHttpInterceptor();
+				if (window.jQuery) wirejQueryInterceptor();
+				overlayContainer = document.getElementById('overlay-container');
+			}
+
+			//Hook into httpInterceptor factory request/response/responseError functions                
+			function wireUpHttpInterceptor() {
+
+				httpInterceptor.request = function (config) {
+					processRequest();
+					return config || $q.when(config);
+				};
+
+				httpInterceptor.response = function (response) {
+					processResponse();
+					return response || $q.when(response);
+				};
+
+				httpInterceptor.responseError = function (rejection) {
+					processResponse();
+					return $q.reject(rejection);
+				};
+			}
+
+			//Monitor jQuery Ajax calls in case it's used in an app
+			function wirejQueryInterceptor() {
+				$(document).ajaxStart(function () {
+					processRequest();
+				});
+
+				$(document).ajaxComplete(function () {
+					processResponse();
+				});
+
+				$(document).ajaxError(function () {
+					processResponse();
+				});
+			}
+
+			function processRequest() {
+				queue.push({});
+				if (queue.length == 1) {
+					timerPromise = $timeout(function () {
+						if (queue.length) showOverlay();
+					}, scope.wcOverlayDelay ? scope.wcOverlayDelay : 500); //Delay showing for 500 millis to avoid flicker
+				}
+			}
+
+			function processResponse() {
+				queue.pop();
+				if (queue.length == 0) {
+					//Since we don't know if another XHR request will be made, pause before
+					//hiding the overlay. If another XHR request comes in then the overlay
+					//will stay visible which prevents a flicker
+					timerPromiseHide = $timeout(function () {
+						//Make sure queue is still 0 since a new XHR request may have come in
+						//while timer was running
+						if (queue.length == 0) {
+							hideOverlay();
+							if (timerPromiseHide) $timeout.cancel(timerPromiseHide);
+						}
+					}, scope.wcOverlayDelay ? scope.wcOverlayDelay : 500);
+				}
+			}
+
+			function showOverlay() {
+				var w = 0;
+				var h = 0;
+				if (!$window.innerWidth) {
+					if (!(document.documentElement.clientWidth == 0)) {
+						w = document.documentElement.clientWidth;
+						h = document.documentElement.clientHeight;
+					}
+					else {
+						w = document.body.clientWidth;
+						h = document.body.clientHeight;
+					}
+				}
+				else {
+					w = $window.innerWidth;
+					h = $window.innerHeight;
+				}
+				var content = document.getElementById('overlay-content');
+				var contentWidth = parseInt(getComputedStyle(content, 'width').replace('px', ''));
+				var contentHeight = parseInt(getComputedStyle(content, 'height').replace('px', ''));
+
+				content.style.top = h / 2 - contentHeight / 2 + 'px';
+				content.style.left = w / 2 - contentWidth / 2 + 'px'
+
+				overlayContainer.style.display = 'block';
+			}
+
+			function hideOverlay() {
+				if (timerPromise) $timeout.cancel(timerPromise);
+				overlayContainer.style.display = 'none';
+			}
+
+			var getComputedStyle = function () {
+				var func = null;
+				if (document.defaultView && document.defaultView.getComputedStyle) {
+					func = document.defaultView.getComputedStyle;
+				} else if (typeof (document.body.currentStyle) !== "undefined") {
+					func = function (element, anything) {
+						return element["currentStyle"];
+					};
+				}
+
+				return function (element, style) {
+					return func(element, null)[style];
+				}
+			}();
+		}
+	}
+}]);
+
+/*@author Tushar Borole
+ * @description user has to jsut mention the percent, on completion of that percentage scroll; expression will be fired
+ * for example <div id="fixed" when-scrolled="loadMore()" percent="70">*/
+angular.module('platformWebApp')
+    .directive('whenScrolled', function () {
+        return function (scope, elm, attr) {
+            var raw = elm[0];
+            var scrollCompleted = true;
+            scope.$on('scrollCompleted', function () {
+                scrollCompleted = true;
+            });
+
+            elm.bind('scroll', function () {
+                var remainingHeight = raw.offsetHeight - raw.scrollHeight;
+                var scrollTop = raw.scrollTop;
+                var percent = Math.abs((scrollTop / remainingHeight) * 100);
+
+                var elemPercent = 70;
+                if (attr.percent)
+                    elemPercent = attr.percent;
+
+                if (percent > elemPercent) {
+                    if (scrollCompleted) {
+                        scrollCompleted = false;
+                        scope.$apply(attr.whenScrolled);
+                    }
+                }
+            });
+        };
+    });
+
+
+angular.module('platformWebApp').directive('vaShowbigimage', function () {
+    return {
+        scope: {
+        	vaShowbigimage: '='
+        },
+        link: function (scope, element, attrs) {
+            element.bind('mouseenter', function () {
+                var el = $(this),
+                    elW = el.width() + 8,
+                    elLeft = parseInt(el.offset().left) + elW,
+                    elTop  = parseInt(el.offset().top);
+
+                $('body').prepend('<div class="check-image-size"><img src="' + scope.vaShowbigimage + '" alt="" /></div>');
+                
+                var imgH = $('.check-image-size img').height(),
+                    imgW = $('.check-image-size img').width();
+
+                if(imgH >= 300 || imgW >= 300) {
+                	$('body').append('<div class="image-preview" style="left: ' + elLeft + 'px; top: ' + elTop + 'px;"><img src="' + scope.vaShowbigimage + '"></div>');
+                }
+
+                $('.check-image-size').remove();
+            });
+            element.bind('mouseleave', function () {
+                $('.image-preview').remove();
+            });
+        }
+    }
+});
+'use strict';
+
+angular.module('platformWebApp')
+// TODO: Replace with tested localized version (see below)
+.directive('smartFloat', ['$filter', '$compile', function ($filter, $compile) {
+    var INTEGER_REGEXP = /^\-?\d+$/; //Integer number
+    var FLOAT_REGEXP_1 = /^[-+]?\$?\d+.(\d{3})*(,\d*)$/; //Numbers like: 1.123,56
+    var FLOAT_REGEXP_2 = /^[-+]?\$?\d+,(\d{3})*(.\d*)$/; //Numbers like: 1,123.56
+    var FLOAT_REGEXP_3 = /^[-+]?\$?\d+(.\d*)?$/; //Numbers like: 1123.56
+    var FLOAT_REGEXP_4 = /^[-+]?\$?\d+(,\d*)?$/; //Numbers like: 1123,56
+
+    return {
+        require: 'ngModel',
+        link: function (scope, elm, attrs, ctrl) {
+            var fraction = attrs.fraction ? attrs.fraction : 2;
+            if (attrs.numType === "float") {
+                ctrl.$parsers.unshift(function (viewValue) {                    
+                    if (FLOAT_REGEXP_1.test(viewValue)) {
+                        ctrl.$setValidity('float', true);
+                        return parseFloat(viewValue.replace('.', '').replace(',', '.'));
+                    } else if (FLOAT_REGEXP_2.test(viewValue)) {
+                        ctrl.$setValidity('float', true);
+                        return parseFloat(viewValue.replace(',', ''));
+                    } else if (FLOAT_REGEXP_3.test(viewValue)) {
+                        ctrl.$setValidity('float', true);
+                        return parseFloat(viewValue);
+                    } else if (FLOAT_REGEXP_4.test(viewValue)) {
+                        ctrl.$setValidity('float', true);
+                        return parseFloat(viewValue.replace(',', '.'));
+                    } else {
+                        //Allow to use empty values
+                        ctrl.$setValidity('float', !viewValue);
+                        return viewValue;
+                    }
+                });
+
+                ctrl.$formatters.unshift(
+                    function (modelValue) {
+                        return $filter('number')(parseFloat(modelValue), fraction);
+                    }
+                );
+            }
+            else {
+                ctrl.$parsers.unshift(function (viewValue) {
+                    if (INTEGER_REGEXP.test(viewValue)) {
+                        ctrl.$setValidity('integer', true);
+                        return viewValue;
+                    }
+                    else {
+                        //Allow to use empty values
+                        ctrl.$setValidity('integer', !viewValue);
+                        return viewValue;
+                    }
+                });
+            }
+        }
+    };
+}]);
+// Custom directive to support localized integer and float number parsing & validation
+//.directive('smartFloat', ['platformWebApp.numberFormat', function (numberFormat) {
+//    return {
+//        restrict: 'A',
+//        require: 'ngModel',
+//        link: function (scope, elem, attrs, ctrl) {
+//            ctrl.$parsers.unshift(function(viewValue) {
+//                return numberFormat.validate(viewValue, attrs.numType, attrs.minExclusive, attrs.min, attrs.maxExclusive, attrs.max, attrs.fraction, ctrl.$setValidity);
+//            });
+
+//            ctrl.$formatters.unshift(function (modelValue) {
+//                return numberFormat.format(modelValue, attrs.numType, attrs.minExclusive, attrs.min, attrs.maxExclusive, attrs.max, attrs.fraction);
+//            });
+
+//            scope.$on('$localeChangeSuccess', function () {
+//                ctrl.$viewValue = ctrl.$formatters.reduceRight((prev, fn) => fn(prev), ctrl.$modelValue);
+//                ctrl.$render();
+//            });
+//        }
+//    };
+//}]);
+angular.module('platformWebApp')
+.directive('vaTooltip', [function ()
+{
+    return {
+        restrict: 'A',
+        priority: 10000,
+        compile: function (tElem, tAttrs)
+        {
+            var attributes = ["tooltip-placement", "tooltip-animation", "tooltip-popup-delay", "tooltip-trigger", "tooltip-enable", "tooltip-append-to-body", "tooltip-class"];
+            for (var i = 0; i < attributes.length; i++) {
+                var attribute = attributes[i];
+                if (!tElem.attr[attribute]) {
+                    tElem.attr(attribute, '{{' + tAttrs.$normalize(attribute) + '}}');
+                }
+            }
+        }
+    };
+}]);
+angular.module('platformWebApp')
+.directive('vaTooltipOptions', [function () {
+    return {
+        restrict: 'A',
+        scope: false,
+        compile: function () {
+            return function (scope, element, attrs) {
+                var options = ["tooltipPlacement", "tooltipAnimation", "tooltipPopupDelay", "tooltipTrigger", "tooltipEnable", "tooltipAppendToBody", "tooltipClass"];
+                var applyOption = function(option) {
+                    if (attrs[option]) {
+                        scope[option] = attrs[option];
+                        attrs.$observe(option, function() {
+                            scope[option] = attrs[option];
+                        });
+                    }
+                };
+                for (var i = 0; i < options.length; i++) {
+                    applyOption(options[i]);
+                }
+            };
+        }
+    };
+}]);
+
+angular.module('platformWebApp').directive('vaTabs', function () {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attrs) {
+            $('body').delegate('.tab-item', 'click', function () {
+                var self = $(this);
+                    index = self.index();
+
+                self.addClass('__selected').siblings().removeClass('__selected');
+                self.parents('.tabs').find('.tab-cnt').eq(index).addClass('__opened').siblings().removeClass('__opened');
+            });
+        }
+    }
+});
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var a={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["vm.","nm."],DAY:["Sondag","Maandag","Dinsdag","Woensdag","Donderdag","Vrydag","Saterdag"],ERANAMES:["voor Christus","na Christus"],ERAS:["v.C.","n.C."],FIRSTDAYOFWEEK:0,MONTH:["Januarie","Februarie","Maart","April","Mei","Junie","Julie","Augustus","September","Oktober","November","Desember"],SHORTDAY:["So","Ma","Di","Wo","Do","Vr","Sa"],SHORTMONTH:["Jan.","Feb.","Mrt.","Apr","Mei","Jun","Jul","Aug","Sep","Okt","Nov","Des"],WEEKENDRANGE:[5,6],fullDate:"EEEE d MMMM y",longDate:"d MMMM y",medium:"d MMM y HH:mm:ss",mediumDate:"d MMM y",mediumTime:"HH:mm:ss",short:"y-MM-dd HH:mm",shortDate:"y-MM-dd",shortTime:"HH:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"$",DECIMAL_SEP:",",GROUP_SEP:" ",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"af-na",pluralCat:function(e,r){return 1==e?a.ONE:a.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var a={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["vm.","nm."],DAY:["Sondag","Maandag","Dinsdag","Woensdag","Donderdag","Vrydag","Saterdag"],ERANAMES:["voor Christus","na Christus"],ERAS:["v.C.","n.C."],FIRSTDAYOFWEEK:6,MONTH:["Januarie","Februarie","Maart","April","Mei","Junie","Julie","Augustus","September","Oktober","November","Desember"],SHORTDAY:["So","Ma","Di","Wo","Do","Vr","Sa"],SHORTMONTH:["Jan.","Feb.","Mrt.","Apr","Mei","Jun","Jul","Aug","Sep","Okt","Nov","Des"],WEEKENDRANGE:[5,6],fullDate:"EEEE, dd MMMM y",longDate:"dd MMMM y",medium:"dd MMM y h:mm:ss a",mediumDate:"dd MMM y",mediumTime:"h:mm:ss a",short:"y-MM-dd h:mm a",shortDate:"y-MM-dd",shortTime:"h:mm a"},NUMBER_FORMATS:{CURRENCY_SYM:"R",DECIMAL_SEP:",",GROUP_SEP:" ",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"af-za",pluralCat:function(e,r){return 1==e?a.ONE:a.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var a={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["vm.","nm."],DAY:["Sondag","Maandag","Dinsdag","Woensdag","Donderdag","Vrydag","Saterdag"],ERANAMES:["voor Christus","na Christus"],ERAS:["v.C.","n.C."],FIRSTDAYOFWEEK:6,MONTH:["Januarie","Februarie","Maart","April","Mei","Junie","Julie","Augustus","September","Oktober","November","Desember"],SHORTDAY:["So","Ma","Di","Wo","Do","Vr","Sa"],SHORTMONTH:["Jan.","Feb.","Mrt.","Apr","Mei","Jun","Jul","Aug","Sep","Okt","Nov","Des"],WEEKENDRANGE:[5,6],fullDate:"EEEE, dd MMMM y",longDate:"dd MMMM y",medium:"dd MMM y h:mm:ss a",mediumDate:"dd MMM y",mediumTime:"h:mm:ss a",short:"y-MM-dd h:mm a",shortDate:"y-MM-dd",shortTime:"h:mm a"},NUMBER_FORMATS:{CURRENCY_SYM:"R",DECIMAL_SEP:",",GROUP_SEP:" ",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"af",pluralCat:function(e,r){return 1==e?a.ONE:a.OTHER}})}]);
@@ -23218,6 +24309,24 @@ angular.module('platformWebApp')
     }]);
 
 angular.module('platformWebApp')
+.controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    var blade = $scope.blade;
+
+    $scope.openBlade = function () {
+        var newBlade = {
+            id: "changesChildBlade",
+            currentEntities: blade.currentEntity.operationsLog,
+            headIcon: blade.headIcon,
+            title: blade.title,
+            subtitle: 'platform.widgets.operations.blade-subtitle',
+            isExpandable: true,
+            controller: 'platformWebApp.changeLog.operationListController',
+            template: '$(Platform)/Scripts/app/changeLog/blades/operation-list.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, blade);
+    };
+}]);
+angular.module('platformWebApp')
 .factory('platformWebApp.assets.api', ['$resource', function ($resource) {
     return $resource('api/platform/assets', {}, {
         createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
@@ -23237,24 +24346,6 @@ angular.module('platformWebApp')
     };
 }]);
 
-angular.module('platformWebApp')
-.controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    var blade = $scope.blade;
-
-    $scope.openBlade = function () {
-        var newBlade = {
-            id: "changesChildBlade",
-            currentEntities: blade.currentEntity.operationsLog,
-            headIcon: blade.headIcon,
-            title: blade.title,
-            subtitle: 'platform.widgets.operations.blade-subtitle',
-            isExpandable: true,
-            controller: 'platformWebApp.changeLog.operationListController',
-            template: '$(Platform)/Scripts/app/changeLog/blades/operation-list.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, blade);
-    };
-}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.dynamicObjectListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dynamicProperties.api', function ($scope, bladeNavigationService, dynamicPropertiesApi) {
 	var blade = $scope.blade;
@@ -23934,29 +25025,6 @@ angular.module('platformWebApp')
 });
 
 angular.module('platformWebApp')
-.controller('platformWebApp.dynamicPropertyWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-	$scope.blade = $scope.widget.blade;
-	$scope.openBlade = function () {
-        var blade = {
-        	id: "dynamicPropertiesList",
-        	currentEntity: $scope.blade.currentEntity,
-            controller: 'platformWebApp.propertyValueListController',
-            template: '$(Platform)/Scripts/app/dynamicProperties/blades/propertyValue-list.tpl.html'
-        };
-
-        bladeNavigationService.showBlade(blade, $scope.blade);
-    };
-
-
-	$scope.$watch('widget.blade.currentEntity', function (entity) {
-		if (angular.isDefined(entity)) {
-			var groupedByProperty = _.groupBy(entity.dynamicProperties, function (x) { return x.id; });
-			$scope.dynamicPropertyCount = _.keys(groupedByProperty).length;
-		}
-	});
-
-}]);
-angular.module('platformWebApp')
 .controller('platformWebApp.exportImport.exportMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'platformWebApp.authService', function ($scope, bladeNavigationService, exportImportResourse, authService) {
     var blade = $scope.blade;
     blade.headIcon = 'fa-upload';
@@ -24162,6 +25230,29 @@ angular.module('platformWebApp')
     }
 }]);
 
+angular.module('platformWebApp')
+.controller('platformWebApp.dynamicPropertyWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+	$scope.blade = $scope.widget.blade;
+	$scope.openBlade = function () {
+        var blade = {
+        	id: "dynamicPropertiesList",
+        	currentEntity: $scope.blade.currentEntity,
+            controller: 'platformWebApp.propertyValueListController',
+            template: '$(Platform)/Scripts/app/dynamicProperties/blades/propertyValue-list.tpl.html'
+        };
+
+        bladeNavigationService.showBlade(blade, $scope.blade);
+    };
+
+
+	$scope.$watch('widget.blade.currentEntity', function (entity) {
+		if (angular.isDefined(entity)) {
+			var groupedByProperty = _.groupBy(entity.dynamicProperties, function (x) { return x.id; });
+			$scope.dynamicPropertyCount = _.keys(groupedByProperty).length;
+		}
+	});
+
+}]);
 angular.module('platformWebApp')
 .factory('platformWebApp.exportImport.resource', ['$resource', function ($resource) {
 
@@ -24759,7 +25850,7 @@ angular.module('platformWebApp')
         }
     }
 }])
-.directive('vaBlade', ['$compile', 'platformWebApp.bladeNavigationService', 'platformWebApp.toolbarService', '$timeout', '$document', function ($compile, bladeNavigationService, toolbarService, $timeout, $document) {
+.directive('vaBlade', ['$compile', 'platformWebApp.bladeNavigationService', 'platformWebApp.toolbarService', '$timeout', '$document', 'platformWebApp.dialogService', function ($compile, bladeNavigationService, toolbarService, $timeout, $document, dialogService) {
     return {
         terminal: true,
         priority: 100,
@@ -24778,7 +25869,7 @@ angular.module('platformWebApp')
             if (!scope.blade.disableOpenAnimation) {
                 scope.blade.animated = true;
                 $timeout(function () {
-                   scope.blade.animated = false;
+                    scope.blade.animated = false;
                 }, 250);
             }
 
@@ -24795,7 +25886,7 @@ angular.module('platformWebApp')
                 // instead, we need to use sum of width of all blades
                 var previousBlades = scrollToElement.prevAll();
                 var previousBladesWidthSum = 0;
-                previousBlades.each(function() {
+                previousBlades.each(function () {
                     previousBladesWidthSum += $(this).outerWidth();
                 });
                 var scrollLeft = previousBladesWidthSum + scrollToElement.outerWidth(!(scrollToBlade.isExpanded || scrollToBlade.isMaximized)) - mainContent.width();
@@ -24907,8 +25998,15 @@ angular.module('platformWebApp')
                 event.stopPropagation();
                 $document.bind('click', handleClickEvent);
             };
+
+            scope.showErrorDetails = function () {
+                var dialog = { id: "errorDetails" };
+                if (scope.blade.errorBody != undefined)
+                    dialog.message = scope.blade.errorBody;
+                dialogService.showDialog(dialog, '$(Platform)/Scripts/app/modularity/dialogs/errorDetails-dialog.tpl.html', 'platformWebApp.confirmDialogController');
+            };
         }
-    };
+    }
 }])
 .factory('platformWebApp.bladeNavigationService', ['platformWebApp.authService', '$timeout', '$state', 'platformWebApp.dialogService', function (authService, $timeout, $state, dialogService) {
 
@@ -25034,7 +26132,7 @@ angular.module('platformWebApp')
             //    service.currentBlade = firstStateBlade;
             //    return;
             //}
-
+            blade.errorBody = "";
             blade.isLoading = true;
             blade.parentBlade = parentBlade;
             blade.childrenBlades = [];
@@ -25105,16 +26203,18 @@ angular.module('platformWebApp')
             };
         },
         checkPermission: authService.checkPermission,
-        setError: function (msg, blade) {
-            if (blade) {
+        setError: function (error, blade) {
+            if (blade && error) {
                 blade.isLoading = false;
-                blade.error = msg;
+                blade.error = error.status && error.statusText ? error.status + ': ' + error.statusText : error;
+                blade.errorBody = error.data ? error.data.exceptionMessage : blade.errorBody;
             }
         }
     };
 
     return service;
 }]);
+
 angular.module('platformWebApp')
     .directive('vaBreadcrumb', [
         'platformWebApp.breadcrumbHistoryService', function (breadcrumbHistoryService) {
@@ -25405,65 +26505,6 @@ angular.module('platformWebApp')
     }
 });
 
-angular.module('platformWebApp')
-.factory('platformWebApp.widgetService', function () {
-
-    var retVal = {
-        widgetsMap: [],
-        registerWidget: function (widget, containerName) {
-            if (!this.widgetsMap[containerName]) {
-                this.widgetsMap[containerName] = [];
-            }
-            this.widgetsMap[containerName].push(widget);
-        }
-
-    };
-    return retVal;
-})
-.directive('vaWidgetContainer', ['$compile', '$localStorage', 'platformWebApp.widgetService', function ($compile, $localStorage, widgetService) {
-    return {
-        restrict: 'E',
-        replace: true,
-        templateUrl: '$(Platform)/Scripts/app/navigation/widget/widgetContainer.tpl.html',
-        scope: {
-            data: '=?',
-            gridsterOpts: '=?',
-            group: '@',
-            blade: '='
-        },
-        link: function (scope, element, attr) {
-            if (!scope.gridsterOpts) { scope.gridsterOpts = {}; }
-            scope.$storage = $localStorage;
-
-            scope.$watch('gridsterOpts', function () {
-                var groupWidgets = _.filter(widgetService.widgetsMap[scope.group], function (w) { return !angular.isFunction(w.isVisible) || w.isVisible(scope.blade); });
-                scope.widgets = angular.copy(groupWidgets);
-                angular.forEach(scope.widgets, function (w) {
-                    w.blade = scope.blade;
-                    w.widgetsInContainer = scope.widgets;
-                });
-            }, true);
-
-            scope.getKey = function (prefix, widget) {
-                return (prefix + widget.controller + widget.template + scope.group).hashCode();
-            }
-        }
-    }
-}])
-.directive('vaWidget', ['$compile', 'platformWebApp.widgetService', 'platformWebApp.authService', function ($compile, widgetService, authService) {
-    return {
-        link: function (scope, element, attr) {
-
-            if (!scope.widget.permission || authService.checkPermission(scope.widget.permission)) {
-                element.attr('ng-controller', scope.widget.controller);
-                element.attr('ng-model', 'widget');
-                element.removeAttr("va-widget");
-                $compile(element)(scope);
-            }
-
-        }
-    }
-}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.notificationsJournalDetailtsController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.notifications', function ($scope, bladeNavigationService, notifications) {
 	var blade = $scope.blade;
@@ -26292,6 +27333,65 @@ angular.module('platformWebApp')
 	}
 }]);
 angular.module('platformWebApp')
+.factory('platformWebApp.widgetService', function () {
+
+    var retVal = {
+        widgetsMap: [],
+        registerWidget: function (widget, containerName) {
+            if (!this.widgetsMap[containerName]) {
+                this.widgetsMap[containerName] = [];
+            }
+            this.widgetsMap[containerName].push(widget);
+        }
+
+    };
+    return retVal;
+})
+.directive('vaWidgetContainer', ['$compile', '$localStorage', 'platformWebApp.widgetService', function ($compile, $localStorage, widgetService) {
+    return {
+        restrict: 'E',
+        replace: true,
+        templateUrl: '$(Platform)/Scripts/app/navigation/widget/widgetContainer.tpl.html',
+        scope: {
+            data: '=?',
+            gridsterOpts: '=?',
+            group: '@',
+            blade: '='
+        },
+        link: function (scope, element, attr) {
+            if (!scope.gridsterOpts) { scope.gridsterOpts = {}; }
+            scope.$storage = $localStorage;
+
+            scope.$watch('gridsterOpts', function () {
+                var groupWidgets = _.filter(widgetService.widgetsMap[scope.group], function (w) { return !angular.isFunction(w.isVisible) || w.isVisible(scope.blade); });
+                scope.widgets = angular.copy(groupWidgets);
+                angular.forEach(scope.widgets, function (w) {
+                    w.blade = scope.blade;
+                    w.widgetsInContainer = scope.widgets;
+                });
+            }, true);
+
+            scope.getKey = function (prefix, widget) {
+                return (prefix + widget.controller + widget.template + scope.group).hashCode();
+            }
+        }
+    }
+}])
+.directive('vaWidget', ['$compile', 'platformWebApp.widgetService', 'platformWebApp.authService', function ($compile, widgetService, authService) {
+    return {
+        link: function (scope, element, attr) {
+
+            if (!scope.widget.permission || authService.checkPermission(scope.widget.permission)) {
+                element.attr('ng-controller', scope.widget.controller);
+                element.attr('ng-model', 'widget');
+                element.removeAttr("va-widget");
+                $compile(element)(scope);
+            }
+
+        }
+    }
+}]);
+angular.module('platformWebApp')
 .factory('platformWebApp.notifications', ['$resource', function ($resource) {
 
 	return $resource('api/platform/notification/:id', { id: '@Id' }, {
@@ -26393,6 +27493,35 @@ angular.module('platformWebApp')
 	});
 }]);
 
+angular.module('platformWebApp')
+.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
+	return {
+		link: function (scope, element, attrs) {
+
+			if (attrs.vaPermission) {
+				var permissionValue = attrs.vaPermission.trim();
+			
+				//modelObject is a scope property of the parent/current scope
+				scope.$watch(attrs.securityScopes, function (value) {
+					if (value) {
+						toggleVisibilityBasedOnPermission(value);
+					}
+				});
+			
+				function toggleVisibilityBasedOnPermission(securityScopes) {
+					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
+					if (hasPermission)
+						element.show();
+					else
+						element.hide();
+				}
+
+				toggleVisibilityBasedOnPermission();
+				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
+			}
+		}
+	};
+}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.accountApiListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
@@ -27543,34 +28672,30 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
-.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
-	return {
-		link: function (scope, element, attrs) {
-
-			if (attrs.vaPermission) {
-				var permissionValue = attrs.vaPermission.trim();
-			
-				//modelObject is a scope property of the parent/current scope
-				scope.$watch(attrs.securityScopes, function (value) {
-					if (value) {
-						toggleVisibilityBasedOnPermission(value);
-					}
-				});
-			
-				function toggleVisibilityBasedOnPermission(securityScopes) {
-					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
-					if (hasPermission)
-						element.show();
-					else
-						element.hide();
-				}
-
-				toggleVisibilityBasedOnPermission();
-				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
-			}
-		}
-	};
+.factory('platformWebApp.accounts', ['$resource', function ($resource) {
+    return $resource('api/platform/security/users/:id', { id: '@Id' }, {
+        search: { method: 'POST' },
+        generateNewApiAccount: { url: 'api/platform/security/apiaccounts/new' },
+        generateNewApiKey: { url: 'api/platform/security/apiaccounts/newKey', method: 'PUT' },
+        save: { url: 'api/platform/security/users/create', method: 'POST' },
+        changepassword: { url: 'api/platform/security/users/:id/changepassword', method: 'POST' },
+        resetPassword: { url: 'api/platform/security/users/:id/resetpassword', method: 'POST' },
+        update: { method: 'PUT' },
+        locked: { url: 'api/platform/security/users/:id/locked', method: 'GET' },
+        unlock: { url: 'api/platform/security/users/:id/unlock', method: 'POST' }
+    });
 }]);
+angular.module('platformWebApp')
+.factory('platformWebApp.roles', ['$resource', function ($resource) {
+    return $resource('api/platform/security/roles/:roleName', { roleName: '@roleName' }, {
+        search: { url: 'api/platform/security/roles/search', method: 'POST' },
+        queryPermissions: { url: 'api/platform/security/permissions', isArray: true },
+        update: { method: 'PUT' },
+        create: { method: 'POST' },
+
+    });
+}]);
+
 angular.module('platformWebApp')
 .directive('vaLoginToolbar', ['$document', '$timeout', '$state', 'platformWebApp.authService', function ($document, $timeout, $state, authService) {
     return {
@@ -27611,31 +28736,6 @@ angular.module('platformWebApp')
         }
     }
 }])
-angular.module('platformWebApp')
-.factory('platformWebApp.accounts', ['$resource', function ($resource) {
-    return $resource('api/platform/security/users/:id', { id: '@Id' }, {
-        search: { method: 'POST' },
-        generateNewApiAccount: { url: 'api/platform/security/apiaccounts/new' },
-        generateNewApiKey: { url: 'api/platform/security/apiaccounts/newKey', method: 'PUT' },
-        save: { url: 'api/platform/security/users/create', method: 'POST' },
-        changepassword: { url: 'api/platform/security/users/:id/changepassword', method: 'POST' },
-        resetPassword: { url: 'api/platform/security/users/:id/resetpassword', method: 'POST' },
-        update: { method: 'PUT' },
-        locked: { url: 'api/platform/security/users/:id/locked', method: 'GET' },
-        unlock: { url: 'api/platform/security/users/:id/unlock', method: 'POST' }
-    });
-}]);
-angular.module('platformWebApp')
-.factory('platformWebApp.roles', ['$resource', function ($resource) {
-    return $resource('api/platform/security/roles/:roleName', { roleName: '@roleName' }, {
-        search: { url: 'api/platform/security/roles/search', method: 'POST' },
-        queryPermissions: { url: 'api/platform/security/permissions', isArray: true },
-        update: { method: 'PUT' },
-        create: { method: 'POST' },
-
-    });
-}]);
-
 angular.module('platformWebApp')
     .factory('platformWebApp.authService', ['$http', '$rootScope', '$cookieStore', '$state', '$interpolate', function ($http, $rootScope, $cookieStore, $state, $interpolate) {
     var serviceBase = 'api/platform/security/';
@@ -27778,15 +28878,6 @@ angular.module('platformWebApp')
         };
         bladeNavigationService.showBlade(newBlade, $scope.blade);
     };
-}]);
-angular.module('platformWebApp')
-.factory('platformWebApp.settings', ['$resource', function ($resource) {
-    return $resource('api/platform/settings/:id', { id: '@Id' }, {
-        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
-      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
-      	update: { method: 'POST', url: 'api/platform/settings' },
-        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
-    });
 }]);
 angular.module('platformWebApp')
 .controller('platformWebApp.entitySettingListController', ['$scope', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', function ($scope, settingsHelper, bladeNavigationService) {
@@ -28315,6 +29406,15 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
+.factory('platformWebApp.settings', ['$resource', function ($resource) {
+    return $resource('api/platform/settings/:id', { id: '@Id' }, {
+        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
+      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
+      	update: { method: 'POST', url: 'api/platform/settings' },
+        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
+    });
+}]);
+angular.module('platformWebApp')
 .controller('platformWebApp.entitySettingsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
 
@@ -28341,6 +29441,7 @@ angular.module('platformWebApp')
     blade.currentRegionalFormat = i18n.getRegionalFormat();
     blade.currentTimeZone = i18n.getTimeZone();
     blade.currentTimeAgoSettings = i18n.getTimeAgoSettings();
+    blade.currentTimeSettings = i18n.getTimeSettings();
 
     userProfile.load().then(function () {     
          initializeBlade();
@@ -28382,6 +29483,7 @@ angular.module('platformWebApp')
         $scope.timeZones = timeZones.query();
         blade.currentTimeZone = getNameByCode($scope.timeZones, blade.currentTimeZone);
         blade.currentTimeAgoSettings = userProfile.timeAgoSettings;
+        blade.currentTimeSettings = userProfile.timeSettings;
     };
 
     function isLoading() {
@@ -28433,6 +29535,14 @@ angular.module('platformWebApp')
             userProfile.save();
         }
     }
+    $scope.setTimeSettings = function () {
+            if (!isLoading()) {
+                i18n.changeTimeSettings(blade.currentTimeSettings);
+                angular.extend(blade.currentTimeSettings, i18n.getTimeSettings());
+                angular.extend(userProfile.timeSettings, blade.currentTimeSettings);
+                userProfile.save();
+            }
+        }
 }]);
 
 angular.module('platformWebApp')
