@@ -1,7 +1,7 @@
 using System.Threading;
 using Microsoft.Extensions.Primitives;
 
-namespace VirtoCommerce.Storefront.Model.Common.Caching
+namespace VirtoCommerce.Platform.Core.Caching
 {
     /// <summary>
     /// Represents strongly typed cache region contains cancellation token for a concrete cache region type

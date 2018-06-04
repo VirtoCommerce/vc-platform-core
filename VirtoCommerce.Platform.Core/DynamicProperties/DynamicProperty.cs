@@ -1,7 +1,5 @@
-﻿using System;
+using System;
 using System.Linq;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Core.DynamicProperties

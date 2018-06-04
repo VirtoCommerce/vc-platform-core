@@ -128,27 +128,20 @@ namespace VirtoCommerce.Platform.Security.Services
 
         public override async Task<IdentityResult> CreateAsync(ApplicationUser user)
         {
-            try
+            var result = await base.CreateAsync(user);
+            if (result.Succeeded)
             {
-                var result = await base.CreateAsync(user);
-                if (result.Succeeded)
+                if (user.Roles != null)
                 {
-                    if (user.Roles != null)
+                    //Add
+                    foreach (var newRole in user.Roles)
                     {
-                        //Add
-                        foreach (var newRole in user.Roles)
-                        {
-                            await AddToRoleAsync(user, newRole.Name);
-                        }
+                        await AddToRoleAsync(user, newRole.Name);
                     }
-                    SecurityCacheRegion.ExpireUser(user);
                 }
-                return result;
+                SecurityCacheRegion.ExpireUser(user);
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            return result;
         }
 
         protected virtual async Task LoadUserRolesAsync(ApplicationUser user)

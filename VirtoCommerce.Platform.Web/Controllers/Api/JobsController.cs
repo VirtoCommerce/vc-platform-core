@@ -1,14 +1,16 @@
 using System.Linq;
 using Hangfire;
 using Hangfire.States;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.Platform.Core.Jobs;
+using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api
 {
     [Produces("application/json")]
     [Route("api/platform/jobs")]
-    //[Authorize(SecurityConstants.Permissions.BackgroundJobsManage)]
+    [Authorize(SecurityConstants.Permissions.BackgroundJobsManage)]
     public class JobsController : Controller
     {
         private static readonly string[] _finalStates = { DeletedState.StateName, FailedState.StateName, SucceededState.StateName };

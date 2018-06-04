@@ -1,13 +1,15 @@
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.Platform.Core.DynamicProperties;
+using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api
 {
     [Produces("application/json")]
     [Route("api/platform/dynamic")]
-    //[Authorize(SecurityConstants.Permissions.DynamicPropertiesQuery)]
+    [Authorize(SecurityConstants.Permissions.DynamicPropertiesQuery)]
     public class DynamicPropertiesController : Controller
     {
         private readonly IDynamicPropertyRegistrar _dynamicPropertyRegistrar;
@@ -37,13 +39,12 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// Get dynamic properties registered for object type
         /// </summary>
         /// <returns></returns>
-        [HttpGet]
+        [HttpPost]
         [Route("types/{typeName}/properties")]
         [ProducesResponseType(typeof(DynamicProperty[]), 200)]
-        public async Task<IActionResult> GetPropertiesAsync(string typeName)
+        public async Task<IActionResult> Search([FromBody] DynamicPropertySearchCriteria criteria)
         {
-            //TODO: receive search criteria
-            var result = await _dynamicPropertySearchService.SearchDynamicPropertiesAsync(new DynamicPropertySearchCriteria { ObjectType = typeName, Take = int.MaxValue });
+            var result = await _dynamicPropertySearchService.SearchDynamicPropertiesAsync(criteria);
             return Ok(result.Results);
         }
 
@@ -54,7 +55,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("properties")]
         [ProducesResponseType(typeof(DynamicProperty), 200)]
-        //[Authorize(SecurityConstants.Permissions.DynamicPropertiesCreate)]
+        [Authorize(SecurityConstants.Permissions.DynamicPropertiesCreate)]
         public async Task<IActionResult> CreatePropertyAsync([FromBody]DynamicProperty property)
         {
             var result = await _dynamicPropertyService.SaveDynamicPropertiesAsync(new[] { property });
@@ -68,7 +69,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPut]
         [Route("properties")]
         [ProducesResponseType(typeof(void), 200)]
-        //[Authorize(SecurityConstants.Permissions.DynamicPropertiesUpdate)]
+        [Authorize(SecurityConstants.Permissions.DynamicPropertiesUpdate)]
         public async Task<IActionResult> UpdatePropertyAsync([FromBody]DynamicProperty property)
         {
             await _dynamicPropertyService.SaveDynamicPropertiesAsync(new[] { property });
@@ -82,7 +83,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpDelete]
         [Route("properties")]
         [ProducesResponseType(typeof(void), 200)]
-        //[Authorize(SecurityConstants.Permissions.DynamicPropertiesDelete)]
+        [Authorize(SecurityConstants.Permissions.DynamicPropertiesDelete)]
         public async Task<IActionResult> DeletePropertyAsync([FromQuery] string[] propertyIds)
         {
             await _dynamicPropertyService.DeleteDynamicPropertiesAsync(propertyIds);
@@ -93,13 +94,12 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// Get dictionary items
         /// </summary>
         /// <returns></returns>
-        [HttpGet]
-        [Route("dictionaryitems")]
+        [HttpPost]
+        [Route("dictionaryitems/search")]
         [ProducesResponseType(typeof(DynamicPropertyDictionaryItem[]), 200)]
-        public async Task<IActionResult> GetDictionaryItems(string typeName, string propertyId)
+        public async Task<IActionResult> GetDictionaryItems([FromBody]DynamicPropertyDictionaryItemSearchCriteria criteria)
         {
-            //TODO: receive search criteria
-            var result = await _dynamicPropertySearchService.SearchDictionaryItemsAsync(new DynamicPropertyDictionaryItemSearchCriteria { DynamicPropertyId = propertyId, Take = int.MaxValue });
+            var result = await _dynamicPropertySearchService.SearchDictionaryItemsAsync(criteria);
             return Ok(result.Results);
         }
 
@@ -113,7 +113,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("dictionaryitems")]
         [ProducesResponseType(typeof(void), 200)]
-        //[Authorize(SecurityConstants.Permissions.DynamicPropertiesUpdate)]
+        [Authorize(SecurityConstants.Permissions.DynamicPropertiesUpdate)]
         public async Task<IActionResult> SaveDictionaryItemsAsync([FromBody]DynamicPropertyDictionaryItem[] items)
         {
             await _dynamicPropertyService.SaveDictionaryItemsAsync(items);
@@ -128,7 +128,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpDelete]
         [Route("dictionaryitems")]
         [ProducesResponseType(typeof(void), 200)]
-        //[Authorize(SecurityConstants.Permissions.DynamicPropertiesUpdate)]
+        [Authorize(SecurityConstants.Permissions.DynamicPropertiesUpdate)]
         public async Task<IActionResult> DeleteDictionaryItemAsync([FromQuery] string[] ids)
         {
             await _dynamicPropertyService.DeleteDictionaryItemsAsync(ids);

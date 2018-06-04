@@ -30,6 +30,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
     [ApiExplorerSettings(IgnoreApi = true)]
     public class ModulesController : Controller
     {
+        private const string _autoInstallStateSetting = "VirtoCommerce.ModulesAutoInstallState";
         private const string _uploadsUrl = "~/App_Data/Uploads/";
         private readonly IExternalModuleCatalog _moduleCatalog;
         private readonly IModuleInstaller _moduleInstaller;
@@ -281,16 +282,16 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             };
 
 
-            if (!(await _settingsManager.GetValueAsync("VirtoCommerce.ModulesAutoInstalled", false)))
+            if (!(await _settingsManager.GetValueAsync(PlatformConstants.Settings.Setup.ModulesAutoInstalled.Name, false)))
             {
                 using (await AsyncLock.GetLockByKey("autoinstall").LockAsync())
                 {
-                    if (!(await _settingsManager.GetValueAsync("VirtoCommerce.ModulesAutoInstalled", false)))
+                    if (!(await _settingsManager.GetValueAsync(PlatformConstants.Settings.Setup.ModulesAutoInstalled.Name, false)))
                     {
                         var moduleBundles = _extModuleOptions.AutoInstallModuleBundles;
                         if (!moduleBundles.IsNullOrEmpty())
                         {
-                            await _settingsManager.SetValueAsync("VirtoCommerce.ModulesAutoInstalled", true);
+                            _settingsManager.SetValue(_autoInstallStateSetting, AutoInstallState.Processing);
 
                             EnsureModulesCatalogInitialized();
 
@@ -340,6 +341,22 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             return Ok(notification);
         }
 
+        /// <summary>
+        /// This method used by azure automatically deployment scripts to check the installation status
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("autoinstall/state")]
+        [ProducesResponseType(typeof(string), 200)]
+        [ApiExplorerSettings(IgnoreApi = true)]
+        [AllowAnonymous]
+        public IActionResult GetAutoInstallState()
+        {
+            var state = EnumUtility.SafeParse(_settingsManager.GetValue(_autoInstallStateSetting, string.Empty), AutoInstallState.Undefined);
+            return Ok(state);
+        }
+
+        [ApiExplorerSettings(IgnoreApi = true)]
         public void ModuleBackgroundJob(ModuleBackgroundJobOptions options, ModulePushNotification notification)
         {
             try
@@ -377,6 +394,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             }
             finally
             {
+                _settingsManager.SetValue(_autoInstallStateSetting, AutoInstallState.Completed);
+
                 notification.Finished = DateTime.UtcNow;
                 notification.ProgressLog.Add(new ProgressMessage
                 {
