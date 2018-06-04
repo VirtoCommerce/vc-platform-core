@@ -113,7 +113,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [ProducesResponseType(typeof(SettingEntry), 200)]
         public async Task<IActionResult> GetUICustomizationSetting()
         {
-            var result = await _settingsManager.GetSettingByNameAsync("VirtoCommerce.Platform.UI.Customization");
+            var result = await _settingsManager.GetSettingByNameAsync(PlatformConstants.Settings.UserInterface.Customization.Name);
             return Ok(result);
         }
     }

@@ -1,13 +1,13 @@
-﻿angular.module('platformWebApp')
-.controller('platformWebApp.rolePermissionsController', ['$scope', 'platformWebApp.dialogService', function ($scope, dialogService) {
+angular.module('platformWebApp')
+    .controller('platformWebApp.rolePermissionsController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.roles', function ($scope, dialogService, roles) {
     var blade = $scope.blade;
     var allPermissions;
 
     function initializeBlade(data) {
         blade.data = data;
-        blade.promise.then(function (promiseData) {
-            allPermissions = _.filter(angular.copy(promiseData), function (x) {
-                return _.all(data.permissions, function (curr) { return curr.id !== x.id; });
+        roles.queryPermissions({ take: 10000 }, function (result)  {
+            allPermissions = _.filter(angular.copy(result), function (x) {
+                return _.all(data.permissions, function (curr) { return curr.name !== x.name; });
             });
             
             blade.currentEntities = _.groupBy(allPermissions, 'groupName');

@@ -1,4 +1,4 @@
-<div class="blade-static __bottom" ng-include="'$(Platform)/Scripts/common/templates/ok-cancel2.tpl.html'" ng-if="!blade.isApiSave"></div>
+﻿<div class="blade-static __bottom" ng-include="'$(Platform)/Scripts/common/templates/ok-cancel2.tpl.html'" ng-if="!blade.isApiSave"></div>
 <div class="blade-content">
     <div class="blade-inner">
         <div class="inner-block">
@@ -78,7 +78,8 @@
                                     </td>
                                     <td class="table-col" ng-if="blade.currentEntity.isMultilingual">
                                         <div ng-repeat="data in data.displayNames | orderBy: 'locale'" style="margin:5px 0;">
-                                            <span class="flag flag-{{data.locale.substr(3, 2).toLowerCase()}}"></span>
+                                            <span ng-if="data.locale.length>2" class="flag flag-{{data.locale.substr(3,2).toLowerCase()}}"></span>
+                                            <span ng-if="data.locale.length<=2" class="langCode">{{data.locale.toUpperCase()}}</span>
                                             {{data.name}}
                                         </div>
                                     </td>

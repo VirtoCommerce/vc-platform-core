@@ -17,7 +17,7 @@ namespace VirtoCommerce.Platform.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.0.1-rtm-125")
+                .HasAnnotation("ProductVersion", "2.0.3-rtm-10026")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("VirtoCommerce.Platform.Data.Assets.AssetEntryEntity", b =>
@@ -232,7 +232,8 @@ namespace VirtoCommerce.Platform.Data.Migrations
 
                     b.Property<DateTime?>("DateTimeValue");
 
-                    b.Property<decimal?>("DecimalValue");
+                    b.Property<decimal?>("DecimalValue")
+                        .HasColumnType("decimal(18,5)");
 
                     b.Property<string>("DictionaryItemId");
 
@@ -375,7 +376,8 @@ namespace VirtoCommerce.Platform.Data.Migrations
 
                     b.Property<DateTime?>("DateTimeValue");
 
-                    b.Property<decimal>("DecimalValue");
+                    b.Property<decimal>("DecimalValue")
+                        .HasColumnType("decimal(18,5)");
 
                     b.Property<int>("IntegerValue");
 

@@ -1,7 +1,31 @@
+using System;
+using System.Collections.Generic;
+using VirtoCommerce.Platform.Core.Modularity;
+
 namespace VirtoCommerce.Platform.Core.Security
 {
     public static class SecurityConstants
     {
+        public static class Settings
+        {
+            public static ModuleSetting SecurityAccountTypes = new ModuleSetting
+            {
+                Name = "VirtoCommerce.Platform.Security.AccountTypes",
+                ValueType = ModuleSetting.TypeString,
+                IsArray = true,
+                ArrayValues = Enum.GetNames(typeof(UserType)),
+                DefaultValue = UserType.Manager.ToString()
+            };
+
+            public static IEnumerable<ModuleSetting> AllSettings
+            {
+                get
+                {
+                    yield return SecurityAccountTypes;
+                }
+            }
+        }
+
         public static class Claims
         {
             public const string PermissionClaimType = "permission";

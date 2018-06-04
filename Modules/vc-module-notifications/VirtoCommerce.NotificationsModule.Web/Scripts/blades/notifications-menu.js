@@ -16,8 +16,8 @@ angular.module('virtoCommerce.notificationsModule')
 
         $scope.selectedNodeId = data.id;
 
-        var tenantId = $stateParams.tenantId;
-        var tenantType = $stateParams.tenantType;
+        var tenantId = $stateParams.objectId;
+        var tenantType = $stateParams.objectTypeId;
         var newBlade = {
             id: 'notificationsList',
             title: data.name,

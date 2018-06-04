@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using Microsoft.Extensions.Primitives;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Settings;
-using VirtoCommerce.Storefront.Model.Common.Caching;
 
 namespace VirtoCommerce.Platform.Data.Settings
 {

@@ -49,7 +49,7 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
             var cacheKey = CacheKey.With(GetType(), "GetDynamicPropertiesAsync", string.Join("-", ids));
             return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                //Add cache  expiration token for setting
+                //Add cache  expiration token
                 cacheEntry.AddExpirationToken(DynamicPropertiesCacheRegion.CreateChangeToken());
                 using (var repository = _repositoryFactory())
                 {
@@ -68,6 +68,7 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
             var cacheKey = CacheKey.With(GetType(), "GetDynamicPropertyDictionaryItemsAsync", string.Join("-", ids));
             return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
+                cacheEntry.AddExpirationToken(DynamicPropertiesCacheRegion.CreateChangeToken());
                 using (var repository = _repositoryFactory())
                 {
                     //Optimize performance and CPU usage
@@ -105,10 +106,9 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                 }
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
+
+                DynamicPropertiesCacheRegion.ExpireRegion();
             }
-
-            DynamicPropertiesCacheRegion.ExpireRegion();
-
             return properties;
         }
 
@@ -130,9 +130,9 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                 }
 
                 await repository.UnitOfWork.CommitAsync();
-            }
 
-            DynamicPropertiesCacheRegion.ExpireRegion();
+                DynamicPropertiesCacheRegion.ExpireRegion();
+            }
         }
 
 
@@ -160,8 +160,10 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                     }
                 }
                 await repository.UnitOfWork.CommitAsync();
+
+                DynamicPropertiesCacheRegion.ExpireRegion();
             }
-            DynamicPropertiesCacheRegion.ExpireRegion();
+            
         }
 
         public virtual async Task DeleteDictionaryItemsAsync(string[] itemIds)
@@ -183,9 +185,9 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                 }
 
                 await repository.UnitOfWork.CommitAsync();
-            }
 
-            DynamicPropertiesCacheRegion.ExpireRegion();
+                DynamicPropertiesCacheRegion.ExpireRegion();
+            }
         }
 
         public virtual async Task LoadDynamicPropertyValuesAsync(params IHasDynamicProperties[] owners)

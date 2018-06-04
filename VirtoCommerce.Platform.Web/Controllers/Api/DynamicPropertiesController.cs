@@ -37,13 +37,12 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// Get dynamic properties registered for object type
         /// </summary>
         /// <returns></returns>
-        [HttpGet]
+        [HttpPost]
         [Route("types/{typeName}/properties")]
         [ProducesResponseType(typeof(DynamicProperty[]), 200)]
-        public async Task<IActionResult> GetPropertiesAsync(string typeName)
+        public async Task<IActionResult> Search([FromBody] DynamicPropertySearchCriteria criteria)
         {
-            //TODO: receive search criteria
-            var result = await _dynamicPropertySearchService.SearchDynamicPropertiesAsync(new DynamicPropertySearchCriteria { ObjectType = typeName, Take = int.MaxValue });
+            var result = await _dynamicPropertySearchService.SearchDynamicPropertiesAsync(criteria);
             return Ok(result.Results);
         }
 
@@ -93,13 +92,12 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// Get dictionary items
         /// </summary>
         /// <returns></returns>
-        [HttpGet]
-        [Route("dictionaryitems")]
+        [HttpPost]
+        [Route("dictionaryitems/search")]
         [ProducesResponseType(typeof(DynamicPropertyDictionaryItem[]), 200)]
-        public async Task<IActionResult> GetDictionaryItems(string typeName, string propertyId)
+        public async Task<IActionResult> GetDictionaryItems([FromBody]DynamicPropertyDictionaryItemSearchCriteria criteria)
         {
-            //TODO: receive search criteria
-            var result = await _dynamicPropertySearchService.SearchDictionaryItemsAsync(new DynamicPropertyDictionaryItemSearchCriteria { DynamicPropertyId = propertyId, Take = int.MaxValue });
+            var result = await _dynamicPropertySearchService.SearchDictionaryItemsAsync(criteria);
             return Ok(result.Results);
         }
 
@@ -123,8 +121,6 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <summary>
         /// Delete dictionary items
         /// </summary>
-        /// <param name="typeName"></param>
-        /// <param name="propertyId"></param>
         /// <param name="ids">IDs of dictionary items to delete.</param>
         /// <returns></returns>
         [HttpDelete]
