@@ -157,10 +157,8 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
         /// Create folder in file system within to base directory
         /// </summary>
         /// <param name="folder"></param>
-        public virtual async Task CreateFolderAsync(BlobFolder folder)
+        public virtual Task CreateFolderAsync(BlobFolder folder)
         {
-            await Task.Factory.StartNew(() =>
-            {
                 if (folder == null)
                 {
                     throw new ArgumentNullException("folder");
@@ -178,7 +176,8 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
                 {
                     Directory.CreateDirectory(path);
                 }
-            });
+
+            return Task.CompletedTask;
         }
 
         /// <summary>
