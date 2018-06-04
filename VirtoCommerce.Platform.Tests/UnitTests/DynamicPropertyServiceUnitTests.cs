@@ -65,7 +65,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
             //Assert
             Assert.Contains(result, prop => prop.Name == name);
             Assert.Equal(id, result.First().Id);
-            Assert.NotNull(result.First().ModifiedDate);
+            Assert.Null(result.First().ModifiedDate);
         }
 
         [Fact]
@@ -77,19 +77,6 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
            
             //Act
             await _dynamicPropertyService.SaveDictionaryItemsAsync(properties.ToArray());
-        }
-
-        [Fact]
-        public async Task SaveDynamicPropertyValuesAsync_SaveValues()
-        {
-            //Arrange
-            IHasDynamicProperties values = new SomeClass() { Id = "", DynamicProperties = new List<DynamicObjectProperty>()
-            {
-                new DynamicObjectProperty() {Name = "prop"}
-            }};
-
-            //Act
-            await _dynamicPropertyService.SaveDynamicPropertyValuesAsync(values);
         }
     }
 

@@ -26,6 +26,11 @@ namespace VirtoCommerce.Platform.Core.FileManager
                 Directory.CreateDirectory(path);
         }
 
+
+        /// <summary>
+        /// Delete directory or file
+        /// </summary>
+        /// <param name="path"></param>
         public void Delete(string path)
         {
             FileAttributes attributes = File.GetAttributes(path);
@@ -46,6 +51,11 @@ namespace VirtoCommerce.Platform.Core.FileManager
             }
         }
 
+
+        /// <summary>
+        /// Safe deleting with all subdirectories and files
+        /// </summary>
+        /// <param name="path"></param>
         public void SafeDelete(string path)
         {
             if (Directory.Exists(path))
@@ -78,7 +88,7 @@ namespace VirtoCommerce.Platform.Core.FileManager
                     //Then try to delete main directory itself
                     try
                     {
-                        //_txFileManager.DeleteDirectory(directoryPath);
+                        Delete(path);
                     }
                     catch (IOException)
                     {

@@ -103,7 +103,7 @@ namespace VirtoCommerce.Platform.Modules
                         {
                             var existModule = _extModuleCatalog.Modules.OfType<ManifestModuleInfo>().Where(x => x.IsInstalled && x.Id == newModule.Id).First();
                             var dstModuleDir = Path.Combine(_options.DiscoveryPath, existModule.Id);
-                            _fileManager.SafeDeleteDirectory(dstModuleDir);
+                            _fileManager.SafeDelete(dstModuleDir);
                             Report(progress, ProgressMessageLevel.Info, "Updating '{0}' -> '{1}'", existModule, newModule);
                             InnerInstall(newModule, progress);
                             existModule.IsInstalled = false;
@@ -163,7 +163,7 @@ namespace VirtoCommerce.Platform.Modules
                             if (Directory.Exists(moduleDir))
                             {
                                 Report(progress, ProgressMessageLevel.Info, "Deleting module {0} folder", moduleDir);
-                                _fileManager.SafeDeleteDirectory(moduleDir);
+                                _fileManager.SafeDelete(moduleDir);
                             }
                             Report(progress, ProgressMessageLevel.Info, "'{0}' uninstalled successfully.", uninstallingModule);
                             uninstallingModule.IsInstalled = false;

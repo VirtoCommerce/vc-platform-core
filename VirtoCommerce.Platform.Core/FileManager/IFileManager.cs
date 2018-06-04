@@ -1,5 +1,8 @@
 namespace VirtoCommerce.Platform.Core.FileManager
 {
+    /// <summary>
+    /// port from https://github.com/rsevil/Transactions
+    /// </summary>
     public interface IFileManager
     {
         /// <summary>
@@ -15,7 +18,7 @@ namespace VirtoCommerce.Platform.Core.FileManager
         void Delete(string path);
 
         /// <summary>
-        /// Delete all files and directories
+        /// Delete all files and directories safely
         /// </summary>
         /// <param name="path"></param>
         void SafeDelete(string path);
