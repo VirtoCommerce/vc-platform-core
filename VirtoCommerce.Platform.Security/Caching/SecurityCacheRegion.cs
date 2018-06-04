@@ -2,8 +2,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using Microsoft.Extensions.Primitives;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.Storefront.Model.Common.Caching;
 
 namespace VirtoCommerce.Platform.Security.Caching
 {

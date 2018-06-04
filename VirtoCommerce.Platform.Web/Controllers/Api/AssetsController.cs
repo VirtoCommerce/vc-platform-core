@@ -53,7 +53,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [DisableFormValueModelBinding]
         [ProducesResponseType(typeof(BlobInfo[]), 200)]
         [Authorize(SecurityConstants.Permissions.AssetCreate)]
-        public async Task<IActionResult> UploadAssetToLocalFileSystem()
+        public async Task<IActionResult> UploadAssetToLocalFileSystemAsync()
         {
             //ToDo Now supports downloading one file, find a solution for downloading multiple files
             var retVal = new List<BlobInfo>();
@@ -115,7 +115,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [ProducesResponseType(typeof(BlobInfo[]), 200)]
         [Authorize(SecurityConstants.Permissions.AssetCreate)]
         [UploadFile]
-        public async Task<IActionResult> UploadAsset([FromQuery] string folderUrl, [FromQuery]string url = null, [FromQuery]string name = null)
+        public async Task<IActionResult> UploadAssetAsync([FromQuery] string folderUrl, [FromQuery]string url = null, [FromQuery]string name = null)
         {
             if (url == null && !MultipartRequestHelper.IsMultipartContentType(Request.ContentType))
             {
@@ -189,7 +189,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 200)]
         [Route("")]
         [Authorize(SecurityConstants.Permissions.AssetDelete)]
-        public async Task<IActionResult> DeleteBlobs([FromQuery] string[] urls)
+        public async Task<IActionResult> DeleteBlobsAsync([FromQuery] string[] urls)
         {
             await _blobProvider.Remove(urls);
             return Ok();
@@ -202,13 +202,13 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <param name="keyword"></param>
         /// <returns></returns> 
         [HttpGet]
-        [ProducesResponseType(typeof(AssetListItem[]), 200)]
+        [ProducesResponseType(typeof(BlobSearchResult), 200)]
         [Route("")]
         [Authorize(SecurityConstants.Permissions.AssetRead)]
-        public async Task<IActionResult> SearchAssetItems(string folderUrl = null, string keyword = null)
+        public async Task<IActionResult> SearchAssetItemsAsync([FromQuery]string folderUrl = null,[FromQuery] string keyword = null)
         {
             var result = await _blobProvider.SearchAsync(folderUrl, keyword);
-            return Ok(result.Result.ToArray());
+            return Ok(result);
         }
 
         /// <summary>
@@ -220,7 +220,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 200)]
         [Route("folder")]
         [Authorize(SecurityConstants.Permissions.AssetCreate)]
-        public async Task<IActionResult> CreateBlobFolder([FromBody]BlobFolder folder)
+        public async Task<IActionResult> CreateBlobFolderAsync([FromBody]BlobFolder folder)
         {
             await _blobProvider.CreateFolder(folder);
             return Ok();

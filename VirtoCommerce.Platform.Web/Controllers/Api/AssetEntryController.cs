@@ -31,8 +31,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("search")]
         [ProducesResponseType(typeof(GenericSearchResult<AssetEntry>), 200)]
-        // [CheckPermission(Permission = PredefinedPermissions.AssetAccess)]
-        public IActionResult Search(AssetEntrySearchCriteria criteria)
+        [Authorize(SecurityConstants.Permissions.AssetAccess)]
+        public IActionResult Search([FromBody]AssetEntrySearchCriteria criteria)
         {
             var result = _assetSearchService.SearchAssetEntries(criteria);
             return Ok(result);
@@ -45,7 +45,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Route("{id}")]
         [ProducesResponseType(typeof(AssetEntry), 200)]
         [Authorize(SecurityConstants.Permissions.AssetRead)]
-        public IActionResult Get(string id)
+        public IActionResult Get([FromQuery]string id)
         {
             var retVal = _assetService.GetByIds(new[] { id });
             if (retVal?.Any() == true)
@@ -63,7 +63,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Route("")]
         [ProducesResponseType(typeof(void), 200)]
         [Authorize(SecurityConstants.Permissions.AssetUpdate)]
-        public IActionResult Update(AssetEntry item)
+        public IActionResult Update([FromBody]AssetEntry item)
         {
             _assetService.SaveChanges(new[] { item });
             return Ok();

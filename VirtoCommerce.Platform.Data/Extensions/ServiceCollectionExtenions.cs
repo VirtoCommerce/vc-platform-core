@@ -10,6 +10,7 @@ using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Assets.AzureBlobStorage;
 using VirtoCommerce.Platform.Data.Assets.FileSystem;
+using VirtoCommerce.Platform.Data.DynamicProperties;
 using VirtoCommerce.Platform.Data.PushNotifications;
 using VirtoCommerce.Platform.Data.Repositories;
 using VirtoCommerce.Platform.Data.Settings;

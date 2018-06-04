@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
@@ -134,7 +135,7 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
                     ParentUrl = GetAbsoluteUrlFromPath(directoryInfo.Parent.FullName)
                 };
                 folder.RelativeUrl = GetRelativeUrl(folder.Url);
-                retVal.Folders.Add(folder);
+                retVal.Results.Add(folder);
             }
 
             var files = String.IsNullOrEmpty(keyword) ? Directory.GetFiles(storageFolderPath) : Directory.GetFiles(storageFolderPath, "*" + keyword + "*.*", SearchOption.AllDirectories);
@@ -150,8 +151,10 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
                     ModifiedDate = fileInfo.LastWriteTimeUtc
                 };
                 blobInfo.RelativeUrl = GetRelativeUrl(blobInfo.Url);
-                retVal.Items.Add(blobInfo);
+                retVal.Results.Add(blobInfo);
             }
+
+            retVal.TotalCount = retVal.Results.Count();
             return Task.FromResult(retVal);
         }
 

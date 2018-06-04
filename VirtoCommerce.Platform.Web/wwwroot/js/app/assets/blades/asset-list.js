@@ -9,20 +9,21 @@ angular.module('platformWebApp')
 
             blade.refresh = function () {
                 blade.isLoading = true;
-                assets.query(
+                assets.search(
                     {
                         keyword: blade.searchKeyword,
                         folderUrl: blade.currentEntity.url
                     },
                     function (data) {
-                        $scope.pageSettings.totalItems = data.length;
+                        debugger;
+                        $scope.pageSettings.totalItems = data.totalCount;
                         _.each(data, function (x) {
                             x.isImage = x.contentType && x.contentType.startsWith('image/');
                             if (x.isImage) {
                                 x.noCacheUrl = x.url + '?t=' + x.modifiedDate;
                             }
                         });
-                        $scope.listEntries = data;
+                        $scope.listEntries = data.results;
                         blade.isLoading = false;
 
                         //Set navigation breadcrumbs

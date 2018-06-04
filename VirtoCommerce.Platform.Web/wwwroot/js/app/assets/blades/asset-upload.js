@@ -35,10 +35,10 @@ angular.module('platformWebApp')
                     bladeNavigationService.setError(null, blade);
 
                     // check for asset duplicates
-                    assets.query({ folderUrl: folderUrl },
+                    assets.search({ folderUrl: folderUrl },
                         function (data) {
                             blade.isLoading = false;
-                            currentEntities = data;
+                            currentEntities = data.results;
 
                             _.each(addedItems, promptUserDecision);
                             uploader.uploadAll();

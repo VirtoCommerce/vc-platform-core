@@ -26,4 +26,8 @@
     <ProjectReference Include="..\VirtoCommerce.Platform.Data.Assets.FileSystem\VirtoCommerce.Platform.Data.Assets.FileSystem.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Caching\" />
+  </ItemGroup>
+
 </Project>

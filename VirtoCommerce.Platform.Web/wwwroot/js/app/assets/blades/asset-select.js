@@ -15,15 +15,15 @@ angular.module('platformWebApp')
 
             blade.refresh = function () {
                 blade.isLoading = true;
-                assetsApi.query(
+                assetsApi.search(
                     {
                         keyword: blade.searchKeyword,
                         folderUrl: blade.currentEntity.url
                     },
                     function (data) {
-                        $scope.pageSettings.totalItems = data.length;
+                        $scope.pageSettings.totalItems = data.totalCount;
                         _.each(data, function (x) { x.isImage = x.contentType && x.contentType.startsWith('image/'); });
-                        $scope.listEntries = data;
+                        $scope.listEntries = data.results;
                         blade.isLoading = false;
 
                         //Set navigation breadcrumbs

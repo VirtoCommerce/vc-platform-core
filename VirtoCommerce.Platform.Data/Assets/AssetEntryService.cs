@@ -6,12 +6,11 @@ using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Caching;
-using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.Platform.Data.Repositories;
 
 namespace VirtoCommerce.Platform.Data.Assets
 {
-    public class AssetEntryService: ServiceBase, IAssetEntryService, IAssetEntrySearchService
+    public class AssetEntryService:  IAssetEntryService, IAssetEntrySearchService
     {
         private readonly Func<IPlatformRepository> _platformRepository;
         private readonly IBlobUrlResolver _blobUrlResolver;
@@ -24,9 +23,9 @@ namespace VirtoCommerce.Platform.Data.Assets
             _memoryCache = memoryCache;
         }
 
-        public GenericSearchResult<AssetEntry> SearchAssetEntries(AssetEntrySearchCriteria criteria)
+        public  GenericSearchResult<AssetEntry> SearchAssetEntries(AssetEntrySearchCriteria criteria)
         {
-            var cacheKey = $"Search:{criteria?.GetHashCode()}";
+            var cacheKey = CacheKey.With(GetType(), "SearchAssetEntries", criteria.GetHashCode().ToString());
 
             return _memoryCache.GetOrCreateExclusive(cacheKey, (cacheEntry) =>
             {
@@ -34,6 +33,9 @@ namespace VirtoCommerce.Platform.Data.Assets
 
                 using (var repository = _platformRepository())
                 {
+
+                    cacheEntry.AddExpirationToken(AssetCacheRegion.CreateChangeToken());
+
                     var query = repository.AssetEntries;
 
                     if (!string.IsNullOrEmpty(criteria.SearchPhrase))
@@ -83,8 +85,6 @@ namespace VirtoCommerce.Platform.Data.Assets
                         .OrderBy(x => ids.IndexOf(x.Id))
                         .ToList();
 
-                    cacheEntry.AddExpirationToken(AssetCacheRegion.CreateChangeToken());
-
                     return result;
                 }
             });
@@ -118,7 +118,8 @@ namespace VirtoCommerce.Platform.Data.Assets
                         repository.Add(modifiedEntity);
                     }
                 }
-                CommitChanges(repository);
+
+                repository.UnitOfWork.CommitAsync();
 
                 //Reset cached items
                 AssetCacheRegion.ExpireRegion();

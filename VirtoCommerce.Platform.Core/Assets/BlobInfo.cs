@@ -2,7 +2,7 @@ using System;
 
 namespace VirtoCommerce.Platform.Core.Assets
 {
-    public class BlobInfo : BlobObject
+    public class BlobInfo : BlobEntry
     {
         public BlobInfo()
         {
@@ -14,7 +14,6 @@ namespace VirtoCommerce.Platform.Core.Assets
 		public string Key { get; set; }
         public long Size { get; set; }
         public string ContentType { get; set; }
-        public DateTime? ModifiedDate { get; set; }
 
     }
 }

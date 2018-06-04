@@ -1,6 +1,6 @@
 namespace VirtoCommerce.Platform.Core.Assets
 {
-    public class BlobFolder : BlobObject
+    public class BlobFolder : BlobEntry
     {
         public BlobFolder()
         {

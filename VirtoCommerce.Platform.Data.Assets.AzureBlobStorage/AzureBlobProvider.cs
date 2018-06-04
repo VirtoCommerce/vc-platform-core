@@ -205,7 +205,7 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
                             //Do not return empty blob (created with directory because azure blob not support direct directory creation)
                             if (!string.IsNullOrEmpty(blobInfo.Name))
                             {
-                                retVal.Items.Add(blobInfo);
+                                retVal.Results.Add(blobInfo);
                             }
                         }
 
@@ -222,7 +222,7 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
                                     : null
                             };
                             folder.RelativeUrl = folder.Url.Replace(_cloudBlobClient.BaseUri.ToString(), string.Empty);
-                            retVal.Folders.Add(folder);
+                            retVal.Results.Add(folder);
                         }
                     }
                 }
@@ -244,11 +244,14 @@ namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
                             Url = Uri.EscapeUriString(item.Uri.ToString()),
                             
                         };
-                        retVal.Folders.Add(folder);
+                        retVal.Results.Add(folder);
                     }
                 } while (listbContinuationToken != null);
 
             }
+
+            retVal.TotalCount = retVal.Results.Count();
+
             return retVal;
         }
 
