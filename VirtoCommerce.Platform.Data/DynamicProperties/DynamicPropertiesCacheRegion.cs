@@ -1,4 +1,4 @@
-using VirtoCommerce.Storefront.Model.Common.Caching;
+using VirtoCommerce.Platform.Core.Caching;
 
 namespace VirtoCommerce.Platform.Data.DynamicProperties
 {

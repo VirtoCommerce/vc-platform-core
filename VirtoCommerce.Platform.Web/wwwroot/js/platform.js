@@ -23306,6 +23306,7 @@ angular.module('platformWebApp')
                 }
                 return retVal;
             });
+            blade.currentEntity.objectType = blade.objectType;
             blade.origEntity = blade.currentEntity;
             blade.currentEntity = angular.copy(blade.origEntity);
             blade.isLoading = false;
@@ -23361,6 +23362,10 @@ angular.module('platformWebApp')
                     blade.onChangesConfirmedFn(data);
                     // save dictionary items for new entity
                     if (data.isDictionary) {
+                        localDictionaryValues = _.map(localDictionaryValues, function (item) {
+                            item.propertyId = data.id;
+                            return item;
+                        });
                         dictionaryItemsApi.save({ id: blade.objectType, propertyId: data.id },
                             localDictionaryValues,
                             function () {
@@ -23446,9 +23451,15 @@ angular.module('platformWebApp')
     blade.headIcon = 'fa-plus-square-o';
     blade.title = blade.objectType;
     blade.subtitle = 'platform.blades.dynamicProperty-list.subtitle';
+    $scope.pageSettings = {};
+    $scope.pageSettings.totalItems = 0;
+    $scope.pageSettings.currentPage = 1;
+    $scope.pageSettings.numPages = 5;
+    $scope.pageSettings.itemsPerPageCount = 999;
 
     blade.refresh = function (parentRefresh) {
-        dynamicPropertiesApi.getPropertiesForType({ typeName: blade.objectType }, function (results) {
+        var start = $scope.pageSettings.currentPage * $scope.pageSettings.itemsPerPageCount - $scope.pageSettings.itemsPerPageCount;
+        dynamicPropertiesApi.getPropertiesForType({ typeName: blade.objectType }, { skip: start, take: $scope.pageSettings.itemsPerPageCount }, function (results) {
             if (parentRefresh && blade.parentRefresh) {
                 blade.parentRefresh(results);
             }
@@ -23526,7 +23537,7 @@ angular.module('platformWebApp')
         blade.selectedAll = false;
 
         if (blade.isApiSave) {
-            dictionaryItemsApi.query({ id: blade.currentEntity.objectType, propertyId: blade.currentEntity.id },
+            dictionaryItemsApi.getDictionaryItems({}, { id: blade.currentEntity.objectType, dynamicPropertyId: blade.currentEntity.id, take: 999 },
                 initializeBlade,
                 function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
         } else {
@@ -23653,7 +23664,10 @@ angular.module('platformWebApp')
     $scope.saveChanges = function () {
         if (blade.isApiSave) {
             blade.isLoading = true;
-
+            blade.currentEntities = _.map(blade.currentEntities, function (item) {
+                item.propertyId = blade.currentEntity.id;
+                return item;
+            });
             dictionaryItemsApi.save({ id: blade.currentEntity.objectType, propertyId: blade.currentEntity.id },
                 blade.currentEntities,
                 function () {
@@ -23859,12 +23873,14 @@ angular.module('platformWebApp')
 .factory('platformWebApp.dynamicProperties.api', ['$resource', function ($resource) {
     return $resource('api/platform/dynamic/properties', {}, {
         queryTypes: { url: 'api/platform/dynamic/types', isArray: true },
-        getPropertiesForType: { url: 'api/platform/dynamic/types/:typeName/properties', isArray: true },
+        getPropertiesForType: { url: 'api/platform/dynamic/types/:typeName/properties', method: 'POST', isArray: true },
         update: { method: 'PUT' }
     });
 }])
 .factory('platformWebApp.dynamicProperties.dictionaryItemsApi', ['$resource', function ($resource) {
-    return $resource('api/platform/dynamic/dictionaryitems');
+    return $resource('api/platform/dynamic/dictionaryitems', {}, {
+        getDictionaryItems: { url: 'api/platform/dynamic/dictionaryitems/search', method: 'POST', isArray: true },
+    });
 }])
 .factory('platformWebApp.dynamicProperties.valueTypesService', function () {
     var propertyTypes = [
@@ -27764,6 +27780,15 @@ angular.module('platformWebApp')
     };
 }]);
 angular.module('platformWebApp')
+.factory('platformWebApp.settings', ['$resource', function ($resource) {
+    return $resource('api/platform/settings/:id', { id: '@Id' }, {
+        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
+      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
+      	update: { method: 'POST', url: 'api/platform/settings' },
+        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
+    });
+}]);
+angular.module('platformWebApp')
 .controller('platformWebApp.entitySettingListController', ['$scope', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', function ($scope, settingsHelper, bladeNavigationService) {
     var blade = $scope.blade;
     // blade.updatePermission = // Use predefined (parent) permission
@@ -28289,15 +28314,6 @@ angular.module('platformWebApp')
     blade.refresh();
 }]);
 
-angular.module('platformWebApp')
-.factory('platformWebApp.settings', ['$resource', function ($resource) {
-    return $resource('api/platform/settings/:id', { id: '@Id' }, {
-        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
-      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
-      	update: { method: 'POST', url: 'api/platform/settings' },
-        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
-    });
-}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.entitySettingsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;

@@ -8,6 +8,7 @@
                     <span class="list-descr">{{(data.valueType | dynamicPropertyValueTypeToText |translate) + (data.isRequired ? ', Required' : '') + (data.isDictionary ? ', Dictionary' : '') + (data.isArray ? ', Multivalue' :  '') + (data.isMultilingual ? ', Multilingual' : '') }}</span>
                 </li>
             </ul>
+            <ng-include src='pagerTemplate.html'></ng-include>
         </div>
     </div>
 </div>
