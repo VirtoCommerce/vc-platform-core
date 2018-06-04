@@ -14,8 +14,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Smidge;
 using Smidge.Nuglify;
 using Swashbuckle.AspNetCore.Swagger;
@@ -23,7 +23,6 @@ using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Jobs;
 using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.Platform.Core.Notifications;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.Platform.Data.PushNotifications;
@@ -37,6 +36,7 @@ using VirtoCommerce.Platform.Security.Repositories;
 using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Hangfire;
 using VirtoCommerce.Platform.Web.Infrastructure;
+using VirtoCommerce.Platform.Web.JsonConverters;
 using VirtoCommerce.Platform.Web.Middelware;
 using VirtoCommerce.Platform.Web.Swagger;
 
@@ -60,17 +60,28 @@ namespace VirtoCommerce.Platform.Web
 
             services.Configure<PlatformOptions>(Configuration.GetSection("VirtoCommerce"));
             services.Configure<HangfireOptions>(Configuration.GetSection("VirtoCommerce:Jobs"));
-            
+
             PlatformVersion.CurrentVersion = SemanticVersion.Parse(Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default.Application.ApplicationVersion);
 
             services.AddPlatformServices(Configuration);
 
             var mvcBuilder = services.AddMvc().AddJsonOptions(options =>
                 {
-                    options.SerializerSettings.Error = (sender, args) =>
+                    //Next line needs to represent custom derived types in the resulting swagger doc definitions. Because default SwaggerProvider used global JSON serialization settings
+                    //we should register this converter globally.
+                    options.SerializerSettings.ContractResolver = new PolymorphJsonContractResolver();
+
+                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                    options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+                    options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                    options.SerializerSettings.Converters.Add(new StringEnumConverter());
+                    options.SerializerSettings.PreserveReferencesHandling = PreserveReferencesHandling.None;
+                    options.SerializerSettings.Formatting = Formatting.None;
+
+                    options.SerializerSettings.Error += (sender, args) =>
                     {
-                        var log = services.BuildServiceProvider().GetService<ILogger<JsonSerializerSettings>>();
-                        log.LogError(args.ErrorContext.Error, args.ErrorContext.Error.Message);
+                        // Expose any JSON serialization exception as HTTP error
+                        throw new JsonException(args.ErrorContext.Error.Message);
                     };
                 }
             );
@@ -92,6 +103,11 @@ namespace VirtoCommerce.Platform.Web
                 // Note: use the generic overload if you need
                 // to replace the default OpenIddict entities.
                 options.UseOpenIddict();
+            });
+
+            services.AddSecurityServices(options =>
+            {
+                options.NonEditableUsers = new[] { "admin" };
             });
 
             services.AddIdentity<ApplicationUser, Role>()
@@ -157,24 +173,7 @@ namespace VirtoCommerce.Platform.Web
                 options.AddEphemeralSigningKey();
             });
 
-            services.Configure<IdentityOptions>(options =>
-            {
-                // Password settings
-                options.Password.RequireDigit = true;
-                options.Password.RequiredLength = 8;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireLowercase = false;
-                options.Password.RequiredUniqueChars = 6;
-
-                // Lockout settings
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
-                options.Lockout.MaxFailedAccessAttempts = 10;
-                options.Lockout.AllowedForNewUsers = true;
-
-                // User settings
-                options.User.RequireUniqueEmail = true;
-            });
+            services.Configure<IdentityOptions>(Configuration.GetSection("IdentityOptions"));
 
             //always  return 401 instead of 302 for unauthorized  requests
             services.ConfigureApplicationCookie(options =>
@@ -218,8 +217,10 @@ namespace VirtoCommerce.Platform.Web
 
             //Add SignalR for push notifications
             services.AddSignalR();
-            
-            
+
+            services.AddPlatformServices(Configuration);
+
+
 
             services.AddSecurityServices();
 
