@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.AspNetCore.SignalR.Client;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.PushNotifications;
 
@@ -94,10 +93,10 @@ namespace VirtoCommerce.Platform.Data.PushNotifications
 
             if (_hubContext != null)
             {
-                await _hubContext.Clients.All.InvokeAsync("Send", notification);
+                await _hubContext.Clients.All.SendCoreAsync("Send", new[] { notification });
             }
         }
-    
+
     }
 
 }

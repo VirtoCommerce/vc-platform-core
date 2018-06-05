@@ -1,3 +1,395 @@
+var AppDependencies = [
+  'ui.router',
+  'luegg.directives',
+  'googlechart',
+  'gridster',
+  'ui.bootstrap',
+  'ui.utils',
+  'ui.sortable',
+  'ui.select',
+  'ngAnimate',
+  'ngStorage',
+  'ngResource',
+  'ngCookies',
+  'angularMoment',
+  'angularFileUpload',
+  'ngSanitize',
+  'ng-context-menu',
+  'ui.grid', 'ui.grid.autoResize', 'ui.grid.resizeColumns', 'ui.grid.moveColumns', 'ui.grid.saveState', 'ui.grid.selection', 'ui.grid.pagination', 'ui.grid.pinning', 'ui.grid.grouping',
+  'ui.grid.draggable-rows',
+  'ui.codemirror',
+  'focusOn',
+  'textAngular',
+  'ngTagsInput',
+  'tmh.dynamicLocale',
+  'pascalprecht.translate',
+  'angular.filter'
+];
+
+angular.module('platformWebApp', AppDependencies).
+controller('platformWebApp.appCtrl', ['$rootScope', '$scope', '$window', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationService',
+    'platformWebApp.i18n', '$timeout', 'platformWebApp.modules', '$state', 'platformWebApp.bladeNavigationService', 'platformWebApp.userProfile', 'platformWebApp.settings',
+    function ($rootScope, $scope, $window, mainMenuService, pushNotificationService,
+        i18n, $timeout, modules, $state, bladeNavigationService, userProfile, settings) {
+
+        pushNotificationService.run();
+
+        $scope.closeError = function () {
+            $scope.platformError = undefined;
+        };
+        modules.query().$promise.then(function (results) {
+            var modulesWithErrors = _.filter(results, function (x) { return _.any(x.validationErrors); });
+            if (_.any(modulesWithErrors)) {
+                $scope.platformError = {
+                    title: modulesWithErrors.length + " modules are loaded with errors and require your attention.",
+                    detail: ''
+                };
+                _.each(modulesWithErrors, function (x) {
+                    var moduleErrors = "<br/><br/><b>" + x.id + "</b> " + x.version + "<br/>" + x.validationErrors.join("<br/>");
+                    $scope.platformError.detail += moduleErrors;
+                });
+                $state.go('workspace.modularity');
+            }
+        });
+
+
+        $scope.$on('httpError', function (event, error) {
+            if (!event.defaultPrevented) {
+                if (bladeNavigationService.currentBlade) {
+                    bladeNavigationService.setError(error.status + ': ' + error.statusText, bladeNavigationService.currentBlade);
+                }
+            }
+        });
+
+        $scope.$on('httpRequestSuccess', function (event, data) {
+            // clear error on blade cap
+            if (bladeNavigationService.currentBlade) {
+                bladeNavigationService.currentBlade.error = undefined;
+            }
+        });
+
+        $scope.$on('loginStatusChanged', function (event, authContext) {
+            $scope.isAuthenticated = authContext.isAuthenticated;
+        });
+
+        $scope.$on('loginStatusChanged', function (event, authContext) {
+            //reset menu to default state
+            angular.forEach(mainMenuService.menuItems, function (menuItem) { mainMenuService.resetMenuItemDefaults(menuItem); });
+            if (authContext.isAuthenticated) {
+                userProfile.load().then(function () {
+                    i18n.changeLanguage(userProfile.language);
+                    i18n.changeRegionalFormat(userProfile.regionalFormat);
+                    i18n.changeTimeZone(userProfile.timeZone);
+                    i18n.changeTimeAgoSettings(userProfile.timeAgoSettings);
+                    initializeMainMenu(userProfile);
+                });
+            }
+        });
+
+        // TODO: Fix me! we need to detect scripts, not languages + we use to letter language codes only
+        $rootScope.$on('$translateChangeSuccess', function () {
+            var rtlLanguages = ['ar', 'arc', 'bcc', 'bqi', 'ckb', 'dv', 'fa', 'glk', 'he', 'lrc', 'mzn', 'pnb', 'ps', 'sd', 'ug', 'ur', 'yi'];
+            $rootScope.isRTL = rtlLanguages.indexOf(i18n.getLanguage()) >= 0;
+        });
+
+        $scope.mainMenu = {};
+        $scope.mainMenu.items = mainMenuService.menuItems;
+
+        $scope.onMainMenuChanged = function(mainMenu) {
+            if ($scope.isAuthenticated) {
+                saveMainMenuState(mainMenu, userProfile);
+            }
+        };
+
+        function initializeMainMenu(profile) {
+            if (profile.mainMenuState) {
+                $scope.mainMenu.isCollapsed = profile.mainMenuState.isCollapsed;
+                angular.forEach(profile.mainMenuState.items, function (x) {
+                    var existItem = mainMenuService.findByPath(x.path);
+                    if (existItem) {
+                        angular.extend(existItem, x);
+                    }
+                });
+            }
+        }
+
+        function saveMainMenuState(mainMenu, profile) {
+            if (mainMenu && profile.$resolved) {
+                profile.mainMenuState = {
+                    isCollapsed: mainMenu.isCollapsed,
+                    items: _.map(_.filter(mainMenu.items,
+                            function (x) { return !x.isAlwaysOnBar; }),
+                        function (x) { return { path: x.path, isCollapsed: x.isCollapsed, isFavorite: x.isFavorite, order: x.order }; })
+                };
+                profile.save();
+            }
+        }
+
+        settings.getUiCustomizationSetting(function (uiCustomizationSetting) {
+            if (uiCustomizationSetting.value) {
+                $rootScope.uiCustomization = angular.fromJson(uiCustomizationSetting.value);
+            }
+        });
+
+        // DO NOT CHANGE THE FUNCTION BELOW: COPYRIGHT VIOLATION
+        $scope.initExpiration = function (x) {
+            if (x && x.expirationDate) {
+                x.hasExpired = new Date(x.expirationDate) < new Date();
+            }
+            return x;
+        };
+
+        $scope.showLicense = function () {
+            $state.go('workspace.appLicense');
+        };
+
+    }])
+// Specify SignalR server URL (application URL)
+.factory('platformWebApp.signalRServerName', ['$location', function ($location) {
+    var retVal = $location.url() ? $location.absUrl().slice(0, -$location.url().length - 1) : $location.absUrl();
+    return retVal;
+}])
+.factory('platformWebApp.httpErrorInterceptor', ['$q', '$rootScope', function ($q, $rootScope) {
+    var httpErrorInterceptor = {};
+
+    httpErrorInterceptor.request = function (config) {
+        // do something on success
+        if (!config.cache) {
+            $rootScope.$broadcast('httpRequestSuccess', config);
+        }
+        return config;
+    };
+
+    httpErrorInterceptor.responseError = function (rejection) {
+        if (rejection.status === 401) {
+            $rootScope.$broadcast('unauthorized', rejection);
+        }
+        else {
+            $rootScope.$broadcast('httpError', rejection);
+        }
+        return $q.reject(rejection);
+    };
+    httpErrorInterceptor.requestError = function (rejection) {
+        $rootScope.$broadcast('httpError', rejection);
+        return $q.reject(rejection);
+    };
+
+    return httpErrorInterceptor;
+}])
+.factory('translateLoaderErrorHandler', function ($q, $log) {
+    return function (part, lang) {
+        $log.error('Localization "' + part + '" for "' + lang + '" was not loaded.');
+
+        //todo add notification.
+
+        //2) You have to either resolve the promise with a translation table for the given part and language or reject it 3) The partial loader will use the given translation table like it was successfully fetched from the server 4) If you reject the promise, then the loader will reject the whole loading process
+        return $q.when({});
+    };
+})
+.config(['$stateProvider', '$httpProvider', 'uiSelectConfig', 'datepickerConfig', 'datepickerPopupConfig', 'tagsInputConfigProvider', '$compileProvider',
+    function ($stateProvider, $httpProvider, uiSelectConfig, datepickerConfig, datepickerPopupConfig, tagsInputConfigProvider, $compileProvider) {
+
+        RegExp.escape = function (str) {
+            return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+        };
+
+        $stateProvider.state('workspace', {
+            url: '/workspace',
+            templateUrl: '$(Platform)/Scripts/app/workspace.tpl.html'
+        });
+
+        //Add interceptor
+        $httpProvider.interceptors.push('platformWebApp.httpErrorInterceptor');
+        //ui-select set selectize as default theme
+        uiSelectConfig.theme = 'select2';
+
+        datepickerConfig.showWeeks = false;
+        datepickerPopupConfig.datepickerPopup = "mediumDate";
+
+        tagsInputConfigProvider.setDefaults('tagsInput', {
+            addOnEnter: true,
+            addOnSpace: false,
+            addOnComma: false,
+            addOnBlur: true,
+            addOnParse: true,
+            replaceSpacesWithDashes: false,
+            pasteSplitPattern: ";"
+        });
+
+        // Disable Debug Data in DOM ("significant performance boost").
+        // Comment the following line while debugging or execute this in browser console: angular.reloadWithDebugInfo();
+        $compileProvider.debugInfoEnabled(false);
+    }])
+.run(['$rootScope', '$state', '$stateParams', 'platformWebApp.authService', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationService', '$animate', '$templateCache', 'gridsterConfig', 'taOptions', '$timeout', '$templateRequest', '$compile',
+    function ($rootScope, $state, $stateParams, authService, mainMenuService, pushNotificationService, $animate, $templateCache, gridsterConfig, taOptions, $timeout, $templateRequest, $compile) {
+
+        //Disable animation
+        $animate.enabled(false);
+
+        $rootScope.$state = $state;
+        $rootScope.$stateParams = $stateParams;
+        $rootScope.$on('$stateChangeStart', function (event, toState) {
+            if (toState.name === 'resetpasswordDialog') {
+                $rootScope.preventLoginDialog = true;
+            } else if ($rootScope.preventLoginDialog && toState.name === 'loginDialog') {
+                event.preventDefault(); // Prevent state change
+            }
+        });
+
+        var homeMenuItem = {
+            path: 'home',
+            title: 'platform.menu.home',
+            icon: 'fa fa-home',
+            action: function () { $state.go('workspace'); },
+            // this item must always be at the top
+            priority: 0,
+            isAlwaysOnBar: true
+        };
+        mainMenuService.addMenuItem(homeMenuItem);
+
+        var browseMenuItem = {
+            path: 'browse',
+            icon: 'fa fa-search',
+            title: 'platform.menu.browse',
+            priority: 90
+        };
+        mainMenuService.addMenuItem(browseMenuItem);
+
+        var cfgMenuItem = {
+            path: 'configuration',
+            icon: 'fa fa-wrench',
+            title: 'platform.menu.configuration',
+            priority: 91
+        };
+        mainMenuService.addMenuItem(cfgMenuItem);
+
+        var moreMenuItem = {
+            path: 'more',
+            title: 'platform.menu.more',
+            headerTemplate: '$(Platform)/Scripts/app/navigation/menu/mainMenu-list-header.tpl.html',
+            contentTemplate: '$(Platform)/Scripts/app/navigation/menu/mainMenu-list-content.tpl.html',
+            // this item must always be at the bottom, so
+            // don't use just 99 number: we have INFINITE list
+            priority: Number.MAX_SAFE_INTEGER,
+            isAlwaysOnBar: true
+        };
+        mainMenuService.addMenuItem(moreMenuItem);
+
+        $rootScope.$on('unauthorized', function (event, rejection) {
+            if (!authService.isAuthenticated) {
+                $state.go('loginDialog');
+            }
+        });
+
+        //server error handling
+        //$rootScope.$on('httpError', function (event, rejection) {
+        //    if (!(rejection.config.url.indexOf('api/platform/notification') + 1)) {
+        //        pushNotificationService.error({ title: 'HTTP error', description: rejection.status + ' — ' + rejection.statusText, extendedData: rejection.data });
+        //    }
+        //});
+
+        $rootScope.$on('loginStatusChanged', function (event, authContext) {
+            //timeout need because $state not fully loading in run method and need to wait little time
+            $timeout(function () {
+                if (authContext.isAuthenticated) {
+                    if (!$state.current.name || $state.current.name === 'loginDialog') {
+                        $state.go('workspace');
+                    }
+                }
+                else {
+                    $state.go('loginDialog');
+                }
+            }, 500);
+
+        });
+
+        authService.fillAuthData();
+
+        // cache application level templates
+        $templateCache.put('pagerTemplate.html', '<div class="pagination"><pagination boundary-links="true" max-size="pageSettings.numPages" items-per-page="pageSettings.itemsPerPageCount" total-items="pageSettings.totalItems" ng-model="pageSettings.currentPage" class="pagination-sm" previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination></div>');
+
+        gridsterConfig.columns = 4;
+        gridsterConfig.colWidth = 130;
+        gridsterConfig.defaultSizeX = 1;
+        gridsterConfig.resizable = { enabled: false, handles: [] };
+        gridsterConfig.maxRows = 8;
+        gridsterConfig.mobileModeEnabled = false;
+        gridsterConfig.outerMargin = false;
+
+        String.prototype.hashCode = function () {
+            var hash = 0, i, chr, len;
+            if (this.length === 0) return hash;
+            for (i = 0, len = this.length; i < len; i++) {
+                chr = this.charCodeAt(i);
+                hash = (hash << 5) - hash + chr;
+                hash |= 0; // Convert to 32bit integer
+            }
+            return hash;
+        };
+
+        String.prototype.capitalize = function() {
+            return this.charAt(0).toUpperCase() + this.substr(1).toLowerCase();
+        };
+
+        if (!String.prototype.startsWith) {
+            String.prototype.startsWith = function(searchString, position) {
+                if (searchString && searchString.toString() === '[object RegExp]') {
+                    throw TypeError();
+                }
+                var length = this.length;
+                var startIndex = position ? Number(position) : 0;
+                if (isNaN(startIndex)) {
+                    startIndex = 0;
+                }
+                var fromIndex = Math.min(Math.max(startIndex, 0), length);
+                if (fromIndex + searchString.length > length) {
+                    return false;
+                }
+                return this.indexOf(searchString, startIndex) === fromIndex;
+            };
+        }
+
+        if (!String.prototype.endsWith) {
+            String.prototype.endsWith = function(searchString, position) {
+                if (searchString && searchString.toString() === '[object RegExp]') {
+                    throw TypeError();
+                }
+                var length = this.length;
+                var endIndex = length;
+                if (position !== undefined) {
+                    endIndex = position ? Number(position) : 0;
+                    if (isNaN(endIndex)) {
+                        endIndex = 0;
+                    }
+                }
+                var toIndex = Math.min(Math.max(endIndex, 0), length);
+                var fromIndex = toIndex - searchString.length;
+                if (fromIndex < 0) {
+                    return false;
+                }
+                return this.lastIndexOf(searchString, fromIndex) === fromIndex;
+            };
+        }
+
+        if (!angular.isDefined(Number.MIN_SAFE_INTEGER)) {
+            Number.MIN_SAFE_INTEGER = -9007199254740991;
+        }
+        if (!angular.isDefined(Number.MAX_SAFE_INTEGER)) {
+            Number.MAX_SAFE_INTEGER = 9007199254740991;
+        }
+
+        // textAngular
+        taOptions.toolbar = [
+        ['bold', 'italics', 'underline', 'strikeThrough', 'ul', 'ol', 'redo', 'undo', 'clear', 'quote'],
+        ['justifyLeft', 'justifyCenter', 'justifyRight', 'indent', 'outdent', 'html', 'insertImage', 'insertLink', 'insertVideo']];
+
+        //register metaproperties templates
+        $templateRequest('$(Platform)/Scripts/common/directives/genericValueInput.tpl.html').then(function (response) {
+            var template = angular.element(response);
+            $compile(template);
+        });
+    }]);
+
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.signalR = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
 // Copyright (c) .NET Foundation. All rights reserved.
@@ -4630,397 +5022,453 @@ if (hadRuntime) {
 
 },{}]},{},[6])(6)
 });
-var AppDependencies = [
-  'ui.router',
-  'luegg.directives',
-  'googlechart',
-  'gridster',
-  'ui.bootstrap',
-  'ui.utils',
-  'ui.sortable',
-  'ui.select',
-  'ngAnimate',
-  'ngStorage',
-  'ngResource',
-  'ngCookies',
-  'angularMoment',
-  'angularFileUpload',
-  'ngSanitize',
-  'ng-context-menu',
-  'ui.grid', 'ui.grid.autoResize', 'ui.grid.resizeColumns', 'ui.grid.moveColumns', 'ui.grid.saveState', 'ui.grid.selection', 'ui.grid.pagination', 'ui.grid.pinning', 'ui.grid.grouping',
-  'ui.grid.draggable-rows',
-  'ui.codemirror',
-  'focusOn',
-  'textAngular',
-  'ngTagsInput',
-  'tmh.dynamicLocale',
-  'pascalprecht.translate',
-  'angular.filter'
-];
+angular.module('platformWebApp')
+ .factory('platformWebApp.bladeUtils', ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
+     function initializePagination($scope, skipDefaultWatch) {
+         //pagination settings
+         $scope.pageSettings = {};
+         $scope.pageSettings.totalItems = 0;
+         $scope.pageSettings.currentPage = 1;
+         $scope.pageSettings.numPages = 5;
+         $scope.pageSettings.itemsPerPageCount = 20;
 
-angular.module('platformWebApp', AppDependencies).
-controller('platformWebApp.appCtrl', ['$rootScope', '$scope', '$window', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationService',
-    'platformWebApp.i18n', '$timeout', 'platformWebApp.modules', '$state', 'platformWebApp.bladeNavigationService', 'platformWebApp.userProfile', 'platformWebApp.settings',
-    function ($rootScope, $scope, $window, mainMenuService, pushNotificationService,
-        i18n, $timeout, modules, $state, bladeNavigationService, userProfile, settings) {
+         if (!skipDefaultWatch)
+             $scope.$watch('pageSettings.currentPage', $scope.blade.refresh);
+     }
 
-        pushNotificationService.run();
+     return {
+         bladeNavigationService: bladeNavigationService,
+         initializePagination: initializePagination
+     };
+ }]);
 
-        $scope.closeError = function () {
-            $scope.platformError = undefined;
+angular.module('platformWebApp')
+    .filter('boolToValue', function () {
+        return function (input, trueValue, falseValue) {
+            return input ? trueValue : falseValue;
         };
-        modules.query().$promise.then(function (results) {
-            var modulesWithErrors = _.filter(results, function (x) { return _.any(x.validationErrors); });
-            if (_.any(modulesWithErrors)) {
-                $scope.platformError = {
-                    title: modulesWithErrors.length + " modules are loaded with errors and require your attention.",
-                    detail: ''
-                };
-                _.each(modulesWithErrors, function (x) {
-                    var moduleErrors = "<br/><br/><b>" + x.id + "</b> " + x.version + "<br/>" + x.validationErrors.join("<br/>");
-                    $scope.platformError.detail += moduleErrors;
-                });
-                $state.go('workspace.modularity');
-            }
-        });
-
-
-        $scope.$on('httpError', function (event, error) {
-            if (!event.defaultPrevented) {
-                if (bladeNavigationService.currentBlade) {
-                    bladeNavigationService.setError(error.status + ': ' + error.statusText, bladeNavigationService.currentBlade);
-                }
-            }
-        });
-
-        $scope.$on('httpRequestSuccess', function (event, data) {
-            // clear error on blade cap
-            if (bladeNavigationService.currentBlade) {
-                bladeNavigationService.currentBlade.error = undefined;
-            }
-        });
-
-        $scope.$on('loginStatusChanged', function (event, authContext) {
-            $scope.isAuthenticated = authContext.isAuthenticated;
-        });
-
-        $scope.$on('loginStatusChanged', function (event, authContext) {
-            //reset menu to default state
-            angular.forEach(mainMenuService.menuItems, function (menuItem) { mainMenuService.resetMenuItemDefaults(menuItem); });
-            if (authContext.isAuthenticated) {
-                userProfile.load().then(function () {
-                    i18n.changeLanguage(userProfile.language);
-                    i18n.changeRegionalFormat(userProfile.regionalFormat);
-                    i18n.changeTimeZone(userProfile.timeZone);
-                    i18n.changeTimeAgoSettings(userProfile.timeAgoSettings);
-                    initializeMainMenu(userProfile);
-                });
-            }
-        });
-
-        // TODO: Fix me! we need to detect scripts, not languages + we use to letter language codes only
-        $rootScope.$on('$translateChangeSuccess', function () {
-            var rtlLanguages = ['ar', 'arc', 'bcc', 'bqi', 'ckb', 'dv', 'fa', 'glk', 'he', 'lrc', 'mzn', 'pnb', 'ps', 'sd', 'ug', 'ur', 'yi'];
-            $rootScope.isRTL = rtlLanguages.indexOf(i18n.getLanguage()) >= 0;
-        });
-
-        $scope.mainMenu = {};
-        $scope.mainMenu.items = mainMenuService.menuItems;
-
-        $scope.onMainMenuChanged = function(mainMenu) {
-            if ($scope.isAuthenticated) {
-                saveMainMenuState(mainMenu, userProfile);
-            }
+    })
+    .filter('slice', function () {
+        return function (arr, start, end) {
+            return (arr || []).slice(start, end);
         };
+    })
+    .filter('readablesize', function () {
+        return function (input) {
+            if (!input)
+                return null;
 
-        function initializeMainMenu(profile) {
-            if (profile.mainMenuState) {
-                $scope.mainMenu.isCollapsed = profile.mainMenuState.isCollapsed;
-                angular.forEach(profile.mainMenuState.items, function (x) {
-                    var existItem = mainMenuService.findByPath(x.path);
-                    if (existItem) {
-                        angular.extend(existItem, x);
+            var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+            var order = 0;
+            while (input >= 1024 && order + 1 < sizes.length) {
+                order++;
+                input = input / 1024;
+            }
+            return Math.round(input) + ' ' + sizes[order];
+        };
+    })
+    // translate the given properties in the input array
+    .filter('translateArray', ['$translate', function ($translate) {
+        return function (inputArray, propertiesList) {
+            _.each(inputArray, function (inputItem) {
+                _.each(propertiesList, function (prop) {
+                    if (angular.isString(inputItem[prop])) {
+                        var translateKey = inputItem[prop].toLowerCase();
+                        var result = $translate.instant(translateKey);
+                        if (result !== translateKey) inputItem[prop] = result;
                     }
                 });
-            }
+            });
+            return inputArray;
         }
-
-        function saveMainMenuState(mainMenu, profile) {
-            if (mainMenu && profile.$resolved) {
-                profile.mainMenuState = {
-                    isCollapsed: mainMenu.isCollapsed,
-                    items: _.map(_.filter(mainMenu.items,
-                            function (x) { return !x.isAlwaysOnBar; }),
-                        function (x) { return { path: x.path, isCollapsed: x.isCollapsed, isFavorite: x.isFavorite, order: x.order }; })
-                };
-                profile.save();
-            }
-        }
-
-        settings.getUiCustomizationSetting(function (uiCustomizationSetting) {
-            if (uiCustomizationSetting.value) {
-                $rootScope.uiCustomization = angular.fromJson(uiCustomizationSetting.value);
-            }
-        });
-
-        // DO NOT CHANGE THE FUNCTION BELOW: COPYRIGHT VIOLATION
-        $scope.initExpiration = function (x) {
-            if (x && x.expirationDate) {
-                x.hasExpired = new Date(x.expirationDate) < new Date();
-            }
-            return x;
-        };
-
-        $scope.showLicense = function () {
-            $state.go('workspace.appLicense');
-        };
-
     }])
-// Specify SignalR server URL (application URL)
-.factory('platformWebApp.signalRServerName', ['$location', function ($location) {
-    var retVal = $location.url() ? $location.absUrl().slice(0, -$location.url().length - 1) : $location.absUrl();
-    return retVal;
-}])
-.factory('platformWebApp.httpErrorInterceptor', ['$q', '$rootScope', function ($q, $rootScope) {
-    var httpErrorInterceptor = {};
-
-    httpErrorInterceptor.request = function (config) {
-        // do something on success
-        if (!config.cache) {
-            $rootScope.$broadcast('httpRequestSuccess', config);
-        }
-        return config;
-    };
-
-    httpErrorInterceptor.responseError = function (rejection) {
-        if (rejection.status === 401) {
-            $rootScope.$broadcast('unauthorized', rejection);
-        }
-        else {
-            $rootScope.$broadcast('httpError', rejection);
-        }
-        return $q.reject(rejection);
-    };
-    httpErrorInterceptor.requestError = function (rejection) {
-        $rootScope.$broadcast('httpError', rejection);
-        return $q.reject(rejection);
-    };
-
-    return httpErrorInterceptor;
-}])
-.factory('translateLoaderErrorHandler', function ($q, $log) {
-    return function (part, lang) {
-        $log.error('Localization "' + part + '" for "' + lang + '" was not loaded.');
-
-        //todo add notification.
-
-        //2) You have to either resolve the promise with a translation table for the given part and language or reject it 3) The partial loader will use the given translation table like it was successfully fetched from the server 4) If you reject the promise, then the loader will reject the whole loading process
-        return $q.when({});
-    };
-})
-.config(['$stateProvider', '$httpProvider', 'uiSelectConfig', 'datepickerConfig', 'datepickerPopupConfig', 'tagsInputConfigProvider', '$compileProvider',
-    function ($stateProvider, $httpProvider, uiSelectConfig, datepickerConfig, datepickerPopupConfig, tagsInputConfigProvider, $compileProvider) {
-
-        RegExp.escape = function (str) {
-            return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+    // translation with fall-back value if key not found
+    .filter('fallbackTranslate', ['$translate', function ($translate) {
+        return function (translateKey, fallbackValue) {
+            var result = $translate.instant(translateKey);
+            return result === translateKey ? fallbackValue : result;
         };
-
-        $stateProvider.state('workspace', {
-            url: '/workspace',
-            templateUrl: '$(Platform)/Scripts/app/workspace.tpl.html'
-        });
-
-        //Add interceptor
-        $httpProvider.interceptors.push('platformWebApp.httpErrorInterceptor');
-        //ui-select set selectize as default theme
-        uiSelectConfig.theme = 'select2';
-
-        datepickerConfig.showWeeks = false;
-        datepickerPopupConfig.datepickerPopup = "mediumDate";
-
-        tagsInputConfigProvider.setDefaults('tagsInput', {
-            addOnEnter: true,
-            addOnSpace: false,
-            addOnComma: false,
-            addOnBlur: true,
-            addOnParse: true,
-            replaceSpacesWithDashes: false,
-            pasteSplitPattern: ";"
-        });
-
-        // Disable Debug Data in DOM ("significant performance boost").
-        // Comment the following line while debugging or execute this in browser console: angular.reloadWithDebugInfo();
-        $compileProvider.debugInfoEnabled(false);
-    }])
-.run(['$rootScope', '$state', '$stateParams', 'platformWebApp.authService', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationService', '$animate', '$templateCache', 'gridsterConfig', 'taOptions', '$timeout', '$templateRequest', '$compile',
-    function ($rootScope, $state, $stateParams, authService, mainMenuService, pushNotificationService, $animate, $templateCache, gridsterConfig, taOptions, $timeout, $templateRequest, $compile) {
-
-        //Disable animation
-        $animate.enabled(false);
-
-        $rootScope.$state = $state;
-        $rootScope.$stateParams = $stateParams;
-        $rootScope.$on('$stateChangeStart', function (event, toState) {
-            if (toState.name === 'resetpasswordDialog') {
-                $rootScope.preventLoginDialog = true;
-            } else if ($rootScope.preventLoginDialog && toState.name === 'loginDialog') {
-                event.preventDefault(); // Prevent state change
-            }
-        });
-
-        var homeMenuItem = {
-            path: 'home',
-            title: 'platform.menu.home',
-            icon: 'fa fa-home',
-            action: function () { $state.go('workspace'); },
-            // this item must always be at the top
-            priority: 0,
-            isAlwaysOnBar: true
-        };
-        mainMenuService.addMenuItem(homeMenuItem);
-
-        var browseMenuItem = {
-            path: 'browse',
-            icon: 'fa fa-search',
-            title: 'platform.menu.browse',
-            priority: 90
-        };
-        mainMenuService.addMenuItem(browseMenuItem);
-
-        var cfgMenuItem = {
-            path: 'configuration',
-            icon: 'fa fa-wrench',
-            title: 'platform.menu.configuration',
-            priority: 91
-        };
-        mainMenuService.addMenuItem(cfgMenuItem);
-
-        var moreMenuItem = {
-            path: 'more',
-            title: 'platform.menu.more',
-            headerTemplate: '$(Platform)/Scripts/app/navigation/menu/mainMenu-list-header.tpl.html',
-            contentTemplate: '$(Platform)/Scripts/app/navigation/menu/mainMenu-list-content.tpl.html',
-            // this item must always be at the bottom, so
-            // don't use just 99 number: we have INFINITE list
-            priority: Number.MAX_SAFE_INTEGER,
-            isAlwaysOnBar: true
-        };
-        mainMenuService.addMenuItem(moreMenuItem);
-
-        $rootScope.$on('unauthorized', function (event, rejection) {
-            if (!authService.isAuthenticated) {
-                $state.go('loginDialog');
-            }
-        });
-
-        //server error handling
-        //$rootScope.$on('httpError', function (event, rejection) {
-        //    if (!(rejection.config.url.indexOf('api/platform/notification') + 1)) {
-        //        pushNotificationService.error({ title: 'HTTP error', description: rejection.status + ' — ' + rejection.statusText, extendedData: rejection.data });
-        //    }
-        //});
-
-        $rootScope.$on('loginStatusChanged', function (event, authContext) {
-            //timeout need because $state not fully loading in run method and need to wait little time
-            $timeout(function () {
-                if (authContext.isAuthenticated) {
-                    if (!$state.current.name || $state.current.name === 'loginDialog') {
-                        $state.go('workspace');
-                    }
-                }
-                else {
-                    $state.go('loginDialog');
-                }
-            }, 500);
-
-        });
-
-        authService.fillAuthData();
-
-        // cache application level templates
-        $templateCache.put('pagerTemplate.html', '<div class="pagination"><pagination boundary-links="true" max-size="pageSettings.numPages" items-per-page="pageSettings.itemsPerPageCount" total-items="pageSettings.totalItems" ng-model="pageSettings.currentPage" class="pagination-sm" previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination></div>');
-
-        gridsterConfig.columns = 4;
-        gridsterConfig.colWidth = 130;
-        gridsterConfig.defaultSizeX = 1;
-        gridsterConfig.resizable = { enabled: false, handles: [] };
-        gridsterConfig.maxRows = 8;
-        gridsterConfig.mobileModeEnabled = false;
-        gridsterConfig.outerMargin = false;
-
-        String.prototype.hashCode = function () {
-            var hash = 0, i, chr, len;
-            if (this.length === 0) return hash;
-            for (i = 0, len = this.length; i < len; i++) {
-                chr = this.charCodeAt(i);
-                hash = (hash << 5) - hash + chr;
-                hash |= 0; // Convert to 32bit integer
-            }
-            return hash;
-        };
-
-        String.prototype.capitalize = function() {
-            return this.charAt(0).toUpperCase() + this.substr(1).toLowerCase();
-        };
-
-        if (!String.prototype.startsWith) {
-            String.prototype.startsWith = function(searchString, position) {
-                if (searchString && searchString.toString() === '[object RegExp]') {
-                    throw TypeError();
-                }
-                var length = this.length;
-                var startIndex = position ? Number(position) : 0;
-                if (isNaN(startIndex)) {
-                    startIndex = 0;
-                }
-                var fromIndex = Math.min(Math.max(startIndex, 0), length);
-                if (fromIndex + searchString.length > length) {
-                    return false;
-                }
-                return this.indexOf(searchString, startIndex) === fromIndex;
-            };
-        }
-
-        if (!String.prototype.endsWith) {
-            String.prototype.endsWith = function(searchString, position) {
-                if (searchString && searchString.toString() === '[object RegExp]') {
-                    throw TypeError();
-                }
-                var length = this.length;
-                var endIndex = length;
-                if (position !== undefined) {
-                    endIndex = position ? Number(position) : 0;
-                    if (isNaN(endIndex)) {
-                        endIndex = 0;
-                    }
-                }
-                var toIndex = Math.min(Math.max(endIndex, 0), length);
-                var fromIndex = toIndex - searchString.length;
-                if (fromIndex < 0) {
-                    return false;
-                }
-                return this.lastIndexOf(searchString, fromIndex) === fromIndex;
-            };
-        }
-
-        if (!angular.isDefined(Number.MIN_SAFE_INTEGER)) {
-            Number.MIN_SAFE_INTEGER = -9007199254740991;
-        }
-        if (!angular.isDefined(Number.MAX_SAFE_INTEGER)) {
-            Number.MAX_SAFE_INTEGER = 9007199254740991;
-        }
-
-        // textAngular
-        taOptions.toolbar = [
-        ['bold', 'italics', 'underline', 'strikeThrough', 'ul', 'ol', 'redo', 'undo', 'clear', 'quote'],
-        ['justifyLeft', 'justifyCenter', 'justifyRight', 'indent', 'outdent', 'html', 'insertImage', 'insertLink', 'insertVideo']];
-
-        //register metaproperties templates
-        $templateRequest('$(Platform)/Scripts/common/directives/genericValueInput.tpl.html').then(function (response) {
-            var template = angular.element(response);
-            $compile(template);
-        });
     }]);
+angular.module('platformWebApp')
+.factory('platformWebApp.objCompareService', function () {
+
+	//https://stamat.wordpress.com/2013/06/22/javascript-object-comparison/
+
+	var specialChars = [ '$', '_' ];
+	//Returns the object's class, Array, Date, RegExp, Object are of interest to us
+	var getClass = function (val) {
+		return Object.prototype.toString.call(val)
+			.match(/^\[object\s(.*)\]$/)[1];
+	};
+
+	//Defines the type of the value, extended typeof
+	var whatis = function (val) {
+
+		if (val === undefined)
+			return 'undefined';
+		if (val === null)
+			return 'null';
+
+		var type = typeof val;
+
+		if (type === 'object')
+			type = getClass(val).toLowerCase();
+
+		if (type === 'number') {
+			if (val.toString().indexOf('.') > 0)
+				return 'float';
+			else
+				return 'integer';
+		}
+
+		return type;
+	};
+
+	var compareObjects = function (a, b) {
+		if (a === b)
+			return true;
+
+		if (Object.keys(a).length < Object.keys(b).length)
+		{
+			var tmp = a;
+			a = b;
+			b = tmp;
+		}
+
+		for (var i in a) {
+			//ignore system properties and functions
+			if (!_.contains(specialChars, i.charAt(0)) && whatis(a[i]) != 'function') {
+				if (b.hasOwnProperty(i)) {
+					if (!equal(a[i], b[i]))
+						return false;
+				} else {
+					return false;
+				}
+			}
+		}
+
+		//for (var i in b) {
+		//	if (!a.hasOwnProperty(i)) {
+		//		return false;
+		//	}
+		//}
+		return true;
+	};
+
+	var compareArrays = function (a, b) {
+		if (a === b)
+			return true;
+		if (a.length !== b.length)
+			return false;
+		for (var i = 0; i < a.length; i++) {
+			if (!equal(a[i], b[i])) return false;
+		};
+		return true;
+	};
+
+	var _equal = {};
+	_equal.array = compareArrays;
+	_equal.object = compareObjects;
+	_equal.date = function (a, b) {
+		return a.getTime() === b.getTime();
+	};
+	_equal.regexp = function (a, b) {
+		return a.toString() === b.toString();
+	};
+	//	uncoment to support function as string compare
+	//	_equal.fucntion =  _equal.regexp;
+	/*
+	* Are two values equal, deep compare for objects and arrays.
+	* @param a {any}
+	* @param b {any}
+	* @return {boolean} Are equal?
+	*/
+	var equal = function (a, b) {
+		var retVal = a === b;
+		if (!retVal) {
+			var atype = whatis(a), btype = whatis(b);
+			if (atype === btype)
+			{
+				retVal = _equal.hasOwnProperty(atype) ? _equal[atype](a, b) : a == b;
+			}
+		}
+
+		return retVal;
+	}
+
+	return {
+		equal: equal
+	};
+});
+
+angular.module('platformWebApp')
+    .config(['$provide', 'uiGridConstants', function ($provide, uiGridConstants) {
+        $provide.decorator('GridOptions', ['$delegate', '$localStorage', '$translate', 'platformWebApp.bladeNavigationService', function ($delegate, $localStorage, $translate, bladeNavigationService) {
+            var gridOptions = angular.copy($delegate);
+            gridOptions.initialize = function (options) {
+                var initOptions = $delegate.initialize(options);
+                var blade = bladeNavigationService.currentBlade;
+                var $scope = blade.$scope;
+
+                // restore saved state, if any
+                var savedState = $localStorage['gridState:' + blade.template];
+                if (savedState) {
+                    // extend saved columns with custom columnDef information (e.g. cellTemplate, displayName)
+                    var foundDef;
+                    _.each(savedState.columns, function (x) {
+                        if (foundDef = _.findWhere(initOptions.columnDefs, { name: x.name })) {
+                            foundDef.sort = x.sort;
+                            foundDef.width = x.width || foundDef.width;
+                            foundDef.visible = x.visible;
+                            // prevent loading outdated cellTemplate
+                            delete x.cellTemplate;
+                            _.extend(x, foundDef);
+                            x.wasPredefined = true;
+                            initOptions.columnDefs.splice(initOptions.columnDefs.indexOf(foundDef), 1);
+                        } else {
+                            x.wasPredefined = false;
+                        }
+                    });
+                    // savedState.columns = _.reject(savedState.columns, function (x) { return x.cellTemplate && !x.wasPredefined; }); // not sure why was this, but it rejected custom templated fields
+                    initOptions.columnDefs = _.union(initOptions.columnDefs, savedState.columns);
+                } else {
+                    // mark predefined columns
+                    _.each(initOptions.columnDefs, function (x) {
+                        x.visible = angular.isDefined(x.visible) ? x.visible : true;
+                        x.wasPredefined = true;
+                    });
+                }
+
+                // translate headers
+                _.each(initOptions.columnDefs, function (x) { x.headerCellFilter = 'translate'; });
+
+                var customOnRegisterApiCallback = initOptions.onRegisterApi;
+
+                angular.extend(initOptions, {
+                    rowHeight: initOptions.rowHeight === 30 ? 40 : initOptions.rowHeight,
+                    enableGridMenu: true,
+                    //enableVerticalScrollbar: uiGridConstants.scrollbars.NEVER,
+                    //enableHorizontalScrollbar: uiGridConstants.scrollbars.NEVER,
+                    saveFocus: false,
+                    saveFilter: false,
+                    saveGrouping: false,
+                    savePinning: false,
+                    saveSelection: false,
+                    gridMenuTitleFilter: $translate,
+                    onRegisterApi: function (gridApi) {
+                        //set gridApi on scope
+                        $scope.gridApi = gridApi;
+
+                        if (gridApi.saveState) {
+                            if (savedState) {
+                                //$timeout(function () {
+                                gridApi.saveState.restore($scope, savedState);
+                                //}, 10);
+                            }
+
+                            if (gridApi.colResizable)
+                                gridApi.colResizable.on.columnSizeChanged($scope, saveState);
+                            if (gridApi.colMovable)
+                                gridApi.colMovable.on.columnPositionChanged($scope, saveState);
+                            gridApi.core.on.columnVisibilityChanged($scope, saveState);
+                            gridApi.core.on.sortChanged($scope, saveState);
+                            function saveState() {
+                                $localStorage['gridState:' + blade.template] = gridApi.saveState.save();
+                            }
+                        }
+
+                        gridApi.grid.registerDataChangeCallback(processMissingColumns, [uiGridConstants.dataChange.ROW]);
+                        gridApi.grid.registerDataChangeCallback(autoFormatColumns, [uiGridConstants.dataChange.ROW]);
+
+                        if (customOnRegisterApiCallback) {
+                            customOnRegisterApiCallback(gridApi);
+                        }
+                    },
+                    onCollapse: function () {
+                        updateColumnsVisibility(this, true);
+                    },
+                    onExpand: function () {
+                        updateColumnsVisibility(this, false);
+                    }
+                });
+
+                return initOptions;
+            };
+
+            function processMissingColumns(grid) {
+                var gridOptions = grid.options;
+
+                if (!gridOptions.columnDefsGenerated && _.any(grid.rows)) {
+                    var filteredColumns = _.filter(_.pairs(grid.rows[0].entity), function (x) {
+                        return !x[0].startsWith('$$') && (!_.isObject(x[1]) || _.isDate(x[1]));
+                    });
+
+                    var allKeysFromEntity = _.map(filteredColumns, function (x) {
+                        return x[0];
+                    });
+                    // remove non-existing columns
+                    _.each(gridOptions.columnDefs.slice(), function (x) {
+                        if (!_.contains(allKeysFromEntity, x.name) && !x.wasPredefined) {
+                            gridOptions.columnDefs = _.reject(gridOptions.columnDefs, function (d) {
+                                return d.name == x.name;
+                            });
+                        }
+                    });
+
+                    // generate columnDefs for each undefined property
+                    _.each(allKeysFromEntity, function (x) {
+                        if (!_.findWhere(gridOptions.columnDefs, { name: x })) {
+                            gridOptions.columnDefs.push({ name: x, visible: false });
+                        }
+                    });
+                    gridOptions.columnDefsGenerated = true;
+                    grid.api.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
+                }
+            }
+
+            // Configure automatic formatting of columns/
+            // Column with type number will use numberFilter to correct display of values
+            // Column with type date will use predefined template with am-time-ago directive to display date in human-readable format
+            function autoFormatColumns(grid) {
+                var gridOptions = grid.options;
+                grid.buildColumns();
+                var columnDefs = angular.copy(gridOptions.columnDefs);
+                for (var i = 0; i < columnDefs.length; i++) {
+                    var columnDef = columnDefs[i];
+                    for (var j = 0; j < grid.rows.length; j++) {
+                        var value = grid.getCellValue(grid.rows[j], grid.getColumn(columnDef.name));
+                        if (angular.isDefined(value)) {
+                            if (angular.isNumber(value)) {
+                                columnDef.cellFilter = columnDef.cellFilter || 'number';
+                            }
+                            // Default template for columns with dates
+                            else if (angular.isDate(value) || angular.isString(value) && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d+)?Z/.test(value)) {
+                                columnDef.cellTemplate = columnDef.cellTemplate || '$(Platform)/Scripts/common/templates/ui-grid/am-time-ago.cell.html';
+                            }
+                            break;
+                        }
+                    }
+                    gridOptions.columnDefs[i] = columnDef;
+                }
+                grid.options.columnDefs = columnDefs;
+                grid.api.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
+            }
+
+            function updateColumnsVisibility(gridOptions, isCollapsed) {
+                var blade = bladeNavigationService.currentBlade;
+                var $scope = blade.$scope;
+                _.each(gridOptions.columnDefs, function (x) {
+                    // normal: visible, if column was predefined
+                    // collapsed: visible only if we must display column always
+                    if (isCollapsed) {
+                        x.wasVisible = !!x.wasPredefined && x.visible !== false || !!x.visible;
+                    }
+                    x.visible = !isCollapsed ? !!x.wasVisible : !!x.displayAlways;
+                });
+                if ($scope && $scope.gridApi)
+                    $scope.gridApi.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
+            }
+
+            return gridOptions;
+        }]);
+    }])
+
+    .factory('platformWebApp.uiGridHelper', ['$localStorage', '$timeout', 'uiGridConstants', '$translate', function ($localStorage, $timeout, uiGridConstants, $translate) {
+        var retVal = {};
+        retVal.uiGridConstants = uiGridConstants;
+        retVal.initialize = function ($scope, gridOptions, externalRegisterApiCallback) {
+            $scope.gridOptions = angular.extend({
+                data: _.any(gridOptions.data) ? gridOptions.data : 'blade.currentEntities',
+                onRegisterApi: function (gridApi) {
+                    if (externalRegisterApiCallback) {
+                        externalRegisterApiCallback(gridApi);
+                    }
+                }
+            }, gridOptions);
+        };
+
+        retVal.getSortExpression = function ($scope) {
+            var columnDefs;
+            if ($scope.gridApi) {
+                columnDefs = $scope.gridApi.grid.columns;
+            } else {
+                var savedState = $localStorage['gridState:' + $scope.blade.template];
+                columnDefs = savedState ? savedState.columns : $scope.gridOptions.columnDefs;
+            }
+
+            var sorts = _.filter(columnDefs, function (x) {
+                return x.name !== '$path' && x.sort && (x.sort.direction === uiGridConstants.ASC || x.sort.direction === uiGridConstants.DESC);
+            });
+            sorts = _.sortBy(sorts, function (x) {
+                return x.sort.priority;
+            });
+            sorts = _.map(sorts, function (x) {
+                return (x.field ? x.field : x.name) + ':' + (x.sort.direction === uiGridConstants.ASC ? 'asc' : 'desc');
+            });
+            return sorts.join(';');
+        };
+
+        retVal.bindRefreshOnSortChanged = function ($scope) {
+            $scope.gridApi.core.on.sortChanged($scope, function () {
+                if (!$scope.blade.isLoading) $scope.blade.refresh();
+            });
+        };
+
+        return retVal;
+    }])
+
+    // ui-grid extension service. Used for extension grid options from other modules
+    .factory('platformWebApp.ui-grid.extension', [function () {
+        return {
+            extensionsMap: [],
+            registerExtension: function (gridId, extensionFn) {
+                this.extensionsMap[gridId] = extensionFn;
+            },
+            tryExtendGridOptions: function (gridId, gridOptions) {
+                if (this.extensionsMap[gridId]) {
+                    this.extensionsMap[gridId](gridOptions);
+                }
+            }
+        };
+    }])
+
+    // auto height and additional class for ui-grid
+    .directive('uiGridHeight', ['$timeout', '$window', function ($timeout, $window) {
+        return {
+            restrict: 'A',
+            link: {
+                pre: function (scope, element) {
+                    var bladeInner = $(element).parents('.blade-inner');
+                    bladeInner.addClass('ui-grid-no-scroll');
+
+                    var setGridHeight = function () {
+                        $timeout(function () {
+                            $(element).height(bladeInner.height());
+                        });
+                    };
+                    scope.$watch('blade.isExpanded', setGridHeight);
+                    scope.$watch('pageSettings.totalItems', setGridHeight);
+                    angular.element($window).bind('resize', setGridHeight);
+                }
+            }
+        };
+    }])
+    .run(['$templateRequest', function ($templateRequest) {
+        // Pre-load default templates, because we inject templates to grid options dynamically, so they not loaded by default
+        $templateRequest('$(Platform)/Scripts/common/templates/ui-grid/am-time-ago.cell.html');
+    }]);
+
+angular.module('platformWebApp')
+ .factory('platformWebApp.validators', [function () {
+     function webSafeFileNameValidator(value) {
+         var pattern = /^[\w.-]+$/;
+         return pattern.test(value);
+     }
+
+     return {
+         webSafeFileNameValidator: webSafeFileNameValidator
+     };
+ }]);
 
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
@@ -17290,454 +17738,6 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/html"))
 });
 
 angular.module('platformWebApp')
- .factory('platformWebApp.bladeUtils', ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
-     function initializePagination($scope, skipDefaultWatch) {
-         //pagination settings
-         $scope.pageSettings = {};
-         $scope.pageSettings.totalItems = 0;
-         $scope.pageSettings.currentPage = 1;
-         $scope.pageSettings.numPages = 5;
-         $scope.pageSettings.itemsPerPageCount = 20;
-
-         if (!skipDefaultWatch)
-             $scope.$watch('pageSettings.currentPage', $scope.blade.refresh);
-     }
-
-     return {
-         bladeNavigationService: bladeNavigationService,
-         initializePagination: initializePagination
-     };
- }]);
-
-angular.module('platformWebApp')
-    .filter('boolToValue', function () {
-        return function (input, trueValue, falseValue) {
-            return input ? trueValue : falseValue;
-        };
-    })
-    .filter('slice', function () {
-        return function (arr, start, end) {
-            return (arr || []).slice(start, end);
-        };
-    })
-    .filter('readablesize', function () {
-        return function (input) {
-            if (!input)
-                return null;
-
-            var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-            var order = 0;
-            while (input >= 1024 && order + 1 < sizes.length) {
-                order++;
-                input = input / 1024;
-            }
-            return Math.round(input) + ' ' + sizes[order];
-        };
-    })
-    // translate the given properties in the input array
-    .filter('translateArray', ['$translate', function ($translate) {
-        return function (inputArray, propertiesList) {
-            _.each(inputArray, function (inputItem) {
-                _.each(propertiesList, function (prop) {
-                    if (angular.isString(inputItem[prop])) {
-                        var translateKey = inputItem[prop].toLowerCase();
-                        var result = $translate.instant(translateKey);
-                        if (result !== translateKey) inputItem[prop] = result;
-                    }
-                });
-            });
-            return inputArray;
-        }
-    }])
-    // translation with fall-back value if key not found
-    .filter('fallbackTranslate', ['$translate', function ($translate) {
-        return function (translateKey, fallbackValue) {
-            var result = $translate.instant(translateKey);
-            return result === translateKey ? fallbackValue : result;
-        };
-    }]);
-angular.module('platformWebApp')
-.factory('platformWebApp.objCompareService', function () {
-
-	//https://stamat.wordpress.com/2013/06/22/javascript-object-comparison/
-
-	var specialChars = [ '$', '_' ];
-	//Returns the object's class, Array, Date, RegExp, Object are of interest to us
-	var getClass = function (val) {
-		return Object.prototype.toString.call(val)
-			.match(/^\[object\s(.*)\]$/)[1];
-	};
-
-	//Defines the type of the value, extended typeof
-	var whatis = function (val) {
-
-		if (val === undefined)
-			return 'undefined';
-		if (val === null)
-			return 'null';
-
-		var type = typeof val;
-
-		if (type === 'object')
-			type = getClass(val).toLowerCase();
-
-		if (type === 'number') {
-			if (val.toString().indexOf('.') > 0)
-				return 'float';
-			else
-				return 'integer';
-		}
-
-		return type;
-	};
-
-	var compareObjects = function (a, b) {
-		if (a === b)
-			return true;
-
-		if (Object.keys(a).length < Object.keys(b).length)
-		{
-			var tmp = a;
-			a = b;
-			b = tmp;
-		}
-
-		for (var i in a) {
-			//ignore system properties and functions
-			if (!_.contains(specialChars, i.charAt(0)) && whatis(a[i]) != 'function') {
-				if (b.hasOwnProperty(i)) {
-					if (!equal(a[i], b[i]))
-						return false;
-				} else {
-					return false;
-				}
-			}
-		}
-
-		//for (var i in b) {
-		//	if (!a.hasOwnProperty(i)) {
-		//		return false;
-		//	}
-		//}
-		return true;
-	};
-
-	var compareArrays = function (a, b) {
-		if (a === b)
-			return true;
-		if (a.length !== b.length)
-			return false;
-		for (var i = 0; i < a.length; i++) {
-			if (!equal(a[i], b[i])) return false;
-		};
-		return true;
-	};
-
-	var _equal = {};
-	_equal.array = compareArrays;
-	_equal.object = compareObjects;
-	_equal.date = function (a, b) {
-		return a.getTime() === b.getTime();
-	};
-	_equal.regexp = function (a, b) {
-		return a.toString() === b.toString();
-	};
-	//	uncoment to support function as string compare
-	//	_equal.fucntion =  _equal.regexp;
-	/*
-	* Are two values equal, deep compare for objects and arrays.
-	* @param a {any}
-	* @param b {any}
-	* @return {boolean} Are equal?
-	*/
-	var equal = function (a, b) {
-		var retVal = a === b;
-		if (!retVal) {
-			var atype = whatis(a), btype = whatis(b);
-			if (atype === btype)
-			{
-				retVal = _equal.hasOwnProperty(atype) ? _equal[atype](a, b) : a == b;
-			}
-		}
-
-		return retVal;
-	}
-
-	return {
-		equal: equal
-	};
-});
-
-angular.module('platformWebApp')
-    .config(['$provide', 'uiGridConstants', function ($provide, uiGridConstants) {
-        $provide.decorator('GridOptions', ['$delegate', '$localStorage', '$translate', 'platformWebApp.bladeNavigationService', function ($delegate, $localStorage, $translate, bladeNavigationService) {
-            var gridOptions = angular.copy($delegate);
-            gridOptions.initialize = function (options) {
-                var initOptions = $delegate.initialize(options);
-                var blade = bladeNavigationService.currentBlade;
-                var $scope = blade.$scope;
-
-                // restore saved state, if any
-                var savedState = $localStorage['gridState:' + blade.template];
-                if (savedState) {
-                    // extend saved columns with custom columnDef information (e.g. cellTemplate, displayName)
-                    var foundDef;
-                    _.each(savedState.columns, function (x) {
-                        if (foundDef = _.findWhere(initOptions.columnDefs, { name: x.name })) {
-                            foundDef.sort = x.sort;
-                            foundDef.width = x.width || foundDef.width;
-                            foundDef.visible = x.visible;
-                            // prevent loading outdated cellTemplate
-                            delete x.cellTemplate;
-                            _.extend(x, foundDef);
-                            x.wasPredefined = true;
-                            initOptions.columnDefs.splice(initOptions.columnDefs.indexOf(foundDef), 1);
-                        } else {
-                            x.wasPredefined = false;
-                        }
-                    });
-                    // savedState.columns = _.reject(savedState.columns, function (x) { return x.cellTemplate && !x.wasPredefined; }); // not sure why was this, but it rejected custom templated fields
-                    initOptions.columnDefs = _.union(initOptions.columnDefs, savedState.columns);
-                } else {
-                    // mark predefined columns
-                    _.each(initOptions.columnDefs, function (x) {
-                        x.visible = angular.isDefined(x.visible) ? x.visible : true;
-                        x.wasPredefined = true;
-                    });
-                }
-
-                // translate headers
-                _.each(initOptions.columnDefs, function (x) { x.headerCellFilter = 'translate'; });
-
-                var customOnRegisterApiCallback = initOptions.onRegisterApi;
-
-                angular.extend(initOptions, {
-                    rowHeight: initOptions.rowHeight === 30 ? 40 : initOptions.rowHeight,
-                    enableGridMenu: true,
-                    //enableVerticalScrollbar: uiGridConstants.scrollbars.NEVER,
-                    //enableHorizontalScrollbar: uiGridConstants.scrollbars.NEVER,
-                    saveFocus: false,
-                    saveFilter: false,
-                    saveGrouping: false,
-                    savePinning: false,
-                    saveSelection: false,
-                    gridMenuTitleFilter: $translate,
-                    onRegisterApi: function (gridApi) {
-                        //set gridApi on scope
-                        $scope.gridApi = gridApi;
-
-                        if (gridApi.saveState) {
-                            if (savedState) {
-                                //$timeout(function () {
-                                gridApi.saveState.restore($scope, savedState);
-                                //}, 10);
-                            }
-
-                            if (gridApi.colResizable)
-                                gridApi.colResizable.on.columnSizeChanged($scope, saveState);
-                            if (gridApi.colMovable)
-                                gridApi.colMovable.on.columnPositionChanged($scope, saveState);
-                            gridApi.core.on.columnVisibilityChanged($scope, saveState);
-                            gridApi.core.on.sortChanged($scope, saveState);
-                            function saveState() {
-                                $localStorage['gridState:' + blade.template] = gridApi.saveState.save();
-                            }
-                        }
-
-                        gridApi.grid.registerDataChangeCallback(processMissingColumns, [uiGridConstants.dataChange.ROW]);
-                        gridApi.grid.registerDataChangeCallback(autoFormatColumns, [uiGridConstants.dataChange.ROW]);
-
-                        if (customOnRegisterApiCallback) {
-                            customOnRegisterApiCallback(gridApi);
-                        }
-                    },
-                    onCollapse: function () {
-                        updateColumnsVisibility(this, true);
-                    },
-                    onExpand: function () {
-                        updateColumnsVisibility(this, false);
-                    }
-                });
-
-                return initOptions;
-            };
-
-            function processMissingColumns(grid) {
-                var gridOptions = grid.options;
-
-                if (!gridOptions.columnDefsGenerated && _.any(grid.rows)) {
-                    var filteredColumns = _.filter(_.pairs(grid.rows[0].entity), function (x) {
-                        return !x[0].startsWith('$$') && (!_.isObject(x[1]) || _.isDate(x[1]));
-                    });
-
-                    var allKeysFromEntity = _.map(filteredColumns, function (x) {
-                        return x[0];
-                    });
-                    // remove non-existing columns
-                    _.each(gridOptions.columnDefs.slice(), function (x) {
-                        if (!_.contains(allKeysFromEntity, x.name) && !x.wasPredefined) {
-                            gridOptions.columnDefs = _.reject(gridOptions.columnDefs, function (d) {
-                                return d.name == x.name;
-                            });
-                        }
-                    });
-
-                    // generate columnDefs for each undefined property
-                    _.each(allKeysFromEntity, function (x) {
-                        if (!_.findWhere(gridOptions.columnDefs, { name: x })) {
-                            gridOptions.columnDefs.push({ name: x, visible: false });
-                        }
-                    });
-                    gridOptions.columnDefsGenerated = true;
-                    grid.api.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
-                }
-            }
-
-            // Configure automatic formatting of columns/
-            // Column with type number will use numberFilter to correct display of values
-            // Column with type date will use predefined template with am-time-ago directive to display date in human-readable format
-            function autoFormatColumns(grid) {
-                var gridOptions = grid.options;
-                grid.buildColumns();
-                var columnDefs = angular.copy(gridOptions.columnDefs);
-                for (var i = 0; i < columnDefs.length; i++) {
-                    var columnDef = columnDefs[i];
-                    for (var j = 0; j < grid.rows.length; j++) {
-                        var value = grid.getCellValue(grid.rows[j], grid.getColumn(columnDef.name));
-                        if (angular.isDefined(value)) {
-                            if (angular.isNumber(value)) {
-                                columnDef.cellFilter = columnDef.cellFilter || 'number';
-                            }
-                            // Default template for columns with dates
-                            else if (angular.isDate(value) || angular.isString(value) && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d+)?Z/.test(value)) {
-                                columnDef.cellTemplate = columnDef.cellTemplate || '$(Platform)/Scripts/common/templates/ui-grid/am-time-ago.cell.html';
-                            }
-                            break;
-                        }
-                    }
-                    gridOptions.columnDefs[i] = columnDef;
-                }
-                grid.options.columnDefs = columnDefs;
-                grid.api.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
-            }
-
-            function updateColumnsVisibility(gridOptions, isCollapsed) {
-                var blade = bladeNavigationService.currentBlade;
-                var $scope = blade.$scope;
-                _.each(gridOptions.columnDefs, function (x) {
-                    // normal: visible, if column was predefined
-                    // collapsed: visible only if we must display column always
-                    if (isCollapsed) {
-                        x.wasVisible = !!x.wasPredefined && x.visible !== false || !!x.visible;
-                    }
-                    x.visible = !isCollapsed ? !!x.wasVisible : !!x.displayAlways;
-                });
-                if ($scope && $scope.gridApi)
-                    $scope.gridApi.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
-            }
-
-            return gridOptions;
-        }]);
-    }])
-
-    .factory('platformWebApp.uiGridHelper', ['$localStorage', '$timeout', 'uiGridConstants', '$translate', function ($localStorage, $timeout, uiGridConstants, $translate) {
-        var retVal = {};
-        retVal.uiGridConstants = uiGridConstants;
-        retVal.initialize = function ($scope, gridOptions, externalRegisterApiCallback) {
-            $scope.gridOptions = angular.extend({
-                data: _.any(gridOptions.data) ? gridOptions.data : 'blade.currentEntities',
-                onRegisterApi: function (gridApi) {
-                    if (externalRegisterApiCallback) {
-                        externalRegisterApiCallback(gridApi);
-                    }
-                }
-            }, gridOptions);
-        };
-
-        retVal.getSortExpression = function ($scope) {
-            var columnDefs;
-            if ($scope.gridApi) {
-                columnDefs = $scope.gridApi.grid.columns;
-            } else {
-                var savedState = $localStorage['gridState:' + $scope.blade.template];
-                columnDefs = savedState ? savedState.columns : $scope.gridOptions.columnDefs;
-            }
-
-            var sorts = _.filter(columnDefs, function (x) {
-                return x.name !== '$path' && x.sort && (x.sort.direction === uiGridConstants.ASC || x.sort.direction === uiGridConstants.DESC);
-            });
-            sorts = _.sortBy(sorts, function (x) {
-                return x.sort.priority;
-            });
-            sorts = _.map(sorts, function (x) {
-                return (x.field ? x.field : x.name) + ':' + (x.sort.direction === uiGridConstants.ASC ? 'asc' : 'desc');
-            });
-            return sorts.join(';');
-        };
-
-        retVal.bindRefreshOnSortChanged = function ($scope) {
-            $scope.gridApi.core.on.sortChanged($scope, function () {
-                if (!$scope.blade.isLoading) $scope.blade.refresh();
-            });
-        };
-
-        return retVal;
-    }])
-
-    // ui-grid extension service. Used for extension grid options from other modules
-    .factory('platformWebApp.ui-grid.extension', [function () {
-        return {
-            extensionsMap: [],
-            registerExtension: function (gridId, extensionFn) {
-                this.extensionsMap[gridId] = extensionFn;
-            },
-            tryExtendGridOptions: function (gridId, gridOptions) {
-                if (this.extensionsMap[gridId]) {
-                    this.extensionsMap[gridId](gridOptions);
-                }
-            }
-        };
-    }])
-
-    // auto height and additional class for ui-grid
-    .directive('uiGridHeight', ['$timeout', '$window', function ($timeout, $window) {
-        return {
-            restrict: 'A',
-            link: {
-                pre: function (scope, element) {
-                    var bladeInner = $(element).parents('.blade-inner');
-                    bladeInner.addClass('ui-grid-no-scroll');
-
-                    var setGridHeight = function () {
-                        $timeout(function () {
-                            $(element).height(bladeInner.height());
-                        });
-                    };
-                    scope.$watch('blade.isExpanded', setGridHeight);
-                    scope.$watch('pageSettings.totalItems', setGridHeight);
-                    angular.element($window).bind('resize', setGridHeight);
-                }
-            }
-        };
-    }])
-    .run(['$templateRequest', function ($templateRequest) {
-        // Pre-load default templates, because we inject templates to grid options dynamically, so they not loaded by default
-        $templateRequest('$(Platform)/Scripts/common/templates/ui-grid/am-time-ago.cell.html');
-    }]);
-
-angular.module('platformWebApp')
- .factory('platformWebApp.validators', [function () {
-     function webSafeFileNameValidator(value) {
-         var pattern = /^[\w.-]+$/;
-         return pattern.test(value);
-     }
-
-     return {
-         webSafeFileNameValidator: webSafeFileNameValidator
-     };
- }]);
-
-angular.module('platformWebApp')
 .config(['$provide', function ($provide) {
     // Provide default format
     $provide.decorator('currencyFilter', ['$delegate', function ($delegate) {
@@ -17852,40 +17852,29 @@ angular.module('platformWebApp')
         };
         return $delegate;
     }]);
-    // Fix support of first day week for datepicker
-    $provide.decorator('datepickerDirective', ['$delegate', '$locale', function ($delegate, $locale) {
-        var directive = $delegate[0];
-        directive.compile = function () {
-            return function (scope, element, attrs, ctrls) {
-                var controller = ctrls[0];
-                // 0 is Sunday in angular-js and Monday in angular-ui datepicker
-                var firstDayOfWeek = $locale.DATETIME_FORMATS.FIRSTDAYOFWEEK + 1;
-                firstDayOfWeek = firstDayOfWeek === 7 ? 0 : firstDayOfWeek;
-                controller.startingDay = firstDayOfWeek;
-                directive.link.apply(this, arguments);
-            }
-        };
-        return $delegate;
-    }]);
+
     // Fix bugs & add features for datepicker popup
-    $provide.decorator('datepickerPopupDirective', ['$delegate', 'platformWebApp.angularToMomentFormatConverter', 'datepickerPopupConfig', '$filter', '$locale',
-    function ($delegate, formatConverter, datepickerPopupConfig, $filter, $locale) {
+    $provide.decorator('datepickerPopupDirective', ['$delegate', 'platformWebApp.angularToMomentFormatConverter', 'uiDatetimePickerConfig', 'timepickerConfig', '$filter', '$locale',
+        function ($delegate, formatConverter, datepickerPopupConfig, timepickerConfig, $filter, $locale) {
+        //delete bootstrap directive
+        $delegate.shift();
+
+         //use custom date time picker directive
         var directive = $delegate[0];
+
         directive.compile = function (tElem, tAttrs) {
             tElem.attr("datepicker-popup-original", tAttrs.datepickerPopup);
-            return function (scope, element, attrs, ngModelCtrl) {
-                // Automatic localization support for buttons in popup
-                attrs.currentText = attrs.currentText || $filter('translate')('platform.commands.today');
-                attrs.clearText = attrs.clearText || $filter('translate')('platform.commands.clear');
-                attrs.closeText = attrs.closeText || $filter('translate')('platform.commands.close');
-
+            return function (scope, element, attrs, ctrls) {
+                var ngModelCtrl = ctrls[0];
                 // datepicker has some bugs and limitations to support date & time formats,
                 // also, it doesn't support localized input,
                 // so limit format number & convert to date via moment to prevent random occurence of errors
                 var applyFormat = function (newFormat, oldFormat) {
                     if (newFormat !== oldFormat) {
-                        var format = newFormat || datepickerPopupConfig.datepickerPopup;
+
+                        var format = newFormat || datepickerPopupConfig.dateFormat;;
                         formatConverter.validate(format, formatConverter.isInvalidDate);
+
                         if (formatConverter.additionalFormats.includes(format)) {
                             format = $locale.DATETIME_FORMATS[format];
                         }
@@ -17905,6 +17894,7 @@ angular.module('platformWebApp')
                     scope.date = value;
                     return ngModelCtrl.$isEmpty(value) ? value : $filter('date')(moment(value), format);
                 });
+
                 ngModelCtrl.$parsers.unshift(function (value) {
                     if (value) {
                         var format = formatConverter.convert(attrs.datepickerPopup);
@@ -17920,8 +17910,43 @@ angular.module('platformWebApp')
             }
         };
         return $delegate;
-    }]);
+        }]);
+
+    $provide.decorator('timepickerDirective', ['$delegate', 'timepickerConfig', '$locale', 'platformWebApp.settings.helper', 'platformWebApp.i18n', 'platformWebApp.userProfile',
+        function ($delegate, timepickerConfig, $locale, settings, i18n, userProfile) {
+
+        $delegate.shift();
+        var directive = $delegate[0];
+
+        var timeSettings = userProfile.timeSettings;
+        timepickerConfig.showMeridian = timeSettings.showMeridian;
+
+        var compile = directive.compile;
+            directive.compile = function (tElem, tAttrs) {
+                var link = compile.apply(this, arguments);
+                return function (scope, element, attrs, ctrls) {
+
+                    //set 24 hour format
+                    timeSettings = i18n.getTimeSettings();
+                    scope.showMeridian = timeSettings.showMeridian;
+
+                    function cnahgeTimeSettings(showMeridian) {
+                        timeSettings.showMeridian = showMeridian;
+                        i18n.changeTimeSettings(timeSettings);
+                        userProfile.save();
+                    }
+
+                    scope.$watch('showMeridian', function (showMeridian) {
+                            cnahgeTimeSettings(showMeridian);
+                    });
+
+                    link.apply(this, arguments);
+                };
+            };
+            return $delegate;
+        }]);
 }]);
+
 angular.module('platformWebApp')
 // Service provide functions for currency convertion and validation with localization support
 .factory('platformWebApp.currencyFormat', ['platformWebApp.numberFormat', '$filter', '$locale', function (numberFormat, $filter, $locale) {
@@ -18211,9 +18236,10 @@ angular.module('platformWebApp')
 .constant("platformWebApp.fallbackRegionalFormat", "en")
 .constant("platformWebApp.fallbackTimeZone", "Etc/Utc")
 .constant("platformWebApp.fallbackTimeAgoSettings", { useTimeAgo: true, thresholdUnit: 'Never', threshold: null })
+.constant("platformWebApp.fallbackTimeFormat", { showMeridian: true})
 // Service provider get/set function pairs for language, regional format, time zone and time ago settings
-.factory('platformWebApp.i18n', ['platformWebApp.fallbackLanguage', 'platformWebApp.fallbackRegionalFormat', 'platformWebApp.fallbackTimeAgoSettings', 'platformWebApp.common.languages', 'platformWebApp.common.locales', 'platformWebApp.common.timeZones', 'platformWebApp.userProfileApi', '$translate', 'tmhDynamicLocale', 'moment', 'amMoment', 'angularMomentConfig', 'amTimeAgoConfig',
-    function (fallbackLanguage, fallbackRegionalFormat, fallbackTimeAgoSettings, languages, locales, timeZones, userProfileApi, $translate, dynamicLocale, moment, momentService, momentConfig, timeAgoConfig) {
+    .factory('platformWebApp.i18n', ['platformWebApp.fallbackLanguage', 'platformWebApp.fallbackRegionalFormat', 'platformWebApp.fallbackTimeAgoSettings', 'platformWebApp.common.languages', 'platformWebApp.common.locales', 'platformWebApp.common.timeZones', 'platformWebApp.userProfileApi', '$translate', 'tmhDynamicLocale', 'moment', 'amMoment', 'angularMomentConfig', 'amTimeAgoConfig', 'platformWebApp.fallbackTimeFormat',
+        function (fallbackLanguage, fallbackRegionalFormat, fallbackTimeAgoSettings, languages, locales, timeZones, userProfileApi, $translate, dynamicLocale, moment, momentService, momentConfig, timeAgoConfig, fallbackTimeFormat) {
         var changeLanguage = function (language) {
             userProfileApi.getLocales(function(availableLanguages) {
                 availableLanguages.sort();
@@ -18268,8 +18294,11 @@ angular.module('platformWebApp')
                 timeAgoConfig.fullDateThreshold = timeAgoSettings.thresholdUnit && timeAgoSettings.thresholdUnit !== 'Never' ? timeAgoSettings.threshold || 1 : null;
             }
         }
-
-        return {
+        var changeTimeSettings = function (timeSettings) {
+            if (timeSettings)
+                fallbackTimeFormat = timeSettings;
+        }
+            return {
             getLanguage: function() { return languages.normalize($translate.use()) },
             getRegionalFormat: function () { return locales.normalize(dynamicLocale.get()) },
             getTimeZone: function () { return momentConfig.timezone },
@@ -18283,16 +18312,22 @@ angular.module('platformWebApp')
                 result.threshold = result.useTimeAgo && result.thresholdUnit !== 'Never' ? timeAgoConfig.fullDateThreshold : null;
                 return result;
             },
+            getTimeSettings: function () {
+                var result = {};
+                result.showMeridian = fallbackTimeFormat.showMeridian;
+                return result;
+            },
             changeLanguage: changeLanguage,
             changeRegionalFormat: changeRegionalFormat,
             changeTimeZone: changeTimeZone,
-            changeTimeAgoSettings: changeTimeAgoSettings
+            changeTimeAgoSettings: changeTimeAgoSettings,
+            changeTimeSettings: changeTimeSettings
         }
     }
 ])
 // Configure fallbacks for language, regional format, time zone and time ago settings
-.config(['$provide', 'platformWebApp.fallbackLanguage', 'platformWebApp.fallbackRegionalFormat', 'platformWebApp.fallbackTimeZone', 'platformWebApp.fallbackTimeAgoSettings', 'tmhDynamicLocaleProvider', '$translateProvider', 'angularMomentConfig', 'amTimeAgoConfig',
-        function ($provide, fallbackLanguage, fallbackRegionalFormat, fallbackTimeZone, fallbackTimeAgoSettings, dynamicLocaleProvider, $translateProvider, momentConfig, timeAgoConfig) {
+    .config(['$provide', 'platformWebApp.fallbackLanguage', 'platformWebApp.fallbackRegionalFormat', 'platformWebApp.fallbackTimeZone', 'platformWebApp.fallbackTimeAgoSettings', 'tmhDynamicLocaleProvider', '$translateProvider', 'angularMomentConfig', 'amTimeAgoConfig', 'platformWebApp.fallbackTimeFormat',
+        function ($provide, fallbackLanguage, fallbackRegionalFormat, fallbackTimeZone, fallbackTimeAgoSettings, dynamicLocaleProvider, $translateProvider, momentConfig, timeAgoConfig, fallbackTimeFormat) {
 
     // https://angular-translate.github.io/docs/#/guide
     $translateProvider.useUrlLoader('api/platform/localization')
@@ -18340,7 +18375,9 @@ angular.module('platformWebApp')
     i18n.changeRegionalFormat();
     i18n.changeTimeZone();
     i18n.changeTimeAgoSettings();
+    i18n.changeTimeSettings();
 }]);
+
 angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
     $stateProvider
@@ -18573,6 +18610,123 @@ angular.module('platformWebApp')
   }]);
 
 angular.module('platformWebApp')
+.config(['$stateProvider', function ($stateProvider) {
+	$stateProvider
+        .state('workspace.modularity', {
+        	url: '/modules',
+        	templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+        	controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+        		var blade = {
+        			id: 'modulesMain',
+        			title: 'platform.blades.modules-main.title',
+        			controller: 'platformWebApp.modulesMainController',
+        			template: '$(Platform)/Scripts/app/modularity/blades/modules-main.tpl.html',
+        			isClosingDisabled: true
+        		};
+        		bladeNavigationService.showBlade(blade);
+        	}]
+        });
+
+	$stateProvider
+	.state('setupWizard.modulesInstallation', {
+		url: '/modulesInstallation',
+		templateUrl: '$(Platform)/Scripts/app/modularity/templates/modulesInstallation.tpl.html',
+		controller: ['$scope', '$state', '$stateParams', '$window', 'platformWebApp.modules', 'platformWebApp.exportImport.resource', 'platformWebApp.setupWizard', function ($scope, $state, $stateParams, $window, modules, exportImportResourse, setupWizard) {
+			$scope.notification = {};
+			if ($stateParams.notification)
+			{
+				$scope.notification = $stateParams.notification;
+			}
+			//thats need when state direct open by url or push notification
+            var step = setupWizard.findStepByState($state.current.name);
+			if (!$scope.notification.created) {
+			modules.autoInstall({}, function (data) {
+				//if already installed need skip this step
+				if (data.finished) {					
+				    setupWizard.showStep(step.nextStep);
+                }
+            }, function (error) {
+                setupWizard.showStep(step.nextStep);
+            });
+			}
+
+			$scope.restart = function () {
+				$scope.restarted = true;
+				modules.restart({}, function () {
+					setupWizard.showStep(step.nextStep);
+					$window.location.reload();
+				});
+			};		
+
+			$scope.$on("new-notification-event", function (event, notification) {
+				if (notification.notifyType == 'ModuleAutoInstallPushNotification') {
+					angular.copy(notification, $scope.notification);
+					if (notification.finished && notification.errorCount == 0) {
+						$scope.close();
+					}
+				}
+			});
+		}]
+	});
+}])
+.run(
+  ['platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.bladeNavigationService', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', '$rootScope', 'platformWebApp.modules', 'platformWebApp.setupWizard', function (pushNotificationTemplateResolver, bladeNavigationService, mainMenuService, widgetService, $state, $rootScope, modules, setupWizard) {
+  	//Register module in main menu
+  	var menuItem = {
+  		path: 'configuration/modularity',
+  		icon: 'fa fa-cubes',
+  		title: 'platform.menu.modules',
+  		priority: 6,
+  		action: function () { $state.go('workspace.modularity'); },
+  		permission: 'platform:module:access'
+  	};
+  	mainMenuService.addMenuItem(menuItem);
+
+      // Register push notification template
+      pushNotificationTemplateResolver.register({
+	   	priority: 900,
+	   	satisfy: function (notify, place) { return place == 'menu' && notify.notifyType == 'ModulePushNotification'; },
+	   	template: '$(Platform)/Scripts/app/modularity/notifications/menu.tpl.html',
+	   	action: function (notify) { $state.go('workspace.pushNotificationsHistory', notify); }
+      });
+
+  	var historyExportImportTemplate =
+	{
+		priority: 900,
+		satisfy: function (notify, place) { return place == 'history' && notify.notifyType == 'ModulePushNotification'; },
+		template: '$(Platform)/Scripts/app/modularity/notifications/history.tpl.html',
+		action: function (notify) {
+			var blade = {
+				id: 'moduleInstallProgress',
+				title: notify.title,
+				currentEntity: notify,
+				controller: 'platformWebApp.moduleInstallProgressController',
+				template: '$(Platform)/Scripts/app/modularity/wizards/newModule/module-wizard-progress-step.tpl.html'
+			};
+			bladeNavigationService.showBlade(blade);
+		}
+	};
+  	pushNotificationTemplateResolver.register(historyExportImportTemplate);
+
+  	//Switch to  setupWizard.modulesInstallation state when receive ModuleAutoInstallPushNotification push notification
+  	$rootScope.$on("new-notification-event", function (event, notification) {
+  		if (notification.notifyType == 'ModuleAutoInstallPushNotification' && $state.current && $state.current.name != 'setupWizard.modulesInstallation') {
+  			$state.go('setupWizard.modulesInstallation', { notification: notification });
+  		}
+  	});
+	//register setup wizard step - modules auto installation
+  	setupWizard.registerStep({
+  		state: "setupWizard.modulesInstallation",
+  		priority: 1
+  	});
+  
+  }])
+.factory('platformWebApp.moduleHelper', function () {
+	// semver comparison: https://gist.github.com/TheDistantSea/8021359
+	return {};
+});
+
+angular.module('platformWebApp')
 .controller('platformWebApp.licenseDetailController', ['$scope', '$window', 'FileUploader', '$http', 'platformWebApp.bladeNavigationService', function ($scope, $window, FileUploader, $http, bladeNavigationService) {
     var blade = $scope.blade;
     blade.isNew = blade.isNew || !$scope.license;
@@ -18691,123 +18845,6 @@ angular.module('platformWebApp')
 }]);
 angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
-	$stateProvider
-        .state('workspace.modularity', {
-        	url: '/modules',
-        	templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-        	controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-        		var blade = {
-        			id: 'modulesMain',
-        			title: 'platform.blades.modules-main.title',
-        			controller: 'platformWebApp.modulesMainController',
-        			template: '$(Platform)/Scripts/app/modularity/blades/modules-main.tpl.html',
-        			isClosingDisabled: true
-        		};
-        		bladeNavigationService.showBlade(blade);
-        	}]
-        });
-
-	$stateProvider
-	.state('setupWizard.modulesInstallation', {
-		url: '/modulesInstallation',
-		templateUrl: '$(Platform)/Scripts/app/modularity/templates/modulesInstallation.tpl.html',
-		controller: ['$scope', '$state', '$stateParams', '$window', 'platformWebApp.modules', 'platformWebApp.exportImport.resource', 'platformWebApp.setupWizard', function ($scope, $state, $stateParams, $window, modules, exportImportResourse, setupWizard) {
-			$scope.notification = {};
-			if ($stateParams.notification)
-			{
-				$scope.notification = $stateParams.notification;
-			}
-			//thats need when state direct open by url or push notification
-            var step = setupWizard.findStepByState($state.current.name);
-			if (!$scope.notification.created) {
-			modules.autoInstall({}, function (data) {
-				//if already installed need skip this step
-				if (data.finished) {					
-				    setupWizard.showStep(step.nextStep);
-                }
-            }, function (error) {
-                setupWizard.showStep(step.nextStep);
-            });
-			}
-
-			$scope.restart = function () {
-				$scope.restarted = true;
-				modules.restart({}, function () {
-					setupWizard.showStep(step.nextStep);
-					$window.location.reload();
-				});
-			};		
-
-			$scope.$on("new-notification-event", function (event, notification) {
-				if (notification.notifyType == 'ModuleAutoInstallPushNotification') {
-					angular.copy(notification, $scope.notification);
-					if (notification.finished && notification.errorCount == 0) {
-						$scope.close();
-					}
-				}
-			});
-		}]
-	});
-}])
-.run(
-  ['platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.bladeNavigationService', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', '$rootScope', 'platformWebApp.modules', 'platformWebApp.setupWizard', function (pushNotificationTemplateResolver, bladeNavigationService, mainMenuService, widgetService, $state, $rootScope, modules, setupWizard) {
-  	//Register module in main menu
-  	var menuItem = {
-  		path: 'configuration/modularity',
-  		icon: 'fa fa-cubes',
-  		title: 'platform.menu.modules',
-  		priority: 6,
-  		action: function () { $state.go('workspace.modularity'); },
-  		permission: 'platform:module:access'
-  	};
-  	mainMenuService.addMenuItem(menuItem);
-
-      // Register push notification template
-      pushNotificationTemplateResolver.register({
-	   	priority: 900,
-	   	satisfy: function (notify, place) { return place == 'menu' && notify.notifyType == 'ModulePushNotification'; },
-	   	template: '$(Platform)/Scripts/app/modularity/notifications/menu.tpl.html',
-	   	action: function (notify) { $state.go('workspace.pushNotificationsHistory', notify); }
-      });
-
-  	var historyExportImportTemplate =
-	{
-		priority: 900,
-		satisfy: function (notify, place) { return place == 'history' && notify.notifyType == 'ModulePushNotification'; },
-		template: '$(Platform)/Scripts/app/modularity/notifications/history.tpl.html',
-		action: function (notify) {
-			var blade = {
-				id: 'moduleInstallProgress',
-				title: notify.title,
-				currentEntity: notify,
-				controller: 'platformWebApp.moduleInstallProgressController',
-				template: '$(Platform)/Scripts/app/modularity/wizards/newModule/module-wizard-progress-step.tpl.html'
-			};
-			bladeNavigationService.showBlade(blade);
-		}
-	};
-  	pushNotificationTemplateResolver.register(historyExportImportTemplate);
-
-  	//Switch to  setupWizard.modulesInstallation state when receive ModuleAutoInstallPushNotification push notification
-  	$rootScope.$on("new-notification-event", function (event, notification) {
-  		if (notification.notifyType == 'ModuleAutoInstallPushNotification' && $state.current && $state.current.name != 'setupWizard.modulesInstallation') {
-  			$state.go('setupWizard.modulesInstallation', { notification: notification });
-  		}
-  	});
-	//register setup wizard step - modules auto installation
-  	setupWizard.registerStep({
-  		state: "setupWizard.modulesInstallation",
-  		priority: 1
-  	});
-  
-  }])
-.factory('platformWebApp.moduleHelper', function () {
-	// semver comparison: https://gist.github.com/TheDistantSea/8021359
-	return {};
-});
-
-angular.module('platformWebApp')
-.config(['$stateProvider', function ($stateProvider) {
     $stateProvider
 		.state('workspace.notifications', {
 		    url: '/notifications?objectId&objectTypeId',
@@ -18840,6 +18877,164 @@ angular.module('platformWebApp')
       mainMenuService.addMenuItem(menuItem);
   }])
 ;
+angular.module('platformWebApp')
+    .config(['$stateProvider', '$httpProvider', function ($stateProvider, $httpProvider) {
+        $stateProvider.state('loginDialog', {
+	        url: '/login',
+	        templateUrl: '$(Platform)/Scripts/app/security/login/login.tpl.html',
+	        controller: ['$scope', 'platformWebApp.authService', function ($scope, authService) {
+	            $scope.user = {};
+	            $scope.authError = null;
+	            $scope.authReason = false;
+	            $scope.loginProgress = false;
+	            $scope.ok = function () {
+	                // Clear any previous security errors
+	                $scope.authError = null;
+	                $scope.loginProgress = true;
+	                // Try to login
+	                authService.login($scope.user.email, $scope.user.password, $scope.user.remember).then(function (loggedIn) {
+	                    $scope.loginProgress = false;
+	                    if (!loggedIn) {
+	                        $scope.authError = 'invalidCredentials';
+	                    }
+	                }, function (x) {
+	                    $scope.loginProgress = false;
+	                    if (angular.isDefined(x.status)) {
+	                        if (x.status == 401) {
+	                            $scope.authError = 'The login or password is incorrect.';
+	                        } else {
+	                            $scope.authError = 'Authentication error (code: ' + x.status + ').';
+	                        }
+	                    } else {
+	                        $scope.authError = 'Authentication error ' + x;
+	                    }
+	                });
+	            };
+
+	        }]
+	    })
+
+	    $stateProvider.state('forgotpasswordDialog', {
+	        url: '/forgotpassword',
+	        templateUrl: '$(Platform)/Scripts/app/security/login/forgotPassword.tpl.html',
+            controller: ['$scope', 'platformWebApp.authService', '$state', function ($scope, authService, $state) {
+	            $scope.viewModel = {};
+	            $scope.ok = function () {
+	                $scope.isLoading = true;
+	                $scope.errorMessage = null;
+	                authService.requestpasswordreset($scope.viewModel).then(function (retVal) {
+	                    $scope.isLoading = false;
+	                    angular.extend($scope, retVal);
+	                });
+                };
+                $scope.close = function () {
+                    $state.go('loginDialog');
+                };
+	        }]
+	    })
+
+	    $stateProvider.state('resetpasswordDialog', {
+	        url: '/resetpassword/:userId/{code:.*}',
+	        templateUrl: '$(Platform)/Scripts/app/security/login/resetPassword.tpl.html',
+	        controller: ['$rootScope', '$scope', '$stateParams', 'platformWebApp.authService', function ($rootScope, $scope, $stateParams, authService) {
+	            $scope.viewModel = $stateParams;
+	            $scope.ok = function () {
+	                $scope.errorMessage = null;
+	                $scope.isLoading = true;
+	                authService.resetpassword($scope.viewModel).then(function (retVal) {
+	                    $scope.isLoading = false;
+	                    $rootScope.preventLoginDialog = false;
+	                    angular.extend($scope, retVal);
+	                }, function (x) {
+	                    $scope.isLoading = false;
+	                    $scope.viewModel.newPassword = $scope.viewModel.newPassword2 = undefined;
+	                    if (x.status == 400 && x.data && x.data.message) {
+	                        $scope.errorMessage = x.data.message;
+	                    } else {
+	                        $scope.errorMessage = 'Error ' + x;
+	                    }
+	                });
+	            };
+	        }]
+	    })
+
+	    .state('workspace.securityModule', {
+	        url: '/security',
+	        templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+	        controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+				    var blade = {
+				        id: 'security',
+				        title: 'platform.blades.security-main.title',
+				        subtitle: 'platform.blades.security-main.subtitle',
+				        controller: 'platformWebApp.securityMainController',
+				        template: '$(Platform)/Scripts/app/security/blades/security-main.tpl.html',
+				        isClosingDisabled: true
+				    };
+				    bladeNavigationService.showBlade(blade);
+				}
+	        ]
+	    });
+	}])
+    .run(['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.metaFormsService', 'platformWebApp.widgetService', '$state', 'platformWebApp.authService',
+        function ($rootScope, mainMenuService, metaFormsService, widgetService, $state, authService) {
+
+        //Register module in main menu
+        var menuItem = {
+            path: 'configuration/security',
+            icon: 'fa fa-key',
+            title: 'platform.menu.security',
+            priority: 5,
+            action: function () { $state.go('workspace.securityModule'); },
+            permission: 'platform:security:access'
+        };
+        mainMenuService.addMenuItem(menuItem);
+
+        metaFormsService.registerMetaFields("accountDetails",
+        [
+            {
+                name: "isAdministrator",
+                title: "platform.blades.account-detail.labels.is-administrator",
+                valueType: "Boolean",
+                priority: 0
+            },
+            {
+                name: "userName",
+                templateUrl: "accountUserName.html",
+                priority: 1,
+                isRequired: true
+            },
+            {
+                name: "email",
+                templateUrl: "accountEmail.html",
+                priority: 2
+            },
+            {
+                name: "accountType",
+                templateUrl: "accountTypeSelector.html",
+                priority: 3
+            },
+            {
+                name: "accountInfo",
+                templateUrl: "accountInfo.html",
+                priority: 4
+            }
+        ]);
+
+        //Register widgets
+        widgetService.registerWidget({
+            controller: 'platformWebApp.accountRolesWidgetController',
+            template: '$(Platform)/Scripts/app/security/widgets/accountRolesWidget.tpl.html',
+        }, 'accountDetail');
+        widgetService.registerWidget({
+            controller: 'platformWebApp.accountApiWidgetController',
+            template: '$(Platform)/Scripts/app/security/widgets/accountApiWidget.tpl.html',
+        }, 'accountDetail');
+        widgetService.registerWidget({
+            controller: 'platformWebApp.changeLog.operationsWidgetController',
+            template: '$(Platform)/Scripts/app/changeLog/widgets/operations-widget.tpl.html'
+        }, 'accountDetail');
+    }]);
+
 angular.module('platformWebApp')
 .config(
   ['$stateProvider', function ($stateProvider) {
@@ -19011,164 +19206,6 @@ angular.module('platformWebApp')
         };
         return retVal;
 
-    }]);
-
-angular.module('platformWebApp')
-    .config(['$stateProvider', '$httpProvider', function ($stateProvider, $httpProvider) {
-        $stateProvider.state('loginDialog', {
-	        url: '/login',
-	        templateUrl: '$(Platform)/Scripts/app/security/login/login.tpl.html',
-	        controller: ['$scope', 'platformWebApp.authService', function ($scope, authService) {
-	            $scope.user = {};
-	            $scope.authError = null;
-	            $scope.authReason = false;
-	            $scope.loginProgress = false;
-	            $scope.ok = function () {
-	                // Clear any previous security errors
-	                $scope.authError = null;
-	                $scope.loginProgress = true;
-	                // Try to login
-	                authService.login($scope.user.email, $scope.user.password, $scope.user.remember).then(function (loggedIn) {
-	                    $scope.loginProgress = false;
-	                    if (!loggedIn) {
-	                        $scope.authError = 'invalidCredentials';
-	                    }
-	                }, function (x) {
-	                    $scope.loginProgress = false;
-	                    if (angular.isDefined(x.status)) {
-	                        if (x.status == 401) {
-	                            $scope.authError = 'The login or password is incorrect.';
-	                        } else {
-	                            $scope.authError = 'Authentication error (code: ' + x.status + ').';
-	                        }
-	                    } else {
-	                        $scope.authError = 'Authentication error ' + x;
-	                    }
-	                });
-	            };
-
-	        }]
-	    })
-
-	    $stateProvider.state('forgotpasswordDialog', {
-	        url: '/forgotpassword',
-	        templateUrl: '$(Platform)/Scripts/app/security/login/forgotPassword.tpl.html',
-            controller: ['$scope', 'platformWebApp.authService', '$state', function ($scope, authService, $state) {
-	            $scope.viewModel = {};
-	            $scope.ok = function () {
-	                $scope.isLoading = true;
-	                $scope.errorMessage = null;
-	                authService.requestpasswordreset($scope.viewModel).then(function (retVal) {
-	                    $scope.isLoading = false;
-	                    angular.extend($scope, retVal);
-	                });
-                };
-                $scope.close = function () {
-                    $state.go('loginDialog');
-                };
-	        }]
-	    })
-
-	    $stateProvider.state('resetpasswordDialog', {
-	        url: '/resetpassword/:userId/{code:.*}',
-	        templateUrl: '$(Platform)/Scripts/app/security/login/resetPassword.tpl.html',
-	        controller: ['$rootScope', '$scope', '$stateParams', 'platformWebApp.authService', function ($rootScope, $scope, $stateParams, authService) {
-	            $scope.viewModel = $stateParams;
-	            $scope.ok = function () {
-	                $scope.errorMessage = null;
-	                $scope.isLoading = true;
-	                authService.resetpassword($scope.viewModel).then(function (retVal) {
-	                    $scope.isLoading = false;
-	                    $rootScope.preventLoginDialog = false;
-	                    angular.extend($scope, retVal);
-	                }, function (x) {
-	                    $scope.isLoading = false;
-	                    $scope.viewModel.newPassword = $scope.viewModel.newPassword2 = undefined;
-	                    if (x.status == 400 && x.data && x.data.message) {
-	                        $scope.errorMessage = x.data.message;
-	                    } else {
-	                        $scope.errorMessage = 'Error ' + x;
-	                    }
-	                });
-	            };
-	        }]
-	    })
-
-	    .state('workspace.securityModule', {
-	        url: '/security',
-	        templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-	        controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-				    var blade = {
-				        id: 'security',
-				        title: 'platform.blades.security-main.title',
-				        subtitle: 'platform.blades.security-main.subtitle',
-				        controller: 'platformWebApp.securityMainController',
-				        template: '$(Platform)/Scripts/app/security/blades/security-main.tpl.html',
-				        isClosingDisabled: true
-				    };
-				    bladeNavigationService.showBlade(blade);
-				}
-	        ]
-	    });
-	}])
-    .run(['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.metaFormsService', 'platformWebApp.widgetService', '$state', 'platformWebApp.authService',
-        function ($rootScope, mainMenuService, metaFormsService, widgetService, $state, authService) {
-
-        //Register module in main menu
-        var menuItem = {
-            path: 'configuration/security',
-            icon: 'fa fa-key',
-            title: 'platform.menu.security',
-            priority: 5,
-            action: function () { $state.go('workspace.securityModule'); },
-            permission: 'platform:security:access'
-        };
-        mainMenuService.addMenuItem(menuItem);
-
-        metaFormsService.registerMetaFields("accountDetails",
-        [
-            {
-                name: "isAdministrator",
-                title: "platform.blades.account-detail.labels.is-administrator",
-                valueType: "Boolean",
-                priority: 0
-            },
-            {
-                name: "userName",
-                templateUrl: "accountUserName.html",
-                priority: 1,
-                isRequired: true
-            },
-            {
-                name: "email",
-                templateUrl: "accountEmail.html",
-                priority: 2
-            },
-            {
-                name: "accountType",
-                templateUrl: "accountTypeSelector.html",
-                priority: 3
-            },
-            {
-                name: "accountInfo",
-                templateUrl: "accountInfo.html",
-                priority: 4
-            }
-        ]);
-
-        //Register widgets
-        widgetService.registerWidget({
-            controller: 'platformWebApp.accountRolesWidgetController',
-            template: '$(Platform)/Scripts/app/security/widgets/accountRolesWidget.tpl.html',
-        }, 'accountDetail');
-        widgetService.registerWidget({
-            controller: 'platformWebApp.accountApiWidgetController',
-            template: '$(Platform)/Scripts/app/security/widgets/accountApiWidget.tpl.html',
-        }, 'accountDetail');
-        widgetService.registerWidget({
-            controller: 'platformWebApp.changeLog.operationsWidgetController',
-            template: '$(Platform)/Scripts/app/changeLog/widgets/operations-widget.tpl.html'
-        }, 'accountDetail');
     }]);
 
 angular.module("platformWebApp")
@@ -19371,6 +19408,9 @@ angular.module('platformWebApp')
             thresholdUnit: undefined,
             thresholdUnits: undefined
         },
+        timeSettings: {
+            showMeridian: undefined
+        },
         mainMenuState: {},
         load: function () {
             return userProfileApi.get(function (profile) {
@@ -19378,7 +19418,9 @@ angular.module('platformWebApp')
                 profile.language = languages.normalize(settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.Language").value);
                 profile.regionalFormat = locales.normalize(settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.RegionalFormat").value);
                 profile.timeZone = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.TimeZone").value;
-                profile.timeAgoSettings = { };
+                profile.timeSettings = {};
+                profile.timeSettings.showMeridian = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.ShowMeridian").value;
+                profile.timeAgoSettings = {};
                 profile.timeAgoSettings.useTimeAgo = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.UseTimeAgo").value;
                 profile.timeAgoSettings.threshold = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.FullDateThreshold").value;
                 var fullDateThresholdUnitSetting = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.FullDateThresholdUnit");
@@ -19398,6 +19440,7 @@ angular.module('platformWebApp')
             settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.Language").value = languages.normalize(result.language);
             settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.RegionalFormat").value = locales.normalize(result.regionalFormat);
             settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.TimeZone").value = result.timeZone;
+            settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.ShowMeridian").value = result.timeSettings.showMeridian;
             settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.UseTimeAgo").value = result.timeAgoSettings.useTimeAgo;
             settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.FullDateThreshold").value = result.timeAgoSettings.threshold;
             settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.FullDateThresholdUnit").value = result.timeAgoSettings.thresholdUnit;
@@ -19423,744 +19466,6 @@ angular.module('platformWebApp')
     };
     mainMenuService.addMenuItem(menuItem);
 }]);
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-"use strict";
-
-CodeMirror.registerHelper("fold", "brace", function(cm, start) {
-  var line = start.line, lineText = cm.getLine(line);
-  var startCh, tokenType;
-
-  function findOpening(openCh) {
-    for (var at = start.ch, pass = 0;;) {
-      var found = at <= 0 ? -1 : lineText.lastIndexOf(openCh, at - 1);
-      if (found == -1) {
-        if (pass == 1) break;
-        pass = 1;
-        at = lineText.length;
-        continue;
-      }
-      if (pass == 1 && found < start.ch) break;
-      tokenType = cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1));
-      if (!/^(comment|string)/.test(tokenType)) return found + 1;
-      at = found - 1;
-    }
-  }
-
-  var startToken = "{", endToken = "}", startCh = findOpening("{");
-  if (startCh == null) {
-    startToken = "[", endToken = "]";
-    startCh = findOpening("[");
-  }
-
-  if (startCh == null) return;
-  var count = 1, lastLine = cm.lastLine(), end, endCh;
-  outer: for (var i = line; i <= lastLine; ++i) {
-    var text = cm.getLine(i), pos = i == line ? startCh : 0;
-    for (;;) {
-      var nextOpen = text.indexOf(startToken, pos), nextClose = text.indexOf(endToken, pos);
-      if (nextOpen < 0) nextOpen = text.length;
-      if (nextClose < 0) nextClose = text.length;
-      pos = Math.min(nextOpen, nextClose);
-      if (pos == text.length) break;
-      if (cm.getTokenTypeAt(CodeMirror.Pos(i, pos + 1)) == tokenType) {
-        if (pos == nextOpen) ++count;
-        else if (!--count) { end = i; endCh = pos; break outer; }
-      }
-      ++pos;
-    }
-  }
-  if (end == null || line == end && endCh == startCh) return;
-  return {from: CodeMirror.Pos(line, startCh),
-          to: CodeMirror.Pos(end, endCh)};
-});
-
-CodeMirror.registerHelper("fold", "import", function(cm, start) {
-  function hasImport(line) {
-    if (line < cm.firstLine() || line > cm.lastLine()) return null;
-    var start = cm.getTokenAt(CodeMirror.Pos(line, 1));
-    if (!/\S/.test(start.string)) start = cm.getTokenAt(CodeMirror.Pos(line, start.end + 1));
-    if (start.type != "keyword" || start.string != "import") return null;
-    // Now find closing semicolon, return its position
-    for (var i = line, e = Math.min(cm.lastLine(), line + 10); i <= e; ++i) {
-      var text = cm.getLine(i), semi = text.indexOf(";");
-      if (semi != -1) return {startCh: start.end, end: CodeMirror.Pos(i, semi)};
-    }
-  }
-
-  var start = start.line, has = hasImport(start), prev;
-  if (!has || hasImport(start - 1) || ((prev = hasImport(start - 2)) && prev.end.line == start - 1))
-    return null;
-  for (var end = has.end;;) {
-    var next = hasImport(end.line + 1);
-    if (next == null) break;
-    end = next.end;
-  }
-  return {from: cm.clipPos(CodeMirror.Pos(start, has.startCh + 1)), to: end};
-});
-
-CodeMirror.registerHelper("fold", "include", function(cm, start) {
-  function hasInclude(line) {
-    if (line < cm.firstLine() || line > cm.lastLine()) return null;
-    var start = cm.getTokenAt(CodeMirror.Pos(line, 1));
-    if (!/\S/.test(start.string)) start = cm.getTokenAt(CodeMirror.Pos(line, start.end + 1));
-    if (start.type == "meta" && start.string.slice(0, 8) == "#include") return start.start + 8;
-  }
-
-  var start = start.line, has = hasInclude(start);
-  if (has == null || hasInclude(start - 1) != null) return null;
-  for (var end = start;;) {
-    var next = hasInclude(end + 1);
-    if (next == null) break;
-    ++end;
-  }
-  return {from: CodeMirror.Pos(start, has + 1),
-          to: cm.clipPos(CodeMirror.Pos(end))};
-});
-
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-"use strict";
-
-CodeMirror.registerGlobalHelper("fold", "comment", function(mode) {
-  return mode.blockCommentStart && mode.blockCommentEnd;
-}, function(cm, start) {
-  var mode = cm.getModeAt(start), startToken = mode.blockCommentStart, endToken = mode.blockCommentEnd;
-  if (!startToken || !endToken) return;
-  var line = start.line, lineText = cm.getLine(line);
-
-  var startCh;
-  for (var at = start.ch, pass = 0;;) {
-    var found = at <= 0 ? -1 : lineText.lastIndexOf(startToken, at - 1);
-    if (found == -1) {
-      if (pass == 1) return;
-      pass = 1;
-      at = lineText.length;
-      continue;
-    }
-    if (pass == 1 && found < start.ch) return;
-    if (/comment/.test(cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1)))) {
-      startCh = found + startToken.length;
-      break;
-    }
-    at = found - 1;
-  }
-
-  var depth = 1, lastLine = cm.lastLine(), end, endCh;
-  outer: for (var i = line; i <= lastLine; ++i) {
-    var text = cm.getLine(i), pos = i == line ? startCh : 0;
-    for (;;) {
-      var nextOpen = text.indexOf(startToken, pos), nextClose = text.indexOf(endToken, pos);
-      if (nextOpen < 0) nextOpen = text.length;
-      if (nextClose < 0) nextClose = text.length;
-      pos = Math.min(nextOpen, nextClose);
-      if (pos == text.length) break;
-      if (pos == nextOpen) ++depth;
-      else if (!--depth) { end = i; endCh = pos; break outer; }
-      ++pos;
-    }
-  }
-  if (end == null || line == end && endCh == startCh) return;
-  return {from: CodeMirror.Pos(line, startCh),
-          to: CodeMirror.Pos(end, endCh)};
-});
-
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-  "use strict";
-
-  function doFold(cm, pos, options, force) {
-    if (options && options.call) {
-      var finder = options;
-      options = null;
-    } else {
-      var finder = getOption(cm, options, "rangeFinder");
-    }
-    if (typeof pos == "number") pos = CodeMirror.Pos(pos, 0);
-    var minSize = getOption(cm, options, "minFoldSize");
-
-    function getRange(allowFolded) {
-      var range = finder(cm, pos);
-      if (!range || range.to.line - range.from.line < minSize) return null;
-      var marks = cm.findMarksAt(range.from);
-      for (var i = 0; i < marks.length; ++i) {
-        if (marks[i].__isFold && force !== "fold") {
-          if (!allowFolded) return null;
-          range.cleared = true;
-          marks[i].clear();
-        }
-      }
-      return range;
-    }
-
-    var range = getRange(true);
-    if (getOption(cm, options, "scanUp")) while (!range && pos.line > cm.firstLine()) {
-      pos = CodeMirror.Pos(pos.line - 1, 0);
-      range = getRange(false);
-    }
-    if (!range || range.cleared || force === "unfold") return;
-
-    var myWidget = makeWidget(cm, options);
-    CodeMirror.on(myWidget, "mousedown", function(e) {
-      myRange.clear();
-      CodeMirror.e_preventDefault(e);
-    });
-    var myRange = cm.markText(range.from, range.to, {
-      replacedWith: myWidget,
-      clearOnEnter: true,
-      __isFold: true
-    });
-    myRange.on("clear", function(from, to) {
-      CodeMirror.signal(cm, "unfold", cm, from, to);
-    });
-    CodeMirror.signal(cm, "fold", cm, range.from, range.to);
-  }
-
-  function makeWidget(cm, options) {
-    var widget = getOption(cm, options, "widget");
-    if (typeof widget == "string") {
-      var text = document.createTextNode(widget);
-      widget = document.createElement("span");
-      widget.appendChild(text);
-      widget.className = "CodeMirror-foldmarker";
-    }
-    return widget;
-  }
-
-  // Clumsy backwards-compatible interface
-  CodeMirror.newFoldFunction = function(rangeFinder, widget) {
-    return function(cm, pos) { doFold(cm, pos, {rangeFinder: rangeFinder, widget: widget}); };
-  };
-
-  // New-style interface
-  CodeMirror.defineExtension("foldCode", function(pos, options, force) {
-    doFold(this, pos, options, force);
-  });
-
-  CodeMirror.defineExtension("isFolded", function(pos) {
-    var marks = this.findMarksAt(pos);
-    for (var i = 0; i < marks.length; ++i)
-      if (marks[i].__isFold) return true;
-  });
-
-  CodeMirror.commands.toggleFold = function(cm) {
-    cm.foldCode(cm.getCursor());
-  };
-  CodeMirror.commands.fold = function(cm) {
-    cm.foldCode(cm.getCursor(), null, "fold");
-  };
-  CodeMirror.commands.unfold = function(cm) {
-    cm.foldCode(cm.getCursor(), null, "unfold");
-  };
-  CodeMirror.commands.foldAll = function(cm) {
-    cm.operation(function() {
-      for (var i = cm.firstLine(), e = cm.lastLine(); i <= e; i++)
-        cm.foldCode(CodeMirror.Pos(i, 0), null, "fold");
-    });
-  };
-  CodeMirror.commands.unfoldAll = function(cm) {
-    cm.operation(function() {
-      for (var i = cm.firstLine(), e = cm.lastLine(); i <= e; i++)
-        cm.foldCode(CodeMirror.Pos(i, 0), null, "unfold");
-    });
-  };
-
-  CodeMirror.registerHelper("fold", "combine", function() {
-    var funcs = Array.prototype.slice.call(arguments, 0);
-    return function(cm, start) {
-      for (var i = 0; i < funcs.length; ++i) {
-        var found = funcs[i](cm, start);
-        if (found) return found;
-      }
-    };
-  });
-
-  CodeMirror.registerHelper("fold", "auto", function(cm, start) {
-    var helpers = cm.getHelpers(start, "fold");
-    for (var i = 0; i < helpers.length; i++) {
-      var cur = helpers[i](cm, start);
-      if (cur) return cur;
-    }
-  });
-
-  var defaultOptions = {
-    rangeFinder: CodeMirror.fold.auto,
-    widget: "\u2194",
-    minFoldSize: 0,
-    scanUp: false
-  };
-
-  CodeMirror.defineOption("foldOptions", null);
-
-  function getOption(cm, options, name) {
-    if (options && options[name] !== undefined)
-      return options[name];
-    var editorOptions = cm.options.foldOptions;
-    if (editorOptions && editorOptions[name] !== undefined)
-      return editorOptions[name];
-    return defaultOptions[name];
-  }
-
-  CodeMirror.defineExtension("foldOption", function(options, name) {
-    return getOption(this, options, name);
-  });
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"), require("./foldcode"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror", "./foldcode"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-  "use strict";
-
-  CodeMirror.defineOption("foldGutter", false, function(cm, val, old) {
-    if (old && old != CodeMirror.Init) {
-      cm.clearGutter(cm.state.foldGutter.options.gutter);
-      cm.state.foldGutter = null;
-      cm.off("gutterClick", onGutterClick);
-      cm.off("change", onChange);
-      cm.off("viewportChange", onViewportChange);
-      cm.off("fold", onFold);
-      cm.off("unfold", onFold);
-      cm.off("swapDoc", updateInViewport);
-    }
-    if (val) {
-      cm.state.foldGutter = new State(parseOptions(val));
-      updateInViewport(cm);
-      cm.on("gutterClick", onGutterClick);
-      cm.on("change", onChange);
-      cm.on("viewportChange", onViewportChange);
-      cm.on("fold", onFold);
-      cm.on("unfold", onFold);
-      cm.on("swapDoc", updateInViewport);
-    }
-  });
-
-  var Pos = CodeMirror.Pos;
-
-  function State(options) {
-    this.options = options;
-    this.from = this.to = 0;
-  }
-
-  function parseOptions(opts) {
-    if (opts === true) opts = {};
-    if (opts.gutter == null) opts.gutter = "CodeMirror-foldgutter";
-    if (opts.indicatorOpen == null) opts.indicatorOpen = "CodeMirror-foldgutter-open";
-    if (opts.indicatorFolded == null) opts.indicatorFolded = "CodeMirror-foldgutter-folded";
-    return opts;
-  }
-
-  function isFolded(cm, line) {
-    var marks = cm.findMarksAt(Pos(line));
-    for (var i = 0; i < marks.length; ++i)
-      if (marks[i].__isFold && marks[i].find().from.line == line) return marks[i];
-  }
-
-  function marker(spec) {
-    if (typeof spec == "string") {
-      var elt = document.createElement("div");
-      elt.className = spec + " CodeMirror-guttermarker-subtle";
-      return elt;
-    } else {
-      return spec.cloneNode(true);
-    }
-  }
-
-  function updateFoldInfo(cm, from, to) {
-    var opts = cm.state.foldGutter.options, cur = from;
-    var minSize = cm.foldOption(opts, "minFoldSize");
-    var func = cm.foldOption(opts, "rangeFinder");
-    cm.eachLine(from, to, function(line) {
-      var mark = null;
-      if (isFolded(cm, cur)) {
-        mark = marker(opts.indicatorFolded);
-      } else {
-        var pos = Pos(cur, 0);
-        var range = func && func(cm, pos);
-        if (range && range.to.line - range.from.line >= minSize)
-          mark = marker(opts.indicatorOpen);
-      }
-      cm.setGutterMarker(line, opts.gutter, mark);
-      ++cur;
-    });
-  }
-
-  function updateInViewport(cm) {
-    var vp = cm.getViewport(), state = cm.state.foldGutter;
-    if (!state) return;
-    cm.operation(function() {
-      updateFoldInfo(cm, vp.from, vp.to);
-    });
-    state.from = vp.from; state.to = vp.to;
-  }
-
-  function onGutterClick(cm, line, gutter) {
-    var state = cm.state.foldGutter;
-    if (!state) return;
-    var opts = state.options;
-    if (gutter != opts.gutter) return;
-    var folded = isFolded(cm, line);
-    if (folded) folded.clear();
-    else cm.foldCode(Pos(line, 0), opts.rangeFinder);
-  }
-
-  function onChange(cm) {
-    var state = cm.state.foldGutter;
-    if (!state) return;
-    var opts = state.options;
-    state.from = state.to = 0;
-    clearTimeout(state.changeUpdate);
-    state.changeUpdate = setTimeout(function() { updateInViewport(cm); }, opts.foldOnChangeTimeSpan || 600);
-  }
-
-  function onViewportChange(cm) {
-    var state = cm.state.foldGutter;
-    if (!state) return;
-    var opts = state.options;
-    clearTimeout(state.changeUpdate);
-    state.changeUpdate = setTimeout(function() {
-      var vp = cm.getViewport();
-      if (state.from == state.to || vp.from - state.to > 20 || state.from - vp.to > 20) {
-        updateInViewport(cm);
-      } else {
-        cm.operation(function() {
-          if (vp.from < state.from) {
-            updateFoldInfo(cm, vp.from, state.from);
-            state.from = vp.from;
-          }
-          if (vp.to > state.to) {
-            updateFoldInfo(cm, state.to, vp.to);
-            state.to = vp.to;
-          }
-        });
-      }
-    }, opts.updateViewportTimeSpan || 400);
-  }
-
-  function onFold(cm, from) {
-    var state = cm.state.foldGutter;
-    if (!state) return;
-    var line = from.line;
-    if (line >= state.from && line < state.to)
-      updateFoldInfo(cm, line, line + 1);
-  }
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-"use strict";
-
-CodeMirror.registerHelper("fold", "indent", function(cm, start) {
-  var tabSize = cm.getOption("tabSize"), firstLine = cm.getLine(start.line);
-  if (!/\S/.test(firstLine)) return;
-  var getIndent = function(line) {
-    return CodeMirror.countColumn(line, null, tabSize);
-  };
-  var myIndent = getIndent(firstLine);
-  var lastLineInFold = null;
-  // Go through lines until we find a line that definitely doesn't belong in
-  // the block we're folding, or to the end.
-  for (var i = start.line + 1, end = cm.lastLine(); i <= end; ++i) {
-    var curLine = cm.getLine(i);
-    var curIndent = getIndent(curLine);
-    if (curIndent > myIndent) {
-      // Lines with a greater indent are considered part of the block.
-      lastLineInFold = i;
-    } else if (!/\S/.test(curLine)) {
-      // Empty lines might be breaks within the block we're trying to fold.
-    } else {
-      // A non-empty line at an indent equal to or less than ours marks the
-      // start of another block.
-      break;
-    }
-  }
-  if (lastLineInFold) return {
-    from: CodeMirror.Pos(start.line, firstLine.length),
-    to: CodeMirror.Pos(lastLineInFold, cm.getLine(lastLineInFold).length)
-  };
-});
-
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-"use strict";
-
-CodeMirror.registerHelper("fold", "markdown", function(cm, start) {
-  var maxDepth = 100;
-
-  function isHeader(lineNo) {
-    var tokentype = cm.getTokenTypeAt(CodeMirror.Pos(lineNo, 0));
-    return tokentype && /\bheader\b/.test(tokentype);
-  }
-
-  function headerLevel(lineNo, line, nextLine) {
-    var match = line && line.match(/^#+/);
-    if (match && isHeader(lineNo)) return match[0].length;
-    match = nextLine && nextLine.match(/^[=\-]+\s*$/);
-    if (match && isHeader(lineNo + 1)) return nextLine[0] == "=" ? 1 : 2;
-    return maxDepth;
-  }
-
-  var firstLine = cm.getLine(start.line), nextLine = cm.getLine(start.line + 1);
-  var level = headerLevel(start.line, firstLine, nextLine);
-  if (level === maxDepth) return undefined;
-
-  var lastLineNo = cm.lastLine();
-  var end = start.line, nextNextLine = cm.getLine(end + 2);
-  while (end < lastLineNo) {
-    if (headerLevel(end + 1, nextLine, nextNextLine) <= level) break;
-    ++end;
-    nextLine = nextNextLine;
-    nextNextLine = cm.getLine(end + 2);
-  }
-
-  return {
-    from: CodeMirror.Pos(start.line, firstLine.length),
-    to: CodeMirror.Pos(end, cm.getLine(end).length)
-  };
-});
-
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-  "use strict";
-
-  var Pos = CodeMirror.Pos;
-  function cmp(a, b) { return a.line - b.line || a.ch - b.ch; }
-
-  var nameStartChar = "A-Z_a-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD";
-  var nameChar = nameStartChar + "\-\:\.0-9\\u00B7\\u0300-\\u036F\\u203F-\\u2040";
-  var xmlTagStart = new RegExp("<(/?)([" + nameStartChar + "][" + nameChar + "]*)", "g");
-
-  function Iter(cm, line, ch, range) {
-    this.line = line; this.ch = ch;
-    this.cm = cm; this.text = cm.getLine(line);
-    this.min = range ? range.from : cm.firstLine();
-    this.max = range ? range.to - 1 : cm.lastLine();
-  }
-
-  function tagAt(iter, ch) {
-    var type = iter.cm.getTokenTypeAt(Pos(iter.line, ch));
-    return type && /\btag\b/.test(type);
-  }
-
-  function nextLine(iter) {
-    if (iter.line >= iter.max) return;
-    iter.ch = 0;
-    iter.text = iter.cm.getLine(++iter.line);
-    return true;
-  }
-  function prevLine(iter) {
-    if (iter.line <= iter.min) return;
-    iter.text = iter.cm.getLine(--iter.line);
-    iter.ch = iter.text.length;
-    return true;
-  }
-
-  function toTagEnd(iter) {
-    for (;;) {
-      var gt = iter.text.indexOf(">", iter.ch);
-      if (gt == -1) { if (nextLine(iter)) continue; else return; }
-      if (!tagAt(iter, gt + 1)) { iter.ch = gt + 1; continue; }
-      var lastSlash = iter.text.lastIndexOf("/", gt);
-      var selfClose = lastSlash > -1 && !/\S/.test(iter.text.slice(lastSlash + 1, gt));
-      iter.ch = gt + 1;
-      return selfClose ? "selfClose" : "regular";
-    }
-  }
-  function toTagStart(iter) {
-    for (;;) {
-      var lt = iter.ch ? iter.text.lastIndexOf("<", iter.ch - 1) : -1;
-      if (lt == -1) { if (prevLine(iter)) continue; else return; }
-      if (!tagAt(iter, lt + 1)) { iter.ch = lt; continue; }
-      xmlTagStart.lastIndex = lt;
-      iter.ch = lt;
-      var match = xmlTagStart.exec(iter.text);
-      if (match && match.index == lt) return match;
-    }
-  }
-
-  function toNextTag(iter) {
-    for (;;) {
-      xmlTagStart.lastIndex = iter.ch;
-      var found = xmlTagStart.exec(iter.text);
-      if (!found) { if (nextLine(iter)) continue; else return; }
-      if (!tagAt(iter, found.index + 1)) { iter.ch = found.index + 1; continue; }
-      iter.ch = found.index + found[0].length;
-      return found;
-    }
-  }
-  function toPrevTag(iter) {
-    for (;;) {
-      var gt = iter.ch ? iter.text.lastIndexOf(">", iter.ch - 1) : -1;
-      if (gt == -1) { if (prevLine(iter)) continue; else return; }
-      if (!tagAt(iter, gt + 1)) { iter.ch = gt; continue; }
-      var lastSlash = iter.text.lastIndexOf("/", gt);
-      var selfClose = lastSlash > -1 && !/\S/.test(iter.text.slice(lastSlash + 1, gt));
-      iter.ch = gt + 1;
-      return selfClose ? "selfClose" : "regular";
-    }
-  }
-
-  function findMatchingClose(iter, tag) {
-    var stack = [];
-    for (;;) {
-      var next = toNextTag(iter), end, startLine = iter.line, startCh = iter.ch - (next ? next[0].length : 0);
-      if (!next || !(end = toTagEnd(iter))) return;
-      if (end == "selfClose") continue;
-      if (next[1]) { // closing tag
-        for (var i = stack.length - 1; i >= 0; --i) if (stack[i] == next[2]) {
-          stack.length = i;
-          break;
-        }
-        if (i < 0 && (!tag || tag == next[2])) return {
-          tag: next[2],
-          from: Pos(startLine, startCh),
-          to: Pos(iter.line, iter.ch)
-        };
-      } else { // opening tag
-        stack.push(next[2]);
-      }
-    }
-  }
-  function findMatchingOpen(iter, tag) {
-    var stack = [];
-    for (;;) {
-      var prev = toPrevTag(iter);
-      if (!prev) return;
-      if (prev == "selfClose") { toTagStart(iter); continue; }
-      var endLine = iter.line, endCh = iter.ch;
-      var start = toTagStart(iter);
-      if (!start) return;
-      if (start[1]) { // closing tag
-        stack.push(start[2]);
-      } else { // opening tag
-        for (var i = stack.length - 1; i >= 0; --i) if (stack[i] == start[2]) {
-          stack.length = i;
-          break;
-        }
-        if (i < 0 && (!tag || tag == start[2])) return {
-          tag: start[2],
-          from: Pos(iter.line, iter.ch),
-          to: Pos(endLine, endCh)
-        };
-      }
-    }
-  }
-
-  CodeMirror.registerHelper("fold", "xml", function(cm, start) {
-    var iter = new Iter(cm, start.line, 0);
-    for (;;) {
-      var openTag = toNextTag(iter), end;
-      if (!openTag || iter.line != start.line || !(end = toTagEnd(iter))) return;
-      if (!openTag[1] && end != "selfClose") {
-        var start = Pos(iter.line, iter.ch);
-        var close = findMatchingClose(iter, openTag[2]);
-        return close && {from: start, to: close.from};
-      }
-    }
-  });
-  CodeMirror.findMatchingTag = function(cm, pos, range) {
-    var iter = new Iter(cm, pos.line, pos.ch, range);
-    if (iter.text.indexOf(">") == -1 && iter.text.indexOf("<") == -1) return;
-    var end = toTagEnd(iter), to = end && Pos(iter.line, iter.ch);
-    var start = end && toTagStart(iter);
-    if (!end || !start || cmp(iter, pos) > 0) return;
-    var here = {from: Pos(iter.line, iter.ch), to: to, tag: start[2]};
-    if (end == "selfClose") return {open: here, close: null, at: "open"};
-
-    if (start[1]) { // closing tag
-      return {open: findMatchingOpen(iter, start[2]), close: here, at: "close"};
-    } else { // opening tag
-      iter = new Iter(cm, to.line, to.ch, range);
-      return {open: here, close: findMatchingClose(iter, start[2]), at: "open"};
-    }
-  };
-
-  CodeMirror.findEnclosingTag = function(cm, pos, range) {
-    var iter = new Iter(cm, pos.line, pos.ch, range);
-    for (;;) {
-      var open = findMatchingOpen(iter);
-      if (!open) break;
-      var forward = new Iter(cm, pos.line, pos.ch, range);
-      var close = findMatchingClose(forward, open.tag);
-      if (close) return {open: open, close: close};
-    }
-  };
-
-  // Used by addon/edit/closetag.js
-  CodeMirror.scanForClosingTag = function(cm, pos, name, end) {
-    var iter = new Iter(cm, pos.line, pos.ch, end ? {from: 0, to: end} : null);
-    return findMatchingClose(iter, name);
-  };
-});
 
 angular.module('platformWebApp')
 .controller('platformWebApp.confirmDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
@@ -20286,6 +19591,1053 @@ angular.module('platformWebApp')
         }
     }])
 ;
+//replace datetimeDirective
+angular.module('platformWebApp')
+    .constant('uiDatetimePickerConfig',
+        {
+            dateFormat: 'medium',
+            defaultTime: '00:00:00',
+            html5Types: {
+                date: 'yyyy-MM-dd',
+                'datetime-local': 'yyyy-MM-ddTHH:mm:ss.sss',
+                'month': 'yyyy-MM'
+            },
+            initialPicker: 'date',
+            reOpenDefault: false,
+            enableDate: true,
+            enableTime: true,
+            buttonBar: {
+                show: true,
+                now: {
+                    show: true
+                },
+                today: {
+                    show: true
+                },
+                clear: {
+                    show: true
+                },
+                date: {
+                    show: true
+                },
+                time: {
+                    show: true
+                },
+                close: {
+                    show: true
+                }
+            },
+            closeOnDateSelection: false,
+            appendToBody: false,
+            altInputFormats: [],
+            ngModelOptions: {},
+            showMeridian: false
+        })
+    .controller('DateTimePickerController',
+        [
+            '$scope', '$element', '$attrs', '$compile', '$parse', '$document', '$timeout', '$position', 'dateFilter',
+            'dateParser', 'uiDatetimePickerConfig', '$rootScope', 'timepickerConfig',
+            function (scope, element, attrs, $compile, $parse, $document, $timeout, $uibPosition, dateFilter, uibDateParser, uiDatetimePickerConfig, $rootScope, timepickerConfig) {
+                var dateFormat = uiDatetimePickerConfig.dateFormat, ngModel, ngModelOptions, $popup,
+                    cache = {},
+                    watchListeners = [],
+                    closeOnDateSelection = angular.isDefined(attrs.closeOnDateSelection)
+                        ? scope.$parent.$eval(attrs.closeOnDateSelection)
+                        : uiDatetimePickerConfig.closeOnDateSelection,
+                    appendToBody = angular.isDefined(attrs.datepickerAppendToBody)
+                        ? scope.$parent.$eval(attrs.datepickerAppendToBody)
+                        : uiDatetimePickerConfig.appendToBody,
+                    altInputFormats = angular.isDefined(attrs.altInputFormats)
+                        ? scope.$parent.$eval(attrs.altInputFormats)
+                        : uiDatetimePickerConfig.altInputFormats;
+
+                // taken from UI Bootstrap 2.5.0
+                uibDateParser.fromTimezone = function fromTimezone(date, timezone) {
+                    return date && timezone ? convertTimezoneToLocal(date, timezone, true) : date;
+                }
+
+                uibDateParser.toTimezone = function toTimezone(date, timezone) {
+                    return date && timezone ? convertTimezoneToLocal(date, timezone) : date;
+                }
+
+                function timezoneToOffset(timezone, fallback) {
+                    timezone = timezone.replace(/:/g, '');
+                    var requestedTimezoneOffset = Date.parse('Jan 01, 1970 00:00:00 ' + timezone) / 60000;
+                    return isNaN(requestedTimezoneOffset) ? fallback : requestedTimezoneOffset;
+                }
+
+                function addDateMinutes(date, minutes) {
+                    date = new Date(date.getTime());
+                    date.setMinutes(date.getMinutes() + minutes);
+                    return date;
+                }
+
+                function convertTimezoneToLocal(date, timezone, reverse) {
+                    reverse = reverse ? -1 : 1;
+                    var dateTimezoneOffset = date.getTimezoneOffset();
+                    var timezoneOffset = timezoneToOffset(timezone, dateTimezoneOffset);
+                    return addDateMinutes(date, reverse * (timezoneOffset - dateTimezoneOffset));
+                }
+
+
+                this.init = function (_ngModel) {
+                    ngModel = _ngModel;
+                    ngModelOptions = ngModel.$options || uiDatetimePickerConfig.ngModelOptions;
+
+                    scope.watchData = {};
+                    scope.buttonBar = angular.isDefined(attrs.buttonBar)
+                        ? scope.$parent.$eval(attrs.buttonBar)
+                        : uiDatetimePickerConfig.buttonBar;
+
+                    // determine which pickers should be available. Defaults to date and time
+                    scope.enableDate = angular.isDefined(scope.enableDate)
+                        ? scope.enableDate
+                        : uiDatetimePickerConfig.enableDate;
+                    scope.enableTime = angular.isDefined(scope.enableTime)
+                        ? scope.enableTime
+                        : uiDatetimePickerConfig.enableTime;
+
+                    // determine default picker
+                    scope.initialPicker = angular.isDefined(attrs.initialPicker)
+                        ? attrs.initialPicker
+                        : (scope.enableDate ? uiDatetimePickerConfig.initialPicker : 'time');
+
+                    // determine the picker to open when control is re-opened
+                    scope.reOpenDefault = angular.isDefined(attrs.reOpenDefault)
+                        ? attrs.reOpenDefault
+                        : uiDatetimePickerConfig.reOpenDefault;
+
+                    // check if an illegal combination of options exists
+                    if (scope.initialPicker == 'date' && !scope.enableDate) {
+                        throw new Error(
+                            "datetimePicker can't have initialPicker set to date and have enableDate set to false.");
+                    }
+
+                    // default picker view
+                    scope.showPicker = !scope.enableDate ? 'time' : scope.initialPicker;
+
+                    var isHtml5DateInput = false;
+
+                    if (uiDatetimePickerConfig.html5Types[attrs.type]) {
+                        dateFormat = uiDatetimePickerConfig.html5Types[attrs.type];
+                        isHtml5DateInput = true;
+                    } else {
+                        dateFormat = attrs.datepickerPopup || uiDatetimePickerConfig.dateFormat;
+                        attrs.$observe('datetimePicker',
+                            function(value) {
+                                var newDateFormat = value || uiDatetimePickerConfig.dateFormat;
+
+                                if (newDateFormat !== dateFormat) {
+                                    dateFormat = newDateFormat;
+                                    ngModel.$modelValue = null;
+
+                                    if (!dateFormat) {
+                                        throw new Error('datetimePicker must have a date format specified.');
+                                    }
+                                }
+                            });
+                    }
+
+                    // popup element used to display calendar
+                    var popupEl = angular.element('' +
+                        '<div date-picker-wrap>' +
+                        '<div datepicker></div>' +
+                        '</div>' +
+                        '<div time-picker-wrap>' +
+                        '<div timepicker style="margin:0 auto"></div>' +
+                        '</div>');
+
+                    scope.ngModelOptions = angular.copy(ngModelOptions);
+                    scope.ngModelOptions.timezone = null;
+
+                    // get attributes from directive
+                    popupEl.attr({
+                        'ng-model': 'date',
+                        'ng-model-options': 'ngModelOptions',
+                        'ng-change': 'dateSelection(date)'
+                    });
+
+                    // datepicker element
+                    var datepickerEl = angular.element(popupEl.children()[0]);
+
+                    if (isHtml5DateInput) {
+                        if (attrs.type === 'month') {
+                            datepickerEl.attr('datepicker-mode', '"month"');
+                            datepickerEl.attr('min-mode', 'month');
+                        }
+                    }
+
+                    if (attrs.datepickerOptions) {
+                        var options = scope.$parent.$eval(attrs.datepickerOptions);
+
+                        if (options && options.initDate) {
+                            scope.initDate = uibDateParser.fromTimezone(options.initDate, ngModelOptions.timezone);
+                            datepickerEl.attr('init-date', 'initDate');
+                            delete options.initDate;
+                        }
+
+                        angular.forEach(options,
+                            function(value, option) {
+                                datepickerEl.attr(cameltoDash(option), value);
+                            });
+                    }
+
+                    // set datepickerMode to day by default as need to create watch
+                    // else disabled cannot pass in mode
+                    if (!angular.isDefined(attrs['datepickerMode'])) {
+                        attrs['datepickerMode'] = 'day';
+                    }
+
+                    if (attrs.dateDisabled) {
+                        datepickerEl.attr('date-disabled', 'dateDisabled({ date: date, mode: mode })');
+                    }
+
+                    angular.forEach([
+                            'formatDay', 'formatMonth', 'formatYear', 'formatDayHeader', 'formatDayTitle',
+                            'formatMonthTitle', 'showWeeks', 'startingDay', 'yearRows', 'yearColumns'
+                        ],
+                        function(key) {
+                            if (angular.isDefined(attrs[key])) {
+                                datepickerEl.attr(cameltoDash(key), attrs[key]);
+                            }
+                        });
+
+                    if (attrs.customClass) {
+                        datepickerEl.attr('custom-class', 'customClass({ date: date, mode: mode })');
+                    }
+
+                    angular.forEach(['minMode', 'maxMode', 'datepickerMode', 'shortcutPropagation'],
+                        function(key) {
+                            if (attrs[key]) {
+                                var getAttribute = $parse(attrs[key]);
+
+                                watchListeners.push(scope.$parent.$watch(getAttribute,
+                                    function(value) {
+                                        scope.watchData[key] = value;
+                                    }));
+                                datepickerEl.attr(cameltoDash(key), 'watchData.' + key);
+
+                                // Propagate changes from datepicker to outside
+                                if (key === 'datepickerMode') {
+                                    var setAttribute = getAttribute.assign;
+                                    watchListeners.push(scope.$watch('watchData.' + key,
+                                        function(value, oldvalue) {
+                                            if (angular.isFunction(setAttribute) && value !== oldvalue) {
+                                                setAttribute(scope.$parent, value);
+                                            }
+                                        }));
+                                }
+                            }
+                        });
+
+                    // timepicker element
+                    var timepickerEl = angular.element(popupEl.children()[1]);
+
+                    if (attrs.timepickerOptions) {
+                        var options = scope.$parent.$eval(attrs.timepickerOptions);
+                        angular.forEach(options,
+                            function(value, option) {
+                                scope.watchData[option] = value;
+                                timepickerEl.attr(cameltoDash(option), 'watchData.' + option);
+                            });
+                    }
+
+                    // watch attrs - NOTE: minDate and maxDate are used with datePicker and timePicker.  By using the minDate and maxDate
+                    // with the timePicker, you can dynamically set the min and max time values.  This cannot be done using the min and max values
+                    // with the timePickerOptions
+                    angular.forEach(['minDate', 'maxDate', 'initDate'],
+                        function(key) {
+                            if (attrs[key]) {
+                                var getAttribute = $parse(attrs[key]);
+
+                                watchListeners.push(scope.$parent.$watch(getAttribute,
+                                    function(value) {
+                                        scope.watchData[key] = value;
+                                    }));
+                                datepickerEl.attr(cameltoDash(key), 'watchData.' + key);
+
+                                if (key == 'minDate') {
+                                    timepickerEl.attr('min', 'watchData.minDate');
+                                } else if (key == 'maxDate')
+                                    timepickerEl.attr('max', 'watchData.maxDate');
+                            }
+                        });
+
+                    // do not check showWeeks attr, as should be used via datePickerOptions
+
+                    if (!isHtml5DateInput) {
+                        // Internal API to maintain the correct ng-invalid-[key] class
+                        ngModel.$$parserName = 'datetime';
+                        ngModel.$validators.datetime = validator;
+                        ngModel.$parsers.unshift(parseDate);
+                        ngModel.$formatters.push(function(value) {
+                            if (ngModel.$isEmpty(value)) {
+                                scope.date = value;
+                                return value;
+                            }
+                            scope.date = uibDateParser.fromTimezone(value, ngModelOptions.timezone);
+                            dateFormat = dateFormat.replace(/M!/, 'MM')
+                                .replace(/d!/, 'dd');
+
+                            return dateFilter(scope.date, dateFormat);
+                        });
+                    } else {
+                        ngModel.$formatters.push(function(value) {
+                            scope.date = uibDateParser.fromTimezone(value, ngModelOptions.timezone);;
+                            return value;
+                        });
+                    }
+
+                    // Detect changes in the view from the text box
+                    ngModel.$viewChangeListeners.push(function() {
+                        scope.date = parseDateString(ngModel.$viewValue);
+                    });
+
+                    element.bind('keydown', inputKeydownBind);
+
+                    $popup = $compile(popupEl)(scope);
+                    // Prevent jQuery cache memory leak (template is now redundant after linking)
+                    popupEl.remove();
+
+                    if (appendToBody) {
+                        $document.find('body').append($popup);
+                    } else {
+                        element.after($popup);
+                    }
+
+                };
+
+                // get text
+                scope.getText = function(key) {
+                    return scope.buttonBar[key].text || uiDatetimePickerConfig.buttonBar[key].text;
+                };
+
+                // determine if button is to be shown or not
+                scope.doShow = function(key) {
+                    if (angular.isDefined(scope.buttonBar[key].show))
+                        return scope.buttonBar[key].show;
+                    else
+                        return uiDatetimePickerConfig.buttonBar[key].show;
+                };
+
+                // Inner change
+                scope.dateSelection = function (dt) {
+                    // check if timePicker is being shown and merge dates, so that the date
+                    // part is never changed, only the time
+
+                    //set date whis this time (00:00:00:0000)
+                    if (scope.enableTime && scope.showPicker === 'date') {
+                        var defaultTimeForDate = 0;
+
+                        // only proceed if dt is a date
+                        if (dt || dt != null) {
+                            // check if our scope.date is null, and if so, set to todays date
+                            if (!angular.isDefined(scope.date) || scope.date == null) {
+                                scope.date = new Date();
+                            }
+
+                            // dt will not be undefined if the now or today button is pressed
+                            if (dt && dt != null) {
+                                // get the existing date and update the time
+                                var date = new Date(dt);
+                                date.setHours(defaultTimeForDate);
+                                date.setMinutes(defaultTimeForDate);
+                                date.setSeconds(defaultTimeForDate);
+                                date.setMilliseconds(defaultTimeForDate);
+                                dt = date;
+                            }
+                        }
+                    }
+
+                    if (scope.enableTime && scope.showPicker === 'time') {
+                        // only proceed if dt is a date
+                        if (dt || dt != null) {
+                            // check if our scope.date is null, and if so, set to todays date
+                            if (!angular.isDefined(scope.date) || scope.date == null) {
+                                scope.date = new Date();
+                            }
+
+                            // dt will not be undefined if the now or today button is pressed
+                            if (dt && dt != null) {
+                                // get the existing date and update the time
+                                var date = new Date(scope.date);
+                                date.setHours(dt.getHours());
+                                date.setMinutes(dt.getMinutes());
+                                date.setSeconds(dt.getSeconds());
+                                date.setMilliseconds(dt.getMilliseconds());
+                                dt = date;
+                            }
+                        }
+                    }
+
+                    if (angular.isDefined(dt)) {
+                        if (!scope.date) {
+                            var defaultTime = angular.isDefined(attrs.defaultTime)
+                                ? attrs.defaultTime
+                                : uiDatetimePickerConfig.defaultTime;
+                            var t = new Date('2001-01-01 ' + defaultTime);
+
+                            if (!isNaN(t) && dt != null) {
+                                dt.setHours(t.getHours());
+                                dt.setMinutes(t.getMinutes());
+                                dt.setSeconds(t.getSeconds());
+                                dt.setMilliseconds(t.getMilliseconds());
+                            }
+                        }
+                        scope.date = dt;
+                    }
+
+                    var newDate = scope.date ? dateFilter(scope.date, dateFormat, ngModelOptions.timezone) : null;
+
+                    element.val(newDate);
+                    ngModel.$setViewValue(scope.date);
+
+                    if (closeOnDateSelection) {
+                        // do not close when using timePicker as make impossible to choose a time
+                        if (scope.showPicker != 'time' && date != null) {
+                            // if time is enabled, swap to timePicker
+                            if (scope.enableTime) {
+                                scope.open('time');
+                            } else {
+                                scope.close(false);
+                            }
+                        }
+                    }
+
+                };
+
+                scope.keydown = function(evt) {
+                    if (evt.which === 27) {
+                        scope.close(false);
+                        element[0].focus();
+                    }
+                };
+
+                scope.$watch('isOpen',
+                    function(value) {
+                        scope.dropdownStyle = {
+                            display: value ? 'block' : 'none'
+                        };
+
+                        if (value) {
+                            cache['openDate'] = scope.date;
+
+                            var position = appendToBody ? $uibPosition.offset(element) : $uibPosition.position(element);
+
+                            if (appendToBody) {
+                                scope.dropdownStyle.top = (position.top + element.prop('offsetHeight')) + 'px';
+                            } else {
+                                scope.dropdownStyle.top = undefined;
+                            }
+
+                            scope.dropdownStyle.left = position.left + 'px';
+
+                            $timeout(function () { scope.$broadcast('datepicker.focus'); $document.bind('click', documentClickBind); }, 0, false);                            scope.open(scope.showPicker);
+                        } else {
+                            $document.unbind('click', documentClickBind);
+                        }
+                    });
+
+                scope.isDisabled = function(date) {
+                    if (date === 'today' || date === 'now') {
+                        date = new Date();
+                    }
+
+                    return scope.watchData.minDate && scope.compare(date, scope.watchData.minDate) < 0 ||
+                        scope.watchData.maxDate && scope.compare(date, scope.watchData.maxDate) > 0;
+                };
+
+                scope.compare = function(date1, date2) {
+                    return new Date(date1.getFullYear(), date1.getMonth(), date1.getDate()) -
+                        new Date(date2.getFullYear(), date2.getMonth(), date2.getDate());
+                };
+
+                scope.select = function(opt) {
+
+                    var date = null;
+                    if (opt === 'today' || opt == 'now') {
+                        var now = new Date();
+                        if (angular.isDate(scope.date)) {
+                            date = new Date(scope.date);
+                            date.setFullYear(now.getFullYear(), now.getMonth(), now.getDate());
+                            date.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+                        } else {
+                            date = now;
+                        }
+                    }
+
+                    scope.dateSelection(date);
+
+                    if (opt == 'clear')
+                        scope.close();
+                };
+
+                scope.open = function(picker, evt) {
+                    if (angular.isDefined(evt)) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+                    }
+
+                    // need to delay this, else timePicker never shown
+                    $timeout(function() {
+                            scope.showPicker = picker;
+                        },
+                        0);
+
+                    // in order to update the timePicker, we need to update the model reference!
+                    // as found here https://angular-ui.github.io/bootstrap/#/timepicker
+                    $timeout(function () {
+                        if (scope.date == null) {
+                            scope.date = new Date();
+                            } else {
+                                scope.date = new Date(scope.date);
+                            }
+                            
+                        },
+                        50);
+                };
+
+                scope.close = function(closePressed) {
+                    scope.isOpen = false;
+
+                    // if enableDate and enableTime are true, reopen the picker in date mode first
+                    if (scope.enableDate && scope.enableTime)
+                        scope.showPicker = scope.reOpenDefault === false ? 'date' : scope.reOpenDefault;
+
+                    // if a on-close-fn has been defined, lets call it
+                    // we only call this if closePressed is defined!
+                    if (angular.isDefined(closePressed))
+                        scope.whenClosed({
+                            args: {
+                                closePressed: closePressed,
+                                openDate: cache['openDate'] || null,
+                                closeDate: scope.date
+                            }
+                        });
+
+                    element[0].focus();
+                };
+
+                scope.$on('$destroy',
+                    function() {
+                        if (scope.isOpen === true) {
+                            if (!$rootScope.$$phase) {
+                                scope.$apply(function() {
+                                    scope.close();
+                                });
+                            }
+                        }
+
+                        watchListeners.forEach(function(a) { a(); });
+                        $popup.remove();
+                        element.unbind('keydown', inputKeydownBind);
+                        $document.unbind('click', documentClickBind);
+                    });
+
+                function documentClickBind(evt) {
+                    var popup = $popup[0];
+                    var dpContainsTarget = element[0].contains(evt.target);
+
+                    // The popup node may not be an element node
+                    // In some browsers (IE only) element nodes have the 'contains' function
+                    var popupContainsTarget = popup.contains !== undefined && popup.contains(evt.target);
+
+                    if (scope.isOpen && !(dpContainsTarget || popupContainsTarget)) {
+                        scope.$apply(function() {
+                            scope.close(false);
+                        });
+                    }
+                }
+
+                function inputKeydownBind(evt) {
+                    if (evt.which === 27 && scope.isOpen) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+                        scope.$apply(function() {
+                            scope.close(false);
+                        });
+                        element[0].focus();
+                    } else if (evt.which === 40 && !scope.isOpen) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+                        scope.$apply(function() {
+                            scope.isOpen = true;
+                        });
+                    }
+                }
+
+                function cameltoDash(string) {
+                    return string.replace(/([A-Z])/g, function($1) { return '-' + $1.toLowerCase(); });
+                }
+
+                function parseDateString(viewValue) {
+                    var date = uibDateParser.parse(viewValue, dateFormat, scope.date);
+                    if (isNaN(date)) {
+                        for (var i = 0; i < altInputFormats.length; i++) {
+                            date = uibDateParser.parse(viewValue, altInputFormats[i], scope.date);
+                            if (!isNaN(date)) {
+                                return date;
+                            }
+                        }
+                    }
+                    return date;
+                }
+
+                function parseDate(viewValue) {
+                    if (angular.isNumber(viewValue)) {
+                        // presumably timestamp to date object
+                        viewValue = new Date(viewValue);
+                    }
+
+                    if (!viewValue) {
+                        return null;
+                    } else if (angular.isDate(viewValue) && !isNaN(viewValue)) {
+                        return viewValue;
+                    } else if (angular.isString(viewValue)) {
+                        var date = parseDateString(viewValue);
+                        if (!isNaN(date)) {
+                            return uibDateParser.toTimezone(date, ngModelOptions.timezone);
+                        }
+
+                        return undefined;
+                    } else {
+                        return undefined;
+                    }
+                }
+
+                function validator(modelValue, viewValue) {
+                    var value = modelValue || viewValue;
+
+                    if (!(attrs.ngRequired || attrs.required) && !value) {
+                        return true;
+                    }
+
+                    if (angular.isNumber(value)) {
+                        value = new Date(value);
+                    }
+
+                    if (!value) {
+                        return true;
+                    } else if (angular.isDate(value) && !isNaN(value)) {
+                        return true;
+                    } else if (angular.isDate(new Date(value)) && !isNaN(new Date(value).valueOf())) {
+                        return true;
+                    } else if (angular.isString(value)) {
+                        return !isNaN(parseDateString(viewValue));
+                    } else {
+                        return false;
+                    }
+                }
+
+            }
+        ])
+    .directive('datepickerPopup',
+        function() {
+            return {
+                restrict: 'A',
+                require: ['ngModel', 'datepickerPopup'],
+                controller: 'DateTimePickerController',
+                scope: {
+                    isOpen: '=?',
+                    enableDate: '=?',
+                    enableTime: '=?',
+                    initialPicker: '=?',
+                    reOpenDefault: '=?',
+                    dateDisabled: '&',
+                    customClass: '&',
+                    whenClosed: '&'
+                },
+                link: function(scope, element, attrs, ctrls) {
+                    var ngModel = ctrls[0],
+                        ctrl = ctrls[1];
+
+                    ctrl.init(ngModel);
+                }
+            };
+        })
+    .directive('datePickerWrap',
+        function() {
+            return {
+                restrict: 'EA',
+                replace: true,
+                transclude: true,
+                templateUrl: 'template/date-picker.html'
+            };
+        })
+    .directive('timePickerWrap',
+        function() {
+            return {
+                restrict: 'EA',
+                replace: true,
+                transclude: true,
+                templateUrl: 'template/time-picker.html'
+            };
+    });
+
+//replace timeDirective
+angular.module('platformWebApp')
+    .constant('timepickerConfig', {
+        hourStep: 1,
+        minuteStep: 1,
+        showMeridian: true,
+        meridians: null,
+        readonlyInput: false,
+        mousewheel: true,
+        arrowkeys: true,
+        showSpinners: true
+    })
+
+    .controller('TimepickerController', ['$scope', '$attrs', '$parse', '$log', '$locale', 'timepickerConfig', function ($scope, $attrs, $parse, $log, $locale, timepickerConfig) {
+        var selected = new Date(),
+            ngModelCtrl = { $setViewValue: angular.noop }, // nullModelCtrl
+            meridians = angular.isDefined($attrs.meridians) ? $scope.$parent.$eval($attrs.meridians) : timepickerConfig.meridians || $locale.DATETIME_FORMATS.AMPMS;
+            
+        var _24Hour = '24 Hrs';
+
+        this.init = function (ngModelCtrl_, inputs) {
+            ngModelCtrl = ngModelCtrl_;
+            ngModelCtrl.$render = this.render;
+
+            ngModelCtrl.$formatters.unshift(function (modelValue) {
+                return modelValue ? new Date(modelValue) : null;
+            });
+
+            var hoursInputEl = inputs.eq(0),
+                minutesInputEl = inputs.eq(1);
+
+            var mousewheel = angular.isDefined($attrs.mousewheel) ? $scope.$parent.$eval($attrs.mousewheel) : timepickerConfig.mousewheel;
+            if (mousewheel) {
+                this.setupMousewheelEvents(hoursInputEl, minutesInputEl);
+            }
+
+            var arrowkeys = angular.isDefined($attrs.arrowkeys) ? $scope.$parent.$eval($attrs.arrowkeys) : timepickerConfig.arrowkeys;
+            if (arrowkeys) {
+                this.setupArrowkeyEvents(hoursInputEl, minutesInputEl);
+            }
+
+            $scope.readonlyInput = angular.isDefined($attrs.readonlyInput) ? $scope.$parent.$eval($attrs.readonlyInput) : timepickerConfig.readonlyInput;
+            this.setupInputEvents(hoursInputEl, minutesInputEl);
+        };
+
+        var hourStep = timepickerConfig.hourStep;
+        if ($attrs.hourStep) {
+            $scope.$parent.$watch($parse($attrs.hourStep), function (value) {
+                hourStep = parseInt(value, 10);
+            });
+        }
+
+        var minuteStep = timepickerConfig.minuteStep;
+        if ($attrs.minuteStep) {
+            $scope.$parent.$watch($parse($attrs.minuteStep), function (value) {
+                minuteStep = parseInt(value, 10);
+            });
+        }
+
+        // 12H / 24H mode
+        $scope.showMeridian = timepickerConfig.showMeridian;
+        if ($attrs.showMeridian) {
+            $scope.$parent.$watch($parse($attrs.showMeridian), function (value) {
+                $scope.showMeridian = !!value;
+
+                if (ngModelCtrl.$error.time) {
+                    // Evaluate from template
+                    var hours = getHoursFromTemplate(), minutes = getMinutesFromTemplate();
+                    if (angular.isDefined(hours) && angular.isDefined(minutes)) {
+                        selected.setHours(hours);
+                        refresh();
+                    }
+                } else {
+                    updateTemplate();
+                }
+            });
+        }
+
+        // Get $scope.hours in 24H mode if valid
+        function getHoursFromTemplate() {
+            var hours = parseInt($scope.hours, 10);
+            var valid = ($scope.showMeridian) ? (hours > 0 && hours < 13) : (hours >= 0 && hours < 24);
+            if (!valid) {
+                return undefined;
+            }
+
+            if ($scope.showMeridian) {
+                if (hours === 12) {
+                    hours = 0;
+                }
+                if ($scope.meridian === meridians[1]) {
+                    hours = hours + 12;
+                }
+            }
+            return hours;
+        }
+
+        function getMinutesFromTemplate() {
+            var minutes = parseInt($scope.minutes, 10);
+            return (minutes >= 0 && minutes < 60) ? minutes : undefined;
+        }
+
+        function pad(value) {
+            return (angular.isDefined(value) && value.toString().length < 2) ? '0' + value : value.toString();
+        }
+
+        // Respond on mousewheel spin
+        this.setupMousewheelEvents = function (hoursInputEl, minutesInputEl) {
+            var isScrollingUp = function (e) {
+                if (e.originalEvent) {
+                    e = e.originalEvent;
+                }
+                //pick correct delta variable depending on event
+                var delta = (e.wheelDelta) ? e.wheelDelta : -e.deltaY;
+                return (e.detail || delta > 0);
+            };
+
+            hoursInputEl.bind('mousewheel wheel', function (e) {
+                $scope.$apply((isScrollingUp(e)) ? $scope.incrementHours() : $scope.decrementHours());
+                e.preventDefault();
+            });
+
+            minutesInputEl.bind('mousewheel wheel', function (e) {
+                $scope.$apply((isScrollingUp(e)) ? $scope.incrementMinutes() : $scope.decrementMinutes());
+                e.preventDefault();
+            });
+
+        };
+
+        // Respond on up/down arrowkeys
+        this.setupArrowkeyEvents = function (hoursInputEl, minutesInputEl) {
+            hoursInputEl.bind('keydown', function (e) {
+                if (e.which === 38) { // up
+                    e.preventDefault();
+                    $scope.incrementHours();
+                    $scope.$apply();
+                }
+                else if (e.which === 40) { // down
+                    e.preventDefault();
+                    $scope.decrementHours();
+                    $scope.$apply();
+                }
+            });
+
+            minutesInputEl.bind('keydown', function (e) {
+                if (e.which === 38) { // up
+                    e.preventDefault();
+                    $scope.incrementMinutes();
+                    $scope.$apply();
+                }
+                else if (e.which === 40) { // down
+                    e.preventDefault();
+                    $scope.decrementMinutes();
+                    $scope.$apply();
+                }
+            });
+        };
+
+        this.setupInputEvents = function (hoursInputEl, minutesInputEl) {
+            if ($scope.readonlyInput) {
+                $scope.updateHours = angular.noop;
+                $scope.updateMinutes = angular.noop;
+                return;
+            }
+
+            var invalidate = function (invalidHours, invalidMinutes) {
+                ngModelCtrl.$setViewValue(null);
+                ngModelCtrl.$setValidity('time', false);
+                if (angular.isDefined(invalidHours)) {
+                    $scope.invalidHours = invalidHours;
+                }
+                if (angular.isDefined(invalidMinutes)) {
+                    $scope.invalidMinutes = invalidMinutes;
+                }
+            };
+
+            $scope.updateHours = function () {
+                var hours = getHoursFromTemplate();
+
+                if (angular.isDefined(hours)) {
+                    selected.setHours(hours);
+                    refresh('h');
+                } else {
+                    invalidate(true);
+                }
+            };
+
+            hoursInputEl.bind('blur', function (e) {
+                if (!$scope.invalidHours && $scope.hours < 10) {
+                    $scope.$apply(function () {
+                        $scope.hours = pad($scope.hours);
+                    });
+                }
+            });
+
+            $scope.updateMinutes = function () {
+                var minutes = getMinutesFromTemplate();
+
+                if (angular.isDefined(minutes)) {
+                    selected.setMinutes(minutes);
+                    refresh('m');
+                } else {
+                    invalidate(undefined, true);
+                }
+            };
+
+            minutesInputEl.bind('blur', function (e) {
+                if (!$scope.invalidMinutes && $scope.minutes < 10) {
+                    $scope.$apply(function () {
+                        $scope.minutes = pad($scope.minutes);
+                    });
+                }
+            });
+
+        };
+
+        this.render = function () {
+            var date = ngModelCtrl.$viewValue;
+
+            if (isNaN(date)) {
+                ngModelCtrl.$setValidity('time', false);
+                $log.error('Timepicker directive: "ng-model" value must be a Date object, a number of milliseconds since 01.01.1970 or a string representing an RFC2822 or ISO 8601 date.');
+            } else {
+                if (date) {
+                    selected = date;
+                }
+                makeValid();
+                updateTemplate();
+            }
+        };
+
+        // Call internally when we know that model is valid.
+        function refresh(keyboardChange) {
+            makeValid();
+            ngModelCtrl.$setViewValue(new Date(selected));
+            updateTemplate(keyboardChange);
+        }
+
+        function makeValid() {
+            ngModelCtrl.$setValidity('time', true);
+            $scope.invalidHours = false;
+            $scope.invalidMinutes = false;
+        }
+
+        function updateTemplate(keyboardChange) {
+            var hours = selected.getHours(), minutes = selected.getMinutes();
+
+            if ($scope.showMeridian) {
+                hours = (hours === 0 || hours === 12) ? 12 : hours % 12; // Convert 24 to 12 hour system
+            }
+
+            $scope.hours = keyboardChange === 'h' ? hours : pad(hours);
+            if (keyboardChange !== 'm') {
+                $scope.minutes = pad(minutes);
+            }
+             if (!$scope.showMeridian) {
+                 $scope.meridian = _24Hour;
+            }
+            else if ($scope.showMeridian) {
+                $scope.meridian = selected.getHours() < 12 ? meridians[0] : meridians[1];
+            }
+        }
+
+        function addMinutes(minutes) {
+            var dt = new Date(selected.getTime() + minutes * 60000);
+            selected.setHours(dt.getHours(), dt.getMinutes());
+            refresh();
+        }
+
+        $scope.showSpinners = angular.isDefined($attrs.showSpinners) ?
+            $scope.$parent.$eval($attrs.showSpinners) : timepickerConfig.showSpinners;
+
+        $scope.incrementHours = function () {
+            addMinutes(hourStep * 60);
+        };
+        $scope.decrementHours = function () {
+            addMinutes(- hourStep * 60);
+        };
+        $scope.incrementMinutes = function () {
+            addMinutes(minuteStep);
+        };
+        $scope.decrementMinutes = function () {
+            addMinutes(- minuteStep);
+        };
+
+        //fix change am/pm/24 jump through 12:00
+        $scope.toggleMeridian = function () {
+            if ($scope.meridian === meridians[0]) {
+                $scope.showMeridian = true;
+                addMinutes(12 * 60 * ((selected.getHours() < 12) ? 1 : -1));
+                return true;
+            }
+            if ($scope.meridian === meridians[1]) {
+                $scope.showMeridian = false;
+                addMinutes(12 * 60 * ((selected.getHours() < 12) ? 1 : -1));
+                return true;
+            }
+            if ($scope.meridian === _24Hour) {
+                $scope.showMeridian = true;
+                addMinutes(selected.getHours() <= 12 ? 0 : 12 * 60 * ((selected.getHours() >= 12) ? 1 : -1));
+                return true;
+            }
+        };
+    }])
+
+    .directive('timepicker', function () {
+        return {
+            restrict: 'EA',
+            require: ['timepicker', '?^ngModel'],
+            controller: 'TimepickerController',
+            replace: true,
+            scope: {},
+            templateUrl: 'template/timepicker.html',
+            link: function (scope, element, attrs, ctrls) {
+                var timepickerCtrl = ctrls[0], ngModelCtrl = ctrls[1];
+
+                if (ngModelCtrl) {
+                    timepickerCtrl.init(ngModelCtrl, element.find('input'));
+                }
+            }
+        };
+    });
+
+angular.module('platformWebApp').run(['$templateCache', function ($templateCache) {
+    'use strict';
+
+    $templateCache.put('template/date-picker.html',
+        "<ul class=\"dropdown-menu dropdown-menu-left datetime-picker-dropdown\" ng-if=\"isOpen && showPicker == 'date'\" ng-style=dropdownStyle style=left:inherit ng-keydown=keydown($event) ng-click=$event.stopPropagation()><li style=\"padding:0 5px 5px 5px\" class=date-picker-menu><div ng-transclude></div></li><li style=padding:5px ng-if=buttonBar.show><span class=\"btn-group pull-left\" style=margin-right:5px ng-if=\"doShow('today') || doShow('clear')\"><button type=button class=\"btn btn-sm btn-info\" ng-if=\"doShow('today')\" ng-click=\"select('today')\" ng-disabled=\"isDisabled('today')\">{{ 'platform.commands.today' | translate }}</button> <button type=button class=\"btn btn-sm btn-danger\" ng-if=\"doShow('clear')\" ng-click=\"select('clear')\">{{ 'platform.commands.clear' | translate }}</button></span> <span class=\"btn-group pull-right\" ng-if=\"(doShow('time') && enableTime) || doShow('close')\"><button type=button class=\"btn btn-sm btn-default\" ng-if=\"doShow('time') && enableTime\" ng-click=\"open('time', $event)\">{{ 'platform.commands.time' | translate}}</button> <button type=button class=\"btn btn-sm btn-success\" ng-if=\"doShow('close')\" ng-click=close(true)>{{ 'platform.commands.close' | translate}}</button></span></li></ul>"
+    );
+    
+    $templateCache.put('template/time-picker.html',
+        "<ul class=\"dropdown-menu dropdown-menu-left datetime-picker-dropdown\" ng-if=\"isOpen && showPicker == 'time'\" ng-style=dropdownStyle style=left:inherit ng-keydown=keydown($event) ng-click=$event.stopPropagation()><li style=\"padding:0 5px 5px 5px\" class=time-picker-menu><div ng-transclude></div></li><li style=padding:5px ng-if=buttonBar.show><span class=\"btn-group pull-left\" style=margin-right:5px ng-if=\"doShow('now') || doShow('clear')\"><button type=button class=\"btn btn-sm btn-info\" ng-if=\"doShow('now')\" ng-click=\"select('now')\" ng-disabled=\"isDisabled('now')\">{{ 'platform.commands.now' | translate}}</button> <button type=button class=\"btn btn-sm btn-danger\" ng-if=\"doShow('clear')\" ng-click=\"select('clear')\">{{ 'platform.commands.clear' | translate}}</button></span> <span class=\"btn-group pull-right\" ng-if=\"(doShow('date') && enableDate) || doShow('close')\"><button type=button class=\"btn btn-sm btn-default\" ng-if=\"doShow('date') && enableDate\" ng-click=\"open('date', $event)\">{{ 'platform.commands.date' | translate}}</button> <button type=button class=\"btn btn-sm btn-success\" ng-if=\"doShow('close')\" ng-click=close(true)>{{ 'platform.commands.close' | translate }}</button></span></li></ul>"
+    );
+
+    $templateCache.put("template/timepicker.html",
+        "<table>\n" +
+        "  <tbody>\n" +
+        "    <tr class=\"text-center\" ng-show=\"::showSpinners\">\n" +
+        "      <td><a ng-click=\"incrementHours()\" class=\"btn btn-link\"><span class=\"glyphicon glyphicon-chevron-up\"></span></a></td>\n" +
+        "      <td>&nbsp;</td>\n" +
+        "      <td><a ng-click=\"incrementMinutes()\" class=\"btn btn-link\"><span class=\"glyphicon glyphicon-chevron-up\"></span></a></td>\n" +
+        "      <td></td>\n" +
+        "    </tr>\n" +
+        "    <tr>\n" +
+        "      <td class=\"form-group\" ng-class=\"{'has-error': invalidHours}\">\n" +
+        "        <input style=\"width:50px;\" type=\"text\" ng-model=\"hours\" ng-change=\"updateHours()\" class=\"form-control text-center\" ng-readonly=\"::readonlyInput\" maxlength=\"2\">\n" +
+        "      </td>\n" +
+        "      <td>:</td>\n" +
+        "      <td class=\"form-group\" ng-class=\"{'has-error': invalidMinutes}\">\n" +
+        "        <input style=\"width:50px;\" type=\"text\" ng-model=\"minutes\" ng-change=\"updateMinutes()\" class=\"form-control text-center\" ng-readonly=\"::readonlyInput\" maxlength=\"2\">\n" +
+        "      </td>\n" +
+        "      <td><button type=\"button\" class=\"btn btn-default text-center\" ng-click=\"toggleMeridian()\">{{meridian}}</button></td>\n" +
+        "    </tr>\n" +
+        "    <tr class=\"text-center\" ng-show=\"::showSpinners\">\n" +
+        "      <td><a ng-click=\"decrementHours()\" class=\"btn btn-link\"><span class=\"glyphicon glyphicon-chevron-down\"></span></a></td>\n" +
+        "      <td>&nbsp;</td>\n" +
+        "      <td><a ng-click=\"decrementMinutes()\" class=\"btn btn-link\"><span class=\"glyphicon glyphicon-chevron-down\"></span></a></td>\n" +
+        "      <td></td>\n" +
+        "    </tr>\n" +
+        "  </tbody>\n" +
+        "</table>\n" +
+        "");
+}]);
+
 angular.module('platformWebApp')
 .directive('dynamic', ['$compile', function ($compile) {
     return {
@@ -21225,6 +21577,745 @@ angular.module('platformWebApp').directive('vaTabs', function () {
         }
     }
 });
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+"use strict";
+
+CodeMirror.registerHelper("fold", "brace", function(cm, start) {
+  var line = start.line, lineText = cm.getLine(line);
+  var startCh, tokenType;
+
+  function findOpening(openCh) {
+    for (var at = start.ch, pass = 0;;) {
+      var found = at <= 0 ? -1 : lineText.lastIndexOf(openCh, at - 1);
+      if (found == -1) {
+        if (pass == 1) break;
+        pass = 1;
+        at = lineText.length;
+        continue;
+      }
+      if (pass == 1 && found < start.ch) break;
+      tokenType = cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1));
+      if (!/^(comment|string)/.test(tokenType)) return found + 1;
+      at = found - 1;
+    }
+  }
+
+  var startToken = "{", endToken = "}", startCh = findOpening("{");
+  if (startCh == null) {
+    startToken = "[", endToken = "]";
+    startCh = findOpening("[");
+  }
+
+  if (startCh == null) return;
+  var count = 1, lastLine = cm.lastLine(), end, endCh;
+  outer: for (var i = line; i <= lastLine; ++i) {
+    var text = cm.getLine(i), pos = i == line ? startCh : 0;
+    for (;;) {
+      var nextOpen = text.indexOf(startToken, pos), nextClose = text.indexOf(endToken, pos);
+      if (nextOpen < 0) nextOpen = text.length;
+      if (nextClose < 0) nextClose = text.length;
+      pos = Math.min(nextOpen, nextClose);
+      if (pos == text.length) break;
+      if (cm.getTokenTypeAt(CodeMirror.Pos(i, pos + 1)) == tokenType) {
+        if (pos == nextOpen) ++count;
+        else if (!--count) { end = i; endCh = pos; break outer; }
+      }
+      ++pos;
+    }
+  }
+  if (end == null || line == end && endCh == startCh) return;
+  return {from: CodeMirror.Pos(line, startCh),
+          to: CodeMirror.Pos(end, endCh)};
+});
+
+CodeMirror.registerHelper("fold", "import", function(cm, start) {
+  function hasImport(line) {
+    if (line < cm.firstLine() || line > cm.lastLine()) return null;
+    var start = cm.getTokenAt(CodeMirror.Pos(line, 1));
+    if (!/\S/.test(start.string)) start = cm.getTokenAt(CodeMirror.Pos(line, start.end + 1));
+    if (start.type != "keyword" || start.string != "import") return null;
+    // Now find closing semicolon, return its position
+    for (var i = line, e = Math.min(cm.lastLine(), line + 10); i <= e; ++i) {
+      var text = cm.getLine(i), semi = text.indexOf(";");
+      if (semi != -1) return {startCh: start.end, end: CodeMirror.Pos(i, semi)};
+    }
+  }
+
+  var start = start.line, has = hasImport(start), prev;
+  if (!has || hasImport(start - 1) || ((prev = hasImport(start - 2)) && prev.end.line == start - 1))
+    return null;
+  for (var end = has.end;;) {
+    var next = hasImport(end.line + 1);
+    if (next == null) break;
+    end = next.end;
+  }
+  return {from: cm.clipPos(CodeMirror.Pos(start, has.startCh + 1)), to: end};
+});
+
+CodeMirror.registerHelper("fold", "include", function(cm, start) {
+  function hasInclude(line) {
+    if (line < cm.firstLine() || line > cm.lastLine()) return null;
+    var start = cm.getTokenAt(CodeMirror.Pos(line, 1));
+    if (!/\S/.test(start.string)) start = cm.getTokenAt(CodeMirror.Pos(line, start.end + 1));
+    if (start.type == "meta" && start.string.slice(0, 8) == "#include") return start.start + 8;
+  }
+
+  var start = start.line, has = hasInclude(start);
+  if (has == null || hasInclude(start - 1) != null) return null;
+  for (var end = start;;) {
+    var next = hasInclude(end + 1);
+    if (next == null) break;
+    ++end;
+  }
+  return {from: CodeMirror.Pos(start, has + 1),
+          to: cm.clipPos(CodeMirror.Pos(end))};
+});
+
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+"use strict";
+
+CodeMirror.registerGlobalHelper("fold", "comment", function(mode) {
+  return mode.blockCommentStart && mode.blockCommentEnd;
+}, function(cm, start) {
+  var mode = cm.getModeAt(start), startToken = mode.blockCommentStart, endToken = mode.blockCommentEnd;
+  if (!startToken || !endToken) return;
+  var line = start.line, lineText = cm.getLine(line);
+
+  var startCh;
+  for (var at = start.ch, pass = 0;;) {
+    var found = at <= 0 ? -1 : lineText.lastIndexOf(startToken, at - 1);
+    if (found == -1) {
+      if (pass == 1) return;
+      pass = 1;
+      at = lineText.length;
+      continue;
+    }
+    if (pass == 1 && found < start.ch) return;
+    if (/comment/.test(cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1)))) {
+      startCh = found + startToken.length;
+      break;
+    }
+    at = found - 1;
+  }
+
+  var depth = 1, lastLine = cm.lastLine(), end, endCh;
+  outer: for (var i = line; i <= lastLine; ++i) {
+    var text = cm.getLine(i), pos = i == line ? startCh : 0;
+    for (;;) {
+      var nextOpen = text.indexOf(startToken, pos), nextClose = text.indexOf(endToken, pos);
+      if (nextOpen < 0) nextOpen = text.length;
+      if (nextClose < 0) nextClose = text.length;
+      pos = Math.min(nextOpen, nextClose);
+      if (pos == text.length) break;
+      if (pos == nextOpen) ++depth;
+      else if (!--depth) { end = i; endCh = pos; break outer; }
+      ++pos;
+    }
+  }
+  if (end == null || line == end && endCh == startCh) return;
+  return {from: CodeMirror.Pos(line, startCh),
+          to: CodeMirror.Pos(end, endCh)};
+});
+
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+  "use strict";
+
+  function doFold(cm, pos, options, force) {
+    if (options && options.call) {
+      var finder = options;
+      options = null;
+    } else {
+      var finder = getOption(cm, options, "rangeFinder");
+    }
+    if (typeof pos == "number") pos = CodeMirror.Pos(pos, 0);
+    var minSize = getOption(cm, options, "minFoldSize");
+
+    function getRange(allowFolded) {
+      var range = finder(cm, pos);
+      if (!range || range.to.line - range.from.line < minSize) return null;
+      var marks = cm.findMarksAt(range.from);
+      for (var i = 0; i < marks.length; ++i) {
+        if (marks[i].__isFold && force !== "fold") {
+          if (!allowFolded) return null;
+          range.cleared = true;
+          marks[i].clear();
+        }
+      }
+      return range;
+    }
+
+    var range = getRange(true);
+    if (getOption(cm, options, "scanUp")) while (!range && pos.line > cm.firstLine()) {
+      pos = CodeMirror.Pos(pos.line - 1, 0);
+      range = getRange(false);
+    }
+    if (!range || range.cleared || force === "unfold") return;
+
+    var myWidget = makeWidget(cm, options);
+    CodeMirror.on(myWidget, "mousedown", function(e) {
+      myRange.clear();
+      CodeMirror.e_preventDefault(e);
+    });
+    var myRange = cm.markText(range.from, range.to, {
+      replacedWith: myWidget,
+      clearOnEnter: true,
+      __isFold: true
+    });
+    myRange.on("clear", function(from, to) {
+      CodeMirror.signal(cm, "unfold", cm, from, to);
+    });
+    CodeMirror.signal(cm, "fold", cm, range.from, range.to);
+  }
+
+  function makeWidget(cm, options) {
+    var widget = getOption(cm, options, "widget");
+    if (typeof widget == "string") {
+      var text = document.createTextNode(widget);
+      widget = document.createElement("span");
+      widget.appendChild(text);
+      widget.className = "CodeMirror-foldmarker";
+    }
+    return widget;
+  }
+
+  // Clumsy backwards-compatible interface
+  CodeMirror.newFoldFunction = function(rangeFinder, widget) {
+    return function(cm, pos) { doFold(cm, pos, {rangeFinder: rangeFinder, widget: widget}); };
+  };
+
+  // New-style interface
+  CodeMirror.defineExtension("foldCode", function(pos, options, force) {
+    doFold(this, pos, options, force);
+  });
+
+  CodeMirror.defineExtension("isFolded", function(pos) {
+    var marks = this.findMarksAt(pos);
+    for (var i = 0; i < marks.length; ++i)
+      if (marks[i].__isFold) return true;
+  });
+
+  CodeMirror.commands.toggleFold = function(cm) {
+    cm.foldCode(cm.getCursor());
+  };
+  CodeMirror.commands.fold = function(cm) {
+    cm.foldCode(cm.getCursor(), null, "fold");
+  };
+  CodeMirror.commands.unfold = function(cm) {
+    cm.foldCode(cm.getCursor(), null, "unfold");
+  };
+  CodeMirror.commands.foldAll = function(cm) {
+    cm.operation(function() {
+      for (var i = cm.firstLine(), e = cm.lastLine(); i <= e; i++)
+        cm.foldCode(CodeMirror.Pos(i, 0), null, "fold");
+    });
+  };
+  CodeMirror.commands.unfoldAll = function(cm) {
+    cm.operation(function() {
+      for (var i = cm.firstLine(), e = cm.lastLine(); i <= e; i++)
+        cm.foldCode(CodeMirror.Pos(i, 0), null, "unfold");
+    });
+  };
+
+  CodeMirror.registerHelper("fold", "combine", function() {
+    var funcs = Array.prototype.slice.call(arguments, 0);
+    return function(cm, start) {
+      for (var i = 0; i < funcs.length; ++i) {
+        var found = funcs[i](cm, start);
+        if (found) return found;
+      }
+    };
+  });
+
+  CodeMirror.registerHelper("fold", "auto", function(cm, start) {
+    var helpers = cm.getHelpers(start, "fold");
+    for (var i = 0; i < helpers.length; i++) {
+      var cur = helpers[i](cm, start);
+      if (cur) return cur;
+    }
+  });
+
+  var defaultOptions = {
+    rangeFinder: CodeMirror.fold.auto,
+    widget: "\u2194",
+    minFoldSize: 0,
+    scanUp: false
+  };
+
+  CodeMirror.defineOption("foldOptions", null);
+
+  function getOption(cm, options, name) {
+    if (options && options[name] !== undefined)
+      return options[name];
+    var editorOptions = cm.options.foldOptions;
+    if (editorOptions && editorOptions[name] !== undefined)
+      return editorOptions[name];
+    return defaultOptions[name];
+  }
+
+  CodeMirror.defineExtension("foldOption", function(options, name) {
+    return getOption(this, options, name);
+  });
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"), require("./foldcode"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror", "./foldcode"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+  "use strict";
+
+  CodeMirror.defineOption("foldGutter", false, function(cm, val, old) {
+    if (old && old != CodeMirror.Init) {
+      cm.clearGutter(cm.state.foldGutter.options.gutter);
+      cm.state.foldGutter = null;
+      cm.off("gutterClick", onGutterClick);
+      cm.off("change", onChange);
+      cm.off("viewportChange", onViewportChange);
+      cm.off("fold", onFold);
+      cm.off("unfold", onFold);
+      cm.off("swapDoc", updateInViewport);
+    }
+    if (val) {
+      cm.state.foldGutter = new State(parseOptions(val));
+      updateInViewport(cm);
+      cm.on("gutterClick", onGutterClick);
+      cm.on("change", onChange);
+      cm.on("viewportChange", onViewportChange);
+      cm.on("fold", onFold);
+      cm.on("unfold", onFold);
+      cm.on("swapDoc", updateInViewport);
+    }
+  });
+
+  var Pos = CodeMirror.Pos;
+
+  function State(options) {
+    this.options = options;
+    this.from = this.to = 0;
+  }
+
+  function parseOptions(opts) {
+    if (opts === true) opts = {};
+    if (opts.gutter == null) opts.gutter = "CodeMirror-foldgutter";
+    if (opts.indicatorOpen == null) opts.indicatorOpen = "CodeMirror-foldgutter-open";
+    if (opts.indicatorFolded == null) opts.indicatorFolded = "CodeMirror-foldgutter-folded";
+    return opts;
+  }
+
+  function isFolded(cm, line) {
+    var marks = cm.findMarksAt(Pos(line));
+    for (var i = 0; i < marks.length; ++i)
+      if (marks[i].__isFold && marks[i].find().from.line == line) return marks[i];
+  }
+
+  function marker(spec) {
+    if (typeof spec == "string") {
+      var elt = document.createElement("div");
+      elt.className = spec + " CodeMirror-guttermarker-subtle";
+      return elt;
+    } else {
+      return spec.cloneNode(true);
+    }
+  }
+
+  function updateFoldInfo(cm, from, to) {
+    var opts = cm.state.foldGutter.options, cur = from;
+    var minSize = cm.foldOption(opts, "minFoldSize");
+    var func = cm.foldOption(opts, "rangeFinder");
+    cm.eachLine(from, to, function(line) {
+      var mark = null;
+      if (isFolded(cm, cur)) {
+        mark = marker(opts.indicatorFolded);
+      } else {
+        var pos = Pos(cur, 0);
+        var range = func && func(cm, pos);
+        if (range && range.to.line - range.from.line >= minSize)
+          mark = marker(opts.indicatorOpen);
+      }
+      cm.setGutterMarker(line, opts.gutter, mark);
+      ++cur;
+    });
+  }
+
+  function updateInViewport(cm) {
+    var vp = cm.getViewport(), state = cm.state.foldGutter;
+    if (!state) return;
+    cm.operation(function() {
+      updateFoldInfo(cm, vp.from, vp.to);
+    });
+    state.from = vp.from; state.to = vp.to;
+  }
+
+  function onGutterClick(cm, line, gutter) {
+    var state = cm.state.foldGutter;
+    if (!state) return;
+    var opts = state.options;
+    if (gutter != opts.gutter) return;
+    var folded = isFolded(cm, line);
+    if (folded) folded.clear();
+    else cm.foldCode(Pos(line, 0), opts.rangeFinder);
+  }
+
+  function onChange(cm) {
+    var state = cm.state.foldGutter;
+    if (!state) return;
+    var opts = state.options;
+    state.from = state.to = 0;
+    clearTimeout(state.changeUpdate);
+    state.changeUpdate = setTimeout(function() { updateInViewport(cm); }, opts.foldOnChangeTimeSpan || 600);
+  }
+
+  function onViewportChange(cm) {
+    var state = cm.state.foldGutter;
+    if (!state) return;
+    var opts = state.options;
+    clearTimeout(state.changeUpdate);
+    state.changeUpdate = setTimeout(function() {
+      var vp = cm.getViewport();
+      if (state.from == state.to || vp.from - state.to > 20 || state.from - vp.to > 20) {
+        updateInViewport(cm);
+      } else {
+        cm.operation(function() {
+          if (vp.from < state.from) {
+            updateFoldInfo(cm, vp.from, state.from);
+            state.from = vp.from;
+          }
+          if (vp.to > state.to) {
+            updateFoldInfo(cm, state.to, vp.to);
+            state.to = vp.to;
+          }
+        });
+      }
+    }, opts.updateViewportTimeSpan || 400);
+  }
+
+  function onFold(cm, from) {
+    var state = cm.state.foldGutter;
+    if (!state) return;
+    var line = from.line;
+    if (line >= state.from && line < state.to)
+      updateFoldInfo(cm, line, line + 1);
+  }
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+"use strict";
+
+CodeMirror.registerHelper("fold", "indent", function(cm, start) {
+  var tabSize = cm.getOption("tabSize"), firstLine = cm.getLine(start.line);
+  if (!/\S/.test(firstLine)) return;
+  var getIndent = function(line) {
+    return CodeMirror.countColumn(line, null, tabSize);
+  };
+  var myIndent = getIndent(firstLine);
+  var lastLineInFold = null;
+  // Go through lines until we find a line that definitely doesn't belong in
+  // the block we're folding, or to the end.
+  for (var i = start.line + 1, end = cm.lastLine(); i <= end; ++i) {
+    var curLine = cm.getLine(i);
+    var curIndent = getIndent(curLine);
+    if (curIndent > myIndent) {
+      // Lines with a greater indent are considered part of the block.
+      lastLineInFold = i;
+    } else if (!/\S/.test(curLine)) {
+      // Empty lines might be breaks within the block we're trying to fold.
+    } else {
+      // A non-empty line at an indent equal to or less than ours marks the
+      // start of another block.
+      break;
+    }
+  }
+  if (lastLineInFold) return {
+    from: CodeMirror.Pos(start.line, firstLine.length),
+    to: CodeMirror.Pos(lastLineInFold, cm.getLine(lastLineInFold).length)
+  };
+});
+
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+"use strict";
+
+CodeMirror.registerHelper("fold", "markdown", function(cm, start) {
+  var maxDepth = 100;
+
+  function isHeader(lineNo) {
+    var tokentype = cm.getTokenTypeAt(CodeMirror.Pos(lineNo, 0));
+    return tokentype && /\bheader\b/.test(tokentype);
+  }
+
+  function headerLevel(lineNo, line, nextLine) {
+    var match = line && line.match(/^#+/);
+    if (match && isHeader(lineNo)) return match[0].length;
+    match = nextLine && nextLine.match(/^[=\-]+\s*$/);
+    if (match && isHeader(lineNo + 1)) return nextLine[0] == "=" ? 1 : 2;
+    return maxDepth;
+  }
+
+  var firstLine = cm.getLine(start.line), nextLine = cm.getLine(start.line + 1);
+  var level = headerLevel(start.line, firstLine, nextLine);
+  if (level === maxDepth) return undefined;
+
+  var lastLineNo = cm.lastLine();
+  var end = start.line, nextNextLine = cm.getLine(end + 2);
+  while (end < lastLineNo) {
+    if (headerLevel(end + 1, nextLine, nextNextLine) <= level) break;
+    ++end;
+    nextLine = nextNextLine;
+    nextNextLine = cm.getLine(end + 2);
+  }
+
+  return {
+    from: CodeMirror.Pos(start.line, firstLine.length),
+    to: CodeMirror.Pos(end, cm.getLine(end).length)
+  };
+});
+
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+  "use strict";
+
+  var Pos = CodeMirror.Pos;
+  function cmp(a, b) { return a.line - b.line || a.ch - b.ch; }
+
+  var nameStartChar = "A-Z_a-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD";
+  var nameChar = nameStartChar + "\-\:\.0-9\\u00B7\\u0300-\\u036F\\u203F-\\u2040";
+  var xmlTagStart = new RegExp("<(/?)([" + nameStartChar + "][" + nameChar + "]*)", "g");
+
+  function Iter(cm, line, ch, range) {
+    this.line = line; this.ch = ch;
+    this.cm = cm; this.text = cm.getLine(line);
+    this.min = range ? range.from : cm.firstLine();
+    this.max = range ? range.to - 1 : cm.lastLine();
+  }
+
+  function tagAt(iter, ch) {
+    var type = iter.cm.getTokenTypeAt(Pos(iter.line, ch));
+    return type && /\btag\b/.test(type);
+  }
+
+  function nextLine(iter) {
+    if (iter.line >= iter.max) return;
+    iter.ch = 0;
+    iter.text = iter.cm.getLine(++iter.line);
+    return true;
+  }
+  function prevLine(iter) {
+    if (iter.line <= iter.min) return;
+    iter.text = iter.cm.getLine(--iter.line);
+    iter.ch = iter.text.length;
+    return true;
+  }
+
+  function toTagEnd(iter) {
+    for (;;) {
+      var gt = iter.text.indexOf(">", iter.ch);
+      if (gt == -1) { if (nextLine(iter)) continue; else return; }
+      if (!tagAt(iter, gt + 1)) { iter.ch = gt + 1; continue; }
+      var lastSlash = iter.text.lastIndexOf("/", gt);
+      var selfClose = lastSlash > -1 && !/\S/.test(iter.text.slice(lastSlash + 1, gt));
+      iter.ch = gt + 1;
+      return selfClose ? "selfClose" : "regular";
+    }
+  }
+  function toTagStart(iter) {
+    for (;;) {
+      var lt = iter.ch ? iter.text.lastIndexOf("<", iter.ch - 1) : -1;
+      if (lt == -1) { if (prevLine(iter)) continue; else return; }
+      if (!tagAt(iter, lt + 1)) { iter.ch = lt; continue; }
+      xmlTagStart.lastIndex = lt;
+      iter.ch = lt;
+      var match = xmlTagStart.exec(iter.text);
+      if (match && match.index == lt) return match;
+    }
+  }
+
+  function toNextTag(iter) {
+    for (;;) {
+      xmlTagStart.lastIndex = iter.ch;
+      var found = xmlTagStart.exec(iter.text);
+      if (!found) { if (nextLine(iter)) continue; else return; }
+      if (!tagAt(iter, found.index + 1)) { iter.ch = found.index + 1; continue; }
+      iter.ch = found.index + found[0].length;
+      return found;
+    }
+  }
+  function toPrevTag(iter) {
+    for (;;) {
+      var gt = iter.ch ? iter.text.lastIndexOf(">", iter.ch - 1) : -1;
+      if (gt == -1) { if (prevLine(iter)) continue; else return; }
+      if (!tagAt(iter, gt + 1)) { iter.ch = gt; continue; }
+      var lastSlash = iter.text.lastIndexOf("/", gt);
+      var selfClose = lastSlash > -1 && !/\S/.test(iter.text.slice(lastSlash + 1, gt));
+      iter.ch = gt + 1;
+      return selfClose ? "selfClose" : "regular";
+    }
+  }
+
+  function findMatchingClose(iter, tag) {
+    var stack = [];
+    for (;;) {
+      var next = toNextTag(iter), end, startLine = iter.line, startCh = iter.ch - (next ? next[0].length : 0);
+      if (!next || !(end = toTagEnd(iter))) return;
+      if (end == "selfClose") continue;
+      if (next[1]) { // closing tag
+        for (var i = stack.length - 1; i >= 0; --i) if (stack[i] == next[2]) {
+          stack.length = i;
+          break;
+        }
+        if (i < 0 && (!tag || tag == next[2])) return {
+          tag: next[2],
+          from: Pos(startLine, startCh),
+          to: Pos(iter.line, iter.ch)
+        };
+      } else { // opening tag
+        stack.push(next[2]);
+      }
+    }
+  }
+  function findMatchingOpen(iter, tag) {
+    var stack = [];
+    for (;;) {
+      var prev = toPrevTag(iter);
+      if (!prev) return;
+      if (prev == "selfClose") { toTagStart(iter); continue; }
+      var endLine = iter.line, endCh = iter.ch;
+      var start = toTagStart(iter);
+      if (!start) return;
+      if (start[1]) { // closing tag
+        stack.push(start[2]);
+      } else { // opening tag
+        for (var i = stack.length - 1; i >= 0; --i) if (stack[i] == start[2]) {
+          stack.length = i;
+          break;
+        }
+        if (i < 0 && (!tag || tag == start[2])) return {
+          tag: start[2],
+          from: Pos(iter.line, iter.ch),
+          to: Pos(endLine, endCh)
+        };
+      }
+    }
+  }
+
+  CodeMirror.registerHelper("fold", "xml", function(cm, start) {
+    var iter = new Iter(cm, start.line, 0);
+    for (;;) {
+      var openTag = toNextTag(iter), end;
+      if (!openTag || iter.line != start.line || !(end = toTagEnd(iter))) return;
+      if (!openTag[1] && end != "selfClose") {
+        var start = Pos(iter.line, iter.ch);
+        var close = findMatchingClose(iter, openTag[2]);
+        return close && {from: start, to: close.from};
+      }
+    }
+  });
+  CodeMirror.findMatchingTag = function(cm, pos, range) {
+    var iter = new Iter(cm, pos.line, pos.ch, range);
+    if (iter.text.indexOf(">") == -1 && iter.text.indexOf("<") == -1) return;
+    var end = toTagEnd(iter), to = end && Pos(iter.line, iter.ch);
+    var start = end && toTagStart(iter);
+    if (!end || !start || cmp(iter, pos) > 0) return;
+    var here = {from: Pos(iter.line, iter.ch), to: to, tag: start[2]};
+    if (end == "selfClose") return {open: here, close: null, at: "open"};
+
+    if (start[1]) { // closing tag
+      return {open: findMatchingOpen(iter, start[2]), close: here, at: "close"};
+    } else { // opening tag
+      iter = new Iter(cm, to.line, to.ch, range);
+      return {open: here, close: findMatchingClose(iter, start[2]), at: "open"};
+    }
+  };
+
+  CodeMirror.findEnclosingTag = function(cm, pos, range) {
+    var iter = new Iter(cm, pos.line, pos.ch, range);
+    for (;;) {
+      var open = findMatchingOpen(iter);
+      if (!open) break;
+      var forward = new Iter(cm, pos.line, pos.ch, range);
+      var close = findMatchingClose(forward, open.tag);
+      if (close) return {open: open, close: close};
+    }
+  };
+
+  // Used by addon/edit/closetag.js
+  CodeMirror.scanForClosingTag = function(cm, pos, name, end) {
+    var iter = new Iter(cm, pos.line, pos.ch, end ? {from: 0, to: end} : null);
+    return findMatchingClose(iter, name);
+  };
+});
+
 // Full list of countries defined by ISO 3166-1 alpha-3
 // based on https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
 angular.module('platformWebApp')
@@ -22748,6 +23839,44 @@ angular.module('platformWebApp')
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["公元前","公元"],ERAS:["BC","AD"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"d/M/yy ah:mm",shortDate:"d/M/yy",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-hk",pluralCat:function(e,m){return E.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["西元前","西元"],ERAS:["西元前","西元"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日 EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"y/M/d ah:mm",shortDate:"y/M/d",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"NT$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-tw",pluralCat:function(e,m){return E.OTHER}})}]);
 angular.module('platformWebApp')
+.controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    
+    $scope.blade.isLoading = false;
+    // ui-grid
+    $scope.setGridOptions = function (gridOptions) {
+        $scope.gridOptions = gridOptions;
+    };
+}]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    var blade = $scope.blade;
+
+    $scope.openBlade = function () {
+        var newBlade = {
+            id: "changesChildBlade",
+            currentEntities: blade.currentEntity.operationsLog,
+            headIcon: blade.headIcon,
+            title: blade.title,
+            subtitle: 'platform.widgets.operations.blade-subtitle',
+            isExpandable: true,
+            controller: 'platformWebApp.changeLog.operationListController',
+            template: '$(Platform)/Scripts/app/changeLog/blades/operation-list.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, blade);
+    };
+}]);
+angular.module('platformWebApp')
+.factory('platformWebApp.assets.api', ['$resource', function ($resource) {
+    return $resource('api/platform/assets', {}, {
+        createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
+        move: { method: 'POST', url: 'api/platform/assets/move' },
+        uploadFromUrl: { method: 'POST', params: { url: '@url', folderUrl: '@folderUrl', name: '@name' }, isArray: true }
+    });
+}]);
+
+
+angular.module('platformWebApp')
 .controller('platformWebApp.assets.assetListController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', '$sessionStorage', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
     function ($scope, assets, bladeNavigationService, dialogService, $storage, bladeUtils, uiGridHelper) {
         var blade = $scope.blade;
@@ -23217,44 +24346,6 @@ angular.module('platformWebApp')
         blade.isLoading = false;
     }]);
 
-angular.module('platformWebApp')
-.factory('platformWebApp.assets.api', ['$resource', function ($resource) {
-    return $resource('api/platform/assets', {}, {
-        createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
-        move: { method: 'POST', url: 'api/platform/assets/move' },
-        uploadFromUrl: { method: 'POST', params: { url: '@url', folderUrl: '@folderUrl', name: '@name' }, isArray: true }
-    });
-}]);
-
-
-angular.module('platformWebApp')
-.controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    
-    $scope.blade.isLoading = false;
-    // ui-grid
-    $scope.setGridOptions = function (gridOptions) {
-        $scope.gridOptions = gridOptions;
-    };
-}]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    var blade = $scope.blade;
-
-    $scope.openBlade = function () {
-        var newBlade = {
-            id: "changesChildBlade",
-            currentEntities: blade.currentEntity.operationsLog,
-            headIcon: blade.headIcon,
-            title: blade.title,
-            subtitle: 'platform.widgets.operations.blade-subtitle',
-            isExpandable: true,
-            controller: 'platformWebApp.changeLog.operationListController',
-            template: '$(Platform)/Scripts/app/changeLog/blades/operation-list.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, blade);
-    };
-}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.dynamicObjectListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dynamicProperties.api', function ($scope, bladeNavigationService, dynamicPropertiesApi) {
 	var blade = $scope.blade;
@@ -24759,7 +25850,7 @@ angular.module('platformWebApp')
         }
     }
 }])
-.directive('vaBlade', ['$compile', 'platformWebApp.bladeNavigationService', 'platformWebApp.toolbarService', '$timeout', '$document', function ($compile, bladeNavigationService, toolbarService, $timeout, $document) {
+.directive('vaBlade', ['$compile', 'platformWebApp.bladeNavigationService', 'platformWebApp.toolbarService', '$timeout', '$document', 'platformWebApp.dialogService', function ($compile, bladeNavigationService, toolbarService, $timeout, $document, dialogService) {
     return {
         terminal: true,
         priority: 100,
@@ -24778,7 +25869,7 @@ angular.module('platformWebApp')
             if (!scope.blade.disableOpenAnimation) {
                 scope.blade.animated = true;
                 $timeout(function () {
-                   scope.blade.animated = false;
+                    scope.blade.animated = false;
                 }, 250);
             }
 
@@ -24795,7 +25886,7 @@ angular.module('platformWebApp')
                 // instead, we need to use sum of width of all blades
                 var previousBlades = scrollToElement.prevAll();
                 var previousBladesWidthSum = 0;
-                previousBlades.each(function() {
+                previousBlades.each(function () {
                     previousBladesWidthSum += $(this).outerWidth();
                 });
                 var scrollLeft = previousBladesWidthSum + scrollToElement.outerWidth(!(scrollToBlade.isExpanded || scrollToBlade.isMaximized)) - mainContent.width();
@@ -24907,8 +25998,15 @@ angular.module('platformWebApp')
                 event.stopPropagation();
                 $document.bind('click', handleClickEvent);
             };
+
+            scope.showErrorDetails = function () {
+                var dialog = { id: "errorDetails" };
+                if (scope.blade.errorBody != undefined)
+                    dialog.message = scope.blade.errorBody;
+                dialogService.showDialog(dialog, '$(Platform)/Scripts/app/modularity/dialogs/errorDetails-dialog.tpl.html', 'platformWebApp.confirmDialogController');
+            };
         }
-    };
+    }
 }])
 .factory('platformWebApp.bladeNavigationService', ['platformWebApp.authService', '$timeout', '$state', 'platformWebApp.dialogService', function (authService, $timeout, $state, dialogService) {
 
@@ -25034,7 +26132,7 @@ angular.module('platformWebApp')
             //    service.currentBlade = firstStateBlade;
             //    return;
             //}
-
+            blade.errorBody = "";
             blade.isLoading = true;
             blade.parentBlade = parentBlade;
             blade.childrenBlades = [];
@@ -25105,16 +26203,18 @@ angular.module('platformWebApp')
             };
         },
         checkPermission: authService.checkPermission,
-        setError: function (msg, blade) {
-            if (blade) {
+        setError: function (error, blade) {
+            if (blade && error) {
                 blade.isLoading = false;
-                blade.error = msg;
+                blade.error = error.status && error.statusText ? error.status + ': ' + error.statusText : error;
+                blade.errorBody = error.data ? error.data.exceptionMessage : blade.errorBody;
             }
         }
     };
 
     return service;
 }]);
+
 angular.module('platformWebApp')
     .directive('vaBreadcrumb', [
         'platformWebApp.breadcrumbHistoryService', function (breadcrumbHistoryService) {
@@ -26309,90 +27409,6 @@ angular.module('platformWebApp')
 		stopSendingNotifications: { method: 'POST', url: 'api/platform/notification/stopnotifications' }
 	});
 }]);
-angular.module('platformWebApp')
-.controller('platformWebApp.pushNotificationsHistoryController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
-function ($scope, bladeNavigationService, eventTemplateResolver, notifications) {
-    var blade = $scope.blade;
-
-    $scope.pageSettings = {};
-    $scope.pageSettings.totalItems = 0;
-    $scope.pageSettings.currentPage = 1;
-    $scope.pageSettings.numPages = 5;
-    $scope.pageSettings.itemsPerPageCount = 10;
-    $scope.notifications = [];
-
-    $scope.columns = [
-    	{ title: "platform.blades.history.labels.type", orderBy: "NotifyType" },
-		{ title: "platform.blades.history.labels.title", orderBy: "Title" },
-		{ title: "platform.blades.history.labels.created", orderBy: "Created", checked: true, reverse: true }
-
-    ];
-
-    blade.refresh = function () {
-        blade.isLoading = true;
-        var start = $scope.pageSettings.currentPage * $scope.pageSettings.itemsPerPageCount - $scope.pageSettings.itemsPerPageCount;
-        notifications.query({ skip: start, take: $scope.pageSettings.itemsPerPageCount, sort: getOrderByExpression() }, function (data, status, headers, config) {
-            angular.forEach(data.notifyEvents, function (x) {
-                notificationTemplate = eventTemplateResolver.resolve(x, 'history');
-                x.template = notificationTemplate.template;
-                x.action = notificationTemplate.action;
-            });
-            $scope.notifications = data.notifyEvents;
-            $scope.pageSettings.totalItems = data.totalCount;
-            blade.isLoading = false;
-        }, function (error) {
-            bladeNavigationService.setError('Error ' + error.status, blade);
-        });
-    };
-
-    function getOrderByExpression() {
-        var retVal = '';
-        var column = _.find($scope.columns, function (x) { return x.checked; });
-        if (angular.isDefined(column)) {
-            retVal = column.orderBy;
-            if (column.reverse) {
-                retVal += ":desc";
-            }
-        }
-        return retVal;
-    };
-
-    $scope.setOrder = function (column) {
-        //reset prev selection may be commented if need support multiple order clauses
-        _.each($scope.columns, function (x) { x.checked = false });
-        column.checked = true;
-        column.reverse = !column.reverse;
-        $scope.pageSettings.currentPage = 1;
-
-        blade.refresh();
-    }
-
-    blade.toolbarCommands = [
-			{
-			    name: "platform.commands.refresh",
-			    icon: 'fa fa-refresh',
-			    executeMethod: blade.refresh,
-			    canExecuteMethod: function () {
-			        return true;
-			    }
-			}];
-
-    $scope.$watch('pageSettings.currentPage', blade.refresh);
-
-    // actions on load
-    //No need to call this because page 'pageSettings.currentPage' is watched!!! It would trigger subsequent duplicated req...
-    //blade.refresh();
-}]);
-
-angular.module('platformWebApp')
-.factory('platformWebApp.pushNotifications', ['$resource', function ($resource) {
-
-    return $resource('api/platform/pushnotifications/:id', { id: '@Id' }, {
-        markAllAsRead: { method: 'POST', url: 'api/platform/pushnotifications/markAllAsRead' },
-        query: { method: 'POST', url: 'api/platform/pushnotifications' }
-	});
-}]);
-
 angular.module('platformWebApp')
 .controller('platformWebApp.accountApiListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
@@ -27780,14 +28796,89 @@ angular.module('platformWebApp')
     };
 }]);
 angular.module('platformWebApp')
-.factory('platformWebApp.settings', ['$resource', function ($resource) {
-    return $resource('api/platform/settings/:id', { id: '@Id' }, {
-        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
-      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
-      	update: { method: 'POST', url: 'api/platform/settings' },
-        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
-    });
+.controller('platformWebApp.pushNotificationsHistoryController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
+function ($scope, bladeNavigationService, eventTemplateResolver, notifications) {
+    var blade = $scope.blade;
+
+    $scope.pageSettings = {};
+    $scope.pageSettings.totalItems = 0;
+    $scope.pageSettings.currentPage = 1;
+    $scope.pageSettings.numPages = 5;
+    $scope.pageSettings.itemsPerPageCount = 10;
+    $scope.notifications = [];
+
+    $scope.columns = [
+    	{ title: "platform.blades.history.labels.type", orderBy: "NotifyType" },
+		{ title: "platform.blades.history.labels.title", orderBy: "Title" },
+		{ title: "platform.blades.history.labels.created", orderBy: "Created", checked: true, reverse: true }
+
+    ];
+
+    blade.refresh = function () {
+        blade.isLoading = true;
+        var start = $scope.pageSettings.currentPage * $scope.pageSettings.itemsPerPageCount - $scope.pageSettings.itemsPerPageCount;
+        notifications.query({ skip: start, take: $scope.pageSettings.itemsPerPageCount, sort: getOrderByExpression() }, function (data, status, headers, config) {
+            angular.forEach(data.notifyEvents, function (x) {
+                notificationTemplate = eventTemplateResolver.resolve(x, 'history');
+                x.template = notificationTemplate.template;
+                x.action = notificationTemplate.action;
+            });
+            $scope.notifications = data.notifyEvents;
+            $scope.pageSettings.totalItems = data.totalCount;
+            blade.isLoading = false;
+        }, function (error) {
+            bladeNavigationService.setError('Error ' + error.status, blade);
+        });
+    };
+
+    function getOrderByExpression() {
+        var retVal = '';
+        var column = _.find($scope.columns, function (x) { return x.checked; });
+        if (angular.isDefined(column)) {
+            retVal = column.orderBy;
+            if (column.reverse) {
+                retVal += ":desc";
+            }
+        }
+        return retVal;
+    };
+
+    $scope.setOrder = function (column) {
+        //reset prev selection may be commented if need support multiple order clauses
+        _.each($scope.columns, function (x) { x.checked = false });
+        column.checked = true;
+        column.reverse = !column.reverse;
+        $scope.pageSettings.currentPage = 1;
+
+        blade.refresh();
+    }
+
+    blade.toolbarCommands = [
+			{
+			    name: "platform.commands.refresh",
+			    icon: 'fa fa-refresh',
+			    executeMethod: blade.refresh,
+			    canExecuteMethod: function () {
+			        return true;
+			    }
+			}];
+
+    $scope.$watch('pageSettings.currentPage', blade.refresh);
+
+    // actions on load
+    //No need to call this because page 'pageSettings.currentPage' is watched!!! It would trigger subsequent duplicated req...
+    //blade.refresh();
 }]);
+
+angular.module('platformWebApp')
+.factory('platformWebApp.pushNotifications', ['$resource', function ($resource) {
+
+    return $resource('api/platform/pushnotifications/:id', { id: '@Id' }, {
+        markAllAsRead: { method: 'POST', url: 'api/platform/pushnotifications/markAllAsRead' },
+        query: { method: 'POST', url: 'api/platform/pushnotifications' }
+	});
+}]);
+
 angular.module('platformWebApp')
 .controller('platformWebApp.entitySettingListController', ['$scope', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', function ($scope, settingsHelper, bladeNavigationService) {
     var blade = $scope.blade;
@@ -28315,6 +29406,15 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
+.factory('platformWebApp.settings', ['$resource', function ($resource) {
+    return $resource('api/platform/settings/:id', { id: '@Id' }, {
+        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
+      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
+      	update: { method: 'POST', url: 'api/platform/settings' },
+        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
+    });
+}]);
+angular.module('platformWebApp')
 .controller('platformWebApp.entitySettingsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
 
@@ -28341,6 +29441,7 @@ angular.module('platformWebApp')
     blade.currentRegionalFormat = i18n.getRegionalFormat();
     blade.currentTimeZone = i18n.getTimeZone();
     blade.currentTimeAgoSettings = i18n.getTimeAgoSettings();
+    blade.currentTimeSettings = i18n.getTimeSettings();
 
     userProfile.load().then(function () {     
          initializeBlade();
@@ -28382,6 +29483,7 @@ angular.module('platformWebApp')
         $scope.timeZones = timeZones.query();
         blade.currentTimeZone = getNameByCode($scope.timeZones, blade.currentTimeZone);
         blade.currentTimeAgoSettings = userProfile.timeAgoSettings;
+        blade.currentTimeSettings = userProfile.timeSettings;
     };
 
     function isLoading() {
@@ -28433,6 +29535,14 @@ angular.module('platformWebApp')
             userProfile.save();
         }
     }
+    $scope.setTimeSettings = function () {
+            if (!isLoading()) {
+                i18n.changeTimeSettings(blade.currentTimeSettings);
+                angular.extend(blade.currentTimeSettings, i18n.getTimeSettings());
+                angular.extend(userProfile.timeSettings, blade.currentTimeSettings);
+                userProfile.save();
+            }
+        }
 }]);
 
 angular.module('platformWebApp')

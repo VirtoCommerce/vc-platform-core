@@ -358,7 +358,7 @@ namespace VirtoCommerce.Platform.Web
             //Setup SignalR hub
             app.UseSignalR(routes =>
             {
-                routes.MapHub<PushNotificationHub>("pushNotificationHub");
+                routes.MapHub<PushNotificationHub>("/pushNotificationHub");
             });
 
             //Seed default users
