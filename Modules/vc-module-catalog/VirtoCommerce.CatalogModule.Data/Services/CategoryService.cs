@@ -21,7 +21,7 @@ using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CatalogModule.Data.Services
 {
-    public class CategoryService : ServiceBase, ICategoryService
+    public class CategoryService : ICategoryService
     {
         private readonly ICommerceService _commerceService;
         private readonly IOutlineService _outlineService;
@@ -71,12 +71,11 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         public virtual void SaveChanges(IEnumerable<Category> categories)
         {
             var pkMap = new PrimaryKeyResolvingMap();
-            var changedEntries = new List<ChangedEntry<Category>>();
+            var changedEntries = new List<GenericChangedEntry<Category>>();
 
             ValidateCategoryProperties(categories);
 
             using (var repository = _repositoryFactory())
-            using (var changeTracker = GetChangeTracker(repository))
             {
                 var dbExistCategories = repository.GetCategoriesByIds(categories.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var category in categories)
@@ -85,7 +84,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     var modifiedEntity = AbstractTypeFactory<CategoryEntity>.TryCreateInstance().FromModel(category, pkMap);
                     if (originalEntity != null)
                     {
-                        changeTracker.Attach(originalEntity);
+                        changedEntries.Add(new GenericChangedEntry<Category>(category, originalEntity.ToModel(AbstractTypeFactory<Category>.TryCreateInstance()), EntryState.Modified));
                         modifiedEntity.Patch(originalEntity);
                         //Force set ModifiedDate property to mark a product changed. Special for  partial update cases when product table not have changes
                         originalEntity.ModifiedDate = DateTime.UtcNow;
@@ -93,15 +92,16 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     else
                     {
                         repository.Add(modifiedEntity);
+                        changedEntries.Add(new GenericChangedEntry<Category>(category, EntryState.Added));
                     }
                 }
 
                 //Raise domain events
-                _eventPublisher.Publish(new GenericCatalogChangingEvent<Category>(changedEntries));
+                _eventPublisher.Publish(new CategoryChangingEvent(changedEntries));
                 //Save changes in database
                 repository.UnitOfWork.Commit();
                 pkMap.ResolvePrimaryKeys();
-                _eventPublisher.Publish(new GenericCatalogChangedEvent<Category>(changedEntries));
+                _eventPublisher.Publish(new CategoryChangedEvent(changedEntries));
                 //Reset catalog cache
                 CatalogCacheRegion.ExpireRegion();
             }
@@ -112,19 +112,24 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
         public virtual void Delete(IEnumerable<string> categoryIds)
         {
+            var categories = GetByIds(categoryIds, CategoryResponseGroup.Info.ToString());
+            //Raise domain events before deletion
+            var changedEntries = categories.Select(x => new GenericChangedEntry<Category>(x, EntryState.Deleted));
+            _eventPublisher.Publish(new CategoryChangingEvent(changedEntries));
             using (var repository = _repositoryFactory())
             {
                 //TODO: raise events on categories deletion
                 repository.RemoveCategories(categoryIds.ToArray());
-                CommitChanges(repository);
+                repository.UnitOfWork.Commit();
                 //Reset catalog cache
                 CatalogCacheRegion.ExpireRegion();
             }
+            _eventPublisher.Publish(new CategoryChangedEvent(changedEntries));
         }
 
-        #endregion       
+        #endregion
 
-     
+
         protected virtual Dictionary<string, Category> PreloadCategories(string catalogId)
         {
             var cacheKey = CacheKey.With(GetType(), "PreloadCategories", catalogId);
@@ -204,7 +209,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 //Resolve relative urls for category assets
                 if (category.AllAssets != null)
                 {
-                    foreach(var asset in category.AllAssets)
+                    foreach (var asset in category.AllAssets)
                     {
                         asset.Url = _blobUrlResolver.GetAbsoluteUrl(asset.RelativeUrl);
                     }

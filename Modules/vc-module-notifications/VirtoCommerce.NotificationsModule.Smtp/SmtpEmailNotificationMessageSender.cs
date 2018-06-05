@@ -4,7 +4,6 @@ using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
-using VirtoCommerce.NotificationsModule.Core;
 using VirtoCommerce.NotificationsModule.Core.Exceptions;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
@@ -13,9 +12,9 @@ namespace VirtoCommerce.NotificationsModule.Smtp
 {
     public class SmtpEmailNotificationMessageSender : INotificationMessageSender
     {
-        private readonly EmailSendingOptions _emailSendingOptions;
+        private readonly SmtpSenderOptions _emailSendingOptions;
 
-        public SmtpEmailNotificationMessageSender(IOptions<EmailSendingOptions> emailSendingOptions)
+        public SmtpEmailNotificationMessageSender(IOptions<SmtpSenderOptions> emailSendingOptions)
         {
             _emailSendingOptions = emailSendingOptions.Value;
         }
@@ -60,10 +59,10 @@ namespace VirtoCommerce.NotificationsModule.Smtp
 
         private SmtpClient CreateClient()
         {
-            return new SmtpClient(_emailSendingOptions.SmtpOptions.SmtpServer, _emailSendingOptions.SmtpOptions.Port)
+            return new SmtpClient(_emailSendingOptions.SmtpServer, _emailSendingOptions.Port)
             {
                 EnableSsl = true,
-                Credentials = new NetworkCredential(_emailSendingOptions.SmtpOptions.Login, _emailSendingOptions.SmtpOptions.Password)
+                Credentials = new NetworkCredential(_emailSendingOptions.Login, _emailSendingOptions.Password)
             };
         }
     }

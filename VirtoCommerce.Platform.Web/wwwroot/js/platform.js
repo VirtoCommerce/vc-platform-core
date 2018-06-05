@@ -18459,7 +18459,7 @@ angular.module('platformWebApp')
         		}
         		$scope.sampleDataInfos = {};
         		//thats need when state direct open by url or push notification
-        		var step = setupWizard.findStep($state.current.name);
+                var step = setupWizard.findStepByState($state.current.name);
 
         		$scope.close = function () {
         			setupWizard.showStep(step.nextStep);
@@ -18486,8 +18486,8 @@ angular.module('platformWebApp')
         					else
         					{
         						setupWizard.showStep(step.nextStep);
-        					}
-        				});
+                            }
+                        }, function (error) { setupWizard.showStep(step.nextStep); });
         			}
         			else
         			{
@@ -18718,14 +18718,16 @@ angular.module('platformWebApp')
 				$scope.notification = $stateParams.notification;
 			}
 			//thats need when state direct open by url or push notification
-			var step = setupWizard.findStep($state.current.name);
+            var step = setupWizard.findStepByState($state.current.name);
 			if (!$scope.notification.created) {
 			modules.autoInstall({}, function (data) {
 				//if already installed need skip this step
 				if (data.finished) {					
-						setupWizard.showStep(step.nextStep);
-				}
-			});
+				    setupWizard.showStep(step.nextStep);
+                }
+            }, function (error) {
+                setupWizard.showStep(step.nextStep);
+            });
 			}
 
 			$scope.restart = function () {
@@ -19272,13 +19274,7 @@ angular.module('platformWebApp')
         .state('setupWizard', {
         	url: '/setupWizard',
         	templateUrl: '$(Platform)/Scripts/app/setup/templates/setupWizard.tpl.html',
-        	controller: ['$scope', '$state', '$stateParams', 'platformWebApp.setupWizard', function ($scope, $state, $stateParams, setupWizard) {
-        		setupWizard.loadStep(function (step) {
-        			if (step) {
-        				setupWizard.showStep(step);
-        			};
-        		});
-        	}]
+            controller: ['$scope', '$state', '$stateParams', 'platformWebApp.setupWizard', function ($scope, $state, $stateParams, setupWizard) {}]
         });
 }])
 .factory('platformWebApp.setupWizard', ['$state', 'platformWebApp.settings', function ($state, settings) {	
@@ -19286,13 +19282,20 @@ angular.module('platformWebApp')
 	var wizard =
 	{
 		//switches the current step in the wizard to passed or next on the current
-		showStep : function (step) {
-			var state = step ? step.state : "workspace";
-			settings.update([{ name: 'VirtoCommerce.SetupStep', value: state }]);
-			$state.go(state);
+        showStep: function (step) {
+            var state = step ? step.state : "workspace";
+            if (wizard.currentStep != step) {
+                wizard.currentStep = step;
+                settings.update([{ name: 'VirtoCommerce.SetupStep', value: state }], function () {
+                    $state.go(state);
+                });
+            }
+            else {
+                $state.go(state);
+            }  
 		},
 
-		findStep : function (state) {
+		findStepByState : function (state) {
 			return _.find(wizardSteps, function (x) { return x.state == state; });
 		},
 
@@ -19305,19 +19308,21 @@ angular.module('platformWebApp')
 				wizardSteps[i].nextStep = nextStep;
 				nextStep = wizardSteps[i];
 			}
-		},
-
-		loadStep : function (callback) {
+        },
+		load : function () {
 			//Initial step
-			var step = wizardSteps[0];
-			//restore  saved setup step
-			settings.getValues({ id: "VirtoCommerce.SetupStep" }, function (data) {
+            wizard.currentStep = wizardSteps[0];
+            //load  saved setup step
+            return settings.getValues({ id: "VirtoCommerce.SetupStep" }).$promise.then(function (data) {
 				if (angular.isArray(data) && data.length > 0) {
-					step = wizard.findStep(data[0]);
-				}
-				callback(step);
+                    wizard.currentStep = wizard.findStepByState(data[0]);
+                    wizard.isCompleted = wizard.currentStep === undefined;
+                }
+                return wizard;
 			});
-		}
+        },
+        currentStep: undefined,
+        isCompleted: false
 	};
 	return wizard;
 }])
@@ -19327,13 +19332,10 @@ angular.module('platformWebApp')
   	$rootScope.$on('loginStatusChanged', function (event, authContext) {
   		if (authContext.isAuthenticated) {
   			//timeout need because $state not fully loading in run method and need to wait little time
-  			$timeout(function () {
-  				setupWizard.loadStep(function (step) {
-  					if (step) {
-  						setupWizard.showStep(step);
-  					};
-  				});
-  			}, 500);
+                $timeout(function () {
+                    setupWizard.load().then(
+                        function (wizard) { if (!wizard.isCompleted) { wizard.showStep(wizard.currentStep); } });
+                }, 500);
   		}
   	});
 
@@ -20160,6 +20162,112 @@ CodeMirror.registerHelper("fold", "markdown", function(cm, start) {
   };
 });
 
+angular.module('platformWebApp')
+.controller('platformWebApp.confirmDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
+    angular.extend($scope, dialog);
+
+    $scope.yes = function () {
+        $modalInstance.close(true);
+    };
+
+    $scope.no = function () {
+        $modalInstance.close(false);
+    };
+
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
+}])
+.factory('platformWebApp.dialogService', ['$rootScope', '$modal', function ($rootScope, $modal) {
+    var dialogService = {
+        dialogs: [],
+        currentDialog: undefined
+    };
+
+    function findDialog(id) {
+        var found;
+        angular.forEach(dialogService.dialogs, function (dialog) {
+            if (dialog.id == id) {
+                found = dialog;
+            }
+        });
+
+        return found;
+    }
+
+    dialogService.showDialog = function (dialog, templateUrl, controller, cssClass) {
+        var dlg = findDialog(dialog.id);
+
+        if (angular.isUndefined(dlg)) {
+            dlg = dialog;
+
+            dlg.instance = $modal.open({
+                templateUrl: templateUrl,
+                controller: controller,
+                windowClass: cssClass ? cssClass : null,
+                resolve: {
+                    dialog: function () {
+                        return dialog;
+                    }
+                }
+            });
+
+            dlg.instance.result.then(function (result) //success
+            {
+                var idx = dialogService.dialogs.indexOf(dlg);
+                dialogService.dialogs.splice(idx, 1);
+                if (dlg.callback)
+                    dlg.callback(result);
+            }, function (reason) //dismiss
+            {
+                var idx = dialogService.dialogs.indexOf(dlg);
+                dialogService.dialogs.splice(idx, 1);
+            });
+
+            dialogService.dialogs.push(dlg);
+        }
+    };
+
+    dialogService.showConfirmationDialog = function (dialog) {
+        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/confirmDialog.tpl.html', 'platformWebApp.confirmDialogController');
+    };
+
+    dialogService.showNotificationDialog = function (dialog) {
+        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/notifyDialog.tpl.html', 'platformWebApp.confirmDialogController');
+    };
+
+    dialogService.showGalleryDialog = function (dialog) {
+        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/galleryDialog.tpl.html', 'platformWebApp.galleryDialogController', '__gallery');
+    };
+
+    return dialogService;
+
+}])
+
+angular.module('platformWebApp')
+.controller('platformWebApp.galleryDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
+    angular.extend($scope, dialog);
+
+    var imgCount = dialog.images.length;
+
+    $scope.close = function () {
+        $modalInstance.close(false);
+    }
+
+    $scope.prevImage = function (index) {
+        var i = index == -1 ? imgCount - 1 : index;
+        $scope.currentImage = dialog.images[i];
+    }
+
+    $scope.nextImage = function (index) {
+        var i = index == imgCount ? 0 : index;
+        $scope.currentImage = dialog.images[i];
+    }
+
+    $scope.openImage = function (image) {
+        $scope.currentImage = image;
+    }
+}]);
 'use strict';
 
 angular.module('platformWebApp')
@@ -21117,112 +21225,6 @@ angular.module('platformWebApp').directive('vaTabs', function () {
         }
     }
 });
-angular.module('platformWebApp')
-.controller('platformWebApp.confirmDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
-    angular.extend($scope, dialog);
-
-    $scope.yes = function () {
-        $modalInstance.close(true);
-    };
-
-    $scope.no = function () {
-        $modalInstance.close(false);
-    };
-
-    $scope.cancel = function () {
-        $modalInstance.dismiss('cancel');
-    };
-}])
-.factory('platformWebApp.dialogService', ['$rootScope', '$modal', function ($rootScope, $modal) {
-    var dialogService = {
-        dialogs: [],
-        currentDialog: undefined
-    };
-
-    function findDialog(id) {
-        var found;
-        angular.forEach(dialogService.dialogs, function (dialog) {
-            if (dialog.id == id) {
-                found = dialog;
-            }
-        });
-
-        return found;
-    }
-
-    dialogService.showDialog = function (dialog, templateUrl, controller, cssClass) {
-        var dlg = findDialog(dialog.id);
-
-        if (angular.isUndefined(dlg)) {
-            dlg = dialog;
-
-            dlg.instance = $modal.open({
-                templateUrl: templateUrl,
-                controller: controller,
-                windowClass: cssClass ? cssClass : null,
-                resolve: {
-                    dialog: function () {
-                        return dialog;
-                    }
-                }
-            });
-
-            dlg.instance.result.then(function (result) //success
-            {
-                var idx = dialogService.dialogs.indexOf(dlg);
-                dialogService.dialogs.splice(idx, 1);
-                if (dlg.callback)
-                    dlg.callback(result);
-            }, function (reason) //dismiss
-            {
-                var idx = dialogService.dialogs.indexOf(dlg);
-                dialogService.dialogs.splice(idx, 1);
-            });
-
-            dialogService.dialogs.push(dlg);
-        }
-    };
-
-    dialogService.showConfirmationDialog = function (dialog) {
-        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/confirmDialog.tpl.html', 'platformWebApp.confirmDialogController');
-    };
-
-    dialogService.showNotificationDialog = function (dialog) {
-        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/notifyDialog.tpl.html', 'platformWebApp.confirmDialogController');
-    };
-
-    dialogService.showGalleryDialog = function (dialog) {
-        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/galleryDialog.tpl.html', 'platformWebApp.galleryDialogController', '__gallery');
-    };
-
-    return dialogService;
-
-}])
-
-angular.module('platformWebApp')
-.controller('platformWebApp.galleryDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
-    angular.extend($scope, dialog);
-
-    var imgCount = dialog.images.length;
-
-    $scope.close = function () {
-        $modalInstance.close(false);
-    }
-
-    $scope.prevImage = function (index) {
-        var i = index == -1 ? imgCount - 1 : index;
-        $scope.currentImage = dialog.images[i];
-    }
-
-    $scope.nextImage = function (index) {
-        var i = index == imgCount ? 0 : index;
-        $scope.currentImage = dialog.images[i];
-    }
-
-    $scope.openImage = function (image) {
-        $scope.currentImage = image;
-    }
-}]);
 // Full list of countries defined by ISO 3166-1 alpha-3
 // based on https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
 angular.module('platformWebApp')
@@ -23110,7 +23112,6 @@ angular.module('platformWebApp')
 angular.module('platformWebApp')
     .controller('platformWebApp.assets.assetUploadController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'FileUploader', function ($scope, assets, bladeNavigationService, FileUploader) {
         var blade = $scope.blade;
-        $scope.blade.multiple = true;
         var currentEntities;
         if (!blade.fileUploadOptions) {
             blade.fileUploadOptions = {};
@@ -23305,6 +23306,7 @@ angular.module('platformWebApp')
                 }
                 return retVal;
             });
+            blade.currentEntity.objectType = blade.objectType;
             blade.origEntity = blade.currentEntity;
             blade.currentEntity = angular.copy(blade.origEntity);
             blade.isLoading = false;
@@ -23355,11 +23357,15 @@ angular.module('platformWebApp')
 
     $scope.saveChanges = function () {
         if (blade.isNew) {
-            dynamicPropertiesApi.save({ id: blade.objectType }, blade.currentEntity,
+            dynamicPropertiesApi.save(blade.currentEntity,
                 function (data) {
                     blade.onChangesConfirmedFn(data);
                     // save dictionary items for new entity
                     if (data.isDictionary) {
+                        localDictionaryValues = _.map(localDictionaryValues, function (item) {
+                            item.propertyId = data.id;
+                            return item;
+                        });
                         dictionaryItemsApi.save({ id: blade.objectType, propertyId: data.id },
                             localDictionaryValues,
                             function () {
@@ -23374,7 +23380,7 @@ angular.module('platformWebApp')
                 },
                 function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
         } else {
-            dynamicPropertiesApi.update({ id: blade.objectType, propertyId: blade.currentEntity.id }, blade.currentEntity,
+            dynamicPropertiesApi.update(blade.currentEntity,
                 function () {
                     blade.refresh();
                     blade.parentBlade.refresh(true);
@@ -23438,15 +23444,22 @@ angular.module('platformWebApp')
     // on load: 
     blade.refresh();
 }]);
+
 angular.module('platformWebApp')
 .controller('platformWebApp.dynamicPropertyListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dynamicProperties.api', function ($scope, bladeNavigationService, dynamicPropertiesApi) {
     var blade = $scope.blade;
     blade.headIcon = 'fa-plus-square-o';
     blade.title = blade.objectType;
     blade.subtitle = 'platform.blades.dynamicProperty-list.subtitle';
+    $scope.pageSettings = {};
+    $scope.pageSettings.totalItems = 0;
+    $scope.pageSettings.currentPage = 1;
+    $scope.pageSettings.numPages = 5;
+    $scope.pageSettings.itemsPerPageCount = 999;
 
     blade.refresh = function (parentRefresh) {
-        dynamicPropertiesApi.query({ id: blade.objectType }, function (results) {
+        var start = $scope.pageSettings.currentPage * $scope.pageSettings.itemsPerPageCount - $scope.pageSettings.itemsPerPageCount;
+        dynamicPropertiesApi.getPropertiesForType({ typeName: blade.objectType }, { skip: start, take: $scope.pageSettings.itemsPerPageCount }, function (results) {
             if (parentRefresh && blade.parentRefresh) {
                 blade.parentRefresh(results);
             }
@@ -23524,7 +23537,7 @@ angular.module('platformWebApp')
         blade.selectedAll = false;
 
         if (blade.isApiSave) {
-            dictionaryItemsApi.query({ id: blade.currentEntity.objectType, propertyId: blade.currentEntity.id },
+            dictionaryItemsApi.getDictionaryItems({}, { id: blade.currentEntity.objectType, dynamicPropertyId: blade.currentEntity.id, take: 999 },
                 initializeBlade,
                 function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
         } else {
@@ -23651,7 +23664,10 @@ angular.module('platformWebApp')
     $scope.saveChanges = function () {
         if (blade.isApiSave) {
             blade.isLoading = true;
-
+            blade.currentEntities = _.map(blade.currentEntities, function (item) {
+                item.propertyId = blade.currentEntity.id;
+                return item;
+            });
             dictionaryItemsApi.save({ id: blade.currentEntity.objectType, propertyId: blade.currentEntity.id },
                 blade.currentEntities,
                 function () {
@@ -23855,13 +23871,16 @@ angular.module('platformWebApp')
 
 angular.module('platformWebApp')
 .factory('platformWebApp.dynamicProperties.api', ['$resource', function ($resource) {
-    return $resource('api/platform/dynamic/types/:id/properties/:propertyId', {}, {
+    return $resource('api/platform/dynamic/properties', {}, {
         queryTypes: { url: 'api/platform/dynamic/types', isArray: true },
+        getPropertiesForType: { url: 'api/platform/dynamic/types/:typeName/properties', method: 'POST', isArray: true },
         update: { method: 'PUT' }
     });
 }])
 .factory('platformWebApp.dynamicProperties.dictionaryItemsApi', ['$resource', function ($resource) {
-    return $resource('api/platform/dynamic/types/:id/properties/:propertyId/dictionaryitems');
+    return $resource('api/platform/dynamic/dictionaryitems', {}, {
+        getDictionaryItems: { url: 'api/platform/dynamic/dictionaryitems/search', method: 'POST', isArray: true },
+    });
 }])
 .factory('platformWebApp.dynamicProperties.valueTypesService', function () {
     var propertyTypes = [
@@ -23913,6 +23932,7 @@ angular.module('platformWebApp')
         }
     };
 });
+
 angular.module('platformWebApp')
 .controller('platformWebApp.dynamicPropertyWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
 	$scope.blade = $scope.widget.blade;
@@ -24034,7 +24054,6 @@ angular.module('platformWebApp')
     var blade = $scope.blade;
     blade.updatePermission = 'platform:exportImport:import';
     blade.headIcon = 'fa-download';
-    $scope.blade.multiple = true;
     blade.title = 'platform.blades.import-main.title';
     blade.isLoading = false;
     $scope.importRequest = {};
@@ -24149,13 +24168,13 @@ angular.module('platformWebApp')
     return $resource(null, null, {
     	getNewExportManifest: { url: 'api/platform/export/manifest/new' },
         runExport: { method: 'POST', url: 'api/platform/export' },
+
         loadExportManifest: { url: 'api/platform/export/manifest/load' },
         runImport: { method: 'POST', url: 'api/platform/import' },
         sampleDataDiscover: { url: 'api/platform/sampledata/discover', isArray: true },
         importSampleData: { method: 'POST', url: 'api/platform/sampledata/import', params: { url: '@url' } }
     });
 }]);
-
 angular.module('platformWebApp')
 .factory('platformWebApp.jobs', ['$resource', function ($resource) {
 
@@ -26629,8 +26648,7 @@ angular.module('platformWebApp')
     function ($scope, bladeNavigationService, metaFormsService, accounts, roles, dialogService, settings) {
         var blade = $scope.blade;
         blade.updatePermission = 'platform:security:update';
-        blade.promise = roles.search({ takeCount: 10000 }).$promise;
-        blade.accountTypes = [];
+        blade.accountTypes = [];      
 
         blade.refresh = function (parentRefresh) {
             var entity = parentRefresh ? blade.currentEntity : blade.data;
@@ -26687,10 +26705,13 @@ angular.module('platformWebApp')
         $scope.saveChanges = function () {
             blade.isLoading = true;
 
-            accounts.update({}, blade.currentEntity, function (data) {
-                blade.refresh(true);
-            }, function (error) {
-                bladeNavigationService.setError('Error ' + error.status, blade);
+            accounts.update({}, blade.currentEntity, function (result) {
+                if (result.succeeded) {
+                    blade.refresh(true);
+                }
+                else {
+                    bladeNavigationService.setError(_.pluck(result.errors, 'description').join(), blade);
+                }
             });
         };
 
@@ -26787,6 +26808,7 @@ angular.module('platformWebApp')
         // actions on load
         blade.refresh(false);
     }]);
+
 angular.module('platformWebApp')
 .controller('platformWebApp.accountListController', ['$scope', 'platformWebApp.accounts', 'platformWebApp.dialogService', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeNavigationService', 'platformWebApp.bladeUtils',
 function ($scope, accounts, dialogService, uiGridHelper, bladeNavigationService, bladeUtils) {
@@ -27004,7 +27026,6 @@ angular.module('platformWebApp')
                executeMethod: function () {
                    var newBlade = {
                        id: "accountChildBladeChild",
-                       promise: blade.promise,
                        title: blade.title,
                        subtitle: 'platform.blades.account-roles.subtitle',
                        controller: 'platformWebApp.accountRolesController',
@@ -27039,18 +27060,18 @@ angular.module('platformWebApp')
     // on load: 
     // $scope.$watch('blade.parentBlade.currentEntity' gets fired
 }]);
+
 angular.module('platformWebApp')
-.controller('platformWebApp.accountRolesController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', function ($scope, bladeNavigationService, dialogService) {
+    .controller('platformWebApp.accountRolesController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.roles', function ($scope, bladeNavigationService, dialogService, roles) {
     var blade = $scope.blade;
 
     function initializeBlade(data) {
         blade.data = data;
-        blade.promise.then(function (promiseData) {
-            var allRoles = angular.copy(promiseData.roles);
+        roles.search({ take: 10000 }, function (result) {
+            var allRoles = angular.copy(result.results);
             blade.currentEntities = _.filter(allRoles, function (x) {
                 return _.all(data.roles, function (curr) { return curr.id !== x.id; });
             });
-
             blade.isLoading = false;
         });
     };
@@ -27076,6 +27097,7 @@ angular.module('platformWebApp')
     // on load: 
     // $scope.$watch('blade.parentBlade.currentEntity' gets fired
 }]);
+
 angular.module('platformWebApp')
 .controller('platformWebApp.permissionScopesController', ['$q', '$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.permissionScopeResolver', function ($q, $scope, bladeNavigationService, dialogService, permissionScopeResolver) {
     var blade = $scope.blade;
@@ -27148,20 +27170,19 @@ angular.module('platformWebApp')
         if (blade.isNew) {
             initializeBlade({});
         } else {
-            roles.get({ id: blade.data.id }, function (data) {
-                initializeBlade(data);
+            roles.get({ roleName: blade.data.name }, function (role) {
+                initializeBlade(role);
                 if (parentRefresh && blade.parentBlade.refresh) {
                     blade.parentBlade.refresh();
                 }
-            },
-            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+            });
         }
     }
 
-    function initializeBlade(data) {
+    function initializeBlade(role) {
         blade.selectedAll = false;
-        blade.currentEntity = angular.copy(data);
-        blade.origEntity = data;
+        blade.currentEntity = angular.copy(role);
+        blade.origEntity = role;
 
         if (blade.isNew) {
             promise.then(function (promiseData) {
@@ -27190,17 +27211,19 @@ angular.module('platformWebApp')
         }
 
         angular.copy(blade.currentEntity, blade.origEntity);
-
-        roles.update(blade.currentEntity, function (data) {
-            if (blade.isNew) {
-                blade.parentBlade.refresh();
-                blade.parentBlade.selectNode(data);
-            } else {
+        var action = blade.isNew ? roles.create : roles.update;
+        action(blade.currentEntity, function (result) {
+            if (result.succeeded) {
+                if (blade.isNew) {
+                    blade.parentBlade.refresh();
+                    blade.parentBlade.selectNode(blade.currentEntity);
+                }
+                blade.data.name = blade.currentEntity.name;
                 blade.refresh(true);
             }
-            blade.refresh(true);
-        }, function (error) {
-            bladeNavigationService.setError('Error ' + error.status, blade);
+            else {
+                bladeNavigationService.setError(_.pluck(result.errors, 'description').join(), blade);
+            }
         });
     };
 
@@ -27310,6 +27333,7 @@ angular.module('platformWebApp')
     initializeToolbar();
     blade.refresh(false);
 }]);
+
 angular.module('platformWebApp')
 .controller('platformWebApp.roleListController', ['$scope', 'platformWebApp.roles', 'platformWebApp.bladeUtils', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.uiGridHelper',
 function ($scope, roles, bladeUtils, bladeNavigationService, dialogService, uiGridHelper) {
@@ -27319,7 +27343,7 @@ function ($scope, roles, bladeUtils, bladeNavigationService, dialogService, uiGr
     blade.refresh = function () {
         blade.isLoading = true;
 
-        roles.search({
+         roles.search({
             keyword: filter.keyword,
             sort: uiGridHelper.getSortExpression($scope),
             skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
@@ -27335,7 +27359,7 @@ function ($scope, roles, bladeUtils, bladeNavigationService, dialogService, uiGr
     };
 
     blade.selectNode = function (node) {
-        $scope.selectedNodeId = node.id;
+        $scope.selectedNodeName = node.name;
 
         var newBlade = {
             id: 'listItemChild',
@@ -27445,15 +27469,15 @@ function ($scope, roles, bladeUtils, bladeNavigationService, dialogService, uiGr
 }]);
 
 angular.module('platformWebApp')
-.controller('platformWebApp.rolePermissionsController', ['$scope', 'platformWebApp.dialogService', function ($scope, dialogService) {
+    .controller('platformWebApp.rolePermissionsController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.roles', function ($scope, dialogService, roles) {
     var blade = $scope.blade;
     var allPermissions;
 
     function initializeBlade(data) {
         blade.data = data;
-        blade.promise.then(function (promiseData) {
-            allPermissions = _.filter(angular.copy(promiseData), function (x) {
-                return _.all(data.permissions, function (curr) { return curr.id !== x.id; });
+        roles.queryPermissions({ take: 10000 }, function (result)  {
+            allPermissions = _.filter(angular.copy(result), function (x) {
+                return _.all(data.permissions, function (curr) { return curr.name !== x.name; });
             });
             
             blade.currentEntities = _.groupBy(allPermissions, 'groupName');
@@ -27484,6 +27508,7 @@ angular.module('platformWebApp')
     // on load: 
     // $scope.$watch('blade.parentBlade.currentEntity' gets fired
 }]);
+
 angular.module('platformWebApp')
 .controller('platformWebApp.securityMainController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     $scope.selectedNodeId = null;
@@ -27602,12 +27627,15 @@ angular.module('platformWebApp')
 }]);
 angular.module('platformWebApp')
 .factory('platformWebApp.roles', ['$resource', function ($resource) {
-    return $resource('api/platform/security/roles/:id', { id: '@Id' }, {
-        search: { method: 'POST' },
+    return $resource('api/platform/security/roles/:roleName', { roleName: '@roleName' }, {
+        search: { url: 'api/platform/security/roles/search', method: 'POST' },
         queryPermissions: { url: 'api/platform/security/permissions', isArray: true },
-        update: { method: 'PUT' }
+        update: { method: 'PUT' },
+        create: { method: 'POST' },
+
     });
 }]);
+
 angular.module('platformWebApp')
     .factory('platformWebApp.authService', ['$http', '$rootScope', '$cookieStore', '$state', '$interpolate', function ($http, $rootScope, $cookieStore, $state, $interpolate) {
     var serviceBase = 'api/platform/security/';
@@ -27750,6 +27778,15 @@ angular.module('platformWebApp')
         };
         bladeNavigationService.showBlade(newBlade, $scope.blade);
     };
+}]);
+angular.module('platformWebApp')
+.factory('platformWebApp.settings', ['$resource', function ($resource) {
+    return $resource('api/platform/settings/:id', { id: '@Id' }, {
+        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
+      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
+      	update: { method: 'POST', url: 'api/platform/settings' },
+        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
+    });
 }]);
 angular.module('platformWebApp')
 .controller('platformWebApp.entitySettingListController', ['$scope', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', function ($scope, settingsHelper, bladeNavigationService) {
@@ -28278,15 +28315,6 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
-.factory('platformWebApp.settings', ['$resource', function ($resource) {
-    return $resource('api/platform/settings/:id', { id: '@Id' }, {
-        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
-      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
-      	update: { method: 'POST', url: 'api/platform/settings' },
-        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
-    });
-}]);
-angular.module('platformWebApp')
 .controller('platformWebApp.entitySettingsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
 
@@ -28607,15 +28635,15 @@ angular.module('platformWebApp')
         postData.newPassword2 = undefined;
         postData.roles = _.where(blade.currentEntities, { $selected: true });
 
-        accounts.save(postData, function () {
-            blade.parentBlade.refresh();
-            blade.parentBlade.selectNode(postData);
-        }, function (error) {
-            var errText = 'Error ' + error.status;
-            if (error.data && error.data.message) {
-                errText = errText + ": " + error.data.message;
+        accounts.save(postData, function (result) {
+            if (result.succeeded) {
+                blade.parentBlade.refresh();
+                blade.parentBlade.selectNode(postData);
             }
-            bladeNavigationService.setError(errText, $scope.blade);
+            else {
+                bladeNavigationService.setError(_.pluck(result.errors, 'description').join(), blade);
+            }
+        
         });
     };
 

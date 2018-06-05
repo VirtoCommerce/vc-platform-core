@@ -1,17 +1,16 @@
-﻿using System;
+using System;
+using System.ComponentModel;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+using VirtoCommerce.Platform.Core.Exceptions;
 
 namespace VirtoCommerce.Platform.Web.Licensing
 {
     public sealed class License
     {
         private static readonly string _hashAlgorithmName = HashAlgorithmName.SHA256.Name;
-        private static readonly HashAlgorithm _hashAlgorithm = HashAlgorithm.Create(_hashAlgorithmName);
-        private static readonly AsymmetricSignatureDeformatter _signatureDeformatter = CreateSignatureDeformatter(_hashAlgorithmName);
 
         public string Type { get; set; }
         public string CustomerName { get; set; }
@@ -20,7 +19,7 @@ namespace VirtoCommerce.Platform.Web.Licensing
         public string RawLicense { get; set; }
       
 
-        public static License Parse(string rawLicense)
+        public static License Parse(string rawLicense, string publicKeyPath)
         {
             License result = null;
 
@@ -33,7 +32,7 @@ namespace VirtoCommerce.Platform.Web.Licensing
 
                     if (data != null && signature != null)
                     {
-                        if (ValidateSignature(data, signature))
+                        if (ValidateSignature(data, signature, publicKeyPath))
                         {
                             result = JsonConvert.DeserializeObject<License>(data);
                             result.RawLicense = rawLicense;
@@ -46,17 +45,40 @@ namespace VirtoCommerce.Platform.Web.Licensing
         }
 
 
-        private static bool ValidateSignature(string data, string signature)
+        private static bool ValidateSignature(string data, string signature, string publicKeyPath)
         {
             bool result;
+            byte[] dataHash;
 
             var dataBytes = Encoding.UTF8.GetBytes(data);
-            var dataHash = _hashAlgorithm.ComputeHash(dataBytes);
+            using (var algorithm = SHA256.Create())
+            {
+                dataHash = algorithm.ComputeHash(dataBytes);
+            }
+
+            var signatureBytes = Convert.FromBase64String(signature);
 
             try
             {
-                var signatureBytes = Convert.FromBase64String(signature);
-                result = _signatureDeformatter.VerifySignature(dataHash, signatureBytes);
+                var rsaParam = new RSAParameters()
+                {
+                    Modulus = Convert.FromBase64String(ReadFileWithKey(publicKeyPath)),
+                    Exponent = Convert.FromBase64String("AQAB")
+                };
+
+                using (var rsa = new RSACryptoServiceProvider())
+                {
+                    // Import public key
+                    rsa.ImportParameters(rsaParam);
+
+                    // Create signature verifier with the rsa key
+                    var signatureDeformatter = new RSAPKCS1SignatureDeformatter(rsa);
+
+                    // Set the hash algorithm to SHA256.
+                    signatureDeformatter.SetHashAlgorithm(_hashAlgorithmName);
+
+                    result = signatureDeformatter.VerifySignature(dataHash, signatureBytes);
+                }
             }
             catch (FormatException)
             {
@@ -66,17 +88,23 @@ namespace VirtoCommerce.Platform.Web.Licensing
             return result;
         }
 
-        private static RSAPKCS1SignatureDeformatter CreateSignatureDeformatter(string hashAlgorithmName)
+        private static string ReadFileWithKey(string path)
         {
-            var rsa = new RSACryptoServiceProvider();
+            string fileContent;
 
-            // Import public key
-            rsa.FromXmlString("<RSAKeyValue><Modulus>uYgtG8GG6fZ4jZdaL6LF4f2vmmTHNr0H/m+Bfo4vNhOYDlUTOv89FVQ3xE0DPhZ2uQ6Q/AN9KausQz2VbdfUn0Ge/jcHNsdE+9SBdllzgvCr/2sUlCKcpiEIBC9AXnAd7lKFSHiS61cVLo24+8aowoeGsAAO3djqN2xP+4Co9CMywKscLSPUMOJWHMuXAr3+pjamYaqwe3/iv5VA/8ff0evVyqhE/8fIixm9Ti7OhPNwYRDmTKP+t4DRZlp4R46g4v43tg4Q9FYaGKRCuxAdbbEsTYhFzHzv/CcUoFzYF0x3lyW5mfqad5y+LhsWPiHGDrd+xWXq9Nho1glNZ0sGYQ==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>");
+            if (!File.Exists(path))
+            {
+                throw new LicenseOrKeyNotFoundException(path);
+            }
 
-            var signatureDeformatter = new RSAPKCS1SignatureDeformatter(rsa);
-            signatureDeformatter.SetHashAlgorithm(hashAlgorithmName);
+            using (var streamReader = File.OpenText(path))
+            {
+                fileContent = streamReader.ReadToEnd();
+            }
 
-            return signatureDeformatter;
+            return fileContent;
         }
+
+        
     }
 }

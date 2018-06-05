@@ -46,16 +46,17 @@ namespace VirtoCommerce.Platform.Web.ExportImport
         private const string _manifestZipEntryName = "Manifest.json";
         private const string _platformZipEntryName = "PlatformEntries.json";
 
-        private readonly IModuleCatalog _moduleCatalog;
+        private readonly ILocalModuleCatalog _moduleCatalog;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<Role> _roleManager;
         private readonly ISettingsManager _settingsManager;
         private readonly IDynamicPropertyService _dynamicPropertyService;
+        private readonly IDynamicPropertySearchService _dynamicPropertySearchService;
         private readonly IMemoryCache _memoryCache;
         private readonly IKnownPermissionsProvider _permissionsProvider;
 
         public PlatformExportImportManager(UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager, IKnownPermissionsProvider permissionsProvider, ISettingsManager settingsManager,
-                IDynamicPropertyService dynamicPropertyService, IModuleCatalog moduleCatalog, IMemoryCache memoryCache)
+                IDynamicPropertyService dynamicPropertyService, IDynamicPropertySearchService dynamicPropertySearchService, ILocalModuleCatalog moduleCatalog, IMemoryCache memoryCache)
         {
             _dynamicPropertyService = dynamicPropertyService;
             _userManager = userManager;
@@ -64,6 +65,7 @@ namespace VirtoCommerce.Platform.Web.ExportImport
             _moduleCatalog = moduleCatalog;
             _memoryCache = memoryCache;
             _permissionsProvider = permissionsProvider;
+            _dynamicPropertySearchService = dynamicPropertySearchService;
         }
 
         #region IPlatformExportImportManager Members
@@ -109,7 +111,7 @@ namespace VirtoCommerce.Platform.Web.ExportImport
             using (var zipArchive = new ZipArchive(outStream, ZipArchiveMode.Create, true))
             {
                 //Export all selected platform entries
-               await ExportPlatformEntriesInternalAsync(zipArchive, manifest, progressCallback, cancellationToken);
+                await ExportPlatformEntriesInternalAsync(zipArchive, manifest, progressCallback, cancellationToken);
                 //Export all selected  modules
                 ExportModulesInternal(zipArchive, manifest, progressCallback);
 
@@ -169,17 +171,17 @@ namespace VirtoCommerce.Platform.Web.ExportImport
                     progressInfo.Description = $"Import { platformEntries.Users.Count()} users with roles...";
                     progressCallback(progressInfo);
 
-                    foreach(var role in platformEntries.Roles)
+                    foreach (var role in platformEntries.Roles)
                     {
                         //TODO: Test with new and already exist
                         await _roleManager.UpdateAsync(role);
-                        foreach(var permission in role.Permissions)
+                        foreach (var permission in role.Permissions)
                         {
                             //TODO: Test with new and already exist
                             await _roleManager.AddClaimAsync(role, new Claim(SecurityConstants.Claims.PermissionClaimType, permission.Name));
                         }
                     }
-                    
+
                     //Next create or update users
                     foreach (var user in platformEntries.Users)
                     {
@@ -198,17 +200,14 @@ namespace VirtoCommerce.Platform.Web.ExportImport
                 if (manifest.HandleSettings)
                 {
                     //Import dynamic properties
-                    _dynamicPropertyService.SaveProperties(platformEntries.DynamicProperties.ToArray());
-                    foreach (var propDicGroup in platformEntries.DynamicPropertyDictionaryItems.GroupBy(x => x.PropertyId))
-                    {
-                        _dynamicPropertyService.SaveDictionaryItems(propDicGroup.Key, propDicGroup.ToArray());
-                    }
+                    await _dynamicPropertyService.SaveDynamicPropertiesAsync(platformEntries.DynamicProperties.ToArray());
+                    await _dynamicPropertyService.SaveDictionaryItemsAsync(platformEntries.DynamicPropertyDictionaryItems.ToArray());
 
                     foreach (var module in manifest.Modules)
                     {
-                        _settingsManager.SaveSettings(platformEntries.Settings.Where(x => x.ModuleId == module.Id).ToArray());
+                        await _settingsManager.SaveSettingsAsync(platformEntries.Settings.Where(x => x.ModuleId == module.Id).ToArray());
                     }
-                }           
+                }
             }
         }
 
@@ -226,7 +225,7 @@ namespace VirtoCommerce.Platform.Web.ExportImport
                     var permissions = _permissionsProvider.GetAllPermissions();
                     foreach (var role in platformExportObj.Roles)
                     {
-                        role.Permissions = (await _roleManager.GetClaimsAsync(role)).Join(permissions, c=>c.Value, p=>p.Name, (c,p) => p).ToArray();
+                        role.Permissions = (await _roleManager.GetClaimsAsync(role)).Join(permissions, c => c.Value, p => p.Name, (c, p) => p).ToArray();
                     }
                 }
                 //users 
@@ -236,7 +235,7 @@ namespace VirtoCommerce.Platform.Web.ExportImport
 
                 foreach (var user in usersResult)
                 {
-                    var userExt = await  _userManager.FindByIdAsync(user.Id);
+                    var userExt = await _userManager.FindByIdAsync(user.Id);
                     if (userExt != null)
                     {
                         platformExportObj.Users.Add(userExt);
@@ -249,18 +248,19 @@ namespace VirtoCommerce.Platform.Web.ExportImport
             {
                 progressInfo.Description = "Settings: selected modules settings exporting...";
                 progressCallback(progressInfo);
-
-                platformExportObj.Settings = manifest.Modules.SelectMany(x => _settingsManager.GetModuleSettings(x.Id)).ToList();
+                foreach (var module in manifest.Modules)
+                {
+                    var moduleSettings = await _settingsManager.GetModuleSettingsAsync(module.Id);
+                    platformExportObj.Settings = platformExportObj.Settings.Concat(moduleSettings).ToList();
+                }
             }
 
             //Dynamic properties
-            var allTypes = _dynamicPropertyService.GetAvailableObjectTypeNames();
-
             progressInfo.Description = "Dynamic properties: load properties...";
             progressCallback(progressInfo);
 
-            platformExportObj.DynamicProperties = allTypes.SelectMany(x => _dynamicPropertyService.GetProperties(x)).ToList();
-            platformExportObj.DynamicPropertyDictionaryItems = platformExportObj.DynamicProperties.Where(x => x.IsDictionary).SelectMany(x => _dynamicPropertyService.GetDictionaryItems(x.Id)).ToList();
+            platformExportObj.DynamicProperties = (await _dynamicPropertySearchService.SearchDynamicPropertiesAsync(new DynamicPropertySearchCriteria { Take = int.MaxValue })).Results;
+            platformExportObj.DynamicPropertyDictionaryItems = (await _dynamicPropertySearchService.SearchDictionaryItemsAsync(new DynamicPropertyDictionaryItemSearchCriteria { Take = int.MaxValue })).Results;
 
             //Notification templates
             progressInfo.Description = "Notifications: load templates...";

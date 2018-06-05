@@ -1,44 +1,47 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Hosting.Internal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Exceptions;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Data.Helpers;
-using VirtoCommerce.Platform.Web.Converters.Asset;
 using VirtoCommerce.Platform.Web.Extensions;
+using VirtoCommerce.Platform.Web.Helpers;
+using VirtoCommerce.Platform.Web.Infrastructure;
 using VirtoCommerce.Platform.Web.Swagger;
-using webModel = VirtoCommerce.Platform.Web.Model.Asset;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api
 {
     [Route("api/platform/assets")]
     public class AssetsController : Controller
     {
-        private const string _uploadsUrl = "~/App_Data/Uploads/";
-
+        private readonly string _uploadsUrl;
         private readonly IBlobStorageProvider _blobProvider;
         private readonly IBlobUrlResolver _urlResolver;
         private readonly IHostingEnvironment _hostingEnv;
         private static readonly FormOptions _defaultFormOptions = new FormOptions();
 
-        public AssetsController(IBlobStorageProvider blobProvider, IBlobUrlResolver urlResolver, IHostingEnvironment hostingEnv)
+        public AssetsController(IBlobStorageProvider blobProvider, IBlobUrlResolver urlResolver, IHostingEnvironment hostingEnv, IOptions<PlatformOptions> option)
         {
             _blobProvider = blobProvider;
             _urlResolver = urlResolver;
             _hostingEnv = hostingEnv;
+
+            _uploadsUrl = option?.Value?.UploadUrl;
+
+            if (_uploadsUrl == null)
+                throw new PlatformException($"{nameof(option.Value.UploadUrl)} must be set");
         }
 
         /// <summary>
@@ -47,9 +50,10 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("localstorage")]
+        [DisableFormValueModelBinding]
         [ProducesResponseType(typeof(BlobInfo[]), 200)]
         [Authorize(SecurityConstants.Permissions.AssetCreate)]
-        public async Task<IActionResult> UploadAssetToLocalFileSystem()
+        public async Task<IActionResult> UploadAssetToLocalFileSystemAsync()
         {
             //ToDo Now supports downloading one file, find a solution for downloading multiple files
             var retVal = new List<BlobInfo>();
@@ -77,14 +81,14 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                         //ToDo After update to core 2.1 make beautiful https://github.com/aspnet/HttpAbstractions/issues/446
                         var fileName = contentDisposition.FileName.Value.TrimStart('\"').TrimEnd('\"');
 
-                        targetFilePath = Path.Combine(_hostingEnv.MapPath(_uploadsUrl), fileName);
+                        targetFilePath = Path.Combine(Path.GetFullPath(_uploadsUrl), fileName);
                         using (var targetStream = System.IO.File.Create(targetFilePath))
                         {
                             await section.Body.CopyToAsync(targetStream);
                         }
 
                         var blobInfo = AbstractTypeFactory<BlobInfo>.TryCreateInstance();
-                        blobInfo.FileName = fileName;
+                        blobInfo.Name = fileName;
                         blobInfo.Url = _uploadsUrl + fileName;
                         blobInfo.ContentType = MimeTypeResolver.ResolveContentType(fileName);
                         retVal.Add(blobInfo);
@@ -107,10 +111,11 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("")]
+        [DisableFormValueModelBinding]
         [ProducesResponseType(typeof(BlobInfo[]), 200)]
         [Authorize(SecurityConstants.Permissions.AssetCreate)]
         [UploadFile]
-        public async Task<IActionResult> UploadAsset([FromQuery] string folderUrl, [FromQuery]string url = null, [FromQuery]string name = null)
+        public async Task<IActionResult> UploadAssetAsync([FromQuery] string folderUrl, [FromQuery]string url = null, [FromQuery]string name = null)
         {
             if (url == null && !MultipartRequestHelper.IsMultipartContentType(Request.ContentType))
             {
@@ -128,7 +133,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 {
                     remoteStream.CopyTo(blobStream);
                     var blobInfo = AbstractTypeFactory<BlobInfo>.TryCreateInstance();
-                    blobInfo.FileName = fileName;
+                    blobInfo.Name = fileName;
                     blobInfo.RelativeUrl = fileUrl;
                     blobInfo.Url = _urlResolver.GetAbsoluteUrl(fileUrl);
                     retVal.Add(blobInfo);
@@ -136,14 +141,39 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             }
             else
             {
-                var blobMultipartProvider = new BlobStorageMultipartProvider(_blobProvider, _urlResolver, folderUrl);
-                await Request.Content.ReadAsMultipartAsync(blobMultipartProvider);
+                string targetFilePath = null;
 
-                foreach (var blobInfo in blobMultipartProvider.BlobInfos)
+                var boundary = MultipartRequestHelper.GetBoundary(MediaTypeHeaderValue.Parse(Request.ContentType), _defaultFormOptions.MultipartBoundaryLengthLimit);
+                var reader = new MultipartReader(boundary, HttpContext.Request.Body);
+
+                var section = await reader.ReadNextSectionAsync();
+                if (section != null)
                 {
-                    blobInfo.RelativeUrl = blobInfo.Key;
-                    blobInfo.Url = _urlResolver.GetAbsoluteUrl(blobInfo.Key);
-                    retVal.Add(blobInfo);
+                    ContentDispositionHeaderValue contentDisposition;
+                    var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out contentDisposition);
+
+                    if (hasContentDispositionHeader)
+                    {
+                        if (MultipartRequestHelper.HasFileContentDisposition(contentDisposition))
+                        {
+                            //ToDo After update to core 2.1 make beautiful https://github.com/aspnet/HttpAbstractions/issues/446
+                            var fileName = contentDisposition.FileName.Value.TrimStart('\"').TrimEnd('\"');
+
+                            targetFilePath = folderUrl + "/" + fileName;
+
+                            using (var targetStream = _blobProvider.OpenWrite(targetFilePath))
+                            {
+                                await section.Body.CopyToAsync(targetStream);
+                            }
+
+                            var blobInfo = AbstractTypeFactory<BlobInfo>.TryCreateInstance();
+                            blobInfo.Name = fileName;
+                            blobInfo.Url = _uploadsUrl + fileName;
+                            blobInfo.ContentType = MimeTypeResolver.ResolveContentType(fileName);
+                            retVal.Add(blobInfo);
+                        }
+
+                    }
                 }
             }
 
@@ -159,27 +189,26 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 200)]
         [Route("")]
         [Authorize(SecurityConstants.Permissions.AssetDelete)]
-        public IActionResult DeleteBlobs([FromQuery] string[] urls)
+        public async Task<IActionResult> DeleteBlobsAsync([FromQuery] string[] urls)
         {
-            _blobProvider.Remove(urls);
-
-            return NoContent();
+            await _blobProvider.RemoveAsync(urls);
+            return Ok();
         }
 
         /// <summary>
-        /// Search asset folders and blobs
+        /// SearchAsync asset folders and blobs
         /// </summary>
         /// <param name="folderUrl"></param>
         /// <param name="keyword"></param>
-        /// <returns></returns>
+        /// <returns></returns> 
         [HttpGet]
-        [ProducesResponseType(typeof(webModel.AssetListItem[]), 200)]
+        [ProducesResponseType(typeof(GenericSearchResult<BlobEntry>), 200)]
         [Route("")]
         [Authorize(SecurityConstants.Permissions.AssetRead)]
-        public IActionResult SearchAssetItems(string folderUrl = null, string keyword = null)
+        public async Task<IActionResult> SearchAssetItemsAsync([FromQuery]string folderUrl = null,[FromQuery] string keyword = null)
         {
-            var result = _blobProvider.Search(folderUrl, keyword);
-            return Ok(result.ToWebModel());
+            var result = await _blobProvider.SearchAsync(folderUrl, keyword);
+            return Ok(result);
         }
 
         /// <summary>
@@ -191,10 +220,10 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 200)]
         [Route("folder")]
         [Authorize(SecurityConstants.Permissions.AssetCreate)]
-        public IActionResult CreateBlobFolder(BlobFolder folder)
+        public async Task<IActionResult> CreateBlobFolderAsync([FromBody]BlobFolder folder)
         {
-            _blobProvider.CreateFolder(folder);
-            return NoContent();
+            await _blobProvider.CreateFolderAsync(folder);
+            return Ok();
         }
     }
 }

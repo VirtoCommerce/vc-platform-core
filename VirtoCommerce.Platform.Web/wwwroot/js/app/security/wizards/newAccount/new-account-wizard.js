@@ -37,15 +37,15 @@ angular.module('platformWebApp')
         postData.newPassword2 = undefined;
         postData.roles = _.where(blade.currentEntities, { $selected: true });
 
-        accounts.save(postData, function () {
-            blade.parentBlade.refresh();
-            blade.parentBlade.selectNode(postData);
-        }, function (error) {
-            var errText = 'Error ' + error.status;
-            if (error.data && error.data.message) {
-                errText = errText + ": " + error.data.message;
+        accounts.save(postData, function (result) {
+            if (result.succeeded) {
+                blade.parentBlade.refresh();
+                blade.parentBlade.selectNode(postData);
             }
-            bladeNavigationService.setError(errText, $scope.blade);
+            else {
+                bladeNavigationService.setError(_.pluck(result.errors, 'description').join(), blade);
+            }
+        
         });
     };
 

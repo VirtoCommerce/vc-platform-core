@@ -1,10 +1,9 @@
-﻿angular.module('platformWebApp')
+angular.module('platformWebApp')
 .controller('platformWebApp.accountDetailController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.metaFormsService', 'platformWebApp.accounts', 'platformWebApp.roles', 'platformWebApp.dialogService', 'platformWebApp.settings',
     function ($scope, bladeNavigationService, metaFormsService, accounts, roles, dialogService, settings) {
         var blade = $scope.blade;
         blade.updatePermission = 'platform:security:update';
-        blade.promise = roles.search({ takeCount: 10000 }).$promise;
-        blade.accountTypes = [];
+        blade.accountTypes = [];      
 
         blade.refresh = function (parentRefresh) {
             var entity = parentRefresh ? blade.currentEntity : blade.data;
@@ -61,10 +60,13 @@
         $scope.saveChanges = function () {
             blade.isLoading = true;
 
-            accounts.update({}, blade.currentEntity, function (data) {
-                blade.refresh(true);
-            }, function (error) {
-                bladeNavigationService.setError('Error ' + error.status, blade);
+            accounts.update({}, blade.currentEntity, function (result) {
+                if (result.succeeded) {
+                    blade.refresh(true);
+                }
+                else {
+                    bladeNavigationService.setError(_.pluck(result.errors, 'description').join(), blade);
+                }
             });
         };
 

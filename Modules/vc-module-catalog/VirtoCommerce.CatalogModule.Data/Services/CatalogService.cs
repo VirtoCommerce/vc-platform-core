@@ -52,10 +52,9 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         public virtual void SaveChanges(IEnumerable<Catalog> catalogs)
         {
             var pkMap = new PrimaryKeyResolvingMap();
-            var changedEntries = new List<ChangedEntry<Catalog>>();
+            var changedEntries = new List<GenericChangedEntry<Catalog>>();
 
             using (var repository = _repositoryFactory())
-            using (var changeTracker = new ObservableChangeTracker())
             {
                 ValidateCatalogProperties(catalogs);
                 var dbExistEntities = repository.GetCatalogsByIds(catalogs.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
@@ -65,22 +64,21 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     var modifiedEntity = AbstractTypeFactory<CatalogEntity>.TryCreateInstance().FromModel(catalog, pkMap);
                     if (originalEntity != null)
                     {
-                        changeTracker.Attach(originalEntity);
+                        changedEntries.Add(new GenericChangedEntry<Catalog>(catalog, originalEntity.ToModel(AbstractTypeFactory<Catalog>.TryCreateInstance()), EntryState.Modified));
                         modifiedEntity.Patch(originalEntity);
-                        changedEntries.Add(new ChangedEntry<Catalog>(catalog, EntryState.Modified));
                     }
                     else
                     {
                         repository.Add(modifiedEntity);
-                        changedEntries.Add(new ChangedEntry<Catalog>(catalog, EntryState.Added));
+                        changedEntries.Add(new GenericChangedEntry<Catalog>(catalog, EntryState.Added));
                     }
                 }
                 //Raise domain events
-                _eventPublisher.Publish(new GenericCatalogChangingEvent<Catalog>(changedEntries));
+                _eventPublisher.Publish(new CatalogChangingEvent(changedEntries));
                 //Save changes in database
                 repository.UnitOfWork.Commit();
                 pkMap.ResolvePrimaryKeys();
-                _eventPublisher.Publish(new GenericCatalogChangedEvent<Catalog>(changedEntries));
+                _eventPublisher.Publish(new CatalogChangedEvent(changedEntries));
 
                 //Reset cached catalogs and catalogs
                 CatalogCacheRegion.ExpireRegion();
@@ -89,6 +87,10 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
         public void Delete(IEnumerable<string> catalogIds)
         {
+            var catalogs = GetByIds(catalogIds);
+            //Raise domain events before deletion
+            var changedEntries = catalogs.Select(x => new GenericChangedEntry<Catalog>(x, EntryState.Deleted));
+            _eventPublisher.Publish(new CatalogChangingEvent(changedEntries));
             using (var repository = _repositoryFactory())
             {
                 //TODO:  raise events on catalog deletion
@@ -97,6 +99,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 //Reset cached catalogs and catalogs
                 CatalogCacheRegion.ExpireRegion();
             }
+            _eventPublisher.Publish(new CatalogChangedEvent(changedEntries));
         }
         #endregion
 
@@ -137,7 +140,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     {
                         property.Catalog = preloadedCatalogsMap[property.CatalogId];
                         property.ActualizeValues();
-                    }                 
+                    }
                 }
             }
         }

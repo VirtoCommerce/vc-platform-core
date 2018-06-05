@@ -17,8 +17,57 @@ namespace VirtoCommerce.Platform.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.0.1-rtm-125")
+                .HasAnnotation("ProductVersion", "2.0.3-rtm-10026")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+            modelBuilder.Entity("VirtoCommerce.Platform.Data.Assets.AssetEntryEntity", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(64);
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("Group")
+                        .HasMaxLength(64);
+
+                    b.Property<string>("LanguageCode")
+                        .HasMaxLength(10);
+
+                    b.Property<string>("MimeType")
+                        .HasMaxLength(128);
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(64);
+
+                    b.Property<DateTime?>("ModifiedDate");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(1024);
+
+                    b.Property<string>("RelativeUrl")
+                        .IsRequired()
+                        .HasMaxLength(2083);
+
+                    b.Property<long>("Size");
+
+                    b.Property<string>("TenantId")
+                        .HasMaxLength(128);
+
+                    b.Property<string>("TenantType")
+                        .HasMaxLength(256);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RelativeUrl", "Name")
+                        .HasName("IX_AssetEntry_RelativeUrl_Name");
+
+                    b.ToTable("AssetEntry");
+                });
 
             modelBuilder.Entity("VirtoCommerce.Platform.Data.Model.DynamicPropertyDictionaryItemEntity", b =>
                 {
@@ -183,7 +232,8 @@ namespace VirtoCommerce.Platform.Data.Migrations
 
                     b.Property<DateTime?>("DateTimeValue");
 
-                    b.Property<decimal?>("DecimalValue");
+                    b.Property<decimal?>("DecimalValue")
+                        .HasColumnType("decimal(18,5)");
 
                     b.Property<string>("DictionaryItemId");
 
@@ -326,7 +376,8 @@ namespace VirtoCommerce.Platform.Data.Migrations
 
                     b.Property<DateTime?>("DateTimeValue");
 
-                    b.Property<decimal>("DecimalValue");
+                    b.Property<decimal>("DecimalValue")
+                        .HasColumnType("decimal(18,5)");
 
                     b.Property<int>("IntegerValue");
 

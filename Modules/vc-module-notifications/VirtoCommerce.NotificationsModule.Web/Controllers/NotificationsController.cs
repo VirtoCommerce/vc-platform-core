@@ -20,11 +20,11 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
     {
         private readonly INotificationSearchService _notificationSearchService;
         private readonly INotificationService _notificationService;
-        private readonly INotificationTemplateRender _notificationTemplateRender;
+        private readonly INotificationTemplateRenderer _notificationTemplateRender;
 
         public NotificationsController(INotificationSearchService notificationSearchService
             , INotificationService notificationService
-            , INotificationTemplateRender notificationTemplateRender
+            , INotificationTemplateRenderer notificationTemplateRender
             )
         {
             _notificationSearchService = notificationSearchService;

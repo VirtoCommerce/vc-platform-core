@@ -1,10 +1,11 @@
-﻿namespace VirtoCommerce.Platform.Core.Assets
+namespace VirtoCommerce.Platform.Core.Assets
 {
-    public class BlobFolder
+    public class BlobFolder : BlobEntry
     {
-        public string Name { get; set; }
-        public string Url { get; set; }
-        public string RelativeUrl { get; set; }
+        public BlobFolder()
+        {
+            Type = "folder";
+        }
         public string ParentUrl { get; set; }
     }
 }

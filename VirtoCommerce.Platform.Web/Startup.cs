@@ -14,34 +14,31 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Smidge;
 using Smidge.Nuglify;
 using Swashbuckle.AspNetCore.Swagger;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.DynamicProperties;
-using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Jobs;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.Platform.Core.Settings;
-using VirtoCommerce.Platform.Data.DynamicProperties;
+using VirtoCommerce.Platform.Data.Assets.AzureBlobStorage;
+using VirtoCommerce.Platform.Data.Assets.FileSystem;
 using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.Platform.Data.PushNotifications;
 using VirtoCommerce.Platform.Data.Repositories;
-using VirtoCommerce.Platform.Data.Settings;
 using VirtoCommerce.Platform.Modules;
 using VirtoCommerce.Platform.Modules.Extensions;
 using VirtoCommerce.Platform.Security;
 using VirtoCommerce.Platform.Security.Authorization;
 using VirtoCommerce.Platform.Security.Extensions;
 using VirtoCommerce.Platform.Security.Repositories;
-using VirtoCommerce.Platform.Web.ExportImport;
 using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Hangfire;
 using VirtoCommerce.Platform.Web.Infrastructure;
+using VirtoCommerce.Platform.Web.JsonConverters;
 using VirtoCommerce.Platform.Web.Middelware;
 using VirtoCommerce.Platform.Web.Swagger;
 
@@ -57,30 +54,39 @@ namespace VirtoCommerce.Platform.Web
 
         public IConfiguration Configuration { get; }
         public IHostingEnvironment HostingEnvironment { get; }
-        
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddScoped<IPlatformExportImportManager, PlatformExportImportManager>();
-            services.AddSingleton<IDynamicPropertyService, DynamicPropertyService>();
-            services.AddSingleton<IKnownPermissionsProvider, DefaultPermissionProvider>();
-            services.AddSingleton<ISettingsManager, SettingsManager>();
-            services.AddSingleton<IModuleCatalog, ModuleCatalog>();
 
-            services.Configure<DemoOptions>(Configuration.GetSection("VirtoCommerce"));
+            services.Configure<PlatformOptions>(Configuration.GetSection("VirtoCommerce"));
             services.Configure<HangfireOptions>(Configuration.GetSection("VirtoCommerce:Jobs"));
-            services.Configure<PlatformOption>(Configuration.GetSection("VirtoCommerce"));
 
             PlatformVersion.CurrentVersion = SemanticVersion.Parse(Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default.Application.ApplicationVersion);
 
+            services.AddPlatformServices(Configuration);
+
             var mvcBuilder = services.AddMvc().AddJsonOptions(options =>
                 {
-                    options.SerializerSettings.Error = (sender, args) =>
+                    //Next line needs to represent custom derived types in the resulting swagger doc definitions. Because default SwaggerProvider used global JSON serialization settings
+                    //we should register this converter globally.
+                    options.SerializerSettings.ContractResolver = new PolymorphJsonContractResolver();
+
+                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                    options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+                    options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                    options.SerializerSettings.Converters.Add(new StringEnumConverter());
+                    options.SerializerSettings.PreserveReferencesHandling = PreserveReferencesHandling.None;
+                    options.SerializerSettings.Formatting = Formatting.None;
+
+                    options.SerializerSettings.Error += (sender, args) =>
                     {
-                        var log = services.BuildServiceProvider().GetService<ILogger<JsonSerializerSettings>>();
-                        log.LogError(args.ErrorContext.Error, args.ErrorContext.Error.Message);
+                        // Expose any JSON serialization exception as HTTP error
+                        throw new JsonException(args.ErrorContext.Error.Message);
                     };
+                    options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+                    options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                 }
             );
             var modulesDiscoveryPath = Path.GetFullPath("Modules");
@@ -93,7 +99,7 @@ namespace VirtoCommerce.Platform.Web
             {
                 options.ModulesManifestUrl = new Uri(@"https://raw.githubusercontent.com/VirtoCommerce/vc-modules/master/modules.json");
             });
-           
+
             services.AddDbContext<SecurityDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("VirtoCommerce"));
@@ -101,6 +107,11 @@ namespace VirtoCommerce.Platform.Web
                 // Note: use the generic overload if you need
                 // to replace the default OpenIddict entities.
                 options.UseOpenIddict();
+            });
+
+            services.AddSecurityServices(options =>
+            {
+                options.NonEditableUsers = new[] { "admin" };
             });
 
             services.AddIdentity<ApplicationUser, Role>()
@@ -116,6 +127,7 @@ namespace VirtoCommerce.Platform.Web
                 options.ClaimsIdentity.UserIdClaimType = OpenIdConnectConstants.Claims.Subject;
                 options.ClaimsIdentity.RoleClaimType = OpenIdConnectConstants.Claims.Role;
             });
+
 
             // Register the OAuth2 validation handler.
             services.AddAuthentication().AddOAuthValidation();
@@ -165,24 +177,7 @@ namespace VirtoCommerce.Platform.Web
                 options.AddEphemeralSigningKey();
             });
 
-            services.Configure<IdentityOptions>(options =>
-            {
-                // Password settings
-                options.Password.RequireDigit = true;
-                options.Password.RequiredLength = 8;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireLowercase = false;
-                options.Password.RequiredUniqueChars = 6;
-
-                // Lockout settings
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
-                options.Lockout.MaxFailedAccessAttempts = 10;
-                options.Lockout.AllowedForNewUsers = true;
-
-                // User settings
-                options.User.RequireUniqueEmail = true;
-            });
+            services.Configure<IdentityOptions>(Configuration.GetSection("IdentityOptions"));
 
             //always  return 401 instead of 302 for unauthorized  requests
             services.ConfigureApplicationCookie(options =>
@@ -228,29 +223,33 @@ namespace VirtoCommerce.Platform.Web
             services.AddSignalR();
 
             services.AddPlatformServices(Configuration);
+
+
+
             services.AddSecurityServices();
 
-            var assetConnectionString = BlobConnectionString.Parse(Configuration.GetConnectionString("AssetsConnectionString"));
-            //TODO: Azure blob storage
-            if (assetConnectionString.Provider.EqualsInvariant("AzureBlobStorage"))
-            {
-                //var azureBlobOptions = new AzureBlobContentOptions();
-                //Configuration.GetSection("VirtoCommerce:AzureBlobStorage").Bind(azureBlobOptions);
+            var assetsProvider = Configuration.GetSection("Assets:Provider").Value;
 
-                //services.AddAzureBlobContent(options =>
-                //{
-                //    options.Container = contentConnectionString.RootPath;
-                //    options.ConnectionString = contentConnectionString.ConnectionString;
-                //    options.PollForChanges = azureBlobOptions.PollForChanges;
-                //    options.ChangesPoolingInterval = azureBlobOptions.ChangesPoolingInterval;
-                //});
+            if (assetsProvider.EqualsInvariant("AzureBlobStorage"))
+            {
+                var azureBlobOptions = new AzureBlobContentOptions();
+                Configuration.GetSection("Assets:AzureBlobStorage").Bind(azureBlobOptions);
+
+                services.AddAzureBlobProvider(options =>
+                {
+                    options.ConnectionString = azureBlobOptions.ConnectionString;
+                    options.CdnUrl = azureBlobOptions.CdnUrl;
+                });
             }
             else
             {
+                var fileSystemBlobOptions = new FileSystemBlobContentOptions();
+                Configuration.GetSection("Assets:FileSystem").Bind(fileSystemBlobOptions);
+
                 services.AddFileSystemBlobProvider(options =>
                 {
-                    options.StoragePath = HostingEnvironment.MapPath(assetConnectionString.RootPath);
-                    options.BasePublicUrl = assetConnectionString.PublicUrl;
+                    options.RootPath = Path.GetFullPath(fileSystemBlobOptions.RootPath);
+                    options.PublicUrl = fileSystemBlobOptions.PublicUrl;
                 });
             }
 
@@ -262,14 +261,14 @@ namespace VirtoCommerce.Platform.Web
             }
             else
             {
-                services.AddHangfire(config => config.UseMemoryStorage() );
+                services.AddHangfire(config => config.UseMemoryStorage());
             }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-       
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -302,7 +301,7 @@ namespace VirtoCommerce.Platform.Web
                 });
             }
 
-         
+
             app.UseDefaultFiles();
 
 
@@ -320,7 +319,7 @@ namespace VirtoCommerce.Platform.Web
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller}/{action=Index}/{id?}");
+                    template: "{controller=Home}/{action=Index}/{id?}");
             });
 
             //Force migrations
@@ -346,7 +345,7 @@ namespace VirtoCommerce.Platform.Web
             {
                 c.SwaggerEndpoint("/docs/v1/docs.json", "Explore");
                 c.RoutePrefix = "docs";
-                c.EnabledValidator();
+                c.EnableValidator();
             });
 
             app.UseDbTriggers();
@@ -365,14 +364,14 @@ namespace VirtoCommerce.Platform.Web
             //Seed default users
             app.UseDefaultUsersAsync().GetAwaiter().GetResult();
 
-            app.UseHangfireDashboard("/hangfire", new DashboardOptions { Authorization = new [] { new HangfireAuthorizationHandler() }});
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions { Authorization = new[] { new HangfireAuthorizationHandler() } });
             app.UseHangfireServer(new BackgroundJobServerOptions
             {
                 // Create some queues for job prioritization.
                 // Normal equals 'default', because Hangfire depends on it.
                 Queues = new[] { JobPriority.High, JobPriority.Normal, JobPriority.Low }
             });
-            
+
         }
     }
 }

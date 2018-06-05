@@ -30,6 +30,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
     [ApiExplorerSettings(IgnoreApi = true)]
     public class ModulesController : Controller
     {
+        private const string _autoInstallStateSetting = "VirtoCommerce.ModulesAutoInstallState";
         private const string _uploadsUrl = "~/App_Data/Uploads/";
         private readonly IExternalModuleCatalog _moduleCatalog;
         private readonly IModuleInstaller _moduleInstaller;
@@ -40,10 +41,11 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         private static readonly FormOptions _defaultFormOptions = new FormOptions();
         private readonly ExternalModuleCatalogOptions _extModuleOptions;
         private static readonly object _lockObject = new object();
+        private IApplicationLifetime ApplicationLifetime { get; set; }
 
         public ModulesController(IExternalModuleCatalog moduleCatalog, IModuleInstaller moduleInstaller, IPushNotificationManager pushNotifier,
             IUserNameResolver userNameResolver, IHostingEnvironment hostingEnv, Core.Settings.ISettingsManager settingsManager,
-            IOptions<ExternalModuleCatalogOptions> extModuleOptions)
+            IOptions<ExternalModuleCatalogOptions> extModuleOptions, IApplicationLifetime appLifetime)
         {
             _moduleCatalog = moduleCatalog;
             _moduleInstaller = moduleInstaller;
@@ -52,6 +54,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             _settingsManager = settingsManager;
             _hostingEnv = hostingEnv;
             _extModuleOptions = extModuleOptions.Value;
+            ApplicationLifetime = appLifetime;
         }
 
         /// <summary>
@@ -155,7 +158,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
             string targetFilePath = null;
 
-            var boundary = MultipartRequestHelper.GetBoundary(MediaTypeHeaderValue.Parse(Request.ContentType),  _defaultFormOptions.MultipartBoundaryLengthLimit);
+            var boundary = MultipartRequestHelper.GetBoundary(MediaTypeHeaderValue.Parse(Request.ContentType), _defaultFormOptions.MultipartBoundaryLengthLimit);
             var reader = new MultipartReader(boundary, HttpContext.Request.Body);
 
             var section = await reader.ReadNextSectionAsync();
@@ -168,7 +171,10 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 {
                     if (MultipartRequestHelper.HasFileContentDisposition(contentDisposition))
                     {
-                        targetFilePath = Path.Combine(_hostingEnv.MapPath(_uploadsUrl), contentDisposition.FileName.Value);
+                        //ToDo After update to core 2.1 make beautiful https://github.com/aspnet/HttpAbstractions/issues/446
+                        var fileName = contentDisposition.FileName.Value.TrimStart('\"').TrimEnd('\"');
+
+                        targetFilePath = Path.Combine(_hostingEnv.MapPath(_uploadsUrl), fileName);
                         using (var targetStream = System.IO.File.Create(targetFilePath))
                         {
                             await section.Body.CopyToAsync(targetStream);
@@ -258,8 +264,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Authorize(SecurityConstants.Permissions.ModuleManage)]
         public ActionResult Restart()
         {
-            //TODO:
-            throw new NotImplementedException();
+            ApplicationLifetime.StopApplication();
+            return Ok();
         }
 
         /// <summary>
@@ -269,7 +275,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("autoinstall")]
         [Authorize(SecurityConstants.Permissions.PlatformImport)]
-        public ActionResult TryToAutoInstallModules()
+        public async Task<ActionResult> TryToAutoInstallModulesAsync()
         {
             var notification = new ModuleAutoInstallPushNotification(User.Identity.Name)
             {
@@ -279,16 +285,16 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             };
 
 
-            if (!_settingsManager.GetValue("VirtoCommerce.ModulesAutoInstalled", false))
+            if (!(await _settingsManager.GetValueAsync(PlatformConstants.Settings.Setup.ModulesAutoInstalled.Name, false)))
             {
-                lock (_lockObject)
+                using (await AsyncLock.GetLockByKey("autoinstall").LockAsync())
                 {
-                    if (!_settingsManager.GetValue("VirtoCommerce.ModulesAutoInstalled", false))
+                    if (!(await _settingsManager.GetValueAsync(PlatformConstants.Settings.Setup.ModulesAutoInstalled.Name, false)))
                     {
                         var moduleBundles = _extModuleOptions.AutoInstallModuleBundles;
                         if (!moduleBundles.IsNullOrEmpty())
                         {
-                            _settingsManager.SetValue("VirtoCommerce.ModulesAutoInstalled", true);
+                            _settingsManager.SetValue(_autoInstallStateSetting, AutoInstallState.Processing);
 
                             EnsureModulesCatalogInitialized();
 
@@ -338,6 +344,22 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             return Ok(notification);
         }
 
+        /// <summary>
+        /// This method used by azure automatically deployment scripts to check the installation status
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("autoinstall/state")]
+        [ProducesResponseType(typeof(string), 200)]
+        [ApiExplorerSettings(IgnoreApi = true)]
+        [AllowAnonymous]
+        public IActionResult GetAutoInstallState()
+        {
+            var state = EnumUtility.SafeParse(_settingsManager.GetValue(_autoInstallStateSetting, string.Empty), AutoInstallState.Undefined);
+            return Ok(state);
+        }
+
+        [ApiExplorerSettings(IgnoreApi = true)]
         public void ModuleBackgroundJob(ModuleBackgroundJobOptions options, ModulePushNotification notification)
         {
             try
@@ -375,6 +397,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             }
             finally
             {
+                _settingsManager.SetValue(_autoInstallStateSetting, AutoInstallState.Completed);
+
                 notification.Finished = DateTime.UtcNow;
                 notification.ProgressLog.Add(new ProgressMessage
                 {

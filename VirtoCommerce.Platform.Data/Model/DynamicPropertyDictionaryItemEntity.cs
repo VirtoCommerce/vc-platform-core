@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -29,6 +29,7 @@ namespace VirtoCommerce.Platform.Data.Model
             if (dictItem == null)
                 throw new ArgumentNullException(nameof(dictItem));
 
+            dictItem.Id = Id;
             dictItem.PropertyId = PropertyId;
             dictItem.Name = Name;
             dictItem.DisplayNames = DisplayNames.Select(x => x.ToModel(AbstractTypeFactory<DynamicPropertyDictionaryItemName>.TryCreateInstance())).ToArray();

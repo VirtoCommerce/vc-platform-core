@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Settings;
@@ -19,10 +16,8 @@ namespace VirtoCommerce.Platform.Data.Settings
             result.RawDefaultValue = moduleSetting.RawDefaultValue();
             result.Value = result.DefaultValue;
             result.RawValue = result.RawDefaultValue;
-            result.Description = moduleSetting.Description;
             result.AllowedValues = moduleSetting.AllowedValues;
             result.IsArray = moduleSetting.IsArray;
-            result.Title = moduleSetting.Title;
 
             result.ArrayValues = moduleSetting.ArrayValues;
             if (moduleSetting.ArrayValues != null)
@@ -41,7 +36,7 @@ namespace VirtoCommerce.Platform.Data.Settings
             {
                 retVal = SettingValueType.Boolean;
             }
-            else if (valueType == typeof(Int32))
+            else if (valueType == typeof(int))
             {
                 retVal = SettingValueType.Integer;
             }

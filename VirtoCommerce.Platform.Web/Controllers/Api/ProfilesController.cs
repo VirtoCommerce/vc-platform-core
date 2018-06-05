@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Web.Model.Profiles;
@@ -14,14 +16,15 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
     [ApiExplorerSettings(IgnoreApi = true)]
     public class ProfilesController : Controller
     {
-        private static object _lockObject = new object();
         private readonly ISettingsManager _settingsManager;
+        private readonly ILocalModuleCatalog _moduleCatalog;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public ProfilesController(UserManager<ApplicationUser> userManager, ISettingsManager settingsManager)
+        public ProfilesController(UserManager<ApplicationUser> userManager, ISettingsManager settingsManager, ILocalModuleCatalog moduleCatalog)
         {
             _userManager = userManager;
             _settingsManager = settingsManager;
+            _moduleCatalog = moduleCatalog;
         }
 
         /// <summary>
@@ -31,21 +34,24 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpGet]
         [Route("currentuser")]
         [Authorize]
-        public async Task<ActionResult> GetCurrentUserProfile()
+        public async Task<ActionResult> GetCurrentUserProfileAsync()
         {
             var currentUser = await _userManager.FindByNameAsync(User.Identity.Name);
             if (currentUser != null)
             {
-                var userProfile = new UserProfile()
+                var userProfile = AbstractTypeFactory<UserProfile>.TryCreateInstance();
+                userProfile.Id = currentUser.Id;
+                foreach (var module in _moduleCatalog.Modules.OfType<ManifestModuleInfo>())
                 {
-                    Id = currentUser.Id
-                };
-                var modules = _settingsManager.GetModules();
-                userProfile.Settings = modules.SelectMany(module => _settingsManager.GetModuleSettings(module.Id)).Where(setting => setting.GroupName == "Platform|User Profile").ToArray();
-                _settingsManager.LoadEntitySettingsValues(userProfile);
+                    //TODO: move Platform|User Profile to constants
+                    var moduleSetings = (await _settingsManager.GetModuleSettingsAsync(module.Id))
+                                            .Where(setting => setting.GroupName == "Platform|User Profile");
+                    userProfile.Settings = userProfile.Settings.Concat(moduleSetings).Distinct().ToList();
+                }
+                await _settingsManager.LoadEntitySettingsValuesAsync(userProfile);
                 return Ok(userProfile);
             }
-            return NotFound();
+            return Ok();
         }
 
         /// <summary>
@@ -56,16 +62,16 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("currentuser")]
         [Authorize]
-        public async Task<ActionResult> UpdateCurrentUserProfile([FromBody] UserProfile userProfile)
+        public async Task<ActionResult> UpdateCurrentUserProfileAsync([FromBody] UserProfile userProfile)
         {
             var currentUser = await _userManager.FindByNameAsync(User.Identity.Name);
             if (currentUser.Id != userProfile.Id)
             {
                 return Unauthorized();
             }
-            lock (_lockObject)
+            using (await AsyncLock.GetLockByKey(userProfile.ToString()).LockAsync())
             {
-                _settingsManager.SaveEntitySettingsValues(userProfile);
+                await _settingsManager.SaveEntitySettingsValuesAsync(userProfile);
             }
             return Ok();
         }

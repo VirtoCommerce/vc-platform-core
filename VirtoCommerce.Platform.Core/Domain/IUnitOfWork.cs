@@ -1,6 +1,6 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 
-namespace VirtoCommerce.Platform.Core.Common
+namespace VirtoCommerce.Platform.Core.Domain
 {
     public interface IUnitOfWork
 	{

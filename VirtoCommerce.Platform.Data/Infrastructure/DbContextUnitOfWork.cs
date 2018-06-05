@@ -1,7 +1,9 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Domain;
+
 namespace VirtoCommerce.Platform.Data.Infrastructure
 {
     public class DbContextUnitOfWork : IUnitOfWork

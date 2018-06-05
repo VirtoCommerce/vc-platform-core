@@ -1,5 +1,6 @@
 using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
+using VirtoCommerce.Platform.Data.Assets;
 using VirtoCommerce.Platform.Data.Model;
 
 namespace VirtoCommerce.Platform.Data.Repositories
@@ -41,6 +42,10 @@ namespace VirtoCommerce.Platform.Data.Repositories
                         .WithMany(x => x.SettingValues)
                         .HasForeignKey(x => x.SettingId)
                         .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SettingValueEntity>()
+                .Property(x => x.DecimalValue)
+                .HasColumnType("decimal(18,5)");
 
             #endregion
 
@@ -108,8 +113,25 @@ namespace VirtoCommerce.Platform.Data.Repositories
                         .HasForeignKey(x => x.DictionaryItemId);
             modelBuilder.Entity<DynamicPropertyObjectValueEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
                         .IsUnique(false)
-                        .HasName("IX_ObjectType_ObjectId");        
+                        .HasName("IX_ObjectType_ObjectId");
+
+            modelBuilder.Entity<DynamicPropertyObjectValueEntity>()
+                .Property(x => x.DecimalValue)
+                .HasColumnType("decimal(18,5)");
             #endregion
+
+            #region Assets
+
+            modelBuilder.Entity<AssetEntryEntity>().ToTable("AssetEntry").HasKey(x => x.Id);
+            modelBuilder.Entity<AssetEntryEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<AssetEntryEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
+            modelBuilder.Entity<AssetEntryEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
+            modelBuilder.Entity<AssetEntryEntity>().HasIndex(x => new { x.RelativeUrl, x.Name})
+                .IsUnique(false)
+                .HasName("IX_AssetEntry_RelativeUrl_Name");
+
+            #endregion
+
 
             base.OnModelCreating(modelBuilder);
         }

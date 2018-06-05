@@ -1,4 +1,4 @@
-﻿angular.module('platformWebApp')
+angular.module('platformWebApp')
 .controller('platformWebApp.dynamicPropertyDetailController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.settings', 'platformWebApp.dynamicProperties.api', 'platformWebApp.dynamicProperties.dictionaryItemsApi', 'platformWebApp.dynamicProperties.valueTypesService', function ($scope, bladeNavigationService, dialogService, settings, dynamicPropertiesApi, dictionaryItemsApi, valueTypesService) {
     var blade = $scope.blade;
     blade.updatePermission = 'platform:dynamic_properties:update';
@@ -18,6 +18,7 @@
                 }
                 return retVal;
             });
+            blade.currentEntity.objectType = blade.objectType;
             blade.origEntity = blade.currentEntity;
             blade.currentEntity = angular.copy(blade.origEntity);
             blade.isLoading = false;
@@ -68,11 +69,15 @@
 
     $scope.saveChanges = function () {
         if (blade.isNew) {
-            dynamicPropertiesApi.save({ id: blade.objectType }, blade.currentEntity,
+            dynamicPropertiesApi.save(blade.currentEntity,
                 function (data) {
                     blade.onChangesConfirmedFn(data);
                     // save dictionary items for new entity
                     if (data.isDictionary) {
+                        localDictionaryValues = _.map(localDictionaryValues, function (item) {
+                            item.propertyId = data.id;
+                            return item;
+                        });
                         dictionaryItemsApi.save({ id: blade.objectType, propertyId: data.id },
                             localDictionaryValues,
                             function () {
@@ -87,7 +92,7 @@
                 },
                 function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
         } else {
-            dynamicPropertiesApi.update({ id: blade.objectType, propertyId: blade.currentEntity.id }, blade.currentEntity,
+            dynamicPropertiesApi.update(blade.currentEntity,
                 function () {
                     blade.refresh();
                     blade.parentBlade.refresh(true);
