@@ -55,11 +55,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Notifications
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Data.Assets.FileSystem", "VirtoCommerce.Platform.Data.Assets.FileSystem\VirtoCommerce.Platform.Data.Assets.FileSystem.csproj", "{1AC7B40D-B86E-4E5F-B40A-8142D1639A62}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.Platform.Data.Assets.AzureBlobStorage", "VirtoCommerce.Platform.Data.Assets.AzureBlobStorage\VirtoCommerce.Platform.Data.Assets.AzureBlobStorage.csproj", "{576C8563-7105-4C2C-B4F2-8A1DB28D31C7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Data.Assets.AzureBlobStorage", "VirtoCommerce.Platform.Data.Assets.AzureBlobStorage\VirtoCommerce.Platform.Data.Assets.AzureBlobStorage.csproj", "{576C8563-7105-4C2C-B4F2-8A1DB28D31C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.Platform.Tests", "VirtoCommerce.Platform.Tests\VirtoCommerce.Platform.Tests.csproj", "{27CFFA2B-5AE4-4C6D-B762-8C9B4D5CDB2F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Tests", "VirtoCommerce.Platform.Tests\VirtoCommerce.Platform.Tests.csproj", "{27CFFA2B-5AE4-4C6D-B762-8C9B4D5CDB2F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Module1.Data", "Modules\Module1\Module1.Data\Module1.Data.csproj", "{6C7C3624-8CF1-4890-83A9-AA073B93B369}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Module1.Data", "Modules\Module1\Module1.Data\Module1.Data.csproj", "{6C7C3624-8CF1-4890-83A9-AA073B93B369}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
