@@ -248,7 +248,7 @@ namespace VirtoCommerce.Platform.Web
 
                 services.AddFileSystemBlobProvider(options =>
                 {
-                    options.RootPath = HostingEnvironment.MapPath(fileSystemBlobOptions.RootPath);
+                    options.RootPath = Path.GetFullPath(fileSystemBlobOptions.RootPath);
                     options.PublicUrl = fileSystemBlobOptions.PublicUrl;
                 });
             }
