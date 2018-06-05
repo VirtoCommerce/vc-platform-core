@@ -17,18 +17,18 @@ namespace VirtoCommerce.Platform.Data.Repositories
         }
 
         #region IPlatformRepository Members
-        public IQueryable<SettingEntity> Settings { get { return DbContext.Set<SettingEntity>(); } }
+        public virtual IQueryable<SettingEntity> Settings { get { return DbContext.Set<SettingEntity>(); } }
 
-        public IQueryable<DynamicPropertyEntity> DynamicProperties { get { return DbContext.Set<DynamicPropertyEntity>(); } }
-        public IQueryable<DynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get { return DbContext.Set<DynamicPropertyObjectValueEntity>(); } }
-        public IQueryable<DynamicPropertyDictionaryItemEntity> DynamicPropertyDictionaryItems { get { return DbContext.Set<DynamicPropertyDictionaryItemEntity>(); } }
-
-
-        public IQueryable<OperationLogEntity> OperationLogs { get { return DbContext.Set<OperationLogEntity>(); } }
+        public virtual IQueryable<DynamicPropertyEntity> DynamicProperties { get { return DbContext.Set<DynamicPropertyEntity>(); } }
+        public virtual IQueryable<DynamicPropertyObjectValueEntity> DynamicPropertyObjectValues { get { return DbContext.Set<DynamicPropertyObjectValueEntity>(); } }
+        public virtual IQueryable<DynamicPropertyDictionaryItemEntity> DynamicPropertyDictionaryItems { get { return DbContext.Set<DynamicPropertyDictionaryItemEntity>(); } }
 
 
+        public virtual IQueryable<OperationLogEntity> OperationLogs { get { return DbContext.Set<OperationLogEntity>(); } }
 
-        public async Task<DynamicPropertyEntity[]> GetObjectDynamicPropertiesAsync(string[] objectTypeNames, string[] objectIds)
+
+
+        public virtual async Task<DynamicPropertyEntity[]> GetObjectDynamicPropertiesAsync(string[] objectTypeNames, string[] objectIds)
         {
             var properties = DynamicProperties.Include(x => x.DisplayNames)
                                               .OrderBy(x => x.Name)
@@ -42,7 +42,7 @@ namespace VirtoCommerce.Platform.Data.Repositories
             return properties;
         }
 
-        public async Task<DynamicPropertyDictionaryItemEntity[]> GetDynamicPropertyDictionaryItemByIdsAsync(string[] ids)
+        public virtual async Task<DynamicPropertyDictionaryItemEntity[]> GetDynamicPropertyDictionaryItemByIdsAsync(string[] ids)
         {
             var retVal = await DynamicPropertyDictionaryItems.Include(x => x.DisplayNames)
                                      .Where(x => ids.Contains(x.Id))
@@ -50,7 +50,7 @@ namespace VirtoCommerce.Platform.Data.Repositories
             return retVal;
         }
 
-        public async Task<DynamicPropertyEntity[]> GetDynamicPropertiesByIdsAsync(string[] ids)
+        public virtual async Task<DynamicPropertyEntity[]> GetDynamicPropertiesByIdsAsync(string[] ids)
         {
             var retVal = await DynamicProperties.Include(x => x.DisplayNames)
                                           .Where(x => ids.Contains(x.Id))
@@ -61,14 +61,14 @@ namespace VirtoCommerce.Platform.Data.Repositories
 
 
 
-        public async Task<SettingEntity> GetSettingByNameAsync(string name)
+        public virtual async Task<SettingEntity> GetSettingByNameAsync(string name)
         {
             var result = await Settings.Include(x => x.SettingValues)
                                        .FirstOrDefaultAsync(x => x.Name == name && x.ObjectId == null && x.ObjectType == null);
             return result;
         }
 
-        public async Task<SettingEntity[]> GetAllObjectSettingsAsync(string objectType, string objectId)
+        public virtual async Task<SettingEntity[]> GetAllObjectSettingsAsync(string objectType, string objectId)
         {
             var result = await Settings.Include(x => x.SettingValues)
                                  .Where(x => x.ObjectId == objectId && x.ObjectType == objectType)
