@@ -1,0 +1,1 @@
+Add-Migration Initial -Context VirtoCommerce.Platform.Data.Repositories.PlatformDbContext  -Verbose -OutputDir Migrations -Project Module1.Data -Debug -StartupProject Module1.Data
