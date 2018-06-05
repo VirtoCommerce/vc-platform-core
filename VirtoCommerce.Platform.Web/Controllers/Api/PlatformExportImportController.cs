@@ -233,7 +233,6 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             {
                 //pushNotification.InjectFrom(x);
                 pushNotification.Errors = x.Errors;
-                pushNotification.
                 _pushNotifier.Send(pushNotification);
             };
             try

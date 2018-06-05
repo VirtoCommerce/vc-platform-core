@@ -92,7 +92,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
                         var blobInfo = AbstractTypeFactory<BlobInfo>.TryCreateInstance();
                         blobInfo.Name = fileName;
-                        blobInfo.Url = _uploadsUrl + fileName;
+                        blobInfo.Url = _uploadsUrl + "\\" + fileName;
                         blobInfo.ContentType = MimeTypeResolver.ResolveContentType(fileName);
                         retVal.Add(blobInfo);
                     }
