@@ -1,16 +1,18 @@
 using System.IO;
 using VirtoCommerce.Platform.Core.FileManager;
+using VirtoCommerce.Platform.Core.TransactionFileManager;
+using VirtoCommerce.Platform.Data.TransactionFileManager;
 using Xunit;
 
 namespace VirtoCommerce.Platform.Tests.IntegrationTests
 {
     public class FileManagerIntegrationTests
     {
-        private readonly FileManager _fileManager;
+        private readonly TransactionFileManager _fileManager;
 
         public FileManagerIntegrationTests()
         {
-            _fileManager = new FileManager();
+            _fileManager = new TransactionFileManager();
         }
 
         [Fact]

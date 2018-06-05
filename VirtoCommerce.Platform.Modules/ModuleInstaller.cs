@@ -7,8 +7,8 @@ using System.Linq;
 using System.Transactions;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.FileManager;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.TransactionFileManager;
 using VirtoCommerce.Platform.Modules.External;
 
 namespace VirtoCommerce.Platform.Modules
@@ -18,7 +18,7 @@ namespace VirtoCommerce.Platform.Modules
         private const string _packageFileExtension = ".zip";
         private readonly LocalStorageModuleCatalogOptions _options;
         private readonly IExternalModulesClient _externalClient;
-        private readonly IFileManager _fileManager;
+        private readonly ITransactionFileManager _fileManager;
 
 
         private readonly IExternalModuleCatalog _extModuleCatalog;

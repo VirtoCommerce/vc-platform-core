@@ -1,6 +1,7 @@
 using System.IO;
+using VirtoCommerce.Platform.Core.TransactionFileManager;
 
-namespace VirtoCommerce.Platform.Core.FileManager.Operations
+namespace VirtoCommerce.Platform.Data.TransactionFileManager.Operations
 {
     /// <summary>
     /// Creates all directories in the specified path.

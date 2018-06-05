@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 
-namespace VirtoCommerce.Platform.Core.FileManager
+namespace VirtoCommerce.Platform.Data.TransactionFileManager
 {
-    static class FileUtils
+    static class TransactionFileUtils
     {
         private static readonly string tempFolder = Path.Combine(Path.GetTempPath(), "CdFileMgr");
 

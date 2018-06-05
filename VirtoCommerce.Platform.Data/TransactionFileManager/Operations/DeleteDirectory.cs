@@ -1,7 +1,8 @@
 using System;
 using System.IO;
+using VirtoCommerce.Platform.Core.TransactionFileManager;
 
-namespace VirtoCommerce.Platform.Core.FileManager.Operations
+namespace VirtoCommerce.Platform.Data.TransactionFileManager.Operations
 {
     /// <summary>
     /// Deletes the specified directory and all its contents.
@@ -34,7 +35,7 @@ namespace VirtoCommerce.Platform.Core.FileManager.Operations
         {
             if (Directory.Exists(path))
             {
-                string temp = FileUtils.GetTempFileName(String.Empty);
+                string temp = TransactionFileUtils.GetTempFileName(String.Empty);
                 MoveDirectory(path, temp);
                 backupPath = temp;
             }

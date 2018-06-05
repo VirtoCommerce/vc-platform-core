@@ -2,14 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Transactions;
-using VirtoCommerce.Platform.Core.FileManager.Operations;
+using VirtoCommerce.Platform.Core.TransactionFileManager;
+using VirtoCommerce.Platform.Data.TransactionFileManager.Operations;
 
-namespace VirtoCommerce.Platform.Core.FileManager
+namespace VirtoCommerce.Platform.Data.TransactionFileManager
 {
     /// <summary>
     /// port from https://github.com/rsevil/Transactions
     /// </summary>
-    public class FileManager : IFileManager
+    public class TransactionFileManager : ITransactionFileManager
     {
         /// <summary>Creates all directories in the specified path.</summary>
         /// <param name="path">The directory path to create.</param>
@@ -100,7 +101,7 @@ namespace VirtoCommerce.Platform.Core.FileManager
 
         /// <summary>Dictionary of transaction enlistment objects for the current thread.</summary>
         [ThreadStatic]
-        private static Dictionary<string, FileManagerEnlistment> _enlistments;
+        private static Dictionary<string, TransactionFileManagerEnlistment> _enlistments;
 
         private static readonly object _enlistmentsLock = new object();
 
@@ -112,18 +113,18 @@ namespace VirtoCommerce.Platform.Core.FileManager
         private static void EnlistOperation(IRollbackableOperation operation)
         {
             Transaction transaction = Transaction.Current;
-            FileManagerEnlistment enlistment;
+            TransactionFileManagerEnlistment enlistment;
 
             lock (_enlistmentsLock)
             {
                 if (_enlistments == null)
                 {
-                    _enlistments = new Dictionary<string, FileManagerEnlistment>();
+                    _enlistments = new Dictionary<string, TransactionFileManagerEnlistment>();
                 }
 
                 if (!_enlistments.TryGetValue(transaction.TransactionInformation.LocalIdentifier, out enlistment))
                 {
-                    enlistment = new FileManagerEnlistment(transaction);
+                    enlistment = new TransactionFileManagerEnlistment(transaction);
                     _enlistments.Add(transaction.TransactionInformation.LocalIdentifier, enlistment);
                 }
                 enlistment.EnlistOperation(operation);

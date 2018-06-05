@@ -1,9 +1,9 @@
-namespace VirtoCommerce.Platform.Core.FileManager
+namespace VirtoCommerce.Platform.Core.TransactionFileManager
 {
     /// <summary>
     /// Represents a transactional file operation.
     /// </summary>
-    interface IRollbackableOperation
+    public interface IRollbackableOperation
     {
         /// <summary>
         /// Executes the operation.

@@ -1,9 +1,9 @@
-namespace VirtoCommerce.Platform.Core.FileManager
+namespace VirtoCommerce.Platform.Core.TransactionFileManager
 {
     /// <summary>
     /// port from https://github.com/rsevil/Transactions
     /// </summary>
-    public interface IFileManager
+    public interface ITransactionFileManager
     {
         /// <summary>
         /// Creates all directories in the specified path.

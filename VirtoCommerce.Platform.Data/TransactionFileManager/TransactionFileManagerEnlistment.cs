@@ -1,16 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Transactions;
+using VirtoCommerce.Platform.Core.TransactionFileManager;
 
-namespace VirtoCommerce.Platform.Core.FileManager
+namespace VirtoCommerce.Platform.Data.TransactionFileManager
 {
-    sealed class FileManagerEnlistment : IEnlistmentNotification
+    sealed class TransactionFileManagerEnlistment : IEnlistmentNotification
     {
         private readonly List<IRollbackableOperation> _journal = new List<IRollbackableOperation>();
 
         /// <summary>Initializes a new instance of the <see cref="TxEnlistment"/> class.</summary>
         /// <param name="tx">The Transaction.</param>
-        public FileManagerEnlistment(Transaction tx)
+        public TransactionFileManagerEnlistment(Transaction tx)
         {
             tx.EnlistVolatile(this, EnlistmentOptions.None);
         }
