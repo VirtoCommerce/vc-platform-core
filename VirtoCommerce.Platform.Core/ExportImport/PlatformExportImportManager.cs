@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -11,36 +10,12 @@ using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
-using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 
-namespace VirtoCommerce.Platform.Web.ExportImport
+namespace VirtoCommerce.Platform.Core.ExportImport
 {
-    public sealed class PlatformExportEntries
-    {
-        public PlatformExportEntries()
-        {
-            Users = new List<ApplicationUser>();
-            Settings = new List<SettingEntry>();
-            DynamicPropertyDictionaryItems = new List<DynamicPropertyDictionaryItem>();
-        }
-        public bool IsNotEmpty
-        {
-            get
-            {
-                return Users.Any() || Settings.Any();
-            }
-        }
-        public ICollection<ApplicationUser> Users { get; set; }
-        public ICollection<Role> Roles { get; set; }
-        public ICollection<SettingEntry> Settings { get; set; }
-        public ICollection<DynamicPropertyDictionaryItem> DynamicPropertyDictionaryItems { get; set; }
-        public ICollection<DynamicProperty> DynamicProperties { get; set; }
-
-    }
-
     public class PlatformExportImportManager : IPlatformExportImportManager
     {
         private const string _manifestZipEntryName = "Manifest.json";

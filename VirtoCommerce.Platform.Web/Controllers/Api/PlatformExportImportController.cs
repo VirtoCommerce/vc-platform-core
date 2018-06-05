@@ -4,14 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
-using System.Threading.Tasks;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Hosting.Internal;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
@@ -34,7 +30,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
     public class PlatformExportImportController : Controller
     {
         private const string _sampledataStateSetting = "VirtoCommerce.SampleDataState";
-
+        private static string _stringSampleDataUrl;
         private readonly IPlatformExportImportManager _platformExportManager;
         private readonly IPushNotificationManager _pushNotifier;
         private readonly IBlobStorageProvider _blobStorageProvider;
@@ -42,12 +38,11 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         private readonly ISettingsManager _settingsManager;
         private readonly IUserNameResolver _userNameResolver;
         private readonly IHostingEnvironment _hostingEnvironment;
-        private static readonly PlatformOption _options;
         private static readonly object _lockObject = new object();
 
         public PlatformExportImportController(IPlatformExportImportManager platformExportManager, IPushNotificationManager pushNotifier,
             IBlobStorageProvider blobStorageProvider, IBlobUrlResolver blobUrlResolver, ISettingsManager settingManager, IUserNameResolver userNameResolver,
-            IHostingEnvironment hostingEnvironment, IOptions<PlatformOption> options)
+            IHostingEnvironment hostingEnvironment, IOptions<PlatformOptions> options)
         {
             _platformExportManager = platformExportManager;
             _pushNotifier = pushNotifier;
@@ -56,6 +51,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             _settingsManager = settingManager;
             _userNameResolver = userNameResolver;
             _hostingEnvironment = hostingEnvironment;
+
+            _stringSampleDataUrl = options.Value.SampleDataUrl;
         }
 
         [HttpGet]
@@ -139,7 +136,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             {
                 throw new ArgumentNullException(nameof(fileUrl));
             }
-            var localPath = _hostingEnvironment.MapPath(fileUrl);
+            var localPath = Path.GetFullPath(fileUrl);
             PlatformExportManifest retVal;
             using (var stream = new FileStream(localPath, FileMode.Open))
             {
@@ -170,7 +167,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Route("import")]
         [ProducesResponseType(typeof(PlatformImportPushNotification), 200)]
         [Authorize(SecurityConstants.Permissions.PlatformImport)]
-        public IActionResult ProcessImport(PlatformImportExportRequest importRequest)
+        public IActionResult ProcessImport([FromBody]PlatformImportExportRequest importRequest)
         {
             var notification = new PlatformImportPushNotification(_userNameResolver.GetCurrentUserName())
             {
@@ -188,7 +185,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         {
             var retVal = new List<SampleDataInfo>();
 
-            var sampleDataUrl = _options.SampleDataUrl;
+            var sampleDataUrl = _stringSampleDataUrl;
             if (!string.IsNullOrEmpty(sampleDataUrl))
             {
                 //Discovery mode
@@ -235,6 +232,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             Action<ExportImportProgressInfo> progressCallback = x =>
             {
                 //pushNotification.InjectFrom(x);
+                pushNotification.Errors = x.Errors;
+                pushNotification.
                 _pushNotifier.Send(pushNotification);
             };
             try
@@ -292,7 +291,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             var now = DateTime.UtcNow;
             try
             {
-                var localPath = _hostingEnvironment.MapPath(importRequest.FileUrl);
+                var localPath = Path.GetFullPath(importRequest.FileUrl);
 
                 //Load source data only from local file system 
                 using (var stream = new FileStream(localPath, FileMode.Open))
@@ -358,5 +357,6 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 _pushNotifier.Send(pushNotification);
             }
         }
+
     }
 }

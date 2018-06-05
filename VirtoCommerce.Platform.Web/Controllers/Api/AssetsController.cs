@@ -29,14 +29,12 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         private readonly string _uploadsUrl;
         private readonly IBlobStorageProvider _blobProvider;
         private readonly IBlobUrlResolver _urlResolver;
-        private readonly IHostingEnvironment _hostingEnv;
         private static readonly FormOptions _defaultFormOptions = new FormOptions();
 
-        public AssetsController(IBlobStorageProvider blobProvider, IBlobUrlResolver urlResolver, IHostingEnvironment hostingEnv, IOptions<PlatformOptions> option)
+        public AssetsController(IBlobStorageProvider blobProvider, IBlobUrlResolver urlResolver, IOptions<PlatformOptions> option)
         {
             _blobProvider = blobProvider;
             _urlResolver = urlResolver;
-            _hostingEnv = hostingEnv;
 
             _uploadsUrl = option?.Value?.UploadUrl;
 
@@ -81,7 +79,12 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                         //ToDo After update to core 2.1 make beautiful https://github.com/aspnet/HttpAbstractions/issues/446
                         var fileName = contentDisposition.FileName.Value.TrimStart('\"').TrimEnd('\"');
 
-                        targetFilePath = Path.Combine(Path.GetFullPath(_uploadsUrl), fileName);
+                        var uploadsPath = Path.GetFullPath(_uploadsUrl);
+
+                        CheckPath(uploadsPath);
+
+                        targetFilePath = Path.Combine(uploadsPath, fileName);
+
                         using (var targetStream = System.IO.File.Create(targetFilePath))
                         {
                             await section.Body.CopyToAsync(targetStream);
@@ -224,6 +227,14 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         {
             await _blobProvider.CreateFolderAsync(folder);
             return Ok();
+        }
+
+        private void CheckPath(string path)
+        {
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
         }
     }
 }
