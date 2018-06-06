@@ -4,7 +4,6 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
@@ -13,10 +12,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Exceptions;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Data.Helpers;
-using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Helpers;
 using VirtoCommerce.Platform.Web.Infrastructure;
 using VirtoCommerce.Platform.Web.Swagger;
@@ -29,19 +26,14 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         private readonly string _uploadsUrl;
         private readonly IBlobStorageProvider _blobProvider;
         private readonly IBlobUrlResolver _urlResolver;
-        private readonly IHostingEnvironment _hostingEnv;
         private static readonly FormOptions _defaultFormOptions = new FormOptions();
+        private readonly PlatformOptions _platformOptions;
 
-        public AssetsController(IBlobStorageProvider blobProvider, IBlobUrlResolver urlResolver, IHostingEnvironment hostingEnv, IOptions<PlatformOptions> option)
+        public AssetsController(IBlobStorageProvider blobProvider, IBlobUrlResolver urlResolver, IOptions<PlatformOptions> platformOptions)
         {
             _blobProvider = blobProvider;
             _urlResolver = urlResolver;
-            _hostingEnv = hostingEnv;
-
-            _uploadsUrl = option?.Value?.UploadUrl;
-
-            if (_uploadsUrl == null)
-                throw new PlatformException($"{nameof(option.Value.UploadUrl)} must be set");
+            _platformOptions = platformOptions.Value;
         }
 
         /// <summary>
@@ -62,7 +54,11 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             {
                 return BadRequest($"Expected a multipart request, but got {Request.ContentType}");
             }
-
+            var uploadPath = Path.GetFullPath(_platformOptions.LocalUploadFolderPath);
+            if (!Directory.Exists(uploadPath))
+            {
+                Directory.CreateDirectory(uploadPath);
+            }
             string targetFilePath = null;
 
             var boundary = MultipartRequestHelper.GetBoundary(MediaTypeHeaderValue.Parse(Request.ContentType), _defaultFormOptions.MultipartBoundaryLengthLimit);
@@ -79,7 +75,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                     if (MultipartRequestHelper.HasFileContentDisposition(contentDisposition))
                     {
                         var fileName = contentDisposition.FileName.Value;
-                        targetFilePath = _hostingEnv.MapPath(_uploadsUrl) + "/" + fileName;
+                        targetFilePath = Path.Combine(uploadPath, fileName);
 
                         using (var targetStream = System.IO.File.Create(targetFilePath))
                         {
@@ -88,7 +84,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
                         var blobInfo = AbstractTypeFactory<BlobInfo>.TryCreateInstance();
                         blobInfo.Name = fileName;
-                        blobInfo.Url = Path.Combine(_uploadsUrl, fileName);
+                        //Use only file name as Url, for further access to these files need use PlatformOptions.LocalUploadFolderPath 
+                        blobInfo.Url = fileName;
                         blobInfo.ContentType = MimeTypeResolver.ResolveContentType(fileName);
                         retVal.Add(blobInfo);
                     }
@@ -204,7 +201,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [ProducesResponseType(typeof(GenericSearchResult<BlobEntry>), 200)]
         [Route("")]
         [Authorize(SecurityConstants.Permissions.AssetRead)]
-        public async Task<IActionResult> SearchAssetItemsAsync([FromQuery]string folderUrl = null,[FromQuery] string keyword = null)
+        public async Task<IActionResult> SearchAssetItemsAsync([FromQuery]string folderUrl = null, [FromQuery] string keyword = null)
         {
             var result = await _blobProvider.SearchAsync(folderUrl, keyword);
             return Ok(result);
