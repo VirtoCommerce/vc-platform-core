@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using VirtoCommerce.Platform.Core.Bus;
+using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Security.Events;
 using VirtoCommerce.Platform.Core.Security.Search;
@@ -28,11 +29,15 @@ namespace VirtoCommerce.Platform.Security.Extensions
                 services.Configure(setupAction);
             }
 
+            services.AddSingleton(provider => new LogChangesUserChangedEventHandler(provider.CreateScope().ServiceProvider.GetService<IChangeLogService>()));
+
             var providerSnapshot = services.BuildServiceProvider();
             var inProcessBus = providerSnapshot.GetService<IHandlerRegistrar>();
             inProcessBus.RegisterHandler<UserChangedEvent>(async (message, token) => await providerSnapshot.GetService<LogChangesUserChangedEventHandler> ().Handle(message));
             inProcessBus.RegisterHandler<UserPasswordChangedEvent>(async (message, token) => await providerSnapshot.GetService<LogChangesUserChangedEventHandler>().Handle(message));
             inProcessBus.RegisterHandler<UserResetPasswordEvent>(async (message, token) => await providerSnapshot.GetService<LogChangesUserChangedEventHandler>().Handle(message));
+            inProcessBus.RegisterHandler<UserLoginEvent>(async (message, token) => await providerSnapshot.GetService<LogChangesUserChangedEventHandler>().Handle(message));
+            inProcessBus.RegisterHandler<UserLogoutEvent>(async (message, token) => await providerSnapshot.GetService<LogChangesUserChangedEventHandler>().Handle(message));
 
             return services;
         }

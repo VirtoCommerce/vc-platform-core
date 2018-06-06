@@ -8,7 +8,6 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Security.Events;
-using VirtoCommerce.Platform.Security.Resources;
 
 namespace VirtoCommerce.Platform.Security.Handlers
 {
@@ -28,7 +27,7 @@ namespace VirtoCommerce.Platform.Security.Handlers
             {
                 if (changedEntry.EntryState == EntryState.Added)
                 {
-                    SaveOperationLog(changedEntry.NewEntry.Id, SecurityAccountChangesResource.AccountCreatedMessage, EntryState.Added);
+                    SaveOperationLog(changedEntry.NewEntry.Id, "Created", EntryState.Added);
                 }
                 else if (changedEntry.EntryState == EntryState.Modified)
                 {
@@ -55,13 +54,13 @@ namespace VirtoCommerce.Platform.Security.Handlers
 
         public virtual Task Handle(UserPasswordChangedEvent message)
         {
-            SaveOperationLog(message.UserId, SecurityAccountChangesResource.PasswordChangedMessage, EntryState.Modified);
+            SaveOperationLog(message.UserId, "Password changed", EntryState.Modified);
             return Task.CompletedTask;
         }
 
         public virtual Task Handle(UserResetPasswordEvent message)
         {
-            SaveOperationLog(message.UserId, SecurityAccountChangesResource.PasswordResetMessage, EntryState.Modified);
+            SaveOperationLog(message.UserId, "Password resets", EntryState.Modified);
             return Task.CompletedTask;
         }
 
@@ -71,20 +70,25 @@ namespace VirtoCommerce.Platform.Security.Handlers
             var result = new ListDictionary<string, string>();
             if (newUser.UserName != oldUser.UserName)
             {
-                result.Add(SecurityAccountChangesResource.AccountUpdated, $"user name: {oldUser.UserName} -> {newUser.UserName}");
+                result.Add("Changes: {0}", $"user name: {oldUser.UserName} -> {newUser.UserName}");
             }
             if (newUser.UserType != oldUser.UserType)
             {
-                result.Add(SecurityAccountChangesResource.AccountUpdated, $"user type: {oldUser.UserType} -> {newUser.UserType}");
+                result.Add("Changes: {0}", $"user type: {oldUser.UserType} -> {newUser.UserType}");
             }
+
+            //todo add after the implementation
             //if (newUser.UserState != oldUser.UserState)
             //{
-            //    result.Add(SecurityAccountChangesResource.AccountUpdated, $"account state: {oldUser.UserState} -> {newUser.UserState}");
+            //    result.Add("Changes: {0}", $"account state: {oldUser.UserState} -> {newUser.UserState}");
             //}
+
             if (newUser.IsAdministrator != oldUser.IsAdministrator)
             {
-                result.Add(SecurityAccountChangesResource.AccountUpdated, $"root: {oldUser.IsAdministrator} -> {newUser.IsAdministrator}");
+                result.Add("Changes: {0}", $"root: {oldUser.IsAdministrator} -> {newUser.IsAdministrator}");
             }
+
+            //todo add after the implementation
             //if (!newUser.ApiAccounts.IsNullOrEmpty())
             //{
             //    var apiAccountComparer = AnonymousComparer.Create((ApiAccount x) => $"{x.ApiAccountType}-{x.SecretKey}");
@@ -92,11 +96,11 @@ namespace VirtoCommerce.Platform.Security.Handlers
             //    {
             //        if (state == EntryState.Added)
             //        {
-            //            result.Add(SecurityAccountChangesResource.ApiKeysActivated, $"{sourceItem.Name} ({sourceItem.ApiAccountType})");
+            //            result.Add("Activated Api Key(s) [{0}] ", $"{sourceItem.Name} ({sourceItem.ApiAccountType})");
             //        }
             //        else if (state == EntryState.Deleted)
             //        {
-            //            result.Add(SecurityAccountChangesResource.ApiKeysDeactivated, $"{sourceItem.Name} ({sourceItem.ApiAccountType})");
+            //            result.Add("Deactivated Api Key(s) [{0}]</value>", $"{sourceItem.Name} ({sourceItem.ApiAccountType})");
             //        }
             //    }
             //    );
@@ -107,11 +111,11 @@ namespace VirtoCommerce.Platform.Security.Handlers
                 {
                     if (state == EntryState.Added)
                     {
-                        result.Add(SecurityAccountChangesResource.RolesAdded, $"{sourceItem?.Name}");
+                        result.Add("Added role(s) [{0}]", $"{sourceItem?.Name}");
                     }
                     else if (state == EntryState.Deleted)
                     {
-                        result.Add(SecurityAccountChangesResource.RolesRemoved, $"{sourceItem?.Name}");
+                        result.Add("Removed role(s) [{0}]", $"{sourceItem?.Name}");
                     }
                 });
             }
