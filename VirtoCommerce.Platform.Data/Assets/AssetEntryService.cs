@@ -2,12 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
+using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Data.Caching;
 using VirtoCommerce.Platform.Data.Repositories;
-using Microsoft.EntityFrameworkCore;
 
 namespace VirtoCommerce.Platform.Data.Assets
 {

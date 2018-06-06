@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.Platform.Core.Assets;
 
-namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
+namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage.Extensions
 {
-    public static class AzureBlobService
+    public static class ServiceCollectionExtensions
     {
         public static void AddAzureBlobProvider(this IServiceCollection services, Action<AzureBlobContentOptions> setupAction = null)
         {

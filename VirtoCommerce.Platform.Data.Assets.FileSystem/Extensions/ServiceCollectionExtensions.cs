@@ -2,9 +2,9 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.Platform.Core.Assets;
 
-namespace VirtoCommerce.Platform.Data.Assets.FileSystem
+namespace VirtoCommerce.Platform.Data.Assets.FileSystem.Extensions
 {
-    public static class FileSystemBlobService
+    public static class ServiceCollectionExtensions
     {
         public static void AddFileSystemBlobProvider(this IServiceCollection services, Action<FileSystemBlobContentOptions> setupAction = null)
         {

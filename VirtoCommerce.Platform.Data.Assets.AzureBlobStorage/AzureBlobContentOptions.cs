@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.WindowsAzure.Storage.Blob;
 
 namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
