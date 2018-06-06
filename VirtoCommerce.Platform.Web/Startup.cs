@@ -19,13 +19,14 @@ using Newtonsoft.Json.Converters;
 using Smidge;
 using Smidge.Nuglify;
 using Swashbuckle.AspNetCore.Swagger;
-using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Jobs;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Data.Assets.AzureBlobStorage;
+using VirtoCommerce.Platform.Data.Assets.AzureBlobStorage.Extensions;
 using VirtoCommerce.Platform.Data.Assets.FileSystem;
+using VirtoCommerce.Platform.Data.Assets.FileSystem.Extensions;
 using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.Platform.Data.PushNotifications;
 using VirtoCommerce.Platform.Data.Repositories;
@@ -248,7 +249,7 @@ namespace VirtoCommerce.Platform.Web
 
                 services.AddFileSystemBlobProvider(options =>
                 {
-                    options.RootPath = Path.GetFullPath(fileSystemBlobOptions.RootPath);
+                    options.RootPath = HostingEnvironment.MapPath(fileSystemBlobOptions.RootPath);
                     options.PublicUrl = fileSystemBlobOptions.PublicUrl;
                 });
             }
@@ -311,6 +312,13 @@ namespace VirtoCommerce.Platform.Web
                 RequestPath = "/docs",
                 FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot", "swagger")),
                 EnableDefaultFiles = true //serve index.html at /{ options.RoutePrefix }/
+            });
+
+            //Assets
+            app.UseFileServer(new FileServerOptions
+            {
+                RequestPath = "/assets",
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot", "App_Data", "Assets"))
             });
 
             app.UseAuthentication();

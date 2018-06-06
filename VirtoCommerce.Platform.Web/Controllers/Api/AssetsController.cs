@@ -78,10 +78,9 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 {
                     if (MultipartRequestHelper.HasFileContentDisposition(contentDisposition))
                     {
-                        //ToDo After update to core 2.1 make beautiful https://github.com/aspnet/HttpAbstractions/issues/446
-                        var fileName = contentDisposition.FileName.Value.TrimStart('\"').TrimEnd('\"');
+                        var fileName = contentDisposition.FileName.Value;
+                        targetFilePath = _hostingEnv.MapPath(_uploadsUrl) + "/" + fileName;
 
-                        targetFilePath = Path.Combine(Path.GetFullPath(_uploadsUrl), fileName);
                         using (var targetStream = System.IO.File.Create(targetFilePath))
                         {
                             await section.Body.CopyToAsync(targetStream);
@@ -89,7 +88,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
                         var blobInfo = AbstractTypeFactory<BlobInfo>.TryCreateInstance();
                         blobInfo.Name = fileName;
-                        blobInfo.Url = _uploadsUrl + fileName;
+                        blobInfo.Url = Path.Combine(_uploadsUrl, fileName);
                         blobInfo.ContentType = MimeTypeResolver.ResolveContentType(fileName);
                         retVal.Add(blobInfo);
                     }
@@ -156,8 +155,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                     {
                         if (MultipartRequestHelper.HasFileContentDisposition(contentDisposition))
                         {
-                            //ToDo After update to core 2.1 make beautiful https://github.com/aspnet/HttpAbstractions/issues/446
-                            var fileName = contentDisposition.FileName.Value.TrimStart('\"').TrimEnd('\"');
+                            var fileName = contentDisposition.FileName.Value;
 
                             targetFilePath = folderUrl + "/" + fileName;
 
@@ -168,7 +166,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
                             var blobInfo = AbstractTypeFactory<BlobInfo>.TryCreateInstance();
                             blobInfo.Name = fileName;
-                            blobInfo.Url = _uploadsUrl + fileName;
+                            blobInfo.RelativeUrl = targetFilePath;
+                            blobInfo.Url = _urlResolver.GetAbsoluteUrl(targetFilePath);
                             blobInfo.ContentType = MimeTypeResolver.ResolveContentType(fileName);
                             retVal.Add(blobInfo);
                         }
