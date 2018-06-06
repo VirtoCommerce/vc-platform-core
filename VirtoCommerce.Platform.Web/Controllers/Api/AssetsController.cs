@@ -29,12 +29,14 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         private readonly string _uploadsUrl;
         private readonly IBlobStorageProvider _blobProvider;
         private readonly IBlobUrlResolver _urlResolver;
+        private readonly IHostingEnvironment _hostingEnv;
         private static readonly FormOptions _defaultFormOptions = new FormOptions();
 
-        public AssetsController(IBlobStorageProvider blobProvider, IBlobUrlResolver urlResolver, IOptions<PlatformOptions> option)
+        public AssetsController(IBlobStorageProvider blobProvider, IBlobUrlResolver urlResolver, IHostingEnvironment hostingEnv, IOptions<PlatformOptions> option)
         {
             _blobProvider = blobProvider;
             _urlResolver = urlResolver;
+            _hostingEnv = hostingEnv;
 
             _uploadsUrl = option?.Value?.UploadUrl;
 
@@ -79,11 +81,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                         var fileName = contentDisposition.FileName.Value;
                         targetFilePath = _hostingEnv.MapPath(_uploadsUrl) + "/" + fileName;
 
-                        var uploadsPath = Path.GetFullPath(_uploadsUrl);
-
-                        CheckPath(uploadsPath);
-
-                        targetFilePath = Path.Combine(uploadsPath, fileName);
+                        CheckPath(targetFilePath);
 
                         using (var targetStream = System.IO.File.Create(targetFilePath))
                         {
