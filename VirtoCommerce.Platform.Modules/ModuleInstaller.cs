@@ -1,14 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Transactions;
-using ChinhDo.Transactions.FileManager;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.TransactionFileManager;
 using VirtoCommerce.Platform.Modules.External;
 
 namespace VirtoCommerce.Platform.Modules
@@ -18,7 +18,8 @@ namespace VirtoCommerce.Platform.Modules
         private const string _packageFileExtension = ".zip";
         private readonly LocalStorageModuleCatalogOptions _options;
         private readonly IExternalModulesClient _externalClient;
-        private readonly TxFileManager _txFileManager = new TxFileManager();
+        private readonly ITransactionFileManager _fileManager;
+
 
         private readonly IExternalModuleCatalog _extModuleCatalog;
 
@@ -102,10 +103,7 @@ namespace VirtoCommerce.Platform.Modules
                         {
                             var existModule = _extModuleCatalog.Modules.OfType<ManifestModuleInfo>().Where(x => x.IsInstalled && x.Id == newModule.Id).First();
                             var dstModuleDir = Path.Combine(_options.DiscoveryPath, existModule.Id);
-                            if (Directory.Exists(dstModuleDir))
-                            {
-                                SafeDeleteDirectory(dstModuleDir);
-                            }
+                            _fileManager.SafeDelete(dstModuleDir);
                             Report(progress, ProgressMessageLevel.Info, "Updating '{0}' -> '{1}'", existModule, newModule);
                             InnerInstall(newModule, progress);
                             existModule.IsInstalled = false;
@@ -165,7 +163,7 @@ namespace VirtoCommerce.Platform.Modules
                             if (Directory.Exists(moduleDir))
                             {
                                 Report(progress, ProgressMessageLevel.Info, "Deleting module {0} folder", moduleDir);
-                                SafeDeleteDirectory(moduleDir);
+                                _fileManager.SafeDelete(moduleDir);
                             }
                             Report(progress, ProgressMessageLevel.Info, "'{0}' uninstalled successfully.", uninstallingModule);
                             uninstallingModule.IsInstalled = false;
@@ -193,10 +191,7 @@ namespace VirtoCommerce.Platform.Modules
             var dstModuleDir = Path.Combine(_options.DiscoveryPath, module.Id);
             var moduleZipPath = Path.Combine(dstModuleDir, GetModuleZipFileName(module.Id, module.Version.ToString()));
 
-            if (!Directory.Exists(dstModuleDir))
-            {
-                _txFileManager.CreateDirectory(dstModuleDir);
-            }
+            _fileManager.CreateDirectory(dstModuleDir);
 
             //download  module archive from web
             if (Uri.IsWellFormedUriString(module.Ref, UriKind.Absolute))
@@ -224,10 +219,8 @@ namespace VirtoCommerce.Platform.Modules
                     var filePath = Path.Combine(dstModuleDir, entry.FullName);
                     //Create directory if not exist
                     var directoryPath = Path.GetDirectoryName(filePath);
-                    if (!_txFileManager.DirectoryExists(directoryPath))
-                    {
-                        _txFileManager.CreateDirectory(directoryPath);
-                    }
+                    _fileManager.CreateDirectory(directoryPath);
+
                     using (var entryStream = entry.Open())
                     using (var fileStream = File.Create(filePath))
                     {
@@ -240,46 +233,7 @@ namespace VirtoCommerce.Platform.Modules
             Report(progress, ProgressMessageLevel.Info, "Successfully installed '{0}'.", module);
         }
 
-        private void SafeDeleteDirectory(string directoryPath)
-        {
-            if (Directory.Exists(directoryPath))
-            {
-                //try delete whole directory
-                try
-                {
-                    _txFileManager.DeleteDirectory(directoryPath);
-                }
-                //Because some folder can be locked by ASP.NET Bundles file monitor we should ignore IOException
-                catch (IOException)
-                {
-                    //If fail need to delete directory content first
-                    //Files                 
-                    foreach (var file in Directory.EnumerateFiles(directoryPath, "*.*", SearchOption.AllDirectories))
-                    {
-                        _txFileManager.Delete(file);
-                    }
-                    //Dirs
-                    foreach (var subDirectory in Directory.EnumerateDirectories(directoryPath, "*", SearchOption.AllDirectories))
-                    {
-                        try
-                        {
-                            _txFileManager.DeleteDirectory(subDirectory);
-                        }
-                        catch (IOException)
-                        {
-                        }
-                    }
-                    //Then try to delete main directory itself
-                    try
-                    {
-                        _txFileManager.DeleteDirectory(directoryPath);
-                    }
-                    catch (IOException)
-                    {
-                    }
-                }
-            }
-        }
+        
 
         private static void Report(IProgress<ProgressMessage> progress, ProgressMessageLevel level, string format, params object[] args)
         {

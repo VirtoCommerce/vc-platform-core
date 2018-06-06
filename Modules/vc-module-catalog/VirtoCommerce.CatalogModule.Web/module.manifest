@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <module>
     <id>VirtoCommerce.Catalog</id>
     <version>3.0.0</version>
@@ -32,14 +32,7 @@
     </scripts>
 
     <settings>
-        <group name="Catalog|General">
-            <setting>
-                <name>Catalog.ExportImport.Description</name>
-                <valueType>string</valueType>
-                <defaultValue>Export/Import catalogs, categories, products, properties with images binary if you check binary flag</defaultValue>
-                <title>Export/Import description</title>
-                <description>Module description in platform export/import wizard</description>
-            </setting>
+        <group name="Catalog|General">          
             <setting>
                 <name>Catalog.AssociationGroups</name>
                 <valueType>string</valueType>

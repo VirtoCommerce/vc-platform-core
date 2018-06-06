@@ -30,7 +30,6 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
     [ApiExplorerSettings(IgnoreApi = true)]
     public class ModulesController : Controller
     {
-        private const string _autoInstallStateSetting = "VirtoCommerce.ModulesAutoInstallState";
         private const string _uploadsUrl = "~/App_Data/Uploads/";
         private readonly IExternalModuleCatalog _moduleCatalog;
         private readonly IModuleInstaller _moduleInstaller;
@@ -291,7 +290,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                         var moduleBundles = _extModuleOptions.AutoInstallModuleBundles;
                         if (!moduleBundles.IsNullOrEmpty())
                         {
-                            _settingsManager.SetValue(_autoInstallStateSetting, AutoInstallState.Processing);
+                            _settingsManager.SetValue(PlatformConstants.Settings.Setup.ModulesAutoInstallState.Name, AutoInstallState.Processing.ToString());
+                            _settingsManager.SetValue(PlatformConstants.Settings.Setup.ModulesAutoInstalled.Name, true);
 
                             EnsureModulesCatalogInitialized();
 
@@ -352,7 +352,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [AllowAnonymous]
         public IActionResult GetAutoInstallState()
         {
-            var state = EnumUtility.SafeParse(_settingsManager.GetValue(_autoInstallStateSetting, string.Empty), AutoInstallState.Undefined);
+            var state = EnumUtility.SafeParse(_settingsManager.GetValue(PlatformConstants.Settings.Setup.ModulesAutoInstallState.Name, string.Empty), AutoInstallState.Undefined);
             return Ok(state);
         }
 
@@ -394,7 +394,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             }
             finally
             {
-                _settingsManager.SetValue(_autoInstallStateSetting, AutoInstallState.Completed);
+                _settingsManager.SetValue(PlatformConstants.Settings.Setup.ModulesAutoInstallState.Name, AutoInstallState.Completed.ToString());
 
                 notification.Finished = DateTime.UtcNow;
                 notification.ProgressLog.Add(new ProgressMessage

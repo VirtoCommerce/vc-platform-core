@@ -7,7 +7,7 @@ namespace Module1.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(name: "Discriminator", table: "PlatformSetting", nullable: false, maxLength: 128, defaultValue: "SettingEntity2");
-            migrationBuilder.AddColumn<string>(name: "NewField", table: "PlatformSetting", maxLength: 1024);
+            migrationBuilder.AddColumn<string>(name: "NewField", table: "PlatformSetting", maxLength: 1024, nullable: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

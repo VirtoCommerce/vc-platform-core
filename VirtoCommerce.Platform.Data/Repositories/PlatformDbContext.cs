@@ -7,7 +7,12 @@ namespace VirtoCommerce.Platform.Data.Repositories
     public class PlatformDbContext : DbContextWithTriggers
     {
         public PlatformDbContext(DbContextOptions<PlatformDbContext> options)
-            :base(options)
+            : base(options)
+        {
+        }
+
+        protected PlatformDbContext(DbContextOptions options)
+            : base(options)
         {
         }
 
@@ -56,7 +61,7 @@ namespace VirtoCommerce.Platform.Data.Repositories
             modelBuilder.Entity<DynamicPropertyEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
             modelBuilder.Entity<DynamicPropertyEntity>().HasIndex(x => new { x.ObjectType, x.Name })
                         .HasName("IX_PlatformDynamicProperty_ObjectType_Name")
-                        .IsUnique(true);               
+                        .IsUnique(true);
 
             modelBuilder.Entity<DynamicPropertyNameEntity>().ToTable("PlatformDynamicPropertyName").HasKey(x => x.Id);
             modelBuilder.Entity<DynamicPropertyNameEntity>().Property(x => x.Id).HasMaxLength(128);
@@ -106,7 +111,7 @@ namespace VirtoCommerce.Platform.Data.Repositories
             modelBuilder.Entity<DynamicPropertyObjectValueEntity>().HasOne(x => x.Property)
                         .WithMany(x => x.ObjectValues)
                         .HasForeignKey(x => x.PropertyId)
-                        .OnDelete(DeleteBehavior.Cascade);            
+                        .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<DynamicPropertyObjectValueEntity>().HasOne(x => x.DictionaryItem)
                         .WithMany(x => x.ObjectValues)
                         .HasForeignKey(x => x.DictionaryItemId);
