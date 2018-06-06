@@ -15,9 +15,9 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         }
 
         /// <summary>
-        /// Search push notifications
+        /// SearchAsync push notifications
         /// </summary>
-        /// <param name="criteria">Search parameters.</param>
+        /// <param name="criteria">SearchAsync parameters.</param>
         /// <returns></returns>
         [HttpPost]
         [Route("")]

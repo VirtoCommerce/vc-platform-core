@@ -20,11 +20,14 @@ using Newtonsoft.Json.Converters;
 using Smidge;
 using Smidge.Nuglify;
 using Swashbuckle.AspNetCore.Swagger;
-using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Jobs;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Assets.AzureBlobStorage;
+using VirtoCommerce.Platform.Assets.AzureBlobStorage.Extensions;
+using VirtoCommerce.Platform.Assets.FileSystem;
+using VirtoCommerce.Platform.Assets.FileSystem.Extensions;
 using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.Platform.Data.PushNotifications;
 using VirtoCommerce.Platform.Data.Repositories;
@@ -233,27 +236,28 @@ namespace VirtoCommerce.Platform.Web
             services.AddSignalR();
 
 
-            var assetConnectionString = BlobConnectionString.Parse(Configuration.GetConnectionString("AssetsConnectionString"));
-            //TODO: Azure blob storage
-            if (assetConnectionString.Provider.EqualsInvariant("AzureBlobStorage"))
-            {
-                //var azureBlobOptions = new AzureBlobContentOptions();
-                //Configuration.GetSection("VirtoCommerce:AzureBlobStorage").Bind(azureBlobOptions);
+            var assetsProvider = Configuration.GetSection("Assets:Provider").Value;
 
-                //services.AddAzureBlobContent(options =>
-                //{
-                //    options.Container = contentConnectionString.RootPath;
-                //    options.ConnectionString = contentConnectionString.ConnectionString;
-                //    options.PollForChanges = azureBlobOptions.PollForChanges;
-                //    options.ChangesPoolingInterval = azureBlobOptions.ChangesPoolingInterval;
-                //});
+            if (assetsProvider.EqualsInvariant("AzureBlobStorage"))
+            {
+                var azureBlobOptions = new AzureBlobContentOptions();
+                Configuration.GetSection("Assets:AzureBlobStorage").Bind(azureBlobOptions);
+
+                services.AddAzureBlobProvider(options =>
+                {
+                    options.ConnectionString = azureBlobOptions.ConnectionString;
+                    options.CdnUrl = azureBlobOptions.CdnUrl;
+                });
             }
             else
             {
+                var fileSystemBlobOptions = new FileSystemBlobContentOptions();
+                Configuration.GetSection("Assets:FileSystem").Bind(fileSystemBlobOptions);
+
                 services.AddFileSystemBlobProvider(options =>
                 {
-                    options.StoragePath = HostingEnvironment.MapPath(assetConnectionString.RootPath);
-                    options.BasePublicUrl = assetConnectionString.PublicUrl;
+                    options.RootPath = HostingEnvironment.MapPath(fileSystemBlobOptions.RootPath);
+                    options.PublicUrl = fileSystemBlobOptions.PublicUrl;
                 });
             }
 
@@ -307,7 +311,6 @@ namespace VirtoCommerce.Platform.Web
                     RequestPath = new PathString($"/Modules/$({ module.ModuleName })")
                 });
             }
-
 
             app.UseDefaultFiles();
 

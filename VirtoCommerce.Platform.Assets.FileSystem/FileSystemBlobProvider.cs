@@ -1,11 +1,13 @@
 using System;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Exceptions;
 
-namespace VirtoCommerce.Platform.Data.Assets
+namespace VirtoCommerce.Platform.Assets.FileSystem
 {
     public class FileSystemBlobProvider : IBlobStorageProvider, IBlobUrlResolver
     {
@@ -18,14 +20,13 @@ namespace VirtoCommerce.Platform.Data.Assets
         public FileSystemBlobProvider(IOptions<FileSystemBlobContentOptions> options)
         {
             _options = options.Value;
-            if (_options.StoragePath == null)
+            if (_options.RootPath == null)
             {
-                throw new PlatformException($"{ nameof(_options.StoragePath) } must be set");
+                throw new PlatformException($"{ nameof(_options.RootPath) } must be set");
             }
+            _storagePath = _options.RootPath.TrimEnd('\\');
 
-            _storagePath = _options.StoragePath.TrimEnd('\\');
-
-            _basePublicUrl = _options.BasePublicUrl;
+            _basePublicUrl = _options.PublicUrl;
             if (_basePublicUrl != null)
             {
                 _basePublicUrl = _basePublicUrl.TrimEnd('/');
@@ -38,7 +39,7 @@ namespace VirtoCommerce.Platform.Data.Assets
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public virtual BlobInfo GetBlobInfo(string url)
+        public virtual Task<BlobInfo> GetBlobInfoAsync(string url)
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException("url");
@@ -51,18 +52,18 @@ namespace VirtoCommerce.Platform.Data.Assets
             if (File.Exists(filePath))
             {
                 var fileInfo = new FileInfo(filePath);
-                retVal = new BlobInfo
-                {
-                    Url = GetAbsoluteUrlFromPath(filePath),
-                    ContentType = MimeTypeResolver.ResolveContentType(fileInfo.Name),
-                    Size = fileInfo.Length,
-                    FileName = fileInfo.Name,
-                    ModifiedDate = fileInfo.LastWriteTimeUtc
-                };
+
+                retVal = AbstractTypeFactory<BlobInfo>.TryCreateInstance();
+                retVal.Url = GetAbsoluteUrlFromPath(filePath);
+                retVal.ContentType = MimeTypeResolver.ResolveContentType(fileInfo.Name);
+                retVal.Size = fileInfo.Length;
+                retVal.Name = fileInfo.Name;
+                retVal.ModifiedDate = fileInfo.LastWriteTimeUtc;
                 retVal.RelativeUrl = GetRelativeUrl(retVal.Url);
 
             }
-            return retVal;
+
+            return Task.FromResult(retVal);
         }
 
         /// <summary>
@@ -95,19 +96,20 @@ namespace VirtoCommerce.Platform.Data.Assets
             {
                 Directory.CreateDirectory(folderPath);
             }
+
             return File.Open(filePath, FileMode.Create);
         }
 
 
         /// <summary>
-        /// Search folders and blobs in folder
+        /// SearchAsync folders and blobs in folder
         /// </summary>
         /// <param name="folderUrl">absolute or relative path</param>
         /// <param name="keyword"></param>
         /// <returns></returns>
-        public virtual BlobSearchResult Search(string folderUrl, string keyword)
+        public virtual Task<GenericSearchResult<BlobEntry>> SearchAsync(string folderUrl, string keyword)
         {
-            var retVal = new BlobSearchResult();
+            var retVal = new GenericSearchResult<BlobEntry>();
             folderUrl = folderUrl ?? _basePublicUrl;
 
             var storageFolderPath = GetStoragePathFromUrl(folderUrl);
@@ -116,45 +118,45 @@ namespace VirtoCommerce.Platform.Data.Assets
 
             if (!Directory.Exists(storageFolderPath))
             {
-                return retVal;
+                return Task.FromResult(retVal);
             }
             var directories = String.IsNullOrEmpty(keyword) ? Directory.GetDirectories(storageFolderPath) : Directory.GetDirectories(storageFolderPath, "*" + keyword + "*", SearchOption.AllDirectories);
             foreach (var directory in directories)
             {
                 var directoryInfo = new DirectoryInfo(directory);
-                var folder = new BlobFolder
-                {
-                    Name = Path.GetFileName(directory),
-                    Url = GetAbsoluteUrlFromPath(directory),
-                    ParentUrl = GetAbsoluteUrlFromPath(directoryInfo.Parent.FullName)
-                };
+
+                var folder = AbstractTypeFactory<BlobFolder>.TryCreateInstance();
+                folder.Name = Path.GetFileName(directory);
+                folder.Url = GetAbsoluteUrlFromPath(directory);
+                folder.ParentUrl = GetAbsoluteUrlFromPath(directoryInfo.Parent.FullName);
                 folder.RelativeUrl = GetRelativeUrl(folder.Url);
-                retVal.Folders.Add(folder);
+                retVal.Results.Add(folder);
             }
 
             var files = String.IsNullOrEmpty(keyword) ? Directory.GetFiles(storageFolderPath) : Directory.GetFiles(storageFolderPath, "*" + keyword + "*.*", SearchOption.AllDirectories);
             foreach (var file in files)
             {
                 var fileInfo = new FileInfo(file);
-                var blobInfo = new BlobInfo
-                {
-                    Url = GetAbsoluteUrlFromPath(file),
-                    ContentType = MimeTypeResolver.ResolveContentType(fileInfo.Name),
-                    Size = fileInfo.Length,
-                    FileName = fileInfo.Name,
-                    ModifiedDate = fileInfo.LastWriteTimeUtc
-                };
+
+                var blobInfo = AbstractTypeFactory<BlobInfo>.TryCreateInstance();
+                blobInfo.Url = GetAbsoluteUrlFromPath(file);
+                blobInfo.ContentType = MimeTypeResolver.ResolveContentType(fileInfo.Name);
+                blobInfo.Size = fileInfo.Length;
+                blobInfo.Name = fileInfo.Name;
+                blobInfo.ModifiedDate = fileInfo.LastWriteTimeUtc;
                 blobInfo.RelativeUrl = GetRelativeUrl(blobInfo.Url);
-                retVal.Items.Add(blobInfo);
+                retVal.Results.Add(blobInfo);
             }
-            return retVal;
+
+            retVal.TotalCount = retVal.Results.Count();
+            return Task.FromResult(retVal);
         }
 
         /// <summary>
         /// Create folder in file system within to base directory
         /// </summary>
         /// <param name="folder"></param>
-        public virtual void CreateFolder(BlobFolder folder)
+        public virtual Task CreateFolderAsync(BlobFolder folder)
         {
             if (folder == null)
             {
@@ -174,18 +176,18 @@ namespace VirtoCommerce.Platform.Data.Assets
                 Directory.CreateDirectory(path);
             }
 
+            return Task.CompletedTask;
         }
 
         /// <summary>
         /// Remove folders and blobs by absolute or relative urls
         /// </summary>
         /// <param name="urls"></param>
-        public virtual void Remove(string[] urls)
+        public virtual Task RemoveAsync(string[] urls)
         {
             if (urls == null)
-            {
                 throw new ArgumentNullException("urls");
-            }
+
             foreach (var url in urls)
             {
                 var path = GetStoragePathFromUrl(url);
@@ -205,6 +207,8 @@ namespace VirtoCommerce.Platform.Data.Assets
                     File.Delete(path);
                 }
             }
+
+            return Task.CompletedTask;
         }
 
         #endregion
@@ -255,7 +259,7 @@ namespace VirtoCommerce.Platform.Data.Assets
                 }
                 retVal += url;
                 retVal = retVal.Replace("/", "\\").Replace("\\\\", "\\");
-            }       
+            }
             return Uri.UnescapeDataString(retVal);
         }
 

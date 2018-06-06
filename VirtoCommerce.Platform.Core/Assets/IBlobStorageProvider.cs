@@ -1,4 +1,6 @@
-﻿using System.IO;
+using System.IO;
+using System.Threading.Tasks;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Core.Assets
 {
@@ -8,25 +10,25 @@ namespace VirtoCommerce.Platform.Core.Assets
     public interface IBlobStorageProvider
     {
         /// <summary>
-        /// Search blobs by specified criteria
+        /// SearchAsync blobs by specified criteria
         /// </summary>
         /// <param name="folderUrl"></param>
         /// <param name="keyword"></param>
         /// <returns></returns>
-        BlobSearchResult Search(string folderUrl, string keyword);
+        Task<GenericSearchResult<BlobEntry>> SearchAsync(string folderUrl, string keyword);
 
         /// <summary>
         /// Get blog info by url
         /// </summary>
         /// <param name="blobUrl"></param>
         /// <returns></returns>
-        BlobInfo GetBlobInfo(string blobUrl);
+        Task<BlobInfo> GetBlobInfoAsync(string blobUrl);
 
         /// <summary>
         /// Create blob folder in specified provider
         /// </summary>
         /// <param name="folder"></param>
-        void CreateFolder(BlobFolder folder);
+        Task CreateFolderAsync (BlobFolder folder);
 
         /// <summary>
         /// Open blob for reading
@@ -46,6 +48,6 @@ namespace VirtoCommerce.Platform.Core.Assets
         /// Remove secified blobs
         /// </summary>
         /// <param name="urls"></param>
-        void Remove(string[] urls);
+        Task RemoveAsync (string[] urls);
     }
 }
