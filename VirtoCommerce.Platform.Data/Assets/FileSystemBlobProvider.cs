@@ -1,13 +1,11 @@
 using System;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Exceptions;
 
-namespace VirtoCommerce.Platform.Data.Assets.FileSystem
+namespace VirtoCommerce.Platform.Data.Assets
 {
     public class FileSystemBlobProvider : IBlobStorageProvider, IBlobUrlResolver
     {
@@ -20,13 +18,14 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
         public FileSystemBlobProvider(IOptions<FileSystemBlobContentOptions> options)
         {
             _options = options.Value;
-            if (_options.RootPath == null)
+            if (_options.StoragePath == null)
             {
-                throw new PlatformException($"{ nameof(_options.RootPath) } must be set");
+                throw new PlatformException($"{ nameof(_options.StoragePath) } must be set");
             }
-            _storagePath = _options.RootPath.TrimEnd('\\');
 
-            _basePublicUrl = _options.PublicUrl;
+            _storagePath = _options.StoragePath.TrimEnd('\\');
+
+            _basePublicUrl = _options.BasePublicUrl;
             if (_basePublicUrl != null)
             {
                 _basePublicUrl = _basePublicUrl.TrimEnd('/');
@@ -39,7 +38,7 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public virtual Task<BlobInfo> GetBlobInfoAsync(string url)
+        public virtual BlobInfo GetBlobInfo(string url)
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException("url");
@@ -52,18 +51,18 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
             if (File.Exists(filePath))
             {
                 var fileInfo = new FileInfo(filePath);
-
-                retVal = AbstractTypeFactory<BlobInfo>.TryCreateInstance();
-                retVal.Url = GetAbsoluteUrlFromPath(filePath);
-                retVal.ContentType = MimeTypeResolver.ResolveContentType(fileInfo.Name);
-                retVal.Size = fileInfo.Length;
-                retVal.Name = fileInfo.Name;
-                retVal.ModifiedDate = fileInfo.LastWriteTimeUtc;
+                retVal = new BlobInfo
+                {
+                    Url = GetAbsoluteUrlFromPath(filePath),
+                    ContentType = MimeTypeResolver.ResolveContentType(fileInfo.Name),
+                    Size = fileInfo.Length,
+                    FileName = fileInfo.Name,
+                    ModifiedDate = fileInfo.LastWriteTimeUtc
+                };
                 retVal.RelativeUrl = GetRelativeUrl(retVal.Url);
 
             }
-
-            return Task.FromResult(retVal);
+            return retVal;
         }
 
         /// <summary>
@@ -96,20 +95,19 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
             {
                 Directory.CreateDirectory(folderPath);
             }
-
             return File.Open(filePath, FileMode.Create);
         }
 
 
         /// <summary>
-        /// SearchAsync folders and blobs in folder
+        /// Search folders and blobs in folder
         /// </summary>
         /// <param name="folderUrl">absolute or relative path</param>
         /// <param name="keyword"></param>
         /// <returns></returns>
-        public virtual Task<GenericSearchResult<BlobEntry>> SearchAsync(string folderUrl, string keyword)
+        public virtual BlobSearchResult Search(string folderUrl, string keyword)
         {
-            var retVal = new GenericSearchResult<BlobEntry>();
+            var retVal = new BlobSearchResult();
             folderUrl = folderUrl ?? _basePublicUrl;
 
             var storageFolderPath = GetStoragePathFromUrl(folderUrl);
@@ -118,45 +116,45 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
 
             if (!Directory.Exists(storageFolderPath))
             {
-                return Task.FromResult(retVal);
+                return retVal;
             }
             var directories = String.IsNullOrEmpty(keyword) ? Directory.GetDirectories(storageFolderPath) : Directory.GetDirectories(storageFolderPath, "*" + keyword + "*", SearchOption.AllDirectories);
             foreach (var directory in directories)
             {
                 var directoryInfo = new DirectoryInfo(directory);
-
-                var folder = AbstractTypeFactory<BlobFolder>.TryCreateInstance();
-                folder.Name = Path.GetFileName(directory);
-                folder.Url = GetAbsoluteUrlFromPath(directory);
-                folder.ParentUrl = GetAbsoluteUrlFromPath(directoryInfo.Parent.FullName);
+                var folder = new BlobFolder
+                {
+                    Name = Path.GetFileName(directory),
+                    Url = GetAbsoluteUrlFromPath(directory),
+                    ParentUrl = GetAbsoluteUrlFromPath(directoryInfo.Parent.FullName)
+                };
                 folder.RelativeUrl = GetRelativeUrl(folder.Url);
-                retVal.Results.Add(folder);
+                retVal.Folders.Add(folder);
             }
 
             var files = String.IsNullOrEmpty(keyword) ? Directory.GetFiles(storageFolderPath) : Directory.GetFiles(storageFolderPath, "*" + keyword + "*.*", SearchOption.AllDirectories);
             foreach (var file in files)
             {
                 var fileInfo = new FileInfo(file);
-
-                var blobInfo = AbstractTypeFactory<BlobInfo>.TryCreateInstance();
-                blobInfo.Url = GetAbsoluteUrlFromPath(file);
-                blobInfo.ContentType = MimeTypeResolver.ResolveContentType(fileInfo.Name);
-                blobInfo.Size = fileInfo.Length;
-                blobInfo.Name = fileInfo.Name;
-                blobInfo.ModifiedDate = fileInfo.LastWriteTimeUtc;
+                var blobInfo = new BlobInfo
+                {
+                    Url = GetAbsoluteUrlFromPath(file),
+                    ContentType = MimeTypeResolver.ResolveContentType(fileInfo.Name),
+                    Size = fileInfo.Length,
+                    FileName = fileInfo.Name,
+                    ModifiedDate = fileInfo.LastWriteTimeUtc
+                };
                 blobInfo.RelativeUrl = GetRelativeUrl(blobInfo.Url);
-                retVal.Results.Add(blobInfo);
+                retVal.Items.Add(blobInfo);
             }
-
-            retVal.TotalCount = retVal.Results.Count();
-            return Task.FromResult(retVal);
+            return retVal;
         }
 
         /// <summary>
         /// Create folder in file system within to base directory
         /// </summary>
         /// <param name="folder"></param>
-        public virtual Task CreateFolderAsync(BlobFolder folder)
+        public virtual void CreateFolder(BlobFolder folder)
         {
             if (folder == null)
             {
@@ -176,18 +174,18 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
                 Directory.CreateDirectory(path);
             }
 
-            return Task.CompletedTask;
         }
 
         /// <summary>
         /// Remove folders and blobs by absolute or relative urls
         /// </summary>
         /// <param name="urls"></param>
-        public virtual Task RemoveAsync(string[] urls)
+        public virtual void Remove(string[] urls)
         {
             if (urls == null)
+            {
                 throw new ArgumentNullException("urls");
-
+            }
             foreach (var url in urls)
             {
                 var path = GetStoragePathFromUrl(url);
@@ -207,8 +205,6 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
                     File.Delete(path);
                 }
             }
-
-            return Task.CompletedTask;
         }
 
         #endregion
@@ -259,7 +255,7 @@ namespace VirtoCommerce.Platform.Data.Assets.FileSystem
                 }
                 retVal += url;
                 retVal = retVal.Replace("/", "\\").Replace("\\\\", "\\");
-            }
+            }       
             return Uri.UnescapeDataString(retVal);
         }
 
