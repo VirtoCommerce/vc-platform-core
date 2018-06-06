@@ -8,5 +8,6 @@ namespace VirtoCommerce.Platform.Web.Infrastructure
         public string LicenseFilePath { get; set; }
         public string LocalUploadFolderPath { get; set; } = "App_Data/Uploads";
         public string LicensePublicKeyPath { get; set; }
+        public string SampleDataUrl { get; set; }
     }
 }
