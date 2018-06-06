@@ -312,7 +312,6 @@ namespace VirtoCommerce.Platform.Web
                 });
             }
 
-
             app.UseDefaultFiles();
 
 
@@ -322,13 +321,6 @@ namespace VirtoCommerce.Platform.Web
                 RequestPath = "/docs",
                 FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot", "swagger")),
                 EnableDefaultFiles = true //serve index.html at /{ options.RoutePrefix }/
-            });
-
-            //Assets
-            app.UseFileServer(new FileServerOptions
-            {
-                RequestPath = "/assets",
-                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot", "App_Data", "Assets"))
             });
 
             app.UseAuthentication();
