@@ -24,18 +24,22 @@ namespace VirtoCommerce.Platform.Security.Handlers
 
         public virtual Task Handle(UserChangedEvent message)
         {
-            if (message.ChangedEntry.EntryState == EntryState.Added)
+            foreach (var changedEntry in message.ChangedEntries)
             {
-                SaveOperationLog(message.ChangedEntry.NewEntry.Id, SecurityAccountChangesResource.AccountCreatedMessage, EntryState.Added);
-            }
-            else if (message.ChangedEntry.EntryState == EntryState.Modified)
-            {
-                var changes = DetectAccountChanges(message.ChangedEntry.NewEntry, message.ChangedEntry.OldEntry);
-                foreach (var key in changes.Keys)
+                if (changedEntry.EntryState == EntryState.Added)
                 {
-                    SaveOperationLog(message.ChangedEntry.NewEntry.Id, string.Format(key, string.Join(", ", changes[key].ToArray())), EntryState.Modified);
+                    SaveOperationLog(changedEntry.NewEntry.Id, SecurityAccountChangesResource.AccountCreatedMessage, EntryState.Added);
+                }
+                else if (changedEntry.EntryState == EntryState.Modified)
+                {
+                    var changes = DetectAccountChanges(changedEntry.NewEntry, changedEntry.OldEntry);
+                    foreach (var key in changes.Keys)
+                    {
+                        SaveOperationLog(changedEntry.NewEntry.Id, string.Format(key, string.Join(", ", changes[key].ToArray())), EntryState.Modified);
+                    }
                 }
             }
+            
             return Task.CompletedTask;
         }
 
