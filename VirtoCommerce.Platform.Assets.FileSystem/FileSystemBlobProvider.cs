@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Exceptions;
 
-namespace VirtoCommerce.Platform.Data.Assets
+namespace VirtoCommerce.Platform.Assets.FileSystem
 {
     public class FileSystemBlobProvider : IBlobStorageProvider, IBlobUrlResolver
     {
