@@ -1,15 +1,13 @@
-﻿using VirtoCommerce.Platform.Core.Common;
+using System.Collections.Generic;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 
 namespace VirtoCommerce.Platform.Core.Security.Events
 {
-    public class UserChangingEvent : DomainEvent
+    public class UserChangingEvent : GenericChangedEntryEvent<ApplicationUser>
     {
-        public UserChangingEvent(GenericChangedEntry<ApplicationUser> changedEntry)
+        public UserChangingEvent(IEnumerable<GenericChangedEntry<ApplicationUser>> changedEntries) : base(changedEntries)
         {
-            ChangedEntry = changedEntry;
         }
-
-        public GenericChangedEntry<ApplicationUser> ChangedEntry { get; set; }
     }
 }

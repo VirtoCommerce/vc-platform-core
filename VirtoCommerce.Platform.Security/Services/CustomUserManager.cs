@@ -99,24 +99,30 @@ namespace VirtoCommerce.Platform.Security.Services
 
         public override async Task<IdentityResult> DeleteAsync(ApplicationUser user)
         {
-            var userChangedEntry = new GenericChangedEntry<ApplicationUser>(user, EntryState.Deleted);
-            await _eventPublisher.Publish(new UserChangingEvent(userChangedEntry));
+            var changedEntries = new List<GenericChangedEntry<ApplicationUser>>
+            {
+                new GenericChangedEntry<ApplicationUser>(user, EntryState.Deleted)
+            };
+            await _eventPublisher.Publish(new UserChangingEvent(changedEntries));
             var result = await base.DeleteAsync(user);
             if (result.Succeeded)
             {
-                await _eventPublisher.Publish(new UserChangedEvent(userChangedEntry));
+                await _eventPublisher.Publish(new UserChangedEvent(changedEntries));
                 SecurityCacheRegion.ExpireUser(user);
             }
             return result;
         }
         public override async Task<IdentityResult> UpdateAsync(ApplicationUser user)
         {
-            var userChangedEntry = new GenericChangedEntry<ApplicationUser>(user, EntryState.Modified);
-            await _eventPublisher.Publish(new UserChangingEvent(userChangedEntry));
+            var changedEntries = new List<GenericChangedEntry<ApplicationUser>>
+            {
+                new GenericChangedEntry<ApplicationUser>(user, EntryState.Modified)
+            };
+            await _eventPublisher.Publish(new UserChangingEvent(changedEntries));
             var result = await base.UpdateAsync(user);
             if (result.Succeeded)
             {
-                await _eventPublisher.Publish(new UserChangedEvent(userChangedEntry));
+                await _eventPublisher.Publish(new UserChangedEvent(changedEntries));
                 if (user.Roles != null)
                 {
                     var targetRoles = (await GetRolesAsync(user));
@@ -139,12 +145,15 @@ namespace VirtoCommerce.Platform.Security.Services
 
         public override async Task<IdentityResult> CreateAsync(ApplicationUser user)
         {
-            var userChangedEntry = new GenericChangedEntry<ApplicationUser>(user, EntryState.Added);
-            await _eventPublisher.Publish(new UserChangingEvent(userChangedEntry));
+            var changedEntries = new List<GenericChangedEntry<ApplicationUser>>
+            {
+                new GenericChangedEntry<ApplicationUser>(user, EntryState.Added)
+            };
+            await _eventPublisher.Publish(new UserChangingEvent(changedEntries));
             var result = await base.CreateAsync(user);
             if (result.Succeeded)
             {
-                await _eventPublisher.Publish(new UserChangedEvent(userChangedEntry));
+                await _eventPublisher.Publish(new UserChangedEvent(changedEntries));
                 if (user.Roles != null)
                 {
                     //Add
