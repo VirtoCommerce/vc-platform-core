@@ -76,12 +76,11 @@ angular.module('platformWebApp')
     function ($rootScope, $timeout, $interval, $state, mainMenuService, eventTemplateResolver, notifications) {
 
         //SignalR setup connection
-         var transportType = signalR.TransportType.WebSockets;
-         var http = new signalR.HttpConnection('/pushNotificationHub', { transport: transportType });
-         var connection = new signalR.HubConnection(http);
-         connection.start();
-
-
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl("/pushNotificationHub")
+            .build();     
+        connection.start();
+      
         connection.on('Send', function (data) {
             var notifyMenu = mainMenuService.findByPath('pushNotifications');
             var notificationTemplate = eventTemplateResolver.resolve(data, 'menu');

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Web.Model.Modularity;
 
 namespace VirtoCommerce.Platform.Web
 {
@@ -9,6 +10,13 @@ namespace VirtoCommerce.Platform.Web
         {
             public static class Setup
             {
+                public static ModuleSetting ModulesAutoInstallState = new ModuleSetting
+                {
+                    Name = "VirtoCommerce.ModulesAutoInstallState",
+                    ValueType = ModuleSetting.TypeString,
+                    DefaultValue = AutoInstallState.Undefined.ToString()
+                };
+
                 public static ModuleSetting ModulesAutoInstalled = new ModuleSetting
                 {
                     Name = "VirtoCommerce.ModulesAutoInstalled",
@@ -21,6 +29,7 @@ namespace VirtoCommerce.Platform.Web
                     get
                     {
                         yield return ModulesAutoInstalled;
+                        yield return ModulesAutoInstallState;
                     }
                 }
             }

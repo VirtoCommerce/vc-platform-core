@@ -7,6 +7,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace VirtoCommerce.Platform.Web.JsonConverters
 {
+
     /// <summary>
     /// Used for represent derived (overridden) types in resulting swagger API docs.
     /// This converter gets derived types from AbstractTypeFactory
