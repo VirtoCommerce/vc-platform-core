@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Data.Model;
 using VirtoCommerce.Platform.Data.Repositories;
 
 namespace VirtoCommerce.Platform.Data.Assets
@@ -26,7 +27,7 @@ namespace VirtoCommerce.Platform.Data.Assets
 
             using (var repository = _platformRepository())
             {
-                var query =  repository.AssetEntries;
+                var query = repository.AssetEntries;
 
                 if (!string.IsNullOrEmpty(criteria.SearchPhrase))
                 {

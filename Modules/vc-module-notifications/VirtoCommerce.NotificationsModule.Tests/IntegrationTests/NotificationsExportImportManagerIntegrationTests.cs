@@ -68,7 +68,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
         {
             //Arrange
             var manifest = new PlatformExportManifest();
-            var fileStream = new FileStream("c:\\vc\\export_test.json", FileMode.Create);
+            var fileStream = new FileStream(Path.GetFullPath("export_test.json"), FileMode.Create);
             var entityForCount = AbstractTypeFactory<NotificationEntity>.TryCreateInstance(nameof(EmailNotificationEntity));
             entityForCount.Id = Guid.NewGuid().ToString();
             entityForCount.Type = nameof(EmailNotification);
@@ -97,7 +97,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
         {
             //Arrange
             var manifest = new PlatformExportManifest();
-            var fileStream = new FileStream("c:\\vc\\export_test.json", FileMode.Open);
+            var fileStream = new FileStream(Path.GetFullPath("export_test.json"), FileMode.Open);
 
             //Act
             _notificationsExportImportManager.DoImport(fileStream, manifest, exportImportProgressInfo => { }, CancellationToken.None);

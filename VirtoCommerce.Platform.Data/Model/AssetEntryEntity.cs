@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.Platform.Data.Assets
+namespace VirtoCommerce.Platform.Data.Model
 {
     public class AssetEntryEntity : AuditableEntity
     {

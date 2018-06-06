@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <module>
     <id>VirtoCommerce.Module1</id>
     <version>1.0.0</version>
@@ -79,14 +79,7 @@
                     <value>de-DE</value>
                     <value>ja-JP</value>
                 </arrayValues>
-            </setting>
-            <setting>
-                <name>VirtoCommerce.Core.ExportImport.Description</name>
-                <valueType>string</valueType>
-                <defaultValue>Export/Import fulfillment centers</defaultValue>
-                <title>Export/Import description</title>
-                <description>Module description in platform export/import wizard</description>
-            </setting>
+            </setting>         
             <setting>
                 <name>VirtoCommerce.Core.FixedRateShippingMethod.Ground.Rate</name>
                 <valueType>decimal</valueType>

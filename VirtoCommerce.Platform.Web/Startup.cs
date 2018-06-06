@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -67,13 +68,15 @@ namespace VirtoCommerce.Platform.Web
             PlatformVersion.CurrentVersion = SemanticVersion.Parse(Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default.Application.ApplicationVersion);
 
             services.AddPlatformServices(Configuration);
+            services.AddSecurityServices();
 
             var mvcBuilder = services.AddMvc().AddJsonOptions(options =>
                 {
                     //Next line needs to represent custom derived types in the resulting swagger doc definitions. Because default SwaggerProvider used global JSON serialization settings
                     //we should register this converter globally.
                     options.SerializerSettings.ContractResolver = new PolymorphJsonContractResolver();
-
+                    //Next line allow to use polymorph types as parameters in API controller methods
+                    options.SerializerSettings.Converters.Add(new PolymorphJsonConverter());
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                     options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
@@ -89,7 +92,9 @@ namespace VirtoCommerce.Platform.Web
                     options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                 }
-            );
+            )
+            .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
             var modulesDiscoveryPath = Path.GetFullPath("Modules");
             services.AddModules(mvcBuilder, options =>
             {
@@ -108,6 +113,13 @@ namespace VirtoCommerce.Platform.Web
                 // Note: use the generic overload if you need
                 // to replace the default OpenIddict entities.
                 options.UseOpenIddict();
+            });
+
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
             services.AddSecurityServices(options =>
@@ -223,11 +235,6 @@ namespace VirtoCommerce.Platform.Web
             //Add SignalR for push notifications
             services.AddSignalR();
 
-            services.AddPlatformServices(Configuration);
-
-
-
-            services.AddSecurityServices();
 
             var assetsProvider = Configuration.GetSection("Assets:Provider").Value;
 
@@ -279,12 +286,15 @@ namespace VirtoCommerce.Platform.Web
             else
             {
                 app.UseExceptionHandler("/Error");
+                app.UseHsts();
             }
 
             //Return all errors as Json response
             app.UseMiddleware<ApiErrorWrappingMiddleware>();
 
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseCookiePolicy();
 
             //Handle all requests like a $(Platform) and Modules/$({ module.ModuleName }) as static files in correspond folder
             app.UseStaticFiles(new StaticFileOptions()

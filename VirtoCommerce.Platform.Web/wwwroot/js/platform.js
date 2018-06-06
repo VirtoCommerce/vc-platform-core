@@ -1,3 +1,3443 @@
+/** 
+ * @overview ASP.NET Core SignalR JavaScript Client.
+ * @version 1.0.0.
+ * @license
+ * Copyright (c) .NET Foundation. All rights reserved.
+ * Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+ */
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+	typeof define === 'function' && define.amd ? define(factory) :
+	(global.signalR = factory());
+}(this, (function () { 'use strict';
+
+var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+function commonjsRequire () {
+	throw new Error('Dynamic requires are not currently supported by rollup-plugin-commonjs');
+}
+
+function unwrapExports (x) {
+	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+}
+
+function createCommonjsModule(fn, module) {
+	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
+
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at http://www.apache.org/licenses/LICENSE-2.0
+
+THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+MERCHANTABLITY OR NON-INFRINGEMENT.
+
+See the Apache Version 2.0 License for specific language governing permissions
+and limitations under the License.
+***************************************************************************** */
+/* global Reflect, Promise */
+
+var extendStatics = Object.setPrototypeOf ||
+    ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+    function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+
+function __extends(d, b) {
+    extendStatics(d, b);
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+
+var __assign = Object.assign || function __assign(t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+        s = arguments[i];
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+    }
+    return t;
+};
+
+function __rest(s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0)
+            t[p[i]] = s[p[i]];
+    return t;
+}
+
+function __decorate(decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+}
+
+function __param(paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+}
+
+function __metadata(metadataKey, metadataValue) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
+}
+
+function __awaiter(thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+}
+
+function __generator(thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+}
+
+function __exportStar(m, exports) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+
+function __values(o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+}
+
+function __read(o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+}
+
+function __spread() {
+    for (var ar = [], i = 0; i < arguments.length; i++)
+        ar = ar.concat(__read(arguments[i]));
+    return ar;
+}
+
+function __await(v) {
+    return this instanceof __await ? (this.v = v, this) : new __await(v);
+}
+
+function __asyncGenerator(thisArg, _arguments, generator) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var g = generator.apply(thisArg, _arguments || []), i, q = [];
+    return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i;
+    function verb(n) { if (g[n]) i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; }
+    function resume(n, v) { try { step(g[n](v)); } catch (e) { settle(q[0][3], e); } }
+    function step(r) { r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);  }
+    function fulfill(value) { resume("next", value); }
+    function reject(value) { resume("throw", value); }
+    function settle(f, v) { if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]); }
+}
+
+function __asyncDelegator(o) {
+    var i, p;
+    return i = {}, verb("next"), verb("throw", function (e) { throw e; }), verb("return"), i[Symbol.iterator] = function () { return this; }, i;
+    function verb(n, f) { if (o[n]) i[n] = function (v) { return (p = !p) ? { value: __await(o[n](v)), done: n === "return" } : f ? f(v) : v; }; }
+}
+
+function __asyncValues(o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator];
+    return m ? m.call(o) : typeof __values === "function" ? __values(o) : o[Symbol.iterator]();
+}
+
+function __makeTemplateObject(cooked, raw) {
+    if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
+    return cooked;
+}
+
+function __importStar(mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result.default = mod;
+    return result;
+}
+
+function __importDefault(mod) {
+    return (mod && mod.__esModule) ? mod : { default: mod };
+}
+
+
+var tslib_1 = Object.freeze({
+	__extends: __extends,
+	__assign: __assign,
+	__rest: __rest,
+	__decorate: __decorate,
+	__param: __param,
+	__metadata: __metadata,
+	__awaiter: __awaiter,
+	__generator: __generator,
+	__exportStar: __exportStar,
+	__values: __values,
+	__read: __read,
+	__spread: __spread,
+	__await: __await,
+	__asyncGenerator: __asyncGenerator,
+	__asyncDelegator: __asyncDelegator,
+	__asyncValues: __asyncValues,
+	__makeTemplateObject: __makeTemplateObject,
+	__importStar: __importStar,
+	__importDefault: __importDefault
+});
+
+var es6Promise_auto = createCommonjsModule(function (module, exports) {
+/*!
+ * @overview es6-promise - a tiny implementation of Promises/A+.
+ * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
+ * @license   Licensed under MIT license
+ *            See https://raw.githubusercontent.com/stefanpenner/es6-promise/master/LICENSE
+ * @version   v4.2.2+97478eb6
+ */
+
+(function (global, factory) {
+	module.exports = factory();
+}(commonjsGlobal, (function () { function objectOrFunction(x) {
+  var type = typeof x;
+  return x !== null && (type === 'object' || type === 'function');
+}
+
+function isFunction(x) {
+  return typeof x === 'function';
+}
+
+
+
+var _isArray = void 0;
+if (Array.isArray) {
+  _isArray = Array.isArray;
+} else {
+  _isArray = function (x) {
+    return Object.prototype.toString.call(x) === '[object Array]';
+  };
+}
+
+var isArray = _isArray;
+
+var len = 0;
+var vertxNext = void 0;
+var customSchedulerFn = void 0;
+
+var asap = function asap(callback, arg) {
+  queue[len] = callback;
+  queue[len + 1] = arg;
+  len += 2;
+  if (len === 2) {
+    // If len is 2, that means that we need to schedule an async flush.
+    // If additional callbacks are queued before the queue is flushed, they
+    // will be processed by this flush that we are scheduling.
+    if (customSchedulerFn) {
+      customSchedulerFn(flush);
+    } else {
+      scheduleFlush();
+    }
+  }
+};
+
+function setScheduler(scheduleFn) {
+  customSchedulerFn = scheduleFn;
+}
+
+function setAsap(asapFn) {
+  asap = asapFn;
+}
+
+var browserWindow = typeof window !== 'undefined' ? window : undefined;
+var browserGlobal = browserWindow || {};
+var BrowserMutationObserver = browserGlobal.MutationObserver || browserGlobal.WebKitMutationObserver;
+var isNode = typeof self === 'undefined' && typeof process !== 'undefined' && {}.toString.call(process) === '[object process]';
+
+// test for web worker but not in IE10
+var isWorker = typeof Uint8ClampedArray !== 'undefined' && typeof importScripts !== 'undefined' && typeof MessageChannel !== 'undefined';
+
+// node
+function useNextTick() {
+  // node version 0.10.x displays a deprecation warning when nextTick is used recursively
+  // see https://github.com/cujojs/when/issues/410 for details
+  return function () {
+    return process.nextTick(flush);
+  };
+}
+
+// vertx
+function useVertxTimer() {
+  if (typeof vertxNext !== 'undefined') {
+    return function () {
+      vertxNext(flush);
+    };
+  }
+
+  return useSetTimeout();
+}
+
+function useMutationObserver() {
+  var iterations = 0;
+  var observer = new BrowserMutationObserver(flush);
+  var node = document.createTextNode('');
+  observer.observe(node, { characterData: true });
+
+  return function () {
+    node.data = iterations = ++iterations % 2;
+  };
+}
+
+// web worker
+function useMessageChannel() {
+  var channel = new MessageChannel();
+  channel.port1.onmessage = flush;
+  return function () {
+    return channel.port2.postMessage(0);
+  };
+}
+
+function useSetTimeout() {
+  // Store setTimeout reference so es6-promise will be unaffected by
+  // other code modifying setTimeout (like sinon.useFakeTimers())
+  var globalSetTimeout = setTimeout;
+  return function () {
+    return globalSetTimeout(flush, 1);
+  };
+}
+
+var queue = new Array(1000);
+function flush() {
+  for (var i = 0; i < len; i += 2) {
+    var callback = queue[i];
+    var arg = queue[i + 1];
+
+    callback(arg);
+
+    queue[i] = undefined;
+    queue[i + 1] = undefined;
+  }
+
+  len = 0;
+}
+
+function attemptVertx() {
+  try {
+    var r = commonjsRequire;
+    var vertx = r('vertx');
+    vertxNext = vertx.runOnLoop || vertx.runOnContext;
+    return useVertxTimer();
+  } catch (e) {
+    return useSetTimeout();
+  }
+}
+
+var scheduleFlush = void 0;
+// Decide what async method to use to triggering processing of queued callbacks:
+if (isNode) {
+  scheduleFlush = useNextTick();
+} else if (BrowserMutationObserver) {
+  scheduleFlush = useMutationObserver();
+} else if (isWorker) {
+  scheduleFlush = useMessageChannel();
+} else if (browserWindow === undefined && typeof commonjsRequire === 'function') {
+  scheduleFlush = attemptVertx();
+} else {
+  scheduleFlush = useSetTimeout();
+}
+
+function then(onFulfillment, onRejection) {
+  var parent = this;
+
+  var child = new this.constructor(noop);
+
+  if (child[PROMISE_ID] === undefined) {
+    makePromise(child);
+  }
+
+  var _state = parent._state;
+
+
+  if (_state) {
+    var callback = arguments[_state - 1];
+    asap(function () {
+      return invokeCallback(_state, child, callback, parent._result);
+    });
+  } else {
+    subscribe(parent, child, onFulfillment, onRejection);
+  }
+
+  return child;
+}
+
+/**
+  `Promise.resolve` returns a promise that will become resolved with the
+  passed `value`. It is shorthand for the following:
+
+  ```javascript
+  let promise = new Promise(function(resolve, reject){
+    resolve(1);
+  });
+
+  promise.then(function(value){
+    // value === 1
+  });
+  ```
+
+  Instead of writing the above, your code now simply becomes the following:
+
+  ```javascript
+  let promise = Promise.resolve(1);
+
+  promise.then(function(value){
+    // value === 1
+  });
+  ```
+
+  @method resolve
+  @static
+  @param {Any} value value that the returned promise will be resolved with
+  Useful for tooling.
+  @return {Promise} a promise that will become fulfilled with the given
+  `value`
+*/
+function resolve$1(object) {
+  /*jshint validthis:true */
+  var Constructor = this;
+
+  if (object && typeof object === 'object' && object.constructor === Constructor) {
+    return object;
+  }
+
+  var promise = new Constructor(noop);
+  resolve(promise, object);
+  return promise;
+}
+
+var PROMISE_ID = Math.random().toString(36).substring(16);
+
+function noop() {}
+
+var PENDING = void 0;
+var FULFILLED = 1;
+var REJECTED = 2;
+
+var GET_THEN_ERROR = new ErrorObject();
+
+function selfFulfillment() {
+  return new TypeError("You cannot resolve a promise with itself");
+}
+
+function cannotReturnOwn() {
+  return new TypeError('A promises callback cannot return that same promise.');
+}
+
+function getThen(promise) {
+  try {
+    return promise.then;
+  } catch (error) {
+    GET_THEN_ERROR.error = error;
+    return GET_THEN_ERROR;
+  }
+}
+
+function tryThen(then$$1, value, fulfillmentHandler, rejectionHandler) {
+  try {
+    then$$1.call(value, fulfillmentHandler, rejectionHandler);
+  } catch (e) {
+    return e;
+  }
+}
+
+function handleForeignThenable(promise, thenable, then$$1) {
+  asap(function (promise) {
+    var sealed = false;
+    var error = tryThen(then$$1, thenable, function (value) {
+      if (sealed) {
+        return;
+      }
+      sealed = true;
+      if (thenable !== value) {
+        resolve(promise, value);
+      } else {
+        fulfill(promise, value);
+      }
+    }, function (reason) {
+      if (sealed) {
+        return;
+      }
+      sealed = true;
+
+      reject(promise, reason);
+    }, 'Settle: ' + (promise._label || ' unknown promise'));
+
+    if (!sealed && error) {
+      sealed = true;
+      reject(promise, error);
+    }
+  }, promise);
+}
+
+function handleOwnThenable(promise, thenable) {
+  if (thenable._state === FULFILLED) {
+    fulfill(promise, thenable._result);
+  } else if (thenable._state === REJECTED) {
+    reject(promise, thenable._result);
+  } else {
+    subscribe(thenable, undefined, function (value) {
+      return resolve(promise, value);
+    }, function (reason) {
+      return reject(promise, reason);
+    });
+  }
+}
+
+function handleMaybeThenable(promise, maybeThenable, then$$1) {
+  if (maybeThenable.constructor === promise.constructor && then$$1 === then && maybeThenable.constructor.resolve === resolve$1) {
+    handleOwnThenable(promise, maybeThenable);
+  } else {
+    if (then$$1 === GET_THEN_ERROR) {
+      reject(promise, GET_THEN_ERROR.error);
+      GET_THEN_ERROR.error = null;
+    } else if (then$$1 === undefined) {
+      fulfill(promise, maybeThenable);
+    } else if (isFunction(then$$1)) {
+      handleForeignThenable(promise, maybeThenable, then$$1);
+    } else {
+      fulfill(promise, maybeThenable);
+    }
+  }
+}
+
+function resolve(promise, value) {
+  if (promise === value) {
+    reject(promise, selfFulfillment());
+  } else if (objectOrFunction(value)) {
+    handleMaybeThenable(promise, value, getThen(value));
+  } else {
+    fulfill(promise, value);
+  }
+}
+
+function publishRejection(promise) {
+  if (promise._onerror) {
+    promise._onerror(promise._result);
+  }
+
+  publish(promise);
+}
+
+function fulfill(promise, value) {
+  if (promise._state !== PENDING) {
+    return;
+  }
+
+  promise._result = value;
+  promise._state = FULFILLED;
+
+  if (promise._subscribers.length !== 0) {
+    asap(publish, promise);
+  }
+}
+
+function reject(promise, reason) {
+  if (promise._state !== PENDING) {
+    return;
+  }
+  promise._state = REJECTED;
+  promise._result = reason;
+
+  asap(publishRejection, promise);
+}
+
+function subscribe(parent, child, onFulfillment, onRejection) {
+  var _subscribers = parent._subscribers;
+  var length = _subscribers.length;
+
+
+  parent._onerror = null;
+
+  _subscribers[length] = child;
+  _subscribers[length + FULFILLED] = onFulfillment;
+  _subscribers[length + REJECTED] = onRejection;
+
+  if (length === 0 && parent._state) {
+    asap(publish, parent);
+  }
+}
+
+function publish(promise) {
+  var subscribers = promise._subscribers;
+  var settled = promise._state;
+
+  if (subscribers.length === 0) {
+    return;
+  }
+
+  var child = void 0,
+      callback = void 0,
+      detail = promise._result;
+
+  for (var i = 0; i < subscribers.length; i += 3) {
+    child = subscribers[i];
+    callback = subscribers[i + settled];
+
+    if (child) {
+      invokeCallback(settled, child, callback, detail);
+    } else {
+      callback(detail);
+    }
+  }
+
+  promise._subscribers.length = 0;
+}
+
+function ErrorObject() {
+  this.error = null;
+}
+
+var TRY_CATCH_ERROR = new ErrorObject();
+
+function tryCatch(callback, detail) {
+  try {
+    return callback(detail);
+  } catch (e) {
+    TRY_CATCH_ERROR.error = e;
+    return TRY_CATCH_ERROR;
+  }
+}
+
+function invokeCallback(settled, promise, callback, detail) {
+  var hasCallback = isFunction(callback),
+      value = void 0,
+      error = void 0,
+      succeeded = void 0,
+      failed = void 0;
+
+  if (hasCallback) {
+    value = tryCatch(callback, detail);
+
+    if (value === TRY_CATCH_ERROR) {
+      failed = true;
+      error = value.error;
+      value.error = null;
+    } else {
+      succeeded = true;
+    }
+
+    if (promise === value) {
+      reject(promise, cannotReturnOwn());
+      return;
+    }
+  } else {
+    value = detail;
+    succeeded = true;
+  }
+
+  if (promise._state !== PENDING) {
+    // noop
+  } else if (hasCallback && succeeded) {
+    resolve(promise, value);
+  } else if (failed) {
+    reject(promise, error);
+  } else if (settled === FULFILLED) {
+    fulfill(promise, value);
+  } else if (settled === REJECTED) {
+    reject(promise, value);
+  }
+}
+
+function initializePromise(promise, resolver) {
+  try {
+    resolver(function resolvePromise(value) {
+      resolve(promise, value);
+    }, function rejectPromise(reason) {
+      reject(promise, reason);
+    });
+  } catch (e) {
+    reject(promise, e);
+  }
+}
+
+var id = 0;
+function nextId() {
+  return id++;
+}
+
+function makePromise(promise) {
+  promise[PROMISE_ID] = id++;
+  promise._state = undefined;
+  promise._result = undefined;
+  promise._subscribers = [];
+}
+
+function validationError() {
+  return new Error('Array Methods must be provided an Array');
+}
+
+function validationError() {
+  return new Error('Array Methods must be provided an Array');
+}
+
+var Enumerator = function () {
+  function Enumerator(Constructor, input) {
+    this._instanceConstructor = Constructor;
+    this.promise = new Constructor(noop);
+
+    if (!this.promise[PROMISE_ID]) {
+      makePromise(this.promise);
+    }
+
+    if (isArray(input)) {
+      this.length = input.length;
+      this._remaining = input.length;
+
+      this._result = new Array(this.length);
+
+      if (this.length === 0) {
+        fulfill(this.promise, this._result);
+      } else {
+        this.length = this.length || 0;
+        this._enumerate(input);
+        if (this._remaining === 0) {
+          fulfill(this.promise, this._result);
+        }
+      }
+    } else {
+      reject(this.promise, validationError());
+    }
+  }
+
+  Enumerator.prototype._enumerate = function _enumerate(input) {
+    for (var i = 0; this._state === PENDING && i < input.length; i++) {
+      this._eachEntry(input[i], i);
+    }
+  };
+
+  Enumerator.prototype._eachEntry = function _eachEntry(entry, i) {
+    var c = this._instanceConstructor;
+    var resolve$$1 = c.resolve;
+
+
+    if (resolve$$1 === resolve$1) {
+      var _then = getThen(entry);
+
+      if (_then === then && entry._state !== PENDING) {
+        this._settledAt(entry._state, i, entry._result);
+      } else if (typeof _then !== 'function') {
+        this._remaining--;
+        this._result[i] = entry;
+      } else if (c === Promise$2) {
+        var promise = new c(noop);
+        handleMaybeThenable(promise, entry, _then);
+        this._willSettleAt(promise, i);
+      } else {
+        this._willSettleAt(new c(function (resolve$$1) {
+          return resolve$$1(entry);
+        }), i);
+      }
+    } else {
+      this._willSettleAt(resolve$$1(entry), i);
+    }
+  };
+
+  Enumerator.prototype._settledAt = function _settledAt(state, i, value) {
+    var promise = this.promise;
+
+
+    if (promise._state === PENDING) {
+      this._remaining--;
+
+      if (state === REJECTED) {
+        reject(promise, value);
+      } else {
+        this._result[i] = value;
+      }
+    }
+
+    if (this._remaining === 0) {
+      fulfill(promise, this._result);
+    }
+  };
+
+  Enumerator.prototype._willSettleAt = function _willSettleAt(promise, i) {
+    var enumerator = this;
+
+    subscribe(promise, undefined, function (value) {
+      return enumerator._settledAt(FULFILLED, i, value);
+    }, function (reason) {
+      return enumerator._settledAt(REJECTED, i, reason);
+    });
+  };
+
+  return Enumerator;
+}();
+
+/**
+  `Promise.all` accepts an array of promises, and returns a new promise which
+  is fulfilled with an array of fulfillment values for the passed promises, or
+  rejected with the reason of the first passed promise to be rejected. It casts all
+  elements of the passed iterable to promises as it runs this algorithm.
+
+  Example:
+
+  ```javascript
+  let promise1 = resolve(1);
+  let promise2 = resolve(2);
+  let promise3 = resolve(3);
+  let promises = [ promise1, promise2, promise3 ];
+
+  Promise.all(promises).then(function(array){
+    // The array here would be [ 1, 2, 3 ];
+  });
+  ```
+
+  If any of the `promises` given to `all` are rejected, the first promise
+  that is rejected will be given as an argument to the returned promises's
+  rejection handler. For example:
+
+  Example:
+
+  ```javascript
+  let promise1 = resolve(1);
+  let promise2 = reject(new Error("2"));
+  let promise3 = reject(new Error("3"));
+  let promises = [ promise1, promise2, promise3 ];
+
+  Promise.all(promises).then(function(array){
+    // Code here never runs because there are rejected promises!
+  }, function(error) {
+    // error.message === "2"
+  });
+  ```
+
+  @method all
+  @static
+  @param {Array} entries array of promises
+  @param {String} label optional string for labeling the promise.
+  Useful for tooling.
+  @return {Promise} promise that is fulfilled when all `promises` have been
+  fulfilled, or rejected if any of them become rejected.
+  @static
+*/
+function all(entries) {
+  return new Enumerator(this, entries).promise;
+}
+
+/**
+  `Promise.race` returns a new promise which is settled in the same way as the
+  first passed promise to settle.
+
+  Example:
+
+  ```javascript
+  let promise1 = new Promise(function(resolve, reject){
+    setTimeout(function(){
+      resolve('promise 1');
+    }, 200);
+  });
+
+  let promise2 = new Promise(function(resolve, reject){
+    setTimeout(function(){
+      resolve('promise 2');
+    }, 100);
+  });
+
+  Promise.race([promise1, promise2]).then(function(result){
+    // result === 'promise 2' because it was resolved before promise1
+    // was resolved.
+  });
+  ```
+
+  `Promise.race` is deterministic in that only the state of the first
+  settled promise matters. For example, even if other promises given to the
+  `promises` array argument are resolved, but the first settled promise has
+  become rejected before the other promises became fulfilled, the returned
+  promise will become rejected:
+
+  ```javascript
+  let promise1 = new Promise(function(resolve, reject){
+    setTimeout(function(){
+      resolve('promise 1');
+    }, 200);
+  });
+
+  let promise2 = new Promise(function(resolve, reject){
+    setTimeout(function(){
+      reject(new Error('promise 2'));
+    }, 100);
+  });
+
+  Promise.race([promise1, promise2]).then(function(result){
+    // Code here never runs
+  }, function(reason){
+    // reason.message === 'promise 2' because promise 2 became rejected before
+    // promise 1 became fulfilled
+  });
+  ```
+
+  An example real-world use case is implementing timeouts:
+
+  ```javascript
+  Promise.race([ajax('foo.json'), timeout(5000)])
+  ```
+
+  @method race
+  @static
+  @param {Array} promises array of promises to observe
+  Useful for tooling.
+  @return {Promise} a promise which settles in the same way as the first passed
+  promise to settle.
+*/
+function race(entries) {
+  /*jshint validthis:true */
+  var Constructor = this;
+
+  if (!isArray(entries)) {
+    return new Constructor(function (_, reject) {
+      return reject(new TypeError('You must pass an array to race.'));
+    });
+  } else {
+    return new Constructor(function (resolve, reject) {
+      var length = entries.length;
+      for (var i = 0; i < length; i++) {
+        Constructor.resolve(entries[i]).then(resolve, reject);
+      }
+    });
+  }
+}
+
+/**
+  `Promise.reject` returns a promise rejected with the passed `reason`.
+  It is shorthand for the following:
+
+  ```javascript
+  let promise = new Promise(function(resolve, reject){
+    reject(new Error('WHOOPS'));
+  });
+
+  promise.then(function(value){
+    // Code here doesn't run because the promise is rejected!
+  }, function(reason){
+    // reason.message === 'WHOOPS'
+  });
+  ```
+
+  Instead of writing the above, your code now simply becomes the following:
+
+  ```javascript
+  let promise = Promise.reject(new Error('WHOOPS'));
+
+  promise.then(function(value){
+    // Code here doesn't run because the promise is rejected!
+  }, function(reason){
+    // reason.message === 'WHOOPS'
+  });
+  ```
+
+  @method reject
+  @static
+  @param {Any} reason value that the returned promise will be rejected with.
+  Useful for tooling.
+  @return {Promise} a promise rejected with the given `reason`.
+*/
+function reject$1(reason) {
+  /*jshint validthis:true */
+  var Constructor = this;
+  var promise = new Constructor(noop);
+  reject(promise, reason);
+  return promise;
+}
+
+function needsResolver() {
+  throw new TypeError('You must pass a resolver function as the first argument to the promise constructor');
+}
+
+function needsNew() {
+  throw new TypeError("Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.");
+}
+
+/**
+  Promise objects represent the eventual result of an asynchronous operation. The
+  primary way of interacting with a promise is through its `then` method, which
+  registers callbacks to receive either a promise's eventual value or the reason
+  why the promise cannot be fulfilled.
+
+  Terminology
+  -----------
+
+  - `promise` is an object or function with a `then` method whose behavior conforms to this specification.
+  - `thenable` is an object or function that defines a `then` method.
+  - `value` is any legal JavaScript value (including undefined, a thenable, or a promise).
+  - `exception` is a value that is thrown using the throw statement.
+  - `reason` is a value that indicates why a promise was rejected.
+  - `settled` the final resting state of a promise, fulfilled or rejected.
+
+  A promise can be in one of three states: pending, fulfilled, or rejected.
+
+  Promises that are fulfilled have a fulfillment value and are in the fulfilled
+  state.  Promises that are rejected have a rejection reason and are in the
+  rejected state.  A fulfillment value is never a thenable.
+
+  Promises can also be said to *resolve* a value.  If this value is also a
+  promise, then the original promise's settled state will match the value's
+  settled state.  So a promise that *resolves* a promise that rejects will
+  itself reject, and a promise that *resolves* a promise that fulfills will
+  itself fulfill.
+
+
+  Basic Usage:
+  ------------
+
+  ```js
+  let promise = new Promise(function(resolve, reject) {
+    // on success
+    resolve(value);
+
+    // on failure
+    reject(reason);
+  });
+
+  promise.then(function(value) {
+    // on fulfillment
+  }, function(reason) {
+    // on rejection
+  });
+  ```
+
+  Advanced Usage:
+  ---------------
+
+  Promises shine when abstracting away asynchronous interactions such as
+  `XMLHttpRequest`s.
+
+  ```js
+  function getJSON(url) {
+    return new Promise(function(resolve, reject){
+      let xhr = new XMLHttpRequest();
+
+      xhr.open('GET', url);
+      xhr.onreadystatechange = handler;
+      xhr.responseType = 'json';
+      xhr.setRequestHeader('Accept', 'application/json');
+      xhr.send();
+
+      function handler() {
+        if (this.readyState === this.DONE) {
+          if (this.status === 200) {
+            resolve(this.response);
+          } else {
+            reject(new Error('getJSON: `' + url + '` failed with status: [' + this.status + ']'));
+          }
+        }
+      };
+    });
+  }
+
+  getJSON('/posts.json').then(function(json) {
+    // on fulfillment
+  }, function(reason) {
+    // on rejection
+  });
+  ```
+
+  Unlike callbacks, promises are great composable primitives.
+
+  ```js
+  Promise.all([
+    getJSON('/posts'),
+    getJSON('/comments')
+  ]).then(function(values){
+    values[0] // => postsJSON
+    values[1] // => commentsJSON
+
+    return values;
+  });
+  ```
+
+  @class Promise
+  @param {Function} resolver
+  Useful for tooling.
+  @constructor
+*/
+
+var Promise$2 = function () {
+  function Promise(resolver) {
+    this[PROMISE_ID] = nextId();
+    this._result = this._state = undefined;
+    this._subscribers = [];
+
+    if (noop !== resolver) {
+      typeof resolver !== 'function' && needsResolver();
+      this instanceof Promise ? initializePromise(this, resolver) : needsNew();
+    }
+  }
+
+  /**
+  The primary way of interacting with a promise is through its `then` method,
+  which registers callbacks to receive either a promise's eventual value or the
+  reason why the promise cannot be fulfilled.
+   ```js
+  findUser().then(function(user){
+    // user is available
+  }, function(reason){
+    // user is unavailable, and you are given the reason why
+  });
+  ```
+   Chaining
+  --------
+   The return value of `then` is itself a promise.  This second, 'downstream'
+  promise is resolved with the return value of the first promise's fulfillment
+  or rejection handler, or rejected if the handler throws an exception.
+   ```js
+  findUser().then(function (user) {
+    return user.name;
+  }, function (reason) {
+    return 'default name';
+  }).then(function (userName) {
+    // If `findUser` fulfilled, `userName` will be the user's name, otherwise it
+    // will be `'default name'`
+  });
+   findUser().then(function (user) {
+    throw new Error('Found user, but still unhappy');
+  }, function (reason) {
+    throw new Error('`findUser` rejected and we're unhappy');
+  }).then(function (value) {
+    // never reached
+  }, function (reason) {
+    // if `findUser` fulfilled, `reason` will be 'Found user, but still unhappy'.
+    // If `findUser` rejected, `reason` will be '`findUser` rejected and we're unhappy'.
+  });
+  ```
+  If the downstream promise does not specify a rejection handler, rejection reasons will be propagated further downstream.
+   ```js
+  findUser().then(function (user) {
+    throw new PedagogicalException('Upstream error');
+  }).then(function (value) {
+    // never reached
+  }).then(function (value) {
+    // never reached
+  }, function (reason) {
+    // The `PedgagocialException` is propagated all the way down to here
+  });
+  ```
+   Assimilation
+  ------------
+   Sometimes the value you want to propagate to a downstream promise can only be
+  retrieved asynchronously. This can be achieved by returning a promise in the
+  fulfillment or rejection handler. The downstream promise will then be pending
+  until the returned promise is settled. This is called *assimilation*.
+   ```js
+  findUser().then(function (user) {
+    return findCommentsByAuthor(user);
+  }).then(function (comments) {
+    // The user's comments are now available
+  });
+  ```
+   If the assimliated promise rejects, then the downstream promise will also reject.
+   ```js
+  findUser().then(function (user) {
+    return findCommentsByAuthor(user);
+  }).then(function (comments) {
+    // If `findCommentsByAuthor` fulfills, we'll have the value here
+  }, function (reason) {
+    // If `findCommentsByAuthor` rejects, we'll have the reason here
+  });
+  ```
+   Simple Example
+  --------------
+   Synchronous Example
+   ```javascript
+  let result;
+   try {
+    result = findResult();
+    // success
+  } catch(reason) {
+    // failure
+  }
+  ```
+   Errback Example
+   ```js
+  findResult(function(result, err){
+    if (err) {
+      // failure
+    } else {
+      // success
+    }
+  });
+  ```
+   Promise Example;
+   ```javascript
+  findResult().then(function(result){
+    // success
+  }, function(reason){
+    // failure
+  });
+  ```
+   Advanced Example
+  --------------
+   Synchronous Example
+   ```javascript
+  let author, books;
+   try {
+    author = findAuthor();
+    books  = findBooksByAuthor(author);
+    // success
+  } catch(reason) {
+    // failure
+  }
+  ```
+   Errback Example
+   ```js
+   function foundBooks(books) {
+   }
+   function failure(reason) {
+   }
+   findAuthor(function(author, err){
+    if (err) {
+      failure(err);
+      // failure
+    } else {
+      try {
+        findBoooksByAuthor(author, function(books, err) {
+          if (err) {
+            failure(err);
+          } else {
+            try {
+              foundBooks(books);
+            } catch(reason) {
+              failure(reason);
+            }
+          }
+        });
+      } catch(error) {
+        failure(err);
+      }
+      // success
+    }
+  });
+  ```
+   Promise Example;
+   ```javascript
+  findAuthor().
+    then(findBooksByAuthor).
+    then(function(books){
+      // found books
+  }).catch(function(reason){
+    // something went wrong
+  });
+  ```
+   @method then
+  @param {Function} onFulfilled
+  @param {Function} onRejected
+  Useful for tooling.
+  @return {Promise}
+  */
+
+  /**
+  `catch` is simply sugar for `then(undefined, onRejection)` which makes it the same
+  as the catch block of a try/catch statement.
+  ```js
+  function findAuthor(){
+  throw new Error('couldn't find that author');
+  }
+  // synchronous
+  try {
+  findAuthor();
+  } catch(reason) {
+  // something went wrong
+  }
+  // async with promises
+  findAuthor().catch(function(reason){
+  // something went wrong
+  });
+  ```
+  @method catch
+  @param {Function} onRejection
+  Useful for tooling.
+  @return {Promise}
+  */
+
+
+  Promise.prototype.catch = function _catch(onRejection) {
+    return this.then(null, onRejection);
+  };
+
+  /**
+    `finally` will be invoked regardless of the promise's fate just as native
+    try/catch/finally behaves
+  
+    Synchronous example:
+  
+    ```js
+    findAuthor() {
+      if (Math.random() > 0.5) {
+        throw new Error();
+      }
+      return new Author();
+    }
+  
+    try {
+      return findAuthor(); // succeed or fail
+    } catch(error) {
+      return findOtherAuther();
+    } finally {
+      // always runs
+      // doesn't affect the return value
+    }
+    ```
+  
+    Asynchronous example:
+  
+    ```js
+    findAuthor().catch(function(reason){
+      return findOtherAuther();
+    }).finally(function(){
+      // author was either found, or not
+    });
+    ```
+  
+    @method finally
+    @param {Function} callback
+    @return {Promise}
+  */
+
+
+  Promise.prototype.finally = function _finally(callback) {
+    var promise = this;
+    var constructor = promise.constructor;
+
+    return promise.then(function (value) {
+      return constructor.resolve(callback()).then(function () {
+        return value;
+      });
+    }, function (reason) {
+      return constructor.resolve(callback()).then(function () {
+        throw reason;
+      });
+    });
+  };
+
+  return Promise;
+}();
+
+Promise$2.prototype.then = then;
+Promise$2.all = all;
+Promise$2.race = race;
+Promise$2.resolve = resolve$1;
+Promise$2.reject = reject$1;
+Promise$2._setScheduler = setScheduler;
+Promise$2._setAsap = setAsap;
+Promise$2._asap = asap;
+
+/*global self*/
+function polyfill() {
+    var local = void 0;
+
+    if (typeof commonjsGlobal !== 'undefined') {
+        local = commonjsGlobal;
+    } else if (typeof self !== 'undefined') {
+        local = self;
+    } else {
+        try {
+            local = Function('return this')();
+        } catch (e) {
+            throw new Error('polyfill failed because global object is unavailable in this environment');
+        }
+    }
+
+    var P = local.Promise;
+
+    if (P) {
+        var promiseToString = null;
+        try {
+            promiseToString = Object.prototype.toString.call(P.resolve());
+        } catch (e) {
+            // silently ignored
+        }
+
+        if (promiseToString === '[object Promise]' && !P.cast) {
+            return;
+        }
+    }
+
+    local.Promise = Promise$2;
+}
+
+// Strange compat..
+Promise$2.polyfill = polyfill;
+Promise$2.Promise = Promise$2;
+
+Promise$2.polyfill();
+
+return Promise$2;
+
+})));
+
+
+
+
+});
+
+var Errors = createCommonjsModule(function (module, exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+
+/** Error thrown when an HTTP request fails. */
+var HttpError = /** @class */ (function (_super) {
+    tslib_1.__extends(HttpError, _super);
+    /** Constructs a new instance of {@link HttpError}.
+     *
+     * @param {string} errorMessage A descriptive error message.
+     * @param {number} statusCode The HTTP status code represented by this error.
+     */
+    function HttpError(errorMessage, statusCode) {
+        var _newTarget = this.constructor;
+        var _this = this;
+        var trueProto = _newTarget.prototype;
+        _this = _super.call(this, errorMessage) || this;
+        _this.statusCode = statusCode;
+        // Workaround issue in Typescript compiler
+        // https://github.com/Microsoft/TypeScript/issues/13965#issuecomment-278570200
+        _this.__proto__ = trueProto;
+        return _this;
+    }
+    return HttpError;
+}(Error));
+exports.HttpError = HttpError;
+/** Error thrown when a timeout elapses. */
+var TimeoutError = /** @class */ (function (_super) {
+    tslib_1.__extends(TimeoutError, _super);
+    /** Constructs a new instance of {@link TimeoutError}.
+     *
+     * @param {string} errorMessage A descriptive error message.
+     */
+    function TimeoutError(errorMessage) {
+        var _newTarget = this.constructor;
+        if (errorMessage === void 0) { errorMessage = "A timeout occurred."; }
+        var _this = this;
+        var trueProto = _newTarget.prototype;
+        _this = _super.call(this, errorMessage) || this;
+        // Workaround issue in Typescript compiler
+        // https://github.com/Microsoft/TypeScript/issues/13965#issuecomment-278570200
+        _this.__proto__ = trueProto;
+        return _this;
+    }
+    return TimeoutError;
+}(Error));
+exports.TimeoutError = TimeoutError;
+
+});
+
+unwrapExports(Errors);
+var Errors_1 = Errors.HttpError;
+var Errors_2 = Errors.TimeoutError;
+
+var ILogger = createCommonjsModule(function (module, exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+// These values are designed to match the ASP.NET Log Levels since that's the pattern we're emulating here.
+/** Indicates the severity of a log message.
+ *
+ * Log Levels are ordered in increasing severity. So `Debug` is more severe than `Trace`, etc.
+ */
+var LogLevel;
+(function (LogLevel) {
+    /** Log level for very low severity diagnostic messages. */
+    LogLevel[LogLevel["Trace"] = 0] = "Trace";
+    /** Log level for low severity diagnostic messages. */
+    LogLevel[LogLevel["Debug"] = 1] = "Debug";
+    /** Log level for informational diagnostic messages. */
+    LogLevel[LogLevel["Information"] = 2] = "Information";
+    /** Log level for diagnostic messages that indicate a non-fatal problem. */
+    LogLevel[LogLevel["Warning"] = 3] = "Warning";
+    /** Log level for diagnostic messages that indicate a failure in the current operation. */
+    LogLevel[LogLevel["Error"] = 4] = "Error";
+    /** Log level for diagnostic messages that indicate a failure that will terminate the entire application. */
+    LogLevel[LogLevel["Critical"] = 5] = "Critical";
+    /** The highest possible log level. Used when configuring logging to indicate that no log messages should be emitted. */
+    LogLevel[LogLevel["None"] = 6] = "None";
+})(LogLevel = exports.LogLevel || (exports.LogLevel = {}));
+
+});
+
+unwrapExports(ILogger);
+var ILogger_1 = ILogger.LogLevel;
+
+var HttpClient_1 = createCommonjsModule(function (module, exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+
+
+
+/** Represents an HTTP response. */
+var HttpResponse = /** @class */ (function () {
+    function HttpResponse(statusCode, statusText, content) {
+        this.statusCode = statusCode;
+        this.statusText = statusText;
+        this.content = content;
+    }
+    return HttpResponse;
+}());
+exports.HttpResponse = HttpResponse;
+/** Abstraction over an HTTP client.
+ *
+ * This class provides an abstraction over an HTTP client so that a different implementation can be provided on different platforms.
+ */
+var HttpClient = /** @class */ (function () {
+    function HttpClient() {
+    }
+    HttpClient.prototype.get = function (url, options) {
+        return this.send(tslib_1.__assign({}, options, { method: "GET", url: url }));
+    };
+    HttpClient.prototype.post = function (url, options) {
+        return this.send(tslib_1.__assign({}, options, { method: "POST", url: url }));
+    };
+    HttpClient.prototype.delete = function (url, options) {
+        return this.send(tslib_1.__assign({}, options, { method: "DELETE", url: url }));
+    };
+    return HttpClient;
+}());
+exports.HttpClient = HttpClient;
+/** Default implementation of {@link HttpClient}. */
+var DefaultHttpClient = /** @class */ (function (_super) {
+    tslib_1.__extends(DefaultHttpClient, _super);
+    /** Creates a new instance of the {@link DefaultHttpClient}, using the provided {@link ILogger} to log messages. */
+    function DefaultHttpClient(logger) {
+        var _this = _super.call(this) || this;
+        _this.logger = logger;
+        return _this;
+    }
+    /** @inheritDoc */
+    DefaultHttpClient.prototype.send = function (request) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            var xhr = new XMLHttpRequest();
+            xhr.open(request.method, request.url, true);
+            xhr.withCredentials = true;
+            xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+            if (request.headers) {
+                Object.keys(request.headers)
+                    .forEach(function (header) { return xhr.setRequestHeader(header, request.headers[header]); });
+            }
+            if (request.responseType) {
+                xhr.responseType = request.responseType;
+            }
+            if (request.abortSignal) {
+                request.abortSignal.onabort = function () {
+                    xhr.abort();
+                };
+            }
+            if (request.timeout) {
+                xhr.timeout = request.timeout;
+            }
+            xhr.onload = function () {
+                if (request.abortSignal) {
+                    request.abortSignal.onabort = null;
+                }
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    resolve(new HttpResponse(xhr.status, xhr.statusText, xhr.response || xhr.responseText));
+                }
+                else {
+                    reject(new Errors.HttpError(xhr.statusText, xhr.status));
+                }
+            };
+            xhr.onerror = function () {
+                _this.logger.log(ILogger.LogLevel.Warning, "Error from HTTP request. " + xhr.status + ": " + xhr.statusText);
+                reject(new Errors.HttpError(xhr.statusText, xhr.status));
+            };
+            xhr.ontimeout = function () {
+                _this.logger.log(ILogger.LogLevel.Warning, "Timeout from HTTP request.");
+                reject(new Errors.TimeoutError());
+            };
+            xhr.send(request.content || "");
+        });
+    };
+    return DefaultHttpClient;
+}(HttpClient));
+exports.DefaultHttpClient = DefaultHttpClient;
+
+});
+
+unwrapExports(HttpClient_1);
+var HttpClient_2 = HttpClient_1.HttpResponse;
+var HttpClient_3 = HttpClient_1.HttpClient;
+var HttpClient_4 = HttpClient_1.DefaultHttpClient;
+
+var TextMessageFormat_1 = createCommonjsModule(function (module, exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+// Not exported from index
+var TextMessageFormat = /** @class */ (function () {
+    function TextMessageFormat() {
+    }
+    TextMessageFormat.write = function (output) {
+        return "" + output + TextMessageFormat.RecordSeparator;
+    };
+    TextMessageFormat.parse = function (input) {
+        if (input[input.length - 1] !== TextMessageFormat.RecordSeparator) {
+            throw new Error("Message is incomplete.");
+        }
+        var messages = input.split(TextMessageFormat.RecordSeparator);
+        messages.pop();
+        return messages;
+    };
+    TextMessageFormat.RecordSeparatorCode = 0x1e;
+    TextMessageFormat.RecordSeparator = String.fromCharCode(TextMessageFormat.RecordSeparatorCode);
+    return TextMessageFormat;
+}());
+exports.TextMessageFormat = TextMessageFormat;
+
+});
+
+unwrapExports(TextMessageFormat_1);
+var TextMessageFormat_2 = TextMessageFormat_1.TextMessageFormat;
+
+var HandshakeProtocol_1 = createCommonjsModule(function (module, exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+
+var HandshakeProtocol = /** @class */ (function () {
+    function HandshakeProtocol() {
+    }
+    // Handshake request is always JSON
+    HandshakeProtocol.prototype.writeHandshakeRequest = function (handshakeRequest) {
+        return TextMessageFormat_1.TextMessageFormat.write(JSON.stringify(handshakeRequest));
+    };
+    HandshakeProtocol.prototype.parseHandshakeResponse = function (data) {
+        var responseMessage;
+        var messageData;
+        var remainingData;
+        if (data instanceof ArrayBuffer) {
+            // Format is binary but still need to read JSON text from handshake response
+            var binaryData = new Uint8Array(data);
+            var separatorIndex = binaryData.indexOf(TextMessageFormat_1.TextMessageFormat.RecordSeparatorCode);
+            if (separatorIndex === -1) {
+                throw new Error("Message is incomplete.");
+            }
+            // content before separator is handshake response
+            // optional content after is additional messages
+            var responseLength = separatorIndex + 1;
+            messageData = String.fromCharCode.apply(null, binaryData.slice(0, responseLength));
+            remainingData = (binaryData.byteLength > responseLength) ? binaryData.slice(responseLength).buffer : null;
+        }
+        else {
+            var textData = data;
+            var separatorIndex = textData.indexOf(TextMessageFormat_1.TextMessageFormat.RecordSeparator);
+            if (separatorIndex === -1) {
+                throw new Error("Message is incomplete.");
+            }
+            // content before separator is handshake response
+            // optional content after is additional messages
+            var responseLength = separatorIndex + 1;
+            messageData = textData.substring(0, responseLength);
+            remainingData = (textData.length > responseLength) ? textData.substring(responseLength) : null;
+        }
+        // At this point we should have just the single handshake message
+        var messages = TextMessageFormat_1.TextMessageFormat.parse(messageData);
+        responseMessage = JSON.parse(messages[0]);
+        // multiple messages could have arrived with handshake
+        // return additional data to be parsed as usual, or null if all parsed
+        return [remainingData, responseMessage];
+    };
+    return HandshakeProtocol;
+}());
+exports.HandshakeProtocol = HandshakeProtocol;
+
+});
+
+unwrapExports(HandshakeProtocol_1);
+var HandshakeProtocol_2 = HandshakeProtocol_1.HandshakeProtocol;
+
+var IHubProtocol = createCommonjsModule(function (module, exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+/** Defines the type of a Hub Message. */
+var MessageType;
+(function (MessageType) {
+    /** Indicates the message is an Invocation message and implements the {@link InvocationMessage} interface. */
+    MessageType[MessageType["Invocation"] = 1] = "Invocation";
+    /** Indicates the message is a StreamItem message and implements the {@link StreamItemMessage} interface. */
+    MessageType[MessageType["StreamItem"] = 2] = "StreamItem";
+    /** Indicates the message is a Completion message and implements the {@link CompletionMessage} interface. */
+    MessageType[MessageType["Completion"] = 3] = "Completion";
+    /** Indicates the message is a Stream Invocation message and implements the {@link StreamInvocationMessage} interface. */
+    MessageType[MessageType["StreamInvocation"] = 4] = "StreamInvocation";
+    /** Indicates the message is a Cancel Invocation message and implements the {@link CancelInvocationMessage} interface. */
+    MessageType[MessageType["CancelInvocation"] = 5] = "CancelInvocation";
+    /** Indicates the message is a Ping message and implements the {@link PingMessage} interface. */
+    MessageType[MessageType["Ping"] = 6] = "Ping";
+    /** Indicates the message is a Close message and implements the {@link CloseMessage} interface. */
+    MessageType[MessageType["Close"] = 7] = "Close";
+})(MessageType = exports.MessageType || (exports.MessageType = {}));
+
+});
+
+unwrapExports(IHubProtocol);
+var IHubProtocol_1 = IHubProtocol.MessageType;
+
+var Loggers = createCommonjsModule(function (module, exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+/** A logger that does nothing when log messages are sent to it. */
+var NullLogger = /** @class */ (function () {
+    function NullLogger() {
+    }
+    /** @inheritDoc */
+    NullLogger.prototype.log = function (logLevel, message) {
+    };
+    /** The singleton instance of the {@link NullLogger}. */
+    NullLogger.instance = new NullLogger();
+    return NullLogger;
+}());
+exports.NullLogger = NullLogger;
+
+});
+
+unwrapExports(Loggers);
+var Loggers_1 = Loggers.NullLogger;
+
+var Utils = createCommonjsModule(function (module, exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+
+
+
+var Arg = /** @class */ (function () {
+    function Arg() {
+    }
+    Arg.isRequired = function (val, name) {
+        if (val === null || val === undefined) {
+            throw new Error("The '" + name + "' argument is required.");
+        }
+    };
+    Arg.isIn = function (val, values, name) {
+        // TypeScript enums have keys for **both** the name and the value of each enum member on the type itself.
+        if (!(val in values)) {
+            throw new Error("Unknown " + name + " value: " + val + ".");
+        }
+    };
+    return Arg;
+}());
+exports.Arg = Arg;
+function getDataDetail(data, includeContent) {
+    var length = null;
+    if (data instanceof ArrayBuffer) {
+        length = "Binary data of length " + data.byteLength;
+        if (includeContent) {
+            length += ". Content: '" + formatArrayBuffer(data) + "'";
+        }
+    }
+    else if (typeof data === "string") {
+        length = "String data of length " + data.length;
+        if (includeContent) {
+            length += ". Content: '" + data + "'.";
+        }
+    }
+    return length;
+}
+exports.getDataDetail = getDataDetail;
+function formatArrayBuffer(data) {
+    var view = new Uint8Array(data);
+    // Uint8Array.map only supports returning another Uint8Array?
+    var str = "";
+    view.forEach(function (num) {
+        var pad = num < 16 ? "0" : "";
+        str += "0x" + pad + num.toString(16) + " ";
+    });
+    // Trim of trailing space.
+    return str.substr(0, str.length - 1);
+}
+exports.formatArrayBuffer = formatArrayBuffer;
+function sendMessage(logger, transportName, httpClient, url, accessTokenFactory, content, logMessageContent) {
+    return tslib_1.__awaiter(this, void 0, void 0, function () {
+        var headers, token, response, _a;
+        return tslib_1.__generator(this, function (_b) {
+            switch (_b.label) {
+                case 0: return [4 /*yield*/, accessTokenFactory()];
+                case 1:
+                    token = _b.sent();
+                    if (token) {
+                        headers = (_a = {}, _a["Authorization"] = "Bearer " + token, _a);
+                    }
+                    logger.log(ILogger.LogLevel.Trace, "(" + transportName + " transport) sending data. " + getDataDetail(content, logMessageContent) + ".");
+                    return [4 /*yield*/, httpClient.post(url, {
+                            content: content,
+                            headers: headers,
+                        })];
+                case 2:
+                    response = _b.sent();
+                    logger.log(ILogger.LogLevel.Trace, "(" + transportName + " transport) request complete. Response status: " + response.statusCode + ".");
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+exports.sendMessage = sendMessage;
+function createLogger(logger) {
+    if (logger === undefined) {
+        return new ConsoleLogger(ILogger.LogLevel.Information);
+    }
+    if (logger === null) {
+        return Loggers.NullLogger.instance;
+    }
+    if (logger.log) {
+        return logger;
+    }
+    return new ConsoleLogger(logger);
+}
+exports.createLogger = createLogger;
+var Subject = /** @class */ (function () {
+    function Subject(cancelCallback) {
+        this.observers = [];
+        this.cancelCallback = cancelCallback;
+    }
+    Subject.prototype.next = function (item) {
+        for (var _i = 0, _a = this.observers; _i < _a.length; _i++) {
+            var observer = _a[_i];
+            observer.next(item);
+        }
+    };
+    Subject.prototype.error = function (err) {
+        for (var _i = 0, _a = this.observers; _i < _a.length; _i++) {
+            var observer = _a[_i];
+            if (observer.error) {
+                observer.error(err);
+            }
+        }
+    };
+    Subject.prototype.complete = function () {
+        for (var _i = 0, _a = this.observers; _i < _a.length; _i++) {
+            var observer = _a[_i];
+            if (observer.complete) {
+                observer.complete();
+            }
+        }
+    };
+    Subject.prototype.subscribe = function (observer) {
+        this.observers.push(observer);
+        return new SubjectSubscription(this, observer);
+    };
+    return Subject;
+}());
+exports.Subject = Subject;
+var SubjectSubscription = /** @class */ (function () {
+    function SubjectSubscription(subject, observer) {
+        this.subject = subject;
+        this.observer = observer;
+    }
+    SubjectSubscription.prototype.dispose = function () {
+        var index = this.subject.observers.indexOf(this.observer);
+        if (index > -1) {
+            this.subject.observers.splice(index, 1);
+        }
+        if (this.subject.observers.length === 0) {
+            this.subject.cancelCallback().catch(function (_) { });
+        }
+    };
+    return SubjectSubscription;
+}());
+exports.SubjectSubscription = SubjectSubscription;
+var ConsoleLogger = /** @class */ (function () {
+    function ConsoleLogger(minimumLogLevel) {
+        this.minimumLogLevel = minimumLogLevel;
+    }
+    ConsoleLogger.prototype.log = function (logLevel, message) {
+        if (logLevel >= this.minimumLogLevel) {
+            switch (logLevel) {
+                case ILogger.LogLevel.Critical:
+                case ILogger.LogLevel.Error:
+                    console.error(ILogger.LogLevel[logLevel] + ": " + message);
+                    break;
+                case ILogger.LogLevel.Warning:
+                    console.warn(ILogger.LogLevel[logLevel] + ": " + message);
+                    break;
+                case ILogger.LogLevel.Information:
+                    console.info(ILogger.LogLevel[logLevel] + ": " + message);
+                    break;
+                default:
+                    // console.debug only goes to attached debuggers in Node, so we use console.log for Trace and Debug
+                    console.log(ILogger.LogLevel[logLevel] + ": " + message);
+                    break;
+            }
+        }
+    };
+    return ConsoleLogger;
+}());
+exports.ConsoleLogger = ConsoleLogger;
+
+});
+
+unwrapExports(Utils);
+var Utils_1 = Utils.Arg;
+var Utils_2 = Utils.getDataDetail;
+var Utils_3 = Utils.formatArrayBuffer;
+var Utils_4 = Utils.sendMessage;
+var Utils_5 = Utils.createLogger;
+var Utils_6 = Utils.Subject;
+var Utils_7 = Utils.SubjectSubscription;
+var Utils_8 = Utils.ConsoleLogger;
+
+var HubConnection_1 = createCommonjsModule(function (module, exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+
+
+
+
+
+var DEFAULT_TIMEOUT_IN_MS = 30 * 1000;
+/** Represents a connection to a SignalR Hub. */
+var HubConnection = /** @class */ (function () {
+    function HubConnection(connection, logger, protocol) {
+        var _this = this;
+        Utils.Arg.isRequired(connection, "connection");
+        Utils.Arg.isRequired(logger, "logger");
+        Utils.Arg.isRequired(protocol, "protocol");
+        this.serverTimeoutInMilliseconds = DEFAULT_TIMEOUT_IN_MS;
+        this.logger = logger;
+        this.protocol = protocol;
+        this.connection = connection;
+        this.handshakeProtocol = new HandshakeProtocol_1.HandshakeProtocol();
+        this.connection.onreceive = function (data) { return _this.processIncomingData(data); };
+        this.connection.onclose = function (error) { return _this.connectionClosed(error); };
+        this.callbacks = {};
+        this.methods = {};
+        this.closedCallbacks = [];
+        this.id = 0;
+    }
+    /** @internal */
+    // Using a public static factory method means we can have a private constructor and an _internal_
+    // create method that can be used by HubConnectionBuilder. An "internal" constructor would just
+    // be stripped away and the '.d.ts' file would have no constructor, which is interpreted as a
+    // public parameter-less constructor.
+    HubConnection.create = function (connection, logger, protocol) {
+        return new HubConnection(connection, logger, protocol);
+    };
+    /** Starts the connection.
+     *
+     * @returns {Promise<void>} A Promise that resolves when the connection has been successfully established, or rejects with an error.
+     */
+    HubConnection.prototype.start = function () {
+        return tslib_1.__awaiter(this, void 0, void 0, function () {
+            var handshakeRequest;
+            return tslib_1.__generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        handshakeRequest = {
+                            protocol: this.protocol.name,
+                            version: this.protocol.version,
+                        };
+                        this.logger.log(ILogger.LogLevel.Debug, "Starting HubConnection.");
+                        this.receivedHandshakeResponse = false;
+                        return [4 /*yield*/, this.connection.start(this.protocol.transferFormat)];
+                    case 1:
+                        _a.sent();
+                        this.logger.log(ILogger.LogLevel.Debug, "Sending handshake request.");
+                        return [4 /*yield*/, this.connection.send(this.handshakeProtocol.writeHandshakeRequest(handshakeRequest))];
+                    case 2:
+                        _a.sent();
+                        this.logger.log(ILogger.LogLevel.Information, "Using HubProtocol '" + this.protocol.name + "'.");
+                        // defensively cleanup timeout in case we receive a message from the server before we finish start
+                        this.cleanupTimeout();
+                        this.configureTimeout();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    /** Stops the connection.
+     *
+     * @returns {Promise<void>} A Promise that resolves when the connection has been successfully terminated, or rejects with an error.
+     */
+    HubConnection.prototype.stop = function () {
+        this.logger.log(ILogger.LogLevel.Debug, "Stopping HubConnection.");
+        this.cleanupTimeout();
+        return this.connection.stop();
+    };
+    /** Invokes a streaming hub method on the server using the specified name and arguments.
+     *
+     * @typeparam T The type of the items returned by the server.
+     * @param {string} methodName The name of the server method to invoke.
+     * @param {any[]} args The arguments used to invoke the server method.
+     * @returns {IStreamResult<T>} An object that yields results from the server as they are received.
+     */
+    HubConnection.prototype.stream = function (methodName) {
+        var _this = this;
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
+        }
+        var invocationDescriptor = this.createStreamInvocation(methodName, args);
+        var subject = new Utils.Subject(function () {
+            var cancelInvocation = _this.createCancelInvocation(invocationDescriptor.invocationId);
+            var cancelMessage = _this.protocol.writeMessage(cancelInvocation);
+            delete _this.callbacks[invocationDescriptor.invocationId];
+            return _this.connection.send(cancelMessage);
+        });
+        this.callbacks[invocationDescriptor.invocationId] = function (invocationEvent, error) {
+            if (error) {
+                subject.error(error);
+                return;
+            }
+            if (invocationEvent.type === IHubProtocol.MessageType.Completion) {
+                if (invocationEvent.error) {
+                    subject.error(new Error(invocationEvent.error));
+                }
+                else {
+                    subject.complete();
+                }
+            }
+            else {
+                subject.next((invocationEvent.item));
+            }
+        };
+        var message = this.protocol.writeMessage(invocationDescriptor);
+        this.connection.send(message)
+            .catch(function (e) {
+            subject.error(e);
+            delete _this.callbacks[invocationDescriptor.invocationId];
+        });
+        return subject;
+    };
+    /** Invokes a hub method on the server using the specified name and arguments. Does not wait for a response from the receiver.
+     *
+     * The Promise returned by this method resolves when the client has sent the invocation to the server. The server may still
+     * be processing the invocation.
+     *
+     * @param {string} methodName The name of the server method to invoke.
+     * @param {any[]} args The arguments used to invoke the server method.
+     * @returns {Promise<void>} A Promise that resolves when the invocation has been successfully sent, or rejects with an error.
+     */
+    HubConnection.prototype.send = function (methodName) {
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
+        }
+        var invocationDescriptor = this.createInvocation(methodName, args, true);
+        var message = this.protocol.writeMessage(invocationDescriptor);
+        return this.connection.send(message);
+    };
+    /** Invokes a hub method on the server using the specified name and arguments.
+     *
+     * The Promise returned by this method resolves when the server indicates it has finished invoking the method. When the promise
+     * resolves, the server has finished invoking the method. If the server method returns a result, it is produced as the result of
+     * resolving the Promise.
+     *
+     * @typeparam T The expected return type.
+     * @param {string} methodName The name of the server method to invoke.
+     * @param {any[]} args The arguments used to invoke the server method.
+     * @returns {Promise<T>} A Promise that resolves with the result of the server method (if any), or rejects with an error.
+     */
+    HubConnection.prototype.invoke = function (methodName) {
+        var _this = this;
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
+        }
+        var invocationDescriptor = this.createInvocation(methodName, args, false);
+        var p = new Promise(function (resolve, reject) {
+            _this.callbacks[invocationDescriptor.invocationId] = function (invocationEvent, error) {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                if (invocationEvent.type === IHubProtocol.MessageType.Completion) {
+                    var completionMessage = invocationEvent;
+                    if (completionMessage.error) {
+                        reject(new Error(completionMessage.error));
+                    }
+                    else {
+                        resolve(completionMessage.result);
+                    }
+                }
+                else {
+                    reject(new Error("Unexpected message type: " + invocationEvent.type));
+                }
+            };
+            var message = _this.protocol.writeMessage(invocationDescriptor);
+            _this.connection.send(message)
+                .catch(function (e) {
+                reject(e);
+                delete _this.callbacks[invocationDescriptor.invocationId];
+            });
+        });
+        return p;
+    };
+    /** Registers a handler that will be invoked when the hub method with the specified method name is invoked.
+     *
+     * @param {string} methodName The name of the hub method to define.
+     * @param {Function} newMethod The handler that will be raised when the hub method is invoked.
+     */
+    HubConnection.prototype.on = function (methodName, newMethod) {
+        if (!methodName || !newMethod) {
+            return;
+        }
+        methodName = methodName.toLowerCase();
+        if (!this.methods[methodName]) {
+            this.methods[methodName] = [];
+        }
+        // Preventing adding the same handler multiple times.
+        if (this.methods[methodName].indexOf(newMethod) !== -1) {
+            return;
+        }
+        this.methods[methodName].push(newMethod);
+    };
+    HubConnection.prototype.off = function (methodName, method) {
+        if (!methodName) {
+            return;
+        }
+        methodName = methodName.toLowerCase();
+        var handlers = this.methods[methodName];
+        if (!handlers) {
+            return;
+        }
+        if (method) {
+            var removeIdx = handlers.indexOf(method);
+            if (removeIdx !== -1) {
+                handlers.splice(removeIdx, 1);
+                if (handlers.length === 0) {
+                    delete this.methods[methodName];
+                }
+            }
+        }
+        else {
+            delete this.methods[methodName];
+        }
+    };
+    /** Registers a handler that will be invoked when the connection is closed.
+     *
+     * @param {Function} callback The handler that will be invoked when the connection is closed. Optionally receives a single argument containing the error that caused the connection to close (if any).
+     */
+    HubConnection.prototype.onclose = function (callback) {
+        if (callback) {
+            this.closedCallbacks.push(callback);
+        }
+    };
+    HubConnection.prototype.processIncomingData = function (data) {
+        this.cleanupTimeout();
+        if (!this.receivedHandshakeResponse) {
+            data = this.processHandshakeResponse(data);
+            this.receivedHandshakeResponse = true;
+        }
+        // Data may have all been read when processing handshake response
+        if (data) {
+            // Parse the messages
+            var messages = this.protocol.parseMessages(data, this.logger);
+            for (var _i = 0, messages_1 = messages; _i < messages_1.length; _i++) {
+                var message = messages_1[_i];
+                switch (message.type) {
+                    case IHubProtocol.MessageType.Invocation:
+                        this.invokeClientMethod(message);
+                        break;
+                    case IHubProtocol.MessageType.StreamItem:
+                    case IHubProtocol.MessageType.Completion:
+                        var callback = this.callbacks[message.invocationId];
+                        if (callback != null) {
+                            if (message.type === IHubProtocol.MessageType.Completion) {
+                                delete this.callbacks[message.invocationId];
+                            }
+                            callback(message);
+                        }
+                        break;
+                    case IHubProtocol.MessageType.Ping:
+                        // Don't care about pings
+                        break;
+                    case IHubProtocol.MessageType.Close:
+                        this.logger.log(ILogger.LogLevel.Information, "Close message received from server.");
+                        this.connection.stop(message.error ? new Error("Server returned an error on close: " + message.error) : null);
+                        break;
+                    default:
+                        this.logger.log(ILogger.LogLevel.Warning, "Invalid message type: " + message.type);
+                        break;
+                }
+            }
+        }
+        this.configureTimeout();
+    };
+    HubConnection.prototype.processHandshakeResponse = function (data) {
+        var responseMessage;
+        var remainingData;
+        try {
+            _a = this.handshakeProtocol.parseHandshakeResponse(data), remainingData = _a[0], responseMessage = _a[1];
+        }
+        catch (e) {
+            var message = "Error parsing handshake response: " + e;
+            this.logger.log(ILogger.LogLevel.Error, message);
+            var error = new Error(message);
+            this.connection.stop(error);
+            throw error;
+        }
+        if (responseMessage.error) {
+            var message = "Server returned handshake error: " + responseMessage.error;
+            this.logger.log(ILogger.LogLevel.Error, message);
+            this.connection.stop(new Error(message));
+        }
+        else {
+            this.logger.log(ILogger.LogLevel.Debug, "Server handshake complete.");
+        }
+        return remainingData;
+        var _a;
+    };
+    HubConnection.prototype.configureTimeout = function () {
+        var _this = this;
+        if (!this.connection.features || !this.connection.features.inherentKeepAlive) {
+            // Set the timeout timer
+            this.timeoutHandle = setTimeout(function () { return _this.serverTimeout(); }, this.serverTimeoutInMilliseconds);
+        }
+    };
+    HubConnection.prototype.serverTimeout = function () {
+        // The server hasn't talked to us in a while. It doesn't like us anymore ... :(
+        // Terminate the connection
+        this.connection.stop(new Error("Server timeout elapsed without receiving a message from the server."));
+    };
+    HubConnection.prototype.invokeClientMethod = function (invocationMessage) {
+        var _this = this;
+        var methods = this.methods[invocationMessage.target.toLowerCase()];
+        if (methods) {
+            methods.forEach(function (m) { return m.apply(_this, invocationMessage.arguments); });
+            if (invocationMessage.invocationId) {
+                // This is not supported in v1. So we return an error to avoid blocking the server waiting for the response.
+                var message = "Server requested a response, which is not supported in this version of the client.";
+                this.logger.log(ILogger.LogLevel.Error, message);
+                this.connection.stop(new Error(message));
+            }
+        }
+        else {
+            this.logger.log(ILogger.LogLevel.Warning, "No client method with the name '" + invocationMessage.target + "' found.");
+        }
+    };
+    HubConnection.prototype.connectionClosed = function (error) {
+        var _this = this;
+        var callbacks = this.callbacks;
+        this.callbacks = {};
+        Object.keys(callbacks)
+            .forEach(function (key) {
+            var callback = callbacks[key];
+            callback(undefined, error ? error : new Error("Invocation canceled due to connection being closed."));
+        });
+        this.cleanupTimeout();
+        this.closedCallbacks.forEach(function (c) { return c.apply(_this, [error]); });
+    };
+    HubConnection.prototype.cleanupTimeout = function () {
+        if (this.timeoutHandle) {
+            clearTimeout(this.timeoutHandle);
+        }
+    };
+    HubConnection.prototype.createInvocation = function (methodName, args, nonblocking) {
+        if (nonblocking) {
+            return {
+                arguments: args,
+                target: methodName,
+                type: IHubProtocol.MessageType.Invocation,
+            };
+        }
+        else {
+            var id = this.id;
+            this.id++;
+            return {
+                arguments: args,
+                invocationId: id.toString(),
+                target: methodName,
+                type: IHubProtocol.MessageType.Invocation,
+            };
+        }
+    };
+    HubConnection.prototype.createStreamInvocation = function (methodName, args) {
+        var id = this.id;
+        this.id++;
+        return {
+            arguments: args,
+            invocationId: id.toString(),
+            target: methodName,
+            type: IHubProtocol.MessageType.StreamInvocation,
+        };
+    };
+    HubConnection.prototype.createCancelInvocation = function (id) {
+        return {
+            invocationId: id,
+            type: IHubProtocol.MessageType.CancelInvocation,
+        };
+    };
+    return HubConnection;
+}());
+exports.HubConnection = HubConnection;
+
+});
+
+unwrapExports(HubConnection_1);
+var HubConnection_2 = HubConnection_1.HubConnection;
+
+var ITransport = createCommonjsModule(function (module, exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+// This will be treated as a bit flag in the future, so we keep it using power-of-two values.
+/** Specifies a specific HTTP transport type. */
+var HttpTransportType;
+(function (HttpTransportType) {
+    /** Specifies no transport preference. */
+    HttpTransportType[HttpTransportType["None"] = 0] = "None";
+    /** Specifies the WebSockets transport. */
+    HttpTransportType[HttpTransportType["WebSockets"] = 1] = "WebSockets";
+    /** Specifies the Server-Sent Events transport. */
+    HttpTransportType[HttpTransportType["ServerSentEvents"] = 2] = "ServerSentEvents";
+    /** Specifies the Long Polling transport. */
+    HttpTransportType[HttpTransportType["LongPolling"] = 4] = "LongPolling";
+})(HttpTransportType = exports.HttpTransportType || (exports.HttpTransportType = {}));
+/** Specifies the transfer format for a connection. */
+var TransferFormat;
+(function (TransferFormat) {
+    /** Specifies that only text data will be transmitted over the connection. */
+    TransferFormat[TransferFormat["Text"] = 1] = "Text";
+    /** Specifies that binary data will be transmitted over the connection. */
+    TransferFormat[TransferFormat["Binary"] = 2] = "Binary";
+})(TransferFormat = exports.TransferFormat || (exports.TransferFormat = {}));
+
+});
+
+unwrapExports(ITransport);
+var ITransport_1 = ITransport.HttpTransportType;
+var ITransport_2 = ITransport.TransferFormat;
+
+var AbortController_1 = createCommonjsModule(function (module, exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+// Rough polyfill of https://developer.mozilla.org/en-US/docs/Web/API/AbortController
+// We don't actually ever use the API being polyfilled, we always use the polyfill because
+// it's a very new API right now.
+// Not exported from index.
+var AbortController = /** @class */ (function () {
+    function AbortController() {
+        this.isAborted = false;
+    }
+    AbortController.prototype.abort = function () {
+        if (!this.isAborted) {
+            this.isAborted = true;
+            if (this.onabort) {
+                this.onabort();
+            }
+        }
+    };
+    Object.defineProperty(AbortController.prototype, "signal", {
+        get: function () {
+            return this;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(AbortController.prototype, "aborted", {
+        get: function () {
+            return this.isAborted;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return AbortController;
+}());
+exports.AbortController = AbortController;
+
+});
+
+unwrapExports(AbortController_1);
+var AbortController_2 = AbortController_1.AbortController;
+
+var LongPollingTransport_1 = createCommonjsModule(function (module, exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+
+
+
+
+
+
+var SHUTDOWN_TIMEOUT = 5 * 1000;
+// Not exported from 'index', this type is internal.
+var LongPollingTransport = /** @class */ (function () {
+    function LongPollingTransport(httpClient, accessTokenFactory, logger, logMessageContent, shutdownTimeout) {
+        this.httpClient = httpClient;
+        this.accessTokenFactory = accessTokenFactory || (function () { return null; });
+        this.logger = logger;
+        this.pollAbort = new AbortController_1.AbortController();
+        this.logMessageContent = logMessageContent;
+        this.shutdownTimeout = shutdownTimeout || SHUTDOWN_TIMEOUT;
+    }
+    Object.defineProperty(LongPollingTransport.prototype, "pollAborted", {
+        // This is an internal type, not exported from 'index' so this is really just internal.
+        get: function () {
+            return this.pollAbort.aborted;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    LongPollingTransport.prototype.connect = function (url, transferFormat) {
+        return tslib_1.__awaiter(this, void 0, void 0, function () {
+            var pollOptions, token, closeError, pollUrl, response;
+            return tslib_1.__generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        Utils.Arg.isRequired(url, "url");
+                        Utils.Arg.isRequired(transferFormat, "transferFormat");
+                        Utils.Arg.isIn(transferFormat, ITransport.TransferFormat, "transferFormat");
+                        this.url = url;
+                        this.logger.log(ILogger.LogLevel.Trace, "(LongPolling transport) Connecting");
+                        if (transferFormat === ITransport.TransferFormat.Binary && (typeof new XMLHttpRequest().responseType !== "string")) {
+                            // This will work if we fix: https://github.com/aspnet/SignalR/issues/742
+                            throw new Error("Binary protocols over XmlHttpRequest not implementing advanced features are not supported.");
+                        }
+                        pollOptions = {
+                            abortSignal: this.pollAbort.signal,
+                            headers: {},
+                            timeout: 90000,
+                        };
+                        if (transferFormat === ITransport.TransferFormat.Binary) {
+                            pollOptions.responseType = "arraybuffer";
+                        }
+                        return [4 /*yield*/, this.accessTokenFactory()];
+                    case 1:
+                        token = _a.sent();
+                        this.updateHeaderToken(pollOptions, token);
+                        pollUrl = url + "&_=" + Date.now();
+                        this.logger.log(ILogger.LogLevel.Trace, "(LongPolling transport) polling: " + pollUrl);
+                        return [4 /*yield*/, this.httpClient.get(pollUrl, pollOptions)];
+                    case 2:
+                        response = _a.sent();
+                        if (response.statusCode !== 200) {
+                            this.logger.log(ILogger.LogLevel.Error, "(LongPolling transport) Unexpected response code: " + response.statusCode);
+                            // Mark running as false so that the poll immediately ends and runs the close logic
+                            closeError = new Errors.HttpError(response.statusText, response.statusCode);
+                            this.running = false;
+                        }
+                        else {
+                            this.running = true;
+                        }
+                        this.poll(this.url, pollOptions, closeError);
+                        return [2 /*return*/, Promise.resolve()];
+                }
+            });
+        });
+    };
+    LongPollingTransport.prototype.updateHeaderToken = function (request, token) {
+        if (token) {
+            // tslint:disable-next-line:no-string-literal
+            request.headers["Authorization"] = "Bearer " + token;
+            return;
+        }
+        // tslint:disable-next-line:no-string-literal
+        if (request.headers["Authorization"]) {
+            // tslint:disable-next-line:no-string-literal
+            delete request.headers["Authorization"];
+        }
+    };
+    LongPollingTransport.prototype.poll = function (url, pollOptions, closeError) {
+        return tslib_1.__awaiter(this, void 0, void 0, function () {
+            var token, pollUrl, response, e_1;
+            return tslib_1.__generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, , 8, 9]);
+                        _a.label = 1;
+                    case 1:
+                        if (!this.running) return [3 /*break*/, 7];
+                        return [4 /*yield*/, this.accessTokenFactory()];
+                    case 2:
+                        token = _a.sent();
+                        this.updateHeaderToken(pollOptions, token);
+                        _a.label = 3;
+                    case 3:
+                        _a.trys.push([3, 5, , 6]);
+                        pollUrl = url + "&_=" + Date.now();
+                        this.logger.log(ILogger.LogLevel.Trace, "(LongPolling transport) polling: " + pollUrl);
+                        return [4 /*yield*/, this.httpClient.get(pollUrl, pollOptions)];
+                    case 4:
+                        response = _a.sent();
+                        if (response.statusCode === 204) {
+                            this.logger.log(ILogger.LogLevel.Information, "(LongPolling transport) Poll terminated by server");
+                            this.running = false;
+                        }
+                        else if (response.statusCode !== 200) {
+                            this.logger.log(ILogger.LogLevel.Error, "(LongPolling transport) Unexpected response code: " + response.statusCode);
+                            // Unexpected status code
+                            closeError = new Errors.HttpError(response.statusText, response.statusCode);
+                            this.running = false;
+                        }
+                        else {
+                            // Process the response
+                            if (response.content) {
+                                this.logger.log(ILogger.LogLevel.Trace, "(LongPolling transport) data received. " + Utils.getDataDetail(response.content, this.logMessageContent));
+                                if (this.onreceive) {
+                                    this.onreceive(response.content);
+                                }
+                            }
+                            else {
+                                // This is another way timeout manifest.
+                                this.logger.log(ILogger.LogLevel.Trace, "(LongPolling transport) Poll timed out, reissuing.");
+                            }
+                        }
+                        return [3 /*break*/, 6];
+                    case 5:
+                        e_1 = _a.sent();
+                        if (!this.running) {
+                            // Log but disregard errors that occur after we were stopped by DELETE
+                            this.logger.log(ILogger.LogLevel.Trace, "(LongPolling transport) Poll errored after shutdown: " + e_1.message);
+                        }
+                        else {
+                            if (e_1 instanceof Errors.TimeoutError) {
+                                // Ignore timeouts and reissue the poll.
+                                this.logger.log(ILogger.LogLevel.Trace, "(LongPolling transport) Poll timed out, reissuing.");
+                            }
+                            else {
+                                // Close the connection with the error as the result.
+                                closeError = e_1;
+                                this.running = false;
+                            }
+                        }
+                        return [3 /*break*/, 6];
+                    case 6: return [3 /*break*/, 1];
+                    case 7: return [3 /*break*/, 9];
+                    case 8:
+                        // Indicate that we've stopped so the shutdown timer doesn't get registered.
+                        this.stopped = true;
+                        // Clean up the shutdown timer if it was registered
+                        if (this.shutdownTimer) {
+                            clearTimeout(this.shutdownTimer);
+                        }
+                        // Fire our onclosed event
+                        if (this.onclose) {
+                            this.logger.log(ILogger.LogLevel.Trace, "(LongPolling transport) Firing onclose event. Error: " + (closeError || "<undefined>"));
+                            this.onclose(closeError);
+                        }
+                        this.logger.log(ILogger.LogLevel.Trace, "(LongPolling transport) Transport finished.");
+                        return [7 /*endfinally*/];
+                    case 9: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    LongPollingTransport.prototype.send = function (data) {
+        return tslib_1.__awaiter(this, void 0, void 0, function () {
+            return tslib_1.__generator(this, function (_a) {
+                if (!this.running) {
+                    return [2 /*return*/, Promise.reject(new Error("Cannot send until the transport is connected"))];
+                }
+                return [2 /*return*/, Utils.sendMessage(this.logger, "LongPolling", this.httpClient, this.url, this.accessTokenFactory, data, this.logMessageContent)];
+            });
+        });
+    };
+    LongPollingTransport.prototype.stop = function () {
+        return tslib_1.__awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            var deleteOptions, token, response;
+            return tslib_1.__generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, , 3, 4]);
+                        this.running = false;
+                        this.logger.log(ILogger.LogLevel.Trace, "(LongPolling transport) sending DELETE request to " + this.url + ".");
+                        deleteOptions = {
+                            headers: {},
+                        };
+                        return [4 /*yield*/, this.accessTokenFactory()];
+                    case 1:
+                        token = _a.sent();
+                        this.updateHeaderToken(deleteOptions, token);
+                        return [4 /*yield*/, this.httpClient.delete(this.url, deleteOptions)];
+                    case 2:
+                        response = _a.sent();
+                        this.logger.log(ILogger.LogLevel.Trace, "(LongPolling transport) DELETE request accepted.");
+                        return [3 /*break*/, 4];
+                    case 3:
+                        // Abort the poll after the shutdown timeout if the server doesn't stop the poll.
+                        if (!this.stopped) {
+                            this.shutdownTimer = setTimeout(function () {
+                                _this.logger.log(ILogger.LogLevel.Warning, "(LongPolling transport) server did not terminate after DELETE request, canceling poll.");
+                                // Abort any outstanding poll
+                                _this.pollAbort.abort();
+                            }, this.shutdownTimeout);
+                        }
+                        return [7 /*endfinally*/];
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    return LongPollingTransport;
+}());
+exports.LongPollingTransport = LongPollingTransport;
+
+});
+
+unwrapExports(LongPollingTransport_1);
+var LongPollingTransport_2 = LongPollingTransport_1.LongPollingTransport;
+
+var ServerSentEventsTransport_1 = createCommonjsModule(function (module, exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+
+
+
+
+var ServerSentEventsTransport = /** @class */ (function () {
+    function ServerSentEventsTransport(httpClient, accessTokenFactory, logger, logMessageContent) {
+        this.httpClient = httpClient;
+        this.accessTokenFactory = accessTokenFactory || (function () { return null; });
+        this.logger = logger;
+        this.logMessageContent = logMessageContent;
+    }
+    ServerSentEventsTransport.prototype.connect = function (url, transferFormat) {
+        return tslib_1.__awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            var token;
+            return tslib_1.__generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        Utils.Arg.isRequired(url, "url");
+                        Utils.Arg.isRequired(transferFormat, "transferFormat");
+                        Utils.Arg.isIn(transferFormat, ITransport.TransferFormat, "transferFormat");
+                        if (typeof (EventSource) === "undefined") {
+                            throw new Error("'EventSource' is not supported in your environment.");
+                        }
+                        this.logger.log(ILogger.LogLevel.Trace, "(SSE transport) Connecting");
+                        return [4 /*yield*/, this.accessTokenFactory()];
+                    case 1:
+                        token = _a.sent();
+                        if (token) {
+                            url += (url.indexOf("?") < 0 ? "?" : "&") + ("access_token=" + encodeURIComponent(token));
+                        }
+                        this.url = url;
+                        return [2 /*return*/, new Promise(function (resolve, reject) {
+                                var opened = false;
+                                if (transferFormat !== ITransport.TransferFormat.Text) {
+                                    reject(new Error("The Server-Sent Events transport only supports the 'Text' transfer format"));
+                                }
+                                var eventSource = new EventSource(url, { withCredentials: true });
+                                try {
+                                    eventSource.onmessage = function (e) {
+                                        if (_this.onreceive) {
+                                            try {
+                                                _this.logger.log(ILogger.LogLevel.Trace, "(SSE transport) data received. " + Utils.getDataDetail(e.data, _this.logMessageContent) + ".");
+                                                _this.onreceive(e.data);
+                                            }
+                                            catch (error) {
+                                                if (_this.onclose) {
+                                                    _this.onclose(error);
+                                                }
+                                                return;
+                                            }
+                                        }
+                                    };
+                                    eventSource.onerror = function (e) {
+                                        var error = new Error(e.message || "Error occurred");
+                                        if (opened) {
+                                            _this.close(error);
+                                        }
+                                        else {
+                                            reject(error);
+                                        }
+                                    };
+                                    eventSource.onopen = function () {
+                                        _this.logger.log(ILogger.LogLevel.Information, "SSE connected to " + _this.url);
+                                        _this.eventSource = eventSource;
+                                        opened = true;
+                                        resolve();
+                                    };
+                                }
+                                catch (e) {
+                                    return Promise.reject(e);
+                                }
+                            })];
+                }
+            });
+        });
+    };
+    ServerSentEventsTransport.prototype.send = function (data) {
+        return tslib_1.__awaiter(this, void 0, void 0, function () {
+            return tslib_1.__generator(this, function (_a) {
+                if (!this.eventSource) {
+                    return [2 /*return*/, Promise.reject(new Error("Cannot send until the transport is connected"))];
+                }
+                return [2 /*return*/, Utils.sendMessage(this.logger, "SSE", this.httpClient, this.url, this.accessTokenFactory, data, this.logMessageContent)];
+            });
+        });
+    };
+    ServerSentEventsTransport.prototype.stop = function () {
+        this.close();
+        return Promise.resolve();
+    };
+    ServerSentEventsTransport.prototype.close = function (e) {
+        if (this.eventSource) {
+            this.eventSource.close();
+            this.eventSource = null;
+            if (this.onclose) {
+                this.onclose(e);
+            }
+        }
+    };
+    return ServerSentEventsTransport;
+}());
+exports.ServerSentEventsTransport = ServerSentEventsTransport;
+
+});
+
+unwrapExports(ServerSentEventsTransport_1);
+var ServerSentEventsTransport_2 = ServerSentEventsTransport_1.ServerSentEventsTransport;
+
+var WebSocketTransport_1 = createCommonjsModule(function (module, exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+
+
+
+
+var WebSocketTransport = /** @class */ (function () {
+    function WebSocketTransport(accessTokenFactory, logger, logMessageContent) {
+        this.logger = logger;
+        this.accessTokenFactory = accessTokenFactory || (function () { return null; });
+        this.logMessageContent = logMessageContent;
+    }
+    WebSocketTransport.prototype.connect = function (url, transferFormat) {
+        return tslib_1.__awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            var token;
+            return tslib_1.__generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        Utils.Arg.isRequired(url, "url");
+                        Utils.Arg.isRequired(transferFormat, "transferFormat");
+                        Utils.Arg.isIn(transferFormat, ITransport.TransferFormat, "transferFormat");
+                        if (typeof (WebSocket) === "undefined") {
+                            throw new Error("'WebSocket' is not supported in your environment.");
+                        }
+                        this.logger.log(ILogger.LogLevel.Trace, "(WebSockets transport) Connecting");
+                        return [4 /*yield*/, this.accessTokenFactory()];
+                    case 1:
+                        token = _a.sent();
+                        if (token) {
+                            url += (url.indexOf("?") < 0 ? "?" : "&") + ("access_token=" + encodeURIComponent(token));
+                        }
+                        return [2 /*return*/, new Promise(function (resolve, reject) {
+                                url = url.replace(/^http/, "ws");
+                                var webSocket = new WebSocket(url);
+                                if (transferFormat === ITransport.TransferFormat.Binary) {
+                                    webSocket.binaryType = "arraybuffer";
+                                }
+                                webSocket.onopen = function (event) {
+                                    _this.logger.log(ILogger.LogLevel.Information, "WebSocket connected to " + url);
+                                    _this.webSocket = webSocket;
+                                    resolve();
+                                };
+                                webSocket.onerror = function (event) {
+                                    reject(event.error);
+                                };
+                                webSocket.onmessage = function (message) {
+                                    _this.logger.log(ILogger.LogLevel.Trace, "(WebSockets transport) data received. " + Utils.getDataDetail(message.data, _this.logMessageContent) + ".");
+                                    if (_this.onreceive) {
+                                        _this.onreceive(message.data);
+                                    }
+                                };
+                                webSocket.onclose = function (event) {
+                                    // webSocket will be null if the transport did not start successfully
+                                    _this.logger.log(ILogger.LogLevel.Trace, "(WebSockets transport) socket closed.");
+                                    if (_this.onclose) {
+                                        if (event.wasClean === false || event.code !== 1000) {
+                                            _this.onclose(new Error("Websocket closed with status code: " + event.code + " (" + event.reason + ")"));
+                                        }
+                                        else {
+                                            _this.onclose();
+                                        }
+                                    }
+                                };
+                            })];
+                }
+            });
+        });
+    };
+    WebSocketTransport.prototype.send = function (data) {
+        if (this.webSocket && this.webSocket.readyState === WebSocket.OPEN) {
+            this.logger.log(ILogger.LogLevel.Trace, "(WebSockets transport) sending data. " + Utils.getDataDetail(data, this.logMessageContent) + ".");
+            this.webSocket.send(data);
+            return Promise.resolve();
+        }
+        return Promise.reject("WebSocket is not in the OPEN state");
+    };
+    WebSocketTransport.prototype.stop = function () {
+        if (this.webSocket) {
+            this.webSocket.close();
+            this.webSocket = null;
+        }
+        return Promise.resolve();
+    };
+    return WebSocketTransport;
+}());
+exports.WebSocketTransport = WebSocketTransport;
+
+});
+
+unwrapExports(WebSocketTransport_1);
+var WebSocketTransport_2 = WebSocketTransport_1.WebSocketTransport;
+
+var HttpConnection_1 = createCommonjsModule(function (module, exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+
+
+
+
+
+
+
+
+var MAX_REDIRECTS = 100;
+var HttpConnection = /** @class */ (function () {
+    function HttpConnection(url, options) {
+        if (options === void 0) { options = {}; }
+        this.features = {};
+        Utils.Arg.isRequired(url, "url");
+        this.logger = Utils.createLogger(options.logger);
+        this.baseUrl = this.resolveUrl(url);
+        options = options || {};
+        options.accessTokenFactory = options.accessTokenFactory || (function () { return null; });
+        options.logMessageContent = options.logMessageContent || false;
+        this.httpClient = options.httpClient || new HttpClient_1.DefaultHttpClient(this.logger);
+        this.connectionState = 2 /* Disconnected */;
+        this.options = options;
+    }
+    HttpConnection.prototype.start = function (transferFormat) {
+        transferFormat = transferFormat || ITransport.TransferFormat.Binary;
+        Utils.Arg.isIn(transferFormat, ITransport.TransferFormat, "transferFormat");
+        this.logger.log(ILogger.LogLevel.Debug, "Starting connection with transfer format '" + ITransport.TransferFormat[transferFormat] + "'.");
+        if (this.connectionState !== 2 /* Disconnected */) {
+            return Promise.reject(new Error("Cannot start a connection that is not in the 'Disconnected' state."));
+        }
+        this.connectionState = 0 /* Connecting */;
+        this.startPromise = this.startInternal(transferFormat);
+        return this.startPromise;
+    };
+    HttpConnection.prototype.send = function (data) {
+        if (this.connectionState !== 1 /* Connected */) {
+            throw new Error("Cannot send data if the connection is not in the 'Connected' State.");
+        }
+        return this.transport.send(data);
+    };
+    HttpConnection.prototype.stop = function (error) {
+        return tslib_1.__awaiter(this, void 0, void 0, function () {
+            var e_1;
+            return tslib_1.__generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        this.connectionState = 2 /* Disconnected */;
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, this.startPromise];
+                    case 2:
+                        _a.sent();
+                        return [3 /*break*/, 4];
+                    case 3:
+                        e_1 = _a.sent();
+                        return [3 /*break*/, 4];
+                    case 4:
+                        if (!this.transport) return [3 /*break*/, 6];
+                        this.stopError = error;
+                        return [4 /*yield*/, this.transport.stop()];
+                    case 5:
+                        _a.sent();
+                        this.transport = null;
+                        _a.label = 6;
+                    case 6: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    HttpConnection.prototype.startInternal = function (transferFormat) {
+        return tslib_1.__awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            var url, negotiateResponse, redirects, _loop_1, this_1, state_1, e_2;
+            return tslib_1.__generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        url = this.baseUrl;
+                        this.accessTokenFactory = this.options.accessTokenFactory;
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 12, , 13]);
+                        if (!this.options.skipNegotiation) return [3 /*break*/, 5];
+                        if (!(this.options.transport === ITransport.HttpTransportType.WebSockets)) return [3 /*break*/, 3];
+                        // No need to add a connection ID in this case
+                        this.transport = this.constructTransport(ITransport.HttpTransportType.WebSockets);
+                        // We should just call connect directly in this case.
+                        // No fallback or negotiate in this case.
+                        return [4 /*yield*/, this.transport.connect(url, transferFormat)];
+                    case 2:
+                        // We should just call connect directly in this case.
+                        // No fallback or negotiate in this case.
+                        _a.sent();
+                        return [3 /*break*/, 4];
+                    case 3: throw Error("Negotiation can only be skipped when using the WebSocket transport directly.");
+                    case 4: return [3 /*break*/, 11];
+                    case 5:
+                        negotiateResponse = null;
+                        redirects = 0;
+                        _loop_1 = function () {
+                            var accessToken_1;
+                            return tslib_1.__generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0: return [4 /*yield*/, this_1.getNegotiationResponse(url)];
+                                    case 1:
+                                        negotiateResponse = _a.sent();
+                                        // the user tries to stop the connection when it is being started
+                                        if (this_1.connectionState === 2 /* Disconnected */) {
+                                            return [2 /*return*/, { value: void 0 }];
+                                        }
+                                        if (negotiateResponse.url) {
+                                            url = negotiateResponse.url;
+                                        }
+                                        if (negotiateResponse.accessToken) {
+                                            accessToken_1 = negotiateResponse.accessToken;
+                                            this_1.accessTokenFactory = function () { return accessToken_1; };
+                                        }
+                                        redirects++;
+                                        return [2 /*return*/];
+                                }
+                            });
+                        };
+                        this_1 = this;
+                        _a.label = 6;
+                    case 6: return [5 /*yield**/, _loop_1()];
+                    case 7:
+                        state_1 = _a.sent();
+                        if (typeof state_1 === "object")
+                            return [2 /*return*/, state_1.value];
+                        _a.label = 8;
+                    case 8:
+                        if (negotiateResponse.url && redirects < MAX_REDIRECTS) return [3 /*break*/, 6];
+                        _a.label = 9;
+                    case 9:
+                        if (redirects === MAX_REDIRECTS && negotiateResponse.url) {
+                            throw Error("Negotiate redirection limit exceeded.");
+                        }
+                        return [4 /*yield*/, this.createTransport(url, this.options.transport, negotiateResponse, transferFormat)];
+                    case 10:
+                        _a.sent();
+                        _a.label = 11;
+                    case 11:
+                        if (this.transport instanceof LongPollingTransport_1.LongPollingTransport) {
+                            this.features.inherentKeepAlive = true;
+                        }
+                        this.transport.onreceive = this.onreceive;
+                        this.transport.onclose = function (e) { return _this.stopConnection(e); };
+                        // only change the state if we were connecting to not overwrite
+                        // the state if the connection is already marked as Disconnected
+                        this.changeState(0 /* Connecting */, 1 /* Connected */);
+                        return [3 /*break*/, 13];
+                    case 12:
+                        e_2 = _a.sent();
+                        this.logger.log(ILogger.LogLevel.Error, "Failed to start the connection: " + e_2);
+                        this.connectionState = 2 /* Disconnected */;
+                        this.transport = null;
+                        throw e_2;
+                    case 13: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    HttpConnection.prototype.getNegotiationResponse = function (url) {
+        return tslib_1.__awaiter(this, void 0, void 0, function () {
+            var token, headers, negotiateUrl, response, e_3, _a;
+            return tslib_1.__generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, this.accessTokenFactory()];
+                    case 1:
+                        token = _b.sent();
+                        if (token) {
+                            headers = (_a = {}, _a["Authorization"] = "Bearer " + token, _a);
+                        }
+                        negotiateUrl = this.resolveNegotiateUrl(url);
+                        this.logger.log(ILogger.LogLevel.Debug, "Sending negotiation request: " + negotiateUrl);
+                        _b.label = 2;
+                    case 2:
+                        _b.trys.push([2, 4, , 5]);
+                        return [4 /*yield*/, this.httpClient.post(negotiateUrl, {
+                                content: "",
+                                headers: headers,
+                            })];
+                    case 3:
+                        response = _b.sent();
+                        if (response.statusCode !== 200) {
+                            throw Error("Unexpected status code returned from negotiate " + response.statusCode);
+                        }
+                        return [2 /*return*/, JSON.parse(response.content)];
+                    case 4:
+                        e_3 = _b.sent();
+                        this.logger.log(ILogger.LogLevel.Error, "Failed to complete negotiation with the server: " + e_3);
+                        throw e_3;
+                    case 5: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    HttpConnection.prototype.createConnectUrl = function (url, connectionId) {
+        return url + (url.indexOf("?") === -1 ? "?" : "&") + ("id=" + connectionId);
+    };
+    HttpConnection.prototype.createTransport = function (url, requestedTransport, negotiateResponse, requestedTransferFormat) {
+        return tslib_1.__awaiter(this, void 0, void 0, function () {
+            var connectUrl, transports, _i, transports_1, endpoint, transport, ex_1;
+            return tslib_1.__generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        connectUrl = this.createConnectUrl(url, negotiateResponse.connectionId);
+                        if (!this.isITransport(requestedTransport)) return [3 /*break*/, 2];
+                        this.logger.log(ILogger.LogLevel.Debug, "Connection was provided an instance of ITransport, using that directly.");
+                        this.transport = requestedTransport;
+                        return [4 /*yield*/, this.transport.connect(connectUrl, requestedTransferFormat)];
+                    case 1:
+                        _a.sent();
+                        // only change the state if we were connecting to not overwrite
+                        // the state if the connection is already marked as Disconnected
+                        this.changeState(0 /* Connecting */, 1 /* Connected */);
+                        return [2 /*return*/];
+                    case 2:
+                        transports = negotiateResponse.availableTransports;
+                        _i = 0, transports_1 = transports;
+                        _a.label = 3;
+                    case 3:
+                        if (!(_i < transports_1.length)) return [3 /*break*/, 9];
+                        endpoint = transports_1[_i];
+                        this.connectionState = 0 /* Connecting */;
+                        transport = this.resolveTransport(endpoint, requestedTransport, requestedTransferFormat);
+                        if (!(typeof transport === "number")) return [3 /*break*/, 8];
+                        this.transport = this.constructTransport(transport);
+                        if (!(negotiateResponse.connectionId === null)) return [3 /*break*/, 5];
+                        return [4 /*yield*/, this.getNegotiationResponse(url)];
+                    case 4:
+                        negotiateResponse = _a.sent();
+                        connectUrl = this.createConnectUrl(url, negotiateResponse.connectionId);
+                        _a.label = 5;
+                    case 5:
+                        _a.trys.push([5, 7, , 8]);
+                        return [4 /*yield*/, this.transport.connect(connectUrl, requestedTransferFormat)];
+                    case 6:
+                        _a.sent();
+                        this.changeState(0 /* Connecting */, 1 /* Connected */);
+                        return [2 /*return*/];
+                    case 7:
+                        ex_1 = _a.sent();
+                        this.logger.log(ILogger.LogLevel.Error, "Failed to start the transport '" + ITransport.HttpTransportType[transport] + "': " + ex_1);
+                        this.connectionState = 2 /* Disconnected */;
+                        negotiateResponse.connectionId = null;
+                        return [3 /*break*/, 8];
+                    case 8:
+                        _i++;
+                        return [3 /*break*/, 3];
+                    case 9: throw new Error("Unable to initialize any of the available transports.");
+                }
+            });
+        });
+    };
+    HttpConnection.prototype.constructTransport = function (transport) {
+        switch (transport) {
+            case ITransport.HttpTransportType.WebSockets:
+                return new WebSocketTransport_1.WebSocketTransport(this.accessTokenFactory, this.logger, this.options.logMessageContent);
+            case ITransport.HttpTransportType.ServerSentEvents:
+                return new ServerSentEventsTransport_1.ServerSentEventsTransport(this.httpClient, this.accessTokenFactory, this.logger, this.options.logMessageContent);
+            case ITransport.HttpTransportType.LongPolling:
+                return new LongPollingTransport_1.LongPollingTransport(this.httpClient, this.accessTokenFactory, this.logger, this.options.logMessageContent);
+            default:
+                throw new Error("Unknown transport: " + transport + ".");
+        }
+    };
+    HttpConnection.prototype.resolveTransport = function (endpoint, requestedTransport, requestedTransferFormat) {
+        var transport = ITransport.HttpTransportType[endpoint.transport];
+        if (transport === null || transport === undefined) {
+            this.logger.log(ILogger.LogLevel.Debug, "Skipping transport '" + endpoint.transport + "' because it is not supported by this client.");
+        }
+        else {
+            var transferFormats = endpoint.transferFormats.map(function (s) { return ITransport.TransferFormat[s]; });
+            if (transportMatches(requestedTransport, transport)) {
+                if (transferFormats.indexOf(requestedTransferFormat) >= 0) {
+                    if ((transport === ITransport.HttpTransportType.WebSockets && typeof WebSocket === "undefined") ||
+                        (transport === ITransport.HttpTransportType.ServerSentEvents && typeof EventSource === "undefined")) {
+                        this.logger.log(ILogger.LogLevel.Debug, "Skipping transport '" + ITransport.HttpTransportType[transport] + "' because it is not supported in your environment.'");
+                    }
+                    else {
+                        this.logger.log(ILogger.LogLevel.Debug, "Selecting transport '" + ITransport.HttpTransportType[transport] + "'");
+                        return transport;
+                    }
+                }
+                else {
+                    this.logger.log(ILogger.LogLevel.Debug, "Skipping transport '" + ITransport.HttpTransportType[transport] + "' because it does not support the requested transfer format '" + ITransport.TransferFormat[requestedTransferFormat] + "'.");
+                }
+            }
+            else {
+                this.logger.log(ILogger.LogLevel.Debug, "Skipping transport '" + ITransport.HttpTransportType[transport] + "' because it was disabled by the client.");
+            }
+        }
+        return null;
+    };
+    HttpConnection.prototype.isITransport = function (transport) {
+        return transport && typeof (transport) === "object" && "connect" in transport;
+    };
+    HttpConnection.prototype.changeState = function (from, to) {
+        if (this.connectionState === from) {
+            this.connectionState = to;
+            return true;
+        }
+        return false;
+    };
+    HttpConnection.prototype.stopConnection = function (error) {
+        return tslib_1.__awaiter(this, void 0, void 0, function () {
+            return tslib_1.__generator(this, function (_a) {
+                this.transport = null;
+                // If we have a stopError, it takes precedence over the error from the transport
+                error = this.stopError || error;
+                if (error) {
+                    this.logger.log(ILogger.LogLevel.Error, "Connection disconnected with error '" + error + "'.");
+                }
+                else {
+                    this.logger.log(ILogger.LogLevel.Information, "Connection disconnected.");
+                }
+                this.connectionState = 2 /* Disconnected */;
+                if (this.onclose) {
+                    this.onclose(error);
+                }
+                return [2 /*return*/];
+            });
+        });
+    };
+    HttpConnection.prototype.resolveUrl = function (url) {
+        // startsWith is not supported in IE
+        if (url.lastIndexOf("https://", 0) === 0 || url.lastIndexOf("http://", 0) === 0) {
+            return url;
+        }
+        if (typeof window === "undefined" || !window || !window.document) {
+            throw new Error("Cannot resolve '" + url + "'.");
+        }
+        // Setting the url to the href propery of an anchor tag handles normalization
+        // for us. There are 3 main cases.
+        // 1. Relative  path normalization e.g "b" -> "http://localhost:5000/a/b"
+        // 2. Absolute path normalization e.g "/a/b" -> "http://localhost:5000/a/b"
+        // 3. Networkpath reference normalization e.g "//localhost:5000/a/b" -> "http://localhost:5000/a/b"
+        var aTag = window.document.createElement("a");
+        aTag.href = url;
+        this.logger.log(ILogger.LogLevel.Information, "Normalizing '" + url + "' to '" + aTag.href + "'.");
+        return aTag.href;
+    };
+    HttpConnection.prototype.resolveNegotiateUrl = function (url) {
+        var index = url.indexOf("?");
+        var negotiateUrl = url.substring(0, index === -1 ? url.length : index);
+        if (negotiateUrl[negotiateUrl.length - 1] !== "/") {
+            negotiateUrl += "/";
+        }
+        negotiateUrl += "negotiate";
+        negotiateUrl += index === -1 ? "" : url.substring(index);
+        return negotiateUrl;
+    };
+    return HttpConnection;
+}());
+exports.HttpConnection = HttpConnection;
+function transportMatches(requestedTransport, actualTransport) {
+    return !requestedTransport || ((actualTransport & requestedTransport) !== 0);
+}
+
+});
+
+unwrapExports(HttpConnection_1);
+var HttpConnection_2 = HttpConnection_1.HttpConnection;
+
+var JsonHubProtocol_1 = createCommonjsModule(function (module, exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+
+
+
+
+
+var JSON_HUB_PROTOCOL_NAME = "json";
+/** Implements the JSON Hub Protocol. */
+var JsonHubProtocol = /** @class */ (function () {
+    function JsonHubProtocol() {
+        /** @inheritDoc */
+        this.name = JSON_HUB_PROTOCOL_NAME;
+        /** @inheritDoc */
+        this.version = 1;
+        /** @inheritDoc */
+        this.transferFormat = ITransport.TransferFormat.Text;
+    }
+    /** Creates an array of {@link HubMessage} objects from the specified serialized representation.
+     *
+     * @param {string} input A string containing the serialized representation.
+     * @param {ILogger} logger A logger that will be used to log messages that occur during parsing.
+     */
+    JsonHubProtocol.prototype.parseMessages = function (input, logger) {
+        // The interface does allow "ArrayBuffer" to be passed in, but this implementation does not. So let's throw a useful error.
+        if (typeof input !== "string") {
+            throw new Error("Invalid input for JSON hub protocol. Expected a string.");
+        }
+        if (!input) {
+            return [];
+        }
+        if (logger === null) {
+            logger = Loggers.NullLogger.instance;
+        }
+        // Parse the messages
+        var messages = TextMessageFormat_1.TextMessageFormat.parse(input);
+        var hubMessages = [];
+        for (var _i = 0, messages_1 = messages; _i < messages_1.length; _i++) {
+            var message = messages_1[_i];
+            var parsedMessage = JSON.parse(message);
+            if (typeof parsedMessage.type !== "number") {
+                throw new Error("Invalid payload.");
+            }
+            switch (parsedMessage.type) {
+                case IHubProtocol.MessageType.Invocation:
+                    this.isInvocationMessage(parsedMessage);
+                    break;
+                case IHubProtocol.MessageType.StreamItem:
+                    this.isStreamItemMessage(parsedMessage);
+                    break;
+                case IHubProtocol.MessageType.Completion:
+                    this.isCompletionMessage(parsedMessage);
+                    break;
+                case IHubProtocol.MessageType.Ping:
+                    // Single value, no need to validate
+                    break;
+                case IHubProtocol.MessageType.Close:
+                    // All optional values, no need to validate
+                    break;
+                default:
+                    // Future protocol changes can add message types, old clients can ignore them
+                    logger.log(ILogger.LogLevel.Information, "Unknown message type '" + parsedMessage.type + "' ignored.");
+                    continue;
+            }
+            hubMessages.push(parsedMessage);
+        }
+        return hubMessages;
+    };
+    /** Writes the specified {@link HubMessage} to a string and returns it.
+     *
+     * @param {HubMessage} message The message to write.
+     * @returns {string} A string containing the serialized representation of the message.
+     */
+    JsonHubProtocol.prototype.writeMessage = function (message) {
+        return TextMessageFormat_1.TextMessageFormat.write(JSON.stringify(message));
+    };
+    JsonHubProtocol.prototype.isInvocationMessage = function (message) {
+        this.assertNotEmptyString(message.target, "Invalid payload for Invocation message.");
+        if (message.invocationId !== undefined) {
+            this.assertNotEmptyString(message.invocationId, "Invalid payload for Invocation message.");
+        }
+    };
+    JsonHubProtocol.prototype.isStreamItemMessage = function (message) {
+        this.assertNotEmptyString(message.invocationId, "Invalid payload for StreamItem message.");
+        if (message.item === undefined) {
+            throw new Error("Invalid payload for StreamItem message.");
+        }
+    };
+    JsonHubProtocol.prototype.isCompletionMessage = function (message) {
+        if (message.result && message.error) {
+            throw new Error("Invalid payload for Completion message.");
+        }
+        if (!message.result && message.error) {
+            this.assertNotEmptyString(message.error, "Invalid payload for Completion message.");
+        }
+        this.assertNotEmptyString(message.invocationId, "Invalid payload for Completion message.");
+    };
+    JsonHubProtocol.prototype.assertNotEmptyString = function (value, errorMessage) {
+        if (typeof value !== "string" || value === "") {
+            throw new Error(errorMessage);
+        }
+    };
+    return JsonHubProtocol;
+}());
+exports.JsonHubProtocol = JsonHubProtocol;
+
+});
+
+unwrapExports(JsonHubProtocol_1);
+var JsonHubProtocol_2 = JsonHubProtocol_1.JsonHubProtocol;
+
+var HubConnectionBuilder_1 = createCommonjsModule(function (module, exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+
+
+
+
+
+/** A builder for configuring {@link HubConnection} instances. */
+var HubConnectionBuilder = /** @class */ (function () {
+    function HubConnectionBuilder() {
+    }
+    HubConnectionBuilder.prototype.configureLogging = function (logging) {
+        Utils.Arg.isRequired(logging, "logging");
+        if (isLogger(logging)) {
+            this.logger = logging;
+        }
+        else {
+            this.logger = new Utils.ConsoleLogger(logging);
+        }
+        return this;
+    };
+    HubConnectionBuilder.prototype.withUrl = function (url, transportTypeOrOptions) {
+        Utils.Arg.isRequired(url, "url");
+        this.url = url;
+        // Flow-typing knows where it's at. Since HttpTransportType is a number and IHttpConnectionOptions is guaranteed
+        // to be an object, we know (as does TypeScript) this comparison is all we need to figure out which overload was called.
+        if (typeof transportTypeOrOptions === "object") {
+            this.httpConnectionOptions = transportTypeOrOptions;
+        }
+        else {
+            this.httpConnectionOptions = {
+                transport: transportTypeOrOptions,
+            };
+        }
+        return this;
+    };
+    /** Configures the {@link HubConnection} to use the specified Hub Protocol.
+     *
+     * @param {IHubProtocol} protocol The {@link IHubProtocol} implementation to use.
+     */
+    HubConnectionBuilder.prototype.withHubProtocol = function (protocol) {
+        Utils.Arg.isRequired(protocol, "protocol");
+        this.protocol = protocol;
+        return this;
+    };
+    /** Creates a {@link HubConnection} from the configuration options specified in this builder.
+     *
+     * @returns {HubConnection} The configured {@link HubConnection}.
+     */
+    HubConnectionBuilder.prototype.build = function () {
+        // If httpConnectionOptions has a logger, use it. Otherwise, override it with the one
+        // provided to configureLogger
+        var httpConnectionOptions = this.httpConnectionOptions || {};
+        // If it's 'null', the user **explicitly** asked for null, don't mess with it.
+        if (httpConnectionOptions.logger === undefined) {
+            // If our logger is undefined or null, that's OK, the HttpConnection constructor will handle it.
+            httpConnectionOptions.logger = this.logger;
+        }
+        // Now create the connection
+        if (!this.url) {
+            throw new Error("The 'HubConnectionBuilder.withUrl' method must be called before building the connection.");
+        }
+        var connection = new HttpConnection_1.HttpConnection(this.url, httpConnectionOptions);
+        return HubConnection_1.HubConnection.create(connection, this.logger || Loggers.NullLogger.instance, this.protocol || new JsonHubProtocol_1.JsonHubProtocol());
+    };
+    return HubConnectionBuilder;
+}());
+exports.HubConnectionBuilder = HubConnectionBuilder;
+function isLogger(logger) {
+    return logger.log !== undefined;
+}
+
+});
+
+unwrapExports(HubConnectionBuilder_1);
+var HubConnectionBuilder_2 = HubConnectionBuilder_1.HubConnectionBuilder;
+
+var cjs = createCommonjsModule(function (module, exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+// Version token that will be replaced by the prepack command
+/** The version of the SignalR client. */
+exports.VERSION = "0.0.0-DEV_BUILD";
+
+exports.HttpError = Errors.HttpError;
+exports.TimeoutError = Errors.TimeoutError;
+
+exports.DefaultHttpClient = HttpClient_1.DefaultHttpClient;
+exports.HttpClient = HttpClient_1.HttpClient;
+exports.HttpResponse = HttpClient_1.HttpResponse;
+
+exports.HubConnection = HubConnection_1.HubConnection;
+
+exports.HubConnectionBuilder = HubConnectionBuilder_1.HubConnectionBuilder;
+
+exports.MessageType = IHubProtocol.MessageType;
+
+exports.LogLevel = ILogger.LogLevel;
+
+exports.HttpTransportType = ITransport.HttpTransportType;
+exports.TransferFormat = ITransport.TransferFormat;
+
+exports.NullLogger = Loggers.NullLogger;
+
+exports.JsonHubProtocol = JsonHubProtocol_1.JsonHubProtocol;
+
+});
+
+unwrapExports(cjs);
+var cjs_1 = cjs.VERSION;
+var cjs_2 = cjs.HttpError;
+var cjs_3 = cjs.TimeoutError;
+var cjs_4 = cjs.DefaultHttpClient;
+var cjs_5 = cjs.HttpClient;
+var cjs_6 = cjs.HttpResponse;
+var cjs_7 = cjs.HubConnection;
+var cjs_8 = cjs.HubConnectionBuilder;
+var cjs_9 = cjs.MessageType;
+var cjs_10 = cjs.LogLevel;
+var cjs_11 = cjs.HttpTransportType;
+var cjs_12 = cjs.TransferFormat;
+var cjs_13 = cjs.NullLogger;
+var cjs_14 = cjs.JsonHubProtocol;
+
+var browserIndex = createCommonjsModule(function (module, exports) {
+Object.defineProperty(exports, "__esModule", { value: true });
+
+// This is where we add any polyfills we'll need for the browser. It is the entry module for browser-specific builds.
+
+// Copy from Array.prototype into Uint8Array to polyfill on IE. It's OK because the implementations of indexOf and slice use properties
+// that exist on Uint8Array with the same name, and JavaScript is magic.
+// We make them 'writable' because the Buffer polyfill messes with it as well.
+if (!Uint8Array.prototype.indexOf) {
+    Object.defineProperty(Uint8Array.prototype, "indexOf", {
+        value: Array.prototype.indexOf,
+        writable: true,
+    });
+}
+if (!Uint8Array.prototype.slice) {
+    Object.defineProperty(Uint8Array.prototype, "slice", {
+        value: Array.prototype.slice,
+        writable: true,
+    });
+}
+if (!Uint8Array.prototype.forEach) {
+    Object.defineProperty(Uint8Array.prototype, "forEach", {
+        value: Array.prototype.forEach,
+        writable: true,
+    });
+}
+tslib_1.__exportStar(cjs, exports);
+
+});
+
+var browserIndex$1 = unwrapExports(browserIndex);
+
+return browserIndex$1;
+
+})));
+//# sourceMappingURL=signalr.js.map
+
 var AppDependencies = [
   'ui.router',
   'luegg.directives',
@@ -389,5086 +3829,6 @@ controller('platformWebApp.appCtrl', ['$rootScope', '$scope', '$window', 'platfo
             $compile(template);
         });
     }]);
-
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.signalR = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-"use strict";
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
-
-var _classCallCheck2 = require("babel-runtime/helpers/classCallCheck");
-
-var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-var _createClass2 = require("babel-runtime/helpers/createClass");
-
-var _createClass3 = _interopRequireDefault(_createClass2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-Object.defineProperty(exports, "__esModule", { value: true });
-
-var Base64EncodedHubProtocol = function () {
-    function Base64EncodedHubProtocol(protocol) {
-        (0, _classCallCheck3.default)(this, Base64EncodedHubProtocol);
-
-        this.wrappedProtocol = protocol;
-        this.name = this.wrappedProtocol.name;
-        this.type = 1 /* Text */;
-    }
-
-    (0, _createClass3.default)(Base64EncodedHubProtocol, [{
-        key: "parseMessages",
-        value: function parseMessages(input) {
-            // The format of the message is `size:message;`
-            var pos = input.indexOf(":");
-            if (pos == -1 || input[input.length - 1] != ';') {
-                throw new Error("Invalid payload.");
-            }
-            var lenStr = input.substring(0, pos);
-            if (!/^[0-9]+$/.test(lenStr)) {
-                throw new Error("Invalid length: '" + lenStr + "'");
-            }
-            var messageSize = parseInt(lenStr, 10);
-            // 2 accounts for ':' after message size and trailing ';'
-            if (messageSize != input.length - pos - 2) {
-                throw new Error("Invalid message size.");
-            }
-            var encodedMessage = input.substring(pos + 1, input.length - 1);
-            // atob/btoa are browsers APIs but they can be polyfilled. If this becomes problematic we can use
-            // base64-js module
-            var s = atob(encodedMessage);
-            var payload = new Uint8Array(s.length);
-            for (var i = 0; i < payload.length; i++) {
-                payload[i] = s.charCodeAt(i);
-            }
-            return this.wrappedProtocol.parseMessages(payload.buffer);
-        }
-    }, {
-        key: "writeMessage",
-        value: function writeMessage(message) {
-            var payload = new Uint8Array(this.wrappedProtocol.writeMessage(message));
-            var s = "";
-            for (var i = 0; i < payload.byteLength; i++) {
-                s += String.fromCharCode(payload[i]);
-            }
-            // atob/btoa are browsers APIs but they can be polyfilled. If this becomes problematic we can use
-            // base64-js module
-            var encodedMessage = btoa(s);
-            return encodedMessage.length.toString() + ":" + encodedMessage + ";";
-        }
-    }]);
-    return Base64EncodedHubProtocol;
-}();
-
-exports.Base64EncodedHubProtocol = Base64EncodedHubProtocol;
-
-},{"babel-runtime/helpers/classCallCheck":22,"babel-runtime/helpers/createClass":23}],2:[function(require,module,exports){
-"use strict";
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var TextMessageFormat;
-(function (TextMessageFormat) {
-    var RecordSeparator = String.fromCharCode(0x1e);
-    function write(output) {
-        return "" + output + RecordSeparator;
-    }
-    TextMessageFormat.write = write;
-    function parse(input) {
-        if (input[input.length - 1] != RecordSeparator) {
-            throw new Error("Message is incomplete.");
-        }
-        var messages = input.split(RecordSeparator);
-        messages.pop();
-        return messages;
-    }
-    TextMessageFormat.parse = parse;
-})(TextMessageFormat = exports.TextMessageFormat || (exports.TextMessageFormat = {}));
-var BinaryMessageFormat;
-(function (BinaryMessageFormat) {
-    // The length prefix of binary messages is encoded as VarInt. Read the comment in
-    // the BinaryMessageParser.TryParseMessage for details.
-    function write(output) {
-        // msgpack5 uses returns Buffer instead of Uint8Array on IE10 and some other browser
-        //  in which case .byteLength does will be undefined
-        var size = output.byteLength || output.length;
-        var lenBuffer = [];
-        do {
-            var sizePart = size & 0x7f;
-            size = size >> 7;
-            if (size > 0) {
-                sizePart |= 0x80;
-            }
-            lenBuffer.push(sizePart);
-        } while (size > 0);
-        // msgpack5 uses returns Buffer instead of Uint8Array on IE10 and some other browser
-        //  in which case .byteLength does will be undefined
-        size = output.byteLength || output.length;
-        var buffer = new Uint8Array(lenBuffer.length + size);
-        buffer.set(lenBuffer, 0);
-        buffer.set(output, lenBuffer.length);
-        return buffer.buffer;
-    }
-    BinaryMessageFormat.write = write;
-    function parse(input) {
-        var result = [];
-        var uint8Array = new Uint8Array(input);
-        var maxLengthPrefixSize = 5;
-        var numBitsToShift = [0, 7, 14, 21, 28];
-        for (var offset = 0; offset < input.byteLength;) {
-            var numBytes = 0;
-            var size = 0;
-            var byteRead = void 0;
-            do {
-                byteRead = uint8Array[offset + numBytes];
-                size = size | (byteRead & 0x7f) << numBitsToShift[numBytes];
-                numBytes++;
-            } while (numBytes < Math.min(maxLengthPrefixSize, input.byteLength - offset) && (byteRead & 0x80) != 0);
-            if ((byteRead & 0x80) !== 0 && numBytes < maxLengthPrefixSize) {
-                throw new Error("Cannot read message size.");
-            }
-            if (numBytes === maxLengthPrefixSize && byteRead > 7) {
-                throw new Error("Messages bigger than 2GB are not supported.");
-            }
-            if (uint8Array.byteLength >= offset + numBytes + size) {
-                // IE does not support .slice() so use subarray
-                result.push(uint8Array.slice ? uint8Array.slice(offset + numBytes, offset + numBytes + size) : uint8Array.subarray(offset + numBytes, offset + numBytes + size));
-            } else {
-                throw new Error("Incomplete message.");
-            }
-            offset = offset + numBytes + size;
-        }
-        return result;
-    }
-    BinaryMessageFormat.parse = parse;
-})(BinaryMessageFormat = exports.BinaryMessageFormat || (exports.BinaryMessageFormat = {}));
-
-},{}],3:[function(require,module,exports){
-"use strict";
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
-
-var _promise = require("babel-runtime/core-js/promise");
-
-var _promise2 = _interopRequireDefault(_promise);
-
-var _classCallCheck2 = require("babel-runtime/helpers/classCallCheck");
-
-var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-var _createClass2 = require("babel-runtime/helpers/createClass");
-
-var _createClass3 = _interopRequireDefault(_createClass2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var HttpError_1 = require("./HttpError");
-
-var HttpClient = function () {
-    function HttpClient() {
-        (0, _classCallCheck3.default)(this, HttpClient);
-    }
-
-    (0, _createClass3.default)(HttpClient, [{
-        key: "get",
-        value: function get(url, headers) {
-            return this.xhr("GET", url, headers);
-        }
-    }, {
-        key: "options",
-        value: function options(url, headers) {
-            return this.xhr("OPTIONS", url, headers);
-        }
-    }, {
-        key: "post",
-        value: function post(url, content, headers) {
-            return this.xhr("POST", url, headers, content);
-        }
-    }, {
-        key: "xhr",
-        value: function xhr(method, url, headers, content) {
-            return new _promise2.default(function (resolve, reject) {
-                var xhr = new XMLHttpRequest();
-                xhr.open(method, url, true);
-                xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-                if (headers) {
-                    headers.forEach(function (value, header) {
-                        return xhr.setRequestHeader(header, value);
-                    });
-                }
-                xhr.send(content);
-                xhr.onload = function () {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        resolve(xhr.response || xhr.responseText);
-                    } else {
-                        reject(new HttpError_1.HttpError(xhr.statusText, xhr.status));
-                    }
-                };
-                xhr.onerror = function () {
-                    reject(new HttpError_1.HttpError(xhr.statusText, xhr.status));
-                };
-            });
-        }
-    }]);
-    return HttpClient;
-}();
-
-exports.HttpClient = HttpClient;
-
-},{"./HttpError":5,"babel-runtime/core-js/promise":19,"babel-runtime/helpers/classCallCheck":22,"babel-runtime/helpers/createClass":23}],4:[function(require,module,exports){
-"use strict";
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
-
-var _typeof2 = require("babel-runtime/helpers/typeof");
-
-var _typeof3 = _interopRequireDefault(_typeof2);
-
-var _regenerator = require("babel-runtime/regenerator");
-
-var _regenerator2 = _interopRequireDefault(_regenerator);
-
-var _classCallCheck2 = require("babel-runtime/helpers/classCallCheck");
-
-var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-var _createClass2 = require("babel-runtime/helpers/createClass");
-
-var _createClass3 = _interopRequireDefault(_createClass2);
-
-var _promise = require("babel-runtime/core-js/promise");
-
-var _promise2 = _interopRequireDefault(_promise);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var __awaiter = undefined && undefined.__awaiter || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = _promise2.default))(function (resolve, reject) {
-        function fulfilled(value) {
-            try {
-                step(generator.next(value));
-            } catch (e) {
-                reject(e);
-            }
-        }
-        function rejected(value) {
-            try {
-                step(generator["throw"](value));
-            } catch (e) {
-                reject(e);
-            }
-        }
-        function step(result) {
-            result.done ? resolve(result.value) : new P(function (resolve) {
-                resolve(result.value);
-            }).then(fulfilled, rejected);
-        }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var Transports_1 = require("./Transports");
-var HttpClient_1 = require("./HttpClient");
-var ILogger_1 = require("./ILogger");
-var Loggers_1 = require("./Loggers");
-
-var HttpConnection = function () {
-    function HttpConnection(url) {
-        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        (0, _classCallCheck3.default)(this, HttpConnection);
-
-        this.features = {};
-        this.logger = Loggers_1.LoggerFactory.createLogger(options.logging);
-        this.url = this.resolveUrl(url);
-        options = options || {};
-        this.httpClient = options.httpClient || new HttpClient_1.HttpClient();
-        this.connectionState = 0 /* Initial */;
-        this.options = options;
-    }
-
-    (0, _createClass3.default)(HttpConnection, [{
-        key: "start",
-        value: function start() {
-            return __awaiter(this, void 0, void 0, /*#__PURE__*/_regenerator2.default.mark(function _callee() {
-                return _regenerator2.default.wrap(function _callee$(_context) {
-                    while (1) {
-                        switch (_context.prev = _context.next) {
-                            case 0:
-                                if (!(this.connectionState != 0 /* Initial */)) {
-                                    _context.next = 2;
-                                    break;
-                                }
-
-                                return _context.abrupt("return", _promise2.default.reject(new Error("Cannot start a connection that is not in the 'Initial' state.")));
-
-                            case 2:
-                                this.connectionState = 1 /* Connecting */;
-                                this.startPromise = this.startInternal();
-                                return _context.abrupt("return", this.startPromise);
-
-                            case 5:
-                            case "end":
-                                return _context.stop();
-                        }
-                    }
-                }, _callee, this);
-            }));
-        }
-    }, {
-        key: "startInternal",
-        value: function startInternal() {
-            return __awaiter(this, void 0, void 0, /*#__PURE__*/_regenerator2.default.mark(function _callee2() {
-                var _this = this;
-
-                var negotiatePayload, negotiateResponse, requestedTransferMode;
-                return _regenerator2.default.wrap(function _callee2$(_context2) {
-                    while (1) {
-                        switch (_context2.prev = _context2.next) {
-                            case 0:
-                                _context2.prev = 0;
-                                _context2.next = 3;
-                                return this.httpClient.options(this.url);
-
-                            case 3:
-                                negotiatePayload = _context2.sent;
-                                negotiateResponse = JSON.parse(negotiatePayload);
-
-                                this.connectionId = negotiateResponse.connectionId;
-                                // the user tries to stop the the connection when it is being started
-
-                                if (!(this.connectionState == 3 /* Disconnected */)) {
-                                    _context2.next = 8;
-                                    break;
-                                }
-
-                                return _context2.abrupt("return");
-
-                            case 8:
-                                this.url += (this.url.indexOf("?") == -1 ? "?" : "&") + ("id=" + this.connectionId);
-                                this.transport = this.createTransport(this.options.transport, negotiateResponse.availableTransports);
-                                this.transport.onreceive = this.onreceive;
-                                this.transport.onclose = function (e) {
-                                    return _this.stopConnection(true, e);
-                                };
-                                requestedTransferMode = this.features.transferMode === 2 /* Binary */
-                                ? 2 /* Binary */
-                                : 1;
-                                _context2.next = 15;
-                                return this.transport.connect(this.url, requestedTransferMode);
-
-                            case 15:
-                                this.features.transferMode = _context2.sent;
-
-                                // only change the state if we were connecting to not overwrite
-                                // the state if the connection is already marked as Disconnected
-                                this.changeState(1 /* Connecting */, 2 /* Connected */);
-                                _context2.next = 25;
-                                break;
-
-                            case 19:
-                                _context2.prev = 19;
-                                _context2.t0 = _context2["catch"](0);
-
-                                this.logger.log(ILogger_1.LogLevel.Error, "Failed to start the connection. " + _context2.t0);
-                                this.connectionState = 3 /* Disconnected */;
-                                this.transport = null;
-                                throw _context2.t0;
-
-                            case 25:
-                                ;
-
-                            case 26:
-                            case "end":
-                                return _context2.stop();
-                        }
-                    }
-                }, _callee2, this, [[0, 19]]);
-            }));
-        }
-    }, {
-        key: "createTransport",
-        value: function createTransport(transport, availableTransports) {
-            if (!transport && availableTransports.length > 0) {
-                transport = Transports_1.TransportType[availableTransports[0]];
-            }
-            if (transport === Transports_1.TransportType.WebSockets && availableTransports.indexOf(Transports_1.TransportType[transport]) >= 0) {
-                return new Transports_1.WebSocketTransport(this.logger);
-            }
-            if (transport === Transports_1.TransportType.ServerSentEvents && availableTransports.indexOf(Transports_1.TransportType[transport]) >= 0) {
-                return new Transports_1.ServerSentEventsTransport(this.httpClient, this.logger);
-            }
-            if (transport === Transports_1.TransportType.LongPolling && availableTransports.indexOf(Transports_1.TransportType[transport]) >= 0) {
-                return new Transports_1.LongPollingTransport(this.httpClient, this.logger);
-            }
-            if (this.isITransport(transport)) {
-                return transport;
-            }
-            throw new Error("No available transports found.");
-        }
-    }, {
-        key: "isITransport",
-        value: function isITransport(transport) {
-            return (typeof transport === "undefined" ? "undefined" : (0, _typeof3.default)(transport)) === "object" && "connect" in transport;
-        }
-    }, {
-        key: "changeState",
-        value: function changeState(from, to) {
-            if (this.connectionState == from) {
-                this.connectionState = to;
-                return true;
-            }
-            return false;
-        }
-    }, {
-        key: "send",
-        value: function send(data) {
-            if (this.connectionState != 2 /* Connected */) {
-                    throw new Error("Cannot send data if the connection is not in the 'Connected' State");
-                }
-            return this.transport.send(data);
-        }
-    }, {
-        key: "stop",
-        value: function stop() {
-            return __awaiter(this, void 0, void 0, /*#__PURE__*/_regenerator2.default.mark(function _callee3() {
-                var previousState;
-                return _regenerator2.default.wrap(function _callee3$(_context3) {
-                    while (1) {
-                        switch (_context3.prev = _context3.next) {
-                            case 0:
-                                previousState = this.connectionState;
-
-                                this.connectionState = 3 /* Disconnected */;
-                                _context3.prev = 2;
-                                _context3.next = 5;
-                                return this.startPromise;
-
-                            case 5:
-                                _context3.next = 9;
-                                break;
-
-                            case 7:
-                                _context3.prev = 7;
-                                _context3.t0 = _context3["catch"](2);
-
-                            case 9:
-                                this.stopConnection( /*raiseClosed*/previousState == 2 /* Connected */);
-
-                            case 10:
-                            case "end":
-                                return _context3.stop();
-                        }
-                    }
-                }, _callee3, this, [[2, 7]]);
-            }));
-        }
-    }, {
-        key: "stopConnection",
-        value: function stopConnection(raiseClosed, error) {
-            if (this.transport) {
-                this.transport.stop();
-                this.transport = null;
-            }
-            this.connectionState = 3 /* Disconnected */;
-            if (raiseClosed && this.onclose) {
-                this.onclose(error);
-            }
-        }
-    }, {
-        key: "resolveUrl",
-        value: function resolveUrl(url) {
-            // startsWith is not supported in IE
-            if (url.lastIndexOf("https://", 0) === 0 || url.lastIndexOf("http://", 0) === 0) {
-                return url;
-            }
-            if (typeof window === 'undefined' || !window || !window.document) {
-                throw new Error("Cannot resolve '" + url + "'.");
-            }
-            var parser = window.document.createElement("a");
-            parser.href = url;
-            var baseUrl = !parser.protocol || parser.protocol === ":" ? window.document.location.protocol + "//" + (parser.host || window.document.location.host) : parser.protocol + "//" + parser.host;
-            if (!url || url[0] != '/') {
-                url = '/' + url;
-            }
-            var normalizedUrl = baseUrl + url;
-            this.logger.log(ILogger_1.LogLevel.Information, "Normalizing '" + url + "' to '" + normalizedUrl + "'");
-            return normalizedUrl;
-        }
-    }]);
-    return HttpConnection;
-}();
-
-exports.HttpConnection = HttpConnection;
-
-},{"./HttpClient":3,"./ILogger":7,"./Loggers":9,"./Transports":11,"babel-runtime/core-js/promise":19,"babel-runtime/helpers/classCallCheck":22,"babel-runtime/helpers/createClass":23,"babel-runtime/helpers/typeof":26,"babel-runtime/regenerator":27}],5:[function(require,module,exports){
-"use strict";
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
-
-var _getPrototypeOf = require("babel-runtime/core-js/object/get-prototype-of");
-
-var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
-
-var _classCallCheck2 = require("babel-runtime/helpers/classCallCheck");
-
-var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-var _possibleConstructorReturn2 = require("babel-runtime/helpers/possibleConstructorReturn");
-
-var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
-
-var _inherits2 = require("babel-runtime/helpers/inherits");
-
-var _inherits3 = _interopRequireDefault(_inherits2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-Object.defineProperty(exports, "__esModule", { value: true });
-
-var HttpError = function (_Error) {
-    (0, _inherits3.default)(HttpError, _Error);
-
-    function HttpError(errorMessage, statusCode) {
-        (0, _classCallCheck3.default)(this, HttpError);
-
-        var _this = (0, _possibleConstructorReturn3.default)(this, (HttpError.__proto__ || (0, _getPrototypeOf2.default)(HttpError)).call(this, errorMessage));
-
-        _this.statusCode = statusCode;
-        return _this;
-    }
-
-    return HttpError;
-}(Error);
-
-exports.HttpError = HttpError;
-
-},{"babel-runtime/core-js/object/get-prototype-of":17,"babel-runtime/helpers/classCallCheck":22,"babel-runtime/helpers/inherits":24,"babel-runtime/helpers/possibleConstructorReturn":25}],6:[function(require,module,exports){
-"use strict";
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
-
-var _regenerator = require("babel-runtime/regenerator");
-
-var _regenerator2 = _interopRequireDefault(_regenerator);
-
-var _stringify = require("babel-runtime/core-js/json/stringify");
-
-var _stringify2 = _interopRequireDefault(_stringify);
-
-var _map = require("babel-runtime/core-js/map");
-
-var _map2 = _interopRequireDefault(_map);
-
-var _classCallCheck2 = require("babel-runtime/helpers/classCallCheck");
-
-var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-var _createClass2 = require("babel-runtime/helpers/createClass");
-
-var _createClass3 = _interopRequireDefault(_createClass2);
-
-var _promise = require("babel-runtime/core-js/promise");
-
-var _promise2 = _interopRequireDefault(_promise);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var __awaiter = undefined && undefined.__awaiter || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = _promise2.default))(function (resolve, reject) {
-        function fulfilled(value) {
-            try {
-                step(generator.next(value));
-            } catch (e) {
-                reject(e);
-            }
-        }
-        function rejected(value) {
-            try {
-                step(generator["throw"](value));
-            } catch (e) {
-                reject(e);
-            }
-        }
-        function step(result) {
-            result.done ? resolve(result.value) : new P(function (resolve) {
-                resolve(result.value);
-            }).then(fulfilled, rejected);
-        }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var HttpConnection_1 = require("./HttpConnection");
-var Observable_1 = require("./Observable");
-var JsonHubProtocol_1 = require("./JsonHubProtocol");
-var Formatters_1 = require("./Formatters");
-var Base64EncodedHubProtocol_1 = require("./Base64EncodedHubProtocol");
-var ILogger_1 = require("./ILogger");
-var Loggers_1 = require("./Loggers");
-var Transports_1 = require("./Transports");
-exports.TransportType = Transports_1.TransportType;
-var HttpConnection_2 = require("./HttpConnection");
-exports.HttpConnection = HttpConnection_2.HttpConnection;
-var JsonHubProtocol_2 = require("./JsonHubProtocol");
-exports.JsonHubProtocol = JsonHubProtocol_2.JsonHubProtocol;
-var ILogger_2 = require("./ILogger");
-exports.LogLevel = ILogger_2.LogLevel;
-var Loggers_2 = require("./Loggers");
-exports.ConsoleLogger = Loggers_2.ConsoleLogger;
-exports.NullLogger = Loggers_2.NullLogger;
-
-var HubConnection = function () {
-    function HubConnection(urlOrConnection) {
-        var _this = this;
-
-        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        (0, _classCallCheck3.default)(this, HubConnection);
-
-        options = options || {};
-        if (typeof urlOrConnection === "string") {
-            this.connection = new HttpConnection_1.HttpConnection(urlOrConnection, options);
-        } else {
-            this.connection = urlOrConnection;
-        }
-        this.logger = Loggers_1.LoggerFactory.createLogger(options.logging);
-        this.protocol = options.protocol || new JsonHubProtocol_1.JsonHubProtocol();
-        this.connection.onreceive = function (data) {
-            return _this.processIncomingData(data);
-        };
-        this.connection.onclose = function (error) {
-            return _this.connectionClosed(error);
-        };
-        this.callbacks = new _map2.default();
-        this.methods = new _map2.default();
-        this.closedCallbacks = [];
-        this.id = 0;
-    }
-
-    (0, _createClass3.default)(HubConnection, [{
-        key: "processIncomingData",
-        value: function processIncomingData(data) {
-            // Parse the messages
-            var messages = this.protocol.parseMessages(data);
-            for (var i = 0; i < messages.length; ++i) {
-                var message = messages[i];
-                switch (message.type) {
-                    case 1 /* Invocation */:
-                        this.invokeClientMethod(message);
-                        break;
-                    case 2 /* Result */:
-                    case 3 /* Completion */:
-                        var callback = this.callbacks.get(message.invocationId);
-                        if (callback != null) {
-                            if (message.type == 3 /* Completion */) {
-                                    this.callbacks.delete(message.invocationId);
-                                }
-                            callback(message);
-                        }
-                        break;
-                    default:
-                        this.logger.log(ILogger_1.LogLevel.Warning, "Invalid message type: " + data);
-                        break;
-                }
-            }
-        }
-    }, {
-        key: "invokeClientMethod",
-        value: function invokeClientMethod(invocationMessage) {
-            var _this2 = this;
-
-            var methods = this.methods.get(invocationMessage.target.toLowerCase());
-            if (methods) {
-                methods.forEach(function (m) {
-                    return m.apply(_this2, invocationMessage.arguments);
-                });
-                if (!invocationMessage.nonblocking) {
-                    // TODO: send result back to the server?
-                }
-            } else {
-                this.logger.log(ILogger_1.LogLevel.Warning, "No client method with the name '" + invocationMessage.target + "' found.");
-            }
-        }
-    }, {
-        key: "connectionClosed",
-        value: function connectionClosed(error) {
-            var _this3 = this;
-
-            var errorCompletionMessage = {
-                type: 3 /* Completion */
-                , invocationId: "-1",
-                error: error ? error.message : "Invocation cancelled due to connection being closed."
-            };
-            this.callbacks.forEach(function (callback) {
-                callback(errorCompletionMessage);
-            });
-            this.callbacks.clear();
-            this.closedCallbacks.forEach(function (c) {
-                return c.apply(_this3, [error]);
-            });
-        }
-    }, {
-        key: "start",
-        value: function start() {
-            return __awaiter(this, void 0, void 0, /*#__PURE__*/_regenerator2.default.mark(function _callee() {
-                var requestedTransferMode, actualTransferMode;
-                return _regenerator2.default.wrap(function _callee$(_context) {
-                    while (1) {
-                        switch (_context.prev = _context.next) {
-                            case 0:
-                                requestedTransferMode = this.protocol.type === 2 /* Binary */ ? 2 /* Binary */
-                                : 1;
-
-                                this.connection.features.transferMode = requestedTransferMode;
-                                _context.next = 4;
-                                return this.connection.start();
-
-                            case 4:
-                                actualTransferMode = this.connection.features.transferMode;
-                                _context.next = 7;
-                                return this.connection.send(Formatters_1.TextMessageFormat.write((0, _stringify2.default)({ protocol: this.protocol.name })));
-
-                            case 7:
-                                this.logger.log(ILogger_1.LogLevel.Information, "Using HubProtocol '" + this.protocol.name + "'.");
-                                if (requestedTransferMode === 2 /* Binary */ && actualTransferMode === 1 /* Text */) {
-                                        this.protocol = new Base64EncodedHubProtocol_1.Base64EncodedHubProtocol(this.protocol);
-                                    }
-
-                            case 9:
-                            case "end":
-                                return _context.stop();
-                        }
-                    }
-                }, _callee, this);
-            }));
-        }
-    }, {
-        key: "stop",
-        value: function stop() {
-            return this.connection.stop();
-        }
-    }, {
-        key: "stream",
-        value: function stream(methodName) {
-            var _this4 = this;
-
-            for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-                args[_key - 1] = arguments[_key];
-            }
-
-            var invocationDescriptor = this.createInvocation(methodName, args, false);
-            var subject = new Observable_1.Subject();
-            this.callbacks.set(invocationDescriptor.invocationId, function (invocationEvent) {
-                if (invocationEvent.type === 3 /* Completion */) {
-                        var completionMessage = invocationEvent;
-                        if (completionMessage.error) {
-                            subject.error(new Error(completionMessage.error));
-                        } else if (completionMessage.result) {
-                            subject.error(new Error("Server provided a result in a completion response to a streamed invocation."));
-                        } else {
-                            // TODO: Log a warning if there's a payload?
-                            subject.complete();
-                        }
-                    } else {
-                    subject.next(invocationEvent.item);
-                }
-            });
-            var message = this.protocol.writeMessage(invocationDescriptor);
-            this.connection.send(message).catch(function (e) {
-                subject.error(e);
-                _this4.callbacks.delete(invocationDescriptor.invocationId);
-            });
-            return subject;
-        }
-    }, {
-        key: "send",
-        value: function send(methodName) {
-            for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-                args[_key2 - 1] = arguments[_key2];
-            }
-
-            var invocationDescriptor = this.createInvocation(methodName, args, true);
-            var message = this.protocol.writeMessage(invocationDescriptor);
-            return this.connection.send(message);
-        }
-    }, {
-        key: "invoke",
-        value: function invoke(methodName) {
-            var _this5 = this;
-
-            for (var _len3 = arguments.length, args = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-                args[_key3 - 1] = arguments[_key3];
-            }
-
-            var invocationDescriptor = this.createInvocation(methodName, args, false);
-            var p = new _promise2.default(function (resolve, reject) {
-                _this5.callbacks.set(invocationDescriptor.invocationId, function (invocationEvent) {
-                    if (invocationEvent.type === 3 /* Completion */) {
-                            var completionMessage = invocationEvent;
-                            if (completionMessage.error) {
-                                reject(new Error(completionMessage.error));
-                            } else {
-                                resolve(completionMessage.result);
-                            }
-                        } else {
-                        reject(new Error("Streaming methods must be invoked using HubConnection.stream"));
-                    }
-                });
-                var message = _this5.protocol.writeMessage(invocationDescriptor);
-                _this5.connection.send(message).catch(function (e) {
-                    reject(e);
-                    _this5.callbacks.delete(invocationDescriptor.invocationId);
-                });
-            });
-            return p;
-        }
-    }, {
-        key: "on",
-        value: function on(methodName, method) {
-            if (!methodName || !method) {
-                return;
-            }
-            methodName = methodName.toLowerCase();
-            if (!this.methods.has(methodName)) {
-                this.methods.set(methodName, []);
-            }
-            this.methods.get(methodName).push(method);
-        }
-    }, {
-        key: "off",
-        value: function off(methodName, method) {
-            if (!methodName || !method) {
-                return;
-            }
-            methodName = methodName.toLowerCase();
-            var handlers = this.methods.get(methodName);
-            if (!handlers) {
-                return;
-            }
-            var removeIdx = handlers.indexOf(method);
-            if (removeIdx != -1) {
-                handlers.splice(removeIdx, 1);
-            }
-        }
-    }, {
-        key: "onclose",
-        value: function onclose(callback) {
-            if (callback) {
-                this.closedCallbacks.push(callback);
-            }
-        }
-    }, {
-        key: "createInvocation",
-        value: function createInvocation(methodName, args, nonblocking) {
-            var id = this.id;
-            this.id++;
-            return {
-                type: 1 /* Invocation */
-                , invocationId: id.toString(),
-                target: methodName,
-                arguments: args,
-                nonblocking: nonblocking
-            };
-        }
-    }]);
-    return HubConnection;
-}();
-
-exports.HubConnection = HubConnection;
-
-},{"./Base64EncodedHubProtocol":1,"./Formatters":2,"./HttpConnection":4,"./ILogger":7,"./JsonHubProtocol":8,"./Loggers":9,"./Observable":10,"./Transports":11,"babel-runtime/core-js/json/stringify":13,"babel-runtime/core-js/map":14,"babel-runtime/core-js/promise":19,"babel-runtime/helpers/classCallCheck":22,"babel-runtime/helpers/createClass":23,"babel-runtime/regenerator":27}],7:[function(require,module,exports){
-"use strict";
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var LogLevel;
-(function (LogLevel) {
-    LogLevel[LogLevel["Trace"] = 0] = "Trace";
-    LogLevel[LogLevel["Information"] = 1] = "Information";
-    LogLevel[LogLevel["Warning"] = 2] = "Warning";
-    LogLevel[LogLevel["Error"] = 3] = "Error";
-    LogLevel[LogLevel["None"] = 4] = "None";
-})(LogLevel = exports.LogLevel || (exports.LogLevel = {}));
-
-},{}],8:[function(require,module,exports){
-"use strict";
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
-
-var _stringify = require("babel-runtime/core-js/json/stringify");
-
-var _stringify2 = _interopRequireDefault(_stringify);
-
-var _classCallCheck2 = require("babel-runtime/helpers/classCallCheck");
-
-var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-var _createClass2 = require("babel-runtime/helpers/createClass");
-
-var _createClass3 = _interopRequireDefault(_createClass2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Formatters_1 = require("./Formatters");
-
-var JsonHubProtocol = function () {
-    function JsonHubProtocol() {
-        (0, _classCallCheck3.default)(this, JsonHubProtocol);
-
-        this.name = "json";
-        this.type = 1 /* Text */;
-    }
-
-    (0, _createClass3.default)(JsonHubProtocol, [{
-        key: "parseMessages",
-        value: function parseMessages(input) {
-            if (!input) {
-                return [];
-            }
-            // Parse the messages
-            var messages = Formatters_1.TextMessageFormat.parse(input);
-            var hubMessages = [];
-            for (var i = 0; i < messages.length; ++i) {
-                hubMessages.push(JSON.parse(messages[i]));
-            }
-            return hubMessages;
-        }
-    }, {
-        key: "writeMessage",
-        value: function writeMessage(message) {
-            return Formatters_1.TextMessageFormat.write((0, _stringify2.default)(message));
-        }
-    }]);
-    return JsonHubProtocol;
-}();
-
-exports.JsonHubProtocol = JsonHubProtocol;
-
-},{"./Formatters":2,"babel-runtime/core-js/json/stringify":13,"babel-runtime/helpers/classCallCheck":22,"babel-runtime/helpers/createClass":23}],9:[function(require,module,exports){
-"use strict";
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
-
-var _classCallCheck2 = require("babel-runtime/helpers/classCallCheck");
-
-var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-var _createClass2 = require("babel-runtime/helpers/createClass");
-
-var _createClass3 = _interopRequireDefault(_createClass2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var ILogger_1 = require("./ILogger");
-
-var NullLogger = function () {
-    function NullLogger() {
-        (0, _classCallCheck3.default)(this, NullLogger);
-    }
-
-    (0, _createClass3.default)(NullLogger, [{
-        key: "log",
-        value: function log(logLevel, message) {}
-    }]);
-    return NullLogger;
-}();
-
-exports.NullLogger = NullLogger;
-
-var ConsoleLogger = function () {
-    function ConsoleLogger(minimumLogLevel) {
-        (0, _classCallCheck3.default)(this, ConsoleLogger);
-
-        this.minimumLogLevel = minimumLogLevel;
-    }
-
-    (0, _createClass3.default)(ConsoleLogger, [{
-        key: "log",
-        value: function log(logLevel, message) {
-            if (logLevel >= this.minimumLogLevel) {
-                console.log(ILogger_1.LogLevel[logLevel] + ": " + message);
-            }
-        }
-    }]);
-    return ConsoleLogger;
-}();
-
-exports.ConsoleLogger = ConsoleLogger;
-var LoggerFactory;
-(function (LoggerFactory) {
-    function createLogger(logging) {
-        if (logging === undefined) {
-            return new ConsoleLogger(ILogger_1.LogLevel.Information);
-        }
-        if (logging === null) {
-            return new NullLogger();
-        }
-        if (logging.log) {
-            return logging;
-        }
-        return new ConsoleLogger(logging);
-    }
-    LoggerFactory.createLogger = createLogger;
-})(LoggerFactory = exports.LoggerFactory || (exports.LoggerFactory = {}));
-
-},{"./ILogger":7,"babel-runtime/helpers/classCallCheck":22,"babel-runtime/helpers/createClass":23}],10:[function(require,module,exports){
-"use strict";
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
-
-var _getIterator2 = require("babel-runtime/core-js/get-iterator");
-
-var _getIterator3 = _interopRequireDefault(_getIterator2);
-
-var _classCallCheck2 = require("babel-runtime/helpers/classCallCheck");
-
-var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-var _createClass2 = require("babel-runtime/helpers/createClass");
-
-var _createClass3 = _interopRequireDefault(_createClass2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-Object.defineProperty(exports, "__esModule", { value: true });
-
-var Subject = function () {
-    function Subject() {
-        (0, _classCallCheck3.default)(this, Subject);
-
-        this.observers = [];
-    }
-
-    (0, _createClass3.default)(Subject, [{
-        key: "next",
-        value: function next(item) {
-            var _iteratorNormalCompletion = true;
-            var _didIteratorError = false;
-            var _iteratorError = undefined;
-
-            try {
-                for (var _iterator = (0, _getIterator3.default)(this.observers), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                    var observer = _step.value;
-
-                    observer.next(item);
-                }
-            } catch (err) {
-                _didIteratorError = true;
-                _iteratorError = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion && _iterator.return) {
-                        _iterator.return();
-                    }
-                } finally {
-                    if (_didIteratorError) {
-                        throw _iteratorError;
-                    }
-                }
-            }
-        }
-    }, {
-        key: "error",
-        value: function error(err) {
-            var _iteratorNormalCompletion2 = true;
-            var _didIteratorError2 = false;
-            var _iteratorError2 = undefined;
-
-            try {
-                for (var _iterator2 = (0, _getIterator3.default)(this.observers), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                    var observer = _step2.value;
-
-                    observer.error(err);
-                }
-            } catch (err) {
-                _didIteratorError2 = true;
-                _iteratorError2 = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                        _iterator2.return();
-                    }
-                } finally {
-                    if (_didIteratorError2) {
-                        throw _iteratorError2;
-                    }
-                }
-            }
-        }
-    }, {
-        key: "complete",
-        value: function complete() {
-            var _iteratorNormalCompletion3 = true;
-            var _didIteratorError3 = false;
-            var _iteratorError3 = undefined;
-
-            try {
-                for (var _iterator3 = (0, _getIterator3.default)(this.observers), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                    var observer = _step3.value;
-
-                    observer.complete();
-                }
-            } catch (err) {
-                _didIteratorError3 = true;
-                _iteratorError3 = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                        _iterator3.return();
-                    }
-                } finally {
-                    if (_didIteratorError3) {
-                        throw _iteratorError3;
-                    }
-                }
-            }
-        }
-    }, {
-        key: "subscribe",
-        value: function subscribe(observer) {
-            this.observers.push(observer);
-        }
-    }]);
-    return Subject;
-}();
-
-exports.Subject = Subject;
-
-},{"babel-runtime/core-js/get-iterator":12,"babel-runtime/helpers/classCallCheck":22,"babel-runtime/helpers/createClass":23}],11:[function(require,module,exports){
-"use strict";
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
-
-var _map = require("babel-runtime/core-js/map");
-
-var _map2 = _interopRequireDefault(_map);
-
-var _regenerator = require("babel-runtime/regenerator");
-
-var _regenerator2 = _interopRequireDefault(_regenerator);
-
-var _classCallCheck2 = require("babel-runtime/helpers/classCallCheck");
-
-var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-var _createClass2 = require("babel-runtime/helpers/createClass");
-
-var _createClass3 = _interopRequireDefault(_createClass2);
-
-var _promise = require("babel-runtime/core-js/promise");
-
-var _promise2 = _interopRequireDefault(_promise);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var __awaiter = undefined && undefined.__awaiter || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = _promise2.default))(function (resolve, reject) {
-        function fulfilled(value) {
-            try {
-                step(generator.next(value));
-            } catch (e) {
-                reject(e);
-            }
-        }
-        function rejected(value) {
-            try {
-                step(generator["throw"](value));
-            } catch (e) {
-                reject(e);
-            }
-        }
-        function step(result) {
-            result.done ? resolve(result.value) : new P(function (resolve) {
-                resolve(result.value);
-            }).then(fulfilled, rejected);
-        }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var HttpError_1 = require("./HttpError");
-var ILogger_1 = require("./ILogger");
-var TransportType;
-(function (TransportType) {
-    TransportType[TransportType["WebSockets"] = 0] = "WebSockets";
-    TransportType[TransportType["ServerSentEvents"] = 1] = "ServerSentEvents";
-    TransportType[TransportType["LongPolling"] = 2] = "LongPolling";
-})(TransportType = exports.TransportType || (exports.TransportType = {}));
-
-var WebSocketTransport = function () {
-    function WebSocketTransport(logger) {
-        (0, _classCallCheck3.default)(this, WebSocketTransport);
-
-        this.logger = logger;
-    }
-
-    (0, _createClass3.default)(WebSocketTransport, [{
-        key: "connect",
-        value: function connect(url, requestedTransferMode) {
-            var _this = this;
-
-            return new _promise2.default(function (resolve, reject) {
-                url = url.replace(/^http/, "ws");
-                var webSocket = new WebSocket(url);
-                if (requestedTransferMode == 2 /* Binary */) {
-                        webSocket.binaryType = "arraybuffer";
-                    }
-                webSocket.onopen = function (event) {
-                    _this.logger.log(ILogger_1.LogLevel.Information, "WebSocket connected to " + url);
-                    _this.webSocket = webSocket;
-                    resolve(requestedTransferMode);
-                };
-                webSocket.onerror = function (event) {
-                    reject();
-                };
-                webSocket.onmessage = function (message) {
-                    _this.logger.log(ILogger_1.LogLevel.Trace, "(WebSockets transport) data received: " + message.data);
-                    if (_this.onreceive) {
-                        _this.onreceive(message.data);
-                    }
-                };
-                webSocket.onclose = function (event) {
-                    // webSocket will be null if the transport did not start successfully
-                    if (_this.onclose && _this.webSocket) {
-                        if (event.wasClean === false || event.code !== 1000) {
-                            _this.onclose(new Error("Websocket closed with status code: " + event.code + " (" + event.reason + ")"));
-                        } else {
-                            _this.onclose();
-                        }
-                    }
-                };
-            });
-        }
-    }, {
-        key: "send",
-        value: function send(data) {
-            if (this.webSocket && this.webSocket.readyState === WebSocket.OPEN) {
-                this.webSocket.send(data);
-                return _promise2.default.resolve();
-            }
-            return _promise2.default.reject("WebSocket is not in the OPEN state");
-        }
-    }, {
-        key: "stop",
-        value: function stop() {
-            if (this.webSocket) {
-                this.webSocket.close();
-                this.webSocket = null;
-            }
-        }
-    }]);
-    return WebSocketTransport;
-}();
-
-exports.WebSocketTransport = WebSocketTransport;
-
-var ServerSentEventsTransport = function () {
-    function ServerSentEventsTransport(httpClient, logger) {
-        (0, _classCallCheck3.default)(this, ServerSentEventsTransport);
-
-        this.httpClient = httpClient;
-        this.logger = logger;
-    }
-
-    (0, _createClass3.default)(ServerSentEventsTransport, [{
-        key: "connect",
-        value: function connect(url, requestedTransferMode) {
-            var _this2 = this;
-
-            if (typeof EventSource === "undefined") {
-                _promise2.default.reject("EventSource not supported by the browser.");
-            }
-            this.url = url;
-            return new _promise2.default(function (resolve, reject) {
-                var eventSource = new EventSource(_this2.url);
-                try {
-                    eventSource.onmessage = function (e) {
-                        if (_this2.onreceive) {
-                            try {
-                                _this2.logger.log(ILogger_1.LogLevel.Trace, "(SSE transport) data received: " + e.data);
-                                _this2.onreceive(e.data);
-                            } catch (error) {
-                                if (_this2.onclose) {
-                                    _this2.onclose(error);
-                                }
-                                return;
-                            }
-                        }
-                    };
-                    eventSource.onerror = function (e) {
-                        reject();
-                        // don't report an error if the transport did not start successfully
-                        if (_this2.eventSource && _this2.onclose) {
-                            _this2.onclose(new Error(e.message || "Error occurred"));
-                        }
-                    };
-                    eventSource.onopen = function () {
-                        _this2.logger.log(ILogger_1.LogLevel.Information, "SSE connected to " + _this2.url);
-                        _this2.eventSource = eventSource;
-                        // SSE is a text protocol
-                        resolve(1 /* Text */);
-                    };
-                } catch (e) {
-                    return _promise2.default.reject(e);
-                }
-            });
-        }
-    }, {
-        key: "send",
-        value: function send(data) {
-            return __awaiter(this, void 0, void 0, /*#__PURE__*/_regenerator2.default.mark(function _callee() {
-                return _regenerator2.default.wrap(function _callee$(_context) {
-                    while (1) {
-                        switch (_context.prev = _context.next) {
-                            case 0:
-                                return _context.abrupt("return", _send(this.httpClient, this.url, data));
-
-                            case 1:
-                            case "end":
-                                return _context.stop();
-                        }
-                    }
-                }, _callee, this);
-            }));
-        }
-    }, {
-        key: "stop",
-        value: function stop() {
-            if (this.eventSource) {
-                this.eventSource.close();
-                this.eventSource = null;
-            }
-        }
-    }]);
-    return ServerSentEventsTransport;
-}();
-
-exports.ServerSentEventsTransport = ServerSentEventsTransport;
-
-var LongPollingTransport = function () {
-    function LongPollingTransport(httpClient, logger) {
-        (0, _classCallCheck3.default)(this, LongPollingTransport);
-
-        this.httpClient = httpClient;
-        this.logger = logger;
-    }
-
-    (0, _createClass3.default)(LongPollingTransport, [{
-        key: "connect",
-        value: function connect(url, requestedTransferMode) {
-            this.url = url;
-            this.shouldPoll = true;
-            if (requestedTransferMode === 2 /* Binary */ && typeof new XMLHttpRequest().responseType !== "string") {
-                // This will work if we fix: https://github.com/aspnet/SignalR/issues/742
-                throw new Error("Binary protocols over XmlHttpRequest not implementing advanced features are not supported.");
-            }
-            this.poll(this.url, requestedTransferMode);
-            return _promise2.default.resolve(requestedTransferMode);
-        }
-    }, {
-        key: "poll",
-        value: function poll(url, transferMode) {
-            var _this3 = this;
-
-            if (!this.shouldPoll) {
-                return;
-            }
-            var pollXhr = new XMLHttpRequest();
-            pollXhr.onload = function () {
-                if (pollXhr.status == 200) {
-                    if (_this3.onreceive) {
-                        try {
-                            var response = transferMode === 1 /* Text */
-                            ? pollXhr.responseText : pollXhr.response;
-                            if (response) {
-                                _this3.logger.log(ILogger_1.LogLevel.Trace, "(LongPolling transport) data received: " + response);
-                                _this3.onreceive(response);
-                            } else {
-                                _this3.logger.log(ILogger_1.LogLevel.Information, "(LongPolling transport) timed out");
-                            }
-                        } catch (error) {
-                            if (_this3.onclose) {
-                                _this3.onclose(error);
-                            }
-                            return;
-                        }
-                    }
-                    _this3.poll(url, transferMode);
-                } else if (_this3.pollXhr.status == 204) {
-                    if (_this3.onclose) {
-                        _this3.onclose();
-                    }
-                } else {
-                    if (_this3.onclose) {
-                        _this3.onclose(new HttpError_1.HttpError(pollXhr.statusText, pollXhr.status));
-                    }
-                }
-            };
-            pollXhr.onerror = function () {
-                if (_this3.onclose) {
-                    // network related error or denied cross domain request
-                    _this3.onclose(new Error("Sending HTTP request failed."));
-                }
-            };
-            pollXhr.ontimeout = function () {
-                _this3.poll(url, transferMode);
-            };
-            this.pollXhr = pollXhr;
-            this.pollXhr.open("GET", url + "&_=" + Date.now(), true);
-            if (transferMode === 2 /* Binary */) {
-                    this.pollXhr.responseType = "arraybuffer";
-                }
-            // TODO: consider making timeout configurable
-            this.pollXhr.timeout = 120000;
-            this.pollXhr.send();
-        }
-    }, {
-        key: "send",
-        value: function send(data) {
-            return __awaiter(this, void 0, void 0, /*#__PURE__*/_regenerator2.default.mark(function _callee2() {
-                return _regenerator2.default.wrap(function _callee2$(_context2) {
-                    while (1) {
-                        switch (_context2.prev = _context2.next) {
-                            case 0:
-                                return _context2.abrupt("return", _send(this.httpClient, this.url, data));
-
-                            case 1:
-                            case "end":
-                                return _context2.stop();
-                        }
-                    }
-                }, _callee2, this);
-            }));
-        }
-    }, {
-        key: "stop",
-        value: function stop() {
-            this.shouldPoll = false;
-            if (this.pollXhr) {
-                this.pollXhr.abort();
-                this.pollXhr = null;
-            }
-        }
-    }]);
-    return LongPollingTransport;
-}();
-
-exports.LongPollingTransport = LongPollingTransport;
-var headers = new _map2.default();
-function _send(httpClient, url, data) {
-    return __awaiter(this, void 0, void 0, /*#__PURE__*/_regenerator2.default.mark(function _callee3() {
-        return _regenerator2.default.wrap(function _callee3$(_context3) {
-            while (1) {
-                switch (_context3.prev = _context3.next) {
-                    case 0:
-                        _context3.next = 2;
-                        return httpClient.post(url, data, headers);
-
-                    case 2:
-                    case "end":
-                        return _context3.stop();
-                }
-            }
-        }, _callee3, this);
-    }));
-}
-
-},{"./HttpError":5,"./ILogger":7,"babel-runtime/core-js/map":14,"babel-runtime/core-js/promise":19,"babel-runtime/helpers/classCallCheck":22,"babel-runtime/helpers/createClass":23,"babel-runtime/regenerator":27}],12:[function(require,module,exports){
-module.exports = { "default": require("core-js/library/fn/get-iterator"), __esModule: true };
-},{"core-js/library/fn/get-iterator":28}],13:[function(require,module,exports){
-module.exports = { "default": require("core-js/library/fn/json/stringify"), __esModule: true };
-},{"core-js/library/fn/json/stringify":29}],14:[function(require,module,exports){
-module.exports = { "default": require("core-js/library/fn/map"), __esModule: true };
-},{"core-js/library/fn/map":30}],15:[function(require,module,exports){
-module.exports = { "default": require("core-js/library/fn/object/create"), __esModule: true };
-},{"core-js/library/fn/object/create":31}],16:[function(require,module,exports){
-module.exports = { "default": require("core-js/library/fn/object/define-property"), __esModule: true };
-},{"core-js/library/fn/object/define-property":32}],17:[function(require,module,exports){
-module.exports = { "default": require("core-js/library/fn/object/get-prototype-of"), __esModule: true };
-},{"core-js/library/fn/object/get-prototype-of":33}],18:[function(require,module,exports){
-module.exports = { "default": require("core-js/library/fn/object/set-prototype-of"), __esModule: true };
-},{"core-js/library/fn/object/set-prototype-of":34}],19:[function(require,module,exports){
-module.exports = { "default": require("core-js/library/fn/promise"), __esModule: true };
-},{"core-js/library/fn/promise":35}],20:[function(require,module,exports){
-module.exports = { "default": require("core-js/library/fn/symbol"), __esModule: true };
-},{"core-js/library/fn/symbol":36}],21:[function(require,module,exports){
-module.exports = { "default": require("core-js/library/fn/symbol/iterator"), __esModule: true };
-},{"core-js/library/fn/symbol/iterator":37}],22:[function(require,module,exports){
-"use strict";
-
-exports.__esModule = true;
-
-exports.default = function (instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-};
-},{}],23:[function(require,module,exports){
-"use strict";
-
-exports.__esModule = true;
-
-var _defineProperty = require("../core-js/object/define-property");
-
-var _defineProperty2 = _interopRequireDefault(_defineProperty);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = function () {
-  function defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      (0, _defineProperty2.default)(target, descriptor.key, descriptor);
-    }
-  }
-
-  return function (Constructor, protoProps, staticProps) {
-    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) defineProperties(Constructor, staticProps);
-    return Constructor;
-  };
-}();
-},{"../core-js/object/define-property":16}],24:[function(require,module,exports){
-"use strict";
-
-exports.__esModule = true;
-
-var _setPrototypeOf = require("../core-js/object/set-prototype-of");
-
-var _setPrototypeOf2 = _interopRequireDefault(_setPrototypeOf);
-
-var _create = require("../core-js/object/create");
-
-var _create2 = _interopRequireDefault(_create);
-
-var _typeof2 = require("../helpers/typeof");
-
-var _typeof3 = _interopRequireDefault(_typeof2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = function (subClass, superClass) {
-  if (typeof superClass !== "function" && superClass !== null) {
-    throw new TypeError("Super expression must either be null or a function, not " + (typeof superClass === "undefined" ? "undefined" : (0, _typeof3.default)(superClass)));
-  }
-
-  subClass.prototype = (0, _create2.default)(superClass && superClass.prototype, {
-    constructor: {
-      value: subClass,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-  if (superClass) _setPrototypeOf2.default ? (0, _setPrototypeOf2.default)(subClass, superClass) : subClass.__proto__ = superClass;
-};
-},{"../core-js/object/create":15,"../core-js/object/set-prototype-of":18,"../helpers/typeof":26}],25:[function(require,module,exports){
-"use strict";
-
-exports.__esModule = true;
-
-var _typeof2 = require("../helpers/typeof");
-
-var _typeof3 = _interopRequireDefault(_typeof2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = function (self, call) {
-  if (!self) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }
-
-  return call && ((typeof call === "undefined" ? "undefined" : (0, _typeof3.default)(call)) === "object" || typeof call === "function") ? call : self;
-};
-},{"../helpers/typeof":26}],26:[function(require,module,exports){
-"use strict";
-
-exports.__esModule = true;
-
-var _iterator = require("../core-js/symbol/iterator");
-
-var _iterator2 = _interopRequireDefault(_iterator);
-
-var _symbol = require("../core-js/symbol");
-
-var _symbol2 = _interopRequireDefault(_symbol);
-
-var _typeof = typeof _symbol2.default === "function" && typeof _iterator2.default === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof _symbol2.default === "function" && obj.constructor === _symbol2.default && obj !== _symbol2.default.prototype ? "symbol" : typeof obj; };
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = typeof _symbol2.default === "function" && _typeof(_iterator2.default) === "symbol" ? function (obj) {
-  return typeof obj === "undefined" ? "undefined" : _typeof(obj);
-} : function (obj) {
-  return obj && typeof _symbol2.default === "function" && obj.constructor === _symbol2.default && obj !== _symbol2.default.prototype ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof(obj);
-};
-},{"../core-js/symbol":20,"../core-js/symbol/iterator":21}],27:[function(require,module,exports){
-module.exports = require("regenerator-runtime");
-
-},{"regenerator-runtime":140}],28:[function(require,module,exports){
-require('../modules/web.dom.iterable');
-require('../modules/es6.string.iterator');
-module.exports = require('../modules/core.get-iterator');
-
-},{"../modules/core.get-iterator":121,"../modules/es6.string.iterator":130,"../modules/web.dom.iterable":139}],29:[function(require,module,exports){
-var core = require('../../modules/_core');
-var $JSON = core.JSON || (core.JSON = { stringify: JSON.stringify });
-module.exports = function stringify(it) { // eslint-disable-line no-unused-vars
-  return $JSON.stringify.apply($JSON, arguments);
-};
-
-},{"../../modules/_core":52}],30:[function(require,module,exports){
-require('../modules/es6.object.to-string');
-require('../modules/es6.string.iterator');
-require('../modules/web.dom.iterable');
-require('../modules/es6.map');
-require('../modules/es7.map.to-json');
-require('../modules/es7.map.of');
-require('../modules/es7.map.from');
-module.exports = require('../modules/_core').Map;
-
-},{"../modules/_core":52,"../modules/es6.map":123,"../modules/es6.object.to-string":128,"../modules/es6.string.iterator":130,"../modules/es7.map.from":132,"../modules/es7.map.of":133,"../modules/es7.map.to-json":134,"../modules/web.dom.iterable":139}],31:[function(require,module,exports){
-require('../../modules/es6.object.create');
-var $Object = require('../../modules/_core').Object;
-module.exports = function create(P, D) {
-  return $Object.create(P, D);
-};
-
-},{"../../modules/_core":52,"../../modules/es6.object.create":124}],32:[function(require,module,exports){
-require('../../modules/es6.object.define-property');
-var $Object = require('../../modules/_core').Object;
-module.exports = function defineProperty(it, key, desc) {
-  return $Object.defineProperty(it, key, desc);
-};
-
-},{"../../modules/_core":52,"../../modules/es6.object.define-property":125}],33:[function(require,module,exports){
-require('../../modules/es6.object.get-prototype-of');
-module.exports = require('../../modules/_core').Object.getPrototypeOf;
-
-},{"../../modules/_core":52,"../../modules/es6.object.get-prototype-of":126}],34:[function(require,module,exports){
-require('../../modules/es6.object.set-prototype-of');
-module.exports = require('../../modules/_core').Object.setPrototypeOf;
-
-},{"../../modules/_core":52,"../../modules/es6.object.set-prototype-of":127}],35:[function(require,module,exports){
-require('../modules/es6.object.to-string');
-require('../modules/es6.string.iterator');
-require('../modules/web.dom.iterable');
-require('../modules/es6.promise');
-require('../modules/es7.promise.finally');
-require('../modules/es7.promise.try');
-module.exports = require('../modules/_core').Promise;
-
-},{"../modules/_core":52,"../modules/es6.object.to-string":128,"../modules/es6.promise":129,"../modules/es6.string.iterator":130,"../modules/es7.promise.finally":135,"../modules/es7.promise.try":136,"../modules/web.dom.iterable":139}],36:[function(require,module,exports){
-require('../../modules/es6.symbol');
-require('../../modules/es6.object.to-string');
-require('../../modules/es7.symbol.async-iterator');
-require('../../modules/es7.symbol.observable');
-module.exports = require('../../modules/_core').Symbol;
-
-},{"../../modules/_core":52,"../../modules/es6.object.to-string":128,"../../modules/es6.symbol":131,"../../modules/es7.symbol.async-iterator":137,"../../modules/es7.symbol.observable":138}],37:[function(require,module,exports){
-require('../../modules/es6.string.iterator');
-require('../../modules/web.dom.iterable');
-module.exports = require('../../modules/_wks-ext').f('iterator');
-
-},{"../../modules/_wks-ext":118,"../../modules/es6.string.iterator":130,"../../modules/web.dom.iterable":139}],38:[function(require,module,exports){
-module.exports = function (it) {
-  if (typeof it != 'function') throw TypeError(it + ' is not a function!');
-  return it;
-};
-
-},{}],39:[function(require,module,exports){
-module.exports = function () { /* empty */ };
-
-},{}],40:[function(require,module,exports){
-module.exports = function (it, Constructor, name, forbiddenField) {
-  if (!(it instanceof Constructor) || (forbiddenField !== undefined && forbiddenField in it)) {
-    throw TypeError(name + ': incorrect invocation!');
-  } return it;
-};
-
-},{}],41:[function(require,module,exports){
-var isObject = require('./_is-object');
-module.exports = function (it) {
-  if (!isObject(it)) throw TypeError(it + ' is not an object!');
-  return it;
-};
-
-},{"./_is-object":71}],42:[function(require,module,exports){
-var forOf = require('./_for-of');
-
-module.exports = function (iter, ITERATOR) {
-  var result = [];
-  forOf(iter, false, result.push, result, ITERATOR);
-  return result;
-};
-
-},{"./_for-of":61}],43:[function(require,module,exports){
-// false -> Array#indexOf
-// true  -> Array#includes
-var toIObject = require('./_to-iobject');
-var toLength = require('./_to-length');
-var toAbsoluteIndex = require('./_to-absolute-index');
-module.exports = function (IS_INCLUDES) {
-  return function ($this, el, fromIndex) {
-    var O = toIObject($this);
-    var length = toLength(O.length);
-    var index = toAbsoluteIndex(fromIndex, length);
-    var value;
-    // Array#includes uses SameValueZero equality algorithm
-    // eslint-disable-next-line no-self-compare
-    if (IS_INCLUDES && el != el) while (length > index) {
-      value = O[index++];
-      // eslint-disable-next-line no-self-compare
-      if (value != value) return true;
-    // Array#indexOf ignores holes, Array#includes - not
-    } else for (;length > index; index++) if (IS_INCLUDES || index in O) {
-      if (O[index] === el) return IS_INCLUDES || index || 0;
-    } return !IS_INCLUDES && -1;
-  };
-};
-
-},{"./_to-absolute-index":109,"./_to-iobject":111,"./_to-length":112}],44:[function(require,module,exports){
-// 0 -> Array#forEach
-// 1 -> Array#map
-// 2 -> Array#filter
-// 3 -> Array#some
-// 4 -> Array#every
-// 5 -> Array#find
-// 6 -> Array#findIndex
-var ctx = require('./_ctx');
-var IObject = require('./_iobject');
-var toObject = require('./_to-object');
-var toLength = require('./_to-length');
-var asc = require('./_array-species-create');
-module.exports = function (TYPE, $create) {
-  var IS_MAP = TYPE == 1;
-  var IS_FILTER = TYPE == 2;
-  var IS_SOME = TYPE == 3;
-  var IS_EVERY = TYPE == 4;
-  var IS_FIND_INDEX = TYPE == 6;
-  var NO_HOLES = TYPE == 5 || IS_FIND_INDEX;
-  var create = $create || asc;
-  return function ($this, callbackfn, that) {
-    var O = toObject($this);
-    var self = IObject(O);
-    var f = ctx(callbackfn, that, 3);
-    var length = toLength(self.length);
-    var index = 0;
-    var result = IS_MAP ? create($this, length) : IS_FILTER ? create($this, 0) : undefined;
-    var val, res;
-    for (;length > index; index++) if (NO_HOLES || index in self) {
-      val = self[index];
-      res = f(val, index, O);
-      if (TYPE) {
-        if (IS_MAP) result[index] = res;   // map
-        else if (res) switch (TYPE) {
-          case 3: return true;             // some
-          case 5: return val;              // find
-          case 6: return index;            // findIndex
-          case 2: result.push(val);        // filter
-        } else if (IS_EVERY) return false; // every
-      }
-    }
-    return IS_FIND_INDEX ? -1 : IS_SOME || IS_EVERY ? IS_EVERY : result;
-  };
-};
-
-},{"./_array-species-create":46,"./_ctx":53,"./_iobject":68,"./_to-length":112,"./_to-object":113}],45:[function(require,module,exports){
-var isObject = require('./_is-object');
-var isArray = require('./_is-array');
-var SPECIES = require('./_wks')('species');
-
-module.exports = function (original) {
-  var C;
-  if (isArray(original)) {
-    C = original.constructor;
-    // cross-realm fallback
-    if (typeof C == 'function' && (C === Array || isArray(C.prototype))) C = undefined;
-    if (isObject(C)) {
-      C = C[SPECIES];
-      if (C === null) C = undefined;
-    }
-  } return C === undefined ? Array : C;
-};
-
-},{"./_is-array":70,"./_is-object":71,"./_wks":119}],46:[function(require,module,exports){
-// 9.4.2.3 ArraySpeciesCreate(originalArray, length)
-var speciesConstructor = require('./_array-species-constructor');
-
-module.exports = function (original, length) {
-  return new (speciesConstructor(original))(length);
-};
-
-},{"./_array-species-constructor":45}],47:[function(require,module,exports){
-// getting tag from 19.1.3.6 Object.prototype.toString()
-var cof = require('./_cof');
-var TAG = require('./_wks')('toStringTag');
-// ES3 wrong here
-var ARG = cof(function () { return arguments; }()) == 'Arguments';
-
-// fallback for IE11 Script Access Denied error
-var tryGet = function (it, key) {
-  try {
-    return it[key];
-  } catch (e) { /* empty */ }
-};
-
-module.exports = function (it) {
-  var O, T, B;
-  return it === undefined ? 'Undefined' : it === null ? 'Null'
-    // @@toStringTag case
-    : typeof (T = tryGet(O = Object(it), TAG)) == 'string' ? T
-    // builtinTag case
-    : ARG ? cof(O)
-    // ES3 arguments fallback
-    : (B = cof(O)) == 'Object' && typeof O.callee == 'function' ? 'Arguments' : B;
-};
-
-},{"./_cof":48,"./_wks":119}],48:[function(require,module,exports){
-var toString = {}.toString;
-
-module.exports = function (it) {
-  return toString.call(it).slice(8, -1);
-};
-
-},{}],49:[function(require,module,exports){
-'use strict';
-var dP = require('./_object-dp').f;
-var create = require('./_object-create');
-var redefineAll = require('./_redefine-all');
-var ctx = require('./_ctx');
-var anInstance = require('./_an-instance');
-var forOf = require('./_for-of');
-var $iterDefine = require('./_iter-define');
-var step = require('./_iter-step');
-var setSpecies = require('./_set-species');
-var DESCRIPTORS = require('./_descriptors');
-var fastKey = require('./_meta').fastKey;
-var validate = require('./_validate-collection');
-var SIZE = DESCRIPTORS ? '_s' : 'size';
-
-var getEntry = function (that, key) {
-  // fast case
-  var index = fastKey(key);
-  var entry;
-  if (index !== 'F') return that._i[index];
-  // frozen object case
-  for (entry = that._f; entry; entry = entry.n) {
-    if (entry.k == key) return entry;
-  }
-};
-
-module.exports = {
-  getConstructor: function (wrapper, NAME, IS_MAP, ADDER) {
-    var C = wrapper(function (that, iterable) {
-      anInstance(that, C, NAME, '_i');
-      that._t = NAME;         // collection type
-      that._i = create(null); // index
-      that._f = undefined;    // first entry
-      that._l = undefined;    // last entry
-      that[SIZE] = 0;         // size
-      if (iterable != undefined) forOf(iterable, IS_MAP, that[ADDER], that);
-    });
-    redefineAll(C.prototype, {
-      // 23.1.3.1 Map.prototype.clear()
-      // 23.2.3.2 Set.prototype.clear()
-      clear: function clear() {
-        for (var that = validate(this, NAME), data = that._i, entry = that._f; entry; entry = entry.n) {
-          entry.r = true;
-          if (entry.p) entry.p = entry.p.n = undefined;
-          delete data[entry.i];
-        }
-        that._f = that._l = undefined;
-        that[SIZE] = 0;
-      },
-      // 23.1.3.3 Map.prototype.delete(key)
-      // 23.2.3.4 Set.prototype.delete(value)
-      'delete': function (key) {
-        var that = validate(this, NAME);
-        var entry = getEntry(that, key);
-        if (entry) {
-          var next = entry.n;
-          var prev = entry.p;
-          delete that._i[entry.i];
-          entry.r = true;
-          if (prev) prev.n = next;
-          if (next) next.p = prev;
-          if (that._f == entry) that._f = next;
-          if (that._l == entry) that._l = prev;
-          that[SIZE]--;
-        } return !!entry;
-      },
-      // 23.2.3.6 Set.prototype.forEach(callbackfn, thisArg = undefined)
-      // 23.1.3.5 Map.prototype.forEach(callbackfn, thisArg = undefined)
-      forEach: function forEach(callbackfn /* , that = undefined */) {
-        validate(this, NAME);
-        var f = ctx(callbackfn, arguments.length > 1 ? arguments[1] : undefined, 3);
-        var entry;
-        while (entry = entry ? entry.n : this._f) {
-          f(entry.v, entry.k, this);
-          // revert to the last existing entry
-          while (entry && entry.r) entry = entry.p;
-        }
-      },
-      // 23.1.3.7 Map.prototype.has(key)
-      // 23.2.3.7 Set.prototype.has(value)
-      has: function has(key) {
-        return !!getEntry(validate(this, NAME), key);
-      }
-    });
-    if (DESCRIPTORS) dP(C.prototype, 'size', {
-      get: function () {
-        return validate(this, NAME)[SIZE];
-      }
-    });
-    return C;
-  },
-  def: function (that, key, value) {
-    var entry = getEntry(that, key);
-    var prev, index;
-    // change existing entry
-    if (entry) {
-      entry.v = value;
-    // create new entry
-    } else {
-      that._l = entry = {
-        i: index = fastKey(key, true), // <- index
-        k: key,                        // <- key
-        v: value,                      // <- value
-        p: prev = that._l,             // <- previous entry
-        n: undefined,                  // <- next entry
-        r: false                       // <- removed
-      };
-      if (!that._f) that._f = entry;
-      if (prev) prev.n = entry;
-      that[SIZE]++;
-      // add to index
-      if (index !== 'F') that._i[index] = entry;
-    } return that;
-  },
-  getEntry: getEntry,
-  setStrong: function (C, NAME, IS_MAP) {
-    // add .keys, .values, .entries, [@@iterator]
-    // 23.1.3.4, 23.1.3.8, 23.1.3.11, 23.1.3.12, 23.2.3.5, 23.2.3.8, 23.2.3.10, 23.2.3.11
-    $iterDefine(C, NAME, function (iterated, kind) {
-      this._t = validate(iterated, NAME); // target
-      this._k = kind;                     // kind
-      this._l = undefined;                // previous
-    }, function () {
-      var that = this;
-      var kind = that._k;
-      var entry = that._l;
-      // revert to the last existing entry
-      while (entry && entry.r) entry = entry.p;
-      // get next entry
-      if (!that._t || !(that._l = entry = entry ? entry.n : that._t._f)) {
-        // or finish the iteration
-        that._t = undefined;
-        return step(1);
-      }
-      // return step by kind
-      if (kind == 'keys') return step(0, entry.k);
-      if (kind == 'values') return step(0, entry.v);
-      return step(0, [entry.k, entry.v]);
-    }, IS_MAP ? 'entries' : 'values', !IS_MAP, true);
-
-    // add [@@species], 23.1.2.2, 23.2.2.2
-    setSpecies(NAME);
-  }
-};
-
-},{"./_an-instance":40,"./_ctx":53,"./_descriptors":55,"./_for-of":61,"./_iter-define":74,"./_iter-step":76,"./_meta":79,"./_object-create":82,"./_object-dp":83,"./_redefine-all":97,"./_set-species":102,"./_validate-collection":116}],50:[function(require,module,exports){
-// https://github.com/DavidBruant/Map-Set.prototype.toJSON
-var classof = require('./_classof');
-var from = require('./_array-from-iterable');
-module.exports = function (NAME) {
-  return function toJSON() {
-    if (classof(this) != NAME) throw TypeError(NAME + "#toJSON isn't generic");
-    return from(this);
-  };
-};
-
-},{"./_array-from-iterable":42,"./_classof":47}],51:[function(require,module,exports){
-'use strict';
-var global = require('./_global');
-var $export = require('./_export');
-var meta = require('./_meta');
-var fails = require('./_fails');
-var hide = require('./_hide');
-var redefineAll = require('./_redefine-all');
-var forOf = require('./_for-of');
-var anInstance = require('./_an-instance');
-var isObject = require('./_is-object');
-var setToStringTag = require('./_set-to-string-tag');
-var dP = require('./_object-dp').f;
-var each = require('./_array-methods')(0);
-var DESCRIPTORS = require('./_descriptors');
-
-module.exports = function (NAME, wrapper, methods, common, IS_MAP, IS_WEAK) {
-  var Base = global[NAME];
-  var C = Base;
-  var ADDER = IS_MAP ? 'set' : 'add';
-  var proto = C && C.prototype;
-  var O = {};
-  if (!DESCRIPTORS || typeof C != 'function' || !(IS_WEAK || proto.forEach && !fails(function () {
-    new C().entries().next();
-  }))) {
-    // create collection constructor
-    C = common.getConstructor(wrapper, NAME, IS_MAP, ADDER);
-    redefineAll(C.prototype, methods);
-    meta.NEED = true;
-  } else {
-    C = wrapper(function (target, iterable) {
-      anInstance(target, C, NAME, '_c');
-      target._c = new Base();
-      if (iterable != undefined) forOf(iterable, IS_MAP, target[ADDER], target);
-    });
-    each('add,clear,delete,forEach,get,has,set,keys,values,entries,toJSON'.split(','), function (KEY) {
-      var IS_ADDER = KEY == 'add' || KEY == 'set';
-      if (KEY in proto && !(IS_WEAK && KEY == 'clear')) hide(C.prototype, KEY, function (a, b) {
-        anInstance(this, C, KEY);
-        if (!IS_ADDER && IS_WEAK && !isObject(a)) return KEY == 'get' ? undefined : false;
-        var result = this._c[KEY](a === 0 ? 0 : a, b);
-        return IS_ADDER ? this : result;
-      });
-    });
-    IS_WEAK || dP(C.prototype, 'size', {
-      get: function () {
-        return this._c.size;
-      }
-    });
-  }
-
-  setToStringTag(C, NAME);
-
-  O[NAME] = C;
-  $export($export.G + $export.W + $export.F, O);
-
-  if (!IS_WEAK) common.setStrong(C, NAME, IS_MAP);
-
-  return C;
-};
-
-},{"./_an-instance":40,"./_array-methods":44,"./_descriptors":55,"./_export":59,"./_fails":60,"./_for-of":61,"./_global":62,"./_hide":64,"./_is-object":71,"./_meta":79,"./_object-dp":83,"./_redefine-all":97,"./_set-to-string-tag":103}],52:[function(require,module,exports){
-var core = module.exports = { version: '2.5.1' };
-if (typeof __e == 'number') __e = core; // eslint-disable-line no-undef
-
-},{}],53:[function(require,module,exports){
-// optional / simple context binding
-var aFunction = require('./_a-function');
-module.exports = function (fn, that, length) {
-  aFunction(fn);
-  if (that === undefined) return fn;
-  switch (length) {
-    case 1: return function (a) {
-      return fn.call(that, a);
-    };
-    case 2: return function (a, b) {
-      return fn.call(that, a, b);
-    };
-    case 3: return function (a, b, c) {
-      return fn.call(that, a, b, c);
-    };
-  }
-  return function (/* ...args */) {
-    return fn.apply(that, arguments);
-  };
-};
-
-},{"./_a-function":38}],54:[function(require,module,exports){
-// 7.2.1 RequireObjectCoercible(argument)
-module.exports = function (it) {
-  if (it == undefined) throw TypeError("Can't call method on  " + it);
-  return it;
-};
-
-},{}],55:[function(require,module,exports){
-// Thank's IE8 for his funny defineProperty
-module.exports = !require('./_fails')(function () {
-  return Object.defineProperty({}, 'a', { get: function () { return 7; } }).a != 7;
-});
-
-},{"./_fails":60}],56:[function(require,module,exports){
-var isObject = require('./_is-object');
-var document = require('./_global').document;
-// typeof document.createElement is 'object' in old IE
-var is = isObject(document) && isObject(document.createElement);
-module.exports = function (it) {
-  return is ? document.createElement(it) : {};
-};
-
-},{"./_global":62,"./_is-object":71}],57:[function(require,module,exports){
-// IE 8- don't enum bug keys
-module.exports = (
-  'constructor,hasOwnProperty,isPrototypeOf,propertyIsEnumerable,toLocaleString,toString,valueOf'
-).split(',');
-
-},{}],58:[function(require,module,exports){
-// all enumerable object keys, includes symbols
-var getKeys = require('./_object-keys');
-var gOPS = require('./_object-gops');
-var pIE = require('./_object-pie');
-module.exports = function (it) {
-  var result = getKeys(it);
-  var getSymbols = gOPS.f;
-  if (getSymbols) {
-    var symbols = getSymbols(it);
-    var isEnum = pIE.f;
-    var i = 0;
-    var key;
-    while (symbols.length > i) if (isEnum.call(it, key = symbols[i++])) result.push(key);
-  } return result;
-};
-
-},{"./_object-gops":88,"./_object-keys":91,"./_object-pie":92}],59:[function(require,module,exports){
-var global = require('./_global');
-var core = require('./_core');
-var ctx = require('./_ctx');
-var hide = require('./_hide');
-var PROTOTYPE = 'prototype';
-
-var $export = function (type, name, source) {
-  var IS_FORCED = type & $export.F;
-  var IS_GLOBAL = type & $export.G;
-  var IS_STATIC = type & $export.S;
-  var IS_PROTO = type & $export.P;
-  var IS_BIND = type & $export.B;
-  var IS_WRAP = type & $export.W;
-  var exports = IS_GLOBAL ? core : core[name] || (core[name] = {});
-  var expProto = exports[PROTOTYPE];
-  var target = IS_GLOBAL ? global : IS_STATIC ? global[name] : (global[name] || {})[PROTOTYPE];
-  var key, own, out;
-  if (IS_GLOBAL) source = name;
-  for (key in source) {
-    // contains in native
-    own = !IS_FORCED && target && target[key] !== undefined;
-    if (own && key in exports) continue;
-    // export native or passed
-    out = own ? target[key] : source[key];
-    // prevent global pollution for namespaces
-    exports[key] = IS_GLOBAL && typeof target[key] != 'function' ? source[key]
-    // bind timers to global for call from export context
-    : IS_BIND && own ? ctx(out, global)
-    // wrap global constructors for prevent change them in library
-    : IS_WRAP && target[key] == out ? (function (C) {
-      var F = function (a, b, c) {
-        if (this instanceof C) {
-          switch (arguments.length) {
-            case 0: return new C();
-            case 1: return new C(a);
-            case 2: return new C(a, b);
-          } return new C(a, b, c);
-        } return C.apply(this, arguments);
-      };
-      F[PROTOTYPE] = C[PROTOTYPE];
-      return F;
-    // make static versions for prototype methods
-    })(out) : IS_PROTO && typeof out == 'function' ? ctx(Function.call, out) : out;
-    // export proto methods to core.%CONSTRUCTOR%.methods.%NAME%
-    if (IS_PROTO) {
-      (exports.virtual || (exports.virtual = {}))[key] = out;
-      // export proto methods to core.%CONSTRUCTOR%.prototype.%NAME%
-      if (type & $export.R && expProto && !expProto[key]) hide(expProto, key, out);
-    }
-  }
-};
-// type bitmap
-$export.F = 1;   // forced
-$export.G = 2;   // global
-$export.S = 4;   // static
-$export.P = 8;   // proto
-$export.B = 16;  // bind
-$export.W = 32;  // wrap
-$export.U = 64;  // safe
-$export.R = 128; // real proto method for `library`
-module.exports = $export;
-
-},{"./_core":52,"./_ctx":53,"./_global":62,"./_hide":64}],60:[function(require,module,exports){
-module.exports = function (exec) {
-  try {
-    return !!exec();
-  } catch (e) {
-    return true;
-  }
-};
-
-},{}],61:[function(require,module,exports){
-var ctx = require('./_ctx');
-var call = require('./_iter-call');
-var isArrayIter = require('./_is-array-iter');
-var anObject = require('./_an-object');
-var toLength = require('./_to-length');
-var getIterFn = require('./core.get-iterator-method');
-var BREAK = {};
-var RETURN = {};
-var exports = module.exports = function (iterable, entries, fn, that, ITERATOR) {
-  var iterFn = ITERATOR ? function () { return iterable; } : getIterFn(iterable);
-  var f = ctx(fn, that, entries ? 2 : 1);
-  var index = 0;
-  var length, step, iterator, result;
-  if (typeof iterFn != 'function') throw TypeError(iterable + ' is not iterable!');
-  // fast case for arrays with default iterator
-  if (isArrayIter(iterFn)) for (length = toLength(iterable.length); length > index; index++) {
-    result = entries ? f(anObject(step = iterable[index])[0], step[1]) : f(iterable[index]);
-    if (result === BREAK || result === RETURN) return result;
-  } else for (iterator = iterFn.call(iterable); !(step = iterator.next()).done;) {
-    result = call(iterator, f, step.value, entries);
-    if (result === BREAK || result === RETURN) return result;
-  }
-};
-exports.BREAK = BREAK;
-exports.RETURN = RETURN;
-
-},{"./_an-object":41,"./_ctx":53,"./_is-array-iter":69,"./_iter-call":72,"./_to-length":112,"./core.get-iterator-method":120}],62:[function(require,module,exports){
-// https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
-var global = module.exports = typeof window != 'undefined' && window.Math == Math
-  ? window : typeof self != 'undefined' && self.Math == Math ? self
-  // eslint-disable-next-line no-new-func
-  : Function('return this')();
-if (typeof __g == 'number') __g = global; // eslint-disable-line no-undef
-
-},{}],63:[function(require,module,exports){
-var hasOwnProperty = {}.hasOwnProperty;
-module.exports = function (it, key) {
-  return hasOwnProperty.call(it, key);
-};
-
-},{}],64:[function(require,module,exports){
-var dP = require('./_object-dp');
-var createDesc = require('./_property-desc');
-module.exports = require('./_descriptors') ? function (object, key, value) {
-  return dP.f(object, key, createDesc(1, value));
-} : function (object, key, value) {
-  object[key] = value;
-  return object;
-};
-
-},{"./_descriptors":55,"./_object-dp":83,"./_property-desc":96}],65:[function(require,module,exports){
-var document = require('./_global').document;
-module.exports = document && document.documentElement;
-
-},{"./_global":62}],66:[function(require,module,exports){
-module.exports = !require('./_descriptors') && !require('./_fails')(function () {
-  return Object.defineProperty(require('./_dom-create')('div'), 'a', { get: function () { return 7; } }).a != 7;
-});
-
-},{"./_descriptors":55,"./_dom-create":56,"./_fails":60}],67:[function(require,module,exports){
-// fast apply, http://jsperf.lnkit.com/fast-apply/5
-module.exports = function (fn, args, that) {
-  var un = that === undefined;
-  switch (args.length) {
-    case 0: return un ? fn()
-                      : fn.call(that);
-    case 1: return un ? fn(args[0])
-                      : fn.call(that, args[0]);
-    case 2: return un ? fn(args[0], args[1])
-                      : fn.call(that, args[0], args[1]);
-    case 3: return un ? fn(args[0], args[1], args[2])
-                      : fn.call(that, args[0], args[1], args[2]);
-    case 4: return un ? fn(args[0], args[1], args[2], args[3])
-                      : fn.call(that, args[0], args[1], args[2], args[3]);
-  } return fn.apply(that, args);
-};
-
-},{}],68:[function(require,module,exports){
-// fallback for non-array-like ES3 and non-enumerable old V8 strings
-var cof = require('./_cof');
-// eslint-disable-next-line no-prototype-builtins
-module.exports = Object('z').propertyIsEnumerable(0) ? Object : function (it) {
-  return cof(it) == 'String' ? it.split('') : Object(it);
-};
-
-},{"./_cof":48}],69:[function(require,module,exports){
-// check on default Array iterator
-var Iterators = require('./_iterators');
-var ITERATOR = require('./_wks')('iterator');
-var ArrayProto = Array.prototype;
-
-module.exports = function (it) {
-  return it !== undefined && (Iterators.Array === it || ArrayProto[ITERATOR] === it);
-};
-
-},{"./_iterators":77,"./_wks":119}],70:[function(require,module,exports){
-// 7.2.2 IsArray(argument)
-var cof = require('./_cof');
-module.exports = Array.isArray || function isArray(arg) {
-  return cof(arg) == 'Array';
-};
-
-},{"./_cof":48}],71:[function(require,module,exports){
-module.exports = function (it) {
-  return typeof it === 'object' ? it !== null : typeof it === 'function';
-};
-
-},{}],72:[function(require,module,exports){
-// call something on iterator step with safe closing on error
-var anObject = require('./_an-object');
-module.exports = function (iterator, fn, value, entries) {
-  try {
-    return entries ? fn(anObject(value)[0], value[1]) : fn(value);
-  // 7.4.6 IteratorClose(iterator, completion)
-  } catch (e) {
-    var ret = iterator['return'];
-    if (ret !== undefined) anObject(ret.call(iterator));
-    throw e;
-  }
-};
-
-},{"./_an-object":41}],73:[function(require,module,exports){
-'use strict';
-var create = require('./_object-create');
-var descriptor = require('./_property-desc');
-var setToStringTag = require('./_set-to-string-tag');
-var IteratorPrototype = {};
-
-// 25.1.2.1.1 %IteratorPrototype%[@@iterator]()
-require('./_hide')(IteratorPrototype, require('./_wks')('iterator'), function () { return this; });
-
-module.exports = function (Constructor, NAME, next) {
-  Constructor.prototype = create(IteratorPrototype, { next: descriptor(1, next) });
-  setToStringTag(Constructor, NAME + ' Iterator');
-};
-
-},{"./_hide":64,"./_object-create":82,"./_property-desc":96,"./_set-to-string-tag":103,"./_wks":119}],74:[function(require,module,exports){
-'use strict';
-var LIBRARY = require('./_library');
-var $export = require('./_export');
-var redefine = require('./_redefine');
-var hide = require('./_hide');
-var has = require('./_has');
-var Iterators = require('./_iterators');
-var $iterCreate = require('./_iter-create');
-var setToStringTag = require('./_set-to-string-tag');
-var getPrototypeOf = require('./_object-gpo');
-var ITERATOR = require('./_wks')('iterator');
-var BUGGY = !([].keys && 'next' in [].keys()); // Safari has buggy iterators w/o `next`
-var FF_ITERATOR = '@@iterator';
-var KEYS = 'keys';
-var VALUES = 'values';
-
-var returnThis = function () { return this; };
-
-module.exports = function (Base, NAME, Constructor, next, DEFAULT, IS_SET, FORCED) {
-  $iterCreate(Constructor, NAME, next);
-  var getMethod = function (kind) {
-    if (!BUGGY && kind in proto) return proto[kind];
-    switch (kind) {
-      case KEYS: return function keys() { return new Constructor(this, kind); };
-      case VALUES: return function values() { return new Constructor(this, kind); };
-    } return function entries() { return new Constructor(this, kind); };
-  };
-  var TAG = NAME + ' Iterator';
-  var DEF_VALUES = DEFAULT == VALUES;
-  var VALUES_BUG = false;
-  var proto = Base.prototype;
-  var $native = proto[ITERATOR] || proto[FF_ITERATOR] || DEFAULT && proto[DEFAULT];
-  var $default = $native || getMethod(DEFAULT);
-  var $entries = DEFAULT ? !DEF_VALUES ? $default : getMethod('entries') : undefined;
-  var $anyNative = NAME == 'Array' ? proto.entries || $native : $native;
-  var methods, key, IteratorPrototype;
-  // Fix native
-  if ($anyNative) {
-    IteratorPrototype = getPrototypeOf($anyNative.call(new Base()));
-    if (IteratorPrototype !== Object.prototype && IteratorPrototype.next) {
-      // Set @@toStringTag to native iterators
-      setToStringTag(IteratorPrototype, TAG, true);
-      // fix for some old engines
-      if (!LIBRARY && !has(IteratorPrototype, ITERATOR)) hide(IteratorPrototype, ITERATOR, returnThis);
-    }
-  }
-  // fix Array#{values, @@iterator}.name in V8 / FF
-  if (DEF_VALUES && $native && $native.name !== VALUES) {
-    VALUES_BUG = true;
-    $default = function values() { return $native.call(this); };
-  }
-  // Define iterator
-  if ((!LIBRARY || FORCED) && (BUGGY || VALUES_BUG || !proto[ITERATOR])) {
-    hide(proto, ITERATOR, $default);
-  }
-  // Plug for library
-  Iterators[NAME] = $default;
-  Iterators[TAG] = returnThis;
-  if (DEFAULT) {
-    methods = {
-      values: DEF_VALUES ? $default : getMethod(VALUES),
-      keys: IS_SET ? $default : getMethod(KEYS),
-      entries: $entries
-    };
-    if (FORCED) for (key in methods) {
-      if (!(key in proto)) redefine(proto, key, methods[key]);
-    } else $export($export.P + $export.F * (BUGGY || VALUES_BUG), NAME, methods);
-  }
-  return methods;
-};
-
-},{"./_export":59,"./_has":63,"./_hide":64,"./_iter-create":73,"./_iterators":77,"./_library":78,"./_object-gpo":89,"./_redefine":98,"./_set-to-string-tag":103,"./_wks":119}],75:[function(require,module,exports){
-var ITERATOR = require('./_wks')('iterator');
-var SAFE_CLOSING = false;
-
-try {
-  var riter = [7][ITERATOR]();
-  riter['return'] = function () { SAFE_CLOSING = true; };
-  // eslint-disable-next-line no-throw-literal
-  Array.from(riter, function () { throw 2; });
-} catch (e) { /* empty */ }
-
-module.exports = function (exec, skipClosing) {
-  if (!skipClosing && !SAFE_CLOSING) return false;
-  var safe = false;
-  try {
-    var arr = [7];
-    var iter = arr[ITERATOR]();
-    iter.next = function () { return { done: safe = true }; };
-    arr[ITERATOR] = function () { return iter; };
-    exec(arr);
-  } catch (e) { /* empty */ }
-  return safe;
-};
-
-},{"./_wks":119}],76:[function(require,module,exports){
-module.exports = function (done, value) {
-  return { value: value, done: !!done };
-};
-
-},{}],77:[function(require,module,exports){
-module.exports = {};
-
-},{}],78:[function(require,module,exports){
-module.exports = true;
-
-},{}],79:[function(require,module,exports){
-var META = require('./_uid')('meta');
-var isObject = require('./_is-object');
-var has = require('./_has');
-var setDesc = require('./_object-dp').f;
-var id = 0;
-var isExtensible = Object.isExtensible || function () {
-  return true;
-};
-var FREEZE = !require('./_fails')(function () {
-  return isExtensible(Object.preventExtensions({}));
-});
-var setMeta = function (it) {
-  setDesc(it, META, { value: {
-    i: 'O' + ++id, // object ID
-    w: {}          // weak collections IDs
-  } });
-};
-var fastKey = function (it, create) {
-  // return primitive with prefix
-  if (!isObject(it)) return typeof it == 'symbol' ? it : (typeof it == 'string' ? 'S' : 'P') + it;
-  if (!has(it, META)) {
-    // can't set metadata to uncaught frozen object
-    if (!isExtensible(it)) return 'F';
-    // not necessary to add metadata
-    if (!create) return 'E';
-    // add missing metadata
-    setMeta(it);
-  // return object ID
-  } return it[META].i;
-};
-var getWeak = function (it, create) {
-  if (!has(it, META)) {
-    // can't set metadata to uncaught frozen object
-    if (!isExtensible(it)) return true;
-    // not necessary to add metadata
-    if (!create) return false;
-    // add missing metadata
-    setMeta(it);
-  // return hash weak collections IDs
-  } return it[META].w;
-};
-// add metadata on freeze-family methods calling
-var onFreeze = function (it) {
-  if (FREEZE && meta.NEED && isExtensible(it) && !has(it, META)) setMeta(it);
-  return it;
-};
-var meta = module.exports = {
-  KEY: META,
-  NEED: false,
-  fastKey: fastKey,
-  getWeak: getWeak,
-  onFreeze: onFreeze
-};
-
-},{"./_fails":60,"./_has":63,"./_is-object":71,"./_object-dp":83,"./_uid":115}],80:[function(require,module,exports){
-var global = require('./_global');
-var macrotask = require('./_task').set;
-var Observer = global.MutationObserver || global.WebKitMutationObserver;
-var process = global.process;
-var Promise = global.Promise;
-var isNode = require('./_cof')(process) == 'process';
-
-module.exports = function () {
-  var head, last, notify;
-
-  var flush = function () {
-    var parent, fn;
-    if (isNode && (parent = process.domain)) parent.exit();
-    while (head) {
-      fn = head.fn;
-      head = head.next;
-      try {
-        fn();
-      } catch (e) {
-        if (head) notify();
-        else last = undefined;
-        throw e;
-      }
-    } last = undefined;
-    if (parent) parent.enter();
-  };
-
-  // Node.js
-  if (isNode) {
-    notify = function () {
-      process.nextTick(flush);
-    };
-  // browsers with MutationObserver
-  } else if (Observer) {
-    var toggle = true;
-    var node = document.createTextNode('');
-    new Observer(flush).observe(node, { characterData: true }); // eslint-disable-line no-new
-    notify = function () {
-      node.data = toggle = !toggle;
-    };
-  // environments with maybe non-completely correct, but existent Promise
-  } else if (Promise && Promise.resolve) {
-    var promise = Promise.resolve();
-    notify = function () {
-      promise.then(flush);
-    };
-  // for other environments - macrotask based on:
-  // - setImmediate
-  // - MessageChannel
-  // - window.postMessag
-  // - onreadystatechange
-  // - setTimeout
-  } else {
-    notify = function () {
-      // strange IE + webpack dev server bug - use .call(global)
-      macrotask.call(global, flush);
-    };
-  }
-
-  return function (fn) {
-    var task = { fn: fn, next: undefined };
-    if (last) last.next = task;
-    if (!head) {
-      head = task;
-      notify();
-    } last = task;
-  };
-};
-
-},{"./_cof":48,"./_global":62,"./_task":108}],81:[function(require,module,exports){
-'use strict';
-// 25.4.1.5 NewPromiseCapability(C)
-var aFunction = require('./_a-function');
-
-function PromiseCapability(C) {
-  var resolve, reject;
-  this.promise = new C(function ($$resolve, $$reject) {
-    if (resolve !== undefined || reject !== undefined) throw TypeError('Bad Promise constructor');
-    resolve = $$resolve;
-    reject = $$reject;
-  });
-  this.resolve = aFunction(resolve);
-  this.reject = aFunction(reject);
-}
-
-module.exports.f = function (C) {
-  return new PromiseCapability(C);
-};
-
-},{"./_a-function":38}],82:[function(require,module,exports){
-// 19.1.2.2 / 15.2.3.5 Object.create(O [, Properties])
-var anObject = require('./_an-object');
-var dPs = require('./_object-dps');
-var enumBugKeys = require('./_enum-bug-keys');
-var IE_PROTO = require('./_shared-key')('IE_PROTO');
-var Empty = function () { /* empty */ };
-var PROTOTYPE = 'prototype';
-
-// Create object with fake `null` prototype: use iframe Object with cleared prototype
-var createDict = function () {
-  // Thrash, waste and sodomy: IE GC bug
-  var iframe = require('./_dom-create')('iframe');
-  var i = enumBugKeys.length;
-  var lt = '<';
-  var gt = '>';
-  var iframeDocument;
-  iframe.style.display = 'none';
-  require('./_html').appendChild(iframe);
-  iframe.src = 'javascript:'; // eslint-disable-line no-script-url
-  // createDict = iframe.contentWindow.Object;
-  // html.removeChild(iframe);
-  iframeDocument = iframe.contentWindow.document;
-  iframeDocument.open();
-  iframeDocument.write(lt + 'script' + gt + 'document.F=Object' + lt + '/script' + gt);
-  iframeDocument.close();
-  createDict = iframeDocument.F;
-  while (i--) delete createDict[PROTOTYPE][enumBugKeys[i]];
-  return createDict();
-};
-
-module.exports = Object.create || function create(O, Properties) {
-  var result;
-  if (O !== null) {
-    Empty[PROTOTYPE] = anObject(O);
-    result = new Empty();
-    Empty[PROTOTYPE] = null;
-    // add "__proto__" for Object.getPrototypeOf polyfill
-    result[IE_PROTO] = O;
-  } else result = createDict();
-  return Properties === undefined ? result : dPs(result, Properties);
-};
-
-},{"./_an-object":41,"./_dom-create":56,"./_enum-bug-keys":57,"./_html":65,"./_object-dps":84,"./_shared-key":104}],83:[function(require,module,exports){
-var anObject = require('./_an-object');
-var IE8_DOM_DEFINE = require('./_ie8-dom-define');
-var toPrimitive = require('./_to-primitive');
-var dP = Object.defineProperty;
-
-exports.f = require('./_descriptors') ? Object.defineProperty : function defineProperty(O, P, Attributes) {
-  anObject(O);
-  P = toPrimitive(P, true);
-  anObject(Attributes);
-  if (IE8_DOM_DEFINE) try {
-    return dP(O, P, Attributes);
-  } catch (e) { /* empty */ }
-  if ('get' in Attributes || 'set' in Attributes) throw TypeError('Accessors not supported!');
-  if ('value' in Attributes) O[P] = Attributes.value;
-  return O;
-};
-
-},{"./_an-object":41,"./_descriptors":55,"./_ie8-dom-define":66,"./_to-primitive":114}],84:[function(require,module,exports){
-var dP = require('./_object-dp');
-var anObject = require('./_an-object');
-var getKeys = require('./_object-keys');
-
-module.exports = require('./_descriptors') ? Object.defineProperties : function defineProperties(O, Properties) {
-  anObject(O);
-  var keys = getKeys(Properties);
-  var length = keys.length;
-  var i = 0;
-  var P;
-  while (length > i) dP.f(O, P = keys[i++], Properties[P]);
-  return O;
-};
-
-},{"./_an-object":41,"./_descriptors":55,"./_object-dp":83,"./_object-keys":91}],85:[function(require,module,exports){
-var pIE = require('./_object-pie');
-var createDesc = require('./_property-desc');
-var toIObject = require('./_to-iobject');
-var toPrimitive = require('./_to-primitive');
-var has = require('./_has');
-var IE8_DOM_DEFINE = require('./_ie8-dom-define');
-var gOPD = Object.getOwnPropertyDescriptor;
-
-exports.f = require('./_descriptors') ? gOPD : function getOwnPropertyDescriptor(O, P) {
-  O = toIObject(O);
-  P = toPrimitive(P, true);
-  if (IE8_DOM_DEFINE) try {
-    return gOPD(O, P);
-  } catch (e) { /* empty */ }
-  if (has(O, P)) return createDesc(!pIE.f.call(O, P), O[P]);
-};
-
-},{"./_descriptors":55,"./_has":63,"./_ie8-dom-define":66,"./_object-pie":92,"./_property-desc":96,"./_to-iobject":111,"./_to-primitive":114}],86:[function(require,module,exports){
-// fallback for IE11 buggy Object.getOwnPropertyNames with iframe and window
-var toIObject = require('./_to-iobject');
-var gOPN = require('./_object-gopn').f;
-var toString = {}.toString;
-
-var windowNames = typeof window == 'object' && window && Object.getOwnPropertyNames
-  ? Object.getOwnPropertyNames(window) : [];
-
-var getWindowNames = function (it) {
-  try {
-    return gOPN(it);
-  } catch (e) {
-    return windowNames.slice();
-  }
-};
-
-module.exports.f = function getOwnPropertyNames(it) {
-  return windowNames && toString.call(it) == '[object Window]' ? getWindowNames(it) : gOPN(toIObject(it));
-};
-
-},{"./_object-gopn":87,"./_to-iobject":111}],87:[function(require,module,exports){
-// 19.1.2.7 / 15.2.3.4 Object.getOwnPropertyNames(O)
-var $keys = require('./_object-keys-internal');
-var hiddenKeys = require('./_enum-bug-keys').concat('length', 'prototype');
-
-exports.f = Object.getOwnPropertyNames || function getOwnPropertyNames(O) {
-  return $keys(O, hiddenKeys);
-};
-
-},{"./_enum-bug-keys":57,"./_object-keys-internal":90}],88:[function(require,module,exports){
-exports.f = Object.getOwnPropertySymbols;
-
-},{}],89:[function(require,module,exports){
-// 19.1.2.9 / 15.2.3.2 Object.getPrototypeOf(O)
-var has = require('./_has');
-var toObject = require('./_to-object');
-var IE_PROTO = require('./_shared-key')('IE_PROTO');
-var ObjectProto = Object.prototype;
-
-module.exports = Object.getPrototypeOf || function (O) {
-  O = toObject(O);
-  if (has(O, IE_PROTO)) return O[IE_PROTO];
-  if (typeof O.constructor == 'function' && O instanceof O.constructor) {
-    return O.constructor.prototype;
-  } return O instanceof Object ? ObjectProto : null;
-};
-
-},{"./_has":63,"./_shared-key":104,"./_to-object":113}],90:[function(require,module,exports){
-var has = require('./_has');
-var toIObject = require('./_to-iobject');
-var arrayIndexOf = require('./_array-includes')(false);
-var IE_PROTO = require('./_shared-key')('IE_PROTO');
-
-module.exports = function (object, names) {
-  var O = toIObject(object);
-  var i = 0;
-  var result = [];
-  var key;
-  for (key in O) if (key != IE_PROTO) has(O, key) && result.push(key);
-  // Don't enum bug & hidden keys
-  while (names.length > i) if (has(O, key = names[i++])) {
-    ~arrayIndexOf(result, key) || result.push(key);
-  }
-  return result;
-};
-
-},{"./_array-includes":43,"./_has":63,"./_shared-key":104,"./_to-iobject":111}],91:[function(require,module,exports){
-// 19.1.2.14 / 15.2.3.14 Object.keys(O)
-var $keys = require('./_object-keys-internal');
-var enumBugKeys = require('./_enum-bug-keys');
-
-module.exports = Object.keys || function keys(O) {
-  return $keys(O, enumBugKeys);
-};
-
-},{"./_enum-bug-keys":57,"./_object-keys-internal":90}],92:[function(require,module,exports){
-exports.f = {}.propertyIsEnumerable;
-
-},{}],93:[function(require,module,exports){
-// most Object methods by ES6 should accept primitives
-var $export = require('./_export');
-var core = require('./_core');
-var fails = require('./_fails');
-module.exports = function (KEY, exec) {
-  var fn = (core.Object || {})[KEY] || Object[KEY];
-  var exp = {};
-  exp[KEY] = exec(fn);
-  $export($export.S + $export.F * fails(function () { fn(1); }), 'Object', exp);
-};
-
-},{"./_core":52,"./_export":59,"./_fails":60}],94:[function(require,module,exports){
-module.exports = function (exec) {
-  try {
-    return { e: false, v: exec() };
-  } catch (e) {
-    return { e: true, v: e };
-  }
-};
-
-},{}],95:[function(require,module,exports){
-var anObject = require('./_an-object');
-var isObject = require('./_is-object');
-var newPromiseCapability = require('./_new-promise-capability');
-
-module.exports = function (C, x) {
-  anObject(C);
-  if (isObject(x) && x.constructor === C) return x;
-  var promiseCapability = newPromiseCapability.f(C);
-  var resolve = promiseCapability.resolve;
-  resolve(x);
-  return promiseCapability.promise;
-};
-
-},{"./_an-object":41,"./_is-object":71,"./_new-promise-capability":81}],96:[function(require,module,exports){
-module.exports = function (bitmap, value) {
-  return {
-    enumerable: !(bitmap & 1),
-    configurable: !(bitmap & 2),
-    writable: !(bitmap & 4),
-    value: value
-  };
-};
-
-},{}],97:[function(require,module,exports){
-var hide = require('./_hide');
-module.exports = function (target, src, safe) {
-  for (var key in src) {
-    if (safe && target[key]) target[key] = src[key];
-    else hide(target, key, src[key]);
-  } return target;
-};
-
-},{"./_hide":64}],98:[function(require,module,exports){
-module.exports = require('./_hide');
-
-},{"./_hide":64}],99:[function(require,module,exports){
-'use strict';
-// https://tc39.github.io/proposal-setmap-offrom/
-var $export = require('./_export');
-var aFunction = require('./_a-function');
-var ctx = require('./_ctx');
-var forOf = require('./_for-of');
-
-module.exports = function (COLLECTION) {
-  $export($export.S, COLLECTION, { from: function from(source /* , mapFn, thisArg */) {
-    var mapFn = arguments[1];
-    var mapping, A, n, cb;
-    aFunction(this);
-    mapping = mapFn !== undefined;
-    if (mapping) aFunction(mapFn);
-    if (source == undefined) return new this();
-    A = [];
-    if (mapping) {
-      n = 0;
-      cb = ctx(mapFn, arguments[2], 2);
-      forOf(source, false, function (nextItem) {
-        A.push(cb(nextItem, n++));
-      });
-    } else {
-      forOf(source, false, A.push, A);
-    }
-    return new this(A);
-  } });
-};
-
-},{"./_a-function":38,"./_ctx":53,"./_export":59,"./_for-of":61}],100:[function(require,module,exports){
-'use strict';
-// https://tc39.github.io/proposal-setmap-offrom/
-var $export = require('./_export');
-
-module.exports = function (COLLECTION) {
-  $export($export.S, COLLECTION, { of: function of() {
-    var length = arguments.length;
-    var A = Array(length);
-    while (length--) A[length] = arguments[length];
-    return new this(A);
-  } });
-};
-
-},{"./_export":59}],101:[function(require,module,exports){
-// Works with __proto__ only. Old v8 can't work with null proto objects.
-/* eslint-disable no-proto */
-var isObject = require('./_is-object');
-var anObject = require('./_an-object');
-var check = function (O, proto) {
-  anObject(O);
-  if (!isObject(proto) && proto !== null) throw TypeError(proto + ": can't set as prototype!");
-};
-module.exports = {
-  set: Object.setPrototypeOf || ('__proto__' in {} ? // eslint-disable-line
-    function (test, buggy, set) {
-      try {
-        set = require('./_ctx')(Function.call, require('./_object-gopd').f(Object.prototype, '__proto__').set, 2);
-        set(test, []);
-        buggy = !(test instanceof Array);
-      } catch (e) { buggy = true; }
-      return function setPrototypeOf(O, proto) {
-        check(O, proto);
-        if (buggy) O.__proto__ = proto;
-        else set(O, proto);
-        return O;
-      };
-    }({}, false) : undefined),
-  check: check
-};
-
-},{"./_an-object":41,"./_ctx":53,"./_is-object":71,"./_object-gopd":85}],102:[function(require,module,exports){
-'use strict';
-var global = require('./_global');
-var core = require('./_core');
-var dP = require('./_object-dp');
-var DESCRIPTORS = require('./_descriptors');
-var SPECIES = require('./_wks')('species');
-
-module.exports = function (KEY) {
-  var C = typeof core[KEY] == 'function' ? core[KEY] : global[KEY];
-  if (DESCRIPTORS && C && !C[SPECIES]) dP.f(C, SPECIES, {
-    configurable: true,
-    get: function () { return this; }
-  });
-};
-
-},{"./_core":52,"./_descriptors":55,"./_global":62,"./_object-dp":83,"./_wks":119}],103:[function(require,module,exports){
-var def = require('./_object-dp').f;
-var has = require('./_has');
-var TAG = require('./_wks')('toStringTag');
-
-module.exports = function (it, tag, stat) {
-  if (it && !has(it = stat ? it : it.prototype, TAG)) def(it, TAG, { configurable: true, value: tag });
-};
-
-},{"./_has":63,"./_object-dp":83,"./_wks":119}],104:[function(require,module,exports){
-var shared = require('./_shared')('keys');
-var uid = require('./_uid');
-module.exports = function (key) {
-  return shared[key] || (shared[key] = uid(key));
-};
-
-},{"./_shared":105,"./_uid":115}],105:[function(require,module,exports){
-var global = require('./_global');
-var SHARED = '__core-js_shared__';
-var store = global[SHARED] || (global[SHARED] = {});
-module.exports = function (key) {
-  return store[key] || (store[key] = {});
-};
-
-},{"./_global":62}],106:[function(require,module,exports){
-// 7.3.20 SpeciesConstructor(O, defaultConstructor)
-var anObject = require('./_an-object');
-var aFunction = require('./_a-function');
-var SPECIES = require('./_wks')('species');
-module.exports = function (O, D) {
-  var C = anObject(O).constructor;
-  var S;
-  return C === undefined || (S = anObject(C)[SPECIES]) == undefined ? D : aFunction(S);
-};
-
-},{"./_a-function":38,"./_an-object":41,"./_wks":119}],107:[function(require,module,exports){
-var toInteger = require('./_to-integer');
-var defined = require('./_defined');
-// true  -> String#at
-// false -> String#codePointAt
-module.exports = function (TO_STRING) {
-  return function (that, pos) {
-    var s = String(defined(that));
-    var i = toInteger(pos);
-    var l = s.length;
-    var a, b;
-    if (i < 0 || i >= l) return TO_STRING ? '' : undefined;
-    a = s.charCodeAt(i);
-    return a < 0xd800 || a > 0xdbff || i + 1 === l || (b = s.charCodeAt(i + 1)) < 0xdc00 || b > 0xdfff
-      ? TO_STRING ? s.charAt(i) : a
-      : TO_STRING ? s.slice(i, i + 2) : (a - 0xd800 << 10) + (b - 0xdc00) + 0x10000;
-  };
-};
-
-},{"./_defined":54,"./_to-integer":110}],108:[function(require,module,exports){
-var ctx = require('./_ctx');
-var invoke = require('./_invoke');
-var html = require('./_html');
-var cel = require('./_dom-create');
-var global = require('./_global');
-var process = global.process;
-var setTask = global.setImmediate;
-var clearTask = global.clearImmediate;
-var MessageChannel = global.MessageChannel;
-var Dispatch = global.Dispatch;
-var counter = 0;
-var queue = {};
-var ONREADYSTATECHANGE = 'onreadystatechange';
-var defer, channel, port;
-var run = function () {
-  var id = +this;
-  // eslint-disable-next-line no-prototype-builtins
-  if (queue.hasOwnProperty(id)) {
-    var fn = queue[id];
-    delete queue[id];
-    fn();
-  }
-};
-var listener = function (event) {
-  run.call(event.data);
-};
-// Node.js 0.9+ & IE10+ has setImmediate, otherwise:
-if (!setTask || !clearTask) {
-  setTask = function setImmediate(fn) {
-    var args = [];
-    var i = 1;
-    while (arguments.length > i) args.push(arguments[i++]);
-    queue[++counter] = function () {
-      // eslint-disable-next-line no-new-func
-      invoke(typeof fn == 'function' ? fn : Function(fn), args);
-    };
-    defer(counter);
-    return counter;
-  };
-  clearTask = function clearImmediate(id) {
-    delete queue[id];
-  };
-  // Node.js 0.8-
-  if (require('./_cof')(process) == 'process') {
-    defer = function (id) {
-      process.nextTick(ctx(run, id, 1));
-    };
-  // Sphere (JS game engine) Dispatch API
-  } else if (Dispatch && Dispatch.now) {
-    defer = function (id) {
-      Dispatch.now(ctx(run, id, 1));
-    };
-  // Browsers with MessageChannel, includes WebWorkers
-  } else if (MessageChannel) {
-    channel = new MessageChannel();
-    port = channel.port2;
-    channel.port1.onmessage = listener;
-    defer = ctx(port.postMessage, port, 1);
-  // Browsers with postMessage, skip WebWorkers
-  // IE8 has postMessage, but it's sync & typeof its postMessage is 'object'
-  } else if (global.addEventListener && typeof postMessage == 'function' && !global.importScripts) {
-    defer = function (id) {
-      global.postMessage(id + '', '*');
-    };
-    global.addEventListener('message', listener, false);
-  // IE8-
-  } else if (ONREADYSTATECHANGE in cel('script')) {
-    defer = function (id) {
-      html.appendChild(cel('script'))[ONREADYSTATECHANGE] = function () {
-        html.removeChild(this);
-        run.call(id);
-      };
-    };
-  // Rest old browsers
-  } else {
-    defer = function (id) {
-      setTimeout(ctx(run, id, 1), 0);
-    };
-  }
-}
-module.exports = {
-  set: setTask,
-  clear: clearTask
-};
-
-},{"./_cof":48,"./_ctx":53,"./_dom-create":56,"./_global":62,"./_html":65,"./_invoke":67}],109:[function(require,module,exports){
-var toInteger = require('./_to-integer');
-var max = Math.max;
-var min = Math.min;
-module.exports = function (index, length) {
-  index = toInteger(index);
-  return index < 0 ? max(index + length, 0) : min(index, length);
-};
-
-},{"./_to-integer":110}],110:[function(require,module,exports){
-// 7.1.4 ToInteger
-var ceil = Math.ceil;
-var floor = Math.floor;
-module.exports = function (it) {
-  return isNaN(it = +it) ? 0 : (it > 0 ? floor : ceil)(it);
-};
-
-},{}],111:[function(require,module,exports){
-// to indexed object, toObject with fallback for non-array-like ES3 strings
-var IObject = require('./_iobject');
-var defined = require('./_defined');
-module.exports = function (it) {
-  return IObject(defined(it));
-};
-
-},{"./_defined":54,"./_iobject":68}],112:[function(require,module,exports){
-// 7.1.15 ToLength
-var toInteger = require('./_to-integer');
-var min = Math.min;
-module.exports = function (it) {
-  return it > 0 ? min(toInteger(it), 0x1fffffffffffff) : 0; // pow(2, 53) - 1 == 9007199254740991
-};
-
-},{"./_to-integer":110}],113:[function(require,module,exports){
-// 7.1.13 ToObject(argument)
-var defined = require('./_defined');
-module.exports = function (it) {
-  return Object(defined(it));
-};
-
-},{"./_defined":54}],114:[function(require,module,exports){
-// 7.1.1 ToPrimitive(input [, PreferredType])
-var isObject = require('./_is-object');
-// instead of the ES6 spec version, we didn't implement @@toPrimitive case
-// and the second argument - flag - preferred type is a string
-module.exports = function (it, S) {
-  if (!isObject(it)) return it;
-  var fn, val;
-  if (S && typeof (fn = it.toString) == 'function' && !isObject(val = fn.call(it))) return val;
-  if (typeof (fn = it.valueOf) == 'function' && !isObject(val = fn.call(it))) return val;
-  if (!S && typeof (fn = it.toString) == 'function' && !isObject(val = fn.call(it))) return val;
-  throw TypeError("Can't convert object to primitive value");
-};
-
-},{"./_is-object":71}],115:[function(require,module,exports){
-var id = 0;
-var px = Math.random();
-module.exports = function (key) {
-  return 'Symbol('.concat(key === undefined ? '' : key, ')_', (++id + px).toString(36));
-};
-
-},{}],116:[function(require,module,exports){
-var isObject = require('./_is-object');
-module.exports = function (it, TYPE) {
-  if (!isObject(it) || it._t !== TYPE) throw TypeError('Incompatible receiver, ' + TYPE + ' required!');
-  return it;
-};
-
-},{"./_is-object":71}],117:[function(require,module,exports){
-var global = require('./_global');
-var core = require('./_core');
-var LIBRARY = require('./_library');
-var wksExt = require('./_wks-ext');
-var defineProperty = require('./_object-dp').f;
-module.exports = function (name) {
-  var $Symbol = core.Symbol || (core.Symbol = LIBRARY ? {} : global.Symbol || {});
-  if (name.charAt(0) != '_' && !(name in $Symbol)) defineProperty($Symbol, name, { value: wksExt.f(name) });
-};
-
-},{"./_core":52,"./_global":62,"./_library":78,"./_object-dp":83,"./_wks-ext":118}],118:[function(require,module,exports){
-exports.f = require('./_wks');
-
-},{"./_wks":119}],119:[function(require,module,exports){
-var store = require('./_shared')('wks');
-var uid = require('./_uid');
-var Symbol = require('./_global').Symbol;
-var USE_SYMBOL = typeof Symbol == 'function';
-
-var $exports = module.exports = function (name) {
-  return store[name] || (store[name] =
-    USE_SYMBOL && Symbol[name] || (USE_SYMBOL ? Symbol : uid)('Symbol.' + name));
-};
-
-$exports.store = store;
-
-},{"./_global":62,"./_shared":105,"./_uid":115}],120:[function(require,module,exports){
-var classof = require('./_classof');
-var ITERATOR = require('./_wks')('iterator');
-var Iterators = require('./_iterators');
-module.exports = require('./_core').getIteratorMethod = function (it) {
-  if (it != undefined) return it[ITERATOR]
-    || it['@@iterator']
-    || Iterators[classof(it)];
-};
-
-},{"./_classof":47,"./_core":52,"./_iterators":77,"./_wks":119}],121:[function(require,module,exports){
-var anObject = require('./_an-object');
-var get = require('./core.get-iterator-method');
-module.exports = require('./_core').getIterator = function (it) {
-  var iterFn = get(it);
-  if (typeof iterFn != 'function') throw TypeError(it + ' is not iterable!');
-  return anObject(iterFn.call(it));
-};
-
-},{"./_an-object":41,"./_core":52,"./core.get-iterator-method":120}],122:[function(require,module,exports){
-'use strict';
-var addToUnscopables = require('./_add-to-unscopables');
-var step = require('./_iter-step');
-var Iterators = require('./_iterators');
-var toIObject = require('./_to-iobject');
-
-// 22.1.3.4 Array.prototype.entries()
-// 22.1.3.13 Array.prototype.keys()
-// 22.1.3.29 Array.prototype.values()
-// 22.1.3.30 Array.prototype[@@iterator]()
-module.exports = require('./_iter-define')(Array, 'Array', function (iterated, kind) {
-  this._t = toIObject(iterated); // target
-  this._i = 0;                   // next index
-  this._k = kind;                // kind
-// 22.1.5.2.1 %ArrayIteratorPrototype%.next()
-}, function () {
-  var O = this._t;
-  var kind = this._k;
-  var index = this._i++;
-  if (!O || index >= O.length) {
-    this._t = undefined;
-    return step(1);
-  }
-  if (kind == 'keys') return step(0, index);
-  if (kind == 'values') return step(0, O[index]);
-  return step(0, [index, O[index]]);
-}, 'values');
-
-// argumentsList[@@iterator] is %ArrayProto_values% (9.4.4.6, 9.4.4.7)
-Iterators.Arguments = Iterators.Array;
-
-addToUnscopables('keys');
-addToUnscopables('values');
-addToUnscopables('entries');
-
-},{"./_add-to-unscopables":39,"./_iter-define":74,"./_iter-step":76,"./_iterators":77,"./_to-iobject":111}],123:[function(require,module,exports){
-'use strict';
-var strong = require('./_collection-strong');
-var validate = require('./_validate-collection');
-var MAP = 'Map';
-
-// 23.1 Map Objects
-module.exports = require('./_collection')(MAP, function (get) {
-  return function Map() { return get(this, arguments.length > 0 ? arguments[0] : undefined); };
-}, {
-  // 23.1.3.6 Map.prototype.get(key)
-  get: function get(key) {
-    var entry = strong.getEntry(validate(this, MAP), key);
-    return entry && entry.v;
-  },
-  // 23.1.3.9 Map.prototype.set(key, value)
-  set: function set(key, value) {
-    return strong.def(validate(this, MAP), key === 0 ? 0 : key, value);
-  }
-}, strong, true);
-
-},{"./_collection":51,"./_collection-strong":49,"./_validate-collection":116}],124:[function(require,module,exports){
-var $export = require('./_export');
-// 19.1.2.2 / 15.2.3.5 Object.create(O [, Properties])
-$export($export.S, 'Object', { create: require('./_object-create') });
-
-},{"./_export":59,"./_object-create":82}],125:[function(require,module,exports){
-var $export = require('./_export');
-// 19.1.2.4 / 15.2.3.6 Object.defineProperty(O, P, Attributes)
-$export($export.S + $export.F * !require('./_descriptors'), 'Object', { defineProperty: require('./_object-dp').f });
-
-},{"./_descriptors":55,"./_export":59,"./_object-dp":83}],126:[function(require,module,exports){
-// 19.1.2.9 Object.getPrototypeOf(O)
-var toObject = require('./_to-object');
-var $getPrototypeOf = require('./_object-gpo');
-
-require('./_object-sap')('getPrototypeOf', function () {
-  return function getPrototypeOf(it) {
-    return $getPrototypeOf(toObject(it));
-  };
-});
-
-},{"./_object-gpo":89,"./_object-sap":93,"./_to-object":113}],127:[function(require,module,exports){
-// 19.1.3.19 Object.setPrototypeOf(O, proto)
-var $export = require('./_export');
-$export($export.S, 'Object', { setPrototypeOf: require('./_set-proto').set });
-
-},{"./_export":59,"./_set-proto":101}],128:[function(require,module,exports){
-
-},{}],129:[function(require,module,exports){
-'use strict';
-var LIBRARY = require('./_library');
-var global = require('./_global');
-var ctx = require('./_ctx');
-var classof = require('./_classof');
-var $export = require('./_export');
-var isObject = require('./_is-object');
-var aFunction = require('./_a-function');
-var anInstance = require('./_an-instance');
-var forOf = require('./_for-of');
-var speciesConstructor = require('./_species-constructor');
-var task = require('./_task').set;
-var microtask = require('./_microtask')();
-var newPromiseCapabilityModule = require('./_new-promise-capability');
-var perform = require('./_perform');
-var promiseResolve = require('./_promise-resolve');
-var PROMISE = 'Promise';
-var TypeError = global.TypeError;
-var process = global.process;
-var $Promise = global[PROMISE];
-var isNode = classof(process) == 'process';
-var empty = function () { /* empty */ };
-var Internal, newGenericPromiseCapability, OwnPromiseCapability, Wrapper;
-var newPromiseCapability = newGenericPromiseCapability = newPromiseCapabilityModule.f;
-
-var USE_NATIVE = !!function () {
-  try {
-    // correct subclassing with @@species support
-    var promise = $Promise.resolve(1);
-    var FakePromise = (promise.constructor = {})[require('./_wks')('species')] = function (exec) {
-      exec(empty, empty);
-    };
-    // unhandled rejections tracking support, NodeJS Promise without it fails @@species test
-    return (isNode || typeof PromiseRejectionEvent == 'function') && promise.then(empty) instanceof FakePromise;
-  } catch (e) { /* empty */ }
-}();
-
-// helpers
-var isThenable = function (it) {
-  var then;
-  return isObject(it) && typeof (then = it.then) == 'function' ? then : false;
-};
-var notify = function (promise, isReject) {
-  if (promise._n) return;
-  promise._n = true;
-  var chain = promise._c;
-  microtask(function () {
-    var value = promise._v;
-    var ok = promise._s == 1;
-    var i = 0;
-    var run = function (reaction) {
-      var handler = ok ? reaction.ok : reaction.fail;
-      var resolve = reaction.resolve;
-      var reject = reaction.reject;
-      var domain = reaction.domain;
-      var result, then;
-      try {
-        if (handler) {
-          if (!ok) {
-            if (promise._h == 2) onHandleUnhandled(promise);
-            promise._h = 1;
-          }
-          if (handler === true) result = value;
-          else {
-            if (domain) domain.enter();
-            result = handler(value);
-            if (domain) domain.exit();
-          }
-          if (result === reaction.promise) {
-            reject(TypeError('Promise-chain cycle'));
-          } else if (then = isThenable(result)) {
-            then.call(result, resolve, reject);
-          } else resolve(result);
-        } else reject(value);
-      } catch (e) {
-        reject(e);
-      }
-    };
-    while (chain.length > i) run(chain[i++]); // variable length - can't use forEach
-    promise._c = [];
-    promise._n = false;
-    if (isReject && !promise._h) onUnhandled(promise);
-  });
-};
-var onUnhandled = function (promise) {
-  task.call(global, function () {
-    var value = promise._v;
-    var unhandled = isUnhandled(promise);
-    var result, handler, console;
-    if (unhandled) {
-      result = perform(function () {
-        if (isNode) {
-          process.emit('unhandledRejection', value, promise);
-        } else if (handler = global.onunhandledrejection) {
-          handler({ promise: promise, reason: value });
-        } else if ((console = global.console) && console.error) {
-          console.error('Unhandled promise rejection', value);
-        }
-      });
-      // Browsers should not trigger `rejectionHandled` event if it was handled here, NodeJS - should
-      promise._h = isNode || isUnhandled(promise) ? 2 : 1;
-    } promise._a = undefined;
-    if (unhandled && result.e) throw result.v;
-  });
-};
-var isUnhandled = function (promise) {
-  if (promise._h == 1) return false;
-  var chain = promise._a || promise._c;
-  var i = 0;
-  var reaction;
-  while (chain.length > i) {
-    reaction = chain[i++];
-    if (reaction.fail || !isUnhandled(reaction.promise)) return false;
-  } return true;
-};
-var onHandleUnhandled = function (promise) {
-  task.call(global, function () {
-    var handler;
-    if (isNode) {
-      process.emit('rejectionHandled', promise);
-    } else if (handler = global.onrejectionhandled) {
-      handler({ promise: promise, reason: promise._v });
-    }
-  });
-};
-var $reject = function (value) {
-  var promise = this;
-  if (promise._d) return;
-  promise._d = true;
-  promise = promise._w || promise; // unwrap
-  promise._v = value;
-  promise._s = 2;
-  if (!promise._a) promise._a = promise._c.slice();
-  notify(promise, true);
-};
-var $resolve = function (value) {
-  var promise = this;
-  var then;
-  if (promise._d) return;
-  promise._d = true;
-  promise = promise._w || promise; // unwrap
-  try {
-    if (promise === value) throw TypeError("Promise can't be resolved itself");
-    if (then = isThenable(value)) {
-      microtask(function () {
-        var wrapper = { _w: promise, _d: false }; // wrap
-        try {
-          then.call(value, ctx($resolve, wrapper, 1), ctx($reject, wrapper, 1));
-        } catch (e) {
-          $reject.call(wrapper, e);
-        }
-      });
-    } else {
-      promise._v = value;
-      promise._s = 1;
-      notify(promise, false);
-    }
-  } catch (e) {
-    $reject.call({ _w: promise, _d: false }, e); // wrap
-  }
-};
-
-// constructor polyfill
-if (!USE_NATIVE) {
-  // 25.4.3.1 Promise(executor)
-  $Promise = function Promise(executor) {
-    anInstance(this, $Promise, PROMISE, '_h');
-    aFunction(executor);
-    Internal.call(this);
-    try {
-      executor(ctx($resolve, this, 1), ctx($reject, this, 1));
-    } catch (err) {
-      $reject.call(this, err);
-    }
-  };
-  // eslint-disable-next-line no-unused-vars
-  Internal = function Promise(executor) {
-    this._c = [];             // <- awaiting reactions
-    this._a = undefined;      // <- checked in isUnhandled reactions
-    this._s = 0;              // <- state
-    this._d = false;          // <- done
-    this._v = undefined;      // <- value
-    this._h = 0;              // <- rejection state, 0 - default, 1 - handled, 2 - unhandled
-    this._n = false;          // <- notify
-  };
-  Internal.prototype = require('./_redefine-all')($Promise.prototype, {
-    // 25.4.5.3 Promise.prototype.then(onFulfilled, onRejected)
-    then: function then(onFulfilled, onRejected) {
-      var reaction = newPromiseCapability(speciesConstructor(this, $Promise));
-      reaction.ok = typeof onFulfilled == 'function' ? onFulfilled : true;
-      reaction.fail = typeof onRejected == 'function' && onRejected;
-      reaction.domain = isNode ? process.domain : undefined;
-      this._c.push(reaction);
-      if (this._a) this._a.push(reaction);
-      if (this._s) notify(this, false);
-      return reaction.promise;
-    },
-    // 25.4.5.1 Promise.prototype.catch(onRejected)
-    'catch': function (onRejected) {
-      return this.then(undefined, onRejected);
-    }
-  });
-  OwnPromiseCapability = function () {
-    var promise = new Internal();
-    this.promise = promise;
-    this.resolve = ctx($resolve, promise, 1);
-    this.reject = ctx($reject, promise, 1);
-  };
-  newPromiseCapabilityModule.f = newPromiseCapability = function (C) {
-    return C === $Promise || C === Wrapper
-      ? new OwnPromiseCapability(C)
-      : newGenericPromiseCapability(C);
-  };
-}
-
-$export($export.G + $export.W + $export.F * !USE_NATIVE, { Promise: $Promise });
-require('./_set-to-string-tag')($Promise, PROMISE);
-require('./_set-species')(PROMISE);
-Wrapper = require('./_core')[PROMISE];
-
-// statics
-$export($export.S + $export.F * !USE_NATIVE, PROMISE, {
-  // 25.4.4.5 Promise.reject(r)
-  reject: function reject(r) {
-    var capability = newPromiseCapability(this);
-    var $$reject = capability.reject;
-    $$reject(r);
-    return capability.promise;
-  }
-});
-$export($export.S + $export.F * (LIBRARY || !USE_NATIVE), PROMISE, {
-  // 25.4.4.6 Promise.resolve(x)
-  resolve: function resolve(x) {
-    return promiseResolve(LIBRARY && this === Wrapper ? $Promise : this, x);
-  }
-});
-$export($export.S + $export.F * !(USE_NATIVE && require('./_iter-detect')(function (iter) {
-  $Promise.all(iter)['catch'](empty);
-})), PROMISE, {
-  // 25.4.4.1 Promise.all(iterable)
-  all: function all(iterable) {
-    var C = this;
-    var capability = newPromiseCapability(C);
-    var resolve = capability.resolve;
-    var reject = capability.reject;
-    var result = perform(function () {
-      var values = [];
-      var index = 0;
-      var remaining = 1;
-      forOf(iterable, false, function (promise) {
-        var $index = index++;
-        var alreadyCalled = false;
-        values.push(undefined);
-        remaining++;
-        C.resolve(promise).then(function (value) {
-          if (alreadyCalled) return;
-          alreadyCalled = true;
-          values[$index] = value;
-          --remaining || resolve(values);
-        }, reject);
-      });
-      --remaining || resolve(values);
-    });
-    if (result.e) reject(result.v);
-    return capability.promise;
-  },
-  // 25.4.4.4 Promise.race(iterable)
-  race: function race(iterable) {
-    var C = this;
-    var capability = newPromiseCapability(C);
-    var reject = capability.reject;
-    var result = perform(function () {
-      forOf(iterable, false, function (promise) {
-        C.resolve(promise).then(capability.resolve, reject);
-      });
-    });
-    if (result.e) reject(result.v);
-    return capability.promise;
-  }
-});
-
-},{"./_a-function":38,"./_an-instance":40,"./_classof":47,"./_core":52,"./_ctx":53,"./_export":59,"./_for-of":61,"./_global":62,"./_is-object":71,"./_iter-detect":75,"./_library":78,"./_microtask":80,"./_new-promise-capability":81,"./_perform":94,"./_promise-resolve":95,"./_redefine-all":97,"./_set-species":102,"./_set-to-string-tag":103,"./_species-constructor":106,"./_task":108,"./_wks":119}],130:[function(require,module,exports){
-'use strict';
-var $at = require('./_string-at')(true);
-
-// 21.1.3.27 String.prototype[@@iterator]()
-require('./_iter-define')(String, 'String', function (iterated) {
-  this._t = String(iterated); // target
-  this._i = 0;                // next index
-// 21.1.5.2.1 %StringIteratorPrototype%.next()
-}, function () {
-  var O = this._t;
-  var index = this._i;
-  var point;
-  if (index >= O.length) return { value: undefined, done: true };
-  point = $at(O, index);
-  this._i += point.length;
-  return { value: point, done: false };
-});
-
-},{"./_iter-define":74,"./_string-at":107}],131:[function(require,module,exports){
-'use strict';
-// ECMAScript 6 symbols shim
-var global = require('./_global');
-var has = require('./_has');
-var DESCRIPTORS = require('./_descriptors');
-var $export = require('./_export');
-var redefine = require('./_redefine');
-var META = require('./_meta').KEY;
-var $fails = require('./_fails');
-var shared = require('./_shared');
-var setToStringTag = require('./_set-to-string-tag');
-var uid = require('./_uid');
-var wks = require('./_wks');
-var wksExt = require('./_wks-ext');
-var wksDefine = require('./_wks-define');
-var enumKeys = require('./_enum-keys');
-var isArray = require('./_is-array');
-var anObject = require('./_an-object');
-var toIObject = require('./_to-iobject');
-var toPrimitive = require('./_to-primitive');
-var createDesc = require('./_property-desc');
-var _create = require('./_object-create');
-var gOPNExt = require('./_object-gopn-ext');
-var $GOPD = require('./_object-gopd');
-var $DP = require('./_object-dp');
-var $keys = require('./_object-keys');
-var gOPD = $GOPD.f;
-var dP = $DP.f;
-var gOPN = gOPNExt.f;
-var $Symbol = global.Symbol;
-var $JSON = global.JSON;
-var _stringify = $JSON && $JSON.stringify;
-var PROTOTYPE = 'prototype';
-var HIDDEN = wks('_hidden');
-var TO_PRIMITIVE = wks('toPrimitive');
-var isEnum = {}.propertyIsEnumerable;
-var SymbolRegistry = shared('symbol-registry');
-var AllSymbols = shared('symbols');
-var OPSymbols = shared('op-symbols');
-var ObjectProto = Object[PROTOTYPE];
-var USE_NATIVE = typeof $Symbol == 'function';
-var QObject = global.QObject;
-// Don't use setters in Qt Script, https://github.com/zloirock/core-js/issues/173
-var setter = !QObject || !QObject[PROTOTYPE] || !QObject[PROTOTYPE].findChild;
-
-// fallback for old Android, https://code.google.com/p/v8/issues/detail?id=687
-var setSymbolDesc = DESCRIPTORS && $fails(function () {
-  return _create(dP({}, 'a', {
-    get: function () { return dP(this, 'a', { value: 7 }).a; }
-  })).a != 7;
-}) ? function (it, key, D) {
-  var protoDesc = gOPD(ObjectProto, key);
-  if (protoDesc) delete ObjectProto[key];
-  dP(it, key, D);
-  if (protoDesc && it !== ObjectProto) dP(ObjectProto, key, protoDesc);
-} : dP;
-
-var wrap = function (tag) {
-  var sym = AllSymbols[tag] = _create($Symbol[PROTOTYPE]);
-  sym._k = tag;
-  return sym;
-};
-
-var isSymbol = USE_NATIVE && typeof $Symbol.iterator == 'symbol' ? function (it) {
-  return typeof it == 'symbol';
-} : function (it) {
-  return it instanceof $Symbol;
-};
-
-var $defineProperty = function defineProperty(it, key, D) {
-  if (it === ObjectProto) $defineProperty(OPSymbols, key, D);
-  anObject(it);
-  key = toPrimitive(key, true);
-  anObject(D);
-  if (has(AllSymbols, key)) {
-    if (!D.enumerable) {
-      if (!has(it, HIDDEN)) dP(it, HIDDEN, createDesc(1, {}));
-      it[HIDDEN][key] = true;
-    } else {
-      if (has(it, HIDDEN) && it[HIDDEN][key]) it[HIDDEN][key] = false;
-      D = _create(D, { enumerable: createDesc(0, false) });
-    } return setSymbolDesc(it, key, D);
-  } return dP(it, key, D);
-};
-var $defineProperties = function defineProperties(it, P) {
-  anObject(it);
-  var keys = enumKeys(P = toIObject(P));
-  var i = 0;
-  var l = keys.length;
-  var key;
-  while (l > i) $defineProperty(it, key = keys[i++], P[key]);
-  return it;
-};
-var $create = function create(it, P) {
-  return P === undefined ? _create(it) : $defineProperties(_create(it), P);
-};
-var $propertyIsEnumerable = function propertyIsEnumerable(key) {
-  var E = isEnum.call(this, key = toPrimitive(key, true));
-  if (this === ObjectProto && has(AllSymbols, key) && !has(OPSymbols, key)) return false;
-  return E || !has(this, key) || !has(AllSymbols, key) || has(this, HIDDEN) && this[HIDDEN][key] ? E : true;
-};
-var $getOwnPropertyDescriptor = function getOwnPropertyDescriptor(it, key) {
-  it = toIObject(it);
-  key = toPrimitive(key, true);
-  if (it === ObjectProto && has(AllSymbols, key) && !has(OPSymbols, key)) return;
-  var D = gOPD(it, key);
-  if (D && has(AllSymbols, key) && !(has(it, HIDDEN) && it[HIDDEN][key])) D.enumerable = true;
-  return D;
-};
-var $getOwnPropertyNames = function getOwnPropertyNames(it) {
-  var names = gOPN(toIObject(it));
-  var result = [];
-  var i = 0;
-  var key;
-  while (names.length > i) {
-    if (!has(AllSymbols, key = names[i++]) && key != HIDDEN && key != META) result.push(key);
-  } return result;
-};
-var $getOwnPropertySymbols = function getOwnPropertySymbols(it) {
-  var IS_OP = it === ObjectProto;
-  var names = gOPN(IS_OP ? OPSymbols : toIObject(it));
-  var result = [];
-  var i = 0;
-  var key;
-  while (names.length > i) {
-    if (has(AllSymbols, key = names[i++]) && (IS_OP ? has(ObjectProto, key) : true)) result.push(AllSymbols[key]);
-  } return result;
-};
-
-// 19.4.1.1 Symbol([description])
-if (!USE_NATIVE) {
-  $Symbol = function Symbol() {
-    if (this instanceof $Symbol) throw TypeError('Symbol is not a constructor!');
-    var tag = uid(arguments.length > 0 ? arguments[0] : undefined);
-    var $set = function (value) {
-      if (this === ObjectProto) $set.call(OPSymbols, value);
-      if (has(this, HIDDEN) && has(this[HIDDEN], tag)) this[HIDDEN][tag] = false;
-      setSymbolDesc(this, tag, createDesc(1, value));
-    };
-    if (DESCRIPTORS && setter) setSymbolDesc(ObjectProto, tag, { configurable: true, set: $set });
-    return wrap(tag);
-  };
-  redefine($Symbol[PROTOTYPE], 'toString', function toString() {
-    return this._k;
-  });
-
-  $GOPD.f = $getOwnPropertyDescriptor;
-  $DP.f = $defineProperty;
-  require('./_object-gopn').f = gOPNExt.f = $getOwnPropertyNames;
-  require('./_object-pie').f = $propertyIsEnumerable;
-  require('./_object-gops').f = $getOwnPropertySymbols;
-
-  if (DESCRIPTORS && !require('./_library')) {
-    redefine(ObjectProto, 'propertyIsEnumerable', $propertyIsEnumerable, true);
-  }
-
-  wksExt.f = function (name) {
-    return wrap(wks(name));
-  };
-}
-
-$export($export.G + $export.W + $export.F * !USE_NATIVE, { Symbol: $Symbol });
-
-for (var es6Symbols = (
-  // 19.4.2.2, 19.4.2.3, 19.4.2.4, 19.4.2.6, 19.4.2.8, 19.4.2.9, 19.4.2.10, 19.4.2.11, 19.4.2.12, 19.4.2.13, 19.4.2.14
-  'hasInstance,isConcatSpreadable,iterator,match,replace,search,species,split,toPrimitive,toStringTag,unscopables'
-).split(','), j = 0; es6Symbols.length > j;)wks(es6Symbols[j++]);
-
-for (var wellKnownSymbols = $keys(wks.store), k = 0; wellKnownSymbols.length > k;) wksDefine(wellKnownSymbols[k++]);
-
-$export($export.S + $export.F * !USE_NATIVE, 'Symbol', {
-  // 19.4.2.1 Symbol.for(key)
-  'for': function (key) {
-    return has(SymbolRegistry, key += '')
-      ? SymbolRegistry[key]
-      : SymbolRegistry[key] = $Symbol(key);
-  },
-  // 19.4.2.5 Symbol.keyFor(sym)
-  keyFor: function keyFor(sym) {
-    if (!isSymbol(sym)) throw TypeError(sym + ' is not a symbol!');
-    for (var key in SymbolRegistry) if (SymbolRegistry[key] === sym) return key;
-  },
-  useSetter: function () { setter = true; },
-  useSimple: function () { setter = false; }
-});
-
-$export($export.S + $export.F * !USE_NATIVE, 'Object', {
-  // 19.1.2.2 Object.create(O [, Properties])
-  create: $create,
-  // 19.1.2.4 Object.defineProperty(O, P, Attributes)
-  defineProperty: $defineProperty,
-  // 19.1.2.3 Object.defineProperties(O, Properties)
-  defineProperties: $defineProperties,
-  // 19.1.2.6 Object.getOwnPropertyDescriptor(O, P)
-  getOwnPropertyDescriptor: $getOwnPropertyDescriptor,
-  // 19.1.2.7 Object.getOwnPropertyNames(O)
-  getOwnPropertyNames: $getOwnPropertyNames,
-  // 19.1.2.8 Object.getOwnPropertySymbols(O)
-  getOwnPropertySymbols: $getOwnPropertySymbols
-});
-
-// 24.3.2 JSON.stringify(value [, replacer [, space]])
-$JSON && $export($export.S + $export.F * (!USE_NATIVE || $fails(function () {
-  var S = $Symbol();
-  // MS Edge converts symbol values to JSON as {}
-  // WebKit converts symbol values to JSON as null
-  // V8 throws on boxed symbols
-  return _stringify([S]) != '[null]' || _stringify({ a: S }) != '{}' || _stringify(Object(S)) != '{}';
-})), 'JSON', {
-  stringify: function stringify(it) {
-    if (it === undefined || isSymbol(it)) return; // IE8 returns string on undefined
-    var args = [it];
-    var i = 1;
-    var replacer, $replacer;
-    while (arguments.length > i) args.push(arguments[i++]);
-    replacer = args[1];
-    if (typeof replacer == 'function') $replacer = replacer;
-    if ($replacer || !isArray(replacer)) replacer = function (key, value) {
-      if ($replacer) value = $replacer.call(this, key, value);
-      if (!isSymbol(value)) return value;
-    };
-    args[1] = replacer;
-    return _stringify.apply($JSON, args);
-  }
-});
-
-// 19.4.3.4 Symbol.prototype[@@toPrimitive](hint)
-$Symbol[PROTOTYPE][TO_PRIMITIVE] || require('./_hide')($Symbol[PROTOTYPE], TO_PRIMITIVE, $Symbol[PROTOTYPE].valueOf);
-// 19.4.3.5 Symbol.prototype[@@toStringTag]
-setToStringTag($Symbol, 'Symbol');
-// 20.2.1.9 Math[@@toStringTag]
-setToStringTag(Math, 'Math', true);
-// 24.3.3 JSON[@@toStringTag]
-setToStringTag(global.JSON, 'JSON', true);
-
-},{"./_an-object":41,"./_descriptors":55,"./_enum-keys":58,"./_export":59,"./_fails":60,"./_global":62,"./_has":63,"./_hide":64,"./_is-array":70,"./_library":78,"./_meta":79,"./_object-create":82,"./_object-dp":83,"./_object-gopd":85,"./_object-gopn":87,"./_object-gopn-ext":86,"./_object-gops":88,"./_object-keys":91,"./_object-pie":92,"./_property-desc":96,"./_redefine":98,"./_set-to-string-tag":103,"./_shared":105,"./_to-iobject":111,"./_to-primitive":114,"./_uid":115,"./_wks":119,"./_wks-define":117,"./_wks-ext":118}],132:[function(require,module,exports){
-// https://tc39.github.io/proposal-setmap-offrom/#sec-map.from
-require('./_set-collection-from')('Map');
-
-},{"./_set-collection-from":99}],133:[function(require,module,exports){
-// https://tc39.github.io/proposal-setmap-offrom/#sec-map.of
-require('./_set-collection-of')('Map');
-
-},{"./_set-collection-of":100}],134:[function(require,module,exports){
-// https://github.com/DavidBruant/Map-Set.prototype.toJSON
-var $export = require('./_export');
-
-$export($export.P + $export.R, 'Map', { toJSON: require('./_collection-to-json')('Map') });
-
-},{"./_collection-to-json":50,"./_export":59}],135:[function(require,module,exports){
-// https://github.com/tc39/proposal-promise-finally
-'use strict';
-var $export = require('./_export');
-var core = require('./_core');
-var global = require('./_global');
-var speciesConstructor = require('./_species-constructor');
-var promiseResolve = require('./_promise-resolve');
-
-$export($export.P + $export.R, 'Promise', { 'finally': function (onFinally) {
-  var C = speciesConstructor(this, core.Promise || global.Promise);
-  var isFunction = typeof onFinally == 'function';
-  return this.then(
-    isFunction ? function (x) {
-      return promiseResolve(C, onFinally()).then(function () { return x; });
-    } : onFinally,
-    isFunction ? function (e) {
-      return promiseResolve(C, onFinally()).then(function () { throw e; });
-    } : onFinally
-  );
-} });
-
-},{"./_core":52,"./_export":59,"./_global":62,"./_promise-resolve":95,"./_species-constructor":106}],136:[function(require,module,exports){
-'use strict';
-// https://github.com/tc39/proposal-promise-try
-var $export = require('./_export');
-var newPromiseCapability = require('./_new-promise-capability');
-var perform = require('./_perform');
-
-$export($export.S, 'Promise', { 'try': function (callbackfn) {
-  var promiseCapability = newPromiseCapability.f(this);
-  var result = perform(callbackfn);
-  (result.e ? promiseCapability.reject : promiseCapability.resolve)(result.v);
-  return promiseCapability.promise;
-} });
-
-},{"./_export":59,"./_new-promise-capability":81,"./_perform":94}],137:[function(require,module,exports){
-require('./_wks-define')('asyncIterator');
-
-},{"./_wks-define":117}],138:[function(require,module,exports){
-require('./_wks-define')('observable');
-
-},{"./_wks-define":117}],139:[function(require,module,exports){
-require('./es6.array.iterator');
-var global = require('./_global');
-var hide = require('./_hide');
-var Iterators = require('./_iterators');
-var TO_STRING_TAG = require('./_wks')('toStringTag');
-
-var DOMIterables = ('CSSRuleList,CSSStyleDeclaration,CSSValueList,ClientRectList,DOMRectList,DOMStringList,' +
-  'DOMTokenList,DataTransferItemList,FileList,HTMLAllCollection,HTMLCollection,HTMLFormElement,HTMLSelectElement,' +
-  'MediaList,MimeTypeArray,NamedNodeMap,NodeList,PaintRequestList,Plugin,PluginArray,SVGLengthList,SVGNumberList,' +
-  'SVGPathSegList,SVGPointList,SVGStringList,SVGTransformList,SourceBufferList,StyleSheetList,TextTrackCueList,' +
-  'TextTrackList,TouchList').split(',');
-
-for (var i = 0; i < DOMIterables.length; i++) {
-  var NAME = DOMIterables[i];
-  var Collection = global[NAME];
-  var proto = Collection && Collection.prototype;
-  if (proto && !proto[TO_STRING_TAG]) hide(proto, TO_STRING_TAG, NAME);
-  Iterators[NAME] = Iterators.Array;
-}
-
-},{"./_global":62,"./_hide":64,"./_iterators":77,"./_wks":119,"./es6.array.iterator":122}],140:[function(require,module,exports){
-// This method of obtaining a reference to the global object needs to be
-// kept identical to the way it is obtained in runtime.js
-var g = (function() { return this })() || Function("return this")();
-
-// Use `getOwnPropertyNames` because not all browsers support calling
-// `hasOwnProperty` on the global `self` object in a worker. See #183.
-var hadRuntime = g.regeneratorRuntime &&
-  Object.getOwnPropertyNames(g).indexOf("regeneratorRuntime") >= 0;
-
-// Save the old regeneratorRuntime in case it needs to be restored later.
-var oldRuntime = hadRuntime && g.regeneratorRuntime;
-
-// Force reevalutation of runtime.js.
-g.regeneratorRuntime = undefined;
-
-module.exports = require("./runtime");
-
-if (hadRuntime) {
-  // Restore the original runtime.
-  g.regeneratorRuntime = oldRuntime;
-} else {
-  // Remove the global property added by runtime.js.
-  try {
-    delete g.regeneratorRuntime;
-  } catch(e) {
-    g.regeneratorRuntime = undefined;
-  }
-}
-
-},{"./runtime":141}],141:[function(require,module,exports){
-/**
- * Copyright (c) 2014, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * https://raw.github.com/facebook/regenerator/master/LICENSE file. An
- * additional grant of patent rights can be found in the PATENTS file in
- * the same directory.
- */
-
-!(function(global) {
-  "use strict";
-
-  var Op = Object.prototype;
-  var hasOwn = Op.hasOwnProperty;
-  var undefined; // More compressible than void 0.
-  var $Symbol = typeof Symbol === "function" ? Symbol : {};
-  var iteratorSymbol = $Symbol.iterator || "@@iterator";
-  var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
-  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
-
-  var inModule = typeof module === "object";
-  var runtime = global.regeneratorRuntime;
-  if (runtime) {
-    if (inModule) {
-      // If regeneratorRuntime is defined globally and we're in a module,
-      // make the exports object identical to regeneratorRuntime.
-      module.exports = runtime;
-    }
-    // Don't bother evaluating the rest of this file if the runtime was
-    // already defined globally.
-    return;
-  }
-
-  // Define the runtime globally (as expected by generated code) as either
-  // module.exports (if we're in a module) or a new, empty object.
-  runtime = global.regeneratorRuntime = inModule ? module.exports : {};
-
-  function wrap(innerFn, outerFn, self, tryLocsList) {
-    // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
-    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator;
-    var generator = Object.create(protoGenerator.prototype);
-    var context = new Context(tryLocsList || []);
-
-    // The ._invoke method unifies the implementations of the .next,
-    // .throw, and .return methods.
-    generator._invoke = makeInvokeMethod(innerFn, self, context);
-
-    return generator;
-  }
-  runtime.wrap = wrap;
-
-  // Try/catch helper to minimize deoptimizations. Returns a completion
-  // record like context.tryEntries[i].completion. This interface could
-  // have been (and was previously) designed to take a closure to be
-  // invoked without arguments, but in all the cases we care about we
-  // already have an existing method we want to call, so there's no need
-  // to create a new function object. We can even get away with assuming
-  // the method takes exactly one argument, since that happens to be true
-  // in every case, so we don't have to touch the arguments object. The
-  // only additional allocation required is the completion record, which
-  // has a stable shape and so hopefully should be cheap to allocate.
-  function tryCatch(fn, obj, arg) {
-    try {
-      return { type: "normal", arg: fn.call(obj, arg) };
-    } catch (err) {
-      return { type: "throw", arg: err };
-    }
-  }
-
-  var GenStateSuspendedStart = "suspendedStart";
-  var GenStateSuspendedYield = "suspendedYield";
-  var GenStateExecuting = "executing";
-  var GenStateCompleted = "completed";
-
-  // Returning this object from the innerFn has the same effect as
-  // breaking out of the dispatch switch statement.
-  var ContinueSentinel = {};
-
-  // Dummy constructor functions that we use as the .constructor and
-  // .constructor.prototype properties for functions that return Generator
-  // objects. For full spec compliance, you may wish to configure your
-  // minifier not to mangle the names of these two functions.
-  function Generator() {}
-  function GeneratorFunction() {}
-  function GeneratorFunctionPrototype() {}
-
-  // This is a polyfill for %IteratorPrototype% for environments that
-  // don't natively support it.
-  var IteratorPrototype = {};
-  IteratorPrototype[iteratorSymbol] = function () {
-    return this;
-  };
-
-  var getProto = Object.getPrototypeOf;
-  var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
-  if (NativeIteratorPrototype &&
-      NativeIteratorPrototype !== Op &&
-      hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) {
-    // This environment has a native %IteratorPrototype%; use it instead
-    // of the polyfill.
-    IteratorPrototype = NativeIteratorPrototype;
-  }
-
-  var Gp = GeneratorFunctionPrototype.prototype =
-    Generator.prototype = Object.create(IteratorPrototype);
-  GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
-  GeneratorFunctionPrototype.constructor = GeneratorFunction;
-  GeneratorFunctionPrototype[toStringTagSymbol] =
-    GeneratorFunction.displayName = "GeneratorFunction";
-
-  // Helper for defining the .next, .throw, and .return methods of the
-  // Iterator interface in terms of a single ._invoke method.
-  function defineIteratorMethods(prototype) {
-    ["next", "throw", "return"].forEach(function(method) {
-      prototype[method] = function(arg) {
-        return this._invoke(method, arg);
-      };
-    });
-  }
-
-  runtime.isGeneratorFunction = function(genFun) {
-    var ctor = typeof genFun === "function" && genFun.constructor;
-    return ctor
-      ? ctor === GeneratorFunction ||
-        // For the native GeneratorFunction constructor, the best we can
-        // do is to check its .name property.
-        (ctor.displayName || ctor.name) === "GeneratorFunction"
-      : false;
-  };
-
-  runtime.mark = function(genFun) {
-    if (Object.setPrototypeOf) {
-      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
-    } else {
-      genFun.__proto__ = GeneratorFunctionPrototype;
-      if (!(toStringTagSymbol in genFun)) {
-        genFun[toStringTagSymbol] = "GeneratorFunction";
-      }
-    }
-    genFun.prototype = Object.create(Gp);
-    return genFun;
-  };
-
-  // Within the body of any async function, `await x` is transformed to
-  // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
-  // `hasOwn.call(value, "__await")` to determine if the yielded value is
-  // meant to be awaited.
-  runtime.awrap = function(arg) {
-    return { __await: arg };
-  };
-
-  function AsyncIterator(generator) {
-    function invoke(method, arg, resolve, reject) {
-      var record = tryCatch(generator[method], generator, arg);
-      if (record.type === "throw") {
-        reject(record.arg);
-      } else {
-        var result = record.arg;
-        var value = result.value;
-        if (value &&
-            typeof value === "object" &&
-            hasOwn.call(value, "__await")) {
-          return Promise.resolve(value.__await).then(function(value) {
-            invoke("next", value, resolve, reject);
-          }, function(err) {
-            invoke("throw", err, resolve, reject);
-          });
-        }
-
-        return Promise.resolve(value).then(function(unwrapped) {
-          // When a yielded Promise is resolved, its final value becomes
-          // the .value of the Promise<{value,done}> result for the
-          // current iteration. If the Promise is rejected, however, the
-          // result for this iteration will be rejected with the same
-          // reason. Note that rejections of yielded Promises are not
-          // thrown back into the generator function, as is the case
-          // when an awaited Promise is rejected. This difference in
-          // behavior between yield and await is important, because it
-          // allows the consumer to decide what to do with the yielded
-          // rejection (swallow it and continue, manually .throw it back
-          // into the generator, abandon iteration, whatever). With
-          // await, by contrast, there is no opportunity to examine the
-          // rejection reason outside the generator function, so the
-          // only option is to throw it from the await expression, and
-          // let the generator function handle the exception.
-          result.value = unwrapped;
-          resolve(result);
-        }, reject);
-      }
-    }
-
-    var previousPromise;
-
-    function enqueue(method, arg) {
-      function callInvokeWithMethodAndArg() {
-        return new Promise(function(resolve, reject) {
-          invoke(method, arg, resolve, reject);
-        });
-      }
-
-      return previousPromise =
-        // If enqueue has been called before, then we want to wait until
-        // all previous Promises have been resolved before calling invoke,
-        // so that results are always delivered in the correct order. If
-        // enqueue has not been called before, then it is important to
-        // call invoke immediately, without waiting on a callback to fire,
-        // so that the async generator function has the opportunity to do
-        // any necessary setup in a predictable way. This predictability
-        // is why the Promise constructor synchronously invokes its
-        // executor callback, and why async functions synchronously
-        // execute code before the first await. Since we implement simple
-        // async functions in terms of async generators, it is especially
-        // important to get this right, even though it requires care.
-        previousPromise ? previousPromise.then(
-          callInvokeWithMethodAndArg,
-          // Avoid propagating failures to Promises returned by later
-          // invocations of the iterator.
-          callInvokeWithMethodAndArg
-        ) : callInvokeWithMethodAndArg();
-    }
-
-    // Define the unified helper method that is used to implement .next,
-    // .throw, and .return (see defineIteratorMethods).
-    this._invoke = enqueue;
-  }
-
-  defineIteratorMethods(AsyncIterator.prototype);
-  AsyncIterator.prototype[asyncIteratorSymbol] = function () {
-    return this;
-  };
-  runtime.AsyncIterator = AsyncIterator;
-
-  // Note that simple async functions are implemented on top of
-  // AsyncIterator objects; they just return a Promise for the value of
-  // the final result produced by the iterator.
-  runtime.async = function(innerFn, outerFn, self, tryLocsList) {
-    var iter = new AsyncIterator(
-      wrap(innerFn, outerFn, self, tryLocsList)
-    );
-
-    return runtime.isGeneratorFunction(outerFn)
-      ? iter // If outerFn is a generator, return the full iterator.
-      : iter.next().then(function(result) {
-          return result.done ? result.value : iter.next();
-        });
-  };
-
-  function makeInvokeMethod(innerFn, self, context) {
-    var state = GenStateSuspendedStart;
-
-    return function invoke(method, arg) {
-      if (state === GenStateExecuting) {
-        throw new Error("Generator is already running");
-      }
-
-      if (state === GenStateCompleted) {
-        if (method === "throw") {
-          throw arg;
-        }
-
-        // Be forgiving, per 25.3.3.3.3 of the spec:
-        // https://people.mozilla.org/~jorendorff/es6-draft.html#sec-generatorresume
-        return doneResult();
-      }
-
-      context.method = method;
-      context.arg = arg;
-
-      while (true) {
-        var delegate = context.delegate;
-        if (delegate) {
-          var delegateResult = maybeInvokeDelegate(delegate, context);
-          if (delegateResult) {
-            if (delegateResult === ContinueSentinel) continue;
-            return delegateResult;
-          }
-        }
-
-        if (context.method === "next") {
-          // Setting context._sent for legacy support of Babel's
-          // function.sent implementation.
-          context.sent = context._sent = context.arg;
-
-        } else if (context.method === "throw") {
-          if (state === GenStateSuspendedStart) {
-            state = GenStateCompleted;
-            throw context.arg;
-          }
-
-          context.dispatchException(context.arg);
-
-        } else if (context.method === "return") {
-          context.abrupt("return", context.arg);
-        }
-
-        state = GenStateExecuting;
-
-        var record = tryCatch(innerFn, self, context);
-        if (record.type === "normal") {
-          // If an exception is thrown from innerFn, we leave state ===
-          // GenStateExecuting and loop back for another invocation.
-          state = context.done
-            ? GenStateCompleted
-            : GenStateSuspendedYield;
-
-          if (record.arg === ContinueSentinel) {
-            continue;
-          }
-
-          return {
-            value: record.arg,
-            done: context.done
-          };
-
-        } else if (record.type === "throw") {
-          state = GenStateCompleted;
-          // Dispatch the exception by looping back around to the
-          // context.dispatchException(context.arg) call above.
-          context.method = "throw";
-          context.arg = record.arg;
-        }
-      }
-    };
-  }
-
-  // Call delegate.iterator[context.method](context.arg) and handle the
-  // result, either by returning a { value, done } result from the
-  // delegate iterator, or by modifying context.method and context.arg,
-  // setting context.delegate to null, and returning the ContinueSentinel.
-  function maybeInvokeDelegate(delegate, context) {
-    var method = delegate.iterator[context.method];
-    if (method === undefined) {
-      // A .throw or .return when the delegate iterator has no .throw
-      // method always terminates the yield* loop.
-      context.delegate = null;
-
-      if (context.method === "throw") {
-        if (delegate.iterator.return) {
-          // If the delegate iterator has a return method, give it a
-          // chance to clean up.
-          context.method = "return";
-          context.arg = undefined;
-          maybeInvokeDelegate(delegate, context);
-
-          if (context.method === "throw") {
-            // If maybeInvokeDelegate(context) changed context.method from
-            // "return" to "throw", let that override the TypeError below.
-            return ContinueSentinel;
-          }
-        }
-
-        context.method = "throw";
-        context.arg = new TypeError(
-          "The iterator does not provide a 'throw' method");
-      }
-
-      return ContinueSentinel;
-    }
-
-    var record = tryCatch(method, delegate.iterator, context.arg);
-
-    if (record.type === "throw") {
-      context.method = "throw";
-      context.arg = record.arg;
-      context.delegate = null;
-      return ContinueSentinel;
-    }
-
-    var info = record.arg;
-
-    if (! info) {
-      context.method = "throw";
-      context.arg = new TypeError("iterator result is not an object");
-      context.delegate = null;
-      return ContinueSentinel;
-    }
-
-    if (info.done) {
-      // Assign the result of the finished delegate to the temporary
-      // variable specified by delegate.resultName (see delegateYield).
-      context[delegate.resultName] = info.value;
-
-      // Resume execution at the desired location (see delegateYield).
-      context.next = delegate.nextLoc;
-
-      // If context.method was "throw" but the delegate handled the
-      // exception, let the outer generator proceed normally. If
-      // context.method was "next", forget context.arg since it has been
-      // "consumed" by the delegate iterator. If context.method was
-      // "return", allow the original .return call to continue in the
-      // outer generator.
-      if (context.method !== "return") {
-        context.method = "next";
-        context.arg = undefined;
-      }
-
-    } else {
-      // Re-yield the result returned by the delegate method.
-      return info;
-    }
-
-    // The delegate iterator is finished, so forget it and continue with
-    // the outer generator.
-    context.delegate = null;
-    return ContinueSentinel;
-  }
-
-  // Define Generator.prototype.{next,throw,return} in terms of the
-  // unified ._invoke helper method.
-  defineIteratorMethods(Gp);
-
-  Gp[toStringTagSymbol] = "Generator";
-
-  // A Generator should always return itself as the iterator object when the
-  // @@iterator function is called on it. Some browsers' implementations of the
-  // iterator prototype chain incorrectly implement this, causing the Generator
-  // object to not be returned from this call. This ensures that doesn't happen.
-  // See https://github.com/facebook/regenerator/issues/274 for more details.
-  Gp[iteratorSymbol] = function() {
-    return this;
-  };
-
-  Gp.toString = function() {
-    return "[object Generator]";
-  };
-
-  function pushTryEntry(locs) {
-    var entry = { tryLoc: locs[0] };
-
-    if (1 in locs) {
-      entry.catchLoc = locs[1];
-    }
-
-    if (2 in locs) {
-      entry.finallyLoc = locs[2];
-      entry.afterLoc = locs[3];
-    }
-
-    this.tryEntries.push(entry);
-  }
-
-  function resetTryEntry(entry) {
-    var record = entry.completion || {};
-    record.type = "normal";
-    delete record.arg;
-    entry.completion = record;
-  }
-
-  function Context(tryLocsList) {
-    // The root entry object (effectively a try statement without a catch
-    // or a finally block) gives us a place to store values thrown from
-    // locations where there is no enclosing try statement.
-    this.tryEntries = [{ tryLoc: "root" }];
-    tryLocsList.forEach(pushTryEntry, this);
-    this.reset(true);
-  }
-
-  runtime.keys = function(object) {
-    var keys = [];
-    for (var key in object) {
-      keys.push(key);
-    }
-    keys.reverse();
-
-    // Rather than returning an object with a next method, we keep
-    // things simple and return the next function itself.
-    return function next() {
-      while (keys.length) {
-        var key = keys.pop();
-        if (key in object) {
-          next.value = key;
-          next.done = false;
-          return next;
-        }
-      }
-
-      // To avoid creating an additional object, we just hang the .value
-      // and .done properties off the next function object itself. This
-      // also ensures that the minifier will not anonymize the function.
-      next.done = true;
-      return next;
-    };
-  };
-
-  function values(iterable) {
-    if (iterable) {
-      var iteratorMethod = iterable[iteratorSymbol];
-      if (iteratorMethod) {
-        return iteratorMethod.call(iterable);
-      }
-
-      if (typeof iterable.next === "function") {
-        return iterable;
-      }
-
-      if (!isNaN(iterable.length)) {
-        var i = -1, next = function next() {
-          while (++i < iterable.length) {
-            if (hasOwn.call(iterable, i)) {
-              next.value = iterable[i];
-              next.done = false;
-              return next;
-            }
-          }
-
-          next.value = undefined;
-          next.done = true;
-
-          return next;
-        };
-
-        return next.next = next;
-      }
-    }
-
-    // Return an iterator with no values.
-    return { next: doneResult };
-  }
-  runtime.values = values;
-
-  function doneResult() {
-    return { value: undefined, done: true };
-  }
-
-  Context.prototype = {
-    constructor: Context,
-
-    reset: function(skipTempReset) {
-      this.prev = 0;
-      this.next = 0;
-      // Resetting context._sent for legacy support of Babel's
-      // function.sent implementation.
-      this.sent = this._sent = undefined;
-      this.done = false;
-      this.delegate = null;
-
-      this.method = "next";
-      this.arg = undefined;
-
-      this.tryEntries.forEach(resetTryEntry);
-
-      if (!skipTempReset) {
-        for (var name in this) {
-          // Not sure about the optimal order of these conditions:
-          if (name.charAt(0) === "t" &&
-              hasOwn.call(this, name) &&
-              !isNaN(+name.slice(1))) {
-            this[name] = undefined;
-          }
-        }
-      }
-    },
-
-    stop: function() {
-      this.done = true;
-
-      var rootEntry = this.tryEntries[0];
-      var rootRecord = rootEntry.completion;
-      if (rootRecord.type === "throw") {
-        throw rootRecord.arg;
-      }
-
-      return this.rval;
-    },
-
-    dispatchException: function(exception) {
-      if (this.done) {
-        throw exception;
-      }
-
-      var context = this;
-      function handle(loc, caught) {
-        record.type = "throw";
-        record.arg = exception;
-        context.next = loc;
-
-        if (caught) {
-          // If the dispatched exception was caught by a catch block,
-          // then let that catch block handle the exception normally.
-          context.method = "next";
-          context.arg = undefined;
-        }
-
-        return !! caught;
-      }
-
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        var record = entry.completion;
-
-        if (entry.tryLoc === "root") {
-          // Exception thrown outside of any try block that could handle
-          // it, so set the completion value of the entire function to
-          // throw the exception.
-          return handle("end");
-        }
-
-        if (entry.tryLoc <= this.prev) {
-          var hasCatch = hasOwn.call(entry, "catchLoc");
-          var hasFinally = hasOwn.call(entry, "finallyLoc");
-
-          if (hasCatch && hasFinally) {
-            if (this.prev < entry.catchLoc) {
-              return handle(entry.catchLoc, true);
-            } else if (this.prev < entry.finallyLoc) {
-              return handle(entry.finallyLoc);
-            }
-
-          } else if (hasCatch) {
-            if (this.prev < entry.catchLoc) {
-              return handle(entry.catchLoc, true);
-            }
-
-          } else if (hasFinally) {
-            if (this.prev < entry.finallyLoc) {
-              return handle(entry.finallyLoc);
-            }
-
-          } else {
-            throw new Error("try statement without catch or finally");
-          }
-        }
-      }
-    },
-
-    abrupt: function(type, arg) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        if (entry.tryLoc <= this.prev &&
-            hasOwn.call(entry, "finallyLoc") &&
-            this.prev < entry.finallyLoc) {
-          var finallyEntry = entry;
-          break;
-        }
-      }
-
-      if (finallyEntry &&
-          (type === "break" ||
-           type === "continue") &&
-          finallyEntry.tryLoc <= arg &&
-          arg <= finallyEntry.finallyLoc) {
-        // Ignore the finally entry if control is not jumping to a
-        // location outside the try/catch block.
-        finallyEntry = null;
-      }
-
-      var record = finallyEntry ? finallyEntry.completion : {};
-      record.type = type;
-      record.arg = arg;
-
-      if (finallyEntry) {
-        this.method = "next";
-        this.next = finallyEntry.finallyLoc;
-        return ContinueSentinel;
-      }
-
-      return this.complete(record);
-    },
-
-    complete: function(record, afterLoc) {
-      if (record.type === "throw") {
-        throw record.arg;
-      }
-
-      if (record.type === "break" ||
-          record.type === "continue") {
-        this.next = record.arg;
-      } else if (record.type === "return") {
-        this.rval = this.arg = record.arg;
-        this.method = "return";
-        this.next = "end";
-      } else if (record.type === "normal" && afterLoc) {
-        this.next = afterLoc;
-      }
-
-      return ContinueSentinel;
-    },
-
-    finish: function(finallyLoc) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        if (entry.finallyLoc === finallyLoc) {
-          this.complete(entry.completion, entry.afterLoc);
-          resetTryEntry(entry);
-          return ContinueSentinel;
-        }
-      }
-    },
-
-    "catch": function(tryLoc) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        if (entry.tryLoc === tryLoc) {
-          var record = entry.completion;
-          if (record.type === "throw") {
-            var thrown = record.arg;
-            resetTryEntry(entry);
-          }
-          return thrown;
-        }
-      }
-
-      // The context.catch method must only be called with a location
-      // argument that corresponds to a known catch block.
-      throw new Error("illegal catch attempt");
-    },
-
-    delegateYield: function(iterable, resultName, nextLoc) {
-      this.delegate = {
-        iterator: values(iterable),
-        resultName: resultName,
-        nextLoc: nextLoc
-      };
-
-      if (this.method === "next") {
-        // Deliberately forget the last sent value so that we don't
-        // accidentally pass it on to the delegate.
-        this.arg = undefined;
-      }
-
-      return ContinueSentinel;
-    }
-  };
-})(
-  // In sloppy mode, unbound `this` refers to the global object, fallback to
-  // Function constructor if we're in global strict mode. That is sadly a form
-  // of indirect eval which violates Content Security Policy.
-  (function() { return this })() || Function("return this")()
-);
-
-},{}]},{},[6])(6)
-});
-angular.module('platformWebApp')
- .factory('platformWebApp.bladeUtils', ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
-     function initializePagination($scope, skipDefaultWatch) {
-         //pagination settings
-         $scope.pageSettings = {};
-         $scope.pageSettings.totalItems = 0;
-         $scope.pageSettings.currentPage = 1;
-         $scope.pageSettings.numPages = 5;
-         $scope.pageSettings.itemsPerPageCount = 20;
-
-         if (!skipDefaultWatch)
-             $scope.$watch('pageSettings.currentPage', $scope.blade.refresh);
-     }
-
-     return {
-         bladeNavigationService: bladeNavigationService,
-         initializePagination: initializePagination
-     };
- }]);
-
-angular.module('platformWebApp')
-    .filter('boolToValue', function () {
-        return function (input, trueValue, falseValue) {
-            return input ? trueValue : falseValue;
-        };
-    })
-    .filter('slice', function () {
-        return function (arr, start, end) {
-            return (arr || []).slice(start, end);
-        };
-    })
-    .filter('readablesize', function () {
-        return function (input) {
-            if (!input)
-                return null;
-
-            var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-            var order = 0;
-            while (input >= 1024 && order + 1 < sizes.length) {
-                order++;
-                input = input / 1024;
-            }
-            return Math.round(input) + ' ' + sizes[order];
-        };
-    })
-    // translate the given properties in the input array
-    .filter('translateArray', ['$translate', function ($translate) {
-        return function (inputArray, propertiesList) {
-            _.each(inputArray, function (inputItem) {
-                _.each(propertiesList, function (prop) {
-                    if (angular.isString(inputItem[prop])) {
-                        var translateKey = inputItem[prop].toLowerCase();
-                        var result = $translate.instant(translateKey);
-                        if (result !== translateKey) inputItem[prop] = result;
-                    }
-                });
-            });
-            return inputArray;
-        }
-    }])
-    // translation with fall-back value if key not found
-    .filter('fallbackTranslate', ['$translate', function ($translate) {
-        return function (translateKey, fallbackValue) {
-            var result = $translate.instant(translateKey);
-            return result === translateKey ? fallbackValue : result;
-        };
-    }]);
-angular.module('platformWebApp')
-.factory('platformWebApp.objCompareService', function () {
-
-	//https://stamat.wordpress.com/2013/06/22/javascript-object-comparison/
-
-	var specialChars = [ '$', '_' ];
-	//Returns the object's class, Array, Date, RegExp, Object are of interest to us
-	var getClass = function (val) {
-		return Object.prototype.toString.call(val)
-			.match(/^\[object\s(.*)\]$/)[1];
-	};
-
-	//Defines the type of the value, extended typeof
-	var whatis = function (val) {
-
-		if (val === undefined)
-			return 'undefined';
-		if (val === null)
-			return 'null';
-
-		var type = typeof val;
-
-		if (type === 'object')
-			type = getClass(val).toLowerCase();
-
-		if (type === 'number') {
-			if (val.toString().indexOf('.') > 0)
-				return 'float';
-			else
-				return 'integer';
-		}
-
-		return type;
-	};
-
-	var compareObjects = function (a, b) {
-		if (a === b)
-			return true;
-
-		if (Object.keys(a).length < Object.keys(b).length)
-		{
-			var tmp = a;
-			a = b;
-			b = tmp;
-		}
-
-		for (var i in a) {
-			//ignore system properties and functions
-			if (!_.contains(specialChars, i.charAt(0)) && whatis(a[i]) != 'function') {
-				if (b.hasOwnProperty(i)) {
-					if (!equal(a[i], b[i]))
-						return false;
-				} else {
-					return false;
-				}
-			}
-		}
-
-		//for (var i in b) {
-		//	if (!a.hasOwnProperty(i)) {
-		//		return false;
-		//	}
-		//}
-		return true;
-	};
-
-	var compareArrays = function (a, b) {
-		if (a === b)
-			return true;
-		if (a.length !== b.length)
-			return false;
-		for (var i = 0; i < a.length; i++) {
-			if (!equal(a[i], b[i])) return false;
-		};
-		return true;
-	};
-
-	var _equal = {};
-	_equal.array = compareArrays;
-	_equal.object = compareObjects;
-	_equal.date = function (a, b) {
-		return a.getTime() === b.getTime();
-	};
-	_equal.regexp = function (a, b) {
-		return a.toString() === b.toString();
-	};
-	//	uncoment to support function as string compare
-	//	_equal.fucntion =  _equal.regexp;
-	/*
-	* Are two values equal, deep compare for objects and arrays.
-	* @param a {any}
-	* @param b {any}
-	* @return {boolean} Are equal?
-	*/
-	var equal = function (a, b) {
-		var retVal = a === b;
-		if (!retVal) {
-			var atype = whatis(a), btype = whatis(b);
-			if (atype === btype)
-			{
-				retVal = _equal.hasOwnProperty(atype) ? _equal[atype](a, b) : a == b;
-			}
-		}
-
-		return retVal;
-	}
-
-	return {
-		equal: equal
-	};
-});
-
-angular.module('platformWebApp')
-    .config(['$provide', 'uiGridConstants', function ($provide, uiGridConstants) {
-        $provide.decorator('GridOptions', ['$delegate', '$localStorage', '$translate', 'platformWebApp.bladeNavigationService', function ($delegate, $localStorage, $translate, bladeNavigationService) {
-            var gridOptions = angular.copy($delegate);
-            gridOptions.initialize = function (options) {
-                var initOptions = $delegate.initialize(options);
-                var blade = bladeNavigationService.currentBlade;
-                var $scope = blade.$scope;
-
-                // restore saved state, if any
-                var savedState = $localStorage['gridState:' + blade.template];
-                if (savedState) {
-                    // extend saved columns with custom columnDef information (e.g. cellTemplate, displayName)
-                    var foundDef;
-                    _.each(savedState.columns, function (x) {
-                        if (foundDef = _.findWhere(initOptions.columnDefs, { name: x.name })) {
-                            foundDef.sort = x.sort;
-                            foundDef.width = x.width || foundDef.width;
-                            foundDef.visible = x.visible;
-                            // prevent loading outdated cellTemplate
-                            delete x.cellTemplate;
-                            _.extend(x, foundDef);
-                            x.wasPredefined = true;
-                            initOptions.columnDefs.splice(initOptions.columnDefs.indexOf(foundDef), 1);
-                        } else {
-                            x.wasPredefined = false;
-                        }
-                    });
-                    // savedState.columns = _.reject(savedState.columns, function (x) { return x.cellTemplate && !x.wasPredefined; }); // not sure why was this, but it rejected custom templated fields
-                    initOptions.columnDefs = _.union(initOptions.columnDefs, savedState.columns);
-                } else {
-                    // mark predefined columns
-                    _.each(initOptions.columnDefs, function (x) {
-                        x.visible = angular.isDefined(x.visible) ? x.visible : true;
-                        x.wasPredefined = true;
-                    });
-                }
-
-                // translate headers
-                _.each(initOptions.columnDefs, function (x) { x.headerCellFilter = 'translate'; });
-
-                var customOnRegisterApiCallback = initOptions.onRegisterApi;
-
-                angular.extend(initOptions, {
-                    rowHeight: initOptions.rowHeight === 30 ? 40 : initOptions.rowHeight,
-                    enableGridMenu: true,
-                    //enableVerticalScrollbar: uiGridConstants.scrollbars.NEVER,
-                    //enableHorizontalScrollbar: uiGridConstants.scrollbars.NEVER,
-                    saveFocus: false,
-                    saveFilter: false,
-                    saveGrouping: false,
-                    savePinning: false,
-                    saveSelection: false,
-                    gridMenuTitleFilter: $translate,
-                    onRegisterApi: function (gridApi) {
-                        //set gridApi on scope
-                        $scope.gridApi = gridApi;
-
-                        if (gridApi.saveState) {
-                            if (savedState) {
-                                //$timeout(function () {
-                                gridApi.saveState.restore($scope, savedState);
-                                //}, 10);
-                            }
-
-                            if (gridApi.colResizable)
-                                gridApi.colResizable.on.columnSizeChanged($scope, saveState);
-                            if (gridApi.colMovable)
-                                gridApi.colMovable.on.columnPositionChanged($scope, saveState);
-                            gridApi.core.on.columnVisibilityChanged($scope, saveState);
-                            gridApi.core.on.sortChanged($scope, saveState);
-                            function saveState() {
-                                $localStorage['gridState:' + blade.template] = gridApi.saveState.save();
-                            }
-                        }
-
-                        gridApi.grid.registerDataChangeCallback(processMissingColumns, [uiGridConstants.dataChange.ROW]);
-                        gridApi.grid.registerDataChangeCallback(autoFormatColumns, [uiGridConstants.dataChange.ROW]);
-
-                        if (customOnRegisterApiCallback) {
-                            customOnRegisterApiCallback(gridApi);
-                        }
-                    },
-                    onCollapse: function () {
-                        updateColumnsVisibility(this, true);
-                    },
-                    onExpand: function () {
-                        updateColumnsVisibility(this, false);
-                    }
-                });
-
-                return initOptions;
-            };
-
-            function processMissingColumns(grid) {
-                var gridOptions = grid.options;
-
-                if (!gridOptions.columnDefsGenerated && _.any(grid.rows)) {
-                    var filteredColumns = _.filter(_.pairs(grid.rows[0].entity), function (x) {
-                        return !x[0].startsWith('$$') && (!_.isObject(x[1]) || _.isDate(x[1]));
-                    });
-
-                    var allKeysFromEntity = _.map(filteredColumns, function (x) {
-                        return x[0];
-                    });
-                    // remove non-existing columns
-                    _.each(gridOptions.columnDefs.slice(), function (x) {
-                        if (!_.contains(allKeysFromEntity, x.name) && !x.wasPredefined) {
-                            gridOptions.columnDefs = _.reject(gridOptions.columnDefs, function (d) {
-                                return d.name == x.name;
-                            });
-                        }
-                    });
-
-                    // generate columnDefs for each undefined property
-                    _.each(allKeysFromEntity, function (x) {
-                        if (!_.findWhere(gridOptions.columnDefs, { name: x })) {
-                            gridOptions.columnDefs.push({ name: x, visible: false });
-                        }
-                    });
-                    gridOptions.columnDefsGenerated = true;
-                    grid.api.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
-                }
-            }
-
-            // Configure automatic formatting of columns/
-            // Column with type number will use numberFilter to correct display of values
-            // Column with type date will use predefined template with am-time-ago directive to display date in human-readable format
-            function autoFormatColumns(grid) {
-                var gridOptions = grid.options;
-                grid.buildColumns();
-                var columnDefs = angular.copy(gridOptions.columnDefs);
-                for (var i = 0; i < columnDefs.length; i++) {
-                    var columnDef = columnDefs[i];
-                    for (var j = 0; j < grid.rows.length; j++) {
-                        var value = grid.getCellValue(grid.rows[j], grid.getColumn(columnDef.name));
-                        if (angular.isDefined(value)) {
-                            if (angular.isNumber(value)) {
-                                columnDef.cellFilter = columnDef.cellFilter || 'number';
-                            }
-                            // Default template for columns with dates
-                            else if (angular.isDate(value) || angular.isString(value) && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d+)?Z/.test(value)) {
-                                columnDef.cellTemplate = columnDef.cellTemplate || '$(Platform)/Scripts/common/templates/ui-grid/am-time-ago.cell.html';
-                            }
-                            break;
-                        }
-                    }
-                    gridOptions.columnDefs[i] = columnDef;
-                }
-                grid.options.columnDefs = columnDefs;
-                grid.api.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
-            }
-
-            function updateColumnsVisibility(gridOptions, isCollapsed) {
-                var blade = bladeNavigationService.currentBlade;
-                var $scope = blade.$scope;
-                _.each(gridOptions.columnDefs, function (x) {
-                    // normal: visible, if column was predefined
-                    // collapsed: visible only if we must display column always
-                    if (isCollapsed) {
-                        x.wasVisible = !!x.wasPredefined && x.visible !== false || !!x.visible;
-                    }
-                    x.visible = !isCollapsed ? !!x.wasVisible : !!x.displayAlways;
-                });
-                if ($scope && $scope.gridApi)
-                    $scope.gridApi.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
-            }
-
-            return gridOptions;
-        }]);
-    }])
-
-    .factory('platformWebApp.uiGridHelper', ['$localStorage', '$timeout', 'uiGridConstants', '$translate', function ($localStorage, $timeout, uiGridConstants, $translate) {
-        var retVal = {};
-        retVal.uiGridConstants = uiGridConstants;
-        retVal.initialize = function ($scope, gridOptions, externalRegisterApiCallback) {
-            $scope.gridOptions = angular.extend({
-                data: _.any(gridOptions.data) ? gridOptions.data : 'blade.currentEntities',
-                onRegisterApi: function (gridApi) {
-                    if (externalRegisterApiCallback) {
-                        externalRegisterApiCallback(gridApi);
-                    }
-                }
-            }, gridOptions);
-        };
-
-        retVal.getSortExpression = function ($scope) {
-            var columnDefs;
-            if ($scope.gridApi) {
-                columnDefs = $scope.gridApi.grid.columns;
-            } else {
-                var savedState = $localStorage['gridState:' + $scope.blade.template];
-                columnDefs = savedState ? savedState.columns : $scope.gridOptions.columnDefs;
-            }
-
-            var sorts = _.filter(columnDefs, function (x) {
-                return x.name !== '$path' && x.sort && (x.sort.direction === uiGridConstants.ASC || x.sort.direction === uiGridConstants.DESC);
-            });
-            sorts = _.sortBy(sorts, function (x) {
-                return x.sort.priority;
-            });
-            sorts = _.map(sorts, function (x) {
-                return (x.field ? x.field : x.name) + ':' + (x.sort.direction === uiGridConstants.ASC ? 'asc' : 'desc');
-            });
-            return sorts.join(';');
-        };
-
-        retVal.bindRefreshOnSortChanged = function ($scope) {
-            $scope.gridApi.core.on.sortChanged($scope, function () {
-                if (!$scope.blade.isLoading) $scope.blade.refresh();
-            });
-        };
-
-        return retVal;
-    }])
-
-    // ui-grid extension service. Used for extension grid options from other modules
-    .factory('platformWebApp.ui-grid.extension', [function () {
-        return {
-            extensionsMap: [],
-            registerExtension: function (gridId, extensionFn) {
-                this.extensionsMap[gridId] = extensionFn;
-            },
-            tryExtendGridOptions: function (gridId, gridOptions) {
-                if (this.extensionsMap[gridId]) {
-                    this.extensionsMap[gridId](gridOptions);
-                }
-            }
-        };
-    }])
-
-    // auto height and additional class for ui-grid
-    .directive('uiGridHeight', ['$timeout', '$window', function ($timeout, $window) {
-        return {
-            restrict: 'A',
-            link: {
-                pre: function (scope, element) {
-                    var bladeInner = $(element).parents('.blade-inner');
-                    bladeInner.addClass('ui-grid-no-scroll');
-
-                    var setGridHeight = function () {
-                        $timeout(function () {
-                            $(element).height(bladeInner.height());
-                        });
-                    };
-                    scope.$watch('blade.isExpanded', setGridHeight);
-                    scope.$watch('pageSettings.totalItems', setGridHeight);
-                    angular.element($window).bind('resize', setGridHeight);
-                }
-            }
-        };
-    }])
-    .run(['$templateRequest', function ($templateRequest) {
-        // Pre-load default templates, because we inject templates to grid options dynamically, so they not loaded by default
-        $templateRequest('$(Platform)/Scripts/common/templates/ui-grid/am-time-ago.cell.html');
-    }]);
-
-angular.module('platformWebApp')
- .factory('platformWebApp.validators', [function () {
-     function webSafeFileNameValidator(value) {
-         var pattern = /^[\w.-]+$/;
-         return pattern.test(value);
-     }
-
-     return {
-         webSafeFileNameValidator: webSafeFileNameValidator
-     };
- }]);
 
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
@@ -18379,6 +16739,454 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
+ .factory('platformWebApp.bladeUtils', ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
+     function initializePagination($scope, skipDefaultWatch) {
+         //pagination settings
+         $scope.pageSettings = {};
+         $scope.pageSettings.totalItems = 0;
+         $scope.pageSettings.currentPage = 1;
+         $scope.pageSettings.numPages = 5;
+         $scope.pageSettings.itemsPerPageCount = 20;
+
+         if (!skipDefaultWatch)
+             $scope.$watch('pageSettings.currentPage', $scope.blade.refresh);
+     }
+
+     return {
+         bladeNavigationService: bladeNavigationService,
+         initializePagination: initializePagination
+     };
+ }]);
+
+angular.module('platformWebApp')
+    .filter('boolToValue', function () {
+        return function (input, trueValue, falseValue) {
+            return input ? trueValue : falseValue;
+        };
+    })
+    .filter('slice', function () {
+        return function (arr, start, end) {
+            return (arr || []).slice(start, end);
+        };
+    })
+    .filter('readablesize', function () {
+        return function (input) {
+            if (!input)
+                return null;
+
+            var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+            var order = 0;
+            while (input >= 1024 && order + 1 < sizes.length) {
+                order++;
+                input = input / 1024;
+            }
+            return Math.round(input) + ' ' + sizes[order];
+        };
+    })
+    // translate the given properties in the input array
+    .filter('translateArray', ['$translate', function ($translate) {
+        return function (inputArray, propertiesList) {
+            _.each(inputArray, function (inputItem) {
+                _.each(propertiesList, function (prop) {
+                    if (angular.isString(inputItem[prop])) {
+                        var translateKey = inputItem[prop].toLowerCase();
+                        var result = $translate.instant(translateKey);
+                        if (result !== translateKey) inputItem[prop] = result;
+                    }
+                });
+            });
+            return inputArray;
+        }
+    }])
+    // translation with fall-back value if key not found
+    .filter('fallbackTranslate', ['$translate', function ($translate) {
+        return function (translateKey, fallbackValue) {
+            var result = $translate.instant(translateKey);
+            return result === translateKey ? fallbackValue : result;
+        };
+    }]);
+angular.module('platformWebApp')
+.factory('platformWebApp.objCompareService', function () {
+
+	//https://stamat.wordpress.com/2013/06/22/javascript-object-comparison/
+
+	var specialChars = [ '$', '_' ];
+	//Returns the object's class, Array, Date, RegExp, Object are of interest to us
+	var getClass = function (val) {
+		return Object.prototype.toString.call(val)
+			.match(/^\[object\s(.*)\]$/)[1];
+	};
+
+	//Defines the type of the value, extended typeof
+	var whatis = function (val) {
+
+		if (val === undefined)
+			return 'undefined';
+		if (val === null)
+			return 'null';
+
+		var type = typeof val;
+
+		if (type === 'object')
+			type = getClass(val).toLowerCase();
+
+		if (type === 'number') {
+			if (val.toString().indexOf('.') > 0)
+				return 'float';
+			else
+				return 'integer';
+		}
+
+		return type;
+	};
+
+	var compareObjects = function (a, b) {
+		if (a === b)
+			return true;
+
+		if (Object.keys(a).length < Object.keys(b).length)
+		{
+			var tmp = a;
+			a = b;
+			b = tmp;
+		}
+
+		for (var i in a) {
+			//ignore system properties and functions
+			if (!_.contains(specialChars, i.charAt(0)) && whatis(a[i]) != 'function') {
+				if (b.hasOwnProperty(i)) {
+					if (!equal(a[i], b[i]))
+						return false;
+				} else {
+					return false;
+				}
+			}
+		}
+
+		//for (var i in b) {
+		//	if (!a.hasOwnProperty(i)) {
+		//		return false;
+		//	}
+		//}
+		return true;
+	};
+
+	var compareArrays = function (a, b) {
+		if (a === b)
+			return true;
+		if (a.length !== b.length)
+			return false;
+		for (var i = 0; i < a.length; i++) {
+			if (!equal(a[i], b[i])) return false;
+		};
+		return true;
+	};
+
+	var _equal = {};
+	_equal.array = compareArrays;
+	_equal.object = compareObjects;
+	_equal.date = function (a, b) {
+		return a.getTime() === b.getTime();
+	};
+	_equal.regexp = function (a, b) {
+		return a.toString() === b.toString();
+	};
+	//	uncoment to support function as string compare
+	//	_equal.fucntion =  _equal.regexp;
+	/*
+	* Are two values equal, deep compare for objects and arrays.
+	* @param a {any}
+	* @param b {any}
+	* @return {boolean} Are equal?
+	*/
+	var equal = function (a, b) {
+		var retVal = a === b;
+		if (!retVal) {
+			var atype = whatis(a), btype = whatis(b);
+			if (atype === btype)
+			{
+				retVal = _equal.hasOwnProperty(atype) ? _equal[atype](a, b) : a == b;
+			}
+		}
+
+		return retVal;
+	}
+
+	return {
+		equal: equal
+	};
+});
+
+angular.module('platformWebApp')
+    .config(['$provide', 'uiGridConstants', function ($provide, uiGridConstants) {
+        $provide.decorator('GridOptions', ['$delegate', '$localStorage', '$translate', 'platformWebApp.bladeNavigationService', function ($delegate, $localStorage, $translate, bladeNavigationService) {
+            var gridOptions = angular.copy($delegate);
+            gridOptions.initialize = function (options) {
+                var initOptions = $delegate.initialize(options);
+                var blade = bladeNavigationService.currentBlade;
+                var $scope = blade.$scope;
+
+                // restore saved state, if any
+                var savedState = $localStorage['gridState:' + blade.template];
+                if (savedState) {
+                    // extend saved columns with custom columnDef information (e.g. cellTemplate, displayName)
+                    var foundDef;
+                    _.each(savedState.columns, function (x) {
+                        if (foundDef = _.findWhere(initOptions.columnDefs, { name: x.name })) {
+                            foundDef.sort = x.sort;
+                            foundDef.width = x.width || foundDef.width;
+                            foundDef.visible = x.visible;
+                            // prevent loading outdated cellTemplate
+                            delete x.cellTemplate;
+                            _.extend(x, foundDef);
+                            x.wasPredefined = true;
+                            initOptions.columnDefs.splice(initOptions.columnDefs.indexOf(foundDef), 1);
+                        } else {
+                            x.wasPredefined = false;
+                        }
+                    });
+                    // savedState.columns = _.reject(savedState.columns, function (x) { return x.cellTemplate && !x.wasPredefined; }); // not sure why was this, but it rejected custom templated fields
+                    initOptions.columnDefs = _.union(initOptions.columnDefs, savedState.columns);
+                } else {
+                    // mark predefined columns
+                    _.each(initOptions.columnDefs, function (x) {
+                        x.visible = angular.isDefined(x.visible) ? x.visible : true;
+                        x.wasPredefined = true;
+                    });
+                }
+
+                // translate headers
+                _.each(initOptions.columnDefs, function (x) { x.headerCellFilter = 'translate'; });
+
+                var customOnRegisterApiCallback = initOptions.onRegisterApi;
+
+                angular.extend(initOptions, {
+                    rowHeight: initOptions.rowHeight === 30 ? 40 : initOptions.rowHeight,
+                    enableGridMenu: true,
+                    //enableVerticalScrollbar: uiGridConstants.scrollbars.NEVER,
+                    //enableHorizontalScrollbar: uiGridConstants.scrollbars.NEVER,
+                    saveFocus: false,
+                    saveFilter: false,
+                    saveGrouping: false,
+                    savePinning: false,
+                    saveSelection: false,
+                    gridMenuTitleFilter: $translate,
+                    onRegisterApi: function (gridApi) {
+                        //set gridApi on scope
+                        $scope.gridApi = gridApi;
+
+                        if (gridApi.saveState) {
+                            if (savedState) {
+                                //$timeout(function () {
+                                gridApi.saveState.restore($scope, savedState);
+                                //}, 10);
+                            }
+
+                            if (gridApi.colResizable)
+                                gridApi.colResizable.on.columnSizeChanged($scope, saveState);
+                            if (gridApi.colMovable)
+                                gridApi.colMovable.on.columnPositionChanged($scope, saveState);
+                            gridApi.core.on.columnVisibilityChanged($scope, saveState);
+                            gridApi.core.on.sortChanged($scope, saveState);
+                            function saveState() {
+                                $localStorage['gridState:' + blade.template] = gridApi.saveState.save();
+                            }
+                        }
+
+                        gridApi.grid.registerDataChangeCallback(processMissingColumns, [uiGridConstants.dataChange.ROW]);
+                        gridApi.grid.registerDataChangeCallback(autoFormatColumns, [uiGridConstants.dataChange.ROW]);
+
+                        if (customOnRegisterApiCallback) {
+                            customOnRegisterApiCallback(gridApi);
+                        }
+                    },
+                    onCollapse: function () {
+                        updateColumnsVisibility(this, true);
+                    },
+                    onExpand: function () {
+                        updateColumnsVisibility(this, false);
+                    }
+                });
+
+                return initOptions;
+            };
+
+            function processMissingColumns(grid) {
+                var gridOptions = grid.options;
+
+                if (!gridOptions.columnDefsGenerated && _.any(grid.rows)) {
+                    var filteredColumns = _.filter(_.pairs(grid.rows[0].entity), function (x) {
+                        return !x[0].startsWith('$$') && (!_.isObject(x[1]) || _.isDate(x[1]));
+                    });
+
+                    var allKeysFromEntity = _.map(filteredColumns, function (x) {
+                        return x[0];
+                    });
+                    // remove non-existing columns
+                    _.each(gridOptions.columnDefs.slice(), function (x) {
+                        if (!_.contains(allKeysFromEntity, x.name) && !x.wasPredefined) {
+                            gridOptions.columnDefs = _.reject(gridOptions.columnDefs, function (d) {
+                                return d.name == x.name;
+                            });
+                        }
+                    });
+
+                    // generate columnDefs for each undefined property
+                    _.each(allKeysFromEntity, function (x) {
+                        if (!_.findWhere(gridOptions.columnDefs, { name: x })) {
+                            gridOptions.columnDefs.push({ name: x, visible: false });
+                        }
+                    });
+                    gridOptions.columnDefsGenerated = true;
+                    grid.api.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
+                }
+            }
+
+            // Configure automatic formatting of columns/
+            // Column with type number will use numberFilter to correct display of values
+            // Column with type date will use predefined template with am-time-ago directive to display date in human-readable format
+            function autoFormatColumns(grid) {
+                var gridOptions = grid.options;
+                grid.buildColumns();
+                var columnDefs = angular.copy(gridOptions.columnDefs);
+                for (var i = 0; i < columnDefs.length; i++) {
+                    var columnDef = columnDefs[i];
+                    for (var j = 0; j < grid.rows.length; j++) {
+                        var value = grid.getCellValue(grid.rows[j], grid.getColumn(columnDef.name));
+                        if (angular.isDefined(value)) {
+                            if (angular.isNumber(value)) {
+                                columnDef.cellFilter = columnDef.cellFilter || 'number';
+                            }
+                            // Default template for columns with dates
+                            else if (angular.isDate(value) || angular.isString(value) && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d+)?Z/.test(value)) {
+                                columnDef.cellTemplate = columnDef.cellTemplate || '$(Platform)/Scripts/common/templates/ui-grid/am-time-ago.cell.html';
+                            }
+                            break;
+                        }
+                    }
+                    gridOptions.columnDefs[i] = columnDef;
+                }
+                grid.options.columnDefs = columnDefs;
+                grid.api.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
+            }
+
+            function updateColumnsVisibility(gridOptions, isCollapsed) {
+                var blade = bladeNavigationService.currentBlade;
+                var $scope = blade.$scope;
+                _.each(gridOptions.columnDefs, function (x) {
+                    // normal: visible, if column was predefined
+                    // collapsed: visible only if we must display column always
+                    if (isCollapsed) {
+                        x.wasVisible = !!x.wasPredefined && x.visible !== false || !!x.visible;
+                    }
+                    x.visible = !isCollapsed ? !!x.wasVisible : !!x.displayAlways;
+                });
+                if ($scope && $scope.gridApi)
+                    $scope.gridApi.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
+            }
+
+            return gridOptions;
+        }]);
+    }])
+
+    .factory('platformWebApp.uiGridHelper', ['$localStorage', '$timeout', 'uiGridConstants', '$translate', function ($localStorage, $timeout, uiGridConstants, $translate) {
+        var retVal = {};
+        retVal.uiGridConstants = uiGridConstants;
+        retVal.initialize = function ($scope, gridOptions, externalRegisterApiCallback) {
+            $scope.gridOptions = angular.extend({
+                data: _.any(gridOptions.data) ? gridOptions.data : 'blade.currentEntities',
+                onRegisterApi: function (gridApi) {
+                    if (externalRegisterApiCallback) {
+                        externalRegisterApiCallback(gridApi);
+                    }
+                }
+            }, gridOptions);
+        };
+
+        retVal.getSortExpression = function ($scope) {
+            var columnDefs;
+            if ($scope.gridApi) {
+                columnDefs = $scope.gridApi.grid.columns;
+            } else {
+                var savedState = $localStorage['gridState:' + $scope.blade.template];
+                columnDefs = savedState ? savedState.columns : $scope.gridOptions.columnDefs;
+            }
+
+            var sorts = _.filter(columnDefs, function (x) {
+                return x.name !== '$path' && x.sort && (x.sort.direction === uiGridConstants.ASC || x.sort.direction === uiGridConstants.DESC);
+            });
+            sorts = _.sortBy(sorts, function (x) {
+                return x.sort.priority;
+            });
+            sorts = _.map(sorts, function (x) {
+                return (x.field ? x.field : x.name) + ':' + (x.sort.direction === uiGridConstants.ASC ? 'asc' : 'desc');
+            });
+            return sorts.join(';');
+        };
+
+        retVal.bindRefreshOnSortChanged = function ($scope) {
+            $scope.gridApi.core.on.sortChanged($scope, function () {
+                if (!$scope.blade.isLoading) $scope.blade.refresh();
+            });
+        };
+
+        return retVal;
+    }])
+
+    // ui-grid extension service. Used for extension grid options from other modules
+    .factory('platformWebApp.ui-grid.extension', [function () {
+        return {
+            extensionsMap: [],
+            registerExtension: function (gridId, extensionFn) {
+                this.extensionsMap[gridId] = extensionFn;
+            },
+            tryExtendGridOptions: function (gridId, gridOptions) {
+                if (this.extensionsMap[gridId]) {
+                    this.extensionsMap[gridId](gridOptions);
+                }
+            }
+        };
+    }])
+
+    // auto height and additional class for ui-grid
+    .directive('uiGridHeight', ['$timeout', '$window', function ($timeout, $window) {
+        return {
+            restrict: 'A',
+            link: {
+                pre: function (scope, element) {
+                    var bladeInner = $(element).parents('.blade-inner');
+                    bladeInner.addClass('ui-grid-no-scroll');
+
+                    var setGridHeight = function () {
+                        $timeout(function () {
+                            $(element).height(bladeInner.height());
+                        });
+                    };
+                    scope.$watch('blade.isExpanded', setGridHeight);
+                    scope.$watch('pageSettings.totalItems', setGridHeight);
+                    angular.element($window).bind('resize', setGridHeight);
+                }
+            }
+        };
+    }])
+    .run(['$templateRequest', function ($templateRequest) {
+        // Pre-load default templates, because we inject templates to grid options dynamically, so they not loaded by default
+        $templateRequest('$(Platform)/Scripts/common/templates/ui-grid/am-time-ago.cell.html');
+    }]);
+
+angular.module('platformWebApp')
+ .factory('platformWebApp.validators', [function () {
+     function webSafeFileNameValidator(value) {
+         var pattern = /^[\w.-]+$/;
+         return pattern.test(value);
+     }
+
+     return {
+         webSafeFileNameValidator: webSafeFileNameValidator
+     };
+ }]);
+
+angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
     $stateProvider
         .state('workspace.assets', {
@@ -18610,123 +17418,6 @@ angular.module('platformWebApp')
   }]);
 
 angular.module('platformWebApp')
-.config(['$stateProvider', function ($stateProvider) {
-	$stateProvider
-        .state('workspace.modularity', {
-        	url: '/modules',
-        	templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-        	controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-        		var blade = {
-        			id: 'modulesMain',
-        			title: 'platform.blades.modules-main.title',
-        			controller: 'platformWebApp.modulesMainController',
-        			template: '$(Platform)/Scripts/app/modularity/blades/modules-main.tpl.html',
-        			isClosingDisabled: true
-        		};
-        		bladeNavigationService.showBlade(blade);
-        	}]
-        });
-
-	$stateProvider
-	.state('setupWizard.modulesInstallation', {
-		url: '/modulesInstallation',
-		templateUrl: '$(Platform)/Scripts/app/modularity/templates/modulesInstallation.tpl.html',
-		controller: ['$scope', '$state', '$stateParams', '$window', 'platformWebApp.modules', 'platformWebApp.exportImport.resource', 'platformWebApp.setupWizard', function ($scope, $state, $stateParams, $window, modules, exportImportResourse, setupWizard) {
-			$scope.notification = {};
-			if ($stateParams.notification)
-			{
-				$scope.notification = $stateParams.notification;
-			}
-			//thats need when state direct open by url or push notification
-            var step = setupWizard.findStepByState($state.current.name);
-			if (!$scope.notification.created) {
-			modules.autoInstall({}, function (data) {
-				//if already installed need skip this step
-				if (data.finished) {					
-				    setupWizard.showStep(step.nextStep);
-                }
-            }, function (error) {
-                setupWizard.showStep(step.nextStep);
-            });
-			}
-
-			$scope.restart = function () {
-				$scope.restarted = true;
-				modules.restart({}, function () {
-					setupWizard.showStep(step.nextStep);
-					$window.location.reload();
-				});
-			};		
-
-			$scope.$on("new-notification-event", function (event, notification) {
-				if (notification.notifyType == 'ModuleAutoInstallPushNotification') {
-					angular.copy(notification, $scope.notification);
-					if (notification.finished && notification.errorCount == 0) {
-						$scope.close();
-					}
-				}
-			});
-		}]
-	});
-}])
-.run(
-  ['platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.bladeNavigationService', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', '$rootScope', 'platformWebApp.modules', 'platformWebApp.setupWizard', function (pushNotificationTemplateResolver, bladeNavigationService, mainMenuService, widgetService, $state, $rootScope, modules, setupWizard) {
-  	//Register module in main menu
-  	var menuItem = {
-  		path: 'configuration/modularity',
-  		icon: 'fa fa-cubes',
-  		title: 'platform.menu.modules',
-  		priority: 6,
-  		action: function () { $state.go('workspace.modularity'); },
-  		permission: 'platform:module:access'
-  	};
-  	mainMenuService.addMenuItem(menuItem);
-
-      // Register push notification template
-      pushNotificationTemplateResolver.register({
-	   	priority: 900,
-	   	satisfy: function (notify, place) { return place == 'menu' && notify.notifyType == 'ModulePushNotification'; },
-	   	template: '$(Platform)/Scripts/app/modularity/notifications/menu.tpl.html',
-	   	action: function (notify) { $state.go('workspace.pushNotificationsHistory', notify); }
-      });
-
-  	var historyExportImportTemplate =
-	{
-		priority: 900,
-		satisfy: function (notify, place) { return place == 'history' && notify.notifyType == 'ModulePushNotification'; },
-		template: '$(Platform)/Scripts/app/modularity/notifications/history.tpl.html',
-		action: function (notify) {
-			var blade = {
-				id: 'moduleInstallProgress',
-				title: notify.title,
-				currentEntity: notify,
-				controller: 'platformWebApp.moduleInstallProgressController',
-				template: '$(Platform)/Scripts/app/modularity/wizards/newModule/module-wizard-progress-step.tpl.html'
-			};
-			bladeNavigationService.showBlade(blade);
-		}
-	};
-  	pushNotificationTemplateResolver.register(historyExportImportTemplate);
-
-  	//Switch to  setupWizard.modulesInstallation state when receive ModuleAutoInstallPushNotification push notification
-  	$rootScope.$on("new-notification-event", function (event, notification) {
-  		if (notification.notifyType == 'ModuleAutoInstallPushNotification' && $state.current && $state.current.name != 'setupWizard.modulesInstallation') {
-  			$state.go('setupWizard.modulesInstallation', { notification: notification });
-  		}
-  	});
-	//register setup wizard step - modules auto installation
-  	setupWizard.registerStep({
-  		state: "setupWizard.modulesInstallation",
-  		priority: 1
-  	});
-  
-  }])
-.factory('platformWebApp.moduleHelper', function () {
-	// semver comparison: https://gist.github.com/TheDistantSea/8021359
-	return {};
-});
-
-angular.module('platformWebApp')
 .controller('platformWebApp.licenseDetailController', ['$scope', '$window', 'FileUploader', '$http', 'platformWebApp.bladeNavigationService', function ($scope, $window, FileUploader, $http, bladeNavigationService) {
     var blade = $scope.blade;
     blade.isNew = blade.isNew || !$scope.license;
@@ -18845,6 +17536,123 @@ angular.module('platformWebApp')
 }]);
 angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
+	$stateProvider
+        .state('workspace.modularity', {
+        	url: '/modules',
+        	templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+        	controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+        		var blade = {
+        			id: 'modulesMain',
+        			title: 'platform.blades.modules-main.title',
+        			controller: 'platformWebApp.modulesMainController',
+        			template: '$(Platform)/Scripts/app/modularity/blades/modules-main.tpl.html',
+        			isClosingDisabled: true
+        		};
+        		bladeNavigationService.showBlade(blade);
+        	}]
+        });
+
+	$stateProvider
+	.state('setupWizard.modulesInstallation', {
+		url: '/modulesInstallation',
+		templateUrl: '$(Platform)/Scripts/app/modularity/templates/modulesInstallation.tpl.html',
+		controller: ['$scope', '$state', '$stateParams', '$window', 'platformWebApp.modules', 'platformWebApp.exportImport.resource', 'platformWebApp.setupWizard', function ($scope, $state, $stateParams, $window, modules, exportImportResourse, setupWizard) {
+			$scope.notification = {};
+			if ($stateParams.notification)
+			{
+				$scope.notification = $stateParams.notification;
+			}
+			//thats need when state direct open by url or push notification
+            var step = setupWizard.findStepByState($state.current.name);
+			if (!$scope.notification.created) {
+			modules.autoInstall({}, function (data) {
+				//if already installed need skip this step
+				if (data.finished) {					
+				    setupWizard.showStep(step.nextStep);
+                }
+            }, function (error) {
+                setupWizard.showStep(step.nextStep);
+            });
+			}
+
+			$scope.restart = function () {
+				$scope.restarted = true;
+				modules.restart({}, function () {
+					setupWizard.showStep(step.nextStep);
+					$window.location.reload();
+				});
+			};		
+
+			$scope.$on("new-notification-event", function (event, notification) {
+				if (notification.notifyType == 'ModuleAutoInstallPushNotification') {
+					angular.copy(notification, $scope.notification);
+					if (notification.finished && notification.errorCount == 0) {
+						$scope.close();
+					}
+				}
+			});
+		}]
+	});
+}])
+.run(
+  ['platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.bladeNavigationService', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', '$rootScope', 'platformWebApp.modules', 'platformWebApp.setupWizard', function (pushNotificationTemplateResolver, bladeNavigationService, mainMenuService, widgetService, $state, $rootScope, modules, setupWizard) {
+  	//Register module in main menu
+  	var menuItem = {
+  		path: 'configuration/modularity',
+  		icon: 'fa fa-cubes',
+  		title: 'platform.menu.modules',
+  		priority: 6,
+  		action: function () { $state.go('workspace.modularity'); },
+  		permission: 'platform:module:access'
+  	};
+  	mainMenuService.addMenuItem(menuItem);
+
+      // Register push notification template
+      pushNotificationTemplateResolver.register({
+	   	priority: 900,
+	   	satisfy: function (notify, place) { return place == 'menu' && notify.notifyType == 'ModulePushNotification'; },
+	   	template: '$(Platform)/Scripts/app/modularity/notifications/menu.tpl.html',
+	   	action: function (notify) { $state.go('workspace.pushNotificationsHistory', notify); }
+      });
+
+  	var historyExportImportTemplate =
+	{
+		priority: 900,
+		satisfy: function (notify, place) { return place == 'history' && notify.notifyType == 'ModulePushNotification'; },
+		template: '$(Platform)/Scripts/app/modularity/notifications/history.tpl.html',
+		action: function (notify) {
+			var blade = {
+				id: 'moduleInstallProgress',
+				title: notify.title,
+				currentEntity: notify,
+				controller: 'platformWebApp.moduleInstallProgressController',
+				template: '$(Platform)/Scripts/app/modularity/wizards/newModule/module-wizard-progress-step.tpl.html'
+			};
+			bladeNavigationService.showBlade(blade);
+		}
+	};
+  	pushNotificationTemplateResolver.register(historyExportImportTemplate);
+
+  	//Switch to  setupWizard.modulesInstallation state when receive ModuleAutoInstallPushNotification push notification
+  	$rootScope.$on("new-notification-event", function (event, notification) {
+  		if (notification.notifyType == 'ModuleAutoInstallPushNotification' && $state.current && $state.current.name != 'setupWizard.modulesInstallation') {
+  			$state.go('setupWizard.modulesInstallation', { notification: notification });
+  		}
+  	});
+	//register setup wizard step - modules auto installation
+  	setupWizard.registerStep({
+  		state: "setupWizard.modulesInstallation",
+  		priority: 1
+  	});
+  
+  }])
+.factory('platformWebApp.moduleHelper', function () {
+	// semver comparison: https://gist.github.com/TheDistantSea/8021359
+	return {};
+});
+
+angular.module('platformWebApp')
+.config(['$stateProvider', function ($stateProvider) {
     $stateProvider
 		.state('workspace.notifications', {
 		    url: '/notifications?objectId&objectTypeId',
@@ -18877,6 +17685,185 @@ angular.module('platformWebApp')
       mainMenuService.addMenuItem(menuItem);
   }])
 ;
+angular.module('platformWebApp')
+.config(
+  ['$stateProvider', function ($stateProvider) {
+      $stateProvider
+          .state('workspace.pushNotificationsHistory', {
+              url: '/events',
+              templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+              controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+                  var blade = {
+                      id: 'events',
+                      title: 'platform.blades.history.title',
+                      breadcrumbs: [],
+                      subtitle: 'platform.blades.history.subtitle',
+                      controller: 'platformWebApp.pushNotificationsHistoryController',
+                      template: '$(Platform)/Scripts/app/pushNotifications/blade/history.tpl.html',
+                      isClosingDisabled: true
+                  };
+                  bladeNavigationService.showBlade(blade);
+              }
+              ]
+          });
+  }])
+.factory('platformWebApp.pushNotificationTemplateResolver', ['platformWebApp.bladeNavigationService', '$state', function (bladeNavigationService, $state) {
+    var notificationTemplates = [];
+
+    function register(template) {
+        notificationTemplates.push(template);
+        notificationTemplates.sort(function (a, b) { return a.priority - b.priority; });
+    };
+    function resolve(notification, place) {
+        return _.find(notificationTemplates, function (x) { return x.satisfy(notification, place); });
+    };
+    var retVal = {
+        register: register,
+        resolve: resolve,
+    };
+
+    //Recent events notification template (error, info, debug) 
+    var menuDefaultTemplate =
+        {
+            priority: 1000,
+            satisfy: function (notification, place) { return place == 'menu'; },
+            //template for display that notification in menu and list
+            template: '$(Platform)/Scripts/app/pushNotifications/menuDefault.tpl.html',
+            //action executed when notification selected
+            action: function (notify) { $state.go('workspace.pushNotificationsHistory', notify) }
+        };
+
+    //In history list notification template (error, info, debug)
+    var historyDefaultTemplate =
+        {
+            priority: 1000,
+            satisfy: function (notification, place) { return place == 'history'; },
+            //template for display that notification in menu and list
+            template: '$(Platform)/Scripts/app/pushNotifications/blade/historyDefault.tpl.html',
+            //action executed in event detail
+            action: function (notify) {
+                var blade = {
+                    id: 'notifyDetail',
+                    title: 'platform.blades.historyDetailDefault.title',
+                    subtitle: 'platform.blades.historyDetailDefault.subtitle',
+                    template: '$(Platform)/Scripts/app/pushNotifications/blade/historyDetailDefault.tpl.html',
+                    isClosingDisabled: false,
+                    notify: notify
+                };
+                bladeNavigationService.showBlade(blade);
+            }
+        };
+
+    retVal.register(menuDefaultTemplate);
+    retVal.register(historyDefaultTemplate);
+
+    return retVal;
+}])
+.factory('platformWebApp.pushNotificationService', ['$rootScope', '$timeout', '$interval', '$state', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
+    function ($rootScope, $timeout, $interval, $state, mainMenuService, eventTemplateResolver, notifications) {
+
+        //SignalR setup connection
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl("/pushNotificationHub")
+            .build();     
+        connection.start();
+
+        ////SignalR setup connection
+        // var transportType = signalR.TransportType.WebSockets;
+        // var http = new signalR.HttpConnection('/pushNotificationHub', { transport: transportType });
+        // var connection = new signalR.HubConnection(http);
+        // connection.start();
+
+
+        connection.on('Send', function (data) {
+            var notifyMenu = mainMenuService.findByPath('pushNotifications');
+            var notificationTemplate = eventTemplateResolver.resolve(data, 'menu');
+            //broadcast event
+            $rootScope.$broadcast("new-notification-event", data);
+
+            var menuItem = {
+                path: 'pushNotifications/notifications',
+                icon: 'fa fa-bell-o',
+                title: data.title,
+                priority: 2,
+                permission: '',
+                children: [],
+                action: notificationTemplate.action,
+                template: notificationTemplate.template,
+                notify: data
+            };
+
+            var alreadyExitstItem = _.find(notifyMenu.children, function (x) { return x.notify.id == menuItem.notify.id; });
+            if (alreadyExitstItem) {
+                angular.copy(menuItem, alreadyExitstItem);
+            }
+            else {
+                menuItem.parent = notifyMenu;
+                notifyMenu.children.push(menuItem);
+                notifyMenu.newCount++;
+
+                if (angular.isDefined(notifyMenu.intervalPromise)) {
+                    $interval.cancel(notifyMenu.intervalPromise);
+                }
+                animateNotify();
+                notifyMenu.intervalPromise = $interval(animateNotify, 30000);
+            }
+        });
+
+        function animateNotify() {
+            var notifyMenu = mainMenuService.findByPath('pushNotifications');
+            notifyMenu.isAnimated = true;
+
+            $timeout(function () {
+                notifyMenu.isAnimated = false;
+            }, 1500);
+        }
+
+        function markAllAsRead() {
+            var notifyMenu = mainMenuService.findByPath('pushNotifications');
+            if (angular.isDefined(notifyMenu.intervalPromise)) {
+                $interval.cancel(notifyMenu.intervalPromise);
+            }
+
+            notifications.markAllAsRead(null, function (data, status, headers, config) {
+                notifyMenu.isAnimated = false;
+                notifyMenu.newCount = 0;
+            }, function (error) {
+                //bladeNavigationService.setError('Error ' + error.status, blade);
+            });
+        }
+
+        var retVal = {
+            run: function () {
+                if (!this.running) {
+                    var notifyMenu = mainMenuService.findByPath('pushNotifications');
+                    if (!angular.isDefined(notifyMenu)) {
+                        notifyMenu = {
+                            path: 'pushNotifications',
+                            icon: 'fa fa-bell-o',
+                            title: 'platform.menu.notifications',
+                            priority: 2,
+                            isAlwaysOnBar: true,
+                            permission: '',
+                            headerTemplate: '$(Platform)/Scripts/app/pushNotifications/menuHeader.tpl.html',
+                            template: '$(Platform)/Scripts/app/pushNotifications/menu.tpl.html',
+                            action: function () { markAllAsRead(); if (this.children.length == 0) { this.showHistory(); } },
+                            showHistory: function () { $state.go('workspace.pushNotificationsHistory'); },
+                            clearRecent: function () { notifyMenu.children.splice(0, notifyMenu.children.length); },
+                            children: [],
+                            newCount: 0
+                        };
+                        mainMenuService.addMenuItem(notifyMenu);
+                    }
+                    this.running = true;
+                };
+            },
+            running: false
+        };
+        return retVal;
+
+    }]);
+
 angular.module('platformWebApp')
     .config(['$stateProvider', '$httpProvider', function ($stateProvider, $httpProvider) {
         $stateProvider.state('loginDialog', {
@@ -19033,179 +18020,6 @@ angular.module('platformWebApp')
             controller: 'platformWebApp.changeLog.operationsWidgetController',
             template: '$(Platform)/Scripts/app/changeLog/widgets/operations-widget.tpl.html'
         }, 'accountDetail');
-    }]);
-
-angular.module('platformWebApp')
-.config(
-  ['$stateProvider', function ($stateProvider) {
-      $stateProvider
-          .state('workspace.pushNotificationsHistory', {
-              url: '/events',
-              templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-              controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-                  var blade = {
-                      id: 'events',
-                      title: 'platform.blades.history.title',
-                      breadcrumbs: [],
-                      subtitle: 'platform.blades.history.subtitle',
-                      controller: 'platformWebApp.pushNotificationsHistoryController',
-                      template: '$(Platform)/Scripts/app/pushNotifications/blade/history.tpl.html',
-                      isClosingDisabled: true
-                  };
-                  bladeNavigationService.showBlade(blade);
-              }
-              ]
-          });
-  }])
-.factory('platformWebApp.pushNotificationTemplateResolver', ['platformWebApp.bladeNavigationService', '$state', function (bladeNavigationService, $state) {
-    var notificationTemplates = [];
-
-    function register(template) {
-        notificationTemplates.push(template);
-        notificationTemplates.sort(function (a, b) { return a.priority - b.priority; });
-    };
-    function resolve(notification, place) {
-        return _.find(notificationTemplates, function (x) { return x.satisfy(notification, place); });
-    };
-    var retVal = {
-        register: register,
-        resolve: resolve,
-    };
-
-    //Recent events notification template (error, info, debug) 
-    var menuDefaultTemplate =
-        {
-            priority: 1000,
-            satisfy: function (notification, place) { return place == 'menu'; },
-            //template for display that notification in menu and list
-            template: '$(Platform)/Scripts/app/pushNotifications/menuDefault.tpl.html',
-            //action executed when notification selected
-            action: function (notify) { $state.go('workspace.pushNotificationsHistory', notify) }
-        };
-
-    //In history list notification template (error, info, debug)
-    var historyDefaultTemplate =
-        {
-            priority: 1000,
-            satisfy: function (notification, place) { return place == 'history'; },
-            //template for display that notification in menu and list
-            template: '$(Platform)/Scripts/app/pushNotifications/blade/historyDefault.tpl.html',
-            //action executed in event detail
-            action: function (notify) {
-                var blade = {
-                    id: 'notifyDetail',
-                    title: 'platform.blades.historyDetailDefault.title',
-                    subtitle: 'platform.blades.historyDetailDefault.subtitle',
-                    template: '$(Platform)/Scripts/app/pushNotifications/blade/historyDetailDefault.tpl.html',
-                    isClosingDisabled: false,
-                    notify: notify
-                };
-                bladeNavigationService.showBlade(blade);
-            }
-        };
-
-    retVal.register(menuDefaultTemplate);
-    retVal.register(historyDefaultTemplate);
-
-    return retVal;
-}])
-.factory('platformWebApp.pushNotificationService', ['$rootScope', '$timeout', '$interval', '$state', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
-    function ($rootScope, $timeout, $interval, $state, mainMenuService, eventTemplateResolver, notifications) {
-
-        //SignalR setup connection
-         var transportType = signalR.TransportType.WebSockets;
-         var http = new signalR.HttpConnection('/pushNotificationHub', { transport: transportType });
-         var connection = new signalR.HubConnection(http);
-         connection.start();
-
-
-        connection.on('Send', function (data) {
-            var notifyMenu = mainMenuService.findByPath('pushNotifications');
-            var notificationTemplate = eventTemplateResolver.resolve(data, 'menu');
-            //broadcast event
-            $rootScope.$broadcast("new-notification-event", data);
-
-            var menuItem = {
-                path: 'pushNotifications/notifications',
-                icon: 'fa fa-bell-o',
-                title: data.title,
-                priority: 2,
-                permission: '',
-                children: [],
-                action: notificationTemplate.action,
-                template: notificationTemplate.template,
-                notify: data
-            };
-
-            var alreadyExitstItem = _.find(notifyMenu.children, function (x) { return x.notify.id == menuItem.notify.id; });
-            if (alreadyExitstItem) {
-                angular.copy(menuItem, alreadyExitstItem);
-            }
-            else {
-                menuItem.parent = notifyMenu;
-                notifyMenu.children.push(menuItem);
-                notifyMenu.newCount++;
-
-                if (angular.isDefined(notifyMenu.intervalPromise)) {
-                    $interval.cancel(notifyMenu.intervalPromise);
-                }
-                animateNotify();
-                notifyMenu.intervalPromise = $interval(animateNotify, 30000);
-            }
-        });
-
-        function animateNotify() {
-            var notifyMenu = mainMenuService.findByPath('pushNotifications');
-            notifyMenu.isAnimated = true;
-
-            $timeout(function () {
-                notifyMenu.isAnimated = false;
-            }, 1500);
-        }
-
-        function markAllAsRead() {
-            var notifyMenu = mainMenuService.findByPath('pushNotifications');
-            if (angular.isDefined(notifyMenu.intervalPromise)) {
-                $interval.cancel(notifyMenu.intervalPromise);
-            }
-
-            notifications.markAllAsRead(null, function (data, status, headers, config) {
-                notifyMenu.isAnimated = false;
-                notifyMenu.newCount = 0;
-            }, function (error) {
-                //bladeNavigationService.setError('Error ' + error.status, blade);
-            });
-        }
-
-        var retVal = {
-            run: function () {
-                if (!this.running) {
-                    var notifyMenu = mainMenuService.findByPath('pushNotifications');
-                    if (!angular.isDefined(notifyMenu)) {
-                        notifyMenu = {
-                            path: 'pushNotifications',
-                            icon: 'fa fa-bell-o',
-                            title: 'platform.menu.notifications',
-                            priority: 2,
-                            isAlwaysOnBar: true,
-                            permission: '',
-                            headerTemplate: '$(Platform)/Scripts/app/pushNotifications/menuHeader.tpl.html',
-                            template: '$(Platform)/Scripts/app/pushNotifications/menu.tpl.html',
-                            action: function () { markAllAsRead(); if (this.children.length == 0) { this.showHistory(); } },
-                            showHistory: function () { $state.go('workspace.pushNotificationsHistory'); },
-                            clearRecent: function () { notifyMenu.children.splice(0, notifyMenu.children.length); },
-                            children: [],
-                            newCount: 0
-                        };
-                        mainMenuService.addMenuItem(notifyMenu);
-                    }
-                    this.running = true;
-                };
-            },
-            running: false
-        };
-        return retVal;
-
     }]);
 
 angular.module("platformWebApp")
@@ -19467,6 +18281,1869 @@ angular.module('platformWebApp')
     mainMenuService.addMenuItem(menuItem);
 }]);
 
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+"use strict";
+
+CodeMirror.registerHelper("fold", "brace", function(cm, start) {
+  var line = start.line, lineText = cm.getLine(line);
+  var startCh, tokenType;
+
+  function findOpening(openCh) {
+    for (var at = start.ch, pass = 0;;) {
+      var found = at <= 0 ? -1 : lineText.lastIndexOf(openCh, at - 1);
+      if (found == -1) {
+        if (pass == 1) break;
+        pass = 1;
+        at = lineText.length;
+        continue;
+      }
+      if (pass == 1 && found < start.ch) break;
+      tokenType = cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1));
+      if (!/^(comment|string)/.test(tokenType)) return found + 1;
+      at = found - 1;
+    }
+  }
+
+  var startToken = "{", endToken = "}", startCh = findOpening("{");
+  if (startCh == null) {
+    startToken = "[", endToken = "]";
+    startCh = findOpening("[");
+  }
+
+  if (startCh == null) return;
+  var count = 1, lastLine = cm.lastLine(), end, endCh;
+  outer: for (var i = line; i <= lastLine; ++i) {
+    var text = cm.getLine(i), pos = i == line ? startCh : 0;
+    for (;;) {
+      var nextOpen = text.indexOf(startToken, pos), nextClose = text.indexOf(endToken, pos);
+      if (nextOpen < 0) nextOpen = text.length;
+      if (nextClose < 0) nextClose = text.length;
+      pos = Math.min(nextOpen, nextClose);
+      if (pos == text.length) break;
+      if (cm.getTokenTypeAt(CodeMirror.Pos(i, pos + 1)) == tokenType) {
+        if (pos == nextOpen) ++count;
+        else if (!--count) { end = i; endCh = pos; break outer; }
+      }
+      ++pos;
+    }
+  }
+  if (end == null || line == end && endCh == startCh) return;
+  return {from: CodeMirror.Pos(line, startCh),
+          to: CodeMirror.Pos(end, endCh)};
+});
+
+CodeMirror.registerHelper("fold", "import", function(cm, start) {
+  function hasImport(line) {
+    if (line < cm.firstLine() || line > cm.lastLine()) return null;
+    var start = cm.getTokenAt(CodeMirror.Pos(line, 1));
+    if (!/\S/.test(start.string)) start = cm.getTokenAt(CodeMirror.Pos(line, start.end + 1));
+    if (start.type != "keyword" || start.string != "import") return null;
+    // Now find closing semicolon, return its position
+    for (var i = line, e = Math.min(cm.lastLine(), line + 10); i <= e; ++i) {
+      var text = cm.getLine(i), semi = text.indexOf(";");
+      if (semi != -1) return {startCh: start.end, end: CodeMirror.Pos(i, semi)};
+    }
+  }
+
+  var start = start.line, has = hasImport(start), prev;
+  if (!has || hasImport(start - 1) || ((prev = hasImport(start - 2)) && prev.end.line == start - 1))
+    return null;
+  for (var end = has.end;;) {
+    var next = hasImport(end.line + 1);
+    if (next == null) break;
+    end = next.end;
+  }
+  return {from: cm.clipPos(CodeMirror.Pos(start, has.startCh + 1)), to: end};
+});
+
+CodeMirror.registerHelper("fold", "include", function(cm, start) {
+  function hasInclude(line) {
+    if (line < cm.firstLine() || line > cm.lastLine()) return null;
+    var start = cm.getTokenAt(CodeMirror.Pos(line, 1));
+    if (!/\S/.test(start.string)) start = cm.getTokenAt(CodeMirror.Pos(line, start.end + 1));
+    if (start.type == "meta" && start.string.slice(0, 8) == "#include") return start.start + 8;
+  }
+
+  var start = start.line, has = hasInclude(start);
+  if (has == null || hasInclude(start - 1) != null) return null;
+  for (var end = start;;) {
+    var next = hasInclude(end + 1);
+    if (next == null) break;
+    ++end;
+  }
+  return {from: CodeMirror.Pos(start, has + 1),
+          to: cm.clipPos(CodeMirror.Pos(end))};
+});
+
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+"use strict";
+
+CodeMirror.registerGlobalHelper("fold", "comment", function(mode) {
+  return mode.blockCommentStart && mode.blockCommentEnd;
+}, function(cm, start) {
+  var mode = cm.getModeAt(start), startToken = mode.blockCommentStart, endToken = mode.blockCommentEnd;
+  if (!startToken || !endToken) return;
+  var line = start.line, lineText = cm.getLine(line);
+
+  var startCh;
+  for (var at = start.ch, pass = 0;;) {
+    var found = at <= 0 ? -1 : lineText.lastIndexOf(startToken, at - 1);
+    if (found == -1) {
+      if (pass == 1) return;
+      pass = 1;
+      at = lineText.length;
+      continue;
+    }
+    if (pass == 1 && found < start.ch) return;
+    if (/comment/.test(cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1)))) {
+      startCh = found + startToken.length;
+      break;
+    }
+    at = found - 1;
+  }
+
+  var depth = 1, lastLine = cm.lastLine(), end, endCh;
+  outer: for (var i = line; i <= lastLine; ++i) {
+    var text = cm.getLine(i), pos = i == line ? startCh : 0;
+    for (;;) {
+      var nextOpen = text.indexOf(startToken, pos), nextClose = text.indexOf(endToken, pos);
+      if (nextOpen < 0) nextOpen = text.length;
+      if (nextClose < 0) nextClose = text.length;
+      pos = Math.min(nextOpen, nextClose);
+      if (pos == text.length) break;
+      if (pos == nextOpen) ++depth;
+      else if (!--depth) { end = i; endCh = pos; break outer; }
+      ++pos;
+    }
+  }
+  if (end == null || line == end && endCh == startCh) return;
+  return {from: CodeMirror.Pos(line, startCh),
+          to: CodeMirror.Pos(end, endCh)};
+});
+
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+  "use strict";
+
+  function doFold(cm, pos, options, force) {
+    if (options && options.call) {
+      var finder = options;
+      options = null;
+    } else {
+      var finder = getOption(cm, options, "rangeFinder");
+    }
+    if (typeof pos == "number") pos = CodeMirror.Pos(pos, 0);
+    var minSize = getOption(cm, options, "minFoldSize");
+
+    function getRange(allowFolded) {
+      var range = finder(cm, pos);
+      if (!range || range.to.line - range.from.line < minSize) return null;
+      var marks = cm.findMarksAt(range.from);
+      for (var i = 0; i < marks.length; ++i) {
+        if (marks[i].__isFold && force !== "fold") {
+          if (!allowFolded) return null;
+          range.cleared = true;
+          marks[i].clear();
+        }
+      }
+      return range;
+    }
+
+    var range = getRange(true);
+    if (getOption(cm, options, "scanUp")) while (!range && pos.line > cm.firstLine()) {
+      pos = CodeMirror.Pos(pos.line - 1, 0);
+      range = getRange(false);
+    }
+    if (!range || range.cleared || force === "unfold") return;
+
+    var myWidget = makeWidget(cm, options);
+    CodeMirror.on(myWidget, "mousedown", function(e) {
+      myRange.clear();
+      CodeMirror.e_preventDefault(e);
+    });
+    var myRange = cm.markText(range.from, range.to, {
+      replacedWith: myWidget,
+      clearOnEnter: true,
+      __isFold: true
+    });
+    myRange.on("clear", function(from, to) {
+      CodeMirror.signal(cm, "unfold", cm, from, to);
+    });
+    CodeMirror.signal(cm, "fold", cm, range.from, range.to);
+  }
+
+  function makeWidget(cm, options) {
+    var widget = getOption(cm, options, "widget");
+    if (typeof widget == "string") {
+      var text = document.createTextNode(widget);
+      widget = document.createElement("span");
+      widget.appendChild(text);
+      widget.className = "CodeMirror-foldmarker";
+    }
+    return widget;
+  }
+
+  // Clumsy backwards-compatible interface
+  CodeMirror.newFoldFunction = function(rangeFinder, widget) {
+    return function(cm, pos) { doFold(cm, pos, {rangeFinder: rangeFinder, widget: widget}); };
+  };
+
+  // New-style interface
+  CodeMirror.defineExtension("foldCode", function(pos, options, force) {
+    doFold(this, pos, options, force);
+  });
+
+  CodeMirror.defineExtension("isFolded", function(pos) {
+    var marks = this.findMarksAt(pos);
+    for (var i = 0; i < marks.length; ++i)
+      if (marks[i].__isFold) return true;
+  });
+
+  CodeMirror.commands.toggleFold = function(cm) {
+    cm.foldCode(cm.getCursor());
+  };
+  CodeMirror.commands.fold = function(cm) {
+    cm.foldCode(cm.getCursor(), null, "fold");
+  };
+  CodeMirror.commands.unfold = function(cm) {
+    cm.foldCode(cm.getCursor(), null, "unfold");
+  };
+  CodeMirror.commands.foldAll = function(cm) {
+    cm.operation(function() {
+      for (var i = cm.firstLine(), e = cm.lastLine(); i <= e; i++)
+        cm.foldCode(CodeMirror.Pos(i, 0), null, "fold");
+    });
+  };
+  CodeMirror.commands.unfoldAll = function(cm) {
+    cm.operation(function() {
+      for (var i = cm.firstLine(), e = cm.lastLine(); i <= e; i++)
+        cm.foldCode(CodeMirror.Pos(i, 0), null, "unfold");
+    });
+  };
+
+  CodeMirror.registerHelper("fold", "combine", function() {
+    var funcs = Array.prototype.slice.call(arguments, 0);
+    return function(cm, start) {
+      for (var i = 0; i < funcs.length; ++i) {
+        var found = funcs[i](cm, start);
+        if (found) return found;
+      }
+    };
+  });
+
+  CodeMirror.registerHelper("fold", "auto", function(cm, start) {
+    var helpers = cm.getHelpers(start, "fold");
+    for (var i = 0; i < helpers.length; i++) {
+      var cur = helpers[i](cm, start);
+      if (cur) return cur;
+    }
+  });
+
+  var defaultOptions = {
+    rangeFinder: CodeMirror.fold.auto,
+    widget: "\u2194",
+    minFoldSize: 0,
+    scanUp: false
+  };
+
+  CodeMirror.defineOption("foldOptions", null);
+
+  function getOption(cm, options, name) {
+    if (options && options[name] !== undefined)
+      return options[name];
+    var editorOptions = cm.options.foldOptions;
+    if (editorOptions && editorOptions[name] !== undefined)
+      return editorOptions[name];
+    return defaultOptions[name];
+  }
+
+  CodeMirror.defineExtension("foldOption", function(options, name) {
+    return getOption(this, options, name);
+  });
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"), require("./foldcode"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror", "./foldcode"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+  "use strict";
+
+  CodeMirror.defineOption("foldGutter", false, function(cm, val, old) {
+    if (old && old != CodeMirror.Init) {
+      cm.clearGutter(cm.state.foldGutter.options.gutter);
+      cm.state.foldGutter = null;
+      cm.off("gutterClick", onGutterClick);
+      cm.off("change", onChange);
+      cm.off("viewportChange", onViewportChange);
+      cm.off("fold", onFold);
+      cm.off("unfold", onFold);
+      cm.off("swapDoc", updateInViewport);
+    }
+    if (val) {
+      cm.state.foldGutter = new State(parseOptions(val));
+      updateInViewport(cm);
+      cm.on("gutterClick", onGutterClick);
+      cm.on("change", onChange);
+      cm.on("viewportChange", onViewportChange);
+      cm.on("fold", onFold);
+      cm.on("unfold", onFold);
+      cm.on("swapDoc", updateInViewport);
+    }
+  });
+
+  var Pos = CodeMirror.Pos;
+
+  function State(options) {
+    this.options = options;
+    this.from = this.to = 0;
+  }
+
+  function parseOptions(opts) {
+    if (opts === true) opts = {};
+    if (opts.gutter == null) opts.gutter = "CodeMirror-foldgutter";
+    if (opts.indicatorOpen == null) opts.indicatorOpen = "CodeMirror-foldgutter-open";
+    if (opts.indicatorFolded == null) opts.indicatorFolded = "CodeMirror-foldgutter-folded";
+    return opts;
+  }
+
+  function isFolded(cm, line) {
+    var marks = cm.findMarksAt(Pos(line));
+    for (var i = 0; i < marks.length; ++i)
+      if (marks[i].__isFold && marks[i].find().from.line == line) return marks[i];
+  }
+
+  function marker(spec) {
+    if (typeof spec == "string") {
+      var elt = document.createElement("div");
+      elt.className = spec + " CodeMirror-guttermarker-subtle";
+      return elt;
+    } else {
+      return spec.cloneNode(true);
+    }
+  }
+
+  function updateFoldInfo(cm, from, to) {
+    var opts = cm.state.foldGutter.options, cur = from;
+    var minSize = cm.foldOption(opts, "minFoldSize");
+    var func = cm.foldOption(opts, "rangeFinder");
+    cm.eachLine(from, to, function(line) {
+      var mark = null;
+      if (isFolded(cm, cur)) {
+        mark = marker(opts.indicatorFolded);
+      } else {
+        var pos = Pos(cur, 0);
+        var range = func && func(cm, pos);
+        if (range && range.to.line - range.from.line >= minSize)
+          mark = marker(opts.indicatorOpen);
+      }
+      cm.setGutterMarker(line, opts.gutter, mark);
+      ++cur;
+    });
+  }
+
+  function updateInViewport(cm) {
+    var vp = cm.getViewport(), state = cm.state.foldGutter;
+    if (!state) return;
+    cm.operation(function() {
+      updateFoldInfo(cm, vp.from, vp.to);
+    });
+    state.from = vp.from; state.to = vp.to;
+  }
+
+  function onGutterClick(cm, line, gutter) {
+    var state = cm.state.foldGutter;
+    if (!state) return;
+    var opts = state.options;
+    if (gutter != opts.gutter) return;
+    var folded = isFolded(cm, line);
+    if (folded) folded.clear();
+    else cm.foldCode(Pos(line, 0), opts.rangeFinder);
+  }
+
+  function onChange(cm) {
+    var state = cm.state.foldGutter;
+    if (!state) return;
+    var opts = state.options;
+    state.from = state.to = 0;
+    clearTimeout(state.changeUpdate);
+    state.changeUpdate = setTimeout(function() { updateInViewport(cm); }, opts.foldOnChangeTimeSpan || 600);
+  }
+
+  function onViewportChange(cm) {
+    var state = cm.state.foldGutter;
+    if (!state) return;
+    var opts = state.options;
+    clearTimeout(state.changeUpdate);
+    state.changeUpdate = setTimeout(function() {
+      var vp = cm.getViewport();
+      if (state.from == state.to || vp.from - state.to > 20 || state.from - vp.to > 20) {
+        updateInViewport(cm);
+      } else {
+        cm.operation(function() {
+          if (vp.from < state.from) {
+            updateFoldInfo(cm, vp.from, state.from);
+            state.from = vp.from;
+          }
+          if (vp.to > state.to) {
+            updateFoldInfo(cm, state.to, vp.to);
+            state.to = vp.to;
+          }
+        });
+      }
+    }, opts.updateViewportTimeSpan || 400);
+  }
+
+  function onFold(cm, from) {
+    var state = cm.state.foldGutter;
+    if (!state) return;
+    var line = from.line;
+    if (line >= state.from && line < state.to)
+      updateFoldInfo(cm, line, line + 1);
+  }
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+"use strict";
+
+CodeMirror.registerHelper("fold", "indent", function(cm, start) {
+  var tabSize = cm.getOption("tabSize"), firstLine = cm.getLine(start.line);
+  if (!/\S/.test(firstLine)) return;
+  var getIndent = function(line) {
+    return CodeMirror.countColumn(line, null, tabSize);
+  };
+  var myIndent = getIndent(firstLine);
+  var lastLineInFold = null;
+  // Go through lines until we find a line that definitely doesn't belong in
+  // the block we're folding, or to the end.
+  for (var i = start.line + 1, end = cm.lastLine(); i <= end; ++i) {
+    var curLine = cm.getLine(i);
+    var curIndent = getIndent(curLine);
+    if (curIndent > myIndent) {
+      // Lines with a greater indent are considered part of the block.
+      lastLineInFold = i;
+    } else if (!/\S/.test(curLine)) {
+      // Empty lines might be breaks within the block we're trying to fold.
+    } else {
+      // A non-empty line at an indent equal to or less than ours marks the
+      // start of another block.
+      break;
+    }
+  }
+  if (lastLineInFold) return {
+    from: CodeMirror.Pos(start.line, firstLine.length),
+    to: CodeMirror.Pos(lastLineInFold, cm.getLine(lastLineInFold).length)
+  };
+});
+
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+"use strict";
+
+CodeMirror.registerHelper("fold", "markdown", function(cm, start) {
+  var maxDepth = 100;
+
+  function isHeader(lineNo) {
+    var tokentype = cm.getTokenTypeAt(CodeMirror.Pos(lineNo, 0));
+    return tokentype && /\bheader\b/.test(tokentype);
+  }
+
+  function headerLevel(lineNo, line, nextLine) {
+    var match = line && line.match(/^#+/);
+    if (match && isHeader(lineNo)) return match[0].length;
+    match = nextLine && nextLine.match(/^[=\-]+\s*$/);
+    if (match && isHeader(lineNo + 1)) return nextLine[0] == "=" ? 1 : 2;
+    return maxDepth;
+  }
+
+  var firstLine = cm.getLine(start.line), nextLine = cm.getLine(start.line + 1);
+  var level = headerLevel(start.line, firstLine, nextLine);
+  if (level === maxDepth) return undefined;
+
+  var lastLineNo = cm.lastLine();
+  var end = start.line, nextNextLine = cm.getLine(end + 2);
+  while (end < lastLineNo) {
+    if (headerLevel(end + 1, nextLine, nextNextLine) <= level) break;
+    ++end;
+    nextLine = nextNextLine;
+    nextNextLine = cm.getLine(end + 2);
+  }
+
+  return {
+    from: CodeMirror.Pos(start.line, firstLine.length),
+    to: CodeMirror.Pos(end, cm.getLine(end).length)
+  };
+});
+
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+  "use strict";
+
+  var Pos = CodeMirror.Pos;
+  function cmp(a, b) { return a.line - b.line || a.ch - b.ch; }
+
+  var nameStartChar = "A-Z_a-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD";
+  var nameChar = nameStartChar + "\-\:\.0-9\\u00B7\\u0300-\\u036F\\u203F-\\u2040";
+  var xmlTagStart = new RegExp("<(/?)([" + nameStartChar + "][" + nameChar + "]*)", "g");
+
+  function Iter(cm, line, ch, range) {
+    this.line = line; this.ch = ch;
+    this.cm = cm; this.text = cm.getLine(line);
+    this.min = range ? range.from : cm.firstLine();
+    this.max = range ? range.to - 1 : cm.lastLine();
+  }
+
+  function tagAt(iter, ch) {
+    var type = iter.cm.getTokenTypeAt(Pos(iter.line, ch));
+    return type && /\btag\b/.test(type);
+  }
+
+  function nextLine(iter) {
+    if (iter.line >= iter.max) return;
+    iter.ch = 0;
+    iter.text = iter.cm.getLine(++iter.line);
+    return true;
+  }
+  function prevLine(iter) {
+    if (iter.line <= iter.min) return;
+    iter.text = iter.cm.getLine(--iter.line);
+    iter.ch = iter.text.length;
+    return true;
+  }
+
+  function toTagEnd(iter) {
+    for (;;) {
+      var gt = iter.text.indexOf(">", iter.ch);
+      if (gt == -1) { if (nextLine(iter)) continue; else return; }
+      if (!tagAt(iter, gt + 1)) { iter.ch = gt + 1; continue; }
+      var lastSlash = iter.text.lastIndexOf("/", gt);
+      var selfClose = lastSlash > -1 && !/\S/.test(iter.text.slice(lastSlash + 1, gt));
+      iter.ch = gt + 1;
+      return selfClose ? "selfClose" : "regular";
+    }
+  }
+  function toTagStart(iter) {
+    for (;;) {
+      var lt = iter.ch ? iter.text.lastIndexOf("<", iter.ch - 1) : -1;
+      if (lt == -1) { if (prevLine(iter)) continue; else return; }
+      if (!tagAt(iter, lt + 1)) { iter.ch = lt; continue; }
+      xmlTagStart.lastIndex = lt;
+      iter.ch = lt;
+      var match = xmlTagStart.exec(iter.text);
+      if (match && match.index == lt) return match;
+    }
+  }
+
+  function toNextTag(iter) {
+    for (;;) {
+      xmlTagStart.lastIndex = iter.ch;
+      var found = xmlTagStart.exec(iter.text);
+      if (!found) { if (nextLine(iter)) continue; else return; }
+      if (!tagAt(iter, found.index + 1)) { iter.ch = found.index + 1; continue; }
+      iter.ch = found.index + found[0].length;
+      return found;
+    }
+  }
+  function toPrevTag(iter) {
+    for (;;) {
+      var gt = iter.ch ? iter.text.lastIndexOf(">", iter.ch - 1) : -1;
+      if (gt == -1) { if (prevLine(iter)) continue; else return; }
+      if (!tagAt(iter, gt + 1)) { iter.ch = gt; continue; }
+      var lastSlash = iter.text.lastIndexOf("/", gt);
+      var selfClose = lastSlash > -1 && !/\S/.test(iter.text.slice(lastSlash + 1, gt));
+      iter.ch = gt + 1;
+      return selfClose ? "selfClose" : "regular";
+    }
+  }
+
+  function findMatchingClose(iter, tag) {
+    var stack = [];
+    for (;;) {
+      var next = toNextTag(iter), end, startLine = iter.line, startCh = iter.ch - (next ? next[0].length : 0);
+      if (!next || !(end = toTagEnd(iter))) return;
+      if (end == "selfClose") continue;
+      if (next[1]) { // closing tag
+        for (var i = stack.length - 1; i >= 0; --i) if (stack[i] == next[2]) {
+          stack.length = i;
+          break;
+        }
+        if (i < 0 && (!tag || tag == next[2])) return {
+          tag: next[2],
+          from: Pos(startLine, startCh),
+          to: Pos(iter.line, iter.ch)
+        };
+      } else { // opening tag
+        stack.push(next[2]);
+      }
+    }
+  }
+  function findMatchingOpen(iter, tag) {
+    var stack = [];
+    for (;;) {
+      var prev = toPrevTag(iter);
+      if (!prev) return;
+      if (prev == "selfClose") { toTagStart(iter); continue; }
+      var endLine = iter.line, endCh = iter.ch;
+      var start = toTagStart(iter);
+      if (!start) return;
+      if (start[1]) { // closing tag
+        stack.push(start[2]);
+      } else { // opening tag
+        for (var i = stack.length - 1; i >= 0; --i) if (stack[i] == start[2]) {
+          stack.length = i;
+          break;
+        }
+        if (i < 0 && (!tag || tag == start[2])) return {
+          tag: start[2],
+          from: Pos(iter.line, iter.ch),
+          to: Pos(endLine, endCh)
+        };
+      }
+    }
+  }
+
+  CodeMirror.registerHelper("fold", "xml", function(cm, start) {
+    var iter = new Iter(cm, start.line, 0);
+    for (;;) {
+      var openTag = toNextTag(iter), end;
+      if (!openTag || iter.line != start.line || !(end = toTagEnd(iter))) return;
+      if (!openTag[1] && end != "selfClose") {
+        var start = Pos(iter.line, iter.ch);
+        var close = findMatchingClose(iter, openTag[2]);
+        return close && {from: start, to: close.from};
+      }
+    }
+  });
+  CodeMirror.findMatchingTag = function(cm, pos, range) {
+    var iter = new Iter(cm, pos.line, pos.ch, range);
+    if (iter.text.indexOf(">") == -1 && iter.text.indexOf("<") == -1) return;
+    var end = toTagEnd(iter), to = end && Pos(iter.line, iter.ch);
+    var start = end && toTagStart(iter);
+    if (!end || !start || cmp(iter, pos) > 0) return;
+    var here = {from: Pos(iter.line, iter.ch), to: to, tag: start[2]};
+    if (end == "selfClose") return {open: here, close: null, at: "open"};
+
+    if (start[1]) { // closing tag
+      return {open: findMatchingOpen(iter, start[2]), close: here, at: "close"};
+    } else { // opening tag
+      iter = new Iter(cm, to.line, to.ch, range);
+      return {open: here, close: findMatchingClose(iter, start[2]), at: "open"};
+    }
+  };
+
+  CodeMirror.findEnclosingTag = function(cm, pos, range) {
+    var iter = new Iter(cm, pos.line, pos.ch, range);
+    for (;;) {
+      var open = findMatchingOpen(iter);
+      if (!open) break;
+      var forward = new Iter(cm, pos.line, pos.ch, range);
+      var close = findMatchingClose(forward, open.tag);
+      if (close) return {open: open, close: close};
+    }
+  };
+
+  // Used by addon/edit/closetag.js
+  CodeMirror.scanForClosingTag = function(cm, pos, name, end) {
+    var iter = new Iter(cm, pos.line, pos.ch, end ? {from: 0, to: end} : null);
+    return findMatchingClose(iter, name);
+  };
+});
+
+// Full list of countries defined by ISO 3166-1 alpha-3
+// based on https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
+angular.module('platformWebApp')
+.factory('platformWebApp.common.countries', function () {
+    return {
+        get: function (id) {
+            return _.findWhere(this.query(), { id: this.normalize(id) });
+        },
+        contains: function (id) {
+            return _.map(this.query(), function (entry) { return entry.id }).includes(this.normalize(id));
+        },
+        normalize: function(id) {
+            var result = undefined;
+            if (!!id) {
+                result = id.toUpperCase();
+            }
+            return result;
+        },
+        query: function () {
+            return [
+    { id: "AFG", name: "Afghanistan" },
+    { id: "ALA", name: "Åland Islands" },
+    { id: "ALB", name: "Albania" },
+    { id: "DZA", name: "Algeria" },
+    { id: "ASM", name: "American Samoa" },
+    { id: "AND", name: "Andorra" },
+    { id: "AGO", name: "Angola" },
+    { id: "AIA", name: "Anguilla" },
+    { id: "ATA", name: "Antarctica" },
+    { id: "ATG", name: "Antigua and Barbuda" },
+    { id: "ARG", name: "Argentina" },
+    { id: "ARM", name: "Armenia" },
+    { id: "ABW", name: "Aruba" },
+    { id: "AUS", name: "Australia" },
+    { id: "AUT", name: "Austria" },
+    { id: "AZE", name: "Azerbaijan" },
+    { id: "BHS", name: "Bahamas" },
+    { id: "BHR", name: "Bahrain" },
+    { id: "BGD", name: "Bangladesh" },
+    { id: "BRB", name: "Barbados" },
+    { id: "BLR", name: "Belarus" },
+    { id: "BEL", name: "Belgium" },
+    { id: "BLZ", name: "Belize" },
+    { id: "BEN", name: "Benin" },
+    { id: "BMU", name: "Bermuda" },
+    { id: "BTN", name: "Bhutan" },
+    { id: "BOL", name: "Bolivia, Plurinational State of" },
+    { id: "BES", name: "Bonaire, Sint Eustatius and Saba" },
+    { id: "BIH", name: "Bosnia and Herzegovina" },
+    { id: "BWA", name: "Botswana" },
+    { id: "BVT", name: "Bouvet Island" },
+    { id: "BRA", name: "Brazil" },
+    { id: "IOT", name: "British Indian Ocean Territory" },
+    { id: "BRN", name: "Brunei Darussalam" },
+    { id: "BGR", name: "Bulgaria" },
+    { id: "BFA", name: "Burkina Faso" },
+    { id: "BDI", name: "Burundi" },
+    { id: "KHM", name: "Cambodia" },
+    { id: "CMR", name: "Cameroon" },
+    { id: "CAN", name: "Canada" },
+    { id: "CPV", name: "Cape Verde" },
+    { id: "CYM", name: "Cayman Islands" },
+    { id: "CAF", name: "Central African Republic" },
+    { id: "TCD", name: "Chad" },
+    { id: "CHL", name: "Chile" },
+    { id: "CHN", name: "China" },
+    { id: "CXR", name: "Christmas Island" },
+    { id: "CCK", name: "Cocos (Keeling) Islands" },
+    { id: "COL", name: "Colombia" },
+    { id: "COM", name: "Comoros" },
+    { id: "COG", name: "Congo" },
+    { id: "COD", name: "Congo, the Democratic Republic of the" },
+    { id: "COK", name: "Cook Islands" },
+    { id: "CRI", name: "Costa Rica" },
+    { id: "CIV", name: "Côte d'Ivoire" },
+    { id: "HRV", name: "Croatia" },
+    { id: "CUB", name: "Cuba" },
+    { id: "CUW", name: "Curaçao" },
+    { id: "CYP", name: "Cyprus" },
+    { id: "CZE", name: "Czech Republic" },
+    { id: "DNK", name: "Denmark" },
+    { id: "DJI", name: "Djibouti" },
+    { id: "DMA", name: "Dominica" },
+    { id: "DOM", name: "Dominican Republic" },
+    { id: "ECU", name: "Ecuador" },
+    { id: "EGY", name: "Egypt" },
+    { id: "SLV", name: "El Salvador" },
+    { id: "GNQ", name: "Equatorial Guinea" },
+    { id: "ERI", name: "Eritrea" },
+    { id: "EST", name: "Estonia" },
+    { id: "ETH", name: "Ethiopia" },
+    { id: "FLK", name: "Falkland Islands (Malvinas)" },
+    { id: "FRO", name: "Faroe Islands" },
+    { id: "FJI", name: "Fiji" },
+    { id: "FIN", name: "Finland" },
+    { id: "FRA", name: "France" },
+    { id: "GUF", name: "French Guiana" },
+    { id: "PYF", name: "French Polynesia" },
+    { id: "ATF", name: "French Southern Territories" },
+    { id: "GAB", name: "Gabon" },
+    { id: "GMB", name: "Gambia" },
+    { id: "GEO", name: "Georgia" },
+    { id: "DEU", name: "Germany" },
+    { id: "GHA", name: "Ghana" },
+    { id: "GIB", name: "Gibraltar" },
+    { id: "GRC", name: "Greece" },
+    { id: "GRL", name: "Greenland" },
+    { id: "GRD", name: "Grenada" },
+    { id: "GLP", name: "Guadeloupe" },
+    { id: "GUM", name: "Guam" },
+    { id: "GTM", name: "Guatemala" },
+    { id: "GGY", name: "Guernsey" },
+    { id: "GIN", name: "Guinea" },
+    { id: "GNB", name: "Guinea-Bissau" },
+    { id: "GUY", name: "Guyana" },
+    { id: "HTI", name: "Haiti" },
+    { id: "HMD", name: "Heard Island and McDonald Islands" },
+    { id: "VAT", name: "Holy See (Vatican City State)" },
+    { id: "HND", name: "Honduras" },
+    { id: "HKG", name: "Hong Kong" },
+    { id: "HUN", name: "Hungary" },
+    { id: "ISL", name: "Iceland" },
+    { id: "IND", name: "India" },
+    { id: "IDN", name: "Indonesia" },
+    { id: "IRN", name: "Iran, Islamic Republic of" },
+    { id: "IRQ", name: "Iraq" },
+    { id: "IRL", name: "Ireland" },
+    { id: "IMN", name: "Isle of Man" },
+    { id: "ISR", name: "Israel" },
+    { id: "ITA", name: "Italy" },
+    { id: "JAM", name: "Jamaica" },
+    { id: "JPN", name: "Japan" },
+    { id: "JEY", name: "Jersey" },
+    { id: "JOR", name: "Jordan" },
+    { id: "KAZ", name: "Kazakhstan" },
+    { id: "KEN", name: "Kenya" },
+    { id: "KIR", name: "Kiribati" },
+    { id: "PRK", name: "Korea, Democratic People's Republic of" },
+    { id: "KOR", name: "Korea, Republic of" },
+    { id: "KWT", name: "Kuwait" },
+    { id: "KGZ", name: "Kyrgyzstan" },
+    { id: "LAO", name: "Lao People's Democratic Republic" },
+    { id: "LVA", name: "Latvia" },
+    { id: "LBN", name: "Lebanon" },
+    { id: "LSO", name: "Lesotho" },
+    { id: "LBR", name: "Liberia" },
+    { id: "LBY", name: "Libya" },
+    { id: "LIE", name: "Liechtenstein" },
+    { id: "LTU", name: "Lithuania" },
+    { id: "LUX", name: "Luxembourg" },
+    { id: "MAC", name: "Macao" },
+    { id: "MKD", name: "Macedonia, the former Yugoslav Republic of" },
+    { id: "MDG", name: "Madagascar" },
+    { id: "MWI", name: "Malawi" },
+    { id: "MYS", name: "Malaysia" },
+    { id: "MDV", name: "Maldives" },
+    { id: "MLI", name: "Mali" },
+    { id: "MLT", name: "Malta" },
+    { id: "MHL", name: "Marshall Islands" },
+    { id: "MTQ", name: "Martinique" },
+    { id: "MRT", name: "Mauritania" },
+    { id: "MUS", name: "Mauritius" },
+    { id: "MYT", name: "Mayotte" },
+    { id: "MEX", name: "Mexico" },
+    { id: "FSM", name: "Micronesia, Federated States of" },
+    { id: "MDA", name: "Moldova, Republic of" },
+    { id: "MCO", name: "Monaco" },
+    { id: "MNG", name: "Mongolia" },
+    { id: "MNE", name: "Montenegro" },
+    { id: "MSR", name: "Montserrat" },
+    { id: "MAR", name: "Morocco" },
+    { id: "MOZ", name: "Mozambique" },
+    { id: "MMR", name: "Myanmar" },
+    { id: "NAM", name: "Namibia" },
+    { id: "NRU", name: "Nauru" },
+    { id: "NPL", name: "Nepal" },
+    { id: "NLD", name: "Netherlands" },
+    { id: "NCL", name: "New Caledonia" },
+    { id: "NZL", name: "New Zealand" },
+    { id: "NIC", name: "Nicaragua" },
+    { id: "NER", name: "Niger" },
+    { id: "NGA", name: "Nigeria" },
+    { id: "NIU", name: "Niue" },
+    { id: "NFK", name: "Norfolk Island" },
+    { id: "MNP", name: "Northern Mariana Islands" },
+    { id: "NOR", name: "Norway" },
+    { id: "OMN", name: "Oman" },
+    { id: "PAK", name: "Pakistan" },
+    { id: "PLW", name: "Palau" },
+    { id: "PSE", name: "Palestinian Territory, Occupied" },
+    { id: "PAN", name: "Panama" },
+    { id: "PNG", name: "Papua New Guinea" },
+    { id: "PRY", name: "Paraguay" },
+    { id: "PER", name: "Peru" },
+    { id: "PHL", name: "Philippines" },
+    { id: "PCN", name: "Pitcairn" },
+    { id: "POL", name: "Poland" },
+    { id: "PRT", name: "Portugal" },
+    { id: "PRI", name: "Puerto Rico" },
+    { id: "QAT", name: "Qatar" },
+    { id: "REU", name: "Réunion" },
+    { id: "ROU", name: "Romania" },
+    { id: "RUS", name: "Russian Federation" },
+    { id: "RWA", name: "Rwanda" },
+    { id: "BLM", name: "Saint Barthélemy" },
+    { id: "SHN", name: "Saint Helena, Ascension and Tristan da Cunha" },
+    { id: "KNA", name: "Saint Kitts and Nevis" },
+    { id: "LCA", name: "Saint Lucia" },
+    { id: "MAF", name: "Saint Martin (French part)" },
+    { id: "SPM", name: "Saint Pierre and Miquelon" },
+    { id: "VCT", name: "Saint Vincent and the Grenadines" },
+    { id: "WSM", name: "Samoa" },
+    { id: "SMR", name: "San Marino" },
+    { id: "STP", name: "Sao Tome and Principe" },
+    { id: "SAU", name: "Saudi Arabia" },
+    { id: "SEN", name: "Senegal" },
+    { id: "SRB", name: "Serbia" },
+    { id: "SYC", name: "Seychelles" },
+    { id: "SLE", name: "Sierra Leone" },
+    { id: "SGP", name: "Singapore" },
+    { id: "SXM", name: "Sint Maarten (Dutch part)" },
+    { id: "SVK", name: "Slovakia" },
+    { id: "SVN", name: "Slovenia" },
+    { id: "SLB", name: "Solomon Islands" },
+    { id: "SOM", name: "Somalia" },
+    { id: "ZAF", name: "South Africa" },
+    { id: "SGS", name: "South Georgia and the South Sandwich Islands" },
+    { id: "SSD", name: "South Sudan" },
+    { id: "ESP", name: "Spain" },
+    { id: "LKA", name: "Sri Lanka" },
+    { id: "SDN", name: "Sudan" },
+    { id: "SUR", name: "Suriname" },
+    { id: "SJM", name: "Svalbard and Jan Mayen" },
+    { id: "SWZ", name: "Swaziland" },
+    { id: "SWE", name: "Sweden" },
+    { id: "CHE", name: "Switzerland" },
+    { id: "SYR", name: "Syrian Arab Republic" },
+    { id: "TWN", name: "Taiwan, Province of China" },
+    { id: "TJK", name: "Tajikistan" },
+    { id: "TZA", name: "Tanzania, United Republic of" },
+    { id: "THA", name: "Thailand" },
+    { id: "TLS", name: "Timor-Leste" },
+    { id: "TGO", name: "Togo" },
+    { id: "TKL", name: "Tokelau" },
+    { id: "TON", name: "Tonga" },
+    { id: "TTO", name: "Trinidad and Tobago" },
+    { id: "TUN", name: "Tunisia" },
+    { id: "TUR", name: "Turkey" },
+    { id: "TKM", name: "Turkmenistan" },
+    { id: "TCA", name: "Turks and Caicos Islands" },
+    { id: "TUV", name: "Tuvalu" },
+    { id: "UGA", name: "Uganda" },
+    { id: "UKR", name: "Ukraine" },
+    { id: "ARE", name: "United Arab Emirates" },
+    { id: "GBR", name: "United Kingdom" },
+    { id: "USA", name: "United States" },
+    { id: "UMI", name: "United States Minor Outlying Islands" },
+    { id: "URY", name: "Uruguay" },
+    { id: "UZB", name: "Uzbekistan" },
+    { id: "VUT", name: "Vanuatu" },
+    { id: "VEN", name: "Venezuela, Bolivarian Republic of" },
+    { id: "VNM", name: "Viet Nam" },
+    { id: "VGB", name: "Virgin Islands, British" },
+    { id: "VIR", name: "Virgin Islands, U.S." },
+    { id: "WLF", name: "Wallis and Futuna" },
+    { id: "ESH", name: "Western Sahara" },
+    { id: "YEM", name: "Yemen" },
+    { id: "ZMB", name: "Zambia" },
+    { id: "ZWE", name: "Zimbabwe" }
+            ];
+        }
+    };
+});
+// Full list of languages defined by ISO 639-1
+// based on https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
+angular.module('platformWebApp')
+.factory('platformWebApp.common.languages', function () {
+    return {
+        get: function (id) {
+            return _.findWhere(this.query(), { id: this.normalize(id) });
+        },
+        contains: function (id) {
+            return _.map(this.query(), function (entry) { return entry.id }).includes(this.normalize(id));
+        },
+        normalize: function(id) {
+            var result = undefined;
+            if (!!id) {
+                result = id.toLowerCase();
+            }
+            return result;
+        },
+        query: function () {
+            return [
+      { id: "ab", name: "Abkhaz", nativeName: "аҧсуа" },
+      { id: "aa", name: "Afar", nativeName: "Afaraf" },
+      { id: "af", name: "Afrikaans", nativeName: "Afrikaans" },
+      { id: "ak", name: "Akan", nativeName: "Akan" },
+      { id: "sq", name: "Albanian", nativeName: "Shqip" },
+      { id: "am", name: "Amharic", nativeName: "አማርኛ" },
+      { id: "ar", name: "Arabic", nativeName: "العربية" },
+      { id: "an", name: "Aragonese", nativeName: "Aragonés" },
+      { id: "hy", name: "Armenian", nativeName: "Հայերեն" },
+      { id: "as", name: "Assamese", nativeName: "অসমীয়া" },
+      { id: "av", name: "Avaric", nativeName: "авар мацӀ, магӀарул мацӀ" },
+      { id: "ae", name: "Avestan", nativeName: "avesta" },
+      { id: "ay", name: "Aymara", nativeName: "aymar aru" },
+      { id: "az", name: "Azerbaijani", nativeName: "azərbaycan dili" },
+      { id: "bm", name: "Bambara", nativeName: "bamanankan" },
+      { id: "ba", name: "Bashkir", nativeName: "башҡорт теле" },
+      { id: "eu", name: "Basque", nativeName: "euskara, euskera" },
+      { id: "be", name: "Belarusian", nativeName: "Беларуская" },
+      { id: "bn", name: "Bengali", nativeName: "বাংলা" },
+      { id: "bh", name: "Bihari", nativeName: "भोजपुरी" },
+      { id: "bi", name: "Bislama", nativeName: "Bislama" },
+      { id: "bs", name: "Bosnian", nativeName: "bosanski jezik" },
+      { id: "br", name: "Breton", nativeName: "brezhoneg" },
+      { id: "bg", name: "Bulgarian", nativeName: "български език" },
+      { id: "my", name: "Burmese", nativeName: "ဗမာစာ" },
+      { id: "ca", name: "Catalan; Valencian", nativeName: "Català" },
+      { id: "ch", name: "Chamorro", nativeName: "Chamoru" },
+      { id: "ce", name: "Chechen", nativeName: "нохчийн мотт" },
+      { id: "ny", name: "Chichewa; Chewa; Nyanja", nativeName: "chiCheŵa, chinyanja" },
+      { id: "zh", name: "Chinese", nativeName: "中文 (Zhōngwén), 汉语, 漢語" },
+      { id: "cv", name: "Chuvash", nativeName: "чӑваш чӗлхи" },
+      { id: "kw", name: "Cornish", nativeName: "Kernewek" },
+      { id: "co", name: "Corsican", nativeName: "corsu, lingua corsa" },
+      { id: "cr", name: "Cree", nativeName: "ᓀᐦᐃᔭᐍᐏᐣ" },
+      { id: "hr", name: "Croatian", nativeName: "hrvatski" },
+      { id: "cs", name: "Czech", nativeName: "česky, čeština" },
+      { id: "da", name: "Danish", nativeName: "dansk" },
+      { id: "dv", name: "Divehi; Dhivehi; Maldivian;", nativeName: "ދިވެހި" },
+      { id: "nl", name: "Dutch", nativeName: "Nederlands, Vlaams" },
+      { id: "dz", name: "Dzongkha", nativeName: "རྫོང་ཁ" },
+      { id: "en", name: "English", nativeName: "English" },
+      { id: "eo", name: "Esperanto", nativeName: "Esperanto" },
+      { id: "et", name: "Estonian", nativeName: "eesti, eesti keel" },
+      { id: "ee", name: "Ewe", nativeName: "Eʋegbe" },
+      { id: "fo", name: "Faroese", nativeName: "føroyskt" },
+      { id: "fj", name: "Fijian", nativeName: "vosa Vakaviti" },
+      { id: "fi", name: "Finnish", nativeName: "suomi, suomen kieli" },
+      { id: "fr", name: "French", nativeName: "français, langue française" },
+      { id: "ff", name: "Fula; Fulah; Pulaar; Pular", nativeName: "Fulfulde, Pulaar, Pular" },
+      { id: "gl", name: "Galician", nativeName: "Galego" },
+      { id: "ka", name: "Georgian", nativeName: "ქართული" },
+      { id: "de", name: "German", nativeName: "Deutsch" },
+      { id: "el", name: "Greek, Modern", nativeName: "Ελληνικά" },
+      { id: "gn", name: "Guaraní", nativeName: "Avañeẽ" },
+      { id: "gu", name: "Gujarati", nativeName: "ગુજરાતી" },
+      { id: "ht", name: "Haitian; Haitian Creole", nativeName: "Kreyòl ayisyen" },
+      { id: "ha", name: "Hausa", nativeName: "Hausa, هَوُسَ" },
+      { id: "he", name: "Hebrew (modern)", nativeName: "עברית" },
+      { id: "hz", name: "Herero", nativeName: "Otjiherero" },
+      { id: "hi", name: "Hindi", nativeName: "हिन्दी, हिंदी" },
+      { id: "ho", name: "Hiri Motu", nativeName: "Hiri Motu" },
+      { id: "hu", name: "Hungarian", nativeName: "Magyar" },
+      { id: "ia", name: "Interlingua", nativeName: "Interlingua" },
+      { id: "id", name: "Indonesian", nativeName: "Bahasa Indonesia" },
+      { id: "ie", name: "Interlingue", nativeName: "Originally called Occidental; then Interlingue after WWII" },
+      { id: "ga", name: "Irish", nativeName: "Gaeilge" },
+      { id: "ig", name: "Igbo", nativeName: "Asụsụ Igbo" },
+      { id: "ik", name: "Inupiaq", nativeName: "Iñupiaq, Iñupiatun" },
+      { id: "io", name: "Ido", nativeName: "Ido" },
+      { id: "is", name: "Icelandic", nativeName: "Íslenska" },
+      { id: "it", name: "Italian", nativeName: "Italiano" },
+      { id: "iu", name: "Inuktitut", nativeName: "ᐃᓄᒃᑎᑐᑦ" },
+      { id: "ja", name: "Japanese", nativeName: "日本語 (にほんご／にっぽんご)" },
+      { id: "jv", name: "Javanese", nativeName: "basa Jawa" },
+      { id: "kl", name: "Kalaallisut, Greenlandic", nativeName: "kalaallisut, kalaallit oqaasii" },
+      { id: "kn", name: "Kannada", nativeName: "ಕನ್ನಡ" },
+      { id: "kr", name: "Kanuri", nativeName: "Kanuri" },
+      { id: "ks", name: "Kashmiri", nativeName: "कश्मीरी, كشميري‎" },
+      { id: "kk", name: "Kazakh", nativeName: "Қазақ тілі" },
+      { id: "km", name: "Khmer", nativeName: "ភាសាខ្មែរ" },
+      { id: "ki", name: "Kikuyu, Gikuyu", nativeName: "Gĩkũyũ" },
+      { id: "rw", name: "Kinyarwanda", nativeName: "Ikinyarwanda" },
+      { id: "ky", name: "Kirghiz, Kyrgyz", nativeName: "кыргыз тили" },
+      { id: "kv", name: "Komi", nativeName: "коми кыв" },
+      { id: "kg", name: "Kongo", nativeName: "KiKongo" },
+      { id: "ko", name: "Korean", nativeName: "한국어 (韓國語), 조선말 (朝鮮語)" },
+      { id: "ku", name: "Kurdish", nativeName: "Kurdî, كوردی‎" },
+      { id: "kj", name: "Kwanyama, Kuanyama", nativeName: "Kuanyama" },
+      { id: "la", name: "Latin", nativeName: "latine, lingua latina" },
+      { id: "lb", name: "Luxembourgish, Letzeburgesch", nativeName: "Lëtzebuergesch" },
+      { id: "lg", name: "Luganda", nativeName: "Luganda" },
+      { id: "li", name: "Limburgish, Limburgan, Limburger", nativeName: "Limburgs" },
+      { id: "ln", name: "Lingala", nativeName: "Lingála" },
+      { id: "lo", name: "Lao", nativeName: "ພາສາລາວ" },
+      { id: "lt", name: "Lithuanian", nativeName: "lietuvių kalba" },
+      { id: "lu", name: "Luba-Katanga", nativeName: "" },
+      { id: "lv", name: "Latvian", nativeName: "latviešu valoda" },
+      { id: "gv", name: "Manx", nativeName: "Gaelg, Gailck" },
+      { id: "mk", name: "Macedonian", nativeName: "македонски јазик" },
+      { id: "mg", name: "Malagasy", nativeName: "Malagasy fiteny" },
+      { id: "ms", name: "Malay", nativeName: "bahasa Melayu, بهاس ملايو‎" },
+      { id: "ml", name: "Malayalam", nativeName: "മലയാളം" },
+      { id: "mt", name: "Maltese", nativeName: "Malti" },
+      { id: "mi", name: "Māori", nativeName: "te reo Māori" },
+      { id: "mr", name: "Marathi (Marāṭhī)", nativeName: "मराठी" },
+      { id: "mh", name: "Marshallese", nativeName: "Kajin M̧ajeļ" },
+      { id: "mn", name: "Mongolian", nativeName: "монгол" },
+      { id: "na", name: "Nauru", nativeName: "Ekakairũ Naoero" },
+      { id: "nv", name: "Navajo, Navaho", nativeName: "Diné bizaad, Dinékʼehǰí" },
+      { id: "nb", name: "Norwegian Bokmål", nativeName: "Norsk bokmål" },
+      { id: "nd", name: "North Ndebele", nativeName: "isiNdebele" },
+      { id: "ne", name: "Nepali", nativeName: "नेपाली" },
+      { id: "ng", name: "Ndonga", nativeName: "Owambo" },
+      { id: "nn", name: "Norwegian Nynorsk", nativeName: "Norsk nynorsk" },
+      { id: "no", name: "Norwegian", nativeName: "Norsk" },
+      { id: "ii", name: "Nuosu", nativeName: "ꆈꌠ꒿ Nuosuhxop" },
+      { id: "nr", name: "South Ndebele", nativeName: "isiNdebele" },
+      { id: "oc", name: "Occitan", nativeName: "Occitan" },
+      { id: "oj", name: "Ojibwe, Ojibwa", nativeName: "ᐊᓂᔑᓈᐯᒧᐎᓐ" },
+      { id: "cu", name: "Old Church Slavonic, Church Slavic, Church Slavonic, Old Bulgarian, Old Slavonic", nativeName: "ѩзыкъ словѣньскъ" },
+      { id: "om", name: "Oromo", nativeName: "Afaan Oromoo" },
+      { id: "or", name: "Oriya", nativeName: "ଓଡ଼ିଆ" },
+      { id: "os", name: "Ossetian, Ossetic", nativeName: "ирон æвзаг" },
+      { id: "pa", name: "Panjabi, Punjabi", nativeName: "ਪੰਜਾਬੀ, پنجابی‎" },
+      { id: "pi", name: "Pāli", nativeName: "पाऴि" },
+      { id: "fa", name: "Persian", nativeName: "فارسی" },
+      { id: "pl", name: "Polish", nativeName: "polski" },
+      { id: "ps", name: "Pashto, Pushto", nativeName: "پښتو" },
+      { id: "pt", name: "Portuguese", nativeName: "Português" },
+      { id: "qu", name: "Quechua", nativeName: "Runa Simi, Kichwa" },
+      { id: "rm", name: "Romansh", nativeName: "rumantsch grischun" },
+      { id: "rn", name: "Kirundi", nativeName: "kiRundi" },
+      { id: "ro", name: "Romanian, Moldavian, Moldovan", nativeName: "română" },
+      { id: "ru", name: "Russian", nativeName: "русский язык" },
+      { id: "sa", name: "Sanskrit (Saṁskṛta)", nativeName: "संस्कृतम्" },
+      { id: "sc", name: "Sardinian", nativeName: "sardu" },
+      { id: "sd", name: "Sindhi", nativeName: "सिन्धी, سنڌي، سندھی‎" },
+      { id: "se", name: "Northern Sami", nativeName: "Davvisámegiella" },
+      { id: "sm", name: "Samoan", nativeName: "gagana faa Samoa" },
+      { id: "sg", name: "Sango", nativeName: "yângâ tî sängö" },
+      { id: "sr", name: "Serbian", nativeName: "српски језик" },
+      { id: "gd", name: "Scottish Gaelic; Gaelic", nativeName: "Gàidhlig" },
+      { id: "sn", name: "Shona", nativeName: "chiShona" },
+      { id: "si", name: "Sinhala, Sinhalese", nativeName: "සිංහල" },
+      { id: "sk", name: "Slovak", nativeName: "slovenčina" },
+      { id: "sl", name: "Slovene", nativeName: "slovenščina" },
+      { id: "so", name: "Somali", nativeName: "Soomaaliga, af Soomaali" },
+      { id: "st", name: "Southern Sotho", nativeName: "Sesotho" },
+      { id: "es", name: "Spanish; Castilian", nativeName: "español, castellano" },
+      { id: "su", name: "Sundanese", nativeName: "Basa Sunda" },
+      { id: "sw", name: "Swahili", nativeName: "Kiswahili" },
+      { id: "ss", name: "Swati", nativeName: "SiSwati" },
+      { id: "sv", name: "Swedish", nativeName: "svenska" },
+      { id: "ta", name: "Tamil", nativeName: "தமிழ்" },
+      { id: "te", name: "Telugu", nativeName: "తెలుగు" },
+      { id: "tg", name: "Tajik", nativeName: "тоҷикӣ, toğikī, تاجیکی‎" },
+      { id: "th", name: "Thai", nativeName: "ไทย" },
+      { id: "ti", name: "Tigrinya", nativeName: "ትግርኛ" },
+      { id: "bo", name: "Tibetan Standard, Tibetan, Central", nativeName: "བོད་ཡིག" },
+      { id: "tk", name: "Turkmen", nativeName: "Türkmen, Түркмен" },
+      { id: "tl", name: "Tagalog", nativeName: "Wikang Tagalog, ᜏᜒᜃᜅ᜔ ᜆᜄᜎᜓᜄ᜔" },
+      { id: "tn", name: "Tswana", nativeName: "Setswana" },
+      { id: "to", name: "Tonga (Tonga Islands)", nativeName: "faka Tonga" },
+      { id: "tr", name: "Turkish", nativeName: "Türkçe" },
+      { id: "ts", name: "Tsonga", nativeName: "Xitsonga" },
+      { id: "tt", name: "Tatar", nativeName: "татарча, tatarça, تاتارچا‎" },
+      { id: "tw", name: "Twi", nativeName: "Twi" },
+      { id: "ty", name: "Tahitian", nativeName: "Reo Tahiti" },
+      { id: "ug", name: "Uighur, Uyghur", nativeName: "Uyƣurqə, ئۇيغۇرچە‎" },
+      { id: "uk", name: "Ukrainian", nativeName: "українська" },
+      { id: "ur", name: "Urdu", nativeName: "اردو" },
+      { id: "uz", name: "Uzbek", nativeName: "zbek, Ўзбек, أۇزبېك‎" },
+      { id: "ve", name: "Venda", nativeName: "Tshivenḓa" },
+      { id: "vi", name: "Vietnamese", nativeName: "Tiếng Việt" },
+      { id: "vo", name: "Volapük", nativeName: "Volapük" },
+      { id: "wa", name: "Walloon", nativeName: "Walon" },
+      { id: "cy", name: "Welsh", nativeName: "Cymraeg" },
+      { id: "wo", name: "Wolof", nativeName: "Wollof" },
+      { id: "fy", name: "Western Frisian", nativeName: "Frysk" },
+      { id: "xh", name: "Xhosa", nativeName: "isiXhosa" },
+      { id: "yi", name: "Yiddish", nativeName: "ייִדיש" },
+      { id: "yo", name: "Yoruba", nativeName: "Yorùbá" },
+      { id: "za", name: "Zhuang, Chuang", nativeName: "Saɯ cueŋƅ, Saw cuengh" },
+      { id: "zu", name: "Zulu", nativeName: "isiZulu" }
+            ];
+        }
+    };
+});
+// Subset of list of locales defined by CLDR
+// based on https://github.com/umpirsky/locale-list
+angular.module('platformWebApp')
+.factory('platformWebApp.common.locales', function () {
+    return {
+        get: function (id) {
+            return _.findWhere(this.query(), { id: this.normalize(id) });
+        },
+        contains: function (id) {
+            return _.map(this.query(), function (entry) { return entry.id }).includes(this.normalize(id));
+        },
+        normalize: function(id) {
+            var result = undefined;
+            if (!!id) {
+                var parts = id.split(/[-_]/g);
+                parts[0] = parts[0].toLowerCase();
+                if (parts.length > 1) {
+                    parts[1] = parts[1].length === 2 ? parts[1].toUpperCase() : parts[1].capitalize();
+                }
+                if (parts.length > 2) {
+                    parts[2] = parts[2].toUpperCase();
+                }
+                result = parts.join('_');
+            }
+            return result;
+        },
+        query: function () {
+            return [
+    { id: "af", name: "Afrikaans", nativeName: "Afrikaans" },
+    { id: "af_NA", name: "Afrikaans (Namibia)", nativeName: "Afrikaans (Namibië)" },
+    { id: "af_ZA", name: "Afrikaans (South Africa)", nativeName: "Afrikaans (Suid-Afrika)" },
+    { id: "ak", name: "Akan", nativeName: "Akan" },
+    { id: "ak_GH", name: "Akan (Ghana)", nativeName: "Akan (Gaana)" },
+    { id: "sq", name: "Albanian", nativeName: "shqip" },
+    { id: "sq_AL", name: "Albanian (Albania)", nativeName: "shqip (Shqipëri)" },
+    { id: "sq_XK", name: "Albanian (Kosovo)", nativeName: "shqip (Kosovë)" },
+    { id: "sq_MK", name: "Albanian (Macedonia)", nativeName: "shqip (Maqedoni)" },
+    { id: "am", name: "Amharic", nativeName: "አማርኛ" },
+    { id: "am_ET", name: "Amharic (Ethiopia)", nativeName: "አማርኛ (ኢትዮጵያ)" },
+    { id: "ar", name: "Arabic", nativeName: "العربية" },
+    { id: "ar_DZ", name: "Arabic (Algeria)", nativeName: "العربية (الجزائر)" },
+    { id: "ar_BH", name: "Arabic (Bahrain)", nativeName: "العربية (البحرين)" },
+    { id: "ar_TD", name: "Arabic (Chad)", nativeName: "العربية (تشاد)" },
+    { id: "ar_KM", name: "Arabic (Comoros)", nativeName: "العربية (جزر القمر)" },
+    { id: "ar_DJ", name: "Arabic (Djibouti)", nativeName: "العربية (جيبوتي)" },
+    { id: "ar_EG", name: "Arabic (Egypt)", nativeName: "العربية (مصر)" },
+    { id: "ar_ER", name: "Arabic (Eritrea)", nativeName: "العربية (أريتريا)" },
+    { id: "ar_IQ", name: "Arabic (Iraq)", nativeName: "العربية (العراق)" },
+    { id: "ar_IL", name: "Arabic (Israel)", nativeName: "العربية (إسرائيل)" },
+    { id: "ar_JO", name: "Arabic (Jordan)", nativeName: "العربية (الأردن)" },
+    { id: "ar_KW", name: "Arabic (Kuwait)", nativeName: "العربية (الكويت)" },
+    { id: "ar_LB", name: "Arabic (Lebanon)", nativeName: "العربية (لبنان)" },
+    { id: "ar_LY", name: "Arabic (Libya)", nativeName: "العربية (ليبيا)" },
+    { id: "ar_MR", name: "Arabic (Mauritania)", nativeName: "العربية (موريتانيا)" },
+    { id: "ar_MA", name: "Arabic (Morocco)", nativeName: "العربية (المغرب)" },
+    { id: "ar_OM", name: "Arabic (Oman)", nativeName: "العربية (عُمان)" },
+    { id: "ar_PS", name: "Arabic (Palestinian Territories)", nativeName: "العربية (الأراضي الفلسطينية)" },
+    { id: "ar_QA", name: "Arabic (Qatar)", nativeName: "العربية (قطر)" },
+    { id: "ar_SA", name: "Arabic (Saudi Arabia)", nativeName: "العربية (المملكة العربية السعودية)" },
+    { id: "ar_SO", name: "Arabic (Somalia)", nativeName: "العربية (الصومال)" },
+    { id: "ar_SS", name: "Arabic (South Sudan)", nativeName: "العربية (جنوب السودان)" },
+    { id: "ar_SD", name: "Arabic (Sudan)", nativeName: "العربية (السودان)" },
+    { id: "ar_SY", name: "Arabic (Syria)", nativeName: "العربية (سوريا)" },
+    { id: "ar_TN", name: "Arabic (Tunisia)", nativeName: "العربية (تونس)" },
+    { id: "ar_AE", name: "Arabic (United Arab Emirates)", nativeName: "العربية (الإمارات العربية المتحدة)" },
+    { id: "ar_EH", name: "Arabic (Western Sahara)", nativeName: "العربية (الصحراء الغربية)" },
+    { id: "ar_YE", name: "Arabic (Yemen)", nativeName: "العربية (اليمن)" },
+    { id: "hy", name: "Armenian", nativeName: "հայերեն" },
+    { id: "hy_AM", name: "Armenian (Armenia)", nativeName: "հայերեն (Հայաստան)" },
+    { id: "as", name: "Assamese", nativeName: "অসমীয়া" },
+    { id: "as_IN", name: "Assamese (India)", nativeName: "অসমীয়া (ভাৰত)" },
+    { id: "az", name: "Azerbaijani", nativeName: "azərbaycan" },
+    { id: "az_AZ", name: "Azerbaijani (Azerbaijan)", nativeName: "azərbaycan (Azərbaycan)" },
+    { id: "az_Cyrl_AZ", name: "Azerbaijani (Cyrillic, Azerbaijan)", nativeName: "Азәрбајҹан (kiril, Азәрбајҹан)" },
+    { id: "az_Cyrl", name: "Azerbaijani (Cyrillic)", nativeName: "Азәрбајҹан (kiril)" },
+    { id: "az_Latn_AZ", name: "Azerbaijani (Latin, Azerbaijan)", nativeName: "azərbaycan (latın, Azərbaycan)" },
+    { id: "az_Latn", name: "Azerbaijani (Latin)", nativeName: "azərbaycan (latın)" },
+    { id: "bm", name: "Bambara", nativeName: "bamanakan" },
+    { id: "bm_Latn_ML", name: "Bambara (Latin, Mali)", nativeName: "Bambara (Latin, Mali)" },
+    { id: "bm_Latn", name: "Bambara (Latin)", nativeName: "Bambara (Latin)" },
+    { id: "eu", name: "Basque", nativeName: "euskara" },
+    { id: "eu_ES", name: "Basque (Spain)", nativeName: "euskara (Espainia)" },
+    { id: "be", name: "Belarusian", nativeName: "беларуская" },
+    { id: "be_BY", name: "Belarusian (Belarus)", nativeName: "беларуская (Беларусь)" },
+    { id: "bn", name: "Bengali", nativeName: "বাংলা" },
+    { id: "bn_BD", name: "Bengali (Bangladesh)", nativeName: "বাংলা (বাংলাদেশ)" },
+    { id: "bn_IN", name: "Bengali (India)", nativeName: "বাংলা (ভারত)" },
+    { id: "bs", name: "Bosnian", nativeName: "bosanski" },
+    { id: "bs_BA", name: "Bosnian (Bosnia & Herzegovina)", nativeName: "bosanski (Bosna i Hercegovina)" },
+    { id: "bs_Cyrl_BA", name: "Bosnian (Cyrillic, Bosnia & Herzegovina)", nativeName: "босански (Ћирилица, Босна и Херцеговина)" },
+    { id: "bs_Cyrl", name: "Bosnian (Cyrillic)", nativeName: "босански (Ћирилица)" },
+    { id: "bs_Latn_BA", name: "Bosnian (Latin, Bosnia & Herzegovina)", nativeName: "bosanski (latinica, Bosna i Hercegovina)" },
+    { id: "bs_Latn", name: "Bosnian (Latin)", nativeName: "bosanski (latinica)" },
+    { id: "br", name: "Breton", nativeName: "brezhoneg" },
+    { id: "br_FR", name: "Breton (France)", nativeName: "brezhoneg (Frañs)" },
+    { id: "bg", name: "Bulgarian", nativeName: "български" },
+    { id: "bg_BG", name: "Bulgarian (Bulgaria)", nativeName: "български (България)" },
+    { id: "my", name: "Burmese", nativeName: "ဗမာ" },
+    { id: "my_MM", name: "Burmese (Myanmar (Burma))", nativeName: "ဗမာ (မြန်မာ)" },
+    { id: "ca", name: "Catalan", nativeName: "català" },
+    { id: "ca_AD", name: "Catalan (Andorra)", nativeName: "català (Andorra)" },
+    { id: "ca_FR", name: "Catalan (France)", nativeName: "català (França)" },
+    { id: "ca_IT", name: "Catalan (Italy)", nativeName: "català (Itàlia)" },
+    { id: "ca_ES", name: "Catalan (Spain)", nativeName: "català (Espanya)" },
+    { id: "zh", name: "Chinese", nativeName: "中文" },
+    { id: "zh_CN", name: "Chinese (China)", nativeName: "中文 (中国)" },
+    { id: "zh_HK", name: "Chinese (Hong Kong SAR China)", nativeName: "中文 (中国香港特别行政区)" },
+    { id: "zh_MO", name: "Chinese (Macau SAR China)", nativeName: "中文 (中国澳门特别行政区)" },
+    { id: "zh_Hans_CN", name: "Chinese (Simplified, China)", nativeName: "中文 (简体中文, 中国)" },
+    { id: "zh_Hans_HK", name: "Chinese (Simplified, Hong Kong SAR China)", nativeName: "中文 (简体中文, 中国香港特别行政区)" },
+    { id: "zh_Hans_MO", name: "Chinese (Simplified, Macau SAR China)", nativeName: "中文 (简体中文, 中国澳门特别行政区)" },
+    { id: "zh_Hans_SG", name: "Chinese (Simplified, Singapore)", nativeName: "中文 (简体中文, 新加坡)" },
+    { id: "zh_Hans", name: "Chinese (Simplified)", nativeName: "中文 (简体中文)" },
+    { id: "zh_SG", name: "Chinese (Singapore)", nativeName: "中文 (新加坡)" },
+    { id: "zh_TW", name: "Chinese (Taiwan)", nativeName: "中文 (台湾)" },
+    { id: "zh_Hant_HK", name: "Chinese (Traditional, Hong Kong SAR China)", nativeName: "中文 (繁體字, 中華人民共和國香港特別行政區)" },
+    { id: "zh_Hant_MO", name: "Chinese (Traditional, Macau SAR China)", nativeName: "中文 (繁體, 中華人民共和國澳門特別行政區)" },
+    { id: "zh_Hant_TW", name: "Chinese (Traditional, Taiwan)", nativeName: "中文 (繁體, 台灣)" },
+    { id: "zh_Hant", name: "Chinese (Traditional)", nativeName: "中文 (繁體)" },
+    { id: "kw", name: "Cornish", nativeName: "kernewek" },
+    { id: "kw_GB", name: "Cornish (United Kingdom)", nativeName: "kernewek (Rywvaneth Unys)" },
+    { id: "hr", name: "Croatian", nativeName: "hrvatski" },
+    { id: "hr_BA", name: "Croatian (Bosnia & Herzegovina)", nativeName: "hrvatski (Bosna i Hercegovina)" },
+    { id: "hr_HR", name: "Croatian (Croatia)", nativeName: "hrvatski (Hrvatska)" },
+    { id: "cs", name: "Czech", nativeName: "čeština" },
+    { id: "cs_CZ", name: "Czech (Czech Republic)", nativeName: "čeština (Česká republika)" },
+    { id: "da", name: "Danish", nativeName: "dansk" },
+    { id: "da_DK", name: "Danish (Denmark)", nativeName: "dansk (Danmark)" },
+    { id: "da_GL", name: "Danish (Greenland)", nativeName: "dansk (Grønland)" },
+    { id: "nl", name: "Dutch", nativeName: "Nederlands" },
+    { id: "nl_AW", name: "Dutch (Aruba)", nativeName: "Nederlands (Aruba)" },
+    { id: "nl_BE", name: "Dutch (Belgium)", nativeName: "Nederlands (België)" },
+    { id: "nl_BQ", name: "Dutch (Caribbean Netherlands)", nativeName: "Nederlands (Caribisch Nederland)" },
+    { id: "nl_CW", name: "Dutch (Curaçao)", nativeName: "Nederlands (Curaçao)" },
+    { id: "nl_NL", name: "Dutch (Netherlands)", nativeName: "Nederlands (Nederland)" },
+    { id: "nl_SX", name: "Dutch (Sint Maarten)", nativeName: "Nederlands (Sint-Maarten)" },
+    { id: "nl_SR", name: "Dutch (Suriname)", nativeName: "Nederlands (Suriname)" },
+    { id: "dz", name: "Dzongkha", nativeName: "རྫོང་ཁ" },
+    { id: "dz_BT", name: "Dzongkha (Bhutan)", nativeName: "རྫོང་ཁ (འབྲུག)" },
+    { id: "en", name: "English", nativeName: "English" },
+    { id: "en_AS", name: "English (American Samoa)", nativeName: "English (American Samoa)" },
+    { id: "en_AI", name: "English (Anguilla)", nativeName: "English (Anguilla)" },
+    { id: "en_AG", name: "English (Antigua & Barbuda)", nativeName: "English (Antigua & Barbuda)" },
+    { id: "en_AU", name: "English (Australia)", nativeName: "English (Australia)" },
+    { id: "en_BS", name: "English (Bahamas)", nativeName: "English (Bahamas)" },
+    { id: "en_BB", name: "English (Barbados)", nativeName: "English (Barbados)" },
+    { id: "en_BE", name: "English (Belgium)", nativeName: "English (Belgium)" },
+    { id: "en_BZ", name: "English (Belize)", nativeName: "English (Belize)" },
+    { id: "en_BM", name: "English (Bermuda)", nativeName: "English (Bermuda)" },
+    { id: "en_BW", name: "English (Botswana)", nativeName: "English (Botswana)" },
+    { id: "en_IO", name: "English (British Indian Ocean Territory)", nativeName: "English (British Indian Ocean Territory)" },
+    { id: "en_VG", name: "English (British Virgin Islands)", nativeName: "English (British Virgin Islands)" },
+    { id: "en_CM", name: "English (Cameroon)", nativeName: "English (Cameroon)" },
+    { id: "en_CA", name: "English (Canada)", nativeName: "English (Canada)" },
+    { id: "en_KY", name: "English (Cayman Islands)", nativeName: "English (Cayman Islands)" },
+    { id: "en_CX", name: "English (Christmas Island)", nativeName: "English (Christmas Island)" },
+    { id: "en_CC", name: "English (Cocos (Keeling) Islands)", nativeName: "English (Cocos (Keeling) Islands)" },
+    { id: "en_CK", name: "English (Cook Islands)", nativeName: "English (Cook Islands)" },
+    { id: "en_DG", name: "English (Diego Garcia)", nativeName: "English (Diego Garcia)" },
+    { id: "en_DM", name: "English (Dominica)", nativeName: "English (Dominica)" },
+    { id: "en_ER", name: "English (Eritrea)", nativeName: "English (Eritrea)" },
+    { id: "en_FK", name: "English (Falkland Islands)", nativeName: "English (Falkland Islands)" },
+    { id: "en_FJ", name: "English (Fiji)", nativeName: "English (Fiji)" },
+    { id: "en_GM", name: "English (Gambia)", nativeName: "English (Gambia)" },
+    { id: "en_GH", name: "English (Ghana)", nativeName: "English (Ghana)" },
+    { id: "en_GI", name: "English (Gibraltar)", nativeName: "English (Gibraltar)" },
+    { id: "en_GD", name: "English (Grenada)", nativeName: "English (Grenada)" },
+    { id: "en_GU", name: "English (Guam)", nativeName: "English (Guam)" },
+    { id: "en_GG", name: "English (Guernsey)", nativeName: "English (Guernsey)" },
+    { id: "en_GY", name: "English (Guyana)", nativeName: "English (Guyana)" },
+    { id: "en_HK", name: "English (Hong Kong SAR China)", nativeName: "English (Hong Kong SAR China)" },
+    { id: "en_IN", name: "English (India)", nativeName: "English (India)" },
+    { id: "en_IE", name: "English (Ireland)", nativeName: "English (Ireland)" },
+    { id: "en_IM", name: "English (Isle of Man)", nativeName: "English (Isle of Man)" },
+    { id: "en_JM", name: "English (Jamaica)", nativeName: "English (Jamaica)" },
+    { id: "en_JE", name: "English (Jersey)", nativeName: "English (Jersey)" },
+    { id: "en_KE", name: "English (Kenya)", nativeName: "English (Kenya)" },
+    { id: "en_KI", name: "English (Kiribati)", nativeName: "English (Kiribati)" },
+    { id: "en_LS", name: "English (Lesotho)", nativeName: "English (Lesotho)" },
+    { id: "en_LR", name: "English (Liberia)", nativeName: "English (Liberia)" },
+    { id: "en_MO", name: "English (Macau SAR China)", nativeName: "English (Macau SAR China)" },
+    { id: "en_MG", name: "English (Madagascar)", nativeName: "English (Madagascar)" },
+    { id: "en_MW", name: "English (Malawi)", nativeName: "English (Malawi)" },
+    { id: "en_MY", name: "English (Malaysia)", nativeName: "English (Malaysia)" },
+    { id: "en_MT", name: "English (Malta)", nativeName: "English (Malta)" },
+    { id: "en_MH", name: "English (Marshall Islands)", nativeName: "English (Marshall Islands)" },
+    { id: "en_MU", name: "English (Mauritius)", nativeName: "English (Mauritius)" },
+    { id: "en_FM", name: "English (Micronesia)", nativeName: "English (Micronesia)" },
+    { id: "en_MS", name: "English (Montserrat)", nativeName: "English (Montserrat)" },
+    { id: "en_NA", name: "English (Namibia)", nativeName: "English (Namibia)" },
+    { id: "en_NR", name: "English (Nauru)", nativeName: "English (Nauru)" },
+    { id: "en_NZ", name: "English (New Zealand)", nativeName: "English (New Zealand)" },
+    { id: "en_NG", name: "English (Nigeria)", nativeName: "English (Nigeria)" },
+    { id: "en_NU", name: "English (Niue)", nativeName: "English (Niue)" },
+    { id: "en_NF", name: "English (Norfolk Island)", nativeName: "English (Norfolk Island)" },
+    { id: "en_MP", name: "English (Northern Mariana Islands)", nativeName: "English (Northern Mariana Islands)" },
+    { id: "en_PK", name: "English (Pakistan)", nativeName: "English (Pakistan)" },
+    { id: "en_PW", name: "English (Palau)", nativeName: "English (Palau)" },
+    { id: "en_PG", name: "English (Papua New Guinea)", nativeName: "English (Papua New Guinea)" },
+    { id: "en_PH", name: "English (Philippines)", nativeName: "English (Philippines)" },
+    { id: "en_PN", name: "English (Pitcairn Islands)", nativeName: "English (Pitcairn Islands)" },
+    { id: "en_PR", name: "English (Puerto Rico)", nativeName: "English (Puerto Rico)" },
+    { id: "en_RW", name: "English (Rwanda)", nativeName: "English (Rwanda)" },
+    { id: "en_WS", name: "English (Samoa)", nativeName: "English (Samoa)" },
+    { id: "en_SC", name: "English (Seychelles)", nativeName: "English (Seychelles)" },
+    { id: "en_SL", name: "English (Sierra Leone)", nativeName: "English (Sierra Leone)" },
+    { id: "en_SG", name: "English (Singapore)", nativeName: "English (Singapore)" },
+    { id: "en_SX", name: "English (Sint Maarten)", nativeName: "English (Sint Maarten)" },
+    { id: "en_SB", name: "English (Solomon Islands)", nativeName: "English (Solomon Islands)" },
+    { id: "en_ZA", name: "English (South Africa)", nativeName: "English (South Africa)" },
+    { id: "en_SS", name: "English (South Sudan)", nativeName: "English (South Sudan)" },
+    { id: "en_SH", name: "English (St. Helena)", nativeName: "English (St. Helena)" },
+    { id: "en_KN", name: "English (St. Kitts & Nevis)", nativeName: "English (St. Kitts & Nevis)" },
+    { id: "en_LC", name: "English (St. Lucia)", nativeName: "English (St. Lucia)" },
+    { id: "en_VC", name: "English (St. Vincent & Grenadines)", nativeName: "English (St. Vincent & Grenadines)" },
+    { id: "en_SD", name: "English (Sudan)", nativeName: "English (Sudan)" },
+    { id: "en_SZ", name: "English (Swaziland)", nativeName: "English (Swaziland)" },
+    { id: "en_TZ", name: "English (Tanzania)", nativeName: "English (Tanzania)" },
+    { id: "en_TK", name: "English (Tokelau)", nativeName: "English (Tokelau)" },
+    { id: "en_TO", name: "English (Tonga)", nativeName: "English (Tonga)" },
+    { id: "en_TT", name: "English (Trinidad & Tobago)", nativeName: "English (Trinidad & Tobago)" },
+    { id: "en_TC", name: "English (Turks & Caicos Islands)", nativeName: "English (Turks & Caicos Islands)" },
+    { id: "en_TV", name: "English (Tuvalu)", nativeName: "English (Tuvalu)" },
+    { id: "en_UM", name: "English (U.S. Outlying Islands)", nativeName: "English (U.S. Outlying Islands)" },
+    { id: "en_VI", name: "English (U.S. Virgin Islands)", nativeName: "English (U.S. Virgin Islands)" },
+    { id: "en_UG", name: "English (Uganda)", nativeName: "English (Uganda)" },
+    { id: "en_GB", name: "English (United Kingdom)", nativeName: "English (United Kingdom)" },
+    { id: "en_US", name: "English (United States)", nativeName: "English (United States)" },
+    { id: "en_VU", name: "English (Vanuatu)", nativeName: "English (Vanuatu)" },
+    { id: "en_ZM", name: "English (Zambia)", nativeName: "English (Zambia)" },
+    { id: "en_ZW", name: "English (Zimbabwe)", nativeName: "English (Zimbabwe)" },
+    { id: "eo", name: "Esperanto", nativeName: "esperanto" },
+    { id: "et", name: "Estonian", nativeName: "eesti" },
+    { id: "et_EE", name: "Estonian (Estonia)", nativeName: "eesti (Eesti)" },
+    { id: "ee", name: "Ewe", nativeName: "eʋegbe" },
+    { id: "ee_GH", name: "Ewe (Ghana)", nativeName: "eʋegbe (Ghana nutome)" },
+    { id: "ee_TG", name: "Ewe (Togo)", nativeName: "eʋegbe (Togo nutome)" },
+    { id: "fo", name: "Faroese", nativeName: "føroyskt" },
+    { id: "fo_FO", name: "Faroese (Faroe Islands)", nativeName: "føroyskt (Føroyar)" },
+    { id: "fi", name: "Finnish", nativeName: "suomi" },
+    { id: "fi_FI", name: "Finnish (Finland)", nativeName: "suomi (Suomi)" },
+    { id: "fr", name: "French", nativeName: "français" },
+    { id: "fr_DZ", name: "French (Algeria)", nativeName: "français (Algérie)" },
+    { id: "fr_BE", name: "French (Belgium)", nativeName: "français (Belgique)" },
+    { id: "fr_BJ", name: "French (Benin)", nativeName: "français (Bénin)" },
+    { id: "fr_BF", name: "French (Burkina Faso)", nativeName: "français (Burkina Faso)" },
+    { id: "fr_BI", name: "French (Burundi)", nativeName: "français (Burundi)" },
+    { id: "fr_CM", name: "French (Cameroon)", nativeName: "français (Cameroun)" },
+    { id: "fr_CA", name: "French (Canada)", nativeName: "français (Canada)" },
+    { id: "fr_CF", name: "French (Central African Republic)", nativeName: "français (République centrafricaine)" },
+    { id: "fr_TD", name: "French (Chad)", nativeName: "français (Tchad)" },
+    { id: "fr_KM", name: "French (Comoros)", nativeName: "français (Comores)" },
+    { id: "fr_CG", name: "French (Congo - Brazzaville)", nativeName: "français (Congo-Brazzaville)" },
+    { id: "fr_CD", name: "French (Congo - Kinshasa)", nativeName: "français (Congo-Kinshasa)" },
+    { id: "fr_CI", name: "French (Côte d’Ivoire)", nativeName: "français (Côte d’Ivoire)" },
+    { id: "fr_DJ", name: "French (Djibouti)", nativeName: "français (Djibouti)" },
+    { id: "fr_GQ", name: "French (Equatorial Guinea)", nativeName: "français (Guinée équatoriale)" },
+    { id: "fr_FR", name: "French (France)", nativeName: "français (France)" },
+    { id: "fr_GF", name: "French (French Guiana)", nativeName: "français (Guyane française)" },
+    { id: "fr_PF", name: "French (French Polynesia)", nativeName: "français (Polynésie française)" },
+    { id: "fr_GA", name: "French (Gabon)", nativeName: "français (Gabon)" },
+    { id: "fr_GP", name: "French (Guadeloupe)", nativeName: "français (Guadeloupe)" },
+    { id: "fr_GN", name: "French (Guinea)", nativeName: "français (Guinée)" },
+    { id: "fr_HT", name: "French (Haiti)", nativeName: "français (Haïti)" },
+    { id: "fr_LU", name: "French (Luxembourg)", nativeName: "français (Luxembourg)" },
+    { id: "fr_MG", name: "French (Madagascar)", nativeName: "français (Madagascar)" },
+    { id: "fr_ML", name: "French (Mali)", nativeName: "français (Mali)" },
+    { id: "fr_MQ", name: "French (Martinique)", nativeName: "français (Martinique)" },
+    { id: "fr_MR", name: "French (Mauritania)", nativeName: "français (Mauritanie)" },
+    { id: "fr_MU", name: "French (Mauritius)", nativeName: "français (Maurice)" },
+    { id: "fr_YT", name: "French (Mayotte)", nativeName: "français (Mayotte)" },
+    { id: "fr_MC", name: "French (Monaco)", nativeName: "français (Monaco)" },
+    { id: "fr_MA", name: "French (Morocco)", nativeName: "français (Maroc)" },
+    { id: "fr_NC", name: "French (New Caledonia)", nativeName: "français (Nouvelle-Calédonie)" },
+    { id: "fr_NE", name: "French (Niger)", nativeName: "français (Niger)" },
+    { id: "fr_RE", name: "French (Réunion)", nativeName: "français (La Réunion)" },
+    { id: "fr_RW", name: "French (Rwanda)", nativeName: "français (Rwanda)" },
+    { id: "fr_SN", name: "French (Senegal)", nativeName: "français (Sénégal)" },
+    { id: "fr_SC", name: "French (Seychelles)", nativeName: "français (Seychelles)" },
+    { id: "fr_BL", name: "French (St. Barthélemy)", nativeName: "français (Saint-Barthélemy)" },
+    { id: "fr_MF", name: "French (St. Martin)", nativeName: "français (Saint-Martin (partie française))" },
+    { id: "fr_PM", name: "French (St. Pierre & Miquelon)", nativeName: "français (Saint-Pierre-et-Miquelon)" },
+    { id: "fr_CH", name: "French (Switzerland)", nativeName: "français (Suisse)" },
+    { id: "fr_SY", name: "French (Syria)", nativeName: "français (Syrie)" },
+    { id: "fr_TG", name: "French (Togo)", nativeName: "français (Togo)" },
+    { id: "fr_TN", name: "French (Tunisia)", nativeName: "français (Tunisie)" },
+    { id: "fr_VU", name: "French (Vanuatu)", nativeName: "français (Vanuatu)" },
+    { id: "fr_WF", name: "French (Wallis & Futuna)", nativeName: "français (Wallis-et-Futuna)" },
+    { id: "ff", name: "Fulah", nativeName: "Pulaar" },
+    { id: "ff_CM", name: "Fulah (Cameroon)", nativeName: "Pulaar (Kameruun)" },
+    { id: "ff_GN", name: "Fulah (Guinea)", nativeName: "Pulaar (Gine)" },
+    { id: "ff_MR", name: "Fulah (Mauritania)", nativeName: "Pulaar (Muritani)" },
+    { id: "ff_SN", name: "Fulah (Senegal)", nativeName: "Pulaar (Senegaal)" },
+    { id: "gl", name: "Galician", nativeName: "galego" },
+    { id: "gl_ES", name: "Galician (Spain)", nativeName: "galego (España)" },
+    { id: "lg", name: "Ganda", nativeName: "Luganda" },
+    { id: "lg_UG", name: "Ganda (Uganda)", nativeName: "Luganda (Yuganda)" },
+    { id: "ka", name: "Georgian", nativeName: "ქართული" },
+    { id: "ka_GE", name: "Georgian (Georgia)", nativeName: "ქართული (საქართველო)" },
+    { id: "de", name: "German", nativeName: "Deutsch" },
+    { id: "de_AT", name: "German (Austria)", nativeName: "Deutsch (Österreich)" },
+    { id: "de_BE", name: "German (Belgium)", nativeName: "Deutsch (Belgien)" },
+    { id: "de_DE", name: "German (Germany)", nativeName: "Deutsch (Deutschland)" },
+    { id: "de_LI", name: "German (Liechtenstein)", nativeName: "Deutsch (Liechtenstein)" },
+    { id: "de_LU", name: "German (Luxembourg)", nativeName: "Deutsch (Luxemburg)" },
+    { id: "de_CH", name: "German (Switzerland)", nativeName: "Deutsch (Schweiz)" },
+    { id: "el", name: "Greek", nativeName: "Ελληνικά" },
+    { id: "el_CY", name: "Greek (Cyprus)", nativeName: "Ελληνικά (Κύπρος)" },
+    { id: "el_GR", name: "Greek (Greece)", nativeName: "Ελληνικά (Ελλάδα)" },
+    { id: "gu", name: "Gujarati", nativeName: "ગુજરાતી" },
+    { id: "gu_IN", name: "Gujarati (India)", nativeName: "ગુજરાતી (ભારત)" },
+    { id: "ha", name: "Hausa", nativeName: "Hausa" },
+    { id: "ha_GH", name: "Hausa (Ghana)", nativeName: "Hausa (Gana)" },
+    { id: "ha_Latn_GH", name: "Hausa (Latin, Ghana)", nativeName: "Hausa (Latin, Ghana)" },
+    { id: "ha_Latn_NE", name: "Hausa (Latin, Niger)", nativeName: "Hausa (Latin, Niger)" },
+    { id: "ha_Latn_NG", name: "Hausa (Latin, Nigeria)", nativeName: "Hausa (Latin, Nigeria)" },
+    { id: "ha_Latn", name: "Hausa (Latin)", nativeName: "Hausa (Latin)" },
+    { id: "ha_NE", name: "Hausa (Niger)", nativeName: "Hausa (Nijar)" },
+    { id: "ha_NG", name: "Hausa (Nigeria)", nativeName: "Hausa (Najeriya)" },
+    { id: "he", name: "Hebrew", nativeName: "עברית" },
+    { id: "he_IL", name: "Hebrew (Israel)", nativeName: "עברית (ישראל)" },
+    { id: "hi", name: "Hindi", nativeName: "हिंदी" },
+    { id: "hi_IN", name: "Hindi (India)", nativeName: "हिंदी (भारत)" },
+    { id: "hu", name: "Hungarian", nativeName: "magyar" },
+    { id: "hu_HU", name: "Hungarian (Hungary)", nativeName: "magyar (Magyarország)" },
+    { id: "is", name: "Icelandic", nativeName: "íslenska" },
+    { id: "is_IS", name: "Icelandic (Iceland)", nativeName: "íslenska (Ísland)" },
+    { id: "ig", name: "Igbo", nativeName: "Igbo" },
+    { id: "ig_NG", name: "Igbo (Nigeria)", nativeName: "Igbo (Nigeria)" },
+    { id: "id", name: "Indonesian", nativeName: "Bahasa Indonesia" },
+    { id: "id_ID", name: "Indonesian (Indonesia)", nativeName: "Bahasa Indonesia (Indonesia)" },
+    { id: "ga", name: "Irish", nativeName: "Gaeilge" },
+    { id: "ga_IE", name: "Irish (Ireland)", nativeName: "Gaeilge (Éire)" },
+    { id: "it", name: "Italian", nativeName: "italiano" },
+    { id: "it_IT", name: "Italian (Italy)", nativeName: "italiano (Italia)" },
+    { id: "it_SM", name: "Italian (San Marino)", nativeName: "italiano (San Marino)" },
+    { id: "it_CH", name: "Italian (Switzerland)", nativeName: "italiano (Svizzera)" },
+    { id: "ja", name: "Japanese", nativeName: "日本語" },
+    { id: "ja_JP", name: "Japanese (Japan)", nativeName: "日本語 (日本)" },
+    { id: "kl", name: "Kalaallisut", nativeName: "kalaallisut" },
+    { id: "kl_GL", name: "Kalaallisut (Greenland)", nativeName: "kalaallisut (Kalaallit Nunaat)" },
+    { id: "kn", name: "Kannada", nativeName: "ಕನ್ನಡ" },
+    { id: "kn_IN", name: "Kannada (India)", nativeName: "ಕನ್ನಡ (ಭಾರತ)" },
+    { id: "ks", name: "Kashmiri", nativeName: "کٲشُر" },
+    { id: "ks_Arab_IN", name: "Kashmiri (Arabic, India)", nativeName: "کٲشُر (اَربی, ہِنٛدوستان)" },
+    { id: "ks_Arab", name: "Kashmiri (Arabic)", nativeName: "کٲشُر (اَربی)" },
+    { id: "ks_IN", name: "Kashmiri (India)", nativeName: "کٲشُر (ہِنٛدوستان)" },
+    { id: "kk", name: "Kazakh", nativeName: "қазақ тілі" },
+    { id: "kk_Cyrl_KZ", name: "Kazakh (Cyrillic, Kazakhstan)", nativeName: "қазақ тілі (кирилл жазуы, Қазақстан)" },
+    { id: "kk_Cyrl", name: "Kazakh (Cyrillic)", nativeName: "қазақ тілі (кирилл жазуы)" },
+    { id: "kk_KZ", name: "Kazakh (Kazakhstan)", nativeName: "қазақ тілі (Қазақстан)" },
+    { id: "km", name: "Khmer", nativeName: "ខ្មែរ" },
+    { id: "km_KH", name: "Khmer (Cambodia)", nativeName: "ខ្មែរ (កម្ពុជា)" },
+    { id: "ki", name: "Kikuyu", nativeName: "Gikuyu" },
+    { id: "ki_KE", name: "Kikuyu (Kenya)", nativeName: "Gikuyu (Kenya)" },
+    { id: "rw", name: "Kinyarwanda", nativeName: "Kinyarwanda" },
+    { id: "rw_RW", name: "Kinyarwanda (Rwanda)", nativeName: "Kinyarwanda (Rwanda)" },
+    { id: "ko", name: "Korean", nativeName: "한국어" },
+    { id: "ko_KP", name: "Korean (North Korea)", nativeName: "한국어 (조선 민주주의 인민 공화국)" },
+    { id: "ko_KR", name: "Korean (South Korea)", nativeName: "한국어 (대한민국)" },
+    { id: "ky", name: "Kyrgyz", nativeName: "кыргызча" },
+    { id: "ky_Cyrl_KG", name: "Kyrgyz (Cyrillic, Kyrgyzstan)", nativeName: "кыргызча (Кирилик, Кыргызстан)" },
+    { id: "ky_Cyrl", name: "Kyrgyz (Cyrillic)", nativeName: "кыргызча (Кирилик)" },
+    { id: "ky_KG", name: "Kyrgyz (Kyrgyzstan)", nativeName: "кыргызча (Кыргызстан)" },
+    { id: "lo", name: "Lao", nativeName: "ລາວ" },
+    { id: "lo_LA", name: "Lao (Laos)", nativeName: "ລາວ (ລາວ)" },
+    { id: "lv", name: "Latvian", nativeName: "latviešu" },
+    { id: "lv_LV", name: "Latvian (Latvia)", nativeName: "latviešu (Latvija)" },
+    { id: "ln", name: "Lingala", nativeName: "lingála" },
+    { id: "ln_AO", name: "Lingala (Angola)", nativeName: "lingála (Angóla)" },
+    { id: "ln_CF", name: "Lingala (Central African Republic)", nativeName: "lingála (Repibiki ya Afríka ya Káti)" },
+    { id: "ln_CG", name: "Lingala (Congo - Brazzaville)", nativeName: "lingála (Kongo)" },
+    { id: "ln_CD", name: "Lingala (Congo - Kinshasa)", nativeName: "lingála (Repibiki demokratiki ya Kongó)" },
+    { id: "lt", name: "Lithuanian", nativeName: "lietuvių" },
+    { id: "lt_LT", name: "Lithuanian (Lithuania)", nativeName: "lietuvių (Lietuva)" },
+    { id: "lu", name: "Luba-Katanga", nativeName: "Tshiluba" },
+    { id: "lu_CD", name: "Luba-Katanga (Congo - Kinshasa)", nativeName: "Tshiluba (Ditunga wa Kongu)" },
+    { id: "lb", name: "Luxembourgish", nativeName: "Lëtzebuergesch" },
+    { id: "lb_LU", name: "Luxembourgish (Luxembourg)", nativeName: "Lëtzebuergesch (Lëtzebuerg)" },
+    { id: "mk", name: "Macedonian", nativeName: "македонски" },
+    { id: "mk_MK", name: "Macedonian (Macedonia)", nativeName: "македонски (Македонија)" },
+    { id: "mg", name: "Malagasy", nativeName: "Malagasy" },
+    { id: "mg_MG", name: "Malagasy (Madagascar)", nativeName: "Malagasy (Madagasikara)" },
+    { id: "ms", name: "Malay", nativeName: "Bahasa Melayu" },
+    { id: "ms_BN", name: "Malay (Brunei)", nativeName: "Bahasa Melayu (Brunei)" },
+    { id: "ms_Latn_BN", name: "Malay (Latin, Brunei)", nativeName: "Bahasa Melayu (Latin, Brunei)" },
+    { id: "ms_Latn_MY", name: "Malay (Latin, Malaysia)", nativeName: "Bahasa Melayu (Latin, Malaysia)" },
+    { id: "ms_Latn_SG", name: "Malay (Latin, Singapore)", nativeName: "Bahasa Melayu (Latin, Singapura)" },
+    { id: "ms_Latn", name: "Malay (Latin)", nativeName: "Bahasa Melayu (Latin)" },
+    { id: "ms_MY", name: "Malay (Malaysia)", nativeName: "Bahasa Melayu (Malaysia)" },
+    { id: "ms_SG", name: "Malay (Singapore)", nativeName: "Bahasa Melayu (Singapura)" },
+    { id: "ml", name: "Malayalam", nativeName: "മലയാളം" },
+    { id: "ml_IN", name: "Malayalam (India)", nativeName: "മലയാളം (ഇന്ത്യ)" },
+    { id: "mt", name: "Maltese", nativeName: "Malti" },
+    { id: "mt_MT", name: "Maltese (Malta)", nativeName: "Malti (Malta)" },
+    { id: "gv", name: "Manx", nativeName: "Gaelg" },
+    { id: "gv_IM", name: "Manx (Isle of Man)", nativeName: "Gaelg (Ellan Vannin)" },
+    { id: "mr", name: "Marathi", nativeName: "मराठी" },
+    { id: "mr_IN", name: "Marathi (India)", nativeName: "मराठी (भारत)" },
+    { id: "mn", name: "Mongolian", nativeName: "монгол" },
+    { id: "mn_Cyrl_MN", name: "Mongolian (Cyrillic, Mongolia)", nativeName: "монгол (кирил, Монгол)" },
+    { id: "mn_Cyrl", name: "Mongolian (Cyrillic)", nativeName: "монгол (кирил)" },
+    { id: "mn_MN", name: "Mongolian (Mongolia)", nativeName: "монгол (Монгол)" },
+    { id: "ne", name: "Nepali", nativeName: "नेपाली" },
+    { id: "ne_IN", name: "Nepali (India)", nativeName: "नेपाली (भारत)" },
+    { id: "ne_NP", name: "Nepali (Nepal)", nativeName: "नेपाली (नेपाल)" },
+    { id: "nd", name: "North Ndebele", nativeName: "isiNdebele" },
+    { id: "nd_ZW", name: "North Ndebele (Zimbabwe)", nativeName: "isiNdebele (Zimbabwe)" },
+    { id: "se", name: "Northern Sami", nativeName: "davvisámegiella" },
+    { id: "se_FI", name: "Northern Sami (Finland)", nativeName: "davvisámegiella (Suopma)" },
+    { id: "se_NO", name: "Northern Sami (Norway)", nativeName: "davvisámegiella (Norga)" },
+    { id: "se_SE", name: "Northern Sami (Sweden)", nativeName: "davvisámegiella (Ruoŧŧa)" },
+    { id: "no", name: "Norwegian", nativeName: "Norwegian" },
+    { id: "no_NO", name: "Norwegian (Norway)", nativeName: "Norwegian (Norway)" },
+    { id: "nb", name: "Norwegian Bokmål", nativeName: "norsk bokmål" },
+    { id: "nb_NO", name: "Norwegian Bokmål (Norway)", nativeName: "norsk bokmål (Norge)" },
+    { id: "nb_SJ", name: "Norwegian Bokmål (Svalbard & Jan Mayen)", nativeName: "norsk bokmål (Svalbard og Jan Mayen)" },
+    { id: "nn", name: "Norwegian Nynorsk", nativeName: "nynorsk" },
+    { id: "nn_NO", name: "Norwegian Nynorsk (Norway)", nativeName: "nynorsk (Noreg)" },
+    { id: "or", name: "Oriya", nativeName: "ଓଡ଼ିଆ" },
+    { id: "or_IN", name: "Oriya (India)", nativeName: "ଓଡ଼ିଆ (ଭାରତ)" },
+    { id: "om", name: "Oromo", nativeName: "Oromoo" },
+    { id: "om_ET", name: "Oromo (Ethiopia)", nativeName: "Oromoo (Itoophiyaa)" },
+    { id: "om_KE", name: "Oromo (Kenya)", nativeName: "Oromoo (Keeniyaa)" },
+    { id: "os", name: "Ossetic", nativeName: "ирон" },
+    { id: "os_GE", name: "Ossetic (Georgia)", nativeName: "ирон (Гуырдзыстон)" },
+    { id: "os_RU", name: "Ossetic (Russia)", nativeName: "ирон (Уӕрӕсе)" },
+    { id: "ps", name: "Pashto", nativeName: "پښتو" },
+    { id: "ps_AF", name: "Pashto (Afghanistan)", nativeName: "پښتو (افغانستان)" },
+    { id: "fa", name: "Persian", nativeName: "فارسی" },
+    { id: "fa_AF", name: "Persian (Afghanistan)", nativeName: "دری (افغانستان)" },
+    { id: "fa_IR", name: "Persian (Iran)", nativeName: "فارسی (ایران)" },
+    { id: "pl", name: "Polish", nativeName: "polski" },
+    { id: "pl_PL", name: "Polish (Poland)", nativeName: "polski (Polska)" },
+    { id: "pt", name: "Portuguese", nativeName: "português" },
+    { id: "pt_AO", name: "Portuguese (Angola)", nativeName: "português (Angola)" },
+    { id: "pt_BR", name: "Portuguese (Brazil)", nativeName: "português (Brasil)" },
+    { id: "pt_CV", name: "Portuguese (Cape Verde)", nativeName: "português (Cabo Verde)" },
+    { id: "pt_GW", name: "Portuguese (Guinea-Bissau)", nativeName: "português (Guiné Bissau)" },
+    { id: "pt_MO", name: "Portuguese (Macau SAR China)", nativeName: "português (Macau, RAE da China)" },
+    { id: "pt_MZ", name: "Portuguese (Mozambique)", nativeName: "português (Moçambique)" },
+    { id: "pt_PT", name: "Portuguese (Portugal)", nativeName: "português (Portugal)" },
+    { id: "pt_ST", name: "Portuguese (São Tomé & Príncipe)", nativeName: "português (São Tomé e Príncipe)" },
+    { id: "pt_TL", name: "Portuguese (Timor-Leste)", nativeName: "português (Timor-Leste)" },
+    { id: "pa", name: "Punjabi", nativeName: "ਪੰਜਾਬੀ" },
+    { id: "pa_Arab_PK", name: "Punjabi (Arabic, Pakistan)", nativeName: "پنجابی (عربی, پکستان)" },
+    { id: "pa_Arab", name: "Punjabi (Arabic)", nativeName: "پنجابی (عربی)" },
+    { id: "pa_Guru_IN", name: "Punjabi (Gurmukhi, India)", nativeName: "ਪੰਜਾਬੀ (ਗੁਰਮੁਖੀ, ਭਾਰਤ)" },
+    { id: "pa_Guru", name: "Punjabi (Gurmukhi)", nativeName: "ਪੰਜਾਬੀ (ਗੁਰਮੁਖੀ)" },
+    { id: "pa_IN", name: "Punjabi (India)", nativeName: "ਪੰਜਾਬੀ (ਭਾਰਤ)" },
+    { id: "pa_PK", name: "Punjabi (Pakistan)", nativeName: "ਪੰਜਾਬੀ (ਪਾਕਿਸਤਾਨ)" },
+    { id: "qu", name: "Quechua", nativeName: "Runasimi" },
+    { id: "qu_BO", name: "Quechua (Bolivia)", nativeName: "Runasimi (Bolivia)" },
+    { id: "qu_EC", name: "Quechua (Ecuador)", nativeName: "Runasimi (Ecuador)" },
+    { id: "qu_PE", name: "Quechua (Peru)", nativeName: "Runasimi (Perú)" },
+    { id: "ro", name: "Romanian", nativeName: "română" },
+    { id: "ro_MD", name: "Romanian (Moldova)", nativeName: "română (Republica Moldova)" },
+    { id: "ro_RO", name: "Romanian (Romania)", nativeName: "română (România)" },
+    { id: "rm", name: "Romansh", nativeName: "rumantsch" },
+    { id: "rm_CH", name: "Romansh (Switzerland)", nativeName: "rumantsch (Svizra)" },
+    { id: "rn", name: "Rundi", nativeName: "Ikirundi" },
+    { id: "rn_BI", name: "Rundi (Burundi)", nativeName: "Ikirundi (Uburundi)" },
+    { id: "ru", name: "Russian", nativeName: "русский" },
+    { id: "ru_BY", name: "Russian (Belarus)", nativeName: "русский (Беларусь)" },
+    { id: "ru_KZ", name: "Russian (Kazakhstan)", nativeName: "русский (Казахстан)" },
+    { id: "ru_KG", name: "Russian (Kyrgyzstan)", nativeName: "русский (Киргизия)" },
+    { id: "ru_MD", name: "Russian (Moldova)", nativeName: "русский (Молдова)" },
+    { id: "ru_RU", name: "Russian (Russia)", nativeName: "русский (Россия)" },
+    { id: "ru_UA", name: "Russian (Ukraine)", nativeName: "русский (Украина)" },
+    { id: "sg", name: "Sango", nativeName: "Sängö" },
+    { id: "sg_CF", name: "Sango (Central African Republic)", nativeName: "Sängö (Ködörösêse tî Bêafrîka)" },
+    { id: "gd", name: "Scottish Gaelic", nativeName: "Gàidhlig" },
+    { id: "gd_GB", name: "Scottish Gaelic (United Kingdom)", nativeName: "Gàidhlig (An Rìoghachd Aonaichte)" },
+    { id: "sr", name: "Serbian", nativeName: "српски" },
+    { id: "sr_BA", name: "Serbian (Bosnia & Herzegovina)", nativeName: "српски (Босна и Херцеговина)" },
+    { id: "sr_Cyrl_BA", name: "Serbian (Cyrillic, Bosnia & Herzegovina)", nativeName: "српски (ћирилица, Босна и Херцеговина)" },
+    { id: "sr_Cyrl_XK", name: "Serbian (Cyrillic, Kosovo)", nativeName: "српски (ћирилица, Косово)" },
+    { id: "sr_Cyrl_ME", name: "Serbian (Cyrillic, Montenegro)", nativeName: "српски (ћирилица, Црна Гора)" },
+    { id: "sr_Cyrl_RS", name: "Serbian (Cyrillic, Serbia)", nativeName: "српски (ћирилица, Србија)" },
+    { id: "sr_Cyrl", name: "Serbian (Cyrillic)", nativeName: "српски (ћирилица)" },
+    { id: "sr_XK", name: "Serbian (Kosovo)", nativeName: "српски (Косово)" },
+    { id: "sr_Latn_BA", name: "Serbian (Latin, Bosnia & Herzegovina)", nativeName: "srpski (latinica, Bosna i Hercegovina)" },
+    { id: "sr_Latn_XK", name: "Serbian (Latin, Kosovo)", nativeName: "srpski (latinica, Kosovo)" },
+    { id: "sr_Latn_ME", name: "Serbian (Latin, Montenegro)", nativeName: "srpski (latinica, Crna Gora)" },
+    { id: "sr_Latn_RS", name: "Serbian (Latin, Serbia)", nativeName: "srpski (latinica, Srbija)" },
+    { id: "sr_Latn", name: "Serbian (Latin)", nativeName: "srpski (latinica)" },
+    { id: "sr_ME", name: "Serbian (Montenegro)", nativeName: "српски (Црна Гора)" },
+    { id: "sr_RS", name: "Serbian (Serbia)", nativeName: "српски (Србија)" },
+    { id: "sh", name: "Serbo-Croatian", nativeName: "Serbo-Croatian" },
+    { id: "sh_BA", name: "Serbo-Croatian (Bosnia & Herzegovina)", nativeName: "Serbo-Croatian (Bosnia & Herzegovina)" },
+    { id: "sn", name: "Shona", nativeName: "chiShona" },
+    { id: "sn_ZW", name: "Shona (Zimbabwe)", nativeName: "chiShona (Zimbabwe)" },
+    { id: "ii", name: "Sichuan Yi", nativeName: "ꆈꌠꉙ" },
+    { id: "ii_CN", name: "Sichuan Yi (China)", nativeName: "ꆈꌠꉙ (ꍏꇩ)" },
+    { id: "si", name: "Sinhala", nativeName: "සිංහල" },
+    { id: "si_LK", name: "Sinhala (Sri Lanka)", nativeName: "සිංහල (ශ්‍රී ලංකාව)" },
+    { id: "sk", name: "Slovak", nativeName: "slovenčina" },
+    { id: "sk_SK", name: "Slovak (Slovakia)", nativeName: "slovenčina (Slovensko)" },
+    { id: "sl", name: "Slovenian", nativeName: "slovenščina" },
+    { id: "sl_SI", name: "Slovenian (Slovenia)", nativeName: "slovenščina (Slovenija)" },
+    { id: "so", name: "Somali", nativeName: "Soomaali" },
+    { id: "so_DJ", name: "Somali (Djibouti)", nativeName: "Soomaali (Jabuuti)" },
+    { id: "so_ET", name: "Somali (Ethiopia)", nativeName: "Soomaali (Itoobiya)" },
+    { id: "so_KE", name: "Somali (Kenya)", nativeName: "Soomaali (Kiiniya)" },
+    { id: "so_SO", name: "Somali (Somalia)", nativeName: "Soomaali (Soomaaliya)" },
+    { id: "es", name: "Spanish", nativeName: "español" },
+    { id: "es_AR", name: "Spanish (Argentina)", nativeName: "español (Argentina)" },
+    { id: "es_BO", name: "Spanish (Bolivia)", nativeName: "español (Bolivia)" },
+    { id: "es_IC", name: "Spanish (Canary Islands)", nativeName: "español (islas Canarias)" },
+    { id: "es_EA", name: "Spanish (Ceuta & Melilla)", nativeName: "español (Ceuta y Melilla)" },
+    { id: "es_CL", name: "Spanish (Chile)", nativeName: "español (Chile)" },
+    { id: "es_CO", name: "Spanish (Colombia)", nativeName: "español (Colombia)" },
+    { id: "es_CR", name: "Spanish (Costa Rica)", nativeName: "español (Costa Rica)" },
+    { id: "es_CU", name: "Spanish (Cuba)", nativeName: "español (Cuba)" },
+    { id: "es_DO", name: "Spanish (Dominican Republic)", nativeName: "español (República Dominicana)" },
+    { id: "es_EC", name: "Spanish (Ecuador)", nativeName: "español (Ecuador)" },
+    { id: "es_SV", name: "Spanish (El Salvador)", nativeName: "español (El Salvador)" },
+    { id: "es_GQ", name: "Spanish (Equatorial Guinea)", nativeName: "español (Guinea Ecuatorial)" },
+    { id: "es_GT", name: "Spanish (Guatemala)", nativeName: "español (Guatemala)" },
+    { id: "es_HN", name: "Spanish (Honduras)", nativeName: "español (Honduras)" },
+    { id: "es_MX", name: "Spanish (Mexico)", nativeName: "español (México)" },
+    { id: "es_NI", name: "Spanish (Nicaragua)", nativeName: "español (Nicaragua)" },
+    { id: "es_PA", name: "Spanish (Panama)", nativeName: "español (Panamá)" },
+    { id: "es_PY", name: "Spanish (Paraguay)", nativeName: "español (Paraguay)" },
+    { id: "es_PE", name: "Spanish (Peru)", nativeName: "español (Perú)" },
+    { id: "es_PH", name: "Spanish (Philippines)", nativeName: "español (Filipinas)" },
+    { id: "es_PR", name: "Spanish (Puerto Rico)", nativeName: "español (Puerto Rico)" },
+    { id: "es_ES", name: "Spanish (Spain)", nativeName: "español (España)" },
+    { id: "es_US", name: "Spanish (United States)", nativeName: "español (Estados Unidos)" },
+    { id: "es_UY", name: "Spanish (Uruguay)", nativeName: "español (Uruguay)" },
+    { id: "es_VE", name: "Spanish (Venezuela)", nativeName: "español (Venezuela)" },
+    { id: "sw", name: "Swahili", nativeName: "Kiswahili" },
+    { id: "sw_KE", name: "Swahili (Kenya)", nativeName: "Kiswahili (Kenya)" },
+    { id: "sw_TZ", name: "Swahili (Tanzania)", nativeName: "Kiswahili (Tanzania)" },
+    { id: "sw_UG", name: "Swahili (Uganda)", nativeName: "Kiswahili (Uganda)" },
+    { id: "sv", name: "Swedish", nativeName: "svenska" },
+    { id: "sv_AX", name: "Swedish (Åland Islands)", nativeName: "svenska (Åland)" },
+    { id: "sv_FI", name: "Swedish (Finland)", nativeName: "svenska (Finland)" },
+    { id: "sv_SE", name: "Swedish (Sweden)", nativeName: "svenska (Sverige)" },
+    { id: "tl", name: "Tagalog", nativeName: "Tagalog" },
+    { id: "tl_PH", name: "Tagalog (Philippines)", nativeName: "Tagalog (Philippines)" },
+    { id: "ta", name: "Tamil", nativeName: "தமிழ்" },
+    { id: "ta_IN", name: "Tamil (India)", nativeName: "தமிழ் (இந்தியா)" },
+    { id: "ta_MY", name: "Tamil (Malaysia)", nativeName: "தமிழ் (மலேஷியா)" },
+    { id: "ta_SG", name: "Tamil (Singapore)", nativeName: "தமிழ் (சிங்கப்பூர்)" },
+    { id: "ta_LK", name: "Tamil (Sri Lanka)", nativeName: "தமிழ் (இலங்கை)" },
+    { id: "te", name: "Telugu", nativeName: "తెలుగు" },
+    { id: "te_IN", name: "Telugu (India)", nativeName: "తెలుగు (భారత దేశం)" },
+    { id: "th", name: "Thai", nativeName: "ไทย" },
+    { id: "th_TH", name: "Thai (Thailand)", nativeName: "ไทย (ไทย)" },
+    { id: "bo", name: "Tibetan", nativeName: "བོད་སྐད་" },
+    { id: "bo_CN", name: "Tibetan (China)", nativeName: "བོད་སྐད་ (རྒྱ་ནག)" },
+    { id: "bo_IN", name: "Tibetan (India)", nativeName: "བོད་སྐད་ (རྒྱ་གར་)" },
+    { id: "ti", name: "Tigrinya", nativeName: "ትግርኛ" },
+    { id: "ti_ER", name: "Tigrinya (Eritrea)", nativeName: "Tigrinya (Eritrea)" },
+    { id: "ti_ET", name: "Tigrinya (Ethiopia)", nativeName: "Tigrinya (Ethiopia)" },
+    { id: "to", name: "Tongan", nativeName: "lea fakatonga" },
+    { id: "to_TO", name: "Tongan (Tonga)", nativeName: "lea fakatonga (Tonga)" },
+    { id: "tr", name: "Turkish", nativeName: "Türkçe" },
+    { id: "tr_CY", name: "Turkish (Cyprus)", nativeName: "Türkçe (Güney Kıbrıs Rum Kesimi)" },
+    { id: "tr_TR", name: "Turkish (Turkey)", nativeName: "Türkçe (Türkiye)" },
+    { id: "uk", name: "Ukrainian", nativeName: "українська" },
+    { id: "uk_UA", name: "Ukrainian (Ukraine)", nativeName: "українська (Україна)" },
+    { id: "ur", name: "Urdu", nativeName: "اردو" },
+    { id: "ur_IN", name: "Urdu (India)", nativeName: "اردو (بھارت)" },
+    { id: "ur_PK", name: "Urdu (Pakistan)", nativeName: "اردو (پاکستان)" },
+    { id: "ug", name: "Uyghur", nativeName: "ئۇيغۇرچە" },
+    { id: "ug_Arab_CN", name: "Uyghur (Arabic, China)", nativeName: "ئۇيغۇرچە (ئەرەب, جۇڭگو)" },
+    { id: "ug_Arab", name: "Uyghur (Arabic)", nativeName: "ئۇيغۇرچە (ئەرەب)" },
+    { id: "ug_CN", name: "Uyghur (China)", nativeName: "ئۇيغۇرچە (جۇڭگو)" },
+    { id: "uz", name: "Uzbek", nativeName: "oʻzbekcha" },
+    { id: "uz_AF", name: "Uzbek (Afghanistan)", nativeName: "oʻzbekcha (Afgʻoniston)" },
+    { id: "uz_Arab_AF", name: "Uzbek (Arabic, Afghanistan)", nativeName: "اوزبیک (عربی, افغانستان)" },
+    { id: "uz_Arab", name: "Uzbek (Arabic)", nativeName: "اوزبیک (عربی)" },
+    { id: "uz_Cyrl_UZ", name: "Uzbek (Cyrillic, Uzbekistan)", nativeName: "Ўзбек (Кирил, Ўзбекистон)" },
+    { id: "uz_Cyrl", name: "Uzbek (Cyrillic)", nativeName: "Ўзбек (Кирил)" },
+    { id: "uz_Latn_UZ", name: "Uzbek (Latin, Uzbekistan)", nativeName: "oʻzbekcha (Lotin, Oʻzbekiston)" },
+    { id: "uz_Latn", name: "Uzbek (Latin)", nativeName: "oʻzbekcha (Lotin)" },
+    { id: "uz_UZ", name: "Uzbek (Uzbekistan)", nativeName: "oʻzbekcha (Oʻzbekiston)" },
+    { id: "vi", name: "Vietnamese", nativeName: "Tiếng Việt" },
+    { id: "vi_VN", name: "Vietnamese (Vietnam)", nativeName: "Tiếng Việt (Việt Nam)" },
+    { id: "cy", name: "Welsh", nativeName: "Cymraeg" },
+    { id: "cy_GB", name: "Welsh (United Kingdom)", nativeName: "Cymraeg (Y Deyrnas Unedig)" },
+    { id: "fy", name: "Western Frisian", nativeName: "West-Frysk" },
+    { id: "fy_NL", name: "Western Frisian (Netherlands)", nativeName: "West-Frysk (Nederlân)" },
+    { id: "yi", name: "Yiddish", nativeName: "ייִדיש" },
+    { id: "yo", name: "Yoruba", nativeName: "Èdè Yorùbá" },
+    { id: "yo_BJ", name: "Yoruba (Benin)", nativeName: "Èdè Yorùbá (Orílɛ́ède Bɛ̀nɛ̀)" },
+    { id: "yo_NG", name: "Yoruba (Nigeria)", nativeName: "Èdè Yorùbá (Orílẹ́ède Nàìjíríà)" },
+    { id: "zu", name: "Zulu", nativeName: "isiZulu" },
+    { id: "zu_ZA", name: "Zulu (South Africa)", nativeName: "isiZulu (i-South Africa)" }
+            ];
+        }
+    };
+});
+// Full list of time zones defined in tz database
+// see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+angular.module('platformWebApp')
+.factory('platformWebApp.common.timeZones', ['moment', function(moment) {
+    var result = {
+        get: function(id) {
+            return _.find(this.query(), function(x) { return x.id.toLowerCase() === id.toLowerCase(); });
+        },
+        contains: function (id) {
+            return _.some(this.query(), function (x) { return x.id.toLowerCase() === id.toLowerCase(); });
+        },
+        utcOffset: function (id) {
+            var offset = moment.tz.zone(id).offset(moment().valueOf());
+            // UTC offset has inverted sign. Compare to zero to avoid -0
+            offset = offset === 0 ? 0 : offset * -1;
+            var minutes = offset % 60;
+            var hours = (offset - minutes) / 60;
+            // format: ±HHMM
+            var pad = function (n, withSign) {
+                var result = '';
+                if (withSign) {
+                    result = n >= 0 ? '+' : '-';
+                    n = n < 0 ? n * -1 : n;
+                }
+                result += n < 10 ? '0' + n : n;
+                return result;
+            }
+            return { hours: hours, minutes: minutes, formatted: pad(hours, true) + ':' + pad(minutes) };
+        },
+        query: function () {
+            // Get time zone from moment list of time zones, append UTC offset to name (UTC ±XX:XX Continent/City) and sort by UTC offset
+            return _.map(moment.tz.names(), function (x) {
+                var utcOffset = result.utcOffset(x);
+                return {
+                    id: x,
+                    utcOffset: utcOffset,
+                    name: '(UTC ' + utcOffset.formatted + ') ' + x
+                };
+            }).sort(function (a, b) {
+                if (!a.utcOffset || !b.utcOffset) {
+                    return !b.utcOffset ? -1 : !a.utcOffset ? 1 : 0;
+                }
+                return a.utcOffset.hours === b.utcOffset.hours ? a.utcOffset.minutes - b.utcOffset.minutes : a.utcOffset.hours - b.utcOffset.hours;
+            });
+        }
+    };
+    return result;
+}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.confirmDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
     angular.extend($scope, dialog);
@@ -21577,1869 +22254,6 @@ angular.module('platformWebApp').directive('vaTabs', function () {
         }
     }
 });
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-"use strict";
-
-CodeMirror.registerHelper("fold", "brace", function(cm, start) {
-  var line = start.line, lineText = cm.getLine(line);
-  var startCh, tokenType;
-
-  function findOpening(openCh) {
-    for (var at = start.ch, pass = 0;;) {
-      var found = at <= 0 ? -1 : lineText.lastIndexOf(openCh, at - 1);
-      if (found == -1) {
-        if (pass == 1) break;
-        pass = 1;
-        at = lineText.length;
-        continue;
-      }
-      if (pass == 1 && found < start.ch) break;
-      tokenType = cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1));
-      if (!/^(comment|string)/.test(tokenType)) return found + 1;
-      at = found - 1;
-    }
-  }
-
-  var startToken = "{", endToken = "}", startCh = findOpening("{");
-  if (startCh == null) {
-    startToken = "[", endToken = "]";
-    startCh = findOpening("[");
-  }
-
-  if (startCh == null) return;
-  var count = 1, lastLine = cm.lastLine(), end, endCh;
-  outer: for (var i = line; i <= lastLine; ++i) {
-    var text = cm.getLine(i), pos = i == line ? startCh : 0;
-    for (;;) {
-      var nextOpen = text.indexOf(startToken, pos), nextClose = text.indexOf(endToken, pos);
-      if (nextOpen < 0) nextOpen = text.length;
-      if (nextClose < 0) nextClose = text.length;
-      pos = Math.min(nextOpen, nextClose);
-      if (pos == text.length) break;
-      if (cm.getTokenTypeAt(CodeMirror.Pos(i, pos + 1)) == tokenType) {
-        if (pos == nextOpen) ++count;
-        else if (!--count) { end = i; endCh = pos; break outer; }
-      }
-      ++pos;
-    }
-  }
-  if (end == null || line == end && endCh == startCh) return;
-  return {from: CodeMirror.Pos(line, startCh),
-          to: CodeMirror.Pos(end, endCh)};
-});
-
-CodeMirror.registerHelper("fold", "import", function(cm, start) {
-  function hasImport(line) {
-    if (line < cm.firstLine() || line > cm.lastLine()) return null;
-    var start = cm.getTokenAt(CodeMirror.Pos(line, 1));
-    if (!/\S/.test(start.string)) start = cm.getTokenAt(CodeMirror.Pos(line, start.end + 1));
-    if (start.type != "keyword" || start.string != "import") return null;
-    // Now find closing semicolon, return its position
-    for (var i = line, e = Math.min(cm.lastLine(), line + 10); i <= e; ++i) {
-      var text = cm.getLine(i), semi = text.indexOf(";");
-      if (semi != -1) return {startCh: start.end, end: CodeMirror.Pos(i, semi)};
-    }
-  }
-
-  var start = start.line, has = hasImport(start), prev;
-  if (!has || hasImport(start - 1) || ((prev = hasImport(start - 2)) && prev.end.line == start - 1))
-    return null;
-  for (var end = has.end;;) {
-    var next = hasImport(end.line + 1);
-    if (next == null) break;
-    end = next.end;
-  }
-  return {from: cm.clipPos(CodeMirror.Pos(start, has.startCh + 1)), to: end};
-});
-
-CodeMirror.registerHelper("fold", "include", function(cm, start) {
-  function hasInclude(line) {
-    if (line < cm.firstLine() || line > cm.lastLine()) return null;
-    var start = cm.getTokenAt(CodeMirror.Pos(line, 1));
-    if (!/\S/.test(start.string)) start = cm.getTokenAt(CodeMirror.Pos(line, start.end + 1));
-    if (start.type == "meta" && start.string.slice(0, 8) == "#include") return start.start + 8;
-  }
-
-  var start = start.line, has = hasInclude(start);
-  if (has == null || hasInclude(start - 1) != null) return null;
-  for (var end = start;;) {
-    var next = hasInclude(end + 1);
-    if (next == null) break;
-    ++end;
-  }
-  return {from: CodeMirror.Pos(start, has + 1),
-          to: cm.clipPos(CodeMirror.Pos(end))};
-});
-
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-"use strict";
-
-CodeMirror.registerGlobalHelper("fold", "comment", function(mode) {
-  return mode.blockCommentStart && mode.blockCommentEnd;
-}, function(cm, start) {
-  var mode = cm.getModeAt(start), startToken = mode.blockCommentStart, endToken = mode.blockCommentEnd;
-  if (!startToken || !endToken) return;
-  var line = start.line, lineText = cm.getLine(line);
-
-  var startCh;
-  for (var at = start.ch, pass = 0;;) {
-    var found = at <= 0 ? -1 : lineText.lastIndexOf(startToken, at - 1);
-    if (found == -1) {
-      if (pass == 1) return;
-      pass = 1;
-      at = lineText.length;
-      continue;
-    }
-    if (pass == 1 && found < start.ch) return;
-    if (/comment/.test(cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1)))) {
-      startCh = found + startToken.length;
-      break;
-    }
-    at = found - 1;
-  }
-
-  var depth = 1, lastLine = cm.lastLine(), end, endCh;
-  outer: for (var i = line; i <= lastLine; ++i) {
-    var text = cm.getLine(i), pos = i == line ? startCh : 0;
-    for (;;) {
-      var nextOpen = text.indexOf(startToken, pos), nextClose = text.indexOf(endToken, pos);
-      if (nextOpen < 0) nextOpen = text.length;
-      if (nextClose < 0) nextClose = text.length;
-      pos = Math.min(nextOpen, nextClose);
-      if (pos == text.length) break;
-      if (pos == nextOpen) ++depth;
-      else if (!--depth) { end = i; endCh = pos; break outer; }
-      ++pos;
-    }
-  }
-  if (end == null || line == end && endCh == startCh) return;
-  return {from: CodeMirror.Pos(line, startCh),
-          to: CodeMirror.Pos(end, endCh)};
-});
-
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-  "use strict";
-
-  function doFold(cm, pos, options, force) {
-    if (options && options.call) {
-      var finder = options;
-      options = null;
-    } else {
-      var finder = getOption(cm, options, "rangeFinder");
-    }
-    if (typeof pos == "number") pos = CodeMirror.Pos(pos, 0);
-    var minSize = getOption(cm, options, "minFoldSize");
-
-    function getRange(allowFolded) {
-      var range = finder(cm, pos);
-      if (!range || range.to.line - range.from.line < minSize) return null;
-      var marks = cm.findMarksAt(range.from);
-      for (var i = 0; i < marks.length; ++i) {
-        if (marks[i].__isFold && force !== "fold") {
-          if (!allowFolded) return null;
-          range.cleared = true;
-          marks[i].clear();
-        }
-      }
-      return range;
-    }
-
-    var range = getRange(true);
-    if (getOption(cm, options, "scanUp")) while (!range && pos.line > cm.firstLine()) {
-      pos = CodeMirror.Pos(pos.line - 1, 0);
-      range = getRange(false);
-    }
-    if (!range || range.cleared || force === "unfold") return;
-
-    var myWidget = makeWidget(cm, options);
-    CodeMirror.on(myWidget, "mousedown", function(e) {
-      myRange.clear();
-      CodeMirror.e_preventDefault(e);
-    });
-    var myRange = cm.markText(range.from, range.to, {
-      replacedWith: myWidget,
-      clearOnEnter: true,
-      __isFold: true
-    });
-    myRange.on("clear", function(from, to) {
-      CodeMirror.signal(cm, "unfold", cm, from, to);
-    });
-    CodeMirror.signal(cm, "fold", cm, range.from, range.to);
-  }
-
-  function makeWidget(cm, options) {
-    var widget = getOption(cm, options, "widget");
-    if (typeof widget == "string") {
-      var text = document.createTextNode(widget);
-      widget = document.createElement("span");
-      widget.appendChild(text);
-      widget.className = "CodeMirror-foldmarker";
-    }
-    return widget;
-  }
-
-  // Clumsy backwards-compatible interface
-  CodeMirror.newFoldFunction = function(rangeFinder, widget) {
-    return function(cm, pos) { doFold(cm, pos, {rangeFinder: rangeFinder, widget: widget}); };
-  };
-
-  // New-style interface
-  CodeMirror.defineExtension("foldCode", function(pos, options, force) {
-    doFold(this, pos, options, force);
-  });
-
-  CodeMirror.defineExtension("isFolded", function(pos) {
-    var marks = this.findMarksAt(pos);
-    for (var i = 0; i < marks.length; ++i)
-      if (marks[i].__isFold) return true;
-  });
-
-  CodeMirror.commands.toggleFold = function(cm) {
-    cm.foldCode(cm.getCursor());
-  };
-  CodeMirror.commands.fold = function(cm) {
-    cm.foldCode(cm.getCursor(), null, "fold");
-  };
-  CodeMirror.commands.unfold = function(cm) {
-    cm.foldCode(cm.getCursor(), null, "unfold");
-  };
-  CodeMirror.commands.foldAll = function(cm) {
-    cm.operation(function() {
-      for (var i = cm.firstLine(), e = cm.lastLine(); i <= e; i++)
-        cm.foldCode(CodeMirror.Pos(i, 0), null, "fold");
-    });
-  };
-  CodeMirror.commands.unfoldAll = function(cm) {
-    cm.operation(function() {
-      for (var i = cm.firstLine(), e = cm.lastLine(); i <= e; i++)
-        cm.foldCode(CodeMirror.Pos(i, 0), null, "unfold");
-    });
-  };
-
-  CodeMirror.registerHelper("fold", "combine", function() {
-    var funcs = Array.prototype.slice.call(arguments, 0);
-    return function(cm, start) {
-      for (var i = 0; i < funcs.length; ++i) {
-        var found = funcs[i](cm, start);
-        if (found) return found;
-      }
-    };
-  });
-
-  CodeMirror.registerHelper("fold", "auto", function(cm, start) {
-    var helpers = cm.getHelpers(start, "fold");
-    for (var i = 0; i < helpers.length; i++) {
-      var cur = helpers[i](cm, start);
-      if (cur) return cur;
-    }
-  });
-
-  var defaultOptions = {
-    rangeFinder: CodeMirror.fold.auto,
-    widget: "\u2194",
-    minFoldSize: 0,
-    scanUp: false
-  };
-
-  CodeMirror.defineOption("foldOptions", null);
-
-  function getOption(cm, options, name) {
-    if (options && options[name] !== undefined)
-      return options[name];
-    var editorOptions = cm.options.foldOptions;
-    if (editorOptions && editorOptions[name] !== undefined)
-      return editorOptions[name];
-    return defaultOptions[name];
-  }
-
-  CodeMirror.defineExtension("foldOption", function(options, name) {
-    return getOption(this, options, name);
-  });
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"), require("./foldcode"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror", "./foldcode"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-  "use strict";
-
-  CodeMirror.defineOption("foldGutter", false, function(cm, val, old) {
-    if (old && old != CodeMirror.Init) {
-      cm.clearGutter(cm.state.foldGutter.options.gutter);
-      cm.state.foldGutter = null;
-      cm.off("gutterClick", onGutterClick);
-      cm.off("change", onChange);
-      cm.off("viewportChange", onViewportChange);
-      cm.off("fold", onFold);
-      cm.off("unfold", onFold);
-      cm.off("swapDoc", updateInViewport);
-    }
-    if (val) {
-      cm.state.foldGutter = new State(parseOptions(val));
-      updateInViewport(cm);
-      cm.on("gutterClick", onGutterClick);
-      cm.on("change", onChange);
-      cm.on("viewportChange", onViewportChange);
-      cm.on("fold", onFold);
-      cm.on("unfold", onFold);
-      cm.on("swapDoc", updateInViewport);
-    }
-  });
-
-  var Pos = CodeMirror.Pos;
-
-  function State(options) {
-    this.options = options;
-    this.from = this.to = 0;
-  }
-
-  function parseOptions(opts) {
-    if (opts === true) opts = {};
-    if (opts.gutter == null) opts.gutter = "CodeMirror-foldgutter";
-    if (opts.indicatorOpen == null) opts.indicatorOpen = "CodeMirror-foldgutter-open";
-    if (opts.indicatorFolded == null) opts.indicatorFolded = "CodeMirror-foldgutter-folded";
-    return opts;
-  }
-
-  function isFolded(cm, line) {
-    var marks = cm.findMarksAt(Pos(line));
-    for (var i = 0; i < marks.length; ++i)
-      if (marks[i].__isFold && marks[i].find().from.line == line) return marks[i];
-  }
-
-  function marker(spec) {
-    if (typeof spec == "string") {
-      var elt = document.createElement("div");
-      elt.className = spec + " CodeMirror-guttermarker-subtle";
-      return elt;
-    } else {
-      return spec.cloneNode(true);
-    }
-  }
-
-  function updateFoldInfo(cm, from, to) {
-    var opts = cm.state.foldGutter.options, cur = from;
-    var minSize = cm.foldOption(opts, "minFoldSize");
-    var func = cm.foldOption(opts, "rangeFinder");
-    cm.eachLine(from, to, function(line) {
-      var mark = null;
-      if (isFolded(cm, cur)) {
-        mark = marker(opts.indicatorFolded);
-      } else {
-        var pos = Pos(cur, 0);
-        var range = func && func(cm, pos);
-        if (range && range.to.line - range.from.line >= minSize)
-          mark = marker(opts.indicatorOpen);
-      }
-      cm.setGutterMarker(line, opts.gutter, mark);
-      ++cur;
-    });
-  }
-
-  function updateInViewport(cm) {
-    var vp = cm.getViewport(), state = cm.state.foldGutter;
-    if (!state) return;
-    cm.operation(function() {
-      updateFoldInfo(cm, vp.from, vp.to);
-    });
-    state.from = vp.from; state.to = vp.to;
-  }
-
-  function onGutterClick(cm, line, gutter) {
-    var state = cm.state.foldGutter;
-    if (!state) return;
-    var opts = state.options;
-    if (gutter != opts.gutter) return;
-    var folded = isFolded(cm, line);
-    if (folded) folded.clear();
-    else cm.foldCode(Pos(line, 0), opts.rangeFinder);
-  }
-
-  function onChange(cm) {
-    var state = cm.state.foldGutter;
-    if (!state) return;
-    var opts = state.options;
-    state.from = state.to = 0;
-    clearTimeout(state.changeUpdate);
-    state.changeUpdate = setTimeout(function() { updateInViewport(cm); }, opts.foldOnChangeTimeSpan || 600);
-  }
-
-  function onViewportChange(cm) {
-    var state = cm.state.foldGutter;
-    if (!state) return;
-    var opts = state.options;
-    clearTimeout(state.changeUpdate);
-    state.changeUpdate = setTimeout(function() {
-      var vp = cm.getViewport();
-      if (state.from == state.to || vp.from - state.to > 20 || state.from - vp.to > 20) {
-        updateInViewport(cm);
-      } else {
-        cm.operation(function() {
-          if (vp.from < state.from) {
-            updateFoldInfo(cm, vp.from, state.from);
-            state.from = vp.from;
-          }
-          if (vp.to > state.to) {
-            updateFoldInfo(cm, state.to, vp.to);
-            state.to = vp.to;
-          }
-        });
-      }
-    }, opts.updateViewportTimeSpan || 400);
-  }
-
-  function onFold(cm, from) {
-    var state = cm.state.foldGutter;
-    if (!state) return;
-    var line = from.line;
-    if (line >= state.from && line < state.to)
-      updateFoldInfo(cm, line, line + 1);
-  }
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-"use strict";
-
-CodeMirror.registerHelper("fold", "indent", function(cm, start) {
-  var tabSize = cm.getOption("tabSize"), firstLine = cm.getLine(start.line);
-  if (!/\S/.test(firstLine)) return;
-  var getIndent = function(line) {
-    return CodeMirror.countColumn(line, null, tabSize);
-  };
-  var myIndent = getIndent(firstLine);
-  var lastLineInFold = null;
-  // Go through lines until we find a line that definitely doesn't belong in
-  // the block we're folding, or to the end.
-  for (var i = start.line + 1, end = cm.lastLine(); i <= end; ++i) {
-    var curLine = cm.getLine(i);
-    var curIndent = getIndent(curLine);
-    if (curIndent > myIndent) {
-      // Lines with a greater indent are considered part of the block.
-      lastLineInFold = i;
-    } else if (!/\S/.test(curLine)) {
-      // Empty lines might be breaks within the block we're trying to fold.
-    } else {
-      // A non-empty line at an indent equal to or less than ours marks the
-      // start of another block.
-      break;
-    }
-  }
-  if (lastLineInFold) return {
-    from: CodeMirror.Pos(start.line, firstLine.length),
-    to: CodeMirror.Pos(lastLineInFold, cm.getLine(lastLineInFold).length)
-  };
-});
-
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-"use strict";
-
-CodeMirror.registerHelper("fold", "markdown", function(cm, start) {
-  var maxDepth = 100;
-
-  function isHeader(lineNo) {
-    var tokentype = cm.getTokenTypeAt(CodeMirror.Pos(lineNo, 0));
-    return tokentype && /\bheader\b/.test(tokentype);
-  }
-
-  function headerLevel(lineNo, line, nextLine) {
-    var match = line && line.match(/^#+/);
-    if (match && isHeader(lineNo)) return match[0].length;
-    match = nextLine && nextLine.match(/^[=\-]+\s*$/);
-    if (match && isHeader(lineNo + 1)) return nextLine[0] == "=" ? 1 : 2;
-    return maxDepth;
-  }
-
-  var firstLine = cm.getLine(start.line), nextLine = cm.getLine(start.line + 1);
-  var level = headerLevel(start.line, firstLine, nextLine);
-  if (level === maxDepth) return undefined;
-
-  var lastLineNo = cm.lastLine();
-  var end = start.line, nextNextLine = cm.getLine(end + 2);
-  while (end < lastLineNo) {
-    if (headerLevel(end + 1, nextLine, nextNextLine) <= level) break;
-    ++end;
-    nextLine = nextNextLine;
-    nextNextLine = cm.getLine(end + 2);
-  }
-
-  return {
-    from: CodeMirror.Pos(start.line, firstLine.length),
-    to: CodeMirror.Pos(end, cm.getLine(end).length)
-  };
-});
-
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-  "use strict";
-
-  var Pos = CodeMirror.Pos;
-  function cmp(a, b) { return a.line - b.line || a.ch - b.ch; }
-
-  var nameStartChar = "A-Z_a-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD";
-  var nameChar = nameStartChar + "\-\:\.0-9\\u00B7\\u0300-\\u036F\\u203F-\\u2040";
-  var xmlTagStart = new RegExp("<(/?)([" + nameStartChar + "][" + nameChar + "]*)", "g");
-
-  function Iter(cm, line, ch, range) {
-    this.line = line; this.ch = ch;
-    this.cm = cm; this.text = cm.getLine(line);
-    this.min = range ? range.from : cm.firstLine();
-    this.max = range ? range.to - 1 : cm.lastLine();
-  }
-
-  function tagAt(iter, ch) {
-    var type = iter.cm.getTokenTypeAt(Pos(iter.line, ch));
-    return type && /\btag\b/.test(type);
-  }
-
-  function nextLine(iter) {
-    if (iter.line >= iter.max) return;
-    iter.ch = 0;
-    iter.text = iter.cm.getLine(++iter.line);
-    return true;
-  }
-  function prevLine(iter) {
-    if (iter.line <= iter.min) return;
-    iter.text = iter.cm.getLine(--iter.line);
-    iter.ch = iter.text.length;
-    return true;
-  }
-
-  function toTagEnd(iter) {
-    for (;;) {
-      var gt = iter.text.indexOf(">", iter.ch);
-      if (gt == -1) { if (nextLine(iter)) continue; else return; }
-      if (!tagAt(iter, gt + 1)) { iter.ch = gt + 1; continue; }
-      var lastSlash = iter.text.lastIndexOf("/", gt);
-      var selfClose = lastSlash > -1 && !/\S/.test(iter.text.slice(lastSlash + 1, gt));
-      iter.ch = gt + 1;
-      return selfClose ? "selfClose" : "regular";
-    }
-  }
-  function toTagStart(iter) {
-    for (;;) {
-      var lt = iter.ch ? iter.text.lastIndexOf("<", iter.ch - 1) : -1;
-      if (lt == -1) { if (prevLine(iter)) continue; else return; }
-      if (!tagAt(iter, lt + 1)) { iter.ch = lt; continue; }
-      xmlTagStart.lastIndex = lt;
-      iter.ch = lt;
-      var match = xmlTagStart.exec(iter.text);
-      if (match && match.index == lt) return match;
-    }
-  }
-
-  function toNextTag(iter) {
-    for (;;) {
-      xmlTagStart.lastIndex = iter.ch;
-      var found = xmlTagStart.exec(iter.text);
-      if (!found) { if (nextLine(iter)) continue; else return; }
-      if (!tagAt(iter, found.index + 1)) { iter.ch = found.index + 1; continue; }
-      iter.ch = found.index + found[0].length;
-      return found;
-    }
-  }
-  function toPrevTag(iter) {
-    for (;;) {
-      var gt = iter.ch ? iter.text.lastIndexOf(">", iter.ch - 1) : -1;
-      if (gt == -1) { if (prevLine(iter)) continue; else return; }
-      if (!tagAt(iter, gt + 1)) { iter.ch = gt; continue; }
-      var lastSlash = iter.text.lastIndexOf("/", gt);
-      var selfClose = lastSlash > -1 && !/\S/.test(iter.text.slice(lastSlash + 1, gt));
-      iter.ch = gt + 1;
-      return selfClose ? "selfClose" : "regular";
-    }
-  }
-
-  function findMatchingClose(iter, tag) {
-    var stack = [];
-    for (;;) {
-      var next = toNextTag(iter), end, startLine = iter.line, startCh = iter.ch - (next ? next[0].length : 0);
-      if (!next || !(end = toTagEnd(iter))) return;
-      if (end == "selfClose") continue;
-      if (next[1]) { // closing tag
-        for (var i = stack.length - 1; i >= 0; --i) if (stack[i] == next[2]) {
-          stack.length = i;
-          break;
-        }
-        if (i < 0 && (!tag || tag == next[2])) return {
-          tag: next[2],
-          from: Pos(startLine, startCh),
-          to: Pos(iter.line, iter.ch)
-        };
-      } else { // opening tag
-        stack.push(next[2]);
-      }
-    }
-  }
-  function findMatchingOpen(iter, tag) {
-    var stack = [];
-    for (;;) {
-      var prev = toPrevTag(iter);
-      if (!prev) return;
-      if (prev == "selfClose") { toTagStart(iter); continue; }
-      var endLine = iter.line, endCh = iter.ch;
-      var start = toTagStart(iter);
-      if (!start) return;
-      if (start[1]) { // closing tag
-        stack.push(start[2]);
-      } else { // opening tag
-        for (var i = stack.length - 1; i >= 0; --i) if (stack[i] == start[2]) {
-          stack.length = i;
-          break;
-        }
-        if (i < 0 && (!tag || tag == start[2])) return {
-          tag: start[2],
-          from: Pos(iter.line, iter.ch),
-          to: Pos(endLine, endCh)
-        };
-      }
-    }
-  }
-
-  CodeMirror.registerHelper("fold", "xml", function(cm, start) {
-    var iter = new Iter(cm, start.line, 0);
-    for (;;) {
-      var openTag = toNextTag(iter), end;
-      if (!openTag || iter.line != start.line || !(end = toTagEnd(iter))) return;
-      if (!openTag[1] && end != "selfClose") {
-        var start = Pos(iter.line, iter.ch);
-        var close = findMatchingClose(iter, openTag[2]);
-        return close && {from: start, to: close.from};
-      }
-    }
-  });
-  CodeMirror.findMatchingTag = function(cm, pos, range) {
-    var iter = new Iter(cm, pos.line, pos.ch, range);
-    if (iter.text.indexOf(">") == -1 && iter.text.indexOf("<") == -1) return;
-    var end = toTagEnd(iter), to = end && Pos(iter.line, iter.ch);
-    var start = end && toTagStart(iter);
-    if (!end || !start || cmp(iter, pos) > 0) return;
-    var here = {from: Pos(iter.line, iter.ch), to: to, tag: start[2]};
-    if (end == "selfClose") return {open: here, close: null, at: "open"};
-
-    if (start[1]) { // closing tag
-      return {open: findMatchingOpen(iter, start[2]), close: here, at: "close"};
-    } else { // opening tag
-      iter = new Iter(cm, to.line, to.ch, range);
-      return {open: here, close: findMatchingClose(iter, start[2]), at: "open"};
-    }
-  };
-
-  CodeMirror.findEnclosingTag = function(cm, pos, range) {
-    var iter = new Iter(cm, pos.line, pos.ch, range);
-    for (;;) {
-      var open = findMatchingOpen(iter);
-      if (!open) break;
-      var forward = new Iter(cm, pos.line, pos.ch, range);
-      var close = findMatchingClose(forward, open.tag);
-      if (close) return {open: open, close: close};
-    }
-  };
-
-  // Used by addon/edit/closetag.js
-  CodeMirror.scanForClosingTag = function(cm, pos, name, end) {
-    var iter = new Iter(cm, pos.line, pos.ch, end ? {from: 0, to: end} : null);
-    return findMatchingClose(iter, name);
-  };
-});
-
-// Full list of countries defined by ISO 3166-1 alpha-3
-// based on https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
-angular.module('platformWebApp')
-.factory('platformWebApp.common.countries', function () {
-    return {
-        get: function (id) {
-            return _.findWhere(this.query(), { id: this.normalize(id) });
-        },
-        contains: function (id) {
-            return _.map(this.query(), function (entry) { return entry.id }).includes(this.normalize(id));
-        },
-        normalize: function(id) {
-            var result = undefined;
-            if (!!id) {
-                result = id.toUpperCase();
-            }
-            return result;
-        },
-        query: function () {
-            return [
-    { id: "AFG", name: "Afghanistan" },
-    { id: "ALA", name: "Åland Islands" },
-    { id: "ALB", name: "Albania" },
-    { id: "DZA", name: "Algeria" },
-    { id: "ASM", name: "American Samoa" },
-    { id: "AND", name: "Andorra" },
-    { id: "AGO", name: "Angola" },
-    { id: "AIA", name: "Anguilla" },
-    { id: "ATA", name: "Antarctica" },
-    { id: "ATG", name: "Antigua and Barbuda" },
-    { id: "ARG", name: "Argentina" },
-    { id: "ARM", name: "Armenia" },
-    { id: "ABW", name: "Aruba" },
-    { id: "AUS", name: "Australia" },
-    { id: "AUT", name: "Austria" },
-    { id: "AZE", name: "Azerbaijan" },
-    { id: "BHS", name: "Bahamas" },
-    { id: "BHR", name: "Bahrain" },
-    { id: "BGD", name: "Bangladesh" },
-    { id: "BRB", name: "Barbados" },
-    { id: "BLR", name: "Belarus" },
-    { id: "BEL", name: "Belgium" },
-    { id: "BLZ", name: "Belize" },
-    { id: "BEN", name: "Benin" },
-    { id: "BMU", name: "Bermuda" },
-    { id: "BTN", name: "Bhutan" },
-    { id: "BOL", name: "Bolivia, Plurinational State of" },
-    { id: "BES", name: "Bonaire, Sint Eustatius and Saba" },
-    { id: "BIH", name: "Bosnia and Herzegovina" },
-    { id: "BWA", name: "Botswana" },
-    { id: "BVT", name: "Bouvet Island" },
-    { id: "BRA", name: "Brazil" },
-    { id: "IOT", name: "British Indian Ocean Territory" },
-    { id: "BRN", name: "Brunei Darussalam" },
-    { id: "BGR", name: "Bulgaria" },
-    { id: "BFA", name: "Burkina Faso" },
-    { id: "BDI", name: "Burundi" },
-    { id: "KHM", name: "Cambodia" },
-    { id: "CMR", name: "Cameroon" },
-    { id: "CAN", name: "Canada" },
-    { id: "CPV", name: "Cape Verde" },
-    { id: "CYM", name: "Cayman Islands" },
-    { id: "CAF", name: "Central African Republic" },
-    { id: "TCD", name: "Chad" },
-    { id: "CHL", name: "Chile" },
-    { id: "CHN", name: "China" },
-    { id: "CXR", name: "Christmas Island" },
-    { id: "CCK", name: "Cocos (Keeling) Islands" },
-    { id: "COL", name: "Colombia" },
-    { id: "COM", name: "Comoros" },
-    { id: "COG", name: "Congo" },
-    { id: "COD", name: "Congo, the Democratic Republic of the" },
-    { id: "COK", name: "Cook Islands" },
-    { id: "CRI", name: "Costa Rica" },
-    { id: "CIV", name: "Côte d'Ivoire" },
-    { id: "HRV", name: "Croatia" },
-    { id: "CUB", name: "Cuba" },
-    { id: "CUW", name: "Curaçao" },
-    { id: "CYP", name: "Cyprus" },
-    { id: "CZE", name: "Czech Republic" },
-    { id: "DNK", name: "Denmark" },
-    { id: "DJI", name: "Djibouti" },
-    { id: "DMA", name: "Dominica" },
-    { id: "DOM", name: "Dominican Republic" },
-    { id: "ECU", name: "Ecuador" },
-    { id: "EGY", name: "Egypt" },
-    { id: "SLV", name: "El Salvador" },
-    { id: "GNQ", name: "Equatorial Guinea" },
-    { id: "ERI", name: "Eritrea" },
-    { id: "EST", name: "Estonia" },
-    { id: "ETH", name: "Ethiopia" },
-    { id: "FLK", name: "Falkland Islands (Malvinas)" },
-    { id: "FRO", name: "Faroe Islands" },
-    { id: "FJI", name: "Fiji" },
-    { id: "FIN", name: "Finland" },
-    { id: "FRA", name: "France" },
-    { id: "GUF", name: "French Guiana" },
-    { id: "PYF", name: "French Polynesia" },
-    { id: "ATF", name: "French Southern Territories" },
-    { id: "GAB", name: "Gabon" },
-    { id: "GMB", name: "Gambia" },
-    { id: "GEO", name: "Georgia" },
-    { id: "DEU", name: "Germany" },
-    { id: "GHA", name: "Ghana" },
-    { id: "GIB", name: "Gibraltar" },
-    { id: "GRC", name: "Greece" },
-    { id: "GRL", name: "Greenland" },
-    { id: "GRD", name: "Grenada" },
-    { id: "GLP", name: "Guadeloupe" },
-    { id: "GUM", name: "Guam" },
-    { id: "GTM", name: "Guatemala" },
-    { id: "GGY", name: "Guernsey" },
-    { id: "GIN", name: "Guinea" },
-    { id: "GNB", name: "Guinea-Bissau" },
-    { id: "GUY", name: "Guyana" },
-    { id: "HTI", name: "Haiti" },
-    { id: "HMD", name: "Heard Island and McDonald Islands" },
-    { id: "VAT", name: "Holy See (Vatican City State)" },
-    { id: "HND", name: "Honduras" },
-    { id: "HKG", name: "Hong Kong" },
-    { id: "HUN", name: "Hungary" },
-    { id: "ISL", name: "Iceland" },
-    { id: "IND", name: "India" },
-    { id: "IDN", name: "Indonesia" },
-    { id: "IRN", name: "Iran, Islamic Republic of" },
-    { id: "IRQ", name: "Iraq" },
-    { id: "IRL", name: "Ireland" },
-    { id: "IMN", name: "Isle of Man" },
-    { id: "ISR", name: "Israel" },
-    { id: "ITA", name: "Italy" },
-    { id: "JAM", name: "Jamaica" },
-    { id: "JPN", name: "Japan" },
-    { id: "JEY", name: "Jersey" },
-    { id: "JOR", name: "Jordan" },
-    { id: "KAZ", name: "Kazakhstan" },
-    { id: "KEN", name: "Kenya" },
-    { id: "KIR", name: "Kiribati" },
-    { id: "PRK", name: "Korea, Democratic People's Republic of" },
-    { id: "KOR", name: "Korea, Republic of" },
-    { id: "KWT", name: "Kuwait" },
-    { id: "KGZ", name: "Kyrgyzstan" },
-    { id: "LAO", name: "Lao People's Democratic Republic" },
-    { id: "LVA", name: "Latvia" },
-    { id: "LBN", name: "Lebanon" },
-    { id: "LSO", name: "Lesotho" },
-    { id: "LBR", name: "Liberia" },
-    { id: "LBY", name: "Libya" },
-    { id: "LIE", name: "Liechtenstein" },
-    { id: "LTU", name: "Lithuania" },
-    { id: "LUX", name: "Luxembourg" },
-    { id: "MAC", name: "Macao" },
-    { id: "MKD", name: "Macedonia, the former Yugoslav Republic of" },
-    { id: "MDG", name: "Madagascar" },
-    { id: "MWI", name: "Malawi" },
-    { id: "MYS", name: "Malaysia" },
-    { id: "MDV", name: "Maldives" },
-    { id: "MLI", name: "Mali" },
-    { id: "MLT", name: "Malta" },
-    { id: "MHL", name: "Marshall Islands" },
-    { id: "MTQ", name: "Martinique" },
-    { id: "MRT", name: "Mauritania" },
-    { id: "MUS", name: "Mauritius" },
-    { id: "MYT", name: "Mayotte" },
-    { id: "MEX", name: "Mexico" },
-    { id: "FSM", name: "Micronesia, Federated States of" },
-    { id: "MDA", name: "Moldova, Republic of" },
-    { id: "MCO", name: "Monaco" },
-    { id: "MNG", name: "Mongolia" },
-    { id: "MNE", name: "Montenegro" },
-    { id: "MSR", name: "Montserrat" },
-    { id: "MAR", name: "Morocco" },
-    { id: "MOZ", name: "Mozambique" },
-    { id: "MMR", name: "Myanmar" },
-    { id: "NAM", name: "Namibia" },
-    { id: "NRU", name: "Nauru" },
-    { id: "NPL", name: "Nepal" },
-    { id: "NLD", name: "Netherlands" },
-    { id: "NCL", name: "New Caledonia" },
-    { id: "NZL", name: "New Zealand" },
-    { id: "NIC", name: "Nicaragua" },
-    { id: "NER", name: "Niger" },
-    { id: "NGA", name: "Nigeria" },
-    { id: "NIU", name: "Niue" },
-    { id: "NFK", name: "Norfolk Island" },
-    { id: "MNP", name: "Northern Mariana Islands" },
-    { id: "NOR", name: "Norway" },
-    { id: "OMN", name: "Oman" },
-    { id: "PAK", name: "Pakistan" },
-    { id: "PLW", name: "Palau" },
-    { id: "PSE", name: "Palestinian Territory, Occupied" },
-    { id: "PAN", name: "Panama" },
-    { id: "PNG", name: "Papua New Guinea" },
-    { id: "PRY", name: "Paraguay" },
-    { id: "PER", name: "Peru" },
-    { id: "PHL", name: "Philippines" },
-    { id: "PCN", name: "Pitcairn" },
-    { id: "POL", name: "Poland" },
-    { id: "PRT", name: "Portugal" },
-    { id: "PRI", name: "Puerto Rico" },
-    { id: "QAT", name: "Qatar" },
-    { id: "REU", name: "Réunion" },
-    { id: "ROU", name: "Romania" },
-    { id: "RUS", name: "Russian Federation" },
-    { id: "RWA", name: "Rwanda" },
-    { id: "BLM", name: "Saint Barthélemy" },
-    { id: "SHN", name: "Saint Helena, Ascension and Tristan da Cunha" },
-    { id: "KNA", name: "Saint Kitts and Nevis" },
-    { id: "LCA", name: "Saint Lucia" },
-    { id: "MAF", name: "Saint Martin (French part)" },
-    { id: "SPM", name: "Saint Pierre and Miquelon" },
-    { id: "VCT", name: "Saint Vincent and the Grenadines" },
-    { id: "WSM", name: "Samoa" },
-    { id: "SMR", name: "San Marino" },
-    { id: "STP", name: "Sao Tome and Principe" },
-    { id: "SAU", name: "Saudi Arabia" },
-    { id: "SEN", name: "Senegal" },
-    { id: "SRB", name: "Serbia" },
-    { id: "SYC", name: "Seychelles" },
-    { id: "SLE", name: "Sierra Leone" },
-    { id: "SGP", name: "Singapore" },
-    { id: "SXM", name: "Sint Maarten (Dutch part)" },
-    { id: "SVK", name: "Slovakia" },
-    { id: "SVN", name: "Slovenia" },
-    { id: "SLB", name: "Solomon Islands" },
-    { id: "SOM", name: "Somalia" },
-    { id: "ZAF", name: "South Africa" },
-    { id: "SGS", name: "South Georgia and the South Sandwich Islands" },
-    { id: "SSD", name: "South Sudan" },
-    { id: "ESP", name: "Spain" },
-    { id: "LKA", name: "Sri Lanka" },
-    { id: "SDN", name: "Sudan" },
-    { id: "SUR", name: "Suriname" },
-    { id: "SJM", name: "Svalbard and Jan Mayen" },
-    { id: "SWZ", name: "Swaziland" },
-    { id: "SWE", name: "Sweden" },
-    { id: "CHE", name: "Switzerland" },
-    { id: "SYR", name: "Syrian Arab Republic" },
-    { id: "TWN", name: "Taiwan, Province of China" },
-    { id: "TJK", name: "Tajikistan" },
-    { id: "TZA", name: "Tanzania, United Republic of" },
-    { id: "THA", name: "Thailand" },
-    { id: "TLS", name: "Timor-Leste" },
-    { id: "TGO", name: "Togo" },
-    { id: "TKL", name: "Tokelau" },
-    { id: "TON", name: "Tonga" },
-    { id: "TTO", name: "Trinidad and Tobago" },
-    { id: "TUN", name: "Tunisia" },
-    { id: "TUR", name: "Turkey" },
-    { id: "TKM", name: "Turkmenistan" },
-    { id: "TCA", name: "Turks and Caicos Islands" },
-    { id: "TUV", name: "Tuvalu" },
-    { id: "UGA", name: "Uganda" },
-    { id: "UKR", name: "Ukraine" },
-    { id: "ARE", name: "United Arab Emirates" },
-    { id: "GBR", name: "United Kingdom" },
-    { id: "USA", name: "United States" },
-    { id: "UMI", name: "United States Minor Outlying Islands" },
-    { id: "URY", name: "Uruguay" },
-    { id: "UZB", name: "Uzbekistan" },
-    { id: "VUT", name: "Vanuatu" },
-    { id: "VEN", name: "Venezuela, Bolivarian Republic of" },
-    { id: "VNM", name: "Viet Nam" },
-    { id: "VGB", name: "Virgin Islands, British" },
-    { id: "VIR", name: "Virgin Islands, U.S." },
-    { id: "WLF", name: "Wallis and Futuna" },
-    { id: "ESH", name: "Western Sahara" },
-    { id: "YEM", name: "Yemen" },
-    { id: "ZMB", name: "Zambia" },
-    { id: "ZWE", name: "Zimbabwe" }
-            ];
-        }
-    };
-});
-// Full list of languages defined by ISO 639-1
-// based on https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
-angular.module('platformWebApp')
-.factory('platformWebApp.common.languages', function () {
-    return {
-        get: function (id) {
-            return _.findWhere(this.query(), { id: this.normalize(id) });
-        },
-        contains: function (id) {
-            return _.map(this.query(), function (entry) { return entry.id }).includes(this.normalize(id));
-        },
-        normalize: function(id) {
-            var result = undefined;
-            if (!!id) {
-                result = id.toLowerCase();
-            }
-            return result;
-        },
-        query: function () {
-            return [
-      { id: "ab", name: "Abkhaz", nativeName: "аҧсуа" },
-      { id: "aa", name: "Afar", nativeName: "Afaraf" },
-      { id: "af", name: "Afrikaans", nativeName: "Afrikaans" },
-      { id: "ak", name: "Akan", nativeName: "Akan" },
-      { id: "sq", name: "Albanian", nativeName: "Shqip" },
-      { id: "am", name: "Amharic", nativeName: "አማርኛ" },
-      { id: "ar", name: "Arabic", nativeName: "العربية" },
-      { id: "an", name: "Aragonese", nativeName: "Aragonés" },
-      { id: "hy", name: "Armenian", nativeName: "Հայերեն" },
-      { id: "as", name: "Assamese", nativeName: "অসমীয়া" },
-      { id: "av", name: "Avaric", nativeName: "авар мацӀ, магӀарул мацӀ" },
-      { id: "ae", name: "Avestan", nativeName: "avesta" },
-      { id: "ay", name: "Aymara", nativeName: "aymar aru" },
-      { id: "az", name: "Azerbaijani", nativeName: "azərbaycan dili" },
-      { id: "bm", name: "Bambara", nativeName: "bamanankan" },
-      { id: "ba", name: "Bashkir", nativeName: "башҡорт теле" },
-      { id: "eu", name: "Basque", nativeName: "euskara, euskera" },
-      { id: "be", name: "Belarusian", nativeName: "Беларуская" },
-      { id: "bn", name: "Bengali", nativeName: "বাংলা" },
-      { id: "bh", name: "Bihari", nativeName: "भोजपुरी" },
-      { id: "bi", name: "Bislama", nativeName: "Bislama" },
-      { id: "bs", name: "Bosnian", nativeName: "bosanski jezik" },
-      { id: "br", name: "Breton", nativeName: "brezhoneg" },
-      { id: "bg", name: "Bulgarian", nativeName: "български език" },
-      { id: "my", name: "Burmese", nativeName: "ဗမာစာ" },
-      { id: "ca", name: "Catalan; Valencian", nativeName: "Català" },
-      { id: "ch", name: "Chamorro", nativeName: "Chamoru" },
-      { id: "ce", name: "Chechen", nativeName: "нохчийн мотт" },
-      { id: "ny", name: "Chichewa; Chewa; Nyanja", nativeName: "chiCheŵa, chinyanja" },
-      { id: "zh", name: "Chinese", nativeName: "中文 (Zhōngwén), 汉语, 漢語" },
-      { id: "cv", name: "Chuvash", nativeName: "чӑваш чӗлхи" },
-      { id: "kw", name: "Cornish", nativeName: "Kernewek" },
-      { id: "co", name: "Corsican", nativeName: "corsu, lingua corsa" },
-      { id: "cr", name: "Cree", nativeName: "ᓀᐦᐃᔭᐍᐏᐣ" },
-      { id: "hr", name: "Croatian", nativeName: "hrvatski" },
-      { id: "cs", name: "Czech", nativeName: "česky, čeština" },
-      { id: "da", name: "Danish", nativeName: "dansk" },
-      { id: "dv", name: "Divehi; Dhivehi; Maldivian;", nativeName: "ދިވެހި" },
-      { id: "nl", name: "Dutch", nativeName: "Nederlands, Vlaams" },
-      { id: "dz", name: "Dzongkha", nativeName: "རྫོང་ཁ" },
-      { id: "en", name: "English", nativeName: "English" },
-      { id: "eo", name: "Esperanto", nativeName: "Esperanto" },
-      { id: "et", name: "Estonian", nativeName: "eesti, eesti keel" },
-      { id: "ee", name: "Ewe", nativeName: "Eʋegbe" },
-      { id: "fo", name: "Faroese", nativeName: "føroyskt" },
-      { id: "fj", name: "Fijian", nativeName: "vosa Vakaviti" },
-      { id: "fi", name: "Finnish", nativeName: "suomi, suomen kieli" },
-      { id: "fr", name: "French", nativeName: "français, langue française" },
-      { id: "ff", name: "Fula; Fulah; Pulaar; Pular", nativeName: "Fulfulde, Pulaar, Pular" },
-      { id: "gl", name: "Galician", nativeName: "Galego" },
-      { id: "ka", name: "Georgian", nativeName: "ქართული" },
-      { id: "de", name: "German", nativeName: "Deutsch" },
-      { id: "el", name: "Greek, Modern", nativeName: "Ελληνικά" },
-      { id: "gn", name: "Guaraní", nativeName: "Avañeẽ" },
-      { id: "gu", name: "Gujarati", nativeName: "ગુજરાતી" },
-      { id: "ht", name: "Haitian; Haitian Creole", nativeName: "Kreyòl ayisyen" },
-      { id: "ha", name: "Hausa", nativeName: "Hausa, هَوُسَ" },
-      { id: "he", name: "Hebrew (modern)", nativeName: "עברית" },
-      { id: "hz", name: "Herero", nativeName: "Otjiherero" },
-      { id: "hi", name: "Hindi", nativeName: "हिन्दी, हिंदी" },
-      { id: "ho", name: "Hiri Motu", nativeName: "Hiri Motu" },
-      { id: "hu", name: "Hungarian", nativeName: "Magyar" },
-      { id: "ia", name: "Interlingua", nativeName: "Interlingua" },
-      { id: "id", name: "Indonesian", nativeName: "Bahasa Indonesia" },
-      { id: "ie", name: "Interlingue", nativeName: "Originally called Occidental; then Interlingue after WWII" },
-      { id: "ga", name: "Irish", nativeName: "Gaeilge" },
-      { id: "ig", name: "Igbo", nativeName: "Asụsụ Igbo" },
-      { id: "ik", name: "Inupiaq", nativeName: "Iñupiaq, Iñupiatun" },
-      { id: "io", name: "Ido", nativeName: "Ido" },
-      { id: "is", name: "Icelandic", nativeName: "Íslenska" },
-      { id: "it", name: "Italian", nativeName: "Italiano" },
-      { id: "iu", name: "Inuktitut", nativeName: "ᐃᓄᒃᑎᑐᑦ" },
-      { id: "ja", name: "Japanese", nativeName: "日本語 (にほんご／にっぽんご)" },
-      { id: "jv", name: "Javanese", nativeName: "basa Jawa" },
-      { id: "kl", name: "Kalaallisut, Greenlandic", nativeName: "kalaallisut, kalaallit oqaasii" },
-      { id: "kn", name: "Kannada", nativeName: "ಕನ್ನಡ" },
-      { id: "kr", name: "Kanuri", nativeName: "Kanuri" },
-      { id: "ks", name: "Kashmiri", nativeName: "कश्मीरी, كشميري‎" },
-      { id: "kk", name: "Kazakh", nativeName: "Қазақ тілі" },
-      { id: "km", name: "Khmer", nativeName: "ភាសាខ្មែរ" },
-      { id: "ki", name: "Kikuyu, Gikuyu", nativeName: "Gĩkũyũ" },
-      { id: "rw", name: "Kinyarwanda", nativeName: "Ikinyarwanda" },
-      { id: "ky", name: "Kirghiz, Kyrgyz", nativeName: "кыргыз тили" },
-      { id: "kv", name: "Komi", nativeName: "коми кыв" },
-      { id: "kg", name: "Kongo", nativeName: "KiKongo" },
-      { id: "ko", name: "Korean", nativeName: "한국어 (韓國語), 조선말 (朝鮮語)" },
-      { id: "ku", name: "Kurdish", nativeName: "Kurdî, كوردی‎" },
-      { id: "kj", name: "Kwanyama, Kuanyama", nativeName: "Kuanyama" },
-      { id: "la", name: "Latin", nativeName: "latine, lingua latina" },
-      { id: "lb", name: "Luxembourgish, Letzeburgesch", nativeName: "Lëtzebuergesch" },
-      { id: "lg", name: "Luganda", nativeName: "Luganda" },
-      { id: "li", name: "Limburgish, Limburgan, Limburger", nativeName: "Limburgs" },
-      { id: "ln", name: "Lingala", nativeName: "Lingála" },
-      { id: "lo", name: "Lao", nativeName: "ພາສາລາວ" },
-      { id: "lt", name: "Lithuanian", nativeName: "lietuvių kalba" },
-      { id: "lu", name: "Luba-Katanga", nativeName: "" },
-      { id: "lv", name: "Latvian", nativeName: "latviešu valoda" },
-      { id: "gv", name: "Manx", nativeName: "Gaelg, Gailck" },
-      { id: "mk", name: "Macedonian", nativeName: "македонски јазик" },
-      { id: "mg", name: "Malagasy", nativeName: "Malagasy fiteny" },
-      { id: "ms", name: "Malay", nativeName: "bahasa Melayu, بهاس ملايو‎" },
-      { id: "ml", name: "Malayalam", nativeName: "മലയാളം" },
-      { id: "mt", name: "Maltese", nativeName: "Malti" },
-      { id: "mi", name: "Māori", nativeName: "te reo Māori" },
-      { id: "mr", name: "Marathi (Marāṭhī)", nativeName: "मराठी" },
-      { id: "mh", name: "Marshallese", nativeName: "Kajin M̧ajeļ" },
-      { id: "mn", name: "Mongolian", nativeName: "монгол" },
-      { id: "na", name: "Nauru", nativeName: "Ekakairũ Naoero" },
-      { id: "nv", name: "Navajo, Navaho", nativeName: "Diné bizaad, Dinékʼehǰí" },
-      { id: "nb", name: "Norwegian Bokmål", nativeName: "Norsk bokmål" },
-      { id: "nd", name: "North Ndebele", nativeName: "isiNdebele" },
-      { id: "ne", name: "Nepali", nativeName: "नेपाली" },
-      { id: "ng", name: "Ndonga", nativeName: "Owambo" },
-      { id: "nn", name: "Norwegian Nynorsk", nativeName: "Norsk nynorsk" },
-      { id: "no", name: "Norwegian", nativeName: "Norsk" },
-      { id: "ii", name: "Nuosu", nativeName: "ꆈꌠ꒿ Nuosuhxop" },
-      { id: "nr", name: "South Ndebele", nativeName: "isiNdebele" },
-      { id: "oc", name: "Occitan", nativeName: "Occitan" },
-      { id: "oj", name: "Ojibwe, Ojibwa", nativeName: "ᐊᓂᔑᓈᐯᒧᐎᓐ" },
-      { id: "cu", name: "Old Church Slavonic, Church Slavic, Church Slavonic, Old Bulgarian, Old Slavonic", nativeName: "ѩзыкъ словѣньскъ" },
-      { id: "om", name: "Oromo", nativeName: "Afaan Oromoo" },
-      { id: "or", name: "Oriya", nativeName: "ଓଡ଼ିଆ" },
-      { id: "os", name: "Ossetian, Ossetic", nativeName: "ирон æвзаг" },
-      { id: "pa", name: "Panjabi, Punjabi", nativeName: "ਪੰਜਾਬੀ, پنجابی‎" },
-      { id: "pi", name: "Pāli", nativeName: "पाऴि" },
-      { id: "fa", name: "Persian", nativeName: "فارسی" },
-      { id: "pl", name: "Polish", nativeName: "polski" },
-      { id: "ps", name: "Pashto, Pushto", nativeName: "پښتو" },
-      { id: "pt", name: "Portuguese", nativeName: "Português" },
-      { id: "qu", name: "Quechua", nativeName: "Runa Simi, Kichwa" },
-      { id: "rm", name: "Romansh", nativeName: "rumantsch grischun" },
-      { id: "rn", name: "Kirundi", nativeName: "kiRundi" },
-      { id: "ro", name: "Romanian, Moldavian, Moldovan", nativeName: "română" },
-      { id: "ru", name: "Russian", nativeName: "русский язык" },
-      { id: "sa", name: "Sanskrit (Saṁskṛta)", nativeName: "संस्कृतम्" },
-      { id: "sc", name: "Sardinian", nativeName: "sardu" },
-      { id: "sd", name: "Sindhi", nativeName: "सिन्धी, سنڌي، سندھی‎" },
-      { id: "se", name: "Northern Sami", nativeName: "Davvisámegiella" },
-      { id: "sm", name: "Samoan", nativeName: "gagana faa Samoa" },
-      { id: "sg", name: "Sango", nativeName: "yângâ tî sängö" },
-      { id: "sr", name: "Serbian", nativeName: "српски језик" },
-      { id: "gd", name: "Scottish Gaelic; Gaelic", nativeName: "Gàidhlig" },
-      { id: "sn", name: "Shona", nativeName: "chiShona" },
-      { id: "si", name: "Sinhala, Sinhalese", nativeName: "සිංහල" },
-      { id: "sk", name: "Slovak", nativeName: "slovenčina" },
-      { id: "sl", name: "Slovene", nativeName: "slovenščina" },
-      { id: "so", name: "Somali", nativeName: "Soomaaliga, af Soomaali" },
-      { id: "st", name: "Southern Sotho", nativeName: "Sesotho" },
-      { id: "es", name: "Spanish; Castilian", nativeName: "español, castellano" },
-      { id: "su", name: "Sundanese", nativeName: "Basa Sunda" },
-      { id: "sw", name: "Swahili", nativeName: "Kiswahili" },
-      { id: "ss", name: "Swati", nativeName: "SiSwati" },
-      { id: "sv", name: "Swedish", nativeName: "svenska" },
-      { id: "ta", name: "Tamil", nativeName: "தமிழ்" },
-      { id: "te", name: "Telugu", nativeName: "తెలుగు" },
-      { id: "tg", name: "Tajik", nativeName: "тоҷикӣ, toğikī, تاجیکی‎" },
-      { id: "th", name: "Thai", nativeName: "ไทย" },
-      { id: "ti", name: "Tigrinya", nativeName: "ትግርኛ" },
-      { id: "bo", name: "Tibetan Standard, Tibetan, Central", nativeName: "བོད་ཡིག" },
-      { id: "tk", name: "Turkmen", nativeName: "Türkmen, Түркмен" },
-      { id: "tl", name: "Tagalog", nativeName: "Wikang Tagalog, ᜏᜒᜃᜅ᜔ ᜆᜄᜎᜓᜄ᜔" },
-      { id: "tn", name: "Tswana", nativeName: "Setswana" },
-      { id: "to", name: "Tonga (Tonga Islands)", nativeName: "faka Tonga" },
-      { id: "tr", name: "Turkish", nativeName: "Türkçe" },
-      { id: "ts", name: "Tsonga", nativeName: "Xitsonga" },
-      { id: "tt", name: "Tatar", nativeName: "татарча, tatarça, تاتارچا‎" },
-      { id: "tw", name: "Twi", nativeName: "Twi" },
-      { id: "ty", name: "Tahitian", nativeName: "Reo Tahiti" },
-      { id: "ug", name: "Uighur, Uyghur", nativeName: "Uyƣurqə, ئۇيغۇرچە‎" },
-      { id: "uk", name: "Ukrainian", nativeName: "українська" },
-      { id: "ur", name: "Urdu", nativeName: "اردو" },
-      { id: "uz", name: "Uzbek", nativeName: "zbek, Ўзбек, أۇزبېك‎" },
-      { id: "ve", name: "Venda", nativeName: "Tshivenḓa" },
-      { id: "vi", name: "Vietnamese", nativeName: "Tiếng Việt" },
-      { id: "vo", name: "Volapük", nativeName: "Volapük" },
-      { id: "wa", name: "Walloon", nativeName: "Walon" },
-      { id: "cy", name: "Welsh", nativeName: "Cymraeg" },
-      { id: "wo", name: "Wolof", nativeName: "Wollof" },
-      { id: "fy", name: "Western Frisian", nativeName: "Frysk" },
-      { id: "xh", name: "Xhosa", nativeName: "isiXhosa" },
-      { id: "yi", name: "Yiddish", nativeName: "ייִדיש" },
-      { id: "yo", name: "Yoruba", nativeName: "Yorùbá" },
-      { id: "za", name: "Zhuang, Chuang", nativeName: "Saɯ cueŋƅ, Saw cuengh" },
-      { id: "zu", name: "Zulu", nativeName: "isiZulu" }
-            ];
-        }
-    };
-});
-// Subset of list of locales defined by CLDR
-// based on https://github.com/umpirsky/locale-list
-angular.module('platformWebApp')
-.factory('platformWebApp.common.locales', function () {
-    return {
-        get: function (id) {
-            return _.findWhere(this.query(), { id: this.normalize(id) });
-        },
-        contains: function (id) {
-            return _.map(this.query(), function (entry) { return entry.id }).includes(this.normalize(id));
-        },
-        normalize: function(id) {
-            var result = undefined;
-            if (!!id) {
-                var parts = id.split(/[-_]/g);
-                parts[0] = parts[0].toLowerCase();
-                if (parts.length > 1) {
-                    parts[1] = parts[1].length === 2 ? parts[1].toUpperCase() : parts[1].capitalize();
-                }
-                if (parts.length > 2) {
-                    parts[2] = parts[2].toUpperCase();
-                }
-                result = parts.join('_');
-            }
-            return result;
-        },
-        query: function () {
-            return [
-    { id: "af", name: "Afrikaans", nativeName: "Afrikaans" },
-    { id: "af_NA", name: "Afrikaans (Namibia)", nativeName: "Afrikaans (Namibië)" },
-    { id: "af_ZA", name: "Afrikaans (South Africa)", nativeName: "Afrikaans (Suid-Afrika)" },
-    { id: "ak", name: "Akan", nativeName: "Akan" },
-    { id: "ak_GH", name: "Akan (Ghana)", nativeName: "Akan (Gaana)" },
-    { id: "sq", name: "Albanian", nativeName: "shqip" },
-    { id: "sq_AL", name: "Albanian (Albania)", nativeName: "shqip (Shqipëri)" },
-    { id: "sq_XK", name: "Albanian (Kosovo)", nativeName: "shqip (Kosovë)" },
-    { id: "sq_MK", name: "Albanian (Macedonia)", nativeName: "shqip (Maqedoni)" },
-    { id: "am", name: "Amharic", nativeName: "አማርኛ" },
-    { id: "am_ET", name: "Amharic (Ethiopia)", nativeName: "አማርኛ (ኢትዮጵያ)" },
-    { id: "ar", name: "Arabic", nativeName: "العربية" },
-    { id: "ar_DZ", name: "Arabic (Algeria)", nativeName: "العربية (الجزائر)" },
-    { id: "ar_BH", name: "Arabic (Bahrain)", nativeName: "العربية (البحرين)" },
-    { id: "ar_TD", name: "Arabic (Chad)", nativeName: "العربية (تشاد)" },
-    { id: "ar_KM", name: "Arabic (Comoros)", nativeName: "العربية (جزر القمر)" },
-    { id: "ar_DJ", name: "Arabic (Djibouti)", nativeName: "العربية (جيبوتي)" },
-    { id: "ar_EG", name: "Arabic (Egypt)", nativeName: "العربية (مصر)" },
-    { id: "ar_ER", name: "Arabic (Eritrea)", nativeName: "العربية (أريتريا)" },
-    { id: "ar_IQ", name: "Arabic (Iraq)", nativeName: "العربية (العراق)" },
-    { id: "ar_IL", name: "Arabic (Israel)", nativeName: "العربية (إسرائيل)" },
-    { id: "ar_JO", name: "Arabic (Jordan)", nativeName: "العربية (الأردن)" },
-    { id: "ar_KW", name: "Arabic (Kuwait)", nativeName: "العربية (الكويت)" },
-    { id: "ar_LB", name: "Arabic (Lebanon)", nativeName: "العربية (لبنان)" },
-    { id: "ar_LY", name: "Arabic (Libya)", nativeName: "العربية (ليبيا)" },
-    { id: "ar_MR", name: "Arabic (Mauritania)", nativeName: "العربية (موريتانيا)" },
-    { id: "ar_MA", name: "Arabic (Morocco)", nativeName: "العربية (المغرب)" },
-    { id: "ar_OM", name: "Arabic (Oman)", nativeName: "العربية (عُمان)" },
-    { id: "ar_PS", name: "Arabic (Palestinian Territories)", nativeName: "العربية (الأراضي الفلسطينية)" },
-    { id: "ar_QA", name: "Arabic (Qatar)", nativeName: "العربية (قطر)" },
-    { id: "ar_SA", name: "Arabic (Saudi Arabia)", nativeName: "العربية (المملكة العربية السعودية)" },
-    { id: "ar_SO", name: "Arabic (Somalia)", nativeName: "العربية (الصومال)" },
-    { id: "ar_SS", name: "Arabic (South Sudan)", nativeName: "العربية (جنوب السودان)" },
-    { id: "ar_SD", name: "Arabic (Sudan)", nativeName: "العربية (السودان)" },
-    { id: "ar_SY", name: "Arabic (Syria)", nativeName: "العربية (سوريا)" },
-    { id: "ar_TN", name: "Arabic (Tunisia)", nativeName: "العربية (تونس)" },
-    { id: "ar_AE", name: "Arabic (United Arab Emirates)", nativeName: "العربية (الإمارات العربية المتحدة)" },
-    { id: "ar_EH", name: "Arabic (Western Sahara)", nativeName: "العربية (الصحراء الغربية)" },
-    { id: "ar_YE", name: "Arabic (Yemen)", nativeName: "العربية (اليمن)" },
-    { id: "hy", name: "Armenian", nativeName: "հայերեն" },
-    { id: "hy_AM", name: "Armenian (Armenia)", nativeName: "հայերեն (Հայաստան)" },
-    { id: "as", name: "Assamese", nativeName: "অসমীয়া" },
-    { id: "as_IN", name: "Assamese (India)", nativeName: "অসমীয়া (ভাৰত)" },
-    { id: "az", name: "Azerbaijani", nativeName: "azərbaycan" },
-    { id: "az_AZ", name: "Azerbaijani (Azerbaijan)", nativeName: "azərbaycan (Azərbaycan)" },
-    { id: "az_Cyrl_AZ", name: "Azerbaijani (Cyrillic, Azerbaijan)", nativeName: "Азәрбајҹан (kiril, Азәрбајҹан)" },
-    { id: "az_Cyrl", name: "Azerbaijani (Cyrillic)", nativeName: "Азәрбајҹан (kiril)" },
-    { id: "az_Latn_AZ", name: "Azerbaijani (Latin, Azerbaijan)", nativeName: "azərbaycan (latın, Azərbaycan)" },
-    { id: "az_Latn", name: "Azerbaijani (Latin)", nativeName: "azərbaycan (latın)" },
-    { id: "bm", name: "Bambara", nativeName: "bamanakan" },
-    { id: "bm_Latn_ML", name: "Bambara (Latin, Mali)", nativeName: "Bambara (Latin, Mali)" },
-    { id: "bm_Latn", name: "Bambara (Latin)", nativeName: "Bambara (Latin)" },
-    { id: "eu", name: "Basque", nativeName: "euskara" },
-    { id: "eu_ES", name: "Basque (Spain)", nativeName: "euskara (Espainia)" },
-    { id: "be", name: "Belarusian", nativeName: "беларуская" },
-    { id: "be_BY", name: "Belarusian (Belarus)", nativeName: "беларуская (Беларусь)" },
-    { id: "bn", name: "Bengali", nativeName: "বাংলা" },
-    { id: "bn_BD", name: "Bengali (Bangladesh)", nativeName: "বাংলা (বাংলাদেশ)" },
-    { id: "bn_IN", name: "Bengali (India)", nativeName: "বাংলা (ভারত)" },
-    { id: "bs", name: "Bosnian", nativeName: "bosanski" },
-    { id: "bs_BA", name: "Bosnian (Bosnia & Herzegovina)", nativeName: "bosanski (Bosna i Hercegovina)" },
-    { id: "bs_Cyrl_BA", name: "Bosnian (Cyrillic, Bosnia & Herzegovina)", nativeName: "босански (Ћирилица, Босна и Херцеговина)" },
-    { id: "bs_Cyrl", name: "Bosnian (Cyrillic)", nativeName: "босански (Ћирилица)" },
-    { id: "bs_Latn_BA", name: "Bosnian (Latin, Bosnia & Herzegovina)", nativeName: "bosanski (latinica, Bosna i Hercegovina)" },
-    { id: "bs_Latn", name: "Bosnian (Latin)", nativeName: "bosanski (latinica)" },
-    { id: "br", name: "Breton", nativeName: "brezhoneg" },
-    { id: "br_FR", name: "Breton (France)", nativeName: "brezhoneg (Frañs)" },
-    { id: "bg", name: "Bulgarian", nativeName: "български" },
-    { id: "bg_BG", name: "Bulgarian (Bulgaria)", nativeName: "български (България)" },
-    { id: "my", name: "Burmese", nativeName: "ဗမာ" },
-    { id: "my_MM", name: "Burmese (Myanmar (Burma))", nativeName: "ဗမာ (မြန်မာ)" },
-    { id: "ca", name: "Catalan", nativeName: "català" },
-    { id: "ca_AD", name: "Catalan (Andorra)", nativeName: "català (Andorra)" },
-    { id: "ca_FR", name: "Catalan (France)", nativeName: "català (França)" },
-    { id: "ca_IT", name: "Catalan (Italy)", nativeName: "català (Itàlia)" },
-    { id: "ca_ES", name: "Catalan (Spain)", nativeName: "català (Espanya)" },
-    { id: "zh", name: "Chinese", nativeName: "中文" },
-    { id: "zh_CN", name: "Chinese (China)", nativeName: "中文 (中国)" },
-    { id: "zh_HK", name: "Chinese (Hong Kong SAR China)", nativeName: "中文 (中国香港特别行政区)" },
-    { id: "zh_MO", name: "Chinese (Macau SAR China)", nativeName: "中文 (中国澳门特别行政区)" },
-    { id: "zh_Hans_CN", name: "Chinese (Simplified, China)", nativeName: "中文 (简体中文, 中国)" },
-    { id: "zh_Hans_HK", name: "Chinese (Simplified, Hong Kong SAR China)", nativeName: "中文 (简体中文, 中国香港特别行政区)" },
-    { id: "zh_Hans_MO", name: "Chinese (Simplified, Macau SAR China)", nativeName: "中文 (简体中文, 中国澳门特别行政区)" },
-    { id: "zh_Hans_SG", name: "Chinese (Simplified, Singapore)", nativeName: "中文 (简体中文, 新加坡)" },
-    { id: "zh_Hans", name: "Chinese (Simplified)", nativeName: "中文 (简体中文)" },
-    { id: "zh_SG", name: "Chinese (Singapore)", nativeName: "中文 (新加坡)" },
-    { id: "zh_TW", name: "Chinese (Taiwan)", nativeName: "中文 (台湾)" },
-    { id: "zh_Hant_HK", name: "Chinese (Traditional, Hong Kong SAR China)", nativeName: "中文 (繁體字, 中華人民共和國香港特別行政區)" },
-    { id: "zh_Hant_MO", name: "Chinese (Traditional, Macau SAR China)", nativeName: "中文 (繁體, 中華人民共和國澳門特別行政區)" },
-    { id: "zh_Hant_TW", name: "Chinese (Traditional, Taiwan)", nativeName: "中文 (繁體, 台灣)" },
-    { id: "zh_Hant", name: "Chinese (Traditional)", nativeName: "中文 (繁體)" },
-    { id: "kw", name: "Cornish", nativeName: "kernewek" },
-    { id: "kw_GB", name: "Cornish (United Kingdom)", nativeName: "kernewek (Rywvaneth Unys)" },
-    { id: "hr", name: "Croatian", nativeName: "hrvatski" },
-    { id: "hr_BA", name: "Croatian (Bosnia & Herzegovina)", nativeName: "hrvatski (Bosna i Hercegovina)" },
-    { id: "hr_HR", name: "Croatian (Croatia)", nativeName: "hrvatski (Hrvatska)" },
-    { id: "cs", name: "Czech", nativeName: "čeština" },
-    { id: "cs_CZ", name: "Czech (Czech Republic)", nativeName: "čeština (Česká republika)" },
-    { id: "da", name: "Danish", nativeName: "dansk" },
-    { id: "da_DK", name: "Danish (Denmark)", nativeName: "dansk (Danmark)" },
-    { id: "da_GL", name: "Danish (Greenland)", nativeName: "dansk (Grønland)" },
-    { id: "nl", name: "Dutch", nativeName: "Nederlands" },
-    { id: "nl_AW", name: "Dutch (Aruba)", nativeName: "Nederlands (Aruba)" },
-    { id: "nl_BE", name: "Dutch (Belgium)", nativeName: "Nederlands (België)" },
-    { id: "nl_BQ", name: "Dutch (Caribbean Netherlands)", nativeName: "Nederlands (Caribisch Nederland)" },
-    { id: "nl_CW", name: "Dutch (Curaçao)", nativeName: "Nederlands (Curaçao)" },
-    { id: "nl_NL", name: "Dutch (Netherlands)", nativeName: "Nederlands (Nederland)" },
-    { id: "nl_SX", name: "Dutch (Sint Maarten)", nativeName: "Nederlands (Sint-Maarten)" },
-    { id: "nl_SR", name: "Dutch (Suriname)", nativeName: "Nederlands (Suriname)" },
-    { id: "dz", name: "Dzongkha", nativeName: "རྫོང་ཁ" },
-    { id: "dz_BT", name: "Dzongkha (Bhutan)", nativeName: "རྫོང་ཁ (འབྲུག)" },
-    { id: "en", name: "English", nativeName: "English" },
-    { id: "en_AS", name: "English (American Samoa)", nativeName: "English (American Samoa)" },
-    { id: "en_AI", name: "English (Anguilla)", nativeName: "English (Anguilla)" },
-    { id: "en_AG", name: "English (Antigua & Barbuda)", nativeName: "English (Antigua & Barbuda)" },
-    { id: "en_AU", name: "English (Australia)", nativeName: "English (Australia)" },
-    { id: "en_BS", name: "English (Bahamas)", nativeName: "English (Bahamas)" },
-    { id: "en_BB", name: "English (Barbados)", nativeName: "English (Barbados)" },
-    { id: "en_BE", name: "English (Belgium)", nativeName: "English (Belgium)" },
-    { id: "en_BZ", name: "English (Belize)", nativeName: "English (Belize)" },
-    { id: "en_BM", name: "English (Bermuda)", nativeName: "English (Bermuda)" },
-    { id: "en_BW", name: "English (Botswana)", nativeName: "English (Botswana)" },
-    { id: "en_IO", name: "English (British Indian Ocean Territory)", nativeName: "English (British Indian Ocean Territory)" },
-    { id: "en_VG", name: "English (British Virgin Islands)", nativeName: "English (British Virgin Islands)" },
-    { id: "en_CM", name: "English (Cameroon)", nativeName: "English (Cameroon)" },
-    { id: "en_CA", name: "English (Canada)", nativeName: "English (Canada)" },
-    { id: "en_KY", name: "English (Cayman Islands)", nativeName: "English (Cayman Islands)" },
-    { id: "en_CX", name: "English (Christmas Island)", nativeName: "English (Christmas Island)" },
-    { id: "en_CC", name: "English (Cocos (Keeling) Islands)", nativeName: "English (Cocos (Keeling) Islands)" },
-    { id: "en_CK", name: "English (Cook Islands)", nativeName: "English (Cook Islands)" },
-    { id: "en_DG", name: "English (Diego Garcia)", nativeName: "English (Diego Garcia)" },
-    { id: "en_DM", name: "English (Dominica)", nativeName: "English (Dominica)" },
-    { id: "en_ER", name: "English (Eritrea)", nativeName: "English (Eritrea)" },
-    { id: "en_FK", name: "English (Falkland Islands)", nativeName: "English (Falkland Islands)" },
-    { id: "en_FJ", name: "English (Fiji)", nativeName: "English (Fiji)" },
-    { id: "en_GM", name: "English (Gambia)", nativeName: "English (Gambia)" },
-    { id: "en_GH", name: "English (Ghana)", nativeName: "English (Ghana)" },
-    { id: "en_GI", name: "English (Gibraltar)", nativeName: "English (Gibraltar)" },
-    { id: "en_GD", name: "English (Grenada)", nativeName: "English (Grenada)" },
-    { id: "en_GU", name: "English (Guam)", nativeName: "English (Guam)" },
-    { id: "en_GG", name: "English (Guernsey)", nativeName: "English (Guernsey)" },
-    { id: "en_GY", name: "English (Guyana)", nativeName: "English (Guyana)" },
-    { id: "en_HK", name: "English (Hong Kong SAR China)", nativeName: "English (Hong Kong SAR China)" },
-    { id: "en_IN", name: "English (India)", nativeName: "English (India)" },
-    { id: "en_IE", name: "English (Ireland)", nativeName: "English (Ireland)" },
-    { id: "en_IM", name: "English (Isle of Man)", nativeName: "English (Isle of Man)" },
-    { id: "en_JM", name: "English (Jamaica)", nativeName: "English (Jamaica)" },
-    { id: "en_JE", name: "English (Jersey)", nativeName: "English (Jersey)" },
-    { id: "en_KE", name: "English (Kenya)", nativeName: "English (Kenya)" },
-    { id: "en_KI", name: "English (Kiribati)", nativeName: "English (Kiribati)" },
-    { id: "en_LS", name: "English (Lesotho)", nativeName: "English (Lesotho)" },
-    { id: "en_LR", name: "English (Liberia)", nativeName: "English (Liberia)" },
-    { id: "en_MO", name: "English (Macau SAR China)", nativeName: "English (Macau SAR China)" },
-    { id: "en_MG", name: "English (Madagascar)", nativeName: "English (Madagascar)" },
-    { id: "en_MW", name: "English (Malawi)", nativeName: "English (Malawi)" },
-    { id: "en_MY", name: "English (Malaysia)", nativeName: "English (Malaysia)" },
-    { id: "en_MT", name: "English (Malta)", nativeName: "English (Malta)" },
-    { id: "en_MH", name: "English (Marshall Islands)", nativeName: "English (Marshall Islands)" },
-    { id: "en_MU", name: "English (Mauritius)", nativeName: "English (Mauritius)" },
-    { id: "en_FM", name: "English (Micronesia)", nativeName: "English (Micronesia)" },
-    { id: "en_MS", name: "English (Montserrat)", nativeName: "English (Montserrat)" },
-    { id: "en_NA", name: "English (Namibia)", nativeName: "English (Namibia)" },
-    { id: "en_NR", name: "English (Nauru)", nativeName: "English (Nauru)" },
-    { id: "en_NZ", name: "English (New Zealand)", nativeName: "English (New Zealand)" },
-    { id: "en_NG", name: "English (Nigeria)", nativeName: "English (Nigeria)" },
-    { id: "en_NU", name: "English (Niue)", nativeName: "English (Niue)" },
-    { id: "en_NF", name: "English (Norfolk Island)", nativeName: "English (Norfolk Island)" },
-    { id: "en_MP", name: "English (Northern Mariana Islands)", nativeName: "English (Northern Mariana Islands)" },
-    { id: "en_PK", name: "English (Pakistan)", nativeName: "English (Pakistan)" },
-    { id: "en_PW", name: "English (Palau)", nativeName: "English (Palau)" },
-    { id: "en_PG", name: "English (Papua New Guinea)", nativeName: "English (Papua New Guinea)" },
-    { id: "en_PH", name: "English (Philippines)", nativeName: "English (Philippines)" },
-    { id: "en_PN", name: "English (Pitcairn Islands)", nativeName: "English (Pitcairn Islands)" },
-    { id: "en_PR", name: "English (Puerto Rico)", nativeName: "English (Puerto Rico)" },
-    { id: "en_RW", name: "English (Rwanda)", nativeName: "English (Rwanda)" },
-    { id: "en_WS", name: "English (Samoa)", nativeName: "English (Samoa)" },
-    { id: "en_SC", name: "English (Seychelles)", nativeName: "English (Seychelles)" },
-    { id: "en_SL", name: "English (Sierra Leone)", nativeName: "English (Sierra Leone)" },
-    { id: "en_SG", name: "English (Singapore)", nativeName: "English (Singapore)" },
-    { id: "en_SX", name: "English (Sint Maarten)", nativeName: "English (Sint Maarten)" },
-    { id: "en_SB", name: "English (Solomon Islands)", nativeName: "English (Solomon Islands)" },
-    { id: "en_ZA", name: "English (South Africa)", nativeName: "English (South Africa)" },
-    { id: "en_SS", name: "English (South Sudan)", nativeName: "English (South Sudan)" },
-    { id: "en_SH", name: "English (St. Helena)", nativeName: "English (St. Helena)" },
-    { id: "en_KN", name: "English (St. Kitts & Nevis)", nativeName: "English (St. Kitts & Nevis)" },
-    { id: "en_LC", name: "English (St. Lucia)", nativeName: "English (St. Lucia)" },
-    { id: "en_VC", name: "English (St. Vincent & Grenadines)", nativeName: "English (St. Vincent & Grenadines)" },
-    { id: "en_SD", name: "English (Sudan)", nativeName: "English (Sudan)" },
-    { id: "en_SZ", name: "English (Swaziland)", nativeName: "English (Swaziland)" },
-    { id: "en_TZ", name: "English (Tanzania)", nativeName: "English (Tanzania)" },
-    { id: "en_TK", name: "English (Tokelau)", nativeName: "English (Tokelau)" },
-    { id: "en_TO", name: "English (Tonga)", nativeName: "English (Tonga)" },
-    { id: "en_TT", name: "English (Trinidad & Tobago)", nativeName: "English (Trinidad & Tobago)" },
-    { id: "en_TC", name: "English (Turks & Caicos Islands)", nativeName: "English (Turks & Caicos Islands)" },
-    { id: "en_TV", name: "English (Tuvalu)", nativeName: "English (Tuvalu)" },
-    { id: "en_UM", name: "English (U.S. Outlying Islands)", nativeName: "English (U.S. Outlying Islands)" },
-    { id: "en_VI", name: "English (U.S. Virgin Islands)", nativeName: "English (U.S. Virgin Islands)" },
-    { id: "en_UG", name: "English (Uganda)", nativeName: "English (Uganda)" },
-    { id: "en_GB", name: "English (United Kingdom)", nativeName: "English (United Kingdom)" },
-    { id: "en_US", name: "English (United States)", nativeName: "English (United States)" },
-    { id: "en_VU", name: "English (Vanuatu)", nativeName: "English (Vanuatu)" },
-    { id: "en_ZM", name: "English (Zambia)", nativeName: "English (Zambia)" },
-    { id: "en_ZW", name: "English (Zimbabwe)", nativeName: "English (Zimbabwe)" },
-    { id: "eo", name: "Esperanto", nativeName: "esperanto" },
-    { id: "et", name: "Estonian", nativeName: "eesti" },
-    { id: "et_EE", name: "Estonian (Estonia)", nativeName: "eesti (Eesti)" },
-    { id: "ee", name: "Ewe", nativeName: "eʋegbe" },
-    { id: "ee_GH", name: "Ewe (Ghana)", nativeName: "eʋegbe (Ghana nutome)" },
-    { id: "ee_TG", name: "Ewe (Togo)", nativeName: "eʋegbe (Togo nutome)" },
-    { id: "fo", name: "Faroese", nativeName: "føroyskt" },
-    { id: "fo_FO", name: "Faroese (Faroe Islands)", nativeName: "føroyskt (Føroyar)" },
-    { id: "fi", name: "Finnish", nativeName: "suomi" },
-    { id: "fi_FI", name: "Finnish (Finland)", nativeName: "suomi (Suomi)" },
-    { id: "fr", name: "French", nativeName: "français" },
-    { id: "fr_DZ", name: "French (Algeria)", nativeName: "français (Algérie)" },
-    { id: "fr_BE", name: "French (Belgium)", nativeName: "français (Belgique)" },
-    { id: "fr_BJ", name: "French (Benin)", nativeName: "français (Bénin)" },
-    { id: "fr_BF", name: "French (Burkina Faso)", nativeName: "français (Burkina Faso)" },
-    { id: "fr_BI", name: "French (Burundi)", nativeName: "français (Burundi)" },
-    { id: "fr_CM", name: "French (Cameroon)", nativeName: "français (Cameroun)" },
-    { id: "fr_CA", name: "French (Canada)", nativeName: "français (Canada)" },
-    { id: "fr_CF", name: "French (Central African Republic)", nativeName: "français (République centrafricaine)" },
-    { id: "fr_TD", name: "French (Chad)", nativeName: "français (Tchad)" },
-    { id: "fr_KM", name: "French (Comoros)", nativeName: "français (Comores)" },
-    { id: "fr_CG", name: "French (Congo - Brazzaville)", nativeName: "français (Congo-Brazzaville)" },
-    { id: "fr_CD", name: "French (Congo - Kinshasa)", nativeName: "français (Congo-Kinshasa)" },
-    { id: "fr_CI", name: "French (Côte d’Ivoire)", nativeName: "français (Côte d’Ivoire)" },
-    { id: "fr_DJ", name: "French (Djibouti)", nativeName: "français (Djibouti)" },
-    { id: "fr_GQ", name: "French (Equatorial Guinea)", nativeName: "français (Guinée équatoriale)" },
-    { id: "fr_FR", name: "French (France)", nativeName: "français (France)" },
-    { id: "fr_GF", name: "French (French Guiana)", nativeName: "français (Guyane française)" },
-    { id: "fr_PF", name: "French (French Polynesia)", nativeName: "français (Polynésie française)" },
-    { id: "fr_GA", name: "French (Gabon)", nativeName: "français (Gabon)" },
-    { id: "fr_GP", name: "French (Guadeloupe)", nativeName: "français (Guadeloupe)" },
-    { id: "fr_GN", name: "French (Guinea)", nativeName: "français (Guinée)" },
-    { id: "fr_HT", name: "French (Haiti)", nativeName: "français (Haïti)" },
-    { id: "fr_LU", name: "French (Luxembourg)", nativeName: "français (Luxembourg)" },
-    { id: "fr_MG", name: "French (Madagascar)", nativeName: "français (Madagascar)" },
-    { id: "fr_ML", name: "French (Mali)", nativeName: "français (Mali)" },
-    { id: "fr_MQ", name: "French (Martinique)", nativeName: "français (Martinique)" },
-    { id: "fr_MR", name: "French (Mauritania)", nativeName: "français (Mauritanie)" },
-    { id: "fr_MU", name: "French (Mauritius)", nativeName: "français (Maurice)" },
-    { id: "fr_YT", name: "French (Mayotte)", nativeName: "français (Mayotte)" },
-    { id: "fr_MC", name: "French (Monaco)", nativeName: "français (Monaco)" },
-    { id: "fr_MA", name: "French (Morocco)", nativeName: "français (Maroc)" },
-    { id: "fr_NC", name: "French (New Caledonia)", nativeName: "français (Nouvelle-Calédonie)" },
-    { id: "fr_NE", name: "French (Niger)", nativeName: "français (Niger)" },
-    { id: "fr_RE", name: "French (Réunion)", nativeName: "français (La Réunion)" },
-    { id: "fr_RW", name: "French (Rwanda)", nativeName: "français (Rwanda)" },
-    { id: "fr_SN", name: "French (Senegal)", nativeName: "français (Sénégal)" },
-    { id: "fr_SC", name: "French (Seychelles)", nativeName: "français (Seychelles)" },
-    { id: "fr_BL", name: "French (St. Barthélemy)", nativeName: "français (Saint-Barthélemy)" },
-    { id: "fr_MF", name: "French (St. Martin)", nativeName: "français (Saint-Martin (partie française))" },
-    { id: "fr_PM", name: "French (St. Pierre & Miquelon)", nativeName: "français (Saint-Pierre-et-Miquelon)" },
-    { id: "fr_CH", name: "French (Switzerland)", nativeName: "français (Suisse)" },
-    { id: "fr_SY", name: "French (Syria)", nativeName: "français (Syrie)" },
-    { id: "fr_TG", name: "French (Togo)", nativeName: "français (Togo)" },
-    { id: "fr_TN", name: "French (Tunisia)", nativeName: "français (Tunisie)" },
-    { id: "fr_VU", name: "French (Vanuatu)", nativeName: "français (Vanuatu)" },
-    { id: "fr_WF", name: "French (Wallis & Futuna)", nativeName: "français (Wallis-et-Futuna)" },
-    { id: "ff", name: "Fulah", nativeName: "Pulaar" },
-    { id: "ff_CM", name: "Fulah (Cameroon)", nativeName: "Pulaar (Kameruun)" },
-    { id: "ff_GN", name: "Fulah (Guinea)", nativeName: "Pulaar (Gine)" },
-    { id: "ff_MR", name: "Fulah (Mauritania)", nativeName: "Pulaar (Muritani)" },
-    { id: "ff_SN", name: "Fulah (Senegal)", nativeName: "Pulaar (Senegaal)" },
-    { id: "gl", name: "Galician", nativeName: "galego" },
-    { id: "gl_ES", name: "Galician (Spain)", nativeName: "galego (España)" },
-    { id: "lg", name: "Ganda", nativeName: "Luganda" },
-    { id: "lg_UG", name: "Ganda (Uganda)", nativeName: "Luganda (Yuganda)" },
-    { id: "ka", name: "Georgian", nativeName: "ქართული" },
-    { id: "ka_GE", name: "Georgian (Georgia)", nativeName: "ქართული (საქართველო)" },
-    { id: "de", name: "German", nativeName: "Deutsch" },
-    { id: "de_AT", name: "German (Austria)", nativeName: "Deutsch (Österreich)" },
-    { id: "de_BE", name: "German (Belgium)", nativeName: "Deutsch (Belgien)" },
-    { id: "de_DE", name: "German (Germany)", nativeName: "Deutsch (Deutschland)" },
-    { id: "de_LI", name: "German (Liechtenstein)", nativeName: "Deutsch (Liechtenstein)" },
-    { id: "de_LU", name: "German (Luxembourg)", nativeName: "Deutsch (Luxemburg)" },
-    { id: "de_CH", name: "German (Switzerland)", nativeName: "Deutsch (Schweiz)" },
-    { id: "el", name: "Greek", nativeName: "Ελληνικά" },
-    { id: "el_CY", name: "Greek (Cyprus)", nativeName: "Ελληνικά (Κύπρος)" },
-    { id: "el_GR", name: "Greek (Greece)", nativeName: "Ελληνικά (Ελλάδα)" },
-    { id: "gu", name: "Gujarati", nativeName: "ગુજરાતી" },
-    { id: "gu_IN", name: "Gujarati (India)", nativeName: "ગુજરાતી (ભારત)" },
-    { id: "ha", name: "Hausa", nativeName: "Hausa" },
-    { id: "ha_GH", name: "Hausa (Ghana)", nativeName: "Hausa (Gana)" },
-    { id: "ha_Latn_GH", name: "Hausa (Latin, Ghana)", nativeName: "Hausa (Latin, Ghana)" },
-    { id: "ha_Latn_NE", name: "Hausa (Latin, Niger)", nativeName: "Hausa (Latin, Niger)" },
-    { id: "ha_Latn_NG", name: "Hausa (Latin, Nigeria)", nativeName: "Hausa (Latin, Nigeria)" },
-    { id: "ha_Latn", name: "Hausa (Latin)", nativeName: "Hausa (Latin)" },
-    { id: "ha_NE", name: "Hausa (Niger)", nativeName: "Hausa (Nijar)" },
-    { id: "ha_NG", name: "Hausa (Nigeria)", nativeName: "Hausa (Najeriya)" },
-    { id: "he", name: "Hebrew", nativeName: "עברית" },
-    { id: "he_IL", name: "Hebrew (Israel)", nativeName: "עברית (ישראל)" },
-    { id: "hi", name: "Hindi", nativeName: "हिंदी" },
-    { id: "hi_IN", name: "Hindi (India)", nativeName: "हिंदी (भारत)" },
-    { id: "hu", name: "Hungarian", nativeName: "magyar" },
-    { id: "hu_HU", name: "Hungarian (Hungary)", nativeName: "magyar (Magyarország)" },
-    { id: "is", name: "Icelandic", nativeName: "íslenska" },
-    { id: "is_IS", name: "Icelandic (Iceland)", nativeName: "íslenska (Ísland)" },
-    { id: "ig", name: "Igbo", nativeName: "Igbo" },
-    { id: "ig_NG", name: "Igbo (Nigeria)", nativeName: "Igbo (Nigeria)" },
-    { id: "id", name: "Indonesian", nativeName: "Bahasa Indonesia" },
-    { id: "id_ID", name: "Indonesian (Indonesia)", nativeName: "Bahasa Indonesia (Indonesia)" },
-    { id: "ga", name: "Irish", nativeName: "Gaeilge" },
-    { id: "ga_IE", name: "Irish (Ireland)", nativeName: "Gaeilge (Éire)" },
-    { id: "it", name: "Italian", nativeName: "italiano" },
-    { id: "it_IT", name: "Italian (Italy)", nativeName: "italiano (Italia)" },
-    { id: "it_SM", name: "Italian (San Marino)", nativeName: "italiano (San Marino)" },
-    { id: "it_CH", name: "Italian (Switzerland)", nativeName: "italiano (Svizzera)" },
-    { id: "ja", name: "Japanese", nativeName: "日本語" },
-    { id: "ja_JP", name: "Japanese (Japan)", nativeName: "日本語 (日本)" },
-    { id: "kl", name: "Kalaallisut", nativeName: "kalaallisut" },
-    { id: "kl_GL", name: "Kalaallisut (Greenland)", nativeName: "kalaallisut (Kalaallit Nunaat)" },
-    { id: "kn", name: "Kannada", nativeName: "ಕನ್ನಡ" },
-    { id: "kn_IN", name: "Kannada (India)", nativeName: "ಕನ್ನಡ (ಭಾರತ)" },
-    { id: "ks", name: "Kashmiri", nativeName: "کٲشُر" },
-    { id: "ks_Arab_IN", name: "Kashmiri (Arabic, India)", nativeName: "کٲشُر (اَربی, ہِنٛدوستان)" },
-    { id: "ks_Arab", name: "Kashmiri (Arabic)", nativeName: "کٲشُر (اَربی)" },
-    { id: "ks_IN", name: "Kashmiri (India)", nativeName: "کٲشُر (ہِنٛدوستان)" },
-    { id: "kk", name: "Kazakh", nativeName: "қазақ тілі" },
-    { id: "kk_Cyrl_KZ", name: "Kazakh (Cyrillic, Kazakhstan)", nativeName: "қазақ тілі (кирилл жазуы, Қазақстан)" },
-    { id: "kk_Cyrl", name: "Kazakh (Cyrillic)", nativeName: "қазақ тілі (кирилл жазуы)" },
-    { id: "kk_KZ", name: "Kazakh (Kazakhstan)", nativeName: "қазақ тілі (Қазақстан)" },
-    { id: "km", name: "Khmer", nativeName: "ខ្មែរ" },
-    { id: "km_KH", name: "Khmer (Cambodia)", nativeName: "ខ្មែរ (កម្ពុជា)" },
-    { id: "ki", name: "Kikuyu", nativeName: "Gikuyu" },
-    { id: "ki_KE", name: "Kikuyu (Kenya)", nativeName: "Gikuyu (Kenya)" },
-    { id: "rw", name: "Kinyarwanda", nativeName: "Kinyarwanda" },
-    { id: "rw_RW", name: "Kinyarwanda (Rwanda)", nativeName: "Kinyarwanda (Rwanda)" },
-    { id: "ko", name: "Korean", nativeName: "한국어" },
-    { id: "ko_KP", name: "Korean (North Korea)", nativeName: "한국어 (조선 민주주의 인민 공화국)" },
-    { id: "ko_KR", name: "Korean (South Korea)", nativeName: "한국어 (대한민국)" },
-    { id: "ky", name: "Kyrgyz", nativeName: "кыргызча" },
-    { id: "ky_Cyrl_KG", name: "Kyrgyz (Cyrillic, Kyrgyzstan)", nativeName: "кыргызча (Кирилик, Кыргызстан)" },
-    { id: "ky_Cyrl", name: "Kyrgyz (Cyrillic)", nativeName: "кыргызча (Кирилик)" },
-    { id: "ky_KG", name: "Kyrgyz (Kyrgyzstan)", nativeName: "кыргызча (Кыргызстан)" },
-    { id: "lo", name: "Lao", nativeName: "ລາວ" },
-    { id: "lo_LA", name: "Lao (Laos)", nativeName: "ລາວ (ລາວ)" },
-    { id: "lv", name: "Latvian", nativeName: "latviešu" },
-    { id: "lv_LV", name: "Latvian (Latvia)", nativeName: "latviešu (Latvija)" },
-    { id: "ln", name: "Lingala", nativeName: "lingála" },
-    { id: "ln_AO", name: "Lingala (Angola)", nativeName: "lingála (Angóla)" },
-    { id: "ln_CF", name: "Lingala (Central African Republic)", nativeName: "lingála (Repibiki ya Afríka ya Káti)" },
-    { id: "ln_CG", name: "Lingala (Congo - Brazzaville)", nativeName: "lingála (Kongo)" },
-    { id: "ln_CD", name: "Lingala (Congo - Kinshasa)", nativeName: "lingála (Repibiki demokratiki ya Kongó)" },
-    { id: "lt", name: "Lithuanian", nativeName: "lietuvių" },
-    { id: "lt_LT", name: "Lithuanian (Lithuania)", nativeName: "lietuvių (Lietuva)" },
-    { id: "lu", name: "Luba-Katanga", nativeName: "Tshiluba" },
-    { id: "lu_CD", name: "Luba-Katanga (Congo - Kinshasa)", nativeName: "Tshiluba (Ditunga wa Kongu)" },
-    { id: "lb", name: "Luxembourgish", nativeName: "Lëtzebuergesch" },
-    { id: "lb_LU", name: "Luxembourgish (Luxembourg)", nativeName: "Lëtzebuergesch (Lëtzebuerg)" },
-    { id: "mk", name: "Macedonian", nativeName: "македонски" },
-    { id: "mk_MK", name: "Macedonian (Macedonia)", nativeName: "македонски (Македонија)" },
-    { id: "mg", name: "Malagasy", nativeName: "Malagasy" },
-    { id: "mg_MG", name: "Malagasy (Madagascar)", nativeName: "Malagasy (Madagasikara)" },
-    { id: "ms", name: "Malay", nativeName: "Bahasa Melayu" },
-    { id: "ms_BN", name: "Malay (Brunei)", nativeName: "Bahasa Melayu (Brunei)" },
-    { id: "ms_Latn_BN", name: "Malay (Latin, Brunei)", nativeName: "Bahasa Melayu (Latin, Brunei)" },
-    { id: "ms_Latn_MY", name: "Malay (Latin, Malaysia)", nativeName: "Bahasa Melayu (Latin, Malaysia)" },
-    { id: "ms_Latn_SG", name: "Malay (Latin, Singapore)", nativeName: "Bahasa Melayu (Latin, Singapura)" },
-    { id: "ms_Latn", name: "Malay (Latin)", nativeName: "Bahasa Melayu (Latin)" },
-    { id: "ms_MY", name: "Malay (Malaysia)", nativeName: "Bahasa Melayu (Malaysia)" },
-    { id: "ms_SG", name: "Malay (Singapore)", nativeName: "Bahasa Melayu (Singapura)" },
-    { id: "ml", name: "Malayalam", nativeName: "മലയാളം" },
-    { id: "ml_IN", name: "Malayalam (India)", nativeName: "മലയാളം (ഇന്ത്യ)" },
-    { id: "mt", name: "Maltese", nativeName: "Malti" },
-    { id: "mt_MT", name: "Maltese (Malta)", nativeName: "Malti (Malta)" },
-    { id: "gv", name: "Manx", nativeName: "Gaelg" },
-    { id: "gv_IM", name: "Manx (Isle of Man)", nativeName: "Gaelg (Ellan Vannin)" },
-    { id: "mr", name: "Marathi", nativeName: "मराठी" },
-    { id: "mr_IN", name: "Marathi (India)", nativeName: "मराठी (भारत)" },
-    { id: "mn", name: "Mongolian", nativeName: "монгол" },
-    { id: "mn_Cyrl_MN", name: "Mongolian (Cyrillic, Mongolia)", nativeName: "монгол (кирил, Монгол)" },
-    { id: "mn_Cyrl", name: "Mongolian (Cyrillic)", nativeName: "монгол (кирил)" },
-    { id: "mn_MN", name: "Mongolian (Mongolia)", nativeName: "монгол (Монгол)" },
-    { id: "ne", name: "Nepali", nativeName: "नेपाली" },
-    { id: "ne_IN", name: "Nepali (India)", nativeName: "नेपाली (भारत)" },
-    { id: "ne_NP", name: "Nepali (Nepal)", nativeName: "नेपाली (नेपाल)" },
-    { id: "nd", name: "North Ndebele", nativeName: "isiNdebele" },
-    { id: "nd_ZW", name: "North Ndebele (Zimbabwe)", nativeName: "isiNdebele (Zimbabwe)" },
-    { id: "se", name: "Northern Sami", nativeName: "davvisámegiella" },
-    { id: "se_FI", name: "Northern Sami (Finland)", nativeName: "davvisámegiella (Suopma)" },
-    { id: "se_NO", name: "Northern Sami (Norway)", nativeName: "davvisámegiella (Norga)" },
-    { id: "se_SE", name: "Northern Sami (Sweden)", nativeName: "davvisámegiella (Ruoŧŧa)" },
-    { id: "no", name: "Norwegian", nativeName: "Norwegian" },
-    { id: "no_NO", name: "Norwegian (Norway)", nativeName: "Norwegian (Norway)" },
-    { id: "nb", name: "Norwegian Bokmål", nativeName: "norsk bokmål" },
-    { id: "nb_NO", name: "Norwegian Bokmål (Norway)", nativeName: "norsk bokmål (Norge)" },
-    { id: "nb_SJ", name: "Norwegian Bokmål (Svalbard & Jan Mayen)", nativeName: "norsk bokmål (Svalbard og Jan Mayen)" },
-    { id: "nn", name: "Norwegian Nynorsk", nativeName: "nynorsk" },
-    { id: "nn_NO", name: "Norwegian Nynorsk (Norway)", nativeName: "nynorsk (Noreg)" },
-    { id: "or", name: "Oriya", nativeName: "ଓଡ଼ିଆ" },
-    { id: "or_IN", name: "Oriya (India)", nativeName: "ଓଡ଼ିଆ (ଭାରତ)" },
-    { id: "om", name: "Oromo", nativeName: "Oromoo" },
-    { id: "om_ET", name: "Oromo (Ethiopia)", nativeName: "Oromoo (Itoophiyaa)" },
-    { id: "om_KE", name: "Oromo (Kenya)", nativeName: "Oromoo (Keeniyaa)" },
-    { id: "os", name: "Ossetic", nativeName: "ирон" },
-    { id: "os_GE", name: "Ossetic (Georgia)", nativeName: "ирон (Гуырдзыстон)" },
-    { id: "os_RU", name: "Ossetic (Russia)", nativeName: "ирон (Уӕрӕсе)" },
-    { id: "ps", name: "Pashto", nativeName: "پښتو" },
-    { id: "ps_AF", name: "Pashto (Afghanistan)", nativeName: "پښتو (افغانستان)" },
-    { id: "fa", name: "Persian", nativeName: "فارسی" },
-    { id: "fa_AF", name: "Persian (Afghanistan)", nativeName: "دری (افغانستان)" },
-    { id: "fa_IR", name: "Persian (Iran)", nativeName: "فارسی (ایران)" },
-    { id: "pl", name: "Polish", nativeName: "polski" },
-    { id: "pl_PL", name: "Polish (Poland)", nativeName: "polski (Polska)" },
-    { id: "pt", name: "Portuguese", nativeName: "português" },
-    { id: "pt_AO", name: "Portuguese (Angola)", nativeName: "português (Angola)" },
-    { id: "pt_BR", name: "Portuguese (Brazil)", nativeName: "português (Brasil)" },
-    { id: "pt_CV", name: "Portuguese (Cape Verde)", nativeName: "português (Cabo Verde)" },
-    { id: "pt_GW", name: "Portuguese (Guinea-Bissau)", nativeName: "português (Guiné Bissau)" },
-    { id: "pt_MO", name: "Portuguese (Macau SAR China)", nativeName: "português (Macau, RAE da China)" },
-    { id: "pt_MZ", name: "Portuguese (Mozambique)", nativeName: "português (Moçambique)" },
-    { id: "pt_PT", name: "Portuguese (Portugal)", nativeName: "português (Portugal)" },
-    { id: "pt_ST", name: "Portuguese (São Tomé & Príncipe)", nativeName: "português (São Tomé e Príncipe)" },
-    { id: "pt_TL", name: "Portuguese (Timor-Leste)", nativeName: "português (Timor-Leste)" },
-    { id: "pa", name: "Punjabi", nativeName: "ਪੰਜਾਬੀ" },
-    { id: "pa_Arab_PK", name: "Punjabi (Arabic, Pakistan)", nativeName: "پنجابی (عربی, پکستان)" },
-    { id: "pa_Arab", name: "Punjabi (Arabic)", nativeName: "پنجابی (عربی)" },
-    { id: "pa_Guru_IN", name: "Punjabi (Gurmukhi, India)", nativeName: "ਪੰਜਾਬੀ (ਗੁਰਮੁਖੀ, ਭਾਰਤ)" },
-    { id: "pa_Guru", name: "Punjabi (Gurmukhi)", nativeName: "ਪੰਜਾਬੀ (ਗੁਰਮੁਖੀ)" },
-    { id: "pa_IN", name: "Punjabi (India)", nativeName: "ਪੰਜਾਬੀ (ਭਾਰਤ)" },
-    { id: "pa_PK", name: "Punjabi (Pakistan)", nativeName: "ਪੰਜਾਬੀ (ਪਾਕਿਸਤਾਨ)" },
-    { id: "qu", name: "Quechua", nativeName: "Runasimi" },
-    { id: "qu_BO", name: "Quechua (Bolivia)", nativeName: "Runasimi (Bolivia)" },
-    { id: "qu_EC", name: "Quechua (Ecuador)", nativeName: "Runasimi (Ecuador)" },
-    { id: "qu_PE", name: "Quechua (Peru)", nativeName: "Runasimi (Perú)" },
-    { id: "ro", name: "Romanian", nativeName: "română" },
-    { id: "ro_MD", name: "Romanian (Moldova)", nativeName: "română (Republica Moldova)" },
-    { id: "ro_RO", name: "Romanian (Romania)", nativeName: "română (România)" },
-    { id: "rm", name: "Romansh", nativeName: "rumantsch" },
-    { id: "rm_CH", name: "Romansh (Switzerland)", nativeName: "rumantsch (Svizra)" },
-    { id: "rn", name: "Rundi", nativeName: "Ikirundi" },
-    { id: "rn_BI", name: "Rundi (Burundi)", nativeName: "Ikirundi (Uburundi)" },
-    { id: "ru", name: "Russian", nativeName: "русский" },
-    { id: "ru_BY", name: "Russian (Belarus)", nativeName: "русский (Беларусь)" },
-    { id: "ru_KZ", name: "Russian (Kazakhstan)", nativeName: "русский (Казахстан)" },
-    { id: "ru_KG", name: "Russian (Kyrgyzstan)", nativeName: "русский (Киргизия)" },
-    { id: "ru_MD", name: "Russian (Moldova)", nativeName: "русский (Молдова)" },
-    { id: "ru_RU", name: "Russian (Russia)", nativeName: "русский (Россия)" },
-    { id: "ru_UA", name: "Russian (Ukraine)", nativeName: "русский (Украина)" },
-    { id: "sg", name: "Sango", nativeName: "Sängö" },
-    { id: "sg_CF", name: "Sango (Central African Republic)", nativeName: "Sängö (Ködörösêse tî Bêafrîka)" },
-    { id: "gd", name: "Scottish Gaelic", nativeName: "Gàidhlig" },
-    { id: "gd_GB", name: "Scottish Gaelic (United Kingdom)", nativeName: "Gàidhlig (An Rìoghachd Aonaichte)" },
-    { id: "sr", name: "Serbian", nativeName: "српски" },
-    { id: "sr_BA", name: "Serbian (Bosnia & Herzegovina)", nativeName: "српски (Босна и Херцеговина)" },
-    { id: "sr_Cyrl_BA", name: "Serbian (Cyrillic, Bosnia & Herzegovina)", nativeName: "српски (ћирилица, Босна и Херцеговина)" },
-    { id: "sr_Cyrl_XK", name: "Serbian (Cyrillic, Kosovo)", nativeName: "српски (ћирилица, Косово)" },
-    { id: "sr_Cyrl_ME", name: "Serbian (Cyrillic, Montenegro)", nativeName: "српски (ћирилица, Црна Гора)" },
-    { id: "sr_Cyrl_RS", name: "Serbian (Cyrillic, Serbia)", nativeName: "српски (ћирилица, Србија)" },
-    { id: "sr_Cyrl", name: "Serbian (Cyrillic)", nativeName: "српски (ћирилица)" },
-    { id: "sr_XK", name: "Serbian (Kosovo)", nativeName: "српски (Косово)" },
-    { id: "sr_Latn_BA", name: "Serbian (Latin, Bosnia & Herzegovina)", nativeName: "srpski (latinica, Bosna i Hercegovina)" },
-    { id: "sr_Latn_XK", name: "Serbian (Latin, Kosovo)", nativeName: "srpski (latinica, Kosovo)" },
-    { id: "sr_Latn_ME", name: "Serbian (Latin, Montenegro)", nativeName: "srpski (latinica, Crna Gora)" },
-    { id: "sr_Latn_RS", name: "Serbian (Latin, Serbia)", nativeName: "srpski (latinica, Srbija)" },
-    { id: "sr_Latn", name: "Serbian (Latin)", nativeName: "srpski (latinica)" },
-    { id: "sr_ME", name: "Serbian (Montenegro)", nativeName: "српски (Црна Гора)" },
-    { id: "sr_RS", name: "Serbian (Serbia)", nativeName: "српски (Србија)" },
-    { id: "sh", name: "Serbo-Croatian", nativeName: "Serbo-Croatian" },
-    { id: "sh_BA", name: "Serbo-Croatian (Bosnia & Herzegovina)", nativeName: "Serbo-Croatian (Bosnia & Herzegovina)" },
-    { id: "sn", name: "Shona", nativeName: "chiShona" },
-    { id: "sn_ZW", name: "Shona (Zimbabwe)", nativeName: "chiShona (Zimbabwe)" },
-    { id: "ii", name: "Sichuan Yi", nativeName: "ꆈꌠꉙ" },
-    { id: "ii_CN", name: "Sichuan Yi (China)", nativeName: "ꆈꌠꉙ (ꍏꇩ)" },
-    { id: "si", name: "Sinhala", nativeName: "සිංහල" },
-    { id: "si_LK", name: "Sinhala (Sri Lanka)", nativeName: "සිංහල (ශ්‍රී ලංකාව)" },
-    { id: "sk", name: "Slovak", nativeName: "slovenčina" },
-    { id: "sk_SK", name: "Slovak (Slovakia)", nativeName: "slovenčina (Slovensko)" },
-    { id: "sl", name: "Slovenian", nativeName: "slovenščina" },
-    { id: "sl_SI", name: "Slovenian (Slovenia)", nativeName: "slovenščina (Slovenija)" },
-    { id: "so", name: "Somali", nativeName: "Soomaali" },
-    { id: "so_DJ", name: "Somali (Djibouti)", nativeName: "Soomaali (Jabuuti)" },
-    { id: "so_ET", name: "Somali (Ethiopia)", nativeName: "Soomaali (Itoobiya)" },
-    { id: "so_KE", name: "Somali (Kenya)", nativeName: "Soomaali (Kiiniya)" },
-    { id: "so_SO", name: "Somali (Somalia)", nativeName: "Soomaali (Soomaaliya)" },
-    { id: "es", name: "Spanish", nativeName: "español" },
-    { id: "es_AR", name: "Spanish (Argentina)", nativeName: "español (Argentina)" },
-    { id: "es_BO", name: "Spanish (Bolivia)", nativeName: "español (Bolivia)" },
-    { id: "es_IC", name: "Spanish (Canary Islands)", nativeName: "español (islas Canarias)" },
-    { id: "es_EA", name: "Spanish (Ceuta & Melilla)", nativeName: "español (Ceuta y Melilla)" },
-    { id: "es_CL", name: "Spanish (Chile)", nativeName: "español (Chile)" },
-    { id: "es_CO", name: "Spanish (Colombia)", nativeName: "español (Colombia)" },
-    { id: "es_CR", name: "Spanish (Costa Rica)", nativeName: "español (Costa Rica)" },
-    { id: "es_CU", name: "Spanish (Cuba)", nativeName: "español (Cuba)" },
-    { id: "es_DO", name: "Spanish (Dominican Republic)", nativeName: "español (República Dominicana)" },
-    { id: "es_EC", name: "Spanish (Ecuador)", nativeName: "español (Ecuador)" },
-    { id: "es_SV", name: "Spanish (El Salvador)", nativeName: "español (El Salvador)" },
-    { id: "es_GQ", name: "Spanish (Equatorial Guinea)", nativeName: "español (Guinea Ecuatorial)" },
-    { id: "es_GT", name: "Spanish (Guatemala)", nativeName: "español (Guatemala)" },
-    { id: "es_HN", name: "Spanish (Honduras)", nativeName: "español (Honduras)" },
-    { id: "es_MX", name: "Spanish (Mexico)", nativeName: "español (México)" },
-    { id: "es_NI", name: "Spanish (Nicaragua)", nativeName: "español (Nicaragua)" },
-    { id: "es_PA", name: "Spanish (Panama)", nativeName: "español (Panamá)" },
-    { id: "es_PY", name: "Spanish (Paraguay)", nativeName: "español (Paraguay)" },
-    { id: "es_PE", name: "Spanish (Peru)", nativeName: "español (Perú)" },
-    { id: "es_PH", name: "Spanish (Philippines)", nativeName: "español (Filipinas)" },
-    { id: "es_PR", name: "Spanish (Puerto Rico)", nativeName: "español (Puerto Rico)" },
-    { id: "es_ES", name: "Spanish (Spain)", nativeName: "español (España)" },
-    { id: "es_US", name: "Spanish (United States)", nativeName: "español (Estados Unidos)" },
-    { id: "es_UY", name: "Spanish (Uruguay)", nativeName: "español (Uruguay)" },
-    { id: "es_VE", name: "Spanish (Venezuela)", nativeName: "español (Venezuela)" },
-    { id: "sw", name: "Swahili", nativeName: "Kiswahili" },
-    { id: "sw_KE", name: "Swahili (Kenya)", nativeName: "Kiswahili (Kenya)" },
-    { id: "sw_TZ", name: "Swahili (Tanzania)", nativeName: "Kiswahili (Tanzania)" },
-    { id: "sw_UG", name: "Swahili (Uganda)", nativeName: "Kiswahili (Uganda)" },
-    { id: "sv", name: "Swedish", nativeName: "svenska" },
-    { id: "sv_AX", name: "Swedish (Åland Islands)", nativeName: "svenska (Åland)" },
-    { id: "sv_FI", name: "Swedish (Finland)", nativeName: "svenska (Finland)" },
-    { id: "sv_SE", name: "Swedish (Sweden)", nativeName: "svenska (Sverige)" },
-    { id: "tl", name: "Tagalog", nativeName: "Tagalog" },
-    { id: "tl_PH", name: "Tagalog (Philippines)", nativeName: "Tagalog (Philippines)" },
-    { id: "ta", name: "Tamil", nativeName: "தமிழ்" },
-    { id: "ta_IN", name: "Tamil (India)", nativeName: "தமிழ் (இந்தியா)" },
-    { id: "ta_MY", name: "Tamil (Malaysia)", nativeName: "தமிழ் (மலேஷியா)" },
-    { id: "ta_SG", name: "Tamil (Singapore)", nativeName: "தமிழ் (சிங்கப்பூர்)" },
-    { id: "ta_LK", name: "Tamil (Sri Lanka)", nativeName: "தமிழ் (இலங்கை)" },
-    { id: "te", name: "Telugu", nativeName: "తెలుగు" },
-    { id: "te_IN", name: "Telugu (India)", nativeName: "తెలుగు (భారత దేశం)" },
-    { id: "th", name: "Thai", nativeName: "ไทย" },
-    { id: "th_TH", name: "Thai (Thailand)", nativeName: "ไทย (ไทย)" },
-    { id: "bo", name: "Tibetan", nativeName: "བོད་སྐད་" },
-    { id: "bo_CN", name: "Tibetan (China)", nativeName: "བོད་སྐད་ (རྒྱ་ནག)" },
-    { id: "bo_IN", name: "Tibetan (India)", nativeName: "བོད་སྐད་ (རྒྱ་གར་)" },
-    { id: "ti", name: "Tigrinya", nativeName: "ትግርኛ" },
-    { id: "ti_ER", name: "Tigrinya (Eritrea)", nativeName: "Tigrinya (Eritrea)" },
-    { id: "ti_ET", name: "Tigrinya (Ethiopia)", nativeName: "Tigrinya (Ethiopia)" },
-    { id: "to", name: "Tongan", nativeName: "lea fakatonga" },
-    { id: "to_TO", name: "Tongan (Tonga)", nativeName: "lea fakatonga (Tonga)" },
-    { id: "tr", name: "Turkish", nativeName: "Türkçe" },
-    { id: "tr_CY", name: "Turkish (Cyprus)", nativeName: "Türkçe (Güney Kıbrıs Rum Kesimi)" },
-    { id: "tr_TR", name: "Turkish (Turkey)", nativeName: "Türkçe (Türkiye)" },
-    { id: "uk", name: "Ukrainian", nativeName: "українська" },
-    { id: "uk_UA", name: "Ukrainian (Ukraine)", nativeName: "українська (Україна)" },
-    { id: "ur", name: "Urdu", nativeName: "اردو" },
-    { id: "ur_IN", name: "Urdu (India)", nativeName: "اردو (بھارت)" },
-    { id: "ur_PK", name: "Urdu (Pakistan)", nativeName: "اردو (پاکستان)" },
-    { id: "ug", name: "Uyghur", nativeName: "ئۇيغۇرچە" },
-    { id: "ug_Arab_CN", name: "Uyghur (Arabic, China)", nativeName: "ئۇيغۇرچە (ئەرەب, جۇڭگو)" },
-    { id: "ug_Arab", name: "Uyghur (Arabic)", nativeName: "ئۇيغۇرچە (ئەرەب)" },
-    { id: "ug_CN", name: "Uyghur (China)", nativeName: "ئۇيغۇرچە (جۇڭگو)" },
-    { id: "uz", name: "Uzbek", nativeName: "oʻzbekcha" },
-    { id: "uz_AF", name: "Uzbek (Afghanistan)", nativeName: "oʻzbekcha (Afgʻoniston)" },
-    { id: "uz_Arab_AF", name: "Uzbek (Arabic, Afghanistan)", nativeName: "اوزبیک (عربی, افغانستان)" },
-    { id: "uz_Arab", name: "Uzbek (Arabic)", nativeName: "اوزبیک (عربی)" },
-    { id: "uz_Cyrl_UZ", name: "Uzbek (Cyrillic, Uzbekistan)", nativeName: "Ўзбек (Кирил, Ўзбекистон)" },
-    { id: "uz_Cyrl", name: "Uzbek (Cyrillic)", nativeName: "Ўзбек (Кирил)" },
-    { id: "uz_Latn_UZ", name: "Uzbek (Latin, Uzbekistan)", nativeName: "oʻzbekcha (Lotin, Oʻzbekiston)" },
-    { id: "uz_Latn", name: "Uzbek (Latin)", nativeName: "oʻzbekcha (Lotin)" },
-    { id: "uz_UZ", name: "Uzbek (Uzbekistan)", nativeName: "oʻzbekcha (Oʻzbekiston)" },
-    { id: "vi", name: "Vietnamese", nativeName: "Tiếng Việt" },
-    { id: "vi_VN", name: "Vietnamese (Vietnam)", nativeName: "Tiếng Việt (Việt Nam)" },
-    { id: "cy", name: "Welsh", nativeName: "Cymraeg" },
-    { id: "cy_GB", name: "Welsh (United Kingdom)", nativeName: "Cymraeg (Y Deyrnas Unedig)" },
-    { id: "fy", name: "Western Frisian", nativeName: "West-Frysk" },
-    { id: "fy_NL", name: "Western Frisian (Netherlands)", nativeName: "West-Frysk (Nederlân)" },
-    { id: "yi", name: "Yiddish", nativeName: "ייִדיש" },
-    { id: "yo", name: "Yoruba", nativeName: "Èdè Yorùbá" },
-    { id: "yo_BJ", name: "Yoruba (Benin)", nativeName: "Èdè Yorùbá (Orílɛ́ède Bɛ̀nɛ̀)" },
-    { id: "yo_NG", name: "Yoruba (Nigeria)", nativeName: "Èdè Yorùbá (Orílẹ́ède Nàìjíríà)" },
-    { id: "zu", name: "Zulu", nativeName: "isiZulu" },
-    { id: "zu_ZA", name: "Zulu (South Africa)", nativeName: "isiZulu (i-South Africa)" }
-            ];
-        }
-    };
-});
-// Full list of time zones defined in tz database
-// see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-angular.module('platformWebApp')
-.factory('platformWebApp.common.timeZones', ['moment', function(moment) {
-    var result = {
-        get: function(id) {
-            return _.find(this.query(), function(x) { return x.id.toLowerCase() === id.toLowerCase(); });
-        },
-        contains: function (id) {
-            return _.some(this.query(), function (x) { return x.id.toLowerCase() === id.toLowerCase(); });
-        },
-        utcOffset: function (id) {
-            var offset = moment.tz.zone(id).offset(moment().valueOf());
-            // UTC offset has inverted sign. Compare to zero to avoid -0
-            offset = offset === 0 ? 0 : offset * -1;
-            var minutes = offset % 60;
-            var hours = (offset - minutes) / 60;
-            // format: ±HHMM
-            var pad = function (n, withSign) {
-                var result = '';
-                if (withSign) {
-                    result = n >= 0 ? '+' : '-';
-                    n = n < 0 ? n * -1 : n;
-                }
-                result += n < 10 ? '0' + n : n;
-                return result;
-            }
-            return { hours: hours, minutes: minutes, formatted: pad(hours, true) + ':' + pad(minutes) };
-        },
-        query: function () {
-            // Get time zone from moment list of time zones, append UTC offset to name (UTC ±XX:XX Continent/City) and sort by UTC offset
-            return _.map(moment.tz.names(), function (x) {
-                var utcOffset = result.utcOffset(x);
-                return {
-                    id: x,
-                    utcOffset: utcOffset,
-                    name: '(UTC ' + utcOffset.formatted + ') ' + x
-                };
-            }).sort(function (a, b) {
-                if (!a.utcOffset || !b.utcOffset) {
-                    return !b.utcOffset ? -1 : !a.utcOffset ? 1 : 0;
-                }
-                return a.utcOffset.hours === b.utcOffset.hours ? a.utcOffset.minutes - b.utcOffset.minutes : a.utcOffset.hours - b.utcOffset.hours;
-            });
-        }
-    };
-    return result;
-}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var a={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["vm.","nm."],DAY:["Sondag","Maandag","Dinsdag","Woensdag","Donderdag","Vrydag","Saterdag"],ERANAMES:["voor Christus","na Christus"],ERAS:["v.C.","n.C."],FIRSTDAYOFWEEK:0,MONTH:["Januarie","Februarie","Maart","April","Mei","Junie","Julie","Augustus","September","Oktober","November","Desember"],SHORTDAY:["So","Ma","Di","Wo","Do","Vr","Sa"],SHORTMONTH:["Jan.","Feb.","Mrt.","Apr","Mei","Jun","Jul","Aug","Sep","Okt","Nov","Des"],WEEKENDRANGE:[5,6],fullDate:"EEEE d MMMM y",longDate:"d MMMM y",medium:"d MMM y HH:mm:ss",mediumDate:"d MMM y",mediumTime:"HH:mm:ss",short:"y-MM-dd HH:mm",shortDate:"y-MM-dd",shortTime:"HH:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"$",DECIMAL_SEP:",",GROUP_SEP:" ",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"af-na",pluralCat:function(e,r){return 1==e?a.ONE:a.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var a={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["vm.","nm."],DAY:["Sondag","Maandag","Dinsdag","Woensdag","Donderdag","Vrydag","Saterdag"],ERANAMES:["voor Christus","na Christus"],ERAS:["v.C.","n.C."],FIRSTDAYOFWEEK:6,MONTH:["Januarie","Februarie","Maart","April","Mei","Junie","Julie","Augustus","September","Oktober","November","Desember"],SHORTDAY:["So","Ma","Di","Wo","Do","Vr","Sa"],SHORTMONTH:["Jan.","Feb.","Mrt.","Apr","Mei","Jun","Jul","Aug","Sep","Okt","Nov","Des"],WEEKENDRANGE:[5,6],fullDate:"EEEE, dd MMMM y",longDate:"dd MMMM y",medium:"dd MMM y h:mm:ss a",mediumDate:"dd MMM y",mediumTime:"h:mm:ss a",short:"y-MM-dd h:mm a",shortDate:"y-MM-dd",shortTime:"h:mm a"},NUMBER_FORMATS:{CURRENCY_SYM:"R",DECIMAL_SEP:",",GROUP_SEP:" ",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"af-za",pluralCat:function(e,r){return 1==e?a.ONE:a.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var a={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["vm.","nm."],DAY:["Sondag","Maandag","Dinsdag","Woensdag","Donderdag","Vrydag","Saterdag"],ERANAMES:["voor Christus","na Christus"],ERAS:["v.C.","n.C."],FIRSTDAYOFWEEK:6,MONTH:["Januarie","Februarie","Maart","April","Mei","Junie","Julie","Augustus","September","Oktober","November","Desember"],SHORTDAY:["So","Ma","Di","Wo","Do","Vr","Sa"],SHORTMONTH:["Jan.","Feb.","Mrt.","Apr","Mei","Jun","Jul","Aug","Sep","Okt","Nov","Des"],WEEKENDRANGE:[5,6],fullDate:"EEEE, dd MMMM y",longDate:"dd MMMM y",medium:"dd MMM y h:mm:ss a",mediumDate:"dd MMM y",mediumTime:"h:mm:ss a",short:"y-MM-dd h:mm a",shortDate:"y-MM-dd",shortTime:"h:mm a"},NUMBER_FORMATS:{CURRENCY_SYM:"R",DECIMAL_SEP:",",GROUP_SEP:" ",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"af",pluralCat:function(e,r){return 1==e?a.ONE:a.OTHER}})}]);
@@ -23838,44 +22652,6 @@ angular.module('platformWebApp')
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["公元前","公元"],ERAS:["公元前","公元"],FIRSTDAYOFWEEK:6,MONTH:["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"],SHORTDAY:["周日","周一","周二","周三","周四","周五","周六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"yy/M/d ah:mm",shortDate:"yy/M/d",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"¥",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤ ",negSuf:"",posPre:"¤ ",posSuf:""}]},id:"zh-cn",pluralCat:function(e,m){return E.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["公元前","公元"],ERAS:["BC","AD"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"d/M/yy ah:mm",shortDate:"d/M/yy",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-hk",pluralCat:function(e,m){return E.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["西元前","西元"],ERAS:["西元前","西元"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日 EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"y/M/d ah:mm",shortDate:"y/M/d",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"NT$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-tw",pluralCat:function(e,m){return E.OTHER}})}]);
-angular.module('platformWebApp')
-.controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    
-    $scope.blade.isLoading = false;
-    // ui-grid
-    $scope.setGridOptions = function (gridOptions) {
-        $scope.gridOptions = gridOptions;
-    };
-}]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    var blade = $scope.blade;
-
-    $scope.openBlade = function () {
-        var newBlade = {
-            id: "changesChildBlade",
-            currentEntities: blade.currentEntity.operationsLog,
-            headIcon: blade.headIcon,
-            title: blade.title,
-            subtitle: 'platform.widgets.operations.blade-subtitle',
-            isExpandable: true,
-            controller: 'platformWebApp.changeLog.operationListController',
-            template: '$(Platform)/Scripts/app/changeLog/blades/operation-list.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, blade);
-    };
-}]);
-angular.module('platformWebApp')
-.factory('platformWebApp.assets.api', ['$resource', function ($resource) {
-    return $resource('api/platform/assets', {}, {
-        createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
-        move: { method: 'POST', url: 'api/platform/assets/move' },
-        uploadFromUrl: { method: 'POST', params: { url: '@url', folderUrl: '@folderUrl', name: '@name' }, isArray: true }
-    });
-}]);
-
-
 angular.module('platformWebApp')
 .controller('platformWebApp.assets.assetListController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', '$sessionStorage', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
     function ($scope, assets, bladeNavigationService, dialogService, $storage, bladeUtils, uiGridHelper) {
@@ -24346,6 +23122,44 @@ angular.module('platformWebApp')
         blade.isLoading = false;
     }]);
 
+angular.module('platformWebApp')
+.factory('platformWebApp.assets.api', ['$resource', function ($resource) {
+    return $resource('api/platform/assets', {}, {
+        createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
+        move: { method: 'POST', url: 'api/platform/assets/move' },
+        uploadFromUrl: { method: 'POST', params: { url: '@url', folderUrl: '@folderUrl', name: '@name' }, isArray: true }
+    });
+}]);
+
+
+angular.module('platformWebApp')
+.controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    
+    $scope.blade.isLoading = false;
+    // ui-grid
+    $scope.setGridOptions = function (gridOptions) {
+        $scope.gridOptions = gridOptions;
+    };
+}]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    var blade = $scope.blade;
+
+    $scope.openBlade = function () {
+        var newBlade = {
+            id: "changesChildBlade",
+            currentEntities: blade.currentEntity.operationsLog,
+            headIcon: blade.headIcon,
+            title: blade.title,
+            subtitle: 'platform.widgets.operations.blade-subtitle',
+            isExpandable: true,
+            controller: 'platformWebApp.changeLog.operationListController',
+            template: '$(Platform)/Scripts/app/changeLog/blades/operation-list.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, blade);
+    };
+}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.dynamicObjectListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dynamicProperties.api', function ($scope, bladeNavigationService, dynamicPropertiesApi) {
 	var blade = $scope.blade;
@@ -27410,6 +26224,90 @@ angular.module('platformWebApp')
 	});
 }]);
 angular.module('platformWebApp')
+.controller('platformWebApp.pushNotificationsHistoryController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
+function ($scope, bladeNavigationService, eventTemplateResolver, notifications) {
+    var blade = $scope.blade;
+
+    $scope.pageSettings = {};
+    $scope.pageSettings.totalItems = 0;
+    $scope.pageSettings.currentPage = 1;
+    $scope.pageSettings.numPages = 5;
+    $scope.pageSettings.itemsPerPageCount = 10;
+    $scope.notifications = [];
+
+    $scope.columns = [
+    	{ title: "platform.blades.history.labels.type", orderBy: "NotifyType" },
+		{ title: "platform.blades.history.labels.title", orderBy: "Title" },
+		{ title: "platform.blades.history.labels.created", orderBy: "Created", checked: true, reverse: true }
+
+    ];
+
+    blade.refresh = function () {
+        blade.isLoading = true;
+        var start = $scope.pageSettings.currentPage * $scope.pageSettings.itemsPerPageCount - $scope.pageSettings.itemsPerPageCount;
+        notifications.query({ skip: start, take: $scope.pageSettings.itemsPerPageCount, sort: getOrderByExpression() }, function (data, status, headers, config) {
+            angular.forEach(data.notifyEvents, function (x) {
+                notificationTemplate = eventTemplateResolver.resolve(x, 'history');
+                x.template = notificationTemplate.template;
+                x.action = notificationTemplate.action;
+            });
+            $scope.notifications = data.notifyEvents;
+            $scope.pageSettings.totalItems = data.totalCount;
+            blade.isLoading = false;
+        }, function (error) {
+            bladeNavigationService.setError('Error ' + error.status, blade);
+        });
+    };
+
+    function getOrderByExpression() {
+        var retVal = '';
+        var column = _.find($scope.columns, function (x) { return x.checked; });
+        if (angular.isDefined(column)) {
+            retVal = column.orderBy;
+            if (column.reverse) {
+                retVal += ":desc";
+            }
+        }
+        return retVal;
+    };
+
+    $scope.setOrder = function (column) {
+        //reset prev selection may be commented if need support multiple order clauses
+        _.each($scope.columns, function (x) { x.checked = false });
+        column.checked = true;
+        column.reverse = !column.reverse;
+        $scope.pageSettings.currentPage = 1;
+
+        blade.refresh();
+    }
+
+    blade.toolbarCommands = [
+			{
+			    name: "platform.commands.refresh",
+			    icon: 'fa fa-refresh',
+			    executeMethod: blade.refresh,
+			    canExecuteMethod: function () {
+			        return true;
+			    }
+			}];
+
+    $scope.$watch('pageSettings.currentPage', blade.refresh);
+
+    // actions on load
+    //No need to call this because page 'pageSettings.currentPage' is watched!!! It would trigger subsequent duplicated req...
+    //blade.refresh();
+}]);
+
+angular.module('platformWebApp')
+.factory('platformWebApp.pushNotifications', ['$resource', function ($resource) {
+
+    return $resource('api/platform/pushnotifications/:id', { id: '@Id' }, {
+        markAllAsRead: { method: 'POST', url: 'api/platform/pushnotifications/markAllAsRead' },
+        query: { method: 'POST', url: 'api/platform/pushnotifications' }
+	});
+}]);
+
+angular.module('platformWebApp')
 .controller('platformWebApp.accountApiListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
     blade.updatePermission = 'platform:security:update';
@@ -28795,90 +27693,6 @@ angular.module('platformWebApp')
         bladeNavigationService.showBlade(newBlade, $scope.blade);
     };
 }]);
-angular.module('platformWebApp')
-.controller('platformWebApp.pushNotificationsHistoryController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
-function ($scope, bladeNavigationService, eventTemplateResolver, notifications) {
-    var blade = $scope.blade;
-
-    $scope.pageSettings = {};
-    $scope.pageSettings.totalItems = 0;
-    $scope.pageSettings.currentPage = 1;
-    $scope.pageSettings.numPages = 5;
-    $scope.pageSettings.itemsPerPageCount = 10;
-    $scope.notifications = [];
-
-    $scope.columns = [
-    	{ title: "platform.blades.history.labels.type", orderBy: "NotifyType" },
-		{ title: "platform.blades.history.labels.title", orderBy: "Title" },
-		{ title: "platform.blades.history.labels.created", orderBy: "Created", checked: true, reverse: true }
-
-    ];
-
-    blade.refresh = function () {
-        blade.isLoading = true;
-        var start = $scope.pageSettings.currentPage * $scope.pageSettings.itemsPerPageCount - $scope.pageSettings.itemsPerPageCount;
-        notifications.query({ skip: start, take: $scope.pageSettings.itemsPerPageCount, sort: getOrderByExpression() }, function (data, status, headers, config) {
-            angular.forEach(data.notifyEvents, function (x) {
-                notificationTemplate = eventTemplateResolver.resolve(x, 'history');
-                x.template = notificationTemplate.template;
-                x.action = notificationTemplate.action;
-            });
-            $scope.notifications = data.notifyEvents;
-            $scope.pageSettings.totalItems = data.totalCount;
-            blade.isLoading = false;
-        }, function (error) {
-            bladeNavigationService.setError('Error ' + error.status, blade);
-        });
-    };
-
-    function getOrderByExpression() {
-        var retVal = '';
-        var column = _.find($scope.columns, function (x) { return x.checked; });
-        if (angular.isDefined(column)) {
-            retVal = column.orderBy;
-            if (column.reverse) {
-                retVal += ":desc";
-            }
-        }
-        return retVal;
-    };
-
-    $scope.setOrder = function (column) {
-        //reset prev selection may be commented if need support multiple order clauses
-        _.each($scope.columns, function (x) { x.checked = false });
-        column.checked = true;
-        column.reverse = !column.reverse;
-        $scope.pageSettings.currentPage = 1;
-
-        blade.refresh();
-    }
-
-    blade.toolbarCommands = [
-			{
-			    name: "platform.commands.refresh",
-			    icon: 'fa fa-refresh',
-			    executeMethod: blade.refresh,
-			    canExecuteMethod: function () {
-			        return true;
-			    }
-			}];
-
-    $scope.$watch('pageSettings.currentPage', blade.refresh);
-
-    // actions on load
-    //No need to call this because page 'pageSettings.currentPage' is watched!!! It would trigger subsequent duplicated req...
-    //blade.refresh();
-}]);
-
-angular.module('platformWebApp')
-.factory('platformWebApp.pushNotifications', ['$resource', function ($resource) {
-
-    return $resource('api/platform/pushnotifications/:id', { id: '@Id' }, {
-        markAllAsRead: { method: 'POST', url: 'api/platform/pushnotifications/markAllAsRead' },
-        query: { method: 'POST', url: 'api/platform/pushnotifications' }
-	});
-}]);
-
 angular.module('platformWebApp')
 .controller('platformWebApp.entitySettingListController', ['$scope', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', function ($scope, settingsHelper, bladeNavigationService) {
     var blade = $scope.blade;
