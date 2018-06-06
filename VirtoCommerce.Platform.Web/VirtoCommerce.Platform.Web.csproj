@@ -23,6 +23,7 @@
     <None Remove="wwwroot\App_Data\**" />
     <None Remove="wwwroot\Scripts\**" />
   </ItemGroup>
+  
   <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.Validation" Version="2.0.0-rc1-final" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.6.19" />
@@ -44,7 +45,7 @@
     <PackageReference Include="OpenIddict" Version="2.0.0-rc1-final" />
     <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="2.0.0-rc1-final" />
     <PackageReference Include="OpenIddict.Mvc" Version="2.0.0-rc1-final" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="2.4.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="2.5.0" />
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
     <PackageReference Include="VirtoCommerce.Smidge" Version="3.0.0-beta002" />
     <PackageReference Include="VirtoCommerce.Smidge.Nuglify" Version="2.0.0-beta002" />
@@ -57,5 +58,10 @@
   <ItemGroup>
     <Folder Include="RewriteRules\" />
     <Folder Include="TagHelpers\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="wwwroot\swagger\index.html" />
+    <None Include="wwwroot\swagger\logo_small.png" />
+    <None Include="wwwroot\swagger\vc.css" />
   </ItemGroup>
 </Project>

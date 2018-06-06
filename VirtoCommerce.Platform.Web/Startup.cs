@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Primitives;
 using Hangfire;
@@ -313,12 +314,12 @@ namespace VirtoCommerce.Platform.Web
 
 
             //register swagger content
-            app.UseFileServer(new FileServerOptions
-            {
-                RequestPath = "/docs",
-                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot", "swagger")),
-                EnableDefaultFiles = true //serve index.html at /{ options.RoutePrefix }/
-            });
+            //app.UseFileServer(new FileServerOptions
+            //{
+            //    RequestPath = "/docs",
+            //    FileProvider = new PhysicalFileProvider(Path.GetFullPath("Swagger")),
+            //    EnableDefaultFiles = true //serve index.html at /{ options.RoutePrefix }/
+            //});
 
             app.UseAuthentication();
 
@@ -347,12 +348,21 @@ namespace VirtoCommerce.Platform.Web
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger(c => c.RouteTemplate = "docs/{documentName}/docs.json");
+            //app.UseSwagger();
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/docs/v1/docs.json", "Explore");
                 c.RoutePrefix = "docs";
                 c.EnableValidator();
+                c.IndexStream = () =>
+                {
+                    var type = GetType().GetTypeInfo().Assembly
+                        .GetManifestResourceStream("VirtoCommerce.Platform.Web.wwwroot.swagger.index.html");
+                    return type;
+                };
+                c.DocumentTitle = "VirtoCommerce Solution REST API documentation";
+                c.InjectStylesheet("/swagger/vc.css");
             });
 
             app.UseDbTriggers();
