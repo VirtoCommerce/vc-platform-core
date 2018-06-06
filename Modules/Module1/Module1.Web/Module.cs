@@ -1,13 +1,14 @@
 using System;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Module1.Abstractions;
 using Module1.Data;
 using Module1.Services;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Data.Model;
 using VirtoCommerce.Platform.Data.Repositories;
 
 namespace Module1.Web
@@ -20,12 +21,11 @@ namespace Module1.Web
         {
             //var mode = FluentValidation.CascadeMode.Continue;
             serviceCollection.AddSingleton<IMyService, MyServiceImpl>();
-            serviceCollection.AddDbContext<PlatformDbContext>(builder =>
+            serviceCollection.AddDbContext<PlatformDbContext2>(builder =>
             {
-                builder.UseSqlServer("Data Source=(local);Initial Catalog=VirtoCommerce3.0;Persist Security Info=True;User ID=virto;Password=virto;MultipleActiveResultSets=True;Connect Timeout=30", x => x.MigrationsAssembly("Module1.Data"));
-                builder.ReplaceService<IModelCustomizer, PlatformDbContextCustomizer>();
+                builder.UseSqlServer("Data Source=(local);Initial Catalog=VirtoCommerce3.0;Persist Security Info=True;User ID=virto;Password=virto;MultipleActiveResultSets=True;Connect Timeout=30");
             });
-
+            serviceCollection.AddTransient<IPlatformRepository, PlatformRepository2>();
         }
 
         public void PostInitialize(IServiceProvider serviceProvider)
@@ -35,12 +35,13 @@ namespace Module1.Web
             var dynamicPropertyRegistrar = serviceProvider.GetRequiredService<IDynamicPropertyRegistrar>();
             dynamicPropertyRegistrar.RegisterType<TestClass>();
 
-            using (var platformDbContext = serviceProvider.GetRequiredService<PlatformDbContext>())
+            using (var platformDbContext = serviceProvider.GetRequiredService<PlatformDbContext2>())
             {
                 platformDbContext.Database.EnsureCreated();
                 platformDbContext.Database.Migrate();
             }
-
+            AbstractTypeFactory<SettingEntity>.OverrideType<SettingEntity, SettingEntity2>();
+            AbstractTypeFactory<SettingEntry>.OverrideType<SettingEntry, SettingEntry2>();
         }
 
         public void Uninstall()
