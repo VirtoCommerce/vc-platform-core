@@ -1,6 +1,4 @@
 using System.IO;
-using VirtoCommerce.Platform.Core.FileManager;
-using VirtoCommerce.Platform.Core.TransactionFileManager;
 using VirtoCommerce.Platform.Data.TransactionFileManager;
 using Xunit;
 

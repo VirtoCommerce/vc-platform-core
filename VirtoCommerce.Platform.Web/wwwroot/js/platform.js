@@ -5022,454 +5022,6 @@ controller('platformWebApp.appCtrl', ['$rootScope', '$scope', '$window', 'platfo
         });
     }]);
 
-angular.module('platformWebApp')
- .factory('platformWebApp.bladeUtils', ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
-     function initializePagination($scope, skipDefaultWatch) {
-         //pagination settings
-         $scope.pageSettings = {};
-         $scope.pageSettings.totalItems = 0;
-         $scope.pageSettings.currentPage = 1;
-         $scope.pageSettings.numPages = 5;
-         $scope.pageSettings.itemsPerPageCount = 20;
-
-         if (!skipDefaultWatch)
-             $scope.$watch('pageSettings.currentPage', $scope.blade.refresh);
-     }
-
-     return {
-         bladeNavigationService: bladeNavigationService,
-         initializePagination: initializePagination
-     };
- }]);
-
-angular.module('platformWebApp')
-    .filter('boolToValue', function () {
-        return function (input, trueValue, falseValue) {
-            return input ? trueValue : falseValue;
-        };
-    })
-    .filter('slice', function () {
-        return function (arr, start, end) {
-            return (arr || []).slice(start, end);
-        };
-    })
-    .filter('readablesize', function () {
-        return function (input) {
-            if (!input)
-                return null;
-
-            var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-            var order = 0;
-            while (input >= 1024 && order + 1 < sizes.length) {
-                order++;
-                input = input / 1024;
-            }
-            return Math.round(input) + ' ' + sizes[order];
-        };
-    })
-    // translate the given properties in the input array
-    .filter('translateArray', ['$translate', function ($translate) {
-        return function (inputArray, propertiesList) {
-            _.each(inputArray, function (inputItem) {
-                _.each(propertiesList, function (prop) {
-                    if (angular.isString(inputItem[prop])) {
-                        var translateKey = inputItem[prop].toLowerCase();
-                        var result = $translate.instant(translateKey);
-                        if (result !== translateKey) inputItem[prop] = result;
-                    }
-                });
-            });
-            return inputArray;
-        }
-    }])
-    // translation with fall-back value if key not found
-    .filter('fallbackTranslate', ['$translate', function ($translate) {
-        return function (translateKey, fallbackValue) {
-            var result = $translate.instant(translateKey);
-            return result === translateKey ? fallbackValue : result;
-        };
-    }]);
-angular.module('platformWebApp')
-.factory('platformWebApp.objCompareService', function () {
-
-	//https://stamat.wordpress.com/2013/06/22/javascript-object-comparison/
-
-	var specialChars = [ '$', '_' ];
-	//Returns the object's class, Array, Date, RegExp, Object are of interest to us
-	var getClass = function (val) {
-		return Object.prototype.toString.call(val)
-			.match(/^\[object\s(.*)\]$/)[1];
-	};
-
-	//Defines the type of the value, extended typeof
-	var whatis = function (val) {
-
-		if (val === undefined)
-			return 'undefined';
-		if (val === null)
-			return 'null';
-
-		var type = typeof val;
-
-		if (type === 'object')
-			type = getClass(val).toLowerCase();
-
-		if (type === 'number') {
-			if (val.toString().indexOf('.') > 0)
-				return 'float';
-			else
-				return 'integer';
-		}
-
-		return type;
-	};
-
-	var compareObjects = function (a, b) {
-		if (a === b)
-			return true;
-
-		if (Object.keys(a).length < Object.keys(b).length)
-		{
-			var tmp = a;
-			a = b;
-			b = tmp;
-		}
-
-		for (var i in a) {
-			//ignore system properties and functions
-			if (!_.contains(specialChars, i.charAt(0)) && whatis(a[i]) != 'function') {
-				if (b.hasOwnProperty(i)) {
-					if (!equal(a[i], b[i]))
-						return false;
-				} else {
-					return false;
-				}
-			}
-		}
-
-		//for (var i in b) {
-		//	if (!a.hasOwnProperty(i)) {
-		//		return false;
-		//	}
-		//}
-		return true;
-	};
-
-	var compareArrays = function (a, b) {
-		if (a === b)
-			return true;
-		if (a.length !== b.length)
-			return false;
-		for (var i = 0; i < a.length; i++) {
-			if (!equal(a[i], b[i])) return false;
-		};
-		return true;
-	};
-
-	var _equal = {};
-	_equal.array = compareArrays;
-	_equal.object = compareObjects;
-	_equal.date = function (a, b) {
-		return a.getTime() === b.getTime();
-	};
-	_equal.regexp = function (a, b) {
-		return a.toString() === b.toString();
-	};
-	//	uncoment to support function as string compare
-	//	_equal.fucntion =  _equal.regexp;
-	/*
-	* Are two values equal, deep compare for objects and arrays.
-	* @param a {any}
-	* @param b {any}
-	* @return {boolean} Are equal?
-	*/
-	var equal = function (a, b) {
-		var retVal = a === b;
-		if (!retVal) {
-			var atype = whatis(a), btype = whatis(b);
-			if (atype === btype)
-			{
-				retVal = _equal.hasOwnProperty(atype) ? _equal[atype](a, b) : a == b;
-			}
-		}
-
-		return retVal;
-	}
-
-	return {
-		equal: equal
-	};
-});
-
-angular.module('platformWebApp')
-    .config(['$provide', 'uiGridConstants', function ($provide, uiGridConstants) {
-        $provide.decorator('GridOptions', ['$delegate', '$localStorage', '$translate', 'platformWebApp.bladeNavigationService', function ($delegate, $localStorage, $translate, bladeNavigationService) {
-            var gridOptions = angular.copy($delegate);
-            gridOptions.initialize = function (options) {
-                var initOptions = $delegate.initialize(options);
-                var blade = bladeNavigationService.currentBlade;
-                var $scope = blade.$scope;
-
-                // restore saved state, if any
-                var savedState = $localStorage['gridState:' + blade.template];
-                if (savedState) {
-                    // extend saved columns with custom columnDef information (e.g. cellTemplate, displayName)
-                    var foundDef;
-                    _.each(savedState.columns, function (x) {
-                        if (foundDef = _.findWhere(initOptions.columnDefs, { name: x.name })) {
-                            foundDef.sort = x.sort;
-                            foundDef.width = x.width || foundDef.width;
-                            foundDef.visible = x.visible;
-                            // prevent loading outdated cellTemplate
-                            delete x.cellTemplate;
-                            _.extend(x, foundDef);
-                            x.wasPredefined = true;
-                            initOptions.columnDefs.splice(initOptions.columnDefs.indexOf(foundDef), 1);
-                        } else {
-                            x.wasPredefined = false;
-                        }
-                    });
-                    // savedState.columns = _.reject(savedState.columns, function (x) { return x.cellTemplate && !x.wasPredefined; }); // not sure why was this, but it rejected custom templated fields
-                    initOptions.columnDefs = _.union(initOptions.columnDefs, savedState.columns);
-                } else {
-                    // mark predefined columns
-                    _.each(initOptions.columnDefs, function (x) {
-                        x.visible = angular.isDefined(x.visible) ? x.visible : true;
-                        x.wasPredefined = true;
-                    });
-                }
-
-                // translate headers
-                _.each(initOptions.columnDefs, function (x) { x.headerCellFilter = 'translate'; });
-
-                var customOnRegisterApiCallback = initOptions.onRegisterApi;
-
-                angular.extend(initOptions, {
-                    rowHeight: initOptions.rowHeight === 30 ? 40 : initOptions.rowHeight,
-                    enableGridMenu: true,
-                    //enableVerticalScrollbar: uiGridConstants.scrollbars.NEVER,
-                    //enableHorizontalScrollbar: uiGridConstants.scrollbars.NEVER,
-                    saveFocus: false,
-                    saveFilter: false,
-                    saveGrouping: false,
-                    savePinning: false,
-                    saveSelection: false,
-                    gridMenuTitleFilter: $translate,
-                    onRegisterApi: function (gridApi) {
-                        //set gridApi on scope
-                        $scope.gridApi = gridApi;
-
-                        if (gridApi.saveState) {
-                            if (savedState) {
-                                //$timeout(function () {
-                                gridApi.saveState.restore($scope, savedState);
-                                //}, 10);
-                            }
-
-                            if (gridApi.colResizable)
-                                gridApi.colResizable.on.columnSizeChanged($scope, saveState);
-                            if (gridApi.colMovable)
-                                gridApi.colMovable.on.columnPositionChanged($scope, saveState);
-                            gridApi.core.on.columnVisibilityChanged($scope, saveState);
-                            gridApi.core.on.sortChanged($scope, saveState);
-                            function saveState() {
-                                $localStorage['gridState:' + blade.template] = gridApi.saveState.save();
-                            }
-                        }
-
-                        gridApi.grid.registerDataChangeCallback(processMissingColumns, [uiGridConstants.dataChange.ROW]);
-                        gridApi.grid.registerDataChangeCallback(autoFormatColumns, [uiGridConstants.dataChange.ROW]);
-
-                        if (customOnRegisterApiCallback) {
-                            customOnRegisterApiCallback(gridApi);
-                        }
-                    },
-                    onCollapse: function () {
-                        updateColumnsVisibility(this, true);
-                    },
-                    onExpand: function () {
-                        updateColumnsVisibility(this, false);
-                    }
-                });
-
-                return initOptions;
-            };
-
-            function processMissingColumns(grid) {
-                var gridOptions = grid.options;
-
-                if (!gridOptions.columnDefsGenerated && _.any(grid.rows)) {
-                    var filteredColumns = _.filter(_.pairs(grid.rows[0].entity), function (x) {
-                        return !x[0].startsWith('$$') && (!_.isObject(x[1]) || _.isDate(x[1]));
-                    });
-
-                    var allKeysFromEntity = _.map(filteredColumns, function (x) {
-                        return x[0];
-                    });
-                    // remove non-existing columns
-                    _.each(gridOptions.columnDefs.slice(), function (x) {
-                        if (!_.contains(allKeysFromEntity, x.name) && !x.wasPredefined) {
-                            gridOptions.columnDefs = _.reject(gridOptions.columnDefs, function (d) {
-                                return d.name == x.name;
-                            });
-                        }
-                    });
-
-                    // generate columnDefs for each undefined property
-                    _.each(allKeysFromEntity, function (x) {
-                        if (!_.findWhere(gridOptions.columnDefs, { name: x })) {
-                            gridOptions.columnDefs.push({ name: x, visible: false });
-                        }
-                    });
-                    gridOptions.columnDefsGenerated = true;
-                    grid.api.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
-                }
-            }
-
-            // Configure automatic formatting of columns/
-            // Column with type number will use numberFilter to correct display of values
-            // Column with type date will use predefined template with am-time-ago directive to display date in human-readable format
-            function autoFormatColumns(grid) {
-                var gridOptions = grid.options;
-                grid.buildColumns();
-                var columnDefs = angular.copy(gridOptions.columnDefs);
-                for (var i = 0; i < columnDefs.length; i++) {
-                    var columnDef = columnDefs[i];
-                    for (var j = 0; j < grid.rows.length; j++) {
-                        var value = grid.getCellValue(grid.rows[j], grid.getColumn(columnDef.name));
-                        if (angular.isDefined(value)) {
-                            if (angular.isNumber(value)) {
-                                columnDef.cellFilter = columnDef.cellFilter || 'number';
-                            }
-                            // Default template for columns with dates
-                            else if (angular.isDate(value) || angular.isString(value) && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d+)?Z/.test(value)) {
-                                columnDef.cellTemplate = columnDef.cellTemplate || '$(Platform)/Scripts/common/templates/ui-grid/am-time-ago.cell.html';
-                            }
-                            break;
-                        }
-                    }
-                    gridOptions.columnDefs[i] = columnDef;
-                }
-                grid.options.columnDefs = columnDefs;
-                grid.api.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
-            }
-
-            function updateColumnsVisibility(gridOptions, isCollapsed) {
-                var blade = bladeNavigationService.currentBlade;
-                var $scope = blade.$scope;
-                _.each(gridOptions.columnDefs, function (x) {
-                    // normal: visible, if column was predefined
-                    // collapsed: visible only if we must display column always
-                    if (isCollapsed) {
-                        x.wasVisible = !!x.wasPredefined && x.visible !== false || !!x.visible;
-                    }
-                    x.visible = !isCollapsed ? !!x.wasVisible : !!x.displayAlways;
-                });
-                if ($scope && $scope.gridApi)
-                    $scope.gridApi.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
-            }
-
-            return gridOptions;
-        }]);
-    }])
-
-    .factory('platformWebApp.uiGridHelper', ['$localStorage', '$timeout', 'uiGridConstants', '$translate', function ($localStorage, $timeout, uiGridConstants, $translate) {
-        var retVal = {};
-        retVal.uiGridConstants = uiGridConstants;
-        retVal.initialize = function ($scope, gridOptions, externalRegisterApiCallback) {
-            $scope.gridOptions = angular.extend({
-                data: _.any(gridOptions.data) ? gridOptions.data : 'blade.currentEntities',
-                onRegisterApi: function (gridApi) {
-                    if (externalRegisterApiCallback) {
-                        externalRegisterApiCallback(gridApi);
-                    }
-                }
-            }, gridOptions);
-        };
-
-        retVal.getSortExpression = function ($scope) {
-            var columnDefs;
-            if ($scope.gridApi) {
-                columnDefs = $scope.gridApi.grid.columns;
-            } else {
-                var savedState = $localStorage['gridState:' + $scope.blade.template];
-                columnDefs = savedState ? savedState.columns : $scope.gridOptions.columnDefs;
-            }
-
-            var sorts = _.filter(columnDefs, function (x) {
-                return x.name !== '$path' && x.sort && (x.sort.direction === uiGridConstants.ASC || x.sort.direction === uiGridConstants.DESC);
-            });
-            sorts = _.sortBy(sorts, function (x) {
-                return x.sort.priority;
-            });
-            sorts = _.map(sorts, function (x) {
-                return (x.field ? x.field : x.name) + ':' + (x.sort.direction === uiGridConstants.ASC ? 'asc' : 'desc');
-            });
-            return sorts.join(';');
-        };
-
-        retVal.bindRefreshOnSortChanged = function ($scope) {
-            $scope.gridApi.core.on.sortChanged($scope, function () {
-                if (!$scope.blade.isLoading) $scope.blade.refresh();
-            });
-        };
-
-        return retVal;
-    }])
-
-    // ui-grid extension service. Used for extension grid options from other modules
-    .factory('platformWebApp.ui-grid.extension', [function () {
-        return {
-            extensionsMap: [],
-            registerExtension: function (gridId, extensionFn) {
-                this.extensionsMap[gridId] = extensionFn;
-            },
-            tryExtendGridOptions: function (gridId, gridOptions) {
-                if (this.extensionsMap[gridId]) {
-                    this.extensionsMap[gridId](gridOptions);
-                }
-            }
-        };
-    }])
-
-    // auto height and additional class for ui-grid
-    .directive('uiGridHeight', ['$timeout', '$window', function ($timeout, $window) {
-        return {
-            restrict: 'A',
-            link: {
-                pre: function (scope, element) {
-                    var bladeInner = $(element).parents('.blade-inner');
-                    bladeInner.addClass('ui-grid-no-scroll');
-
-                    var setGridHeight = function () {
-                        $timeout(function () {
-                            $(element).height(bladeInner.height());
-                        });
-                    };
-                    scope.$watch('blade.isExpanded', setGridHeight);
-                    scope.$watch('pageSettings.totalItems', setGridHeight);
-                    angular.element($window).bind('resize', setGridHeight);
-                }
-            }
-        };
-    }])
-    .run(['$templateRequest', function ($templateRequest) {
-        // Pre-load default templates, because we inject templates to grid options dynamically, so they not loaded by default
-        $templateRequest('$(Platform)/Scripts/common/templates/ui-grid/am-time-ago.cell.html');
-    }]);
-
-angular.module('platformWebApp')
- .factory('platformWebApp.validators', [function () {
-     function webSafeFileNameValidator(value) {
-         var pattern = /^[\w.-]+$/;
-         return pattern.test(value);
-     }
-
-     return {
-         webSafeFileNameValidator: webSafeFileNameValidator
-     };
- }]);
-
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -17738,6 +17290,454 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/html"))
 });
 
 angular.module('platformWebApp')
+ .factory('platformWebApp.bladeUtils', ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
+     function initializePagination($scope, skipDefaultWatch) {
+         //pagination settings
+         $scope.pageSettings = {};
+         $scope.pageSettings.totalItems = 0;
+         $scope.pageSettings.currentPage = 1;
+         $scope.pageSettings.numPages = 5;
+         $scope.pageSettings.itemsPerPageCount = 20;
+
+         if (!skipDefaultWatch)
+             $scope.$watch('pageSettings.currentPage', $scope.blade.refresh);
+     }
+
+     return {
+         bladeNavigationService: bladeNavigationService,
+         initializePagination: initializePagination
+     };
+ }]);
+
+angular.module('platformWebApp')
+    .filter('boolToValue', function () {
+        return function (input, trueValue, falseValue) {
+            return input ? trueValue : falseValue;
+        };
+    })
+    .filter('slice', function () {
+        return function (arr, start, end) {
+            return (arr || []).slice(start, end);
+        };
+    })
+    .filter('readablesize', function () {
+        return function (input) {
+            if (!input)
+                return null;
+
+            var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+            var order = 0;
+            while (input >= 1024 && order + 1 < sizes.length) {
+                order++;
+                input = input / 1024;
+            }
+            return Math.round(input) + ' ' + sizes[order];
+        };
+    })
+    // translate the given properties in the input array
+    .filter('translateArray', ['$translate', function ($translate) {
+        return function (inputArray, propertiesList) {
+            _.each(inputArray, function (inputItem) {
+                _.each(propertiesList, function (prop) {
+                    if (angular.isString(inputItem[prop])) {
+                        var translateKey = inputItem[prop].toLowerCase();
+                        var result = $translate.instant(translateKey);
+                        if (result !== translateKey) inputItem[prop] = result;
+                    }
+                });
+            });
+            return inputArray;
+        }
+    }])
+    // translation with fall-back value if key not found
+    .filter('fallbackTranslate', ['$translate', function ($translate) {
+        return function (translateKey, fallbackValue) {
+            var result = $translate.instant(translateKey);
+            return result === translateKey ? fallbackValue : result;
+        };
+    }]);
+angular.module('platformWebApp')
+.factory('platformWebApp.objCompareService', function () {
+
+	//https://stamat.wordpress.com/2013/06/22/javascript-object-comparison/
+
+	var specialChars = [ '$', '_' ];
+	//Returns the object's class, Array, Date, RegExp, Object are of interest to us
+	var getClass = function (val) {
+		return Object.prototype.toString.call(val)
+			.match(/^\[object\s(.*)\]$/)[1];
+	};
+
+	//Defines the type of the value, extended typeof
+	var whatis = function (val) {
+
+		if (val === undefined)
+			return 'undefined';
+		if (val === null)
+			return 'null';
+
+		var type = typeof val;
+
+		if (type === 'object')
+			type = getClass(val).toLowerCase();
+
+		if (type === 'number') {
+			if (val.toString().indexOf('.') > 0)
+				return 'float';
+			else
+				return 'integer';
+		}
+
+		return type;
+	};
+
+	var compareObjects = function (a, b) {
+		if (a === b)
+			return true;
+
+		if (Object.keys(a).length < Object.keys(b).length)
+		{
+			var tmp = a;
+			a = b;
+			b = tmp;
+		}
+
+		for (var i in a) {
+			//ignore system properties and functions
+			if (!_.contains(specialChars, i.charAt(0)) && whatis(a[i]) != 'function') {
+				if (b.hasOwnProperty(i)) {
+					if (!equal(a[i], b[i]))
+						return false;
+				} else {
+					return false;
+				}
+			}
+		}
+
+		//for (var i in b) {
+		//	if (!a.hasOwnProperty(i)) {
+		//		return false;
+		//	}
+		//}
+		return true;
+	};
+
+	var compareArrays = function (a, b) {
+		if (a === b)
+			return true;
+		if (a.length !== b.length)
+			return false;
+		for (var i = 0; i < a.length; i++) {
+			if (!equal(a[i], b[i])) return false;
+		};
+		return true;
+	};
+
+	var _equal = {};
+	_equal.array = compareArrays;
+	_equal.object = compareObjects;
+	_equal.date = function (a, b) {
+		return a.getTime() === b.getTime();
+	};
+	_equal.regexp = function (a, b) {
+		return a.toString() === b.toString();
+	};
+	//	uncoment to support function as string compare
+	//	_equal.fucntion =  _equal.regexp;
+	/*
+	* Are two values equal, deep compare for objects and arrays.
+	* @param a {any}
+	* @param b {any}
+	* @return {boolean} Are equal?
+	*/
+	var equal = function (a, b) {
+		var retVal = a === b;
+		if (!retVal) {
+			var atype = whatis(a), btype = whatis(b);
+			if (atype === btype)
+			{
+				retVal = _equal.hasOwnProperty(atype) ? _equal[atype](a, b) : a == b;
+			}
+		}
+
+		return retVal;
+	}
+
+	return {
+		equal: equal
+	};
+});
+
+angular.module('platformWebApp')
+    .config(['$provide', 'uiGridConstants', function ($provide, uiGridConstants) {
+        $provide.decorator('GridOptions', ['$delegate', '$localStorage', '$translate', 'platformWebApp.bladeNavigationService', function ($delegate, $localStorage, $translate, bladeNavigationService) {
+            var gridOptions = angular.copy($delegate);
+            gridOptions.initialize = function (options) {
+                var initOptions = $delegate.initialize(options);
+                var blade = bladeNavigationService.currentBlade;
+                var $scope = blade.$scope;
+
+                // restore saved state, if any
+                var savedState = $localStorage['gridState:' + blade.template];
+                if (savedState) {
+                    // extend saved columns with custom columnDef information (e.g. cellTemplate, displayName)
+                    var foundDef;
+                    _.each(savedState.columns, function (x) {
+                        if (foundDef = _.findWhere(initOptions.columnDefs, { name: x.name })) {
+                            foundDef.sort = x.sort;
+                            foundDef.width = x.width || foundDef.width;
+                            foundDef.visible = x.visible;
+                            // prevent loading outdated cellTemplate
+                            delete x.cellTemplate;
+                            _.extend(x, foundDef);
+                            x.wasPredefined = true;
+                            initOptions.columnDefs.splice(initOptions.columnDefs.indexOf(foundDef), 1);
+                        } else {
+                            x.wasPredefined = false;
+                        }
+                    });
+                    // savedState.columns = _.reject(savedState.columns, function (x) { return x.cellTemplate && !x.wasPredefined; }); // not sure why was this, but it rejected custom templated fields
+                    initOptions.columnDefs = _.union(initOptions.columnDefs, savedState.columns);
+                } else {
+                    // mark predefined columns
+                    _.each(initOptions.columnDefs, function (x) {
+                        x.visible = angular.isDefined(x.visible) ? x.visible : true;
+                        x.wasPredefined = true;
+                    });
+                }
+
+                // translate headers
+                _.each(initOptions.columnDefs, function (x) { x.headerCellFilter = 'translate'; });
+
+                var customOnRegisterApiCallback = initOptions.onRegisterApi;
+
+                angular.extend(initOptions, {
+                    rowHeight: initOptions.rowHeight === 30 ? 40 : initOptions.rowHeight,
+                    enableGridMenu: true,
+                    //enableVerticalScrollbar: uiGridConstants.scrollbars.NEVER,
+                    //enableHorizontalScrollbar: uiGridConstants.scrollbars.NEVER,
+                    saveFocus: false,
+                    saveFilter: false,
+                    saveGrouping: false,
+                    savePinning: false,
+                    saveSelection: false,
+                    gridMenuTitleFilter: $translate,
+                    onRegisterApi: function (gridApi) {
+                        //set gridApi on scope
+                        $scope.gridApi = gridApi;
+
+                        if (gridApi.saveState) {
+                            if (savedState) {
+                                //$timeout(function () {
+                                gridApi.saveState.restore($scope, savedState);
+                                //}, 10);
+                            }
+
+                            if (gridApi.colResizable)
+                                gridApi.colResizable.on.columnSizeChanged($scope, saveState);
+                            if (gridApi.colMovable)
+                                gridApi.colMovable.on.columnPositionChanged($scope, saveState);
+                            gridApi.core.on.columnVisibilityChanged($scope, saveState);
+                            gridApi.core.on.sortChanged($scope, saveState);
+                            function saveState() {
+                                $localStorage['gridState:' + blade.template] = gridApi.saveState.save();
+                            }
+                        }
+
+                        gridApi.grid.registerDataChangeCallback(processMissingColumns, [uiGridConstants.dataChange.ROW]);
+                        gridApi.grid.registerDataChangeCallback(autoFormatColumns, [uiGridConstants.dataChange.ROW]);
+
+                        if (customOnRegisterApiCallback) {
+                            customOnRegisterApiCallback(gridApi);
+                        }
+                    },
+                    onCollapse: function () {
+                        updateColumnsVisibility(this, true);
+                    },
+                    onExpand: function () {
+                        updateColumnsVisibility(this, false);
+                    }
+                });
+
+                return initOptions;
+            };
+
+            function processMissingColumns(grid) {
+                var gridOptions = grid.options;
+
+                if (!gridOptions.columnDefsGenerated && _.any(grid.rows)) {
+                    var filteredColumns = _.filter(_.pairs(grid.rows[0].entity), function (x) {
+                        return !x[0].startsWith('$$') && (!_.isObject(x[1]) || _.isDate(x[1]));
+                    });
+
+                    var allKeysFromEntity = _.map(filteredColumns, function (x) {
+                        return x[0];
+                    });
+                    // remove non-existing columns
+                    _.each(gridOptions.columnDefs.slice(), function (x) {
+                        if (!_.contains(allKeysFromEntity, x.name) && !x.wasPredefined) {
+                            gridOptions.columnDefs = _.reject(gridOptions.columnDefs, function (d) {
+                                return d.name == x.name;
+                            });
+                        }
+                    });
+
+                    // generate columnDefs for each undefined property
+                    _.each(allKeysFromEntity, function (x) {
+                        if (!_.findWhere(gridOptions.columnDefs, { name: x })) {
+                            gridOptions.columnDefs.push({ name: x, visible: false });
+                        }
+                    });
+                    gridOptions.columnDefsGenerated = true;
+                    grid.api.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
+                }
+            }
+
+            // Configure automatic formatting of columns/
+            // Column with type number will use numberFilter to correct display of values
+            // Column with type date will use predefined template with am-time-ago directive to display date in human-readable format
+            function autoFormatColumns(grid) {
+                var gridOptions = grid.options;
+                grid.buildColumns();
+                var columnDefs = angular.copy(gridOptions.columnDefs);
+                for (var i = 0; i < columnDefs.length; i++) {
+                    var columnDef = columnDefs[i];
+                    for (var j = 0; j < grid.rows.length; j++) {
+                        var value = grid.getCellValue(grid.rows[j], grid.getColumn(columnDef.name));
+                        if (angular.isDefined(value)) {
+                            if (angular.isNumber(value)) {
+                                columnDef.cellFilter = columnDef.cellFilter || 'number';
+                            }
+                            // Default template for columns with dates
+                            else if (angular.isDate(value) || angular.isString(value) && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d+)?Z/.test(value)) {
+                                columnDef.cellTemplate = columnDef.cellTemplate || '$(Platform)/Scripts/common/templates/ui-grid/am-time-ago.cell.html';
+                            }
+                            break;
+                        }
+                    }
+                    gridOptions.columnDefs[i] = columnDef;
+                }
+                grid.options.columnDefs = columnDefs;
+                grid.api.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
+            }
+
+            function updateColumnsVisibility(gridOptions, isCollapsed) {
+                var blade = bladeNavigationService.currentBlade;
+                var $scope = blade.$scope;
+                _.each(gridOptions.columnDefs, function (x) {
+                    // normal: visible, if column was predefined
+                    // collapsed: visible only if we must display column always
+                    if (isCollapsed) {
+                        x.wasVisible = !!x.wasPredefined && x.visible !== false || !!x.visible;
+                    }
+                    x.visible = !isCollapsed ? !!x.wasVisible : !!x.displayAlways;
+                });
+                if ($scope && $scope.gridApi)
+                    $scope.gridApi.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
+            }
+
+            return gridOptions;
+        }]);
+    }])
+
+    .factory('platformWebApp.uiGridHelper', ['$localStorage', '$timeout', 'uiGridConstants', '$translate', function ($localStorage, $timeout, uiGridConstants, $translate) {
+        var retVal = {};
+        retVal.uiGridConstants = uiGridConstants;
+        retVal.initialize = function ($scope, gridOptions, externalRegisterApiCallback) {
+            $scope.gridOptions = angular.extend({
+                data: _.any(gridOptions.data) ? gridOptions.data : 'blade.currentEntities',
+                onRegisterApi: function (gridApi) {
+                    if (externalRegisterApiCallback) {
+                        externalRegisterApiCallback(gridApi);
+                    }
+                }
+            }, gridOptions);
+        };
+
+        retVal.getSortExpression = function ($scope) {
+            var columnDefs;
+            if ($scope.gridApi) {
+                columnDefs = $scope.gridApi.grid.columns;
+            } else {
+                var savedState = $localStorage['gridState:' + $scope.blade.template];
+                columnDefs = savedState ? savedState.columns : $scope.gridOptions.columnDefs;
+            }
+
+            var sorts = _.filter(columnDefs, function (x) {
+                return x.name !== '$path' && x.sort && (x.sort.direction === uiGridConstants.ASC || x.sort.direction === uiGridConstants.DESC);
+            });
+            sorts = _.sortBy(sorts, function (x) {
+                return x.sort.priority;
+            });
+            sorts = _.map(sorts, function (x) {
+                return (x.field ? x.field : x.name) + ':' + (x.sort.direction === uiGridConstants.ASC ? 'asc' : 'desc');
+            });
+            return sorts.join(';');
+        };
+
+        retVal.bindRefreshOnSortChanged = function ($scope) {
+            $scope.gridApi.core.on.sortChanged($scope, function () {
+                if (!$scope.blade.isLoading) $scope.blade.refresh();
+            });
+        };
+
+        return retVal;
+    }])
+
+    // ui-grid extension service. Used for extension grid options from other modules
+    .factory('platformWebApp.ui-grid.extension', [function () {
+        return {
+            extensionsMap: [],
+            registerExtension: function (gridId, extensionFn) {
+                this.extensionsMap[gridId] = extensionFn;
+            },
+            tryExtendGridOptions: function (gridId, gridOptions) {
+                if (this.extensionsMap[gridId]) {
+                    this.extensionsMap[gridId](gridOptions);
+                }
+            }
+        };
+    }])
+
+    // auto height and additional class for ui-grid
+    .directive('uiGridHeight', ['$timeout', '$window', function ($timeout, $window) {
+        return {
+            restrict: 'A',
+            link: {
+                pre: function (scope, element) {
+                    var bladeInner = $(element).parents('.blade-inner');
+                    bladeInner.addClass('ui-grid-no-scroll');
+
+                    var setGridHeight = function () {
+                        $timeout(function () {
+                            $(element).height(bladeInner.height());
+                        });
+                    };
+                    scope.$watch('blade.isExpanded', setGridHeight);
+                    scope.$watch('pageSettings.totalItems', setGridHeight);
+                    angular.element($window).bind('resize', setGridHeight);
+                }
+            }
+        };
+    }])
+    .run(['$templateRequest', function ($templateRequest) {
+        // Pre-load default templates, because we inject templates to grid options dynamically, so they not loaded by default
+        $templateRequest('$(Platform)/Scripts/common/templates/ui-grid/am-time-ago.cell.html');
+    }]);
+
+angular.module('platformWebApp')
+ .factory('platformWebApp.validators', [function () {
+     function webSafeFileNameValidator(value) {
+         var pattern = /^[\w.-]+$/;
+         return pattern.test(value);
+     }
+
+     return {
+         webSafeFileNameValidator: webSafeFileNameValidator
+     };
+ }]);
+
+angular.module('platformWebApp')
 .config(['$provide', function ($provide) {
     // Provide default format
     $provide.decorator('currencyFilter', ['$delegate', function ($delegate) {
@@ -18409,6 +18409,65 @@ angular.module('platformWebApp')
   }]);
 angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
+    $stateProvider
+        .state('workspace.dynamicProperties', {
+            url: '/dynamicProperties',
+            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+            controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+                var blade = {
+                    id: 'dynamicPropertiesTypes',
+                    controller: 'platformWebApp.dynamicObjectListController',
+                    template: '$(Platform)/Scripts/app/dynamicProperties/blades/dynamicObject-list.tpl.html',
+                    isClosingDisabled: true
+                };
+                bladeNavigationService.showBlade(blade);
+            }
+            ]
+        });
+}]
+)
+.run(
+  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', function ($rootScope, mainMenuService, widgetService, $state) {
+      var menuItem = {
+          path: 'configuration/dynamicProperties',
+          icon: 'fa fa-pencil-square-o',
+          title: 'platform.menu.dynamic-properties',
+          priority: 2,
+          action: function () { $state.go('workspace.dynamicProperties'); },
+          permission: 'platform:dynamic_properties:access'
+      };
+      mainMenuService.addMenuItem(menuItem);
+  }])
+.filter('dynamicPropertyValueTypeToText', function () {
+    return function (input) {
+        var retVal;
+        switch (input) {
+            case 'ShortText': retVal = 'platform.properties.short-text.title'; break;
+            case 'LongText': retVal = 'platform.properties.long-text.title'; break;
+            case 'Integer': retVal = 'platform.properties.integer.title'; break;
+            case 'Decimal': retVal = 'platform.properties.decimal.title'; break;
+            case 'DateTime': retVal = 'platform.properties.date-time.title'; break;
+            case 'Boolean': retVal = 'platform.properties.boolean.title'; break;
+            case 'Html': retVal = 'platform.properties.html.title'; break;
+            default:
+                retVal = input ? input : 'platform.properties.undefined.title';
+        }
+        return retVal;
+    }
+})
+//Filter for showing localized display name in current user language
+.filter('localizeDynamicPropertyName', function () {
+    return function (input, lang) {
+        var retVal = input.name;
+        var displayName = _.find(input.displayNames, function (obj) { return obj && obj.locale.startsWith(lang); });
+        if (displayName && displayName.name)
+            retVal += ' (' + displayName.name + ')';
+
+        return retVal;
+    }
+});
+angular.module('platformWebApp')
+.config(['$stateProvider', function ($stateProvider) {
 	$stateProvider
         .state('workspace.exportImport', {
         	url: '/exportImport',
@@ -18550,65 +18609,6 @@ angular.module('platformWebApp')
 
   }]);
 
-angular.module('platformWebApp')
-.config(['$stateProvider', function ($stateProvider) {
-    $stateProvider
-        .state('workspace.dynamicProperties', {
-            url: '/dynamicProperties',
-            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-            controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-                var blade = {
-                    id: 'dynamicPropertiesTypes',
-                    controller: 'platformWebApp.dynamicObjectListController',
-                    template: '$(Platform)/Scripts/app/dynamicProperties/blades/dynamicObject-list.tpl.html',
-                    isClosingDisabled: true
-                };
-                bladeNavigationService.showBlade(blade);
-            }
-            ]
-        });
-}]
-)
-.run(
-  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', function ($rootScope, mainMenuService, widgetService, $state) {
-      var menuItem = {
-          path: 'configuration/dynamicProperties',
-          icon: 'fa fa-pencil-square-o',
-          title: 'platform.menu.dynamic-properties',
-          priority: 2,
-          action: function () { $state.go('workspace.dynamicProperties'); },
-          permission: 'platform:dynamic_properties:access'
-      };
-      mainMenuService.addMenuItem(menuItem);
-  }])
-.filter('dynamicPropertyValueTypeToText', function () {
-    return function (input) {
-        var retVal;
-        switch (input) {
-            case 'ShortText': retVal = 'platform.properties.short-text.title'; break;
-            case 'LongText': retVal = 'platform.properties.long-text.title'; break;
-            case 'Integer': retVal = 'platform.properties.integer.title'; break;
-            case 'Decimal': retVal = 'platform.properties.decimal.title'; break;
-            case 'DateTime': retVal = 'platform.properties.date-time.title'; break;
-            case 'Boolean': retVal = 'platform.properties.boolean.title'; break;
-            case 'Html': retVal = 'platform.properties.html.title'; break;
-            default:
-                retVal = input ? input : 'platform.properties.undefined.title';
-        }
-        return retVal;
-    }
-})
-//Filter for showing localized display name in current user language
-.filter('localizeDynamicPropertyName', function () {
-    return function (input, lang) {
-        var retVal = input.name;
-        var displayName = _.find(input.displayNames, function (obj) { return obj && obj.locale.startsWith(lang); });
-        if (displayName && displayName.name)
-            retVal += ' (' + displayName.name + ')';
-
-        return retVal;
-    }
-});
 angular.module('platformWebApp')
 .controller('platformWebApp.licenseDetailController', ['$scope', '$window', 'FileUploader', '$http', 'platformWebApp.bladeNavigationService', function ($scope, $window, FileUploader, $http, bladeNavigationService) {
     var blade = $scope.blade;
@@ -18878,6 +18878,179 @@ angular.module('platformWebApp')
   }])
 ;
 angular.module('platformWebApp')
+.config(
+  ['$stateProvider', function ($stateProvider) {
+      $stateProvider
+          .state('workspace.pushNotificationsHistory', {
+              url: '/events',
+              templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+              controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+                  var blade = {
+                      id: 'events',
+                      title: 'platform.blades.history.title',
+                      breadcrumbs: [],
+                      subtitle: 'platform.blades.history.subtitle',
+                      controller: 'platformWebApp.pushNotificationsHistoryController',
+                      template: '$(Platform)/Scripts/app/pushNotifications/blade/history.tpl.html',
+                      isClosingDisabled: true
+                  };
+                  bladeNavigationService.showBlade(blade);
+              }
+              ]
+          });
+  }])
+.factory('platformWebApp.pushNotificationTemplateResolver', ['platformWebApp.bladeNavigationService', '$state', function (bladeNavigationService, $state) {
+    var notificationTemplates = [];
+
+    function register(template) {
+        notificationTemplates.push(template);
+        notificationTemplates.sort(function (a, b) { return a.priority - b.priority; });
+    };
+    function resolve(notification, place) {
+        return _.find(notificationTemplates, function (x) { return x.satisfy(notification, place); });
+    };
+    var retVal = {
+        register: register,
+        resolve: resolve,
+    };
+
+    //Recent events notification template (error, info, debug) 
+    var menuDefaultTemplate =
+        {
+            priority: 1000,
+            satisfy: function (notification, place) { return place == 'menu'; },
+            //template for display that notification in menu and list
+            template: '$(Platform)/Scripts/app/pushNotifications/menuDefault.tpl.html',
+            //action executed when notification selected
+            action: function (notify) { $state.go('workspace.pushNotificationsHistory', notify) }
+        };
+
+    //In history list notification template (error, info, debug)
+    var historyDefaultTemplate =
+        {
+            priority: 1000,
+            satisfy: function (notification, place) { return place == 'history'; },
+            //template for display that notification in menu and list
+            template: '$(Platform)/Scripts/app/pushNotifications/blade/historyDefault.tpl.html',
+            //action executed in event detail
+            action: function (notify) {
+                var blade = {
+                    id: 'notifyDetail',
+                    title: 'platform.blades.historyDetailDefault.title',
+                    subtitle: 'platform.blades.historyDetailDefault.subtitle',
+                    template: '$(Platform)/Scripts/app/pushNotifications/blade/historyDetailDefault.tpl.html',
+                    isClosingDisabled: false,
+                    notify: notify
+                };
+                bladeNavigationService.showBlade(blade);
+            }
+        };
+
+    retVal.register(menuDefaultTemplate);
+    retVal.register(historyDefaultTemplate);
+
+    return retVal;
+}])
+.factory('platformWebApp.pushNotificationService', ['$rootScope', '$timeout', '$interval', '$state', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
+    function ($rootScope, $timeout, $interval, $state, mainMenuService, eventTemplateResolver, notifications) {
+
+        //SignalR setup connection
+         var transportType = signalR.TransportType.WebSockets;
+         var http = new signalR.HttpConnection('/pushNotificationHub', { transport: transportType });
+         var connection = new signalR.HubConnection(http);
+         connection.start();
+
+
+        connection.on('Send', function (data) {
+            var notifyMenu = mainMenuService.findByPath('pushNotifications');
+            var notificationTemplate = eventTemplateResolver.resolve(data, 'menu');
+            //broadcast event
+            $rootScope.$broadcast("new-notification-event", data);
+
+            var menuItem = {
+                path: 'pushNotifications/notifications',
+                icon: 'fa fa-bell-o',
+                title: data.title,
+                priority: 2,
+                permission: '',
+                children: [],
+                action: notificationTemplate.action,
+                template: notificationTemplate.template,
+                notify: data
+            };
+
+            var alreadyExitstItem = _.find(notifyMenu.children, function (x) { return x.notify.id == menuItem.notify.id; });
+            if (alreadyExitstItem) {
+                angular.copy(menuItem, alreadyExitstItem);
+            }
+            else {
+                menuItem.parent = notifyMenu;
+                notifyMenu.children.push(menuItem);
+                notifyMenu.newCount++;
+
+                if (angular.isDefined(notifyMenu.intervalPromise)) {
+                    $interval.cancel(notifyMenu.intervalPromise);
+                }
+                animateNotify();
+                notifyMenu.intervalPromise = $interval(animateNotify, 30000);
+            }
+        });
+
+        function animateNotify() {
+            var notifyMenu = mainMenuService.findByPath('pushNotifications');
+            notifyMenu.isAnimated = true;
+
+            $timeout(function () {
+                notifyMenu.isAnimated = false;
+            }, 1500);
+        }
+
+        function markAllAsRead() {
+            var notifyMenu = mainMenuService.findByPath('pushNotifications');
+            if (angular.isDefined(notifyMenu.intervalPromise)) {
+                $interval.cancel(notifyMenu.intervalPromise);
+            }
+
+            notifications.markAllAsRead(null, function (data, status, headers, config) {
+                notifyMenu.isAnimated = false;
+                notifyMenu.newCount = 0;
+            }, function (error) {
+                //bladeNavigationService.setError('Error ' + error.status, blade);
+            });
+        }
+
+        var retVal = {
+            run: function () {
+                if (!this.running) {
+                    var notifyMenu = mainMenuService.findByPath('pushNotifications');
+                    if (!angular.isDefined(notifyMenu)) {
+                        notifyMenu = {
+                            path: 'pushNotifications',
+                            icon: 'fa fa-bell-o',
+                            title: 'platform.menu.notifications',
+                            priority: 2,
+                            isAlwaysOnBar: true,
+                            permission: '',
+                            headerTemplate: '$(Platform)/Scripts/app/pushNotifications/menuHeader.tpl.html',
+                            template: '$(Platform)/Scripts/app/pushNotifications/menu.tpl.html',
+                            action: function () { markAllAsRead(); if (this.children.length == 0) { this.showHistory(); } },
+                            showHistory: function () { $state.go('workspace.pushNotificationsHistory'); },
+                            clearRecent: function () { notifyMenu.children.splice(0, notifyMenu.children.length); },
+                            children: [],
+                            newCount: 0
+                        };
+                        mainMenuService.addMenuItem(notifyMenu);
+                    }
+                    this.running = true;
+                };
+            },
+            running: false
+        };
+        return retVal;
+
+    }]);
+
+angular.module('platformWebApp')
     .config(['$stateProvider', '$httpProvider', function ($stateProvider, $httpProvider) {
         $stateProvider.state('loginDialog', {
 	        url: '/login',
@@ -19133,179 +19306,6 @@ function DictionarySettingDetailBlade(settingName) {
     this.template = '$(Platform)/Scripts/app/settings/blades/setting-dictionary.tpl.html';
 }
 angular.module('platformWebApp')
-.config(
-  ['$stateProvider', function ($stateProvider) {
-      $stateProvider
-          .state('workspace.pushNotificationsHistory', {
-              url: '/events',
-              templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-              controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-                  var blade = {
-                      id: 'events',
-                      title: 'platform.blades.history.title',
-                      breadcrumbs: [],
-                      subtitle: 'platform.blades.history.subtitle',
-                      controller: 'platformWebApp.pushNotificationsHistoryController',
-                      template: '$(Platform)/Scripts/app/pushNotifications/blade/history.tpl.html',
-                      isClosingDisabled: true
-                  };
-                  bladeNavigationService.showBlade(blade);
-              }
-              ]
-          });
-  }])
-.factory('platformWebApp.pushNotificationTemplateResolver', ['platformWebApp.bladeNavigationService', '$state', function (bladeNavigationService, $state) {
-    var notificationTemplates = [];
-
-    function register(template) {
-        notificationTemplates.push(template);
-        notificationTemplates.sort(function (a, b) { return a.priority - b.priority; });
-    };
-    function resolve(notification, place) {
-        return _.find(notificationTemplates, function (x) { return x.satisfy(notification, place); });
-    };
-    var retVal = {
-        register: register,
-        resolve: resolve,
-    };
-
-    //Recent events notification template (error, info, debug) 
-    var menuDefaultTemplate =
-        {
-            priority: 1000,
-            satisfy: function (notification, place) { return place == 'menu'; },
-            //template for display that notification in menu and list
-            template: '$(Platform)/Scripts/app/pushNotifications/menuDefault.tpl.html',
-            //action executed when notification selected
-            action: function (notify) { $state.go('workspace.pushNotificationsHistory', notify) }
-        };
-
-    //In history list notification template (error, info, debug)
-    var historyDefaultTemplate =
-        {
-            priority: 1000,
-            satisfy: function (notification, place) { return place == 'history'; },
-            //template for display that notification in menu and list
-            template: '$(Platform)/Scripts/app/pushNotifications/blade/historyDefault.tpl.html',
-            //action executed in event detail
-            action: function (notify) {
-                var blade = {
-                    id: 'notifyDetail',
-                    title: 'platform.blades.historyDetailDefault.title',
-                    subtitle: 'platform.blades.historyDetailDefault.subtitle',
-                    template: '$(Platform)/Scripts/app/pushNotifications/blade/historyDetailDefault.tpl.html',
-                    isClosingDisabled: false,
-                    notify: notify
-                };
-                bladeNavigationService.showBlade(blade);
-            }
-        };
-
-    retVal.register(menuDefaultTemplate);
-    retVal.register(historyDefaultTemplate);
-
-    return retVal;
-}])
-.factory('platformWebApp.pushNotificationService', ['$rootScope', '$timeout', '$interval', '$state', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
-    function ($rootScope, $timeout, $interval, $state, mainMenuService, eventTemplateResolver, notifications) {
-
-        //SignalR setup connection
-         var transportType = signalR.TransportType.WebSockets;
-         var http = new signalR.HttpConnection('/pushNotificationHub', { transport: transportType });
-         var connection = new signalR.HubConnection(http);
-         connection.start();
-
-
-        connection.on('Send', function (data) {
-            var notifyMenu = mainMenuService.findByPath('pushNotifications');
-            var notificationTemplate = eventTemplateResolver.resolve(data, 'menu');
-            //broadcast event
-            $rootScope.$broadcast("new-notification-event", data);
-
-            var menuItem = {
-                path: 'pushNotifications/notifications',
-                icon: 'fa fa-bell-o',
-                title: data.title,
-                priority: 2,
-                permission: '',
-                children: [],
-                action: notificationTemplate.action,
-                template: notificationTemplate.template,
-                notify: data
-            };
-
-            var alreadyExitstItem = _.find(notifyMenu.children, function (x) { return x.notify.id == menuItem.notify.id; });
-            if (alreadyExitstItem) {
-                angular.copy(menuItem, alreadyExitstItem);
-            }
-            else {
-                menuItem.parent = notifyMenu;
-                notifyMenu.children.push(menuItem);
-                notifyMenu.newCount++;
-
-                if (angular.isDefined(notifyMenu.intervalPromise)) {
-                    $interval.cancel(notifyMenu.intervalPromise);
-                }
-                animateNotify();
-                notifyMenu.intervalPromise = $interval(animateNotify, 30000);
-            }
-        });
-
-        function animateNotify() {
-            var notifyMenu = mainMenuService.findByPath('pushNotifications');
-            notifyMenu.isAnimated = true;
-
-            $timeout(function () {
-                notifyMenu.isAnimated = false;
-            }, 1500);
-        }
-
-        function markAllAsRead() {
-            var notifyMenu = mainMenuService.findByPath('pushNotifications');
-            if (angular.isDefined(notifyMenu.intervalPromise)) {
-                $interval.cancel(notifyMenu.intervalPromise);
-            }
-
-            notifications.markAllAsRead(null, function (data, status, headers, config) {
-                notifyMenu.isAnimated = false;
-                notifyMenu.newCount = 0;
-            }, function (error) {
-                //bladeNavigationService.setError('Error ' + error.status, blade);
-            });
-        }
-
-        var retVal = {
-            run: function () {
-                if (!this.running) {
-                    var notifyMenu = mainMenuService.findByPath('pushNotifications');
-                    if (!angular.isDefined(notifyMenu)) {
-                        notifyMenu = {
-                            path: 'pushNotifications',
-                            icon: 'fa fa-bell-o',
-                            title: 'platform.menu.notifications',
-                            priority: 2,
-                            isAlwaysOnBar: true,
-                            permission: '',
-                            headerTemplate: '$(Platform)/Scripts/app/pushNotifications/menuHeader.tpl.html',
-                            template: '$(Platform)/Scripts/app/pushNotifications/menu.tpl.html',
-                            action: function () { markAllAsRead(); if (this.children.length == 0) { this.showHistory(); } },
-                            showHistory: function () { $state.go('workspace.pushNotificationsHistory'); },
-                            clearRecent: function () { notifyMenu.children.splice(0, notifyMenu.children.length); },
-                            children: [],
-                            newCount: 0
-                        };
-                        mainMenuService.addMenuItem(notifyMenu);
-                    }
-                    this.running = true;
-                };
-            },
-            running: false
-        };
-        return retVal;
-
-    }]);
-
-angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
 	$stateProvider
         .state('setupWizard', {
@@ -19466,6 +19466,745 @@ angular.module('platformWebApp')
     };
     mainMenuService.addMenuItem(menuItem);
 }]);
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+"use strict";
+
+CodeMirror.registerHelper("fold", "brace", function(cm, start) {
+  var line = start.line, lineText = cm.getLine(line);
+  var startCh, tokenType;
+
+  function findOpening(openCh) {
+    for (var at = start.ch, pass = 0;;) {
+      var found = at <= 0 ? -1 : lineText.lastIndexOf(openCh, at - 1);
+      if (found == -1) {
+        if (pass == 1) break;
+        pass = 1;
+        at = lineText.length;
+        continue;
+      }
+      if (pass == 1 && found < start.ch) break;
+      tokenType = cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1));
+      if (!/^(comment|string)/.test(tokenType)) return found + 1;
+      at = found - 1;
+    }
+  }
+
+  var startToken = "{", endToken = "}", startCh = findOpening("{");
+  if (startCh == null) {
+    startToken = "[", endToken = "]";
+    startCh = findOpening("[");
+  }
+
+  if (startCh == null) return;
+  var count = 1, lastLine = cm.lastLine(), end, endCh;
+  outer: for (var i = line; i <= lastLine; ++i) {
+    var text = cm.getLine(i), pos = i == line ? startCh : 0;
+    for (;;) {
+      var nextOpen = text.indexOf(startToken, pos), nextClose = text.indexOf(endToken, pos);
+      if (nextOpen < 0) nextOpen = text.length;
+      if (nextClose < 0) nextClose = text.length;
+      pos = Math.min(nextOpen, nextClose);
+      if (pos == text.length) break;
+      if (cm.getTokenTypeAt(CodeMirror.Pos(i, pos + 1)) == tokenType) {
+        if (pos == nextOpen) ++count;
+        else if (!--count) { end = i; endCh = pos; break outer; }
+      }
+      ++pos;
+    }
+  }
+  if (end == null || line == end && endCh == startCh) return;
+  return {from: CodeMirror.Pos(line, startCh),
+          to: CodeMirror.Pos(end, endCh)};
+});
+
+CodeMirror.registerHelper("fold", "import", function(cm, start) {
+  function hasImport(line) {
+    if (line < cm.firstLine() || line > cm.lastLine()) return null;
+    var start = cm.getTokenAt(CodeMirror.Pos(line, 1));
+    if (!/\S/.test(start.string)) start = cm.getTokenAt(CodeMirror.Pos(line, start.end + 1));
+    if (start.type != "keyword" || start.string != "import") return null;
+    // Now find closing semicolon, return its position
+    for (var i = line, e = Math.min(cm.lastLine(), line + 10); i <= e; ++i) {
+      var text = cm.getLine(i), semi = text.indexOf(";");
+      if (semi != -1) return {startCh: start.end, end: CodeMirror.Pos(i, semi)};
+    }
+  }
+
+  var start = start.line, has = hasImport(start), prev;
+  if (!has || hasImport(start - 1) || ((prev = hasImport(start - 2)) && prev.end.line == start - 1))
+    return null;
+  for (var end = has.end;;) {
+    var next = hasImport(end.line + 1);
+    if (next == null) break;
+    end = next.end;
+  }
+  return {from: cm.clipPos(CodeMirror.Pos(start, has.startCh + 1)), to: end};
+});
+
+CodeMirror.registerHelper("fold", "include", function(cm, start) {
+  function hasInclude(line) {
+    if (line < cm.firstLine() || line > cm.lastLine()) return null;
+    var start = cm.getTokenAt(CodeMirror.Pos(line, 1));
+    if (!/\S/.test(start.string)) start = cm.getTokenAt(CodeMirror.Pos(line, start.end + 1));
+    if (start.type == "meta" && start.string.slice(0, 8) == "#include") return start.start + 8;
+  }
+
+  var start = start.line, has = hasInclude(start);
+  if (has == null || hasInclude(start - 1) != null) return null;
+  for (var end = start;;) {
+    var next = hasInclude(end + 1);
+    if (next == null) break;
+    ++end;
+  }
+  return {from: CodeMirror.Pos(start, has + 1),
+          to: cm.clipPos(CodeMirror.Pos(end))};
+});
+
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+"use strict";
+
+CodeMirror.registerGlobalHelper("fold", "comment", function(mode) {
+  return mode.blockCommentStart && mode.blockCommentEnd;
+}, function(cm, start) {
+  var mode = cm.getModeAt(start), startToken = mode.blockCommentStart, endToken = mode.blockCommentEnd;
+  if (!startToken || !endToken) return;
+  var line = start.line, lineText = cm.getLine(line);
+
+  var startCh;
+  for (var at = start.ch, pass = 0;;) {
+    var found = at <= 0 ? -1 : lineText.lastIndexOf(startToken, at - 1);
+    if (found == -1) {
+      if (pass == 1) return;
+      pass = 1;
+      at = lineText.length;
+      continue;
+    }
+    if (pass == 1 && found < start.ch) return;
+    if (/comment/.test(cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1)))) {
+      startCh = found + startToken.length;
+      break;
+    }
+    at = found - 1;
+  }
+
+  var depth = 1, lastLine = cm.lastLine(), end, endCh;
+  outer: for (var i = line; i <= lastLine; ++i) {
+    var text = cm.getLine(i), pos = i == line ? startCh : 0;
+    for (;;) {
+      var nextOpen = text.indexOf(startToken, pos), nextClose = text.indexOf(endToken, pos);
+      if (nextOpen < 0) nextOpen = text.length;
+      if (nextClose < 0) nextClose = text.length;
+      pos = Math.min(nextOpen, nextClose);
+      if (pos == text.length) break;
+      if (pos == nextOpen) ++depth;
+      else if (!--depth) { end = i; endCh = pos; break outer; }
+      ++pos;
+    }
+  }
+  if (end == null || line == end && endCh == startCh) return;
+  return {from: CodeMirror.Pos(line, startCh),
+          to: CodeMirror.Pos(end, endCh)};
+});
+
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+  "use strict";
+
+  function doFold(cm, pos, options, force) {
+    if (options && options.call) {
+      var finder = options;
+      options = null;
+    } else {
+      var finder = getOption(cm, options, "rangeFinder");
+    }
+    if (typeof pos == "number") pos = CodeMirror.Pos(pos, 0);
+    var minSize = getOption(cm, options, "minFoldSize");
+
+    function getRange(allowFolded) {
+      var range = finder(cm, pos);
+      if (!range || range.to.line - range.from.line < minSize) return null;
+      var marks = cm.findMarksAt(range.from);
+      for (var i = 0; i < marks.length; ++i) {
+        if (marks[i].__isFold && force !== "fold") {
+          if (!allowFolded) return null;
+          range.cleared = true;
+          marks[i].clear();
+        }
+      }
+      return range;
+    }
+
+    var range = getRange(true);
+    if (getOption(cm, options, "scanUp")) while (!range && pos.line > cm.firstLine()) {
+      pos = CodeMirror.Pos(pos.line - 1, 0);
+      range = getRange(false);
+    }
+    if (!range || range.cleared || force === "unfold") return;
+
+    var myWidget = makeWidget(cm, options);
+    CodeMirror.on(myWidget, "mousedown", function(e) {
+      myRange.clear();
+      CodeMirror.e_preventDefault(e);
+    });
+    var myRange = cm.markText(range.from, range.to, {
+      replacedWith: myWidget,
+      clearOnEnter: true,
+      __isFold: true
+    });
+    myRange.on("clear", function(from, to) {
+      CodeMirror.signal(cm, "unfold", cm, from, to);
+    });
+    CodeMirror.signal(cm, "fold", cm, range.from, range.to);
+  }
+
+  function makeWidget(cm, options) {
+    var widget = getOption(cm, options, "widget");
+    if (typeof widget == "string") {
+      var text = document.createTextNode(widget);
+      widget = document.createElement("span");
+      widget.appendChild(text);
+      widget.className = "CodeMirror-foldmarker";
+    }
+    return widget;
+  }
+
+  // Clumsy backwards-compatible interface
+  CodeMirror.newFoldFunction = function(rangeFinder, widget) {
+    return function(cm, pos) { doFold(cm, pos, {rangeFinder: rangeFinder, widget: widget}); };
+  };
+
+  // New-style interface
+  CodeMirror.defineExtension("foldCode", function(pos, options, force) {
+    doFold(this, pos, options, force);
+  });
+
+  CodeMirror.defineExtension("isFolded", function(pos) {
+    var marks = this.findMarksAt(pos);
+    for (var i = 0; i < marks.length; ++i)
+      if (marks[i].__isFold) return true;
+  });
+
+  CodeMirror.commands.toggleFold = function(cm) {
+    cm.foldCode(cm.getCursor());
+  };
+  CodeMirror.commands.fold = function(cm) {
+    cm.foldCode(cm.getCursor(), null, "fold");
+  };
+  CodeMirror.commands.unfold = function(cm) {
+    cm.foldCode(cm.getCursor(), null, "unfold");
+  };
+  CodeMirror.commands.foldAll = function(cm) {
+    cm.operation(function() {
+      for (var i = cm.firstLine(), e = cm.lastLine(); i <= e; i++)
+        cm.foldCode(CodeMirror.Pos(i, 0), null, "fold");
+    });
+  };
+  CodeMirror.commands.unfoldAll = function(cm) {
+    cm.operation(function() {
+      for (var i = cm.firstLine(), e = cm.lastLine(); i <= e; i++)
+        cm.foldCode(CodeMirror.Pos(i, 0), null, "unfold");
+    });
+  };
+
+  CodeMirror.registerHelper("fold", "combine", function() {
+    var funcs = Array.prototype.slice.call(arguments, 0);
+    return function(cm, start) {
+      for (var i = 0; i < funcs.length; ++i) {
+        var found = funcs[i](cm, start);
+        if (found) return found;
+      }
+    };
+  });
+
+  CodeMirror.registerHelper("fold", "auto", function(cm, start) {
+    var helpers = cm.getHelpers(start, "fold");
+    for (var i = 0; i < helpers.length; i++) {
+      var cur = helpers[i](cm, start);
+      if (cur) return cur;
+    }
+  });
+
+  var defaultOptions = {
+    rangeFinder: CodeMirror.fold.auto,
+    widget: "\u2194",
+    minFoldSize: 0,
+    scanUp: false
+  };
+
+  CodeMirror.defineOption("foldOptions", null);
+
+  function getOption(cm, options, name) {
+    if (options && options[name] !== undefined)
+      return options[name];
+    var editorOptions = cm.options.foldOptions;
+    if (editorOptions && editorOptions[name] !== undefined)
+      return editorOptions[name];
+    return defaultOptions[name];
+  }
+
+  CodeMirror.defineExtension("foldOption", function(options, name) {
+    return getOption(this, options, name);
+  });
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"), require("./foldcode"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror", "./foldcode"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+  "use strict";
+
+  CodeMirror.defineOption("foldGutter", false, function(cm, val, old) {
+    if (old && old != CodeMirror.Init) {
+      cm.clearGutter(cm.state.foldGutter.options.gutter);
+      cm.state.foldGutter = null;
+      cm.off("gutterClick", onGutterClick);
+      cm.off("change", onChange);
+      cm.off("viewportChange", onViewportChange);
+      cm.off("fold", onFold);
+      cm.off("unfold", onFold);
+      cm.off("swapDoc", updateInViewport);
+    }
+    if (val) {
+      cm.state.foldGutter = new State(parseOptions(val));
+      updateInViewport(cm);
+      cm.on("gutterClick", onGutterClick);
+      cm.on("change", onChange);
+      cm.on("viewportChange", onViewportChange);
+      cm.on("fold", onFold);
+      cm.on("unfold", onFold);
+      cm.on("swapDoc", updateInViewport);
+    }
+  });
+
+  var Pos = CodeMirror.Pos;
+
+  function State(options) {
+    this.options = options;
+    this.from = this.to = 0;
+  }
+
+  function parseOptions(opts) {
+    if (opts === true) opts = {};
+    if (opts.gutter == null) opts.gutter = "CodeMirror-foldgutter";
+    if (opts.indicatorOpen == null) opts.indicatorOpen = "CodeMirror-foldgutter-open";
+    if (opts.indicatorFolded == null) opts.indicatorFolded = "CodeMirror-foldgutter-folded";
+    return opts;
+  }
+
+  function isFolded(cm, line) {
+    var marks = cm.findMarksAt(Pos(line));
+    for (var i = 0; i < marks.length; ++i)
+      if (marks[i].__isFold && marks[i].find().from.line == line) return marks[i];
+  }
+
+  function marker(spec) {
+    if (typeof spec == "string") {
+      var elt = document.createElement("div");
+      elt.className = spec + " CodeMirror-guttermarker-subtle";
+      return elt;
+    } else {
+      return spec.cloneNode(true);
+    }
+  }
+
+  function updateFoldInfo(cm, from, to) {
+    var opts = cm.state.foldGutter.options, cur = from;
+    var minSize = cm.foldOption(opts, "minFoldSize");
+    var func = cm.foldOption(opts, "rangeFinder");
+    cm.eachLine(from, to, function(line) {
+      var mark = null;
+      if (isFolded(cm, cur)) {
+        mark = marker(opts.indicatorFolded);
+      } else {
+        var pos = Pos(cur, 0);
+        var range = func && func(cm, pos);
+        if (range && range.to.line - range.from.line >= minSize)
+          mark = marker(opts.indicatorOpen);
+      }
+      cm.setGutterMarker(line, opts.gutter, mark);
+      ++cur;
+    });
+  }
+
+  function updateInViewport(cm) {
+    var vp = cm.getViewport(), state = cm.state.foldGutter;
+    if (!state) return;
+    cm.operation(function() {
+      updateFoldInfo(cm, vp.from, vp.to);
+    });
+    state.from = vp.from; state.to = vp.to;
+  }
+
+  function onGutterClick(cm, line, gutter) {
+    var state = cm.state.foldGutter;
+    if (!state) return;
+    var opts = state.options;
+    if (gutter != opts.gutter) return;
+    var folded = isFolded(cm, line);
+    if (folded) folded.clear();
+    else cm.foldCode(Pos(line, 0), opts.rangeFinder);
+  }
+
+  function onChange(cm) {
+    var state = cm.state.foldGutter;
+    if (!state) return;
+    var opts = state.options;
+    state.from = state.to = 0;
+    clearTimeout(state.changeUpdate);
+    state.changeUpdate = setTimeout(function() { updateInViewport(cm); }, opts.foldOnChangeTimeSpan || 600);
+  }
+
+  function onViewportChange(cm) {
+    var state = cm.state.foldGutter;
+    if (!state) return;
+    var opts = state.options;
+    clearTimeout(state.changeUpdate);
+    state.changeUpdate = setTimeout(function() {
+      var vp = cm.getViewport();
+      if (state.from == state.to || vp.from - state.to > 20 || state.from - vp.to > 20) {
+        updateInViewport(cm);
+      } else {
+        cm.operation(function() {
+          if (vp.from < state.from) {
+            updateFoldInfo(cm, vp.from, state.from);
+            state.from = vp.from;
+          }
+          if (vp.to > state.to) {
+            updateFoldInfo(cm, state.to, vp.to);
+            state.to = vp.to;
+          }
+        });
+      }
+    }, opts.updateViewportTimeSpan || 400);
+  }
+
+  function onFold(cm, from) {
+    var state = cm.state.foldGutter;
+    if (!state) return;
+    var line = from.line;
+    if (line >= state.from && line < state.to)
+      updateFoldInfo(cm, line, line + 1);
+  }
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+"use strict";
+
+CodeMirror.registerHelper("fold", "indent", function(cm, start) {
+  var tabSize = cm.getOption("tabSize"), firstLine = cm.getLine(start.line);
+  if (!/\S/.test(firstLine)) return;
+  var getIndent = function(line) {
+    return CodeMirror.countColumn(line, null, tabSize);
+  };
+  var myIndent = getIndent(firstLine);
+  var lastLineInFold = null;
+  // Go through lines until we find a line that definitely doesn't belong in
+  // the block we're folding, or to the end.
+  for (var i = start.line + 1, end = cm.lastLine(); i <= end; ++i) {
+    var curLine = cm.getLine(i);
+    var curIndent = getIndent(curLine);
+    if (curIndent > myIndent) {
+      // Lines with a greater indent are considered part of the block.
+      lastLineInFold = i;
+    } else if (!/\S/.test(curLine)) {
+      // Empty lines might be breaks within the block we're trying to fold.
+    } else {
+      // A non-empty line at an indent equal to or less than ours marks the
+      // start of another block.
+      break;
+    }
+  }
+  if (lastLineInFold) return {
+    from: CodeMirror.Pos(start.line, firstLine.length),
+    to: CodeMirror.Pos(lastLineInFold, cm.getLine(lastLineInFold).length)
+  };
+});
+
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+"use strict";
+
+CodeMirror.registerHelper("fold", "markdown", function(cm, start) {
+  var maxDepth = 100;
+
+  function isHeader(lineNo) {
+    var tokentype = cm.getTokenTypeAt(CodeMirror.Pos(lineNo, 0));
+    return tokentype && /\bheader\b/.test(tokentype);
+  }
+
+  function headerLevel(lineNo, line, nextLine) {
+    var match = line && line.match(/^#+/);
+    if (match && isHeader(lineNo)) return match[0].length;
+    match = nextLine && nextLine.match(/^[=\-]+\s*$/);
+    if (match && isHeader(lineNo + 1)) return nextLine[0] == "=" ? 1 : 2;
+    return maxDepth;
+  }
+
+  var firstLine = cm.getLine(start.line), nextLine = cm.getLine(start.line + 1);
+  var level = headerLevel(start.line, firstLine, nextLine);
+  if (level === maxDepth) return undefined;
+
+  var lastLineNo = cm.lastLine();
+  var end = start.line, nextNextLine = cm.getLine(end + 2);
+  while (end < lastLineNo) {
+    if (headerLevel(end + 1, nextLine, nextNextLine) <= level) break;
+    ++end;
+    nextLine = nextNextLine;
+    nextNextLine = cm.getLine(end + 2);
+  }
+
+  return {
+    from: CodeMirror.Pos(start.line, firstLine.length),
+    to: CodeMirror.Pos(end, cm.getLine(end).length)
+  };
+});
+
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+  "use strict";
+
+  var Pos = CodeMirror.Pos;
+  function cmp(a, b) { return a.line - b.line || a.ch - b.ch; }
+
+  var nameStartChar = "A-Z_a-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD";
+  var nameChar = nameStartChar + "\-\:\.0-9\\u00B7\\u0300-\\u036F\\u203F-\\u2040";
+  var xmlTagStart = new RegExp("<(/?)([" + nameStartChar + "][" + nameChar + "]*)", "g");
+
+  function Iter(cm, line, ch, range) {
+    this.line = line; this.ch = ch;
+    this.cm = cm; this.text = cm.getLine(line);
+    this.min = range ? range.from : cm.firstLine();
+    this.max = range ? range.to - 1 : cm.lastLine();
+  }
+
+  function tagAt(iter, ch) {
+    var type = iter.cm.getTokenTypeAt(Pos(iter.line, ch));
+    return type && /\btag\b/.test(type);
+  }
+
+  function nextLine(iter) {
+    if (iter.line >= iter.max) return;
+    iter.ch = 0;
+    iter.text = iter.cm.getLine(++iter.line);
+    return true;
+  }
+  function prevLine(iter) {
+    if (iter.line <= iter.min) return;
+    iter.text = iter.cm.getLine(--iter.line);
+    iter.ch = iter.text.length;
+    return true;
+  }
+
+  function toTagEnd(iter) {
+    for (;;) {
+      var gt = iter.text.indexOf(">", iter.ch);
+      if (gt == -1) { if (nextLine(iter)) continue; else return; }
+      if (!tagAt(iter, gt + 1)) { iter.ch = gt + 1; continue; }
+      var lastSlash = iter.text.lastIndexOf("/", gt);
+      var selfClose = lastSlash > -1 && !/\S/.test(iter.text.slice(lastSlash + 1, gt));
+      iter.ch = gt + 1;
+      return selfClose ? "selfClose" : "regular";
+    }
+  }
+  function toTagStart(iter) {
+    for (;;) {
+      var lt = iter.ch ? iter.text.lastIndexOf("<", iter.ch - 1) : -1;
+      if (lt == -1) { if (prevLine(iter)) continue; else return; }
+      if (!tagAt(iter, lt + 1)) { iter.ch = lt; continue; }
+      xmlTagStart.lastIndex = lt;
+      iter.ch = lt;
+      var match = xmlTagStart.exec(iter.text);
+      if (match && match.index == lt) return match;
+    }
+  }
+
+  function toNextTag(iter) {
+    for (;;) {
+      xmlTagStart.lastIndex = iter.ch;
+      var found = xmlTagStart.exec(iter.text);
+      if (!found) { if (nextLine(iter)) continue; else return; }
+      if (!tagAt(iter, found.index + 1)) { iter.ch = found.index + 1; continue; }
+      iter.ch = found.index + found[0].length;
+      return found;
+    }
+  }
+  function toPrevTag(iter) {
+    for (;;) {
+      var gt = iter.ch ? iter.text.lastIndexOf(">", iter.ch - 1) : -1;
+      if (gt == -1) { if (prevLine(iter)) continue; else return; }
+      if (!tagAt(iter, gt + 1)) { iter.ch = gt; continue; }
+      var lastSlash = iter.text.lastIndexOf("/", gt);
+      var selfClose = lastSlash > -1 && !/\S/.test(iter.text.slice(lastSlash + 1, gt));
+      iter.ch = gt + 1;
+      return selfClose ? "selfClose" : "regular";
+    }
+  }
+
+  function findMatchingClose(iter, tag) {
+    var stack = [];
+    for (;;) {
+      var next = toNextTag(iter), end, startLine = iter.line, startCh = iter.ch - (next ? next[0].length : 0);
+      if (!next || !(end = toTagEnd(iter))) return;
+      if (end == "selfClose") continue;
+      if (next[1]) { // closing tag
+        for (var i = stack.length - 1; i >= 0; --i) if (stack[i] == next[2]) {
+          stack.length = i;
+          break;
+        }
+        if (i < 0 && (!tag || tag == next[2])) return {
+          tag: next[2],
+          from: Pos(startLine, startCh),
+          to: Pos(iter.line, iter.ch)
+        };
+      } else { // opening tag
+        stack.push(next[2]);
+      }
+    }
+  }
+  function findMatchingOpen(iter, tag) {
+    var stack = [];
+    for (;;) {
+      var prev = toPrevTag(iter);
+      if (!prev) return;
+      if (prev == "selfClose") { toTagStart(iter); continue; }
+      var endLine = iter.line, endCh = iter.ch;
+      var start = toTagStart(iter);
+      if (!start) return;
+      if (start[1]) { // closing tag
+        stack.push(start[2]);
+      } else { // opening tag
+        for (var i = stack.length - 1; i >= 0; --i) if (stack[i] == start[2]) {
+          stack.length = i;
+          break;
+        }
+        if (i < 0 && (!tag || tag == start[2])) return {
+          tag: start[2],
+          from: Pos(iter.line, iter.ch),
+          to: Pos(endLine, endCh)
+        };
+      }
+    }
+  }
+
+  CodeMirror.registerHelper("fold", "xml", function(cm, start) {
+    var iter = new Iter(cm, start.line, 0);
+    for (;;) {
+      var openTag = toNextTag(iter), end;
+      if (!openTag || iter.line != start.line || !(end = toTagEnd(iter))) return;
+      if (!openTag[1] && end != "selfClose") {
+        var start = Pos(iter.line, iter.ch);
+        var close = findMatchingClose(iter, openTag[2]);
+        return close && {from: start, to: close.from};
+      }
+    }
+  });
+  CodeMirror.findMatchingTag = function(cm, pos, range) {
+    var iter = new Iter(cm, pos.line, pos.ch, range);
+    if (iter.text.indexOf(">") == -1 && iter.text.indexOf("<") == -1) return;
+    var end = toTagEnd(iter), to = end && Pos(iter.line, iter.ch);
+    var start = end && toTagStart(iter);
+    if (!end || !start || cmp(iter, pos) > 0) return;
+    var here = {from: Pos(iter.line, iter.ch), to: to, tag: start[2]};
+    if (end == "selfClose") return {open: here, close: null, at: "open"};
+
+    if (start[1]) { // closing tag
+      return {open: findMatchingOpen(iter, start[2]), close: here, at: "close"};
+    } else { // opening tag
+      iter = new Iter(cm, to.line, to.ch, range);
+      return {open: here, close: findMatchingClose(iter, start[2]), at: "open"};
+    }
+  };
+
+  CodeMirror.findEnclosingTag = function(cm, pos, range) {
+    var iter = new Iter(cm, pos.line, pos.ch, range);
+    for (;;) {
+      var open = findMatchingOpen(iter);
+      if (!open) break;
+      var forward = new Iter(cm, pos.line, pos.ch, range);
+      var close = findMatchingClose(forward, open.tag);
+      if (close) return {open: open, close: close};
+    }
+  };
+
+  // Used by addon/edit/closetag.js
+  CodeMirror.scanForClosingTag = function(cm, pos, name, end) {
+    var iter = new Iter(cm, pos.line, pos.ch, end ? {from: 0, to: end} : null);
+    return findMatchingClose(iter, name);
+  };
+});
 
 angular.module('platformWebApp')
 .controller('platformWebApp.confirmDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
@@ -21577,745 +22316,6 @@ angular.module('platformWebApp').directive('vaTabs', function () {
         }
     }
 });
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-"use strict";
-
-CodeMirror.registerHelper("fold", "brace", function(cm, start) {
-  var line = start.line, lineText = cm.getLine(line);
-  var startCh, tokenType;
-
-  function findOpening(openCh) {
-    for (var at = start.ch, pass = 0;;) {
-      var found = at <= 0 ? -1 : lineText.lastIndexOf(openCh, at - 1);
-      if (found == -1) {
-        if (pass == 1) break;
-        pass = 1;
-        at = lineText.length;
-        continue;
-      }
-      if (pass == 1 && found < start.ch) break;
-      tokenType = cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1));
-      if (!/^(comment|string)/.test(tokenType)) return found + 1;
-      at = found - 1;
-    }
-  }
-
-  var startToken = "{", endToken = "}", startCh = findOpening("{");
-  if (startCh == null) {
-    startToken = "[", endToken = "]";
-    startCh = findOpening("[");
-  }
-
-  if (startCh == null) return;
-  var count = 1, lastLine = cm.lastLine(), end, endCh;
-  outer: for (var i = line; i <= lastLine; ++i) {
-    var text = cm.getLine(i), pos = i == line ? startCh : 0;
-    for (;;) {
-      var nextOpen = text.indexOf(startToken, pos), nextClose = text.indexOf(endToken, pos);
-      if (nextOpen < 0) nextOpen = text.length;
-      if (nextClose < 0) nextClose = text.length;
-      pos = Math.min(nextOpen, nextClose);
-      if (pos == text.length) break;
-      if (cm.getTokenTypeAt(CodeMirror.Pos(i, pos + 1)) == tokenType) {
-        if (pos == nextOpen) ++count;
-        else if (!--count) { end = i; endCh = pos; break outer; }
-      }
-      ++pos;
-    }
-  }
-  if (end == null || line == end && endCh == startCh) return;
-  return {from: CodeMirror.Pos(line, startCh),
-          to: CodeMirror.Pos(end, endCh)};
-});
-
-CodeMirror.registerHelper("fold", "import", function(cm, start) {
-  function hasImport(line) {
-    if (line < cm.firstLine() || line > cm.lastLine()) return null;
-    var start = cm.getTokenAt(CodeMirror.Pos(line, 1));
-    if (!/\S/.test(start.string)) start = cm.getTokenAt(CodeMirror.Pos(line, start.end + 1));
-    if (start.type != "keyword" || start.string != "import") return null;
-    // Now find closing semicolon, return its position
-    for (var i = line, e = Math.min(cm.lastLine(), line + 10); i <= e; ++i) {
-      var text = cm.getLine(i), semi = text.indexOf(";");
-      if (semi != -1) return {startCh: start.end, end: CodeMirror.Pos(i, semi)};
-    }
-  }
-
-  var start = start.line, has = hasImport(start), prev;
-  if (!has || hasImport(start - 1) || ((prev = hasImport(start - 2)) && prev.end.line == start - 1))
-    return null;
-  for (var end = has.end;;) {
-    var next = hasImport(end.line + 1);
-    if (next == null) break;
-    end = next.end;
-  }
-  return {from: cm.clipPos(CodeMirror.Pos(start, has.startCh + 1)), to: end};
-});
-
-CodeMirror.registerHelper("fold", "include", function(cm, start) {
-  function hasInclude(line) {
-    if (line < cm.firstLine() || line > cm.lastLine()) return null;
-    var start = cm.getTokenAt(CodeMirror.Pos(line, 1));
-    if (!/\S/.test(start.string)) start = cm.getTokenAt(CodeMirror.Pos(line, start.end + 1));
-    if (start.type == "meta" && start.string.slice(0, 8) == "#include") return start.start + 8;
-  }
-
-  var start = start.line, has = hasInclude(start);
-  if (has == null || hasInclude(start - 1) != null) return null;
-  for (var end = start;;) {
-    var next = hasInclude(end + 1);
-    if (next == null) break;
-    ++end;
-  }
-  return {from: CodeMirror.Pos(start, has + 1),
-          to: cm.clipPos(CodeMirror.Pos(end))};
-});
-
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-"use strict";
-
-CodeMirror.registerGlobalHelper("fold", "comment", function(mode) {
-  return mode.blockCommentStart && mode.blockCommentEnd;
-}, function(cm, start) {
-  var mode = cm.getModeAt(start), startToken = mode.blockCommentStart, endToken = mode.blockCommentEnd;
-  if (!startToken || !endToken) return;
-  var line = start.line, lineText = cm.getLine(line);
-
-  var startCh;
-  for (var at = start.ch, pass = 0;;) {
-    var found = at <= 0 ? -1 : lineText.lastIndexOf(startToken, at - 1);
-    if (found == -1) {
-      if (pass == 1) return;
-      pass = 1;
-      at = lineText.length;
-      continue;
-    }
-    if (pass == 1 && found < start.ch) return;
-    if (/comment/.test(cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1)))) {
-      startCh = found + startToken.length;
-      break;
-    }
-    at = found - 1;
-  }
-
-  var depth = 1, lastLine = cm.lastLine(), end, endCh;
-  outer: for (var i = line; i <= lastLine; ++i) {
-    var text = cm.getLine(i), pos = i == line ? startCh : 0;
-    for (;;) {
-      var nextOpen = text.indexOf(startToken, pos), nextClose = text.indexOf(endToken, pos);
-      if (nextOpen < 0) nextOpen = text.length;
-      if (nextClose < 0) nextClose = text.length;
-      pos = Math.min(nextOpen, nextClose);
-      if (pos == text.length) break;
-      if (pos == nextOpen) ++depth;
-      else if (!--depth) { end = i; endCh = pos; break outer; }
-      ++pos;
-    }
-  }
-  if (end == null || line == end && endCh == startCh) return;
-  return {from: CodeMirror.Pos(line, startCh),
-          to: CodeMirror.Pos(end, endCh)};
-});
-
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-  "use strict";
-
-  function doFold(cm, pos, options, force) {
-    if (options && options.call) {
-      var finder = options;
-      options = null;
-    } else {
-      var finder = getOption(cm, options, "rangeFinder");
-    }
-    if (typeof pos == "number") pos = CodeMirror.Pos(pos, 0);
-    var minSize = getOption(cm, options, "minFoldSize");
-
-    function getRange(allowFolded) {
-      var range = finder(cm, pos);
-      if (!range || range.to.line - range.from.line < minSize) return null;
-      var marks = cm.findMarksAt(range.from);
-      for (var i = 0; i < marks.length; ++i) {
-        if (marks[i].__isFold && force !== "fold") {
-          if (!allowFolded) return null;
-          range.cleared = true;
-          marks[i].clear();
-        }
-      }
-      return range;
-    }
-
-    var range = getRange(true);
-    if (getOption(cm, options, "scanUp")) while (!range && pos.line > cm.firstLine()) {
-      pos = CodeMirror.Pos(pos.line - 1, 0);
-      range = getRange(false);
-    }
-    if (!range || range.cleared || force === "unfold") return;
-
-    var myWidget = makeWidget(cm, options);
-    CodeMirror.on(myWidget, "mousedown", function(e) {
-      myRange.clear();
-      CodeMirror.e_preventDefault(e);
-    });
-    var myRange = cm.markText(range.from, range.to, {
-      replacedWith: myWidget,
-      clearOnEnter: true,
-      __isFold: true
-    });
-    myRange.on("clear", function(from, to) {
-      CodeMirror.signal(cm, "unfold", cm, from, to);
-    });
-    CodeMirror.signal(cm, "fold", cm, range.from, range.to);
-  }
-
-  function makeWidget(cm, options) {
-    var widget = getOption(cm, options, "widget");
-    if (typeof widget == "string") {
-      var text = document.createTextNode(widget);
-      widget = document.createElement("span");
-      widget.appendChild(text);
-      widget.className = "CodeMirror-foldmarker";
-    }
-    return widget;
-  }
-
-  // Clumsy backwards-compatible interface
-  CodeMirror.newFoldFunction = function(rangeFinder, widget) {
-    return function(cm, pos) { doFold(cm, pos, {rangeFinder: rangeFinder, widget: widget}); };
-  };
-
-  // New-style interface
-  CodeMirror.defineExtension("foldCode", function(pos, options, force) {
-    doFold(this, pos, options, force);
-  });
-
-  CodeMirror.defineExtension("isFolded", function(pos) {
-    var marks = this.findMarksAt(pos);
-    for (var i = 0; i < marks.length; ++i)
-      if (marks[i].__isFold) return true;
-  });
-
-  CodeMirror.commands.toggleFold = function(cm) {
-    cm.foldCode(cm.getCursor());
-  };
-  CodeMirror.commands.fold = function(cm) {
-    cm.foldCode(cm.getCursor(), null, "fold");
-  };
-  CodeMirror.commands.unfold = function(cm) {
-    cm.foldCode(cm.getCursor(), null, "unfold");
-  };
-  CodeMirror.commands.foldAll = function(cm) {
-    cm.operation(function() {
-      for (var i = cm.firstLine(), e = cm.lastLine(); i <= e; i++)
-        cm.foldCode(CodeMirror.Pos(i, 0), null, "fold");
-    });
-  };
-  CodeMirror.commands.unfoldAll = function(cm) {
-    cm.operation(function() {
-      for (var i = cm.firstLine(), e = cm.lastLine(); i <= e; i++)
-        cm.foldCode(CodeMirror.Pos(i, 0), null, "unfold");
-    });
-  };
-
-  CodeMirror.registerHelper("fold", "combine", function() {
-    var funcs = Array.prototype.slice.call(arguments, 0);
-    return function(cm, start) {
-      for (var i = 0; i < funcs.length; ++i) {
-        var found = funcs[i](cm, start);
-        if (found) return found;
-      }
-    };
-  });
-
-  CodeMirror.registerHelper("fold", "auto", function(cm, start) {
-    var helpers = cm.getHelpers(start, "fold");
-    for (var i = 0; i < helpers.length; i++) {
-      var cur = helpers[i](cm, start);
-      if (cur) return cur;
-    }
-  });
-
-  var defaultOptions = {
-    rangeFinder: CodeMirror.fold.auto,
-    widget: "\u2194",
-    minFoldSize: 0,
-    scanUp: false
-  };
-
-  CodeMirror.defineOption("foldOptions", null);
-
-  function getOption(cm, options, name) {
-    if (options && options[name] !== undefined)
-      return options[name];
-    var editorOptions = cm.options.foldOptions;
-    if (editorOptions && editorOptions[name] !== undefined)
-      return editorOptions[name];
-    return defaultOptions[name];
-  }
-
-  CodeMirror.defineExtension("foldOption", function(options, name) {
-    return getOption(this, options, name);
-  });
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"), require("./foldcode"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror", "./foldcode"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-  "use strict";
-
-  CodeMirror.defineOption("foldGutter", false, function(cm, val, old) {
-    if (old && old != CodeMirror.Init) {
-      cm.clearGutter(cm.state.foldGutter.options.gutter);
-      cm.state.foldGutter = null;
-      cm.off("gutterClick", onGutterClick);
-      cm.off("change", onChange);
-      cm.off("viewportChange", onViewportChange);
-      cm.off("fold", onFold);
-      cm.off("unfold", onFold);
-      cm.off("swapDoc", updateInViewport);
-    }
-    if (val) {
-      cm.state.foldGutter = new State(parseOptions(val));
-      updateInViewport(cm);
-      cm.on("gutterClick", onGutterClick);
-      cm.on("change", onChange);
-      cm.on("viewportChange", onViewportChange);
-      cm.on("fold", onFold);
-      cm.on("unfold", onFold);
-      cm.on("swapDoc", updateInViewport);
-    }
-  });
-
-  var Pos = CodeMirror.Pos;
-
-  function State(options) {
-    this.options = options;
-    this.from = this.to = 0;
-  }
-
-  function parseOptions(opts) {
-    if (opts === true) opts = {};
-    if (opts.gutter == null) opts.gutter = "CodeMirror-foldgutter";
-    if (opts.indicatorOpen == null) opts.indicatorOpen = "CodeMirror-foldgutter-open";
-    if (opts.indicatorFolded == null) opts.indicatorFolded = "CodeMirror-foldgutter-folded";
-    return opts;
-  }
-
-  function isFolded(cm, line) {
-    var marks = cm.findMarksAt(Pos(line));
-    for (var i = 0; i < marks.length; ++i)
-      if (marks[i].__isFold && marks[i].find().from.line == line) return marks[i];
-  }
-
-  function marker(spec) {
-    if (typeof spec == "string") {
-      var elt = document.createElement("div");
-      elt.className = spec + " CodeMirror-guttermarker-subtle";
-      return elt;
-    } else {
-      return spec.cloneNode(true);
-    }
-  }
-
-  function updateFoldInfo(cm, from, to) {
-    var opts = cm.state.foldGutter.options, cur = from;
-    var minSize = cm.foldOption(opts, "minFoldSize");
-    var func = cm.foldOption(opts, "rangeFinder");
-    cm.eachLine(from, to, function(line) {
-      var mark = null;
-      if (isFolded(cm, cur)) {
-        mark = marker(opts.indicatorFolded);
-      } else {
-        var pos = Pos(cur, 0);
-        var range = func && func(cm, pos);
-        if (range && range.to.line - range.from.line >= minSize)
-          mark = marker(opts.indicatorOpen);
-      }
-      cm.setGutterMarker(line, opts.gutter, mark);
-      ++cur;
-    });
-  }
-
-  function updateInViewport(cm) {
-    var vp = cm.getViewport(), state = cm.state.foldGutter;
-    if (!state) return;
-    cm.operation(function() {
-      updateFoldInfo(cm, vp.from, vp.to);
-    });
-    state.from = vp.from; state.to = vp.to;
-  }
-
-  function onGutterClick(cm, line, gutter) {
-    var state = cm.state.foldGutter;
-    if (!state) return;
-    var opts = state.options;
-    if (gutter != opts.gutter) return;
-    var folded = isFolded(cm, line);
-    if (folded) folded.clear();
-    else cm.foldCode(Pos(line, 0), opts.rangeFinder);
-  }
-
-  function onChange(cm) {
-    var state = cm.state.foldGutter;
-    if (!state) return;
-    var opts = state.options;
-    state.from = state.to = 0;
-    clearTimeout(state.changeUpdate);
-    state.changeUpdate = setTimeout(function() { updateInViewport(cm); }, opts.foldOnChangeTimeSpan || 600);
-  }
-
-  function onViewportChange(cm) {
-    var state = cm.state.foldGutter;
-    if (!state) return;
-    var opts = state.options;
-    clearTimeout(state.changeUpdate);
-    state.changeUpdate = setTimeout(function() {
-      var vp = cm.getViewport();
-      if (state.from == state.to || vp.from - state.to > 20 || state.from - vp.to > 20) {
-        updateInViewport(cm);
-      } else {
-        cm.operation(function() {
-          if (vp.from < state.from) {
-            updateFoldInfo(cm, vp.from, state.from);
-            state.from = vp.from;
-          }
-          if (vp.to > state.to) {
-            updateFoldInfo(cm, state.to, vp.to);
-            state.to = vp.to;
-          }
-        });
-      }
-    }, opts.updateViewportTimeSpan || 400);
-  }
-
-  function onFold(cm, from) {
-    var state = cm.state.foldGutter;
-    if (!state) return;
-    var line = from.line;
-    if (line >= state.from && line < state.to)
-      updateFoldInfo(cm, line, line + 1);
-  }
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-"use strict";
-
-CodeMirror.registerHelper("fold", "indent", function(cm, start) {
-  var tabSize = cm.getOption("tabSize"), firstLine = cm.getLine(start.line);
-  if (!/\S/.test(firstLine)) return;
-  var getIndent = function(line) {
-    return CodeMirror.countColumn(line, null, tabSize);
-  };
-  var myIndent = getIndent(firstLine);
-  var lastLineInFold = null;
-  // Go through lines until we find a line that definitely doesn't belong in
-  // the block we're folding, or to the end.
-  for (var i = start.line + 1, end = cm.lastLine(); i <= end; ++i) {
-    var curLine = cm.getLine(i);
-    var curIndent = getIndent(curLine);
-    if (curIndent > myIndent) {
-      // Lines with a greater indent are considered part of the block.
-      lastLineInFold = i;
-    } else if (!/\S/.test(curLine)) {
-      // Empty lines might be breaks within the block we're trying to fold.
-    } else {
-      // A non-empty line at an indent equal to or less than ours marks the
-      // start of another block.
-      break;
-    }
-  }
-  if (lastLineInFold) return {
-    from: CodeMirror.Pos(start.line, firstLine.length),
-    to: CodeMirror.Pos(lastLineInFold, cm.getLine(lastLineInFold).length)
-  };
-});
-
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-"use strict";
-
-CodeMirror.registerHelper("fold", "markdown", function(cm, start) {
-  var maxDepth = 100;
-
-  function isHeader(lineNo) {
-    var tokentype = cm.getTokenTypeAt(CodeMirror.Pos(lineNo, 0));
-    return tokentype && /\bheader\b/.test(tokentype);
-  }
-
-  function headerLevel(lineNo, line, nextLine) {
-    var match = line && line.match(/^#+/);
-    if (match && isHeader(lineNo)) return match[0].length;
-    match = nextLine && nextLine.match(/^[=\-]+\s*$/);
-    if (match && isHeader(lineNo + 1)) return nextLine[0] == "=" ? 1 : 2;
-    return maxDepth;
-  }
-
-  var firstLine = cm.getLine(start.line), nextLine = cm.getLine(start.line + 1);
-  var level = headerLevel(start.line, firstLine, nextLine);
-  if (level === maxDepth) return undefined;
-
-  var lastLineNo = cm.lastLine();
-  var end = start.line, nextNextLine = cm.getLine(end + 2);
-  while (end < lastLineNo) {
-    if (headerLevel(end + 1, nextLine, nextNextLine) <= level) break;
-    ++end;
-    nextLine = nextNextLine;
-    nextNextLine = cm.getLine(end + 2);
-  }
-
-  return {
-    from: CodeMirror.Pos(start.line, firstLine.length),
-    to: CodeMirror.Pos(end, cm.getLine(end).length)
-  };
-});
-
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-  "use strict";
-
-  var Pos = CodeMirror.Pos;
-  function cmp(a, b) { return a.line - b.line || a.ch - b.ch; }
-
-  var nameStartChar = "A-Z_a-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD";
-  var nameChar = nameStartChar + "\-\:\.0-9\\u00B7\\u0300-\\u036F\\u203F-\\u2040";
-  var xmlTagStart = new RegExp("<(/?)([" + nameStartChar + "][" + nameChar + "]*)", "g");
-
-  function Iter(cm, line, ch, range) {
-    this.line = line; this.ch = ch;
-    this.cm = cm; this.text = cm.getLine(line);
-    this.min = range ? range.from : cm.firstLine();
-    this.max = range ? range.to - 1 : cm.lastLine();
-  }
-
-  function tagAt(iter, ch) {
-    var type = iter.cm.getTokenTypeAt(Pos(iter.line, ch));
-    return type && /\btag\b/.test(type);
-  }
-
-  function nextLine(iter) {
-    if (iter.line >= iter.max) return;
-    iter.ch = 0;
-    iter.text = iter.cm.getLine(++iter.line);
-    return true;
-  }
-  function prevLine(iter) {
-    if (iter.line <= iter.min) return;
-    iter.text = iter.cm.getLine(--iter.line);
-    iter.ch = iter.text.length;
-    return true;
-  }
-
-  function toTagEnd(iter) {
-    for (;;) {
-      var gt = iter.text.indexOf(">", iter.ch);
-      if (gt == -1) { if (nextLine(iter)) continue; else return; }
-      if (!tagAt(iter, gt + 1)) { iter.ch = gt + 1; continue; }
-      var lastSlash = iter.text.lastIndexOf("/", gt);
-      var selfClose = lastSlash > -1 && !/\S/.test(iter.text.slice(lastSlash + 1, gt));
-      iter.ch = gt + 1;
-      return selfClose ? "selfClose" : "regular";
-    }
-  }
-  function toTagStart(iter) {
-    for (;;) {
-      var lt = iter.ch ? iter.text.lastIndexOf("<", iter.ch - 1) : -1;
-      if (lt == -1) { if (prevLine(iter)) continue; else return; }
-      if (!tagAt(iter, lt + 1)) { iter.ch = lt; continue; }
-      xmlTagStart.lastIndex = lt;
-      iter.ch = lt;
-      var match = xmlTagStart.exec(iter.text);
-      if (match && match.index == lt) return match;
-    }
-  }
-
-  function toNextTag(iter) {
-    for (;;) {
-      xmlTagStart.lastIndex = iter.ch;
-      var found = xmlTagStart.exec(iter.text);
-      if (!found) { if (nextLine(iter)) continue; else return; }
-      if (!tagAt(iter, found.index + 1)) { iter.ch = found.index + 1; continue; }
-      iter.ch = found.index + found[0].length;
-      return found;
-    }
-  }
-  function toPrevTag(iter) {
-    for (;;) {
-      var gt = iter.ch ? iter.text.lastIndexOf(">", iter.ch - 1) : -1;
-      if (gt == -1) { if (prevLine(iter)) continue; else return; }
-      if (!tagAt(iter, gt + 1)) { iter.ch = gt; continue; }
-      var lastSlash = iter.text.lastIndexOf("/", gt);
-      var selfClose = lastSlash > -1 && !/\S/.test(iter.text.slice(lastSlash + 1, gt));
-      iter.ch = gt + 1;
-      return selfClose ? "selfClose" : "regular";
-    }
-  }
-
-  function findMatchingClose(iter, tag) {
-    var stack = [];
-    for (;;) {
-      var next = toNextTag(iter), end, startLine = iter.line, startCh = iter.ch - (next ? next[0].length : 0);
-      if (!next || !(end = toTagEnd(iter))) return;
-      if (end == "selfClose") continue;
-      if (next[1]) { // closing tag
-        for (var i = stack.length - 1; i >= 0; --i) if (stack[i] == next[2]) {
-          stack.length = i;
-          break;
-        }
-        if (i < 0 && (!tag || tag == next[2])) return {
-          tag: next[2],
-          from: Pos(startLine, startCh),
-          to: Pos(iter.line, iter.ch)
-        };
-      } else { // opening tag
-        stack.push(next[2]);
-      }
-    }
-  }
-  function findMatchingOpen(iter, tag) {
-    var stack = [];
-    for (;;) {
-      var prev = toPrevTag(iter);
-      if (!prev) return;
-      if (prev == "selfClose") { toTagStart(iter); continue; }
-      var endLine = iter.line, endCh = iter.ch;
-      var start = toTagStart(iter);
-      if (!start) return;
-      if (start[1]) { // closing tag
-        stack.push(start[2]);
-      } else { // opening tag
-        for (var i = stack.length - 1; i >= 0; --i) if (stack[i] == start[2]) {
-          stack.length = i;
-          break;
-        }
-        if (i < 0 && (!tag || tag == start[2])) return {
-          tag: start[2],
-          from: Pos(iter.line, iter.ch),
-          to: Pos(endLine, endCh)
-        };
-      }
-    }
-  }
-
-  CodeMirror.registerHelper("fold", "xml", function(cm, start) {
-    var iter = new Iter(cm, start.line, 0);
-    for (;;) {
-      var openTag = toNextTag(iter), end;
-      if (!openTag || iter.line != start.line || !(end = toTagEnd(iter))) return;
-      if (!openTag[1] && end != "selfClose") {
-        var start = Pos(iter.line, iter.ch);
-        var close = findMatchingClose(iter, openTag[2]);
-        return close && {from: start, to: close.from};
-      }
-    }
-  });
-  CodeMirror.findMatchingTag = function(cm, pos, range) {
-    var iter = new Iter(cm, pos.line, pos.ch, range);
-    if (iter.text.indexOf(">") == -1 && iter.text.indexOf("<") == -1) return;
-    var end = toTagEnd(iter), to = end && Pos(iter.line, iter.ch);
-    var start = end && toTagStart(iter);
-    if (!end || !start || cmp(iter, pos) > 0) return;
-    var here = {from: Pos(iter.line, iter.ch), to: to, tag: start[2]};
-    if (end == "selfClose") return {open: here, close: null, at: "open"};
-
-    if (start[1]) { // closing tag
-      return {open: findMatchingOpen(iter, start[2]), close: here, at: "close"};
-    } else { // opening tag
-      iter = new Iter(cm, to.line, to.ch, range);
-      return {open: here, close: findMatchingClose(iter, start[2]), at: "open"};
-    }
-  };
-
-  CodeMirror.findEnclosingTag = function(cm, pos, range) {
-    var iter = new Iter(cm, pos.line, pos.ch, range);
-    for (;;) {
-      var open = findMatchingOpen(iter);
-      if (!open) break;
-      var forward = new Iter(cm, pos.line, pos.ch, range);
-      var close = findMatchingClose(forward, open.tag);
-      if (close) return {open: open, close: close};
-    }
-  };
-
-  // Used by addon/edit/closetag.js
-  CodeMirror.scanForClosingTag = function(cm, pos, name, end) {
-    var iter = new Iter(cm, pos.line, pos.ch, end ? {from: 0, to: end} : null);
-    return findMatchingClose(iter, name);
-  };
-});
-
 // Full list of countries defined by ISO 3166-1 alpha-3
 // based on https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
 angular.module('platformWebApp')
@@ -23839,36 +23839,9 @@ angular.module('platformWebApp')
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["公元前","公元"],ERAS:["BC","AD"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"d/M/yy ah:mm",shortDate:"d/M/yy",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-hk",pluralCat:function(e,m){return E.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["西元前","西元"],ERAS:["西元前","西元"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日 EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"y/M/d ah:mm",shortDate:"y/M/d",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"NT$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-tw",pluralCat:function(e,m){return E.OTHER}})}]);
 angular.module('platformWebApp')
-.controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    
-    $scope.blade.isLoading = false;
-    // ui-grid
-    $scope.setGridOptions = function (gridOptions) {
-        $scope.gridOptions = gridOptions;
-    };
-}]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    var blade = $scope.blade;
-
-    $scope.openBlade = function () {
-        var newBlade = {
-            id: "changesChildBlade",
-            currentEntities: blade.currentEntity.operationsLog,
-            headIcon: blade.headIcon,
-            title: blade.title,
-            subtitle: 'platform.widgets.operations.blade-subtitle',
-            isExpandable: true,
-            controller: 'platformWebApp.changeLog.operationListController',
-            template: '$(Platform)/Scripts/app/changeLog/blades/operation-list.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, blade);
-    };
-}]);
-angular.module('platformWebApp')
 .factory('platformWebApp.assets.api', ['$resource', function ($resource) {
     return $resource('api/platform/assets', {}, {
+        search: { method: 'GET', url: 'api/platform/assets', isArray: false },
         createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
         move: { method: 'POST', url: 'api/platform/assets/move' },
         uploadFromUrl: { method: 'POST', params: { url: '@url', folderUrl: '@folderUrl', name: '@name' }, isArray: true }
@@ -23877,366 +23850,366 @@ angular.module('platformWebApp')
 
 
 angular.module('platformWebApp')
-.controller('platformWebApp.assets.assetListController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', '$sessionStorage', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
-    function ($scope, assets, bladeNavigationService, dialogService, $storage, bladeUtils, uiGridHelper) {
-        var blade = $scope.blade;
-        blade.title = 'platform.blades.asset-list.title';
-        if (!blade.currentEntity) {
-            blade.currentEntity = {};
-        }
+    .controller('platformWebApp.assets.assetListController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', '$sessionStorage', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
+        function ($scope, assets, bladeNavigationService, dialogService, $storage, bladeUtils, uiGridHelper) {
+            var blade = $scope.blade;
+            blade.title = 'platform.blades.asset-list.title';
+            if (!blade.currentEntity) {
+                blade.currentEntity = {};
+            }
 
-        blade.refresh = function () {
-            blade.isLoading = true;
-            assets.query(
-                {
-                    keyword: blade.searchKeyword,
-                    folderUrl: blade.currentEntity.url
-                },
-            function (data) {
-                $scope.pageSettings.totalItems = data.length;
-                _.each(data, function (x) {
-                    x.isImage = x.contentType && x.contentType.startsWith('image/');
-                    if (x.isImage) {
-                        x.noCacheUrl = x.url + '?t=' + x.modifiedDate;
+            blade.refresh = function () {
+                blade.isLoading = true;
+                assets.search(
+                    {
+                        keyword: blade.searchKeyword,
+                        folderUrl: blade.currentEntity.url
+                    },
+                    function (data) {
+                        $scope.pageSettings.totalItems = data.totalCount;
+                        _.each(data.results, function (x) {
+                            x.isImage = x.contentType && x.contentType.startsWith('image/');
+                            if (x.isImage) {
+                                x.noCacheUrl = x.url + '?t=' + x.modifiedDate;
+                            }
+                        });
+                        $scope.listEntries = data.results;
+                        blade.isLoading = false;
+
+                        //Set navigation breadcrumbs
+                        setBreadcrumbs();
+                    }, function (error) {
+                        bladeNavigationService.setError('Error ' + error.status, blade);
+                    });
+            };
+
+            //Breadcrumbs
+            function setBreadcrumbs() {
+                if (blade.breadcrumbs) {
+                    //Clone array (angular.copy leaves the same reference)
+                    var breadcrumbs = blade.breadcrumbs.slice(0);
+
+                    //prevent duplicate items
+                    if (blade.currentEntity.url && _.all(breadcrumbs, function (x) { return x.id !== blade.currentEntity.url; })) {
+                        var breadCrumb = generateBreadcrumb(blade.currentEntity.url, blade.currentEntity.name);
+                        breadcrumbs.push(breadCrumb);
                     }
-                });
-                $scope.listEntries = data;
-                blade.isLoading = false;
-
-                //Set navigation breadcrumbs
-                setBreadcrumbs();
-            }, function (error) {
-                bladeNavigationService.setError('Error ' + error.status, blade);
-            });
-        };
-
-        //Breadcrumbs
-        function setBreadcrumbs() {
-            if (blade.breadcrumbs) {
-                //Clone array (angular.copy leaves the same reference)
-                var breadcrumbs = blade.breadcrumbs.slice(0);
-
-                //prevent duplicate items
-                if (blade.currentEntity.url && _.all(breadcrumbs, function (x) { return x.id !== blade.currentEntity.url; })) {
-                    var breadCrumb = generateBreadcrumb(blade.currentEntity.url, blade.currentEntity.name);
-                    breadcrumbs.push(breadCrumb);
-                }
-                blade.breadcrumbs = breadcrumbs;
-            } else {
-                blade.breadcrumbs = [generateBreadcrumb(blade.currentEntity.url, 'all')];
-            }
-        }
-
-        function generateBreadcrumb(id, name) {
-            return {
-                id: id,
-                name: name,
-                blade: blade,
-                navigate: function (breadcrumb) {
-                    breadcrumb.blade.searchKeyword = null;
-                    breadcrumb.blade.disableOpenAnimation = true;
-                    bladeNavigationService.showBlade(breadcrumb.blade, breadcrumb.blade.parentBlade);
-                    // breadcrumb.blade.refresh();
-                }
-            }
-        }
-
-        function newFolder(value, prefix) {
-            var result = prompt(prefix ? prefix + "\n\nEnter folder name:" : "Enter folder name:", value);
-            if (result != null) {
-                if (blade.currentEntity.url) {
-                    assets.createFolder({ name: result, parentUrl: blade.currentEntity.url },
-                            blade.refresh,
-                            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+                    blade.breadcrumbs = breadcrumbs;
                 } else {
-                    if (result.length < 3 || result.length > 63 || !result.match(/^[a-z0-9]+(-[a-z0-9]+)*$/)) {
-                        newFolder(result, "A folder name must conform to the following naming rules:\n  Folder name must be from 3 through 63 characters long.\n  Folder name must start with a letter or number, and can contain only letters, numbers, and the dash (-) character.\n  Every dash (-) character must be immediately preceded and followed by a letter or number; consecutive dashes are not permitted.\n  All letters in a folder name must be lowercase.");
-                    } else {
+                    blade.breadcrumbs = [generateBreadcrumb(blade.currentEntity.url, 'all')];
+                }
+            }
+
+            function generateBreadcrumb(id, name) {
+                return {
+                    id: id,
+                    name: name,
+                    blade: blade,
+                    navigate: function (breadcrumb) {
+                        breadcrumb.blade.searchKeyword = null;
+                        breadcrumb.blade.disableOpenAnimation = true;
+                        bladeNavigationService.showBlade(breadcrumb.blade, breadcrumb.blade.parentBlade);
+                        // breadcrumb.blade.refresh();
+                    }
+                }
+            }
+
+            function newFolder(value, prefix) {
+                var result = prompt(prefix ? prefix + "\n\nEnter folder name:" : "Enter folder name:", value);
+                if (result != null) {
+                    if (blade.currentEntity.url) {
                         assets.createFolder({ name: result, parentUrl: blade.currentEntity.url },
                             blade.refresh,
                             function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-                    }
-                }
-            }
-        }
-
-        $scope.copyUrl = function (data) {
-            window.prompt("Copy to clipboard: Ctrl+C, Enter", data.url);
-        };
-
-        $scope.downloadUrl = function (data) {
-            window.open(data.url, '_blank');
-        };
-
-        //$scope.rename = function (listItem) {
-        //    rename(listItem);
-        //};
-
-        //function rename(listItem) {
-        //    var result = prompt("Enter new name", listItem.name);
-        //    if (result) {
-        //        listItem.name = result;
-        //    }
-        //}
-
-        function isItemsChecked() {
-            return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
-        }
-
-        $scope.delete = function (data) {
-            deleteList([data]);
-        };
-
-        function deleteList(selection) {
-            bladeNavigationService.closeChildrenBlades(blade, function () {
-                var dialog = {
-                    id: "confirmDeleteItem",
-                    title: "platform.dialogs.folders-delete.title",
-                    message: "platform.dialogs.folders-delete.message",
-                    callback: function (remove) {
-                        if (remove) {
-                            var listEntryIds = _.pluck(selection, 'url');
-                            assets.remove({ urls: listEntryIds },
+                    } else {
+                        if (result.length < 3 || result.length > 63 || !result.match(/^[a-z0-9]+(-[a-z0-9]+)*$/)) {
+                            newFolder(result, "A folder name must conform to the following naming rules:\n  Folder name must be from 3 through 63 characters long.\n  Folder name must start with a letter or number, and can contain only letters, numbers, and the dash (-) character.\n  Every dash (-) character must be immediately preceded and followed by a letter or number; consecutive dashes are not permitted.\n  All letters in a folder name must be lowercase.");
+                        } else {
+                            assets.createFolder({ name: result, parentUrl: blade.currentEntity.url },
                                 blade.refresh,
                                 function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
                         }
                     }
                 }
-                dialogService.showConfirmationDialog(dialog);
-            });
-        }
-
-        $scope.selectNode = function (listItem) {
-            if (listItem.type === 'folder') {
-                var newBlade = {
-                    id: blade.id,
-                    breadcrumbs: blade.breadcrumbs,
-                    currentEntity: listItem,
-                    disableOpenAnimation: true,
-                    controller: blade.controller,
-                    template: blade.template,
-                    isClosingDisabled: blade.isClosingDisabled
-                };
-
-                bladeNavigationService.showBlade(newBlade, blade.parentBlade);
             }
-        };
 
-        blade.headIcon = 'fa-folder-o';
+            $scope.copyUrl = function (data) {
+                window.prompt("Copy to clipboard: Ctrl+C, Enter", data.url);
+            };
 
-        blade.toolbarCommands = [
-            {
-                name: "platform.commands.refresh", icon: 'fa fa-refresh',
-                executeMethod: blade.refresh,
-                canExecuteMethod: function () {
-                    return true;
-                }
-            },
-            {
-                name: "platform.commands.new-folder", icon: 'fa fa-folder-o',
-                executeMethod: function () { newFolder(); },
-                canExecuteMethod: function () {
-                    return true;
-                },
-                permission: 'platform:asset:create'
-            },
-            {
-                name: "platform.commands.upload", icon: 'fa fa-upload',
-                executeMethod: function () {
-                    var newBlade = {
-                        id: "assetUpload",
-                        currentEntityId: blade.currentEntity.url,
-                        title: 'platform.blades.asset-upload.title',
-                        controller: 'platformWebApp.assets.assetUploadController',
-                        template: '$(Platform)/Scripts/app/assets/blades/asset-upload.tpl.html'
-                    };
-                    bladeNavigationService.showBlade(newBlade, blade);
-                },
-                canExecuteMethod: function () {
-                    return true;
-                },
-                permission: 'platform:asset:create'
-            },
-            //{
-            //    name: "Rename", icon: 'fa fa-font',
-            //    executeMethod: function () {
-            //        rename(getFirstChecked())
-            //    },
-            //    canExecuteMethod: isSingleChecked,
-            //    permission: 'platform:asset:update'
-            //},
-            {
-                name: "platform.commands.delete", icon: 'fa fa-trash-o',
-                executeMethod: function () { deleteList($scope.gridApi.selection.getSelectedRows()); },
-                canExecuteMethod: isItemsChecked,
-                permission: 'platform:asset:delete'
-            }
-            //{
-            //    name: "Cut",
-            //    icon: 'fa fa-cut',
-            //    executeMethod: function () {
-            //    },
-            //    canExecuteMethod: isItemsChecked,
-            //    permission: 'asset:delete'
-            //},
-            //{
-            //    name: "Paste",
-            //    icon: 'fa fa-clipboard',
-            //    executeMethod: function () {
-            //        blade.isLoading = true;
-            //        assets.move({
-            //            folder: blade.currentEntity.url,
-            //            listEntries: $storage.catalogClipboardContent
-            //        }, function () {
-            //            delete $storage.catalogClipboardContent;
-            //            blade.refresh();
-            //        }, function (error) {
-            //            bladeNavigationService.setError('Error ' + error.status, blade);
-            //        });
-            //    },
-            //    canExecuteMethod: function () {
-            //        return $storage.catalogClipboardContent;
-            //    },
-            //    permission: 'asset:delete'
+            $scope.downloadUrl = function (data) {
+                window.open(data.url, '_blank');
+            };
+
+            //$scope.rename = function (listItem) {
+            //    rename(listItem);
+            //};
+
+            //function rename(listItem) {
+            //    var result = prompt("Enter new name", listItem.name);
+            //    if (result) {
+            //        listItem.name = result;
+            //    }
             //}
-        ];
 
-        // ui-grid
-        $scope.setGridOptions = function (gridOptions) {
-            uiGridHelper.initialize($scope, gridOptions,
-            function (gridApi) {
-                $scope.$watch('pageSettings.currentPage', gridApi.pagination.seek);
-            });
-        };
-        bladeUtils.initializePagination($scope, true);
+            function isItemsChecked() {
+                return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
+            }
 
-        blade.refresh();
-    }]);
+            $scope.delete = function (data) {
+                deleteList([data]);
+            };
+
+            function deleteList(selection) {
+                bladeNavigationService.closeChildrenBlades(blade, function () {
+                    var dialog = {
+                        id: "confirmDeleteItem",
+                        title: "platform.dialogs.folders-delete.title",
+                        message: "platform.dialogs.folders-delete.message",
+                        callback: function (remove) {
+                            if (remove) {
+                                var listEntryIds = _.pluck(selection, 'url');
+                                assets.remove({ urls: listEntryIds },
+                                    blade.refresh,
+                                    function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+                            }
+                        }
+                    }
+                    dialogService.showConfirmationDialog(dialog);
+                });
+            }
+
+            $scope.selectNode = function (listItem) {
+                if (listItem.type === 'folder') {
+                    var newBlade = {
+                        id: blade.id,
+                        breadcrumbs: blade.breadcrumbs,
+                        currentEntity: listItem,
+                        disableOpenAnimation: true,
+                        controller: blade.controller,
+                        template: blade.template,
+                        isClosingDisabled: blade.isClosingDisabled
+                    };
+
+                    bladeNavigationService.showBlade(newBlade, blade.parentBlade);
+                }
+            };
+
+            blade.headIcon = 'fa-folder-o';
+
+            blade.toolbarCommands = [
+                {
+                    name: "platform.commands.refresh", icon: 'fa fa-refresh',
+                    executeMethod: blade.refresh,
+                    canExecuteMethod: function () {
+                        return true;
+                    }
+                },
+                {
+                    name: "platform.commands.new-folder", icon: 'fa fa-folder-o',
+                    executeMethod: function () { newFolder(); },
+                    canExecuteMethod: function () {
+                        return true;
+                    },
+                    permission: 'platform:asset:create'
+                },
+                {
+                    name: "platform.commands.upload", icon: 'fa fa-upload',
+                    executeMethod: function () {
+                        var newBlade = {
+                            id: "assetUpload",
+                            currentEntityId: blade.currentEntity.url,
+                            title: 'platform.blades.asset-upload.title',
+                            controller: 'platformWebApp.assets.assetUploadController',
+                            template: '$(Platform)/Scripts/app/assets/blades/asset-upload.tpl.html'
+                        };
+                        bladeNavigationService.showBlade(newBlade, blade);
+                    },
+                    canExecuteMethod: function () {
+                        return true;
+                    },
+                    permission: 'platform:asset:create'
+                },
+                //{
+                //    name: "Rename", icon: 'fa fa-font',
+                //    executeMethod: function () {
+                //        rename(getFirstChecked())
+                //    },
+                //    canExecuteMethod: isSingleChecked,
+                //    permission: 'platform:asset:update'
+                //},
+                {
+                    name: "platform.commands.delete", icon: 'fa fa-trash-o',
+                    executeMethod: function () { deleteList($scope.gridApi.selection.getSelectedRows()); },
+                    canExecuteMethod: isItemsChecked,
+                    permission: 'platform:asset:delete'
+                }
+                //{
+                //    name: "Cut",
+                //    icon: 'fa fa-cut',
+                //    executeMethod: function () {
+                //    },
+                //    canExecuteMethod: isItemsChecked,
+                //    permission: 'asset:delete'
+                //},
+                //{
+                //    name: "Paste",
+                //    icon: 'fa fa-clipboard',
+                //    executeMethod: function () {
+                //        blade.isLoading = true;
+                //        assets.move({
+                //            folder: blade.currentEntity.url,
+                //            listEntries: $storage.catalogClipboardContent
+                //        }, function () {
+                //            delete $storage.catalogClipboardContent;
+                //            blade.refresh();
+                //        }, function (error) {
+                //            bladeNavigationService.setError('Error ' + error.status, blade);
+                //        });
+                //    },
+                //    canExecuteMethod: function () {
+                //        return $storage.catalogClipboardContent;
+                //    },
+                //    permission: 'asset:delete'
+                //}
+            ];
+
+            // ui-grid
+            $scope.setGridOptions = function (gridOptions) {
+                uiGridHelper.initialize($scope, gridOptions,
+                    function (gridApi) {
+                        $scope.$watch('pageSettings.currentPage', gridApi.pagination.seek);
+                    });
+            };
+            bladeUtils.initializePagination($scope, true);
+
+            blade.refresh();
+        }]);
 
 angular.module('platformWebApp')
-.controller('platformWebApp.assets.assetSelectController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
-    function ($scope, assetsApi, bladeNavigationService, bladeUtils, uiGridHelper) {
-        var blade = $scope.blade;
-        blade.template = '$(Platform)/Scripts/app/assets/blades/asset-select.tpl.html';
+    .controller('platformWebApp.assets.assetSelectController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
+        function ($scope, assetsApi, bladeNavigationService, bladeUtils, uiGridHelper) {
+            var blade = $scope.blade;
+            blade.template = '$(Platform)/Scripts/app/assets/blades/asset-select.tpl.html';
 
-        blade.headIcon = 'fa-folder-o';
+            blade.headIcon = 'fa-folder-o';
 
-        if (!blade.currentEntity) {
-            blade.currentEntity = {};
-        }
-        if (blade.folder) {
-            blade.currentEntity.url = '/' + blade.folder;
-        }
+            if (!blade.currentEntity) {
+                blade.currentEntity = {};
+            }
+            if (blade.folder) {
+                blade.currentEntity.url = '/' + blade.folder;
+            }
 
-        blade.refresh = function () {
-            blade.isLoading = true;
-            assetsApi.query(
+            blade.refresh = function () {
+                blade.isLoading = true;
+                assetsApi.search(
+                    {
+                        keyword: blade.searchKeyword,
+                        folderUrl: blade.currentEntity.url
+                    },
+                    function (data) {
+                        $scope.pageSettings.totalItems = data.totalCount;
+                        _.each(data.results, function (x) { x.isImage = x.contentType && x.contentType.startsWith('image/'); });
+                        $scope.listEntries = data.results;
+                        blade.isLoading = false;
+
+                        //Set navigation breadcrumbs
+                        setBreadcrumbs();
+                    }, function (error) {
+                        bladeNavigationService.setError('Error ' + error.status, blade);
+                    });
+            };
+
+            //Breadcrumbs
+            function setBreadcrumbs() {
+                if (blade.breadcrumbs) {
+                    //Clone array (angular.copy leaves the same reference)
+                    var breadcrumbs = blade.breadcrumbs.slice(0);
+
+                    //prevent duplicate items
+                    if (blade.currentEntity.url && _.all(breadcrumbs, function (x) { return x.id !== blade.currentEntity.url; })) {
+                        var breadCrumb = generateBreadcrumb(blade.currentEntity.url, blade.currentEntity.name);
+                        breadcrumbs.push(breadCrumb);
+                    }
+                    blade.breadcrumbs = breadcrumbs;
+                } else {
+                    var name = "all";
+                    if (blade.folder)
+                        name = blade.folder;
+
+                    blade.breadcrumbs = [generateBreadcrumb(blade.currentEntity.url, name)];
+                }
+            }
+
+            function generateBreadcrumb(id, name) {
+                return {
+                    id: id,
+                    name: name,
+                    blade: blade,
+                    navigate: function (breadcrumb) {
+                        breadcrumb.blade.searchKeyword = null;
+                        breadcrumb.blade.disableOpenAnimation = true;
+                        bladeNavigationService.showBlade(breadcrumb.blade, breadcrumb.blade.parentBlade);
+                    }
+                }
+            }
+
+            function isItemsChecked() {
+                return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
+            }
+
+            function getSelectedAssets() {
+                return $scope.gridApi.selection.getSelectedRows();
+            }
+
+            $scope.selectNode = function (listItem) {
+                if (listItem.type === 'folder') {
+                    var newBlade = {
+                        id: blade.id,
+                        title: blade.title,
+                        breadcrumbs: blade.breadcrumbs,
+                        currentEntity: listItem,
+                        disableOpenAnimation: true,
+                        controller: blade.controller,
+                        template: blade.template,
+                        isClosingDisabled: blade.isClosingDisabled,
+                        onSelect: blade.onSelect
+                    };
+
+                    bladeNavigationService.showBlade(newBlade, blade.parentBlade);
+                }
+            };
+
+            blade.toolbarCommands = [
                 {
-                    keyword: blade.searchKeyword,
-                    folderUrl: blade.currentEntity.url
-                },
-            function (data) {
-                $scope.pageSettings.totalItems = data.length;
-                _.each(data, function (x) { x.isImage = x.contentType && x.contentType.startsWith('image/'); });
-                $scope.listEntries = data;
-                blade.isLoading = false;
-
-                //Set navigation breadcrumbs
-                setBreadcrumbs();
-            }, function (error) {
-                bladeNavigationService.setError('Error ' + error.status, blade);
-            });
-        };
-
-        //Breadcrumbs
-        function setBreadcrumbs() {
-            if (blade.breadcrumbs) {
-                //Clone array (angular.copy leaves the same reference)
-                var breadcrumbs = blade.breadcrumbs.slice(0);
-
-                //prevent duplicate items
-                if (blade.currentEntity.url && _.all(breadcrumbs, function (x) { return x.id !== blade.currentEntity.url; })) {
-                    var breadCrumb = generateBreadcrumb(blade.currentEntity.url, blade.currentEntity.name);
-                    breadcrumbs.push(breadCrumb);
+                    name: 'platform.commands.confirm',
+                    icon: 'fa fa-check',
+                    executeMethod: function () { $scope.saveChanges(); },
+                    canExecuteMethod: function () {
+                        return isItemsChecked();
+                    }
                 }
-                blade.breadcrumbs = breadcrumbs;
-            } else {
-                var name = "all";
-                if (blade.folder)
-                    name = blade.folder;
+            ];
 
-                blade.breadcrumbs = [generateBreadcrumb(blade.currentEntity.url, name)];
-            }
-        }
+            $scope.saveChanges = function () {
+                if (blade.onSelect)
+                    blade.onSelect(getSelectedAssets());
 
-        function generateBreadcrumb(id, name) {
-            return {
-                id: id,
-                name: name,
-                blade: blade,
-                navigate: function (breadcrumb) {
-                    breadcrumb.blade.searchKeyword = null;
-                    breadcrumb.blade.disableOpenAnimation = true;
-                    bladeNavigationService.showBlade(breadcrumb.blade, breadcrumb.blade.parentBlade);
-                }
-            }
-        }
+                $scope.bladeClose();
+            };
 
-        function isItemsChecked() {
-            return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
-        }
+            // ui-grid
+            $scope.setGridOptions = function (gridOptions) {
+                uiGridHelper.initialize($scope, gridOptions,
+                    function (gridApi) {
+                        $scope.$watch('pageSettings.currentPage', gridApi.pagination.seek);
+                    });
+            };
+            bladeUtils.initializePagination($scope, true);
 
-        function getSelectedAssets() {
-            return $scope.gridApi.selection.getSelectedRows();
-        }
-
-        $scope.selectNode = function (listItem) {
-            if (listItem.type === 'folder') {
-                var newBlade = {
-                    id: blade.id,
-                    title: blade.title,
-                    breadcrumbs: blade.breadcrumbs,
-                    currentEntity: listItem,
-                    disableOpenAnimation: true,
-                    controller: blade.controller,
-                    template: blade.template,
-                    isClosingDisabled: blade.isClosingDisabled,
-                    onSelect: blade.onSelect
-                };
-
-                bladeNavigationService.showBlade(newBlade, blade.parentBlade);
-            }
-        };
-
-        blade.toolbarCommands = [
-            {
-                name: 'platform.commands.confirm',
-                icon: 'fa fa-check',
-                executeMethod: function () { $scope.saveChanges(); },
-                canExecuteMethod: function() {
-                    return isItemsChecked();;
-                }
-            }
-        ];
-
-        $scope.saveChanges = function() {
-            if (blade.onSelect)
-                blade.onSelect(getSelectedAssets());
-
-            $scope.bladeClose();
-        };
-
-        // ui-grid
-        $scope.setGridOptions = function (gridOptions) {
-            uiGridHelper.initialize($scope, gridOptions,
-            function (gridApi) {
-                $scope.$watch('pageSettings.currentPage', gridApi.pagination.seek);
-            });
-        };
-        bladeUtils.initializePagination($scope, true);
-
-        blade.refresh();
-    }]);
+            blade.refresh();
+        }]);
 
 angular.module('platformWebApp')
     .controller('platformWebApp.assets.assetUploadController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'FileUploader', function ($scope, assets, bladeNavigationService, FileUploader) {
@@ -24245,6 +24218,7 @@ angular.module('platformWebApp')
         if (!blade.fileUploadOptions) {
             blade.fileUploadOptions = {};
         }
+        var folderUrl = blade.currentEntityId || "";
 
         function initialize() {
             if (!$scope.uploader) {
@@ -24252,7 +24226,7 @@ angular.module('platformWebApp')
                 var uploader = $scope.uploader = new FileUploader({
                     scope: $scope,
                     headers: { Accept: 'application/json' },
-                    url: 'api/platform/assets?folderUrl=' + blade.currentEntityId,
+                    url: 'api/platform/assets?folderUrl=' + folderUrl,
                     method: 'POST',
                     //autoUpload: true,
                     removeAfterUpload: true
@@ -24261,7 +24235,7 @@ angular.module('platformWebApp')
                 if (blade.fileUploadOptions.accept && blade.fileUploadOptions.accept.contains('image')) {
                     uploader.filters.push({
                         name: 'imageFilter',
-                        fn: function(item) {
+                        fn: function (item) {
                             var type = '|' + item.type.slice(item.type.lastIndexOf('/') + 1) + '|';
                             return '|jpg|png|jpeg|bmp|gif|'.indexOf(type) !== -1;
                         }
@@ -24274,10 +24248,10 @@ angular.module('platformWebApp')
                     bladeNavigationService.setError(null, blade);
 
                     // check for asset duplicates
-                    assets.query({ folderUrl: blade.currentEntityId },
+                    assets.search({ folderUrl: folderUrl },
                         function (data) {
                             blade.isLoading = false;
-                            currentEntities = data;
+                            currentEntities = data.results;
 
                             _.each(addedItems, promptUserDecision);
                             uploader.uploadAll();
@@ -24329,7 +24303,7 @@ angular.module('platformWebApp')
             if (blade.newExternalImageUrl) {
                 blade.uploadCompleted = false;
 
-                assets.uploadFromUrl({ folderUrl: blade.currentEntityId, url: blade.newExternalImageUrl }, function (data) {
+                assets.uploadFromUrl({ folderUrl: folderUrl, url: blade.newExternalImageUrl }, function (data) {
                     refreshParentBlade();
                     if (blade.onUploadComplete) {
                         blade.onUploadComplete(data);
@@ -24347,223 +24321,32 @@ angular.module('platformWebApp')
     }]);
 
 angular.module('platformWebApp')
-.controller('platformWebApp.exportImport.exportMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'platformWebApp.authService', function ($scope, bladeNavigationService, exportImportResourse, authService) {
-    var blade = $scope.blade;
-    blade.headIcon = 'fa-upload';
-    blade.title = 'platform.blades.export-main.title';
-
-    $scope.exportRequest = {};
-
-    function initializeBlade() {
-        exportImportResourse.getNewExportManifest(function (data) {
-            $scope.exportRequest.exportManifest = data;
-            blade.isLoading = false;
-        });
-    };
-
-    $scope.$on("new-notification-event", function (event, notification) {
-        if (blade.notification && notification.id == blade.notification.id) {
-            angular.copy(notification, blade.notification);
-            if (notification.errorCount > 0) {
-                bladeNavigationService.setError('Export error', blade);
-            }
-        }
-    });
-
-    $scope.canStartProcess = function () {
-        return authService.checkPermission('platform:exportImport:export') && (_.any($scope.exportRequest.modules) || $scope.exportRequest.handleSecurity || $scope.exportRequest.handleSettings);
-    }
-
-    $scope.updateModuleSelection = function () {
-        var selection = _.where($scope.exportRequest.exportManifest.modules, { isChecked: true });
-        $scope.exportRequest.modules = _.pluck(selection, 'id');
-    };
-
-    $scope.startExport = function () {
-        blade.isLoading = true;
-        exportImportResourse.runExport($scope.exportRequest,
-            function (data) { blade.notification = data; blade.isLoading = false; });
-    }
-
-    blade.toolbarCommands = [
-		{
-		    name: "platform.commands.select-all", icon: 'fa fa-check-square-o',
-		    executeMethod: function () { selectAll(true) },
-		    canExecuteMethod: function () { return $scope.exportRequest.exportManifest && !blade.notification; }
-		},
-        {
-            name: "platform.commands.unselect-all", icon: 'fa fa-square-o',
-            executeMethod: function () { selectAll(false) },
-            canExecuteMethod: function () { return $scope.exportRequest.exportManifest && !blade.notification; }
-        }
-    ];
-
-    var selectAll = function (action) {
-        $scope.exportRequest.handleSecurity = action;
-        $scope.exportRequest.handleBinaryData = action;
-        $scope.exportRequest.handleSettings = action;
-        _.forEach($scope.exportRequest.exportManifest.modules, function (module) { module.isChecked = action; });
-
-        $scope.updateModuleSelection();
-    }
-
-    initializeBlade();
-}]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.exportImport.mainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.authService', function ($scope, bladeNavigationService, authService) {
-
-    $scope.export = function () {
-        $scope.selectedNodeId = 'export';
-
-        var newBlade = {
-            controller: 'platformWebApp.exportImport.exportMainController',
-            template: '$(Platform)/Scripts/app/exportImport/blades/export-main.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, $scope.blade);
-    };
-
-    $scope.import = function () {
-        if (authService.checkPermission('platform:exportImport:import')) {
-            $scope.selectedNodeId = 'import';
-
-            var newBlade = {
-                controller: 'platformWebApp.exportImport.importMainController',
-                template: '$(Platform)/Scripts/app/exportImport/blades/import-main.tpl.html'
-            };
-            bladeNavigationService.showBlade(newBlade, $scope.blade);
-        }
-    };
-
-    $scope.blade.headIcon = 'fa-database';
+.controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    
     $scope.blade.isLoading = false;
-}]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.exportImport.importMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'FileUploader', function ($scope, bladeNavigationService, exportImportResourse, FileUploader) {
-    var blade = $scope.blade;
-    blade.updatePermission = 'platform:exportImport:import';
-    blade.headIcon = 'fa-download';
-    blade.title = 'platform.blades.import-main.title';
-    blade.isLoading = false;
-    $scope.importRequest = {};
-    var origManifest;
-
-    $scope.$on("new-notification-event", function (event, notification) {
-        if (blade.notification && notification.id == blade.notification.id) {
-            angular.copy(notification, blade.notification);
-            if (notification.errorCount > 0) {
-                bladeNavigationService.setError('Import error', blade);
-            }
-        }
-    });
-
-    $scope.canStartProcess = function () {
-        return blade.hasUpdatePermission() && (_.any($scope.importRequest.modules) || $scope.importRequest.handleSecurity || $scope.importRequest.handleSettings || $scope.importRequest.handleBinaryData);
-    }
-
-    $scope.startProcess = function () {
-        blade.isLoading = true;
-        exportImportResourse.runImport($scope.importRequest,
-            function (data) { blade.notification = data; blade.isLoading = false; },
-            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-    }
-
-    $scope.updateModuleSelection = function () {
-        var selection = _.where($scope.importRequest.exportManifest.modules, { isChecked: true });
-        $scope.importRequest.modules = _.pluck(selection, 'id');
+    // ui-grid
+    $scope.setGridOptions = function (gridOptions) {
+        $scope.gridOptions = gridOptions;
     };
-
-    if (!$scope.uploader) {
-        // create the uploader
-        var uploader = $scope.uploader = new FileUploader({
-            scope: $scope,
-            headers: { Accept: 'application/json' },
-            url: 'api/platform/assets/localstorage',
-            method: 'POST',
-            autoUpload: true,
-            removeAfterUpload: true
-        });
-
-        // ADDING FILTERS
-        // zip only
-        uploader.filters.push({
-            name: 'zipFilter',
-            fn: function (i /*{File|FileLikeObject}*/, options) {
-                return i.name.toLowerCase().endsWith('.zip');
-            }
-        });
-
-        uploader.onBeforeUploadItem = function (fileItem) {
-            blade.isLoading = true;
-            bladeNavigationService.setError(null, blade);
-        };
-
-        uploader.onErrorItem = function (item, response, status, headers) {
-            bladeNavigationService.setError(item._file.name + ' failed: ' + (response.message ? response.message : status), blade);
-        };
-
-        uploader.onSuccessItem = function (fileItem, asset, status, headers) {
-            $scope.importRequest.fileUrl = asset[0].url;
-            $scope.importRequest.fileName = asset[0].name;
-
-            exportImportResourse.loadExportManifest({ fileUrl: $scope.importRequest.fileUrl }, function (data) {
-                origManifest = angular.copy(data);
-
-                // select all available data for import
-                $scope.importRequest.handleSecurity = data.handleSecurity;
-                $scope.importRequest.handleSettings = data.handleSettings;
-                $scope.importRequest.handleBinaryData = data.handleBinaryData;
-
-                _.each(data.modules, function (x) { x.isChecked = true; });
-
-                $scope.importRequest.exportManifest = data;
-                $scope.updateModuleSelection();
-                blade.isLoading = false;
-            });
-        };
-    }
-
-
-    blade.toolbarCommands = [
-        {
-            name: "platform.commands.select-all", icon: 'fa fa-check-square-o',
-            executeMethod: function () { selectAll(true) },
-            canExecuteMethod: function () { return $scope.importRequest.exportManifest && !blade.notification; }
-        },
-        {
-            name: "platform.commands.unselect-all", icon: 'fa fa-square-o',
-            executeMethod: function () { selectAll(false) },
-            canExecuteMethod: function () { return $scope.importRequest.exportManifest && !blade.notification; }
-        }
-    ];
-
-    var selectAll = function (action) {
-        if (origManifest.handleSecurity)
-            $scope.importRequest.handleSecurity = action;
-        if (origManifest.handleBinaryData)
-            $scope.importRequest.handleBinaryData = action;
-        if (origManifest.handleSettings)
-            $scope.importRequest.handleSettings = action;
-
-        _.forEach($scope.importRequest.exportManifest.modules, function (module) { module.isChecked = action; });
-
-        $scope.updateModuleSelection();
-    }
 }]);
 
 angular.module('platformWebApp')
-.factory('platformWebApp.exportImport.resource', ['$resource', function ($resource) {
+.controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    var blade = $scope.blade;
 
-    return $resource(null, null, {
-    	getNewExportManifest: { url: 'api/platform/export/manifest/new' },
-        runExport: { method: 'POST', url: 'api/platform/export' },
-
-        loadExportManifest: { url: 'api/platform/export/manifest/load' },
-        runImport: { method: 'POST', url: 'api/platform/import' },
-        sampleDataDiscover: { url: 'api/platform/sampledata/discover', isArray: true },
-        importSampleData: { method: 'POST', url: 'api/platform/sampledata/import', params: { url: '@url' } }
-    });
+    $scope.openBlade = function () {
+        var newBlade = {
+            id: "changesChildBlade",
+            currentEntities: blade.currentEntity.operationsLog,
+            headIcon: blade.headIcon,
+            title: blade.title,
+            subtitle: 'platform.widgets.operations.blade-subtitle',
+            isExpandable: true,
+            controller: 'platformWebApp.changeLog.operationListController',
+            template: '$(Platform)/Scripts/app/changeLog/blades/operation-list.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, blade);
+    };
 }]);
 angular.module('platformWebApp')
 .controller('platformWebApp.dynamicObjectListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dynamicProperties.api', function ($scope, bladeNavigationService, dynamicPropertiesApi) {
@@ -25265,6 +25048,225 @@ angular.module('platformWebApp')
 		}
 	});
 
+}]);
+angular.module('platformWebApp')
+.controller('platformWebApp.exportImport.exportMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'platformWebApp.authService', function ($scope, bladeNavigationService, exportImportResourse, authService) {
+    var blade = $scope.blade;
+    blade.headIcon = 'fa-upload';
+    blade.title = 'platform.blades.export-main.title';
+
+    $scope.exportRequest = {};
+
+    function initializeBlade() {
+        exportImportResourse.getNewExportManifest(function (data) {
+            $scope.exportRequest.exportManifest = data;
+            blade.isLoading = false;
+        });
+    };
+
+    $scope.$on("new-notification-event", function (event, notification) {
+        if (blade.notification && notification.id == blade.notification.id) {
+            angular.copy(notification, blade.notification);
+            if (notification.errorCount > 0) {
+                bladeNavigationService.setError('Export error', blade);
+            }
+        }
+    });
+
+    $scope.canStartProcess = function () {
+        return authService.checkPermission('platform:exportImport:export') && (_.any($scope.exportRequest.modules) || $scope.exportRequest.handleSecurity || $scope.exportRequest.handleSettings);
+    }
+
+    $scope.updateModuleSelection = function () {
+        var selection = _.where($scope.exportRequest.exportManifest.modules, { isChecked: true });
+        $scope.exportRequest.modules = _.pluck(selection, 'id');
+    };
+
+    $scope.startExport = function () {
+        blade.isLoading = true;
+        exportImportResourse.runExport($scope.exportRequest,
+            function (data) { blade.notification = data; blade.isLoading = false; });
+    }
+
+    blade.toolbarCommands = [
+		{
+		    name: "platform.commands.select-all", icon: 'fa fa-check-square-o',
+		    executeMethod: function () { selectAll(true) },
+		    canExecuteMethod: function () { return $scope.exportRequest.exportManifest && !blade.notification; }
+		},
+        {
+            name: "platform.commands.unselect-all", icon: 'fa fa-square-o',
+            executeMethod: function () { selectAll(false) },
+            canExecuteMethod: function () { return $scope.exportRequest.exportManifest && !blade.notification; }
+        }
+    ];
+
+    var selectAll = function (action) {
+        $scope.exportRequest.handleSecurity = action;
+        $scope.exportRequest.handleBinaryData = action;
+        $scope.exportRequest.handleSettings = action;
+        _.forEach($scope.exportRequest.exportManifest.modules, function (module) { module.isChecked = action; });
+
+        $scope.updateModuleSelection();
+    }
+
+    initializeBlade();
+}]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.exportImport.mainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.authService', function ($scope, bladeNavigationService, authService) {
+
+    $scope.export = function () {
+        $scope.selectedNodeId = 'export';
+
+        var newBlade = {
+            controller: 'platformWebApp.exportImport.exportMainController',
+            template: '$(Platform)/Scripts/app/exportImport/blades/export-main.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, $scope.blade);
+    };
+
+    $scope.import = function () {
+        if (authService.checkPermission('platform:exportImport:import')) {
+            $scope.selectedNodeId = 'import';
+
+            var newBlade = {
+                controller: 'platformWebApp.exportImport.importMainController',
+                template: '$(Platform)/Scripts/app/exportImport/blades/import-main.tpl.html'
+            };
+            bladeNavigationService.showBlade(newBlade, $scope.blade);
+        }
+    };
+
+    $scope.blade.headIcon = 'fa-database';
+    $scope.blade.isLoading = false;
+}]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.exportImport.importMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'FileUploader', function ($scope, bladeNavigationService, exportImportResourse, FileUploader) {
+    var blade = $scope.blade;
+    blade.updatePermission = 'platform:exportImport:import';
+    blade.headIcon = 'fa-download';
+    blade.title = 'platform.blades.import-main.title';
+    blade.isLoading = false;
+    $scope.importRequest = {};
+    var origManifest;
+
+    $scope.$on("new-notification-event", function (event, notification) {
+        if (blade.notification && notification.id == blade.notification.id) {
+            angular.copy(notification, blade.notification);
+            if (notification.errorCount > 0) {
+                bladeNavigationService.setError('Import error', blade);
+            }
+        }
+    });
+
+    $scope.canStartProcess = function () {
+        return blade.hasUpdatePermission() && (_.any($scope.importRequest.modules) || $scope.importRequest.handleSecurity || $scope.importRequest.handleSettings || $scope.importRequest.handleBinaryData);
+    }
+
+    $scope.startProcess = function () {
+        blade.isLoading = true;
+        exportImportResourse.runImport($scope.importRequest,
+            function (data) { blade.notification = data; blade.isLoading = false; },
+            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+    }
+
+    $scope.updateModuleSelection = function () {
+        var selection = _.where($scope.importRequest.exportManifest.modules, { isChecked: true });
+        $scope.importRequest.modules = _.pluck(selection, 'id');
+    };
+
+    if (!$scope.uploader) {
+        // create the uploader
+        var uploader = $scope.uploader = new FileUploader({
+            scope: $scope,
+            headers: { Accept: 'application/json' },
+            url: 'api/platform/assets/localstorage',
+            method: 'POST',
+            autoUpload: true,
+            removeAfterUpload: true
+        });
+
+        // ADDING FILTERS
+        // zip only
+        uploader.filters.push({
+            name: 'zipFilter',
+            fn: function (i /*{File|FileLikeObject}*/, options) {
+                return i.name.toLowerCase().endsWith('.zip');
+            }
+        });
+
+        uploader.onBeforeUploadItem = function (fileItem) {
+            blade.isLoading = true;
+            bladeNavigationService.setError(null, blade);
+        };
+
+        uploader.onErrorItem = function (item, response, status, headers) {
+            bladeNavigationService.setError(item._file.name + ' failed: ' + (response.message ? response.message : status), blade);
+        };
+
+        uploader.onSuccessItem = function (fileItem, asset, status, headers) {
+            $scope.importRequest.fileUrl = asset[0].url;
+            $scope.importRequest.fileName = asset[0].name;
+
+            exportImportResourse.loadExportManifest({ fileUrl: $scope.importRequest.fileUrl }, function (data) {
+                origManifest = angular.copy(data);
+
+                // select all available data for import
+                $scope.importRequest.handleSecurity = data.handleSecurity;
+                $scope.importRequest.handleSettings = data.handleSettings;
+                $scope.importRequest.handleBinaryData = data.handleBinaryData;
+
+                _.each(data.modules, function (x) { x.isChecked = true; });
+
+                $scope.importRequest.exportManifest = data;
+                $scope.updateModuleSelection();
+                blade.isLoading = false;
+            });
+        };
+    }
+
+
+    blade.toolbarCommands = [
+        {
+            name: "platform.commands.select-all", icon: 'fa fa-check-square-o',
+            executeMethod: function () { selectAll(true) },
+            canExecuteMethod: function () { return $scope.importRequest.exportManifest && !blade.notification; }
+        },
+        {
+            name: "platform.commands.unselect-all", icon: 'fa fa-square-o',
+            executeMethod: function () { selectAll(false) },
+            canExecuteMethod: function () { return $scope.importRequest.exportManifest && !blade.notification; }
+        }
+    ];
+
+    var selectAll = function (action) {
+        if (origManifest.handleSecurity)
+            $scope.importRequest.handleSecurity = action;
+        if (origManifest.handleBinaryData)
+            $scope.importRequest.handleBinaryData = action;
+        if (origManifest.handleSettings)
+            $scope.importRequest.handleSettings = action;
+
+        _.forEach($scope.importRequest.exportManifest.modules, function (module) { module.isChecked = action; });
+
+        $scope.updateModuleSelection();
+    }
+}]);
+
+angular.module('platformWebApp')
+.factory('platformWebApp.exportImport.resource', ['$resource', function ($resource) {
+
+    return $resource(null, null, {
+    	getNewExportManifest: { url: 'api/platform/export/manifest/new' },
+        runExport: { method: 'POST', url: 'api/platform/export' },
+
+        loadExportManifest: { url: 'api/platform/export/manifest/load' },
+        runImport: { method: 'POST', url: 'api/platform/import' },
+        sampleDataDiscover: { url: 'api/platform/sampledata/discover', isArray: true },
+        importSampleData: { method: 'POST', url: 'api/platform/sampledata/import', params: { url: '@url' } }
+    });
 }]);
 angular.module('platformWebApp')
 .factory('platformWebApp.jobs', ['$resource', function ($resource) {
@@ -26215,6 +26217,92 @@ angular.module('platformWebApp')
     return service;
 }]);
 
+angular.module('platformWebApp')
+    .directive('vaBreadcrumb', [
+        'platformWebApp.breadcrumbHistoryService', function (breadcrumbHistoryService) {
+            return {
+                restrict: 'E',
+                require: 'ngModel',
+                replace: true,
+                scope: {
+                    bladeId: '='
+                },
+        templateUrl: '$(Platform)/Scripts/app/navigation/breadcrumbs/breadcrumbs.tpl.html',
+                link: function (scope, element, attr, ngModelController) {
+                    scope.breadcrumbs = [];
+                    ngModelController.$render = function () {
+                        scope.breadcrumbs = ngModelController.$modelValue;
+                    };
+
+                    scope.innerNavigate = function (breadcrumb) {
+                        breadcrumb.navigate(breadcrumb);
+                    };
+
+                    scope.canNavigateBack = function () {
+                        return breadcrumbHistoryService.check(scope.bladeId);
+                    };
+
+                    scope.navigateBack = function () {
+                        if (scope.canNavigateBack()) {
+                            var breadcrumb = breadcrumbHistoryService.pop(scope.bladeId);
+                            breadcrumb.navigate(breadcrumb);
+                        }
+                    };
+                    scope.$watchCollection('breadcrumbs', function (newItems) {
+                        breadcrumbHistoryService.push(newItems, scope.bladeId);
+                    });
+                }
+            }
+        }
+    ])
+    .factory('platformWebApp.breadcrumbHistoryService', function () {
+        var map = {};
+
+        function breadcrumbsEqual(x,y) {
+            return x && y && x.id === y.id && x.name === y.name;
+        }
+
+        return {
+            push: function (breadcrumbs, id) {
+                var history = map[id];
+                if (!history) {
+                    map[id] = history = {
+                        ignoreNextAction: false,
+                        records: []
+                    };
+                }
+
+                var currentBreadcrumb = _.last(breadcrumbs);
+
+                if (history.ignoreNextAction) {
+                    history.ignoreNextAction = false;
+                } else if (history.currentBreadcrumb &&
+                            !breadcrumbsEqual(history.currentBreadcrumb, currentBreadcrumb) &&
+                            !breadcrumbsEqual(history.currentBreadcrumb, _.last(history.records))) {
+                    history.records.push(history.currentBreadcrumb);
+                }
+
+                if (currentBreadcrumb) {
+                    history.currentBreadcrumb = currentBreadcrumb;
+                }
+            },
+
+            check: function (id) {
+                return map[id] && _.any(map[id].records);
+            },
+
+            pop: function (id) {
+                var retVal = undefined;
+                var history = map[id];
+                if (_.any(history.records)) {
+                    retVal = history.records.pop();
+                    history.ignoreNextAction = true;
+                }
+
+                return retVal;
+            }
+        };
+    });
 angular.module('platformWebApp')
 .factory('platformWebApp.mainMenuService', [function () {
 
@@ -27305,6 +27393,108 @@ angular.module('platformWebApp')
 		return $sce.trustAsHtml(html_code);
 	}
 }]);
+angular.module('platformWebApp')
+.factory('platformWebApp.notifications', ['$resource', function ($resource) {
+
+	return $resource('api/platform/notification/:id', { id: '@Id' }, {
+		getNotificationList: { method: 'GET', url: 'api/platform/notification', isArray: true },
+		getTemplateById: { method: 'GET', url: 'api/platform/notification/template/:id' },
+		getTemplate: { method: 'GET', url: 'api/platform/notification/template' },
+		getTemplates: { method: 'GET', url: 'api/platform/notification/templates', isArray: true },
+		updateTemplate: { method: 'POST', url: 'api/platform/notification/template' },
+		deleteTemplate: { method: 'DELETE', url: 'api/platform/notification/template/:id' },
+		prepareTestData: { method: 'GET', url: 'api/platform/notification/template/:type/getTestingParameters', isArray: true },
+		resolveNotification: { method: 'POST', url: 'api/platform/notification/template/rendernotificationcontent' },
+		sendNotification: { method: 'POST', url: 'api/platform/notification/template/sendnotification' },
+		getNotificationJournalList: { method: 'GET', url: 'api/platform/notification/journal/:objectId/:objectTypeId' },
+		getNotificationJournalDetails: { method: 'GET', url: 'api/platform/notification/notification/:id' },
+		stopSendingNotifications: { method: 'POST', url: 'api/platform/notification/stopnotifications' }
+	});
+}]);
+angular.module('platformWebApp')
+.controller('platformWebApp.pushNotificationsHistoryController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
+function ($scope, bladeNavigationService, eventTemplateResolver, notifications) {
+    var blade = $scope.blade;
+
+    $scope.pageSettings = {};
+    $scope.pageSettings.totalItems = 0;
+    $scope.pageSettings.currentPage = 1;
+    $scope.pageSettings.numPages = 5;
+    $scope.pageSettings.itemsPerPageCount = 10;
+    $scope.notifications = [];
+
+    $scope.columns = [
+    	{ title: "platform.blades.history.labels.type", orderBy: "NotifyType" },
+		{ title: "platform.blades.history.labels.title", orderBy: "Title" },
+		{ title: "platform.blades.history.labels.created", orderBy: "Created", checked: true, reverse: true }
+
+    ];
+
+    blade.refresh = function () {
+        blade.isLoading = true;
+        var start = $scope.pageSettings.currentPage * $scope.pageSettings.itemsPerPageCount - $scope.pageSettings.itemsPerPageCount;
+        notifications.query({ skip: start, take: $scope.pageSettings.itemsPerPageCount, sort: getOrderByExpression() }, function (data, status, headers, config) {
+            angular.forEach(data.notifyEvents, function (x) {
+                notificationTemplate = eventTemplateResolver.resolve(x, 'history');
+                x.template = notificationTemplate.template;
+                x.action = notificationTemplate.action;
+            });
+            $scope.notifications = data.notifyEvents;
+            $scope.pageSettings.totalItems = data.totalCount;
+            blade.isLoading = false;
+        }, function (error) {
+            bladeNavigationService.setError('Error ' + error.status, blade);
+        });
+    };
+
+    function getOrderByExpression() {
+        var retVal = '';
+        var column = _.find($scope.columns, function (x) { return x.checked; });
+        if (angular.isDefined(column)) {
+            retVal = column.orderBy;
+            if (column.reverse) {
+                retVal += ":desc";
+            }
+        }
+        return retVal;
+    };
+
+    $scope.setOrder = function (column) {
+        //reset prev selection may be commented if need support multiple order clauses
+        _.each($scope.columns, function (x) { x.checked = false });
+        column.checked = true;
+        column.reverse = !column.reverse;
+        $scope.pageSettings.currentPage = 1;
+
+        blade.refresh();
+    }
+
+    blade.toolbarCommands = [
+			{
+			    name: "platform.commands.refresh",
+			    icon: 'fa fa-refresh',
+			    executeMethod: blade.refresh,
+			    canExecuteMethod: function () {
+			        return true;
+			    }
+			}];
+
+    $scope.$watch('pageSettings.currentPage', blade.refresh);
+
+    // actions on load
+    //No need to call this because page 'pageSettings.currentPage' is watched!!! It would trigger subsequent duplicated req...
+    //blade.refresh();
+}]);
+
+angular.module('platformWebApp')
+.factory('platformWebApp.pushNotifications', ['$resource', function ($resource) {
+
+    return $resource('api/platform/pushnotifications/:id', { id: '@Id' }, {
+        markAllAsRead: { method: 'POST', url: 'api/platform/pushnotifications/markAllAsRead' },
+        query: { method: 'POST', url: 'api/platform/pushnotifications' }
+	});
+}]);
+
 angular.module('platformWebApp')
 .controller('platformWebApp.accountApiListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
@@ -28455,24 +28645,6 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
-.factory('platformWebApp.notifications', ['$resource', function ($resource) {
-
-	return $resource('api/platform/notification/:id', { id: '@Id' }, {
-		getNotificationList: { method: 'GET', url: 'api/platform/notification', isArray: true },
-		getTemplateById: { method: 'GET', url: 'api/platform/notification/template/:id' },
-		getTemplate: { method: 'GET', url: 'api/platform/notification/template' },
-		getTemplates: { method: 'GET', url: 'api/platform/notification/templates', isArray: true },
-		updateTemplate: { method: 'POST', url: 'api/platform/notification/template' },
-		deleteTemplate: { method: 'DELETE', url: 'api/platform/notification/template/:id' },
-		prepareTestData: { method: 'GET', url: 'api/platform/notification/template/:type/getTestingParameters', isArray: true },
-		resolveNotification: { method: 'POST', url: 'api/platform/notification/template/rendernotificationcontent' },
-		sendNotification: { method: 'POST', url: 'api/platform/notification/template/sendnotification' },
-		getNotificationJournalList: { method: 'GET', url: 'api/platform/notification/journal/:objectId/:objectTypeId' },
-		getNotificationJournalDetails: { method: 'GET', url: 'api/platform/notification/notification/:id' },
-		stopSendingNotifications: { method: 'POST', url: 'api/platform/notification/stopnotifications' }
-	});
-}]);
-angular.module('platformWebApp')
 .directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
 	return {
 		link: function (scope, element, attrs) {
@@ -28501,31 +28673,6 @@ angular.module('platformWebApp')
 		}
 	};
 }]);
-angular.module('platformWebApp')
-.factory('platformWebApp.accounts', ['$resource', function ($resource) {
-    return $resource('api/platform/security/users/:id', { id: '@Id' }, {
-        search: { method: 'POST' },
-        generateNewApiAccount: { url: 'api/platform/security/apiaccounts/new' },
-        generateNewApiKey: { url: 'api/platform/security/apiaccounts/newKey', method: 'PUT' },
-        save: { url: 'api/platform/security/users/create', method: 'POST' },
-        changepassword: { url: 'api/platform/security/users/:id/changepassword', method: 'POST' },
-        resetPassword: { url: 'api/platform/security/users/:id/resetpassword', method: 'POST' },
-        update: { method: 'PUT' },
-        locked: { url: 'api/platform/security/users/:id/locked', method: 'GET' },
-        unlock: { url: 'api/platform/security/users/:id/unlock', method: 'POST' }
-    });
-}]);
-angular.module('platformWebApp')
-.factory('platformWebApp.roles', ['$resource', function ($resource) {
-    return $resource('api/platform/security/roles/:roleName', { roleName: '@roleName' }, {
-        search: { url: 'api/platform/security/roles/search', method: 'POST' },
-        queryPermissions: { url: 'api/platform/security/permissions', isArray: true },
-        update: { method: 'PUT' },
-        create: { method: 'POST' },
-
-    });
-}]);
-
 angular.module('platformWebApp')
 .directive('vaLoginToolbar', ['$document', '$timeout', '$state', 'platformWebApp.authService', function ($document, $timeout, $state, authService) {
     return {
@@ -28566,6 +28713,31 @@ angular.module('platformWebApp')
         }
     }
 }])
+angular.module('platformWebApp')
+.factory('platformWebApp.accounts', ['$resource', function ($resource) {
+    return $resource('api/platform/security/users/:id', { id: '@Id' }, {
+        search: { method: 'POST' },
+        generateNewApiAccount: { url: 'api/platform/security/apiaccounts/new' },
+        generateNewApiKey: { url: 'api/platform/security/apiaccounts/newKey', method: 'PUT' },
+        save: { url: 'api/platform/security/users/create', method: 'POST' },
+        changepassword: { url: 'api/platform/security/users/:id/changepassword', method: 'POST' },
+        resetPassword: { url: 'api/platform/security/users/:id/resetpassword', method: 'POST' },
+        update: { method: 'PUT' },
+        locked: { url: 'api/platform/security/users/:id/locked', method: 'GET' },
+        unlock: { url: 'api/platform/security/users/:id/unlock', method: 'POST' }
+    });
+}]);
+angular.module('platformWebApp')
+.factory('platformWebApp.roles', ['$resource', function ($resource) {
+    return $resource('api/platform/security/roles/:roleName', { roleName: '@roleName' }, {
+        search: { url: 'api/platform/security/roles/search', method: 'POST' },
+        queryPermissions: { url: 'api/platform/security/permissions', isArray: true },
+        update: { method: 'PUT' },
+        create: { method: 'POST' },
+
+    });
+}]);
+
 angular.module('platformWebApp')
     .factory('platformWebApp.authService', ['$http', '$rootScope', '$cookieStore', '$state', '$interpolate', function ($http, $rootScope, $cookieStore, $state, $interpolate) {
     var serviceBase = 'api/platform/security/';
@@ -28709,92 +28881,6 @@ angular.module('platformWebApp')
         bladeNavigationService.showBlade(newBlade, $scope.blade);
     };
 }]);
-angular.module('platformWebApp')
-    .directive('vaBreadcrumb', [
-        'platformWebApp.breadcrumbHistoryService', function (breadcrumbHistoryService) {
-            return {
-                restrict: 'E',
-                require: 'ngModel',
-                replace: true,
-                scope: {
-                    bladeId: '='
-                },
-        templateUrl: '$(Platform)/Scripts/app/navigation/breadcrumbs/breadcrumbs.tpl.html',
-                link: function (scope, element, attr, ngModelController) {
-                    scope.breadcrumbs = [];
-                    ngModelController.$render = function () {
-                        scope.breadcrumbs = ngModelController.$modelValue;
-                    };
-
-                    scope.innerNavigate = function (breadcrumb) {
-                        breadcrumb.navigate(breadcrumb);
-                    };
-
-                    scope.canNavigateBack = function () {
-                        return breadcrumbHistoryService.check(scope.bladeId);
-                    };
-
-                    scope.navigateBack = function () {
-                        if (scope.canNavigateBack()) {
-                            var breadcrumb = breadcrumbHistoryService.pop(scope.bladeId);
-                            breadcrumb.navigate(breadcrumb);
-                        }
-                    };
-                    scope.$watchCollection('breadcrumbs', function (newItems) {
-                        breadcrumbHistoryService.push(newItems, scope.bladeId);
-                    });
-                }
-            }
-        }
-    ])
-    .factory('platformWebApp.breadcrumbHistoryService', function () {
-        var map = {};
-
-        function breadcrumbsEqual(x,y) {
-            return x && y && x.id === y.id && x.name === y.name;
-        }
-
-        return {
-            push: function (breadcrumbs, id) {
-                var history = map[id];
-                if (!history) {
-                    map[id] = history = {
-                        ignoreNextAction: false,
-                        records: []
-                    };
-                }
-
-                var currentBreadcrumb = _.last(breadcrumbs);
-
-                if (history.ignoreNextAction) {
-                    history.ignoreNextAction = false;
-                } else if (history.currentBreadcrumb &&
-                            !breadcrumbsEqual(history.currentBreadcrumb, currentBreadcrumb) &&
-                            !breadcrumbsEqual(history.currentBreadcrumb, _.last(history.records))) {
-                    history.records.push(history.currentBreadcrumb);
-                }
-
-                if (currentBreadcrumb) {
-                    history.currentBreadcrumb = currentBreadcrumb;
-                }
-            },
-
-            check: function (id) {
-                return map[id] && _.any(map[id].records);
-            },
-
-            pop: function (id) {
-                var retVal = undefined;
-                var history = map[id];
-                if (_.any(history.records)) {
-                    retVal = history.records.pop();
-                    history.ignoreNextAction = true;
-                }
-
-                return retVal;
-            }
-        };
-    });
 angular.module('platformWebApp')
 .controller('platformWebApp.entitySettingListController', ['$scope', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', function ($scope, settingsHelper, bladeNavigationService) {
     var blade = $scope.blade;
@@ -29344,90 +29430,6 @@ angular.module('platformWebApp')
         bladeNavigationService.showBlade(newBlade, blade);
     };
 }]);
-angular.module('platformWebApp')
-.controller('platformWebApp.pushNotificationsHistoryController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
-function ($scope, bladeNavigationService, eventTemplateResolver, notifications) {
-    var blade = $scope.blade;
-
-    $scope.pageSettings = {};
-    $scope.pageSettings.totalItems = 0;
-    $scope.pageSettings.currentPage = 1;
-    $scope.pageSettings.numPages = 5;
-    $scope.pageSettings.itemsPerPageCount = 10;
-    $scope.notifications = [];
-
-    $scope.columns = [
-    	{ title: "platform.blades.history.labels.type", orderBy: "NotifyType" },
-		{ title: "platform.blades.history.labels.title", orderBy: "Title" },
-		{ title: "platform.blades.history.labels.created", orderBy: "Created", checked: true, reverse: true }
-
-    ];
-
-    blade.refresh = function () {
-        blade.isLoading = true;
-        var start = $scope.pageSettings.currentPage * $scope.pageSettings.itemsPerPageCount - $scope.pageSettings.itemsPerPageCount;
-        notifications.query({ skip: start, take: $scope.pageSettings.itemsPerPageCount, sort: getOrderByExpression() }, function (data, status, headers, config) {
-            angular.forEach(data.notifyEvents, function (x) {
-                notificationTemplate = eventTemplateResolver.resolve(x, 'history');
-                x.template = notificationTemplate.template;
-                x.action = notificationTemplate.action;
-            });
-            $scope.notifications = data.notifyEvents;
-            $scope.pageSettings.totalItems = data.totalCount;
-            blade.isLoading = false;
-        }, function (error) {
-            bladeNavigationService.setError('Error ' + error.status, blade);
-        });
-    };
-
-    function getOrderByExpression() {
-        var retVal = '';
-        var column = _.find($scope.columns, function (x) { return x.checked; });
-        if (angular.isDefined(column)) {
-            retVal = column.orderBy;
-            if (column.reverse) {
-                retVal += ":desc";
-            }
-        }
-        return retVal;
-    };
-
-    $scope.setOrder = function (column) {
-        //reset prev selection may be commented if need support multiple order clauses
-        _.each($scope.columns, function (x) { x.checked = false });
-        column.checked = true;
-        column.reverse = !column.reverse;
-        $scope.pageSettings.currentPage = 1;
-
-        blade.refresh();
-    }
-
-    blade.toolbarCommands = [
-			{
-			    name: "platform.commands.refresh",
-			    icon: 'fa fa-refresh',
-			    executeMethod: blade.refresh,
-			    canExecuteMethod: function () {
-			        return true;
-			    }
-			}];
-
-    $scope.$watch('pageSettings.currentPage', blade.refresh);
-
-    // actions on load
-    //No need to call this because page 'pageSettings.currentPage' is watched!!! It would trigger subsequent duplicated req...
-    //blade.refresh();
-}]);
-
-angular.module('platformWebApp')
-.factory('platformWebApp.pushNotifications', ['$resource', function ($resource) {
-
-    return $resource('api/platform/pushnotifications/:id', { id: '@Id' }, {
-        markAllAsRead: { method: 'POST', url: 'api/platform/pushnotifications/markAllAsRead' },
-        query: { method: 'POST', url: 'api/platform/pushnotifications' }
-	});
-}]);
-
 angular.module('platformWebApp')
 .controller('platformWebApp.userProfile.userProfileController', ['$rootScope', '$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', 'platformWebApp.settings.helper',
     'platformWebApp.i18n', 'platformWebApp.userProfile', 'platformWebApp.common.languages', 'platformWebApp.common.locales', 'platformWebApp.common.timeZones', 'platformWebApp.userProfileApi',
