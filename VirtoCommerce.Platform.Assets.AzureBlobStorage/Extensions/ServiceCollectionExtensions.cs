@@ -2,7 +2,7 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.Platform.Core.Assets;
 
-namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage.Extensions
+namespace VirtoCommerce.Platform.Assets.AzureBlobStorage.Extensions
 {
     public static class ServiceCollectionExtensions
     {

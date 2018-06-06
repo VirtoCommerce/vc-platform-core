@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace VirtoCommerce.Platform.Data.Assets.FileSystem
+namespace VirtoCommerce.Platform.Assets.FileSystem
 {
     public class FileSystemBlobContentOptions
     {

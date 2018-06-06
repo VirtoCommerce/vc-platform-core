@@ -21,9 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
-    <ProjectReference Include="..\VirtoCommerce.Platform.Data.Assets.AzureBlobStorage\VirtoCommerce.Platform.Data.Assets.AzureBlobStorage.csproj" />
-    <ProjectReference Include="..\VirtoCommerce.Platform.Data.Assets.FileSystem\VirtoCommerce.Platform.Data.Assets.FileSystem.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />  
   </ItemGroup>
 
 </Project>

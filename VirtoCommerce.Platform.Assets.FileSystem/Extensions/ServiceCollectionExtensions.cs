@@ -2,7 +2,7 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.Platform.Core.Assets;
 
-namespace VirtoCommerce.Platform.Data.Assets.FileSystem.Extensions
+namespace VirtoCommerce.Platform.Assets.FileSystem.Extensions
 {
     public static class ServiceCollectionExtensions
     {

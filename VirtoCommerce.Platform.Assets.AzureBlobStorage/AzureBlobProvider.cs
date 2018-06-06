@@ -11,7 +11,7 @@ using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Exceptions;
 
-namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
+namespace VirtoCommerce.Platform.Assets.AzureBlobStorage
 {
     public class AzureBlobProvider : IBlobStorageProvider, IBlobUrlResolver
     {

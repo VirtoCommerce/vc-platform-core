@@ -1,6 +1,6 @@
 using Microsoft.WindowsAzure.Storage.Blob;
 
-namespace VirtoCommerce.Platform.Data.Assets.AzureBlobStorage
+namespace VirtoCommerce.Platform.Assets.AzureBlobStorage
 {
     public class AzureBlobContentOptions
     {
