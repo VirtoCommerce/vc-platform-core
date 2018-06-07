@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using VirtoCommerce.Platform.Core.Domain;
 
 namespace VirtoCommerce.Platform.Core.Common
 {
