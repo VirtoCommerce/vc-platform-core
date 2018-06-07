@@ -11,6 +11,7 @@ namespace VirtoCommerce.Platform.Core.Common
 
         public string Id { get; set; }
         public string Type { get; set; }
+        public bool IsValid => !string.IsNullOrEmpty(Id) && !string.IsNullOrEmpty(Type);
 
     }
 }

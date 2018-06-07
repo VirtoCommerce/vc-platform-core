@@ -2,14 +2,12 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Settings;
-using VirtoCommerce.Platform.Data.Assets;
 using VirtoCommerce.Platform.Data.ChangeLog;
 using VirtoCommerce.Platform.Data.DynamicProperties;
 using VirtoCommerce.Platform.Data.PushNotifications;
@@ -38,16 +36,5 @@ namespace VirtoCommerce.Platform.Data.Extensions
             return services;
 
         }
-
-        public static void AddFileSystemBlobProvider(this IServiceCollection services, Action<FileSystemBlobContentOptions> setupAction = null)
-        {
-            services.AddSingleton<IBlobStorageProvider, FileSystemBlobProvider>();
-            services.AddSingleton<IBlobUrlResolver, FileSystemBlobProvider>();
-            if (setupAction != null)
-            {
-                services.Configure(setupAction);
-            }
-        }
-
     }
 }

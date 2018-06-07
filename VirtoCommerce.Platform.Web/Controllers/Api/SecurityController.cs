@@ -190,9 +190,9 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         }
 
         /// <summary>
-        /// Search roles by keyword
+        /// SearchAsync roles by keyword
         /// </summary>
-        /// <param name="request">Search parameters.</param>
+        /// <param name="request">SearchAsync parameters.</param>
         [HttpPost]
         [Route("roles/search")]
         [ProducesResponseType(typeof(GenericSearchResult<Role>), 200)]
@@ -310,7 +310,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         //}
 
         /// <summary>
-        /// Search users by keyword
+        /// SearchAsync users by keyword
         /// </summary>
         /// <param name="criteria">Search criteria.</param>
         [HttpPost]

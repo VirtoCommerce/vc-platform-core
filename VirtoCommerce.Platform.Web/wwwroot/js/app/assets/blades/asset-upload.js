@@ -1,10 +1,11 @@
-﻿angular.module('platformWebApp')
+angular.module('platformWebApp')
     .controller('platformWebApp.assets.assetUploadController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'FileUploader', function ($scope, assets, bladeNavigationService, FileUploader) {
         var blade = $scope.blade;
         var currentEntities;
         if (!blade.fileUploadOptions) {
             blade.fileUploadOptions = {};
         }
+        var folderUrl = blade.currentEntityId || "";
 
         function initialize() {
             if (!$scope.uploader) {
@@ -12,7 +13,7 @@
                 var uploader = $scope.uploader = new FileUploader({
                     scope: $scope,
                     headers: { Accept: 'application/json' },
-                    url: 'api/platform/assets?folderUrl=' + blade.currentEntityId,
+                    url: 'api/platform/assets?folderUrl=' + folderUrl,
                     method: 'POST',
                     //autoUpload: true,
                     removeAfterUpload: true
@@ -21,7 +22,7 @@
                 if (blade.fileUploadOptions.accept && blade.fileUploadOptions.accept.contains('image')) {
                     uploader.filters.push({
                         name: 'imageFilter',
-                        fn: function(item) {
+                        fn: function (item) {
                             var type = '|' + item.type.slice(item.type.lastIndexOf('/') + 1) + '|';
                             return '|jpg|png|jpeg|bmp|gif|'.indexOf(type) !== -1;
                         }
@@ -34,10 +35,10 @@
                     bladeNavigationService.setError(null, blade);
 
                     // check for asset duplicates
-                    assets.query({ folderUrl: blade.currentEntityId },
+                    assets.search({ folderUrl: folderUrl },
                         function (data) {
                             blade.isLoading = false;
-                            currentEntities = data;
+                            currentEntities = data.results;
 
                             _.each(addedItems, promptUserDecision);
                             uploader.uploadAll();
@@ -89,7 +90,7 @@
             if (blade.newExternalImageUrl) {
                 blade.uploadCompleted = false;
 
-                assets.uploadFromUrl({ folderUrl: blade.currentEntityId, url: blade.newExternalImageUrl }, function (data) {
+                assets.uploadFromUrl({ folderUrl: folderUrl, url: blade.newExternalImageUrl }, function (data) {
                     refreshParentBlade();
                     if (blade.onUploadComplete) {
                         blade.onUploadComplete(data);
