@@ -351,16 +351,8 @@ namespace VirtoCommerce.Platform.Web
             app.UseSmidgeNuglify();
 
 
-            //register swagger content
-            //app.UseFileServer(new FileServerOptions
-            //{
-            //    RequestPath = "/docs",
-            //    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot", "swagger")),
-            //    EnableDefaultFiles = true //serve index.html at /{ options.RoutePrefix }/
-            //});
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger(c => c.RouteTemplate = "docs/{documentName}/docs.json");
-            //app.UseSwagger();
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
@@ -374,8 +366,11 @@ namespace VirtoCommerce.Platform.Web
                     return type;
                 };
                 c.DocumentTitle = "VirtoCommerce Solution REST API documentation";
-                //c.InjectStylesheet("/swagger/vc.css");
+                c.InjectStylesheet("/swagger/vc.css");
+                c.ShowExtensions();
+                c.DocExpansion(DocExpansion.None);
             });
+            
 
             app.UseDbTriggers();
             //Register platform settings

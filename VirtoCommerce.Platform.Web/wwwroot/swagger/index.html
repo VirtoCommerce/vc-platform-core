@@ -10,6 +10,8 @@
     <link href='/swagger/print.css' media='print' rel='stylesheet' type='text/css'/>
     <link rel="stylesheet" type="text/css" href="./swagger-ui.css">
     <link href='//fonts.googleapis.com/css?family=Exo+2:400,300,500,600,400italic&amp;subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+    <link rel="icon" type="image/png" href="/swagger/logo_small.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/swagger/logo_small.png" sizes="16x16" />
     %(HeadContent)
 </head>
 
@@ -30,7 +32,22 @@
     </div>
 
     <div id="message-bar" class="swagger-ui-wrap" data-sw-translate>&nbsp;</div>
-    <div id="swagger-ui-container" class="swagger-ui-wrap"></div>
+    <div class="swagger-ui-wrap">
+        <div class="info" id="api_info">
+            <div class="info_title">VirtoCommerce Solution REST API documentation</div>
+            <div class="info_description markdown">
+                <p>For this sample, you can use the key to satisfy the authorization filters.</p>
+            </div>
+            
+            <div class="info_name">Created by Virto Commerce</div>
+            <div class="info_url">See more at <a href="http://virtocommerce.com">http://virtocommerce.com</a></div>
+            <div class="info_email"><a href="mailto:support@virtocommerce.com?subject=VirtoCommerce Solution REST API documentation">Contact the developer</a></div>
+            <div class="info_license"><a href="http://virtocommerce.com/opensourcelicense">Virto Commerce Open Software License 3.0</a></div>
+        </div>
+    </div>
+    <div id="swagger-ui-container" class="swagger-ui-wrap">
+        
+    </div>
 
     <script src="./swagger-ui-bundle.js"> </script>
     <script src="./swagger-ui-standalone-preset.js"> </script>
