@@ -219,7 +219,14 @@ namespace VirtoCommerce.Platform.Web
             // Register the Swagger generator
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info { Title = "VirtoCommerce Solution REST API documentation", Version = "v1" });
+                c.SwaggerDoc("v1", new Info { Title = "VirtoCommerce Solution REST API documentation", Version = "v1", Description = "For this sample, you can use the"
+                    , Contact = new Contact
+                    {
+                        Email = "support@virtocommerce.com",
+                        Name = "Virto Commerce",
+                        Url = "http://virtocommerce.com"
+                    }
+                });
                 c.TagActionsBy(api => api.GroupByModuleName(services));
                 c.DocInclusionPredicate((docName, api) => true);
                 c.DescribeAllEnumsAsStrings();
@@ -316,13 +323,7 @@ namespace VirtoCommerce.Platform.Web
             app.UseDefaultFiles();
 
 
-            //register swagger content
-            //app.UseFileServer(new FileServerOptions
-            //{
-            //    RequestPath = "/docs",
-            //    FileProvider = new PhysicalFileProvider(Path.GetFullPath("Swagger")),
-            //    EnableDefaultFiles = true //serve index.html at /{ options.RoutePrefix }/
-            //});
+            
 
             app.UseAuthentication();
 
@@ -349,6 +350,14 @@ namespace VirtoCommerce.Platform.Web
             });
             app.UseSmidgeNuglify();
 
+
+            //register swagger content
+            //app.UseFileServer(new FileServerOptions
+            //{
+            //    RequestPath = "/docs",
+            //    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot", "swagger")),
+            //    EnableDefaultFiles = true //serve index.html at /{ options.RoutePrefix }/
+            //});
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger(c => c.RouteTemplate = "docs/{documentName}/docs.json");
             //app.UseSwagger();
@@ -365,7 +374,7 @@ namespace VirtoCommerce.Platform.Web
                     return type;
                 };
                 c.DocumentTitle = "VirtoCommerce Solution REST API documentation";
-                c.InjectStylesheet("/swagger/vc.css");
+                //c.InjectStylesheet("/swagger/vc.css");
             });
 
             app.UseDbTriggers();

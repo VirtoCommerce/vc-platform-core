@@ -20,7 +20,7 @@ body
     /* padding: 13px 0; */
 }
 .swagger-section #header a#logo {
-  display: inline-block;
+  /* display: inline-block; */
   font-size: 1.2em;
   font-weight: bold;
   text-decoration: none;
