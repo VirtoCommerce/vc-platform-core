@@ -27,6 +27,7 @@
     <ProjectReference Include="..\VirtoCommerce.NotificationsModule.SendGrid\VirtoCommerce.NotificationsModule.SendGrid.csproj" />
     <ProjectReference Include="..\VirtoCommerce.NotificationsModule.Smtp\VirtoCommerce.NotificationsModule.Smtp.csproj" />
     <ProjectReference Include="..\VirtoCommerce.NotificationsModule.Web\VirtoCommerce.NotificationsModule.Web.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.NotificationsSampleModule.Web\VirtoCommerce.NotificationsSampleModule.Web.csproj" />
   </ItemGroup>
 
 </Project>

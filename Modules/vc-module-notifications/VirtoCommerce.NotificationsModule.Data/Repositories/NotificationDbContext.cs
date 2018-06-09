@@ -11,7 +11,12 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             : base(options)
         {
         }
-        
+
+        protected NotificationDbContext(DbContextOptions options)
+            : base(options)
+        {
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             #region Notification
