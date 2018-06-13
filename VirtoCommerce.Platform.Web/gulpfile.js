@@ -1,4 +1,4 @@
-/// <binding AfterBuild='min:js, min:css' />
+/// <binding />
 "use strict";
 
 var gulp = require("gulp"),
@@ -57,15 +57,15 @@ gulp.task("min:js", function () {
     var plainStream = gulp.src(src_paths)
         .pipe(sourcemaps.init())
         .pipe(concat('platform.js'))
-        // Add transformation tasks to the pipeline here.
-        .pipe(sourcemaps.write('../maps'))
+        //// Add transformation tasks to the pipeline here.
+        //.pipe(sourcemaps.write('../maps'))
         .pipe(gulp.dest('wwwroot/js/'));
 
     var minStream = gulp.src(src_paths)
         .pipe(sourcemaps.init())
         .pipe(concat('platform.min.js'))
-        .pipe(uglify())
-        .pipe(sourcemaps.write('../maps'))
+        //.pipe(uglify())
+        //.pipe(sourcemaps.write('../maps'))
         .pipe(gulp.dest('wwwroot/js/'));
     return merge(plainStream, minStream);
 });
@@ -102,6 +102,13 @@ gulp.task("min:css", function () {
         .pipe(concat('platform.css'))
         .pipe(cssmin())
         .pipe(gulp.dest('wwwroot/css'));
+});
+
+// Watch Task
+
+gulp.task('watch', function () {
+    var watch_patch = ['wwwroot/js/**/*.js', '!wwwroot/js/**/*.min.js', '!wwwroot/js/allPackages.js', '!wwwroot/js/platform.js'];
+    gulp.watch(watch_patch, ['min:js']);
 });
 
 gulp.task("clean", function () {

@@ -77,6 +77,11 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                         var fileName = contentDisposition.FileName.Value;
                         targetFilePath = Path.Combine(uploadPath, fileName);
 
+                        if (!Directory.Exists(uploadPath))
+                        {
+                            Directory.CreateDirectory(uploadPath);
+                        }
+
                         using (var targetStream = System.IO.File.Create(targetFilePath))
                         {
                             await section.Body.CopyToAsync(targetStream);

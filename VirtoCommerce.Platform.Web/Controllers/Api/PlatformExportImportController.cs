@@ -143,7 +143,9 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             {
                 throw new ArgumentNullException(nameof(fileUrl));
             }
-            var localPath = _hostEnv.MapPath(fileUrl);
+
+            var localPath = Path.Combine(Path.GetFullPath(_platformOptions.LocalUploadFolderPath), fileUrl);
+
             PlatformExportManifest retVal;
             using (var stream = new FileStream(localPath, FileMode.Open))
             {
@@ -190,8 +192,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         }
 
         [HttpPost]
-        [Route("exortimport/tasks/{jobId}/cancel")]
-        public IActionResult Cancel([FromBody]string jobId)
+        [Route("exortimport/tasks/cancel")]
+        public IActionResult Cancel([FromQuery]string jobId)
         {
             BackgroundJob.Delete(jobId);
             return Ok();
