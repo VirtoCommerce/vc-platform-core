@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<module>
+    <id>VirtoCommerce.Inventory</id>
+    <version>3.0.0</version>
+    <platformVersion>3.0.0</platformVersion>
+    <dependencies>
+        <dependency id="VirtoCommerce.Core" version="3.0.0" />
+        <dependency id="VirtoCommerce.Catalog" version="3.0.0" />
+    </dependencies>
+    <title>Inventory module</title>
+    <description>Simplify inventory management functionality</description>
+    <authors>
+        <author>Virto Commerce</author>
+    </authors>
+    <owners>
+        <owner>Virto Commerce</owner>
+    </owners>
+    <projectUrl>https://virtocommerce.com/apps/extensions/virto-inventory-module</projectUrl>
+    <iconUrl>Modules/$(VirtoCommerce.InventoryModule)/Content/logoVC.png</iconUrl>
+    <releaseNotes>First version.</releaseNotes>
+    <copyright>Copyright © 2011-2018 Virto Commerce. All rights reserved</copyright>
+    <tags>order system</tags>
+
+    <assemblyFile>VirtoCommerce.InventoryModule.Web.dll</assemblyFile>
+    <moduleType>VirtoCommerce.InventoryModule.Web.Module, VirtoCommerce.InventoryModule.Web</moduleType>
+
+    <scripts>
+        <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
+    </scripts>
+
+    <settings>
+        <group name="Inventory|General">
+            <setting>
+                <name>Inventory.ExportImport.Description</name>
+                <valueType>string</valueType>
+                <defaultValue>Export/Import inventory information</defaultValue>
+                <title>Export/Import description</title>
+                <description>Module description in platform export/import wizard</description>
+            </setting>
+            <setting>
+                <name>Inventory.ExportImport.PageSize</name>
+                <valueType>integer</valueType>
+                <defaultValue>50</defaultValue>
+                <title>The page size being used for Export / Import</title>
+                <description>High value may will cause slow performance</description>
+            </setting>
+        </group>
+    </settings>
+    <permissions>
+        <group name="Inventory">
+            <permission id="inventory:update" name="Update inventory related data" description="Permission to update inventory related data."/>
+            <permission id="inventory:fulfillment:edit" name="Manage fulfillment centers"/>
+            <permission id="inventory:fulfillment:delete" name="Delete fulfillment centers"/>
+        </group>
+    </permissions>
+</module>
