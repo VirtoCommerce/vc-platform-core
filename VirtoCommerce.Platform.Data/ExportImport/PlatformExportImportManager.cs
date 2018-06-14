@@ -235,16 +235,16 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                 }
             }
 
-            ////Dynamic properties
-            //progressInfo.Description = "Dynamic properties: load properties...";
-            //progressCallback(progressInfo);
+            //Dynamic properties
+            progressInfo.Description = "Dynamic properties: load properties...";
+            progressCallback(progressInfo);
 
-            //platformExportObj.DynamicProperties = (await _dynamicPropertySearchService.SearchDynamicPropertiesAsync(new DynamicPropertySearchCriteria { Take = int.MaxValue })).Results;
-            //platformExportObj.DynamicPropertyDictionaryItems = (await _dynamicPropertySearchService.SearchDictionaryItemsAsync(new DynamicPropertyDictionaryItemSearchCriteria { Take = int.MaxValue })).Results;
+            platformExportObj.DynamicProperties = (await _dynamicPropertySearchService.SearchDynamicPropertiesAsync(new DynamicPropertySearchCriteria { Take = int.MaxValue })).Results;
+            platformExportObj.DynamicPropertyDictionaryItems = (await _dynamicPropertySearchService.SearchDictionaryItemsAsync(new DynamicPropertyDictionaryItemSearchCriteria { Take = int.MaxValue })).Results;
 
-            ////Notification templates
-            //progressInfo.Description = "Notifications: load templates...";
-            //progressCallback(progressInfo);
+            //Notification templates
+            progressInfo.Description = "Notifications: load templates...";
+            progressCallback(progressInfo);
 
             //Create part for platform entries
             var platformEntiriesPart = zipArchive.CreateEntry(_platformZipEntryName, CompressionLevel.Optimal);
