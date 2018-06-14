@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using VirtoCommerce.Platform.Core.Events;
-using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.InventoryModule.Core.Model;
+using VirtoCommerce.Platform.Core.Domain;
+using VirtoCommerce.Platform.Core.Events;
 
-namespace VirtoCommerce.Domain.Inventory.Events
+namespace VirtoCommerce.InventoryModule.Core.Events
 {
     public class InventoryChangedEvent : GenericChangedEntryEvent<InventoryInfo>
     {

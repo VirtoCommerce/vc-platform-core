@@ -19,6 +19,7 @@ angular.module('virtoCommerce.inventoryModule')
                         take: $scope.pageSettings.itemsPerPageCount
                     }, function (response) {
                         blade.isLoading = false;
+                        $scope.pageSettings.totalItems = response.totalCount;
                         blade.currentEntities = response.results;
                         if (parentRefresh === true) {
                             blade.parentBlade.refresh();
