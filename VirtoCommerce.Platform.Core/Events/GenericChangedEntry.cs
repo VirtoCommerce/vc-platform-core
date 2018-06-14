@@ -1,6 +1,6 @@
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.Platform.Core.Domain
+namespace VirtoCommerce.Platform.Core.Events
 {
     public class GenericChangedEntry<T> : ValueObject
     {

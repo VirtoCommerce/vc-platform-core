@@ -12,8 +12,10 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using OpenIddict.Core;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Notifications;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Core.Security.Events;
 using VirtoCommerce.Platform.Core.Security.Search;
 using VirtoCommerce.Platform.Web.Model.Security;
 
@@ -31,10 +33,11 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         private readonly IUserSearchService _userSearchService;
         private readonly IRoleSearchService _roleSearchService;
         private readonly IEmailSender _emailSender;
+        private readonly IEventPublisher _eventPublisher;
 
         public SecurityController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager,
                 IKnownPermissionsProvider permissionsProvider, IUserSearchService userSearchService, IRoleSearchService roleSearchService,
-                IOptions<SecurityOptions> securityOptions, IEmailSender emailSender)
+                IOptions<SecurityOptions> securityOptions, IEmailSender emailSender, IEventPublisher eventPublisher)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -44,6 +47,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             _userSearchService = userSearchService;
             _roleSearchService = roleSearchService;
             _emailSender = emailSender;
+            _eventPublisher = eventPublisher;
         }
 
         /// <summary>
@@ -63,6 +67,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             if (loginResult.Succeeded)
             {
                 var user = await _userManager.FindByNameAsync(request.UserName);
+                await _eventPublisher.Publish(new UserLoginEvent(user));
                 //Do not allow login to admin customers and rejected users
                 if (await _signInManager.UserManager.IsInRoleAsync(user, SecurityConstants.Roles.Customer))
                 {
@@ -81,7 +86,13 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Route("logout")]
         public async Task<ActionResult> Logout()
         {
-            await _signInManager.SignOutAsync();
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            if (user != null)
+            {
+                await _signInManager.SignOutAsync();
+                await _eventPublisher.Publish(new UserLogoutEvent(user));
+            }
+            
             return Ok();
         }
 
@@ -378,6 +389,11 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             }
 
             var result = await _signInManager.UserManager.ChangePasswordAsync(user, changePassword.OldPassword, changePassword.NewPassword);
+            if (result.Succeeded)
+            {
+                await _eventPublisher.Publish(new UserPasswordChangedEvent(user.Id));
+            }
+            
             return Ok(result);
         }
 
@@ -403,6 +419,11 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 return BadRequest(new IdentityError() { Description = "It is forbidden to edit this user." });
             }
             var result = await _signInManager.UserManager.ResetPasswordAsync(user, resetPasswordConfirm.Token, resetPasswordConfirm.NewPassword);
+            if (result.Succeeded)
+            {
+                await _eventPublisher.Publish(new UserResetPasswordEvent(user.Id));
+            }
+            
             return Ok(result);
         }
 
