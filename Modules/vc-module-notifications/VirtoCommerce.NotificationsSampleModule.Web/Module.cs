@@ -21,10 +21,10 @@ namespace VirtoCommerce.NotificationsSampleModule.Web
 
         public void PostInitialize(IServiceProvider serviceProvider)
         {
+            AbstractTypeFactory<NotificationEntity>.RegisterType<TwitterNotificationEntity>();
             AbstractTypeFactory<Notification>.RegisterType<TwitterNotification>().MapToType<NotificationEntity>();
             AbstractTypeFactory<NotificationTemplate>.RegisterType<TwitterNotificationTemplate>().MapToType<NotificationTemplateEntity>();
             AbstractTypeFactory<NotificationMessage>.RegisterType<TwitterNotificationMessage>().MapToType<NotificationMessageEntity>();
-            AbstractTypeFactory<NotificationEntity>.RegisterType<TwitterNotificationEntity>();
             var registrar = serviceProvider.GetService<INotificationRegistrar>();
             registrar.RegisterNotification<PostTwitterNotification>();
             registrar.RegisterNotification<RegistrationEmailNotification>();
