@@ -105,7 +105,6 @@ gulp.task("min:css", function () {
 });
 
 // Watch Task
-
 gulp.task('watch', function () {
     var watch_patch = ['wwwroot/js/**/*.js', '!wwwroot/js/**/*.min.js', '!wwwroot/js/allPackages.js', '!wwwroot/js/platform.js'];
     gulp.watch(watch_patch, ['min:js']);

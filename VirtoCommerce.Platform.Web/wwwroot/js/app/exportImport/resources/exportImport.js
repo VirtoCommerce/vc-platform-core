@@ -11,10 +11,6 @@ angular.module('platformWebApp')
             sampleDataDiscover: { url: 'api/platform/sampledata/discover', isArray: true },
             importSampleData: { method: 'POST', url: 'api/platform/sampledata/import', params: { url: '@url' } },
 
-            taskCancel: {
-                method: 'POST',
-                url: 'api/platform/exortimport/tasks/cancel',
-                params: { jobId: '@jobId' }
-            }
+            taskCancel: { method: 'POST', url: 'api/platform/exortimport/tasks/cancel', params: { jobId: '@jobId' }}
         });
 }]);

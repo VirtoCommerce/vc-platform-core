@@ -32,25 +32,28 @@ angular.module('platformWebApp')
         $scope.exportRequest.modules = _.pluck(selection, 'id');
     };
 
-    $scope.startExport = function () {
+    $scope.startExport = function() {
         blade.isLoading = true;
         exportImportResourse.runExport($scope.exportRequest,
-            function (data) { blade.notification = data; blade.isLoading = false; });
+            function(data) {
+                blade.notification = data;
+                blade.isLoading = false;
+            });
 
         blade.toolbarCommands.splice(0, 2, commandCancel);
-        }
+    };
 
-        var commandCancel = {
-            name: 'platform.commands.cancel',
-            icon: 'fa fa-times',
-            canExecuteMethod: function () {
-                return blade.notification && !blade.notification.finished;
-            },
-            executeMethod: function () {
-                exportImportResourse.taskCancel({ jobId: blade.notification.jobId }, null, function (data) {
-                });
-            }
-        };
+    var commandCancel = {
+        name: 'platform.commands.cancel',
+        icon: 'fa fa-times',
+        canExecuteMethod: function () {
+            return blade.notification && !blade.notification.finished;
+        },
+        executeMethod: function () {
+            exportImportResourse.taskCancel({ jobId: blade.notification.jobId }, null, function (data) {
+            });
+        }
+    };
 
     blade.toolbarCommands = [
 		{
@@ -75,5 +78,4 @@ angular.module('platformWebApp')
     }
 
         initializeBlade();
-
 }]);
