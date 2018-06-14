@@ -3,11 +3,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.Platform.Core.Bus;
+using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Data.ChangeLog;
 using VirtoCommerce.Platform.Data.DynamicProperties;
 using VirtoCommerce.Platform.Data.ExportImport;
 using VirtoCommerce.Platform.Data.PushNotifications;
@@ -26,10 +28,13 @@ namespace VirtoCommerce.Platform.Data.Extensions
             services.AddSingleton<Func<IPlatformRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IPlatformRepository>());
             services.AddSingleton<ISettingsManager, SettingsManager>();
             services.AddSingleton<IPushNotificationManager, PushNotificationManager>();
-            services.AddSingleton<IEventPublisher, InProcessBus>();
             services.AddSingleton<IDynamicPropertyService, DynamicPropertyService>();
             services.AddSingleton<IDynamicPropertySearchService, DynamicPropertySearchService>();
             services.AddSingleton<IDynamicPropertyRegistrar, DynamicPropertyService>();
+            var inProcessBus = new InProcessBus();
+            services.AddSingleton<IHandlerRegistrar>(inProcessBus);
+            services.AddSingleton<IEventPublisher>(inProcessBus);
+            services.AddSingleton<IChangeLogService, ChangeLogService>();
             services.AddScoped<IPlatformExportImportManager, PlatformExportImportManager>();
             return services;
 
