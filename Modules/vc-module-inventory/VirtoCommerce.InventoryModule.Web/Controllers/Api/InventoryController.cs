@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.InventoryModule.Core.Model;
 using VirtoCommerce.InventoryModule.Core.Model.Search;
 using VirtoCommerce.InventoryModule.Core.Services;
-using VirtoCommerce.InventoryModule.Web.Security;
+using VirtoCommerce.InventoryModule.Core.Security;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.InventoryModule.Web.Controllers.Api

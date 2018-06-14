@@ -1,4 +1,4 @@
-﻿namespace VirtoCommerce.InventoryModule.Web.Security
+namespace VirtoCommerce.InventoryModule.Core.Security
 {
     public static class InventoryPredefinedPermissions
     {
