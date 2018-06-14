@@ -47,8 +47,6 @@ namespace VirtoCommerce.InventoryModule.Data.Model
 
 		[Required]
 		[StringLength(128)]
-        //todo
-        //[Index]
 		public string Sku { get; set; }
 
 

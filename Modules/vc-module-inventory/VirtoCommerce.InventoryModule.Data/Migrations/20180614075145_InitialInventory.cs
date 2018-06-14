@@ -74,6 +74,11 @@ namespace VirtoCommerce.InventoryModule.Data.Migrations
                 name: "IX_Inventory_FulfillmentCenterId",
                 table: "Inventory",
                 column: "FulfillmentCenterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Inventory_Sku",
+                table: "Inventory",
+                column: "Sku");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

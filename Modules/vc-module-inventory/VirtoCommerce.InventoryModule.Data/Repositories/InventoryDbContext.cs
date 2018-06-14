@@ -18,14 +18,15 @@ namespace VirtoCommerce.InventoryModule.Data.Repositories
         {
             modelBuilder.Entity<InventoryEntity>().ToTable("Inventory").HasKey(x => x.Id);
             modelBuilder.Entity<InventoryEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<InventoryEntity>().HasIndex(
+                inv => new { inv.Sku }).IsUnique(false);
 
             modelBuilder.Entity<FulfillmentCenterEntity>().ToTable("FulfillmentCenter").HasKey(x => x.Id);
             modelBuilder.Entity<FulfillmentCenterEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<InventoryEntity>().HasOne(x => x.FulfillmentCenter).WithMany()
                 .HasForeignKey(x => x.FulfillmentCenterId)
                 .OnDelete(DeleteBehavior.SetNull);
-
-
+            
             base.OnModelCreating(modelBuilder);
         }
     }

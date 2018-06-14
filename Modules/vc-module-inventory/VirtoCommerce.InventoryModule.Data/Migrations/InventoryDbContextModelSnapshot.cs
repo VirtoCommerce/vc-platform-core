@@ -131,6 +131,8 @@ namespace VirtoCommerce.InventoryModule.Data.Migrations
 
                     b.HasIndex("FulfillmentCenterId");
 
+                    b.HasIndex("Sku");
+
                     b.ToTable("Inventory");
                 });
 

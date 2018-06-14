@@ -10,7 +10,7 @@ using VirtoCommerce.InventoryModule.Data.Repositories;
 namespace VirtoCommerce.InventoryModule.Data.Migrations
 {
     [DbContext(typeof(InventoryDbContext))]
-    [Migration("20180613145115_InitialInventory")]
+    [Migration("20180614075145_InitialInventory")]
     partial class InitialInventory
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -132,6 +132,8 @@ namespace VirtoCommerce.InventoryModule.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("FulfillmentCenterId");
+
+                    b.HasIndex("Sku");
 
                     b.ToTable("Inventory");
                 });
