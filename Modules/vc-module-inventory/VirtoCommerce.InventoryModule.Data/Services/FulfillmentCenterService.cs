@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.InventoryModule.Core.Events;
 using VirtoCommerce.InventoryModule.Core.Model;
 using VirtoCommerce.InventoryModule.Core.Services;
+using VirtoCommerce.InventoryModule.Data.Cashing;
 using VirtoCommerce.InventoryModule.Data.Model;
 using VirtoCommerce.InventoryModule.Data.Repositories;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.Events;
@@ -18,10 +21,12 @@ namespace VirtoCommerce.InventoryModule.Data.Services
     {
         private readonly Func<IInventoryRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
-        public FulfillmentCenterService(Func<IInventoryRepository> repositoryFactory, IEventPublisher eventPublisher)
+        private readonly IMemoryCache _memoryCache;
+        public FulfillmentCenterService(Func<IInventoryRepository> repositoryFactory, IEventPublisher eventPublisher, IMemoryCache memoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
+            _memoryCache = memoryCache;
         }
 
         #region IFulfillmentCenterService members
@@ -31,15 +36,21 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             {
                 throw new ArgumentNullException(nameof(ids));
             }
-            IEnumerable<FulfillmentCenter> result = null;
-            using (var repository = _repositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), "PreloadFulfillmentCenter");
+            return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                repository.DisableChangesTracking();
+                cacheEntry.AddExpirationToken(InventoryCacheRegion.CreateChangeToken());
+                IEnumerable<FulfillmentCenter> result = null;
+                using (var repository = _repositoryFactory())
+                {
+                    repository.DisableChangesTracking();
 
-                var fulfillmentCenters = await repository.GetFulfillmentCenters(ids);
-                result = fulfillmentCenters.Select(x => x.ToModel(AbstractTypeFactory<FulfillmentCenter>.TryCreateInstance())).ToArray();
-            }
-            return result;
+                    var fulfillmentCenters = await repository.GetFulfillmentCenters(ids);
+                    result = fulfillmentCenters
+                        .Select(x => x.ToModel(AbstractTypeFactory<FulfillmentCenter>.TryCreateInstance())).ToArray();
+                }
+                return result;
+            });
         }
 
         public async Task SaveChangesAsync(IEnumerable<FulfillmentCenter> fulfillmentCenters)
@@ -74,6 +85,9 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
                 await _eventPublisher.Publish(new FulfillmentCenterChangedEvent(changedEntries));
+
+                //Reset cached catalogs and catalogs
+                InventoryCacheRegion.ExpireRegion();
             }
         }
 
@@ -92,6 +106,9 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                 await _eventPublisher.Publish(new FulfillmentCenterChangingEvent(changedEntries));
                 await repository.UnitOfWork.CommitAsync();
                 await _eventPublisher.Publish(new FulfillmentCenterChangedEvent(changedEntries));
+
+                //Reset cached catalogs and catalogs
+                InventoryCacheRegion.ExpireRegion();
             }
         }
         #endregion

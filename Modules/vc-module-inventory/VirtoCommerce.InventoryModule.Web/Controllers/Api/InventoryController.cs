@@ -15,17 +15,15 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
     public class InventoryController : Controller
     {
         private readonly IInventoryService _inventoryService;
-        private readonly IInventorySearchService _inventorySearchService;
         private readonly IFulfillmentCenterSearchService _fulfillmentCenterSearchService;
         private readonly IFulfillmentCenterService _fulfillmentCenterService;
 
         public InventoryController(IInventoryService inventoryService, IFulfillmentCenterSearchService fulfillmentCenterSearchService,
-                                          IInventorySearchService inventorySearchService, IFulfillmentCenterService fulfillmentCenterService)
+                                          IFulfillmentCenterService fulfillmentCenterService)
         {
             _inventoryService = inventoryService;
             _fulfillmentCenterSearchService = fulfillmentCenterSearchService;
             _fulfillmentCenterService = fulfillmentCenterService;
-            _inventorySearchService = inventorySearchService;
         }
 
         /// <summary>
