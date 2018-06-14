@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using VirtoCommerce.InventoryModule.Data.Model;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.Platform.Core.Domain;
@@ -19,14 +20,19 @@ namespace VirtoCommerce.InventoryModule.Data.Repositories
 
         public IQueryable<FulfillmentCenterEntity> FulfillmentCenters => DbContext.Set<FulfillmentCenterEntity>();
 
-        public IEnumerable<InventoryEntity> GetProductsInventories(IEnumerable<string> productIds)
+        public async Task<IEnumerable<InventoryEntity>> GetProductsInventories(IEnumerable<string> productIds)
         {
-            return Inventories.Where(x => productIds.Contains(x.Sku)).Include(x => x.FulfillmentCenter).ToArray();
+            return await Inventories.Where(x => productIds.Contains(x.Sku)).Include(x => x.FulfillmentCenter).ToListAsync();
         }
 
-        public IEnumerable<FulfillmentCenterEntity> GetFulfillmentCenters(IEnumerable<string> ids)
+        public async Task<IEnumerable<FulfillmentCenterEntity>> GetFulfillmentCenters(IEnumerable<string> ids)
         {
-            return FulfillmentCenters.Where(x => ids.Contains(x.Id)).ToArray();
+            return await FulfillmentCenters.Where(x => ids.Contains(x.Id)).ToListAsync();
+        }
+
+        public async Task<IEnumerable<InventoryEntity>> GetByIdsAsync(string[] ids)
+        {
+            return await Inventories.Where(x => ids.Contains(x.Id)).ToListAsync();
         }
 
         #endregion

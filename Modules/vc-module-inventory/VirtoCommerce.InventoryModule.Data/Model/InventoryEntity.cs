@@ -1,11 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.Platform.Core.Common;
-using System.ComponentModel.DataAnnotations.Schema;
-using VirtoCommerce.Domain.Inventory.Model;
 using VirtoCommerce.InventoryModule.Core.Model;
 
 namespace VirtoCommerce.InventoryModule.Data.Model
@@ -58,6 +53,7 @@ namespace VirtoCommerce.InventoryModule.Data.Model
 
         public virtual InventoryInfo ToModel(InventoryInfo inventory)
         {
+            inventory.Id = Id;
             inventory.CreatedBy = CreatedBy;
             inventory.CreatedDate = CreatedDate;
             inventory.ModifiedBy = ModifiedBy;
@@ -86,7 +82,7 @@ namespace VirtoCommerce.InventoryModule.Data.Model
 
         public virtual InventoryEntity FromModel(InventoryInfo inventory)
         {
-
+            Id = inventory.Id;
             CreatedBy = inventory.CreatedBy;
             CreatedDate = inventory.CreatedDate;
             ModifiedBy = inventory.ModifiedBy;
@@ -106,7 +102,6 @@ namespace VirtoCommerce.InventoryModule.Data.Model
             Status = (int)inventory.Status;
 
             return this;
-
         }
 
         public virtual void Patch(InventoryEntity target)

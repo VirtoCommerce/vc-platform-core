@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.InventoryModule.Core.Events;
 using VirtoCommerce.InventoryModule.Core.Model;
 using VirtoCommerce.InventoryModule.Core.Services;
@@ -25,33 +26,29 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             _eventPublisher = eventPublisher;
         }
 
-        public InventoryInfo GetById(string itemId)
+        public async Task<IEnumerable<InventoryInfo>> GetByIdsAsync(string[] itemIds)
         {
-            var result = GetProductsInventoryInfos(new[] { itemId }).FirstOrDefault();
-            return result;
-        }
-
-        #region IInventoryService Members
-
-
-        [Obsolete]
-        public IEnumerable<InventoryInfo> GetAllInventoryInfos()
-        {
+            //var inventories = await GetProductsInventoryInfosAsync(new[] {itemId});
+            //var result = inventories.FirstOrDefault();
+            //return result;
             using (var repository = _repositoryFactory())
             {
                 repository.DisableChangesTracking();
-                var result = repository.Inventories.ToArray().Select(x => x.ToModel(AbstractTypeFactory<InventoryInfo>.TryCreateInstance()));
-                return result;
+                var entity = await repository.Inventories.ToArrayAsync();
+                return entity.Select(e => e.ToModel(AbstractTypeFactory<InventoryInfo>.TryCreateInstance()));
             }
         }
 
-        public IEnumerable<InventoryInfo> GetProductsInventoryInfos(IEnumerable<string> productIds)
+        #region IInventoryService Members
+        
+
+        public async Task<IEnumerable<InventoryInfo>> GetProductsInventoryInfosAsync(IEnumerable<string> productIds)
         {
             var retVal = new List<InventoryInfo>();
             using (var repository = _repositoryFactory())
             {
                 repository.DisableChangesTracking();
-                var entities = repository.GetProductsInventories(productIds.ToArray());
+                var entities = await repository.GetProductsInventories(productIds.ToArray());
                 retVal.AddRange(entities.Select(x => x.ToModel(AbstractTypeFactory<InventoryInfo>.TryCreateInstance())));
             }
             return retVal;
@@ -67,7 +64,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             var changedEntries = new List<GenericChangedEntry<InventoryInfo>>();
             using (var repository = _repositoryFactory())
             {
-                var dataExistInventories = repository.GetProductsInventories(inventoryInfos.Select(x=>x.ProductId));
+                var dataExistInventories = await repository.GetProductsInventories(inventoryInfos.Select(x=>x.ProductId));
                 foreach (var changedInventory in inventoryInfos)
                 {               
                     var originalEntity = dataExistInventories.FirstOrDefault(x => x.Sku == changedInventory.ProductId && x.FulfillmentCenterId == changedInventory.FulfillmentCenterId);
@@ -87,7 +84,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
 
                 //Raise domain events
                 await _eventPublisher.Publish(new InventoryChangingEvent(changedEntries));
-                repository.UnitOfWork.Commit();
+                await repository.UnitOfWork.CommitAsync();
                 await _eventPublisher.Publish(new InventoryChangedEvent(changedEntries));
             }
         }

@@ -22,13 +22,13 @@ namespace VirtoCommerce.InventoryModule.Web
         public void Initialize(IServiceCollection serviceCollection)
         {
             var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
-            serviceCollection.AddScoped<IInventoryRepository, InventoryRepositoryImpl>();
+            serviceCollection.AddTransient<IInventoryRepository, InventoryRepositoryImpl>();
             serviceCollection.AddDbContext<InventoryDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce")));
-            serviceCollection.AddScoped<Func<IInventoryRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IInventoryRepository>());
-            serviceCollection.AddScoped<IInventoryService, InventoryServiceImpl>();
-            serviceCollection.AddScoped<IInventorySearchService, InventorySearchService>();
-            serviceCollection.AddScoped<IFulfillmentCenterSearchService, FulfillmentCenterSearchService>();
-            serviceCollection.AddScoped<IFulfillmentCenterService, FulfillmentCenterService>();
+            serviceCollection.AddSingleton<Func<IInventoryRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IInventoryRepository>());
+            serviceCollection.AddSingleton<IInventoryService, InventoryServiceImpl>();
+            serviceCollection.AddSingleton<IInventorySearchService, InventorySearchService>();
+            serviceCollection.AddSingleton<IFulfillmentCenterSearchService, FulfillmentCenterSearchService>();
+            serviceCollection.AddSingleton<IFulfillmentCenterService, FulfillmentCenterService>();
         }
 
         public void PostInitialize(IServiceProvider serviceProvider)

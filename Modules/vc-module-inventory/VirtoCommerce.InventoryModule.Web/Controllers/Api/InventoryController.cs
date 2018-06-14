@@ -35,9 +35,9 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         [AllowAnonymous]
         [ProducesResponseType(typeof(GenericSearchResult<FulfillmentCenter>), 200)]
         [Route("fulfillmentcenters/search")]
-        public IActionResult SearchFulfillmentCenters([FromBody] FulfillmentCenterSearchCriteria searchCriteria)
+        public async Task<IActionResult> SearchFulfillmentCenters([FromBody] FulfillmentCenterSearchCriteria searchCriteria)
         {
-            var retVal = _fulfillmentCenterSearchService.SearchCenters(searchCriteria);
+            var retVal = await _fulfillmentCenterSearchService.SearchCentersAsync(searchCriteria);
             return Ok(retVal);
         }
 
@@ -49,10 +49,10 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         [HttpGet]
         [ProducesResponseType(typeof(FulfillmentCenter), 200)]
         [Route("fulfillmentcenters/{id}")]
-        public IActionResult GetFulfillmentCenter(string id)
+        public async Task<IActionResult> GetFulfillmentCenter(string id)
         {
-            var retVal = _fulfillmentCenterService.GetByIds(new[] { id }).FirstOrDefault();
-            return Ok(retVal);
+            var retVal = await _fulfillmentCenterService.GetByIdsAsync(new[] { id });
+            return Ok(retVal.FirstOrDefault());
         }
 
         /// <summary>
@@ -63,9 +63,9 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         [ProducesResponseType(typeof(FulfillmentCenter), 200)]
         [Route("fulfillmentcenters")]
         [Authorize(InventoryPredefinedPermissions.FulfillmentEdit)]
-        public IActionResult SaveFulfillmentCenter(FulfillmentCenter center)
+        public async Task<IActionResult> SaveFulfillmentCenter(FulfillmentCenter center)
         {
-            _fulfillmentCenterService.SaveChangesAsync(new[] { center });
+            await _fulfillmentCenterService.SaveChangesAsync(new[] { center });
             return Ok(center);
         }
 
@@ -91,14 +91,14 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         [HttpGet]
         [Route("products")]
         [ProducesResponseType(typeof(InventoryInfo[]), 200)]
-        public IActionResult GetProductsInventories([FromQuery] string[] ids)
+        public async Task<IActionResult> GetProductsInventories([FromQuery] string[] ids)
         {
             var result = new List<InventoryInfo>();
-            var allFulfillments = _fulfillmentCenterSearchService.SearchCenters(new FulfillmentCenterSearchCriteria { Take = int.MaxValue }).Results;
-            var inventories = _inventoryService.GetProductsInventoryInfos(ids);
+            var allFulfillments = await _fulfillmentCenterSearchService.SearchCentersAsync(new FulfillmentCenterSearchCriteria { Take = int.MaxValue });
+            var inventories = await _inventoryService.GetProductsInventoryInfosAsync(ids);
             foreach (var productId in ids)
             {
-                foreach (var fulfillment in allFulfillments)
+                foreach (var fulfillment in allFulfillments.Results)
                 {
                     var inventory = inventories.FirstOrDefault(x => x.ProductId == productId && x.FulfillmentCenterId == fulfillment.Id);
                     if (inventory == null)
@@ -123,9 +123,9 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         [HttpPost]
         [Route("products/plenty")]
         [ProducesResponseType(typeof(InventoryInfo[]), 200)]
-        public IActionResult GetProductsInventoriesByPlentyIds([FromBody] string[] ids)
+        public async Task<IActionResult> GetProductsInventoriesByPlentyIds([FromBody] string[] ids)
         {
-            return GetProductsInventories(ids);
+            return await GetProductsInventories(ids);
         }
 
         /// <summary>
@@ -136,9 +136,9 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         [HttpGet]
         [Route("products/{productId}")]
         [ProducesResponseType(typeof(InventoryInfo[]), 200)]
-        public IActionResult GetProductInventories(string productId)
+        public async Task<IActionResult> GetProductInventories(string productId)
         {
-            return GetProductsInventories(new[] { productId });
+            return await GetProductsInventories(new[] { productId });
         }
 
         /// <summary>

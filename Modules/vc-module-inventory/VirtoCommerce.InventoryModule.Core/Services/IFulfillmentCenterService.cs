@@ -7,7 +7,7 @@ namespace VirtoCommerce.InventoryModule.Core.Services
     public interface IFulfillmentCenterService
     {
         Task SaveChangesAsync(IEnumerable<FulfillmentCenter> fulfillmentCenters);
-        IEnumerable<FulfillmentCenter> GetByIds(IEnumerable<string> ids, string responseGroup = null);
+        Task<IEnumerable<FulfillmentCenter>> GetByIdsAsync(IEnumerable<string> ids, string responseGroup = null);
         Task DeleteAsync(IEnumerable<string> ids);
     }
 }

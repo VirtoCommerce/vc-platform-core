@@ -25,7 +25,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
         }
 
         #region IFulfillmentCenterService members
-        public IEnumerable<FulfillmentCenter> GetByIds(IEnumerable<string> ids, string responseGroup = null)
+        public async Task<IEnumerable<FulfillmentCenter>> GetByIdsAsync(IEnumerable<string> ids, string responseGroup = null)
         {
             if (ids == null)
             {
@@ -36,9 +36,8 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             {
                 repository.DisableChangesTracking();
 
-                result = repository.GetFulfillmentCenters(ids)
-                                   .Select(x => x.ToModel(AbstractTypeFactory<FulfillmentCenter>.TryCreateInstance()))
-                                   .ToArray();
+                var fulfillmentCenters = await repository.GetFulfillmentCenters(ids);
+                result = fulfillmentCenters.Select(x => x.ToModel(AbstractTypeFactory<FulfillmentCenter>.TryCreateInstance())).ToArray();
             }
             return result;
         }
@@ -54,7 +53,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             var changedEntries = new List<GenericChangedEntry<FulfillmentCenter>>();
             using (var repository = _repositoryFactory())
             {
-                var existEntities = repository.GetFulfillmentCenters(fulfillmentCenters.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
+                var existEntities = await repository.GetFulfillmentCenters(fulfillmentCenters.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var changedCenter in fulfillmentCenters)
                 {
                     var existEntity = existEntities.FirstOrDefault(x => x.Id == changedCenter.Id);
@@ -72,7 +71,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                 }
                 //Raise domain events
                 await _eventPublisher.Publish(new FulfillmentCenterChangingEvent(changedEntries));
-                repository.UnitOfWork.Commit();
+                await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
                 await _eventPublisher.Publish(new FulfillmentCenterChangedEvent(changedEntries));
             }
@@ -83,7 +82,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             using (var repository = _repositoryFactory())
             {
                 var changedEntries = new List<GenericChangedEntry<FulfillmentCenter>>();
-                var dbCenters = repository.GetFulfillmentCenters(ids);
+                var dbCenters = await repository.GetFulfillmentCenters(ids);
                 foreach (var dbCenter in dbCenters)
                 {
                     repository.Remove(dbCenter);
@@ -91,7 +90,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                 }
 
                 await _eventPublisher.Publish(new FulfillmentCenterChangingEvent(changedEntries));
-                repository.UnitOfWork.Commit();
+                await repository.UnitOfWork.CommitAsync();
                 await _eventPublisher.Publish(new FulfillmentCenterChangedEvent(changedEntries));
             }
         }

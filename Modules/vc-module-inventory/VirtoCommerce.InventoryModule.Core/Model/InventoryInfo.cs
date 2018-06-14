@@ -7,6 +7,8 @@ namespace VirtoCommerce.InventoryModule.Core.Model
 {
     public class InventoryInfo : ValueObject, IAuditable
     {
+        public string Id { get; set; }
+
         #region IAuditable Members
         public DateTime CreatedDate { get; set; }
         public string CreatedBy { get; set; }

@@ -1,5 +1,7 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.Domain.Inventory.Model.Search;
 using VirtoCommerce.InventoryModule.Core.Model;
 using VirtoCommerce.InventoryModule.Core.Services;
@@ -17,7 +19,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             _repositoryFactory = repositoryFactory;
         }
 
-        public GenericSearchResult<InventoryInfo> SearchInventories(InventorySearchCriteria criteria)
+        public async Task<GenericSearchResult<InventoryInfo>> SearchInventoriesAsync(InventorySearchCriteria criteria)
         {
             var result = new GenericSearchResult<InventoryInfo>();
             using (var repository = _repositoryFactory())
@@ -41,10 +43,9 @@ namespace VirtoCommerce.InventoryModule.Data.Services
 
                 query = query.OrderBySortInfos(sortInfos);
 
-                result.TotalCount = query.Count();
-                result.Results = query.Skip(criteria.Skip)
-                                 .Take(criteria.Take)
-                                 .ToArray()
+                result.TotalCount = await query.CountAsync();
+                var list = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                result.Results = list
                                  .Select(x => x.ToModel(AbstractTypeFactory<InventoryInfo>.TryCreateInstance()))
                                  .ToList();
             }

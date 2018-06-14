@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.Domain.Search;
+using VirtoCommerce.InventoryModule.Core.Services;
 using VirtoCommerce.InventoryModule.Data.Model;
 using VirtoCommerce.InventoryModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.ChangeLog;
@@ -17,12 +18,12 @@ namespace VirtoCommerce.InventoryModule.Data.Search.Indexing
         public const string ChangeLogObjectType = nameof(InventoryEntity);
 
         private readonly IChangeLogService _changeLogService;
-        private readonly Func<IInventoryRepository> _inventoryRepositoryFactory;
+        private readonly IInventoryService _inventoryService;
 
-        public ProductAvailabilityChangesProvider(IChangeLogService changeLogService, Func<IInventoryRepository> inventoryRepositoryFactory)
+        public ProductAvailabilityChangesProvider(IChangeLogService changeLogService, IInventoryService inventoryService)
         {
             _changeLogService = changeLogService;
-            _inventoryRepositoryFactory = inventoryRepositoryFactory;
+            _inventoryService = inventoryService;
         }
 
         public async Task<long> GetTotalChangesCountAsync(DateTime? startDate, DateTime? endDate)
@@ -51,28 +52,17 @@ namespace VirtoCommerce.InventoryModule.Data.Search.Indexing
                     .Take((int)take)
                     .ToArray();
 
-                var inventories = GetInventoryByIds(changeLogOperations.Select(o => o.ObjectId).ToArray());
+                var inventories = await _inventoryService.GetByIdsAsync(changeLogOperations.Select(o => o.ObjectId).ToArray());
 
                 result = changeLogOperations.Join(inventories, o => o.ObjectId,  i => i .Id, (o, i) => new IndexDocumentChange
                 {
-                    DocumentId = i.Sku,
+                    DocumentId = i.ProductId,
                     ChangeType = IndexDocumentChangeType.Modified,
                     ChangeDate = o.ModifiedDate ?? o.CreatedDate,
                 }).ToList();
             
 
             return await Task.FromResult(result);
-        }
-
-        protected virtual IEnumerable<InventoryEntity> GetInventoryByIds(string[] inventoryIds)
-        {
-            // TODO: How to get product for deleted completeness entry?
-            using (var repository = _inventoryRepositoryFactory())
-            {
-                // TODO: Replace with service after GetById will be implemented
-                var inventories = repository.Inventories.Where(i => inventoryIds.Contains(i.Id)).ToArray();
-                return inventories;
-            }
         }
     }
 }
