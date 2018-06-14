@@ -69,7 +69,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.ImageToolsMod
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.ImageToolsModule.Data", "Modules\vc-module-imageTools\VirtoCommerce.ImageToolsModule.Data\VirtoCommerce.ImageToolsModule.Data.csproj", "{00371C83-FE70-4991-9AC6-1933C92DFBA1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.ImageToolsModule.Tests", "VirtoCommerce.ImageToolsModule.Tests\VirtoCommerce.ImageToolsModule.Tests.csproj", "{10F4C30B-AF5B-4344-BE0D-9EBA3A40B2E1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.ImageToolsModule.Tests", "Modules\vc-module-imageTools\VirtoCommerce.ImageToolsModule.Tests\VirtoCommerce.ImageToolsModule.Tests.csproj", "{F422D33A-26B3-4B8F-AC2D-9636129A996A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -185,10 +185,10 @@ Global
 		{00371C83-FE70-4991-9AC6-1933C92DFBA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{00371C83-FE70-4991-9AC6-1933C92DFBA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{00371C83-FE70-4991-9AC6-1933C92DFBA1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{10F4C30B-AF5B-4344-BE0D-9EBA3A40B2E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{10F4C30B-AF5B-4344-BE0D-9EBA3A40B2E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{10F4C30B-AF5B-4344-BE0D-9EBA3A40B2E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{10F4C30B-AF5B-4344-BE0D-9EBA3A40B2E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F422D33A-26B3-4B8F-AC2D-9636129A996A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F422D33A-26B3-4B8F-AC2D-9636129A996A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F422D33A-26B3-4B8F-AC2D-9636129A996A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F422D33A-26B3-4B8F-AC2D-9636129A996A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -218,7 +218,7 @@ Global
 		{B64532FA-C064-43CC-85E6-A6B975A49795} = {7052A390-9A84-46DA-BD3B-556FD74DEC97}
 		{77EF6D02-2A26-4EC5-AC77-E16AA4794386} = {B64532FA-C064-43CC-85E6-A6B975A49795}
 		{00371C83-FE70-4991-9AC6-1933C92DFBA1} = {B64532FA-C064-43CC-85E6-A6B975A49795}
-		{10F4C30B-AF5B-4344-BE0D-9EBA3A40B2E1} = {B64532FA-C064-43CC-85E6-A6B975A49795}
+		{F422D33A-26B3-4B8F-AC2D-9636129A996A} = {B64532FA-C064-43CC-85E6-A6B975A49795}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {80F99D88-A3B2-4ED2-9148-43D43EBFFFC3}

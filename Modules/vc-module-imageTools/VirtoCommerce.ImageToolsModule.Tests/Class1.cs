@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VirtoCommerce.ImageToolsModule.Core
+namespace VirtoCommerce.ImageToolsModule.Tests
 {
     public class Class1
     {
