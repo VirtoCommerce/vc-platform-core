@@ -8,6 +8,6 @@ namespace VirtoCommerce.ImageToolsModule.Core.Services
 {
     public interface IThumbnailTaskSearchService
     {
-        Task<ThumbnailOptionSearchResult> SearchAsync(ThumbnailTaskSearchCriteria criteria);
+        Task<ThumbnailTaskSearchResult> SearchAsync(ThumbnailTaskSearchCriteria criteria);
     }
 }

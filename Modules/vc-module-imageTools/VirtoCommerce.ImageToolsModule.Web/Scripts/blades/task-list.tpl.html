@@ -1,0 +1,49 @@
+﻿<div class="blade-content __medium-wide">
+    <div class="blade-inner">
+        <div class="inner-block" ng-init="setGridOptions({
+                useExternalSorting: true,
+                showTreeRowHeader: false,
+                data: 'items',
+                rowTemplate: 'item-list.row.html',
+                rowHeight: 60,
+                infiniteScrollRowsFromEnd: 10,
+                columnDefs: [
+                        { name: 'actions', displayName: '', enableColumnResizing: false, enableSorting: false, width: 30, cellTemplate: 'item-list-actions.cell.html', pinnedLeft:true },
+                        { name: 'name', displayName: 'imageTools.blades.tasks-list.labels.task-name', cellTemplate: 'item-list-name.cell.html' },
+                        { name: 'lastRun', displayName: 'imageTools.blades.tasks-list.labels.last-run', width: 40 },
+                 ]})">
+            <div class="table-wrapper" ng-if="items.length > 0">
+                <div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-save-state ui-grid-selection ui-grid-resize-columns ui-grid-move-columns ui-grid-pinning ui-grid-height ui-grid-infinite-scroll></div>
+                <ul class="menu __context" role="menu" id="cil_menu_{{blade.level}}">
+                    <li class="menu-item" ng-click='edit(contextMenuEntity)'>
+                        <i class="menu-ico fa fa-edit"></i> {{'platform.commands.manage' | translate}}
+                    </li>
+                    <li class="menu-item" ng-click='cut(contextMenuEntity)' va-permission="catalog:create">
+                        <i class="menu-ico fa fa-exclamation"></i> {{'imageTools.commands.run' | translate}}
+                    </li>
+                    <li class="menu-item" ng-click='delete(contextMenuEntity)' va-permission="catalog:delete">
+                        <i class="menu-ico fa fa-trash-o"></i> {{'platform.commands.delete' | translate}}
+                    </li>
+                </ul>
+            </div>
+            <div class="note" ng-if="!items.length">{{ 'platform.list.no-data' | translate }}</div>
+        </div>
+    </div>
+</div>
+
+<script type="text/ng-template" id="item-list.row.html">
+    <div ng-click='grid.appScope.selectItem($event, row.entity)' ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" ui-grid-one-bind-id-grid="rowRenderIndex + '-' + col.uid + '-cell'" class="ui-grid-cell" ng-class="{'ui-grid-row-header-cell': col.isRowHeader, '__hovered': grid.appScope.contextMenuEntity === row.entity, '__selected': row.entity.id===grid.appScope.selectedNodeId }" role="{{col.isRowHeader ? 'rowheader' : 'gridcell' }}" ui-grid-cell context-menu="grid.appScope.contextMenuEntity = row.entity" data-target="cil_menu_{{grid.appScope.blade.level}}"></div>
+</script>
+<script type="text/ng-template" id="item-list-actions.cell.html">
+    <div class="ui-grid-actions" left-click-menu="grid.appScope.contextMenuEntity = row.entity" data-target="cil_menu_{{grid.appScope.blade.level}}">
+        <i class="fa fa-ellipsis-v"></i>
+    </div>
+</script>
+<script type="text/ng-template" id="item-list-name.cell.html">
+    <div class="ui-grid-cell-contents">
+        <div class="inner-contents">
+            <div class="table-t">{{COL_FIELD}}</div>
+            <div class="table-descr">{{row.entity.workPath}} {{row.entity.description}}</div>
+        </div>
+    </div>
+</script>

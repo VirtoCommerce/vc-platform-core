@@ -1,0 +1,17 @@
+﻿<div class="modal-header">
+    <h3 class="modal-title">{{ 'imageTools.dialogs.task-run.title' | translate }}</h3>
+</div>
+<div class="modal-body">
+    <p class="text">{{ 'imageTools.dialogs.task-run.msg1' | translate }}</p>
+    <div class="form-group">
+        <ul>
+            <li>{{ 'imageTools.dialogs.task-run.msg2' | translate }}</li>
+            <li>{{ 'imageTools.dialogs.task-run.msg3' | translate }}</li>
+        </ul>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn" ng-disabled="isFirstRun" ng-class="{'__disabled': isFirstRun}" ng-click="no()">{{ 'imageTools.dialogs.task-run.btn-changes' | translate }}</button>
+    <button class="btn" ng-click="yes()">{{ 'imageTools.dialogs.task-run.btn-regenerate' | translate}}</button>
+    <button class="btn" ng-click="cancel()">{{ 'platform.commands.cancel' | translate }}</button>
+</div>
