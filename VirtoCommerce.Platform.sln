@@ -61,6 +61,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Module1.Data", "Modules\Module1\Module1.Data\Module1.Data.csproj", "{6C7C3624-8CF1-4890-83A9-AA073B93B369}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vc-module-licensing", "vc-module-licensing", "{3EF8A012-05A5-4830-B089-502078ABF596}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.LicensingModule.Web", "Modules\vc-module-licensing\VirtoCommerce.LicensingModule.Web\VirtoCommerce.LicensingModule.Web.csproj", "{F2CA48A2-8CC7-4CD6-A03B-6AE826FDF3F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.LicensingModule.Core", "Modules\vc-module-licensing\VirtoCommerce.LicensingModule.Core\VirtoCommerce.LicensingModule.Core.csproj", "{5D91D3EE-B042-4077-9685-D7035B9B3556}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.LicensingModule.Data", "Modules\vc-module-licensing\VirtoCommerce.LicensingModule.Data\VirtoCommerce.LicensingModule.Data.csproj", "{D8E113CD-BF29-4B0A-9F1C-A1BBC24FA02E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -163,6 +171,18 @@ Global
 		{6C7C3624-8CF1-4890-83A9-AA073B93B369}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C7C3624-8CF1-4890-83A9-AA073B93B369}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C7C3624-8CF1-4890-83A9-AA073B93B369}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2CA48A2-8CC7-4CD6-A03B-6AE826FDF3F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2CA48A2-8CC7-4CD6-A03B-6AE826FDF3F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2CA48A2-8CC7-4CD6-A03B-6AE826FDF3F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2CA48A2-8CC7-4CD6-A03B-6AE826FDF3F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D91D3EE-B042-4077-9685-D7035B9B3556}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D91D3EE-B042-4077-9685-D7035B9B3556}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D91D3EE-B042-4077-9685-D7035B9B3556}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D91D3EE-B042-4077-9685-D7035B9B3556}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8E113CD-BF29-4B0A-9F1C-A1BBC24FA02E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8E113CD-BF29-4B0A-9F1C-A1BBC24FA02E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8E113CD-BF29-4B0A-9F1C-A1BBC24FA02E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8E113CD-BF29-4B0A-9F1C-A1BBC24FA02E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -188,6 +208,10 @@ Global
 		{BFE3327C-D8A5-4746-98CE-C7D30A078A62} = {AFB12010-1866-4A31-865E-5D2DF65FB521}
 		{97309EC4-1D4E-40E3-A3E3-FC239C78E5C2} = {AFB12010-1866-4A31-865E-5D2DF65FB521}
 		{6C7C3624-8CF1-4890-83A9-AA073B93B369} = {1B8260F3-4F5D-4046-9AE0-34F2F9320409}
+		{3EF8A012-05A5-4830-B089-502078ABF596} = {7052A390-9A84-46DA-BD3B-556FD74DEC97}
+		{F2CA48A2-8CC7-4CD6-A03B-6AE826FDF3F7} = {3EF8A012-05A5-4830-B089-502078ABF596}
+		{5D91D3EE-B042-4077-9685-D7035B9B3556} = {3EF8A012-05A5-4830-B089-502078ABF596}
+		{D8E113CD-BF29-4B0A-9F1C-A1BBC24FA02E} = {3EF8A012-05A5-4830-B089-502078ABF596}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {80F99D88-A3B2-4ED2-9148-43D43EBFFFC3}

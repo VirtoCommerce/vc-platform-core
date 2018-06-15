@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<module>
+    <id>VirtoCommerce.Licensing</id>
+    <version>3.0.0</version>
+    <platformVersion>3.0.0</platformVersion>
+    <dependencies>
+        <dependency id="VirtoCommerce.Core" version="3.0.0" />
+    </dependencies>
+
+    <title>Licensing module</title>
+    <description>License management</description>
+    <authors>
+        <author>Egidijus Mažeika</author>
+        <author>Artem Dudarev</author>
+    </authors>
+    <owners>
+        <owner>Virto Commerce</owner>
+    </owners>
+    <projectUrl>https://virtocommerce.com/virto-licensing-module</projectUrl>
+    <iconUrl>Modules/$(VirtoCommerce.Licensing)/Content/logoVC.png</iconUrl>
+    <releaseNotes>Third version.</releaseNotes>
+    <copyright>Copyright © 2011-2018 Virto Commerce. All rights reserved</copyright>
+    <tags>licensing</tags>
+
+    <assemblyFile>VirtoCommerce.LicensingModule.Web.dll</assemblyFile>
+    <moduleType>VirtoCommerce.LicensingModule.Web.Module, VirtoCommerce.LicensingModule.Web</moduleType>
+
+    <scripts>
+        <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
+    </scripts>
+
+    <settings>
+        <group name="Licensing">
+            <setting>
+                <name>Licensing.LicenseType</name>
+                <valueType>string</valueType>
+                <defaultValue>Commerce</defaultValue>
+                <title>License types</title>
+                <description>License types</description>
+                <isArray>true</isArray>
+                <arrayValues>
+                    <value>Commerce</value>
+                    <value>Community deployment</value>
+                </arrayValues>
+            </setting>
+            <setting>
+                <name>Licensing.SignaturePrivateKey</name>
+                <valueType>text</valueType>
+                <title>Signature private key</title>
+                <description>Private key for signing licenses</description>
+            </setting>
+        </group>
+    </settings>
+
+    <permissions>
+        <group name="Licensing">
+            <permission id="licensing:access" name="Open licensing menu" description=""/>
+            <permission id="licensing:create" name="Create licensing data" description=""/>
+            <permission id="licensing:read" name="View licensing data" description=""/>
+            <permission id="licensing:update" name="Update licensing data" description=""/>
+            <permission id="licensing:delete" name="Delete licensing data" description=""/>
+            <permission id="licensing:issue" name="Issue license" description=""/>
+        </group>
+    </permissions>
+</module>
