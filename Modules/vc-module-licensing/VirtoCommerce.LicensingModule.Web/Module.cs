@@ -18,9 +18,9 @@ namespace VirtoCommerce.LicensingModule.Web
         {
             var snapshot = serviceCollection.BuildServiceProvider();
             var configuration = snapshot.GetService<IConfiguration>();
+            serviceCollection.AddTransient<ILicenseRepository, LicenseRepository>();
             serviceCollection.AddDbContext<LicenseDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce")));
-            serviceCollection.AddScoped<ILicenseRepository, LicenseRepository>();
-            serviceCollection.AddScoped<Func<ILicenseRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<ILicenseRepository>());
+            serviceCollection.AddSingleton<Func<ILicenseRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<ILicenseRepository>());
             //log License activations and changes
             serviceCollection.AddSingleton<IObserver<LicenseSignedEvent>, LogLicenseEventsObserver>();
             serviceCollection.AddSingleton<IObserver<LicenseChangedEvent>, LogLicenseEventsObserver>();
@@ -29,6 +29,13 @@ namespace VirtoCommerce.LicensingModule.Web
 
         public void PostInitialize(IServiceProvider serviceProvider)
         {
+            //Force migrations
+            using (var serviceScope = serviceProvider.CreateScope())
+            {
+                var licenseDbContext = serviceScope.ServiceProvider.GetRequiredService<LicenseDbContext>();
+                licenseDbContext.Database.EnsureCreated();
+                licenseDbContext.Database.Migrate();
+            }
         }
 
         public void Uninstall()

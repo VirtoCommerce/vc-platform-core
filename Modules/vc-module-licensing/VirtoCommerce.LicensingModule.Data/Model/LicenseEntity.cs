@@ -1,7 +1,5 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Omu.ValueInjecter;
 using VirtoCommerce.LicensingModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -33,7 +31,18 @@ namespace VirtoCommerce.LicensingModule.Data.Model
             if (license == null)
                 throw new ArgumentNullException(nameof(license));
 
-            license.InjectFrom(this);
+            license.Id = Id;
+            license.CreatedDate = CreatedDate;
+            license.CreatedBy = CreatedBy;
+            license.ModifiedDate = ModifiedDate;
+            license.ModifiedBy = ModifiedBy;
+
+            license.Type = Type;
+            license.CustomerName = CustomerName;
+            license.CustomerEmail = CustomerEmail;
+            license.ExpirationDate = ExpirationDate;
+            license.ActivationCode = ActivationCode;
+
             return license;
         }
 
@@ -44,7 +53,17 @@ namespace VirtoCommerce.LicensingModule.Data.Model
 
             pkMap.AddPair(license, this);
 
-            this.InjectFrom(license);
+            Id = license.Id;
+            CreatedDate = license.CreatedDate;
+            CreatedBy = license.CreatedBy;
+            ModifiedDate = license.ModifiedDate;
+            ModifiedBy = license.ModifiedBy;
+
+            Type = license.Type;
+            CustomerName = license.CustomerName;
+            CustomerEmail = license.CustomerEmail;
+            ExpirationDate = license.ExpirationDate;
+            ActivationCode = license.ActivationCode;
 
             return this;
         }

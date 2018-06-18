@@ -163,11 +163,11 @@ namespace VirtoCommerce.LicensingModule.Data.Services
         }
 
 
-        private Task<LicenseEntity> GetByCodeAsync(string code)
+        private async Task<LicenseEntity> GetByCodeAsync(string code)
         {
             using (var repository = _licenseRepositoryFactory())
             {
-                return repository.Licenses.FirstOrDefaultAsync(x => x.ActivationCode == code);
+                return await repository.Licenses.FirstOrDefaultAsync(x => x.ActivationCode == code);
             }
         }
 

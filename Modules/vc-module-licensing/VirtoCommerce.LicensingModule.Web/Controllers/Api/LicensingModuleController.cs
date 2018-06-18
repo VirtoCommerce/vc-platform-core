@@ -1,119 +1,132 @@
-using System.ComponentModel;
-using System.Net;
+using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.LicensingModule.Core.Model;
 using VirtoCommerce.LicensingModule.Core.Security;
+using VirtoCommerce.LicensingModule.Core.Services;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.LicensingModule.Web.Controllers.Api
 {
     [Route("api/licenses")]
-    [Authorize(PredefinedPermissions.Read)]
     public class LicensingModuleController : Controller
     {
-        //private readonly ILicenseService _licenseService;
+        private readonly ILicenseService _licenseService;
+        
+        public LicensingModuleController(ILicenseService licenseService)
+        {
+            _licenseService = licenseService;
+        }
+
+        [HttpPost]
+        [Route("search")]
+        [ProducesResponseType(typeof(GenericSearchResult<License>), 200)]
+        [Authorize(PredefinedPermissions.Read)]
+        public async Task<IActionResult> SearchLicenses(LicenseSearchCriteria request)
+        {
+            if (request == null)
+            {
+                return BadRequest("request is null");
+            }
+
+            var searchResponse = await _licenseService.SearchAsync(request);
+
+            return Ok(searchResponse);
+        }
+
+        [HttpGet]
+        [Route("{id}")]
+        [ProducesResponseType(typeof(License), 200)]
+        [Authorize(PredefinedPermissions.Read)]
+        public async Task<IActionResult> GetLicenseById(string id)
+        {
+            var retVal = await _licenseService.GetByIdsAsync(new[] { id });
+            return Ok(retVal.FirstOrDefault());
+        }
+
+        [HttpPost]
+        [Route("")]
+        [ProducesResponseType(typeof(License), 200)]
+        [Authorize(PredefinedPermissions.Create)]
+        public async Task<IActionResult> CreateLicense([FromBody]License license)
+        {
+            await _licenseService.SaveChangesAsync(new[] { license });
+            return Ok(license);
+        }
+
+        [HttpPut]
+        [Route("")]
+        [ProducesResponseType(typeof(License), 200)]
+        [Authorize(PredefinedPermissions.Update)]
+        public async Task<IActionResult> UpdateLicense([FromBody]License license)
+        {
+            await _licenseService.SaveChangesAsync(new[] { license });
+            return Ok(license);
+        }
+
+        /// <summary>
+        ///  Delete Licenses
+        /// </summary>
+        /// <param name="ids">Licenses' ids for delete</param>
+        [HttpDelete]
+        [Route("")]
+        [ProducesResponseType(typeof(void), 200)]
+        [Authorize(PredefinedPermissions.Delete)]
+        public async Task<IActionResult> DeleteLicensesByIds([FromQuery] string[] ids)
+        {
+            await _licenseService.DeleteAsync(ids);
+            return Ok();
+        }
+
+        [HttpGet]
+        [Route("download/{activationCode}")]
+        [ProducesResponseType(typeof(ContentResult), 200)]
+        [Authorize(PredefinedPermissions.Issue)]
+        public Task<IActionResult> Download(string activationCode)
+        {
+            var remoteIpAddress = Request.HttpContext.Connection.RemoteIpAddress;
+            return GetSignedLicenseAsync(activationCode, false, remoteIpAddress.ToString());
+        }
+
+        [HttpGet]
+        [Route("activate/{activationCode}")]
+        [ProducesResponseType(typeof(ContentResult), 200)]
+        [AllowAnonymous]
+        public Task<IActionResult> Activate(string activationCode)
+        {
+            var remoteIpAddress = Request.HttpContext.Connection.RemoteIpAddress;
+            return GetSignedLicenseAsync(activationCode, true, remoteIpAddress.ToString());
+        }
 
 
-        //public LicensingModuleController(ILicenseService licenseService)
-        //{
-        //    _licenseService = licenseService;
-        //}
+        private async Task<IActionResult> GetSignedLicenseAsync(string activationCode, bool isActivated, string ip)
+        {
+            //var clientIp = GetClientIpAddress();
+            var signedLicense = await _licenseService.GetSignedLicenseAsync(activationCode, ip, isActivated);
 
-        //[HttpPost]
-        //[Route("search")]
-        //[ResponseType(typeof(GenericSearchResult<License>))]
-        //public IHttpActionResult SearchLicenses(LicenseSearchCriteria request)
-        //{
-        //    if (request == null)
-        //    {
-        //        return BadRequest("request is null");
-        //    }
+            if (!string.IsNullOrEmpty(signedLicense))
+            {
+                var result = new ContentResult
+                {
+                    Content = signedLicense
+                    , StatusCode = 200
+                    , ContentType = "application/octet-stream"
+                };
 
-        //    var searchResponse = _licenseService.Search(request);
+                var contentDisposition = new System.Net.Mime.ContentDisposition("attachment")
+                {
+                    FileName = "VirtoCommerce.lic"
+                };
+                Response.Headers.Add("Content-Disposition", contentDisposition.ToString());
 
-        //    return Ok(searchResponse);
-        //}
+                return result;
+            }
 
-        //[HttpGet]
-        //[Route("{id}")]
-        //[ResponseType(typeof(License))]
-        //[CheckPermission(Permission = PredefinedPermissions.Read)]
-        //public IHttpActionResult GetLicenseById(string id)
-        //{
-        //    var retVal = _licenseService.GetByIds(new[] { id }).FirstOrDefault();
-        //    return Ok(retVal);
-        //}
-
-        //[HttpPost]
-        //[Route("")]
-        //[ResponseType(typeof(License))]
-        //[CheckPermission(Permission = PredefinedPermissions.Create)]
-        //public IHttpActionResult CreateLicense(License license)
-        //{
-        //    _licenseService.SaveChanges(new[] { license });
-        //    return Ok(license);
-        //}
-
-        //[HttpPut]
-        //[Route("")]
-        //[ResponseType(typeof(License))]
-        //[CheckPermission(Permission = PredefinedPermissions.Update)]
-        //public IHttpActionResult UpdateLicense(License license)
-        //{
-        //    _licenseService.SaveChanges(new[] { license });
-        //    return Ok(license);
-        //}
-
-        ///// <summary>
-        /////  Delete Licenses
-        ///// </summary>
-        ///// <param name="ids">Licenses' ids for delete</param>
-        //[HttpDelete]
-        //[Route("")]
-        //[ResponseType(typeof(void))]
-        //[CheckPermission(Permission = PredefinedPermissions.Delete)]
-        //public IHttpActionResult DeleteLicensesByIds([FromUri] string[] ids)
-        //{
-        //    _licenseService.Delete(ids);
-        //    return StatusCode(HttpStatusCode.NoContent);
-        //}
-
-        //[HttpGet]
-        //[Route("download/{activationCode}")]
-        //[ResponseType(typeof(HttpResponseMessage))]
-        //[CheckPermission(Permission = PredefinedPermissions.Issue)]
-        //public HttpResponseMessage Download(string activationCode)
-        //{
-        //    return GetSignedLicense(activationCode, false);
-        //}
-
-        //[HttpGet]
-        //[Route("activate/{activationCode}")]
-        //[ResponseType(typeof(HttpResponseMessage))]
-        //[AllowAnonymous]
-        //public HttpResponseMessage Activate(string activationCode)
-        //{
-        //    return GetSignedLicense(activationCode, true);
-        //}
-
-
-        //private HttpResponseMessage GetSignedLicense(string activationCode, bool isActivated)
-        //{
-        //    var clientIp = GetClientIpAddress(Request);
-        //    var signedLicense = _licenseService.GetSignedLicense(activationCode, clientIp, isActivated);
-
-        //    if (!string.IsNullOrEmpty(signedLicense))
-        //    {
-        //        var result = new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(Encoding.UTF8.GetBytes(signedLicense)) };
-        //        result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = "VirtoCommerce.lic" };
-        //        result.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-        //        return result;
-        //    }
-
-        //    return new HttpResponseMessage(HttpStatusCode.NotFound);
-        //}
+            return new NotFoundResult();
+        }
 
         //private static string GetClientIpAddress(HttpRequestMessage requestMessage)
         //{
