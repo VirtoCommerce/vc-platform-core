@@ -23,7 +23,6 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
     [Route("api/platform/assets")]
     public class AssetsController : Controller
     {
-        private readonly string _uploadsUrl;
         private readonly IBlobStorageProvider _blobProvider;
         private readonly IBlobUrlResolver _urlResolver;
         private static readonly FormOptions _defaultFormOptions = new FormOptions();

@@ -22646,16 +22646,6 @@ angular.module('platformWebApp')
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["公元前","公元"],ERAS:["BC","AD"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"d/M/yy ah:mm",shortDate:"d/M/yy",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-hk",pluralCat:function(e,m){return E.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["西元前","西元"],ERAS:["西元前","西元"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日 EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"y/M/d ah:mm",shortDate:"y/M/d",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"NT$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-tw",pluralCat:function(e,m){return E.OTHER}})}]);
 angular.module('platformWebApp')
-.controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    
-    $scope.blade.isLoading = false;
-    // ui-grid
-    $scope.setGridOptions = function (gridOptions) {
-        $scope.gridOptions = gridOptions;
-    };
-}]);
-
-angular.module('platformWebApp')
     .controller('platformWebApp.assets.assetListController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', '$sessionStorage', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
         function ($scope, assets, bladeNavigationService, dialogService, $storage, bladeUtils, uiGridHelper) {
             var blade = $scope.blade;
@@ -23138,6 +23128,16 @@ angular.module('platformWebApp')
 
 
 angular.module('platformWebApp')
+.controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    
+    $scope.blade.isLoading = false;
+    // ui-grid
+    $scope.setGridOptions = function (gridOptions) {
+        $scope.gridOptions = gridOptions;
+    };
+}]);
+
+angular.module('platformWebApp')
 .controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
 
@@ -23155,70 +23155,6 @@ angular.module('platformWebApp')
         bladeNavigationService.showBlade(newBlade, blade);
     };
 }]);
-angular.module('platformWebApp')
-.factory('platformWebApp.dynamicProperties.api', ['$resource', function ($resource) {
-    return $resource('api/platform/dynamic/properties', {}, {
-        queryTypes: { url: 'api/platform/dynamic/types', isArray: true },
-        getPropertiesForType: { url: 'api/platform/dynamic/types/:typeName/properties', method: 'POST', isArray: true },
-        update: { method: 'PUT' }
-    });
-}])
-.factory('platformWebApp.dynamicProperties.dictionaryItemsApi', ['$resource', function ($resource) {
-    return $resource('api/platform/dynamic/dictionaryitems', {}, {
-        getDictionaryItems: { url: 'api/platform/dynamic/dictionaryitems/search', method: 'POST', isArray: true },
-    });
-}])
-.factory('platformWebApp.dynamicProperties.valueTypesService', function () {
-    var propertyTypes = [
-        {
-            valueType: "ShortText",
-            title: "platform.properties.short-text.title",
-            description: "platform.properties.short-text.description"
-        },
-        {
-            valueType: "LongText",
-            title: "platform.properties.long-text.title",
-            description: "platform.properties.long-text.description"
-        },
-        {
-            valueType: "Integer",
-            title: "platform.properties.integer.title",
-            description: "platform.properties.integer.description"
-        },
-        {
-            valueType: "Decimal",
-            title: "platform.properties.decimal.title",
-            description: "platform.properties.decimal.description"
-        },
-        {
-            valueType: "DateTime",
-            title: "platform.properties.date-time.title",
-            description: "platform.properties.date-time.description"
-        },
-        {
-            valueType: "Boolean",
-            title: "platform.properties.boolean.title",
-            description: "platform.properties.boolean.description"
-        },
-        {
-            valueType: "Html",
-            title: "platform.properties.html.title",
-            description: "platform.properties.html.description"
-        },
-        {
-            valueType: "Image",
-            title: "platform.properties.image.title",
-            description: "platform.properties.image.description"
-        }
-    ];
-
-    return {
-        query: function() {
-            return propertyTypes;
-        }
-    };
-});
-
 angular.module('platformWebApp')
 .controller('platformWebApp.dynamicObjectListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dynamicProperties.api', function ($scope, bladeNavigationService, dynamicPropertiesApi) {
 	var blade = $scope.blade;
@@ -23834,6 +23770,70 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
+.factory('platformWebApp.dynamicProperties.api', ['$resource', function ($resource) {
+    return $resource('api/platform/dynamic/properties', {}, {
+        queryTypes: { url: 'api/platform/dynamic/types', isArray: true },
+        getPropertiesForType: { url: 'api/platform/dynamic/types/:typeName/properties', method: 'POST', isArray: true },
+        update: { method: 'PUT' }
+    });
+}])
+.factory('platformWebApp.dynamicProperties.dictionaryItemsApi', ['$resource', function ($resource) {
+    return $resource('api/platform/dynamic/dictionaryitems', {}, {
+        getDictionaryItems: { url: 'api/platform/dynamic/dictionaryitems/search', method: 'POST', isArray: true },
+    });
+}])
+.factory('platformWebApp.dynamicProperties.valueTypesService', function () {
+    var propertyTypes = [
+        {
+            valueType: "ShortText",
+            title: "platform.properties.short-text.title",
+            description: "platform.properties.short-text.description"
+        },
+        {
+            valueType: "LongText",
+            title: "platform.properties.long-text.title",
+            description: "platform.properties.long-text.description"
+        },
+        {
+            valueType: "Integer",
+            title: "platform.properties.integer.title",
+            description: "platform.properties.integer.description"
+        },
+        {
+            valueType: "Decimal",
+            title: "platform.properties.decimal.title",
+            description: "platform.properties.decimal.description"
+        },
+        {
+            valueType: "DateTime",
+            title: "platform.properties.date-time.title",
+            description: "platform.properties.date-time.description"
+        },
+        {
+            valueType: "Boolean",
+            title: "platform.properties.boolean.title",
+            description: "platform.properties.boolean.description"
+        },
+        {
+            valueType: "Html",
+            title: "platform.properties.html.title",
+            description: "platform.properties.html.description"
+        },
+        {
+            valueType: "Image",
+            title: "platform.properties.image.title",
+            description: "platform.properties.image.description"
+        }
+    ];
+
+    return {
+        query: function() {
+            return propertyTypes;
+        }
+    };
+});
+
+angular.module('platformWebApp')
 .controller('platformWebApp.dynamicPropertyWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
 	$scope.blade = $scope.widget.blade;
 	$scope.openBlade = function () {
@@ -24080,537 +24080,6 @@ angular.module('platformWebApp')
 
     return $resource('api/platform/jobs', {}, {
         getStatus: { url: 'api/platform/jobs/:id' }
-    });
-}]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.moduleDetailController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.bladeNavigationService', 'platformWebApp.modules', 'platformWebApp.moduleHelper', 'FileUploader', 'platformWebApp.settings', function ($scope, dialogService, bladeNavigationService, modules, moduleHelper, FileUploader, settings) {
-    var blade = $scope.blade;
-
-    function initializeBlade() {
-        if (blade.currentEntity.isInstalled) {
-            var canUpdate = _.any(moduleHelper.allmodules, function (x) {
-                return x.id === blade.currentEntity.id && !x.isInstalled;
-            });
-            blade.toolbarCommands = [
-                {
-                    name: "platform.commands.update", icon: 'fa fa-upload',
-                    executeMethod: function () {
-                        blade.currentEntity = _.last(_.where(moduleHelper.allmodules, { id: blade.currentEntity.id, isInstalled: false }));
-                        initializeBlade();
-                    },
-                    canExecuteMethod: function () { return canUpdate; },
-                    permission: 'platform:module:manage'
-                },
-                {
-                    name: "platform.commands.uninstall", icon: 'fa fa-trash-o',
-                    executeMethod: function () {
-                        $scope.confirmActionInDialog('uninstall');
-                    },
-                    canExecuteMethod: function () { return true; },
-                    permission: 'platform:module:manage'
-                }
-            ];
-
-            // hide settings toolbar button when there are no settings available #523
-            settings.getSettings({ id: blade.currentEntity.id }, function (results) {
-                if (_.any(results)) {
-                    blade.toolbarCommands.push({
-                        name: "platform.commands.settings", icon: 'fa fa-wrench',
-                        executeMethod: function () {
-                            var newBlade = {
-                                id: 'moduleSettingsSection',
-                                moduleId: blade.currentEntity.id,
-                                data: results,
-                                title: 'platform.blades.module-settings-detail.title',
-                                //subtitle: '',
-                                controller: 'platformWebApp.settingsDetailController',
-                                template: '$(Platform)/Scripts/app/settings/blades/settings-detail.tpl.html'
-                            };
-                            bladeNavigationService.showBlade(newBlade, blade);
-                        },
-                        canExecuteMethod: function () { return true; }
-                    });
-                }
-                blade.isLoading = false;
-            });
-        } else {
-            blade.toolbarCommands = [];
-            blade.mode = blade.currentEntity.$alternativeVersion ? 'update' : 'install';
-            $scope.availableVersions = _.where(moduleHelper.allmodules, { id: blade.currentEntity.id, isInstalled: false });
-            blade.isLoading = false;
-        }
-    }
-
-    $scope.openDependencyModule = function (dependency) {
-        module = _.findWhere(moduleHelper.allmodules, { id: dependency.id, version: dependency.version }) ||
-                    _.findWhere(moduleHelper.allmodules, { id: dependency.id }) ||
-                     module;
-        blade.parentBlade.selectNode(module);
-    };
-
-    $scope.confirmActionInDialog = function (action) {
-        blade.isLoading = true;
-
-        //var clone = {
-        //    id: blade.currentEntity.id,
-        //    version: blade.currentEntity.version,
-        //};
-        var selection = [blade.currentEntity];
-        var modulesApiMethod = action === 'uninstall' ? modules.getDependents : modules.getDependencies;
-        modulesApiMethod(selection, function (data) {
-            blade.isLoading = false;
-
-            var dialog = {
-                id: "confirmation",
-                action: action,
-                selection: selection,
-                dependencies: data,
-                callback: function () {
-                    // initiate module (un)installation
-                    blade.isLoading = true;
-                    _.each(selection, function (x) {
-                        if (!_.findWhere(data, { id: x.id })) {
-                            data.push(x);
-                        }
-                    });
-
-                    switch (action) {
-                        case 'install':
-                        case 'update':
-                            modulesApiMethod = modules.install;
-                            break;
-                        case 'uninstall':
-                            modulesApiMethod = modules.uninstall;
-                            break;
-                    }
-                    modulesApiMethod(data, function (data) {
-                        // show module (un)installation progress
-                        var newBlade = {
-                            id: 'moduleInstallProgress',
-                            currentEntity: data,
-                            controller: 'platformWebApp.moduleInstallProgressController',
-                            template: '$(Platform)/Scripts/app/modularity/wizards/newModule/module-wizard-progress-step.tpl.html'
-                        };
-                        switch (action) {
-                            case 'install':
-                                _.extend(newBlade, { title: 'platform.blades.module-wizard-progress-step.title-install' });
-                                break;
-                            case 'update':
-                                _.extend(newBlade, { title: 'platform.blades.module-wizard-progress-step.title-update' });
-                                break;
-                            case 'uninstall':
-                                _.extend(newBlade, { title: 'platform.blades.module-wizard-progress-step.title-uninstall' });
-                                break;
-                        }
-                        bladeNavigationService.showBlade(newBlade, blade.parentBlade);
-                    }, function (error) {
-                        bladeNavigationService.setError('Error ' + error.status, blade);
-                    });
-                }
-            }
-            dialogService.showDialog(dialog, '$(Platform)/Scripts/app/modularity/dialogs/moduleAction-dialog.tpl.html', 'platformWebApp.confirmDialogController');
-        }, function (error) {
-            bladeNavigationService.setError('Error ' + error.status, blade);
-        });
-    };
-
-    blade.headIcon = 'fa-cubes';
-
-    if (blade.mode === 'advanced') {
-        // the uploader
-        var uploader = $scope.uploader = new FileUploader({
-            scope: $scope,
-            headers: {
-                Accept: 'application/json'
-            },
-            url: 'api/platform/modules/localstorage',
-            autoUpload: true,
-            removeAfterUpload: true
-        });
-
-        // ADD FILTERS: packages only
-        uploader.filters.push({
-            name: 'packageFilter',
-            fn: function (i /*{File|FileLikeObject}*/, options) {
-                return i.name.endsWith('.zip');
-            }
-        });
-
-        uploader.onAfterAddingFile = function (item) {
-            bladeNavigationService.setError(null, blade);
-            blade.isLoading = true;
-        };
-
-        uploader.onCompleteAll = function () {
-            blade.isLoading = false;
-        };
-
-        uploader.onSuccessItem = function (fileItem, data, status, headers) {
-            if (data) {
-                if (data.tags) {
-                    data.tagsArray = data.tags.split(' ');
-                }
-                blade.currentEntity = data;
-                blade.mode = undefined;
-                initializeBlade();
-            } else {
-                bladeNavigationService.setError('Invalid module package: ' + fileItem.file.name, blade);
-            }
-        };
-
-        uploader.onErrorItem = function (item, response, status, headers) {
-            if (item.isUploaded) {
-                bladeNavigationService.setError('File uploaded with error status: ' + status, blade);
-            } else {
-                bladeNavigationService.setError('Failed to upload. Error status: ' + status, blade);
-            }
-        };
-
-        blade.isLoading = false;
-    } else {
-        initializeBlade();
-    }
-}]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.modulesListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.modules', 'uiGridConstants', 'platformWebApp.uiGridHelper', 'platformWebApp.moduleHelper', '$timeout',
-function ($scope, bladeNavigationService, dialogService, modules, uiGridConstants, uiGridHelper, moduleHelper, $timeout) {
-    $scope.uiGridConstants = uiGridConstants;
-    var blade = $scope.blade;
-
-    blade.refresh = function () {
-        blade.isLoading = true;
-        blade.parentBlade.refresh().then(function (data) {
-            blade.currentEntities = blade.isGrouped ? moduleHelper.moduleBundles : data;
-            blade.isLoading = false;
-        })
-    };
-
-    blade.selectNode = function (node) {
-        $scope.selectedNodeId = node.id;
-
-        var newBlade = {
-            id: 'moduleDetails',
-            title: 'platform.blades.module-detail.title',
-            currentEntity: node,
-            controller: 'platformWebApp.moduleDetailController',
-            template: '$(Platform)/Scripts/app/modularity/blades/module-detail.tpl.html'
-        };
-
-        bladeNavigationService.showBlade(newBlade, blade);
-    };
-
-    function isItemsChecked() {
-        return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
-    }
-
-    // initialize blade.toolbarCommands
-    switch (blade.mode) {
-        case 'update':
-            blade.toolbarCommands = [{
-                name: "platform.commands.update", icon: 'fa fa-arrow-up',
-                executeMethod: function () { $scope.confirmActionInDialog('update', $scope.gridApi.selection.getSelectedRows()); },
-                canExecuteMethod: isItemsChecked,
-                permission: 'platform:module:manage'
-            }];
-            break;
-        case 'available':
-            blade.toolbarCommands = [{
-                name: "platform.commands.install", icon: 'fa fa-plus',
-                executeMethod: function () { $scope.confirmActionInDialog('install', $scope.gridApi.selection.getSelectedRows()); },
-                canExecuteMethod: isItemsChecked,
-                permission: 'platform:module:manage'
-            }];
-            break;
-        case 'installed':
-            blade.toolbarCommands = [{
-                name: "platform.commands.uninstall", icon: 'fa fa-trash-o',
-                executeMethod: function () { $scope.confirmActionInDialog('uninstall', $scope.gridApi.selection.getSelectedRows()); },
-                canExecuteMethod: isItemsChecked,
-                permission: 'platform:module:manage'
-            }];
-            break;
-    }
-
-    $scope.confirmActionInDialog = function (action, selection) {
-        if (_.any(selection)) {
-            bladeNavigationService.closeChildrenBlades(blade, function () {
-                blade.isLoading = true;
-
-                // eliminate duplicating nodes, if any
-                var grouped = _.groupBy(selection, 'id');
-                selection = [];
-                _.each(grouped, function (vals) {
-                    selection.push(_.last(vals));
-                });
-
-                var modulesApiMethod = action === 'uninstall' ? modules.getDependents : modules.getDependencies;
-                modulesApiMethod(selection, function (data) {
-                    blade.isLoading = false;
-
-                    var dialog = {
-                        id: "confirm",
-                        action: action,
-                        selection: selection,
-                        dependencies: data,
-                        callback: function () {
-                            // confirmed. Initiate modules (un)installation
-                            _.each(selection, function (x) {
-                                if (!_.findWhere(data, { id: x.id })) {
-                                    data.push(x);
-                                }
-                            });
-
-                            modulesApiMethod = action === 'uninstall' ? modules.uninstall : modules.install;
-                            modulesApiMethod(data, onAfterConfirmed, function (error) {
-                                bladeNavigationService.setError('Error ' + error.status, blade);
-                            });
-                        }
-                    }
-                    dialogService.showDialog(dialog, '$(Platform)/Scripts/app/modularity/dialogs/moduleAction-dialog.tpl.html', 'platformWebApp.confirmDialogController');
-                }, function (error) {
-                    bladeNavigationService.setError('Error ' + error.status, blade);
-                });
-            });
-        }
-    }
-
-    function onAfterConfirmed(data) {
-        var newBlade = {
-            id: 'moduleInstallProgress',
-            currentEntity: data,
-            title: blade.title,
-            controller: 'platformWebApp.moduleInstallProgressController',
-            template: '$(Platform)/Scripts/app/modularity/wizards/newModule/module-wizard-progress-step.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, blade);
-    }
-
-
-    // ui-grid
-    $scope.setGridOptions = function (gridOptions) {
-        switch (blade.mode) {
-            case 'update':
-            case 'installed':
-                _.extend(gridOptions, {
-                    showTreeRowHeader: false
-                });
-                break;
-            case 'available':
-                _.extend(gridOptions, {
-                    enableGroupHeaderSelection: true
-                });
-                break;
-        }
-
-        uiGridHelper.initialize($scope, gridOptions, function (gridApi) {
-            gridApi.grid.registerRowsProcessor($scope.singleFilter, 90);
-
-            if (blade.mode === 'available') {
-                $scope.$watch('blade.isGrouped', function (isGrouped) {
-                    if (isGrouped) {
-                        blade.currentEntities = moduleHelper.moduleBundles;
-                        if (!_.any(gridApi.grouping.getGrouping().grouping)) {
-                            gridApi.grouping.groupColumn('$group');
-                        }
-                        $timeout(gridApi.treeBase.expandAllRows);
-                    } else {
-                        blade.currentEntities = moduleHelper.availableModules;
-                        gridApi.grouping.clearGrouping();
-                    }
-                });
-
-                // toggle grouped rows selection
-                gridApi.selection.on.rowSelectionChanged($scope, function (row) {
-                    if (row.internalRow) {
-                        _.each(row.treeNode.children, function (treeNode) {
-                            if (row.isSelected) {
-                                gridApi.selection.selectRow(treeNode.row.entity);
-                            } else {
-                                gridApi.selection.unSelectRow(treeNode.row.entity);
-                            }
-                        });
-                    }
-                });
-
-                $scope.toggleRow = function (row) {
-                    gridApi.treeBase.toggleRowTreeState(row);
-                };
-
-                $scope.getGroupInfo = function (groupEntity) {
-                    return _.values(groupEntity)[0];
-                };
-            }
-        });
-    };
-
-    $scope.singleFilter = function (renderableRows) {
-        var visibleCount = 0;
-        renderableRows.forEach(function (row) {
-            var searchText = angular.lowercase(blade.searchText);
-            row.visible = !searchText ||
-                            row.entity.title.toLowerCase().indexOf(searchText) !== -1 ||
-                            row.entity.tags.toLowerCase().indexOf(searchText) !== -1 ||
-                            row.entity.version.toLowerCase().indexOf(searchText) !== -1 ||
-                            row.entity.description.toLowerCase().indexOf(searchText) !== -1;
-            if (row.visible) visibleCount++;
-        });
-
-        $scope.filteredEntitiesCount = visibleCount;
-        return renderableRows;
-    };
-
-
-    blade.isLoading = false;
-}]);
-
-angular.module('platformWebApp')
-    .controller('platformWebApp.modulesMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.modules', 'platformWebApp.moduleHelper', function ($scope, bladeNavigationService, modules, moduleHelper) {
-        var blade = $scope.blade;
-        var nodeUpdate, nodeAvailable, nodeInstalled;
-        $scope.selectedNodeId = null;
-
-        blade.reload = function () {
-            modules.reload().$promise.then(blade.refresh);
-        };
-
-        blade.refresh = function () {
-            blade.isLoading = true;
-
-            return modules.query().$promise.then(function (results) {
-                moduleHelper.moduleBundles = [];
-                moduleHelper.allmodules = results;
-                _.each(results, function (x) {
-                    x.description = x.description || '';
-                    x.tags = x.tags || '';
-                    if (x.tags) {
-                        x.tagsArray = x.tags.split(' ');
-                    }
-                    if (x.owners) {
-                        x.$owner = x.owners.join(', ');
-                    }
-                    x.$isOwnedByVirto = _.contains(x.owners, 'Virto Commerce');
-                });
-
-                var newResults = [];
-                var grouped = _.groupBy(results, 'id');
-                _.each(grouped, function (vals, key) {
-                    var latest = _.last(vals);
-                    newResults.push(latest);
-
-                    // pre-calculate $alternativeVersion: set latest OR installed version here
-                    var foundInstalledModule;
-                    if (foundInstalledModule = _.findWhere(vals, { isInstalled: true })) {
-                        _.each(vals, function (m) {
-                            if (m === foundInstalledModule) {
-                                if (m !== latest)
-                                    m.$alternativeVersion = latest.version;
-                            } else {
-                                m.$alternativeVersion = foundInstalledModule.version;
-                            }
-                        });
-                    }
-
-                    // prepare bundled (grouped) data source of available modules
-                    if (!latest.isInstalled && !latest.$alternativeVersion) {
-                        if (_.any(latest.groups)) {
-                            _.each(latest.groups, function (x, index) {
-                                var clone = angular.copy(latest);
-                                clone.$group = x;
-                                moduleHelper.moduleBundles.push(clone);
-                            });
-                        } else {
-                            var clone = angular.copy(latest);
-                            clone.$group = 'platform.blades.modules-list.labels.ungrouped';
-                            moduleHelper.moduleBundles.push(clone);
-                        }
-                    }
-                });
-
-                nodeUpdate.entities = _.filter(newResults, function (x) { return !x.isInstalled && x.$alternativeVersion; });
-                nodeAvailable.entities = moduleHelper.availableModules = _.filter(newResults, function (x) { return !x.isInstalled && !x.$alternativeVersion; });
-                nodeInstalled.entities = _.where(results, { isInstalled: true });
-                nodeWithErrors.entities = _.filter(results, function (x) { return x.isInstalled && _.any(x.validationErrors); });
-                if (_.any(nodeWithErrors.entities) && !nodeWithErrors.isAddedToList) {
-                    nodeWithErrors.isAddedToList = true;
-                    blade.currentEntities.splice(3, 0, nodeWithErrors);
-                }
-
-                openFirstBladeInitially();
-                blade.isLoading = false;
-
-                // return results for current child list
-                return _.findWhere(blade.currentEntities, { mode: $scope.selectedNodeId }).entities;
-            }, function (error) {
-                bladeNavigationService.setError('Error ' + error.status, blade);
-            });
-        };
-
-        blade.openBlade = function (data) {
-            $scope.selectedNodeId = data.mode;
-
-            var newBlade = {
-                id: 'modulesList',
-                mode: data.mode,
-                currentEntities: data.entities,
-                title: data.name,
-                subtitle: 'platform.blades.modules-list.subtitle',
-                controller: 'platformWebApp.modulesListController',
-                template: '$(Platform)/Scripts/app/modularity/blades/modules-list.tpl.html'
-            };
-
-            if (data.mode === 'withErrors') {
-                angular.extend(newBlade, {
-                    mode: 'installed'
-                });
-            }
-
-            if (data.mode === 'advanced') {
-                angular.extend(newBlade, {
-                    controller: 'platformWebApp.moduleDetailController',
-                    template: '$(Platform)/Scripts/app/modularity/blades/module-detail.tpl.html'
-                });
-            }
-
-            bladeNavigationService.showBlade(newBlade, blade);
-        };
-
-        blade.toolbarCommands = [
-            {
-                name: "platform.commands.refresh", icon: 'fa fa-refresh',
-                executeMethod: blade.reload,
-                canExecuteMethod: function () { return true; }
-            }
-        ];
-
-        blade.headIcon = 'fa-cubes';
-
-        blade.currentEntities = [
-            nodeUpdate = { name: 'platform.blades.modules-main.labels.updates', mode: 'update' },
-            nodeAvailable = { name: 'platform.blades.modules-main.labels.available', mode: 'available' },
-            nodeInstalled = { name: 'platform.blades.modules-main.labels.installed', mode: 'installed' },
-            { name: 'platform.blades.modules-main.labels.advanced', mode: 'advanced' }
-        ];
-
-        var nodeWithErrors = { name: 'platform.blades.modules-main.labels.withErrors', mode: 'withErrors' };
-
-        var openFirstBladeInitially = _.once(function () { blade.openBlade(blade.currentEntities[0]); });
-
-        blade.refresh();
-    }]);
-
-angular.module('platformWebApp')
-.factory('platformWebApp.modules', ['$resource', function ($resource) {
-
-    return $resource('api/platform/modules', null, {
-        getDependencies: { method: 'POST', url: 'api/platform/modules/getmissingdependencies', isArray: true },
-        getDependents: { method: 'POST', url: 'api/platform/modules/getdependents', isArray: true },
-        install: { method: 'POST', url: 'api/platform/modules/install' },
-        uninstall: { method: 'POST', url: 'api/platform/modules/uninstall' },
-        restart: { method: 'POST', url: 'api/platform/modules/restart' },
-        autoInstall: { method: 'POST', url: 'api/platform/modules/autoinstall' },
-        reload: { method: 'POST', url: 'api/platform/modules/reload', isArray: true },
     });
 }]);
 
@@ -25374,23 +24843,536 @@ angular.module('platformWebApp')
     }
 }]);
 angular.module('platformWebApp')
-.factory('platformWebApp.notifications', ['$resource', function ($resource) {
+.controller('platformWebApp.moduleDetailController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.bladeNavigationService', 'platformWebApp.modules', 'platformWebApp.moduleHelper', 'FileUploader', 'platformWebApp.settings', function ($scope, dialogService, bladeNavigationService, modules, moduleHelper, FileUploader, settings) {
+    var blade = $scope.blade;
 
-	return $resource('api/platform/notification/:id', { id: '@Id' }, {
-		getNotificationList: { method: 'GET', url: 'api/platform/notification', isArray: true },
-		getTemplateById: { method: 'GET', url: 'api/platform/notification/template/:id' },
-		getTemplate: { method: 'GET', url: 'api/platform/notification/template' },
-		getTemplates: { method: 'GET', url: 'api/platform/notification/templates', isArray: true },
-		updateTemplate: { method: 'POST', url: 'api/platform/notification/template' },
-		deleteTemplate: { method: 'DELETE', url: 'api/platform/notification/template/:id' },
-		prepareTestData: { method: 'GET', url: 'api/platform/notification/template/:type/getTestingParameters', isArray: true },
-		resolveNotification: { method: 'POST', url: 'api/platform/notification/template/rendernotificationcontent' },
-		sendNotification: { method: 'POST', url: 'api/platform/notification/template/sendnotification' },
-		getNotificationJournalList: { method: 'GET', url: 'api/platform/notification/journal/:objectId/:objectTypeId' },
-		getNotificationJournalDetails: { method: 'GET', url: 'api/platform/notification/notification/:id' },
-		stopSendingNotifications: { method: 'POST', url: 'api/platform/notification/stopnotifications' }
-	});
+    function initializeBlade() {
+        if (blade.currentEntity.isInstalled) {
+            var canUpdate = _.any(moduleHelper.allmodules, function (x) {
+                return x.id === blade.currentEntity.id && !x.isInstalled;
+            });
+            blade.toolbarCommands = [
+                {
+                    name: "platform.commands.update", icon: 'fa fa-upload',
+                    executeMethod: function () {
+                        blade.currentEntity = _.last(_.where(moduleHelper.allmodules, { id: blade.currentEntity.id, isInstalled: false }));
+                        initializeBlade();
+                    },
+                    canExecuteMethod: function () { return canUpdate; },
+                    permission: 'platform:module:manage'
+                },
+                {
+                    name: "platform.commands.uninstall", icon: 'fa fa-trash-o',
+                    executeMethod: function () {
+                        $scope.confirmActionInDialog('uninstall');
+                    },
+                    canExecuteMethod: function () { return true; },
+                    permission: 'platform:module:manage'
+                }
+            ];
+
+            // hide settings toolbar button when there are no settings available #523
+            settings.getSettings({ id: blade.currentEntity.id }, function (results) {
+                if (_.any(results)) {
+                    blade.toolbarCommands.push({
+                        name: "platform.commands.settings", icon: 'fa fa-wrench',
+                        executeMethod: function () {
+                            var newBlade = {
+                                id: 'moduleSettingsSection',
+                                moduleId: blade.currentEntity.id,
+                                data: results,
+                                title: 'platform.blades.module-settings-detail.title',
+                                //subtitle: '',
+                                controller: 'platformWebApp.settingsDetailController',
+                                template: '$(Platform)/Scripts/app/settings/blades/settings-detail.tpl.html'
+                            };
+                            bladeNavigationService.showBlade(newBlade, blade);
+                        },
+                        canExecuteMethod: function () { return true; }
+                    });
+                }
+                blade.isLoading = false;
+            });
+        } else {
+            blade.toolbarCommands = [];
+            blade.mode = blade.currentEntity.$alternativeVersion ? 'update' : 'install';
+            $scope.availableVersions = _.where(moduleHelper.allmodules, { id: blade.currentEntity.id, isInstalled: false });
+            blade.isLoading = false;
+        }
+    }
+
+    $scope.openDependencyModule = function (dependency) {
+        module = _.findWhere(moduleHelper.allmodules, { id: dependency.id, version: dependency.version }) ||
+                    _.findWhere(moduleHelper.allmodules, { id: dependency.id }) ||
+                     module;
+        blade.parentBlade.selectNode(module);
+    };
+
+    $scope.confirmActionInDialog = function (action) {
+        blade.isLoading = true;
+
+        //var clone = {
+        //    id: blade.currentEntity.id,
+        //    version: blade.currentEntity.version,
+        //};
+        var selection = [blade.currentEntity];
+        var modulesApiMethod = action === 'uninstall' ? modules.getDependents : modules.getDependencies;
+        modulesApiMethod(selection, function (data) {
+            blade.isLoading = false;
+
+            var dialog = {
+                id: "confirmation",
+                action: action,
+                selection: selection,
+                dependencies: data,
+                callback: function () {
+                    // initiate module (un)installation
+                    blade.isLoading = true;
+                    _.each(selection, function (x) {
+                        if (!_.findWhere(data, { id: x.id })) {
+                            data.push(x);
+                        }
+                    });
+
+                    switch (action) {
+                        case 'install':
+                        case 'update':
+                            modulesApiMethod = modules.install;
+                            break;
+                        case 'uninstall':
+                            modulesApiMethod = modules.uninstall;
+                            break;
+                    }
+                    modulesApiMethod(data, function (data) {
+                        // show module (un)installation progress
+                        var newBlade = {
+                            id: 'moduleInstallProgress',
+                            currentEntity: data,
+                            controller: 'platformWebApp.moduleInstallProgressController',
+                            template: '$(Platform)/Scripts/app/modularity/wizards/newModule/module-wizard-progress-step.tpl.html'
+                        };
+                        switch (action) {
+                            case 'install':
+                                _.extend(newBlade, { title: 'platform.blades.module-wizard-progress-step.title-install' });
+                                break;
+                            case 'update':
+                                _.extend(newBlade, { title: 'platform.blades.module-wizard-progress-step.title-update' });
+                                break;
+                            case 'uninstall':
+                                _.extend(newBlade, { title: 'platform.blades.module-wizard-progress-step.title-uninstall' });
+                                break;
+                        }
+                        bladeNavigationService.showBlade(newBlade, blade.parentBlade);
+                    }, function (error) {
+                        bladeNavigationService.setError('Error ' + error.status, blade);
+                    });
+                }
+            }
+            dialogService.showDialog(dialog, '$(Platform)/Scripts/app/modularity/dialogs/moduleAction-dialog.tpl.html', 'platformWebApp.confirmDialogController');
+        }, function (error) {
+            bladeNavigationService.setError('Error ' + error.status, blade);
+        });
+    };
+
+    blade.headIcon = 'fa-cubes';
+
+    if (blade.mode === 'advanced') {
+        // the uploader
+        var uploader = $scope.uploader = new FileUploader({
+            scope: $scope,
+            headers: {
+                Accept: 'application/json'
+            },
+            url: 'api/platform/modules/localstorage',
+            autoUpload: true,
+            removeAfterUpload: true
+        });
+
+        // ADD FILTERS: packages only
+        uploader.filters.push({
+            name: 'packageFilter',
+            fn: function (i /*{File|FileLikeObject}*/, options) {
+                return i.name.endsWith('.zip');
+            }
+        });
+
+        uploader.onAfterAddingFile = function (item) {
+            bladeNavigationService.setError(null, blade);
+            blade.isLoading = true;
+        };
+
+        uploader.onCompleteAll = function () {
+            blade.isLoading = false;
+        };
+
+        uploader.onSuccessItem = function (fileItem, data, status, headers) {
+            if (data) {
+                if (data.tags) {
+                    data.tagsArray = data.tags.split(' ');
+                }
+                blade.currentEntity = data;
+                blade.mode = undefined;
+                initializeBlade();
+            } else {
+                bladeNavigationService.setError('Invalid module package: ' + fileItem.file.name, blade);
+            }
+        };
+
+        uploader.onErrorItem = function (item, response, status, headers) {
+            if (item.isUploaded) {
+                bladeNavigationService.setError('File uploaded with error status: ' + status, blade);
+            } else {
+                bladeNavigationService.setError('Failed to upload. Error status: ' + status, blade);
+            }
+        };
+
+        blade.isLoading = false;
+    } else {
+        initializeBlade();
+    }
 }]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.modulesListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.modules', 'uiGridConstants', 'platformWebApp.uiGridHelper', 'platformWebApp.moduleHelper', '$timeout',
+function ($scope, bladeNavigationService, dialogService, modules, uiGridConstants, uiGridHelper, moduleHelper, $timeout) {
+    $scope.uiGridConstants = uiGridConstants;
+    var blade = $scope.blade;
+
+    blade.refresh = function () {
+        blade.isLoading = true;
+        blade.parentBlade.refresh().then(function (data) {
+            blade.currentEntities = blade.isGrouped ? moduleHelper.moduleBundles : data;
+            blade.isLoading = false;
+        })
+    };
+
+    blade.selectNode = function (node) {
+        $scope.selectedNodeId = node.id;
+
+        var newBlade = {
+            id: 'moduleDetails',
+            title: 'platform.blades.module-detail.title',
+            currentEntity: node,
+            controller: 'platformWebApp.moduleDetailController',
+            template: '$(Platform)/Scripts/app/modularity/blades/module-detail.tpl.html'
+        };
+
+        bladeNavigationService.showBlade(newBlade, blade);
+    };
+
+    function isItemsChecked() {
+        return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
+    }
+
+    // initialize blade.toolbarCommands
+    switch (blade.mode) {
+        case 'update':
+            blade.toolbarCommands = [{
+                name: "platform.commands.update", icon: 'fa fa-arrow-up',
+                executeMethod: function () { $scope.confirmActionInDialog('update', $scope.gridApi.selection.getSelectedRows()); },
+                canExecuteMethod: isItemsChecked,
+                permission: 'platform:module:manage'
+            }];
+            break;
+        case 'available':
+            blade.toolbarCommands = [{
+                name: "platform.commands.install", icon: 'fa fa-plus',
+                executeMethod: function () { $scope.confirmActionInDialog('install', $scope.gridApi.selection.getSelectedRows()); },
+                canExecuteMethod: isItemsChecked,
+                permission: 'platform:module:manage'
+            }];
+            break;
+        case 'installed':
+            blade.toolbarCommands = [{
+                name: "platform.commands.uninstall", icon: 'fa fa-trash-o',
+                executeMethod: function () { $scope.confirmActionInDialog('uninstall', $scope.gridApi.selection.getSelectedRows()); },
+                canExecuteMethod: isItemsChecked,
+                permission: 'platform:module:manage'
+            }];
+            break;
+    }
+
+    $scope.confirmActionInDialog = function (action, selection) {
+        if (_.any(selection)) {
+            bladeNavigationService.closeChildrenBlades(blade, function () {
+                blade.isLoading = true;
+
+                // eliminate duplicating nodes, if any
+                var grouped = _.groupBy(selection, 'id');
+                selection = [];
+                _.each(grouped, function (vals) {
+                    selection.push(_.last(vals));
+                });
+
+                var modulesApiMethod = action === 'uninstall' ? modules.getDependents : modules.getDependencies;
+                modulesApiMethod(selection, function (data) {
+                    blade.isLoading = false;
+
+                    var dialog = {
+                        id: "confirm",
+                        action: action,
+                        selection: selection,
+                        dependencies: data,
+                        callback: function () {
+                            // confirmed. Initiate modules (un)installation
+                            _.each(selection, function (x) {
+                                if (!_.findWhere(data, { id: x.id })) {
+                                    data.push(x);
+                                }
+                            });
+
+                            modulesApiMethod = action === 'uninstall' ? modules.uninstall : modules.install;
+                            modulesApiMethod(data, onAfterConfirmed, function (error) {
+                                bladeNavigationService.setError('Error ' + error.status, blade);
+                            });
+                        }
+                    }
+                    dialogService.showDialog(dialog, '$(Platform)/Scripts/app/modularity/dialogs/moduleAction-dialog.tpl.html', 'platformWebApp.confirmDialogController');
+                }, function (error) {
+                    bladeNavigationService.setError('Error ' + error.status, blade);
+                });
+            });
+        }
+    }
+
+    function onAfterConfirmed(data) {
+        var newBlade = {
+            id: 'moduleInstallProgress',
+            currentEntity: data,
+            title: blade.title,
+            controller: 'platformWebApp.moduleInstallProgressController',
+            template: '$(Platform)/Scripts/app/modularity/wizards/newModule/module-wizard-progress-step.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, blade);
+    }
+
+
+    // ui-grid
+    $scope.setGridOptions = function (gridOptions) {
+        switch (blade.mode) {
+            case 'update':
+            case 'installed':
+                _.extend(gridOptions, {
+                    showTreeRowHeader: false
+                });
+                break;
+            case 'available':
+                _.extend(gridOptions, {
+                    enableGroupHeaderSelection: true
+                });
+                break;
+        }
+
+        uiGridHelper.initialize($scope, gridOptions, function (gridApi) {
+            gridApi.grid.registerRowsProcessor($scope.singleFilter, 90);
+
+            if (blade.mode === 'available') {
+                $scope.$watch('blade.isGrouped', function (isGrouped) {
+                    if (isGrouped) {
+                        blade.currentEntities = moduleHelper.moduleBundles;
+                        if (!_.any(gridApi.grouping.getGrouping().grouping)) {
+                            gridApi.grouping.groupColumn('$group');
+                        }
+                        $timeout(gridApi.treeBase.expandAllRows);
+                    } else {
+                        blade.currentEntities = moduleHelper.availableModules;
+                        gridApi.grouping.clearGrouping();
+                    }
+                });
+
+                // toggle grouped rows selection
+                gridApi.selection.on.rowSelectionChanged($scope, function (row) {
+                    if (row.internalRow) {
+                        _.each(row.treeNode.children, function (treeNode) {
+                            if (row.isSelected) {
+                                gridApi.selection.selectRow(treeNode.row.entity);
+                            } else {
+                                gridApi.selection.unSelectRow(treeNode.row.entity);
+                            }
+                        });
+                    }
+                });
+
+                $scope.toggleRow = function (row) {
+                    gridApi.treeBase.toggleRowTreeState(row);
+                };
+
+                $scope.getGroupInfo = function (groupEntity) {
+                    return _.values(groupEntity)[0];
+                };
+            }
+        });
+    };
+
+    $scope.singleFilter = function (renderableRows) {
+        var visibleCount = 0;
+        renderableRows.forEach(function (row) {
+            var searchText = angular.lowercase(blade.searchText);
+            row.visible = !searchText ||
+                            row.entity.title.toLowerCase().indexOf(searchText) !== -1 ||
+                            row.entity.tags.toLowerCase().indexOf(searchText) !== -1 ||
+                            row.entity.version.toLowerCase().indexOf(searchText) !== -1 ||
+                            row.entity.description.toLowerCase().indexOf(searchText) !== -1;
+            if (row.visible) visibleCount++;
+        });
+
+        $scope.filteredEntitiesCount = visibleCount;
+        return renderableRows;
+    };
+
+
+    blade.isLoading = false;
+}]);
+
+angular.module('platformWebApp')
+    .controller('platformWebApp.modulesMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.modules', 'platformWebApp.moduleHelper', function ($scope, bladeNavigationService, modules, moduleHelper) {
+        var blade = $scope.blade;
+        var nodeUpdate, nodeAvailable, nodeInstalled;
+        $scope.selectedNodeId = null;
+
+        blade.reload = function () {
+            modules.reload().$promise.then(blade.refresh);
+        };
+
+        blade.refresh = function () {
+            blade.isLoading = true;
+
+            return modules.query().$promise.then(function (results) {
+                moduleHelper.moduleBundles = [];
+                moduleHelper.allmodules = results;
+                _.each(results, function (x) {
+                    x.description = x.description || '';
+                    x.tags = x.tags || '';
+                    if (x.tags) {
+                        x.tagsArray = x.tags.split(' ');
+                    }
+                    if (x.owners) {
+                        x.$owner = x.owners.join(', ');
+                    }
+                    x.$isOwnedByVirto = _.contains(x.owners, 'Virto Commerce');
+                });
+
+                var newResults = [];
+                var grouped = _.groupBy(results, 'id');
+                _.each(grouped, function (vals, key) {
+                    var latest = _.last(vals);
+                    newResults.push(latest);
+
+                    // pre-calculate $alternativeVersion: set latest OR installed version here
+                    var foundInstalledModule;
+                    if (foundInstalledModule = _.findWhere(vals, { isInstalled: true })) {
+                        _.each(vals, function (m) {
+                            if (m === foundInstalledModule) {
+                                if (m !== latest)
+                                    m.$alternativeVersion = latest.version;
+                            } else {
+                                m.$alternativeVersion = foundInstalledModule.version;
+                            }
+                        });
+                    }
+
+                    // prepare bundled (grouped) data source of available modules
+                    if (!latest.isInstalled && !latest.$alternativeVersion) {
+                        if (_.any(latest.groups)) {
+                            _.each(latest.groups, function (x, index) {
+                                var clone = angular.copy(latest);
+                                clone.$group = x;
+                                moduleHelper.moduleBundles.push(clone);
+                            });
+                        } else {
+                            var clone = angular.copy(latest);
+                            clone.$group = 'platform.blades.modules-list.labels.ungrouped';
+                            moduleHelper.moduleBundles.push(clone);
+                        }
+                    }
+                });
+
+                nodeUpdate.entities = _.filter(newResults, function (x) { return !x.isInstalled && x.$alternativeVersion; });
+                nodeAvailable.entities = moduleHelper.availableModules = _.filter(newResults, function (x) { return !x.isInstalled && !x.$alternativeVersion; });
+                nodeInstalled.entities = _.where(results, { isInstalled: true });
+                nodeWithErrors.entities = _.filter(results, function (x) { return x.isInstalled && _.any(x.validationErrors); });
+                if (_.any(nodeWithErrors.entities) && !nodeWithErrors.isAddedToList) {
+                    nodeWithErrors.isAddedToList = true;
+                    blade.currentEntities.splice(3, 0, nodeWithErrors);
+                }
+
+                openFirstBladeInitially();
+                blade.isLoading = false;
+
+                // return results for current child list
+                return _.findWhere(blade.currentEntities, { mode: $scope.selectedNodeId }).entities;
+            }, function (error) {
+                bladeNavigationService.setError('Error ' + error.status, blade);
+            });
+        };
+
+        blade.openBlade = function (data) {
+            $scope.selectedNodeId = data.mode;
+
+            var newBlade = {
+                id: 'modulesList',
+                mode: data.mode,
+                currentEntities: data.entities,
+                title: data.name,
+                subtitle: 'platform.blades.modules-list.subtitle',
+                controller: 'platformWebApp.modulesListController',
+                template: '$(Platform)/Scripts/app/modularity/blades/modules-list.tpl.html'
+            };
+
+            if (data.mode === 'withErrors') {
+                angular.extend(newBlade, {
+                    mode: 'installed'
+                });
+            }
+
+            if (data.mode === 'advanced') {
+                angular.extend(newBlade, {
+                    controller: 'platformWebApp.moduleDetailController',
+                    template: '$(Platform)/Scripts/app/modularity/blades/module-detail.tpl.html'
+                });
+            }
+
+            bladeNavigationService.showBlade(newBlade, blade);
+        };
+
+        blade.toolbarCommands = [
+            {
+                name: "platform.commands.refresh", icon: 'fa fa-refresh',
+                executeMethod: blade.reload,
+                canExecuteMethod: function () { return true; }
+            }
+        ];
+
+        blade.headIcon = 'fa-cubes';
+
+        blade.currentEntities = [
+            nodeUpdate = { name: 'platform.blades.modules-main.labels.updates', mode: 'update' },
+            nodeAvailable = { name: 'platform.blades.modules-main.labels.available', mode: 'available' },
+            nodeInstalled = { name: 'platform.blades.modules-main.labels.installed', mode: 'installed' },
+            { name: 'platform.blades.modules-main.labels.advanced', mode: 'advanced' }
+        ];
+
+        var nodeWithErrors = { name: 'platform.blades.modules-main.labels.withErrors', mode: 'withErrors' };
+
+        var openFirstBladeInitially = _.once(function () { blade.openBlade(blade.currentEntities[0]); });
+
+        blade.refresh();
+    }]);
+
+angular.module('platformWebApp')
+.factory('platformWebApp.modules', ['$resource', function ($resource) {
+
+    return $resource('api/platform/modules', null, {
+        getDependencies: { method: 'POST', url: 'api/platform/modules/getmissingdependencies', isArray: true },
+        getDependents: { method: 'POST', url: 'api/platform/modules/getdependents', isArray: true },
+        install: { method: 'POST', url: 'api/platform/modules/install' },
+        uninstall: { method: 'POST', url: 'api/platform/modules/uninstall' },
+        restart: { method: 'POST', url: 'api/platform/modules/restart' },
+        autoInstall: { method: 'POST', url: 'api/platform/modules/autoinstall' },
+        reload: { method: 'POST', url: 'api/platform/modules/reload', isArray: true },
+    });
+}]);
+
 angular.module('platformWebApp')
 .controller('platformWebApp.notificationsJournalDetailtsController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.notifications', function ($scope, bladeNavigationService, notifications) {
 	var blade = $scope.blade;
@@ -26219,6 +26201,24 @@ angular.module('platformWebApp')
 	}
 }]);
 angular.module('platformWebApp')
+.factory('platformWebApp.notifications', ['$resource', function ($resource) {
+
+	return $resource('api/platform/notification/:id', { id: '@Id' }, {
+		getNotificationList: { method: 'GET', url: 'api/platform/notification', isArray: true },
+		getTemplateById: { method: 'GET', url: 'api/platform/notification/template/:id' },
+		getTemplate: { method: 'GET', url: 'api/platform/notification/template' },
+		getTemplates: { method: 'GET', url: 'api/platform/notification/templates', isArray: true },
+		updateTemplate: { method: 'POST', url: 'api/platform/notification/template' },
+		deleteTemplate: { method: 'DELETE', url: 'api/platform/notification/template/:id' },
+		prepareTestData: { method: 'GET', url: 'api/platform/notification/template/:type/getTestingParameters', isArray: true },
+		resolveNotification: { method: 'POST', url: 'api/platform/notification/template/rendernotificationcontent' },
+		sendNotification: { method: 'POST', url: 'api/platform/notification/template/sendnotification' },
+		getNotificationJournalList: { method: 'GET', url: 'api/platform/notification/journal/:objectId/:objectTypeId' },
+		getNotificationJournalDetails: { method: 'GET', url: 'api/platform/notification/notification/:id' },
+		stopSendingNotifications: { method: 'POST', url: 'api/platform/notification/stopnotifications' }
+	});
+}]);
+angular.module('platformWebApp')
 .controller('platformWebApp.pushNotificationsHistoryController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
 function ($scope, bladeNavigationService, eventTemplateResolver, notifications) {
     var blade = $scope.blade;
@@ -26293,35 +26293,6 @@ function ($scope, bladeNavigationService, eventTemplateResolver, notifications) 
     //blade.refresh();
 }]);
 
-angular.module('platformWebApp')
-.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
-	return {
-		link: function (scope, element, attrs) {
-
-			if (attrs.vaPermission) {
-				var permissionValue = attrs.vaPermission.trim();
-			
-				//modelObject is a scope property of the parent/current scope
-				scope.$watch(attrs.securityScopes, function (value) {
-					if (value) {
-						toggleVisibilityBasedOnPermission(value);
-					}
-				});
-			
-				function toggleVisibilityBasedOnPermission(securityScopes) {
-					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
-					if (hasPermission)
-						element.show();
-					else
-						element.hide();
-				}
-
-				toggleVisibilityBasedOnPermission();
-				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
-			}
-		}
-	};
-}]);
 angular.module('platformWebApp')
 .factory('platformWebApp.pushNotifications', ['$resource', function ($resource) {
 
@@ -27480,6 +27451,35 @@ angular.module('platformWebApp')
     initializeBlade();
 }]);
 
+angular.module('platformWebApp')
+.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
+	return {
+		link: function (scope, element, attrs) {
+
+			if (attrs.vaPermission) {
+				var permissionValue = attrs.vaPermission.trim();
+			
+				//modelObject is a scope property of the parent/current scope
+				scope.$watch(attrs.securityScopes, function (value) {
+					if (value) {
+						toggleVisibilityBasedOnPermission(value);
+					}
+				});
+			
+				function toggleVisibilityBasedOnPermission(securityScopes) {
+					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
+					if (hasPermission)
+						element.show();
+					else
+						element.hide();
+				}
+
+				toggleVisibilityBasedOnPermission();
+				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
+			}
+		}
+	};
+}]);
 angular.module('platformWebApp')
 .directive('vaLoginToolbar', ['$document', '$timeout', '$state', 'platformWebApp.authService', function ($document, $timeout, $state, authService) {
     return {
