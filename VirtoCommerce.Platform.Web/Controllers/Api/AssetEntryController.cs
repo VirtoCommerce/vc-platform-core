@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Security;
@@ -31,7 +32,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("search")]
         [ProducesResponseType(typeof(GenericSearchResult<AssetEntry>), 200)]
-        [Authorize(SecurityConstants.Permissions.AssetAccess)]
+        [Authorize(PlatformConstants.Security.Permissions.AssetAccess)]
         public async Task<IActionResult> Search([FromBody]AssetEntrySearchCriteria criteria)
         {
             var result = await _assetSearchService.SearchAssetEntriesAsync(criteria);
@@ -44,7 +45,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(AssetEntry), 200)]
-        [Authorize(SecurityConstants.Permissions.AssetRead)]
+        [Authorize(PlatformConstants.Security.Permissions.AssetRead)]
         public async Task<IActionResult> Get([FromQuery]string id)
         {
             var retVal = await _assetService.GetByIdsAsync(new[] { id });
@@ -62,7 +63,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPut]
         [Route("")]
         [ProducesResponseType(typeof(void), 200)]
-        [Authorize(SecurityConstants.Permissions.AssetUpdate)]
+        [Authorize(PlatformConstants.Security.Permissions.AssetUpdate)]
         public async Task<IActionResult> Update([FromBody]AssetEntry item)
         {
             await _assetService.SaveChangesAsync(new[] { item });
@@ -77,7 +78,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpDelete]
         [ProducesResponseType(typeof(void), 200)]
         [Route("")]
-        [Authorize(SecurityConstants.Permissions.AssetDelete)]
+        [Authorize(PlatformConstants.Security.Permissions.AssetDelete)]
         public async Task<IActionResult> Delete([FromQuery] string[] ids)
         {
             await _assetService.DeleteAsync(ids);

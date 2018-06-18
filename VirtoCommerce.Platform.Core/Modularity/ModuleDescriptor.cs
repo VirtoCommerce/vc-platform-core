@@ -2,9 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Modularity;
 
-namespace VirtoCommerce.Platform.Web.Model.Modularity
+namespace VirtoCommerce.Platform.Core.Modularity
 {
     public class ModuleDescriptor : Entity
     {
@@ -13,11 +12,11 @@ namespace VirtoCommerce.Platform.Web.Model.Modularity
             ValidationErrors = new List<string>();
         }
         [JsonIgnore]
-        public Core.Modularity.ModuleIdentity Identity
+        public ModuleIdentity Identity
         {
             get
             {
-                return new Core.Modularity.ModuleIdentity(Id, Version);
+                return new ModuleIdentity(Id, Version);
             }
         }
         public string Version { get; set; }
@@ -61,7 +60,7 @@ namespace VirtoCommerce.Platform.Web.Model.Modularity
             Groups = moduleInfo.Groups;
             if (moduleInfo.Dependencies != null)
             {
-                Dependencies = moduleInfo.Dependencies.Select(x => new ModuleIdentity { Id = x.Id, Version = x.Version.ToString() }).ToList();
+                Dependencies = moduleInfo.Dependencies.Select(x => new ModuleIdentity(x.Id, x.Version)).ToList();
             }
             ValidationErrors = moduleInfo.Errors;
             return this;

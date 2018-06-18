@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.PushNotifications;
 
-namespace VirtoCommerce.Platform.Web.Model.Modularity
+namespace VirtoCommerce.Platform.Core.Modularity.PushNotifications
 {
     public class ModulePushNotification : PushNotification
     {
