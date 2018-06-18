@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.InventoryModule.Data.Model;
 using Microsoft.EntityFrameworkCore;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Data.Infrastructure;
 
@@ -20,9 +21,21 @@ namespace VirtoCommerce.InventoryModule.Data.Repositories
 
         public IQueryable<FulfillmentCenterEntity> FulfillmentCenters => DbContext.Set<FulfillmentCenterEntity>();
 
-        public async Task<IEnumerable<InventoryEntity>> GetProductsInventories(IEnumerable<string> productIds)
+        public async Task<IEnumerable<InventoryEntity>> GetProductsInventories(IEnumerable<string> productIds, string responseGroup)
         {
-            return await Inventories.Where(x => productIds.Contains(x.Sku)).Include(x => x.FulfillmentCenter).ToListAsync();
+            var inventories = await Inventories.Where(x => productIds.Contains(x.Sku)).ToListAsync();
+
+            var inventoryResponseGroup = EnumUtility.SafeParse(responseGroup, InventoryResponseGroup.Full);
+
+            foreach (var inventory in inventories)
+            {
+                if ((inventoryResponseGroup & InventoryResponseGroup.WithFulfillmentCenter) == InventoryResponseGroup.WithFulfillmentCenter)
+                {
+                    var fulfillmentCenter = await DbContext.Set<FulfillmentCenterEntity>().FirstOrDefaultAsync(t => t.Id.Equals(inventory.FulfillmentCenterId));
+                }
+            }
+
+            return inventories;
         }
 
         public async Task<IEnumerable<FulfillmentCenterEntity>> GetFulfillmentCenters(IEnumerable<string> ids)
@@ -30,9 +43,21 @@ namespace VirtoCommerce.InventoryModule.Data.Repositories
             return await FulfillmentCenters.Where(x => ids.Contains(x.Id)).ToListAsync();
         }
 
-        public async Task<IEnumerable<InventoryEntity>> GetByIdsAsync(string[] ids)
+        public async Task<IEnumerable<InventoryEntity>> GetByIdsAsync(string[] ids, string responseGroup)
         {
-            return await Inventories.Where(x => ids.Contains(x.Id)).ToListAsync();
+            var inventories = await Inventories.Where(x => ids.Contains(x.Id)).ToListAsync();
+
+            var inventoryResponseGroup = EnumUtility.SafeParse(responseGroup, InventoryResponseGroup.Full);
+
+            foreach (var inventory in inventories)
+            {
+                if ((inventoryResponseGroup & InventoryResponseGroup.WithFulfillmentCenter) == InventoryResponseGroup.WithFulfillmentCenter)
+                {
+                    var fulfillmentCenter = await DbContext.Set<FulfillmentCenterEntity>().FirstOrDefaultAsync(t => t.Id.Equals(inventory.FulfillmentCenterId));
+                }
+            }
+
+            return inventories;
         }
 
         #endregion

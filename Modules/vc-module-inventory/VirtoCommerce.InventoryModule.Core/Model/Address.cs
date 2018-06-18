@@ -1,13 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using VirtoCommerce.Domain.Commerce.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.InventoryModule.Core.Model
 {
-    public class Address : ValueObject, ICloneable
+    public class Address : Entity, ICloneable
     {
         //Temporary workaround to be able make references to the address
         public string Key { get; set; }
@@ -38,16 +36,6 @@ namespace VirtoCommerce.InventoryModule.Core.Model
         public override string ToString()
         {
             return string.Join(", ", new[] { FirstName, LastName, Line1, City, RegionName, PostalCode ?? Zip, CountryName }.Where(x => !string.IsNullOrWhiteSpace(x)));
-        }
-
-        protected override IEnumerable<object> GetEqualityComponents()
-        {
-            var result = base.GetEqualityComponents();
-            if (!string.IsNullOrEmpty(Key))
-            {
-                result = new[] { Key };
-            }
-            return result;
         }
     }
 }

@@ -3,13 +3,14 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VirtoCommerce.InventoryModule.Core.Model;
+using VirtoCommerce.InventoryModule.Core.Model.Search;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.InventoryModule.Web.JsonConverters
 {
     public class PolymorphicInventoryJsonConverter : JsonConverter
     {
-        private readonly Type[] _knowTypes = new[] { typeof(InventoryInfo) };
+        private readonly Type[] _knowTypes = new[] { typeof(InventoryInfo), typeof(FulfillmentCenter), typeof(Address), typeof(FulfillmentCenterSearchCriteria) };
 
         public override bool CanWrite => false;
         public override bool CanRead => true;

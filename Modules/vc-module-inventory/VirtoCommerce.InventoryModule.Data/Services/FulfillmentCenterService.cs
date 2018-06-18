@@ -30,16 +30,16 @@ namespace VirtoCommerce.InventoryModule.Data.Services
         }
 
         #region IFulfillmentCenterService members
-        public async Task<IEnumerable<FulfillmentCenter>> GetByIdsAsync(IEnumerable<string> ids, string responseGroup = null)
+        public async Task<IEnumerable<FulfillmentCenter>> GetByIdsAsync(IEnumerable<string> ids)
         {
             if (ids == null)
             {
                 throw new ArgumentNullException(nameof(ids));
             }
-            var cacheKey = CacheKey.With(GetType(), "PreloadFulfillmentCenter");
+            var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", ids));
             return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                cacheEntry.AddExpirationToken(InventoryCacheRegion.CreateChangeToken());
+                cacheEntry.AddExpirationToken(FulfillmentCenterCacheRegion.CreateChangeToken());
                 IEnumerable<FulfillmentCenter> result = null;
                 using (var repository = _repositoryFactory())
                 {
@@ -80,14 +80,13 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                         changedEntries.Add(new GenericChangedEntry<FulfillmentCenter>(changedCenter, EntryState.Added));
                     }
                 }
-                //Raise domain events
+
                 await _eventPublisher.Publish(new FulfillmentCenterChangingEvent(changedEntries));
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
                 await _eventPublisher.Publish(new FulfillmentCenterChangedEvent(changedEntries));
 
-                //Reset cached catalogs and catalogs
-                InventoryCacheRegion.ExpireRegion();
+                FulfillmentCenterCacheRegion.ExpireRegion();
             }
         }
 
@@ -107,8 +106,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                 await repository.UnitOfWork.CommitAsync();
                 await _eventPublisher.Publish(new FulfillmentCenterChangedEvent(changedEntries));
 
-                //Reset cached catalogs and catalogs
-                InventoryCacheRegion.ExpireRegion();
+                FulfillmentCenterCacheRegion.ExpireRegion();
             }
         }
         #endregion

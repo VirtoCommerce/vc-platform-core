@@ -23,7 +23,7 @@ namespace VirtoCommerce.InventoryModule.Web
         {
             var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
             serviceCollection.AddTransient<IInventoryRepository, InventoryRepositoryImpl>();
-            serviceCollection.AddDbContext<InventoryDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce")));
+            serviceCollection.AddDbContext<InventoryDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerceModules.Inventory")));
             serviceCollection.AddSingleton<Func<IInventoryRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IInventoryRepository>());
             serviceCollection.AddSingleton<IInventoryService, InventoryServiceImpl>();
             serviceCollection.AddSingleton<IInventorySearchService, InventorySearchService>();
@@ -33,29 +33,38 @@ namespace VirtoCommerce.InventoryModule.Web
 
         public void PostInitialize(IServiceProvider serviceProvider)
         {
-            //Register product availability indexation 
-            #region Search
-
-            var productIndexingConfigurations = serviceProvider.GetService<IndexDocumentConfiguration[]>();
-            if (productIndexingConfigurations != null)
+            //Force migrations
+            using (var serviceScope = serviceProvider.CreateScope())
             {
-                var productAvaibilitySource = new IndexDocumentSource
-                {
-                    ChangesProvider = serviceProvider.GetService<ProductAvailabilityChangesProvider>(),
-                    DocumentBuilder = serviceProvider.GetService<ProductAvailabilityDocumentBuilder>(),
-                };
-
-                foreach (var configuration in productIndexingConfigurations.Where(c => c.DocumentType == KnownDocumentTypes.Product))
-                {
-                    if (configuration.RelatedSources == null)
-                    {
-                        configuration.RelatedSources = new List<IndexDocumentSource>();
-                    }
-                    configuration.RelatedSources.Add(productAvaibilitySource);
-                }
+                var inventoryDbContext = serviceScope.ServiceProvider.GetRequiredService<InventoryDbContext>();
+                inventoryDbContext.Database.EnsureCreated();
+                inventoryDbContext.Database.Migrate();
             }
 
-            #endregion
+            //TODO implement after SearchModule
+            //Register product availability indexation 
+            //#region Search
+
+            //var productIndexingConfigurations = serviceProvider.GetService<IndexDocumentConfiguration[]>();
+            //if (productIndexingConfigurations != null)
+            //{
+            //    var productAvaibilitySource = new IndexDocumentSource
+            //    {
+            //        ChangesProvider = serviceProvider.GetService<ProductAvailabilityChangesProvider>(),
+            //        DocumentBuilder = serviceProvider.GetService<ProductAvailabilityDocumentBuilder>(),
+            //    };
+
+            //    foreach (var configuration in productIndexingConfigurations.Where(c => c.DocumentType == KnownDocumentTypes.Product))
+            //    {
+            //        if (configuration.RelatedSources == null)
+            //        {
+            //            configuration.RelatedSources = new List<IndexDocumentSource>();
+            //        }
+            //        configuration.RelatedSources.Add(productAvaibilitySource);
+            //    }
+            //}
+
+            //#endregion
 
             // enable polymorphic types in API controller methods
             var mvcJsonOptions = serviceProvider.GetService<IOptions<MvcJsonOptions>>();

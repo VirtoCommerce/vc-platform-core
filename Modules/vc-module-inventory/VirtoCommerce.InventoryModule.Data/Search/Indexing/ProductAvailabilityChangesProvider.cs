@@ -52,7 +52,8 @@ namespace VirtoCommerce.InventoryModule.Data.Search.Indexing
                     .Take((int)take)
                     .ToArray();
 
-                var inventories = await _inventoryService.GetByIdsAsync(changeLogOperations.Select(o => o.ObjectId).ToArray());
+            var inventories = await _inventoryService.GetByIdsAsync(
+                changeLogOperations.Select(o => o.ObjectId).ToArray(), InventoryResponseGroup.Default.ToString());
 
                 result = changeLogOperations.Join(inventories, o => o.ObjectId,  i => i .Id, (o, i) => new IndexDocumentChange
                 {

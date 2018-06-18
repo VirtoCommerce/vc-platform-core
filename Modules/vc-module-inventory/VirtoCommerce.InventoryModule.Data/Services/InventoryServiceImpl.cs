@@ -31,9 +31,9 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             _memoryCache = memoryCache;
         }
 
-        public async Task<IEnumerable<InventoryInfo>> GetByIdsAsync(string[] itemIds)
+        public async Task<IEnumerable<InventoryInfo>> GetByIdsAsync(string[] itemIds, string responseGroup = null)
         {
-            var cacheKey = CacheKey.With(GetType(), "PreloadInventory");
+            var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", itemIds), responseGroup);
             return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(InventoryCacheRegion.CreateChangeToken());
@@ -48,10 +48,9 @@ namespace VirtoCommerce.InventoryModule.Data.Services
 
         #region IInventoryService Members
         
-
-        public async Task<IEnumerable<InventoryInfo>> GetProductsInventoryInfosAsync(IEnumerable<string> productIds)
+        public async Task<IEnumerable<InventoryInfo>> GetProductsInventoryInfosAsync(IEnumerable<string> productIds, string responseGroup = null)
         {
-            var cacheKey = CacheKey.With(GetType(), "PreloadProductsInventory");
+            var cacheKey = CacheKey.With(GetType(), "GetProductsInventoryInfosAsync", string.Join("-", productIds), responseGroup);
             return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(InventoryCacheRegion.CreateChangeToken());
@@ -59,7 +58,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                 using (var repository = _repositoryFactory())
                 {
                     repository.DisableChangesTracking();
-                    var entities = await repository.GetProductsInventories(productIds.ToArray());
+                    var entities = await repository.GetProductsInventories(productIds.ToArray(), responseGroup);
                     retVal.AddRange(entities.Select(x =>
                         x.ToModel(AbstractTypeFactory<InventoryInfo>.TryCreateInstance())));
                 }
@@ -67,7 +66,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             });
         }
 
-        public async Task UpsertInventoriesAsync(IEnumerable<InventoryInfo> inventoryInfos)
+        public async Task SaveChangesAsync(IEnumerable<InventoryInfo> inventoryInfos)
         {
             if (inventoryInfos == null)
             {
@@ -100,22 +99,10 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                 await repository.UnitOfWork.CommitAsync();
                 await _eventPublisher.Publish(new InventoryChangedEvent(changedEntries));
 
-                //Reset cached catalogs and catalogs
                 InventoryCacheRegion.ExpireRegion();
             }
         }
-
-
-        public async Task<InventoryInfo> UpsertInventoryAsync(InventoryInfo inventoryInfo)
-        {
-            if (inventoryInfo == null)
-            {
-                throw new ArgumentNullException(nameof(inventoryInfo));
-            }
-            await UpsertInventoriesAsync(new[] { inventoryInfo });
-            return inventoryInfo;
-        }
-
+        
         #endregion
 
     }

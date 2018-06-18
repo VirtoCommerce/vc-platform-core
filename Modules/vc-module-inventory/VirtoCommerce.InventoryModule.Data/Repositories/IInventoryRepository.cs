@@ -10,8 +10,8 @@ namespace VirtoCommerce.InventoryModule.Data.Repositories
 		IQueryable<InventoryEntity> Inventories { get; }
         IQueryable<FulfillmentCenterEntity> FulfillmentCenters { get; }
 
-	    Task<IEnumerable<InventoryEntity>> GetProductsInventories(IEnumerable<string> productIds);
+	    Task<IEnumerable<InventoryEntity>> GetProductsInventories(IEnumerable<string> productIds, string responseGroup = null);
         Task<IEnumerable<FulfillmentCenterEntity>> GetFulfillmentCenters(IEnumerable<string> ids);
-	    Task<IEnumerable<InventoryEntity>> GetByIdsAsync(string[] ids);
+	    Task<IEnumerable<InventoryEntity>> GetByIdsAsync(string[] ids, string responseGroup = null);
 	}
 }

@@ -5,17 +5,8 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.InventoryModule.Core.Model
 {
-    public class InventoryInfo : ValueObject, IAuditable
+    public class InventoryInfo : AuditableEntity
     {
-        public string Id { get; set; }
-
-        #region IAuditable Members
-        public DateTime CreatedDate { get; set; }
-        public string CreatedBy { get; set; }
-        public DateTime? ModifiedDate { get; set; }
-        public string ModifiedBy { get; set; }
-        #endregion
-
         public string FulfillmentCenterId { get; set; }
         public FulfillmentCenter FulfillmentCenter { get; set; }
 
@@ -46,12 +37,6 @@ namespace VirtoCommerce.InventoryModule.Core.Model
                 result = Math.Max(0, InStockQuantity - ReservedQuantity) > 0;
             }
             return result;
-        }
-
-        protected override IEnumerable<object> GetEqualityComponents()
-        {
-            yield return FulfillmentCenterId;
-            yield return ProductId;
         }
     }
 }

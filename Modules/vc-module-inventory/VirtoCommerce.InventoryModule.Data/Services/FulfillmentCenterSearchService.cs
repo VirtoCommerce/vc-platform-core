@@ -30,7 +30,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             var cacheKey = CacheKey.With(GetType(), "SearchCentersAsync", criteria.GetHashCode().ToString());
             return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                cacheEntry.AddExpirationToken(InventoryCacheRegion.CreateChangeToken());
+                cacheEntry.AddExpirationToken(FulfillmentCenterCacheRegion.CreateChangeToken());
                 var result = new GenericSearchResult<FulfillmentCenter>();
                 using (var repository = _repositoryFactory())
                 {
@@ -51,8 +51,8 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                     query = query.OrderBySortInfos(sortInfos);
 
                     result.TotalCount = await query.CountAsync();
-                    var arrayFullfillmentCentries = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                    result.Results = arrayFullfillmentCentries
+                    var arrayFullfillmentCenters = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                    result.Results = arrayFullfillmentCenters
                         .Select(x => x.ToModel(AbstractTypeFactory<FulfillmentCenter>.TryCreateInstance()))
                         .ToList();
                 }
