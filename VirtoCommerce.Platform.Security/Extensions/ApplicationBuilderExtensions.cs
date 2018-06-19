@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.Platform.Security
@@ -12,7 +13,7 @@ namespace VirtoCommerce.Platform.Security
         public static IApplicationBuilder UsePlatformPermissions(this IApplicationBuilder appBuilder)
         {
             var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IKnownPermissionsProvider>();
-            permissionsProvider.RegisterPermissions(SecurityConstants.Permissions.AllPermissions.Select(x => new Permission() { GroupName = "Platform", Name = x }).ToArray());
+            permissionsProvider.RegisterPermissions(PlatformConstants.Security.Permissions.AllPermissions.Select(x => new Permission() { GroupName = "Platform", Name = x }).ToArray());
             return appBuilder;
         }
 

@@ -779,6 +779,14 @@
         "VirtoCommerce.Platform.UI.Customization": {
             "description": "JSON contains personalization settings of manager UI",
             "title": "The manager UI customization"
+        },
+        "VirtoCommerce.Platform.Cache.Enabled": {
+            "description": "Using this setting, you can turn on and off  cache globally for the entire platform application",
+            "title": "Enable or disable cache globally"
+        },
+        "VirtoCommerce.Platform.Cache.AbsoulteExpiration": {
+            "description": "Specifies the maximum time  that the cached data to be stored in the cache. Format: [-][d.]hh:mm:ss[.fffffff]",
+            "title": "The global lifetime of objects in the cache"
         }
     }
 

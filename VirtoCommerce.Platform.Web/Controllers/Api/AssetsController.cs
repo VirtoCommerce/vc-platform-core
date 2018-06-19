@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
+using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Security;
@@ -43,7 +44,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Route("localstorage")]
         [DisableFormValueModelBinding]
         [ProducesResponseType(typeof(BlobInfo[]), 200)]
-        [Authorize(SecurityConstants.Permissions.AssetCreate)]
+        [Authorize(PlatformConstants.Security.Permissions.AssetCreate)]
         public async Task<IActionResult> UploadAssetToLocalFileSystemAsync()
         {
             //ToDo Now supports downloading one file, find a solution for downloading multiple files
@@ -66,8 +67,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             var section = await reader.ReadNextSectionAsync();
             if (section != null)
             {
-                ContentDispositionHeaderValue contentDisposition;
-                var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out contentDisposition);
+                var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out ContentDispositionHeaderValue contentDisposition);
 
                 if (hasContentDispositionHeader)
                 {
@@ -108,7 +108,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Route("")]
         [DisableFormValueModelBinding]
         [ProducesResponseType(typeof(BlobInfo[]), 200)]
-        [Authorize(SecurityConstants.Permissions.AssetCreate)]
+        [Authorize(PlatformConstants.Security.Permissions.AssetCreate)]
         [UploadFile]
         public async Task<IActionResult> UploadAssetAsync([FromQuery] string folderUrl, [FromQuery]string url = null, [FromQuery]string name = null)
         {
@@ -144,8 +144,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 var section = await reader.ReadNextSectionAsync();
                 if (section != null)
                 {
-                    ContentDispositionHeaderValue contentDisposition;
-                    var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out contentDisposition);
+                    var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out ContentDispositionHeaderValue contentDisposition);
 
                     if (hasContentDispositionHeader)
                     {
@@ -183,7 +182,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpDelete]
         [ProducesResponseType(typeof(void), 200)]
         [Route("")]
-        [Authorize(SecurityConstants.Permissions.AssetDelete)]
+        [Authorize(PlatformConstants.Security.Permissions.AssetDelete)]
         public async Task<IActionResult> DeleteBlobsAsync([FromQuery] string[] urls)
         {
             await _blobProvider.RemoveAsync(urls);
@@ -199,7 +198,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpGet]
         [ProducesResponseType(typeof(GenericSearchResult<BlobEntry>), 200)]
         [Route("")]
-        [Authorize(SecurityConstants.Permissions.AssetRead)]
+        [Authorize(PlatformConstants.Security.Permissions.AssetRead)]
         public async Task<IActionResult> SearchAssetItemsAsync([FromQuery]string folderUrl = null, [FromQuery] string keyword = null)
         {
             var result = await _blobProvider.SearchAsync(folderUrl, keyword);
@@ -214,7 +213,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [ProducesResponseType(typeof(void), 200)]
         [Route("folder")]
-        [Authorize(SecurityConstants.Permissions.AssetCreate)]
+        [Authorize(PlatformConstants.Security.Permissions.AssetCreate)]
         public async Task<IActionResult> CreateBlobFolderAsync([FromBody]BlobFolder folder)
         {
             await _blobProvider.CreateFolderAsync(folder);

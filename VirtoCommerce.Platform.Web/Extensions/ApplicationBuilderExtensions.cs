@@ -1,6 +1,7 @@
 using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
@@ -23,7 +24,12 @@ namespace VirtoCommerce.Platform.Web.Extensions
                     new ModuleSettingsGroup
                     {
                         Name = "Platform|Security",
-                        Settings = SecurityConstants.Settings.AllSettings.ToArray()
+                        Settings = PlatformConstants.Settings.Security.AllSettings.ToArray()
+                     },
+                     new ModuleSettingsGroup
+                    {
+                        Name = "Platform|Cache",
+                        Settings = PlatformConstants.Settings.Cache.AllSettings.ToArray()
                      },
                     new ModuleSettingsGroup
                     {
