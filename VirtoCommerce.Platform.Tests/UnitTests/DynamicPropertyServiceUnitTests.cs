@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.DynamicProperties;
@@ -19,7 +20,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
         private readonly Mock<IPlatformRepository> _platformRepositoryMock;
         private readonly Func<IPlatformRepository> _repositoryFactory;
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
-        private readonly Mock<IMemoryCache> _memoryCasheMock;
+        private readonly Mock<IPlatformMemoryCache> _memoryCasheMock;
         private readonly DynamicPropertyService _dynamicPropertyService;
 
         public DynamicPropertyServiceUnitTests()
@@ -28,7 +29,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
             _repositoryFactory = () => _platformRepositoryMock.Object;
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _platformRepositoryMock.Setup(ss => ss.UnitOfWork).Returns(_mockUnitOfWork.Object);
-            _memoryCasheMock = new Mock<IMemoryCache>();
+            _memoryCasheMock = new Mock<IPlatformMemoryCache>();
             _dynamicPropertyService = new DynamicPropertyService(_repositoryFactory, _memoryCasheMock.Object);
         }
 
@@ -38,7 +39,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
             //Arrange
             var name = "Some property";
             var properties = new List<DynamicProperty>() { new DynamicProperty { Name = name } };
-           
+
 
             //Act
             var result = await _dynamicPropertyService.SaveDynamicPropertiesAsync(properties.ToArray());
@@ -55,7 +56,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
             var name = "Some property";
             var id = Guid.NewGuid().ToString();
             var properties = new List<DynamicProperty>() { new DynamicProperty { Name = name, Id = id } };
-            _platformRepositoryMock.Setup(n => n.GetDynamicPropertiesByIdsAsync(new [] { id})).ReturnsAsync(new DynamicPropertyEntity[]
+            _platformRepositoryMock.Setup(n => n.GetDynamicPropertiesByIdsAsync(new[] { id })).ReturnsAsync(new DynamicPropertyEntity[]
             {
                 new DynamicPropertyEntity { CreatedDate = DateTime.Now, ModifiedDate = DateTime.Now, Id = id }
             });
@@ -75,7 +76,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
             //Arrange
             var name = "Some item";
             var properties = new List<DynamicPropertyDictionaryItem>() { new DynamicPropertyDictionaryItem() { Name = name, } };
-           
+
             //Act
             await _dynamicPropertyService.SaveDictionaryItemsAsync(properties.ToArray());
         }

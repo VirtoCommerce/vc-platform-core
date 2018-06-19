@@ -14,6 +14,9 @@ namespace VirtoCommerce.Platform.Core.Modularity
         public const string TypeSecureString = "secureString";
         public const string TypeJson = "json";
 
+        [XmlElement("restartRequired")]
+        public bool RestartRequired { get; set; }
+
         [XmlElement("name")]
         public string Name { get; set; }
 

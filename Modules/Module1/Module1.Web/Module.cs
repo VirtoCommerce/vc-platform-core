@@ -1,5 +1,6 @@
 using System;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Module1.Abstractions;
 using Module1.Data;
@@ -19,11 +20,12 @@ namespace Module1.Web
 
         public void Initialize(IServiceCollection serviceCollection)
         {
+            var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
             //var mode = FluentValidation.CascadeMode.Continue;
             serviceCollection.AddSingleton<IMyService, MyServiceImpl>();
             serviceCollection.AddDbContext<PlatformDbContext2>(builder =>
             {
-                builder.UseSqlServer("Data Source=(local);Initial Catalog=VirtoCommerce3.0;Persist Security Info=True;User ID=virto;Password=virto;MultipleActiveResultSets=True;Connect Timeout=30");
+                builder.UseSqlServer(configuration.GetConnectionString("VirtoCommerce"));
             });
             serviceCollection.AddTransient<IPlatformRepository, PlatformRepository2>();
         }

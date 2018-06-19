@@ -15,8 +15,8 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
     {
         private readonly Func<IPlatformRepository> _repositoryFactory;
         private readonly IDynamicPropertyService _dynamicPropertyService;
-        private readonly IMemoryCache _memoryCache;
-        public DynamicPropertySearchService(Func<IPlatformRepository> repositoryFactory, IDynamicPropertyService dynamicPropertyService, IMemoryCache memoryCache)
+        private readonly IPlatformMemoryCache _memoryCache;
+        public DynamicPropertySearchService(Func<IPlatformRepository> repositoryFactory, IDynamicPropertyService dynamicPropertyService, IPlatformMemoryCache memoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _dynamicPropertyService = dynamicPropertyService;

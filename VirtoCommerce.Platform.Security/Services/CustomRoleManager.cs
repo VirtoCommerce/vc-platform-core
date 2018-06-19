@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Security;
@@ -17,8 +18,8 @@ namespace VirtoCommerce.Platform.Security.Services
     public class CustomRoleManager : AspNetRoleManager<Role>
     {
         private readonly IKnownPermissionsProvider _knownPermissions;
-        private readonly IMemoryCache _memoryCache;
-        public CustomRoleManager(IKnownPermissionsProvider knownPermissions, IMemoryCache memoryCache, IRoleStore<Role> store, IEnumerable<IRoleValidator<Role>> roleValidators,
+        private readonly IPlatformMemoryCache _memoryCache;
+        public CustomRoleManager(IKnownPermissionsProvider knownPermissions, IPlatformMemoryCache memoryCache, IRoleStore<Role> store, IEnumerable<IRoleValidator<Role>> roleValidators,
                                  ILookupNormalizer keyNormalizer, IdentityErrorDescriber errors, ILogger<RoleManager<Role>> logger, IHttpContextAccessor contextAccessor)
             : base(store, roleValidators, keyNormalizer, errors, logger, contextAccessor)
         {
@@ -63,7 +64,7 @@ namespace VirtoCommerce.Platform.Security.Services
             var result = await base.CreateAsync(role);
             if (result.Succeeded && !role.Permissions.IsNullOrEmpty())
             {
-                var permissionRoleClaims = role.Permissions.Select(x => new Claim(SecurityConstants.Claims.PermissionClaimType, x.Name));
+                var permissionRoleClaims = role.Permissions.Select(x => new Claim(PlatformConstants.Security.Claims.PermissionClaimType, x.Name));
                 foreach (var claim in permissionRoleClaims)
                 {
                     await base.AddClaimAsync(role, claim);
@@ -80,8 +81,8 @@ namespace VirtoCommerce.Platform.Security.Services
             var result = await base.UpdateAsync(role);
             if (result.Succeeded && role.Permissions != null)
             {
-                var sourcePermissionClaims = role.Permissions.Select(x => new Claim(SecurityConstants.Claims.PermissionClaimType, x.Name)).ToList();
-                var targetPermissionClaims = (await GetClaimsAsync(role)).Where(x => x.Type == SecurityConstants.Claims.PermissionClaimType).ToList();
+                var sourcePermissionClaims = role.Permissions.Select(x => new Claim(PlatformConstants.Security.Claims.PermissionClaimType, x.Name)).ToList();
+                var targetPermissionClaims = (await GetClaimsAsync(role)).Where(x => x.Type == PlatformConstants.Security.Claims.PermissionClaimType).ToList();
                 var comparer = AnonymousComparer.Create((Claim x) => x.Value);
                 //Add
                 foreach (var sourceClaim in sourcePermissionClaims.Except(targetPermissionClaims, comparer))
@@ -119,7 +120,7 @@ namespace VirtoCommerce.Platform.Security.Services
             if (SupportsRoleClaims)
             {
                 //Load role claims and convert it to the permissions and assign to role
-                var rolePermissionClaims = (await GetClaimsAsync(role)).Where(x => x.Type == SecurityConstants.Claims.PermissionClaimType);
+                var rolePermissionClaims = (await GetClaimsAsync(role)).Where(x => x.Type == PlatformConstants.Security.Claims.PermissionClaimType);
                 role.Permissions = _knownPermissions.GetAllPermissions().Join(rolePermissionClaims, p => p.Name, c => c.Value, (p, c) => p).ToList();
             }
         }
