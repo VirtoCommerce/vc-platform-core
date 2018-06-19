@@ -1,4 +1,4 @@
-﻿angular.module("virtoCommerce.coreModule.searchIndex", [])
+angular.module("virtoCommerce.coreModule.searchIndex", [])
 .config(['$stateProvider', function ($stateProvider) {
     $stateProvider.state('workspace.searchIndexModule', {
         url: '/searchIndex',
@@ -23,7 +23,7 @@
     pushNotificationTemplateResolver.register({
         priority: 900,
         satisfy: function (notify, place) { return place == 'history' && notify.notifyType == 'IndexProgressPushNotification'; },
-        template: '$(Platform)/Scripts/app/pushNotifications/blade/historyDefault.tpl.html',
+        template: 'Modules/$(VirtoCommerce.Core)/Scripts/SearchIndex/notifications/historyIndex.tpl.html',
         action: function (notify) {
             var blade = {
                 id: 'indexProgress',
@@ -33,6 +33,13 @@
             };
             bladeNavigationService.showBlade(blade);
         }
+    });
+
+    pushNotificationTemplateResolver.register({
+        priority: 900,
+        satisfy: function (notify, place) { return place == 'menu' && notify.notifyType == 'IndexProgressPushNotification';  },
+        template: 'Modules/$(VirtoCommerce.Core)/Scripts/SearchIndex/notifications/menuIndex.tpl.html',
+        action: function (notify) { $state.go('workspace.pushNotificationsHistory', notify) }
     });
 
     mainMenuService.addMenuItem({

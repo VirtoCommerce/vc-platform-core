@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<module>
+    <id>VirtoCommerce.Search</id>
+    <version>3.0.0</version>
+    <platformVersion>3.0.0</platformVersion>
+    <title>Search module</title>
+    <description>Search module</description>
+    <authors>
+        <author>Eugeny Tatarincev</author>
+    </authors>
+    <owners>
+        <owner>Virto Commerce</owner>
+    </owners>
+    <projectUrl>https://virtocommerce.com/apps/extensions/virto-core-module</projectUrl>
+    <iconUrl>Modules/$(VirtoCommerce.Search)/Content/logoVC.png</iconUrl>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright © 2011-2018 Virto Commerce. All rights reserved</copyright>
+    <tags>security core</tags>
+
+    <assemblyFile>VirtoCommerce.SearchModule.Web.dll</assemblyFile>
+    <moduleType>VirtoCommerce.SearchModule.Web.Module, VirtoCommerce.SearchModule.Web</moduleType>
+
+    <styles>
+        <directory virtualPath="$/Content" searchPattern="*.css" searchSubdirectories="true" />
+    </styles>
+    <scripts>
+        <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
+    </scripts>
+    
+    <incompatibilities>
+    </incompatibilities>
+    
+    <settings>
+        <group name="Search|General">
+            <setting>
+                <name>VirtoCommerce.Search.SearchConnectionString</name>
+                <valueType>string</valueType>
+                <defaultValue>provider=Lucene;server=~/App_Data/Lucene;scope=default</defaultValue>
+                <title>Search configuration string (requires restart)</title>
+                <description>
+                    <![CDATA[ 
+                    provider=AzureSearch;server=ServiceName;key=AccessKey;scope=default
+                    provider=Elasticsearch;server=localhost:9200;scope=default
+                    provider=Lucene;server=~/App_Data/Lucene;scope=default
+                    ]]>
+                </description>
+            </setting>
+            <setting>
+                <name>VirtoCommerce.Search.IndexingJobs.Enable</name>
+                <valueType>boolean</valueType>
+                <defaultValue>true</defaultValue>
+                <title>Schedule indexing jobs (requires restart)</title>
+                <description>Enable or disable periodic search index builders</description>
+            </setting>
+            <setting>
+                <name>VirtoCommerce.Search.IndexingJobs.CronExpression</name>
+                <valueType>string</valueType>
+                <defaultValue>0/5 * * * *</defaultValue>
+                <title>Indexing jobs cron expression (requires restart)</title>
+                <description>
+                    <![CDATA[ 
+                    x minutes use "0/x * * * *"
+                    x hourse use "0 */x * * *" you can set minutes also "15 */x * * *"
+                    x days "0 0 */x * *"   
+                    ]]>
+                </description>
+            </setting>
+            <setting>
+                <name>VirtoCommerce.Search.IndexPartitionSize</name>
+                <valueType>integer</valueType>
+                <defaultValue>50</defaultValue>
+                <title>The maximum items count per indexing partition</title>
+                <description>High value may will cause slow performance</description>
+            </setting>
+            <setting>
+                <name>VirtoCommerce.Search.IndexingJobs.ScaleOut</name>
+                <valueType>boolean</valueType>
+                <defaultValue>false</defaultValue>
+                <title>Enable scale out indexing (requires restart)</title>
+                <description>Scale out indexing partitions through job scheduler for parallel indexation</description>
+            </setting>
+            <setting>
+                <name>VirtoCommerce.Search.IndexingJobs.MaxQueueSize</name>
+                <valueType>integer</valueType>
+                <defaultValue>25</defaultValue>
+                <title>The maximum number queued indexing jobs (requires restart)</title>
+                <description>Limits indexation job progress to run too far ahead</description>
+            </setting>
+        </group>
+    </settings>
+
+    <permissions>
+        <group name="Search">
+			<permission id="search:index:rebuild" name="Rebuild Index" description="Allows to delete search index and build it again."/>
+        </group>
+    </permissions>
+</module>

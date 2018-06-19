@@ -1,0 +1,1 @@
+java org.antlr.v4.Tool -package VirtoCommerce.CoreModule.Data.Search.SearchPhraseParsing.Antlr SearchPhrase.g4
