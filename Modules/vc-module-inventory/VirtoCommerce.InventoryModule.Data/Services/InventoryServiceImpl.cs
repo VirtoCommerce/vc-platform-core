@@ -23,18 +23,18 @@ namespace VirtoCommerce.InventoryModule.Data.Services
     {
         private readonly Func<IInventoryRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
-        private readonly IMemoryCache _memoryCache;
-        public InventoryServiceImpl(Func<IInventoryRepository> repositoryFactory, IEventPublisher eventPublisher, IMemoryCache memoryCache)
+        private readonly IPlatformMemoryCache _platformMemoryCache;
+        public InventoryServiceImpl(Func<IInventoryRepository> repositoryFactory, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
-            _memoryCache = memoryCache;
+            _platformMemoryCache = platformMemoryCache;
         }
 
         public async Task<IEnumerable<InventoryInfo>> GetByIdsAsync(string[] itemIds, string responseGroup = null)
         {
             var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", itemIds), responseGroup);
-            return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(InventoryCacheRegion.CreateChangeToken());
                 using (var repository = _repositoryFactory())
@@ -51,7 +51,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
         public async Task<IEnumerable<InventoryInfo>> GetProductsInventoryInfosAsync(IEnumerable<string> productIds, string responseGroup = null)
         {
             var cacheKey = CacheKey.With(GetType(), "GetProductsInventoryInfosAsync", string.Join("-", productIds), responseGroup);
-            return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(InventoryCacheRegion.CreateChangeToken());
                 var retVal = new List<InventoryInfo>();

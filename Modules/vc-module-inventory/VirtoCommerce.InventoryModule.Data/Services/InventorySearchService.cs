@@ -17,17 +17,17 @@ namespace VirtoCommerce.InventoryModule.Data.Services
     public class InventorySearchService : IInventorySearchService
     {
         private readonly Func<IInventoryRepository> _repositoryFactory;
-        private readonly IMemoryCache _memoryCache;
-        public InventorySearchService(Func<IInventoryRepository> repositoryFactory, IMemoryCache memoryCache)
+        private readonly IPlatformMemoryCache _platformMemoryCache;
+        public InventorySearchService(Func<IInventoryRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
-            _memoryCache = memoryCache;
+            _platformMemoryCache = platformMemoryCache;
         }
 
         public async Task<GenericSearchResult<InventoryInfo>> SearchInventoriesAsync(InventorySearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), "SearchInventoriesAsync", criteria.GetHashCode().ToString());
-            return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(InventoryCacheRegion.CreateChangeToken());
                 var result = new GenericSearchResult<InventoryInfo>();

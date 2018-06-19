@@ -21,12 +21,12 @@ namespace VirtoCommerce.InventoryModule.Data.Services
     {
         private readonly Func<IInventoryRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
-        private readonly IMemoryCache _memoryCache;
-        public FulfillmentCenterService(Func<IInventoryRepository> repositoryFactory, IEventPublisher eventPublisher, IMemoryCache memoryCache)
+        private readonly IPlatformMemoryCache _platformMemoryCache;
+        public FulfillmentCenterService(Func<IInventoryRepository> repositoryFactory, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
-            _memoryCache = memoryCache;
+            _platformMemoryCache = platformMemoryCache;
         }
 
         #region IFulfillmentCenterService members
@@ -37,7 +37,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                 throw new ArgumentNullException(nameof(ids));
             }
             var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", ids));
-            return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(FulfillmentCenterCacheRegion.CreateChangeToken());
                 IEnumerable<FulfillmentCenter> result = null;
