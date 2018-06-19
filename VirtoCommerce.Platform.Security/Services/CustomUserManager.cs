@@ -17,14 +17,14 @@ namespace VirtoCommerce.Platform.Security.Services
 {
     public class CustomUserManager : AspNetUserManager<ApplicationUser>
     {
-        private readonly IMemoryCache _memoryCache;
+        private readonly IPlatformMemoryCache _memoryCache;
         private readonly RoleManager<Role> _roleManager;
         private readonly IEventPublisher _eventPublisher;
 
         public CustomUserManager(IUserStore<ApplicationUser> store, IOptions<IdentityOptions> optionsAccessor, IPasswordHasher<ApplicationUser> passwordHasher,
                                  IEnumerable<IUserValidator<ApplicationUser>> userValidators, IEnumerable<IPasswordValidator<ApplicationUser>> passwordValidators,
                                  ILookupNormalizer keyNormalizer, IdentityErrorDescriber errors, IServiceProvider services,
-                                 ILogger<UserManager<ApplicationUser>> logger, RoleManager<Role> roleManager, IMemoryCache memoryCache, IEventPublisher eventPublisher)
+                                 ILogger<UserManager<ApplicationUser>> logger, RoleManager<Role> roleManager, IPlatformMemoryCache memoryCache, IEventPublisher eventPublisher)
             : base(store, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger)
         {
             _memoryCache = memoryCache;

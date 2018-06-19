@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace VirtoCommerce.Platform.Web.Model.Modularity
+namespace VirtoCommerce.Platform.Core.Modularity.PushNotifications
 {
     public class ModuleAutoInstallPushNotification : ModulePushNotification
     {

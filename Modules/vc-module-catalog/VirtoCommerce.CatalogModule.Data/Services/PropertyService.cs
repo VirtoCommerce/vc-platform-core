@@ -22,10 +22,10 @@ namespace VirtoCommerce.CatalogModule.Data.Services
     public class PropertyService : IPropertyService
     {
         private readonly Func<ICatalogRepository> _repositoryFactory;
-        private readonly IMemoryCache _memoryCache;
+        private readonly IPlatformMemoryCache _memoryCache;
         private readonly ICatalogService _catalogService;
         private readonly IEventPublisher _eventPublisher;
-        public PropertyService(Func<ICatalogRepository> repositoryFactory, IMemoryCache memoryCache, ICatalogService catalogService, IEventPublisher eventPublisher)
+        public PropertyService(Func<ICatalogRepository> repositoryFactory, IPlatformMemoryCache memoryCache, ICatalogService catalogService, IEventPublisher eventPublisher)
         {
             _repositoryFactory = repositoryFactory;
             _memoryCache = memoryCache;

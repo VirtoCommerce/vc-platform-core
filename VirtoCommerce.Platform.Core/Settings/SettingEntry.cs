@@ -9,6 +9,10 @@ namespace VirtoCommerce.Platform.Core.Settings
     /// </summary>
     public class SettingEntry : ValueObject, ICloneable
     {
+        /// <summary>
+        /// The flag indicates that you need to restart the application to apply this setting changes.
+        /// </summary>
+        public bool RestartRequired { get; set; }
         public string ModuleId { get; set; }
         /// <summary>
         /// Setting may belong to any object in system

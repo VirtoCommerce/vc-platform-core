@@ -19,12 +19,12 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 {
     public class CatalogService : ICatalogService
     {
-        private readonly IMemoryCache _memoryCache;
+        private readonly IPlatformMemoryCache _memoryCache;
         private readonly AbstractValidator<IHasProperties> _hasPropertyValidator;
         private readonly Func<ICatalogRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
 
-        public CatalogService(Func<ICatalogRepository> catalogRepositoryFactory, IMemoryCache cacheManager, AbstractValidator<IHasProperties> hasPropertyValidator, IEventPublisher eventPublisher)
+        public CatalogService(Func<ICatalogRepository> catalogRepositoryFactory, IPlatformMemoryCache cacheManager, AbstractValidator<IHasProperties> hasPropertyValidator, IEventPublisher eventPublisher)
         {
             _repositoryFactory = catalogRepositoryFactory;
             _memoryCache = cacheManager;

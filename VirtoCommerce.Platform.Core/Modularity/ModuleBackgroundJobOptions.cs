@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using VirtoCommerce.Platform.Core.Modularity;
 
-namespace VirtoCommerce.Platform.Web.Model.Modularity
+namespace VirtoCommerce.Platform.Core.Modularity
 {
     public class ModuleBackgroundJobOptions
     {
