@@ -97,14 +97,13 @@ namespace VirtoCommerce.LicensingModule.Web.Controllers.Api
         [AllowAnonymous]
         public Task<IActionResult> Activate(string activationCode)
         {
-            var remoteIpAddress = Request.HttpContext.Connection.RemoteIpAddress;
+            var remoteIpAddress = HttpContext.Connection.RemoteIpAddress;
             return GetSignedLicenseAsync(activationCode, true, remoteIpAddress.ToString());
         }
 
 
         private async Task<IActionResult> GetSignedLicenseAsync(string activationCode, bool isActivated, string ip)
         {
-            //var clientIp = GetClientIpAddress();
             var signedLicense = await _licenseService.GetSignedLicenseAsync(activationCode, ip, isActivated);
 
             if (!string.IsNullOrEmpty(signedLicense))
@@ -128,10 +127,5 @@ namespace VirtoCommerce.LicensingModule.Web.Controllers.Api
             return new NotFoundResult();
         }
 
-        //private static string GetClientIpAddress(HttpRequestMessage requestMessage)
-        //{
-        //    var request = (requestMessage.Properties["MS_HttpContext"] as HttpContextWrapper)?.Request;
-        //    return request?.ServerVariables["HTTP_X_FORWARDED_FOR"]?.Split(',').FirstOrDefault() ?? request?.ServerVariables["REMOTE_ADDR"] ?? request?.UserHostAddress;
-        //}
     }
 }
