@@ -10,7 +10,7 @@ namespace VirtoCommerce.ImageToolsModule.Core.Services
     {
         Task SaveOrUpdateAsync(ThumbnailOption[] options);
 
-       Task<ThumbnailOption[]> GetByIdsAsync(string[] ids);
+        Task<ThumbnailOption[]> GetByIdsAsync(string[] ids);
 
         Task RemoveByIdsAsync(string[] ids);
     }

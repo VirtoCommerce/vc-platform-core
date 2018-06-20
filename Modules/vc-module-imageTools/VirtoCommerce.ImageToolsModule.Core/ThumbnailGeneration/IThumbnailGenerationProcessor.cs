@@ -9,6 +9,6 @@ namespace VirtoCommerce.ImageToolsModule.Core.ThumbnailGeneration
 {
     public interface IThumbnailGenerationProcessor
     {
-        Task ProcessTasksAsync(ThumbnailTask[] tasks, bool regenerate, Action<ThumbnailTaskProgress> progressCallback, ICancellationToken token);
+        Task ProcessTasksAsync(ICollection<ThumbnailTask> tasks, bool regenerate, Action<ThumbnailTaskProgress> progressCallback, ICancellationToken token);
     }
 }

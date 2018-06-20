@@ -17,12 +17,10 @@ namespace VirtoCommerce.ImageToolsModule.Data.Models
 
         public virtual void Patch(ThumbnailTaskOptionEntity target)
         {
-            if (target == null)
-                throw new ArgumentNullException(nameof(target));
-
-            var patchInjection = new PatchInjection<ThumbnailTaskOptionEntity>(x => x.ThumbnailOptionId, x => x.ThumbnailTaskId);
-            target.InjectFrom(patchInjection, this);
-
+            target.ThumbnailOptionId = ThumbnailOptionId;
+            target.ThumbnailOption = ThumbnailOption;
+            target.ThumbnailTaskId = ThumbnailOptionId;
+            target.ThumbnailTask = ThumbnailTask;
         }
     }
 }

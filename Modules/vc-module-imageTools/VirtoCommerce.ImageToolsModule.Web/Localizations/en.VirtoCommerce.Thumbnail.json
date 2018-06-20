@@ -1,0 +1,130 @@
+﻿{
+    "imageTools": {
+        "main-menu-title": "Thumbnails",
+      "blades": {
+        "tasks-list": {
+          "title": "Thumbnails generation tasks list",
+          "subtitle": "List of all tasks for thumbnails generations",
+          "labels": {
+            "task-name": "Task Name",
+            "last-run": "Last run"
+          }
+        },
+        "task-detail": {
+          "title": "Thumbnails generation task detail",
+          "subtitle": "Manage the task settings and detail",
+          "labels": {
+            "name": "Name",
+            "path-images": "Path to images",
+            "thumbnail-settings": "Thumbnail settings"
+          },
+          "placeholders": {
+            "name": "Enter name",
+            "path-images": "Select images path",
+            "thumbnail-settings": "Select settings..."
+          },
+          "descriptions": {
+            "name": "The display task name",
+            "path-images": "The path in asset system which will be used for images discovery. All images in this folder will be processed recursively",
+            "thumbnail-settings": "The list of thumbnails resolutions"
+          }
+        },
+        "task-run": {
+          "labels": {
+            "start": "Start",
+            "end": "End",
+            "stats": "Processed — {{ processedCount }} of {{ totalCount }} images",
+            "errors": "Errors"
+          }
+        },
+        "setting-managment": {
+          "title": "Thumbnails settings",
+          "subtitle": "Manage a thumbnails settings",
+          "background": "background",
+          "height": "height",
+          "width": "width",
+          "no-settings": "No settings"
+        },
+        "setting-detail": {
+          "title": "Thumbnail option detail",
+          "subtitle": "Manage thumbnail setting details",
+          "labels": {
+            "name": "Name",
+            "file-suffix": "Thumbnail file name suffix",
+            "resize-method": "Resize method",
+            "width": "Width (pixels)",
+            "height": "Height (pixels)",
+            "background-color": "Background color",
+            "anchor-position": "Anchor Position"
+          },
+          "placeholders": {
+            "name": "Enter option name",
+            "file-suffix": "Enter name suffix",
+            "width": "Enter width",
+            "height": "Enter height",
+            "background-color": " Enter background color"
+          },
+          "discription": {
+            "name": "The display setting name",
+            "file-suffix": "The suffix that will be added to the back of the original file name, separated by '_'",
+            "resize-method": "Resize method which will be used for image transformation",
+            "width": "Thumbnail width in pixels",
+            "height": "Thumbnail height in pixels",
+            "background-color": "Thumbnail background color i.e. #FFFFFF",
+            "anchor-position": "Anchor position when cropping the image"
+          },
+          "resize-method": {
+            "fixed-size": "Fixed Size",
+            "fixed-width": "Fixed Width",
+            "fixed-height": "Fixed Height",
+            "crop": "Crop"
+          },
+          "anchor-position": {
+            "top-left": "Top Left",
+            "top-center": "Top Center",
+            "top-right": "Top Right",
+            "center-left": "Center Left",
+            "center": "Center",
+            "center-right": "Center Right",
+            "bottom-left": "Bottom Left",
+            "bottom-center": "Bottom Center",
+            "bottom-right": "Bottom Right"
+
+          } 
+        }
+      },
+        "dialogs": {
+            "task-run": {
+                "title": "The thumbnail generation",
+                "msg1": "Choose how to generate the thumbnails. Options:",
+                "msg2": "Process changes: generate thumbnails only for new or changed images",
+                "msg3": "Regenerate: force to generation process for all images",
+                "btn-changes": "Procsess changes",
+                "btn-regenerate": "Regenerate"
+            },
+            "select-folder": {
+                "title": "Thumbnails generation path to images",
+                "msg1": "You can select only the directory and only one."
+            }, 
+            "task-save": {
+                "title": "Save changes",
+                "message": "The Task has been modified. Do you want to save changes?"
+            },
+            "task-delete": {
+                "title": "Delete confirmation",
+                "message": "Are you sure you want to delete this Task?"
+            },
+            "setting-save": {
+                "title": "Save changes",
+                "message": "The Setting has been modified. Do you want to save changes?"
+            },
+            "setting-delete": {
+                "title": "Delete confirmation",
+                "message": "Are you sure you want to delete this Setting?"
+            }
+        },
+        "commands": {
+            "run": "Run" 
+        } 
+    }
+}

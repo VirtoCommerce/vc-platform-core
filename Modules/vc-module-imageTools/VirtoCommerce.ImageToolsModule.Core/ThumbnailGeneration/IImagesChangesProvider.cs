@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -10,8 +11,9 @@ namespace VirtoCommerce.ImageToolsModule.Core.ThumbnailGeneration
     {
         bool IsTotalCountSupported { get; }
 
-        long GetTotalChangesCount(ThumbnailTask task, DateTime? changedSince, ICancellationToken token);
+        Task<long> GetTotalChangesCount(ThumbnailTask task, DateTime? changedSince, ICancellationToken token);
 
-        ImageChange[] GetNextChangesBatch(ThumbnailTask task, DateTime? changedSince, long? skip, long? take, ICancellationToken token);
+        Task<ImageChange[]> GetNextChangesBatch(ThumbnailTask task, DateTime? changedSince, long? skip, long? take,
+            ICancellationToken token);
     }
 }

@@ -8,7 +8,7 @@ namespace VirtoCommerce.ImageToolsModule.Core.Services
 {
     public interface IThumbnailTaskService
     {
-        Task SaveOrUpdateAsync(ThumbnailTask[] options);
+        Task SaveOrUpdateAsync(ICollection<ThumbnailTask> options);
         Task<ThumbnailTask[]> GetByIdsAsync(string[] ids);
         Task RemoveByIdsAsync(string[] ids);
     }

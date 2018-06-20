@@ -16,4 +16,8 @@
     <ProjectReference Include="..\VirtoCommerce.ImageToolsModule.Data\VirtoCommerce.ImageToolsModule.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Localizations\" />
+  </ItemGroup>
+
 </Project>
