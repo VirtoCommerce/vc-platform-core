@@ -1,5 +1,5 @@
-﻿angular.module('virtoCommerce.coreModule.searchIndex')
-.controller('virtoCommerce.coreModule.searchIndex.indexDetailController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.coreModule.searchIndex.searchIndexation', function ($scope, bladeNavigationService, searchIndexationApi) {
+﻿angular.module('virtoCommerce.searchModule')
+.controller('virtoCommerce.searchModule.indexDetailController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.searchModule.searchIndexation', function ($scope, bladeNavigationService, searchIndexationApi) {
     var blade = $scope.blade;
 
     blade.initialize = function (data) {
@@ -22,14 +22,14 @@
                    id: 'indexProgress',
                    notification: data,
                    parentRefresh: blade.parentRefresh,
-                   controller: 'virtoCommerce.coreModule.indexProgressController',
-                   template: 'Modules/$(VirtoCommerce.Core)/Scripts/SearchIndex/blades/index-progress.tpl.html'
+                   controller: 'virtoCommerce.searchModule.indexProgressController',
+                   template: 'Modules/$(VirtoCommerce.Search)/Scripts/blades/index-progress.tpl.html'
                };
                bladeNavigationService.showBlade(newBlade, blade.parentBlade || blade);
            });
        },
        canExecuteMethod: function () { return true; },
-       permission: 'core:search:index:rebuild'
+       permission: 'search:index:rebuild'
      }
     ];
 

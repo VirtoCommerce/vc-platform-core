@@ -1,4 +1,10 @@
-angular.module("virtoCommerce.coreModule.searchIndex", [])
+var moduleTemplateName = "virtoCommerce.searchModule";
+
+if (AppDependencies !== undefined) {
+    AppDependencies.push(moduleTemplateName);
+}
+
+angular.module(moduleTemplateName, [])
 .config(['$stateProvider', function ($stateProvider) {
     $stateProvider.state('workspace.searchIndexModule', {
         url: '/searchIndex',
@@ -7,8 +13,8 @@ angular.module("virtoCommerce.coreModule.searchIndex", [])
                 id: 'searchIndex',
                 title: 'core.blades.document-type-list.title',
                 headIcon: 'fa fa-search',
-                controller: 'virtoCommerce.coreModule.searchIndex.indexesListController',
-                template: 'Modules/$(VirtoCommerce.Core)/Scripts/SearchIndex/blades/indexes-list.tpl.html',
+                controller: 'virtoCommerce.searchModule.indexesListController',
+                template: 'Modules/$(VirtoCommerce.Search)/Scripts/SearchIndex/blades/indexes-list.tpl.html',
                 isClosingDisabled: true
             };
             bladeNavigationService.showBlade(blade);
@@ -23,13 +29,13 @@ angular.module("virtoCommerce.coreModule.searchIndex", [])
     pushNotificationTemplateResolver.register({
         priority: 900,
         satisfy: function (notify, place) { return place == 'history' && notify.notifyType == 'IndexProgressPushNotification'; },
-        template: 'Modules/$(VirtoCommerce.Core)/Scripts/SearchIndex/notifications/historyIndex.tpl.html',
+        template: 'Modules/$(VirtoCommerce.Search)/Scripts/notifications/historyIndex.tpl.html',
         action: function (notify) {
             var blade = {
                 id: 'indexProgress',
                 notification: notify,
-                controller: 'virtoCommerce.coreModule.indexProgressController',
-                template: 'Modules/$(VirtoCommerce.Core)/Scripts/SearchIndex/blades/index-progress.tpl.html'
+                controller: 'virtoCommerce.searchModule.indexProgressController',
+                template: 'Modules/$(VirtoCommerce.Search)/Scripts/blades/index-progress.tpl.html'
             };
             bladeNavigationService.showBlade(blade);
         }
@@ -38,7 +44,7 @@ angular.module("virtoCommerce.coreModule.searchIndex", [])
     pushNotificationTemplateResolver.register({
         priority: 900,
         satisfy: function (notify, place) { return place == 'menu' && notify.notifyType == 'IndexProgressPushNotification';  },
-        template: 'Modules/$(VirtoCommerce.Core)/Scripts/SearchIndex/notifications/menuIndex.tpl.html',
+        template: 'Modules/$(VirtoCommerce.Search)/Scripts/notifications/menuIndex.tpl.html',
         action: function (notify) { $state.go('workspace.pushNotificationsHistory', notify) }
     });
 

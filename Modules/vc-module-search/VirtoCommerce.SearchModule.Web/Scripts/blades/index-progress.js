@@ -1,5 +1,5 @@
-﻿angular.module('virtoCommerce.coreModule.searchIndex')
-.controller('virtoCommerce.coreModule.indexProgressController', ['$scope', 'virtoCommerce.coreModule.searchIndex.searchIndexation', function ($scope, searchIndexationApi) {
+﻿angular.module('virtoCommerce.searchModule')
+.controller('virtoCommerce.searchModule.indexProgressController', ['$scope', 'virtoCommerce.searchModule.searchIndexation', function ($scope, searchIndexationApi) {
     var blade = $scope.blade;
 
     $scope.$on("new-notification-event", function (event, notification) {

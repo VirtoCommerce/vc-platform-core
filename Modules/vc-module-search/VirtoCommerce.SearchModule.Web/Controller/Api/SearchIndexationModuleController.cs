@@ -25,7 +25,7 @@ namespace VirtoCommerce.SearchModule.Web.Controller.Api
         public SearchIndexationModuleController(IndexDocumentConfiguration[] documentConfigs, ISearchProvider searchProvider, IIndexingManager indexingManager, IUserNameResolver userNameResolver, IPushNotificationManager pushNotifier)
         {
             _documentConfigs = documentConfigs;
-            _searchProvider = searchProvider;
+            //_searchProvider = searchProvider;
             _indexingManager = indexingManager;
             _userNameResolver = userNameResolver;
             _pushNotifier = pushNotifier;

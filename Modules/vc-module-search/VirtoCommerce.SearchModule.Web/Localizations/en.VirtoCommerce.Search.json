@@ -1,0 +1,48 @@
+{
+    "core": {
+        "commands": {
+            "apply-filter": "Save & apply",
+            "rebuild-index": "Build Index"
+        },
+        "main-menu-title": {
+            "search-index":  "Search index" 
+        },
+        "blades": {
+            "index-progress": {
+                "labels": {
+                    "start": "Start",
+                    "end": "End",
+                    "errors": "Errors",
+                    "stats": "Indexed - {{ processedCount }} of {{ totalCount }} documents"
+                }
+            },
+            "index-detail": {
+                "title": "Search index",
+                "title-new": "Search index missing",
+                "subtitle": "Search index details",
+                "labels": {
+                    "no-index": "Index not found",
+                    "build-date": "Last indexed",
+                    "content": "Index content"
+                }
+            }
+        },
+        "dialogs": {
+            "reindex": {
+                "title": "Build Search Index",
+                "msg1": "Choose how to update the Search Index. Options:",
+                "msg2": "Build: index for all data without recreating.",
+                "msg3": "Delete + build: Current search index will be deleted and built from scratch. Note that there WON'T BE ANY SEARCH RESULTS until the build process finishes.",
+                "index": "Build",
+                "reindex": "Delete + build"
+            }
+        },
+        "widgets": {
+            "index": {
+                "index-ok": "Indexed <span am-time-ago='indexDate'></span>",
+                "index-old": "Outdated. Index was built <span am-time-ago='indexDate'>",
+                "no-index": "Search index missing"
+            }
+        }
+    }
+}

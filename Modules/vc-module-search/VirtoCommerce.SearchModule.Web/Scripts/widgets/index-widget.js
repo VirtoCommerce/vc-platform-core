@@ -1,5 +1,5 @@
-angular.module('virtoCommerce.coreModule.searchIndex')
-    .controller('virtoCommerce.coreModule.searchIndex.indexWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.coreModule.searchIndex.searchIndexation', function ($scope, bladeNavigationService, searchApi) {
+angular.module('virtoCommerce.searchModule')
+    .controller('virtoCommerce.searchModule.indexWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.searchModule.searchIndexation', function ($scope, bladeNavigationService, searchApi) {
         var blade = $scope.blade;
         var momentFormat = "YYYYMMDDHHmmss";
         $scope.loading = true;
@@ -30,8 +30,8 @@ angular.module('virtoCommerce.coreModule.searchIndex')
                 indexDate: $scope.indexDate,
                 documentType: $scope.widget.documentType,
                 parentRefresh: refresh,
-                controller: 'virtoCommerce.coreModule.searchIndex.indexDetailController',
-                template: 'Modules/$(VirtoCommerce.Core)/Scripts/SearchIndex/blades/index-detail.tpl.html'
+                controller: 'virtoCommerce.searchModule.indexDetailController',
+                template: 'Modules/$(VirtoCommerce.Search)/Scripts/blades/index-detail.tpl.html'
             };
             bladeNavigationService.showBlade(newBlade, blade);
         };

@@ -63,11 +63,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Module1.Data", "Modules\Mod
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vc-module-search", "vc-module-search", "{2CF3266F-AEA4-4EB3-B2CD-8A8B9A2CD42B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.SearchModule.Web", "Modules\vc-module-search\VirtoCommerce.SearchModule.Web\VirtoCommerce.SearchModule.Web.csproj", "{FDC50E71-4FB3-4301-AEE0-8B57197F6F20}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.SearchModule.Web", "Modules\vc-module-search\VirtoCommerce.SearchModule.Web\VirtoCommerce.SearchModule.Web.csproj", "{FDC50E71-4FB3-4301-AEE0-8B57197F6F20}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.SearchModule.Data", "Modules\vc-module-search\VirtoCommerce.SearchModule.Data\VirtoCommerce.SearchModule.Data.csproj", "{335B1EF6-F0E4-4FF1-9A34-91DA7700F66B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.SearchModule.Data", "Modules\vc-module-search\VirtoCommerce.SearchModule.Data\VirtoCommerce.SearchModule.Data.csproj", "{335B1EF6-F0E4-4FF1-9A34-91DA7700F66B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.SearchModule.Core", "Modules\vc-module-search\VirtoCommerce.SearchModule.Core\VirtoCommerce.SearchModule.Core.csproj", "{E9934719-6D4C-4041-BE90-9F67EE5140F0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.SearchModule.Core", "Modules\vc-module-search\VirtoCommerce.SearchModule.Core\VirtoCommerce.SearchModule.Core.csproj", "{E9934719-6D4C-4041-BE90-9F67EE5140F0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.SearchModule.Tests", "Modules\vc-module-search\VirtoCommerce.SearchModule.Tests\VirtoCommerce.SearchModule.Tests.csproj", "{F6350FEE-E3E5-41E9-8C35-FA96B253421F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -183,6 +185,10 @@ Global
 		{E9934719-6D4C-4041-BE90-9F67EE5140F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9934719-6D4C-4041-BE90-9F67EE5140F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9934719-6D4C-4041-BE90-9F67EE5140F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6350FEE-E3E5-41E9-8C35-FA96B253421F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6350FEE-E3E5-41E9-8C35-FA96B253421F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6350FEE-E3E5-41E9-8C35-FA96B253421F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6350FEE-E3E5-41E9-8C35-FA96B253421F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -212,6 +218,7 @@ Global
 		{FDC50E71-4FB3-4301-AEE0-8B57197F6F20} = {2CF3266F-AEA4-4EB3-B2CD-8A8B9A2CD42B}
 		{335B1EF6-F0E4-4FF1-9A34-91DA7700F66B} = {2CF3266F-AEA4-4EB3-B2CD-8A8B9A2CD42B}
 		{E9934719-6D4C-4041-BE90-9F67EE5140F0} = {2CF3266F-AEA4-4EB3-B2CD-8A8B9A2CD42B}
+		{F6350FEE-E3E5-41E9-8C35-FA96B253421F} = {2CF3266F-AEA4-4EB3-B2CD-8A8B9A2CD42B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {80F99D88-A3B2-4ED2-9148-43D43EBFFFC3}

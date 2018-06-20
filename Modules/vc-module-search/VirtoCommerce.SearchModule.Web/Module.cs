@@ -52,6 +52,14 @@ namespace VirtoCommerce.SearchModule.Web
             {
                 serviceCollection.AddSingleton<ISearchConnection>(new SearchConnection(searchConnectionString));
             }
+
+            //TODO delete it after implementation in the modules
+            var productIndexingConfiguration = new IndexDocumentConfiguration
+            {
+                DocumentType = KnownDocumentTypes.Product,
+                DocumentSource = new IndexDocumentSource()
+            };
+            serviceCollection.AddSingleton(new [] {productIndexingConfiguration});
         }
 
         public void PostInitialize(IServiceProvider serviceProvider)

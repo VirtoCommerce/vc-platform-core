@@ -1,5 +1,5 @@
-﻿angular.module('virtoCommerce.coreModule.searchIndex')
-.controller('virtoCommerce.coreModule.searchIndex.indexesListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.bladeUtils', 'virtoCommerce.coreModule.searchIndex.searchIndexation', 'platformWebApp.ui-grid.extension',
+﻿angular.module('virtoCommerce.searchModule')
+.controller('virtoCommerce.searchModule.indexesListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.bladeUtils', 'virtoCommerce.searchModule.searchIndexation', 'platformWebApp.ui-grid.extension',
     function ($scope, bladeNavigationService, dialogService, bladeUtils, searchIndexationApi, gridOptionExtension) {
         var blade = $scope.blade;
         blade.isLoading = false;
@@ -28,14 +28,14 @@
                             id: 'indexProgress',
                             notification: data,
                             parentRefresh: blade.parentRefresh,
-                            controller: 'virtoCommerce.coreModule.indexProgressController',
-                            template: 'Modules/$(VirtoCommerce.Core)/Scripts/SearchIndex/blades/index-progress.tpl.html'
+                            controller: 'virtoCommerce.searchModule.indexProgressController',
+                            template: 'Modules/$(VirtoCommerce.Search)/Scripts/blades/index-progress.tpl.html'
                         };
                         bladeNavigationService.showBlade(newBlade, blade.parentBlade || blade);
                     });
                 }
             }
-            dialogService.showDialog(dialog, 'Modules/$(VirtoCommerce.Core)/Scripts/SearchIndex/dialogs/reindex-dialog.tpl.html', 'platformWebApp.confirmDialogController');
+            dialogService.showDialog(dialog, 'Modules/$(VirtoCommerce.Search)/Scripts/dialogs/reindex-dialog.tpl.html', 'platformWebApp.confirmDialogController');
         }
 
         blade.toolbarCommands = [{
@@ -56,7 +56,7 @@
             executeMethod: function () {
                 $scope.rebuildIndex($scope.gridApi.selection.getSelectedRows());
             },
-            permission: 'core:search:index:rebuild'
+            permission: 'search:index:rebuild'
         }];
 
         // ui-grid
