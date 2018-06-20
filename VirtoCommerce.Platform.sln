@@ -69,7 +69,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.SearchModule.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.SearchModule.Core", "Modules\vc-module-search\VirtoCommerce.SearchModule.Core\VirtoCommerce.SearchModule.Core.csproj", "{E9934719-6D4C-4041-BE90-9F67EE5140F0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.SearchModule.Tests", "Modules\vc-module-search\VirtoCommerce.SearchModule.Tests\VirtoCommerce.SearchModule.Tests.csproj", "{F6350FEE-E3E5-41E9-8C35-FA96B253421F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.SearchModule.Tests", "Modules\vc-module-search\VirtoCommerce.SearchModule.Tests\VirtoCommerce.SearchModule.Tests.csproj", "{F6350FEE-E3E5-41E9-8C35-FA96B253421F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vc-module-lucene-search", "vc-module-lucene-search", "{BBD982A4-60CD-4C00-AA68-F602B335B9C6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.LuceneSearchModule.Web", "Modules\vc-module-lucene-search\VirtoCommerce.LuceneSearchModule.Web\VirtoCommerce.LuceneSearchModule.Web.csproj", "{638722DA-9565-4ED4-8D5D-8ECC69833C6A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.LuceneSearchModule.Data", "Modules\vc-module-lucene-search\VirtoCommerce.LuceneSearchModule.Data\VirtoCommerce.LuceneSearchModule.Data.csproj", "{0E33C225-DB9F-4545-9466-C3A128A8257F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.LuceneSearchModule.Tests", "Modules\vc-module-lucene-search\VirtoCommerce.LuceneSearchModule.Tests\VirtoCommerce.LuceneSearchModule.Tests.csproj", "{94035D71-4183-47D0-8329-9C3705067B7E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -189,6 +197,18 @@ Global
 		{F6350FEE-E3E5-41E9-8C35-FA96B253421F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F6350FEE-E3E5-41E9-8C35-FA96B253421F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F6350FEE-E3E5-41E9-8C35-FA96B253421F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{638722DA-9565-4ED4-8D5D-8ECC69833C6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{638722DA-9565-4ED4-8D5D-8ECC69833C6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{638722DA-9565-4ED4-8D5D-8ECC69833C6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{638722DA-9565-4ED4-8D5D-8ECC69833C6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E33C225-DB9F-4545-9466-C3A128A8257F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E33C225-DB9F-4545-9466-C3A128A8257F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E33C225-DB9F-4545-9466-C3A128A8257F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E33C225-DB9F-4545-9466-C3A128A8257F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94035D71-4183-47D0-8329-9C3705067B7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94035D71-4183-47D0-8329-9C3705067B7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94035D71-4183-47D0-8329-9C3705067B7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94035D71-4183-47D0-8329-9C3705067B7E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -219,6 +239,10 @@ Global
 		{335B1EF6-F0E4-4FF1-9A34-91DA7700F66B} = {2CF3266F-AEA4-4EB3-B2CD-8A8B9A2CD42B}
 		{E9934719-6D4C-4041-BE90-9F67EE5140F0} = {2CF3266F-AEA4-4EB3-B2CD-8A8B9A2CD42B}
 		{F6350FEE-E3E5-41E9-8C35-FA96B253421F} = {2CF3266F-AEA4-4EB3-B2CD-8A8B9A2CD42B}
+		{BBD982A4-60CD-4C00-AA68-F602B335B9C6} = {7052A390-9A84-46DA-BD3B-556FD74DEC97}
+		{638722DA-9565-4ED4-8D5D-8ECC69833C6A} = {BBD982A4-60CD-4C00-AA68-F602B335B9C6}
+		{0E33C225-DB9F-4545-9466-C3A128A8257F} = {BBD982A4-60CD-4C00-AA68-F602B335B9C6}
+		{94035D71-4183-47D0-8329-9C3705067B7E} = {BBD982A4-60CD-4C00-AA68-F602B335B9C6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {80F99D88-A3B2-4ED2-9148-43D43EBFFFC3}
