@@ -3,10 +3,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.InventoryModule.Core;
 using VirtoCommerce.InventoryModule.Core.Model;
 using VirtoCommerce.InventoryModule.Core.Model.Search;
 using VirtoCommerce.InventoryModule.Core.Services;
-using VirtoCommerce.InventoryModule.Core.Security;
 using VirtoCommerce.InventoryModule.Data.Model;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -61,7 +61,7 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         [HttpPut]
         [ProducesResponseType(typeof(FulfillmentCenter), 200)]
         [Route("fulfillmentcenters")]
-        [Authorize(SecurityConstants.Permissions.FulfillmentEdit)]
+        [Authorize(ModuleConstants.Security.Permissions.FulfillmentEdit)]
         public async Task<IActionResult> SaveFulfillmentCenter([FromBody]FulfillmentCenter center)
         {
             await _fulfillmentCenterService.SaveChangesAsync(new[] { center });
@@ -74,7 +74,7 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         [HttpDelete]
         [ProducesResponseType(typeof(void), 200)]
         [Route("fulfillmentcenters")]
-        [Authorize(SecurityConstants.Permissions.FulfillmentDelete)]
+        [Authorize(ModuleConstants.Security.Permissions.FulfillmentDelete)]
         public async Task<IActionResult> DeleteFulfillmentCenters([FromQuery] string[] ids)
         {
             await _fulfillmentCenterService.DeleteAsync(ids);
@@ -148,7 +148,7 @@ namespace VirtoCommerce.InventoryModule.Web.Controllers.Api
         [HttpPut]
         [Route("products/{productId}")]
         [ProducesResponseType(typeof(InventoryInfo), 200)]
-        [Authorize(SecurityConstants.Permissions.Update)]
+        [Authorize(ModuleConstants.Security.Permissions.Update)]
         public async Task<IActionResult> UpdateProductInventory([FromBody]InventoryInfo inventory)
         {
             await _inventoryService.SaveChangesAsync(new [] { inventory});

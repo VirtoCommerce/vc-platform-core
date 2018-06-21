@@ -7,9 +7,6 @@ namespace VirtoCommerce.InventoryModule.Core.Model
 {
     public class Address : Entity, ICloneable
     {
-        //Temporary workaround to be able make references to the address
-        public string Key { get; set; }
-
         public AddressType AddressType { get; set; }
         public string Name { get; set; }
         public string Organization { get; set; }
