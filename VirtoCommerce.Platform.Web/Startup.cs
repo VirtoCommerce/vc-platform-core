@@ -171,7 +171,7 @@ namespace VirtoCommerce.Platform.Web
                        .AllowClientCredentialsFlow();
 
                 // Make the "client_id" parameter mandatory when sending a token request.
-                options.RequireClientIdentification();
+                //options.RequireClientIdentification();
 
                 // When request caching is enabled, authorization and logout requests
                 // are stored in the distributed cache by OpenIddict and the user agent

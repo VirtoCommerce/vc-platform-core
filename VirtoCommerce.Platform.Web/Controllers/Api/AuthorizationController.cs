@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
@@ -164,6 +164,8 @@ namespace Mvc.Server
                 OpenIdConnectServerDefaults.AuthenticationScheme);
 
             ticket.SetResources("resource_server");
+
+
 
             return ticket;
         }
