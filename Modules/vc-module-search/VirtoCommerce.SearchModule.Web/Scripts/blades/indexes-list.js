@@ -48,7 +48,7 @@
                 blade.refresh();
             }
         }, {
-            name: 'core.commands.rebuild-index',
+            name: 'search.commands.rebuild-index',
             icon: 'fa fa-recycle',
             canExecuteMethod: function () {
                 return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());

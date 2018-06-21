@@ -1,5 +1,5 @@
 {
-    "core": {
+    "search": {
         "commands": {
             "rebuild-index": "Suchindex erstellen"
         },
@@ -19,6 +19,18 @@
                     "no-index": "Suchindex nicht gefunden",
                     "build-date": "Letzte Indexierung",
                     "content": "Suchindexinhalt"
+                }
+            },
+            "document-type-list": {
+                "title": "Dokumenttypen",
+                "labels": {
+                    "document-type": "Dokumenttypen",
+                    "indexed-docs-total": "Dokumentenzähler",
+                    "provider": "Provider",
+                    "scope": "Scope",
+                    "last-indexation-date": "Zuletzt indiziert",
+                    "build-index": "Build index",
+                    "rebuild-index": "Rebuild index"
                 }
             }
         },

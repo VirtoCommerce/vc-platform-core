@@ -1,5 +1,5 @@
 {
-    "core": {
+    "search": {
         "commands": {
             "apply-filter": "Save & apply",
             "rebuild-index": "Build Index"
@@ -24,6 +24,18 @@
                     "no-index": "Index not found",
                     "build-date": "Last indexed",
                     "content": "Index content"
+                }
+            },
+            "document-type-list": {
+                "title": "Document types",
+                "labels": {
+                    "document-type": "Document type",
+                    "indexed-docs-total": "Docs count",
+                    "provider": "Provider",
+                    "scope": "Scope",
+                    "last-indexation-date": "Last indexed",
+                    "build-index": "Build index",
+                    "rebuild-index": "Rebuild index"
                 }
             }
         },

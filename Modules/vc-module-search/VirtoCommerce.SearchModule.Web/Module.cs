@@ -60,6 +60,7 @@ namespace VirtoCommerce.SearchModule.Web
                 DocumentSource = new IndexDocumentSource()
             };
             serviceCollection.AddSingleton(new [] {productIndexingConfiguration});
+            serviceCollection.AddSingleton<ISearchProvider, SearchProviderMock>();
         }
 
         public void PostInitialize(IServiceProvider serviceProvider)

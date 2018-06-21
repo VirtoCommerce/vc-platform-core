@@ -1,7 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.SearchModule.Core.Model;
@@ -10,11 +10,11 @@ using VirtoCommerce.SearchModule.Core.Services;
 using VirtoCommerce.SearchModule.Web.BackgroundJobs;
 using VirtoCommerce.SearchModule.Web.Model.PushNotifcations;
 
-namespace VirtoCommerce.SearchModule.Web.Controller.Api
+namespace VirtoCommerce.SearchModule.Web.Controllers.Api
 {
     [Route("api/search/indexes")]
-    [ApiExplorerSettings(IgnoreApi = true)]
-    public class SearchIndexationModuleController : Microsoft.AspNetCore.Mvc.Controller
+    [Produces("application/json")]
+    public class SearchIndexationModuleController : Controller
     {
         private readonly IndexDocumentConfiguration[] _documentConfigs;
         private readonly ISearchProvider _searchProvider;
@@ -25,7 +25,7 @@ namespace VirtoCommerce.SearchModule.Web.Controller.Api
         public SearchIndexationModuleController(IndexDocumentConfiguration[] documentConfigs, ISearchProvider searchProvider, IIndexingManager indexingManager, IUserNameResolver userNameResolver, IPushNotificationManager pushNotifier)
         {
             _documentConfigs = documentConfigs;
-            //_searchProvider = searchProvider;
+            _searchProvider = searchProvider;
             _indexingManager = indexingManager;
             _userNameResolver = userNameResolver;
             _pushNotifier = pushNotifier;

@@ -73,11 +73,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.SearchModule.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vc-module-lucene-search", "vc-module-lucene-search", "{BBD982A4-60CD-4C00-AA68-F602B335B9C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.LuceneSearchModule.Web", "Modules\vc-module-lucene-search\VirtoCommerce.LuceneSearchModule.Web\VirtoCommerce.LuceneSearchModule.Web.csproj", "{638722DA-9565-4ED4-8D5D-8ECC69833C6A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.LuceneSearchModule.Web", "Modules\vc-module-lucene-search\VirtoCommerce.LuceneSearchModule.Web\VirtoCommerce.LuceneSearchModule.Web.csproj", "{638722DA-9565-4ED4-8D5D-8ECC69833C6A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.LuceneSearchModule.Data", "Modules\vc-module-lucene-search\VirtoCommerce.LuceneSearchModule.Data\VirtoCommerce.LuceneSearchModule.Data.csproj", "{0E33C225-DB9F-4545-9466-C3A128A8257F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.LuceneSearchModule.Data", "Modules\vc-module-lucene-search\VirtoCommerce.LuceneSearchModule.Data\VirtoCommerce.LuceneSearchModule.Data.csproj", "{0E33C225-DB9F-4545-9466-C3A128A8257F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.LuceneSearchModule.Tests", "Modules\vc-module-lucene-search\VirtoCommerce.LuceneSearchModule.Tests\VirtoCommerce.LuceneSearchModule.Tests.csproj", "{94035D71-4183-47D0-8329-9C3705067B7E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.LuceneSearchModule.Tests", "Modules\vc-module-lucene-search\VirtoCommerce.LuceneSearchModule.Tests\VirtoCommerce.LuceneSearchModule.Tests.csproj", "{94035D71-4183-47D0-8329-9C3705067B7E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

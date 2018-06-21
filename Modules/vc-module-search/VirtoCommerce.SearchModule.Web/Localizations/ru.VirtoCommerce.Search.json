@@ -1,5 +1,5 @@
 {
-    "core": {
+    "search": {
         "commands": {
             "apply-filter": "Сохранить & применить",
             "rebuild-index": "Построение Индексов"
@@ -24,6 +24,18 @@
                     "no-index": "Индекс не найден",
                     "build-date": "Последние проиндексированные",
                     "content": "Содержимое индекса"
+                }
+            },
+            "document-type-list": {
+                "title": "Типы документов",
+                "labels": {
+                    "document-type": "Тип документа",
+                    "indexed-docs-total": "Количество документов",
+                    "provider": "Поставщик",
+                    "scope": "Объем",
+                    "last-indexation-date": "Дата последней индексации",
+                    "build-index": "Создать индекс",
+                    "rebuild-index": "Перестроить индекс"
                 }
             }
         },

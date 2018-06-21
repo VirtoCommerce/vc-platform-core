@@ -12,7 +12,7 @@
 
     blade.toolbarCommands = [
      {
-       name: "core.commands.rebuild-index",
+       name: "search.commands.rebuild-index",
        icon: 'fa fa-recycle',
        index: 2,
        executeMethod: function (blade) {
@@ -34,9 +34,9 @@
     ];
 
     blade.title = blade.currentEntity.name;
-    blade.subtitle = 'core.blades.index-detail.subtitle';
+    blade.subtitle = 'search.blades.index-detail.subtitle';
     if (!blade.data) {
-        blade.title = 'core.blades.index-detail.title-new';
+        blade.title = 'search.blades.index-detail.title-new';
         blade.subtitle = undefined;
     }
 

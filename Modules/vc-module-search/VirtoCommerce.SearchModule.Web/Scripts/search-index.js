@@ -11,10 +11,10 @@ angular.module(moduleTemplateName, [])
         controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
             var blade = {
                 id: 'searchIndex',
-                title: 'core.blades.document-type-list.title',
+                title: 'search.blades.document-type-list.title',
                 headIcon: 'fa fa-search',
                 controller: 'virtoCommerce.searchModule.indexesListController',
-                template: 'Modules/$(VirtoCommerce.Search)/Scripts/SearchIndex/blades/indexes-list.tpl.html',
+                template: 'Modules/$(VirtoCommerce.Search)/Scripts/blades/indexes-list.tpl.html',
                 isClosingDisabled: true
             };
             bladeNavigationService.showBlade(blade);
@@ -51,7 +51,7 @@ angular.module(moduleTemplateName, [])
     mainMenuService.addMenuItem({
             path: 'browse/searchIndex',
             icon: 'fa fa-search',
-            title: 'core.main-menu-title.search-index',
+            title: 'search.main-menu-title.search-index',
             priority: 25,
             action: function () {
                 $state.go('workspace.searchIndexModule');
