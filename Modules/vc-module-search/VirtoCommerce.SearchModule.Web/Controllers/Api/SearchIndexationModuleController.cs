@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.SearchModule.Core;
 using VirtoCommerce.SearchModule.Core.Model;
-using VirtoCommerce.SearchModule.Core.Security;
 using VirtoCommerce.SearchModule.Core.Services;
 using VirtoCommerce.SearchModule.Web.BackgroundJobs;
 using VirtoCommerce.SearchModule.Web.Model.PushNotifcations;
@@ -69,7 +69,7 @@ namespace VirtoCommerce.SearchModule.Web.Controllers.Api
         [HttpPost]
         [Route("index")]
         [ProducesResponseType(typeof(IndexProgressPushNotification), 200)]
-        [Authorize(SecurityConstants.Permissions.IndexRebuild)]
+        [Authorize(ModuleConstants.Security.Permissions.IndexRebuild)]
         public IActionResult IndexDocuments([FromBody] IndexingOptions[] options)
         {
             var currentUserName = _userNameResolver.GetCurrentUserName();
