@@ -3,11 +3,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.LicensingModule.Core.Events;
+using VirtoCommerce.LicensingModule.Core.Model;
 using VirtoCommerce.LicensingModule.Core.Services;
-using VirtoCommerce.LicensingModule.Data.Observers;
+using VirtoCommerce.LicensingModule.Data.Handlers;
 using VirtoCommerce.LicensingModule.Data.Repositories;
 using VirtoCommerce.LicensingModule.Data.Services;
+using VirtoCommerce.Platform.Core.Bus;
+using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Security.Events;
 
 namespace VirtoCommerce.LicensingModule.Web
 {
@@ -21,10 +25,13 @@ namespace VirtoCommerce.LicensingModule.Web
             serviceCollection.AddTransient<ILicenseRepository, LicenseRepository>();
             serviceCollection.AddDbContext<LicenseDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce")));
             serviceCollection.AddSingleton<Func<ILicenseRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<ILicenseRepository>());
-            //log License activations and changes
-            serviceCollection.AddSingleton<IObserver<LicenseSignedEvent>, LogLicenseEventsObserver>();
-            serviceCollection.AddSingleton<IObserver<LicenseChangedEvent>, LogLicenseEventsObserver>();
+            serviceCollection.AddSingleton(provider => new LogLicenseChangedEventHandler(provider.CreateScope().ServiceProvider.GetService<IChangeLogService>()));
+            var providerSnapshot = serviceCollection.BuildServiceProvider();
+            var inProcessBus = providerSnapshot.GetService<IHandlerRegistrar>();
+            inProcessBus.RegisterHandler<LicenseChangedEvent>(async (message, token) => await providerSnapshot.GetService<LogLicenseChangedEventHandler>().Handle(message));
+            inProcessBus.RegisterHandler<LicenseSignedEvent>(async (message, token) => await providerSnapshot.GetService<LogLicenseChangedEventHandler>().Handle(message));
             serviceCollection.AddSingleton<ILicenseService, LicenseService>();
+            serviceCollection.Configure<LicenseOptions>(configuration.GetSection("VirtoCommerce"));
         }
 
         public void PostInitialize(IServiceProvider serviceProvider)

@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using VirtoCommerce.LicensingModule.Core.Events;
 using VirtoCommerce.LicensingModule.Core.Model;
@@ -14,6 +16,7 @@ using VirtoCommerce.LicensingModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
+using VirtoCommerce.Platform.Core.Exceptions;
 using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.LicensingModule.Data.Services
@@ -24,13 +27,16 @@ namespace VirtoCommerce.LicensingModule.Data.Services
         private readonly IChangeLogService _changeLogService;
         private readonly IEventPublisher _eventPublisher;
         private readonly ISettingsManager _settingsManager;
+        private readonly LicenseOptions _licenseOptions;
 
-        public LicenseService(Func<ILicenseRepository> licenseRepositoryFactory, IChangeLogService changeLogService, ISettingsManager settingsManager, IEventPublisher eventPublisher)
+        public LicenseService(Func<ILicenseRepository> licenseRepositoryFactory, IChangeLogService changeLogService, ISettingsManager settingsManager, IEventPublisher eventPublisher
+            , IOptions<LicenseOptions> licenseOptions)
         {
             _licenseRepositoryFactory = licenseRepositoryFactory;
             _changeLogService = changeLogService;
             _settingsManager = settingsManager;
             _eventPublisher = eventPublisher;
+            _licenseOptions = licenseOptions.Value;
         }
 
         public async Task<GenericSearchResult<License>> SearchAsync(LicenseSearchCriteria criteria)
@@ -117,7 +123,6 @@ namespace VirtoCommerce.LicensingModule.Data.Services
                         }
                     }
                 }
-
                 
                 await repository.UnitOfWork.CommitAsync();
                 await _eventPublisher.Publish(new LicenseChangedEvent(changedEntries));
@@ -179,7 +184,7 @@ namespace VirtoCommerce.LicensingModule.Data.Services
             using (var rsa = new RSACryptoServiceProvider())
             {
                 // TODO: Store private key in a more secure storage, for example in Azure Key Vault
-                var privateKey = _settingsManager.GetValue("Licensing.SignaturePrivateKey", string.Empty);
+                var privateKey = ReadFileWithKey(Path.GetFullPath(_licenseOptions.LicensePrivateKeyPath));
                 if (!string.IsNullOrEmpty(privateKey))
                 {
                     rsa.FromXmlString(privateKey);
@@ -195,6 +200,23 @@ namespace VirtoCommerce.LicensingModule.Data.Services
 
                 return signature;
             }
+        }
+
+        private static string ReadFileWithKey(string path)
+        {
+            string fileContent;
+
+            if (!File.Exists(path))
+            {
+                throw new LicenseOrKeyNotFoundException(path);
+            }
+
+            using (var streamReader = File.OpenText(path))
+            {
+                fileContent = streamReader.ReadToEnd();
+            }
+
+            return fileContent;
         }
     }
 }

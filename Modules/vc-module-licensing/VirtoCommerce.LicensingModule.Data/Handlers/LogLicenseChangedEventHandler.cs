@@ -1,42 +1,31 @@
-using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using VirtoCommerce.LicensingModule.Core.Events;
 using VirtoCommerce.LicensingModule.Core.Model;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Events;
 
-namespace VirtoCommerce.LicensingModule.Data.Observers
+namespace VirtoCommerce.LicensingModule.Data.Handlers
 {
-    public class LogLicenseEventsObserver : IObserver<LicenseSignedEvent>, IObserver<LicenseChangedEvent>
+    public class LogLicenseChangedEventHandler : IEventHandler<LicenseSignedEvent>, IEventHandler<LicenseChangedEvent>
     {
         private readonly IChangeLogService _changeLogService;
 
-        public LogLicenseEventsObserver(IChangeLogService changeLogService)
+        public LogLicenseChangedEventHandler(IChangeLogService changeLogService)
         {
             _changeLogService = changeLogService;
         }
 
-        #region IObserver<LicenseActivateEvent>
-        public void OnNext(LicenseSignedEvent value)
+        public Task Handle(LicenseSignedEvent message)
         {
-            var template = value.IsActivated ? "License activated from IP '{0}'" : "License downloaded from IP '{0}'";
-            var log = GetLogRecord(value.License.Id, template, value.ClientIpAddress);
-            _changeLogService.SaveChanges(log);
-        }
-        #endregion
-
-        #region IObserver<LicenseChangeEvent>
-        public void OnCompleted()
-        {
+            SaveOperationLog(message.License.Id, message.IsActivated ? $"License activated from IP '{message.ClientIpAddress}'" : $"License downloaded from IP '{message.ClientIpAddress}'", EntryState.Modified);
+            return Task.CompletedTask;
         }
 
-        public void OnError(Exception error)
+        public Task Handle(LicenseChangedEvent message)
         {
-        }
-
-        public void OnNext(LicenseChangedEvent value)
-        {
-            foreach (var changedEntry in value.ChangedEntries)
+            foreach (var changedEntry in message.ChangedEntries)
             {
                 var original = changedEntry.OldEntry;
                 var modified = changedEntry.NewEntry;
@@ -69,9 +58,21 @@ namespace VirtoCommerce.LicensingModule.Data.Observers
                     _changeLogService.SaveChanges(operationLogs.ToArray());
                 }
             }
-            
+
+            return Task.CompletedTask;
         }
-        #endregion
+
+        protected virtual void SaveOperationLog(string objectId, string detail, EntryState entryState)
+        {
+            var operation = new OperationLog
+            {
+                ObjectId = objectId,
+                ObjectType = typeof(License).Name,
+                OperationType = entryState,
+                Detail = detail
+            };
+            _changeLogService.SaveChanges(operation);
+        }
 
         private static OperationLog GetLogRecord(string licenseId, string template, params object[] parameters)
         {
