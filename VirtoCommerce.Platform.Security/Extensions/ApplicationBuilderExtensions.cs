@@ -1,8 +1,11 @@
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using OpenIddict.Core;
+using OpenIddict.Models;
 using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Security;
 
@@ -50,7 +53,8 @@ namespace VirtoCommerce.Platform.Security
                 //    var descriptor = new OpenIddictApplicationDescriptor
                 //    {
                 //        ClientId = "manager-ui",
-                //        DisplayName = "Platform manager application"                 
+                //        DisplayName = "Platform manager application",
+                //        ClientSecret = "388D45FA-B36B-4988-BA59-B187D329C207",
                 //    };
                 //    await manager.CreateAsync(descriptor, CancellationToken.None);
                 //}
