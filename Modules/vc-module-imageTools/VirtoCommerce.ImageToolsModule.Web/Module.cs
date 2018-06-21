@@ -1,13 +1,21 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using VirtoCommerce.ImageToolsModule.Web.ExportImport;
+using VirtoCommerce.ImageToolsModule.Core.Models;
+using VirtoCommerce.ImageToolsModule.Core.Services;
+using VirtoCommerce.ImageToolsModule.Data.Models;
+using VirtoCommerce.ImageToolsModule.Data.Repositories;
+using VirtoCommerce.ImageToolsModule.Data.Services;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Core.PushNotifications;
+using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Data.PushNotifications;
+using VirtoCommerce.Platform.Security;
 
 namespace VirtoCommerce.ImageToolsModule.Web
 {
@@ -16,12 +24,34 @@ namespace VirtoCommerce.ImageToolsModule.Web
         public ManifestModuleInfo ModuleInfo { get; set; }
         public void Initialize(IServiceCollection serviceCollection)
         {
-            throw new NotImplementedException();
+            var snapshot = serviceCollection.BuildServiceProvider();
+            var configuration = snapshot.GetService<IConfiguration>();
+
+            serviceCollection.AddDbContext<ThumbnailDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce")));
+
+            serviceCollection.AddScoped<IThumbnailRepository, ThumbnailRepository>();
+            serviceCollection.AddScoped<Func<IThumbnailRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IThumbnailRepository>());
+
+
+            serviceCollection.AddTransient<IThumbnailOptionService, ThumbnailOptionService>();
+            serviceCollection.AddTransient<IThumbnailOptionSearchService, ThumbnailOptionSearchService>();
+
+            serviceCollection.AddTransient<IThumbnailTaskSearchService, ThumbnailTaskSearchService>();
+            serviceCollection.AddTransient<IThumbnailTaskService, ThumbnailTaskService>();
+            serviceCollection.AddTransient<IPushNotificationManager, PushNotificationManager>();
+            serviceCollection.AddTransient<IUserNameResolver, HttpContextUserResolver>();
         }
 
         public void PostInitialize(IServiceProvider serviceProvider)
         {
-            throw new NotImplementedException();
+            AbstractTypeFactory<ThumbnailOption>.RegisterType<ThumbnailOption>().MapToType<ThumbnailOptionEntity>();
+            AbstractTypeFactory<ThumbnailTask>.RegisterType<ThumbnailTask>().MapToType<ThumbnailTaskEntity>();
+
+            using (var thumbnailDbContext = serviceProvider.GetRequiredService<ThumbnailDbContext>())
+            {
+                thumbnailDbContext.Database.EnsureCreated();
+                thumbnailDbContext.Database.Migrate();
+            }
         }
 
         public void Uninstall()

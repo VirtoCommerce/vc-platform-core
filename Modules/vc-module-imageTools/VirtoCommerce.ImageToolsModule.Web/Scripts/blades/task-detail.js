@@ -1,4 +1,4 @@
-﻿angular.module('virtoCommerce.imageToolsModule')
+angular.module('virtoCommerce.imageToolsModule')
     .controller('virtoCommerce.imageToolsModule.taskDetailController', ['$rootScope', '$scope', 'platformWebApp.bladeNavigationService', 'imageToolsConfig', 'virtoCommerce.imageToolsModule.taskApi', 'virtoCommerce.imageToolsModule.optionApi', 'platformWebApp.dialogService',
         function ($rootScope, $scope, bladeNavigationService, imageToolsConfig, taskApi, optionApi, dialogService) {
         var blade = $scope.blade;
@@ -7,7 +7,8 @@
             var optionSearchCriteria = getOptionsSearchCriteria();
 
             optionApi.search(optionSearchCriteria, function (data) {
-                blade.optionList = data.result;
+                debugger;
+                blade.optionList = data.results;
             });
 
             if (blade.isNew) {
@@ -27,11 +28,13 @@
                 var optionSearchCriteria = getOptionsSearchCriteria();
 
                 optionApi.search(optionSearchCriteria, function (options) {
-                    updateEntityOptions(options.result);
-                    blade.optionList = options.result;
+                    debugger;
+                    updateEntityOptions(options.results);
+                    blade.optionList = options.results;
                     blade.isLoading = false;
                 });
             } else {
+                debugger;
                 blade.item = angular.copy(data);
                 blade.currentEntity = blade.item;
                 blade.origEntity = data;

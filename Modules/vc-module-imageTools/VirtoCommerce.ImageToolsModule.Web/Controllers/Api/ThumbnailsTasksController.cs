@@ -70,7 +70,7 @@ namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
         [Route("{id}")]
         [ProducesResponseType(typeof(ThumbnailTask), 200)]
         [Authorize(Security.Thumbnail.Read)]
-        public async Task<IActionResult> Get([FromQuery]string id)
+        public async Task<IActionResult> Get([FromRoute]string id)
         {
             var task = await _thumbnailTaskService.GetByIdsAsync(new[] { id });
             return Ok(task.FirstOrDefault());

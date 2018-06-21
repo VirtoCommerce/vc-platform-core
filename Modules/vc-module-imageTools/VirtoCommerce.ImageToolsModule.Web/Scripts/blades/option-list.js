@@ -1,4 +1,4 @@
-﻿angular.module('virtoCommerce.imageToolsModule')
+angular.module('virtoCommerce.imageToolsModule')
     .controller('virtoCommerce.imageToolsModule.optionListController', ['$scope', 'platformWebApp.bladeNavigationService', 'imageToolsConfig', 'virtoCommerce.imageToolsModule.optionApi',
         function ($scope, bladeNavigationService, imageToolsConfig, optionApi) {
             var blade = $scope.blade;
@@ -10,10 +10,11 @@
 
                 optionApi.search(searchCriteria, function (data) {
                     blade.isLoading = false;
-                    blade.currentEntities = data.result;
+                    blade.currentEntities = data.results;
                 });
 
                 if (parentRefresh && blade.parentBlade.refresh) {
+                    debugger;
                     blade.parentBlade.refresh();
                 }
 

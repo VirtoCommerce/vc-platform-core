@@ -1,3 +1,4 @@
+using System.Security.Cryptography.X509Certificates;
 using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.ImageToolsModule.Data.Models;
@@ -7,11 +8,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Repositories
     public class ThumbnailDbContext : DbContextWithTriggers
     {
         public ThumbnailDbContext(DbContextOptions<ThumbnailDbContext> options)
-        : base(options)
-        {
-        }
-
-        public ThumbnailDbContext(DbContextOptions options) : base(options)
+            : base(options)
         {
         }
 
@@ -42,12 +39,14 @@ namespace VirtoCommerce.ImageToolsModule.Data.Repositories
             modelBuilder.Entity<ThumbnailTaskOptionEntity>()
                 .HasOne(x => x.ThumbnailTask)
                 .WithMany(t => t.ThumbnailTaskOptions)
-                .HasForeignKey(x => x.ThumbnailTaskId);
+                .HasForeignKey(x => x.ThumbnailTaskId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ThumbnailTaskOptionEntity>()
                 .HasOne(x => x.ThumbnailOption)
                 .WithMany()
-                .HasForeignKey(x => x.ThumbnailOptionId);
+                .HasForeignKey(x => x.ThumbnailOptionId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             #endregion
 

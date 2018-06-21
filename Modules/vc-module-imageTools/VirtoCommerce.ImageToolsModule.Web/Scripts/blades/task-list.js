@@ -1,4 +1,4 @@
-﻿angular.module('virtoCommerce.imageToolsModule')
+angular.module('virtoCommerce.imageToolsModule')
     .controller('virtoCommerce.imageToolsModule.taskListController', ['$scope','$timeout', 'platformWebApp.bladeNavigationService', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper', 'platformWebApp.dialogService', 'virtoCommerce.imageToolsModule.taskApi',
         function ($scope, $timeout, bladeNavigationService, bladeUtils, uiGridHelper, dialogService, taskApi) {
             var blade = $scope.blade;
@@ -18,9 +18,9 @@
                 taskApi.search(searchCriteria,
                     function (data) {
                         addDescriptionItem(data.result);
-                        $scope.items = data.result;
-                        
-                        $scope.hasMore = data.result.length === $scope.pageSettings.itemsPerPageCount;
+                        $scope.items = data.results;
+
+                        $scope.hasMore = data.totalCount === $scope.pageSettings.itemsPerPageCount;
 
                             $timeout(function () {
                                 // wait for grid to ingest data changes
@@ -46,7 +46,7 @@
                             function (data) {
                                 addDescriptionItem(data.result);
                                 $scope.items = $scope.items.concat(data.result);
-                                
+                                debugger;
                                 $scope.hasMore = data.listEntries.length === $scope.pageSettings.itemsPerPageCount;
                                 $scope.gridApi.infiniteScroll.dataLoaded();
 

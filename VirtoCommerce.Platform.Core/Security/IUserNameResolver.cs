@@ -1,4 +1,4 @@
-﻿namespace VirtoCommerce.Platform.Core.Security
+namespace VirtoCommerce.Platform.Core.Security
 {
     public interface IUserNameResolver
     {

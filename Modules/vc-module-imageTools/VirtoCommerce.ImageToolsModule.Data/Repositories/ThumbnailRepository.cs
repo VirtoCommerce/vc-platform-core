@@ -19,7 +19,11 @@ namespace VirtoCommerce.ImageToolsModule.Data.Repositories
 
         public async Task<ThumbnailTaskEntity[]> GetThumbnailTasksByIdsAsync(string[] ids)
         {
-            return await ThumbnailTasks.Where(x => ids.Contains(x.Id)).ToArrayAsync();
+            return await ThumbnailTasks
+                .Include(t => t.ThumbnailTaskOptions)
+                    .ThenInclude( o => o.ThumbnailOption)
+                .Where(t => ids.Contains(t.Id))
+                .ToArrayAsync();
         }
 
         public async Task<ThumbnailOptionEntity[]> GetThumbnailOptionsByIdsAsync(string[] ids)

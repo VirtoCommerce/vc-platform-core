@@ -42,8 +42,8 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
                 var totalCount = query.Count();
 
                 var ids = query.Skip(criteria.Skip).Take(criteria.Take).Select(x => x.Id).ToArray();
-                var thumbnailOptions = await repository.GetThumbnailTasksByIdsAsync(ids);
-                var results = thumbnailOptions.Select(t => t.ToModel(AbstractTypeFactory<ThumbnailTask>.TryCreateInstance())).ToArray();
+                var thumbnailTasks = await repository.GetThumbnailTasksByIdsAsync(ids);
+                var results = thumbnailTasks.Select(t => t.ToModel(AbstractTypeFactory<ThumbnailTask>.TryCreateInstance())).ToArray();
 
                 var retVal = new ThumbnailTaskSearchResult
                 {
