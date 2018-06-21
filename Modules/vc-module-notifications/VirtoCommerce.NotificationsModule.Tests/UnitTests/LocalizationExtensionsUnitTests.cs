@@ -24,6 +24,13 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         [Fact]
         public void FindWithLanguage_WhenIsNull_ReturnDefaultLanguage()
         {
+            var ss = new System.Net.Http.FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["grant_type"] = "client_credentials",
+                ["client_id"] = "console",
+                ["client_secret"] = "388D45FA-B36B-4988-BA59-B187D329C207"
+            });
+
             //Arrange
             string languageCode = null;
 
