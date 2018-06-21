@@ -26,7 +26,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
 
         public async Task<GenericSearchResult<InventoryInfo>> SearchInventoriesAsync(InventorySearchCriteria criteria)
         {
-            var cacheKey = CacheKey.With(GetType(), "SearchInventoriesAsync", criteria.GetHashCode().ToString());
+            var cacheKey = CacheKey.With(GetType(), "SearchInventoriesAsync", criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(InventoryCacheRegion.CreateChangeToken());

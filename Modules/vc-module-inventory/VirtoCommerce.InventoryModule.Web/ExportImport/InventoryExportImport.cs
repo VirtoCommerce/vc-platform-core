@@ -9,23 +9,11 @@ using VirtoCommerce.Domain.Inventory.Model.Search;
 using VirtoCommerce.InventoryModule.Core.Model;
 using VirtoCommerce.InventoryModule.Core.Model.Search;
 using VirtoCommerce.InventoryModule.Core.Services;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.InventoryModule.Web.ExportImport
 {
-    public sealed class BackupObject
-    {
-        public BackupObject()
-        {
-            InventoryInfos = Array.Empty<InventoryInfo>();
-            FulfillmentCenters = Array.Empty<FulfillmentCenter>();
-        }
-        public InventoryInfo[] InventoryInfos { get; set; }
-        public FulfillmentCenter[] FulfillmentCenters { get; set; }
-    }
-
     public sealed class InventoryExportImport
     {
         private readonly IInventoryService _inventoryService;
