@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.Domain.Commerce.Model;
 using VirtoCommerce.Domain.Commerce.Services;
@@ -17,7 +18,7 @@ namespace VirtoCommerce.CoreModule.Web
             serviceCollection.AddSingleton<ICommerceService, MockCommerceService>();
         }
 
-        public void PostInitialize(IServiceProvider serviceProvider)
+        public void PostInitialize(IApplicationBuilder appBuilder)
         {
         }
 
@@ -36,11 +37,11 @@ namespace VirtoCommerce.CoreModule.Web
             }
 
             public void DeletePackageTypes(string[] ids)
-            {              
+            {
             }
 
             public void DeleteSeoForObject(ISeoSupport seoSupportObject)
-            {                
+            {
             }
 
             public IEnumerable<Currency> GetAllCurrencies()
@@ -88,12 +89,12 @@ namespace VirtoCommerce.CoreModule.Web
 
             public void UpsertSeoForObjects(ISeoSupport[] seoSupportObjects)
             {
-   
+
             }
 
             public void UpsertSeoInfos(SeoInfo[] seoinfos)
             {
-             
+
             }
         }
     }

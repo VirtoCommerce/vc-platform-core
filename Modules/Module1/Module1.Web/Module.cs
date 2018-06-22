@@ -1,4 +1,5 @@
 using System;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,17 +31,18 @@ namespace Module1.Web
             serviceCollection.AddTransient<IPlatformRepository, PlatformRepository2>();
         }
 
-        public void PostInitialize(IServiceProvider serviceProvider)
+        public void PostInitialize(IApplicationBuilder appBuilder)
         {
-            var settingsService = serviceProvider.GetRequiredService<ISettingsManager>();
-            var platformRepository = serviceProvider.GetRequiredService<IPlatformRepository>();
-            var dynamicPropertyRegistrar = serviceProvider.GetRequiredService<IDynamicPropertyRegistrar>();
+            var dynamicPropertyRegistrar = appBuilder.ApplicationServices.GetRequiredService<IDynamicPropertyRegistrar>();
             dynamicPropertyRegistrar.RegisterType<TestClass>();
 
-            using (var platformDbContext = serviceProvider.GetRequiredService<PlatformDbContext2>())
+            using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
-                platformDbContext.Database.EnsureCreated();
-                platformDbContext.Database.Migrate();
+                using (var platformDbContext = serviceScope.ServiceProvider.GetRequiredService<PlatformDbContext2>())
+                {
+                    platformDbContext.Database.EnsureCreated();
+                    platformDbContext.Database.Migrate();
+                }
             }
             AbstractTypeFactory<SettingEntity>.OverrideType<SettingEntity, SettingEntity2>();
             AbstractTypeFactory<SettingEntry>.OverrideType<SettingEntry, SettingEntry2>();

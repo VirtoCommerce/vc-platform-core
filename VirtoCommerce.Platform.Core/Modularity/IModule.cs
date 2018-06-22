@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace VirtoCommerce.Platform.Core.Modularity
@@ -11,7 +12,7 @@ namespace VirtoCommerce.Platform.Core.Modularity
         /// <summary>
         /// Contain module manifest information
         /// </summary>
-        ManifestModuleInfo ModuleInfo { get; set; }       
+        ManifestModuleInfo ModuleInfo { get; set; }
 
         /// <summary>
         /// Notifies the module that it has been initialized.
@@ -21,7 +22,7 @@ namespace VirtoCommerce.Platform.Core.Modularity
         /// <summary>
         /// This method is called after all modules have been initialized with Initialize().
         /// </summary>
-        void PostInitialize(IServiceProvider serviceProvider);
+        void PostInitialize(IApplicationBuilder appBuilder);
 
         /// <summary>
         /// This method is called before uninstalling the module.
