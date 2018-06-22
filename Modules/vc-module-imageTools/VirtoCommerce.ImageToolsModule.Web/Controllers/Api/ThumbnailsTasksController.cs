@@ -10,7 +10,7 @@ using VirtoCommerce.ImageToolsModule.Web.BackgroundJobs;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Security;
 
-using Security = VirtoCommerce.ImageToolsModule.Core.Security.SecurityConstants;
+using Permission = VirtoCommerce.ImageToolsModule.Core.ThumbnailConstants.Permissions;
 
 namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
 {
@@ -39,7 +39,7 @@ namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
         [HttpPost]
         [Route("")]
         [ProducesResponseType(typeof(ThumbnailTask), 200)]
-        [Authorize(Security.Thumbnail.Create)]
+        [Authorize(Permission.Create)]
         public IActionResult Create([FromBody]ThumbnailTask task)
         {
             _thumbnailTaskService.SaveOrUpdateAsync(new[] { task });
@@ -54,7 +54,7 @@ namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
         [HttpDelete]
         [Route("")]
         [ProducesResponseType(200)]
-        [Authorize(Security.Thumbnail.Delete)]
+        [Authorize(Permission.Delete)]
         public async Task<IActionResult> Delete([FromQuery] string[] ids)
         {
             await _thumbnailTaskService.RemoveByIdsAsync(ids);
@@ -69,7 +69,7 @@ namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
         [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(ThumbnailTask), 200)]
-        [Authorize(Security.Thumbnail.Read)]
+        [Authorize(Permission.Read)]
         public async Task<IActionResult> Get([FromRoute]string id)
         {
             var task = await _thumbnailTaskService.GetByIdsAsync(new[] { id });
@@ -84,7 +84,7 @@ namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
         [HttpPost]
         [Route("search")]
         [ProducesResponseType(typeof(ThumbnailTaskSearchResult), 200)]
-        [Authorize(Security.Thumbnail.Read)]
+        [Authorize(Permission.Read)]
         public async Task<IActionResult> Search([FromBody]ThumbnailTaskSearchCriteria criteria)
         {
             var result = await _thumbnailTaskSearchService.SearchAsync(criteria);
@@ -99,7 +99,7 @@ namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
         [HttpPut]
         [Route("")]
         [ProducesResponseType(200)]
-        [Authorize(Security.Thumbnail.Update)]
+        [Authorize(Permission.Update)]
         public async Task<IActionResult> UpdateAsync([FromBody]ThumbnailTask tasks)
         {
             await _thumbnailTaskService.SaveOrUpdateAsync(new[] { tasks });
@@ -108,7 +108,7 @@ namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
 
         [HttpPost]
         [Route("{jobId}/cancel")]
-        [Authorize(Security.Thumbnail.Read)]
+        [Authorize(Permission.Read)]
         public IActionResult Cancel([FromQuery]string jobId)
         {
             BackgroundJob.Delete(jobId);
@@ -118,7 +118,7 @@ namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
         [HttpPost]
         [Route("run")]
         [ProducesResponseType(typeof(ThumbnailProcessNotification), 200)]
-        [Authorize(Security.Thumbnail.Read)]
+        [Authorize(Permission.Read)]
         public IActionResult Run([FromBody]ThumbnailsTaskRunRequest runRequest)
         {
             var notification = Enqueue(runRequest);

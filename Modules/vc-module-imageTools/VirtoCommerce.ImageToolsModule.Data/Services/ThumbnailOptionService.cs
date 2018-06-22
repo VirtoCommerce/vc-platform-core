@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.ServiceProcess;
-using System.Text;
 using System.Threading.Tasks;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.ImageToolsModule.Core.Services;
@@ -12,7 +9,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ImageToolsModule.Data.Services
 {
-    public class ThumbnailOptionService : ServiceBase, IThumbnailOptionService
+    public class ThumbnailOptionService : IThumbnailOptionService
     {
         private readonly Func<IThumbnailRepository> _thumbnailRepositoryFactory;
 

@@ -1,28 +1,27 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.ServiceProcess;
-using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.ImageToolsModule.Core.Services;
+using VirtoCommerce.ImageToolsModule.Data.Models;
 using VirtoCommerce.ImageToolsModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ImageToolsModule.Data.Services
 {
-    public class ThumbnailOptionSearchService : ServiceBase, IThumbnailOptionSearchService
+    public class ThumbnailOptionSearchService : IThumbnailOptionSearchService
     {
         private readonly Func<IThumbnailRepository> _thumbnailRepositoryFactory;
 
         public ThumbnailOptionSearchService(Func<IThumbnailRepository> thumbnailRepositoryFactory)
         {
-            this._thumbnailRepositoryFactory = thumbnailRepositoryFactory;
+            _thumbnailRepositoryFactory = thumbnailRepositoryFactory;
         }
 
         public async Task<ThumbnailOptionSearchResult> SearchAsync(ThumbnailOptionSearchCriteria criteria)
         {
-            using (var repository = this._thumbnailRepositoryFactory())
+            using (var repository = _thumbnailRepositoryFactory())
             {
                 var sortInfos = criteria.SortInfos;
                 if (sortInfos.IsNullOrEmpty())

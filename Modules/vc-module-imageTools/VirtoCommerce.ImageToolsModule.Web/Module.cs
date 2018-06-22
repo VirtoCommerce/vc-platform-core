@@ -29,17 +29,16 @@ namespace VirtoCommerce.ImageToolsModule.Web
 
             serviceCollection.AddDbContext<ThumbnailDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce")));
 
-            serviceCollection.AddScoped<IThumbnailRepository, ThumbnailRepository>();
-            serviceCollection.AddScoped<Func<IThumbnailRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IThumbnailRepository>());
+            serviceCollection.AddTransient<IThumbnailRepository, ThumbnailRepository>();
+            serviceCollection.AddSingleton<Func<IThumbnailRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IThumbnailRepository>());
 
 
-            serviceCollection.AddTransient<IThumbnailOptionService, ThumbnailOptionService>();
-            serviceCollection.AddTransient<IThumbnailOptionSearchService, ThumbnailOptionSearchService>();
+            serviceCollection.AddSingleton<IThumbnailOptionService, ThumbnailOptionService>();
+            serviceCollection.AddSingleton<IThumbnailOptionSearchService, ThumbnailOptionSearchService>();
 
-            serviceCollection.AddTransient<IThumbnailTaskSearchService, ThumbnailTaskSearchService>();
-            serviceCollection.AddTransient<IThumbnailTaskService, ThumbnailTaskService>();
-            serviceCollection.AddTransient<IPushNotificationManager, PushNotificationManager>();
-            serviceCollection.AddTransient<IUserNameResolver, HttpContextUserResolver>();
+            serviceCollection.AddSingleton<IThumbnailTaskSearchService, ThumbnailTaskSearchService>();
+            serviceCollection.AddSingleton<IThumbnailTaskService, ThumbnailTaskService>();
+            serviceCollection.AddSingleton<IPushNotificationManager, PushNotificationManager>();
         }
 
         public void PostInitialize(IServiceProvider serviceProvider)
