@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <module>
     <id>VirtoCommerce.Notifications</id>
-    <version>1.0.0</version>
-    <platformVersion>2.0.0</platformVersion>
+    <version>3.0.0</version>
+    <platformVersion>3.0.0</platformVersion>
     <title>Notifications module</title>
     <description>description</description>
     <authors>
@@ -12,7 +12,7 @@
         <owner>Virto Commerce</owner>
     </owners>
     <projectUrl>https://virtocommerce.com/apps/extensions/virto-core-module</projectUrl>
-    <iconUrl>Modules/$(VirtoCommerce.Core)/Content/logoVC.png</iconUrl>
+    <iconUrl>Modules/$(VirtoCommerce.Notifications)/Content/logoVC.png</iconUrl>
     <releaseNotes></releaseNotes>
     <copyright>Copyright © 2011-2018 Virto Commerce. All rights reserved</copyright>
     <tags>security core</tags>
