@@ -1,9 +1,12 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using VirtoCommerce.ImageToolsModule.Core;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.ImageToolsModule.Core.Services;
 using VirtoCommerce.ImageToolsModule.Data.Models;
@@ -15,7 +18,6 @@ using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Data.PushNotifications;
-using VirtoCommerce.Platform.Security;
 
 namespace VirtoCommerce.ImageToolsModule.Web
 {
@@ -41,13 +43,28 @@ namespace VirtoCommerce.ImageToolsModule.Web
             serviceCollection.AddSingleton<IPushNotificationManager, PushNotificationManager>();
         }
 
-        public void PostInitialize(IServiceProvider serviceProvider)
+        public void PostInitialize(IApplicationBuilder appBuilder)
         {
             AbstractTypeFactory<ThumbnailOption>.RegisterType<ThumbnailOption>().MapToType<ThumbnailOptionEntity>();
             AbstractTypeFactory<ThumbnailTask>.RegisterType<ThumbnailTask>().MapToType<ThumbnailTaskEntity>();
 
-            using (var thumbnailDbContext = serviceProvider.GetRequiredService<ThumbnailDbContext>())
+
+            //Register module settings
+            ModuleInfo.Settings.Add(new ModuleSettingsGroup
             {
+                Name = "Thumbnail|General",
+                Settings = ThumbnailConstants.Settings.General.AllSettings.ToArray()
+            });
+
+            //Register module permissions
+            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IKnownPermissionsProvider>();
+            permissionsProvider.RegisterPermissions(ThumbnailConstants.Permissions.AllPermissions.Select(x => new Permission() { GroupName = "Thumbnail", Name = x }).ToArray());
+
+
+            //Force migrations
+            using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
+            {
+                var thumbnailDbContext = serviceScope.ServiceProvider.GetRequiredService<ThumbnailDbContext>();
                 thumbnailDbContext.Database.EnsureCreated();
                 thumbnailDbContext.Database.Migrate();
             }
@@ -55,7 +72,6 @@ namespace VirtoCommerce.ImageToolsModule.Web
 
         public void Uninstall()
         {
-            throw new NotImplementedException();
         }
 
         #region ISupportExportImportModule Members

@@ -7,7 +7,6 @@ angular.module('virtoCommerce.imageToolsModule')
             var optionSearchCriteria = getOptionsSearchCriteria();
 
             optionApi.search(optionSearchCriteria, function (data) {
-                debugger;
                 blade.optionList = data.results;
             });
 
@@ -28,13 +27,11 @@ angular.module('virtoCommerce.imageToolsModule')
                 var optionSearchCriteria = getOptionsSearchCriteria();
 
                 optionApi.search(optionSearchCriteria, function (options) {
-                    debugger;
                     updateEntityOptions(options.results);
                     blade.optionList = options.results;
                     blade.isLoading = false;
                 });
             } else {
-                debugger;
                 blade.item = angular.copy(data);
                 blade.currentEntity = blade.item;
                 blade.origEntity = data;

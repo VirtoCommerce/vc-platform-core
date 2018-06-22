@@ -46,7 +46,6 @@ angular.module('virtoCommerce.imageToolsModule')
                             function (data) {
                                 addDescriptionItem(data.result);
                                 $scope.items = $scope.items.concat(data.result);
-                                debugger;
                                 $scope.hasMore = data.listEntries.length === $scope.pageSettings.itemsPerPageCount;
                                 $scope.gridApi.infiniteScroll.dataLoaded();
 

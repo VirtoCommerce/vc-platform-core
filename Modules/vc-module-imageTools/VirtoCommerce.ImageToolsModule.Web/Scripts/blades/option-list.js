@@ -14,7 +14,6 @@ angular.module('virtoCommerce.imageToolsModule')
                 });
 
                 if (parentRefresh && blade.parentBlade.refresh) {
-                    debugger;
                     blade.parentBlade.refresh();
                 }
 
