@@ -8,10 +8,8 @@ namespace VirtoCommerce.SearchModule.Core.Services
     /// </summary>
     public interface IIndexingWorker
     {
-        void IndexDocuments(string documentType, string[] documentIds,
-            IndexingPriority priority = IndexingPriority.Default);
+        void IndexDocuments(string documentType, string[] documentIds, IndexingPriority priority = IndexingPriority.Default);
 
-        void DeleteDocuments(string documentType, string[] documentIds,
-            IndexingPriority priority = IndexingPriority.Default);
+        void DeleteDocuments(string documentType, string[] documentIds, IndexingPriority priority = IndexingPriority.Default);
     }
 }

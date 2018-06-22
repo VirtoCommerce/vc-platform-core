@@ -17,7 +17,6 @@ using VirtoCommerce.Platform.Core.Jobs;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchModule.Core.Services;
 using VirtoCommerce.SearchModule.Core.Model;
-using VirtoCommerce.SearchModule.Web.Model.PushNotifcations;
 using Job = Hangfire.Common.Job;
 
 namespace VirtoCommerce.SearchModule.Web.BackgroundJobs

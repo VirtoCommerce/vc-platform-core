@@ -1,34 +1,18 @@
 using System;
 using System.Runtime.Serialization;
+using VirtoCommerce.Platform.Core.Exceptions;
 
 namespace VirtoCommerce.SearchModule.Core.Exceptions
 {
     [Serializable]
-    public class SearchException : ApplicationException
+    public class SearchException : PlatformException
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SearchException"/> class.
-        /// </summary>
-        public SearchException()
-        {
-        }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="SearchException"/> class.
         /// </summary>
         /// <param name="message">The message.</param>
         public SearchException(string message)
             : base(message)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SearchException"/> class.
-        /// </summary>
-        /// <param name="info">The info.</param>
-        /// <param name="context">The context.</param>
-        protected SearchException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
         {
         }
 

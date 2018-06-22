@@ -89,9 +89,9 @@
         </group>
     </settings>
 
-    <permissions>
+    <!--<permissions>
         <group name="Search">
 			<permission id="search:index:rebuild" name="Rebuild Index" description="Allows to delete search index and build it again."/>
         </group>
-    </permissions>
+    </permissions>-->
 </module>

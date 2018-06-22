@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
@@ -48,20 +49,19 @@ namespace VirtoCommerce.SearchModule.Data.Services
 
             public async Task<IReadOnlyCollection<IndexDocumentChange>> GetNextBatch()
             {
-                if (Skip >= TotalCount)
+                IReadOnlyCollection<IndexDocumentChange> result = null;
+
+                if (Skip < TotalCount)
                 {
-                    return await Task.FromResult<IReadOnlyCollection<IndexDocumentChange>>(null);
+                    var changes = await Provider.GetChangesAsync(StartDate, EndDate, Skip, Take);
+                    if (changes.Any())
+                    {
+                        result = new ReadOnlyCollection<IndexDocumentChange>(changes);
+                        Skip += changes.Count;
+                    }
                 }
 
-                var changes = await Provider.GetChangesAsync(StartDate, EndDate, Skip, Take);
-                if (changes.Count == 0)
-                {
-                    return await Task.FromResult<IReadOnlyCollection<IndexDocumentChange>>(null);
-                }
-
-                Skip += changes.Count;
-
-                return new ReadOnlyCollection<IndexDocumentChange>(changes);
+                return result;
             }
         }
     }

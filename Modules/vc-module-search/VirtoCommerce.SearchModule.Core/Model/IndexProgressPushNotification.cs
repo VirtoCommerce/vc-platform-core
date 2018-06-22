@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.PushNotifications;
 
-namespace VirtoCommerce.SearchModule.Web.Model.PushNotifcations
+namespace VirtoCommerce.SearchModule.Core.Model
 {
     public class IndexProgressPushNotification : PushNotification
     {

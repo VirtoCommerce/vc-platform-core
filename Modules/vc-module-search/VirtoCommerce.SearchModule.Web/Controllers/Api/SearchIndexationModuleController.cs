@@ -8,7 +8,6 @@ using VirtoCommerce.SearchModule.Core;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
 using VirtoCommerce.SearchModule.Web.BackgroundJobs;
-using VirtoCommerce.SearchModule.Web.Model.PushNotifcations;
 
 namespace VirtoCommerce.SearchModule.Web.Controllers.Api
 {

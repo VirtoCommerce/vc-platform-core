@@ -5,7 +5,6 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.SearchModule.Core.Model;
 using Hangfire.Logging;
-using VirtoCommerce.SearchModule.Web.Model.PushNotifcations;
 
 namespace VirtoCommerce.SearchModule.Web.BackgroundJobs
 {

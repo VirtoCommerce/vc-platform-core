@@ -12,7 +12,7 @@ using Xunit;
 namespace VirtoCommerce.SearchModule.Tests
 {
     [CLSCompliant(false)]
-    [Trait("Category", "CI")]
+    [Trait("Category", "Unit")]
     public class IndexingManagerTests
     {
         public const string Rebuild = "rebuild";
@@ -78,6 +78,7 @@ namespace VirtoCommerce.SearchModule.Tests
             var expectedFieldNames = new List<string>(sourceNames) { KnownDocumentFields.IndexationDate };
             ValidateIndexedDocuments(searchProvider.IndexedDocuments.Values, expectedFieldNames, "good2", "good3");
         }
+
         [Theory]
         [InlineData(1, Primary)]
         [InlineData(3, Primary)]

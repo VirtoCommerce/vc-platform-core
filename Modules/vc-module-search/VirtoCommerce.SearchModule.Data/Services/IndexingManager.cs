@@ -144,56 +144,71 @@ namespace VirtoCommerce.SearchModule.Data.Services
 
             progressCallback?.Invoke(new IndexingProgress($"{documentType}: calculating total count", documentType));
 
-            var feeds = await GetChangeFeeds(configuration, options);
-
             var batchOptions = new BatchIndexingOptions
             {
                 DocumentType = options.DocumentType,
                 PrimaryDocumentBuilder = configuration.DocumentSource.DocumentBuilder,
-                SecondaryDocumentBuilders = configuration.RelatedSources?.Where(s => s.DocumentBuilder != null).Select(s => s.DocumentBuilder).ToList(),
+                SecondaryDocumentBuilders = configuration.RelatedSources
+                    ?.Where(s => s.DocumentBuilder != null)
+                    .Select(s => s.DocumentBuilder)
+                    .ToList(),
             };
+
+            var feeds = await GetChangeFeeds(configuration, options);
 
             // Try to get total count to indicate progress. Some feeds don't have a total count.
             var totalCount = feeds.Any(x => x.TotalCount == null)
-                ? (long?) null
-                : feeds.Sum(x => x.TotalCount.GetValueOrDefault());
+                ? (long?)null
+                : feeds.Sum(x => x.TotalCount ?? 0);
 
             long processedCount = 0;
-            foreach (var feed in feeds)
+
+            var changes = await GetNextChangesAsync(feeds);
+            while (changes.Any())
             {
-                IReadOnlyCollection<IndexDocumentChange> batch = null;
-                while(true)
+                IList<string> errors = null;
+
+                if (_backgroundWorker == null)
                 {
-                    batch = await feed.GetNextBatch();
-                    if (batch == null) break;
+                    var indexingResult = await ProcessChangesAsync(changes, batchOptions, cancellationToken);
+                    errors = GetIndexingErrors(indexingResult);
+                }
+                else
+                {
+                    // We're executing a job to index all documents or the changes since a specific time.
+                    // Priority for this indexation work should be quite low.
+                    var documentIds = changes
+                        .Select(x => x.DocumentId)
+                        .Distinct()
+                        .ToArray();
 
-                    IList<string> errors = null;
+                    _backgroundWorker.IndexDocuments(configuration.DocumentType, documentIds, IndexingPriority.Background);
+                }
 
-                    if (_backgroundWorker == null)
-                    {
-                        var indexingResult = await ProcessChangesAsync(batch, batchOptions, cancellationToken);
-                        errors = GetIndexingErrors(indexingResult);
-                    }
-                    else
-                    {
-                        // We're executing a job to index all documents or the changes since a specific time.
-                        // Priority for this indexation work should be quite low.
-                        _backgroundWorker.IndexDocuments(configuration.DocumentType, batch.Select(x => x.DocumentId).ToArray(),
-                            IndexingPriority.Background);
-                    }
-                    processedCount += batch.Count;
+                processedCount += changes.Count;
 
-                    if (totalCount.HasValue)
-                        progressCallback?.Invoke(new IndexingProgress($"{documentType}: {processedCount} of {totalCount} have been indexed", documentType, totalCount, processedCount, errors));
-                    else
-                        progressCallback?.Invoke(new IndexingProgress($"{documentType}: {processedCount} have been indexed", documentType, totalCount, processedCount, errors));
+                var description = totalCount != null
+                    ? $"{documentType}: {processedCount} of {totalCount} have been indexed"
+                    : $"{documentType}: {processedCount} have been indexed";
 
-                    cancellationToken.ThrowIfCancellationRequested();
-                } 
+                progressCallback?.Invoke(new IndexingProgress(description, documentType, totalCount, processedCount, errors));
+
+                changes = await GetNextChangesAsync(feeds);
             }
 
-            progressCallback?.Invoke(new IndexingProgress($"{documentType}: indexation finished", documentType,
-                totalCount.GetValueOrDefault(processedCount), processedCount));
+            progressCallback?.Invoke(new IndexingProgress($"{documentType}: indexation finished", documentType, totalCount ?? processedCount, processedCount));
+        }
+
+        protected virtual async Task<IList<IndexDocumentChange>> GetNextChangesAsync(IList<IIndexDocumentChangeFeed> feeds)
+        {
+            var batches = await Task.WhenAll(feeds.Select(f => f.GetNextBatch()));
+
+            var changes = batches
+                .Where(b => b != null)
+                .SelectMany(b => b)
+                .ToList();
+
+            return changes;
         }
 
         protected virtual async Task<IndexingResult> ProcessChangesAsync(IEnumerable<IndexDocumentChange> changes, BatchIndexingOptions batchOptions, ICancellationToken cancellationToken)
@@ -257,17 +272,17 @@ namespace VirtoCommerce.SearchModule.Data.Services
             // Return in-memory change feed for specific set of document ids.
             if (options.DocumentIds != null)
             {
-                return new[]
+                return new IIndexDocumentChangeFeed[]
                 {
-                    new InMemoryIndexDocumentChangeFeed(options.DocumentIds.ToArray(),
-                        IndexDocumentChangeType.Modified, options.BatchSize.GetValueOrDefault(50))
+                    new InMemoryIndexDocumentChangeFeed(options.DocumentIds.ToArray(), IndexDocumentChangeType.Modified, options.BatchSize ?? 50)
                 };
             }
 
             // Support old ChangesProvider.
             if (configuration.DocumentSource.ChangeFeedFactory == null)
-                configuration.DocumentSource.ChangeFeedFactory
-                    = new IndexDocumentChangeFeedFactoryAdapter(configuration.DocumentSource.ChangesProvider);
+            {
+                configuration.DocumentSource.ChangeFeedFactory = new IndexDocumentChangeFeedFactoryAdapter(configuration.DocumentSource.ChangesProvider);
+            }
 
             var factories = new List<IIndexDocumentChangeFeedFactory>
             {
@@ -290,8 +305,7 @@ namespace VirtoCommerce.SearchModule.Data.Services
                 }
             }
 
-            return await Task.WhenAll(factories.Select(x => x.CreateFeed(options.StartDate, options.EndDate,
-                options.BatchSize.GetValueOrDefault(50))));
+            return await Task.WhenAll(factories.Select(x => x.CreateFeed(options.StartDate, options.EndDate, options.BatchSize ?? 50)));
         }
 
         protected virtual IList<string> GetIndexingErrors(IndexingResult indexingResult)
@@ -319,7 +333,9 @@ namespace VirtoCommerce.SearchModule.Data.Services
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var primaryDocuments = (await primaryDocumentBuilder.GetDocumentsAsync(documentIds))?.Where(d => d != null).ToList();
+            var primaryDocuments = (await primaryDocumentBuilder.GetDocumentsAsync(documentIds))
+                ?.Where(d => d != null)
+                .ToList();
 
             if (primaryDocuments?.Any() == true)
             {
@@ -352,7 +368,11 @@ namespace VirtoCommerce.SearchModule.Data.Services
             var tasks = secondaryDocumentBuilders.Select(p => p.GetDocumentsAsync(documentIds));
             var results = await Task.WhenAll(tasks);
 
-            var result = results.Where(r => r != null).SelectMany(r => r.Where(d => d != null)).ToList();
+            var result = results
+                .Where(r => r != null)
+                .SelectMany(r => r.Where(d => d != null))
+                .ToList();
+
             return result;
         }
 

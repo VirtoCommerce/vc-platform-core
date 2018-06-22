@@ -4,11 +4,15 @@ using System.Linq;
 using Hangfire;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.SearchModule.Core;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
 using VirtoCommerce.SearchModule.Data.Search.SearchPhraseParsing;
+using VirtoCommerce.SearchModule.Data.SearchPhraseParsing;
 using VirtoCommerce.SearchModule.Data.Services;
 using VirtoCommerce.SearchModule.Web.BackgroundJobs;
 
@@ -61,6 +65,21 @@ namespace VirtoCommerce.SearchModule.Web
             };
             serviceCollection.AddSingleton(new [] {productIndexingConfiguration});
             serviceCollection.AddSingleton<ISearchProvider, SearchProviderMock>();
+
+            ModuleInfo.Settings.Add(new ModuleSettingsGroup
+            {
+                Name = "Search|General",
+                Settings = ModuleConstants.Settings.General.AllSettings.ToArray()
+            });
+
+            var permissionsProvider = snapshot.GetRequiredService<IKnownPermissionsProvider>();
+            permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
+                new Permission()
+                {
+                    GroupName = "Search",
+                    ModuleId = "VirtoCommerce.Search",
+                    Name = x
+                }).ToArray());
         }
 
         public void PostInitialize(IServiceProvider serviceProvider)
