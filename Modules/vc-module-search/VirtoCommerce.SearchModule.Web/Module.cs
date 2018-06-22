@@ -31,11 +31,11 @@ namespace VirtoCommerce.SearchModule.Web
             serviceCollection.AddSingleton<ISearchPhraseParser, SearchPhraseParser>();
 
             // Allow scale out of indexation through background worker, if opted-in.
-            if (settingsManager.GetValue("VirtoCommerce.Search.IndexingJobs.ScaleOut", false))
+            if (settingsManager.GetValue(ModuleConstants.Settings.General.IndexingJobs.ScaleOut.Name, false))
             {
                 serviceCollection.AddSingleton<IIndexingWorker>(new HangfireIndexingWorker
                 {
-                    ThrottleQueueCount = settingsManager.GetValue("VirtoCommerce.Search.IndexingJobs.MaxQueueSize", 25)
+                    ThrottleQueueCount = settingsManager.GetValue(ModuleConstants.Settings.General.IndexingJobs.MaxQueueSize.Name, 25)
                 });
             }
             else
@@ -50,7 +50,7 @@ namespace VirtoCommerce.SearchModule.Web
 
             if (string.IsNullOrEmpty(searchConnectionString))
             {
-                searchConnectionString = settingsManager.GetValue("VirtoCommerce.Search.SearchConnectionString", string.Empty);
+                searchConnectionString = settingsManager.GetValue(ModuleConstants.Settings.General.SearchConnectionString.Name, string.Empty);
             }
 
             if (!string.IsNullOrEmpty(searchConnectionString))

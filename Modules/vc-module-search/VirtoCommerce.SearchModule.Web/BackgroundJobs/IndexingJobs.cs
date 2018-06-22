@@ -15,6 +15,7 @@ using Hangfire;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Jobs;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.SearchModule.Core;
 using VirtoCommerce.SearchModule.Core.Services;
 using VirtoCommerce.SearchModule.Core.Model;
 using Job = Hangfire.Common.Job;
@@ -375,7 +376,7 @@ namespace VirtoCommerce.SearchModule.Web.BackgroundJobs
 
         private int GetBatchSize()
         {
-            return _settingsManager.GetValue("VirtoCommerce.Search.IndexPartitionSize", 50);
+            return _settingsManager.GetValue(ModuleConstants.Settings.General.IndexPartitionSize.Name, 50);
         }
 
         private static async Task WaitForIndexationJobsToBeReadyAsync(string queue, Func<Job, bool> jobPredicate)

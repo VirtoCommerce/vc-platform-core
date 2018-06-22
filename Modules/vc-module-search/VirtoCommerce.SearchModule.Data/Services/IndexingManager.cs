@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.SearchModule.Core;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
 
@@ -74,7 +75,7 @@ namespace VirtoCommerce.SearchModule.Data.Services
                 throw new ArgumentNullException($"{nameof(options)}.{nameof(options.DocumentType)}");
 
             if (options.BatchSize == null)
-                options.BatchSize = _settingsManager?.GetValue("VirtoCommerce.Search.IndexPartitionSize", 50) ?? 50;
+                options.BatchSize = _settingsManager?.GetValue(ModuleConstants.Settings.General.IndexPartitionSize.Name, 50) ?? 50;
             if (options.BatchSize < 1)
                 throw new ArgumentException(@"Batch size cannon be less than 1", $"{nameof(options)}.{nameof(options.BatchSize)}");
 
