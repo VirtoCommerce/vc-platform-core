@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Hangfire;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.Platform.Core;
@@ -65,14 +66,20 @@ namespace VirtoCommerce.SearchModule.Web
             };
             serviceCollection.AddSingleton(new [] {productIndexingConfiguration});
             serviceCollection.AddSingleton<ISearchProvider, SearchProviderMock>();
+            
+            
+        }
 
+        public void PostInitialize(IApplicationBuilder appBuilder)
+        {
             ModuleInfo.Settings.Add(new ModuleSettingsGroup
             {
                 Name = "Search|General",
                 Settings = ModuleConstants.Settings.General.AllSettings.ToArray()
             });
 
-            var permissionsProvider = snapshot.GetRequiredService<IKnownPermissionsProvider>();
+
+            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IKnownPermissionsProvider>();
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
                 new Permission()
                 {
@@ -80,15 +87,12 @@ namespace VirtoCommerce.SearchModule.Web
                     ModuleId = "VirtoCommerce.Search",
                     Name = x
                 }).ToArray());
-        }
 
-        public void PostInitialize(IServiceProvider serviceProvider)
-        {
-            var settingsManager = serviceProvider.GetService<ISettingsManager>();
-            var scheduleJobs = settingsManager.GetValue("VirtoCommerce.Search.IndexingJobs.Enable", true);
+            var settingsManager = appBuilder.ApplicationServices.GetService<ISettingsManager>();
+            var scheduleJobs = settingsManager.GetValue(ModuleConstants.Settings.General.IndexingJobs.Enable.Name, true);
             if (scheduleJobs)
             {
-                var cronExpression = settingsManager.GetValue("VirtoCommerce.Search.IndexingJobs.CronExpression", "0/5 * * * *");
+                var cronExpression = settingsManager.GetValue(ModuleConstants.Settings.General.IndexingJobs.CronExpression.Name, ModuleConstants.Settings.General.IndexingJobs.CronExpression.DefaultValue);
                 RecurringJob.AddOrUpdate<IndexingJobs>(j => j.IndexChangesJob(null, JobCancellationToken.Null), cronExpression);
             }
         }

@@ -30,7 +30,7 @@
     <incompatibilities>
     </incompatibilities>
     
-    <settings>
+    <!--<settings>
         <group name="Search|General">
             <setting>
                 <name>VirtoCommerce.Search.SearchConnectionString</name>
@@ -87,7 +87,7 @@
                 <description>Limits indexation job progress to run too far ahead</description>
             </setting>
         </group>
-    </settings>
+    </settings>-->
 
     <!--<permissions>
         <group name="Search">

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using VirtoCommerce.LuceneSearchModule.Data;
@@ -29,7 +30,7 @@ namespace VirtoCommerce.LuceneSearchModule.Web
             }
         }
 
-        public void PostInitialize(IServiceProvider serviceProvider)
+        public void PostInitialize(IApplicationBuilder serviceProvider)
         {
         }
 

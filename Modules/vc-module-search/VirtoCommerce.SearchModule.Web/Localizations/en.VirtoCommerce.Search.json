@@ -5,7 +5,7 @@
             "rebuild-index": "Build Index"
         },
         "main-menu-title": {
-            "search-index":  "Search index" 
+            "search-index": "Search index"
         },
         "blades": {
             "index-progress": {
@@ -56,5 +56,34 @@
                 "no-index": "Search index missing"
             }
         }
-    }
+    },
+    "permissions": {
+        "search:index:rebuild": "Allows to delete search index and build it again."
+    },
+    "settings": {
+        "VirtoCommerce.Search.SearchConnectionString": {
+            "description": "",
+            "title": "Search configuration string (requires restart)"
+        },
+        "VirtoCommerce.Search.IndexingJobs.Enable": {
+            "description": "Enable or disable periodic search index builders",
+            "title": "Schedule indexing jobs (requires restart)"
+        },
+        "VirtoCommerce.Search.IndexingJobs.CronExpression": {
+            "description": "Enable or disable periodic search index builders",
+            "title": "Indexing jobs cron expression (requires restart)"
+        },
+        "VirtoCommerce.Search.IndexPartitionSize": {
+            "description": "High value may will cause slow performance",
+            "title": "The maximum items count per indexing partition"
+        },
+        "VirtoCommerce.Search.IndexingJobs.ScaleOut": {
+            "title": "Enable scale out indexing (requires restart)",
+            "description": "Scale out indexing partitions through job scheduler for parallel indexation"
+        },
+        "VirtoCommerce.Search.IndexingJobs.MaxQueueSize": {
+            "title": "Enable scale out indexing (requires restart)",
+            "description": "Scale out indexing partitions through job scheduler for parallel indexation"
+        }
+    } 
 }
