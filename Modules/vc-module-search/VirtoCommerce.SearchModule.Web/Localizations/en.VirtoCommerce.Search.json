@@ -62,28 +62,28 @@
     },
     "settings": {
         "VirtoCommerce.Search.SearchConnectionString": {
-            "description": "",
-            "title": "Search configuration string (requires restart)"
+            "title": "Search configuration string (requires restart)",
+            "description": "provider=AzureSearch;server=ServiceName;key=AccessKey;scope=default, provider=Elasticsearch;server=localhost:9200;scope=default, provider=Lucene;server=~/App_Data/Lucene;scope=default"
         },
         "VirtoCommerce.Search.IndexingJobs.Enable": {
-            "description": "Enable or disable periodic search index builders",
-            "title": "Schedule indexing jobs (requires restart)"
+            "title": "Schedule indexing jobs (requires restart)",
+            "description": "Enable or disable periodic search index builders"
         },
         "VirtoCommerce.Search.IndexingJobs.CronExpression": {
-            "description": "Enable or disable periodic search index builders",
-            "title": "Indexing jobs cron expression (requires restart)"
+            "title": "Indexing jobs cron expression (requires restart)",
+            "description": "x minutes use '0/x * * * *', x hourse use '0 */x * * *' you can set minutes also '15 */x * * *', x days '0 0 */x * *'"
         },
         "VirtoCommerce.Search.IndexPartitionSize": {
-            "description": "High value may will cause slow performance",
-            "title": "The maximum items count per indexing partition"
+            "title": "The maximum items count per indexing partition",
+            "description": "High value may will cause slow performance"
         },
         "VirtoCommerce.Search.IndexingJobs.ScaleOut": {
             "title": "Enable scale out indexing (requires restart)",
             "description": "Scale out indexing partitions through job scheduler for parallel indexation"
         },
         "VirtoCommerce.Search.IndexingJobs.MaxQueueSize": {
-            "title": "Enable scale out indexing (requires restart)",
-            "description": "Scale out indexing partitions through job scheduler for parallel indexation"
+            "title": "The maximum number queued indexing jobs (requires restart)",
+            "description": "Limits indexation job progress to run too far ahead"
         }
-    } 
+    }
 }
