@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using VirtoCommerce.Domain.Inventory.Model.Search;
+using VirtoCommerce.InventoryModule.Core;
 using VirtoCommerce.InventoryModule.Core.Model;
 using VirtoCommerce.InventoryModule.Core.Model.Search;
 using VirtoCommerce.InventoryModule.Core.Services;
@@ -31,7 +32,7 @@ namespace VirtoCommerce.InventoryModule.Web.ExportImport
             {
                 if (_batchSize == null)
                 {
-                    _batchSize = _settingsManager.GetValue("Inventory.ExportImport.PageSize", 50);
+                    _batchSize = _settingsManager.GetValue(ModuleConstants.Settings.General.PageSize.Name, 50);
                 }
 
                 return (int) _batchSize;

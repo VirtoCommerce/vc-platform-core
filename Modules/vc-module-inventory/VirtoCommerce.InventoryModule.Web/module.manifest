@@ -27,34 +27,4 @@
     <scripts>
         <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
     </scripts>
-
-    <settings>
-        <group name="Inventory|General">
-            <setting>
-                <name>Inventory.ExportImport.Description</name>
-                <valueType>string</valueType>
-                <defaultValue>Export/Import inventory information</defaultValue>
-                <title>Export/Import description</title>
-                <description>Module description in platform export/import wizard</description>
-            </setting>
-            <setting>
-                <name>Inventory.ExportImport.PageSize</name>
-                <valueType>integer</valueType>
-                <defaultValue>50</defaultValue>
-                <title>The page size being used for Export / Import</title>
-                <description>High value may will cause slow performance</description>
-            </setting>
-        </group>
-    </settings>
-    <permissions>
-        <group name="Inventory">
-            <permission id="inventory:read" name="Read inventory related data" description="Permission to read inventory related data."/>
-            <permission id="inventory:create" name="Create inventory related data" description="Permission to create inventory related data."/>
-            <permission id="inventory:update" name="Update inventory related data" description="Permission to update inventory related data."/>
-            <permission id="inventory:access" name="Access inventory related data" description="Permission to access inventory related data."/>
-            <permission id="inventory:delete" name="Delete inventory related data" description="Permission to delete inventory related data."/>
-            <permission id="inventory:fulfillment:edit" name="Manage fulfillment centers"/>
-            <permission id="inventory:fulfillment:delete" name="Delete fulfillment centers"/>
-        </group>
-    </permissions>
 </module>

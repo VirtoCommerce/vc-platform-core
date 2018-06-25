@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using VirtoCommerce.Platform.Core.Modularity;
+
 namespace VirtoCommerce.InventoryModule.Core
 {
     public static class ModuleConstants
@@ -13,6 +16,29 @@ namespace VirtoCommerce.InventoryModule.Core
                 public const string Update = "inventory:update";
                 public const string Access = "inventory:access";
                 public const string Delete = "inventory:delete";
+
+                public static string[] AllPermissions = new[] { FulfillmentEdit, FulfillmentDelete, Read, Create, Update, Access, Delete };
+            }
+        }
+
+        public static class Settings
+        {
+            public static class General
+            {
+                public static ModuleSetting PageSize = new ModuleSetting
+                {
+                    Name = "Inventory.ExportImport.PageSize",
+                    ValueType = ModuleSetting.TypeInteger,
+                    DefaultValue = "50",
+                };
+
+                public static IEnumerable<ModuleSetting> AllSettings
+                {
+                    get
+                    {
+                        yield return PageSize;
+                    }
+                }
             }
         }
     }
