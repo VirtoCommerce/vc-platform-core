@@ -1,0 +1,89 @@
+{
+    "search": {
+        "commands": {
+            "apply-filter": "Save & apply",
+            "rebuild-index": "Build Index"
+        },
+        "main-menu-title": {
+            "search-index": "Search index"
+        },
+        "blades": {
+            "index-progress": {
+                "labels": {
+                    "start": "Start",
+                    "end": "End",
+                    "errors": "Errors",
+                    "stats": "Indexed - {{ processedCount }} of {{ totalCount }} documents"
+                }
+            },
+            "index-detail": {
+                "title": "Search index",
+                "title-new": "Search index missing",
+                "subtitle": "Search index details",
+                "labels": {
+                    "no-index": "Index not found",
+                    "build-date": "Last indexed",
+                    "content": "Index content"
+                }
+            },
+            "document-type-list": {
+                "title": "Document types",
+                "labels": {
+                    "document-type": "Document type",
+                    "indexed-docs-total": "Docs count",
+                    "provider": "Provider",
+                    "scope": "Scope",
+                    "last-indexation-date": "Last indexed",
+                    "build-index": "Build index",
+                    "rebuild-index": "Rebuild index"
+                }
+            }
+        },
+        "dialogs": {
+            "reindex": {
+                "title": "Build Search Index",
+                "msg1": "Choose how to update the Search Index. Options:",
+                "msg2": "Build: index for all data without recreating.",
+                "msg3": "Delete + build: Current search index will be deleted and built from scratch. Note that there WON'T BE ANY SEARCH RESULTS until the build process finishes.",
+                "index": "Build",
+                "reindex": "Delete + build"
+            }
+        },
+        "widgets": {
+            "index": {
+                "index-ok": "Indexed <span am-time-ago='indexDate'></span>",
+                "index-old": "Outdated. Index was built <span am-time-ago='indexDate'>",
+                "no-index": "Search index missing"
+            }
+        }
+    },
+    "permissions": {
+        "search:index:rebuild": "Allows to delete search index and build it again."
+    },
+    "settings": {
+        "VirtoCommerce.Search.SearchConnectionString": {
+            "title": "Search configuration string (requires restart)",
+            "description": "provider=AzureSearch;server=ServiceName;key=AccessKey;scope=default, provider=Elasticsearch;server=localhost:9200;scope=default, provider=Lucene;server=~/App_Data/Lucene;scope=default"
+        },
+        "VirtoCommerce.Search.IndexingJobs.Enable": {
+            "title": "Schedule indexing jobs (requires restart)",
+            "description": "Enable or disable periodic search index builders"
+        },
+        "VirtoCommerce.Search.IndexingJobs.CronExpression": {
+            "title": "Indexing jobs cron expression (requires restart)",
+            "description": "x minutes use '0/x * * * *', x hourse use '0 */x * * *' you can set minutes also '15 */x * * *', x days '0 0 */x * *'"
+        },
+        "VirtoCommerce.Search.IndexPartitionSize": {
+            "title": "The maximum items count per indexing partition",
+            "description": "High value may will cause slow performance"
+        },
+        "VirtoCommerce.Search.IndexingJobs.ScaleOut": {
+            "title": "Enable scale out indexing (requires restart)",
+            "description": "Scale out indexing partitions through job scheduler for parallel indexation"
+        },
+        "VirtoCommerce.Search.IndexingJobs.MaxQueueSize": {
+            "title": "The maximum number queued indexing jobs (requires restart)",
+            "description": "Limits indexation job progress to run too far ahead"
+        }
+    }
+}

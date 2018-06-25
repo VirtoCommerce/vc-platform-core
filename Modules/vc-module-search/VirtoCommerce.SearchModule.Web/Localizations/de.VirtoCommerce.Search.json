@@ -1,0 +1,55 @@
+{
+    "search": {
+        "commands": {
+            "rebuild-index": "Suchindex erstellen"
+        },
+        "blades": {
+            "index-progress": {
+                "labels": {
+                    "start": "Starten",
+                    "end": "Ende",
+                    "errors": "Fehler"
+                }
+            },
+            "index-detail": {
+                "title": "Suchindex",
+                "title-new": "Suchindex fehlt",
+                "subtitle": "Details zum Suchindex",
+                "labels": {
+                    "no-index": "Suchindex nicht gefunden",
+                    "build-date": "Letzte Indexierung",
+                    "content": "Suchindexinhalt"
+                }
+            },
+            "document-type-list": {
+                "title": "Dokumenttypen",
+                "labels": {
+                    "document-type": "Dokumenttypen",
+                    "indexed-docs-total": "Dokumentenzähler",
+                    "provider": "Provider",
+                    "scope": "Scope",
+                    "last-indexation-date": "Zuletzt indiziert",
+                    "build-index": "Build index",
+                    "rebuild-index": "Rebuild index"
+                }
+            }
+        },
+        "dialogs": {
+            "reindex": {
+                "title": "Suchindex durchsuchen",
+                "msg1": "Wählen Sie aus, wie Sie den Suchindex aktualisieren möchten. Optionen:",
+                "msg2": "Update: Update durch Indizierung von fehlenden oder veralteten Daten.",
+                "msg3": "Löschen + aufbauen",
+                "index": "Neuaufbau: Der aktuelle Suchindex wird gelöscht und von Grund auf neu gebaut. Beachten Sie, dass es KEINE SUCHERGEBNISSE GIBT, bis der Aufbauprozess beendet ist.",
+                "reindex": "Löschen + aufbauen"
+            }
+        },
+        "widgets": {
+            "index": {
+                "index-ok": "Suchindex erstellt am <span am-time-ago='indexDate'></span>",
+                "index-old": "Suchindex veraltet. Index wurde zuletzt um <span bin - Zeit - vor='indexDate'> aktualisiert",
+                "no-index": "Suchindex fehlt"
+            }
+        }
+    }
+}
