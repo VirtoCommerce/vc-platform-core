@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using VirtoCommerce.Domain.Search;
 using VirtoCommerce.InventoryModule.Core;
 using VirtoCommerce.InventoryModule.Core.Services;
 using VirtoCommerce.InventoryModule.Data.Repositories;
@@ -16,6 +15,7 @@ using VirtoCommerce.InventoryModule.Data.Services;
 using VirtoCommerce.InventoryModule.Web.JsonConverters;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.InventoryModule.Web
 {
@@ -53,30 +53,29 @@ namespace VirtoCommerce.InventoryModule.Web
                 inventoryDbContext.Database.Migrate();
             }
 
-            //TODO implement after SearchModule
             //Register product availability indexation 
-            //#region Search
+            #region Search
 
-            //var productIndexingConfigurations = serviceProvider.GetService<IndexDocumentConfiguration[]>();
-            //if (productIndexingConfigurations != null)
-            //{
-            //    var productAvaibilitySource = new IndexDocumentSource
-            //    {
-            //        ChangesProvider = serviceProvider.GetService<ProductAvailabilityChangesProvider>(),
-            //        DocumentBuilder = serviceProvider.GetService<ProductAvailabilityDocumentBuilder>(),
-            //    };
+            var productIndexingConfigurations = appBuilder.ApplicationServices.GetService<IndexDocumentConfiguration[]>();
+            if (productIndexingConfigurations != null)
+            {
+                var productAvaibilitySource = new IndexDocumentSource
+                {
+                    ChangesProvider = appBuilder.ApplicationServices.GetService<ProductAvailabilityChangesProvider>(),
+                    DocumentBuilder = appBuilder.ApplicationServices.GetService<ProductAvailabilityDocumentBuilder>(),
+                };
 
-            //    foreach (var configuration in productIndexingConfigurations.Where(c => c.DocumentType == KnownDocumentTypes.Product))
-            //    {
-            //        if (configuration.RelatedSources == null)
-            //        {
-            //            configuration.RelatedSources = new List<IndexDocumentSource>();
-            //        }
-            //        configuration.RelatedSources.Add(productAvaibilitySource);
-            //    }
-            //}
+                foreach (var configuration in productIndexingConfigurations.Where(c => c.DocumentType == KnownDocumentTypes.Product))
+                {
+                    if (configuration.RelatedSources == null)
+                    {
+                        configuration.RelatedSources = new List<IndexDocumentSource>();
+                    }
+                    configuration.RelatedSources.Add(productAvaibilitySource);
+                }
+            }
 
-            //#endregion
+            #endregion
 
             // enable polymorphic types in API controller methods
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();

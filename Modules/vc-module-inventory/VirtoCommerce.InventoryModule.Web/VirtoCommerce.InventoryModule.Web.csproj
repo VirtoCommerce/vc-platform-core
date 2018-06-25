@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
+    <ProjectReference Include="..\..\vc-module-search\VirtoCommerce.SearchModule.Core\VirtoCommerce.SearchModule.Core.csproj" />
     <ProjectReference Include="..\VirtoCommerce.InventoryModule.Core\VirtoCommerce.InventoryModule.Core.csproj" />
     <ProjectReference Include="..\VirtoCommerce.InventoryModule.Data\VirtoCommerce.InventoryModule.Data.csproj" />
   </ItemGroup>

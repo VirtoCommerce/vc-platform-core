@@ -1,0 +1,80 @@
+﻿<div class="blade-static __bottom" ng-if="pageSettings.itemsPerPageCount < pageSettings.totalItems" ng-include="'pagerTemplate.html'"></div>
+<div class="blade-content __medium-wide">
+    <div class="blade-inner">
+        <div class="inner-block" ng-init="setGridOptions('virtoCommerce.coreModule.searchIndex.indexes-list.grid', {
+            data: 'blade.currentEntities',
+            useExternalSorting: true,
+            rowTemplate: 'documentType-list.row.html',
+            columnDefs: [
+                {
+                    name: 'actions',
+                    displayName: '',
+                    enableColumnResizing: false,
+                    enableSorting: false,
+                    width: 30,
+                    cellTemplate: 'list-actions.cell.html',
+                    pinnedLeft: true
+                },
+                {
+                    name: 'documentType',
+                    displayName: 'search.blades.document-type-list.labels.document-type'
+                },
+                {
+                    name: 'lastIndexationDate',
+                    displayName: 'search.blades.document-type-list.labels.last-indexation-date',
+                    cellTemplate: 'default-date.cell.html'
+                },
+                {
+                    name: 'indexedDocumentsCount',
+                    displayName: 'search.blades.document-type-list.labels.indexed-docs-total',
+                    cellTemplate: 'default-count.cell.html'
+                },
+                {
+                    name: 'provider',
+                    displayName: 'search.blades.document-type-list.labels.provider'
+                },
+                {
+                    name: 'scope',
+                    displayName: 'search.blades.document-type-list.labels.scope'
+                }
+            ]})">
+            <div class="table-wrapper" ng-if="blade.currentEntities.length">
+                <div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-save-state ui-grid-selection ui-grid-resize-columns ui-grid-move-columns ui-grid-pinning ui-grid-height></div>
+                <ul class="menu __context" role="menu" id="prl_menu">
+                    <li class="menu-item" ng-click="rebuildIndex([contextMenuEntity])" va-permission="'core:search:index:rebuild'">
+                        <i class="menu-ico fa fa-recycle"></i> {{ 'search.commands.rebuild-index' | translate }}
+                    </li>
+                </ul>
+            </div>
+            <div class="note" ng-if="!blade.currentEntities.length">{{ 'platform.list.no-data' | translate }}</div>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/ng-template" id="documentType-list.row.html">
+    <div
+         class="ui-grid-cell"
+         role="{{ col.isRowHeader ? 'rowheader' : 'gridcell' }}"
+         data-target="prl_menu"
+         ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid"
+         ng-class="{ 'ui-grid-row-header-cell': col.isRowHeader, '__hovered': grid.appScope.contextMenuEntity === row.entity }"
+         ui-grid-one-bind-id-grid="rowRenderIndex + '-' + col.uid + '-cell'"
+         ui-grid-cell
+         context-menu="grid.appScope.contextMenuEntity = row.entity"></div>
+</script>
+<script type="text/ng-template" id="list-actions.cell.html">
+    <div class="ui-grid-actions" left-click-menu="grid.appScope.contextMenuEntity = row.entity" data-target="prl_menu">
+        <i class="fa context-menu"></i>
+    </div>
+</script>
+<script type="text/ng-template" id="default-count.cell.html">
+    <div ng-if="COL_FIELD" class="ui-grid-cell-contents">{{ COL_FIELD }}</div>
+    <div ng-if="!COL_FIELD" class="ui-grid-cell-contents">N/A</div>
+</script>
+<script type="text/ng-template" id="default-date.cell.html">
+    <div ng-if="COL_FIELD" class="ui-grid-cell-contents"><span class="table-date" am-time-ago="COL_FIELD"></span></div>
+    <div ng-if="!COL_FIELD" class="ui-grid-cell-contents">N/A</div>
+</script>
+

@@ -1,0 +1,9 @@
+FD=1
+VD=2
+RD=3
+RangeStart=4
+RangeEnd=5
+String=6
+WS=7
+':'=1
+','=2
