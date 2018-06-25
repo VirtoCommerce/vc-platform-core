@@ -18,7 +18,7 @@ namespace VirtoCommerce.Platform.Data.Settings
             result.RawValue = result.RawDefaultValue;
             result.AllowedValues = moduleSetting.AllowedValues;
             result.IsArray = moduleSetting.IsArray;
-
+            result.RestartRequired = moduleSetting.RestartRequired;
             result.ArrayValues = moduleSetting.ArrayValues;
             if (moduleSetting.ArrayValues != null)
             {

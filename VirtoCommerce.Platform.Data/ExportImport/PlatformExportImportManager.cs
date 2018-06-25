@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
+using VirtoCommerce.Platform.Core;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -30,11 +32,11 @@ namespace VirtoCommerce.Platform.Data.ExportImport
         private readonly ISettingsManager _settingsManager;
         private readonly IDynamicPropertyService _dynamicPropertyService;
         private readonly IDynamicPropertySearchService _dynamicPropertySearchService;
-        private readonly IMemoryCache _memoryCache;
+        private readonly IPlatformMemoryCache _memoryCache;
         private readonly IKnownPermissionsProvider _permissionsProvider;
 
         public PlatformExportImportManager(UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager, IKnownPermissionsProvider permissionsProvider, ISettingsManager settingsManager,
-                IDynamicPropertyService dynamicPropertyService, IDynamicPropertySearchService dynamicPropertySearchService, ILocalModuleCatalog moduleCatalog, IMemoryCache memoryCache)
+                IDynamicPropertyService dynamicPropertyService, IDynamicPropertySearchService dynamicPropertySearchService, ILocalModuleCatalog moduleCatalog, IPlatformMemoryCache memoryCache)
         {
             _dynamicPropertyService = dynamicPropertyService;
             _userManager = userManager;
@@ -156,7 +158,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                         foreach (var permission in role.Permissions)
                         {
                             //TODO: Test with new and already exist
-                            await _roleManager.AddClaimAsync(role, new Claim(SecurityConstants.Claims.PermissionClaimType, permission.Name));
+                            await _roleManager.AddClaimAsync(role, new Claim(PlatformConstants.Security.Claims.PermissionClaimType, permission.Name));
                         }
                     }
 

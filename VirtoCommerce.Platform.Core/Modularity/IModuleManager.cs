@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using Microsoft.AspNetCore.Builder;
 
 namespace VirtoCommerce.Platform.Core.Modularity
 {
@@ -22,7 +23,8 @@ namespace VirtoCommerce.Platform.Core.Modularity
         /// Initializes the module during second iteration through all modules.
         /// </summary>
         /// <param name="moduleInfo"></param>
-        void PostInitializeModule(ModuleInfo moduleInfo, IServiceProvider serviceProvider);
+        /// <param name="appBuilder"></param>
+        void PostInitializeModule(ModuleInfo moduleInfo, IApplicationBuilder appBuilder);
 
         /// <summary>
         /// Raised repeatedly to provide progress as modules are downloaded.

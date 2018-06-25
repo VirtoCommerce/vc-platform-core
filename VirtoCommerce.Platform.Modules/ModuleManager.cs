@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Logging;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Modularity.Exceptions;
@@ -101,12 +102,12 @@ namespace VirtoCommerce.Platform.Modules
             this.LoadModuleTypes(modulesToLoad);
         }
 
-        public void PostInitializeModule(ModuleInfo moduleInfo, IServiceProvider serviceProvider)
+        public void PostInitializeModule(ModuleInfo moduleInfo, IApplicationBuilder applicationBuilder)
         {
             if (moduleInfo == null)
                 throw new ArgumentNullException("moduleInfo");
 
-            _moduleInitializer.PostInitialize(moduleInfo, serviceProvider);
+            _moduleInitializer.PostInitialize(moduleInfo, applicationBuilder);
         }
 
         /// <summary>

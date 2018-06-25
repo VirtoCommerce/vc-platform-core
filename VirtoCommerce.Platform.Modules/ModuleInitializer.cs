@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Linq;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using VirtoCommerce.Platform.Core.Common;
@@ -52,7 +53,7 @@ namespace VirtoCommerce.Platform.Modules
             }
         }
 
-        public void PostInitialize(ModuleInfo moduleInfo, IServiceProvider serviceProvider)
+        public void PostInitialize(ModuleInfo moduleInfo, IApplicationBuilder appBuilder)
         {
             if (moduleInfo == null)
                 throw new ArgumentNullException("moduleInfo");
@@ -61,7 +62,7 @@ namespace VirtoCommerce.Platform.Modules
 
             try
             {
-                moduleInstance.PostInitialize(serviceProvider);
+                moduleInstance.PostInitialize(appBuilder);
             }
             catch (Exception ex)
             {
@@ -103,7 +104,7 @@ namespace VirtoCommerce.Platform.Modules
                 }
             }
             var manifestModule = moduleInfo as ManifestModuleInfo;
-            if(manifestModule != null)
+            if (manifestModule != null)
             {
                 manifestModule.Errors.Add(exception.ToString());
             }
@@ -134,6 +135,6 @@ namespace VirtoCommerce.Platform.Modules
             }
             result.ModuleInfo = moduleInfo as ManifestModuleInfo;
             return result;
-        }     
+        }
     }
 }

@@ -1,6 +1,6 @@
 angular.module('virtoCommerce.notificationsModule')
-.controller('virtoCommerce.notificationsModule.notificationsJournalController', ['$scope', '$translate', 'virtoCommerce.notificationsModule.notificationsService', 'platformWebApp.bladeNavigationService', 'virtoCommerce.notificationsModule.notificationsModuleApi', 'platformWebApp.bladeUtils', 'platformWebApp.dialogService', 'uiGridConstants', 'platformWebApp.uiGridHelper',
-    function ($scope, $translate, notificationsService, bladeNavigationService, notifications, bladeUtils, dialogService, uiGridConstants, uiGridHelper) {
+.controller('virtoCommerce.notificationsModule.notificationsJournalController', ['$scope', '$translate', 'platformWebApp.bladeNavigationService', 'virtoCommerce.notificationsModule.notificationsModuleApi', 'platformWebApp.bladeUtils', 'platformWebApp.dialogService', 'uiGridConstants', 'platformWebApp.uiGridHelper',
+    function ($scope, $translate, bladeNavigationService, notifications, bladeUtils, dialogService, uiGridConstants, uiGridHelper) {
         var blade = $scope.blade;
         $scope.uiGridConstants = uiGridConstants;
         // simple and advanced filtering

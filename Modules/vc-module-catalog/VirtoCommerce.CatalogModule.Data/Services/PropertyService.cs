@@ -10,22 +10,22 @@ using VirtoCommerce.CatalogModule.Data.Caching;
 using VirtoCommerce.CatalogModule.Data.Model;
 using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.CatalogModule.Data.Validation;
-using VirtoCommerce.Domain.Search;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Data.Infrastructure;
+using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Data.Services
 {
     public class PropertyService : IPropertyService
     {
         private readonly Func<ICatalogRepository> _repositoryFactory;
-        private readonly IMemoryCache _memoryCache;
+        private readonly IPlatformMemoryCache _memoryCache;
         private readonly ICatalogService _catalogService;
         private readonly IEventPublisher _eventPublisher;
-        public PropertyService(Func<ICatalogRepository> repositoryFactory, IMemoryCache memoryCache, ICatalogService catalogService, IEventPublisher eventPublisher)
+        public PropertyService(Func<ICatalogRepository> repositoryFactory, IPlatformMemoryCache memoryCache, ICatalogService catalogService, IEventPublisher eventPublisher)
         {
             _repositoryFactory = repositoryFactory;
             _memoryCache = memoryCache;

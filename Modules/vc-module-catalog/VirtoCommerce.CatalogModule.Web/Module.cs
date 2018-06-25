@@ -1,14 +1,18 @@
 using System;
+using System.Linq;
 using FluentValidation;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using VirtoCommerce.CatalogModule.Core;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.CatalogModule.Data.Services;
 using VirtoCommerce.CatalogModule.Data.Validation;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.CatalogModule.Web
 {
@@ -38,10 +42,26 @@ namespace VirtoCommerce.CatalogModule.Web
             serviceCollection.AddSingleton<AbstractValidator<IHasProperties>, HasPropertiesValidator>();
         }
 
-        public void PostInitialize(IServiceProvider serviceProvider)
+        public void PostInitialize(IApplicationBuilder appBuilder)
         {
+            //Register module settings
+            ModuleInfo.Settings.Add(new ModuleSettingsGroup
+            {
+                Name = "Catalog|General",
+                Settings = ModuleConstants.Settings.General.AllSettings.ToArray()
+            });
+            ModuleInfo.Settings.Add(new ModuleSettingsGroup
+            {
+                Name = "Catalog|Search",
+                Settings = ModuleConstants.Settings.Search.AllSettings.ToArray()
+            });
+
+            //Register module permissions
+            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IKnownPermissionsProvider>();
+            permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x => new Permission() { GroupName = "Catalog", Name = x }).ToArray());
+
             //Force migrations
-            using (var serviceScope = serviceProvider.CreateScope())
+            using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
                 var catalogDbContext = serviceScope.ServiceProvider.GetRequiredService<CatalogDbContext>();
                 catalogDbContext.Database.EnsureCreated();

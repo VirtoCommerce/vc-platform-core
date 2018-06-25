@@ -25,14 +25,14 @@ namespace VirtoCommerce.CatalogModule.Data.Services
     {
         private readonly ICommerceService _commerceService;
         private readonly IOutlineService _outlineService;
-        private readonly IMemoryCache _memoryCache;
+        private readonly IPlatformMemoryCache _memoryCache;
         private readonly AbstractValidator<IHasProperties> _hasPropertyValidator;
         private readonly Func<ICatalogRepository> _repositoryFactory;
         private readonly ICatalogService _catalogService;
         private readonly IEventPublisher _eventPublisher;
         private readonly IBlobUrlResolver _blobUrlResolver;
 
-        public CategoryService(Func<ICatalogRepository> catalogRepositoryFactory, ICommerceService commerceService, IOutlineService outlineService, ICatalogService catalogService, IMemoryCache memoryCache,
+        public CategoryService(Func<ICatalogRepository> catalogRepositoryFactory, ICommerceService commerceService, IOutlineService outlineService, ICatalogService catalogService, IPlatformMemoryCache memoryCache,
                                    AbstractValidator<IHasProperties> hasPropertyValidator, IEventPublisher eventPublisher, IBlobUrlResolver blobUrlResolver)
         {
             _repositoryFactory = catalogRepositoryFactory;

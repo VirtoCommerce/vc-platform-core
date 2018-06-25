@@ -16,9 +16,9 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
     public class DynamicPropertyService : IDynamicPropertyService, IDynamicPropertyRegistrar
     {
         private readonly Func<IPlatformRepository> _repositoryFactory;
-        private readonly IMemoryCache _memoryCache;
+        private readonly IPlatformMemoryCache _memoryCache;
 
-        public DynamicPropertyService(Func<IPlatformRepository> repositoryFactory, IMemoryCache memoryCache)
+        public DynamicPropertyService(Func<IPlatformRepository> repositoryFactory, IPlatformMemoryCache memoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _memoryCache = memoryCache;
@@ -163,7 +163,7 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
 
                 DynamicPropertiesCacheRegion.ExpireRegion();
             }
-            
+
         }
 
         public virtual async Task DeleteDictionaryItemsAsync(string[] itemIds)
