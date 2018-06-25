@@ -7,9 +7,9 @@ namespace VirtoCommerce.ImageToolsModule.Core
 {
     public static class ThumbnailConstants
     {
-        public static class Permissions
+        public static class Security
         {
-            public static class Security
+            public static class Permissions
             {
                 public const string Access = "thumbnail:access",
                     Create = "thumbnail:create",

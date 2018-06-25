@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.ImageToolsModule.Core.Services;
 
-using Permission = VirtoCommerce.ImageToolsModule.Core.ThumbnailConstants.Permissions.Security;
+using Permission = VirtoCommerce.ImageToolsModule.Core.ThumbnailConstants.Security.Permissions;
 
 namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
 {

@@ -63,7 +63,7 @@ namespace VirtoCommerce.ImageToolsModule.Web
 
             //Register module permissions
             var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IKnownPermissionsProvider>();
-            permissionsProvider.RegisterPermissions(ThumbnailConstants.Permissions.Security.AllPermissions.Select(x => new Permission() { GroupName = "Thumbnail", Name = x }).ToArray());
+            permissionsProvider.RegisterPermissions(ThumbnailConstants.Security.Permissions.AllPermissions.Select(x => new Permission() { GroupName = "Thumbnail", Name = x }).ToArray());
 
             //Force migrations
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())

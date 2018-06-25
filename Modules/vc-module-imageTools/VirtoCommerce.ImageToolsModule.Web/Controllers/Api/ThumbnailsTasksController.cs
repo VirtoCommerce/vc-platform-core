@@ -10,7 +10,7 @@ using VirtoCommerce.ImageToolsModule.Web.BackgroundJobs;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Security;
 
-using Permission = VirtoCommerce.ImageToolsModule.Core.ThumbnailConstants.Permissions.Security;
+using Permission = VirtoCommerce.ImageToolsModule.Core.ThumbnailConstants.Security.Permissions;
 
 namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
 {
