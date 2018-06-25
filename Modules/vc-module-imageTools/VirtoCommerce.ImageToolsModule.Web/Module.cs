@@ -9,15 +9,15 @@ using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.ImageToolsModule.Core;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.ImageToolsModule.Core.Services;
+using VirtoCommerce.ImageToolsModule.Core.ThumbnailGeneration;
 using VirtoCommerce.ImageToolsModule.Data.Models;
 using VirtoCommerce.ImageToolsModule.Data.Repositories;
 using VirtoCommerce.ImageToolsModule.Data.Services;
+using VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.Platform.Data.PushNotifications;
 
 namespace VirtoCommerce.ImageToolsModule.Web
 {
@@ -40,7 +40,12 @@ namespace VirtoCommerce.ImageToolsModule.Web
 
             serviceCollection.AddSingleton<IThumbnailTaskSearchService, ThumbnailTaskSearchService>();
             serviceCollection.AddSingleton<IThumbnailTaskService, ThumbnailTaskService>();
-            serviceCollection.AddSingleton<IPushNotificationManager, PushNotificationManager>();
+
+            serviceCollection.AddSingleton<IImageResizer, ImageResizer>();
+            serviceCollection.AddSingleton<IImageService, ImageService>();
+            serviceCollection.AddSingleton<IThumbnailGenerator, DefaultThumbnailGenerator>();
+            serviceCollection.AddSingleton<IThumbnailGenerationProcessor, ThumbnailGenerationProcessor>();
+            serviceCollection.AddSingleton<IImagesChangesProvider, BlobImagesChangesProvider>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -58,8 +63,7 @@ namespace VirtoCommerce.ImageToolsModule.Web
 
             //Register module permissions
             var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IKnownPermissionsProvider>();
-            permissionsProvider.RegisterPermissions(ThumbnailConstants.Permissions.AllPermissions.Select(x => new Permission() { GroupName = "Thumbnail", Name = x }).ToArray());
-
+            permissionsProvider.RegisterPermissions(ThumbnailConstants.Permissions.Security.AllPermissions.Select(x => new Permission() { GroupName = "Thumbnail", Name = x }).ToArray());
 
             //Force migrations
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())

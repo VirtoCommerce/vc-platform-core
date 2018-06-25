@@ -122,7 +122,7 @@ angular.module('virtoCommerce.imageToolsModule')
 
                 if (isNew) {
                     angular.extend(newBlade, {
-                        title: 'pricing.blades.pricelist-detail.title-new',
+                        title: 'imageTools.blades.task-detail.title',
                         isNew: true,
                         saveCallback: function (newPricelist) {
                             newBlade.isNew = false;

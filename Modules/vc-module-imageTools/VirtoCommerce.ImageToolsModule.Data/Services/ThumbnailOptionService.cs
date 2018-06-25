@@ -56,15 +56,13 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
             }
         }
 
-        public Task RemoveByIdsAsync(string[] ids)
+        public async Task RemoveByIdsAsync(string[] ids)
         {
             using (var repository = this._thumbnailRepositoryFactory())
             {
-                repository.RemoveThumbnailOptionsByIds(ids);
+                await repository.RemoveThumbnailOptionsByIds(ids);
                 repository.UnitOfWork.Commit();
             }
-
-            return Task.CompletedTask;
         }
     }
 }

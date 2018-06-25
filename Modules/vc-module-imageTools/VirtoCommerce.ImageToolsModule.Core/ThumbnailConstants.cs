@@ -9,13 +9,16 @@ namespace VirtoCommerce.ImageToolsModule.Core
     {
         public static class Permissions
         {
-            public const string Access = "thumbnail:access",
-                Create = "thumbnail:create",
-                Delete = "thumbnail:delete",
-                Update = "thumbnail:update",
-                Read = "thumbnail:read";
+            public static class Security
+            {
+                public const string Access = "thumbnail:access",
+                    Create = "thumbnail:create",
+                    Delete = "thumbnail:delete",
+                    Update = "thumbnail:update",
+                    Read = "thumbnail:read";
 
-            public static string[] AllPermissions = new[] { Access, Create, Delete, Update, Read };
+                public static string[] AllPermissions = new[] { Access, Create, Delete, Update, Read };
+            }
         }
 
         public static class Settings
@@ -53,7 +56,6 @@ namespace VirtoCommerce.ImageToolsModule.Core
                     }
                 }
             }
-
         }
     }
 }
