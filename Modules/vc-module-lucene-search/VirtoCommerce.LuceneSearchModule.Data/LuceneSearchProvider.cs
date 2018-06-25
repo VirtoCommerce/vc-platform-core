@@ -159,15 +159,10 @@ namespace VirtoCommerce.LuceneSearchModule.Data
                 using (var directory = FSDirectory.Open(directoryPath))
                 using (IndexReader reader = DirectoryReader.Open(directory))
                 {
+                    //TODO
                     string field = "contents";
                     var availableFields = new[] {field};
                     IndexSearcher searcher = new IndexSearcher(reader);
-                    //Analyzer analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
-                    //QueryParser parser = new QueryParser(LuceneVersion.LUCENE_48, field, analyzer);
-                    //Query query = parser.Parse(line);
-
-                    //var reader = searcher.IndexReader;
-                    //var availableFields = reader.GetFieldNames(IndexReader.FieldOption.ALL);
                     var providerRequest = LuceneSearchRequestBuilder.BuildRequest(request, indexName, documentType, availableFields);
 
                     var query = string.IsNullOrEmpty(providerRequest?.Query?.ToString()) ? new MatchAllDocsQuery() : providerRequest.Query;
