@@ -1,4 +1,4 @@
-﻿{
+{
     "licensing": {
         "main-menu-title": "Licensing",
         "blades": {
@@ -39,6 +39,25 @@
         },
         "commands": {
             "issue": "Download license"
+        }
+    },
+
+    "permissions": {
+        "licensing:access": "Open licensing menu",
+        "licensing:create": "Create licensing related data",
+        "licensing:read": "View licensing related data",
+        "licensing:update": "Update licensing related data",
+        "licensing:delete": "Delete licensing related data",
+        "licensing:issue": "Issue licensing data",
+    },
+    "settings": {
+        "Licensing.LicenseType": {
+            "description": "License types",
+            "title": "License types"
+        },
+        "Licensing.SignaturePrivateKey": {
+            "description": "Private key for signing licenses",
+            "title": "Signature private key"
         }
     }
 }

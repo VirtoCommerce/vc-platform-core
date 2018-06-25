@@ -28,38 +28,5 @@
     <scripts>
         <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
     </scripts>
-
-    <settings>
-        <group name="Licensing">
-            <setting>
-                <name>Licensing.LicenseType</name>
-                <valueType>string</valueType>
-                <defaultValue>Commerce</defaultValue>
-                <title>License types</title>
-                <description>License types</description>
-                <isArray>true</isArray>
-                <arrayValues>
-                    <value>Commerce</value>
-                    <value>Community deployment</value>
-                </arrayValues>
-            </setting>
-            <setting>
-                <name>Licensing.SignaturePrivateKey</name>
-                <valueType>text</valueType>
-                <title>Signature private key</title>
-                <description>Private key for signing licenses</description>
-            </setting>
-        </group>
-    </settings>
-
-    <permissions>
-        <group name="Licensing">
-            <permission id="licensing:access" name="Open licensing menu" description=""/>
-            <permission id="licensing:create" name="Create licensing data" description=""/>
-            <permission id="licensing:read" name="View licensing data" description=""/>
-            <permission id="licensing:update" name="Update licensing data" description=""/>
-            <permission id="licensing:delete" name="Delete licensing data" description=""/>
-            <permission id="licensing:issue" name="Issue license" description=""/>
-        </group>
-    </permissions>
+    
 </module>
