@@ -1,4 +1,4 @@
-﻿using System.Xml.Serialization;
+using System.Xml.Serialization;
 
 namespace VirtoCommerce.Platform.Core.Modularity
 {
@@ -77,14 +77,6 @@ namespace VirtoCommerce.Platform.Core.Modularity
         [XmlArrayItem(typeof(ManifestBundleFile), ElementName = "file")]
         [XmlArrayItem(typeof(ManifestBundleDirectory), ElementName = "directory")]
         public ManifestBundleItem[] Scripts { get; set; }
-
-        [XmlArray("settings")]
-        [XmlArrayItem("group")]
-        public ModuleSettingsGroup[] Settings { get; set; }
-
-        [XmlArray("permissions")]
-        [XmlArrayItem("group")]
-        public ModulePermissionGroup[] Permissions { get; set; }
 
         [XmlElement("useFullTypeNameInSwagger")]
         public bool UseFullTypeNameInSwagger { get; set; }
