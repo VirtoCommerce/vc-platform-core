@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Threading;
 using Hangfire;
 using Hangfire.Server;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Exceptions;
@@ -21,7 +21,8 @@ using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Hangfire;
-using VirtoCommerce.Platform.Web.Infrastructure;
+
+using Permissions = VirtoCommerce.Platform.Core.PlatformConstants.Security.Permissions;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api
 {
@@ -70,7 +71,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("sampledata/autoinstall")]
         [ProducesResponseType(typeof(SampleDataImportPushNotification), 200)]
-        [Authorize(SecurityConstants.Permissions.PlatformImport)]
+        [Authorize(Permissions.PlatformImport)]
         public IActionResult TryToAutoInstallSampleData()
         {
             var sampleData = InnerDiscoverSampleData().FirstOrDefault(x => !x.Url.IsNullOrEmpty());
@@ -85,7 +86,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("sampledata/import")]
         [ProducesResponseType(typeof(SampleDataImportPushNotification), 200)]
-        [Authorize(SecurityConstants.Permissions.PlatformImport)]
+        [Authorize(Permissions.PlatformImport)]
         public IActionResult ImportSampleData([FromQuery]string url = null)
         {
             lock (_lockObject)
@@ -157,7 +158,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("export")]
         [ProducesResponseType(typeof(PlatformExportPushNotification), 200)]
-        [Authorize(SecurityConstants.Permissions.PlatformImport)]
+        [Authorize(Permissions.PlatformImport)]
         public IActionResult ProcessExport([FromBody]PlatformImportExportRequest exportRequest)
         {
             var notification = new PlatformExportPushNotification(_userNameResolver.GetCurrentUserName())
@@ -175,7 +176,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("import")]
         [ProducesResponseType(typeof(PlatformImportPushNotification), 200)]
-        [Authorize(SecurityConstants.Permissions.PlatformImport)]
+        [Authorize(Permissions.PlatformImport)]
         public IActionResult ProcessImport([FromBody]PlatformImportExportRequest importRequest)
         {
             var notification = new PlatformImportPushNotification(_userNameResolver.GetCurrentUserName())
@@ -192,8 +193,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         }
 
         [HttpPost]
-        [Route("exortimport/tasks/cancel")]
-        public IActionResult Cancel([FromQuery]string jobId)
+        [Route("exortimport/tasks/cancel/{jobId}")]
+        public IActionResult Cancel([FromRoute]string jobId)
         {
             BackgroundJob.Delete(jobId);
             return Ok();
@@ -364,13 +365,13 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                     Directory.CreateDirectory(localTmpFolder);
                 }
                 //Import first to local tmp folder because Azure blob storage doesn't support some special file access mode 
-                using (var stream = new FileStream(localTmpPath, FileMode.OpenOrCreate))
+                using (var stream = System.IO.File.Open(localTmpPath, FileMode.OpenOrCreate))
                 {
                     var manifest = exportRequest.ToManifest();
                     _platformExportManager.ExportAsync(stream, manifest, progressCallback, cancellationTokenWrapper);
                 }
                 //Copy export data to blob provider for get public download url
-                using (var localStream = new FileStream(localTmpPath, FileMode.Open))
+                using (var localStream = System.IO.File.Open(localTmpPath, FileMode.Open))
                 using (var blobStream = _blobStorageProvider.OpenWrite(relativeUrl))
                 {
                     localStream.CopyTo(blobStream);

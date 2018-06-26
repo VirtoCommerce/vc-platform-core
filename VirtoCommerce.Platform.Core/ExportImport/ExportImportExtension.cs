@@ -1,12 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.ExportImport.PushNotifications;
 
-namespace VirtoCommerce.Platform.Core.Extensions
+namespace VirtoCommerce.Platform.Core.ExportImport
 {
     public static class ExportImportExtension
     {

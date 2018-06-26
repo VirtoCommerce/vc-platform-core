@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Core.ExportImport
 {
-    public class SampleDataInfo
+    public class SampleDataInfo : ValueObject
     {
         public string Name { get; set; }
         public string Description { get; set; }

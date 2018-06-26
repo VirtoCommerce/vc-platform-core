@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Core.ExportImport
 {
-    public class PlatformImportExportRequest
+    public class PlatformImportExportRequest : ValueObject
     {
         public string FileUrl { get; set; }
         public bool HandleSecurity { get; set; }
