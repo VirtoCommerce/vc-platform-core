@@ -9,7 +9,7 @@ using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
 using VirtoCommerce.SearchModule.Web.BackgroundJobs;
 
-namespace VirtoCommerce.SearchModule.Web.Controllers.Api
+namespace VirtoCommerce.SearchModule.Web.Controllers
 {
     [Route("api/search/indexes")]
     [Produces("application/json")]
