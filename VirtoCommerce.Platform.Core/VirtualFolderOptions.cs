@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 
-namespace VirtoCommerce.Platform.Web.Infrastructure
+namespace VirtoCommerce.Platform.Core
 {
     public class VirtualFolderOptions
     {
