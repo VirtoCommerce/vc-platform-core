@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <module>
     <id>VirtoCommerce.Content</id>
-    <version>2.13.7</version>
-    <platformVersion>2.13.14</platformVersion>
+    <version>3.0.0</version>
+    <platformVersion>3.0.0</platformVersion>
     <dependencies>
-        <dependency id="VirtoCommerce.Core" version="2.24.6" />
-        <dependency id="VirtoCommerce.Store" version="2.11.0" />
+        <dependency id="VirtoCommerce.Core" version="3.0.0" />
+        <dependency id="VirtoCommerce.Store" version="3.0.0" />
     </dependencies>
 
     <title>CMS Content module</title>
@@ -19,7 +19,7 @@
     <projectUrl>https://virtocommerce.com/apps/extensions/virto-cms-module</projectUrl>
     <iconUrl>https://github.com/VirtoCommerce/vc-module-content/raw/master/VirtoCommerce.ContentModule.Web/Content/logo.png</iconUrl>
     <releaseNotes>First version.</releaseNotes>
-    <copyright>Copyright © 2011-2016 Virto Commerce. All rights reserved</copyright>
+    <copyright>Copyright © 2011-2018 Virto Commerce. All rights reserved</copyright>
     <tags>cms menu</tags>
 
     <assemblyFile>VirtoCommerce.ContentModule.Web.dll</assemblyFile>
@@ -32,35 +32,4 @@
         <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
     </scripts>
 
-    <settings>
-        <group name="CMS Content|General">
-            <setting>
-                <name>VirtoCommerce.Content.ExportImport.Description</name>
-                <valueType>string</valueType>
-                <defaultValue>Export/Import pages, themes, links, menu items </defaultValue>
-                <title>Export/Import description</title>
-                <description>Module description in platform export/import wizard</description>
-            </setting>
-            <setting>
-                <name>VirtoCommerce.Content.CmsContentConnectionString</name>
-                <valueType>string</valueType>
-                <defaultValue>provider=AzureBlobStorage;rootPath=cms-content;DefaultEndpointsProtocol=https;AccountName=testblobprovider;AccountKey=BYEktu0okJQgXfIDuDe1G+z3mUBezn6It7ujn2WcYtyTEcNaKyaOdb5CQKPT0u6DGv86O1rx/+FpgEwzuaYzaA==</defaultValue>
-                <title>CMS content connection string</title>
-                <description>
-                    provider=AzureBlobStorage;rootPath=cms-content;DefaultEndpointsProtocol=https;AccountName=yourAccountName;AccountKey=BYEktu0okJQgXfIDuDe1G+z3mUBezn6It7ujn2WcYtyTEcNaKyaOdb5CQKPT0u6DGv86O1rx/+FpgEwzuaYzaA==
-                    provider=LocalStorage;rootPath=~\App_Data\cms-content;publicUrl=http://localhost/admin/cms-content
-                </description>
-            </setting>
-        </group>
-    </settings>
-
-    <permissions>
-        <group name="Content">
-            <permission id="content:access" name="Open store content menu" description=""/>
-            <permission id="content:create" name="Create store content data" description=""/>
-            <permission id="content:read" name="View store content data" description=""/>
-            <permission id="content:update" name="Update store content data" description=""/>
-            <permission id="content:delete" name="Delete store content data" description=""/>
-        </group>
-    </permissions>
 </module>
