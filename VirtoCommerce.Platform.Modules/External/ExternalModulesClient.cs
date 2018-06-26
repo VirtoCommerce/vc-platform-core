@@ -1,10 +1,11 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using VirtoCommerce.Platform.Core.Modularity;
 
 namespace VirtoCommerce.Platform.Modules.External
 {
