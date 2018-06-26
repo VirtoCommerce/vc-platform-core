@@ -40,18 +40,7 @@ namespace VirtoCommerce.SearchModule.Web
 
             serviceCollection.AddSingleton<IIndexingManager, IndexingManager>();
 
-            var configuration = snapshot.GetService<IConfiguration>();
-            var searchConnectionString = configuration.GetConnectionString("SearchConnectionString");
-
-            if (string.IsNullOrEmpty(searchConnectionString))
-            {
-                searchConnectionString = settingsManager.GetValue(ModuleConstants.Settings.General.SearchConnectionString.Name, string.Empty);
-            }
-
-            if (!string.IsNullOrEmpty(searchConnectionString))
-            {
-                serviceCollection.AddSingleton<ISearchConnection>(new SearchConnection(searchConnectionString));
-            }
+            
 
             //TODO delete it after implementation in the modules
             var productIndexingConfiguration = new IndexDocumentConfiguration
