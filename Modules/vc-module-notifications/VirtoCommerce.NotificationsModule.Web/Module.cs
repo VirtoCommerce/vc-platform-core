@@ -1,10 +1,12 @@
 using System;
+using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using VirtoCommerce.NotificationsModule.Core;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Data.Model;
@@ -18,6 +20,7 @@ using VirtoCommerce.NotificationsModule.Web.Infrastructure;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Notifications;
+using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.NotificationsModule.Web
 {
@@ -58,6 +61,15 @@ namespace VirtoCommerce.NotificationsModule.Web
             AbstractTypeFactory<NotificationMessage>.RegisterType<SmsNotificationMessage>().MapToType<NotificationMessageEntity>();
             AbstractTypeFactory<NotificationEntity>.RegisterType<EmailNotificationEntity>();
             AbstractTypeFactory<NotificationEntity>.RegisterType<SmsNotificationEntity>();
+
+            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IKnownPermissionsProvider>();
+            permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
+                new Permission()
+                {
+                    GroupName = "Notifications",
+                    ModuleId = "VirtoCommerce.Notifications",
+                    Name = x
+                }).ToArray());
 
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicJsonConverter());
