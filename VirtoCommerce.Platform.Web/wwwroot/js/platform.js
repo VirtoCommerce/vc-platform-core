@@ -17857,6 +17857,103 @@ angular.module('platformWebApp')
 
     }]);
 
+angular.module("platformWebApp")
+.config(
+  ['$stateProvider', function ($stateProvider) {
+      $stateProvider
+          .state('workspace.modulesSettings', {
+              url: '/settings',
+              templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+              controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+                  var blade = {
+                      id: 'settings',
+                      title: 'platform.blades.settingGroup-list.title',
+                      //subtitle: 'Manage settings',
+                      controller: 'platformWebApp.settingGroupListController',
+                      template: '$(Platform)/Scripts/app/settings/blades/settingGroup-list.tpl.html',
+                      isClosingDisabled: true
+                  };
+                  bladeNavigationService.showBlade(blade);
+              }
+              ]
+          });
+  }]
+)
+.run(
+  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', function ($rootScope, mainMenuService, widgetService, $state) {
+      //Register module in main menu
+      var menuItem = {
+          path: 'configuration/settings',
+          icon: 'fa fa-gears',
+          title: 'platform.menu.settings',
+          priority: 1,
+          action: function () { $state.go('workspace.modulesSettings'); },
+          permission: 'platform:setting:access'
+      };
+      mainMenuService.addMenuItem(menuItem);
+  }])
+
+.factory('platformWebApp.settings.helper', [function () {
+    var retVal = {};
+
+    retVal.getSetting = function(settings, settingName) {
+        return _.findWhere(settings, { name: settingName });
+    };
+
+    retVal.fixValues = function (settings) {
+        // parse values as they all are strings
+        var selectedSettings = _.where(settings, { valueType: 'Integer' });
+        _.forEach(selectedSettings, function (setting) {
+            setting.value = parseInt(setting.value, 10);
+            if (setting.allowedValues) {
+                setting.allowedValues = _.map(setting.allowedValues, function (value) { return parseInt(value, 10); });
+            }
+        });
+
+        selectedSettings = _.where(settings, { valueType: 'Decimal' });
+        _.forEach(selectedSettings, function (setting) {
+            setting.value = parseFloat(setting.value);
+            if (setting.allowedValues) {
+                setting.allowedValues = _.map(setting.allowedValues, function (value) { return parseFloat(value); });
+            }
+        });
+
+        selectedSettings = _.where(settings, { valueType: 'Boolean' });
+        _.forEach(selectedSettings, function (setting) {
+            setting.value = setting.value && setting.value.toLowerCase() === 'true';
+            if (setting.allowedValues) {
+                setting.allowedValues = _.map(setting.allowedValues, function (value) { return value.toLowerCase() === 'true'; });
+            }
+        });
+
+        selectedSettings = _.where(settings, { isArray: true });
+        _.forEach(selectedSettings, function (setting) {
+            if (setting.arrayValues) {
+                setting.arrayValues = _.map(setting.arrayValues, function (x) { return { value: x }; });
+            }
+        });
+    };
+
+    retVal.toApiFormat = function (settings) {
+        var selectedSettings = _.where(settings, { isArray: true });
+        _.forEach(selectedSettings, function (setting) {
+            if (setting.arrayValues) {
+                setting.arrayValues = _.pluck(setting.arrayValues, 'value');
+            }
+        });
+    };
+
+    return retVal;
+}]);
+
+// dictionary Setting values management helper
+function DictionarySettingDetailBlade(settingName) {
+    this.id = 'dictionarySettingDetails';
+    this.currentEntityId = settingName;
+    this.isApiSave = true;
+    this.controller = 'platformWebApp.settingDictionaryController';
+    this.template = '$(Platform)/Scripts/app/settings/blades/setting-dictionary.tpl.html';
+}
 angular.module('platformWebApp')
     .config(['$stateProvider', '$httpProvider', function ($stateProvider, $httpProvider) {
         $stateProvider.state('loginDialog', {
@@ -18015,103 +18112,6 @@ angular.module('platformWebApp')
         }, 'accountDetail');
     }]);
 
-angular.module("platformWebApp")
-.config(
-  ['$stateProvider', function ($stateProvider) {
-      $stateProvider
-          .state('workspace.modulesSettings', {
-              url: '/settings',
-              templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-              controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-                  var blade = {
-                      id: 'settings',
-                      title: 'platform.blades.settingGroup-list.title',
-                      //subtitle: 'Manage settings',
-                      controller: 'platformWebApp.settingGroupListController',
-                      template: '$(Platform)/Scripts/app/settings/blades/settingGroup-list.tpl.html',
-                      isClosingDisabled: true
-                  };
-                  bladeNavigationService.showBlade(blade);
-              }
-              ]
-          });
-  }]
-)
-.run(
-  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', function ($rootScope, mainMenuService, widgetService, $state) {
-      //Register module in main menu
-      var menuItem = {
-          path: 'configuration/settings',
-          icon: 'fa fa-gears',
-          title: 'platform.menu.settings',
-          priority: 1,
-          action: function () { $state.go('workspace.modulesSettings'); },
-          permission: 'platform:setting:access'
-      };
-      mainMenuService.addMenuItem(menuItem);
-  }])
-
-.factory('platformWebApp.settings.helper', [function () {
-    var retVal = {};
-
-    retVal.getSetting = function(settings, settingName) {
-        return _.findWhere(settings, { name: settingName });
-    };
-
-    retVal.fixValues = function (settings) {
-        // parse values as they all are strings
-        var selectedSettings = _.where(settings, { valueType: 'Integer' });
-        _.forEach(selectedSettings, function (setting) {
-            setting.value = parseInt(setting.value, 10);
-            if (setting.allowedValues) {
-                setting.allowedValues = _.map(setting.allowedValues, function (value) { return parseInt(value, 10); });
-            }
-        });
-
-        selectedSettings = _.where(settings, { valueType: 'Decimal' });
-        _.forEach(selectedSettings, function (setting) {
-            setting.value = parseFloat(setting.value);
-            if (setting.allowedValues) {
-                setting.allowedValues = _.map(setting.allowedValues, function (value) { return parseFloat(value); });
-            }
-        });
-
-        selectedSettings = _.where(settings, { valueType: 'Boolean' });
-        _.forEach(selectedSettings, function (setting) {
-            setting.value = setting.value && setting.value.toLowerCase() === 'true';
-            if (setting.allowedValues) {
-                setting.allowedValues = _.map(setting.allowedValues, function (value) { return value.toLowerCase() === 'true'; });
-            }
-        });
-
-        selectedSettings = _.where(settings, { isArray: true });
-        _.forEach(selectedSettings, function (setting) {
-            if (setting.arrayValues) {
-                setting.arrayValues = _.map(setting.arrayValues, function (x) { return { value: x }; });
-            }
-        });
-    };
-
-    retVal.toApiFormat = function (settings) {
-        var selectedSettings = _.where(settings, { isArray: true });
-        _.forEach(selectedSettings, function (setting) {
-            if (setting.arrayValues) {
-                setting.arrayValues = _.pluck(setting.arrayValues, 'value');
-            }
-        });
-    };
-
-    return retVal;
-}]);
-
-// dictionary Setting values management helper
-function DictionarySettingDetailBlade(settingName) {
-    this.id = 'dictionarySettingDetails';
-    this.currentEntityId = settingName;
-    this.isApiSave = true;
-    this.controller = 'platformWebApp.settingDictionaryController';
-    this.template = '$(Platform)/Scripts/app/settings/blades/setting-dictionary.tpl.html';
-}
 angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
 	$stateProvider
@@ -19013,6 +19013,112 @@ CodeMirror.registerHelper("fold", "markdown", function(cm, start) {
   };
 });
 
+angular.module('platformWebApp')
+.controller('platformWebApp.confirmDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
+    angular.extend($scope, dialog);
+
+    $scope.yes = function () {
+        $modalInstance.close(true);
+    };
+
+    $scope.no = function () {
+        $modalInstance.close(false);
+    };
+
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
+}])
+.factory('platformWebApp.dialogService', ['$rootScope', '$modal', function ($rootScope, $modal) {
+    var dialogService = {
+        dialogs: [],
+        currentDialog: undefined
+    };
+
+    function findDialog(id) {
+        var found;
+        angular.forEach(dialogService.dialogs, function (dialog) {
+            if (dialog.id == id) {
+                found = dialog;
+            }
+        });
+
+        return found;
+    }
+
+    dialogService.showDialog = function (dialog, templateUrl, controller, cssClass) {
+        var dlg = findDialog(dialog.id);
+
+        if (angular.isUndefined(dlg)) {
+            dlg = dialog;
+
+            dlg.instance = $modal.open({
+                templateUrl: templateUrl,
+                controller: controller,
+                windowClass: cssClass ? cssClass : null,
+                resolve: {
+                    dialog: function () {
+                        return dialog;
+                    }
+                }
+            });
+
+            dlg.instance.result.then(function (result) //success
+            {
+                var idx = dialogService.dialogs.indexOf(dlg);
+                dialogService.dialogs.splice(idx, 1);
+                if (dlg.callback)
+                    dlg.callback(result);
+            }, function (reason) //dismiss
+            {
+                var idx = dialogService.dialogs.indexOf(dlg);
+                dialogService.dialogs.splice(idx, 1);
+            });
+
+            dialogService.dialogs.push(dlg);
+        }
+    };
+
+    dialogService.showConfirmationDialog = function (dialog) {
+        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/confirmDialog.tpl.html', 'platformWebApp.confirmDialogController');
+    };
+
+    dialogService.showNotificationDialog = function (dialog) {
+        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/notifyDialog.tpl.html', 'platformWebApp.confirmDialogController');
+    };
+
+    dialogService.showGalleryDialog = function (dialog) {
+        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/galleryDialog.tpl.html', 'platformWebApp.galleryDialogController', '__gallery');
+    };
+
+    return dialogService;
+
+}])
+
+angular.module('platformWebApp')
+.controller('platformWebApp.galleryDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
+    angular.extend($scope, dialog);
+
+    var imgCount = dialog.images.length;
+
+    $scope.close = function () {
+        $modalInstance.close(false);
+    }
+
+    $scope.prevImage = function (index) {
+        var i = index == -1 ? imgCount - 1 : index;
+        $scope.currentImage = dialog.images[i];
+    }
+
+    $scope.nextImage = function (index) {
+        var i = index == imgCount ? 0 : index;
+        $scope.currentImage = dialog.images[i];
+    }
+
+    $scope.openImage = function (image) {
+        $scope.currentImage = image;
+    }
+}]);
 'use strict';
 
 angular.module('platformWebApp')
@@ -21017,112 +21123,6 @@ angular.module('platformWebApp').directive('vaTabs', function () {
         }
     }
 });
-angular.module('platformWebApp')
-.controller('platformWebApp.confirmDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
-    angular.extend($scope, dialog);
-
-    $scope.yes = function () {
-        $modalInstance.close(true);
-    };
-
-    $scope.no = function () {
-        $modalInstance.close(false);
-    };
-
-    $scope.cancel = function () {
-        $modalInstance.dismiss('cancel');
-    };
-}])
-.factory('platformWebApp.dialogService', ['$rootScope', '$modal', function ($rootScope, $modal) {
-    var dialogService = {
-        dialogs: [],
-        currentDialog: undefined
-    };
-
-    function findDialog(id) {
-        var found;
-        angular.forEach(dialogService.dialogs, function (dialog) {
-            if (dialog.id == id) {
-                found = dialog;
-            }
-        });
-
-        return found;
-    }
-
-    dialogService.showDialog = function (dialog, templateUrl, controller, cssClass) {
-        var dlg = findDialog(dialog.id);
-
-        if (angular.isUndefined(dlg)) {
-            dlg = dialog;
-
-            dlg.instance = $modal.open({
-                templateUrl: templateUrl,
-                controller: controller,
-                windowClass: cssClass ? cssClass : null,
-                resolve: {
-                    dialog: function () {
-                        return dialog;
-                    }
-                }
-            });
-
-            dlg.instance.result.then(function (result) //success
-            {
-                var idx = dialogService.dialogs.indexOf(dlg);
-                dialogService.dialogs.splice(idx, 1);
-                if (dlg.callback)
-                    dlg.callback(result);
-            }, function (reason) //dismiss
-            {
-                var idx = dialogService.dialogs.indexOf(dlg);
-                dialogService.dialogs.splice(idx, 1);
-            });
-
-            dialogService.dialogs.push(dlg);
-        }
-    };
-
-    dialogService.showConfirmationDialog = function (dialog) {
-        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/confirmDialog.tpl.html', 'platformWebApp.confirmDialogController');
-    };
-
-    dialogService.showNotificationDialog = function (dialog) {
-        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/notifyDialog.tpl.html', 'platformWebApp.confirmDialogController');
-    };
-
-    dialogService.showGalleryDialog = function (dialog) {
-        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/galleryDialog.tpl.html', 'platformWebApp.galleryDialogController', '__gallery');
-    };
-
-    return dialogService;
-
-}])
-
-angular.module('platformWebApp')
-.controller('platformWebApp.galleryDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
-    angular.extend($scope, dialog);
-
-    var imgCount = dialog.images.length;
-
-    $scope.close = function () {
-        $modalInstance.close(false);
-    }
-
-    $scope.prevImage = function (index) {
-        var i = index == -1 ? imgCount - 1 : index;
-        $scope.currentImage = dialog.images[i];
-    }
-
-    $scope.nextImage = function (index) {
-        var i = index == imgCount ? 0 : index;
-        $scope.currentImage = dialog.images[i];
-    }
-
-    $scope.openImage = function (image) {
-        $scope.currentImage = image;
-    }
-}]);
 // Full list of countries defined by ISO 3166-1 alpha-3
 // based on https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
 angular.module('platformWebApp')
@@ -22646,6 +22646,477 @@ angular.module('platformWebApp')
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["公元前","公元"],ERAS:["BC","AD"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"d/M/yy ah:mm",shortDate:"d/M/yy",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-hk",pluralCat:function(e,m){return E.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["西元前","西元"],ERAS:["西元前","西元"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日 EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"y/M/d ah:mm",shortDate:"y/M/d",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"NT$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-tw",pluralCat:function(e,m){return E.OTHER}})}]);
 angular.module('platformWebApp')
+    .controller('platformWebApp.assets.assetListController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', '$sessionStorage', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
+        function ($scope, assets, bladeNavigationService, dialogService, $storage, bladeUtils, uiGridHelper) {
+            var blade = $scope.blade;
+            blade.title = 'platform.blades.asset-list.title';
+            if (!blade.currentEntity) {
+                blade.currentEntity = {};
+            }
+
+            blade.refresh = function () {
+                blade.isLoading = true;
+                assets.search(
+                    {
+                        keyword: blade.searchKeyword,
+                        folderUrl: blade.currentEntity.url
+                    },
+                    function (data) {
+                        $scope.pageSettings.totalItems = data.totalCount;
+                        _.each(data.results, function (x) {
+                            x.isImage = x.contentType && x.contentType.startsWith('image/');
+                            if (x.isImage) {
+                                x.noCacheUrl = x.url + '?t=' + x.modifiedDate;
+                            }
+                        });
+                        $scope.listEntries = data.results;
+                        blade.isLoading = false;
+
+                        //Set navigation breadcrumbs
+                        setBreadcrumbs();
+                    }, function (error) {
+                        bladeNavigationService.setError('Error ' + error.status, blade);
+                    });
+            };
+
+            //Breadcrumbs
+            function setBreadcrumbs() {
+                if (blade.breadcrumbs) {
+                    //Clone array (angular.copy leaves the same reference)
+                    var breadcrumbs = blade.breadcrumbs.slice(0);
+
+                    //prevent duplicate items
+                    if (blade.currentEntity.url && _.all(breadcrumbs, function (x) { return x.id !== blade.currentEntity.url; })) {
+                        var breadCrumb = generateBreadcrumb(blade.currentEntity.url, blade.currentEntity.name);
+                        breadcrumbs.push(breadCrumb);
+                    }
+                    blade.breadcrumbs = breadcrumbs;
+                } else {
+                    blade.breadcrumbs = [generateBreadcrumb(blade.currentEntity.url, 'all')];
+                }
+            }
+
+            function generateBreadcrumb(id, name) {
+                return {
+                    id: id,
+                    name: name,
+                    blade: blade,
+                    navigate: function (breadcrumb) {
+                        breadcrumb.blade.searchKeyword = null;
+                        breadcrumb.blade.disableOpenAnimation = true;
+                        bladeNavigationService.showBlade(breadcrumb.blade, breadcrumb.blade.parentBlade);
+                        // breadcrumb.blade.refresh();
+                    }
+                }
+            }
+
+            function newFolder(value, prefix) {
+                var result = prompt(prefix ? prefix + "\n\nEnter folder name:" : "Enter folder name:", value);
+                if (result != null) {
+                    if (blade.currentEntity.url) {
+                        assets.createFolder({ name: result, parentUrl: blade.currentEntity.url },
+                            blade.refresh,
+                            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+                    } else {
+                        if (result.length < 3 || result.length > 63 || !result.match(/^[a-z0-9]+(-[a-z0-9]+)*$/)) {
+                            newFolder(result, "A folder name must conform to the following naming rules:\n  Folder name must be from 3 through 63 characters long.\n  Folder name must start with a letter or number, and can contain only letters, numbers, and the dash (-) character.\n  Every dash (-) character must be immediately preceded and followed by a letter or number; consecutive dashes are not permitted.\n  All letters in a folder name must be lowercase.");
+                        } else {
+                            assets.createFolder({ name: result, parentUrl: blade.currentEntity.url },
+                                blade.refresh,
+                                function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+                        }
+                    }
+                }
+            }
+
+            $scope.copyUrl = function (data) {
+                window.prompt("Copy to clipboard: Ctrl+C, Enter", data.url);
+            };
+
+            $scope.downloadUrl = function (data) {
+                window.open(data.url, '_blank');
+            };
+
+            //$scope.rename = function (listItem) {
+            //    rename(listItem);
+            //};
+
+            //function rename(listItem) {
+            //    var result = prompt("Enter new name", listItem.name);
+            //    if (result) {
+            //        listItem.name = result;
+            //    }
+            //}
+
+            function isItemsChecked() {
+                return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
+            }
+
+            $scope.delete = function (data) {
+                deleteList([data]);
+            };
+
+            function deleteList(selection) {
+                bladeNavigationService.closeChildrenBlades(blade, function () {
+                    var dialog = {
+                        id: "confirmDeleteItem",
+                        title: "platform.dialogs.folders-delete.title",
+                        message: "platform.dialogs.folders-delete.message",
+                        callback: function (remove) {
+                            if (remove) {
+                                var listEntryIds = _.pluck(selection, 'url');
+                                assets.remove({ urls: listEntryIds },
+                                    blade.refresh,
+                                    function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+                            }
+                        }
+                    }
+                    dialogService.showConfirmationDialog(dialog);
+                });
+            }
+
+            $scope.selectNode = function (listItem) {
+                if (listItem.type === 'folder') {
+                    var newBlade = {
+                        id: blade.id,
+                        breadcrumbs: blade.breadcrumbs,
+                        currentEntity: listItem,
+                        disableOpenAnimation: true,
+                        controller: blade.controller,
+                        template: blade.template,
+                        isClosingDisabled: blade.isClosingDisabled
+                    };
+
+                    bladeNavigationService.showBlade(newBlade, blade.parentBlade);
+                }
+            };
+
+            blade.headIcon = 'fa-folder-o';
+
+            blade.toolbarCommands = [
+                {
+                    name: "platform.commands.refresh", icon: 'fa fa-refresh',
+                    executeMethod: blade.refresh,
+                    canExecuteMethod: function () {
+                        return true;
+                    }
+                },
+                {
+                    name: "platform.commands.new-folder", icon: 'fa fa-folder-o',
+                    executeMethod: function () { newFolder(); },
+                    canExecuteMethod: function () {
+                        return true;
+                    },
+                    permission: 'platform:asset:create'
+                },
+                {
+                    name: "platform.commands.upload", icon: 'fa fa-upload',
+                    executeMethod: function () {
+                        var newBlade = {
+                            id: "assetUpload",
+                            currentEntityId: blade.currentEntity.url,
+                            title: 'platform.blades.asset-upload.title',
+                            controller: 'platformWebApp.assets.assetUploadController',
+                            template: '$(Platform)/Scripts/app/assets/blades/asset-upload.tpl.html'
+                        };
+                        bladeNavigationService.showBlade(newBlade, blade);
+                    },
+                    canExecuteMethod: function () {
+                        return true;
+                    },
+                    permission: 'platform:asset:create'
+                },
+                //{
+                //    name: "Rename", icon: 'fa fa-font',
+                //    executeMethod: function () {
+                //        rename(getFirstChecked())
+                //    },
+                //    canExecuteMethod: isSingleChecked,
+                //    permission: 'platform:asset:update'
+                //},
+                {
+                    name: "platform.commands.delete", icon: 'fa fa-trash-o',
+                    executeMethod: function () { deleteList($scope.gridApi.selection.getSelectedRows()); },
+                    canExecuteMethod: isItemsChecked,
+                    permission: 'platform:asset:delete'
+                }
+                //{
+                //    name: "Cut",
+                //    icon: 'fa fa-cut',
+                //    executeMethod: function () {
+                //    },
+                //    canExecuteMethod: isItemsChecked,
+                //    permission: 'asset:delete'
+                //},
+                //{
+                //    name: "Paste",
+                //    icon: 'fa fa-clipboard',
+                //    executeMethod: function () {
+                //        blade.isLoading = true;
+                //        assets.move({
+                //            folder: blade.currentEntity.url,
+                //            listEntries: $storage.catalogClipboardContent
+                //        }, function () {
+                //            delete $storage.catalogClipboardContent;
+                //            blade.refresh();
+                //        }, function (error) {
+                //            bladeNavigationService.setError('Error ' + error.status, blade);
+                //        });
+                //    },
+                //    canExecuteMethod: function () {
+                //        return $storage.catalogClipboardContent;
+                //    },
+                //    permission: 'asset:delete'
+                //}
+            ];
+
+            // ui-grid
+            $scope.setGridOptions = function (gridOptions) {
+                uiGridHelper.initialize($scope, gridOptions,
+                    function (gridApi) {
+                        $scope.$watch('pageSettings.currentPage', gridApi.pagination.seek);
+                    });
+            };
+            bladeUtils.initializePagination($scope, true);
+
+            blade.refresh();
+        }]);
+
+angular.module('platformWebApp')
+    .controller('platformWebApp.assets.assetSelectController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
+        function ($scope, assetsApi, bladeNavigationService, bladeUtils, uiGridHelper) {
+            var blade = $scope.blade;
+            blade.template = '$(Platform)/Scripts/app/assets/blades/asset-select.tpl.html';
+
+            blade.headIcon = 'fa-folder-o';
+
+            if (!blade.currentEntity) {
+                blade.currentEntity = {};
+            }
+            if (blade.folder) {
+                blade.currentEntity.url = '/' + blade.folder;
+            }
+
+            blade.refresh = function () {
+                blade.isLoading = true;
+                assetsApi.search(
+                    {
+                        keyword: blade.searchKeyword,
+                        folderUrl: blade.currentEntity.url
+                    },
+                    function (data) {
+                        $scope.pageSettings.totalItems = data.totalCount;
+                        _.each(data.results, function (x) { x.isImage = x.contentType && x.contentType.startsWith('image/'); });
+                        $scope.listEntries = data.results;
+                        blade.isLoading = false;
+
+                        //Set navigation breadcrumbs
+                        setBreadcrumbs();
+                    }, function (error) {
+                        bladeNavigationService.setError('Error ' + error.status, blade);
+                    });
+            };
+
+            //Breadcrumbs
+            function setBreadcrumbs() {
+                if (blade.breadcrumbs) {
+                    //Clone array (angular.copy leaves the same reference)
+                    var breadcrumbs = blade.breadcrumbs.slice(0);
+
+                    //prevent duplicate items
+                    if (blade.currentEntity.url && _.all(breadcrumbs, function (x) { return x.id !== blade.currentEntity.url; })) {
+                        var breadCrumb = generateBreadcrumb(blade.currentEntity.url, blade.currentEntity.name);
+                        breadcrumbs.push(breadCrumb);
+                    }
+                    blade.breadcrumbs = breadcrumbs;
+                } else {
+                    var name = "all";
+                    if (blade.folder)
+                        name = blade.folder;
+
+                    blade.breadcrumbs = [generateBreadcrumb(blade.currentEntity.url, name)];
+                }
+            }
+
+            function generateBreadcrumb(id, name) {
+                return {
+                    id: id,
+                    name: name,
+                    blade: blade,
+                    navigate: function (breadcrumb) {
+                        breadcrumb.blade.searchKeyword = null;
+                        breadcrumb.blade.disableOpenAnimation = true;
+                        bladeNavigationService.showBlade(breadcrumb.blade, breadcrumb.blade.parentBlade);
+                    }
+                }
+            }
+
+            function isItemsChecked() {
+                return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
+            }
+
+            function getSelectedAssets() {
+                return $scope.gridApi.selection.getSelectedRows();
+            }
+
+            $scope.selectNode = function (listItem) {
+                if (listItem.type === 'folder') {
+                    var newBlade = {
+                        id: blade.id,
+                        title: blade.title,
+                        breadcrumbs: blade.breadcrumbs,
+                        currentEntity: listItem,
+                        disableOpenAnimation: true,
+                        controller: blade.controller,
+                        template: blade.template,
+                        isClosingDisabled: blade.isClosingDisabled,
+                        onSelect: blade.onSelect
+                    };
+
+                    bladeNavigationService.showBlade(newBlade, blade.parentBlade);
+                }
+            };
+
+            blade.toolbarCommands = [
+                {
+                    name: 'platform.commands.confirm',
+                    icon: 'fa fa-check',
+                    executeMethod: function () { $scope.saveChanges(); },
+                    canExecuteMethod: function () {
+                        return isItemsChecked();
+                    }
+                }
+            ];
+
+            $scope.saveChanges = function () {
+                if (blade.onSelect)
+                    blade.onSelect(getSelectedAssets());
+
+                $scope.bladeClose();
+            };
+
+            // ui-grid
+            $scope.setGridOptions = function (gridOptions) {
+                uiGridHelper.initialize($scope, gridOptions,
+                    function (gridApi) {
+                        $scope.$watch('pageSettings.currentPage', gridApi.pagination.seek);
+                    });
+            };
+            bladeUtils.initializePagination($scope, true);
+
+            blade.refresh();
+        }]);
+
+angular.module('platformWebApp')
+    .controller('platformWebApp.assets.assetUploadController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'FileUploader', function ($scope, assets, bladeNavigationService, FileUploader) {
+        var blade = $scope.blade;
+        var currentEntities;
+        if (!blade.fileUploadOptions) {
+            blade.fileUploadOptions = {};
+        }
+        var folderUrl = blade.currentEntityId || "";
+
+        function initialize() {
+            if (!$scope.uploader) {
+                // Create the uploader
+                var uploader = $scope.uploader = new FileUploader({
+                    scope: $scope,
+                    headers: { Accept: 'application/json' },
+                    url: 'api/platform/assets?folderUrl=' + folderUrl,
+                    method: 'POST',
+                    //autoUpload: true,
+                    removeAfterUpload: true
+                });
+
+                if (blade.fileUploadOptions.accept && blade.fileUploadOptions.accept.contains('image')) {
+                    uploader.filters.push({
+                        name: 'imageFilter',
+                        fn: function (item) {
+                            var type = '|' + item.type.slice(item.type.lastIndexOf('/') + 1) + '|';
+                            return '|jpg|png|jpeg|bmp|gif|'.indexOf(type) !== -1;
+                        }
+                    });
+                }
+
+                uploader.onAfterAddingAll = function (addedItems) {
+                    blade.isLoading = true;
+                    blade.uploadCompleted = false;
+                    bladeNavigationService.setError(null, blade);
+
+                    // check for asset duplicates
+                    assets.search({ folderUrl: folderUrl },
+                        function (data) {
+                            blade.isLoading = false;
+                            currentEntities = data.results;
+
+                            _.each(addedItems, promptUserDecision);
+                            uploader.uploadAll();
+                        }, function (error) {
+                            bladeNavigationService.setError('Error ' + error.status, blade);
+                        });
+                };
+
+                uploader.onErrorItem = function (item, response, status, headers) {
+                    bladeNavigationService.setError(item._file.name + ' failed: ' + (response.message ? response.message : status), blade);
+                };
+
+                uploader.onCompleteAll = function () {
+                    refreshParentBlade();
+                    blade.uploadCompleted = true;
+                };
+
+                uploader.onSuccessItem = function (fileItem, images) {
+                    if (blade.onUploadComplete) {
+                        blade.onUploadComplete(images);
+                    }
+                };
+            }
+        }
+
+        function refreshParentBlade() {
+            if (blade.parentBlade.refresh && !blade.fileUploadOptions.suppressParentRefresh) {
+                blade.parentBlade.refresh();
+            }
+        }
+
+        function promptUserDecision(item) {
+            if (_.any(currentEntities, function (x) { return x.type === 'blob' && x.name.toLowerCase() === item.file.name.toLowerCase() })) {
+                var result = prompt("File \"" + item.file.name + "\" already exists!\n- Change name / press [OK] to overwrite.\n- Press [Cancel] to skip this file.\nFile name:", item.file.name);
+                if (result == null) {
+                    item.remove();
+                } else if (!result) {
+                    promptUserDecision(item);
+                } else if (result !== item.file.name) {
+                    item.file.name = result;
+                    promptUserDecision(item);
+                } else {
+                    item.url += "&forceFileOverwrite=true";
+                }
+            }
+        }
+
+        $scope.addImageFromUrl = function () {
+            if (blade.newExternalImageUrl) {
+                blade.uploadCompleted = false;
+
+                assets.uploadFromUrl({ folderUrl: folderUrl, url: blade.newExternalImageUrl }, function (data) {
+                    refreshParentBlade();
+                    if (blade.onUploadComplete) {
+                        blade.onUploadComplete(data);
+                    }
+                    blade.newExternalImageUrl = undefined;
+                    blade.uploadCompleted = true;
+                });
+            }
+        };
+
+        blade.headIcon = 'fa-file-o';
+
+        initialize();
+        blade.isLoading = false;
+    }]);
+
+angular.module('platformWebApp')
 .factory('platformWebApp.assets.api', ['$resource', function ($resource) {
     return $resource('api/platform/assets', {}, {
         search: { method: 'GET', url: 'api/platform/assets', isArray: false },
@@ -23612,6 +24083,765 @@ angular.module('platformWebApp')
     });
 }]);
 
+angular.module('platformWebApp')
+.factory('platformWebApp.toolbarService', function () {
+    var toolbarCommandsMap = [];
+    return {
+        register: function (toolbarItem, toolbarController) {
+            var map = toolbarCommandsMap;
+            if (!map[toolbarController]) {
+                map[toolbarController] = [];
+            }
+
+            map[toolbarController].push(toolbarItem);
+            map[toolbarController].sort(function (a, b) {
+                return a.index - b.index;
+            });
+        },
+        resolve: function (bladeCommands, toolbarController) {
+            var externalCommands = toolbarCommandsMap[toolbarController];
+            if (externalCommands) {
+                bladeCommands = angular.copy(bladeCommands || []);
+
+                _.each(externalCommands, function (newCommand) {
+                    var overrideIndex = _.findIndex(bladeCommands, function (bladeCommand) {
+                        return bladeCommand.name === newCommand.name;
+                    });
+                    var deleteCount = overrideIndex >= 0 ? 1 : 0;
+                    overrideIndex = overrideIndex >= 0 ? overrideIndex : newCommand.index;
+
+                    bladeCommands.splice(overrideIndex, deleteCount, newCommand);
+                });
+            }
+
+            return bladeCommands;
+        }
+    };
+})
+.directive('vaBladeContainer', ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
+    return {
+        restrict: 'E',
+        replace: true,
+        templateUrl: '$(Platform)/Scripts/app/navigation/blade/bladeContainer.tpl.html',
+        link: function (scope) {
+            scope.blades = bladeNavigationService.stateBlades();
+        }
+    }
+}])
+.directive('vaBlade', ['$compile', 'platformWebApp.bladeNavigationService', 'platformWebApp.toolbarService', '$timeout', '$document', 'platformWebApp.dialogService', function ($compile, bladeNavigationService, toolbarService, $timeout, $document, dialogService) {
+    return {
+        terminal: true,
+        priority: 100,
+        link: function (scope, element) {
+            element.attr('ng-controller', scope.blade.controller);
+            element.attr('id', scope.blade.id);
+            element.attr('ng-model', "blade");
+            element.removeAttr("va-blade");
+            $compile(element)(scope);
+            scope.blade.$scope = scope;
+
+            var mainContent = $('.cnt');
+            var currentBlade = $(element).parent();
+            var parentBlade = currentBlade.prev();
+
+            if (!scope.blade.disableOpenAnimation) {
+                scope.blade.animated = true;
+                $timeout(function () {
+                    scope.blade.animated = false;
+                }, 250);
+            }
+
+            function scrollContent(scrollToBlade, scrollToElement) {
+                if (!scrollToBlade) {
+                    scrollToBlade = scope.blade;
+                }
+                if (!scrollToElement) {
+                    scrollToElement = currentBlade;
+                }
+
+                // we can't just get current blade position (because of animation) or calculate it
+                // via parent position + parent width (because we may open parent and child blade at the same time)
+                // instead, we need to use sum of width of all blades
+                var previousBlades = scrollToElement.prevAll();
+                var previousBladesWidthSum = 0;
+                previousBlades.each(function () {
+                    previousBladesWidthSum += $(this).outerWidth();
+                });
+                var scrollLeft = previousBladesWidthSum + scrollToElement.outerWidth(!(scrollToBlade.isExpanded || scrollToBlade.isMaximized)) - mainContent.width();
+                mainContent.animate({ scrollLeft: (scrollLeft > 0 ? scrollLeft : 0) }, 500);
+            }
+
+            var updateSize = function () {
+                var contentBlock = currentBlade.find(".blade-content");
+                var containerBlock = currentBlade.find(".blade-container");
+
+                var bladeWidth = "";
+                var bladeMinWidth = "";
+
+                if ((scope.blade.isExpandable && scope.blade.isExpanded) || (!scope.blade.isExpandable && scope.blade.isMaximized)) {
+                    // minimal required width + container padding
+                    bladeMinWidth = 'calc(' + contentBlock.css("min-width") + ' + ' + parseInt(containerBlock.outerWidth() - containerBlock.width()) + 'px)';
+                }
+
+                if (scope.blade.isExpandable && scope.blade.isExpanded) {
+                    var offset = parentBlade.length > 0 ? parentBlade.width() : 0;
+                    // free space of view - parent blade size (if exist)
+                    bladeWidth = 'calc(100% - ' + offset + 'px)';
+                } else if (!scope.blade.isExpandable && scope.blade.isMaximized) {
+                    currentBlade.attr('data-width', currentBlade.outerWidth());
+                    bladeWidth = '100%';
+                }
+
+                currentBlade.width(bladeWidth);
+                currentBlade.css('min-width', bladeMinWidth);
+
+                setVisibleToolsLimit();
+            }
+
+            scope.$watch('blade.isExpanded', function () {
+                // we must recalculate position only at next digest cycle,
+                // because at this time blade UI is not fully (re)initialized
+                // for example, ng-class set classes after this watch called
+                $timeout(updateSize, 0, false);
+            });
+
+            scope.$on('$includeContentLoaded', function (event, src) {
+                if (src === scope.blade.template) {
+                    // see above
+                    $timeout(function () {
+                        updateSize();
+                        scrollContent();
+                    }, 0, false);
+                }
+            });
+
+            scope.bladeMaximize = function () {
+                scope.blade.isMaximized = true;
+                updateSize();
+                scrollContent();
+            };
+
+            scope.bladeMinimize = function () {
+                scope.blade.isMaximized = false;
+                updateSize();
+            };
+
+            scope.bladeClose = function (onAfterClose) {
+                bladeNavigationService.closeBlade(scope.blade, onAfterClose, function (callback) {
+                    scope.blade.animated = true;
+                    scope.blade.closing = true;
+                    $timeout(function () {
+                        currentBlade.remove();
+                        scrollContent(scope.blade.parentBlade, parentBlade);
+                        callback();
+                    }, 125, false);
+                });
+            };
+
+            scope.$watch('blade.toolbarCommands', function (toolbarCommands) {
+                scope.resolvedToolbarCommands = toolbarService.resolve(toolbarCommands, scope.blade.controller);
+
+                setVisibleToolsLimit();
+            }, true);
+
+            var toolbar = currentBlade.find(".blade-toolbar .menu.__inline");
+
+            function setVisibleToolsLimit() {
+                scope.toolsPerLineCount = scope.resolvedToolbarCommands ? scope.resolvedToolbarCommands.length : 1;
+
+                $timeout(function () {
+                    if (toolbar.height() > 55 && scope.toolsPerLineCount > 1) {
+                        var maxToolbarWidth = toolbar.width() - 46; // the 'more' button is 46px wide
+                        //console.log(toolbar.width() + 'maxToolbarWidth: ' + maxToolbarWidth);
+                        var toolsWidth = 0;
+                        var lis = toolbar.find("li");
+                        var i = 0;
+                        while (maxToolbarWidth > toolsWidth && lis.length > i) {
+                            toolsWidth += lis[i].clientWidth;
+                            i++;
+                        }
+                        scope.toolsPerLineCount = i - 1;
+                    }
+                }, 220);
+            }
+
+            function handleClickEvent() {
+                setVisibleToolsLimit();
+                $document.unbind('click', handleClickEvent);
+            }
+
+            scope.showMoreTools = function (event) {
+                scope.toolsPerLineCount = scope.resolvedToolbarCommands.length;
+
+                event.stopPropagation();
+                $document.bind('click', handleClickEvent);
+            };
+
+            scope.showErrorDetails = function () {
+                var dialog = { id: "errorDetails" };
+                if (scope.blade.errorBody != undefined)
+                    dialog.message = scope.blade.errorBody;
+                dialogService.showDialog(dialog, '$(Platform)/Scripts/app/modularity/dialogs/errorDetails-dialog.tpl.html', 'platformWebApp.confirmDialogController');
+            };
+        }
+    }
+}])
+.factory('platformWebApp.bladeNavigationService', ['platformWebApp.authService', '$timeout', '$state', 'platformWebApp.dialogService', function (authService, $timeout, $state, dialogService) {
+
+    function showConfirmationIfNeeded(showConfirmation, canSave, blade, saveChangesCallback, closeCallback, saveTitle, saveMessage) {
+        if (showConfirmation) {
+            var dialog = { id: "confirmCurrentBladeClose" };
+
+            if (canSave) {
+                dialog.title = saveTitle;
+                dialog.message = saveMessage;
+            } else {
+                dialog.title = "Warning";
+                dialog.message = "Validation failed for this object. Will you continue editing and save later?";
+            }
+
+            dialog.callback = function (userChoseYes) {
+                if (canSave) {
+                    if (userChoseYes) {
+                        saveChangesCallback();
+                    }
+                    closeCallback();
+                } else if (!userChoseYes) {
+                    closeCallback();
+                }
+            };
+
+            dialogService.showConfirmationDialog(dialog);
+        }
+        else {
+            closeCallback();
+        }
+    }
+
+    var service = {
+        blades: [],
+        currentBlade: undefined,
+        showConfirmationIfNeeded: showConfirmationIfNeeded,
+        closeBlade: function (blade, callback, onBeforeClosing) {
+            //Need in case a copy was passed
+            blade = service.findBlade(blade.id) || blade;
+
+            // close all children
+            service.closeChildrenBlades(blade, function () {
+                var doCloseBlade = function () {
+                    if (angular.isFunction(onBeforeClosing)) {
+                        onBeforeClosing(doCloseBladeFinal);
+                    } else {
+                        doCloseBladeFinal();
+                    }
+                }
+
+                var doCloseBladeFinal = function () {
+                    var idx = service.stateBlades().indexOf(blade);
+                    if (idx >= 0) service.stateBlades().splice(idx, 1);
+
+                    //remove blade from children collection
+                    if (angular.isDefined(blade.parentBlade)) {
+                        var childIdx = blade.parentBlade.childrenBlades.indexOf(blade);
+                        if (childIdx >= 0) {
+                            blade.parentBlade.childrenBlades.splice(childIdx, 1);
+                        }
+                    }
+                    if (angular.isFunction(callback)) {
+                        callback();
+                    };
+                };
+
+                if (angular.isFunction(blade.onClose)) {
+                    blade.onClose(doCloseBlade);
+                }
+                else {
+                    doCloseBlade();
+                }
+            });
+
+            if (blade.parentBlade && blade.parentBlade.isExpandable) {
+                blade.parentBlade.isExpanded = true;
+                if (angular.isFunction(blade.parentBlade.onExpand)) {
+                    blade.parentBlade.onExpand();
+                }
+            }
+        },
+        closeChildrenBlades: function (blade, callback) {
+            if (blade && _.any(blade.childrenBlades)) {
+                angular.forEach(blade.childrenBlades.slice(), function (child) {
+                    service.closeBlade(child, function () {
+                        // show only when all children were closed
+                        if (blade.childrenBlades.length == 0 && angular.isFunction(callback)) {
+                            callback();
+                        }
+                    });
+                });
+            } else if (angular.isFunction(callback)) {
+                callback();
+            }
+        },
+        stateBlades: function (stateName) {
+            if (angular.isUndefined(stateName)) {
+                stateName = $state.current.name;
+            }
+
+            if (angular.isUndefined(service.blades[stateName])) {
+                service.blades[stateName] = [];
+            }
+
+            return service.blades[stateName];
+        },
+        findBlade: function (id) {
+            var found;
+            angular.forEach(service.stateBlades(), function (blade) {
+                if (blade.id == id) {
+                    found = blade;
+                }
+            });
+
+            return found;
+        },
+        showBlade: function (blade, parentBlade) {
+
+            //If it is first blade for state try to open saved blades
+            //var firstStateBlade = service.stateBlades($state.current.name)[0];
+            //if (angular.isDefined(firstStateBlade) && firstStateBlade.id == blade.id) {
+            //    service.currentBlade = firstStateBlade;
+            //    return;
+            //}
+            blade.errorBody = "";
+            blade.isLoading = true;
+            blade.parentBlade = parentBlade;
+            blade.childrenBlades = [];
+            if (parentBlade) {
+                blade.headIcon = parentBlade.headIcon;
+                blade.updatePermission = parentBlade.updatePermission;
+            }
+            //copy securityscopes from parent blade
+            if (parentBlade != null && parentBlade.securityScopes) {
+                //need merge scopes
+                if (angular.isArray(blade.securityScopes) && angular.isArray(parentBlade.securityScopes)) {
+                    blade.securityScopes = parentBlade.securityScopes.concat(blade.securityScopes);
+                }
+                else {
+                    blade.securityScopes = parentBlade.securityScopes;
+                }
+            }
+
+            var existingBlade = service.findBlade(blade.id);
+
+            //Show blade in previous location
+            if (existingBlade != undefined) {
+                //store prev blade x-index
+                blade.xindex = existingBlade.xindex;
+            } else if (!angular.isDefined(blade.xindex)) {
+                //Show blade as last one by default
+                blade.xindex = service.stateBlades().length;
+            }
+
+            var showBlade = function () {
+                if (angular.isDefined(parentBlade)) {
+                    blade.xindex = service.stateBlades().indexOf(parentBlade) + 1;
+                    parentBlade.childrenBlades.push(blade);
+                }
+                //show blade in same place where it was
+                service.stateBlades().splice(Math.min(blade.xindex, service.stateBlades().length), 0, blade);
+                service.currentBlade = blade;
+            };
+
+            if (angular.isDefined(parentBlade) && parentBlade.childrenBlades.length > 0) {
+                service.closeChildrenBlades(parentBlade, showBlade);
+            }
+            else if (angular.isDefined(existingBlade)) {
+                service.closeBlade(existingBlade, showBlade);
+            }
+            else {
+                $timeout(function() {
+                    showBlade();
+                });
+            }
+
+            if (parentBlade && parentBlade.isExpandable && parentBlade.isExpanded) {
+                parentBlade.isExpanded = false;
+                if (angular.isFunction(parentBlade.onCollapse)) {
+                    parentBlade.onCollapse();
+                }
+            }
+
+            if (blade.isExpandable) {
+                blade.isExpanded = true;
+                if (angular.isFunction(blade.onExpand)) {
+                    blade.onExpand();
+                }
+            }
+
+            blade.hasUpdatePermission = function () {
+                return authService.checkPermission(blade.updatePermission, blade.securityScopes);
+            };
+        },
+        checkPermission: authService.checkPermission,
+        setError: function (error, blade) {
+            if (blade && error) {
+                blade.isLoading = false;
+                blade.error = error.status && error.statusText ? error.status + ': ' + error.statusText : error;
+                blade.errorBody = error.data ? error.data.exceptionMessage : blade.errorBody;
+            }
+        }
+    };
+
+    return service;
+}]);
+
+angular.module('platformWebApp')
+    .directive('vaBreadcrumb', [
+        'platformWebApp.breadcrumbHistoryService', function (breadcrumbHistoryService) {
+            return {
+                restrict: 'E',
+                require: 'ngModel',
+                replace: true,
+                scope: {
+                    bladeId: '='
+                },
+        templateUrl: '$(Platform)/Scripts/app/navigation/breadcrumbs/breadcrumbs.tpl.html',
+                link: function (scope, element, attr, ngModelController) {
+                    scope.breadcrumbs = [];
+                    ngModelController.$render = function () {
+                        scope.breadcrumbs = ngModelController.$modelValue;
+                    };
+
+                    scope.innerNavigate = function (breadcrumb) {
+                        breadcrumb.navigate(breadcrumb);
+                    };
+
+                    scope.canNavigateBack = function () {
+                        return breadcrumbHistoryService.check(scope.bladeId);
+                    };
+
+                    scope.navigateBack = function () {
+                        if (scope.canNavigateBack()) {
+                            var breadcrumb = breadcrumbHistoryService.pop(scope.bladeId);
+                            breadcrumb.navigate(breadcrumb);
+                        }
+                    };
+                    scope.$watchCollection('breadcrumbs', function (newItems) {
+                        breadcrumbHistoryService.push(newItems, scope.bladeId);
+                    });
+                }
+            }
+        }
+    ])
+    .factory('platformWebApp.breadcrumbHistoryService', function () {
+        var map = {};
+
+        function breadcrumbsEqual(x,y) {
+            return x && y && x.id === y.id && x.name === y.name;
+        }
+
+        return {
+            push: function (breadcrumbs, id) {
+                var history = map[id];
+                if (!history) {
+                    map[id] = history = {
+                        ignoreNextAction: false,
+                        records: []
+                    };
+                }
+
+                var currentBreadcrumb = _.last(breadcrumbs);
+
+                if (history.ignoreNextAction) {
+                    history.ignoreNextAction = false;
+                } else if (history.currentBreadcrumb &&
+                            !breadcrumbsEqual(history.currentBreadcrumb, currentBreadcrumb) &&
+                            !breadcrumbsEqual(history.currentBreadcrumb, _.last(history.records))) {
+                    history.records.push(history.currentBreadcrumb);
+                }
+
+                if (currentBreadcrumb) {
+                    history.currentBreadcrumb = currentBreadcrumb;
+                }
+            },
+
+            check: function (id) {
+                return map[id] && _.any(map[id].records);
+            },
+
+            pop: function (id) {
+                var retVal = undefined;
+                var history = map[id];
+                if (_.any(history.records)) {
+                    retVal = history.records.pop();
+                    history.ignoreNextAction = true;
+                }
+
+                return retVal;
+            }
+        };
+    });
+angular.module('platformWebApp')
+.factory('platformWebApp.mainMenuService', [function () {
+
+    var menuItems = [];
+
+    function sortByGroupFirst(a, b) {
+        return a.path.split('/').length - b.path.split('/').length;
+    };
+
+    function sortByPriority(a, b) {
+        if (angular.isDefined(a.priority) && angular.isDefined(b.priority)) {
+            return a.priority < b.priority ? -1 : a.priority > b.priority ? 1 : 0;
+        }
+        return -1;
+    };
+
+    function constructList() {
+        angular.forEach(menuItems.sort(sortByGroupFirst), function (menuItem) {
+            if (!angular.isDefined(menuItem.group)) {
+                menuItem.group = null;
+            }
+            if (menuItem.group == null) {
+                var pathParts = menuItem.path.split('/');
+                var groupPath = null;
+                if (pathParts.length > 1) {
+                    pathParts.pop();
+                    groupPath = pathParts.join('/');
+                }
+                var group = _.find(menuItems, function (menuItem) { return menuItem.path === groupPath });
+                if (angular.isDefined(group)) {
+                    menuItem.group = group;
+                }
+            }
+        });
+        menuItems.sort(sortByPriority);
+    };
+
+    function addMenuItem(menuItem) {
+        resetMenuItemDefaults(menuItem);
+        menuItems.push(menuItem);
+        constructList();
+    }
+
+    function removeMenuItem(menuItem) {
+        var index = menuItems.indexOf(menuItem);
+        menuItems.splice(index, 1);
+        constructList();
+    }
+
+    function resetMenuItemDefaults(menuItem) {
+        // set defaults
+        if (!angular.isDefined(menuItem.priority)) {
+            menuItem.priority = Number.NaN;
+        }
+        if (!angular.isDefined(menuItem.children)) {
+            menuItem.children = [];
+        }
+        if (!angular.isDefined(menuItem.isAlwaysOnBar)) {
+            menuItem.isAlwaysOnBar = false;
+        }
+        menuItem.isCollapsed = false;
+        menuItem.isFavorite = false;
+            // place at the end
+        menuItem.order = Number.MAX_SAFE_INTEGER;
+    }
+
+    function findByPath(path) {
+        return _.find(menuItems, function (menuItem) { return menuItem.path === path });
+    };
+
+    var retVal = {
+        menuItems: menuItems,
+        addMenuItem: addMenuItem,
+        removeMenuItem: removeMenuItem,
+        resetMenuItemDefaults: resetMenuItemDefaults,
+        findByPath: findByPath
+    };
+    return retVal;
+}])
+.directive('vaMainMenu', ["$document",
+    function ($document) {
+
+    return {
+        restrict: 'E',
+        replace: true,
+        transclude: true,
+        require: 'ngModel',
+        scope: {
+            onMenuChanged: "&"
+        },
+        templateUrl: '$(Platform)/Scripts/app/navigation/menu/mainMenu.tpl.html',
+        link: function (scope, element, attr, ngModelController, linker) {
+            scope.menu = ngModelController.$modelValue;
+            ngModelController.$render = function () {
+                scope.menu = ngModelController.$modelValue;
+                updateFavorites();
+                scope.$watch(function () {
+                    return _.filter(scope.menu.items, function (x) { return x.isFavorite && !x.isAlwaysOnBar; });
+                }, function () { updateFavorites(); }, true);
+            };            
+
+            scope.selectItem = function (menuItem) {
+                if (scope.showSubMenu && scope.currentMenuItem === menuItem) {
+                    scope.showSubMenu = false;
+                } else {
+                    scope.currentMenuItem = menuItem;
+                    scope.showSubMenu = menuItem.children.length > 0 || menuItem.path === "more";
+                }
+                if (angular.isDefined(menuItem.action)) {
+                    menuItem.action();
+                }
+            };        
+         
+            function handleKeyUpEvent(event) {
+                if (scope.showSubMenu && event.keyCode === 27) {
+                    scope.$apply(function () {
+                        scope.showSubMenu = false;
+                    });
+                }
+            }
+
+            function handleClickEvent(event) {
+                var dropdownElement = $document.find('.nav-bar .dropdown');
+                var hadDropdownElement = $document.find('.__has-dropdown');
+                if (scope.showSubMenu && !(dropdownElement.is(event.target) || dropdownElement.has(event.target).length > 0 ||
+                                           hadDropdownElement.is(event.target) || hadDropdownElement.has(event.target).length > 0)) {
+                    scope.$apply(function () {
+                        scope.showSubMenu = false;
+                    });
+                }
+            }
+
+            $document.bind('keyup', handleKeyUpEvent);
+            $document.bind('click', handleClickEvent);
+
+            scope.$on('$destroy', function () {
+                $document.unbind('keyup', handleKeyUpEvent);
+                $document.unbind('click', handleClickEvent);
+            });
+
+            // required by ui-sortable: we can't use filters with it
+            // https://github.com/angular-ui/ui-sortable#usage
+            function updateFavorites() {
+                scope.dynamicMenuItems = _.sortBy(_.filter(scope.menu.items, function (x) { return x.isFavorite || x.path === "more"; }), function (x) { return x.order; });
+                raiseOnMenuChanged();
+            }
+
+            function raiseOnMenuChanged() {
+                _.throttle(scope.onMenuChanged({ menu: scope.menu }), 100);
+            };
+            scope.toggleCollapsed = function () {
+                scope.menu.isCollapsed = !scope.menu.isCollapsed;
+                raiseOnMenuChanged();
+            };
+
+            scope.toggleFavorite = function (menuItem) {
+                menuItem.isFavorite = !menuItem.isFavorite;
+                // clear order when removed from favorites
+                if (!menuItem.isFavorite) {
+                    menuItem.order = Number.MAX_SAFE_INTEGER;
+                }
+                var favorites = _.sortBy(_.filter(scope.menu.items, function (x) { return x.isFavorite }), function (x) { return x.order; });
+                // re-calculate order
+                for (var i = 0; i < favorites.length; i++) {
+                    favorites[i].order = i;
+                }
+                // Do not call the callback function to notify what favorites changed.
+                // We're already do that because we call updateFavorites (which call the calback) in ngModelController.$render
+            };
+
+            scope.sortableOptions = {
+                axis: "y",
+                cursor: "move",
+                // always use container with tolerance
+                // because otherwise draggable item can't replace top item:
+                // where is no space between top item and container top border
+                containment: ".outer-wrapper",
+                items: ".__draggable",
+                tolerance: "pointer",
+                stop: function (e, ui) {
+                    // re-calculate order for all favorites
+                    // we may use scope.favorites or source model of ui-sortable
+                    // I'm prefer last, to avoid dependence on directive's model
+                    var favorites = ui.item.sortable.sourceModel;
+                    for (var i = 0; i < favorites.length; i++) {
+                        favorites[i].order = i;
+                    }
+                }
+            };
+        }
+    }
+}]).directive('vaFavorites', function () {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attr) {
+            $(element).keydown(function (e) {
+                if (e.shiftKey && e.keyCode === 32) { // Shift + Space
+                    $(e.target).find(".list-fav").click();
+                }
+            });
+        }
+    }
+});
+
+angular.module('platformWebApp')
+.factory('platformWebApp.widgetService', function () {
+
+    var retVal = {
+        widgetsMap: [],
+        registerWidget: function (widget, containerName) {
+            if (!this.widgetsMap[containerName]) {
+                this.widgetsMap[containerName] = [];
+            }
+            this.widgetsMap[containerName].push(widget);
+        }
+
+    };
+    return retVal;
+})
+.directive('vaWidgetContainer', ['$compile', '$localStorage', 'platformWebApp.widgetService', function ($compile, $localStorage, widgetService) {
+    return {
+        restrict: 'E',
+        replace: true,
+        templateUrl: '$(Platform)/Scripts/app/navigation/widget/widgetContainer.tpl.html',
+        scope: {
+            data: '=?',
+            gridsterOpts: '=?',
+            group: '@',
+            blade: '='
+        },
+        link: function (scope, element, attr) {
+            if (!scope.gridsterOpts) { scope.gridsterOpts = {}; }
+            scope.$storage = $localStorage;
+
+            scope.$watch('gridsterOpts', function () {
+                var groupWidgets = _.filter(widgetService.widgetsMap[scope.group], function (w) { return !angular.isFunction(w.isVisible) || w.isVisible(scope.blade); });
+                scope.widgets = angular.copy(groupWidgets);
+                angular.forEach(scope.widgets, function (w) {
+                    w.blade = scope.blade;
+                    w.widgetsInContainer = scope.widgets;
+                });
+            }, true);
+
+            scope.getKey = function (prefix, widget) {
+                return (prefix + widget.controller + widget.template + scope.group).hashCode();
+            }
+        }
+    }
+}])
+.directive('vaWidget', ['$compile', 'platformWebApp.widgetService', 'platformWebApp.authService', function ($compile, widgetService, authService) {
+    return {
+        link: function (scope, element, attr) {
+
+            if (!scope.widget.permission || authService.checkPermission(scope.widget.permission)) {
+                element.attr('ng-controller', scope.widget.controller);
+                element.attr('ng-model', 'widget');
+                element.removeAttr("va-widget");
+                $compile(element)(scope);
+            }
+
+        }
+    }
+}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.moduleDetailController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.bladeNavigationService', 'platformWebApp.modules', 'platformWebApp.moduleHelper', 'FileUploader', 'platformWebApp.settings', function ($scope, dialogService, bladeNavigationService, modules, moduleHelper, FileUploader, settings) {
     var blade = $scope.blade;
@@ -25073,6 +26303,555 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
+.controller('platformWebApp.entitySettingListController', ['$scope', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', function ($scope, settingsHelper, bladeNavigationService) {
+    var blade = $scope.blade;
+    // blade.updatePermission = // Use predefined (parent) permission
+    blade.title = 'platform.blades.entitySetting-list.title';
+
+    function initializeBlade(results) {
+        blade.data = results;
+        results = angular.copy(results);
+
+        // settingsHelper.fixValues(results);
+        
+        _.each(results, function (setting) {
+            // set group names to show.
+            if (setting.groupName) {
+                var paths = setting.groupName.split('|');
+                setting.groupName = paths.pop();
+            }
+
+            // transform to va-generic-value-input suitable structure
+            setting.isDictionary = _.any(setting.allowedValues);
+            setting.values = setting.isDictionary ? [{ value: { id: setting.value, name: setting.value } }] : [{ id: setting.value, value: setting.value }];
+            if (setting.allowedValues) {
+                setting.allowedValues = _.map(setting.allowedValues, function (x) {
+                    return { id: x, name: x };
+                });
+            }
+        });
+
+
+        results = _.groupBy(results, 'groupName');
+        blade.groupNames = _.keys(results);
+        blade.currentEntities = angular.copy(results);
+        blade.origEntity = results;
+        blade.isLoading = false;
+    }
+
+    $scope.editArray = function (node) {
+        var newBlade = {
+            id: "settingDetailChild",
+            currentEntityId: node.name,
+            controller: 'platformWebApp.settingDictionaryController',
+            template: '$(Platform)/Scripts/app/settings/blades/setting-dictionary.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, blade);
+    }
+
+    function isDirty() {
+        return !angular.equals(blade.currentEntities, blade.origEntity) && blade.hasUpdatePermission();
+    }
+
+    function canSave() {
+        return isDirty() && formScope && formScope.$valid;
+    }
+
+    var formScope;
+    $scope.setForm = function (form) { formScope = form; }
+
+    $scope.cancelChanges = function () {
+        angular.copy(blade.origEntity, blade.currentEntities);
+        $scope.bladeClose();
+    }
+
+    $scope.saveChanges = function () {
+        if (!blade.hasUpdatePermission()) return;
+
+        blade.isLoading = true;
+        var objects = _.flatten(_.map(blade.currentEntities, _.values));
+        objects = _.map(objects, function (x) {
+            x.value = x.isDictionary ? x.values[0].value.id : x.values[0].value;
+            x.values = undefined;
+            x.allowedValues = _.pluck(x.allowedValues, 'id');
+            return x;
+        });
+
+        //settingsHelper.toApiFormat(objects);
+        
+        //console.log('saveChanges3: ' + angular.toJson(objects, true));
+        angular.copy(objects, blade.data);
+        angular.copy(blade.currentEntities, blade.origEntity);
+        $scope.bladeClose();
+    };
+
+    blade.headIcon = 'fa-wrench';
+    blade.isSavingToParentObject = true;
+    blade.toolbarCommands = [
+        {
+            name: "platform.commands.reset", icon: 'fa fa-undo',
+            executeMethod: function () {
+                blade.currentEntities = angular.copy(blade.origEntity);
+            },
+            canExecuteMethod: isDirty,
+            permission: blade.updatePermission
+        }
+    ];
+
+    blade.onClose = function (closeCallback) {
+        bladeNavigationService.showConfirmationIfNeeded(isDirty(), canSave(), blade, $scope.saveChanges, closeCallback, "platform.dialogs.settings-save.title", "platform.dialogs.settings-save.message");
+    };
+
+    $scope.getDictionaryValues = function (setting, callback) {
+        callback(setting.allowedValues);
+    };
+
+    // actions on load
+    $scope.$watch('blade.parentBlade.currentEntity.settings', initializeBlade);
+}]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.settingDictionaryController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', function ($scope, dialogService, bladeNavigationService, settings) {
+    var blade = $scope.blade;
+    blade.updatePermission = 'platform:setting:update';
+    var currentEntities;
+
+    blade.refresh = function (parentRefresh) {
+        settings.get({ id: blade.currentEntityId }, function (setting) {
+            if (parentRefresh && blade.parentRefresh) {
+                blade.parentRefresh(setting.arrayValues);
+            }
+
+            setting.arrayValues = _.map(setting.arrayValues, function (x) { return { value: x }; });
+            blade.origEntity = angular.copy(setting.arrayValues);
+            initializeBlade(setting);
+        });
+    }
+
+    function initializeBlade(data) {
+        blade.title = data.title;
+        blade.currentEntity = data;
+        currentEntities = blade.currentEntity.arrayValues;
+        blade.isLoading = false;
+    }
+
+    $scope.dictValueValidator = function (value) {
+        if (blade.currentEntity) {
+            if (blade.currentEntity.valueType == 'ShortText') {
+                return _.all(currentEntities, function (item) { return angular.lowercase(item.value) !== angular.lowercase(value); });
+            } else {
+                return _.all(currentEntities, function (item) { return item.value !== value; });
+            }
+        }
+        return false;
+    };
+
+    $scope.add = function (form) {
+        if (form.$valid) {
+            currentEntities.push($scope.newValue);
+            resetNewValue();
+            form.$setPristine();
+        }
+    };
+
+    $scope.delete = function (index) {
+        currentEntities.splice(index, 1);
+        $scope.selectedItem = undefined;
+    };
+
+    $scope.selectItem = function (listItem) {
+        $scope.selectedItem = listItem;
+    };
+
+    blade.headIcon = 'fa-wrench';
+    blade.subtitle = 'platform.blades.setting-dictionary.subtitle';
+    blade.toolbarCommands = [
+     {
+         name: "platform.commands.delete", icon: 'fa fa-trash-o',
+         executeMethod: function () {
+             deleteChecked();
+         },
+         canExecuteMethod: function () {
+             return isItemsChecked();
+         }
+     }
+    ];
+
+    if (blade.isApiSave) {
+        var formScope;
+        $scope.setForm = function (form) {
+            formScope = form;
+        }
+
+        function isDirty() {
+            return !angular.equals(currentEntities, blade.origEntity) && blade.hasUpdatePermission();
+        };
+
+        function saveChanges() {
+            blade.selectedAll = false;
+            blade.isLoading = true;
+            blade.currentEntity.arrayValues = _.pluck(blade.currentEntity.arrayValues, 'value');
+
+            settings.update(null, [blade.currentEntity], blade.refresh,
+                function (error) { bladeNavigationService.setError('Error ' + error.status, $scope.blade); });
+        };
+
+        blade.toolbarCommands.splice(0, 0,
+        {
+            name: "platform.commands.save",
+            icon: 'fa fa-save',
+            executeMethod: function () {
+                saveChanges();
+            },
+            canExecuteMethod: function () {
+                return isDirty() && formScope && formScope.$valid;
+            }
+        },
+        {
+            name: "platform.commands.reset",
+            icon: 'fa fa-undo',
+            executeMethod: function () {
+                angular.copy(blade.origEntity, currentEntities);
+                blade.selectedAll = false;
+            },
+            canExecuteMethod: isDirty,
+        });
+        blade.refresh();
+    } else {
+        $scope.$watch('blade.parentBlade.currentEntities', function (data) {
+            if (data) {
+                var allEntities = _.flatten(_.map(data, _.values));
+                initializeBlade(_.findWhere(allEntities, { name: blade.currentEntityId }));
+            }
+        });
+    }
+
+    $scope.checkAll = function () {
+        angular.forEach(currentEntities, function (item) {
+            item._selected = blade.selectedAll;
+        });
+    };
+
+    function resetNewValue() {
+        $scope.newValue = { value: null };
+    }
+
+    function isItemsChecked() {
+        return _.any(currentEntities, function (x) { return x._selected; });
+    }
+
+    function deleteChecked() {
+        //var dialog = {
+        //    id: "confirmDeleteItem",
+        //    title: "platform.dialogs.settings-value-delete.title",
+        //    message: "platform.dialogs.settings-value-delete.message",
+        //    callback: function (remove) {
+        //        if (remove) {
+        var selection = _.where(currentEntities, { _selected: true });
+        angular.forEach(selection, function (listItem) {
+            $scope.delete(currentEntities.indexOf(listItem));
+        });
+        //        }
+        //    }
+        //}
+        //dialogService.showConfirmationDialog(dialog);
+    }
+
+    // on load
+    resetNewValue();
+}]);
+angular.module('platformWebApp')
+.controller('platformWebApp.settingGroupListController', ['$window', 'platformWebApp.modules', '$scope', 'platformWebApp.settings', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService',
+function ($window, modules, $scope, settings, bladeNavigationService, dialogService) {
+    var settingsTree;
+    var blade = $scope.blade;
+
+    blade.refresh = function (disableOpenAnimation) {
+        blade.isLoading = true;
+
+        settings.query({}, function (results) {
+            blade.allSettings = results;
+            settingsTree = {};
+            _.each(results, function (setting) {
+                var paths = (setting.groupName ? setting.groupName : 'General').split('|');
+                var lastParent = settingsTree;
+                var lastParentId = '';
+                _.each(paths, function (path, i) {
+                    lastParentId += '|' + path;
+                    if (!lastParent[path]) {
+                        var treeNode = { name: path, groupName: lastParentId.substring(1) }
+                        lastParent[path] = treeNode;
+                        if (setting.groupName && _.all(blade.allSettings, function (x) { return x.groupName !== treeNode.groupName; })) {
+                            blade.allSettings.push(treeNode);
+                        }
+                    }
+
+                    if (i < paths.length - 1) {
+                        if (!lastParent[path].children) {
+                            lastParent[path].children = {};
+                        }
+                        lastParent = lastParent[path].children;
+                    }
+                });
+            });
+
+            blade.isLoading = false;
+
+            // restore previous selection
+            if (blade.searchText) {
+                blade.currentEntities = settingsTree;
+            } else {
+                // reconstruct tree by breadCrumbs
+                var lastchildren = settingsTree;
+                for (var i = 1; i < blade.breadcrumbs.length; i++) {
+                    lastchildren = lastchildren[blade.breadcrumbs[i].name].children;
+                }
+                blade.currentEntities = lastchildren;
+            }
+
+            // open previous settings detail blade if possible
+            if ($scope.selectedNodeId) {
+                $scope.selectNode({ groupName: $scope.selectedNodeId }, disableOpenAnimation);
+            }
+        },
+        function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+    };
+
+    $scope.selectNode = function (node, disableOpenAnimation) {
+        bladeNavigationService.closeChildrenBlades(blade, function () {
+            $scope.selectedNodeId = node.groupName;
+            if (node.children) {
+                blade.searchText = null;
+                blade.currentEntities = node.children;
+
+                setBreadcrumbs(node);
+            } else {
+                var selectedSettings = _.filter(blade.allSettings, function (x) { return x.groupName === node.groupName || (node.groupName === 'General' && !x.groupName); });
+                var newBlade = {
+                    id: 'settingsSection',
+                    data: selectedSettings,
+                    title: 'platform.blades.settings-detail.title',
+                    disableOpenAnimation: disableOpenAnimation,
+                    controller: 'platformWebApp.settingsDetailController',
+                    template: '$(Platform)/Scripts/app/settings/blades/settings-detail.tpl.html'
+                };
+
+                bladeNavigationService.showBlade(newBlade, blade);
+            }
+        });
+    };
+
+    //Breadcrumbs
+    function setBreadcrumbs(node) {
+        blade.breadcrumbs.splice(1, blade.breadcrumbs.length - 1);
+
+        if (node.groupName) {
+            var lastParentId = '';
+            var lastchildren = settingsTree;
+            var paths = node.groupName.split('|');
+            _.each(paths, function (path) {
+                lastchildren = lastchildren[path].children;
+                lastParentId += '|' + path;
+                var breadCrumb = {
+                    id: lastParentId.substring(1),
+                    name: path,
+                    children: lastchildren,
+                    navigate: function () {
+                        $scope.selectNode({ groupName: this.id, children: this.children });
+                    }
+                };
+
+                blade.breadcrumbs.push(breadCrumb);
+            });
+        }
+    }
+
+    blade.breadcrumbs = [{
+        id: null,
+        name: "platform.navigation.bread-crumb-top",
+        navigate: function () {
+            $scope.selectNode({ groupName: null, children: settingsTree });
+        }
+    }];
+
+    blade.headIcon = 'fa-wrench';
+
+    $scope.$watch('blade.searchText', function (newVal) {
+        if (newVal) {
+            blade.currentEntities = settingsTree;
+            setBreadcrumbs({ groupName: null });
+        }
+    });
+
+    blade.toolbarCommands = [
+          {
+              name: "platform.commands.restart", icon: 'fa fa-bolt',
+              executeMethod: function () { restart(); },
+              canExecuteMethod: function () { return !blade.isLoading; },
+              permission: 'platform:module:manage'
+          }
+    ];
+
+    function restart() {
+        var dialog = {
+            id: "confirmRestart",
+            title: "platform.dialogs.app-restart.title",
+            message: "platform.dialogs.app-restart.message",
+            callback: function (confirm) {
+                if (confirm) {
+                    blade.isLoading = true;
+                    modules.restart(function () {
+                        $window.location.reload();
+                    });
+                }
+            }
+        }
+        dialogService.showConfirmationDialog(dialog);
+    }
+
+    // actions on load
+    blade.refresh();
+}]);
+angular.module('platformWebApp')
+.controller('platformWebApp.settingsDetailController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', function ($scope, dialogService, settingsHelper, bladeNavigationService, settings) {
+    var blade = $scope.blade;
+    blade.updatePermission = 'platform:setting:update';
+
+    blade.refresh = function () {
+        if (blade.moduleId && !blade.data) {
+            blade.isLoading = true;
+
+            settings.getSettings({ id: blade.moduleId }, initializeBlade);
+        } else {
+            initializeBlade(angular.copy(blade.data));
+        }
+    }
+
+    function initializeBlade(results) {
+        settingsHelper.fixValues(results);
+
+        _.each(results, function (setting) {
+            // set group names to show.
+            if (setting.groupName) {
+                var paths = setting.groupName.split('|');
+                setting.groupName = paths.pop();
+            }
+
+            // transform to va-generic-value-input suitable structure
+            setting.isDictionary = _.any(setting.allowedValues);
+            setting.values = setting.isDictionary ? [{ value: { id: setting.value, name: setting.value } }] : [{ id: setting.value, value: setting.value }];
+            if (setting.allowedValues) {
+                setting.allowedValues = _.map(setting.allowedValues, function (x) {
+                    return { id: x, name: x };
+                });
+            }
+        });
+
+
+        results = _.groupBy(results, 'groupName');
+        blade.groupNames = _.keys(results);
+        blade.currentEntities = angular.copy(results);
+        blade.origEntity = results;
+        blade.isLoading = false;
+    }
+
+    $scope.editArray = function (node) {
+        var newBlade = {
+            id: "settingDetailChild",
+            currentEntityId: node.name,
+            controller: 'platformWebApp.settingDictionaryController',
+            template: '$(Platform)/Scripts/app/settings/blades/setting-dictionary.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, blade);
+    }
+
+    var formScope;
+    $scope.setForm = function (form) { formScope = form; };
+
+    function isDirty() {
+        return !angular.equals(blade.currentEntities, blade.origEntity) && blade.hasUpdatePermission();
+    }
+
+    function canSave() {
+        return isDirty() && formScope && formScope.$valid;
+    }
+
+    function saveChanges() {
+        blade.isLoading = true;
+        var objects = _.flatten(_.map(blade.currentEntities, _.values));
+        objects = _.map(objects, function (x) {
+            x.value = x.isDictionary ? x.values[0].value.id : x.values[0].value;
+            x.values = undefined;
+            x.allowedValues = undefined;
+            return x;
+        });
+
+        settingsHelper.toApiFormat(objects);
+
+        //console.log('saveChanges3: ' + angular.toJson(objects, true));
+        settings.update({}, objects, function () {
+            if (blade.moduleId) {
+                blade.data = undefined;
+                blade.refresh();
+            } else {
+                blade.origEntity = blade.currentEntities;
+                blade.parentBlade.refresh(true);
+            }
+        });
+    };
+
+    blade.headIcon = 'fa-wrench';
+    blade.toolbarCommands = [
+        {
+            name: "platform.commands.save", icon: 'fa fa-save',
+            executeMethod: saveChanges,
+            canExecuteMethod: canSave
+        },
+        {
+            name: "platform.commands.reset", icon: 'fa fa-undo',
+            executeMethod: function () {
+                blade.currentEntities = angular.copy(blade.origEntity);
+            },
+            canExecuteMethod: isDirty
+        }
+    ];
+
+    blade.onClose = function (closeCallback) {
+        bladeNavigationService.showConfirmationIfNeeded(isDirty(), canSave(), blade, saveChanges, closeCallback, "platform.dialogs.settings-delete.title", "platform.dialogs.settings-delete.message");
+    };
+
+    $scope.getDictionaryValues = function (setting, callback) {
+        callback(setting.allowedValues);
+    };
+
+    // actions on load
+    blade.refresh();
+}]);
+
+angular.module('platformWebApp')
+.factory('platformWebApp.settings', ['$resource', function ($resource) {
+    return $resource('api/platform/settings/:id', { id: '@Id' }, {
+        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
+      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
+      	update: { method: 'POST', url: 'api/platform/settings' },
+        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
+    });
+}]);
+angular.module('platformWebApp')
+.controller('platformWebApp.entitySettingsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    var blade = $scope.blade;
+
+    $scope.openBlade = function () {
+        var newBlade = {
+            id: 'entitySettingList',
+            updatePermission: blade.updatePermission,
+            controller: 'platformWebApp.entitySettingListController',
+            template: '$(Platform)/Scripts/app/settings/blades/settings-detail.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, blade);
+    };
+}]);
+angular.module('platformWebApp')
 .controller('platformWebApp.accountApiListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
     blade.updatePermission = 'platform:security:update';
@@ -26457,1785 +28236,6 @@ angular.module('platformWebApp')
         };
         bladeNavigationService.showBlade(newBlade, $scope.blade);
     };
-}]);
-angular.module('platformWebApp')
-.controller('platformWebApp.entitySettingListController', ['$scope', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', function ($scope, settingsHelper, bladeNavigationService) {
-    var blade = $scope.blade;
-    // blade.updatePermission = // Use predefined (parent) permission
-    blade.title = 'platform.blades.entitySetting-list.title';
-
-    function initializeBlade(results) {
-        blade.data = results;
-        results = angular.copy(results);
-
-        // settingsHelper.fixValues(results);
-        
-        _.each(results, function (setting) {
-            // set group names to show.
-            if (setting.groupName) {
-                var paths = setting.groupName.split('|');
-                setting.groupName = paths.pop();
-            }
-
-            // transform to va-generic-value-input suitable structure
-            setting.isDictionary = _.any(setting.allowedValues);
-            setting.values = setting.isDictionary ? [{ value: { id: setting.value, name: setting.value } }] : [{ id: setting.value, value: setting.value }];
-            if (setting.allowedValues) {
-                setting.allowedValues = _.map(setting.allowedValues, function (x) {
-                    return { id: x, name: x };
-                });
-            }
-        });
-
-
-        results = _.groupBy(results, 'groupName');
-        blade.groupNames = _.keys(results);
-        blade.currentEntities = angular.copy(results);
-        blade.origEntity = results;
-        blade.isLoading = false;
-    }
-
-    $scope.editArray = function (node) {
-        var newBlade = {
-            id: "settingDetailChild",
-            currentEntityId: node.name,
-            controller: 'platformWebApp.settingDictionaryController',
-            template: '$(Platform)/Scripts/app/settings/blades/setting-dictionary.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, blade);
-    }
-
-    function isDirty() {
-        return !angular.equals(blade.currentEntities, blade.origEntity) && blade.hasUpdatePermission();
-    }
-
-    function canSave() {
-        return isDirty() && formScope && formScope.$valid;
-    }
-
-    var formScope;
-    $scope.setForm = function (form) { formScope = form; }
-
-    $scope.cancelChanges = function () {
-        angular.copy(blade.origEntity, blade.currentEntities);
-        $scope.bladeClose();
-    }
-
-    $scope.saveChanges = function () {
-        if (!blade.hasUpdatePermission()) return;
-
-        blade.isLoading = true;
-        var objects = _.flatten(_.map(blade.currentEntities, _.values));
-        objects = _.map(objects, function (x) {
-            x.value = x.isDictionary ? x.values[0].value.id : x.values[0].value;
-            x.values = undefined;
-            x.allowedValues = _.pluck(x.allowedValues, 'id');
-            return x;
-        });
-
-        //settingsHelper.toApiFormat(objects);
-        
-        //console.log('saveChanges3: ' + angular.toJson(objects, true));
-        angular.copy(objects, blade.data);
-        angular.copy(blade.currentEntities, blade.origEntity);
-        $scope.bladeClose();
-    };
-
-    blade.headIcon = 'fa-wrench';
-    blade.isSavingToParentObject = true;
-    blade.toolbarCommands = [
-        {
-            name: "platform.commands.reset", icon: 'fa fa-undo',
-            executeMethod: function () {
-                blade.currentEntities = angular.copy(blade.origEntity);
-            },
-            canExecuteMethod: isDirty,
-            permission: blade.updatePermission
-        }
-    ];
-
-    blade.onClose = function (closeCallback) {
-        bladeNavigationService.showConfirmationIfNeeded(isDirty(), canSave(), blade, $scope.saveChanges, closeCallback, "platform.dialogs.settings-save.title", "platform.dialogs.settings-save.message");
-    };
-
-    $scope.getDictionaryValues = function (setting, callback) {
-        callback(setting.allowedValues);
-    };
-
-    // actions on load
-    $scope.$watch('blade.parentBlade.currentEntity.settings', initializeBlade);
-}]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.settingDictionaryController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', function ($scope, dialogService, bladeNavigationService, settings) {
-    var blade = $scope.blade;
-    blade.updatePermission = 'platform:setting:update';
-    var currentEntities;
-
-    blade.refresh = function (parentRefresh) {
-        settings.get({ id: blade.currentEntityId }, function (setting) {
-            if (parentRefresh && blade.parentRefresh) {
-                blade.parentRefresh(setting.arrayValues);
-            }
-
-            setting.arrayValues = _.map(setting.arrayValues, function (x) { return { value: x }; });
-            blade.origEntity = angular.copy(setting.arrayValues);
-            initializeBlade(setting);
-        });
-    }
-
-    function initializeBlade(data) {
-        blade.title = data.title;
-        blade.currentEntity = data;
-        currentEntities = blade.currentEntity.arrayValues;
-        blade.isLoading = false;
-    }
-
-    $scope.dictValueValidator = function (value) {
-        if (blade.currentEntity) {
-            if (blade.currentEntity.valueType == 'ShortText') {
-                return _.all(currentEntities, function (item) { return angular.lowercase(item.value) !== angular.lowercase(value); });
-            } else {
-                return _.all(currentEntities, function (item) { return item.value !== value; });
-            }
-        }
-        return false;
-    };
-
-    $scope.add = function (form) {
-        if (form.$valid) {
-            currentEntities.push($scope.newValue);
-            resetNewValue();
-            form.$setPristine();
-        }
-    };
-
-    $scope.delete = function (index) {
-        currentEntities.splice(index, 1);
-        $scope.selectedItem = undefined;
-    };
-
-    $scope.selectItem = function (listItem) {
-        $scope.selectedItem = listItem;
-    };
-
-    blade.headIcon = 'fa-wrench';
-    blade.subtitle = 'platform.blades.setting-dictionary.subtitle';
-    blade.toolbarCommands = [
-     {
-         name: "platform.commands.delete", icon: 'fa fa-trash-o',
-         executeMethod: function () {
-             deleteChecked();
-         },
-         canExecuteMethod: function () {
-             return isItemsChecked();
-         }
-     }
-    ];
-
-    if (blade.isApiSave) {
-        var formScope;
-        $scope.setForm = function (form) {
-            formScope = form;
-        }
-
-        function isDirty() {
-            return !angular.equals(currentEntities, blade.origEntity) && blade.hasUpdatePermission();
-        };
-
-        function saveChanges() {
-            blade.selectedAll = false;
-            blade.isLoading = true;
-            blade.currentEntity.arrayValues = _.pluck(blade.currentEntity.arrayValues, 'value');
-
-            settings.update(null, [blade.currentEntity], blade.refresh,
-                function (error) { bladeNavigationService.setError('Error ' + error.status, $scope.blade); });
-        };
-
-        blade.toolbarCommands.splice(0, 0,
-        {
-            name: "platform.commands.save",
-            icon: 'fa fa-save',
-            executeMethod: function () {
-                saveChanges();
-            },
-            canExecuteMethod: function () {
-                return isDirty() && formScope && formScope.$valid;
-            }
-        },
-        {
-            name: "platform.commands.reset",
-            icon: 'fa fa-undo',
-            executeMethod: function () {
-                angular.copy(blade.origEntity, currentEntities);
-                blade.selectedAll = false;
-            },
-            canExecuteMethod: isDirty,
-        });
-        blade.refresh();
-    } else {
-        $scope.$watch('blade.parentBlade.currentEntities', function (data) {
-            if (data) {
-                var allEntities = _.flatten(_.map(data, _.values));
-                initializeBlade(_.findWhere(allEntities, { name: blade.currentEntityId }));
-            }
-        });
-    }
-
-    $scope.checkAll = function () {
-        angular.forEach(currentEntities, function (item) {
-            item._selected = blade.selectedAll;
-        });
-    };
-
-    function resetNewValue() {
-        $scope.newValue = { value: null };
-    }
-
-    function isItemsChecked() {
-        return _.any(currentEntities, function (x) { return x._selected; });
-    }
-
-    function deleteChecked() {
-        //var dialog = {
-        //    id: "confirmDeleteItem",
-        //    title: "platform.dialogs.settings-value-delete.title",
-        //    message: "platform.dialogs.settings-value-delete.message",
-        //    callback: function (remove) {
-        //        if (remove) {
-        var selection = _.where(currentEntities, { _selected: true });
-        angular.forEach(selection, function (listItem) {
-            $scope.delete(currentEntities.indexOf(listItem));
-        });
-        //        }
-        //    }
-        //}
-        //dialogService.showConfirmationDialog(dialog);
-    }
-
-    // on load
-    resetNewValue();
-}]);
-angular.module('platformWebApp')
-.controller('platformWebApp.settingGroupListController', ['$window', 'platformWebApp.modules', '$scope', 'platformWebApp.settings', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService',
-function ($window, modules, $scope, settings, bladeNavigationService, dialogService) {
-    var settingsTree;
-    var blade = $scope.blade;
-
-    blade.refresh = function (disableOpenAnimation) {
-        blade.isLoading = true;
-
-        settings.query({}, function (results) {
-            blade.allSettings = results;
-            settingsTree = {};
-            _.each(results, function (setting) {
-                var paths = (setting.groupName ? setting.groupName : 'General').split('|');
-                var lastParent = settingsTree;
-                var lastParentId = '';
-                _.each(paths, function (path, i) {
-                    lastParentId += '|' + path;
-                    if (!lastParent[path]) {
-                        var treeNode = { name: path, groupName: lastParentId.substring(1) }
-                        lastParent[path] = treeNode;
-                        if (setting.groupName && _.all(blade.allSettings, function (x) { return x.groupName !== treeNode.groupName; })) {
-                            blade.allSettings.push(treeNode);
-                        }
-                    }
-
-                    if (i < paths.length - 1) {
-                        if (!lastParent[path].children) {
-                            lastParent[path].children = {};
-                        }
-                        lastParent = lastParent[path].children;
-                    }
-                });
-            });
-
-            blade.isLoading = false;
-
-            // restore previous selection
-            if (blade.searchText) {
-                blade.currentEntities = settingsTree;
-            } else {
-                // reconstruct tree by breadCrumbs
-                var lastchildren = settingsTree;
-                for (var i = 1; i < blade.breadcrumbs.length; i++) {
-                    lastchildren = lastchildren[blade.breadcrumbs[i].name].children;
-                }
-                blade.currentEntities = lastchildren;
-            }
-
-            // open previous settings detail blade if possible
-            if ($scope.selectedNodeId) {
-                $scope.selectNode({ groupName: $scope.selectedNodeId }, disableOpenAnimation);
-            }
-        },
-        function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-    };
-
-    $scope.selectNode = function (node, disableOpenAnimation) {
-        bladeNavigationService.closeChildrenBlades(blade, function () {
-            $scope.selectedNodeId = node.groupName;
-            if (node.children) {
-                blade.searchText = null;
-                blade.currentEntities = node.children;
-
-                setBreadcrumbs(node);
-            } else {
-                var selectedSettings = _.filter(blade.allSettings, function (x) { return x.groupName === node.groupName || (node.groupName === 'General' && !x.groupName); });
-                var newBlade = {
-                    id: 'settingsSection',
-                    data: selectedSettings,
-                    title: 'platform.blades.settings-detail.title',
-                    disableOpenAnimation: disableOpenAnimation,
-                    controller: 'platformWebApp.settingsDetailController',
-                    template: '$(Platform)/Scripts/app/settings/blades/settings-detail.tpl.html'
-                };
-
-                bladeNavigationService.showBlade(newBlade, blade);
-            }
-        });
-    };
-
-    //Breadcrumbs
-    function setBreadcrumbs(node) {
-        blade.breadcrumbs.splice(1, blade.breadcrumbs.length - 1);
-
-        if (node.groupName) {
-            var lastParentId = '';
-            var lastchildren = settingsTree;
-            var paths = node.groupName.split('|');
-            _.each(paths, function (path) {
-                lastchildren = lastchildren[path].children;
-                lastParentId += '|' + path;
-                var breadCrumb = {
-                    id: lastParentId.substring(1),
-                    name: path,
-                    children: lastchildren,
-                    navigate: function () {
-                        $scope.selectNode({ groupName: this.id, children: this.children });
-                    }
-                };
-
-                blade.breadcrumbs.push(breadCrumb);
-            });
-        }
-    }
-
-    blade.breadcrumbs = [{
-        id: null,
-        name: "platform.navigation.bread-crumb-top",
-        navigate: function () {
-            $scope.selectNode({ groupName: null, children: settingsTree });
-        }
-    }];
-
-    blade.headIcon = 'fa-wrench';
-
-    $scope.$watch('blade.searchText', function (newVal) {
-        if (newVal) {
-            blade.currentEntities = settingsTree;
-            setBreadcrumbs({ groupName: null });
-        }
-    });
-
-    blade.toolbarCommands = [
-          {
-              name: "platform.commands.restart", icon: 'fa fa-bolt',
-              executeMethod: function () { restart(); },
-              canExecuteMethod: function () { return !blade.isLoading; },
-              permission: 'platform:module:manage'
-          }
-    ];
-
-    function restart() {
-        var dialog = {
-            id: "confirmRestart",
-            title: "platform.dialogs.app-restart.title",
-            message: "platform.dialogs.app-restart.message",
-            callback: function (confirm) {
-                if (confirm) {
-                    blade.isLoading = true;
-                    modules.restart(function () {
-                        $window.location.reload();
-                    });
-                }
-            }
-        }
-        dialogService.showConfirmationDialog(dialog);
-    }
-
-    // actions on load
-    blade.refresh();
-}]);
-angular.module('platformWebApp')
-.controller('platformWebApp.settingsDetailController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', function ($scope, dialogService, settingsHelper, bladeNavigationService, settings) {
-    var blade = $scope.blade;
-    blade.updatePermission = 'platform:setting:update';
-
-    blade.refresh = function () {
-        if (blade.moduleId && !blade.data) {
-            blade.isLoading = true;
-
-            settings.getSettings({ id: blade.moduleId }, initializeBlade);
-        } else {
-            initializeBlade(angular.copy(blade.data));
-        }
-    }
-
-    function initializeBlade(results) {
-        settingsHelper.fixValues(results);
-
-        _.each(results, function (setting) {
-            // set group names to show.
-            if (setting.groupName) {
-                var paths = setting.groupName.split('|');
-                setting.groupName = paths.pop();
-            }
-
-            // transform to va-generic-value-input suitable structure
-            setting.isDictionary = _.any(setting.allowedValues);
-            setting.values = setting.isDictionary ? [{ value: { id: setting.value, name: setting.value } }] : [{ id: setting.value, value: setting.value }];
-            if (setting.allowedValues) {
-                setting.allowedValues = _.map(setting.allowedValues, function (x) {
-                    return { id: x, name: x };
-                });
-            }
-        });
-
-
-        results = _.groupBy(results, 'groupName');
-        blade.groupNames = _.keys(results);
-        blade.currentEntities = angular.copy(results);
-        blade.origEntity = results;
-        blade.isLoading = false;
-    }
-
-    $scope.editArray = function (node) {
-        var newBlade = {
-            id: "settingDetailChild",
-            currentEntityId: node.name,
-            controller: 'platformWebApp.settingDictionaryController',
-            template: '$(Platform)/Scripts/app/settings/blades/setting-dictionary.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, blade);
-    }
-
-    var formScope;
-    $scope.setForm = function (form) { formScope = form; };
-
-    function isDirty() {
-        return !angular.equals(blade.currentEntities, blade.origEntity) && blade.hasUpdatePermission();
-    }
-
-    function canSave() {
-        return isDirty() && formScope && formScope.$valid;
-    }
-
-    function saveChanges() {
-        blade.isLoading = true;
-        var objects = _.flatten(_.map(blade.currentEntities, _.values));
-        objects = _.map(objects, function (x) {
-            x.value = x.isDictionary ? x.values[0].value.id : x.values[0].value;
-            x.values = undefined;
-            x.allowedValues = undefined;
-            return x;
-        });
-
-        settingsHelper.toApiFormat(objects);
-
-        //console.log('saveChanges3: ' + angular.toJson(objects, true));
-        settings.update({}, objects, function () {
-            if (blade.moduleId) {
-                blade.data = undefined;
-                blade.refresh();
-            } else {
-                blade.origEntity = blade.currentEntities;
-                blade.parentBlade.refresh(true);
-            }
-        });
-    };
-
-    blade.headIcon = 'fa-wrench';
-    blade.toolbarCommands = [
-        {
-            name: "platform.commands.save", icon: 'fa fa-save',
-            executeMethod: saveChanges,
-            canExecuteMethod: canSave
-        },
-        {
-            name: "platform.commands.reset", icon: 'fa fa-undo',
-            executeMethod: function () {
-                blade.currentEntities = angular.copy(blade.origEntity);
-            },
-            canExecuteMethod: isDirty
-        }
-    ];
-
-    blade.onClose = function (closeCallback) {
-        bladeNavigationService.showConfirmationIfNeeded(isDirty(), canSave(), blade, saveChanges, closeCallback, "platform.dialogs.settings-delete.title", "platform.dialogs.settings-delete.message");
-    };
-
-    $scope.getDictionaryValues = function (setting, callback) {
-        callback(setting.allowedValues);
-    };
-
-    // actions on load
-    blade.refresh();
-}]);
-
-angular.module('platformWebApp')
-.factory('platformWebApp.settings', ['$resource', function ($resource) {
-    return $resource('api/platform/settings/:id', { id: '@Id' }, {
-        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
-      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
-      	update: { method: 'POST', url: 'api/platform/settings' },
-        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
-    });
-}]);
-angular.module('platformWebApp')
-.controller('platformWebApp.entitySettingsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    var blade = $scope.blade;
-
-    $scope.openBlade = function () {
-        var newBlade = {
-            id: 'entitySettingList',
-            updatePermission: blade.updatePermission,
-            controller: 'platformWebApp.entitySettingListController',
-            template: '$(Platform)/Scripts/app/settings/blades/settings-detail.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, blade);
-    };
-}]);
-angular.module('platformWebApp')
-.factory('platformWebApp.toolbarService', function () {
-    var toolbarCommandsMap = [];
-    return {
-        register: function (toolbarItem, toolbarController) {
-            var map = toolbarCommandsMap;
-            if (!map[toolbarController]) {
-                map[toolbarController] = [];
-            }
-
-            map[toolbarController].push(toolbarItem);
-            map[toolbarController].sort(function (a, b) {
-                return a.index - b.index;
-            });
-        },
-        resolve: function (bladeCommands, toolbarController) {
-            var externalCommands = toolbarCommandsMap[toolbarController];
-            if (externalCommands) {
-                bladeCommands = angular.copy(bladeCommands || []);
-
-                _.each(externalCommands, function (newCommand) {
-                    var overrideIndex = _.findIndex(bladeCommands, function (bladeCommand) {
-                        return bladeCommand.name === newCommand.name;
-                    });
-                    var deleteCount = overrideIndex >= 0 ? 1 : 0;
-                    overrideIndex = overrideIndex >= 0 ? overrideIndex : newCommand.index;
-
-                    bladeCommands.splice(overrideIndex, deleteCount, newCommand);
-                });
-            }
-
-            return bladeCommands;
-        }
-    };
-})
-.directive('vaBladeContainer', ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
-    return {
-        restrict: 'E',
-        replace: true,
-        templateUrl: '$(Platform)/Scripts/app/navigation/blade/bladeContainer.tpl.html',
-        link: function (scope) {
-            scope.blades = bladeNavigationService.stateBlades();
-        }
-    }
-}])
-.directive('vaBlade', ['$compile', 'platformWebApp.bladeNavigationService', 'platformWebApp.toolbarService', '$timeout', '$document', 'platformWebApp.dialogService', function ($compile, bladeNavigationService, toolbarService, $timeout, $document, dialogService) {
-    return {
-        terminal: true,
-        priority: 100,
-        link: function (scope, element) {
-            element.attr('ng-controller', scope.blade.controller);
-            element.attr('id', scope.blade.id);
-            element.attr('ng-model', "blade");
-            element.removeAttr("va-blade");
-            $compile(element)(scope);
-            scope.blade.$scope = scope;
-
-            var mainContent = $('.cnt');
-            var currentBlade = $(element).parent();
-            var parentBlade = currentBlade.prev();
-
-            if (!scope.blade.disableOpenAnimation) {
-                scope.blade.animated = true;
-                $timeout(function () {
-                    scope.blade.animated = false;
-                }, 250);
-            }
-
-            function scrollContent(scrollToBlade, scrollToElement) {
-                if (!scrollToBlade) {
-                    scrollToBlade = scope.blade;
-                }
-                if (!scrollToElement) {
-                    scrollToElement = currentBlade;
-                }
-
-                // we can't just get current blade position (because of animation) or calculate it
-                // via parent position + parent width (because we may open parent and child blade at the same time)
-                // instead, we need to use sum of width of all blades
-                var previousBlades = scrollToElement.prevAll();
-                var previousBladesWidthSum = 0;
-                previousBlades.each(function () {
-                    previousBladesWidthSum += $(this).outerWidth();
-                });
-                var scrollLeft = previousBladesWidthSum + scrollToElement.outerWidth(!(scrollToBlade.isExpanded || scrollToBlade.isMaximized)) - mainContent.width();
-                mainContent.animate({ scrollLeft: (scrollLeft > 0 ? scrollLeft : 0) }, 500);
-            }
-
-            var updateSize = function () {
-                var contentBlock = currentBlade.find(".blade-content");
-                var containerBlock = currentBlade.find(".blade-container");
-
-                var bladeWidth = "";
-                var bladeMinWidth = "";
-
-                if ((scope.blade.isExpandable && scope.blade.isExpanded) || (!scope.blade.isExpandable && scope.blade.isMaximized)) {
-                    // minimal required width + container padding
-                    bladeMinWidth = 'calc(' + contentBlock.css("min-width") + ' + ' + parseInt(containerBlock.outerWidth() - containerBlock.width()) + 'px)';
-                }
-
-                if (scope.blade.isExpandable && scope.blade.isExpanded) {
-                    var offset = parentBlade.length > 0 ? parentBlade.width() : 0;
-                    // free space of view - parent blade size (if exist)
-                    bladeWidth = 'calc(100% - ' + offset + 'px)';
-                } else if (!scope.blade.isExpandable && scope.blade.isMaximized) {
-                    currentBlade.attr('data-width', currentBlade.outerWidth());
-                    bladeWidth = '100%';
-                }
-
-                currentBlade.width(bladeWidth);
-                currentBlade.css('min-width', bladeMinWidth);
-
-                setVisibleToolsLimit();
-            }
-
-            scope.$watch('blade.isExpanded', function () {
-                // we must recalculate position only at next digest cycle,
-                // because at this time blade UI is not fully (re)initialized
-                // for example, ng-class set classes after this watch called
-                $timeout(updateSize, 0, false);
-            });
-
-            scope.$on('$includeContentLoaded', function (event, src) {
-                if (src === scope.blade.template) {
-                    // see above
-                    $timeout(function () {
-                        updateSize();
-                        scrollContent();
-                    }, 0, false);
-                }
-            });
-
-            scope.bladeMaximize = function () {
-                scope.blade.isMaximized = true;
-                updateSize();
-                scrollContent();
-            };
-
-            scope.bladeMinimize = function () {
-                scope.blade.isMaximized = false;
-                updateSize();
-            };
-
-            scope.bladeClose = function (onAfterClose) {
-                bladeNavigationService.closeBlade(scope.blade, onAfterClose, function (callback) {
-                    scope.blade.animated = true;
-                    scope.blade.closing = true;
-                    $timeout(function () {
-                        currentBlade.remove();
-                        scrollContent(scope.blade.parentBlade, parentBlade);
-                        callback();
-                    }, 125, false);
-                });
-            };
-
-            scope.$watch('blade.toolbarCommands', function (toolbarCommands) {
-                scope.resolvedToolbarCommands = toolbarService.resolve(toolbarCommands, scope.blade.controller);
-
-                setVisibleToolsLimit();
-            }, true);
-
-            var toolbar = currentBlade.find(".blade-toolbar .menu.__inline");
-
-            function setVisibleToolsLimit() {
-                scope.toolsPerLineCount = scope.resolvedToolbarCommands ? scope.resolvedToolbarCommands.length : 1;
-
-                $timeout(function () {
-                    if (toolbar.height() > 55 && scope.toolsPerLineCount > 1) {
-                        var maxToolbarWidth = toolbar.width() - 46; // the 'more' button is 46px wide
-                        //console.log(toolbar.width() + 'maxToolbarWidth: ' + maxToolbarWidth);
-                        var toolsWidth = 0;
-                        var lis = toolbar.find("li");
-                        var i = 0;
-                        while (maxToolbarWidth > toolsWidth && lis.length > i) {
-                            toolsWidth += lis[i].clientWidth;
-                            i++;
-                        }
-                        scope.toolsPerLineCount = i - 1;
-                    }
-                }, 220);
-            }
-
-            function handleClickEvent() {
-                setVisibleToolsLimit();
-                $document.unbind('click', handleClickEvent);
-            }
-
-            scope.showMoreTools = function (event) {
-                scope.toolsPerLineCount = scope.resolvedToolbarCommands.length;
-
-                event.stopPropagation();
-                $document.bind('click', handleClickEvent);
-            };
-
-            scope.showErrorDetails = function () {
-                var dialog = { id: "errorDetails" };
-                if (scope.blade.errorBody != undefined)
-                    dialog.message = scope.blade.errorBody;
-                dialogService.showDialog(dialog, '$(Platform)/Scripts/app/modularity/dialogs/errorDetails-dialog.tpl.html', 'platformWebApp.confirmDialogController');
-            };
-        }
-    }
-}])
-.factory('platformWebApp.bladeNavigationService', ['platformWebApp.authService', '$timeout', '$state', 'platformWebApp.dialogService', function (authService, $timeout, $state, dialogService) {
-
-    function showConfirmationIfNeeded(showConfirmation, canSave, blade, saveChangesCallback, closeCallback, saveTitle, saveMessage) {
-        if (showConfirmation) {
-            var dialog = { id: "confirmCurrentBladeClose" };
-
-            if (canSave) {
-                dialog.title = saveTitle;
-                dialog.message = saveMessage;
-            } else {
-                dialog.title = "Warning";
-                dialog.message = "Validation failed for this object. Will you continue editing and save later?";
-            }
-
-            dialog.callback = function (userChoseYes) {
-                if (canSave) {
-                    if (userChoseYes) {
-                        saveChangesCallback();
-                    }
-                    closeCallback();
-                } else if (!userChoseYes) {
-                    closeCallback();
-                }
-            };
-
-            dialogService.showConfirmationDialog(dialog);
-        }
-        else {
-            closeCallback();
-        }
-    }
-
-    var service = {
-        blades: [],
-        currentBlade: undefined,
-        showConfirmationIfNeeded: showConfirmationIfNeeded,
-        closeBlade: function (blade, callback, onBeforeClosing) {
-            //Need in case a copy was passed
-            blade = service.findBlade(blade.id) || blade;
-
-            // close all children
-            service.closeChildrenBlades(blade, function () {
-                var doCloseBlade = function () {
-                    if (angular.isFunction(onBeforeClosing)) {
-                        onBeforeClosing(doCloseBladeFinal);
-                    } else {
-                        doCloseBladeFinal();
-                    }
-                }
-
-                var doCloseBladeFinal = function () {
-                    var idx = service.stateBlades().indexOf(blade);
-                    if (idx >= 0) service.stateBlades().splice(idx, 1);
-
-                    //remove blade from children collection
-                    if (angular.isDefined(blade.parentBlade)) {
-                        var childIdx = blade.parentBlade.childrenBlades.indexOf(blade);
-                        if (childIdx >= 0) {
-                            blade.parentBlade.childrenBlades.splice(childIdx, 1);
-                        }
-                    }
-                    if (angular.isFunction(callback)) {
-                        callback();
-                    };
-                };
-
-                if (angular.isFunction(blade.onClose)) {
-                    blade.onClose(doCloseBlade);
-                }
-                else {
-                    doCloseBlade();
-                }
-            });
-
-            if (blade.parentBlade && blade.parentBlade.isExpandable) {
-                blade.parentBlade.isExpanded = true;
-                if (angular.isFunction(blade.parentBlade.onExpand)) {
-                    blade.parentBlade.onExpand();
-                }
-            }
-        },
-        closeChildrenBlades: function (blade, callback) {
-            if (blade && _.any(blade.childrenBlades)) {
-                angular.forEach(blade.childrenBlades.slice(), function (child) {
-                    service.closeBlade(child, function () {
-                        // show only when all children were closed
-                        if (blade.childrenBlades.length == 0 && angular.isFunction(callback)) {
-                            callback();
-                        }
-                    });
-                });
-            } else if (angular.isFunction(callback)) {
-                callback();
-            }
-        },
-        stateBlades: function (stateName) {
-            if (angular.isUndefined(stateName)) {
-                stateName = $state.current.name;
-            }
-
-            if (angular.isUndefined(service.blades[stateName])) {
-                service.blades[stateName] = [];
-            }
-
-            return service.blades[stateName];
-        },
-        findBlade: function (id) {
-            var found;
-            angular.forEach(service.stateBlades(), function (blade) {
-                if (blade.id == id) {
-                    found = blade;
-                }
-            });
-
-            return found;
-        },
-        showBlade: function (blade, parentBlade) {
-
-            //If it is first blade for state try to open saved blades
-            //var firstStateBlade = service.stateBlades($state.current.name)[0];
-            //if (angular.isDefined(firstStateBlade) && firstStateBlade.id == blade.id) {
-            //    service.currentBlade = firstStateBlade;
-            //    return;
-            //}
-            blade.errorBody = "";
-            blade.isLoading = true;
-            blade.parentBlade = parentBlade;
-            blade.childrenBlades = [];
-            if (parentBlade) {
-                blade.headIcon = parentBlade.headIcon;
-                blade.updatePermission = parentBlade.updatePermission;
-            }
-            //copy securityscopes from parent blade
-            if (parentBlade != null && parentBlade.securityScopes) {
-                //need merge scopes
-                if (angular.isArray(blade.securityScopes) && angular.isArray(parentBlade.securityScopes)) {
-                    blade.securityScopes = parentBlade.securityScopes.concat(blade.securityScopes);
-                }
-                else {
-                    blade.securityScopes = parentBlade.securityScopes;
-                }
-            }
-
-            var existingBlade = service.findBlade(blade.id);
-
-            //Show blade in previous location
-            if (existingBlade != undefined) {
-                //store prev blade x-index
-                blade.xindex = existingBlade.xindex;
-            } else if (!angular.isDefined(blade.xindex)) {
-                //Show blade as last one by default
-                blade.xindex = service.stateBlades().length;
-            }
-
-            var showBlade = function () {
-                if (angular.isDefined(parentBlade)) {
-                    blade.xindex = service.stateBlades().indexOf(parentBlade) + 1;
-                    parentBlade.childrenBlades.push(blade);
-                }
-                //show blade in same place where it was
-                service.stateBlades().splice(Math.min(blade.xindex, service.stateBlades().length), 0, blade);
-                service.currentBlade = blade;
-            };
-
-            if (angular.isDefined(parentBlade) && parentBlade.childrenBlades.length > 0) {
-                service.closeChildrenBlades(parentBlade, showBlade);
-            }
-            else if (angular.isDefined(existingBlade)) {
-                service.closeBlade(existingBlade, showBlade);
-            }
-            else {
-                $timeout(function() {
-                    showBlade();
-                });
-            }
-
-            if (parentBlade && parentBlade.isExpandable && parentBlade.isExpanded) {
-                parentBlade.isExpanded = false;
-                if (angular.isFunction(parentBlade.onCollapse)) {
-                    parentBlade.onCollapse();
-                }
-            }
-
-            if (blade.isExpandable) {
-                blade.isExpanded = true;
-                if (angular.isFunction(blade.onExpand)) {
-                    blade.onExpand();
-                }
-            }
-
-            blade.hasUpdatePermission = function () {
-                return authService.checkPermission(blade.updatePermission, blade.securityScopes);
-            };
-        },
-        checkPermission: authService.checkPermission,
-        setError: function (error, blade) {
-            if (blade && error) {
-                blade.isLoading = false;
-                blade.error = error.status && error.statusText ? error.status + ': ' + error.statusText : error;
-                blade.errorBody = error.data ? error.data.exceptionMessage : blade.errorBody;
-            }
-        }
-    };
-
-    return service;
-}]);
-
-angular.module('platformWebApp')
-    .directive('vaBreadcrumb', [
-        'platformWebApp.breadcrumbHistoryService', function (breadcrumbHistoryService) {
-            return {
-                restrict: 'E',
-                require: 'ngModel',
-                replace: true,
-                scope: {
-                    bladeId: '='
-                },
-        templateUrl: '$(Platform)/Scripts/app/navigation/breadcrumbs/breadcrumbs.tpl.html',
-                link: function (scope, element, attr, ngModelController) {
-                    scope.breadcrumbs = [];
-                    ngModelController.$render = function () {
-                        scope.breadcrumbs = ngModelController.$modelValue;
-                    };
-
-                    scope.innerNavigate = function (breadcrumb) {
-                        breadcrumb.navigate(breadcrumb);
-                    };
-
-                    scope.canNavigateBack = function () {
-                        return breadcrumbHistoryService.check(scope.bladeId);
-                    };
-
-                    scope.navigateBack = function () {
-                        if (scope.canNavigateBack()) {
-                            var breadcrumb = breadcrumbHistoryService.pop(scope.bladeId);
-                            breadcrumb.navigate(breadcrumb);
-                        }
-                    };
-                    scope.$watchCollection('breadcrumbs', function (newItems) {
-                        breadcrumbHistoryService.push(newItems, scope.bladeId);
-                    });
-                }
-            }
-        }
-    ])
-    .factory('platformWebApp.breadcrumbHistoryService', function () {
-        var map = {};
-
-        function breadcrumbsEqual(x,y) {
-            return x && y && x.id === y.id && x.name === y.name;
-        }
-
-        return {
-            push: function (breadcrumbs, id) {
-                var history = map[id];
-                if (!history) {
-                    map[id] = history = {
-                        ignoreNextAction: false,
-                        records: []
-                    };
-                }
-
-                var currentBreadcrumb = _.last(breadcrumbs);
-
-                if (history.ignoreNextAction) {
-                    history.ignoreNextAction = false;
-                } else if (history.currentBreadcrumb &&
-                            !breadcrumbsEqual(history.currentBreadcrumb, currentBreadcrumb) &&
-                            !breadcrumbsEqual(history.currentBreadcrumb, _.last(history.records))) {
-                    history.records.push(history.currentBreadcrumb);
-                }
-
-                if (currentBreadcrumb) {
-                    history.currentBreadcrumb = currentBreadcrumb;
-                }
-            },
-
-            check: function (id) {
-                return map[id] && _.any(map[id].records);
-            },
-
-            pop: function (id) {
-                var retVal = undefined;
-                var history = map[id];
-                if (_.any(history.records)) {
-                    retVal = history.records.pop();
-                    history.ignoreNextAction = true;
-                }
-
-                return retVal;
-            }
-        };
-    });
-angular.module('platformWebApp')
-    .controller('platformWebApp.assets.assetListController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', '$sessionStorage', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
-        function ($scope, assets, bladeNavigationService, dialogService, $storage, bladeUtils, uiGridHelper) {
-            var blade = $scope.blade;
-            blade.title = 'platform.blades.asset-list.title';
-            if (!blade.currentEntity) {
-                blade.currentEntity = {};
-            }
-
-            blade.refresh = function () {
-                blade.isLoading = true;
-                assets.search(
-                    {
-                        keyword: blade.searchKeyword,
-                        folderUrl: blade.currentEntity.url
-                    },
-                    function (data) {
-                        $scope.pageSettings.totalItems = data.totalCount;
-                        _.each(data.results, function (x) {
-                            x.isImage = x.contentType && x.contentType.startsWith('image/');
-                            if (x.isImage) {
-                                x.noCacheUrl = x.url + '?t=' + x.modifiedDate;
-                            }
-                        });
-                        $scope.listEntries = data.results;
-                        blade.isLoading = false;
-
-                        //Set navigation breadcrumbs
-                        setBreadcrumbs();
-                    }, function (error) {
-                        bladeNavigationService.setError('Error ' + error.status, blade);
-                    });
-            };
-
-            //Breadcrumbs
-            function setBreadcrumbs() {
-                if (blade.breadcrumbs) {
-                    //Clone array (angular.copy leaves the same reference)
-                    var breadcrumbs = blade.breadcrumbs.slice(0);
-
-                    //prevent duplicate items
-                    if (blade.currentEntity.url && _.all(breadcrumbs, function (x) { return x.id !== blade.currentEntity.url; })) {
-                        var breadCrumb = generateBreadcrumb(blade.currentEntity.url, blade.currentEntity.name);
-                        breadcrumbs.push(breadCrumb);
-                    }
-                    blade.breadcrumbs = breadcrumbs;
-                } else {
-                    blade.breadcrumbs = [generateBreadcrumb(blade.currentEntity.url, 'all')];
-                }
-            }
-
-            function generateBreadcrumb(id, name) {
-                return {
-                    id: id,
-                    name: name,
-                    blade: blade,
-                    navigate: function (breadcrumb) {
-                        breadcrumb.blade.searchKeyword = null;
-                        breadcrumb.blade.disableOpenAnimation = true;
-                        bladeNavigationService.showBlade(breadcrumb.blade, breadcrumb.blade.parentBlade);
-                        // breadcrumb.blade.refresh();
-                    }
-                }
-            }
-
-            function newFolder(value, prefix) {
-                var result = prompt(prefix ? prefix + "\n\nEnter folder name:" : "Enter folder name:", value);
-                if (result != null) {
-                    if (blade.currentEntity.url) {
-                        assets.createFolder({ name: result, parentUrl: blade.currentEntity.url },
-                            blade.refresh,
-                            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-                    } else {
-                        if (result.length < 3 || result.length > 63 || !result.match(/^[a-z0-9]+(-[a-z0-9]+)*$/)) {
-                            newFolder(result, "A folder name must conform to the following naming rules:\n  Folder name must be from 3 through 63 characters long.\n  Folder name must start with a letter or number, and can contain only letters, numbers, and the dash (-) character.\n  Every dash (-) character must be immediately preceded and followed by a letter or number; consecutive dashes are not permitted.\n  All letters in a folder name must be lowercase.");
-                        } else {
-                            assets.createFolder({ name: result, parentUrl: blade.currentEntity.url },
-                                blade.refresh,
-                                function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-                        }
-                    }
-                }
-            }
-
-            $scope.copyUrl = function (data) {
-                window.prompt("Copy to clipboard: Ctrl+C, Enter", data.url);
-            };
-
-            $scope.downloadUrl = function (data) {
-                window.open(data.url, '_blank');
-            };
-
-            //$scope.rename = function (listItem) {
-            //    rename(listItem);
-            //};
-
-            //function rename(listItem) {
-            //    var result = prompt("Enter new name", listItem.name);
-            //    if (result) {
-            //        listItem.name = result;
-            //    }
-            //}
-
-            function isItemsChecked() {
-                return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
-            }
-
-            $scope.delete = function (data) {
-                deleteList([data]);
-            };
-
-            function deleteList(selection) {
-                bladeNavigationService.closeChildrenBlades(blade, function () {
-                    var dialog = {
-                        id: "confirmDeleteItem",
-                        title: "platform.dialogs.folders-delete.title",
-                        message: "platform.dialogs.folders-delete.message",
-                        callback: function (remove) {
-                            if (remove) {
-                                var listEntryIds = _.pluck(selection, 'url');
-                                assets.remove({ urls: listEntryIds },
-                                    blade.refresh,
-                                    function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-                            }
-                        }
-                    }
-                    dialogService.showConfirmationDialog(dialog);
-                });
-            }
-
-            $scope.selectNode = function (listItem) {
-                if (listItem.type === 'folder') {
-                    var newBlade = {
-                        id: blade.id,
-                        breadcrumbs: blade.breadcrumbs,
-                        currentEntity: listItem,
-                        disableOpenAnimation: true,
-                        controller: blade.controller,
-                        template: blade.template,
-                        isClosingDisabled: blade.isClosingDisabled
-                    };
-
-                    bladeNavigationService.showBlade(newBlade, blade.parentBlade);
-                }
-            };
-
-            blade.headIcon = 'fa-folder-o';
-
-            blade.toolbarCommands = [
-                {
-                    name: "platform.commands.refresh", icon: 'fa fa-refresh',
-                    executeMethod: blade.refresh,
-                    canExecuteMethod: function () {
-                        return true;
-                    }
-                },
-                {
-                    name: "platform.commands.new-folder", icon: 'fa fa-folder-o',
-                    executeMethod: function () { newFolder(); },
-                    canExecuteMethod: function () {
-                        return true;
-                    },
-                    permission: 'platform:asset:create'
-                },
-                {
-                    name: "platform.commands.upload", icon: 'fa fa-upload',
-                    executeMethod: function () {
-                        var newBlade = {
-                            id: "assetUpload",
-                            currentEntityId: blade.currentEntity.url,
-                            title: 'platform.blades.asset-upload.title',
-                            controller: 'platformWebApp.assets.assetUploadController',
-                            template: '$(Platform)/Scripts/app/assets/blades/asset-upload.tpl.html'
-                        };
-                        bladeNavigationService.showBlade(newBlade, blade);
-                    },
-                    canExecuteMethod: function () {
-                        return true;
-                    },
-                    permission: 'platform:asset:create'
-                },
-                //{
-                //    name: "Rename", icon: 'fa fa-font',
-                //    executeMethod: function () {
-                //        rename(getFirstChecked())
-                //    },
-                //    canExecuteMethod: isSingleChecked,
-                //    permission: 'platform:asset:update'
-                //},
-                {
-                    name: "platform.commands.delete", icon: 'fa fa-trash-o',
-                    executeMethod: function () { deleteList($scope.gridApi.selection.getSelectedRows()); },
-                    canExecuteMethod: isItemsChecked,
-                    permission: 'platform:asset:delete'
-                }
-                //{
-                //    name: "Cut",
-                //    icon: 'fa fa-cut',
-                //    executeMethod: function () {
-                //    },
-                //    canExecuteMethod: isItemsChecked,
-                //    permission: 'asset:delete'
-                //},
-                //{
-                //    name: "Paste",
-                //    icon: 'fa fa-clipboard',
-                //    executeMethod: function () {
-                //        blade.isLoading = true;
-                //        assets.move({
-                //            folder: blade.currentEntity.url,
-                //            listEntries: $storage.catalogClipboardContent
-                //        }, function () {
-                //            delete $storage.catalogClipboardContent;
-                //            blade.refresh();
-                //        }, function (error) {
-                //            bladeNavigationService.setError('Error ' + error.status, blade);
-                //        });
-                //    },
-                //    canExecuteMethod: function () {
-                //        return $storage.catalogClipboardContent;
-                //    },
-                //    permission: 'asset:delete'
-                //}
-            ];
-
-            // ui-grid
-            $scope.setGridOptions = function (gridOptions) {
-                uiGridHelper.initialize($scope, gridOptions,
-                    function (gridApi) {
-                        $scope.$watch('pageSettings.currentPage', gridApi.pagination.seek);
-                    });
-            };
-            bladeUtils.initializePagination($scope, true);
-
-            blade.refresh();
-        }]);
-
-angular.module('platformWebApp')
-    .controller('platformWebApp.assets.assetSelectController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
-        function ($scope, assetsApi, bladeNavigationService, bladeUtils, uiGridHelper) {
-            var blade = $scope.blade;
-            blade.template = '$(Platform)/Scripts/app/assets/blades/asset-select.tpl.html';
-
-            blade.headIcon = 'fa-folder-o';
-
-            if (!blade.currentEntity) {
-                blade.currentEntity = {};
-            }
-            if (blade.folder) {
-                blade.currentEntity.url = '/' + blade.folder;
-            }
-
-            blade.refresh = function () {
-                blade.isLoading = true;
-                assetsApi.search(
-                    {
-                        keyword: blade.searchKeyword,
-                        folderUrl: blade.currentEntity.url
-                    },
-                    function (data) {
-                        $scope.pageSettings.totalItems = data.totalCount;
-                        _.each(data.results, function (x) { x.isImage = x.contentType && x.contentType.startsWith('image/'); });
-                        $scope.listEntries = data.results;
-                        blade.isLoading = false;
-
-                        //Set navigation breadcrumbs
-                        setBreadcrumbs();
-                    }, function (error) {
-                        bladeNavigationService.setError('Error ' + error.status, blade);
-                    });
-            };
-
-            //Breadcrumbs
-            function setBreadcrumbs() {
-                if (blade.breadcrumbs) {
-                    //Clone array (angular.copy leaves the same reference)
-                    var breadcrumbs = blade.breadcrumbs.slice(0);
-
-                    //prevent duplicate items
-                    if (blade.currentEntity.url && _.all(breadcrumbs, function (x) { return x.id !== blade.currentEntity.url; })) {
-                        var breadCrumb = generateBreadcrumb(blade.currentEntity.url, blade.currentEntity.name);
-                        breadcrumbs.push(breadCrumb);
-                    }
-                    blade.breadcrumbs = breadcrumbs;
-                } else {
-                    var name = "all";
-                    if (blade.folder)
-                        name = blade.folder;
-
-                    blade.breadcrumbs = [generateBreadcrumb(blade.currentEntity.url, name)];
-                }
-            }
-
-            function generateBreadcrumb(id, name) {
-                return {
-                    id: id,
-                    name: name,
-                    blade: blade,
-                    navigate: function (breadcrumb) {
-                        breadcrumb.blade.searchKeyword = null;
-                        breadcrumb.blade.disableOpenAnimation = true;
-                        bladeNavigationService.showBlade(breadcrumb.blade, breadcrumb.blade.parentBlade);
-                    }
-                }
-            }
-
-            function isItemsChecked() {
-                return $scope.gridApi && _.any($scope.gridApi.selection.getSelectedRows());
-            }
-
-            function getSelectedAssets() {
-                return $scope.gridApi.selection.getSelectedRows();
-            }
-
-            $scope.selectNode = function (listItem) {
-                if (listItem.type === 'folder') {
-                    var newBlade = {
-                        id: blade.id,
-                        title: blade.title,
-                        breadcrumbs: blade.breadcrumbs,
-                        currentEntity: listItem,
-                        disableOpenAnimation: true,
-                        controller: blade.controller,
-                        template: blade.template,
-                        isClosingDisabled: blade.isClosingDisabled,
-                        onSelect: blade.onSelect
-                    };
-
-                    bladeNavigationService.showBlade(newBlade, blade.parentBlade);
-                }
-            };
-
-            blade.toolbarCommands = [
-                {
-                    name: 'platform.commands.confirm',
-                    icon: 'fa fa-check',
-                    executeMethod: function () { $scope.saveChanges(); },
-                    canExecuteMethod: function () {
-                        return isItemsChecked();
-                    }
-                }
-            ];
-
-            $scope.saveChanges = function () {
-                if (blade.onSelect)
-                    blade.onSelect(getSelectedAssets());
-
-                $scope.bladeClose();
-            };
-
-            // ui-grid
-            $scope.setGridOptions = function (gridOptions) {
-                uiGridHelper.initialize($scope, gridOptions,
-                    function (gridApi) {
-                        $scope.$watch('pageSettings.currentPage', gridApi.pagination.seek);
-                    });
-            };
-            bladeUtils.initializePagination($scope, true);
-
-            blade.refresh();
-        }]);
-
-angular.module('platformWebApp')
-    .controller('platformWebApp.assets.assetUploadController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'FileUploader', function ($scope, assets, bladeNavigationService, FileUploader) {
-        var blade = $scope.blade;
-        var currentEntities;
-        if (!blade.fileUploadOptions) {
-            blade.fileUploadOptions = {};
-        }
-        var folderUrl = blade.currentEntityId || "";
-
-        function initialize() {
-            if (!$scope.uploader) {
-                // Create the uploader
-                var uploader = $scope.uploader = new FileUploader({
-                    scope: $scope,
-                    headers: { Accept: 'application/json' },
-                    url: 'api/platform/assets?folderUrl=' + folderUrl,
-                    method: 'POST',
-                    //autoUpload: true,
-                    removeAfterUpload: true
-                });
-
-                if (blade.fileUploadOptions.accept && blade.fileUploadOptions.accept.contains('image')) {
-                    uploader.filters.push({
-                        name: 'imageFilter',
-                        fn: function (item) {
-                            var type = '|' + item.type.slice(item.type.lastIndexOf('/') + 1) + '|';
-                            return '|jpg|png|jpeg|bmp|gif|'.indexOf(type) !== -1;
-                        }
-                    });
-                }
-
-                uploader.onAfterAddingAll = function (addedItems) {
-                    blade.isLoading = true;
-                    blade.uploadCompleted = false;
-                    bladeNavigationService.setError(null, blade);
-
-                    // check for asset duplicates
-                    assets.search({ folderUrl: folderUrl },
-                        function (data) {
-                            blade.isLoading = false;
-                            currentEntities = data.results;
-
-                            _.each(addedItems, promptUserDecision);
-                            uploader.uploadAll();
-                        }, function (error) {
-                            bladeNavigationService.setError('Error ' + error.status, blade);
-                        });
-                };
-
-                uploader.onErrorItem = function (item, response, status, headers) {
-                    bladeNavigationService.setError(item._file.name + ' failed: ' + (response.message ? response.message : status), blade);
-                };
-
-                uploader.onCompleteAll = function () {
-                    refreshParentBlade();
-                    blade.uploadCompleted = true;
-                };
-
-                uploader.onSuccessItem = function (fileItem, images) {
-                    if (blade.onUploadComplete) {
-                        blade.onUploadComplete(images);
-                    }
-                };
-            }
-        }
-
-        function refreshParentBlade() {
-            if (blade.parentBlade.refresh && !blade.fileUploadOptions.suppressParentRefresh) {
-                blade.parentBlade.refresh();
-            }
-        }
-
-        function promptUserDecision(item) {
-            if (_.any(currentEntities, function (x) { return x.type === 'blob' && x.name.toLowerCase() === item.file.name.toLowerCase() })) {
-                var result = prompt("File \"" + item.file.name + "\" already exists!\n- Change name / press [OK] to overwrite.\n- Press [Cancel] to skip this file.\nFile name:", item.file.name);
-                if (result == null) {
-                    item.remove();
-                } else if (!result) {
-                    promptUserDecision(item);
-                } else if (result !== item.file.name) {
-                    item.file.name = result;
-                    promptUserDecision(item);
-                } else {
-                    item.url += "&forceFileOverwrite=true";
-                }
-            }
-        }
-
-        $scope.addImageFromUrl = function () {
-            if (blade.newExternalImageUrl) {
-                blade.uploadCompleted = false;
-
-                assets.uploadFromUrl({ folderUrl: folderUrl, url: blade.newExternalImageUrl }, function (data) {
-                    refreshParentBlade();
-                    if (blade.onUploadComplete) {
-                        blade.onUploadComplete(data);
-                    }
-                    blade.newExternalImageUrl = undefined;
-                    blade.uploadCompleted = true;
-                });
-            }
-        };
-
-        blade.headIcon = 'fa-file-o';
-
-        initialize();
-        blade.isLoading = false;
-    }]);
-
-angular.module('platformWebApp')
-.factory('platformWebApp.mainMenuService', [function () {
-
-    var menuItems = [];
-
-    function sortByGroupFirst(a, b) {
-        return a.path.split('/').length - b.path.split('/').length;
-    };
-
-    function sortByPriority(a, b) {
-        if (angular.isDefined(a.priority) && angular.isDefined(b.priority)) {
-            return a.priority < b.priority ? -1 : a.priority > b.priority ? 1 : 0;
-        }
-        return -1;
-    };
-
-    function constructList() {
-        angular.forEach(menuItems.sort(sortByGroupFirst), function (menuItem) {
-            if (!angular.isDefined(menuItem.group)) {
-                menuItem.group = null;
-            }
-            if (menuItem.group == null) {
-                var pathParts = menuItem.path.split('/');
-                var groupPath = null;
-                if (pathParts.length > 1) {
-                    pathParts.pop();
-                    groupPath = pathParts.join('/');
-                }
-                var group = _.find(menuItems, function (menuItem) { return menuItem.path === groupPath });
-                if (angular.isDefined(group)) {
-                    menuItem.group = group;
-                }
-            }
-        });
-        menuItems.sort(sortByPriority);
-    };
-
-    function addMenuItem(menuItem) {
-        resetMenuItemDefaults(menuItem);
-        menuItems.push(menuItem);
-        constructList();
-    }
-
-    function removeMenuItem(menuItem) {
-        var index = menuItems.indexOf(menuItem);
-        menuItems.splice(index, 1);
-        constructList();
-    }
-
-    function resetMenuItemDefaults(menuItem) {
-        // set defaults
-        if (!angular.isDefined(menuItem.priority)) {
-            menuItem.priority = Number.NaN;
-        }
-        if (!angular.isDefined(menuItem.children)) {
-            menuItem.children = [];
-        }
-        if (!angular.isDefined(menuItem.isAlwaysOnBar)) {
-            menuItem.isAlwaysOnBar = false;
-        }
-        menuItem.isCollapsed = false;
-        menuItem.isFavorite = false;
-            // place at the end
-        menuItem.order = Number.MAX_SAFE_INTEGER;
-    }
-
-    function findByPath(path) {
-        return _.find(menuItems, function (menuItem) { return menuItem.path === path });
-    };
-
-    var retVal = {
-        menuItems: menuItems,
-        addMenuItem: addMenuItem,
-        removeMenuItem: removeMenuItem,
-        resetMenuItemDefaults: resetMenuItemDefaults,
-        findByPath: findByPath
-    };
-    return retVal;
-}])
-.directive('vaMainMenu', ["$document",
-    function ($document) {
-
-    return {
-        restrict: 'E',
-        replace: true,
-        transclude: true,
-        require: 'ngModel',
-        scope: {
-            onMenuChanged: "&"
-        },
-        templateUrl: '$(Platform)/Scripts/app/navigation/menu/mainMenu.tpl.html',
-        link: function (scope, element, attr, ngModelController, linker) {
-            scope.menu = ngModelController.$modelValue;
-            ngModelController.$render = function () {
-                scope.menu = ngModelController.$modelValue;
-                updateFavorites();
-                scope.$watch(function () {
-                    return _.filter(scope.menu.items, function (x) { return x.isFavorite && !x.isAlwaysOnBar; });
-                }, function () { updateFavorites(); }, true);
-            };            
-
-            scope.selectItem = function (menuItem) {
-                if (scope.showSubMenu && scope.currentMenuItem === menuItem) {
-                    scope.showSubMenu = false;
-                } else {
-                    scope.currentMenuItem = menuItem;
-                    scope.showSubMenu = menuItem.children.length > 0 || menuItem.path === "more";
-                }
-                if (angular.isDefined(menuItem.action)) {
-                    menuItem.action();
-                }
-            };        
-         
-            function handleKeyUpEvent(event) {
-                if (scope.showSubMenu && event.keyCode === 27) {
-                    scope.$apply(function () {
-                        scope.showSubMenu = false;
-                    });
-                }
-            }
-
-            function handleClickEvent(event) {
-                var dropdownElement = $document.find('.nav-bar .dropdown');
-                var hadDropdownElement = $document.find('.__has-dropdown');
-                if (scope.showSubMenu && !(dropdownElement.is(event.target) || dropdownElement.has(event.target).length > 0 ||
-                                           hadDropdownElement.is(event.target) || hadDropdownElement.has(event.target).length > 0)) {
-                    scope.$apply(function () {
-                        scope.showSubMenu = false;
-                    });
-                }
-            }
-
-            $document.bind('keyup', handleKeyUpEvent);
-            $document.bind('click', handleClickEvent);
-
-            scope.$on('$destroy', function () {
-                $document.unbind('keyup', handleKeyUpEvent);
-                $document.unbind('click', handleClickEvent);
-            });
-
-            // required by ui-sortable: we can't use filters with it
-            // https://github.com/angular-ui/ui-sortable#usage
-            function updateFavorites() {
-                scope.dynamicMenuItems = _.sortBy(_.filter(scope.menu.items, function (x) { return x.isFavorite || x.path === "more"; }), function (x) { return x.order; });
-                raiseOnMenuChanged();
-            }
-
-            function raiseOnMenuChanged() {
-                _.throttle(scope.onMenuChanged({ menu: scope.menu }), 100);
-            };
-            scope.toggleCollapsed = function () {
-                scope.menu.isCollapsed = !scope.menu.isCollapsed;
-                raiseOnMenuChanged();
-            };
-
-            scope.toggleFavorite = function (menuItem) {
-                menuItem.isFavorite = !menuItem.isFavorite;
-                // clear order when removed from favorites
-                if (!menuItem.isFavorite) {
-                    menuItem.order = Number.MAX_SAFE_INTEGER;
-                }
-                var favorites = _.sortBy(_.filter(scope.menu.items, function (x) { return x.isFavorite }), function (x) { return x.order; });
-                // re-calculate order
-                for (var i = 0; i < favorites.length; i++) {
-                    favorites[i].order = i;
-                }
-                // Do not call the callback function to notify what favorites changed.
-                // We're already do that because we call updateFavorites (which call the calback) in ngModelController.$render
-            };
-
-            scope.sortableOptions = {
-                axis: "y",
-                cursor: "move",
-                // always use container with tolerance
-                // because otherwise draggable item can't replace top item:
-                // where is no space between top item and container top border
-                containment: ".outer-wrapper",
-                items: ".__draggable",
-                tolerance: "pointer",
-                stop: function (e, ui) {
-                    // re-calculate order for all favorites
-                    // we may use scope.favorites or source model of ui-sortable
-                    // I'm prefer last, to avoid dependence on directive's model
-                    var favorites = ui.item.sortable.sourceModel;
-                    for (var i = 0; i < favorites.length; i++) {
-                        favorites[i].order = i;
-                    }
-                }
-            };
-        }
-    }
-}]).directive('vaFavorites', function () {
-    return {
-        restrict: 'A',
-        link: function (scope, element, attr) {
-            $(element).keydown(function (e) {
-                if (e.shiftKey && e.keyCode === 32) { // Shift + Space
-                    $(e.target).find(".list-fav").click();
-                }
-            });
-        }
-    }
-});
-
-angular.module('platformWebApp')
-.factory('platformWebApp.widgetService', function () {
-
-    var retVal = {
-        widgetsMap: [],
-        registerWidget: function (widget, containerName) {
-            if (!this.widgetsMap[containerName]) {
-                this.widgetsMap[containerName] = [];
-            }
-            this.widgetsMap[containerName].push(widget);
-        }
-
-    };
-    return retVal;
-})
-.directive('vaWidgetContainer', ['$compile', '$localStorage', 'platformWebApp.widgetService', function ($compile, $localStorage, widgetService) {
-    return {
-        restrict: 'E',
-        replace: true,
-        templateUrl: '$(Platform)/Scripts/app/navigation/widget/widgetContainer.tpl.html',
-        scope: {
-            data: '=?',
-            gridsterOpts: '=?',
-            group: '@',
-            blade: '='
-        },
-        link: function (scope, element, attr) {
-            if (!scope.gridsterOpts) { scope.gridsterOpts = {}; }
-            scope.$storage = $localStorage;
-
-            scope.$watch('gridsterOpts', function () {
-                var groupWidgets = _.filter(widgetService.widgetsMap[scope.group], function (w) { return !angular.isFunction(w.isVisible) || w.isVisible(scope.blade); });
-                scope.widgets = angular.copy(groupWidgets);
-                angular.forEach(scope.widgets, function (w) {
-                    w.blade = scope.blade;
-                    w.widgetsInContainer = scope.widgets;
-                });
-            }, true);
-
-            scope.getKey = function (prefix, widget) {
-                return (prefix + widget.controller + widget.template + scope.group).hashCode();
-            }
-        }
-    }
-}])
-.directive('vaWidget', ['$compile', 'platformWebApp.widgetService', 'platformWebApp.authService', function ($compile, widgetService, authService) {
-    return {
-        link: function (scope, element, attr) {
-
-            if (!scope.widget.permission || authService.checkPermission(scope.widget.permission)) {
-                element.attr('ng-controller', scope.widget.controller);
-                element.attr('ng-model', 'widget');
-                element.removeAttr("va-widget");
-                $compile(element)(scope);
-            }
-
-        }
-    }
 }]);
 angular.module('platformWebApp')
 .controller('platformWebApp.userProfile.userProfileController', ['$rootScope', '$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', 'platformWebApp.settings.helper',

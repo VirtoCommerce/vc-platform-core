@@ -1,4 +1,4 @@
-namespace VirtoCommerce.Platform.Modules
+namespace VirtoCommerce.Platform.Core.Modularity
 {
     public class LocalStorageModuleCatalogOptions
     {
