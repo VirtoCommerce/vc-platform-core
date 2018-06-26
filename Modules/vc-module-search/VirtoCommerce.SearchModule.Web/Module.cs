@@ -1,18 +1,13 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using Hangfire;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchModule.Core;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
-using VirtoCommerce.SearchModule.Data.Search.SearchPhraseParsing;
 using VirtoCommerce.SearchModule.Data.SearchPhraseParsing;
 using VirtoCommerce.SearchModule.Data.Services;
 using VirtoCommerce.SearchModule.Web.BackgroundJobs;
@@ -27,7 +22,7 @@ namespace VirtoCommerce.SearchModule.Web
         {
             var snapshot = serviceCollection.BuildServiceProvider();
             var settingsManager = snapshot.GetService<ISettingsManager>();
-            
+
             serviceCollection.AddSingleton<ISearchPhraseParser, SearchPhraseParser>();
 
             // Allow scale out of indexation through background worker, if opted-in.
@@ -64,10 +59,8 @@ namespace VirtoCommerce.SearchModule.Web
                 DocumentType = KnownDocumentTypes.Product,
                 DocumentSource = new IndexDocumentSource()
             };
-            serviceCollection.AddSingleton(new [] {productIndexingConfiguration});
-            serviceCollection.AddSingleton<ISearchProvider, SearchProviderMock>();
-            
-            
+            serviceCollection.AddSingleton(new[] { productIndexingConfiguration });
+
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -84,7 +77,7 @@ namespace VirtoCommerce.SearchModule.Web
                 new Permission()
                 {
                     GroupName = "Search",
-                    ModuleId = "VirtoCommerce.Search",
+                    ModuleId = ModuleInfo.Id,
                     Name = x
                 }).ToArray());
 
@@ -93,7 +86,7 @@ namespace VirtoCommerce.SearchModule.Web
             if (scheduleJobs)
             {
                 var cronExpression = settingsManager.GetValue(ModuleConstants.Settings.General.IndexingJobs.CronExpression.Name, ModuleConstants.Settings.General.IndexingJobs.CronExpression.DefaultValue);
-                RecurringJob.AddOrUpdate<IndexingJobs>(j => j.IndexChangesJob(null, JobCancellationToken.Null), cronExpression);
+                //RecurringJob.AddOrUpdate<IndexingJobs>(j => j.IndexChangesJob(null, JobCancellationToken.Null), cronExpression);
             }
         }
 
@@ -101,7 +94,7 @@ namespace VirtoCommerce.SearchModule.Web
         {
         }
 
-        
+
     }
 }
 

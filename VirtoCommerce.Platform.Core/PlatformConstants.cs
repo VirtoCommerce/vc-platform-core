@@ -134,6 +134,23 @@ namespace VirtoCommerce.Platform.Core
                 }
             }
 
+            public static class Modularity
+            {
+                public static ModuleSetting ModulesAutoInstalled = new ModuleSetting
+                {
+                    Name = "VirtoCommerce.ModulesAutoInstalled",
+                    ValueType = ModuleSetting.TypeBoolean,
+                    DefaultValue = false.ToString()
+                };
+                public static ModuleSetting ModulesAutoInstallState = new ModuleSetting
+                {
+                    Name = "VirtoCommerce.ModulesAutoInstallState",
+                    ValueType = ModuleSetting.TypeSecureString,
+                    DefaultValue = AutoInstallState.Undefined.ToString()
+                };
+
+            }
+
             public static class UserProfile
             {
                 public static ModuleSetting MainMenuState = new ModuleSetting

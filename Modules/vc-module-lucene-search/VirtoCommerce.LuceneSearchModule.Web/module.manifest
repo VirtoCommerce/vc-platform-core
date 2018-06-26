@@ -3,9 +3,9 @@
     <id>VirtoCommerce.LuceneSearch</id>
     <version>3.0.0</version>
     <platformVersion>3.0.0</platformVersion>
-    <!--<dependencies>
+    <dependencies>
         <dependency id="VirtoCommerce.Search" version="3.0.0" />
-    </dependencies>-->
+    </dependencies>
 
     <title>Lucene Search module</title>
     <description>Indexed search functionality with Lucene engine</description>
@@ -17,7 +17,7 @@
     </owners>
     <projectUrl>https://virtocommerce.com/apps/extensions/virto-lucene-search-module</projectUrl>
     <iconUrl>https://github.com/VirtoCommerce/vc-module-lucene-search/raw/dev/VirtoCommerce.LuceneSearchModule.Web/Content/logo.png</iconUrl>
-    <releaseNotes>First version.</releaseNotes>
+    <releaseNotes>Third version.</releaseNotes>
     <copyright>Copyright © 2018 Virto Commerce. All rights reserved</copyright>
     <tags>lucene search</tags>
 

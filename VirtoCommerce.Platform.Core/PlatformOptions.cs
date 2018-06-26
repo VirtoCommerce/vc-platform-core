@@ -1,4 +1,4 @@
-namespace VirtoCommerce.Platform.Web.Infrastructure
+namespace VirtoCommerce.Platform.Core
 {
     public class PlatformOptions
     {

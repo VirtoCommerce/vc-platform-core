@@ -80,8 +80,8 @@ namespace VirtoCommerce.Platform.Modules.Extensions
             var moduleCatalog = serviceProvider.GetRequiredService<ILocalModuleCatalog>();
             var allModules = moduleCatalog.Modules.OfType<ManifestModuleInfo>().ToArray();
             return moduleCatalog.CompleteListWithDependencies(allModules)
-                .Where(x => x.State == ModuleState.Initialized)
                 .OfType<ManifestModuleInfo>()
+                .Where(x => x.State == ModuleState.Initialized && !x.Errors.Any())
                 .OrderBy(m => m.Id)
                 .ToArray();
         }
