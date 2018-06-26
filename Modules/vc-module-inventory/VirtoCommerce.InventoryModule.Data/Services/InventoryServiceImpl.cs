@@ -58,7 +58,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                 using (var repository = _repositoryFactory())
                 {
                     repository.DisableChangesTracking();
-                    var entities = await repository.GetProductsInventories(productIds.ToArray(), responseGroup);
+                    var entities = await repository.GetProductsInventoriesAsync(productIds.ToArray(), responseGroup);
                     retVal.AddRange(entities.Select(x =>
                         x.ToModel(AbstractTypeFactory<InventoryInfo>.TryCreateInstance())));
                 }
@@ -76,7 +76,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             var changedEntries = new List<GenericChangedEntry<InventoryInfo>>();
             using (var repository = _repositoryFactory())
             {
-                var dataExistInventories = await repository.GetProductsInventories(inventoryInfos.Select(x=>x.ProductId));
+                var dataExistInventories = await repository.GetProductsInventoriesAsync(inventoryInfos.Select(x=>x.ProductId));
                 foreach (var changedInventory in inventoryInfos)
                 {               
                     var originalEntity = dataExistInventories.FirstOrDefault(x => x.Sku == changedInventory.ProductId && x.FulfillmentCenterId == changedInventory.FulfillmentCenterId);

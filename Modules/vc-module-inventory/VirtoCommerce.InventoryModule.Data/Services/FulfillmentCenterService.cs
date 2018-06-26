@@ -44,7 +44,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                 {
                     repository.DisableChangesTracking();
 
-                    var fulfillmentCenters = await repository.GetFulfillmentCenters(ids);
+                    var fulfillmentCenters = await repository.GetFulfillmentCentersAsync(ids);
                     result = fulfillmentCenters
                         .Select(x => x.ToModel(AbstractTypeFactory<FulfillmentCenter>.TryCreateInstance())).ToArray();
                 }
@@ -63,7 +63,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             var changedEntries = new List<GenericChangedEntry<FulfillmentCenter>>();
             using (var repository = _repositoryFactory())
             {
-                var existEntities = await repository.GetFulfillmentCenters(fulfillmentCenters.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
+                var existEntities = await repository.GetFulfillmentCentersAsync(fulfillmentCenters.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var changedCenter in fulfillmentCenters)
                 {
                     var existEntity = existEntities.FirstOrDefault(x => x.Id == changedCenter.Id);
@@ -94,7 +94,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             using (var repository = _repositoryFactory())
             {
                 var changedEntries = new List<GenericChangedEntry<FulfillmentCenter>>();
-                var dbCenters = await repository.GetFulfillmentCenters(ids);
+                var dbCenters = await repository.GetFulfillmentCentersAsync(ids);
                 foreach (var dbCenter in dbCenters)
                 {
                     repository.Remove(dbCenter);

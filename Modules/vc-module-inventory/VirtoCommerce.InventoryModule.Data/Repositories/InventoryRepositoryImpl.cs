@@ -21,7 +21,7 @@ namespace VirtoCommerce.InventoryModule.Data.Repositories
 
         public IQueryable<FulfillmentCenterEntity> FulfillmentCenters => DbContext.Set<FulfillmentCenterEntity>();
 
-        public async Task<IEnumerable<InventoryEntity>> GetProductsInventories(IEnumerable<string> productIds, string responseGroup)
+        public async Task<IEnumerable<InventoryEntity>> GetProductsInventoriesAsync(IEnumerable<string> productIds, string responseGroup)
         {
             var inventories = await Inventories.Where(x => productIds.Contains(x.Sku)).ToListAsync();
 
@@ -38,7 +38,7 @@ namespace VirtoCommerce.InventoryModule.Data.Repositories
             return inventories;
         }
 
-        public async Task<IEnumerable<FulfillmentCenterEntity>> GetFulfillmentCenters(IEnumerable<string> ids)
+        public async Task<IEnumerable<FulfillmentCenterEntity>> GetFulfillmentCentersAsync(IEnumerable<string> ids)
         {
             return await FulfillmentCenters.Where(x => ids.Contains(x.Id)).ToListAsync();
         }
