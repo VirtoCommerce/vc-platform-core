@@ -67,7 +67,7 @@ namespace VirtoCommerce.NotificationsModule.Web
                 new Permission()
                 {
                     GroupName = "Notifications",
-                    ModuleId = "VirtoCommerce.Notifications",
+                    ModuleId = ModuleInfo.Id,
                     Name = x
                 }).ToArray());
 
