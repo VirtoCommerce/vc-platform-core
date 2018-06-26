@@ -44,6 +44,7 @@ using VirtoCommerce.Platform.Web.Infrastructure;
 using VirtoCommerce.Platform.Web.JsonConverters;
 using VirtoCommerce.Platform.Web.Middelware;
 using VirtoCommerce.Platform.Web.Swagger;
+using VirtoCommerce.Platform.Core;
 
 namespace VirtoCommerce.Platform.Web
 {
@@ -102,10 +103,9 @@ namespace VirtoCommerce.Platform.Web
                 options.DiscoveryPath = modulesDiscoveryPath;
                 options.ProbingPath = "App_Data/Modules";
             });
-            services.AddExternalModules(options =>
-            {
-                options.ModulesManifestUrl = new Uri(@"https://raw.githubusercontent.com/VirtoCommerce/vc-modules/master/modules.json");
-            });
+
+            services.Configure<ExternalModuleCatalogOptions>(Configuration.GetSection("ExternalModules"));
+            services.AddExternalModules();
 
             services.AddDbContext<SecurityDbContext>(options =>
             {
@@ -219,8 +219,13 @@ namespace VirtoCommerce.Platform.Web
             // Register the Swagger generator
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info { Title = "VirtoCommerce Solution REST API documentation", Version = "v1", Description = "For this sample, you can use the"
-                    , Contact = new Contact
+                c.SwaggerDoc("v1", new Info
+                {
+                    Title = "VirtoCommerce Solution REST API documentation",
+                    Version = "v1",
+                    Description = "For this sample, you can use the"
+                    ,
+                    Contact = new Contact
                     {
                         Email = "support@virtocommerce.com",
                         Name = "Virto Commerce",
@@ -323,7 +328,7 @@ namespace VirtoCommerce.Platform.Web
             app.UseDefaultFiles();
 
 
-            
+
 
             app.UseAuthentication();
 
@@ -370,7 +375,7 @@ namespace VirtoCommerce.Platform.Web
                 c.ShowExtensions();
                 c.DocExpansion(DocExpansion.None);
             });
-            
+
 
             app.UseDbTriggers();
             //Register platform settings
