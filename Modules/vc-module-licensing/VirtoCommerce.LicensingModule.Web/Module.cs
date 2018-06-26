@@ -47,7 +47,13 @@ namespace VirtoCommerce.LicensingModule.Web
             });
 
             var permissionsProvider = applicationBuilder.ApplicationServices.GetRequiredService<IKnownPermissionsProvider>();
-            permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x => new Permission() { GroupName = "Licensing", Name = x }).ToArray());
+            permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
+                new Permission()
+                {
+                    GroupName = "Licensing",
+                    Name = x,
+                    ModuleId = ModuleInfo.Id
+                }).ToArray());
 
             //Force migrations
             using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
