@@ -193,7 +193,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         }
 
         [HttpPost]
-        [Route("exortimport/tasks/cancel/{jobId}")]
+        [Route("exortimport/tasks/{jobId}/cancel")]
         public IActionResult Cancel([FromRoute]string jobId)
         {
             BackgroundJob.Delete(jobId);
