@@ -1,4 +1,8 @@
 using System.Collections.Generic;
+using VirtoCommerce.CoreModule.Core.Model.Payment;
+using VirtoCommerce.CoreModule.Core.Model.Shipping;
+using VirtoCommerce.CoreModule.Core.Model.Tax;
+using VirtoCommerce.Domain.Commerce.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Security;
@@ -6,7 +10,7 @@ using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.StoreModule.Core.Model
 {
-    public class Store : AuditableEntity, IHasDynamicProperties, IHaveSettings/*, ISeoSupport*/, ISupportSecurityScopes
+    public class Store : AuditableEntity, IHasDynamicProperties, IHaveSettings, ISeoSupport, ISupportSecurityScopes
     {
         public string Name { get; set; }
         public string Description { get; set; }
@@ -76,11 +80,10 @@ namespace VirtoCommerce.StoreModule.Core.Model
         public ICollection<PaymentMethod> PaymentMethods { get; set; }
         public ICollection<ShippingMethod> ShippingMethods { get; set; }
 
-        //TODO
-        //#region ISeoSupport Members
-        //public string SeoObjectType { get { return GetType().Name; } }
-        //public ICollection<SeoInfo> SeoInfos { get; set; }
-        //#endregion
+        #region ISeoSupport Members
+        public string SeoObjectType { get { return GetType().Name; } }
+        public IList<SeoInfo> SeoInfos { get; set; }
+        #endregion
 
         #region IHasDynamicProperties Members
         public string ObjectType { get; set; }

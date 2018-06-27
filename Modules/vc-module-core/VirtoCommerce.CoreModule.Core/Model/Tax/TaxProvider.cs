@@ -5,8 +5,11 @@ using VirtoCommerce.CoreModule.Common;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
 
-namespace VirtoCommerce.StoreModule.Core.Model
+namespace VirtoCommerce.CoreModule.Core.Model.Tax
 {
+    /// <summary>
+    /// Represent base class for all potential tax calculation integrations
+    /// </summary>
     public abstract class TaxProvider : Entity, IHaveSettings
     {
         public TaxProvider(string code)
@@ -26,19 +29,19 @@ namespace VirtoCommerce.StoreModule.Core.Model
         public bool IsActive { get; set; }
         public int Priority { get; set; }
 
-       public abstract IEnumerable<TaxRate> CalculateRates(IEvaluationContext context);
+        public abstract IEnumerable<TaxRate> CalculateRates(IEvaluationContext context);
+        public virtual string TypeName => GetType().Name;
 
         #region IHaveSettings Members
 
         public ICollection<SettingEntry> Settings { get; set; }
-        public virtual string TypeName => GetType().Name;
 
         #endregion
 
         public string GetSetting(string settingName)
         {
             var setting = Settings.FirstOrDefault(s => s.Name == settingName);
-
+                        
             return setting != null ? setting.Value : string.Empty;
         }
     }

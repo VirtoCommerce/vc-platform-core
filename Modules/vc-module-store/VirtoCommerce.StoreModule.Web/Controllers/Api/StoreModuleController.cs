@@ -4,17 +4,19 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.CoreModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.StoreModule.Core.Services;
 
 namespace VirtoCommerce.StoreModule.Web.Controllers.Api
 {
     [Route("api/stores")]
     public class StoreModuleController : Controller
     {
-        //private readonly IStoreService _storeService;
-        //private readonly IShippingMethodsService _shippingService;
-        //private readonly IPaymentMethodsService _paymentService;
-        //private readonly ITaxService _taxService;
+        private readonly IStoreService _storeService;
+        private readonly IShippingMethodsService _shippingService;
+        private readonly IPaymentMethodsService _paymentService;
+        private readonly ITaxService _taxService;
         //private readonly ISecurityService _securityService;
         //private readonly IPermissionScopeService _permissionScopeService;
         //private readonly INotificationManager _notificationManager;

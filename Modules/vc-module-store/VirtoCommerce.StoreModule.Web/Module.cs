@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.Platform.Core.Modularity;
 
@@ -14,7 +15,7 @@ namespace VirtoCommerce.StoreModule.Web
             throw new NotImplementedException();
         }
 
-        public void PostInitialize(IServiceProvider serviceProvider)
+        public void PostInitialize(IApplicationBuilder appBuilder)
         {
             throw new NotImplementedException();
         }

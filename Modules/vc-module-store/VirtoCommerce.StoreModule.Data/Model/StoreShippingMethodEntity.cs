@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using VirtoCommerce.CoreModule.Core.Model.Shipping;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.StoreModule.Core.Model;
 

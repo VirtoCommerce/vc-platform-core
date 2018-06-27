@@ -1,5 +1,5 @@
-﻿using FluentValidation;
-using VirtoCommerce.Domain.Store.Model;
+using FluentValidation;
+using VirtoCommerce.StoreModule.Core.Model;
 
 namespace VirtoCommerce.StoreModule.Data.Services.Validation
 {

@@ -4,7 +4,7 @@ using VirtoCommerce.CoreModule.Common;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
 
-namespace VirtoCommerce.StoreModule.Core.Model
+namespace VirtoCommerce.CoreModule.Core.Model.Shipping
 {
     public abstract class ShippingMethod : Entity, IHaveSettings
     {
@@ -35,10 +35,11 @@ namespace VirtoCommerce.StoreModule.Core.Model
 		#region IHaveSettings Members
 
 		public ICollection<SettingEntry> Settings { get; set; }
+
+		#endregion
+
+		public abstract IEnumerable<ShippingRate> CalculateRates(IEvaluationContext context);
+
         public virtual string TypeName => GetType().Name;
-
-        #endregion
-
-        public abstract IEnumerable<ShippingRate> CalculateRates(IEvaluationContext context);
-	}
+    }
 }

@@ -2,13 +2,19 @@ using System;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using VirtoCommerce.CoreModule.Core.Model.Payment;
+using VirtoCommerce.CoreModule.Core.Model.Shipping;
+using VirtoCommerce.CoreModule.Core.Model.Tax;
+using VirtoCommerce.CoreModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.StoreModule.Core.Model;
+using VirtoCommerce.StoreModule.Core.Model.Search;
 
 namespace VirtoCommerce.StoreModule.Web.JsonConverters
 {
     public class PolymorphicStoreJsonConverter : JsonConverter
     {
-        private static Type[] _knowTypes = new[] { typeof(Store), typeof(SearchCriteria), typeof(PaymentMethod), typeof(ShippingMethod), typeof(TaxProvider) };
+        private static Type[] _knowTypes = new[] { typeof(Store), typeof(StoreSearchCriteria), typeof(PaymentMethod), typeof(ShippingMethod), typeof(TaxProvider) };
 
         private readonly IPaymentMethodsService _paymentMethodsService;
         private readonly IShippingMethodsService _shippingMethodsService;
@@ -37,9 +43,9 @@ namespace VirtoCommerce.StoreModule.Web.JsonConverters
             {
                 retVal = AbstractTypeFactory<Store>.TryCreateInstance();
             }      
-            else if (typeof(SearchCriteria).IsAssignableFrom(objectType))
+            else if (typeof(StoreSearchCriteria).IsAssignableFrom(objectType))
             {
-                retVal = AbstractTypeFactory<SearchCriteria>.TryCreateInstance();
+                retVal = AbstractTypeFactory<StoreSearchCriteria>.TryCreateInstance();
             }
             else if (objectType == typeof(PaymentMethod))
             {

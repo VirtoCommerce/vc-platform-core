@@ -1,12 +1,7 @@
 using System;
-using System.Linq;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using VirtoCommerce.Domain.Payment.Model;
-using VirtoCommerce.Domain.Store.Model;
-using VirtoCommerce.Domain.Tax.Model;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.StoreModule.Core.Model;
 
 namespace VirtoCommerce.StoreModule.Web.JsonConverters
 {

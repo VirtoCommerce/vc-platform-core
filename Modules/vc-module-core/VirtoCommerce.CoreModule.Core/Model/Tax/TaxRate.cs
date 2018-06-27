@@ -1,6 +1,6 @@
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.StoreModule.Core.Model
+namespace VirtoCommerce.CoreModule.Core.Model.Tax
 {
     public class TaxRate : ValueObject
     {

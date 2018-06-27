@@ -1,4 +1,4 @@
-namespace VirtoCommerce.StoreModule.Core.Model
+namespace VirtoCommerce.CoreModule.Core.Model.Shipping
 {
 	public class ShippingRate
 	{

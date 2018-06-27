@@ -1,26 +1,28 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentValidation;
+using VirtoCommerce.CoreModule.Core.Services;
 using VirtoCommerce.Domain.Commerce.Model;
 using VirtoCommerce.Domain.Commerce.Services;
-using VirtoCommerce.Domain.Payment.Services;
-using VirtoCommerce.Domain.Shipping.Services;
-using VirtoCommerce.Domain.Store.Model;
-using VirtoCommerce.Domain.Store.Services;
-using VirtoCommerce.Domain.Tax.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
+using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Infrastructure;
+using VirtoCommerce.StoreModule.Core.Events;
+using VirtoCommerce.StoreModule.Core.Model;
+using VirtoCommerce.StoreModule.Core.Model.Search;
+using VirtoCommerce.StoreModule.Core.Services;
 using VirtoCommerce.StoreModule.Data.Model;
 using VirtoCommerce.StoreModule.Data.Repositories;
 using VirtoCommerce.StoreModule.Data.Services.Validation;
 
 namespace VirtoCommerce.StoreModule.Data.Services
 {
-    public class StoreServiceImpl : ServiceBase, IStoreService
+    public class StoreServiceImpl : IStoreService
     {
         private readonly Func<IStoreRepository> _repositoryFactory;
         private readonly ICommerceService _commerceService;
@@ -29,10 +31,11 @@ namespace VirtoCommerce.StoreModule.Data.Services
         private readonly IShippingMethodsService _shippingService;
         private readonly IPaymentMethodsService _paymentService;
         private readonly ITaxService _taxService;
+        private readonly IEventPublisher _eventPublisher;
 
         public StoreServiceImpl(Func<IStoreRepository> repositoryFactory, ICommerceService commerceService, ISettingsManager settingManager,
                                 IDynamicPropertyService dynamicPropertyService, IShippingMethodsService shippingService, IPaymentMethodsService paymentService,
-                                ITaxService taxService)
+                                ITaxService taxService, IEventPublisher eventPublisher)
         {
             _repositoryFactory = repositoryFactory;
             _commerceService = commerceService;
@@ -41,18 +44,19 @@ namespace VirtoCommerce.StoreModule.Data.Services
             _shippingService = shippingService;
             _paymentService = paymentService;
             _taxService = taxService;
+            _eventPublisher = eventPublisher;
         }
 
         #region IStoreService Members
 
-        public Store[] GetByIds(string[] ids)
+        public async Task<Store[]> GetByIdsAsync(string[] ids)
         {
             var stores = new List<Store>();
 
             var fulfillmentCenters = _commerceService.GetAllFulfillmentCenters().ToList();
             using (var repository = _repositoryFactory())
             {               
-                var dbStores = repository.GetStoresByIds(ids);
+                var dbStores = await repository.GetStoresByIdsAsync(ids);
                 foreach (var dbStore in dbStores)
                 {
                     var store = AbstractTypeFactory<Store>.TryCreateInstance();
@@ -88,24 +92,25 @@ namespace VirtoCommerce.StoreModule.Data.Services
                     }
 
                     //Set default settings for store it can be override by store instance setting in LoadEntitySettingsValues
-                    store.Settings = _settingManager.GetModuleSettings("VirtoCommerce.Store");
-                    _settingManager.LoadEntitySettingsValues(store);
+                    store.Settings = await _settingManager.GetModuleSettingsAsync("VirtoCommerce.Store");
+                    await _settingManager.LoadEntitySettingsValuesAsync(store);
                     stores.Add(store);
                 }
             }
 
             var result = stores.ToArray();
-            _dynamicPropertyService.LoadDynamicPropertyValues(result);
+            await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(result);
             _commerceService.LoadSeoForObjects(result);
             return result;
         }
 
-        public Store GetById(string id)
+        public async Task<Store> GetByIdAsync(string id)
         {
-            return GetByIds(new[] { id }).FirstOrDefault();
+            var entities = await GetByIdsAsync(new[] {id});
+            return entities.FirstOrDefault();
         }
 
-        public Store Create(Store store)
+        public async Task<Store> CreateAsync(Store store)
         {
             var pkMap = new PrimaryKeyResolvingMap();
 
@@ -117,7 +122,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
             using (var repository = _repositoryFactory())
             {
                 repository.Add(dbStore);
-                CommitChanges(repository);
+                await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
             }
 
@@ -125,22 +130,22 @@ namespace VirtoCommerce.StoreModule.Data.Services
             _commerceService.UpsertSeoForObjects(new[] { store });
 
             //Deep save properties
-            _dynamicPropertyService.SaveDynamicPropertyValues(store);
+            await _dynamicPropertyService.SaveDynamicPropertyValuesAsync(store);
             //Deep save settings
-            _settingManager.SaveEntitySettingsValues(store);
+            await _settingManager.SaveEntitySettingsValuesAsync(store);
 
-            var retVal = GetById(store.Id);
+            var retVal = await GetByIdAsync(store.Id);
             return retVal;
         }
 
-        public void Update(Store[] stores)
+        public async Task UpdateAsync(Store[] stores)
         {
             var pkMap = new PrimaryKeyResolvingMap();
+            var changedEntries = new List<GenericChangedEntry<Store>>();
 
             using (var repository = _repositoryFactory())
-            using (var changeTracker = base.GetChangeTracker(repository))
             {
-                var dbStores = repository.GetStoresByIds(stores.Select(x => x.Id).ToArray());
+                var dbStores = await repository.GetStoresByIdsAsync(stores.Select(x => x.Id).ToArray());
                 foreach (var store in stores)
                 {
                     var sourceEntity = AbstractTypeFactory<StoreEntity>.TryCreateInstance().FromModel(store, pkMap);
@@ -148,35 +153,37 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
                     if (targetEntity != null)
                     {
-                        changeTracker.Attach(targetEntity);
+                        changedEntries.Add(new GenericChangedEntry<Store>(store, targetEntity.ToModel(AbstractTypeFactory<Store>.TryCreateInstance()),
+                            EntryState.Modified));
                         sourceEntity.Patch(targetEntity);
 
-                        _dynamicPropertyService.SaveDynamicPropertyValues(store);
+                        await _dynamicPropertyService.SaveDynamicPropertyValuesAsync(store);
                         //Deep save settings
-                        _settingManager.SaveEntitySettingsValues(store);
+                        await _settingManager.SaveEntitySettingsValuesAsync(store);
 
                         //Patch SeoInfo  separately
                         _commerceService.UpsertSeoForObjects(stores);
                     }
-                }
 
-                CommitChanges(repository);
+                    await repository.UnitOfWork.CommitAsync();
+                }
+                await _eventPublisher.Publish(new StoreChangedEvent(changedEntries));
             }
         }
 
-        public void Delete(string[] ids)
+        public async Task DeleteAsync(string[] ids)
         {
             using (var repository = _repositoryFactory())
             {
-                var stores = GetByIds(ids);
-                var dbStores = repository.GetStoresByIds(ids);
+                var stores = await GetByIdsAsync(ids);
+                var dbStores = await repository.GetStoresByIdsAsync(ids);
 
                 foreach (var store in stores)
                 {
                     _commerceService.DeleteSeoForObject(store);
-                    _dynamicPropertyService.DeleteDynamicPropertyValues(store);
+                    await _dynamicPropertyService.DeleteDynamicPropertyValuesAsync(store);
                     //Deep remove settings
-                    _settingManager.RemoveEntitySettings(store);
+                    await _settingManager.RemoveEntitySettingsAsync(store);
 
                     var dbStore = dbStores.FirstOrDefault(x => x.Id == store.Id);
                     if (dbStore != null)
@@ -184,13 +191,13 @@ namespace VirtoCommerce.StoreModule.Data.Services
                         repository.Remove(dbStore);
                     }
                 }
-                CommitChanges(repository);
+                await repository.UnitOfWork.CommitAsync(); 
             }
         }
 
-        public SearchResult SearchStores(SearchCriteria criteria)
+        public async Task<StoreSearchResult> SearchStoresAsync(StoreSearchCriteria criteria)
         {
-            var retVal = new SearchResult();
+            var retVal = new StoreSearchResult();
             using (var repository = _repositoryFactory())
             {
                 var query = repository.Stores;
@@ -215,42 +222,43 @@ namespace VirtoCommerce.StoreModule.Data.Services
                                  .Take(criteria.Take)
                                  .Select(x => x.Id)
                                  .ToArray();
+                var stores = await GetByIdsAsync(storeIds);
 
-                retVal.Stores = GetByIds(storeIds).AsQueryable().OrderBySortInfos(sortInfos).ToList();
+                retVal.Stores = stores.AsQueryable().OrderBySortInfos(sortInfos).ToList();
             }
             return retVal;
         }
 
+        //TODO
+        ///// <summary>
+        ///// Returns list of stores ids which passed user can signIn
+        ///// </summary>
+        ///// <param name="userId"></param>
+        ///// <returns></returns>
+        //public IEnumerable<string> GetUserAllowedStoreIds(ApplicationUserExtended user)
+        //{
+        //    if (user == null)
+        //    {
+        //        throw new ArgumentNullException("user");
+        //    }
 
-        /// <summary>
-        /// Returns list of stores ids which passed user can signIn
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <returns></returns>
-        public IEnumerable<string> GetUserAllowedStoreIds(ApplicationUserExtended user)
-        {
-            if (user == null)
-            {
-                throw new ArgumentNullException("user");
-            }
+        //    var retVal = new List<string>();
 
-            var retVal = new List<string>();
-
-            if (user.StoreId != null)
-            {
-                var store = GetById(user.StoreId);
-                if (store != null)
-                {
-                    retVal.Add(store.Id);
-                    if (!store.TrustedGroups.IsNullOrEmpty())
-                    {
-                        retVal.AddRange(store.TrustedGroups);
-                    }
-                }
-            }
-            return retVal;
-        }
-
+        //    if (user.StoreId != null)
+        //    {
+        //        var store = GetById(user.StoreId);
+        //        if (store != null)
+        //        {
+        //            retVal.Add(store.Id);
+        //            if (!store.TrustedGroups.IsNullOrEmpty())
+        //            {
+        //                retVal.AddRange(store.TrustedGroups);
+        //            }
+        //        }
+        //    }
+        //    return retVal;
+        //}
+        
         private void ValidateStoreProperties(Store store)
         {
             if (store == null)

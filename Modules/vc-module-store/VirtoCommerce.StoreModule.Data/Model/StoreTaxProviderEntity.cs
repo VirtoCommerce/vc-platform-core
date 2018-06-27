@@ -1,7 +1,8 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using VirtoCommerce.Domain.Tax.Model;
+using VirtoCommerce.CoreModule.Core.Model.Tax;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.StoreModule.Core.Model;
 
 namespace VirtoCommerce.StoreModule.Data.Model
 {
