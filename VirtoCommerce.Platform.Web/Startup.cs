@@ -376,6 +376,13 @@ namespace VirtoCommerce.Platform.Web
                 c.DocExpansion(DocExpansion.None);
             });
 
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions { Authorization = new[] { new HangfireAuthorizationHandler() } });
+            app.UseHangfireServer(new BackgroundJobServerOptions
+            {
+                // Create some queues for job prioritization.
+                // Normal equals 'default', because Hangfire depends on it.
+                Queues = new[] { JobPriority.High, JobPriority.Normal, JobPriority.Low }
+            });
 
             app.UseDbTriggers();
             //Register platform settings
@@ -393,13 +400,7 @@ namespace VirtoCommerce.Platform.Web
             //Seed default users
             app.UseDefaultUsersAsync().GetAwaiter().GetResult();
 
-            app.UseHangfireDashboard("/hangfire", new DashboardOptions { Authorization = new[] { new HangfireAuthorizationHandler() } });
-            app.UseHangfireServer(new BackgroundJobServerOptions
-            {
-                // Create some queues for job prioritization.
-                // Normal equals 'default', because Hangfire depends on it.
-                Queues = new[] { JobPriority.High, JobPriority.Normal, JobPriority.Low }
-            });
+            
 
         }
     }

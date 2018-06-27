@@ -156,6 +156,11 @@ namespace VirtoCommerce.LuceneSearchModule.Data
                 var indexName = GetIndexName(documentType);
                 var directoryPath = GetDirectoryPath(indexName);
 
+                if (!System.IO.Directory.Exists(directoryPath))
+                {
+                    System.IO.Directory.CreateDirectory(directoryPath);
+                }
+
                 using (var directory = FSDirectory.Open(directoryPath))
                 using (IndexReader reader = DirectoryReader.Open(directory))
                 {
