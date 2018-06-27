@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using VirtoCommerce.Domain.Payment.Model;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.StoreModule.Core.Model;
 
 namespace VirtoCommerce.StoreModule.Data.Model
 {

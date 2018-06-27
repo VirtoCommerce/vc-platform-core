@@ -76,6 +76,7 @@ namespace VirtoCommerce.StoreModule.Core.Model
         public ICollection<PaymentMethod> PaymentMethods { get; set; }
         public ICollection<ShippingMethod> ShippingMethods { get; set; }
 
+        //TODO
         //#region ISeoSupport Members
         //public string SeoObjectType { get { return GetType().Name; } }
         //public ICollection<SeoInfo> SeoInfos { get; set; }

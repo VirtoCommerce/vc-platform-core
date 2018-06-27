@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
+using VirtoCommerce.Domain.Commerce.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.StoreModule.Core.Model
 {
-    public abstract class PaymentMethod : Entity, IHaveSettings, IHaveTaxDetalization, ITaxable
+    public abstract class PaymentMethod : Entity, IHaveSettings //, IHaveTaxDetalization, ITaxable
     {
         private PaymentMethod()
         {
@@ -99,12 +100,11 @@ namespace VirtoCommerce.StoreModule.Core.Model
 
         #endregion
 
-        //todo
-        //#region ITaxDetailSupport Members
+        #region ITaxDetailSupport Members
 
         public ICollection<TaxDetail> TaxDetails { get; set; }
 
-        //#endregion
+        #endregion
 
         /// <summary>
         /// Type of payment method
@@ -116,7 +116,7 @@ namespace VirtoCommerce.StoreModule.Core.Model
         /// </summary>
         public abstract PaymentMethodGroupType PaymentMethodGroupType { get; }
 
-        //todo
+        //TODO uncomment after impl. the payment module
         ///// <summary>
         ///// Method that contains logic of registration payment in external payment system
         ///// </summary>

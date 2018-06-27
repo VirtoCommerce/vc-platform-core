@@ -1,9 +1,8 @@
-﻿using System;
+using System;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VirtoCommerce.Domain.Payment.Model;
-using VirtoCommerce.Domain.Shipping.Model;
 using VirtoCommerce.Domain.Store.Model;
 using VirtoCommerce.Domain.Tax.Model;
 using VirtoCommerce.Platform.Core.Common;

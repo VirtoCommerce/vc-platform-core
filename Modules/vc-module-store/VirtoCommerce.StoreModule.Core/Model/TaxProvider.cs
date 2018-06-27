@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using VirtoCommerce.CoreModule.Common;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
 
@@ -25,7 +26,7 @@ namespace VirtoCommerce.StoreModule.Core.Model
         public bool IsActive { get; set; }
         public int Priority { get; set; }
 
-        //public abstract IEnumerable<TaxRate> CalculateRates(IEvaluationContext context);
+       public abstract IEnumerable<TaxRate> CalculateRates(IEvaluationContext context);
 
         #region IHaveSettings Members
 
