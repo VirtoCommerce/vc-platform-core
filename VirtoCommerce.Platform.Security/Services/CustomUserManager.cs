@@ -7,24 +7,29 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Caching;
+using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Core.Security.Events;
 using VirtoCommerce.Platform.Security.Caching;
 
 namespace VirtoCommerce.Platform.Security.Services
 {
     public class CustomUserManager : AspNetUserManager<ApplicationUser>
     {
-        private readonly IMemoryCache _memoryCache;
+        private readonly IPlatformMemoryCache _memoryCache;
         private readonly RoleManager<Role> _roleManager;
+        private readonly IEventPublisher _eventPublisher;
 
         public CustomUserManager(IUserStore<ApplicationUser> store, IOptions<IdentityOptions> optionsAccessor, IPasswordHasher<ApplicationUser> passwordHasher,
                                  IEnumerable<IUserValidator<ApplicationUser>> userValidators, IEnumerable<IPasswordValidator<ApplicationUser>> passwordValidators,
                                  ILookupNormalizer keyNormalizer, IdentityErrorDescriber errors, IServiceProvider services,
-                                 ILogger<UserManager<ApplicationUser>> logger, RoleManager<Role> roleManager, IMemoryCache memoryCache)
+                                 ILogger<UserManager<ApplicationUser>> logger, RoleManager<Role> roleManager, IPlatformMemoryCache memoryCache, IEventPublisher eventPublisher)
             : base(store, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger)
         {
             _memoryCache = memoryCache;
             _roleManager = roleManager;
+            _eventPublisher = eventPublisher;
         }
 
         public override async Task<ApplicationUser> FindByLoginAsync(string loginProvider, string providerKey)
@@ -94,18 +99,31 @@ namespace VirtoCommerce.Platform.Security.Services
 
         public override async Task<IdentityResult> DeleteAsync(ApplicationUser user)
         {
+            var changedEntries = new List<GenericChangedEntry<ApplicationUser>>
+            {
+                new GenericChangedEntry<ApplicationUser>(user, EntryState.Deleted)
+            };
+            await _eventPublisher.Publish(new UserChangingEvent(changedEntries));
             var result = await base.DeleteAsync(user);
             if (result.Succeeded)
             {
+                await _eventPublisher.Publish(new UserChangedEvent(changedEntries));
                 SecurityCacheRegion.ExpireUser(user);
             }
             return result;
         }
         public override async Task<IdentityResult> UpdateAsync(ApplicationUser user)
         {
+            var oldUser = await FindByIdAsync(user.Id);
+            var changedEntries = new List<GenericChangedEntry<ApplicationUser>>
+            {
+                new GenericChangedEntry<ApplicationUser>(user, oldUser, EntryState.Modified)
+            };
+            await _eventPublisher.Publish(new UserChangingEvent(changedEntries));
             var result = await base.UpdateAsync(user);
             if (result.Succeeded)
             {
+                await _eventPublisher.Publish(new UserChangedEvent(changedEntries));
                 if (user.Roles != null)
                 {
                     var targetRoles = (await GetRolesAsync(user));
@@ -128,9 +146,15 @@ namespace VirtoCommerce.Platform.Security.Services
 
         public override async Task<IdentityResult> CreateAsync(ApplicationUser user)
         {
+            var changedEntries = new List<GenericChangedEntry<ApplicationUser>>
+            {
+                new GenericChangedEntry<ApplicationUser>(user, EntryState.Added)
+            };
+            await _eventPublisher.Publish(new UserChangingEvent(changedEntries));
             var result = await base.CreateAsync(user);
             if (result.Succeeded)
             {
+                await _eventPublisher.Publish(new UserChangedEvent(changedEntries));
                 if (user.Roles != null)
                 {
                     //Add

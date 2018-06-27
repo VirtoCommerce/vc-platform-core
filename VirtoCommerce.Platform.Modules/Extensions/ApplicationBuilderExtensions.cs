@@ -12,7 +12,6 @@ using Smidge.Models;
 using Smidge.Nuglify;
 using Smidge.Options;
 using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.Platform.Modules.Extensions
 {
@@ -24,17 +23,9 @@ namespace VirtoCommerce.Platform.Modules.Extensions
             {
                 var moduleManager = serviceScope.ServiceProvider.GetRequiredService<IModuleManager>();
                 var modules = GetInstalledModules(serviceScope.ServiceProvider);
-                var permissionsProvider = serviceScope.ServiceProvider.GetRequiredService<IKnownPermissionsProvider>();
                 foreach (var module in modules)
                 {
-                    //Register modules permissions defined in the module manifest
-                    foreach (var modulePermissionGroup in module.Permissions)
-                    {
-                        var groupPermissions = modulePermissionGroup.Permissions.Select(x => new Permission { Name = x.Id, ModuleId = module.Id, GroupName = modulePermissionGroup.Name }).ToArray();
-                        permissionsProvider.RegisterPermissions(groupPermissions);
-                    }
-
-                    moduleManager.PostInitializeModule(module, serviceScope.ServiceProvider);
+                    moduleManager.PostInitializeModule(module, appBuilder);
                 }
             }
             return appBuilder;
@@ -89,8 +80,8 @@ namespace VirtoCommerce.Platform.Modules.Extensions
             var moduleCatalog = serviceProvider.GetRequiredService<ILocalModuleCatalog>();
             var allModules = moduleCatalog.Modules.OfType<ManifestModuleInfo>().ToArray();
             return moduleCatalog.CompleteListWithDependencies(allModules)
-                .Where(x => x.State == ModuleState.Initialized)
                 .OfType<ManifestModuleInfo>()
+                .Where(x => x.State == ModuleState.Initialized && !x.Errors.Any())
                 .OrderBy(m => m.Id)
                 .ToArray();
         }

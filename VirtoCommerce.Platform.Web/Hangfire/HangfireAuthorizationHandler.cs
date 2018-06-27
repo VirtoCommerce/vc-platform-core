@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Hangfire.Dashboard;
 using Microsoft.AspNetCore.Identity;
+using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.Platform.Web.Hangfire
@@ -14,9 +15,9 @@ namespace VirtoCommerce.Platform.Web.Hangfire
         {
             var httpcontext = context.GetHttpContext();
             var result = httpcontext != null && httpcontext.User.Identity.IsAuthenticated;
-            if(result)
+            if (result)
             {
-                result = httpcontext.User.IsInRole(SecurityConstants.Roles.Administrator) || httpcontext.User.HasClaim(SecurityConstants.Claims.PermissionClaimType, SecurityConstants.Permissions.BackgroundJobsManage);
+                result = httpcontext.User.IsInRole(PlatformConstants.Security.Roles.Administrator) || httpcontext.User.HasClaim(PlatformConstants.Security.Claims.PermissionClaimType, PlatformConstants.Security.Permissions.BackgroundJobsManage);
             }
             return result;
         }

@@ -1,4 +1,5 @@
 using System;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
@@ -16,16 +17,16 @@ namespace VirtoCommerce.NotificationsSampleModule.Web
 
         public void Initialize(IServiceCollection serviceCollection)
         {
-            
+
         }
 
-        public void PostInitialize(IServiceProvider serviceProvider)
+        public void PostInitialize(IApplicationBuilder appBuilder)
         {
+            AbstractTypeFactory<NotificationEntity>.RegisterType<TwitterNotificationEntity>();
             AbstractTypeFactory<Notification>.RegisterType<TwitterNotification>().MapToType<NotificationEntity>();
             AbstractTypeFactory<NotificationTemplate>.RegisterType<TwitterNotificationTemplate>().MapToType<NotificationTemplateEntity>();
             AbstractTypeFactory<NotificationMessage>.RegisterType<TwitterNotificationMessage>().MapToType<NotificationMessageEntity>();
-            AbstractTypeFactory<NotificationEntity>.RegisterType<TwitterNotificationEntity>();
-            var registrar = serviceProvider.GetService<INotificationRegistrar>();
+            var registrar = appBuilder.ApplicationServices.GetService<INotificationRegistrar>();
             registrar.RegisterNotification<PostTwitterNotification>();
             registrar.RegisterNotification<RegistrationEmailNotification>();
         }

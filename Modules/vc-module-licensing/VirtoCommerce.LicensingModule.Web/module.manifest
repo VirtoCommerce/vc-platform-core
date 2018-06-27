@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<module>
+    <id>VirtoCommerce.Licensing</id>
+    <version>3.0.0</version>
+    <platformVersion>3.0.0</platformVersion>
+    <dependencies>
+        <dependency id="VirtoCommerce.Core" version="3.0.0" />
+    </dependencies>
+
+    <title>Licensing module</title>
+    <description>License management</description>
+    <authors>
+        <author>Egidijus Mažeika</author>
+        <author>Artem Dudarev</author>
+    </authors>
+    <owners>
+        <owner>Virto Commerce</owner>
+    </owners>
+    <projectUrl>https://virtocommerce.com/virto-licensing-module</projectUrl>
+    <iconUrl>Modules/$(VirtoCommerce.Licensing)/Content/logoVC.png</iconUrl>
+    <releaseNotes>Third version.</releaseNotes>
+    <copyright>Copyright © 2011-2018 Virto Commerce. All rights reserved</copyright>
+    <tags>licensing</tags>
+
+    <assemblyFile>VirtoCommerce.LicensingModule.Web.dll</assemblyFile>
+    <moduleType>VirtoCommerce.LicensingModule.Web.Module, VirtoCommerce.LicensingModule.Web</moduleType>
+
+    <scripts>
+        <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
+    </scripts>
+    
+</module>

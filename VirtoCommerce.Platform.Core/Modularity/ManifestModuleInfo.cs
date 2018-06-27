@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -47,22 +47,14 @@ namespace VirtoCommerce.Platform.Core.Modularity
                 Scripts.AddRange(manifest.Scripts);
             }
             Permissions = new List<ModulePermissionGroup>();
-            if (manifest.Permissions != null)
-            {
-                Permissions.AddRange(manifest.Permissions);
-            }
             Settings = new List<ModuleSettingsGroup>();
-            if (manifest.Settings != null)
-            {
-                Settings.AddRange(manifest.Settings);
-            }
             Groups = new List<string>();
             if (manifest.Groups != null)
             {
                 Groups.AddRange(manifest.Groups);
             }
             Incompatibilities = new List<ModuleIdentity>();
-            if(manifest.Incompatibilities != null)
+            if (manifest.Incompatibilities != null)
             {
                 Incompatibilities.AddRange(manifest.Incompatibilities.Select(x => new ModuleIdentity(x.Id, x.Version)));
             }

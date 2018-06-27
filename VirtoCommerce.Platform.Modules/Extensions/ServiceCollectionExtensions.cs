@@ -16,7 +16,7 @@ namespace VirtoCommerce.Platform.Modules
             services.AddSingleton<IAssemblyResolver, LoadContextAssemblyResolver>();
             services.AddSingleton<IModuleManager, ModuleManager>();
             services.AddSingleton<ILocalModuleCatalog, LocalStorageModuleCatalog>();
-            services.AddSingleton<IModuleCatalog>( provider => provider.GetService<ILocalModuleCatalog>());
+            services.AddSingleton<IModuleCatalog>(provider => provider.GetService<ILocalModuleCatalog>());
             services.AddSingleton<IAssemblyResolver, LoadContextAssemblyResolver>();
 
             if (setupAction != null)
@@ -30,7 +30,7 @@ namespace VirtoCommerce.Platform.Modules
 
             manager.Run();
             // Ensure all modules are loaded
-            foreach (var module in moduleCatalog.Modules.OfType<ManifestModuleInfo>().Where(x => x.State == ModuleState.NotStarted))
+            foreach (var module in moduleCatalog.Modules.OfType<ManifestModuleInfo>().Where(x => x.State == ModuleState.NotStarted).ToArray())
             {
                 manager.LoadModule(module.ModuleName);
                 // Register API controller from modules
@@ -40,7 +40,7 @@ namespace VirtoCommerce.Platform.Modules
             services.AddSingleton(moduleCatalog);
             return services;
         }
-  
+
         public static IServiceCollection AddExternalModules(this IServiceCollection services, Action<ExternalModuleCatalogOptions> setupAction = null)
         {
             services.AddSingleton<IExternalModulesClient, ExternalModulesClient>();

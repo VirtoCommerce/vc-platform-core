@@ -55,13 +55,13 @@ namespace VirtoCommerce.Platform.Web.Swagger
 
             var xmlCommentsDirectoryPaths = new[]
             {
-                localStorageModuleCatalogOptions.DiscoveryPath,
+                localStorageModuleCatalogOptions.ProbingPath,
                 AppContext.BaseDirectory
             };
 
             foreach (var path in xmlCommentsDirectoryPaths)
             {
-                var xmlComments = Directory.GetFiles(path, "*.Web.XML");
+                var xmlComments = Directory.GetFiles(path, "*.XML");
                 foreach (var xmlComment in xmlComments)
                 {
                     options.IncludeXmlComments(xmlComment);

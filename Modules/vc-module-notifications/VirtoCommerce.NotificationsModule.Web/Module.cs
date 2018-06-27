@@ -1,9 +1,12 @@
 using System;
+using System.Linq;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using VirtoCommerce.NotificationsModule.Core;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Data.Model;
@@ -17,6 +20,7 @@ using VirtoCommerce.NotificationsModule.Web.Infrastructure;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Notifications;
+using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.NotificationsModule.Web
 {
@@ -29,14 +33,14 @@ namespace VirtoCommerce.NotificationsModule.Web
             var snapshot = serviceCollection.BuildServiceProvider();
             var configuration = snapshot.GetService<IConfiguration>();
             serviceCollection.AddDbContext<NotificationDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce")));
-            serviceCollection.AddScoped<INotificationRepository, NotificationRepository>();
-            serviceCollection.AddScoped<Func<INotificationRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<INotificationRepository>());
-            serviceCollection.AddScoped<INotificationService, NotificationService>();
-            serviceCollection.AddScoped<INotificationRegistrar, NotificationService>();
-            serviceCollection.AddScoped<INotificationSearchService, NotificationSearchService>();
-            serviceCollection.AddScoped<INotificationMessageService, NotificationMessageService>();
-            serviceCollection.AddTransient<INotificationSender, NotificationSender>();
-            serviceCollection.AddTransient<INotificationTemplateRenderer, LiquidTemplateRenderer>();
+            serviceCollection.AddTransient<INotificationRepository, NotificationRepository>();
+            serviceCollection.AddSingleton<Func<INotificationRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<INotificationRepository>());
+            serviceCollection.AddSingleton<INotificationService, NotificationService>();
+            serviceCollection.AddSingleton<INotificationRegistrar, NotificationService>();
+            serviceCollection.AddSingleton<INotificationSearchService, NotificationSearchService>();
+            serviceCollection.AddSingleton<INotificationMessageService, NotificationMessageService>();
+            serviceCollection.AddSingleton<INotificationSender, NotificationSender>();
+            serviceCollection.AddSingleton<INotificationTemplateRenderer, LiquidTemplateRenderer>();
             serviceCollection.AddSingleton<INotificationMessageSenderProviderFactory, NotificationMessageSenderProviderFactory>();
             serviceCollection.AddTransient<INotificationMessageSender, SmtpEmailNotificationMessageSender>();
             serviceCollection.AddTransient<INotificationMessageSender, SendGridEmailNotificationMessageSender>();
@@ -47,7 +51,7 @@ namespace VirtoCommerce.NotificationsModule.Web
             serviceCollection.Configure<SendGridSenderOptions>(configuration.GetSection("Notifications:SendGrid"));
         }
 
-        public void PostInitialize(IServiceProvider serviceProvider)
+        public void PostInitialize(IApplicationBuilder appBuilder)
         {
             AbstractTypeFactory<Notification>.RegisterType<EmailNotification>().MapToType<NotificationEntity>();
             AbstractTypeFactory<Notification>.RegisterType<SmsNotification>().MapToType<NotificationEntity>();
@@ -58,18 +62,30 @@ namespace VirtoCommerce.NotificationsModule.Web
             AbstractTypeFactory<NotificationEntity>.RegisterType<EmailNotificationEntity>();
             AbstractTypeFactory<NotificationEntity>.RegisterType<SmsNotificationEntity>();
 
-            var mvcJsonOptions = serviceProvider.GetService<IOptions<MvcJsonOptions>>();
+            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IKnownPermissionsProvider>();
+            permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
+                new Permission()
+                {
+                    GroupName = "Notifications",
+                    ModuleId = ModuleInfo.Id,
+                    Name = x
+                }).ToArray());
+
+            var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicJsonConverter());
 
-            using (var notificationDbContext = serviceProvider.GetRequiredService<NotificationDbContext>())
+            using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
-                notificationDbContext.Database.EnsureCreated();
-                notificationDbContext.Database.Migrate();
+                using (var notificationDbContext = serviceScope.ServiceProvider.GetRequiredService<NotificationDbContext>())
+                {
+                    notificationDbContext.Database.EnsureCreated();
+                    notificationDbContext.Database.Migrate();
+                }
             }
 
-            var configuration = serviceProvider.GetService<IConfiguration>();
+            var configuration = appBuilder.ApplicationServices.GetService<IConfiguration>();
             var notificationGateway = configuration.GetSection("Notifications:Gateway").Value;
-            var notificationMessageSenderProviderFactory = serviceProvider.GetService<INotificationMessageSenderProviderFactory>();
+            var notificationMessageSenderProviderFactory = appBuilder.ApplicationServices.GetService<INotificationMessageSenderProviderFactory>();
             switch (notificationGateway)
             {
                 case "SendGrid":
@@ -79,7 +95,7 @@ namespace VirtoCommerce.NotificationsModule.Web
                     notificationMessageSenderProviderFactory.RegisterSenderForType<EmailNotification, SmtpEmailNotificationMessageSender>();
                     break;
             }
-            
+
         }
 
         public void Uninstall()
