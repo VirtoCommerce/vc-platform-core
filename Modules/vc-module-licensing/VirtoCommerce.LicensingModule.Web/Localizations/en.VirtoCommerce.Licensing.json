@@ -1,0 +1,63 @@
+{
+    "licensing": {
+        "main-menu-title": "Licensing",
+        "blades": {
+            "license-list": {
+                "title": "Licenses",
+                "subtitle": "Manage Licenses",
+                "labels": {
+                    "customer-name": "Company Name",
+                    "customer-email": "Company Email",
+                    "expiration-date": "Expiration date",
+                    "type": "License type"
+                }
+            },
+            "license-detail": {
+                "title": "License details",
+                "title-new": "New License",
+                "labels": {
+                    "customer-name": "Company Name",
+                    "customer-email": "Company Email",
+                    "expiration-date": "Expiration date",
+                    "type": "License type",
+                    "activation-code": "Activation code"
+                },
+                "placeholders": {
+                    "customer-name": "Enter name",
+                    "customer-email": "Enter email",
+                    "expiration-date": "Select date",
+                    "type": "Select...",
+                    "activation-code": "Enter unique code"
+                }
+            }
+        },
+        "dialogs": {
+            "licenses-delete": {
+                "title": "Delete confirmation",
+                "message": "Are you sure you want to delete selected licenses?"
+            }
+        },
+        "commands": {
+            "issue": "Download license"
+        }
+    },
+
+    "permissions": {
+        "licensing:access": "Open licensing menu",
+        "licensing:create": "Create licensing related data",
+        "licensing:read": "View licensing related data",
+        "licensing:update": "Update licensing related data",
+        "licensing:delete": "Delete licensing related data",
+        "licensing:issue": "Issue licensing data",
+    },
+    "settings": {
+        "Licensing.LicenseType": {
+            "description": "License types",
+            "title": "License types"
+        },
+        "Licensing.SignaturePrivateKey": {
+            "description": "Private key for signing licenses",
+            "title": "Signature private key"
+        }
+    }
+}
