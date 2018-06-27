@@ -2,9 +2,11 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.Domain.Inventory.Model.Search;
 using VirtoCommerce.InventoryModule.Core.Model;
 using VirtoCommerce.InventoryModule.Core.Services;
+using VirtoCommerce.InventoryModule.Data.Cashing;
 using VirtoCommerce.InventoryModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
@@ -24,35 +26,50 @@ namespace VirtoCommerce.InventoryModule.Data.Services
 
         public async Task<GenericSearchResult<InventoryInfo>> SearchInventoriesAsync(InventorySearchCriteria criteria)
         {
-            var result = new GenericSearchResult<InventoryInfo>();
-            using (var repository = _repositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), "SearchInventoriesAsync", criteria.GetCacheKey());
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                repository.DisableChangesTracking();
-
-                var query = repository.Inventories;
-                if (!criteria.ProductIds.IsNullOrEmpty())
+                var result = new GenericSearchResult<InventoryInfo>();
+                using (var repository = _repositoryFactory())
                 {
-                    query = query.Where(x => criteria.ProductIds.Contains(x.Sku));
-                }
-                if (!criteria.FulfillmentCenterIds.IsNullOrEmpty())
-                {
-                    query = query.Where(x => criteria.FulfillmentCenterIds.Contains(x.FulfillmentCenterId));
-                }
-                var sortInfos = criteria.SortInfos;
-                if (sortInfos.IsNullOrEmpty())
-                {
-                    sortInfos = new[] { new SortInfo { SortColumn = "ModifiedDate" } };
-                }
+                    repository.DisableChangesTracking();
 
-                query = query.OrderBySortInfos(sortInfos);
+                    var query = repository.Inventories;
+                    if (!criteria.ProductIds.IsNullOrEmpty())
+                    {
+                        query = query.Where(x => criteria.ProductIds.Contains(x.Sku));
+                    }
+                    if (!criteria.FulfillmentCenterIds.IsNullOrEmpty())
+                    {
+                        query = query.Where(x => criteria.FulfillmentCenterIds.Contains(x.FulfillmentCenterId));
+                    }
+                    var sortInfos = criteria.SortInfos;
+                    if (sortInfos.IsNullOrEmpty())
+                    {
+                        sortInfos = new[]
+                        {
+                            new SortInfo
+                            {
+                                SortColumn = "ModifiedDate"
+                            }
+                        };
+                    }
 
-                result.TotalCount = await query.CountAsync();
-                var list = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                result.Results = list
-                    .Select(x => x.ToModel(AbstractTypeFactory<InventoryInfo>.TryCreateInstance()))
-                    .ToList();
-            }
-            return result;
+                    query = query.OrderBySortInfos(sortInfos);
+
+                    result.TotalCount = await query.CountAsync();
+                    var list = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                    result.Results = list
+                        .Select(x =>
+                        {
+                            var inventory = x.ToModel(AbstractTypeFactory<InventoryInfo>.TryCreateInstance());
+                            cacheEntry.AddExpirationToken(InventoryCacheRegion.CreateChangeToken(inventory));
+                            return inventory;
+                        })
+                        .ToList();
+                }
+                return result;
+            });
         }
     }
 }

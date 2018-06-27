@@ -10,7 +10,7 @@ namespace VirtoCommerce.InventoryModule.Data.Cashing
 {
     public class InventoryCacheRegion : CancellableCacheRegion<InventoryCacheRegion>
     {
-        private static readonly ConcurrentDictionary<InventoryInfo, CancellationTokenSource> _inventoryRegionTokenLookup = new ConcurrentDictionary<InventoryInfo, CancellationTokenSource>();
+        private static readonly ConcurrentDictionary<string, CancellationTokenSource> _inventoryRegionTokenLookup = new ConcurrentDictionary<string, CancellationTokenSource>();
 
         public static IChangeToken CreateChangeToken(InventoryInfo inventory)
         {
@@ -18,13 +18,13 @@ namespace VirtoCommerce.InventoryModule.Data.Cashing
             {
                 throw new ArgumentNullException(nameof(inventory));
             }
-            var cancellationTokenSource = _inventoryRegionTokenLookup.GetOrAdd(inventory, new CancellationTokenSource());
+            var cancellationTokenSource = _inventoryRegionTokenLookup.GetOrAdd(inventory.ProductId, new CancellationTokenSource());
             return new CompositeChangeToken(new[] { CreateChangeToken(), new CancellationChangeToken(cancellationTokenSource.Token) });
         }
 
         public static void ExpireInventory(InventoryInfo inventory)
         {
-            if (_inventoryRegionTokenLookup.TryRemove(inventory, out CancellationTokenSource token))
+            if (_inventoryRegionTokenLookup.TryRemove(inventory.ProductId, out CancellationTokenSource token))
             {
                 token.Cancel();
             }
