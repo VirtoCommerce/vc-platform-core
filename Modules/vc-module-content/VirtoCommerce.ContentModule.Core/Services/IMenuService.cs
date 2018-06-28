@@ -1,16 +1,17 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using VirtoCommerce.ContentModule.Core.Model;
 
 namespace VirtoCommerce.ContentModule.Core.Services
 {
     public interface IMenuService
     {
-        IEnumerable<MenuLinkList> GetAllLinkLists();
-        IEnumerable<MenuLinkList> GetListsByStoreId(string storeId);
-        MenuLinkList GetListById(string listId);
-        void AddOrUpdate(MenuLinkList list);
-        void DeleteList(string listId);
-        void DeleteLists(string[] listIds);
-        bool CheckList(string storeId, string name, string language, string id);
+        Task<IEnumerable<MenuLinkList>> GetAllLinkListsAsync();
+        Task<IEnumerable<MenuLinkList>> GetListsByStoreIdAsync(string storeId);
+        Task<MenuLinkList> GetListByIdAsync(string listId);
+        Task AddOrUpdateAsync(MenuLinkList list);
+        Task DeleteListAsync(string listId);
+        Task DeleteListsAsync(string[] listIds);
+        Task<bool> CheckListAsync(string storeId, string name, string language, string id);
     }
 }
