@@ -25,8 +25,13 @@
 
             settingsHelper.fixValues(data.settings);
 
-            data.shippingMethods.sort(function (a, b) { return a.priority - b.priority; });
-            data.paymentMethods.sort(function (a, b) { return a.priority - b.priority; });
+            if (data.shippingMethods) {
+                data.shippingMethods.sort(function (a, b) { return a.priority - b.priority; });
+            }
+
+            if (data.paymentMethods) {
+                data.paymentMethods.sort(function (a, b) { return a.priority - b.priority; });
+            }
 
             _.each(data.shippingMethods, function (x) { settingsHelper.fixValues(x.settings); });
             _.each(data.paymentMethods, function (x) { settingsHelper.fixValues(x.settings); });

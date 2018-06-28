@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using VirtoCommerce.CoreModule.Core.Commerce.Model;
+using VirtoCommerce.CoreModule.Core.Services;
 using VirtoCommerce.Domain.Commerce.Model;
 using VirtoCommerce.Domain.Commerce.Services;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -16,6 +18,9 @@ namespace VirtoCommerce.CoreModule.Web
         public void Initialize(IServiceCollection serviceCollection)
         {
             serviceCollection.AddSingleton<ICommerceService, MockCommerceService>();
+            serviceCollection.AddSingleton<IShippingMethodsService>(new ShippingMethodsServiceImpl());
+            serviceCollection.AddSingleton<IPaymentMethodsService>(new PaymentMethodsServiceImpl());
+            serviceCollection.AddSingleton<ITaxService>(new TaxServiceImpl());
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -46,7 +51,14 @@ namespace VirtoCommerce.CoreModule.Web
 
             public IEnumerable<Currency> GetAllCurrencies()
             {
-                return Enumerable.Empty<Currency>();
+                return new List<Currency>() { new Currency()
+                {
+                    Code = "USD",
+                    Name = "US dollar",
+                    IsPrimary = true,
+                    ExchangeRate = 1,
+                    Symbol = "$",
+                }};
             }
 
             public IEnumerable<FulfillmentCenter> GetAllFulfillmentCenters()

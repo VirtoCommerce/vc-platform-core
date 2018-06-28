@@ -1,4 +1,4 @@
-using VirtoCommerce.CoreModule.Common;
+using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Model.Cart;
 
 namespace VirtoCommerce.CoreModule.Core.Model.Shipping

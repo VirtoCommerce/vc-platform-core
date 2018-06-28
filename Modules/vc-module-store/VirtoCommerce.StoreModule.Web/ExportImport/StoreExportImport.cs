@@ -13,6 +13,7 @@ namespace VirtoCommerce.StoreModule.Web.ExportImport
         //public ICollection<Store> Stores { get; set; }
     }
 
+    //TODO
     public sealed class StoreExportImport
     {
         //private readonly IStoreService _storeService;

@@ -1,5 +1,5 @@
 using System.Collections.Specialized;
-using VirtoCommerce.CoreModule.Common;
+using VirtoCommerce.CoreModule.Core.Common;
 
 namespace VirtoCommerce.CoreModule.Core.Model.Payment
 {
