@@ -2,77 +2,124 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
+using VirtoCommerce.StoreModule.Core.Model;
+using VirtoCommerce.StoreModule.Core.Model.Search;
+using VirtoCommerce.StoreModule.Core.Services;
 
 namespace VirtoCommerce.StoreModule.Web.ExportImport
 {
-    public sealed class BackupObject
-    {
-        //public ICollection<Store> Stores { get; set; }
-    }
-
-    //TODO
     public sealed class StoreExportImport
     {
-        //private readonly IStoreService _storeService;
+        private readonly IStoreService _storeService;
+        private readonly JsonSerializer _serializer;
+        private readonly int BatchSize = 50;
 
-        //public StoreExportImport(IStoreService storeService)
-        //{
-        //    _storeService = storeService;
-        //}
-
-        public void DoExport(Stream backupStream, Action<ExportImportProgressInfo> progressCallback)
+        public StoreExportImport(IStoreService storeService, JsonSerializer jsonSerializer)
         {
-			var backupObject = GetBackupObject(progressCallback);
-            //Remove from backup non active methods
-            //backupObject.Stores.ForEach(x => x.PaymentMethods = x.PaymentMethods.Where(s => s.IsActive).ToList());
-            //backupObject.Stores.ForEach(x => x.ShippingMethods = x.ShippingMethods.Where(s => s.IsActive).ToList());
-
-            backupObject.SerializeJson(backupStream);
+            _storeService = storeService;
+            _serializer = jsonSerializer;
         }
 
-   //     public void DoImport(Stream backupStream, Action<ExportImportProgressInfo> progressCallback)
-   //     {
-   //         var backupObject = backupStream.DeserializeJson<BackupObject>();
-			//var originalObject = GetBackupObject(progressCallback);
-
-			//var progressInfo = new ExportImportProgressInfo();
-			//progressInfo.Description = String.Format("{0} stores importing...", backupObject.Stores.Count());
-			//progressCallback(progressInfo);
-
-   //         UpdateStores(originalObject.Stores, backupObject.Stores);
-   //     }
-
-   //     private void UpdateStores(ICollection<Store> original, ICollection<Store> backup)
-   //     {
-   //         var toUpdate = new List<Store>();
-
-   //         backup.CompareTo(original, EqualityComparer<Store>.Default, (state, x, y) =>
-   //         {
-   //             switch (state)
-   //             {
-   //                 case EntryState.Modified:
-   //                     toUpdate.Add(x);
-   //                     break;
-   //                 case EntryState.Added:
-   //                     _storeService.Create(x);
-   //                     break;
-   //             }
-   //         });
-   //         _storeService.Update(toUpdate.ToArray());
-   //     }
-
-		private BackupObject GetBackupObject(Action<ExportImportProgressInfo> progressCallback)
+        public async Task DoExport(Stream backupStream, Action<ExportImportProgressInfo> progressCallback)
         {
-            var progressInfo = new ExportImportProgressInfo("stores loading...");
-			progressCallback(progressInfo);
+            var progressInfo = new ExportImportProgressInfo { Description = "The store are loading" };
+            progressCallback(progressInfo);
 
-            return new BackupObject
+            using (var sw = new StreamWriter(backupStream, Encoding.UTF8))
+            using (var writer = new JsonTextWriter(sw))
             {
-                //Stores = _storeService.SearchStores(new SearchCriteria { Take = int.MaxValue }).Stores
-            };
-        }      
+                writer.WriteStartObject();
+
+                progressInfo.Description = "Evaluation the number of store records";
+                progressCallback(progressInfo);
+
+                var searchResult = await _storeService.SearchStoresAsync(new StoreSearchCriteria { Take = BatchSize });
+                var totalCount = searchResult.TotalCount;
+                writer.WritePropertyName("StoreTotalCount");
+                writer.WriteValue(totalCount);
+
+                writer.WritePropertyName("Stores");
+                writer.WriteStartArray();
+
+                for (int i = BatchSize; i < totalCount; i += BatchSize)
+                {
+                    progressInfo.Description = $"{i} of {totalCount} stores have been loaded";
+                    progressCallback(progressInfo);
+
+                    searchResult = await _storeService.SearchStoresAsync(new StoreSearchCriteria { Skip = i, Take = BatchSize });
+
+                    foreach (var store in searchResult.Stores)
+                    {
+                        _serializer.Serialize(writer, store);
+                    }
+                    writer.Flush();
+                    progressInfo.Description = $"{ Math.Min(totalCount, i + BatchSize) } of { totalCount } stores exported";
+                    progressCallback(progressInfo);
+                }
+
+                writer.WriteEndArray();
+
+                writer.WriteEndObject();
+                writer.Flush();
+            }
+        }
+
+        public async Task DoImport(Stream backupStream, Action<ExportImportProgressInfo> progressCallback)
+        {
+            var progressInfo = new ExportImportProgressInfo();
+            int storeTotalCount = 0;
+
+            using (var streamReader = new StreamReader(backupStream))
+            using (var reader = new JsonTextReader(streamReader))
+            {
+                while (reader.Read())
+                {
+                    if (reader.TokenType == JsonToken.PropertyName)
+                    {
+                        if (reader.Value.ToString() == "StoresTotalCount")
+                        {
+                            storeTotalCount = reader.ReadAsInt32() ?? 0;
+                        }
+                        else if (reader.Value.ToString() == "Store")
+                        {
+                            var stores = new List<Store>();
+                            var storeCount = 0;
+                            while (reader.TokenType != JsonToken.EndArray)
+                            {
+                                var store = _serializer.Deserialize<Store>(reader);
+                                stores.Add(store);
+                                storeCount++;
+
+                                reader.Read();
+                            }
+
+                            for (int i = 0; i < storeCount; i += BatchSize)
+                            {
+                                var batchStores = stores.Skip(i).Take(BatchSize);
+                                foreach (var store in batchStores)
+                                {
+                                    await _storeService.CreateAsync(store);
+                                }
+
+                                if (storeCount > 0)
+                                {
+                                    progressInfo.Description = $"{i} of {storeCount} stores imported";
+                                }
+                                else
+                                {
+                                    progressInfo.Description = $"{i} stores imported";
+                                }
+                                progressCallback(progressInfo);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }

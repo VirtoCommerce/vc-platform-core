@@ -20,7 +20,7 @@ namespace VirtoCommerce.StoreModule.Web
         {
             var snapshot = serviceCollection.BuildServiceProvider();
             var configuration = snapshot.GetService<IConfiguration>();
-            serviceCollection.AddDbContext<StoreDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce")));
+            serviceCollection.AddDbContext<StoreDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce.Store")));
             serviceCollection.AddTransient<IStoreRepository, StoreRepositoryImpl>();
             serviceCollection.AddSingleton<Func<IStoreRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IStoreRepository>());
             serviceCollection.AddSingleton<IStoreService, StoreServiceImpl>();
