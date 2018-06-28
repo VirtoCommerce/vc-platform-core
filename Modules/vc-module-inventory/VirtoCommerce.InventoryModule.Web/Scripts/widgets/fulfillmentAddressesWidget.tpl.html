@@ -1,0 +1,9 @@
+<div class="gridster-cnt" ng-click="openBlade()">
+    <div class="cnt-inner" ng-if="address && address.countryName">
+        <div class="list-t">{{address.firstName}} {{address.lastName}}</div>
+        <div class="list-t">{{address.countryCode}}, {{ address.regionName}}, {{address.city}}, {{address.line1}}</div>
+    </div>
+    <div class="cnt-inner" ng-if="!address || !address.countryName">
+        <div class="list-count">{{ 'inventory.widgets.fulfillmentWidget.address-detail.no-address' | translate }}</div>
+    </div>
+</div>
