@@ -13,8 +13,8 @@
 			objectTypeId: objectTypeId,
 			languages: blade.currentEntity.languages,
 			subtitle: 'stores.widgets.storeNotificationsWidget.blade-subtitle',
-			controller: 'platformWebApp.notificationsListController',
-			template: '$(Platform)/Scripts/app/notifications/blades/notifications-list.tpl.html'
+			controller: 'virtoCommerce.notificationsModule.notificationsListController',
+			template: 'Modules/$(VirtoCommerce.Notifications)/Scripts/blades/notifications-list.tpl.html'
 		};
 		bladeNavigationService.showBlade(newBlade, blade);
 	};
