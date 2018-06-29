@@ -4,10 +4,15 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using VirtoCommerce.Platform.Core.Bus;
+using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Core.Security.Events;
 using VirtoCommerce.StoreModule.Core;
+using VirtoCommerce.StoreModule.Core.Events;
 using VirtoCommerce.StoreModule.Core.Services;
+using VirtoCommerce.StoreModule.Data.Handlers;
 using VirtoCommerce.StoreModule.Data.Repositories;
 using VirtoCommerce.StoreModule.Data.Services;
 
@@ -24,6 +29,13 @@ namespace VirtoCommerce.StoreModule.Web
             serviceCollection.AddTransient<IStoreRepository, StoreRepositoryImpl>();
             serviceCollection.AddSingleton<Func<IStoreRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IStoreRepository>());
             serviceCollection.AddSingleton<IStoreService, StoreServiceImpl>();
+            serviceCollection.AddSingleton<IStoreSearchService, StoreSearchServiceImpl>();
+
+            serviceCollection.AddSingleton<StoreChangedEventHandler>();
+
+            var providerSnapshot = serviceCollection.BuildServiceProvider();
+            var inProcessBus = providerSnapshot.GetService<IHandlerRegistrar>();
+            inProcessBus.RegisterHandler<StoreChangedEvent>(async (message, token) => await providerSnapshot.GetService<StoreChangedEventHandler>().Handle(message));
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)

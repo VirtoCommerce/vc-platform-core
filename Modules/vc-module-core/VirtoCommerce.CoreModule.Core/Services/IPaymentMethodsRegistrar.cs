@@ -3,7 +3,7 @@ using VirtoCommerce.CoreModule.Core.Model.Payment;
 
 namespace VirtoCommerce.CoreModule.Core.Services
 {
-	public interface IPaymentMethodsService
+	public interface IPaymentMethodsRegistrar
 	{
 		PaymentMethod[] GetAllPaymentMethods();
 		void RegisterPaymentMethod(Func<PaymentMethod> methodGetter);

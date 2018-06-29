@@ -181,18 +181,18 @@ namespace VirtoCommerce.StoreModule.Data.Model
                 }));
             }
 
-            //if (store.ShippingMethods != null)
-            //{
-            //    ShippingMethods = new ObservableCollection<StoreShippingMethodEntity>(store.ShippingMethods.Select(x => AbstractTypeFactory<StoreShippingMethodEntity>.TryCreateInstance().FromModel(x, pkMap)));
-            //}
-            //if (store.PaymentMethods != null)
-            //{
-            //    PaymentMethods = new ObservableCollection<StorePaymentMethodEntity>(store.PaymentMethods.Select(x => AbstractTypeFactory<StorePaymentMethodEntity>.TryCreateInstance().FromModel(x, pkMap)));
-            //}
-            //if (store.TaxProviders != null)
-            //{
-            //    TaxProviders = new ObservableCollection<StoreTaxProviderEntity>(store.TaxProviders.Select(x => AbstractTypeFactory<StoreTaxProviderEntity>.TryCreateInstance().FromModel(x, pkMap)));
-            //}
+            if (store.ShippingMethods != null)
+            {
+                ShippingMethods = new ObservableCollection<StoreShippingMethodEntity>(store.ShippingMethods.Select(x => AbstractTypeFactory<StoreShippingMethodEntity>.TryCreateInstance().FromModel(x, pkMap)));
+            }
+            if (store.PaymentMethods != null)
+            {
+                PaymentMethods = new ObservableCollection<StorePaymentMethodEntity>(store.PaymentMethods.Select(x => AbstractTypeFactory<StorePaymentMethodEntity>.TryCreateInstance().FromModel(x, pkMap)));
+            }
+            if (store.TaxProviders != null)
+            {
+                TaxProviders = new ObservableCollection<StoreTaxProviderEntity>(store.TaxProviders.Select(x => AbstractTypeFactory<StoreTaxProviderEntity>.TryCreateInstance().FromModel(x, pkMap)));
+            }
 
             FulfillmentCenters = new ObservableCollection<StoreFulfillmentCenterEntity>();
             if (store.AdditionalFulfillmentCenterIds != null)

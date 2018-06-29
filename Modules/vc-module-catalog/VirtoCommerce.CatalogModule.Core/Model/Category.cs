@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.CatalogModule.Core.Exceptions;
+using VirtoCommerce.CoreModule.Core.Commerce.Model;
 using VirtoCommerce.Domain.Commerce.Model;
 using VirtoCommerce.Platform.Core.Common;
 

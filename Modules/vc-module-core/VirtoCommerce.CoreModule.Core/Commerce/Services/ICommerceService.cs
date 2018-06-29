@@ -1,19 +1,11 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VirtoCommerce.CoreModule.Core.Commerce.Model;
 using VirtoCommerce.Domain.Commerce.Model;
 
-namespace VirtoCommerce.Domain.Commerce.Services
+namespace VirtoCommerce.CoreModule.Core.Commerce.Services
 {
 	public interface ICommerceService
 	{
-		IEnumerable<FulfillmentCenter> GetAllFulfillmentCenters();
-		FulfillmentCenter UpsertFulfillmentCenter(FulfillmentCenter fullfilmentCenter);
-		void DeleteFulfillmentCenter(string[] ids);
-
         IEnumerable<Currency> GetAllCurrencies();
         void UpsertCurrencies(Currency[] currencies);
         void DeleteCurrencies(string[] codes);

@@ -1,6 +1,8 @@
+using VirtoCommerce.Platform.Core.Common;
+
 namespace VirtoCommerce.CoreModule.Core.Model.Payment
 {
-	public class ProcessPaymentResult
+	public class ProcessPaymentResult : ValueObject
 	{
         public PaymentMethod PaymentMethod { get; set; }
 

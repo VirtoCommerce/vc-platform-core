@@ -2,16 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.CoreModule.Core.Model.Payment;
+using VirtoCommerce.CoreModule.Core.Services;
 
-namespace VirtoCommerce.CoreModule.Core.Services
+namespace VirtoCommerce.CoreModule.Data.Services
 {
-	public class PaymentMethodsServiceImpl : IPaymentMethodsService
+	public class PaymentMethodsRegistrarImpl : IPaymentMethodsRegistrar
 	{
 		private List<Func<PaymentMethod>> _paymentMethods = new List<Func<PaymentMethod>>();
 
-		#region IPaymentService Members
+        #region IPaymentMethodsRegistrar Members
 
-		public PaymentMethod[] GetAllPaymentMethods()
+        public PaymentMethod[] GetAllPaymentMethods()
 		{
 			return _paymentMethods.Select(x => x()).ToArray();
 		}

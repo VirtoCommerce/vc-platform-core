@@ -1,12 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using VirtoCommerce.CoreModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.StoreModule.Core;
 using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Model.Search;
@@ -19,24 +18,18 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
     public class StoreModuleController : Controller
     {
         private readonly IStoreService _storeService;
-        private readonly IShippingMethodsService _shippingService;
-        private readonly IPaymentMethodsService _paymentService;
-        private readonly ITaxService _taxService;
-        //private readonly ISecurityService _securityService;
+        private readonly IStoreSearchService _storeSearchService;
+        private readonly UserManager<ApplicationUser> _userManager;
         //private readonly IPermissionScopeService _permissionScopeService;
-        //private readonly INotificationManager _notificationManager;
 
-        public StoreModuleController(IStoreService storeService, IShippingMethodsService shippingService, IPaymentMethodsService paymentService, ITaxService taxService
-            //                         , ISecurityService securityService, IPermissionScopeService permissionScopeService, INotificationManager notificationManager
+        public StoreModuleController(IStoreService storeService, IStoreSearchService storeSearchService, UserManager<ApplicationUser> userManager
+            //, IPermissionScopeService permissionScopeService
             )
         {
             _storeService = storeService;
-            _shippingService = shippingService;
-            _paymentService = paymentService;
-            _taxService = taxService;
-            //_securityService = securityService;
+            _storeSearchService = storeSearchService;
+            _userManager = userManager;
             //_permissionScopeService = permissionScopeService;
-            //_notificationManager = notificationManager;
         }
 
         /// <summary>
@@ -44,10 +37,9 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         /// </summary>
         [HttpPost]
         [Route("search")]
-        [ProducesResponseType(typeof(StoreSearchResult), 200)]
-        public async Task<StoreSearchResult> SearchStores([FromBody]StoreSearchCriteria criteria)
+        [ProducesResponseType(typeof(GenericSearchResult<Store>), 200)]
+        public async Task<GenericSearchResult<Store>> SearchStores([FromBody]StoreSearchCriteria criteria)
         {
-            var retVal = new StoreSearchResult();
             //Filter resulting stores correspond to current user permissions
             //first check global permission
             //TODO
@@ -67,10 +59,8 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
             //    }
             //}
 
-            var result = await _storeService.SearchStoresAsync(criteria);
-            retVal.TotalCount = result.TotalCount;
-            retVal.Stores = result.Stores.ToArray();
-            return retVal;
+            var result = await _storeSearchService.SearchStoresAsync(criteria);
+            return result;
         }
 
         /// <summary>
@@ -87,7 +77,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
                 Take = int.MaxValue
             };
             var storesSearchResult = await SearchStores(criteria);
-            return Ok(storesSearchResult.Stores);
+            return Ok(storesSearchResult.Results);
         }
 
         /// <summary>
@@ -130,6 +120,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 200)]
         public async Task<IActionResult> Update([FromBody]Store store)
         {
+            //TODO
             //CheckCurrentUserHasPermissionForObjects(StorePredefinedPermissions.Update, store);
             await _storeService.UpdateAsync(new[] { store });
             return Ok();
@@ -144,7 +135,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 200)]
         public async Task<IActionResult> Delete([FromQuery] string[] ids)
         {
-            //var stores = await _storeService.GetByIdsAsync(ids);
+            //TODO
             //CheckCurrentUserHasPermissionForObjects(StorePredefinedPermissions.Delete, stores);
             await _storeService.DeleteAsync(ids);
             return Ok();
@@ -191,21 +182,19 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         [HttpGet]
         [Route("{storeId}/accounts/{id}/loginonbehalf")]
         [ProducesResponseType(typeof(LoginOnBehalfInfo), 200)]
-        public IActionResult GetLoginOnBehalfInfo(string storeId, string id)
+        public async Task<IActionResult> GetLoginOnBehalfInfo(string storeId, string id)
         {
             var result = new LoginOnBehalfInfo
             {
                 UserName = id
             };
 
-            //TODO
-            //var user = await _securityService.FindByIdAsync(id, UserDetails.Reduced);
-
-            //if (user != null)
-            //{
-            //    //TODO: Check if requested user has permission to login on behalf for given store
-            //    result.CanLoginOnBehalf = _securityService.UserHasAnyPermission(user.UserName, null, StorePredefinedPermissions.LoginOnBehalf);
-            //}
+            var user = await _userManager.FindByIdAsync(id);
+            if (user != null)
+            {
+                //TODO
+                //result.CanLoginOnBehalf = _securityService.UserHasAnyPermission(user.UserName, null, StorePredefinedPermissions.LoginOnBehalf);
+            }
 
             return Ok(result);
         }
@@ -218,17 +207,17 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         [HttpGet]
         [Route("allowed/{userId}")]
         [ProducesResponseType(typeof(Store[]), 200)]
-        public IActionResult GetUserAllowedStores(string userId)
+        public async Task<IActionResult> GetUserAllowedStores(string userId)
         {
-            var retVal = new List<Store>();
-            //TODO
-            //var user = await _securityService.FindByIdAsync(userId, UserDetails.Reduced);
-            //if (user != null)
-            //{
-            //    var storeIds = _storeService.GetUserAllowedStoreIds(user);
-            //    retVal.AddRange(_storeService.GetByIds(storeIds.ToArray()));
-            //}
-            return Ok(retVal.ToArray());
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                var storeIds = await _storeService.GetUserAllowedStoreIdsAsync(user);
+                var stores = await _storeService.GetByIdsAsync(storeIds.ToArray());
+                return Ok(stores);
+            }
+
+            return NotFound();
         }
 
         //TODO
