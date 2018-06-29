@@ -8,14 +8,16 @@ using VirtoCommerce.ContentModule.Core.Services;
 using VirtoCommerce.Platform.Assets.AzureBlobStorage;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
+using Microsoft.Extensions.Options;
 
 namespace VirtoCommerce.ContentModule.Data.Services
 {
     public class AzureContentBlobStorageProvider : AzureBlobProvider, IContentBlobStorageProvider
     {
         private readonly string _chrootPath;
-        public AzureContentBlobStorageProvider(string connectionString, string chrootPath)
-            : base(connectionString)
+
+        public AzureContentBlobStorageProvider(IOptions<AzureBlobContentOptions> options, string chrootPath)
+            : base(options)
         {
             if (chrootPath == null)
                 throw new ArgumentNullException(nameof(chrootPath));
@@ -36,6 +38,7 @@ namespace VirtoCommerce.ContentModule.Data.Services
             base.Copy(fromUrl, toUrl);
         }
         #endregion
+
         public override Stream OpenRead(string url)
         {
             return base.OpenRead(NormalizeUrl(url));

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.ContentModule.Core.Model;
@@ -28,15 +29,16 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         [ProducesResponseType(typeof(IEnumerable<MenuLinkList>), 200)]
         [Route("menu")]
         [Authorize(Permissions.Read)]
-        public IActionResult GetLists(string storeId)
+        public async Task<IActionResult> GetListsAsync([FromQuery]string storeId)
         {
             //ToDo
             //CheckCurrentUserHasPermissionForObjects(ContentPredefinedPermissions.Read, new ContentScopeObject { StoreId = storeId });
 
-            var lists = _menuService.GetListsByStoreId(storeId).ToList();
+            var lists = await _menuService.GetListsByStoreIdAsync(storeId);
+
             if (lists.Any())
             {
-                return Ok(lists.Select(s => s.ToWebModel()));
+                return Ok(lists);
             }
             return Ok();
         }
@@ -50,12 +52,12 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         [ProducesResponseType(typeof(MenuLinkList), 200)]
         [Route("menu/{listId}")]
         [Authorize(Permissions.Read)]
-        public IActionResult GetList(string storeId, string listId)
+        public async Task<IActionResult> GetListAsync([FromQuery]string storeId, [FromQuery]string listId)
         {
             //ToDo
             //CheckCurrentUserHasPermissionForObjects(ContentPredefinedPermissions.Read, new ContentScopeObject { StoreId = storeId });
 
-            var item = _menuService.GetListById(listId).ToWebModel();
+            var item = await _menuService.GetListByIdAsync(listId);
             return Ok(item);
         }
 
@@ -71,12 +73,12 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         [ProducesResponseType(typeof(bool), 200)]
         [Route("menu/checkname")]
         [Authorize(Permissions.Read)]
-        public IActionResult CheckName(string storeId, string name, string language = "", string id = "")
+        public async Task<IActionResult> CheckNameAsync([FromQuery]string storeId, [FromQuery]string name, [FromQuery]string language = "", [FromQuery]string id = "")
         {
             //ToDo
             //CheckCurrentUserHasPermissionForObjects(ContentPredefinedPermissions.Read, new ContentScopeObject { StoreId = storeId });
 
-            var retVal = _menuService.CheckListAsync(storeId, name, language, id);
+            var retVal = await _menuService.CheckListAsync(storeId, name, language, id);
             return Ok(new { Result = retVal });
         }
 
@@ -88,14 +90,15 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         [ProducesResponseType(200)]
         [Route("menu")]
         [Authorize(Permissions.Update)]
-        public IActionResult Update(MenuLinkList list)
+        public async Task<IActionResult> UpdateAsync([FromBody]MenuLinkList list)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
+
             //ToDo
             //CheckCurrentUserHasPermissionForObjects(ContentPredefinedPermissions.Update, new ContentScopeObject { StoreId = list.StoreId });
 
-            _menuService.AddOrUpdate(list.ToCoreModel());
+            await _menuService.AddOrUpdateAsync(list);
             return Ok();
         }
 
@@ -107,18 +110,20 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         [ProducesResponseType(200)]
         [Route("menu")]
         [Authorize(Permissions.Delete)]
-        public IActionResult Delete([FromQuery] string[] listIds)
+        public async Task<IActionResult> DeleteAsync([FromQuery] string[] listIds)
         {
             if (listIds == null)
                 throw new ArgumentNullException(nameof(listIds));
 
             foreach (var listId in listIds)
             {
-                var list = _menuService.GetListById(listId).ToWebModel();
+                var list = await _menuService.GetListByIdAsync(listId);
+
                 //ToDo
                 //CheckCurrentUserHasPermissionForObjects(ContentPredefinedPermissions.Delete, new ContentScopeObject { StoreId = list.StoreId });
             }
-            _menuService.DeleteLists(listIds);
+            await _menuService.DeleteListsAsync(listIds);
+
             return Ok();
         }
 

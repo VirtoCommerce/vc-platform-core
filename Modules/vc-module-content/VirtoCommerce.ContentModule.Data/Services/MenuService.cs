@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.ContentModule.Core.Model;
 using VirtoCommerce.ContentModule.Core.Services;
-using VirtoCommerce.ContentModule.Data.Model;
+using VirtoCommerce.ContentModule.Data.Converters;
 using VirtoCommerce.ContentModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -50,7 +50,7 @@ namespace VirtoCommerce.ContentModule.Data.Services
 
                     if (existList != null)
                     {
-                        list.Patch(existList);
+                        list.Patch(existList.ToModel(AbstractTypeFactory<MenuLinkList>.TryCreateInstance()));
                     }
                     else
                     {

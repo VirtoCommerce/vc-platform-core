@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using VirtoCommerce.ContentModule.Core.Services;
 using VirtoCommerce.Platform.Assets.FileSystem;
 using VirtoCommerce.Platform.Core.Assets;
@@ -12,8 +13,8 @@ namespace VirtoCommerce.ContentModule.Data.Services
 {
     public class FileSystemContentBlobStorageProvider : FileSystemBlobProvider, IContentBlobStorageProvider
     {
-        public FileSystemContentBlobStorageProvider(string storagePath, string publicUrl)
-            : base(storagePath, publicUrl)
+        public FileSystemContentBlobStorageProvider(IOptions<FileSystemBlobContentOptions> options)
+            : base(options)
         {
         }
 
@@ -44,6 +45,7 @@ namespace VirtoCommerce.ContentModule.Data.Services
 
             CopyDirectoryRecursive(srcPath, destPath);
         }
+
         #endregion
 
         public override async Task<GenericSearchResult<BlobEntry>> SearchAsync(string folderUrl, string keyword)

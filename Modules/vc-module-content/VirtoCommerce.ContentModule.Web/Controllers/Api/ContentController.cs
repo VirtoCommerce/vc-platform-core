@@ -3,18 +3,25 @@ using System.Collections.Generic;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Net.Http.Headers;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using VirtoCommerce.ContentModule.Core.Model;
 using VirtoCommerce.ContentModule.Core.Services;
+using VirtoCommerce.ContentModule.Data.Model;
 using VirtoCommerce.Platform.Core.Assets;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.DynamicProperties;
+using VirtoCommerce.Platform.Data.Helpers;
+using VirtoCommerce.StoreModule.Core.Services;
 
 using Permissions = VirtoCommerce.ContentModule.Core.ContentConstants.Security.Permissions;
+using VirtoCommerce.ContentModule.Data.Extension;
 
 namespace VirtoCommerce.ContentModule.Web.Controllers.Api
 {
@@ -24,14 +31,15 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         private readonly Func<string, IContentBlobStorageProvider> _contentStorageProviderFactory;
         private readonly IBlobUrlResolver _urlResolver;
         private readonly IStoreService _storeService;
-        private readonly ICacheManager<object> _cacheManager;
+        private readonly IPlatformMemoryCache _memoryCache;
+        private static readonly FormOptions _defaultFormOptions = new FormOptions();
 
-        public ContentController(Func<string, IContentBlobStorageProvider> contentStorageProviderFactory, IBlobUrlResolver urlResolver, ISecurityService securityService, IPermissionScopeService permissionScopeService, IStoreService storeService, ICacheManager<object> cacheManager)
+        public ContentController(Func<string, IContentBlobStorageProvider> contentStorageProviderFactory, IBlobUrlResolver urlResolver, IStoreService storeService, IPlatformMemoryCache memoryCache)
         {
             _storeService = storeService;
             _contentStorageProviderFactory = contentStorageProviderFactory;
             _urlResolver = urlResolver;
-            _cacheManager = cacheManager;
+            _memoryCache = memoryCache;
         }
 
         /// <summary>
@@ -46,11 +54,15 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         public async Task<IActionResult> GetStoreContentStatsAsync(string storeId)
         {
             var contentStorageProvider = _contentStorageProviderFactory("");
-            var store = _storeService.GetById(storeId);
 
-            var pagesCount = _cacheManager.Get("pagesCount", $"content-{storeId}", TimeSpan.FromMinutes(1), () =>
-            {
-                return CountContentItemsRecursive(GetContentBasePath("pages", storeId), contentStorageProvider, GetContentBasePath("blogs", storeId)); ;
+            var store = await _storeService.GetByIdAsync(storeId);
+
+            var cacheKey = CacheKey.With(GetType(), "GetStoreContentStatsAsync", $"content-{storeId}", TimeSpan.FromMinutes(1).ToString());
+
+            var pagesCount = _memoryCache.GetOrCreateExclusive(cacheKey, (cacheEntry) => {
+
+                return CountContentItemsRecursive(GetContentBasePath("pages", storeId), contentStorageProvider, GetContentBasePath("blogs", storeId));
+
             });
 
             var themes = await contentStorageProvider.SearchAsync(GetContentBasePath("themes", storeId), null);
@@ -59,7 +71,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
             var retVal = new ContentStatistic
             {
                 ActiveThemeName = store.GetDynamicPropertyValue("DefaultThemeName", "not set"),
-                ThemesCount = themes.Results.Count( x => x.Type.EqualsInvariant("folder")),
+                ThemesCount = themes.Results.Count(x => x.Type.EqualsInvariant("folder")),
                 BlogsCount = themes.Results.Count(x => x.Type.EqualsInvariant("folder")),
                 PagesCount = pagesCount
             };
@@ -83,7 +95,10 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
             var storageProvider = _contentStorageProviderFactory(GetContentBasePath(contentType, storeId));
 
             await storageProvider.RemoveAsync(urls);
-            _cacheManager.ClearRegion($"content-{storeId}");
+
+            //ToDo Reset cached items
+            //_cacheManager.ClearRegion($"content-{storeId}");
+            ContentCacheRegion.ExpireRegion();
             return Ok();
         }
 
@@ -99,13 +114,12 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         [ProducesResponseType(typeof(byte[]), 200)]
         [Authorize(Permissions.Read)]
 
-        public HttpResponseMessage GetContentItemDataStream(string contentType, string storeId, string relativeUrl)
+        public IActionResult GetContentItemDataStream(string contentType, string storeId, string relativeUrl)
         {
             var storageProvider = _contentStorageProviderFactory(GetContentBasePath(contentType, storeId));
-            var stream = storageProvider.OpenRead(relativeUrl);
-            var result = new HttpResponseMessage(HttpStatusCode.OK) { Content = new StreamContent(stream) };
-            result.Content.Headers.ContentType = new MediaTypeHeaderValue(MimeMapping.GetMimeMapping(relativeUrl));
-            return result;
+            var fileStream = storageProvider.OpenRead(relativeUrl);
+
+            return File(fileStream, MimeTypeResolver.ResolveContentType(relativeUrl));
         }
 
 
@@ -126,10 +140,11 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
             var storageProvider = _contentStorageProviderFactory(GetContentBasePath(contentType, storeId));
 
             var result = await storageProvider.SearchAsync(folderUrl, keyword);
-            var retVal = result.Results.Where( x => x.Type.EqualsInvariant("folder")).Select(x => x.ToContentModel())
-                               .OfType<ContentItem>()
-                               .Concat(result.Results.Select(x => x.ToContentModel()))
-                               .ToArray();
+            var retVal = result.Results.OfType<BlobFolder>()
+                                .Select(x => x.ToContentModel())
+                                .OfType<ContentItem>()
+                                .Concat(result.Results.OfType<BlobInfo>().Select(x => x.ToContentModel()))
+                                .ToArray();
             return Ok(retVal);
         }
 
@@ -184,7 +199,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         [Route("unpack")]
         [ProducesResponseType(200)]
         [Authorize(Permissions.Update)]
-        public IActionResult Unpack(string contentType, string storeId, string archivePath, string destPath)
+        public async Task<IActionResult> UnpackAsync(string contentType, string storeId, string archivePath, string destPath)
         {
             var storageProvider = _contentStorageProviderFactory(GetContentBasePath(contentType, storeId));
 
@@ -205,8 +220,10 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
                 }
 
             }
+
             //remove archive after unpack
-            storageProvider.Remove(new[] { archivePath });
+            await storageProvider.RemoveAsync(new[] { archivePath });
+
             return Ok();
         }
 
@@ -221,11 +238,12 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         [Route("folder")]
         [ProducesResponseType(200)]
         [Authorize(Permissions.Create)]
-        public IActionResult CreateContentFolder(string contentType, string storeId, ContentFolder folder)
+        public async Task<IActionResult> CreateContentFolderAsync(string contentType, string storeId, ContentFolder folder)
         {
             var storageProvider = _contentStorageProviderFactory(GetContentBasePath(contentType, storeId));
 
-            storageProvider.CreateFolderAsync(folder.ToBlobModel());
+            await storageProvider.CreateFolderAsync(folder.ToBlobModel(AbstractTypeFactory<BlobFolder>.TryCreateInstance()));
+
             return Ok();
         }
 
@@ -244,45 +262,72 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         [Authorize(Permissions.Create)]
         public async Task<IActionResult> UploadContent(string contentType, string storeId, [FromQuery] string folderUrl, [FromQuery]string url = null)
         {
-            if (url == null && !Request.Content.IsMimeMultipartContent())
+            if (url == null && !MultipartRequestHelper.IsMultipartContentType(Request.ContentType))
             {
-                throw new HttpResponseException(HttpStatusCode.UnsupportedMediaType);
+                return BadRequest($"Expected a multipart request, but got {Request.ContentType}");
             }
 
             var retVal = new List<ContentFile>();
+
             var storageProvider = _contentStorageProviderFactory(GetContentBasePath(contentType, storeId));
 
             if (url != null)
             {
                 var fileName = HttpUtility.UrlDecode(System.IO.Path.GetFileName(url));
                 var fileUrl = folderUrl + "/" + fileName;
+
                 using (var client = new WebClient())
                 using (var blobStream = storageProvider.OpenWrite(fileUrl))
                 using (var remoteStream = client.OpenRead(url))
                 {
                     remoteStream.CopyTo(blobStream);
 
-                    retVal.Add(new ContentFile
-                    {
-                        Name = fileName,
-                        Url = _urlResolver.GetAbsoluteUrl(fileUrl)
-                    });
+                    var сontentFile = AbstractTypeFactory<ContentFile>.TryCreateInstance();
+
+                    сontentFile.Name = fileName;
+                    сontentFile.Url = _urlResolver.GetAbsoluteUrl(fileUrl);
+                    retVal.Add(сontentFile);
                 }
             }
+
             else
             {
-                var blobMultipartProvider = new BlobStorageMultipartProvider(storageProvider, _urlResolver, folderUrl);
-                await Request.Content.ReadAsMultipartAsync(blobMultipartProvider);
+                string targetFilePath = null;
 
-                var files = blobMultipartProvider.BlobInfos.Select(blobInfo => new ContentFile
+                var boundary = MultipartRequestHelper.GetBoundary(MediaTypeHeaderValue.Parse(Request.ContentType), _defaultFormOptions.MultipartBoundaryLengthLimit);
+                var reader = new MultipartReader(boundary, HttpContext.Request.Body);
+
+                var section = await reader.ReadNextSectionAsync();
+                if (section != null)
                 {
-                    Name = blobInfo.FileName,
-                    Url = _urlResolver.GetAbsoluteUrl(blobInfo.Key)
-                });
-                retVal.AddRange(files);
+                    var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out ContentDispositionHeaderValue contentDisposition);
+
+                    if (hasContentDispositionHeader)
+                    {
+                        if (MultipartRequestHelper.HasFileContentDisposition(contentDisposition))
+                        {
+                            var fileName = contentDisposition.FileName.Value;
+
+                            targetFilePath = folderUrl + "/" + fileName;
+
+                            using (var targetStream = storageProvider.OpenWrite(targetFilePath))
+                            {
+                                await section.Body.CopyToAsync(targetStream);
+                            }
+
+                            var contentFile = AbstractTypeFactory<ContentFile>.TryCreateInstance();
+                            contentFile.Name = fileName;
+                            contentFile.Url = _urlResolver.GetAbsoluteUrl(targetFilePath);
+                            retVal.Add(contentFile);
+                        }
+                    }
+                }
             }
 
-            _cacheManager.ClearRegion($"content-{storeId}");
+            //ToDo Reset cached items
+            //_cacheManager.ClearRegion($"content-{storeId}");
+            ContentCacheRegion.ExpireRegion();
+
             return Ok(retVal.ToArray());
         }
 
