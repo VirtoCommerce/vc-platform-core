@@ -40,7 +40,6 @@ namespace VirtoCommerce.ContentModule.Core.Model
         /// </summary>
         public string AssociatedObjectType { get; set; }
 
-
         public string[] SecurityScopes { get; set; }
     }
 }

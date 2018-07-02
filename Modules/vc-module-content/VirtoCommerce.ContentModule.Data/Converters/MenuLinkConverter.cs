@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 using VirtoCommerce.ContentModule.Core.Model;
+using VirtoCommerce.ContentModule.Data.Model;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ContentModule.Data.Converters
 {
@@ -28,5 +28,39 @@ namespace VirtoCommerce.ContentModule.Data.Converters
             target.Url = source.Url;
 
         }
+
+        public static MenuLinkEntity FromModel(this MenuLink link)
+        {
+            var linkEntity = AbstractTypeFactory<MenuLinkEntity>.TryCreateInstance();
+
+            linkEntity.Id = link.Id;
+            linkEntity.Title = link.Title;
+            linkEntity.Url = link.Url;
+            linkEntity.Priority = link.Priority;
+            linkEntity.MenuLinkListId = link.MenuLinkListId;
+            linkEntity.AssociatedObjectId = link.AssociatedObjectId;
+            linkEntity.AssociatedObjectName = link.AssociatedObjectName;
+            linkEntity.AssociatedObjectType = link.AssociatedObjectType;
+
+            return linkEntity;
+        }
+
+
+        public static MenuLink ToModel(this MenuLinkEntity linkEntity)
+        {
+            var link = AbstractTypeFactory<MenuLink>.TryCreateInstance();
+
+            link.Id = linkEntity.Id;
+            link.Title = linkEntity.Title;
+            link.Url = linkEntity.Url;
+            link.Priority = linkEntity.Priority;
+            link.MenuLinkListId = linkEntity.MenuLinkListId;
+            link.AssociatedObjectId = linkEntity.AssociatedObjectId;
+            link.AssociatedObjectName = linkEntity.AssociatedObjectName;
+            link.AssociatedObjectType = linkEntity.AssociatedObjectType;
+
+            return link;
+        }
+
     }
 }

@@ -6,6 +6,7 @@ namespace VirtoCommerce.Platform.Assets.AzureBlobStorage
     {
         public string ConnectionString { get; set; }
         public string CdnUrl { get; set; }
+        public string RootPath { get; set; }
         public BlobRequestOptions BlobRequestOptions { get; set; } = new BlobRequestOptions();
     }
 }

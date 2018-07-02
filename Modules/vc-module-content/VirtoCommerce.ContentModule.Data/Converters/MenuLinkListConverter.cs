@@ -2,31 +2,31 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using VirtoCommerce.ContentModule.Core.Model;
+using VirtoCommerce.ContentModule.Data.Model;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.ContentModule.Data.Converters;
 
 namespace VirtoCommerce.ContentModule.Data.Converters
 {
     public static class MenuLinkListConverter
     {
-        /// <summary>
-        /// Patch changes
-        /// </summary>
-        /// <param name="source"></param>
-        /// <param name="target"></param>
-        public static void Patch(this MenuLinkList source, MenuLinkList target)
+        public static MenuLinkListEntity FromModel( this MenuLinkList list)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-            if (target == null)
-                throw new ArgumentNullException("target");
+            var listEntity = AbstractTypeFactory<MenuLinkListEntity>.TryCreateInstance();
 
-            target.Language = source.Language;
-            target.Name = source.Name;
+            listEntity.Id = list.Id;
+            listEntity.StoreId = list.StoreId;
+            listEntity.Name = list.Name;
+            listEntity.Language = list.Language;
+            listEntity.ModifiedDate = list.ModifiedDate;
+            listEntity.ModifiedBy = list.ModifiedBy;
 
-            if (!source.MenuLinks.IsNullCollection())
+            foreach (var link in list.MenuLinks)
             {
-                source.MenuLinks.Patch(target.MenuLinks, (sourceLink, targetLink) => sourceLink.Patch(targetLink));
+                listEntity.MenuLinks.Add(link.FromModel());
             }
+
+            return listEntity;
         }
     }
 }

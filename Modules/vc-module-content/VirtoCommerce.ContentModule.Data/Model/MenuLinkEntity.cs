@@ -11,7 +11,7 @@ namespace VirtoCommerce.ContentModule.Data.Model
         public string Title { get; set; }
         [Required]
         [StringLength(2048)]
-        public string Url { get; set; }  
+        public string Url { get; set; }
         [Required]
         public int Priority { get; set; }
         [StringLength(254)]
@@ -23,17 +23,16 @@ namespace VirtoCommerce.ContentModule.Data.Model
         public virtual MenuLinkListEntity MenuLinkList { get; set; }
         public string MenuLinkListId { get; set; }
 
-        public MenuLink ToModel(MenuLink menuLink)
-        {
-            menuLink.Id = Id;
-            menuLink.Title = Title;
-            menuLink.Url = Url;
-            menuLink.Priority = Priority;
-            menuLink.AssociatedObjectId = AssociatedObjectId;
-            menuLink.AssociatedObjectType = AssociatedObjectType;
-            menuLink.AssociatedObjectName = AssociatedObjectName;
 
-            return menuLink;
+        public void Patch(MenuLinkEntity target)
+        {
+            Title = target.Title;
+            Url = target.Url;
+            Priority = target.Priority;
+
+            AssociatedObjectId = target.AssociatedObjectId;
+            AssociatedObjectName = target.AssociatedObjectName;
+            AssociatedObjectType = target.AssociatedObjectType;
         }
     }
 }

@@ -50,16 +50,16 @@ namespace VirtoCommerce.ContentModule.Data.Services
 
                     if (existList != null)
                     {
-                        list.Patch(existList.ToModel(AbstractTypeFactory<MenuLinkList>.TryCreateInstance()));
+                        existList.Patch(list.FromModel());
                     }
                     else
                     {
-                        repository.Add(list);
+                        repository.Add(list.FromModel());
                     }
                 }
                 else
                 {
-                    repository.Add(list);
+                    repository.Add(list.FromModel());
                 }
 
                 await repository.UnitOfWork.CommitAsync();

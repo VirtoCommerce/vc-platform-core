@@ -1,13 +1,19 @@
 using System;
 using System.Linq;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using VirtoCommerce.ContentModule.Core;
 using VirtoCommerce.ContentModule.Core.Services;
+using VirtoCommerce.ContentModule.Data.Extensions;
 using VirtoCommerce.ContentModule.Data.Repositories;
 using VirtoCommerce.ContentModule.Data.Services;
+using VirtoCommerce.Platform.Assets.AzureBlobStorage;
+using VirtoCommerce.Platform.Assets.FileSystem;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 
@@ -27,7 +33,28 @@ namespace VirtoCommerce.ContentModule.Web
 
             serviceCollection.AddSingleton<IMenuService, MenuService>();
 
+            var contentProvider = configuration.GetSection("Content:Provider").Value;
 
+
+            if (contentProvider.EqualsInvariant(AzureBlobProvider.ProviderName))
+            {
+                serviceCollection.Configure<AzureBlobContentOptions>(configuration.GetSection("Content:AzureBlobStorage"));
+                serviceCollection.AddTransient<IContentBlobStorageProvider, AzureContentBlobStorageProvider>();
+            }
+            else
+            {
+                var fileSystemContentBlobOptions = new FileSystemBlobContentOptions();
+                configuration.GetSection("Content:LocalStorage").Bind(fileSystemContentBlobOptions);
+
+                IOptions<FileSystemBlobContentOptions> options = Options.Create(fileSystemContentBlobOptions);
+
+                serviceCollection.AddTransient<FileSystemContentBlobStorageProvider>().Configure<FileSystemBlobContentOptions>(configuration.GetSection("Content:LocalStorage"));
+
+                serviceCollection.AddTransient<Func<string, IContentBlobStorageProvider>>(provider => (str) =>
+                {
+                    return new FileSystemContentBlobStorageProvider(options);
+                });
+            }
 
         }
 

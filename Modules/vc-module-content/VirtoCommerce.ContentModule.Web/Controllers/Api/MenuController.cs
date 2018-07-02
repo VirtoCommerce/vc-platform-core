@@ -29,7 +29,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         [ProducesResponseType(typeof(IEnumerable<MenuLinkList>), 200)]
         [Route("menu")]
         [Authorize(Permissions.Read)]
-        public async Task<IActionResult> GetListsAsync([FromQuery]string storeId)
+        public async Task<IActionResult> GetListsAsync([FromRoute]string storeId)
         {
             //ToDo
             //CheckCurrentUserHasPermissionForObjects(ContentPredefinedPermissions.Read, new ContentScopeObject { StoreId = storeId });
@@ -52,7 +52,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         [ProducesResponseType(typeof(MenuLinkList), 200)]
         [Route("menu/{listId}")]
         [Authorize(Permissions.Read)]
-        public async Task<IActionResult> GetListAsync([FromQuery]string storeId, [FromQuery]string listId)
+        public async Task<IActionResult> GetListAsync([FromRoute]string storeId, [FromRoute]string listId)
         {
             //ToDo
             //CheckCurrentUserHasPermissionForObjects(ContentPredefinedPermissions.Read, new ContentScopeObject { StoreId = storeId });
@@ -73,7 +73,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         [ProducesResponseType(typeof(bool), 200)]
         [Route("menu/checkname")]
         [Authorize(Permissions.Read)]
-        public async Task<IActionResult> CheckNameAsync([FromQuery]string storeId, [FromQuery]string name, [FromQuery]string language = "", [FromQuery]string id = "")
+        public async Task<IActionResult> CheckNameAsync([FromRoute]string storeId, [FromQuery]string name, [FromQuery]string language = "", [FromQuery]string id = "")
         {
             //ToDo
             //CheckCurrentUserHasPermissionForObjects(ContentPredefinedPermissions.Read, new ContentScopeObject { StoreId = storeId });
