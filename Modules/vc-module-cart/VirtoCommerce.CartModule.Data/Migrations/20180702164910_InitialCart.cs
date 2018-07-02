@@ -11,7 +11,7 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                 name: "Cart",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
@@ -58,7 +58,7 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                 name: "CartLineItem",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
@@ -118,7 +118,7 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                 name: "CartPayment",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
@@ -154,7 +154,7 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                 name: "CartShipment",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
@@ -199,7 +199,7 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                 name: "CartAddress",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     AddressType = table.Column<string>(maxLength: 32, nullable: true),
                     Organization = table.Column<string>(maxLength: 64, nullable: true),
                     CountryCode = table.Column<string>(maxLength: 3, nullable: true),
@@ -245,7 +245,7 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                 name: "CartDiscount",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     PromotionId = table.Column<string>(maxLength: 64, nullable: true),
                     PromotionDescription = table.Column<string>(maxLength: 1024, nullable: true),
                     CouponCode = table.Column<string>(maxLength: 64, nullable: true),
@@ -290,15 +290,15 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                 name: "CartShipmentItem",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
                     ModifiedBy = table.Column<string>(maxLength: 64, nullable: true),
                     BarCode = table.Column<string>(maxLength: 128, nullable: true),
                     Quantity = table.Column<int>(nullable: false),
-                    LineItemId = table.Column<string>(nullable: true),
-                    ShipmentId = table.Column<string>(nullable: true)
+                    LineItemId = table.Column<string>(nullable: false),
+                    ShipmentId = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -314,14 +314,14 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                         column: x => x.ShipmentId,
                         principalTable: "CartShipment",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
                 name: "CartTaxDetail",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     Name = table.Column<string>(maxLength: 1024, nullable: true),
                     Rate = table.Column<decimal>(nullable: false),
                     Amount = table.Column<decimal>(type: "Money", nullable: false),
@@ -344,19 +344,19 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                         column: x => x.PaymentId,
                         principalTable: "CartPayment",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_CartTaxDetail_CartShipment_ShipmentId",
                         column: x => x.ShipmentId,
                         principalTable: "CartShipment",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_CartTaxDetail_Cart_ShoppingCartId",
                         column: x => x.ShoppingCartId,
                         principalTable: "Cart",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(

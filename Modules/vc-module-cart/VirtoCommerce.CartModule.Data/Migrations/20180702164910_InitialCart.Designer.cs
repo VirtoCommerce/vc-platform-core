@@ -10,7 +10,7 @@ using VirtoCommerce.CartModule.Data.Repositories;
 namespace VirtoCommerce.CartModule.Data.Migrations
 {
     [DbContext(typeof(CartDbContext))]
-    [Migration("20180702134019_InitialCart")]
+    [Migration("20180702164910_InitialCart")]
     partial class InitialCart
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,7 +24,8 @@ namespace VirtoCommerce.CartModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.AddressEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("AddressType")
                         .HasMaxLength(32);
@@ -92,7 +93,8 @@ namespace VirtoCommerce.CartModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.DiscountEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("CouponCode")
                         .HasMaxLength(64);
@@ -137,7 +139,8 @@ namespace VirtoCommerce.CartModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.LineItemEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("CatalogId")
                         .IsRequired()
@@ -269,7 +272,8 @@ namespace VirtoCommerce.CartModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.PaymentEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("Money");
@@ -336,7 +340,8 @@ namespace VirtoCommerce.CartModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.ShipmentEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(64);
@@ -424,7 +429,8 @@ namespace VirtoCommerce.CartModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.ShipmentItemEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("BarCode")
                         .HasMaxLength(128);
@@ -434,7 +440,8 @@ namespace VirtoCommerce.CartModule.Data.Migrations
 
                     b.Property<DateTime>("CreatedDate");
 
-                    b.Property<string>("LineItemId");
+                    b.Property<string>("LineItemId")
+                        .IsRequired();
 
                     b.Property<string>("ModifiedBy")
                         .HasMaxLength(64);
@@ -443,7 +450,8 @@ namespace VirtoCommerce.CartModule.Data.Migrations
 
                     b.Property<int>("Quantity");
 
-                    b.Property<string>("ShipmentId");
+                    b.Property<string>("ShipmentId")
+                        .IsRequired();
 
                     b.HasKey("Id");
 
@@ -457,7 +465,8 @@ namespace VirtoCommerce.CartModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.ShoppingCartEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("ChannelId")
                         .HasMaxLength(64);
@@ -573,7 +582,8 @@ namespace VirtoCommerce.CartModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.TaxDetailEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("Money");
@@ -679,7 +689,7 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     b.HasOne("VirtoCommerce.CartModule.Data.Model.ShipmentEntity", "Shipment")
                         .WithMany("Items")
                         .HasForeignKey("ShipmentId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.TaxDetailEntity", b =>
@@ -692,17 +702,17 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     b.HasOne("VirtoCommerce.CartModule.Data.Model.PaymentEntity", "Payment")
                         .WithMany("TaxDetails")
                         .HasForeignKey("PaymentId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("VirtoCommerce.CartModule.Data.Model.ShipmentEntity", "Shipment")
                         .WithMany("TaxDetails")
                         .HasForeignKey("ShipmentId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("VirtoCommerce.CartModule.Data.Model.ShoppingCartEntity", "ShoppingCart")
                         .WithMany("TaxDetails")
                         .HasForeignKey("ShoppingCartId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 #pragma warning restore 612, 618
         }
