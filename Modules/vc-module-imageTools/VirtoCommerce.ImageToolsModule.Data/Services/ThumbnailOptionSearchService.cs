@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.ImageToolsModule.Core.Services;
-using VirtoCommerce.ImageToolsModule.Data.Models;
 using VirtoCommerce.ImageToolsModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -34,9 +33,9 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
                     };
 
                 var query = repository.ThumbnailOptions.OrderBySortInfos(sortInfos);
-                var totalCount = query.Count();
+                var totalCount = await query.CountAsync();
 
-                var ids = query.Skip(criteria.Skip).Take(criteria.Take).Select(x => x.Id).ToArray();
+                var ids = await query.Skip(criteria.Skip).Take(criteria.Take).Select(x => x.Id).ToArrayAsync();
                 var thumbnailOptions = await repository.GetThumbnailOptionsByIdsAsync(ids);
                 var results = thumbnailOptions.Select(t => t.ToModel(AbstractTypeFactory<ThumbnailOption>.TryCreateInstance())).ToArray();
 

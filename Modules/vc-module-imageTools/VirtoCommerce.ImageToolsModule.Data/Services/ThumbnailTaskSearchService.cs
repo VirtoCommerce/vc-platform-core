@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.ImageToolsModule.Core.Services;
 using VirtoCommerce.ImageToolsModule.Data.Models;
@@ -36,9 +37,9 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
                     };
                 }
                 query = query.OrderBySortInfos(sortInfos);
-                var totalCount = query.Count();
+                var totalCount = await query.CountAsync();
 
-                var ids = query.Skip(criteria.Skip).Take(criteria.Take).Select(x => x.Id).ToArray();
+                var ids = await query.Skip(criteria.Skip).Take(criteria.Take).Select(x => x.Id).ToArrayAsync();
                 var thumbnailTasks = await repository.GetThumbnailTasksByIdsAsync(ids);
                 var results = thumbnailTasks.Select(t => t.ToModel(AbstractTypeFactory<ThumbnailTask>.TryCreateInstance())).ToArray();
 
