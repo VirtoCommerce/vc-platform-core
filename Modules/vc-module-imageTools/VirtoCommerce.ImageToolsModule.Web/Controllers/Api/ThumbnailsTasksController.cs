@@ -7,6 +7,7 @@ using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.ImageToolsModule.Core.PushNotifications;
 using VirtoCommerce.ImageToolsModule.Core.Services;
 using VirtoCommerce.ImageToolsModule.Web.BackgroundJobs;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Security;
 
@@ -83,7 +84,7 @@ namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("search")]
-        [ProducesResponseType(typeof(ThumbnailTaskSearchResult), 200)]
+        [ProducesResponseType(typeof(GenericSearchResult<ThumbnailTask>), 200)]
         [Authorize(Permission.Read)]
         public async Task<IActionResult> Search([FromBody]ThumbnailTaskSearchCriteria criteria)
         {

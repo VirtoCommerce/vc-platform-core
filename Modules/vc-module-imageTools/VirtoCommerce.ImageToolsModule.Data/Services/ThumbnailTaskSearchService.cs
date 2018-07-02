@@ -18,7 +18,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
             _thumbnailRepositoryFactory = thumbnailThumbnailRepositoryFactoryFactory;
         }
 
-        public async Task<ThumbnailTaskSearchResult> SearchAsync(ThumbnailTaskSearchCriteria criteria)
+        public async Task<GenericSearchResult<ThumbnailTask>> SearchAsync(ThumbnailTaskSearchCriteria criteria)
         {
             using (var repository = _thumbnailRepositoryFactory())
             {
@@ -42,7 +42,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
                 var thumbnailTasks = await repository.GetThumbnailTasksByIdsAsync(ids);
                 var results = thumbnailTasks.Select(t => t.ToModel(AbstractTypeFactory<ThumbnailTask>.TryCreateInstance())).ToArray();
 
-                var retVal = new ThumbnailTaskSearchResult
+                var retVal = new GenericSearchResult<ThumbnailTask>
                 {
                     TotalCount = totalCount,
                     Results = results.AsQueryable().OrderBySortInfos(sortInfos).ToList()

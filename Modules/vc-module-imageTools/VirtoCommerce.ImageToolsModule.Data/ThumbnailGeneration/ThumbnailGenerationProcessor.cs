@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VirtoCommerce.ImageToolsModule.Core;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.ImageToolsModule.Core.ThumbnailGeneration;
 using VirtoCommerce.Platform.Core.Common;
@@ -40,7 +41,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
 
             progressCallback(progressInfo);
 
-            var pageSize = _settingsManager.GetValue("ImageTools.Thumbnails.ProcessBacthSize", 50);
+            var pageSize = _settingsManager.GetValue(ThumbnailConstants.Settings.General.ProcessBacthSize.Name, 50);
             foreach (var task in tasks)
             {
                 progressInfo.Message = $"Procesing task {task.Name}...";

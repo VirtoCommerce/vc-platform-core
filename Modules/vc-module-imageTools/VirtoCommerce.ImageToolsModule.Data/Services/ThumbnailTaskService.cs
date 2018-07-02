@@ -43,7 +43,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
                     }
                 }
 
-                repository.UnitOfWork.Commit();
+                await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
             }
         }

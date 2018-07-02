@@ -42,7 +42,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
                     }
                 }
 
-                repository.UnitOfWork.Commit();
+                await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
             }
         }
@@ -61,7 +61,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
             using (var repository = this._thumbnailRepositoryFactory())
             {
                 await repository.RemoveThumbnailOptionsByIds(ids);
-                repository.UnitOfWork.Commit();
+                await repository.UnitOfWork.CommitAsync();
             }
         }
     }

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.ImageToolsModule.Core.Services;
-
+using VirtoCommerce.Platform.Core.Common;
 using Permission = VirtoCommerce.ImageToolsModule.Core.ThumbnailConstants.Security.Permissions;
 
 namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
@@ -81,7 +81,7 @@ namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("search")]
-        [ProducesResponseType(typeof(ThumbnailOptionSearchResult), 200)]
+        [ProducesResponseType(typeof(GenericSearchResult<ThumbnailTask>), 200)]
         [Authorize(Permission.Read)]
         public async Task<IActionResult> Search([FromBody]ThumbnailOptionSearchCriteria criteria)
         {
