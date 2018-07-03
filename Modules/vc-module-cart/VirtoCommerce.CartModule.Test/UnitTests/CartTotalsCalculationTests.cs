@@ -3,7 +3,7 @@ using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CartModule.Data.Services;
 using Xunit;
 
-namespace VirtoCommerce.CartModule.Test
+namespace VirtoCommerce.CartModule.Test.UnitTests
 {
     [Trait("Category", "CI")]
     public class OrderTotalsCalculationTest
