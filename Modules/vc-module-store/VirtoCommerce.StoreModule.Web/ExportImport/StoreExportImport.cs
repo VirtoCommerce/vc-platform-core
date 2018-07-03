@@ -103,7 +103,7 @@ namespace VirtoCommerce.StoreModule.Web.ExportImport
                                 var batchStores = stores.Skip(i).Take(BatchSize);
                                 foreach (var store in batchStores)
                                 {
-                                    await _storeService.CreateAsync(store);
+                                    await _storeService.SaveChangesAsync(new [] { store });
                                 }
 
                                 if (storeCount > 0)

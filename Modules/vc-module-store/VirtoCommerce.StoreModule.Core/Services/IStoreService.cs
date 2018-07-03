@@ -8,10 +8,8 @@ namespace VirtoCommerce.StoreModule.Core.Services
 {
 	public interface IStoreService
 	{
-        Task<Store> GetByIdAsync(string id);
 	    Task<Store[]> GetByIdsAsync(string[] ids);
-        Task<Store> CreateAsync(Store store);
-		Task UpdateAsync(Store[] stores);
+        Task SaveChangesAsync(Store[] stores);
 		Task DeleteAsync(string[] ids);
 
         /// <summary>

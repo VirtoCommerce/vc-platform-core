@@ -288,24 +288,5 @@ namespace VirtoCommerce.StoreModule.Data.Model
                                       (sourceFulfillmentCenter, targetFulfillmentCenter) => sourceFulfillmentCenter.Patch(targetFulfillmentCenter));
             }
         }
-
-        public static ValidationResult ValidateStoreId(string value, ValidationContext context)
-        {
-            if (string.IsNullOrEmpty(value))
-            {
-                return new ValidationResult("Code can't be empty");
-            }
-
-            const string invalidKeywordCharacters = @"$+;=%{}[]|\/@ ~#!^*&?:'<>,";
-
-            if (value.IndexOfAny(invalidKeywordCharacters.ToCharArray()) > -1)
-            {
-                return new ValidationResult(@"Code must be valid");
-            }
-            else
-            {
-                return ValidationResult.Success;
-            }
-        }
     }
 }

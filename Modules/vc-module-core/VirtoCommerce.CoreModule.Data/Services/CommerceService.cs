@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.CoreModule.Core.Commerce.Model;
 using VirtoCommerce.CoreModule.Core.Commerce.Services;
-using VirtoCommerce.Domain.Commerce.Model;
 
 namespace VirtoCommerce.CoreModule.Data.Services
 {

@@ -89,11 +89,11 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         [ProducesResponseType(typeof(Store), 200)]
         public async Task<IActionResult> GetStoreById(string id)
         {
-            var result = await _storeService.GetByIdAsync(id);
+            var result = await _storeService.GetByIdsAsync(new [] {id});
             //TODO
             //CheckCurrentUserHasPermissionForObjects(StorePredefinedPermissions.Read, result);
             //result.Scopes = _permissionScopeService.GetObjectPermissionScopeStrings(result).ToArray();
-            return Ok(result);
+            return Ok(result.FirstOrDefault());
         }
 
 
@@ -107,8 +107,8 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         [Authorize(ModuleConstants.Security.Permissions.Create)]
         public async Task<IActionResult> Create([FromBody]Store store)
         {
-            var retVal = await _storeService.CreateAsync(store);
-            return Ok(retVal);
+            await _storeService.SaveChangesAsync(new [] {store});
+            return Ok(store);
         }
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         {
             //TODO
             //CheckCurrentUserHasPermissionForObjects(StorePredefinedPermissions.Update, store);
-            await _storeService.UpdateAsync(new[] { store });
+            await _storeService.SaveChangesAsync(new[] { store });
             return Ok();
         }
 
@@ -151,7 +151,8 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 200)]
         public async Task<IActionResult> SendDynamicNotificationAnStoreEmail(SendDynamicNotificationRequest request)
         {
-            var store = await _storeService.GetByIdAsync(request.StoreId);
+            var stores = await _storeService.GetByIdsAsync(new [] {request.StoreId});
+            var store = stores.FirstOrDefault();
 
             if (store == null)
                 throw new InvalidOperationException(string.Concat("Store not found. StoreId: ", request.StoreId));

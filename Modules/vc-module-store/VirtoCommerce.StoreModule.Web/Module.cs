@@ -1,9 +1,12 @@
 using System;
 using System.Linq;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using VirtoCommerce.CoreModule.Core.Services;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -15,6 +18,7 @@ using VirtoCommerce.StoreModule.Core.Services;
 using VirtoCommerce.StoreModule.Data.Handlers;
 using VirtoCommerce.StoreModule.Data.Repositories;
 using VirtoCommerce.StoreModule.Data.Services;
+using VirtoCommerce.StoreModule.Web.JsonConverters;
 
 namespace VirtoCommerce.StoreModule.Web
 {
@@ -25,7 +29,8 @@ namespace VirtoCommerce.StoreModule.Web
         {
             var snapshot = serviceCollection.BuildServiceProvider();
             var configuration = snapshot.GetService<IConfiguration>();
-            serviceCollection.AddDbContext<StoreDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce.Store")));
+            var connectionString = configuration.GetConnectionString("VirtoCommerce.Store") ?? configuration.GetConnectionString("VirtoCommerce");
+            serviceCollection.AddDbContext<StoreDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddTransient<IStoreRepository, StoreRepositoryImpl>();
             serviceCollection.AddSingleton<Func<IStoreRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IStoreRepository>());
             serviceCollection.AddSingleton<IStoreService, StoreServiceImpl>();
@@ -33,9 +38,7 @@ namespace VirtoCommerce.StoreModule.Web
 
             serviceCollection.AddSingleton<StoreChangedEventHandler>();
 
-            var providerSnapshot = serviceCollection.BuildServiceProvider();
-            var inProcessBus = providerSnapshot.GetService<IHandlerRegistrar>();
-            inProcessBus.RegisterHandler<StoreChangedEvent>(async (message, token) => await providerSnapshot.GetService<StoreChangedEventHandler>().Handle(message));
+            
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -66,6 +69,15 @@ namespace VirtoCommerce.StoreModule.Web
                 dbContext.Database.EnsureCreated();
                 dbContext.Database.Migrate();
             }
+
+            var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
+            var paymentMethodsRegistrar = appBuilder.ApplicationServices.GetService<IPaymentMethodsRegistrar>();
+            var shippingMethodsRegistrar = appBuilder.ApplicationServices.GetService<IShippingMethodsRegistrar>();
+            var taxRegistrar = appBuilder.ApplicationServices.GetService<ITaxRegistrar>();
+            mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicStoreJsonConverter(paymentMethodsRegistrar, shippingMethodsRegistrar, taxRegistrar));
+
+            var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
+            inProcessBus.RegisterHandler<StoreChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<StoreChangedEventHandler>().Handle(message));
         }
 
         public void Uninstall()

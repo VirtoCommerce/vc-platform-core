@@ -102,48 +102,20 @@ namespace VirtoCommerce.StoreModule.Data.Services
             return result;
         }
 
-        public async Task<Store> GetByIdAsync(string id)
+        public async Task SaveChangesAsync(Store[] stores)
         {
-            var entities = await GetByIdsAsync(new[] {id});
-            return entities.FirstOrDefault();
-        }
-
-        public async Task<Store> CreateAsync(Store store)
-        {
-            var pkMap = new PrimaryKeyResolvingMap();
-
-            ValidateStoreProperties(store);
-
-            var changedEntries = new List<GenericChangedEntry<Store>>();
-
-            var dbStore = AbstractTypeFactory<StoreEntity>.TryCreateInstance();
-            dbStore = dbStore.FromModel(store, pkMap);
+            ValidateStoresProperties(stores);
 
             using (var repository = _repositoryFactory())
             {
-                repository.Add(dbStore);
-                await repository.UnitOfWork.CommitAsync();
-                pkMap.ResolvePrimaryKeys();
-
-                changedEntries.Add(new GenericChangedEntry<Store>(store, EntryState.Added));
-                await _eventPublisher.Publish(new StoreChangedEvent(changedEntries));
-            }
-
-            return store;
-        }
-
-        public async Task UpdateAsync(Store[] stores)
-        {
-            var pkMap = new PrimaryKeyResolvingMap();
-            var changedEntries = new List<GenericChangedEntry<Store>>();
-
-            using (var repository = _repositoryFactory())
-            {
+                var changedEntries = new List<GenericChangedEntry<Store>>();
+                var pkMap = new PrimaryKeyResolvingMap();
                 var dbStores = await repository.GetStoresByIdsAsync(stores.Select(x => x.Id).ToArray());
+
                 foreach (var store in stores)
                 {
+                    var targetEntity = dbStores.FirstOrDefault(x => x.Id == store.Id);
                     var sourceEntity = AbstractTypeFactory<StoreEntity>.TryCreateInstance().FromModel(store, pkMap);
-                    var targetEntity = dbStores.First(x => x.Id == store.Id);
 
                     if (targetEntity != null)
                     {
@@ -151,10 +123,16 @@ namespace VirtoCommerce.StoreModule.Data.Services
                             EntryState.Modified));
                         sourceEntity.Patch(targetEntity);
                     }
+                    else
+                    {
+                        repository.Add(sourceEntity);
+                        changedEntries.Add(new GenericChangedEntry<Store>(store, EntryState.Added));
+                    }
 
                     await repository.UnitOfWork.CommitAsync();
+                    pkMap.ResolvePrimaryKeys();
+                    await _eventPublisher.Publish(new StoreChangedEvent(changedEntries));
                 }
-                await _eventPublisher.Publish(new StoreChangedEvent(changedEntries));
             }
         }
 
@@ -162,23 +140,21 @@ namespace VirtoCommerce.StoreModule.Data.Services
         {
             using (var repository = _repositoryFactory())
             {
+                var changedEntries = new List<GenericChangedEntry<Store>>();
                 var stores = await GetByIdsAsync(ids);
                 var dbStores = await repository.GetStoresByIdsAsync(ids);
 
                 foreach (var store in stores)
                 {
-                    _commerceService.DeleteSeoForObject(store);
-                    await _dynamicPropertyService.DeleteDynamicPropertyValuesAsync(store);
-                    //Deep remove settings
-                    await _settingManager.RemoveEntitySettingsAsync(store);
-
                     var dbStore = dbStores.FirstOrDefault(x => x.Id == store.Id);
                     if (dbStore != null)
                     {
                         repository.Remove(dbStore);
+                        changedEntries.Add(new GenericChangedEntry<Store>(store, EntryState.Deleted));
                     }
                 }
-                await repository.UnitOfWork.CommitAsync(); 
+                await repository.UnitOfWork.CommitAsync();
+                await _eventPublisher.Publish(new StoreChangedEvent(changedEntries));
             }
         }
 
@@ -198,8 +174,8 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
             if (user.StoreId != null)
             {
-                var store = await GetByIdAsync(user.StoreId);
-                if (store != null)
+                var stores = await GetByIdsAsync(new []{ user.StoreId });
+                foreach (var store in stores)
                 {
                     retVal.Add(store.Id);
                     if (!store.TrustedGroups.IsNullOrEmpty())
@@ -211,15 +187,18 @@ namespace VirtoCommerce.StoreModule.Data.Services
             return retVal;
         }
 
-        private void ValidateStoreProperties(Store store)
+        private void ValidateStoresProperties(IEnumerable<Store> stores)
         {
-            if (store == null)
+            if (stores == null)
             {
-                throw new ArgumentNullException(nameof(store));
+                throw new ArgumentNullException(nameof(stores));
             }
 
             var validator = new StoreValidator();
-            validator.ValidateAndThrow(store);
+            foreach (var store in stores)
+            {
+                validator.ValidateAndThrow(store);
+            }
         }
 
         #endregion
