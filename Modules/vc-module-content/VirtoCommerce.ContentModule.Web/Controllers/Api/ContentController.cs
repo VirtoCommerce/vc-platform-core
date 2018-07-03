@@ -57,13 +57,13 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
 
             var store = await _storeService.GetByIdAsync(storeId);
 
-            var cacheKey = CacheKey.With(GetType(), "GetStoreContentStatsAsync", $"content-{storeId}", TimeSpan.FromMinutes(1).ToString());
+            //var cacheKey = CacheKey.With(GetType(), "GetStoreContentStatsAsync", $"content-{storeId}", TimeSpan.FromMinutes(1).ToString());
 
-            var pagesCount = _memoryCache.GetOrCreateExclusive(cacheKey, (cacheEntry) => {
+            //var pagesCount = _memoryCache.GetOrCreateExclusive(cacheKey, (cacheEntry) => {
 
-                return CountContentItemsRecursive(GetContentBasePath("pages", storeId), contentStorageProvider, GetContentBasePath("blogs", storeId));
+            //    return CountContentItemsRecursive(GetContentBasePath("pages", storeId), contentStorageProvider, GetContentBasePath("blogs", storeId));
 
-            });
+            //});
 
             var themes = await contentStorageProvider.SearchAsync(GetContentBasePath("themes", storeId), null);
             var blogs = await contentStorageProvider.SearchAsync(GetContentBasePath("blogs", storeId), null);
@@ -73,7 +73,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
                 ActiveThemeName = store.GetDynamicPropertyValue("DefaultThemeName", "not set"),
                 ThemesCount = themes.Results.Count(x => x.Type.EqualsInvariant("folder")),
                 BlogsCount = themes.Results.Count(x => x.Type.EqualsInvariant("folder")),
-                PagesCount = pagesCount
+                PagesCount = 10 //pagesCount
             };
             return Ok(retVal);
         }

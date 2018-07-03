@@ -16,9 +16,11 @@ namespace VirtoCommerce.ContentModule.Data.Services
     {
         private readonly string _chrootPath;
 
-        public AzureContentBlobStorageProvider(IOptions<AzureBlobContentOptions> options, string chrootPath)
+        public AzureContentBlobStorageProvider(IOptions<AzureBlobContentOptions> options)
             : base(options)
         {
+            var chrootPath = options.Value.RootPath;
+
             if (chrootPath == null)
                 throw new ArgumentNullException(nameof(chrootPath));
 
