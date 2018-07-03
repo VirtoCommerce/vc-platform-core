@@ -6,7 +6,8 @@ namespace VirtoCommerce.CartModule.Core.Services
 	public interface IShoppingCartService
 	{
 		Task<ShoppingCart[]> GetByIdsAsync(string[] cartIds, string responseGroup = null);
-		Task SaveChangesAsync(ShoppingCart[] carts);
+	    Task<ShoppingCart> GetByIdAsync(string cartId);
+        Task SaveChangesAsync(ShoppingCart[] carts);
 		Task DeleteAsync(string[] cartIds);
 	}
 }

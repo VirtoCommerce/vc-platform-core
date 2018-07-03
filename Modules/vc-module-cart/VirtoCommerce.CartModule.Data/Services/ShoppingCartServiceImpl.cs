@@ -66,6 +66,12 @@ namespace VirtoCommerce.CartModule.Data.Services
             });
         }
 
+        public virtual async Task<ShoppingCart> GetByIdAsync(string id)
+        {
+            var carts = await GetByIdsAsync(new[] {id});
+            return carts.FirstOrDefault();
+        }
+
         public virtual async Task SaveChangesAsync(ShoppingCart[] carts)
         {
             var pkMap = new PrimaryKeyResolvingMap();
