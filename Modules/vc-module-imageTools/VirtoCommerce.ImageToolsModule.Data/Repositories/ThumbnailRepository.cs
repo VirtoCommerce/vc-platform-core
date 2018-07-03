@@ -37,7 +37,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Repositories
 
             foreach (var taskEntity in taskEntities)
             {
-                Remove(taskEntity);
+                RemoveAsync(taskEntity);
             }
         }
 
@@ -47,7 +47,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Repositories
 
             foreach (var optionEntity in optionEntities)
             {
-                Remove(optionEntity);
+                RemoveAsync(optionEntity);
             }
         }
     }

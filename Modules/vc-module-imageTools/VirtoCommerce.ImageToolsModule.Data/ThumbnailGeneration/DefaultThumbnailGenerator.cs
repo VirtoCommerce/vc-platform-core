@@ -64,7 +64,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
 
                 if (thumbnail != null)
                 {
-                    await _imageService.SaveImage(thumbnailUrl, thumbnail, format);
+                    await _imageService.SaveImageAsync(thumbnailUrl, thumbnail, format);
                 }
                 else
                 {

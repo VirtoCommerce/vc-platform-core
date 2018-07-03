@@ -102,7 +102,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
                 foreach (var entity in entities)
                 {
-                    repository.Remove(entity);
+                    repository.RemoveAsync(entity);
                     if (doDeleteValues)
                     {
                         repository.RemoveAllPropertyValues(entity.Id);

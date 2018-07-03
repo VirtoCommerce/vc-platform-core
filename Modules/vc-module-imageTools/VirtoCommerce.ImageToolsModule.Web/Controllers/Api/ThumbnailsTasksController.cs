@@ -43,7 +43,7 @@ namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
         [Authorize(Permission.Create)]
         public async Task<IActionResult> CreateAsync([FromBody]ThumbnailTask task)
         {
-            await _thumbnailTaskService.SaveOrUpdateAsync(new[] { task });
+            await _thumbnailTaskService.SaveChangesAsync(new[] { task });
             return Ok(task);
         }
 
@@ -103,7 +103,7 @@ namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
         [Authorize(Permission.Update)]
         public async Task<IActionResult> UpdateAsync([FromBody]ThumbnailTask tasks)
         {
-            await _thumbnailTaskService.SaveOrUpdateAsync(new[] { tasks });
+            await _thumbnailTaskService.SaveChangesAsync(new[] { tasks });
             return Ok();
         }
 

@@ -64,7 +64,7 @@ namespace VirtoCommerce.ImageToolsModule.Web.BackgroundJobs
                     task.LastRun = DateTime.UtcNow;
                 }
 
-                await _taskService.SaveOrUpdateAsync(tasks);
+                await _taskService.SaveChangesAsync(tasks);
             }
             catch (JobAbortedException)
             {
@@ -105,7 +105,7 @@ namespace VirtoCommerce.ImageToolsModule.Web.BackgroundJobs
                 task.LastRun = DateTime.UtcNow;
             }
 
-            _taskService.SaveOrUpdateAsync(tasks.Results);
+            _taskService.SaveChangesAsync(tasks.Results);
         }
     }
 }

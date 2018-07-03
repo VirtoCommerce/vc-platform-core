@@ -148,7 +148,7 @@ namespace VirtoCommerce.ImageToolsModule.Web.ExportImport
                                 var tasks = _serializer.Deserialize<ThumbnailTask[]>(jsonReader);
                                 progressInfo.Description = $"Importing {tasks.Length} tasks...";
                                 progressCallback(progressInfo);
-                                _taskService.SaveOrUpdateAsync(tasks);
+                                _taskService.SaveChangesAsync(tasks);
                                 break;
                         }
                     }

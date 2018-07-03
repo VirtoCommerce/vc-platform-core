@@ -75,7 +75,7 @@ namespace VirtoCommerce.ImageToolsModule.Tests
                 (string[] ids) => { return taskEntities.Where(t => ids.Contains(t.Id)).ToArray(); });
 
             var sut = new ThumbnailTaskService(() => mock.Object);
-            await sut.SaveOrUpdateAsync(new[]
+            await sut.SaveChangesAsync(new[]
             {
                 new ThumbnailTask()
                 {

@@ -50,7 +50,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
         /// <param name="imageUrl">Image url.</param>
         /// <param name="image">Image object.</param>
         /// <param name="format">Image object format.</param>
-        public virtual async Task SaveImage(string imageUrl, Image image, ImageFormat format)
+        public virtual async Task SaveImageAsync(string imageUrl, Image image, ImageFormat format)
         {
             using (var blobStream = _storageProvider.OpenWrite(imageUrl))
             using (var stream = new MemoryStream())

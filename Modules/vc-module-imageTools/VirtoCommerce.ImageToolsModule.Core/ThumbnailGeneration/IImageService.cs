@@ -25,7 +25,7 @@ namespace VirtoCommerce.ImageToolsModule.Core.ThumbnailGeneration
         /// <param name="imageUrl">Image url.</param>
         /// <param name="image">Image object.</param>
         /// <param name="format">Image object format.</param>
-        Task SaveImage(string imageUrl, Image image, ImageFormat format);
+        Task SaveImageAsync(string imageUrl, Image image, ImageFormat format);
 
         /// <summary>
         /// Get image format by Image object.

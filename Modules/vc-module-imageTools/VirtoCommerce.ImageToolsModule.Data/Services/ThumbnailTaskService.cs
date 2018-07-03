@@ -19,7 +19,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
             _thumbnailRepositoryFactory = thumbnailRepositoryFactory;
         }
 
-        public async Task SaveOrUpdateAsync(ICollection<ThumbnailTask> tasks)
+        public async Task SaveChangesAsync(ICollection<ThumbnailTask> tasks)
         {
             var pkMap = new PrimaryKeyResolvingMap();
             using (var repository = _thumbnailRepositoryFactory())
@@ -53,7 +53,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
             using (var repository = _thumbnailRepositoryFactory())
             {
                 await repository.RemoveThumbnailTasksByIdsAsync(ids);
-                repository.UnitOfWork.Commit();
+                await repository.UnitOfWork.CommitAsync();
             }
         }
 

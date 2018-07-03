@@ -108,9 +108,9 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
         /// EntryState if image exist.
         /// Null is image is empty
         /// </returns>
-        protected virtual bool ExistsAsync(string imageUrl)
+        protected virtual async Task<bool> ExistsAsync(string imageUrl)
         {
-            var blobInfo = _storageProvider.GetBlobInfoAsync(imageUrl).GetAwaiter().GetResult();
+            var blobInfo = await _storageProvider.GetBlobInfoAsync(imageUrl);
             return blobInfo != null;
         }
 
@@ -123,7 +123,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
 
             foreach (var option in options)
             {
-                if (!ExistsAsync(blobInfo.Url.GenerateThumbnailName(option.FileSuffix)))
+                if (!ExistsAsync(blobInfo.Url.GenerateThumbnailName(option.FileSuffix)).GetAwaiter().GetResult())
                 {
                     return EntryState.Added;
                 }
