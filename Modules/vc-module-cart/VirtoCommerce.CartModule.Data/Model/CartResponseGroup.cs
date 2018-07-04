@@ -6,9 +6,9 @@ namespace VirtoCommerce.CartModule.Data.Model
     public enum CartResponseGroup
     {
         Default = 0,
-        //WithTemplates = 1,
-        //WithAttachments = 2,
-        //WithRecipients = 4,
+        WithPayments = 1,
+        WithLineItems = 2,
+        WithShipments = 4,
         Full = 7
     }
 }

@@ -50,7 +50,6 @@ namespace VirtoCommerce.CartModule.Data.Repositories
             #endregion
 
             #region Address
-            //TODO check relations
             modelBuilder.Entity<AddressEntity>().ToTable("CartAddress").HasKey(x => x.Id);
             modelBuilder.Entity<AddressEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<AddressEntity>().HasOne(x => x.ShoppingCart).WithMany(x => x.Addresses)

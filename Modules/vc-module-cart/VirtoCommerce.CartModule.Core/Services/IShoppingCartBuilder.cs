@@ -1,5 +1,8 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using VirtoCommerce.CartModule.Core.Model;
+using VirtoCommerce.CoreModule.Core.Model.Payment;
+using VirtoCommerce.CoreModule.Core.Model.Shipping;
 
 namespace VirtoCommerce.CartModule.Core.Services
 {
@@ -62,26 +65,26 @@ namespace VirtoCommerce.CartModule.Core.Services
         /// <returns></returns>
         IShoppingCartBuilder Clear();
 
-        ///// <summary>
-        ///// Add or update shipment to cart
-        ///// </summary>
-        ///// <param name="shipment"></param>
-        ///// <returns></returns>
-        //IShoppingCartBuilder AddOrUpdateShipment(Shipment shipment);
+        /// <summary>
+        /// Add or update shipment to cart
+        /// </summary>
+        /// <param name="shipment"></param>
+        /// <returns></returns>
+        IShoppingCartBuilder AddOrUpdateShipment(Shipment shipment);
 
-        ///// <summary>
-        ///// Remove exist shipment from cart
-        ///// </summary>
-        ///// <param name="shipmentId"></param>
-        ///// <returns></returns>
-        //IShoppingCartBuilder RemoveShipment(string shipmentId);
+        /// <summary>
+        /// Remove exist shipment from cart
+        /// </summary>
+        /// <param name="shipmentId"></param>
+        /// <returns></returns>
+        IShoppingCartBuilder RemoveShipment(string shipmentId);
 
-        ///// <summary>
-        ///// Add or update payment in cart
-        ///// </summary>
-        ///// <param name="payment"></param>
-        ///// <returns></returns>
-        //IShoppingCartBuilder AddOrUpdatePayment(Payment payment);
+        /// <summary>
+        /// Add or update payment in cart
+        /// </summary>
+        /// <param name="payment"></param>
+        /// <returns></returns>
+        IShoppingCartBuilder AddOrUpdatePayment(Payment payment);
 
         /// <summary>
         /// Merge other cart with captured
@@ -96,17 +99,17 @@ namespace VirtoCommerce.CartModule.Core.Services
         /// <returns></returns>
         Task<IShoppingCartBuilder> RemoveCartAsync();
 
-        ///// <summary>
-        ///// Returns all available shipment methods for current cart
-        ///// </summary>
-        ///// <returns></returns>
-        //ICollection<ShippingRate> GetAvailableShippingRates();
+        /// <summary>
+        /// Returns all available shipment methods for current cart
+        /// </summary>
+        /// <returns></returns>
+        ICollection<ShippingRate> GetAvailableShippingRates();
 
-        ///// <summary>
-        ///// Returns all available payment methods for current cart
-        ///// </summary>
-        ///// <returns></returns>
-        //ICollection<Domain.Payment.Model.PaymentMethod> GetAvailablePaymentMethods();
+        /// <summary>
+        /// Returns all available payment methods for current cart
+        /// </summary>
+        /// <returns></returns>
+        ICollection<PaymentMethod> GetAvailablePaymentMethods();
 
 
         //Save cart changes

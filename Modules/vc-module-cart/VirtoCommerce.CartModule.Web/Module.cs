@@ -26,7 +26,8 @@ namespace VirtoCommerce.CartModule.Web
         {
             var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
             serviceCollection.AddTransient<ICartRepository, CartRepositoryImpl>();
-            serviceCollection.AddDbContext<CartDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce.Cart")));
+            var connectionString = configuration.GetConnectionString("VirtoCommerce.Cart") ?? configuration.GetConnectionString("VirtoCommerce");
+            serviceCollection.AddDbContext<CartDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddSingleton<Func<ICartRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICartRepository>());
             serviceCollection.AddSingleton<IShoppingCartService, ShoppingCartServiceImpl>();
             serviceCollection.AddSingleton<IShoppingCartSearchService, ShoppingCartSearchServiceImpl>();
@@ -34,11 +35,10 @@ namespace VirtoCommerce.CartModule.Web
             serviceCollection.AddSingleton<IShoppingCartBuilder, ShoppingCartBuilderImpl>();
 
             serviceCollection.AddSingleton<CartChangedEventHandler>();
-            serviceCollection.AddSingleton<CartChangeEventHandler>();
             var providerSnapshot = serviceCollection.BuildServiceProvider();
             var inProcessBus = providerSnapshot.GetService<IHandlerRegistrar>();
             inProcessBus.RegisterHandler<CartChangedEvent>(async (message, token) => await providerSnapshot.GetService<CartChangedEventHandler>().Handle(message));
-            inProcessBus.RegisterHandler<CartChangeEvent>(async (message, token) => await providerSnapshot.GetService<CartChangeEventHandler>().Handle(message));
+            inProcessBus.RegisterHandler<CartChangeEvent>(async (message, token) => await providerSnapshot.GetService<CartChangedEventHandler>().Handle(message));
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)

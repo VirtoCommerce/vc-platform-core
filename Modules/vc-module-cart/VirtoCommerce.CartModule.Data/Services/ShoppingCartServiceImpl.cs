@@ -47,7 +47,7 @@ namespace VirtoCommerce.CartModule.Data.Services
                     //Disable DBContext change tracking for better performance 
                     repository.DisableChangesTracking();
 
-                    var cartEntities = await repository.GetShoppingCartsByIdsAsync(cartIds);
+                    var cartEntities = await repository.GetShoppingCartsByIdsAsync(cartIds, responseGroup);
                     foreach (var cartEntity in cartEntities)
                     {
                         var cart = cartEntity.ToModel(AbstractTypeFactory<ShoppingCart>.TryCreateInstance());

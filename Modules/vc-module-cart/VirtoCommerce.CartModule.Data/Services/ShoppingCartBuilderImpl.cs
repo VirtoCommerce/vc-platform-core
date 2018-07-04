@@ -6,31 +6,35 @@ using System.Threading.Tasks;
 using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CartModule.Core.Model.Search;
 using VirtoCommerce.CartModule.Core.Services;
+using VirtoCommerce.CoreModule.Core.Model.Payment;
+using VirtoCommerce.CoreModule.Core.Model.Shipping;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.StoreModule.Core.Model;
+using VirtoCommerce.StoreModule.Core.Services;
 
 namespace VirtoCommerce.CartModule.Data.Services
 {
     public class ShoppingCartBuilderImpl : IShoppingCartBuilder
     {
-        //private readonly IStoreService _storeService;
+        private readonly IStoreService _storeService;
         private readonly IShoppingCartService _shoppingCartService;
         private readonly IShoppingCartSearchService _shoppingCartSearchService;
         //private readonly IMemberService _memberService;
 
-        //private Store _store;
+        private Store _store;
 
         [CLSCompliant(false)]
-        public ShoppingCartBuilderImpl(/*IStoreService storeService, */IShoppingCartService shoppingShoppingCartService, IShoppingCartSearchService shoppingCartSearchService
+        public ShoppingCartBuilderImpl(IStoreService storeService, IShoppingCartService shoppingShoppingCartService, IShoppingCartSearchService shoppingCartSearchService
             //, IMemberService memberService
             )
         {
-            //_storeService = storeService;
+            _storeService = storeService;
             _shoppingCartService = shoppingShoppingCartService;
             _shoppingCartSearchService = shoppingCartSearchService;
             //_memberService = memberService;
         }
 
-        //#region ICartBuilder Members
+        #region ICartBuilder Members
 
         public virtual IShoppingCartBuilder TakeCart(ShoppingCart cart)
         {
@@ -121,94 +125,93 @@ namespace VirtoCommerce.CartModule.Data.Services
             return this;
         }
 
-        //TODO
-        //public virtual ICollection<ShippingRate> GetShippingRates(string shippingMethodCode)
-        //{
-        //    var shippingEvaluationContext = new ShippingEvaluationContext(Cart);
+        public virtual ICollection<ShippingRate> GetShippingRates(string shippingMethodCode)
+        {
+            var shippingEvaluationContext = new ShippingEvaluationContext(Cart);
 
-        //    var shippingMethod = Store.ShippingMethods.FirstOrDefault(x => x.IsActive
-        //                                                                   && x.Code.EqualsInvariant(shippingMethodCode));
+            var shippingMethod = Store.ShippingMethods.FirstOrDefault(x => x.IsActive
+                                                                           && x.Code.EqualsInvariant(shippingMethodCode));
 
-        //    return shippingMethod?.CalculateRates(shippingEvaluationContext).ToList();
-        //}
+            return shippingMethod?.CalculateRates(shippingEvaluationContext).ToList();
+        }
 
-        //public virtual IShoppingCartBuilder AddOrUpdateShipment(Shipment shipment)
-        //{
-        //    Shipment existingShipment = null;
+        public virtual IShoppingCartBuilder AddOrUpdateShipment(Shipment shipment)
+        {
+            Shipment existingShipment = null;
 
-        //    if (!shipment.IsTransient())
-        //    {
-        //        existingShipment = Cart.Shipments.FirstOrDefault(s => s.Id == shipment.Id);
-        //    }
+            if (!shipment.IsTransient())
+            {
+                existingShipment = Cart.Shipments.FirstOrDefault(s => s.Id == shipment.Id);
+            }
 
-        //    if (existingShipment != null)
-        //    {
-        //        Cart.Shipments.Remove(existingShipment);
-        //    }
+            if (existingShipment != null)
+            {
+                Cart.Shipments.Remove(existingShipment);
+            }
 
-        //    shipment.Currency = Cart.Currency;
-        //    Cart.Shipments.Add(shipment);
+            shipment.Currency = Cart.Currency;
+            Cart.Shipments.Add(shipment);
 
-        //    if (!string.IsNullOrEmpty(shipment.ShipmentMethodCode))
-        //    {
-        //        var shippingRates = GetShippingRates(shipment.ShipmentMethodCode);
+            if (!string.IsNullOrEmpty(shipment.ShipmentMethodCode))
+            {
+                var shippingRates = GetShippingRates(shipment.ShipmentMethodCode);
 
-        //        var shippingRate = shippingRates
-        //            .FirstOrDefault(sm => shipment.ShipmentMethodOption.EqualsInvariant(sm.OptionName));
+                var shippingRate = shippingRates
+                    .FirstOrDefault(sm => shipment.ShipmentMethodOption.EqualsInvariant(sm.OptionName));
 
-        //        if (shippingRate == null)
-        //        {
-        //            throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture,
-        //                "Unknown shipment method: {0} with option: {1}", shipment.ShipmentMethodCode, shipment.ShipmentMethodOption));
-        //        }
-        //        shipment.ShipmentMethodCode = shippingRate.ShippingMethod.Code;
-        //        shipment.ShipmentMethodOption = shippingRate.OptionName;
-        //        shipment.Price = shippingRate.Rate;
-        //        shipment.DiscountAmount = shippingRate.DiscountAmount;
-        //        shipment.TaxType = shippingRate.ShippingMethod.TaxType;
-        //    }
+                if (shippingRate == null)
+                {
+                    throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture,
+                        "Unknown shipment method: {0} with option: {1}", shipment.ShipmentMethodCode, shipment.ShipmentMethodOption));
+                }
+                shipment.ShipmentMethodCode = shippingRate.ShippingMethod.Code;
+                shipment.ShipmentMethodOption = shippingRate.OptionName;
+                shipment.Price = shippingRate.Rate;
+                shipment.DiscountAmount = shippingRate.DiscountAmount;
+                shipment.TaxType = shippingRate.ShippingMethod.TaxType;
+            }
 
-        //    return this;
-        //}
+            return this;
+        }
 
-        //public virtual IShoppingCartBuilder RemoveShipment(string shipmentId)
-        //{
-        //    var shipment = Cart.Shipments.FirstOrDefault(s => s.Id == shipmentId);
-        //    if (shipment != null)
-        //    {
-        //        Cart.Shipments.Remove(shipment);
-        //    }
+        public virtual IShoppingCartBuilder RemoveShipment(string shipmentId)
+        {
+            var shipment = Cart.Shipments.FirstOrDefault(s => s.Id == shipmentId);
+            if (shipment != null)
+            {
+                Cart.Shipments.Remove(shipment);
+            }
 
-        //    return this;
-        //}
+            return this;
+        }
 
-        //public virtual IShoppingCartBuilder AddOrUpdatePayment(Payment payment)
-        //{
-        //    Payment existingPayment = null;
+        public virtual IShoppingCartBuilder AddOrUpdatePayment(Payment payment)
+        {
+            Payment existingPayment = null;
 
-        //    if (!payment.IsTransient())
-        //    {
-        //        existingPayment = Cart.Payments.FirstOrDefault(s => s.Id == payment.Id);
-        //    }
+            if (!payment.IsTransient())
+            {
+                existingPayment = Cart.Payments.FirstOrDefault(s => s.Id == payment.Id);
+            }
 
-        //    if (existingPayment != null)
-        //    {
-        //        Cart.Payments.Remove(existingPayment);
-        //    }
-        //    Cart.Payments.Add(payment);
+            if (existingPayment != null)
+            {
+                Cart.Payments.Remove(existingPayment);
+            }
+            Cart.Payments.Add(payment);
 
-        //    if (!string.IsNullOrEmpty(payment.PaymentGatewayCode))
-        //    {
-        //        var availablePaymentMethods = GetAvailablePaymentMethods();
-        //        var paymentMethod = availablePaymentMethods.FirstOrDefault(pm => string.Equals(pm.Code, payment.PaymentGatewayCode, StringComparison.InvariantCultureIgnoreCase));
-        //        if (paymentMethod == null)
-        //        {
-        //            throw new InvalidOperationException("Unknown payment method " + payment.PaymentGatewayCode);
-        //        }
-        //    }
+            if (!string.IsNullOrEmpty(payment.PaymentGatewayCode))
+            {
+                var availablePaymentMethods = GetAvailablePaymentMethods();
+                var paymentMethod = availablePaymentMethods.FirstOrDefault(pm => string.Equals(pm.Code, payment.PaymentGatewayCode, StringComparison.InvariantCultureIgnoreCase));
+                if (paymentMethod == null)
+                {
+                    throw new InvalidOperationException("Unknown payment method " + payment.PaymentGatewayCode);
+                }
+            }
 
-        //    return this;
-        //}
+            return this;
+        }
 
         public virtual async Task<IShoppingCartBuilder> MergeWithCartAsync(ShoppingCart cart)
         {
@@ -236,25 +239,25 @@ namespace VirtoCommerce.CartModule.Data.Services
             return this;
         }
 
-        //public virtual ICollection<ShippingRate> GetAvailableShippingRates()
-        //{
-        //    // TODO: Remake with shipmentId
-        //    var shippingEvaluationContext = new ShippingEvaluationContext(Cart);
+        public virtual ICollection<ShippingRate> GetAvailableShippingRates()
+        {
+            // TODO: Remake with shipmentId
+            var shippingEvaluationContext = new ShippingEvaluationContext(Cart);
 
-        //    var activeAvailableShippingMethods = Store.ShippingMethods.Where(x => x.IsActive).ToList();
+            var activeAvailableShippingMethods = Store.ShippingMethods.Where(x => x.IsActive).ToList();
 
-        //    var availableShippingRates = activeAvailableShippingMethods
-        //        .SelectMany(x => x.CalculateRates(shippingEvaluationContext))
-        //        .Where(x => x.ShippingMethod == null || x.ShippingMethod.IsActive)
-        //        .ToArray();
+            var availableShippingRates = activeAvailableShippingMethods
+                .SelectMany(x => x.CalculateRates(shippingEvaluationContext))
+                .Where(x => x.ShippingMethod == null || x.ShippingMethod.IsActive)
+                .ToArray();
 
-        //    return availableShippingRates;
-        //}
+            return availableShippingRates;
+        }
 
-        //public virtual ICollection<Domain.Payment.Model.PaymentMethod> GetAvailablePaymentMethods()
-        //{
-        //    return Store.PaymentMethods.Where(x => x.IsActive).ToList();
-        //}
+        public virtual ICollection<PaymentMethod> GetAvailablePaymentMethods()
+        {
+            return Store.PaymentMethods.Where(x => x.IsActive).ToList();
+        }
 
         public virtual Task SaveAsync()
         {
@@ -263,10 +266,10 @@ namespace VirtoCommerce.CartModule.Data.Services
 
         public ShoppingCart Cart { get; private set; }
 
-        //#endregion
+        #endregion
 
 
-        //protected Store Store => _store ?? (_store = _storeService.GetById(Cart.StoreId));
+        protected Store Store => _store ?? (_store = _storeService.GetByIdAsync(Cart.StoreId).GetAwaiter().GetResult());
 
 
         protected virtual void InnerChangeItemQuantity(LineItem lineItem, int quantity)

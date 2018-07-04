@@ -9,7 +9,7 @@ using VirtoCommerce.Platform.Core.Events;
 
 namespace VirtoCommerce.CartModule.Data.Handlers
 {
-    public class CartChangedEventHandler : IEventHandler<CartChangedEvent>
+    public class CartChangedEventHandler : IEventHandler<CartChangedEvent>, IEventHandler<CartChangeEvent>
     {
         private readonly IDynamicPropertyService _dynamicPropertyService;
 
@@ -58,6 +58,11 @@ namespace VirtoCommerce.CartModule.Data.Handlers
 
             });
 
+        }
+
+        public Task Handle(CartChangeEvent message)
+        {
+            return Task.CompletedTask;
         }
     }
 }

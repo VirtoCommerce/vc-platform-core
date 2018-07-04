@@ -9,6 +9,8 @@ using VirtoCommerce.CartModule.Core;
 using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CartModule.Core.Model.Search;
 using VirtoCommerce.CartModule.Core.Services;
+using VirtoCommerce.CoreModule.Core.Model.Cart;
+using VirtoCommerce.CoreModule.Core.Model.Shipping;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CartModule.Web.Controllers.Api
@@ -122,35 +124,34 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
             return Ok();
         }
 
-        //TODO
-        //[HttpGet]
-        //[Route("{cartId}/availshippingrates")]
-        //[ProducesResponseType(typeof(ICollection<ShippingRate>), 200)]
-        //public IActionResult GetAvailableShippingRates(string cartId)
-        //{
-        //    var cart = _shoppingCartService.GetByIds(new[] { cartId }).FirstOrDefault();
-        //    var shippingRates = _cartBuilder.TakeCart(cart).GetAvailableShippingRates();
-        //    return Ok(shippingRates);
-        //}
+        [HttpGet]
+        [Route("{cartId}/availshippingrates")]
+        [ProducesResponseType(typeof(ICollection<ShippingRate>), 200)]
+        public async Task<IActionResult> GetAvailableShippingRates(string cartId)
+        {
+            var cart = await _shoppingCartService.GetByIdAsync(cartId);
+            var shippingRates = _cartBuilder.TakeCart(cart).GetAvailableShippingRates();
+            return Ok(shippingRates);
+        }
 
-        //[HttpPost]
-        //[Route("availshippingrates")]
-        //[ProducesResponseType(typeof(ICollection<ShippingRate>), 200)]
-        //public IActionResult GetAvailableShippingRatesByContext(ShippingEvaluationContext context)
-        //{
-        //    var shippingRates = _cartBuilder.TakeCart(context.ShoppingCart).GetAvailableShippingRates();
-        //    return Ok(shippingRates);
-        //}
+        [HttpPost]
+        [Route("availshippingrates")]
+        [ProducesResponseType(typeof(ICollection<ShippingRate>), 200)]
+        public IActionResult GetAvailableShippingRatesByContext(ShippingEvaluationContext context)
+        {
+            var shippingRates = _cartBuilder.TakeCart(context.ShoppingCart).GetAvailableShippingRates();
+            return Ok(shippingRates);
+        }
 
-        //[HttpGet]
-        //[Route("{cartId}/availpaymentmethods")]
-        //[ProducesResponseType(typeof(ICollection<Domain.Payment.Model.PaymentMethod>), 200)]
-        //public IActionResult GetAvailablePaymentMethods(string cartId)
-        //{
-        //    var cart = _shoppingCartService.GetByIds(new[] { cartId }).FirstOrDefault();
-        //    var paymentMethods = _cartBuilder.TakeCart(cart).GetAvailablePaymentMethods();
-        //    return Ok(paymentMethods);
-        //}
+        [HttpGet]
+        [Route("{cartId}/availpaymentmethods")]
+        [ProducesResponseType(typeof(ICollection<CoreModule.Core.Model.Payment.PaymentMethod>), 200)]
+        public async Task<IActionResult> GetAvailablePaymentMethods(string cartId)
+        {
+            var cart = await _shoppingCartService.GetByIdAsync(cartId);
+            var paymentMethods = _cartBuilder.TakeCart(cart).GetAvailablePaymentMethods();
+            return Ok(paymentMethods);
+        }
 
         [HttpPost]
         [Route("{cartId}/coupons/{couponCode}")]
@@ -178,32 +179,32 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
             return Ok();
         }
 
-        //[HttpPost]
-        //[Route("{cartId}/shipments")]
-        //[ProducesResponseType(typeof(void), 200)]
-        //public async Task<IActionResult> AddOrUpdateCartShipment(string cartId, [FromBody] Shipment shipment)
-        //{
-        //    using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(cartId)).LockAsync())
-        //    {
-        //        var cart = _shoppingCartService.GetByIds(new[] { cartId }).FirstOrDefault();
-        //        _cartBuilder.TakeCart(cart).AddOrUpdateShipment(shipment).Save();
-        //    }
-        //    return StatusCode(HttpStatusCode.NoContent);
-        //}
+        [HttpPost]
+        [Route("{cartId}/shipments")]
+        [ProducesResponseType(typeof(void), 200)]
+        public async Task<IActionResult> AddOrUpdateCartShipment(string cartId, [FromBody] Shipment shipment)
+        {
+            using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(cartId)).LockAsync())
+            {
+                var cart = await _shoppingCartService.GetByIdAsync(cartId);
+                await _cartBuilder.TakeCart(cart).AddOrUpdateShipment(shipment).SaveAsync();
+            }
+            return Ok();
+        }
 
-        //[HttpPost]
-        //[Route("{cartId}/payments")]
-        //[ProducesResponseType(typeof(void), 200)]
-        //public async Task<IActionResult> AddOrUpdateCartPayment(string cartId, [FromBody] Payment payment)
-        //{
-        //    using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(cartId)).LockAsync())
-        //    {
-        //        var cart = _shoppingCartService.GetByIds(new[] { cartId }).FirstOrDefault();
-        //        _cartBuilder.TakeCart(cart).AddOrUpdatePayment(payment).Save();
-        //    }
+        [HttpPost]
+        [Route("{cartId}/payments")]
+        [ProducesResponseType(typeof(void), 200)]
+        public async Task<IActionResult> AddOrUpdateCartPayment(string cartId, [FromBody] Payment payment)
+        {
+            using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(cartId)).LockAsync())
+            {
+                var cart = await _shoppingCartService.GetByIdAsync(cartId);
+                await _cartBuilder.TakeCart(cart).AddOrUpdatePayment(payment).SaveAsync();
+            }
 
-        //    return StatusCode(HttpStatusCode.NoContent);
-        //}
+            return Ok();
+        }
 
         /// <summary>
         /// Get shopping cart by id

@@ -27,7 +27,6 @@ namespace VirtoCommerce.CartModule.Data.Repositories
         {
             var carts = await ShoppingCarts.Where(x => ids.Contains(x.Id)).ToArrayAsync();
 
-            //TODO
             var cartResponseGroup = EnumUtility.SafeParse(responseGroup, CartResponseGroup.Full);
 
             var cartTaxDetails = TaxDetails.Where(x => ids.Contains(x.ShoppingCartId)).ToArrayAsync();
@@ -35,25 +34,34 @@ namespace VirtoCommerce.CartModule.Data.Repositories
             var cartAddresses = Addresses.Where(x => ids.Contains(x.ShoppingCartId)).ToArrayAsync();
             await Task.WhenAll(cartTaxDetails, cartDiscounts, cartAddresses);
 
-            var payments = await Payments.Include(x => x.Addresses).Where(x => ids.Contains(x.ShoppingCartId)).ToArrayAsync();
-            var paymentIds = payments.Select(x => x.Id).ToArray();
+            if ((cartResponseGroup & CartResponseGroup.WithPayments) == CartResponseGroup.WithPayments)
+            {
+                var payments = await Payments.Include(x => x.Addresses).Where(x => ids.Contains(x.ShoppingCartId)).ToArrayAsync();
+                var paymentIds = payments.Select(x => x.Id).ToArray();
 
-            var paymentTaxDetails = TaxDetails.Where(x => paymentIds.Contains(x.PaymentId)).ToArrayAsync();
-            var paymentDiscounts = Discounts.Where(x => paymentIds.Contains(x.PaymentId)).ToArrayAsync();
-            await Task.WhenAll(paymentTaxDetails, paymentDiscounts);
+                var paymentTaxDetails = TaxDetails.Where(x => paymentIds.Contains(x.PaymentId)).ToArrayAsync();
+                var paymentDiscounts = Discounts.Where(x => paymentIds.Contains(x.PaymentId)).ToArrayAsync();
+                await Task.WhenAll(paymentTaxDetails, paymentDiscounts);
+            }
 
-            var lineItems = await LineItems.Where(x => ids.Contains(x.ShoppingCartId)).ToArrayAsync();
-            var lineItemIds = lineItems.Select(x => x.Id).ToArray();
-            var lineItemsTaxDetails = TaxDetails.Where(x => lineItemIds.Contains(x.LineItemId)).ToArrayAsync();
-            var lineItemsDiscounts = Discounts.Where(x => lineItemIds.Contains(x.LineItemId)).ToArrayAsync();
-            await Task.WhenAll(lineItemsTaxDetails, lineItemsDiscounts);
+            if ((cartResponseGroup & CartResponseGroup.WithLineItems) == CartResponseGroup.WithLineItems)
+            {
+                var lineItems = await LineItems.Where(x => ids.Contains(x.ShoppingCartId)).ToArrayAsync();
+                var lineItemIds = lineItems.Select(x => x.Id).ToArray();
+                var lineItemsTaxDetails = TaxDetails.Where(x => lineItemIds.Contains(x.LineItemId)).ToArrayAsync();
+                var lineItemsDiscounts = Discounts.Where(x => lineItemIds.Contains(x.LineItemId)).ToArrayAsync();
+                await Task.WhenAll(lineItemsTaxDetails, lineItemsDiscounts);
+            }
 
-            var shipments = await Shipments.Include(x => x.Items).Where(x => ids.Contains(x.ShoppingCartId)).ToArrayAsync();
-            var shipmentIds = shipments.Select(x => x.Id).ToArray();
-            var shipmentTaxDetails = TaxDetails.Where(x => shipmentIds.Contains(x.ShipmentId)).ToArrayAsync();
-            var shipmentDiscounts = Discounts.Where(x => shipmentIds.Contains(x.ShipmentId)).ToArrayAsync();
-            var shipmentAddresses = Addresses.Where(x => shipmentIds.Contains(x.ShipmentId)).ToArrayAsync();
-            await Task.WhenAll(shipmentTaxDetails, shipmentDiscounts, shipmentAddresses);
+            if ((cartResponseGroup & CartResponseGroup.WithShipments) == CartResponseGroup.WithShipments)
+            {
+                var shipments = await Shipments.Include(x => x.Items).Where(x => ids.Contains(x.ShoppingCartId)).ToArrayAsync();
+                var shipmentIds = shipments.Select(x => x.Id).ToArray();
+                var shipmentTaxDetails = TaxDetails.Where(x => shipmentIds.Contains(x.ShipmentId)).ToArrayAsync();
+                var shipmentDiscounts = Discounts.Where(x => shipmentIds.Contains(x.ShipmentId)).ToArrayAsync();
+                var shipmentAddresses = Addresses.Where(x => shipmentIds.Contains(x.ShipmentId)).ToArrayAsync();
+                await Task.WhenAll(shipmentTaxDetails, shipmentDiscounts, shipmentAddresses);
+            }
 
             return carts;
         }
