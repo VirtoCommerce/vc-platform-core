@@ -3,7 +3,6 @@ using VirtoCommerce.CoreModule.Core.Commerce.Model;
 using VirtoCommerce.CoreModule.Core.Model.Payment;
 using VirtoCommerce.CoreModule.Core.Model.Shipping;
 using VirtoCommerce.CoreModule.Core.Model.Tax;
-using VirtoCommerce.Domain.Commerce.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Security;

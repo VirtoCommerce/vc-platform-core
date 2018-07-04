@@ -69,5 +69,12 @@ namespace VirtoCommerce.CoreModule.Core.Model.Cart
         public decimal TaxPercentRate { get; set; }
 
         #endregion
+
+
+        protected override IEnumerable<object> GetEqualityComponents()
+        {
+            yield return ShipmentMethodCode;
+            yield return OptionName;
+        }
     }
 }

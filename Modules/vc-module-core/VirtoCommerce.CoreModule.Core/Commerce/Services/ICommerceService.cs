@@ -1,6 +1,6 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using VirtoCommerce.CoreModule.Core.Commerce.Model;
-using VirtoCommerce.Domain.Commerce.Model;
 
 namespace VirtoCommerce.CoreModule.Core.Commerce.Services
 {
@@ -11,10 +11,10 @@ namespace VirtoCommerce.CoreModule.Core.Commerce.Services
         void DeleteCurrencies(string[] codes);
         IEnumerable<SeoInfo> GetAllSeoDuplicates();
         IEnumerable<SeoInfo> GetSeoByKeyword(string keyword);
-        void UpsertSeoInfos(SeoInfo[] seoinfos);
-        void LoadSeoForObjects(ISeoSupport[] seoSupportObjects);
-        void UpsertSeoForObjects(ISeoSupport[] seoSupportObjects);
-        void DeleteSeoForObject(ISeoSupport seoSupportObject);
+        Task UpsertSeoInfosAsync(SeoInfo[] seoinfos);
+        Task LoadSeoForObjectsAsync(ISeoSupport[] seoSupportObjects);
+        Task UpsertSeoForObjectsAsync(ISeoSupport[] seoSupportObjects);
+        Task DeleteSeoForObjectAsync(ISeoSupport seoSupportObject);
 
         IEnumerable<PackageType> GetAllPackageTypes();
         void UpsertPackageTypes(PackageType[] packageTypes);

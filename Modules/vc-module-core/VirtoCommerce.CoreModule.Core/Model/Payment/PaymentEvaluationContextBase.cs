@@ -6,9 +6,8 @@ namespace VirtoCommerce.CoreModule.Core.Model.Payment
 {
     public abstract class PaymentEvaluationContextBase : ValueObject, IEvaluationContext
     {
-        //TODO
-        //public PaymentIn Payment { get; set; }
-        //public CustomerOrder Order { get; set; }
+        public string PaymentId { get; set; }
+        public string OrderId { get; set; }
         public NameValueCollection Parameters { get; set; }
     }
 }

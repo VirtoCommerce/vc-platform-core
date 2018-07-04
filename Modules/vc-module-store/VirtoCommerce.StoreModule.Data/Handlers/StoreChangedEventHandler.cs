@@ -27,27 +27,24 @@ namespace VirtoCommerce.StoreModule.Data.Handlers
             {
                 if (changedEntry.EntryState == EntryState.Added)
                 {
-                    _commerceService.UpsertSeoForObjects(new[] { changedEntry.NewEntry });
-
+                    var taskUpsertSeoForObjects = _commerceService.UpsertSeoForObjectsAsync(new[] { changedEntry.NewEntry });
                     var taskSaveDynamicPropertyValues = _dynamicPropertyService.SaveDynamicPropertyValuesAsync(changedEntry.NewEntry);
                     var taskSaveEntitySettingsValues = _settingManager.SaveEntitySettingsValuesAsync(changedEntry.NewEntry);
-                    await Task.WhenAll(taskSaveDynamicPropertyValues, taskSaveEntitySettingsValues);
+                    await Task.WhenAll(taskUpsertSeoForObjects, taskSaveDynamicPropertyValues, taskSaveEntitySettingsValues);
                 }
                 else if (changedEntry.EntryState == EntryState.Modified)
                 {
-                    _commerceService.UpsertSeoForObjects(new[] { changedEntry.NewEntry });
-
+                    var taskUpsertSeoForObjects = _commerceService.UpsertSeoForObjectsAsync(new[] { changedEntry.NewEntry });
                     var taskSaveDynamicPropertyValues = _dynamicPropertyService.SaveDynamicPropertyValuesAsync(changedEntry.NewEntry);
                     var taskSaveEntitySettingsValues = _settingManager.SaveEntitySettingsValuesAsync(changedEntry.NewEntry);
-                    await Task.WhenAll(taskSaveDynamicPropertyValues, taskSaveEntitySettingsValues);
+                    await Task.WhenAll(taskUpsertSeoForObjects, taskSaveDynamicPropertyValues, taskSaveEntitySettingsValues);
                 }
                 else if (changedEntry.EntryState == EntryState.Deleted)
                 {
-                    _commerceService.DeleteSeoForObject(changedEntry.NewEntry);
-
+                    var taskDeleteSeoForObject = _commerceService.DeleteSeoForObjectAsync(changedEntry.NewEntry);
                     var taskDeleteDynamicPropertyValues = _dynamicPropertyService.DeleteDynamicPropertyValuesAsync(changedEntry.NewEntry);
                     var taskRemoveEntitySettingsValues = _settingManager.RemoveEntitySettingsAsync(changedEntry.NewEntry);
-                    await Task.WhenAll(taskDeleteDynamicPropertyValues, taskRemoveEntitySettingsValues);
+                    await Task.WhenAll(taskDeleteSeoForObject, taskDeleteDynamicPropertyValues, taskRemoveEntitySettingsValues);
                 }
             }
         }

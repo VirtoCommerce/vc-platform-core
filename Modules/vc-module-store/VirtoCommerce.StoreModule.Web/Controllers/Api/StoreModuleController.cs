@@ -4,11 +4,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.StoreModule.Core;
 using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Model.Search;
+using VirtoCommerce.StoreModule.Core.Notifications;
 using VirtoCommerce.StoreModule.Core.Services;
 using VirtoCommerce.StoreModule.Web.Model;
 
@@ -20,15 +22,18 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         private readonly IStoreService _storeService;
         private readonly IStoreSearchService _storeSearchService;
         private readonly UserManager<ApplicationUser> _userManager;
+
+        private readonly INotificationSender _notificationSender;
         //private readonly IPermissionScopeService _permissionScopeService;
 
         public StoreModuleController(IStoreService storeService, IStoreSearchService storeSearchService, UserManager<ApplicationUser> userManager
-            //, IPermissionScopeService permissionScopeService
+            , INotificationSender notificationSender//, IPermissionScopeService permissionScopeService
             )
         {
             _storeService = storeService;
             _storeSearchService = storeSearchService;
             _userManager = userManager;
+            _notificationSender = notificationSender;
             //_permissionScopeService = permissionScopeService;
         }
 
@@ -89,11 +94,11 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         [ProducesResponseType(typeof(Store), 200)]
         public async Task<IActionResult> GetStoreById(string id)
         {
-            var result = await _storeService.GetByIdsAsync(new [] {id});
+            var result = await _storeService.GetByIdAsync(id);
             //TODO
             //CheckCurrentUserHasPermissionForObjects(StorePredefinedPermissions.Read, result);
             //result.Scopes = _permissionScopeService.GetObjectPermissionScopeStrings(result).ToArray();
-            return Ok(result.FirstOrDefault());
+            return Ok(result);
         }
 
 
@@ -151,8 +156,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 200)]
         public async Task<IActionResult> SendDynamicNotificationAnStoreEmail(SendDynamicNotificationRequest request)
         {
-            var stores = await _storeService.GetByIdsAsync(new [] {request.StoreId});
-            var store = stores.FirstOrDefault();
+            var store = await _storeService.GetByIdAsync(request.StoreId);
 
             if (store == null)
                 throw new InvalidOperationException(string.Concat("Store not found. StoreId: ", request.StoreId));
@@ -160,16 +164,12 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
             if (string.IsNullOrEmpty(store.Email) && string.IsNullOrEmpty(store.AdminEmail))
                 throw new InvalidOperationException(string.Concat("Both store email and admin email are empty. StoreId: ", request.StoreId));
 
-            throw new NotImplementedException();
-            //var notification = _notificationManager.GetNewNotification<StoreDynamicEmailNotification>(request.StoreId, "Store", request.Language);
-
-            //notification.Recipient = !string.IsNullOrEmpty(store.Email) ? store.Email : store.AdminEmail;
-            //notification.Sender = notification.Recipient;
-            //notification.IsActive = true;
-            //notification.FormType = request.Type;
-            //notification.Fields = request.Fields;
-
-            //_notificationManager.ScheduleSendNotification(notification);
+            var notification = new StoreDynamicEmailNotification()
+            {
+                FormType = request.Type,
+                Fields = request.Fields
+            };
+            await _notificationSender.SendNotificationAsync(notification, request.Language);
 
             return Ok();
         }
