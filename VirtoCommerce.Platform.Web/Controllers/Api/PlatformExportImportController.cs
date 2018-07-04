@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Hangfire;
 using Hangfire.Server;
 using Microsoft.AspNetCore.Authorization;
@@ -30,7 +31,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
     [ApiExplorerSettings(IgnoreApi = true)]
     public class PlatformExportImportController : Controller
     {
-        private const string _sampledataStateSetting = "VirtoCommerce.SampleDataState";
+        private static string _sampledataStateSetting = typeof(SampleDataState).FullName;
         private static string _stringSampleDataUrl;
 
         private readonly IPlatformExportImportManager _platformExportManager;
@@ -86,6 +87,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("sampledata/import")]
         [ProducesResponseType(typeof(SampleDataImportPushNotification), 200)]
+        [ProducesResponseType(204)]
         [Authorize(Permissions.PlatformImport)]
         public IActionResult ImportSampleData([FromQuery]string url = null)
         {
@@ -100,7 +102,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                         _settingsManager.SetValue(_sampledataStateSetting, SampleDataState.Processing);
                         var pushNotification = new SampleDataImportPushNotification(User.Identity.Name);
                         _pushNotifier.Send(pushNotification);
-                        var jobId = BackgroundJob.Enqueue(() => SampleDataImportBackground(new Uri(url), _hostEnv.MapPath(_platformOptions.LocalUploadFolderPath), pushNotification, JobCancellationToken.Null, null));
+                        var jobId = BackgroundJob.Enqueue(() => SampleDataImportBackgroundAsync(new Uri(url), _hostEnv.MapPath(_platformOptions.LocalUploadFolderPath), pushNotification, JobCancellationToken.Null, null));
 
                         pushNotification.JobId = jobId;
 
@@ -168,7 +170,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             };
             _pushNotifier.Send(notification);
 
-            var jobId = BackgroundJob.Enqueue(() => PlatformExportBackground(exportRequest, notification, JobCancellationToken.Null, null));
+            var jobId = BackgroundJob.Enqueue( () => PlatformExportBackgroundAsync(exportRequest, notification, JobCancellationToken.Null, null));
             notification.JobId = jobId;
             return Ok(notification);
         }
@@ -246,7 +248,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         }
 
 
-        public void SampleDataImportBackground(Uri url, string tmpPath, SampleDataImportPushNotification pushNotification, IJobCancellationToken cancellationToken, PerformContext context)
+        public async Task SampleDataImportBackgroundAsync(Uri url, string tmpPath, SampleDataImportPushNotification pushNotification, IJobCancellationToken cancellationToken, PerformContext context)
         {
             Action<ExportImportProgressInfo> progressCallback = x =>
             {
@@ -260,7 +262,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 var cancellationTokenWrapper = new JobCancellationTokenWrapper(cancellationToken);
 
                 pushNotification.Description = "Start downloading from " + url;
-                _pushNotifier.Send(pushNotification);
+                await _pushNotifier.SendAsync(pushNotification);
 
                 if (!Directory.Exists(tmpPath))
                 {
@@ -270,10 +272,10 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 var tmpFilePath = Path.Combine(tmpPath, Path.GetFileName(url.ToString()));
                 using (var client = new WebClient())
                 {
-                    client.DownloadProgressChanged += (sender, args) =>
+                    client.DownloadProgressChanged += async (sender, args) =>
                     {
                         pushNotification.Description = string.Format("Sample data {0} of {1} downloading...", args.BytesReceived.ToHumanReadableSize(), args.TotalBytesToReceive.ToHumanReadableSize());
-                        _pushNotifier.Send(pushNotification);
+                        await _pushNotifier.SendAsync(pushNotification);
                     };
                     var task = client.DownloadFileTaskAsync(url, tmpFilePath);
                     task.Wait();
@@ -283,7 +285,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                     var manifest = _platformExportManager.ReadExportManifest(stream);
                     if (manifest != null)
                     {
-                        _platformExportManager.ImportAsync(stream, manifest, progressCallback, cancellationTokenWrapper);
+                        await _platformExportManager.ImportAsync(stream, manifest, progressCallback, cancellationTokenWrapper);
                     }
                 }
             }
@@ -300,7 +302,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 _settingsManager.SetValue(_sampledataStateSetting, SampleDataState.Completed);
                 pushNotification.Description = "Import finished";
                 pushNotification.Finished = DateTime.UtcNow;
-                _pushNotifier.Send(pushNotification);
+                await _pushNotifier.SendAsync(pushNotification);
             }
         }
 
@@ -344,7 +346,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             }
         }
 
-        public void PlatformExportBackground(PlatformImportExportRequest exportRequest, PlatformExportPushNotification pushNotification, IJobCancellationToken cancellationToken, PerformContext context)
+        public async Task PlatformExportBackgroundAsync(PlatformImportExportRequest exportRequest, PlatformExportPushNotification pushNotification, IJobCancellationToken cancellationToken, PerformContext context)
         {
             Action<ExportImportProgressInfo> progressCallback = x =>
             {
@@ -391,7 +393,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             {
                 pushNotification.Description = "Export finished";
                 pushNotification.Finished = DateTime.UtcNow;
-                _pushNotifier.Send(pushNotification);
+                await _pushNotifier.SendAsync(pushNotification);
             }
         }
     }
