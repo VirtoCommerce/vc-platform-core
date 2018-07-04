@@ -272,3 +272,5 @@ __pycache__/
 /VirtoCommerce.Platform.Web/wwwroot/lib
 /VirtoCommerce.Platform.Web/wwwroot/App_Data
 /VirtoCommerce.Platform.Web/wwwroot/maps
+/VirtoCommerce.Platform.Web/wwwroot/cms-content
+/VirtoCommerce.Platform.Web/wwwroot/assets/tmp/JetBrains.ReSharperUltimate.2017.2.2.rar

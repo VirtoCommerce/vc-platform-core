@@ -19,9 +19,10 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Data.Helpers;
 using VirtoCommerce.StoreModule.Core.Services;
+using VirtoCommerce.ContentModule.Data.Extension;
+using VirtoCommerce.Platform.Web.Helpers;
 
 using Permissions = VirtoCommerce.ContentModule.Core.ContentConstants.Security.Permissions;
-using VirtoCommerce.ContentModule.Data.Extension;
 
 namespace VirtoCommerce.ContentModule.Web.Controllers.Api
 {
@@ -258,6 +259,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("")]
+        [DisableFormValueModelBinding]
         [ProducesResponseType(typeof(ContentItem[]), 200)]
         [Authorize(Permissions.Create)]
         public async Task<IActionResult> UploadContent(string contentType, string storeId, [FromQuery] string folderUrl, [FromQuery]string url = null)
@@ -330,7 +332,6 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
 
             return Ok(retVal.ToArray());
         }
-
 
         private string GetContentBasePath(string contentType, string storeId)
         {
