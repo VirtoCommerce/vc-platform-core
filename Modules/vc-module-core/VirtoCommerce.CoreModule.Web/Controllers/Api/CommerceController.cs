@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using VirtoCommerce.Domain.Commerce.Model;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.CoreModule.Core.Commerce.Model;
@@ -57,9 +58,9 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         [HttpPut]
         [ProducesResponseType(typeof(void), 200)]
         [Route("seoinfos/batchupdate")]
-        public IActionResult BatchUpdateSeoInfos(SeoInfo[] seoInfos)
+        public async Task<IActionResult> BatchUpdateSeoInfos(SeoInfo[] seoInfos)
         {
-            _commerceService.UpsertSeoInfos(seoInfos);
+            await _commerceService.UpsertSeoInfosAsync(seoInfos);
             return Ok();
         }
 

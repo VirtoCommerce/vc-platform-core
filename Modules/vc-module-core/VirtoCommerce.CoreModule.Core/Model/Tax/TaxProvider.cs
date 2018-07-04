@@ -12,13 +12,6 @@ namespace VirtoCommerce.CoreModule.Core.Model.Tax
     /// </summary>
     public abstract class TaxProvider : Entity, IHaveSettings
     {
-        public TaxProvider(string code)
-        {
-            Id = Guid.NewGuid().ToString("N");
-            Code = code;
-            IsActive = false;
-        }
-
         /// <summary>
         /// Method identity property (System name)
         /// </summary>

@@ -1,6 +1,8 @@
+using VirtoCommerce.Platform.Core.Common;
+
 namespace VirtoCommerce.CoreModule.Core.Model.Shipping
 {
-	public class ShippingRate
+	public class ShippingRate : ValueObject
 	{
     	/// <summary>
 		/// Shipping option name or identifier

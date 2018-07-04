@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.Platform.Core.Common;
@@ -8,18 +7,6 @@ namespace VirtoCommerce.CoreModule.Core.Model.Shipping
 {
     public abstract class ShippingMethod : Entity, IHaveSettings
     {
-        private ShippingMethod()
-        {
-            Id = Guid.NewGuid().ToString("N");
-            IsActive = true;
-        }
-
-        public ShippingMethod(string code)
-            :this()
-		{
-			Code = code;
-		}
-
 		/// <summary>
 		/// Method identity property (System name)
 		/// </summary>

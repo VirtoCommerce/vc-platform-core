@@ -107,7 +107,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 CatalogCacheRegion.ExpireRegion();
             }
             //Need add seo separately
-            _commerceService.UpsertSeoForObjects(categories.OfType<ISeoSupport>().ToArray());
+            _commerceService.UpsertSeoForObjectsAsync(categories.OfType<ISeoSupport>().ToArray());
         }
 
 
@@ -155,7 +155,8 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 var objectsWithSeo = new List<ISeoSupport>(result.Values);
                 var outlineItems = result.Values.Where(c => c.Outlines != null).SelectMany(c => c.Outlines.SelectMany(o => o.Items));
                 objectsWithSeo.AddRange(outlineItems);
-                _commerceService.LoadSeoForObjects(objectsWithSeo.ToArray());
+                //TODO: convert to async
+                _commerceService.LoadSeoForObjectsAsync(objectsWithSeo.ToArray());
                 return result;
             });
         }

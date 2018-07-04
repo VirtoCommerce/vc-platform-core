@@ -12,14 +12,12 @@ namespace VirtoCommerce.CoreModule.Core.Model.Tax
             Lines = new List<TaxLine>();
         }
 
-        //TODO
-        //public VirtoCommerce.Domain.Store.Model.Store Store { get; set; }
+        public string StoreId { get; set; }
         public string Code { get; set; }
         public string Type { get; set; }
 
-        //TODO
-        //public Customer.Model.Contact Customer { get; set; }
-        //public Customer.Model.Organization Organization { get; set; }
+        public string CustomerId { get; set; }
+        public string OrganizationId { get; set; }
         public Address Address { get; set; }
         public string Currency { get; set; }
         public ICollection<TaxLine> Lines { get; set; }

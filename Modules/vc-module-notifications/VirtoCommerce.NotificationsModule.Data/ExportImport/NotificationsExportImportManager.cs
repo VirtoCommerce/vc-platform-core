@@ -1,18 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Data.Model;
-using VirtoCommerce.NotificationsModule.Web.Infrastructure;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 
-namespace VirtoCommerce.NotificationsModule.Web.ExportImport
+namespace VirtoCommerce.NotificationsModule.Data.ExportImport
 {
     public sealed class NotificationsExportEntries
     {
@@ -27,36 +26,35 @@ namespace VirtoCommerce.NotificationsModule.Web.ExportImport
         public ICollection<EmailNotificationMessage> EmailNotificationMessages { get; set; }
         public ICollection<EmailNotificationTemplate> EmailNotificationTemplates { get; set; }
         //todo SMS
-        
+
 
     }
 
-    public sealed class NotificationsExportImportManager : ISupportExportImportModule
+    public sealed class NotificationsExportImportManager : IExportSupport, IImportSupport
     {
         private const string _manifestZipEntryName = "Manifest.json";
         private const string _notificationsZipEntryName = "NotificationsEntries.json";
         private readonly INotificationSearchService _notificationSearchService;
         private readonly INotificationService _notificationService;
         private const int _batchSize = 50;
+        private readonly JsonSerializer _serializer;
 
         public NotificationsExportImportManager(INotificationSearchService notificationSearchService, INotificationService notificationService)
         {
             _notificationSearchService = notificationSearchService;
             _notificationService = notificationService;
+
+            _serializer = new JsonSerializer
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                Formatting = Formatting.Indented,
+                NullValueHandling = NullValueHandling.Ignore
+            };
         }
 
-        public void DoExport(Stream outStream, PlatformExportManifest manifest, Action<ExportImportProgressInfo> progressCallback,
-            CancellationToken cancellationToken)
+        public Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
-            if (manifest == null)
-            {
-                throw new ArgumentNullException("manifest");
-            }
-
-            if (cancellationToken.IsCancellationRequested)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-            }
+            cancellationToken.ThrowIfCancellationRequested();
 
             var progressInfo = new ExportImportProgressInfo { Description = "loading data..." };
             progressCallback(progressInfo);
@@ -69,14 +67,9 @@ namespace VirtoCommerce.NotificationsModule.Web.ExportImport
                 progressInfo.Description = "Notifications exporting...";
                 progressCallback(progressInfo);
 
-                var notificationsResult = _notificationSearchService.SearchNotifications(new NotificationSearchCriteria { Take = Int32.MaxValue, ResponseGroup = NotificationResponseGroup.Default.ToString()});
+                var notificationsResult = _notificationSearchService.SearchNotifications(new NotificationSearchCriteria { Take = Int32.MaxValue, ResponseGroup = NotificationResponseGroup.Default.ToString() });
                 writer.WritePropertyName("NotificationsTotalCount");
                 writer.WriteValue(notificationsResult.TotalCount);
-
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                }
 
                 writer.WritePropertyName("Notifications");
                 writer.WriteStartArray();
@@ -86,7 +79,7 @@ namespace VirtoCommerce.NotificationsModule.Web.ExportImport
 
                     foreach (var notification in searchResponse.Results)
                     {
-                        GetJsonSerializer().Serialize(writer, notification);
+                        _serializer.Serialize(writer, notification);
                     }
                     writer.Flush();
                     progressInfo.Description = $"{ Math.Min(notificationsResult.TotalCount, i + _batchSize) } of { notificationsResult.TotalCount } notifications exported";
@@ -97,15 +90,13 @@ namespace VirtoCommerce.NotificationsModule.Web.ExportImport
                 writer.WriteEndObject();
                 writer.Flush();
             }
+
+            return Task.CompletedTask;
         }
 
-        public void DoImport(Stream inputStream, PlatformExportManifest manifest, Action<ExportImportProgressInfo> progressCallback,
-            CancellationToken cancellationToken)
+        public Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
-            if (cancellationToken.IsCancellationRequested)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-            }
+            cancellationToken.ThrowIfCancellationRequested();
 
             var progressInfo = new ExportImportProgressInfo();
             var notificationsTotalCount = 0;
@@ -120,11 +111,6 @@ namespace VirtoCommerce.NotificationsModule.Web.ExportImport
                         if (reader.Value.ToString() == "NotificationsTotalCount")
                         {
                             notificationsTotalCount = reader.ReadAsInt32() ?? 0;
-
-                            if (cancellationToken.IsCancellationRequested)
-                            {
-                                cancellationToken.ThrowIfCancellationRequested();
-                            }
                         }
                         else if (reader.Value.ToString() == "Notifications")
                         {
@@ -138,17 +124,13 @@ namespace VirtoCommerce.NotificationsModule.Web.ExportImport
 
                                 while (reader.TokenType != JsonToken.EndArray)
                                 {
-                                    var notification = GetJsonSerializer().Deserialize<Notification>(reader);
+                                    var notification = _serializer.Deserialize<Notification>(reader);
                                     notifications.Add(notification);
                                     notificationsCount++;
 
                                     reader.Read();
                                 }
-
-                                if (cancellationToken.IsCancellationRequested)
-                                {
-                                    cancellationToken.ThrowIfCancellationRequested();
-                                }
+                                cancellationToken.ThrowIfCancellationRequested();
 
                                 if (notificationsCount % _batchSize == 0 || reader.TokenType == JsonToken.EndArray)
                                 {
@@ -171,18 +153,7 @@ namespace VirtoCommerce.NotificationsModule.Web.ExportImport
                     }
                 }
             }
-        }
-
-        private static JsonSerializer GetJsonSerializer()
-        {
-            var serializer = new JsonSerializer
-            {
-                NullValueHandling = NullValueHandling.Ignore,
-                Formatting = Formatting.Indented,
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Converters = { new PolymorphicJsonConverter() }
-            };
-            return serializer;
+            return Task.CompletedTask;
         }
     }
 }

@@ -1,6 +1,8 @@
+using VirtoCommerce.Platform.Core.Common;
+
 namespace VirtoCommerce.CoreModule.Core.Model.Payment
 {
-	public class BankCardInfo
+	public class BankCardInfo : ValueObject
 	{
 		public string BankCardNumber { get; set; }
 		public string BankCardType { get; set; }

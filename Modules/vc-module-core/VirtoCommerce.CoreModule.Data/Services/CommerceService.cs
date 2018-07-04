@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using VirtoCommerce.CoreModule.Core.Commerce.Model;
 using VirtoCommerce.CoreModule.Core.Commerce.Services;
 
@@ -42,22 +43,24 @@ namespace VirtoCommerce.CoreModule.Data.Services
             return Enumerable.Empty<SeoInfo>();
         }
 
-        public void UpsertSeoInfos(SeoInfo[] seoinfos)
+        public Task UpsertSeoInfosAsync(SeoInfo[] seoinfos)
         {
-            throw new System.NotImplementedException();
+            return Task.CompletedTask;
         }
 
-        public void LoadSeoForObjects(ISeoSupport[] seoSupportObjects)
+        public Task LoadSeoForObjectsAsync(ISeoSupport[] seoSupportObjects)
         {
+            return Task.CompletedTask;
         }
 
-        public void UpsertSeoForObjects(ISeoSupport[] seoSupportObjects)
+        public Task UpsertSeoForObjectsAsync(ISeoSupport[] seoSupportObjects)
         {
+            return Task.CompletedTask;
         }
 
-        public void DeleteSeoForObject(ISeoSupport seoSupportObject)
+        public Task DeleteSeoForObjectAsync(ISeoSupport seoSupportObject)
         {
-            throw new System.NotImplementedException();
+            return Task.CompletedTask;
         }
 
         public IEnumerable<PackageType> GetAllPackageTypes()

@@ -23,11 +23,12 @@ namespace VirtoCommerce.Platform.Modules
 
         private readonly IExternalModuleCatalog _extModuleCatalog;
 
-        public ModuleInstaller(IExternalModuleCatalog extModuleCatalog, IOptions<LocalStorageModuleCatalogOptions> localOptions, IExternalModulesClient externalClient)
+        public ModuleInstaller(IExternalModuleCatalog extModuleCatalog, IExternalModulesClient externalClient, ITransactionFileManager txFileManager, IOptions<LocalStorageModuleCatalogOptions> localOptions)
         {
             _extModuleCatalog = extModuleCatalog;
             _externalClient = externalClient;
             _options = localOptions.Value;
+            _fileManager = txFileManager;
         }
 
         #region IModuleInstaller Members
@@ -45,7 +46,7 @@ namespace VirtoCommerce.Platform.Modules
                 }
                 var allInstalledModules = _extModuleCatalog.Modules.OfType<ManifestModuleInfo>().Where(x => x.IsInstalled).ToArray();
                 //Check that incompatible modules does not installed
-                if(!module.Incompatibilities.IsNullOrEmpty())
+                if (!module.Incompatibilities.IsNullOrEmpty())
                 {
                     var installedIncompatibilities = allInstalledModules.Select(x => x.Identity).Join(module.Incompatibilities, x => x.Id, y => y.Id, (x, y) => new { x, y })
                                                           .Where(g => g.y.Version.IsCompatibleWith(g.x.Version)).Select(g => g.x)
@@ -233,7 +234,7 @@ namespace VirtoCommerce.Platform.Modules
             Report(progress, ProgressMessageLevel.Info, "Successfully installed '{0}'.", module);
         }
 
-        
+
 
         private static void Report(IProgress<ProgressMessage> progress, ProgressMessageLevel level, string format, params object[] args)
         {

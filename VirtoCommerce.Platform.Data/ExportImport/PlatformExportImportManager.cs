@@ -7,7 +7,6 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Caching;
@@ -18,31 +17,8 @@ using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 
-namespace VirtoCommerce.Platform.Web.ExportImport
+namespace VirtoCommerce.Platform.Data.ExportImport
 {
-    public sealed class PlatformExportEntries
-    {
-        public PlatformExportEntries()
-        {
-            Users = new List<ApplicationUser>();
-            Settings = new List<SettingEntry>();
-            DynamicPropertyDictionaryItems = new List<DynamicPropertyDictionaryItem>();
-        }
-        public bool IsNotEmpty
-        {
-            get
-            {
-                return Users.Any() || Settings.Any();
-            }
-        }
-        public ICollection<ApplicationUser> Users { get; set; }
-        public ICollection<Role> Roles { get; set; }
-        public ICollection<SettingEntry> Settings { get; set; }
-        public ICollection<DynamicPropertyDictionaryItem> DynamicPropertyDictionaryItems { get; set; }
-        public ICollection<DynamicProperty> DynamicProperties { get; set; }
-
-    }
-
     public class PlatformExportImportManager : IPlatformExportImportManager
     {
         private const string _manifestZipEntryName = "Manifest.json";
@@ -78,7 +54,7 @@ namespace VirtoCommerce.Platform.Web.ExportImport
             {
                 Author = author,
                 PlatformVersion = PlatformVersion.CurrentVersion.ToString(),
-                Modules = InnerGetModulesWithInterface(typeof(ISupportExportImportModule)).Select(x => new ExportModuleInfo
+                Modules = InnerGetModulesWithInterface(typeof(IImportSupport)).Select(x => new ExportModuleInfo
                 {
                     Id = x.Id,
                     Version = x.Version.ToString(),
@@ -99,23 +75,22 @@ namespace VirtoCommerce.Platform.Web.ExportImport
                     retVal = manifestStream.DeserializeJson<PlatformExportManifest>(GetJsonSerializer());
                 }
             }
-
             return retVal;
         }
 
-        public async Task ExportAsync(Stream outStream, PlatformExportManifest manifest, Action<ExportImportProgressInfo> progressCallback, CancellationToken cancellationToken)
+        public async Task ExportAsync(Stream outStream, PlatformExportManifest manifest, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
             if (manifest == null)
             {
-                throw new ArgumentNullException("manifest");
+                throw new ArgumentNullException(nameof(manifest));
             }
 
-            using (var zipArchive = new ZipArchive(outStream))
+            using (var zipArchive = new ZipArchive(outStream, ZipArchiveMode.Create, true))
             {
                 //Export all selected platform entries
                 await ExportPlatformEntriesInternalAsync(zipArchive, manifest, progressCallback, cancellationToken);
                 //Export all selected  modules
-                ExportModulesInternal(zipArchive, manifest, progressCallback);
+                await ExportModulesInternalAsync(zipArchive, manifest, progressCallback, cancellationToken);
 
                 //Write system information about exported modules
                 var manifestZipEntry = zipArchive.CreateEntry(_manifestZipEntryName, CompressionLevel.Optimal);
@@ -128,11 +103,11 @@ namespace VirtoCommerce.Platform.Web.ExportImport
             }
         }
 
-        public async Task ImportAsync(Stream stream, PlatformExportManifest manifest, Action<ExportImportProgressInfo> progressCallback, CancellationToken cancellationToken)
+        public async Task ImportAsync(Stream stream, PlatformExportManifest manifest, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
             if (manifest == null)
             {
-                throw new ArgumentNullException("manifest");
+                throw new ArgumentNullException(nameof(manifest));
             }
 
             var progressInfo = new ExportImportProgressInfo();
@@ -145,16 +120,12 @@ namespace VirtoCommerce.Platform.Web.ExportImport
                 await ImportPlatformEntriesInternalAsync(zipArchive, manifest, progressCallback, cancellationToken);
                 //Import selected modules
                 await ImportModulesInternalAsync(zipArchive, manifest, progressCallback, cancellationToken);
-                //Reset cache
-                //TODO:
-                //_memoryCache.Clear();
-
             }
         }
 
         #endregion
 
-        private async Task ImportPlatformEntriesInternalAsync(ZipArchive zipArchive, PlatformExportManifest manifest, Action<ExportImportProgressInfo> progressCallback, CancellationToken cancellationToken)
+        private async Task ImportPlatformEntriesInternalAsync(ZipArchive zipArchive, PlatformExportManifest manifest, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
             var progressInfo = new ExportImportProgressInfo();
 
@@ -213,7 +184,7 @@ namespace VirtoCommerce.Platform.Web.ExportImport
             }
         }
 
-        private async Task ExportPlatformEntriesInternalAsync(ZipArchive zipArchive, PlatformExportManifest manifest, Action<ExportImportProgressInfo> progressCallback, CancellationToken cancellationToken)
+        private async Task ExportPlatformEntriesInternalAsync(ZipArchive zipArchive, PlatformExportManifest manifest, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
             var progressInfo = new ExportImportProgressInfo();
             var platformExportObj = new PlatformExportEntries();
@@ -264,9 +235,6 @@ namespace VirtoCommerce.Platform.Web.ExportImport
             platformExportObj.DynamicProperties = (await _dynamicPropertySearchService.SearchDynamicPropertiesAsync(new DynamicPropertySearchCriteria { Take = int.MaxValue })).Results;
             platformExportObj.DynamicPropertyDictionaryItems = (await _dynamicPropertySearchService.SearchDictionaryItemsAsync(new DynamicPropertyDictionaryItemSearchCriteria { Take = int.MaxValue })).Results;
 
-            //Notification templates
-            progressInfo.Description = "Notifications: load templates...";
-            progressCallback(progressInfo);
 
             //Create part for platform entries
             var platformEntiriesPart = zipArchive.CreateEntry(_platformZipEntryName, CompressionLevel.Optimal);
@@ -276,75 +244,80 @@ namespace VirtoCommerce.Platform.Web.ExportImport
             }
         }
 
-        private Task ImportModulesInternalAsync(ZipArchive zipArchive, PlatformExportManifest manifest, Action<ExportImportProgressInfo> progressCallback, CancellationToken cancellationToken)
+        private async Task ImportModulesInternalAsync(ZipArchive zipArchive, PlatformExportManifest manifest, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
             var progressInfo = new ExportImportProgressInfo();
             foreach (var moduleInfo in manifest.Modules)
             {
-                var moduleDescriptor = InnerGetModulesWithInterface(typeof(ISupportExportImportModule)).FirstOrDefault(x => x.Id == moduleInfo.Id);
+                var moduleDescriptor = InnerGetModulesWithInterface(typeof(IImportSupport)).FirstOrDefault(x => x.Id == moduleInfo.Id);
                 if (moduleDescriptor != null)
                 {
                     var modulePart = zipArchive.GetEntry(moduleInfo.PartUri);
                     using (var modulePartStream = modulePart.Open())
                     {
-                        Action<ExportImportProgressInfo> modulePorgressCallback = (x) =>
+                        void modulePorgressCallback(ExportImportProgressInfo x)
                         {
                             progressInfo.Description = $"{moduleInfo.Id}: {x.Description}";
                             progressCallback(progressInfo);
-                        };
-                        try
-                        {
-                            ((ISupportExportImportModule)moduleDescriptor.ModuleInstance).DoImport(modulePartStream, manifest, modulePorgressCallback, CancellationToken.None);
                         }
-                        catch (Exception ex)
+                        if (moduleDescriptor.ModuleInstance is IImportSupport importer)
                         {
-                            progressInfo.Errors.Add($"{moduleInfo.Id}: {ex.ToString()}");
-                            progressCallback(progressInfo);
+                            try
+                            {
+                                //TODO: Add JsonConverter which will be materialized concrete ExportImport option type 
+                                var options = manifest.Options.FirstOrDefault(x => x.ModuleIdentity.Id == moduleDescriptor.Identity.Id);
+                                await importer.ImportAsync(modulePartStream, options, modulePorgressCallback, cancellationToken);
+                            }
+                            catch (Exception ex)
+                            {
+                                progressInfo.Errors.Add($"{moduleInfo.Id}: {ex.ToString()}");
+                                progressCallback(progressInfo);
+                            }
                         }
                     }
                 }
             }
-            return Task.CompletedTask;
         }
 
-        private void ExportModulesInternal(ZipArchive zipArchive, PlatformExportManifest manifest, Action<ExportImportProgressInfo> progressCallback)
+        private async Task ExportModulesInternalAsync(ZipArchive zipArchive, PlatformExportManifest manifest, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
             var progressInfo = new ExportImportProgressInfo();
 
             foreach (var module in manifest.Modules)
             {
-                var moduleDescriptor = InnerGetModulesWithInterface(typeof(ISupportExportImportModule)).FirstOrDefault(x => x.Id == module.Id);
+                var moduleDescriptor = InnerGetModulesWithInterface(typeof(IImportSupport)).FirstOrDefault(x => x.Id == module.Id);
                 if (moduleDescriptor != null)
                 {
                     //Create part for module
                     var moduleZipEntryName = module.Id + ".json";
                     var zipEntry = zipArchive.CreateEntry(moduleZipEntryName, CompressionLevel.Optimal);
 
-                    Action<ExportImportProgressInfo> modulePorgressCallback = (x) =>
+                    void modulePorgressCallback(ExportImportProgressInfo x)
                     {
                         progressInfo.Description = $"{ module.Id }: { x.Description }";
                         progressCallback(progressInfo);
-                    };
+                    }
 
                     progressInfo.Description = $"{module.Id}: exporting...";
                     progressCallback(progressInfo);
-
-                    try
+                    if (moduleDescriptor.ModuleInstance is IExportSupport exporter)
                     {
-                        ((ISupportExportImportModule)moduleDescriptor.ModuleInstance).DoExport(zipEntry.Open(), manifest, modulePorgressCallback, CancellationToken.None);
+                        try
+                        {
+                            //TODO: Add JsonConverter which will be materialized concrete ExportImport option type 
+                            var options = manifest.Options.FirstOrDefault(x => x.ModuleIdentity.Id == moduleDescriptor.Identity.Id);
+                            await exporter.ExportAsync(zipEntry.Open(), options, modulePorgressCallback, cancellationToken);
+                        }
+                        catch (Exception ex)
+                        {
+                            progressInfo.Errors.Add($"{ module.Id}: {ex.ToString()}");
+                            progressCallback(progressInfo);
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        progressInfo.Errors.Add($"{ module.Id}: {ex.ToString()}");
-                        progressCallback(progressInfo);
-                    }
-
                     module.PartUri = moduleZipEntryName.ToString();
                 }
             }
-
         }
-
 
         private ManifestModuleInfo[] InnerGetModulesWithInterface(Type interfaceType)
         {

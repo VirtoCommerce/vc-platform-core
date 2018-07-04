@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 
@@ -110,6 +111,12 @@ namespace VirtoCommerce.Platform.Core
 
             public static class Setup
             {
+                public static ModuleSetting SampleDataState = new ModuleSetting
+                {
+                    Name = "VirtoCommerce.SampleDataState",
+                    ValueType = ModuleSetting.TypeString,
+                    DefaultValue = ExportImport.SampleDataState.Undefined.ToString()
+                };
                 public static ModuleSetting ModulesAutoInstallState = new ModuleSetting
                 {
                     Name = "VirtoCommerce.ModulesAutoInstallState",
@@ -130,6 +137,7 @@ namespace VirtoCommerce.Platform.Core
                     {
                         yield return ModulesAutoInstalled;
                         yield return ModulesAutoInstallState;
+                        yield return SampleDataState;
                     }
                 }
             }

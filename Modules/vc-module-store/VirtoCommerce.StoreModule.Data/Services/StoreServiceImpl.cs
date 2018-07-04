@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
+using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CoreModule.Core.Commerce.Model;
 using VirtoCommerce.CoreModule.Core.Commerce.Services;
 using VirtoCommerce.CoreModule.Core.Services;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
@@ -31,10 +33,12 @@ namespace VirtoCommerce.StoreModule.Data.Services
         private readonly IPaymentMethodsRegistrar _paymentService;
         private readonly ITaxRegistrar _taxService;
         private readonly IEventPublisher _eventPublisher;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
 
         public StoreServiceImpl(Func<IStoreRepository> repositoryFactory, ICommerceService commerceService, ISettingsManager settingManager,
                                 IDynamicPropertyService dynamicPropertyService, IShippingMethodsRegistrar shippingService, IPaymentMethodsRegistrar paymentService,
-                                ITaxRegistrar taxService, IEventPublisher eventPublisher)
+                                ITaxRegistrar taxService, IEventPublisher eventPublisher
+            , IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _commerceService = commerceService;
@@ -44,62 +48,49 @@ namespace VirtoCommerce.StoreModule.Data.Services
             _paymentService = paymentService;
             _taxService = taxService;
             _eventPublisher = eventPublisher;
+            _platformMemoryCache = platformMemoryCache;
         }
 
         #region IStoreService Members
 
         public async Task<Store[]> GetByIdsAsync(string[] ids)
         {
-            var stores = new List<Store>();
+            var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", ids));
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            {
+                var stores = new List<Store>();
 
-            using (var repository = _repositoryFactory())
-            {               
-                var dbStores = await repository.GetStoresByIdsAsync(ids);
-                foreach (var dbStore in dbStores)
+                using (var repository = _repositoryFactory())
                 {
-                    var store = AbstractTypeFactory<Store>.TryCreateInstance();
-                    dbStore.ToModel(store);
+                    var dbStores = await repository.GetStoresByIdsAsync(ids);
+                    foreach (var dbStore in dbStores)
+                    {
+                        var store = AbstractTypeFactory<Store>.TryCreateInstance();
+                        dbStore.ToModel(store);
 
-                    //Return all registered methods with store settings 
-                    store.PaymentMethods = _paymentService.GetAllPaymentMethods();
-                    foreach (var paymentMethod in store.PaymentMethods)
-                    {
-                        var dbStoredPaymentMethod = dbStore.PaymentMethods.FirstOrDefault(x => x.Code.EqualsInvariant(paymentMethod.Code));
-                        if (dbStoredPaymentMethod != null)
-                        {
-                            dbStoredPaymentMethod.ToModel(paymentMethod);
-                        }
-                    }
-                    store.ShippingMethods = _shippingService.GetAllShippingMethods();
-                    foreach (var shippingMethod in store.ShippingMethods)
-                    {
-                        var dbStoredShippingMethod = dbStore.ShippingMethods.FirstOrDefault(x => x.Code.EqualsInvariant(shippingMethod.Code));
-                        if (dbStoredShippingMethod != null)
-                        {
-                            dbStoredShippingMethod.ToModel(shippingMethod);
-                        }
-                    }
-                    store.TaxProviders = _taxService.GetAllTaxProviders();
-                    foreach (var taxProvider in store.TaxProviders)
-                    {
-                        var dbStoredTaxProvider = dbStore.TaxProviders.FirstOrDefault(x => x.Code.EqualsInvariant(taxProvider.Code));
-                        if (dbStoredTaxProvider != null)
-                        {
-                            dbStoredTaxProvider.ToModel(taxProvider);
-                        }
-                    }
+                        PopulateStore(store, dbStore);
 
-                    //Set default settings for store it can be override by store instance setting in LoadEntitySettingsValues
-                    store.Settings = await _settingManager.GetModuleSettingsAsync("VirtoCommerce.Store");
-                    await _settingManager.LoadEntitySettingsValuesAsync(store);
-                    stores.Add(store);
+                        //Set default settings for store it can be override by store instance setting in LoadEntitySettingsValues
+                        store.Settings = await _settingManager.GetModuleSettingsAsync("VirtoCommerce.Store");
+                        await _settingManager.LoadEntitySettingsValuesAsync(store);
+                        stores.Add(store);
+                        cacheEntry.AddExpirationToken(StoreCacheRegion.CreateChangeToken(store));
+                    }
                 }
-            }
 
-            var result = stores.ToArray();
-            await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(result);
-            _commerceService.LoadSeoForObjects(result);
-            return result;
+                var result = stores.ToArray();
+                var taskLoadDynamicPropertyValues = _dynamicPropertyService.LoadDynamicPropertyValuesAsync(result);
+                var taskLoadSeoForObjects = _commerceService.LoadSeoForObjectsAsync(result);
+                await Task.WhenAll(taskLoadDynamicPropertyValues, taskLoadSeoForObjects);
+
+                return result;
+            });
+        }
+
+        public async Task<Store> GetByIdAsync(string id)
+        {
+            var stores = await GetByIdsAsync(new[] {id});
+            return stores.FirstOrDefault();
         }
 
         public async Task SaveChangesAsync(Store[] stores)
@@ -134,6 +125,8 @@ namespace VirtoCommerce.StoreModule.Data.Services
                     await _eventPublisher.Publish(new StoreChangedEvent(changedEntries));
                 }
             }
+
+            ClearCache(stores);
         }
 
         public async Task DeleteAsync(string[] ids)
@@ -155,6 +148,8 @@ namespace VirtoCommerce.StoreModule.Data.Services
                 }
                 await repository.UnitOfWork.CommitAsync();
                 await _eventPublisher.Publish(new StoreChangedEvent(changedEntries));
+
+                ClearCache(stores);
             }
         }
 
@@ -187,6 +182,14 @@ namespace VirtoCommerce.StoreModule.Data.Services
             return retVal;
         }
 
+        private void ClearCache(IEnumerable<Store> stores)
+        {
+            foreach (var store in stores)
+            {
+                StoreCacheRegion.ExpireInventory(store);
+            }
+        }
+
         private void ValidateStoresProperties(IEnumerable<Store> stores)
         {
             if (stores == null)
@@ -198,6 +201,42 @@ namespace VirtoCommerce.StoreModule.Data.Services
             foreach (var store in stores)
             {
                 validator.ValidateAndThrow(store);
+            }
+        }
+
+        private void PopulateStore(Store store, StoreEntity dbStore)
+        {
+            //Return all registered methods with store settings 
+            store.PaymentMethods = _paymentService.GetAllPaymentMethods();
+            foreach (var paymentMethod in store.PaymentMethods)
+            {
+                var dbStoredPaymentMethod =
+                    dbStore.PaymentMethods.FirstOrDefault(x => x.Code.EqualsInvariant(paymentMethod.Code));
+                if (dbStoredPaymentMethod != null)
+                {
+                    dbStoredPaymentMethod.ToModel(paymentMethod);
+                }
+            }
+            store.ShippingMethods = _shippingService.GetAllShippingMethods();
+            foreach (var shippingMethod in store.ShippingMethods)
+            {
+                var dbStoredShippingMethod =
+                    dbStore.ShippingMethods.FirstOrDefault(x =>
+                        x.Code.EqualsInvariant(shippingMethod.Code));
+                if (dbStoredShippingMethod != null)
+                {
+                    dbStoredShippingMethod.ToModel(shippingMethod);
+                }
+            }
+            store.TaxProviders = _taxService.GetAllTaxProviders();
+            foreach (var taxProvider in store.TaxProviders)
+            {
+                var dbStoredTaxProvider =
+                    dbStore.TaxProviders.FirstOrDefault(x => x.Code.EqualsInvariant(taxProvider.Code));
+                if (dbStoredTaxProvider != null)
+                {
+                    dbStoredTaxProvider.ToModel(taxProvider);
+                }
             }
         }
 

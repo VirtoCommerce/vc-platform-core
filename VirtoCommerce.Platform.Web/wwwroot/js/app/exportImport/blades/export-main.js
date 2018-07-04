@@ -1,5 +1,6 @@
-﻿angular.module('platformWebApp')
-.controller('platformWebApp.exportImport.exportMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'platformWebApp.authService', function ($scope, bladeNavigationService, exportImportResourse, authService) {
+angular.module('platformWebApp')
+    .controller('platformWebApp.exportImport.exportMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'platformWebApp.authService', 'platformWebApp.toolbarService', function ($scope, bladeNavigationService, exportImportResourse, authService, toolbarService
+) {
     var blade = $scope.blade;
     blade.headIcon = 'fa-upload';
     blade.title = 'platform.blades.export-main.title';
@@ -31,11 +32,28 @@
         $scope.exportRequest.modules = _.pluck(selection, 'id');
     };
 
-    $scope.startExport = function () {
+    $scope.startExport = function() {
         blade.isLoading = true;
         exportImportResourse.runExport($scope.exportRequest,
-            function (data) { blade.notification = data; blade.isLoading = false; });
-    }
+            function(data) {
+                blade.notification = data;
+                blade.isLoading = false;
+            });
+
+        blade.toolbarCommands.splice(0, 2, commandCancel);
+    };
+
+    var commandCancel = {
+        name: 'platform.commands.cancel',
+        icon: 'fa fa-times',
+        canExecuteMethod: function () {
+            return blade.notification && !blade.notification.finished;
+        },
+        executeMethod: function () {
+            exportImportResourse.taskCancel({ jobId: blade.notification.jobId }, null, function (data) {
+            });
+        }
+    };
 
     blade.toolbarCommands = [
 		{
@@ -59,5 +77,5 @@
         $scope.updateModuleSelection();
     }
 
-    initializeBlade();
+        initializeBlade();
 }]);
