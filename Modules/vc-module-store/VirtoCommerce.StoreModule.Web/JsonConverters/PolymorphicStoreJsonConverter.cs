@@ -16,10 +16,10 @@ namespace VirtoCommerce.StoreModule.Web.JsonConverters
     {
         private static Type[] _knowTypes = new[] { typeof(Store), typeof(StoreSearchCriteria), typeof(PaymentMethod), typeof(ShippingMethod), typeof(TaxProvider) };
 
-        private readonly IPaymentMethodsService _paymentMethodsService;
-        private readonly IShippingMethodsService _shippingMethodsService;
-        private readonly ITaxService _taxService;
-        public PolymorphicStoreJsonConverter(IPaymentMethodsService paymentMethodsService, IShippingMethodsService shippingMethodsService, ITaxService taxService)
+        private readonly IPaymentMethodsRegistrar _paymentMethodsService;
+        private readonly IShippingMethodsRegistrar _shippingMethodsService;
+        private readonly ITaxRegistrar _taxService;
+        public PolymorphicStoreJsonConverter(IPaymentMethodsRegistrar paymentMethodsService, IShippingMethodsRegistrar shippingMethodsService, ITaxRegistrar taxService)
         {
             _paymentMethodsService = paymentMethodsService;
             _shippingMethodsService = shippingMethodsService;

@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using VirtoCommerce.Domain.Commerce.Services;
 using VirtoCommerce.Domain.Commerce.Model;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.CoreModule.Core.Commerce.Model;
+using VirtoCommerce.CoreModule.Core.Commerce.Services;
 
 namespace VirtoCommerce.CoreModule.Web.Controllers.Api
 {
@@ -47,60 +47,6 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         //        }
         //    }
         //    return Ok(retVal);
-        //}
-
-
-        ///// <summary>
-        ///// Return all fulfillment centers registered in the system
-        ///// </summary>
-        //[HttpGet]
-        //[ResponseType(typeof(coreModel.FulfillmentCenter[]))]
-        //[Route("fulfillment/centers")]
-        //public IHttpActionResult GetFulfillmentCenters()
-        //{
-        //    var retVal = _commerceService.GetAllFulfillmentCenters().ToArray();
-        //    return Ok(retVal);
-        //}
-
-        ///// <summary>
-        ///// Find fulfillment center by id
-        ///// </summary>
-        ///// <param name="id">fulfillment center id</param>
-        //[HttpGet]
-        //[ResponseType(typeof(coreModel.FulfillmentCenter))]
-        //[Route("fulfillment/centers/{id}")]
-        //public IHttpActionResult GetFulfillmentCenter(string id)
-        //{
-        //    var retVal = _commerceService.GetAllFulfillmentCenters().First(x => x.Id == id);
-        //    return Ok(retVal);
-        //}
-
-        ///// <summary>
-        /////  Update a existing fulfillment center 
-        ///// </summary>
-        ///// <param name="center">fulfillment center</param>
-        //[HttpPut]
-        //[ResponseType(typeof(coreModel.FulfillmentCenter))]
-        //[Route("fulfillment/centers")]
-        //[CheckPermission(Permissions = new[] { CommercePredefinedPermissions.FulfillmentCreate, CommercePredefinedPermissions.FulfillmentUpdate })]
-        //[CLSCompliant(false)]
-        //public IHttpActionResult UpdateFulfillmentCenter(coreModel.FulfillmentCenter center)
-        //{
-        //    var retVal = _commerceService.UpsertFulfillmentCenter(center);
-        //    return Ok(retVal);
-        //}
-
-        ///// <summary>
-        ///// Delete  fulfillment centers registered in the system
-        ///// </summary>
-        //[HttpDelete]
-        //[ResponseType(typeof(void))]
-        //[Route("fulfillment/centers")]
-        //[CheckPermission(Permission = CommercePredefinedPermissions.FulfillmentDelete)]
-        //public IHttpActionResult DeleteFulfillmentCenters([FromUri] string[] ids)
-        //{
-        //    _commerceService.DeleteFulfillmentCenter(ids);
-        //    return StatusCode(HttpStatusCode.NoContent);
         //}
 
         /// <summary>

@@ -2,14 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.CoreModule.Core.Model.Tax;
+using VirtoCommerce.CoreModule.Core.Services;
 
-namespace VirtoCommerce.CoreModule.Core.Services
+namespace VirtoCommerce.CoreModule.Data.Services
 {
-	public class TaxServiceImpl : ITaxService
+	public class TaxRegistrarImpl : ITaxRegistrar
 	{
 		private List<Func<TaxProvider>> _taxProviderFactories = new List<Func<TaxProvider>>();
 
-        #region ITaxService Members
+        #region ITaxRegistrar Members
 
         public TaxProvider[] GetAllTaxProviders()
 		{

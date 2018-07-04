@@ -1,6 +1,8 @@
+using VirtoCommerce.Platform.Core.Common;
+
 namespace VirtoCommerce.CoreModule.Core.Model.Payment
 {
-	public class PostProcessPaymentResult : IProcessResult
+	public class PostProcessPaymentResult : ValueObject, IProcessResult
 	{
 		public PaymentStatus NewPaymentStatus { get; set; }
 

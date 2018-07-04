@@ -22,5 +22,10 @@ angular.module(moduleName, [])
             template: 'Modules/$(VirtoCommerce.Inventory)/Scripts/widgets/fulfillmentAddressesWidget.tpl.html'
         }, 'fulfillmentCenterDetail');
 
+        widgetService.registerWidget({    
+            controller: 'virtoCommerce.inventoryModule.storeFulfillmentWidgetController',
+            template: 'Modules/$(VirtoCommerce.Inventory)/Scripts/widgets/storeFulfillmentWidget.tpl.html'
+        }, 'storeDetail');
+
         metaFormsService.registerMetaFields('inventoryDetails', []);
     }]);

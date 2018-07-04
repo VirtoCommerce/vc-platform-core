@@ -6,7 +6,7 @@ namespace VirtoCommerce.CoreModule.Core.Services
     /// <summary>
     /// Tax provider factory
     /// </summary>
-    public interface ITaxService
+    public interface ITaxRegistrar
     {
         TaxProvider[] GetAllTaxProviders();
         void RegisterTaxProvider(Func<TaxProvider> providerFactory);

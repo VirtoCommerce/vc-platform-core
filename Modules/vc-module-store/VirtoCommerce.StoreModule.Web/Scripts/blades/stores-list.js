@@ -16,7 +16,7 @@ angular.module('virtoCommerce.storeModule')
             }, function (data) {
                 blade.isLoading = false;
                 $scope.pageSettings.totalItems = data.totalCount;
-                blade.currentEntities = data.stores;
+                blade.currentEntities = data.results;
             }, function (error) {
                 bladeNavigationService.setError('Error ' + error.status, blade);
             });

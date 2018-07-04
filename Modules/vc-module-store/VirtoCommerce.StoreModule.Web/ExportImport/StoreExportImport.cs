@@ -15,6 +15,7 @@ namespace VirtoCommerce.StoreModule.Web.ExportImport
     public sealed class StoreExportImport
     {
         private readonly IStoreService _storeService;
+        private readonly IStoreSearchService _storeSearchService;
         private readonly JsonSerializer _serializer;
         private readonly int BatchSize = 50;
 
@@ -37,7 +38,7 @@ namespace VirtoCommerce.StoreModule.Web.ExportImport
                 progressInfo.Description = "Evaluation the number of store records";
                 progressCallback(progressInfo);
 
-                var searchResult = await _storeService.SearchStoresAsync(new StoreSearchCriteria { Take = BatchSize });
+                var searchResult = await _storeSearchService.SearchStoresAsync(new StoreSearchCriteria { Take = BatchSize });
                 var totalCount = searchResult.TotalCount;
                 writer.WritePropertyName("StoreTotalCount");
                 writer.WriteValue(totalCount);
@@ -50,9 +51,9 @@ namespace VirtoCommerce.StoreModule.Web.ExportImport
                     progressInfo.Description = $"{i} of {totalCount} stores have been loaded";
                     progressCallback(progressInfo);
 
-                    searchResult = await _storeService.SearchStoresAsync(new StoreSearchCriteria { Skip = i, Take = BatchSize });
+                    searchResult = await _storeSearchService.SearchStoresAsync(new StoreSearchCriteria { Skip = i, Take = BatchSize });
 
-                    foreach (var store in searchResult.Stores)
+                    foreach (var store in searchResult.Results)
                     {
                         _serializer.Serialize(writer, store);
                     }
@@ -102,7 +103,7 @@ namespace VirtoCommerce.StoreModule.Web.ExportImport
                                 var batchStores = stores.Skip(i).Take(BatchSize);
                                 foreach (var store in batchStores)
                                 {
-                                    await _storeService.CreateAsync(store);
+                                    await _storeService.SaveChangesAsync(new [] { store });
                                 }
 
                                 if (storeCount > 0)

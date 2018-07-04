@@ -2,7 +2,7 @@ using System;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 
-namespace VirtoCommerce.Domain.Commerce.Model
+namespace VirtoCommerce.CoreModule.Core.Commerce.Model
 {
     public class SeoInfo : AuditableEntity, IHasLanguage, ICloneable
     {

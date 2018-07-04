@@ -181,18 +181,18 @@ namespace VirtoCommerce.StoreModule.Data.Model
                 }));
             }
 
-            //if (store.ShippingMethods != null)
-            //{
-            //    ShippingMethods = new ObservableCollection<StoreShippingMethodEntity>(store.ShippingMethods.Select(x => AbstractTypeFactory<StoreShippingMethodEntity>.TryCreateInstance().FromModel(x, pkMap)));
-            //}
-            //if (store.PaymentMethods != null)
-            //{
-            //    PaymentMethods = new ObservableCollection<StorePaymentMethodEntity>(store.PaymentMethods.Select(x => AbstractTypeFactory<StorePaymentMethodEntity>.TryCreateInstance().FromModel(x, pkMap)));
-            //}
-            //if (store.TaxProviders != null)
-            //{
-            //    TaxProviders = new ObservableCollection<StoreTaxProviderEntity>(store.TaxProviders.Select(x => AbstractTypeFactory<StoreTaxProviderEntity>.TryCreateInstance().FromModel(x, pkMap)));
-            //}
+            if (store.ShippingMethods != null)
+            {
+                ShippingMethods = new ObservableCollection<StoreShippingMethodEntity>(store.ShippingMethods.Select(x => AbstractTypeFactory<StoreShippingMethodEntity>.TryCreateInstance().FromModel(x, pkMap)));
+            }
+            if (store.PaymentMethods != null)
+            {
+                PaymentMethods = new ObservableCollection<StorePaymentMethodEntity>(store.PaymentMethods.Select(x => AbstractTypeFactory<StorePaymentMethodEntity>.TryCreateInstance().FromModel(x, pkMap)));
+            }
+            if (store.TaxProviders != null)
+            {
+                TaxProviders = new ObservableCollection<StoreTaxProviderEntity>(store.TaxProviders.Select(x => AbstractTypeFactory<StoreTaxProviderEntity>.TryCreateInstance().FromModel(x, pkMap)));
+            }
 
             FulfillmentCenters = new ObservableCollection<StoreFulfillmentCenterEntity>();
             if (store.AdditionalFulfillmentCenterIds != null)
@@ -286,25 +286,6 @@ namespace VirtoCommerce.StoreModule.Data.Model
                 var fulfillmentCenterComparer = AnonymousComparer.Create((StoreFulfillmentCenterEntity fc) => $"{fc.FulfillmentCenterId}-{fc.Type}");
                 FulfillmentCenters.Patch(target.FulfillmentCenters, fulfillmentCenterComparer,
                                       (sourceFulfillmentCenter, targetFulfillmentCenter) => sourceFulfillmentCenter.Patch(targetFulfillmentCenter));
-            }
-        }
-
-        public static ValidationResult ValidateStoreId(string value, ValidationContext context)
-        {
-            if (string.IsNullOrEmpty(value))
-            {
-                return new ValidationResult("Code can't be empty");
-            }
-
-            const string invalidKeywordCharacters = @"$+;=%{}[]|\/@ ~#!^*&?:'<>,";
-
-            if (value.IndexOfAny(invalidKeywordCharacters.ToCharArray()) > -1)
-            {
-                return new ValidationResult(@"Code must be valid");
-            }
-            else
-            {
-                return ValidationResult.Success;
             }
         }
     }
