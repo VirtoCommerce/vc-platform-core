@@ -1,0 +1,209 @@
+{
+  "stores": {
+	"main-menu-title": "Stores",
+    "blades": {
+      "stores-list": {
+        "title": "Store",
+        "labels": {
+          "no-stores": "Noch keine Stores",
+          "name": "Name"
+        }
+      },
+      "paymentMethod-detail": {
+        "subtitle": "Zahlungsmethode bearbeiten",
+        "labels": {
+          "is-active": "Ist aktiv",
+          "is-partial-payments-available": "Teilweiser Zahlungen verfügbar",
+          "name": "Name",
+          "code": "Code",
+          "description": "Beschreibung",
+          "settings": "Einstellungen"
+        },
+        "placeholders": {
+          "description": "Beschreibung eingeben"
+        }
+      },
+      "paymentMethod-list": {
+        "subtitle": "Zahlungsmethode bearbeiten",
+        "labels": {
+          "is-active": "Ist aktiv",
+          "payment-method": "Zahlungsmethode",
+          "note": "Legen Sie den Auftrag fest, wie Zahlungsmethoden im Web Store sortiert werden. Ziehen und loslassen, um die Reihenfolge zu ändern."
+        },
+        "placeholders": {
+          "description": "Beschreibung eingeben"
+        }
+      },
+      "shippingMethod-detail": {
+        "subtitle": "Versandart eingeben",
+        "labels": {
+          "is-active": "Ist aktiv",
+          "name": "Name",
+          "code": "Code",
+          "tax-type": "Steuertyp",
+          "description": "Beschreibung",
+          "settings": "Einstellungen"
+        },
+        "placeholders": {
+          "tax-type": "Wählen Sie aus...",
+          "description": "Beschreibung eingeben"
+        }
+      },
+      "shippingMethod-list": {
+        "subtitle": {},
+        "labels": {
+          "is-active": "Ist aktiv",
+          "shipping-method": "Versandart",
+          "note": "Legen Sie den Auftrag fest, wie die Versandmethoden im Web Store sortiert werden. Ziehen und loslassen, um die Reihenfolge zu ändern."
+        }
+      },
+      "store-advanced": {
+        "subtitle": {},
+        "labels": {
+          "description": "Beschreibung",
+          "store-url": "Store-URL",
+          "secure-url": "Sichere URL",
+          "store-country": "Shop Land",
+          "store-region": "Shop region",
+          "store-email": "E-Mail speichern",
+          "store-admin-email": "Shop Admin E-Mail",
+          "fulfillment-center": "Fulfillment Center",
+          "returns-fulfillment-center": "Versandkosten Fulfillment Center",
+          "operational-timezone": "Operative Zeitzone"
+        },
+        "placeholders": {
+          "description": "Beschreibung eingeben",
+          "store-url": "URL eingeben",
+          "secure-url": "Geben Sie den sicheren URL ein",
+          "store-country": "Wählen Sie aus...",
+          "store-region": "Region eingeben",
+          "store-email": "Wert eingeben",
+          "store-admin-email": "Wert eingeben",
+          "fulfillment-center": "Wählen Sie aus...",
+          "returns-fulfillment-center": "Wählen Sie aus...",
+          "operational-timezone": "Wählen Sie aus..."
+        }
+      },
+      "store-detail": {
+        "subtitle": "Shop Details",
+        "labels": {
+          "code": "Code",
+          "name": "Name",
+          "catalog": "Katalog",
+          "state": "Status",
+          "default-language": "Standardsprache",
+          "additional-languages": "Zusätzliche Sprachen",
+          "default-currency": "Standardwährung",
+          "additional-currencies": "Weitere Währungen",
+          "linked-stores": "Verbundene Geschäfte (Kunden können Ihre Anmeldeinformationen hier verwenden)"
+        },
+        "placeholders": {
+          "code": "Code eingeben",
+          "name": "Namen eingeben",
+          "catalog": "Wählen Sie aus...",
+          "state": "Wählen Sie aus...",
+          "default-language": "Wählen Sie aus...",
+          "additional-languages": "Wählen Sie aus...",
+          "default-currency": "Wählen Sie aus...",
+          "additional-currencies": "Wählen Sie aus...",
+          "linked-stores": "Dieser Shop hat keine verknüpften Shop"
+        },
+        "descriptions": {
+          "code": "wird als Store-Primärschlüssel und in Storefront als Teil der URL für die Store-Auswahl verwendet",
+          "name": "Anzeigename für Store im Manager darstellen",
+          "catalog": "ein physischer oder virtueller Katalog, der diesem Geschäft zugeordnet ist",
+          "state": "aktueller Geschäftszustand",
+          "default-language": "Primärsprache für diesen Laden",
+          "default-currency": "Hauptwährung für diesen Laden"
+        }
+      },
+      "new-store-wizard": {
+        "title": "Neuer Shop",
+        "subtitle": "Neuen Shop erstellen"
+      },
+      "taxProvider-detail": {
+        "subtitle": "Steueranbieter bearbeiten",
+        "labels": {
+          "name": "Name",
+          "code": "Code",
+          "description": "Beschreibung",
+          "settings": "Einstellungen"
+        },
+        "placeholders": {
+          "description": "Beschreibung eingeben"
+        }
+      },
+      "taxProvider-list": {
+        "subtitle": {},
+        "labels": {
+          "is-active": "Ist aktiv",
+          "tax-provider": "Steueranbieter"
+        }
+      },
+      "loginOnBehalf-list": {
+        "title": "Anmeldung als {{name}}",
+        "labels": {
+          "pick-store-to-login": "Wählen Sie einen Shop für die Anmeldung",
+          "no-stores": "Noch keine Shops"
+        },
+        "validations": {
+          "secure-url-missing": "Sichere URL fehlt. Klicken Sie auf Shopdetails zu öffnen.",
+          "default-language-missing": "Standardsprache fehlt. Klicken Sie auf Shopdetails zu öffnen."
+        }
+      },
+      "account-detail": {
+        "labels": {
+          "container-id": "Container (Shop)"
+        }
+      }
+    },
+    "widgets": {
+      "assetsWidget": {
+        "title": "Medien"
+      },
+      "storeAdvancedWidget": {
+        "title": "Erweiterte Eigenschaften",
+        "blade-subtitle": "Erweiterte Eigenschaften"
+      },
+      "storeNotificationsLogWidget": {
+        "title": "Benachrichtigungsprotokoll",
+        "blade-subtitle": "Benachrichtigungsprotokoll",
+        "blade-title": "Shop {{id}} Benachrichtigung beim Senden des Protokolls"
+      },
+      "storeNotificationsWidget": {
+        "title": "Benachrichtigung",
+        "blade-subtitle": "Benachrichtigungen service",
+        "blade-title": "Shop {{id}} Benachrichtigungstypen Liste"
+      },
+      "storePaymentsWidget": {
+        "title": "Zahlungsmethoden",
+        "blade-subtitle": "Zahlungsmethoden"
+      },
+      "storeSettingsWidget": {
+        "title": "Einstellungen",
+        "blade-subtitle": "Einstellungen"
+      },
+      "storeShippingWidget": {
+        "title": "Versandarten",
+        "blade-subtitle": "Versandarten"
+      },
+      "storeTaxingWidget": {
+        "title": "Steueranbieter",
+        "blade-subtitle": "Steueranbieter"
+      }
+    },
+    "dialogs": {
+      "store-delete": {
+        "title": "Bestätigung löschen",
+        "message": "Sind Sie sicher, dass Sie diesen Shop löschen wollen?"
+      },
+      "store-save": {
+        "title": "Änderungen speichern",
+        "message": "Der Shop wurde geändert. Möchten Sie die Änderungen speichern?"
+      }
+    },
+    "commands": {
+      "login-on-behalf": "Einloggen im Namens von"
+    }
+  }
+}

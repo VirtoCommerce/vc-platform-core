@@ -26,7 +26,8 @@ namespace VirtoCommerce.InventoryModule.Web
         {
             var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
             serviceCollection.AddTransient<IInventoryRepository, InventoryRepositoryImpl>();
-            serviceCollection.AddDbContext<InventoryDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce.Inventory")));
+            var connectionString = configuration.GetConnectionString("VirtoCommerce.Inventory") ?? configuration.GetConnectionString("VirtoCommerce");
+            serviceCollection.AddDbContext<InventoryDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddSingleton<Func<IInventoryRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IInventoryRepository>());
             serviceCollection.AddSingleton<IInventoryService, InventoryServiceImpl>();
             serviceCollection.AddSingleton<IInventorySearchService, InventorySearchService>();

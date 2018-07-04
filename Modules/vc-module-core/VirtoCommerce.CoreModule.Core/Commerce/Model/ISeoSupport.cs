@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.Domain.Commerce.Model
+namespace VirtoCommerce.CoreModule.Core.Commerce.Model
 {
     public interface ISeoSupport : IEntity
     {
