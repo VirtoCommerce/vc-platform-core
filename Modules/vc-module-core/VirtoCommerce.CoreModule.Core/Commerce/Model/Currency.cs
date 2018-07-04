@@ -1,7 +1,10 @@
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.Domain.Commerce.Model
+namespace VirtoCommerce.CoreModule.Core.Commerce.Model
 {
+    /// <summary>
+    /// Currency
+    /// </summary>
     public class Currency : ValueObject
     {
         /// <summary>

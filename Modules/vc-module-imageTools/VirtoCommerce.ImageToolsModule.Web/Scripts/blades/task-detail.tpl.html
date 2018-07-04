@@ -1,0 +1,58 @@
+﻿<div class="blade-content __medium-wide">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form name="detailForm">
+                <fieldset ng-init="setForm(detailForm)">
+
+                    <div class="form-group clearfix">
+                        <div class="column">
+                            <div class="form-group __info list">
+                                <label class="form-label">{{ 'imageTools.blades.task-detail.labels.name' | translate }}</label>
+                                <div class="form-input">
+                                    <input ng-class="{'error': detailForm.name.$invalid && !detailForm.name.$pristine}" required placeholder="{{ 'imageTools.blades.task-detail.placeholders.name' | translate }}" class="form-control" ng-model="blade.currentEntity.name" name="name" type="text" />
+                                </div>
+                                <div class="list-descr">{{ 'imageTools.blades.task-detail.descriptions.name' | translate }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="column">
+                            <div class="form-group __info list">
+                                <label class="form-label">{{ 'imageTools.blades.task-detail.labels.path-images' | translate }}</label>
+                                <div class="form-input __file">
+                                    <input ng-model="blade.currentEntity.workPath" required placeholder="{{ 'imageTools.blades.task-detail.placeholders.path-images' | translate }}" tabindex="-1">
+                                    <button class="btn __file" type="button" ng-click="blade.openFolderPath()" title="Add image by URL">
+                                        <i class="btn-ico fa fa-folder-open-o"></i>
+                                    </button>
+                                </div>
+                                <div class="list-descr">{{ 'imageTools.blades.task-detail.descriptions.path-images' | translate }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group clearfix">
+
+                        <div class="column">
+                            <div class="form-group __info list">
+                                <div class="form-input">
+                                    <label class="form-label">{{ 'imageTools.blades.task-detail.labels.thumbnail-settings' | translate }} <a href="" ng-click="blade.openSettingManagement()" class="form-edit" va-permission="customer:read"><i class="form-ico fa fa-pencil"></i></a></label>
+                                    <div class="form-input">
+                                        <ui-select multiple ng-model="blade.currentEntity.thumbnailOptions" required>
+                                            <ui-select-match placeholder="{{ 'imageTools.blades.task-detail.placeholders.thumbnail-settings' | translate }}">{{$item.name}}</ui-select-match>
+                                            <ui-select-choices repeat="option in blade.optionList | filter: {name: $select.search} | orderBy: 'name'">
+                                                <span ng-bind-html="option.name | highlight: $select.search"></span>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                    <div class="list-descr">{{ 'imageTools.blades.task-detail.descriptions.thumbnail-settings' | translate }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>

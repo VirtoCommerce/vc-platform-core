@@ -1,4 +1,4 @@
-﻿angular.module('platformWebApp')
+angular.module('platformWebApp')
 .controller('platformWebApp.exportImport.importMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'FileUploader', function ($scope, bladeNavigationService, exportImportResourse, FileUploader) {
     var blade = $scope.blade;
     blade.updatePermission = 'platform:exportImport:import';
@@ -26,7 +26,21 @@
         exportImportResourse.runImport($scope.importRequest,
             function (data) { blade.notification = data; blade.isLoading = false; },
             function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+
+        blade.toolbarCommands.splice(0, 2, commandCancel);
     }
+
+    var commandCancel = {
+        name: 'platform.commands.cancel',
+        icon: 'fa fa-times',
+        canExecuteMethod: function () {
+            return blade.notification && !blade.notification.finished;
+        },
+        executeMethod: function () {
+            exportImportResourse.taskCancel({ jobId: blade.notification.jobId }, null, function (data) {
+            });
+        }
+    };
 
     $scope.updateModuleSelection = function () {
         var selection = _.where($scope.importRequest.exportManifest.modules, { isChecked: true });

@@ -1,0 +1,211 @@
+﻿{
+  "stores": {
+    "main-menu-title": "Магазины",
+    "blades": {
+      "stores-list": {
+        "title": "Магазины",
+        "labels": {
+          "no-stores": "Пока нет магазинов",
+          "name": "Название"
+        }
+      },
+      "paymentMethod-detail": {
+        "subtitle": "Изменить способ оплаты",
+        "labels": {
+          "is-active": "Активен",
+          "is-partial-payments-available": "Доступны частичные платежи",
+          "name": "Название",
+          "code": "Код",
+          "description": "Описание",
+          "settings": "Настройки"
+        },
+        "placeholders": {
+          "description": "Введите описание"
+        }
+      },
+      "paymentMethod-list": {
+        "subtitle": "Изменить способ оплаты",
+        "labels": {
+          "is-active": "Активен",
+          "payment-method": "Способ оплаты",
+          "note": "Укажите порядок отображения способов оплаты в интернет-магазине. Перетащите элементы, чтобы изменить порядок"
+        },
+        "placeholders": {
+          "description": "Введите описание"
+        }
+      },
+      "shippingMethod-detail": {
+        "subtitle": "Изменить метод доставки",
+        "labels": {
+          "is-active": "Активен",
+          "name": "Название",
+          "code": "Код",
+          "tax-type": "Тип налога",
+          "description": "Описание",
+          "settings": "Настройки"
+        },
+        "placeholders": {
+          "tax-type": "Выбрать...",
+          "description": "Введите описание"
+        }
+      },
+      "shippingMethod-list": {
+        "subtitle": "",
+        "labels": {
+          "is-active": "Активен",
+          "shipping-method": "Метод доставки",
+          "note": "Укажите порядок отображения методов доставки в интернет-магазине. Перетащите элементы, чтобы изменить порядок"
+        }
+      },
+      "store-advanced": {
+        "subtitle": "",
+        "labels": {
+          "description": "Описание",
+          "store-url": "URL-адрес магазина",
+          "secure-url": "Защищенный URL",
+          "store-country": "Страна",
+          "store-region": "Регион",
+          "store-email": "Электронный адрес магазина",
+          "store-admin-email": "Электронный адрес администратора магазина",
+          "fulfillment-center": "Фулфилмент-центр",
+          "returns-fulfillment-center": "Вернуть Фулфилмент-центры",
+          "additional-fulfillment-centers": "Фулфилмент-центры",
+          "additional-returns-fulfillment-centers": "Вернуть Фулфилмент-центры",
+          "operational-timezone": "Операционный часовой пояс"
+        },
+        "placeholders": {
+          "description": "Введите описание",
+          "store-url": "Введите URL",
+          "secure-url": "Введите защищенный URL",
+          "store-country": "Выбрать ...",
+          "store-region": "Введите регион",
+          "store-email": "Введите значение",
+          "store-admin-email": "Введите значение",
+          "fulfillment-center": "Выбрать...",
+          "returns-fulfillment-center": "Выбрать...",
+          "operational-timezone": "Выбрать..."
+        }
+      },
+      "store-detail": {
+        "subtitle": "Информация о магазине",
+        "labels": {
+          "code": "Код",
+          "name": "Название",
+          "catalog": "Каталог",
+          "state": "Состояние",
+          "default-language": "Язык по умолчанию",
+          "additional-languages": "Дополнительные языки",
+          "default-currency": "Валюта по умолчанию",
+          "additional-currencies": "Дополнительные валюты",
+          "linked-stores": "Связанные магазины (Здесь покупатели могут использовать их учетные данные)"
+        },
+        "placeholders": {
+          "code": "Введите код",
+          "name": "Введите название",
+          "catalog": "Выбрать...",
+          "state": "Выбрать...",
+          "default-language": "Выбрать...",
+          "additional-languages": "Выбрать...",
+          "default-currency": "Выбрать...",
+          "additional-currencies": "Выбрать...",
+          "linked-stores": "Нет связанных с этим магазинов"
+        },
+        "descriptions": {
+          "code": "Будет использован как первичный ключ магазина и на сторефронте как часть пути (чтобы определить выбранный магазин)",
+          "name": "Отображаемое название магазина для представления в менеджере",
+          "catalog": "Физические или виртуальный каталог, связанный с этим магазином",
+          "state": "Текущее состояние магазина",
+          "default-language": "Основной язык для этого магазина",
+          "default-currency": "Основная валюта для этого магазина"
+        } 
+      },
+      "new-store-wizard": {
+        "title": "Новый Магазин",
+        "subtitle": "Создать новый Магазин"
+      },
+      "taxProvider-detail": {
+        "subtitle": "Изменить провайдера налогов",
+        "labels": {
+          "name": "Название",
+          "code": "Код",
+          "description": "Описание",
+          "settings": "Настройки"
+        },
+        "placeholders": {
+          "description": "Введите описание"
+        }
+      },
+      "taxProvider-list": {
+        "subtitle": "",
+        "labels": {
+          "is-active": "Активен",
+          "tax-provider": "Провайдер налогов"
+        }
+      },
+      "loginOnBehalf-list": {
+        "title": "Войти как {{name}}",
+        "labels": {
+          "pick-store-to-login": "Выберите Магазин для входа в систему",
+          "no-stores": "Пока нет Магазинов"
+        },
+        "validations": {
+          "secure-url-missing": "Отсутствует защищенный URL. Нажмите для просмотра информации о Магазине.",
+          "default-language-missing": "Язык по умолчанию отсутствует. Нажмите для просмотра информации о Магазине."
+        }
+      },
+      "account-detail": {
+        "labels": {
+          "container-id": "Хранилище (магазин)"
+        }
+      }
+    },
+    "widgets": {
+      "assetsWidget": {
+        "title": "Ресурсы"
+      },
+      "storeAdvancedWidget": {
+        "title": "Дополнительные свойства",
+        "blade-subtitle": "Дополнительные свойства"
+      },
+      "storeNotificationsLogWidget": {
+        "title": "Журнал уведомлений",
+        "blade-subtitle": "Журнал уведомлений",
+        "blade-title": "Журнал отправки уведомлений Магазина {{id}}"
+      },
+      "storeNotificationsWidget": {
+        "title": "Уведомление",
+        "blade-subtitle": "Служба уведомлений",
+        "blade-title": "Список уведомлений Магазина {{id}}"
+      },
+      "storePaymentsWidget": {
+        "title": "Способы оплаты",
+        "blade-subtitle": "Способы оплаты"
+      },
+      "storeSettingsWidget": {
+        "title": "Настройки",
+        "blade-subtitle": "Настройки"
+      },
+      "storeShippingWidget": {
+        "title": "Способы доставки",
+        "blade-subtitle": "Способы доставки"
+      },
+      "storeTaxingWidget": {
+        "title": "Провайдеры налогов",
+        "blade-subtitle": "Провайдеры налогов"
+      }
+    },
+    "dialogs": {
+      "store-delete": {
+        "title": "Подтверждение удаления",
+        "message": "Вы уверены, что хотите удалить данный Магазин?"
+      },
+      "store-save": {
+        "title": "Сохранение изменений",
+        "message": "Магазин был изменен. Вы хотите сохранить изменения?"
+      }
+    },
+    "commands": {
+      "login-on-behalf": "Вход от имени"
+    }
+  }
+}
