@@ -4,13 +4,15 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using VirtoCommerce.ImageToolsModule.Core.ExportImport;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.ImageToolsModule.Core.Services;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 
-namespace VirtoCommerce.ImageToolsModule.Web.ExportImport
+namespace VirtoCommerce.ImageToolsModule.Data.ExportImport
 {
-    public class ThumbnailsExportImport
+    public class ThumbnailsExportImport : IExportSupport, IImportSupport
     {
         private readonly IThumbnailTaskSearchService _taskSearchService;
         private readonly IThumbnailOptionSearchService _optionSearchService;
@@ -29,26 +31,30 @@ namespace VirtoCommerce.ImageToolsModule.Web.ExportImport
             _taskService = taskService;
             _optionService = optionService;
 
-            _serializer = new JsonSerializer();
-            _serializer.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            _serializer.Formatting = Formatting.Indented;
-            _serializer.NullValueHandling = NullValueHandling.Ignore;
+            _serializer = new JsonSerializer
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                Formatting = Formatting.Indented,
+                NullValueHandling = NullValueHandling.Ignore
+            };
         }
 
-        public void DoExport(Stream outStream, PlatformExportManifest manifest,
-            Action<ExportImportProgressInfo> progressCallback)
+        public async Task ExportAsync(Stream outStream, ExportImportOptions exportOptions, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
+            var moduleExportOptions = exportOptions as ThumbnailExportImportOptions;
+            cancellationToken.ThrowIfCancellationRequested();
+
             var progressInfo = new ExportImportProgressInfo { Description = "loading data..." };
             progressCallback(progressInfo);
 
-            using (StreamWriter sw = new StreamWriter(outStream, Encoding.UTF8))
+            using (var sw = new StreamWriter(outStream, Encoding.UTF8))
             {
-                using (JsonTextWriter writer = new JsonTextWriter(sw))
+                using (var writer = new JsonTextWriter(sw))
                 {
                     writer.WriteStartObject();
 
-                    ExportOptions(writer, _serializer, manifest, progressInfo, progressCallback);
-                    ExportTasksAsync(writer, _serializer, manifest, progressInfo, progressCallback);
+                    await ExportOptions(writer, _serializer, progressInfo, progressCallback, cancellationToken);
+                    await ExportTasksAsync(writer, _serializer, progressInfo, progressCallback, cancellationToken);
 
                     writer.WriteEndObject();
                     writer.Flush();
@@ -56,9 +62,10 @@ namespace VirtoCommerce.ImageToolsModule.Web.ExportImport
             }
         }
 
-        private async Task ExportOptions(JsonTextWriter writer, JsonSerializer serializer, PlatformExportManifest manifest,
-            ExportImportProgressInfo progressInfo, Action<ExportImportProgressInfo> progressCallback)
+        private async Task ExportOptions(JsonTextWriter writer, JsonSerializer serializer, ExportImportProgressInfo progressInfo, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             progressInfo.Description = "Exporting options...";
             progressCallback(progressInfo);
 
@@ -73,7 +80,7 @@ namespace VirtoCommerce.ImageToolsModule.Web.ExportImport
 
             for (int i = 0; i < totalCount; i += _batchSize)
             {
-                var options =  await _optionSearchService.SearchAsync(new ThumbnailOptionSearchCriteria { Take = _batchSize, Skip = i });
+                var options = await _optionSearchService.SearchAsync(new ThumbnailOptionSearchCriteria { Take = _batchSize, Skip = i });
 
                 foreach (var option in options.Results)
                 {
@@ -88,9 +95,10 @@ namespace VirtoCommerce.ImageToolsModule.Web.ExportImport
             writer.WriteEndArray();
         }
 
-        private async Task ExportTasksAsync(JsonTextWriter writer, JsonSerializer serializer, PlatformExportManifest manifest,
-            ExportImportProgressInfo progressInfo, Action<ExportImportProgressInfo> progressCallback)
+        private async Task ExportTasksAsync(JsonTextWriter writer, JsonSerializer serializer, ExportImportProgressInfo progressInfo, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             progressInfo.Description = "Exporting tasks...";
             progressCallback(progressInfo);
 
@@ -121,13 +129,16 @@ namespace VirtoCommerce.ImageToolsModule.Web.ExportImport
         }
 
 
-        public void DoImport(Stream inputStream, PlatformExportManifest manifest,
-            Action<ExportImportProgressInfo> progressCallback)
+        public async Task ImportAsync(Stream inputStream, ExportImportOptions importOptions, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
+            var moduleImportOptions = importOptions as ThumbnailExportImportOptions;
+
+            cancellationToken.ThrowIfCancellationRequested();
+
             var progressInfo = new ExportImportProgressInfo();
-            using (StreamReader streamReader = new StreamReader(inputStream))
+            using (var streamReader = new StreamReader(inputStream))
             {
-                using (JsonTextReader jsonReader = new JsonTextReader(streamReader))
+                using (var jsonReader = new JsonTextReader(streamReader))
                 {
                     while (jsonReader.Read())
                     {
@@ -141,14 +152,14 @@ namespace VirtoCommerce.ImageToolsModule.Web.ExportImport
                                 var options = _serializer.Deserialize<ThumbnailOption[]>(jsonReader);
                                 progressInfo.Description = $"Importing {options.Length} options...";
                                 progressCallback(progressInfo);
-                                _optionService.SaveOrUpdateAsync(options);
+                                await _optionService.SaveOrUpdateAsync(options);
                                 break;
                             case "Tasks":
                                 jsonReader.Read();
                                 var tasks = _serializer.Deserialize<ThumbnailTask[]>(jsonReader);
                                 progressInfo.Description = $"Importing {tasks.Length} tasks...";
                                 progressCallback(progressInfo);
-                                _taskService.SaveChangesAsync(tasks);
+                                await _taskService.SaveChangesAsync(tasks);
                                 break;
                         }
                     }

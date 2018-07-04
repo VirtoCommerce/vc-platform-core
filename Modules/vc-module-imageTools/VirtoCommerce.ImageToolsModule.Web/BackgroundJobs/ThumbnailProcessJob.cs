@@ -105,7 +105,7 @@ namespace VirtoCommerce.ImageToolsModule.Web.BackgroundJobs
                 task.LastRun = DateTime.UtcNow;
             }
 
-            _taskService.SaveChangesAsync(tasks.Results);
+            await _taskService.SaveChangesAsync(tasks.Results);
         }
     }
 }

@@ -1,5 +1,7 @@
 using System;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,14 +11,15 @@ using Microsoft.Extensions.Options;
 using VirtoCommerce.CoreModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.Platform.Core.Bus;
-using VirtoCommerce.Platform.Core.ChangeLog;
+using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.Platform.Core.Security.Events;
 using VirtoCommerce.StoreModule.Core;
 using VirtoCommerce.StoreModule.Core.Events;
 using VirtoCommerce.StoreModule.Core.Notifications;
 using VirtoCommerce.StoreModule.Core.Services;
+using VirtoCommerce.StoreModule.Data.ExportImport;
 using VirtoCommerce.StoreModule.Data.Handlers;
 using VirtoCommerce.StoreModule.Data.Repositories;
 using VirtoCommerce.StoreModule.Data.Services;
@@ -24,9 +27,10 @@ using VirtoCommerce.StoreModule.Web.JsonConverters;
 
 namespace VirtoCommerce.StoreModule.Web
 {
-    public class Module : IModule
+    public class Module : IModule, IExportSupport, IImportSupport
     {
         public ManifestModuleInfo ModuleInfo { get; set; }
+        private IApplicationBuilder _appBuilder;
         public void Initialize(IServiceCollection serviceCollection)
         {
             var snapshot = serviceCollection.BuildServiceProvider();
@@ -37,14 +41,16 @@ namespace VirtoCommerce.StoreModule.Web
             serviceCollection.AddSingleton<Func<IStoreRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IStoreRepository>());
             serviceCollection.AddSingleton<IStoreService, StoreServiceImpl>();
             serviceCollection.AddSingleton<IStoreSearchService, StoreSearchServiceImpl>();
-
+            serviceCollection.AddSingleton<StoreExportImport>();
             serviceCollection.AddSingleton<StoreChangedEventHandler>();
 
-            
+
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
+            _appBuilder = appBuilder;
+
             ModuleInfo.Settings.Add(new ModuleSettingsGroup
             {
                 Name = "Store|General",
@@ -87,6 +93,16 @@ namespace VirtoCommerce.StoreModule.Web
 
         public void Uninstall()
         {
+        }
+
+        public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
+        {
+            await _appBuilder.ApplicationServices.GetRequiredService<StoreExportImport>().ExportAsync(outStream, options, progressCallback, cancellationToken);
+        }
+
+        public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
+        {
+            await _appBuilder.ApplicationServices.GetRequiredService<StoreExportImport>().ImportAsync(inputStream, options, progressCallback, cancellationToken);
         }
     }
 }

@@ -17857,103 +17857,6 @@ angular.module('platformWebApp')
 
     }]);
 
-angular.module("platformWebApp")
-.config(
-  ['$stateProvider', function ($stateProvider) {
-      $stateProvider
-          .state('workspace.modulesSettings', {
-              url: '/settings',
-              templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-              controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-                  var blade = {
-                      id: 'settings',
-                      title: 'platform.blades.settingGroup-list.title',
-                      //subtitle: 'Manage settings',
-                      controller: 'platformWebApp.settingGroupListController',
-                      template: '$(Platform)/Scripts/app/settings/blades/settingGroup-list.tpl.html',
-                      isClosingDisabled: true
-                  };
-                  bladeNavigationService.showBlade(blade);
-              }
-              ]
-          });
-  }]
-)
-.run(
-  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', function ($rootScope, mainMenuService, widgetService, $state) {
-      //Register module in main menu
-      var menuItem = {
-          path: 'configuration/settings',
-          icon: 'fa fa-gears',
-          title: 'platform.menu.settings',
-          priority: 1,
-          action: function () { $state.go('workspace.modulesSettings'); },
-          permission: 'platform:setting:access'
-      };
-      mainMenuService.addMenuItem(menuItem);
-  }])
-
-.factory('platformWebApp.settings.helper', [function () {
-    var retVal = {};
-
-    retVal.getSetting = function(settings, settingName) {
-        return _.findWhere(settings, { name: settingName });
-    };
-
-    retVal.fixValues = function (settings) {
-        // parse values as they all are strings
-        var selectedSettings = _.where(settings, { valueType: 'Integer' });
-        _.forEach(selectedSettings, function (setting) {
-            setting.value = parseInt(setting.value, 10);
-            if (setting.allowedValues) {
-                setting.allowedValues = _.map(setting.allowedValues, function (value) { return parseInt(value, 10); });
-            }
-        });
-
-        selectedSettings = _.where(settings, { valueType: 'Decimal' });
-        _.forEach(selectedSettings, function (setting) {
-            setting.value = parseFloat(setting.value);
-            if (setting.allowedValues) {
-                setting.allowedValues = _.map(setting.allowedValues, function (value) { return parseFloat(value); });
-            }
-        });
-
-        selectedSettings = _.where(settings, { valueType: 'Boolean' });
-        _.forEach(selectedSettings, function (setting) {
-            setting.value = setting.value && setting.value.toLowerCase() === 'true';
-            if (setting.allowedValues) {
-                setting.allowedValues = _.map(setting.allowedValues, function (value) { return value.toLowerCase() === 'true'; });
-            }
-        });
-
-        selectedSettings = _.where(settings, { isArray: true });
-        _.forEach(selectedSettings, function (setting) {
-            if (setting.arrayValues) {
-                setting.arrayValues = _.map(setting.arrayValues, function (x) { return { value: x }; });
-            }
-        });
-    };
-
-    retVal.toApiFormat = function (settings) {
-        var selectedSettings = _.where(settings, { isArray: true });
-        _.forEach(selectedSettings, function (setting) {
-            if (setting.arrayValues) {
-                setting.arrayValues = _.pluck(setting.arrayValues, 'value');
-            }
-        });
-    };
-
-    return retVal;
-}]);
-
-// dictionary Setting values management helper
-function DictionarySettingDetailBlade(settingName) {
-    this.id = 'dictionarySettingDetails';
-    this.currentEntityId = settingName;
-    this.isApiSave = true;
-    this.controller = 'platformWebApp.settingDictionaryController';
-    this.template = '$(Platform)/Scripts/app/settings/blades/setting-dictionary.tpl.html';
-}
 angular.module('platformWebApp')
     .config(['$stateProvider', '$httpProvider', function ($stateProvider, $httpProvider) {
         $stateProvider.state('loginDialog', {
@@ -18112,6 +18015,103 @@ angular.module('platformWebApp')
         }, 'accountDetail');
     }]);
 
+angular.module("platformWebApp")
+.config(
+  ['$stateProvider', function ($stateProvider) {
+      $stateProvider
+          .state('workspace.modulesSettings', {
+              url: '/settings',
+              templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+              controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+                  var blade = {
+                      id: 'settings',
+                      title: 'platform.blades.settingGroup-list.title',
+                      //subtitle: 'Manage settings',
+                      controller: 'platformWebApp.settingGroupListController',
+                      template: '$(Platform)/Scripts/app/settings/blades/settingGroup-list.tpl.html',
+                      isClosingDisabled: true
+                  };
+                  bladeNavigationService.showBlade(blade);
+              }
+              ]
+          });
+  }]
+)
+.run(
+  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', function ($rootScope, mainMenuService, widgetService, $state) {
+      //Register module in main menu
+      var menuItem = {
+          path: 'configuration/settings',
+          icon: 'fa fa-gears',
+          title: 'platform.menu.settings',
+          priority: 1,
+          action: function () { $state.go('workspace.modulesSettings'); },
+          permission: 'platform:setting:access'
+      };
+      mainMenuService.addMenuItem(menuItem);
+  }])
+
+.factory('platformWebApp.settings.helper', [function () {
+    var retVal = {};
+
+    retVal.getSetting = function(settings, settingName) {
+        return _.findWhere(settings, { name: settingName });
+    };
+
+    retVal.fixValues = function (settings) {
+        // parse values as they all are strings
+        var selectedSettings = _.where(settings, { valueType: 'Integer' });
+        _.forEach(selectedSettings, function (setting) {
+            setting.value = parseInt(setting.value, 10);
+            if (setting.allowedValues) {
+                setting.allowedValues = _.map(setting.allowedValues, function (value) { return parseInt(value, 10); });
+            }
+        });
+
+        selectedSettings = _.where(settings, { valueType: 'Decimal' });
+        _.forEach(selectedSettings, function (setting) {
+            setting.value = parseFloat(setting.value);
+            if (setting.allowedValues) {
+                setting.allowedValues = _.map(setting.allowedValues, function (value) { return parseFloat(value); });
+            }
+        });
+
+        selectedSettings = _.where(settings, { valueType: 'Boolean' });
+        _.forEach(selectedSettings, function (setting) {
+            setting.value = setting.value && setting.value.toLowerCase() === 'true';
+            if (setting.allowedValues) {
+                setting.allowedValues = _.map(setting.allowedValues, function (value) { return value.toLowerCase() === 'true'; });
+            }
+        });
+
+        selectedSettings = _.where(settings, { isArray: true });
+        _.forEach(selectedSettings, function (setting) {
+            if (setting.arrayValues) {
+                setting.arrayValues = _.map(setting.arrayValues, function (x) { return { value: x }; });
+            }
+        });
+    };
+
+    retVal.toApiFormat = function (settings) {
+        var selectedSettings = _.where(settings, { isArray: true });
+        _.forEach(selectedSettings, function (setting) {
+            if (setting.arrayValues) {
+                setting.arrayValues = _.pluck(setting.arrayValues, 'value');
+            }
+        });
+    };
+
+    return retVal;
+}]);
+
+// dictionary Setting values management helper
+function DictionarySettingDetailBlade(settingName) {
+    this.id = 'dictionarySettingDetails';
+    this.currentEntityId = settingName;
+    this.isApiSave = true;
+    this.controller = 'platformWebApp.settingDictionaryController';
+    this.template = '$(Platform)/Scripts/app/settings/blades/setting-dictionary.tpl.html';
+}
 angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
 	$stateProvider
@@ -22646,6 +22646,17 @@ angular.module('platformWebApp')
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["公元前","公元"],ERAS:["BC","AD"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"d/M/yy ah:mm",shortDate:"d/M/yy",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-hk",pluralCat:function(e,m){return E.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["西元前","西元"],ERAS:["西元前","西元"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日 EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"y/M/d ah:mm",shortDate:"y/M/d",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"NT$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-tw",pluralCat:function(e,m){return E.OTHER}})}]);
 angular.module('platformWebApp')
+.factory('platformWebApp.assets.api', ['$resource', function ($resource) {
+    return $resource('api/platform/assets', {}, {
+        search: { method: 'GET', url: 'api/platform/assets', isArray: false },
+        createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
+        move: { method: 'POST', url: 'api/platform/assets/move' },
+        uploadFromUrl: { method: 'POST', params: { url: '@url', folderUrl: '@folderUrl', name: '@name' }, isArray: true }
+    });
+}]);
+
+
+angular.module('platformWebApp')
     .controller('platformWebApp.assets.assetListController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', '$sessionStorage', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
         function ($scope, assets, bladeNavigationService, dialogService, $storage, bladeUtils, uiGridHelper) {
             var blade = $scope.blade;
@@ -23115,17 +23126,6 @@ angular.module('platformWebApp')
         initialize();
         blade.isLoading = false;
     }]);
-
-angular.module('platformWebApp')
-.factory('platformWebApp.assets.api', ['$resource', function ($resource) {
-    return $resource('api/platform/assets', {}, {
-        search: { method: 'GET', url: 'api/platform/assets', isArray: false },
-        createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
-        move: { method: 'POST', url: 'api/platform/assets/move' },
-        uploadFromUrl: { method: 'POST', params: { url: '@url', folderUrl: '@folderUrl', name: '@name' }, isArray: true }
-    });
-}]);
-
 
 angular.module('platformWebApp')
 .controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
@@ -23857,7 +23857,8 @@ angular.module('platformWebApp')
 
 }]);
 angular.module('platformWebApp')
-.controller('platformWebApp.exportImport.exportMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'platformWebApp.authService', function ($scope, bladeNavigationService, exportImportResourse, authService) {
+    .controller('platformWebApp.exportImport.exportMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'platformWebApp.authService', 'platformWebApp.toolbarService', function ($scope, bladeNavigationService, exportImportResourse, authService, toolbarService
+) {
     var blade = $scope.blade;
     blade.headIcon = 'fa-upload';
     blade.title = 'platform.blades.export-main.title';
@@ -23889,11 +23890,28 @@ angular.module('platformWebApp')
         $scope.exportRequest.modules = _.pluck(selection, 'id');
     };
 
-    $scope.startExport = function () {
+    $scope.startExport = function() {
         blade.isLoading = true;
         exportImportResourse.runExport($scope.exportRequest,
-            function (data) { blade.notification = data; blade.isLoading = false; });
-    }
+            function(data) {
+                blade.notification = data;
+                blade.isLoading = false;
+            });
+
+        blade.toolbarCommands.splice(0, 2, commandCancel);
+    };
+
+    var commandCancel = {
+        name: 'platform.commands.cancel',
+        icon: 'fa fa-times',
+        canExecuteMethod: function () {
+            return blade.notification && !blade.notification.finished;
+        },
+        executeMethod: function () {
+            exportImportResourse.taskCancel({ jobId: blade.notification.jobId }, null, function (data) {
+            });
+        }
+    };
 
     blade.toolbarCommands = [
 		{
@@ -23917,7 +23935,7 @@ angular.module('platformWebApp')
         $scope.updateModuleSelection();
     }
 
-    initializeBlade();
+        initializeBlade();
 }]);
 
 angular.module('platformWebApp')
@@ -23977,7 +23995,21 @@ angular.module('platformWebApp')
         exportImportResourse.runImport($scope.importRequest,
             function (data) { blade.notification = data; blade.isLoading = false; },
             function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+
+        blade.toolbarCommands.splice(0, 2, commandCancel);
     }
+
+    var commandCancel = {
+        name: 'platform.commands.cancel',
+        icon: 'fa fa-times',
+        canExecuteMethod: function () {
+            return blade.notification && !blade.notification.finished;
+        },
+        executeMethod: function () {
+            exportImportResourse.taskCancel({ jobId: blade.notification.jobId }, null, function (data) {
+            });
+        }
+    };
 
     $scope.updateModuleSelection = function () {
         var selection = _.where($scope.importRequest.exportManifest.modules, { isChecked: true });
@@ -24065,16 +24097,20 @@ angular.module('platformWebApp')
 angular.module('platformWebApp')
 .factory('platformWebApp.exportImport.resource', ['$resource', function ($resource) {
 
-    return $resource(null, null, {
-    	getNewExportManifest: { url: 'api/platform/export/manifest/new' },
-        runExport: { method: 'POST', url: 'api/platform/export' },
+    return $resource(null, {},
+        {
+            getNewExportManifest: { url: 'api/platform/export/manifest/new' },
+            runExport: { method: 'POST', url: 'api/platform/export' },
 
-        loadExportManifest: { url: 'api/platform/export/manifest/load' },
-        runImport: { method: 'POST', url: 'api/platform/import' },
-        sampleDataDiscover: { url: 'api/platform/sampledata/discover', isArray: true },
-        importSampleData: { method: 'POST', url: 'api/platform/sampledata/import', params: { url: '@url' } }
-    });
+            loadExportManifest: { url: 'api/platform/export/manifest/load' },
+            runImport: { method: 'POST', url: 'api/platform/import' },
+            sampleDataDiscover: { url: 'api/platform/sampledata/discover', isArray: true },
+            importSampleData: { method: 'POST', url: 'api/platform/sampledata/import', params: { url: '@url' } },
+
+            taskCancel: { method: 'POST', url: 'api/platform/exortimport/tasks/:jobId/cancel'}
+        });
 }]);
+
 angular.module('platformWebApp')
 .factory('platformWebApp.jobs', ['$resource', function ($resource) {
 
@@ -26303,555 +26339,6 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
-.controller('platformWebApp.entitySettingListController', ['$scope', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', function ($scope, settingsHelper, bladeNavigationService) {
-    var blade = $scope.blade;
-    // blade.updatePermission = // Use predefined (parent) permission
-    blade.title = 'platform.blades.entitySetting-list.title';
-
-    function initializeBlade(results) {
-        blade.data = results;
-        results = angular.copy(results);
-
-        // settingsHelper.fixValues(results);
-        
-        _.each(results, function (setting) {
-            // set group names to show.
-            if (setting.groupName) {
-                var paths = setting.groupName.split('|');
-                setting.groupName = paths.pop();
-            }
-
-            // transform to va-generic-value-input suitable structure
-            setting.isDictionary = _.any(setting.allowedValues);
-            setting.values = setting.isDictionary ? [{ value: { id: setting.value, name: setting.value } }] : [{ id: setting.value, value: setting.value }];
-            if (setting.allowedValues) {
-                setting.allowedValues = _.map(setting.allowedValues, function (x) {
-                    return { id: x, name: x };
-                });
-            }
-        });
-
-
-        results = _.groupBy(results, 'groupName');
-        blade.groupNames = _.keys(results);
-        blade.currentEntities = angular.copy(results);
-        blade.origEntity = results;
-        blade.isLoading = false;
-    }
-
-    $scope.editArray = function (node) {
-        var newBlade = {
-            id: "settingDetailChild",
-            currentEntityId: node.name,
-            controller: 'platformWebApp.settingDictionaryController',
-            template: '$(Platform)/Scripts/app/settings/blades/setting-dictionary.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, blade);
-    }
-
-    function isDirty() {
-        return !angular.equals(blade.currentEntities, blade.origEntity) && blade.hasUpdatePermission();
-    }
-
-    function canSave() {
-        return isDirty() && formScope && formScope.$valid;
-    }
-
-    var formScope;
-    $scope.setForm = function (form) { formScope = form; }
-
-    $scope.cancelChanges = function () {
-        angular.copy(blade.origEntity, blade.currentEntities);
-        $scope.bladeClose();
-    }
-
-    $scope.saveChanges = function () {
-        if (!blade.hasUpdatePermission()) return;
-
-        blade.isLoading = true;
-        var objects = _.flatten(_.map(blade.currentEntities, _.values));
-        objects = _.map(objects, function (x) {
-            x.value = x.isDictionary ? x.values[0].value.id : x.values[0].value;
-            x.values = undefined;
-            x.allowedValues = _.pluck(x.allowedValues, 'id');
-            return x;
-        });
-
-        //settingsHelper.toApiFormat(objects);
-        
-        //console.log('saveChanges3: ' + angular.toJson(objects, true));
-        angular.copy(objects, blade.data);
-        angular.copy(blade.currentEntities, blade.origEntity);
-        $scope.bladeClose();
-    };
-
-    blade.headIcon = 'fa-wrench';
-    blade.isSavingToParentObject = true;
-    blade.toolbarCommands = [
-        {
-            name: "platform.commands.reset", icon: 'fa fa-undo',
-            executeMethod: function () {
-                blade.currentEntities = angular.copy(blade.origEntity);
-            },
-            canExecuteMethod: isDirty,
-            permission: blade.updatePermission
-        }
-    ];
-
-    blade.onClose = function (closeCallback) {
-        bladeNavigationService.showConfirmationIfNeeded(isDirty(), canSave(), blade, $scope.saveChanges, closeCallback, "platform.dialogs.settings-save.title", "platform.dialogs.settings-save.message");
-    };
-
-    $scope.getDictionaryValues = function (setting, callback) {
-        callback(setting.allowedValues);
-    };
-
-    // actions on load
-    $scope.$watch('blade.parentBlade.currentEntity.settings', initializeBlade);
-}]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.settingDictionaryController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', function ($scope, dialogService, bladeNavigationService, settings) {
-    var blade = $scope.blade;
-    blade.updatePermission = 'platform:setting:update';
-    var currentEntities;
-
-    blade.refresh = function (parentRefresh) {
-        settings.get({ id: blade.currentEntityId }, function (setting) {
-            if (parentRefresh && blade.parentRefresh) {
-                blade.parentRefresh(setting.arrayValues);
-            }
-
-            setting.arrayValues = _.map(setting.arrayValues, function (x) { return { value: x }; });
-            blade.origEntity = angular.copy(setting.arrayValues);
-            initializeBlade(setting);
-        });
-    }
-
-    function initializeBlade(data) {
-        blade.title = data.title;
-        blade.currentEntity = data;
-        currentEntities = blade.currentEntity.arrayValues;
-        blade.isLoading = false;
-    }
-
-    $scope.dictValueValidator = function (value) {
-        if (blade.currentEntity) {
-            if (blade.currentEntity.valueType == 'ShortText') {
-                return _.all(currentEntities, function (item) { return angular.lowercase(item.value) !== angular.lowercase(value); });
-            } else {
-                return _.all(currentEntities, function (item) { return item.value !== value; });
-            }
-        }
-        return false;
-    };
-
-    $scope.add = function (form) {
-        if (form.$valid) {
-            currentEntities.push($scope.newValue);
-            resetNewValue();
-            form.$setPristine();
-        }
-    };
-
-    $scope.delete = function (index) {
-        currentEntities.splice(index, 1);
-        $scope.selectedItem = undefined;
-    };
-
-    $scope.selectItem = function (listItem) {
-        $scope.selectedItem = listItem;
-    };
-
-    blade.headIcon = 'fa-wrench';
-    blade.subtitle = 'platform.blades.setting-dictionary.subtitle';
-    blade.toolbarCommands = [
-     {
-         name: "platform.commands.delete", icon: 'fa fa-trash-o',
-         executeMethod: function () {
-             deleteChecked();
-         },
-         canExecuteMethod: function () {
-             return isItemsChecked();
-         }
-     }
-    ];
-
-    if (blade.isApiSave) {
-        var formScope;
-        $scope.setForm = function (form) {
-            formScope = form;
-        }
-
-        function isDirty() {
-            return !angular.equals(currentEntities, blade.origEntity) && blade.hasUpdatePermission();
-        };
-
-        function saveChanges() {
-            blade.selectedAll = false;
-            blade.isLoading = true;
-            blade.currentEntity.arrayValues = _.pluck(blade.currentEntity.arrayValues, 'value');
-
-            settings.update(null, [blade.currentEntity], blade.refresh,
-                function (error) { bladeNavigationService.setError('Error ' + error.status, $scope.blade); });
-        };
-
-        blade.toolbarCommands.splice(0, 0,
-        {
-            name: "platform.commands.save",
-            icon: 'fa fa-save',
-            executeMethod: function () {
-                saveChanges();
-            },
-            canExecuteMethod: function () {
-                return isDirty() && formScope && formScope.$valid;
-            }
-        },
-        {
-            name: "platform.commands.reset",
-            icon: 'fa fa-undo',
-            executeMethod: function () {
-                angular.copy(blade.origEntity, currentEntities);
-                blade.selectedAll = false;
-            },
-            canExecuteMethod: isDirty,
-        });
-        blade.refresh();
-    } else {
-        $scope.$watch('blade.parentBlade.currentEntities', function (data) {
-            if (data) {
-                var allEntities = _.flatten(_.map(data, _.values));
-                initializeBlade(_.findWhere(allEntities, { name: blade.currentEntityId }));
-            }
-        });
-    }
-
-    $scope.checkAll = function () {
-        angular.forEach(currentEntities, function (item) {
-            item._selected = blade.selectedAll;
-        });
-    };
-
-    function resetNewValue() {
-        $scope.newValue = { value: null };
-    }
-
-    function isItemsChecked() {
-        return _.any(currentEntities, function (x) { return x._selected; });
-    }
-
-    function deleteChecked() {
-        //var dialog = {
-        //    id: "confirmDeleteItem",
-        //    title: "platform.dialogs.settings-value-delete.title",
-        //    message: "platform.dialogs.settings-value-delete.message",
-        //    callback: function (remove) {
-        //        if (remove) {
-        var selection = _.where(currentEntities, { _selected: true });
-        angular.forEach(selection, function (listItem) {
-            $scope.delete(currentEntities.indexOf(listItem));
-        });
-        //        }
-        //    }
-        //}
-        //dialogService.showConfirmationDialog(dialog);
-    }
-
-    // on load
-    resetNewValue();
-}]);
-angular.module('platformWebApp')
-.controller('platformWebApp.settingGroupListController', ['$window', 'platformWebApp.modules', '$scope', 'platformWebApp.settings', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService',
-function ($window, modules, $scope, settings, bladeNavigationService, dialogService) {
-    var settingsTree;
-    var blade = $scope.blade;
-
-    blade.refresh = function (disableOpenAnimation) {
-        blade.isLoading = true;
-
-        settings.query({}, function (results) {
-            blade.allSettings = results;
-            settingsTree = {};
-            _.each(results, function (setting) {
-                var paths = (setting.groupName ? setting.groupName : 'General').split('|');
-                var lastParent = settingsTree;
-                var lastParentId = '';
-                _.each(paths, function (path, i) {
-                    lastParentId += '|' + path;
-                    if (!lastParent[path]) {
-                        var treeNode = { name: path, groupName: lastParentId.substring(1) }
-                        lastParent[path] = treeNode;
-                        if (setting.groupName && _.all(blade.allSettings, function (x) { return x.groupName !== treeNode.groupName; })) {
-                            blade.allSettings.push(treeNode);
-                        }
-                    }
-
-                    if (i < paths.length - 1) {
-                        if (!lastParent[path].children) {
-                            lastParent[path].children = {};
-                        }
-                        lastParent = lastParent[path].children;
-                    }
-                });
-            });
-
-            blade.isLoading = false;
-
-            // restore previous selection
-            if (blade.searchText) {
-                blade.currentEntities = settingsTree;
-            } else {
-                // reconstruct tree by breadCrumbs
-                var lastchildren = settingsTree;
-                for (var i = 1; i < blade.breadcrumbs.length; i++) {
-                    lastchildren = lastchildren[blade.breadcrumbs[i].name].children;
-                }
-                blade.currentEntities = lastchildren;
-            }
-
-            // open previous settings detail blade if possible
-            if ($scope.selectedNodeId) {
-                $scope.selectNode({ groupName: $scope.selectedNodeId }, disableOpenAnimation);
-            }
-        },
-        function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-    };
-
-    $scope.selectNode = function (node, disableOpenAnimation) {
-        bladeNavigationService.closeChildrenBlades(blade, function () {
-            $scope.selectedNodeId = node.groupName;
-            if (node.children) {
-                blade.searchText = null;
-                blade.currentEntities = node.children;
-
-                setBreadcrumbs(node);
-            } else {
-                var selectedSettings = _.filter(blade.allSettings, function (x) { return x.groupName === node.groupName || (node.groupName === 'General' && !x.groupName); });
-                var newBlade = {
-                    id: 'settingsSection',
-                    data: selectedSettings,
-                    title: 'platform.blades.settings-detail.title',
-                    disableOpenAnimation: disableOpenAnimation,
-                    controller: 'platformWebApp.settingsDetailController',
-                    template: '$(Platform)/Scripts/app/settings/blades/settings-detail.tpl.html'
-                };
-
-                bladeNavigationService.showBlade(newBlade, blade);
-            }
-        });
-    };
-
-    //Breadcrumbs
-    function setBreadcrumbs(node) {
-        blade.breadcrumbs.splice(1, blade.breadcrumbs.length - 1);
-
-        if (node.groupName) {
-            var lastParentId = '';
-            var lastchildren = settingsTree;
-            var paths = node.groupName.split('|');
-            _.each(paths, function (path) {
-                lastchildren = lastchildren[path].children;
-                lastParentId += '|' + path;
-                var breadCrumb = {
-                    id: lastParentId.substring(1),
-                    name: path,
-                    children: lastchildren,
-                    navigate: function () {
-                        $scope.selectNode({ groupName: this.id, children: this.children });
-                    }
-                };
-
-                blade.breadcrumbs.push(breadCrumb);
-            });
-        }
-    }
-
-    blade.breadcrumbs = [{
-        id: null,
-        name: "platform.navigation.bread-crumb-top",
-        navigate: function () {
-            $scope.selectNode({ groupName: null, children: settingsTree });
-        }
-    }];
-
-    blade.headIcon = 'fa-wrench';
-
-    $scope.$watch('blade.searchText', function (newVal) {
-        if (newVal) {
-            blade.currentEntities = settingsTree;
-            setBreadcrumbs({ groupName: null });
-        }
-    });
-
-    blade.toolbarCommands = [
-          {
-              name: "platform.commands.restart", icon: 'fa fa-bolt',
-              executeMethod: function () { restart(); },
-              canExecuteMethod: function () { return !blade.isLoading; },
-              permission: 'platform:module:manage'
-          }
-    ];
-
-    function restart() {
-        var dialog = {
-            id: "confirmRestart",
-            title: "platform.dialogs.app-restart.title",
-            message: "platform.dialogs.app-restart.message",
-            callback: function (confirm) {
-                if (confirm) {
-                    blade.isLoading = true;
-                    modules.restart(function () {
-                        $window.location.reload();
-                    });
-                }
-            }
-        }
-        dialogService.showConfirmationDialog(dialog);
-    }
-
-    // actions on load
-    blade.refresh();
-}]);
-angular.module('platformWebApp')
-.controller('platformWebApp.settingsDetailController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', function ($scope, dialogService, settingsHelper, bladeNavigationService, settings) {
-    var blade = $scope.blade;
-    blade.updatePermission = 'platform:setting:update';
-
-    blade.refresh = function () {
-        if (blade.moduleId && !blade.data) {
-            blade.isLoading = true;
-
-            settings.getSettings({ id: blade.moduleId }, initializeBlade);
-        } else {
-            initializeBlade(angular.copy(blade.data));
-        }
-    }
-
-    function initializeBlade(results) {
-        settingsHelper.fixValues(results);
-
-        _.each(results, function (setting) {
-            // set group names to show.
-            if (setting.groupName) {
-                var paths = setting.groupName.split('|');
-                setting.groupName = paths.pop();
-            }
-
-            // transform to va-generic-value-input suitable structure
-            setting.isDictionary = _.any(setting.allowedValues);
-            setting.values = setting.isDictionary ? [{ value: { id: setting.value, name: setting.value } }] : [{ id: setting.value, value: setting.value }];
-            if (setting.allowedValues) {
-                setting.allowedValues = _.map(setting.allowedValues, function (x) {
-                    return { id: x, name: x };
-                });
-            }
-        });
-
-
-        results = _.groupBy(results, 'groupName');
-        blade.groupNames = _.keys(results);
-        blade.currentEntities = angular.copy(results);
-        blade.origEntity = results;
-        blade.isLoading = false;
-    }
-
-    $scope.editArray = function (node) {
-        var newBlade = {
-            id: "settingDetailChild",
-            currentEntityId: node.name,
-            controller: 'platformWebApp.settingDictionaryController',
-            template: '$(Platform)/Scripts/app/settings/blades/setting-dictionary.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, blade);
-    }
-
-    var formScope;
-    $scope.setForm = function (form) { formScope = form; };
-
-    function isDirty() {
-        return !angular.equals(blade.currentEntities, blade.origEntity) && blade.hasUpdatePermission();
-    }
-
-    function canSave() {
-        return isDirty() && formScope && formScope.$valid;
-    }
-
-    function saveChanges() {
-        blade.isLoading = true;
-        var objects = _.flatten(_.map(blade.currentEntities, _.values));
-        objects = _.map(objects, function (x) {
-            x.value = x.isDictionary ? x.values[0].value.id : x.values[0].value;
-            x.values = undefined;
-            x.allowedValues = undefined;
-            return x;
-        });
-
-        settingsHelper.toApiFormat(objects);
-
-        //console.log('saveChanges3: ' + angular.toJson(objects, true));
-        settings.update({}, objects, function () {
-            if (blade.moduleId) {
-                blade.data = undefined;
-                blade.refresh();
-            } else {
-                blade.origEntity = blade.currentEntities;
-                blade.parentBlade.refresh(true);
-            }
-        });
-    };
-
-    blade.headIcon = 'fa-wrench';
-    blade.toolbarCommands = [
-        {
-            name: "platform.commands.save", icon: 'fa fa-save',
-            executeMethod: saveChanges,
-            canExecuteMethod: canSave
-        },
-        {
-            name: "platform.commands.reset", icon: 'fa fa-undo',
-            executeMethod: function () {
-                blade.currentEntities = angular.copy(blade.origEntity);
-            },
-            canExecuteMethod: isDirty
-        }
-    ];
-
-    blade.onClose = function (closeCallback) {
-        bladeNavigationService.showConfirmationIfNeeded(isDirty(), canSave(), blade, saveChanges, closeCallback, "platform.dialogs.settings-delete.title", "platform.dialogs.settings-delete.message");
-    };
-
-    $scope.getDictionaryValues = function (setting, callback) {
-        callback(setting.allowedValues);
-    };
-
-    // actions on load
-    blade.refresh();
-}]);
-
-angular.module('platformWebApp')
-.factory('platformWebApp.settings', ['$resource', function ($resource) {
-    return $resource('api/platform/settings/:id', { id: '@Id' }, {
-        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
-      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
-      	update: { method: 'POST', url: 'api/platform/settings' },
-        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
-    });
-}]);
-angular.module('platformWebApp')
-.controller('platformWebApp.entitySettingsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    var blade = $scope.blade;
-
-    $scope.openBlade = function () {
-        var newBlade = {
-            id: 'entitySettingList',
-            updatePermission: blade.updatePermission,
-            controller: 'platformWebApp.entitySettingListController',
-            template: '$(Platform)/Scripts/app/settings/blades/settings-detail.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, blade);
-    };
-}]);
-angular.module('platformWebApp')
 .controller('platformWebApp.accountApiListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
     blade.updatePermission = 'platform:security:update';
@@ -28235,6 +27722,555 @@ angular.module('platformWebApp')
             template: '$(Platform)/Scripts/app/security/blades/account-roles-list.tpl.html'
         };
         bladeNavigationService.showBlade(newBlade, $scope.blade);
+    };
+}]);
+angular.module('platformWebApp')
+.controller('platformWebApp.entitySettingListController', ['$scope', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', function ($scope, settingsHelper, bladeNavigationService) {
+    var blade = $scope.blade;
+    // blade.updatePermission = // Use predefined (parent) permission
+    blade.title = 'platform.blades.entitySetting-list.title';
+
+    function initializeBlade(results) {
+        blade.data = results;
+        results = angular.copy(results);
+
+        // settingsHelper.fixValues(results);
+        
+        _.each(results, function (setting) {
+            // set group names to show.
+            if (setting.groupName) {
+                var paths = setting.groupName.split('|');
+                setting.groupName = paths.pop();
+            }
+
+            // transform to va-generic-value-input suitable structure
+            setting.isDictionary = _.any(setting.allowedValues);
+            setting.values = setting.isDictionary ? [{ value: { id: setting.value, name: setting.value } }] : [{ id: setting.value, value: setting.value }];
+            if (setting.allowedValues) {
+                setting.allowedValues = _.map(setting.allowedValues, function (x) {
+                    return { id: x, name: x };
+                });
+            }
+        });
+
+
+        results = _.groupBy(results, 'groupName');
+        blade.groupNames = _.keys(results);
+        blade.currentEntities = angular.copy(results);
+        blade.origEntity = results;
+        blade.isLoading = false;
+    }
+
+    $scope.editArray = function (node) {
+        var newBlade = {
+            id: "settingDetailChild",
+            currentEntityId: node.name,
+            controller: 'platformWebApp.settingDictionaryController',
+            template: '$(Platform)/Scripts/app/settings/blades/setting-dictionary.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, blade);
+    }
+
+    function isDirty() {
+        return !angular.equals(blade.currentEntities, blade.origEntity) && blade.hasUpdatePermission();
+    }
+
+    function canSave() {
+        return isDirty() && formScope && formScope.$valid;
+    }
+
+    var formScope;
+    $scope.setForm = function (form) { formScope = form; }
+
+    $scope.cancelChanges = function () {
+        angular.copy(blade.origEntity, blade.currentEntities);
+        $scope.bladeClose();
+    }
+
+    $scope.saveChanges = function () {
+        if (!blade.hasUpdatePermission()) return;
+
+        blade.isLoading = true;
+        var objects = _.flatten(_.map(blade.currentEntities, _.values));
+        objects = _.map(objects, function (x) {
+            x.value = x.isDictionary ? x.values[0].value.id : x.values[0].value;
+            x.values = undefined;
+            x.allowedValues = _.pluck(x.allowedValues, 'id');
+            return x;
+        });
+
+        //settingsHelper.toApiFormat(objects);
+        
+        //console.log('saveChanges3: ' + angular.toJson(objects, true));
+        angular.copy(objects, blade.data);
+        angular.copy(blade.currentEntities, blade.origEntity);
+        $scope.bladeClose();
+    };
+
+    blade.headIcon = 'fa-wrench';
+    blade.isSavingToParentObject = true;
+    blade.toolbarCommands = [
+        {
+            name: "platform.commands.reset", icon: 'fa fa-undo',
+            executeMethod: function () {
+                blade.currentEntities = angular.copy(blade.origEntity);
+            },
+            canExecuteMethod: isDirty,
+            permission: blade.updatePermission
+        }
+    ];
+
+    blade.onClose = function (closeCallback) {
+        bladeNavigationService.showConfirmationIfNeeded(isDirty(), canSave(), blade, $scope.saveChanges, closeCallback, "platform.dialogs.settings-save.title", "platform.dialogs.settings-save.message");
+    };
+
+    $scope.getDictionaryValues = function (setting, callback) {
+        callback(setting.allowedValues);
+    };
+
+    // actions on load
+    $scope.$watch('blade.parentBlade.currentEntity.settings', initializeBlade);
+}]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.settingDictionaryController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', function ($scope, dialogService, bladeNavigationService, settings) {
+    var blade = $scope.blade;
+    blade.updatePermission = 'platform:setting:update';
+    var currentEntities;
+
+    blade.refresh = function (parentRefresh) {
+        settings.get({ id: blade.currentEntityId }, function (setting) {
+            if (parentRefresh && blade.parentRefresh) {
+                blade.parentRefresh(setting.arrayValues);
+            }
+
+            setting.arrayValues = _.map(setting.arrayValues, function (x) { return { value: x }; });
+            blade.origEntity = angular.copy(setting.arrayValues);
+            initializeBlade(setting);
+        });
+    }
+
+    function initializeBlade(data) {
+        blade.title = data.title;
+        blade.currentEntity = data;
+        currentEntities = blade.currentEntity.arrayValues;
+        blade.isLoading = false;
+    }
+
+    $scope.dictValueValidator = function (value) {
+        if (blade.currentEntity) {
+            if (blade.currentEntity.valueType == 'ShortText') {
+                return _.all(currentEntities, function (item) { return angular.lowercase(item.value) !== angular.lowercase(value); });
+            } else {
+                return _.all(currentEntities, function (item) { return item.value !== value; });
+            }
+        }
+        return false;
+    };
+
+    $scope.add = function (form) {
+        if (form.$valid) {
+            currentEntities.push($scope.newValue);
+            resetNewValue();
+            form.$setPristine();
+        }
+    };
+
+    $scope.delete = function (index) {
+        currentEntities.splice(index, 1);
+        $scope.selectedItem = undefined;
+    };
+
+    $scope.selectItem = function (listItem) {
+        $scope.selectedItem = listItem;
+    };
+
+    blade.headIcon = 'fa-wrench';
+    blade.subtitle = 'platform.blades.setting-dictionary.subtitle';
+    blade.toolbarCommands = [
+     {
+         name: "platform.commands.delete", icon: 'fa fa-trash-o',
+         executeMethod: function () {
+             deleteChecked();
+         },
+         canExecuteMethod: function () {
+             return isItemsChecked();
+         }
+     }
+    ];
+
+    if (blade.isApiSave) {
+        var formScope;
+        $scope.setForm = function (form) {
+            formScope = form;
+        }
+
+        function isDirty() {
+            return !angular.equals(currentEntities, blade.origEntity) && blade.hasUpdatePermission();
+        };
+
+        function saveChanges() {
+            blade.selectedAll = false;
+            blade.isLoading = true;
+            blade.currentEntity.arrayValues = _.pluck(blade.currentEntity.arrayValues, 'value');
+
+            settings.update(null, [blade.currentEntity], blade.refresh,
+                function (error) { bladeNavigationService.setError('Error ' + error.status, $scope.blade); });
+        };
+
+        blade.toolbarCommands.splice(0, 0,
+        {
+            name: "platform.commands.save",
+            icon: 'fa fa-save',
+            executeMethod: function () {
+                saveChanges();
+            },
+            canExecuteMethod: function () {
+                return isDirty() && formScope && formScope.$valid;
+            }
+        },
+        {
+            name: "platform.commands.reset",
+            icon: 'fa fa-undo',
+            executeMethod: function () {
+                angular.copy(blade.origEntity, currentEntities);
+                blade.selectedAll = false;
+            },
+            canExecuteMethod: isDirty,
+        });
+        blade.refresh();
+    } else {
+        $scope.$watch('blade.parentBlade.currentEntities', function (data) {
+            if (data) {
+                var allEntities = _.flatten(_.map(data, _.values));
+                initializeBlade(_.findWhere(allEntities, { name: blade.currentEntityId }));
+            }
+        });
+    }
+
+    $scope.checkAll = function () {
+        angular.forEach(currentEntities, function (item) {
+            item._selected = blade.selectedAll;
+        });
+    };
+
+    function resetNewValue() {
+        $scope.newValue = { value: null };
+    }
+
+    function isItemsChecked() {
+        return _.any(currentEntities, function (x) { return x._selected; });
+    }
+
+    function deleteChecked() {
+        //var dialog = {
+        //    id: "confirmDeleteItem",
+        //    title: "platform.dialogs.settings-value-delete.title",
+        //    message: "platform.dialogs.settings-value-delete.message",
+        //    callback: function (remove) {
+        //        if (remove) {
+        var selection = _.where(currentEntities, { _selected: true });
+        angular.forEach(selection, function (listItem) {
+            $scope.delete(currentEntities.indexOf(listItem));
+        });
+        //        }
+        //    }
+        //}
+        //dialogService.showConfirmationDialog(dialog);
+    }
+
+    // on load
+    resetNewValue();
+}]);
+angular.module('platformWebApp')
+.controller('platformWebApp.settingGroupListController', ['$window', 'platformWebApp.modules', '$scope', 'platformWebApp.settings', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService',
+function ($window, modules, $scope, settings, bladeNavigationService, dialogService) {
+    var settingsTree;
+    var blade = $scope.blade;
+
+    blade.refresh = function (disableOpenAnimation) {
+        blade.isLoading = true;
+
+        settings.query({}, function (results) {
+            blade.allSettings = results;
+            settingsTree = {};
+            _.each(results, function (setting) {
+                var paths = (setting.groupName ? setting.groupName : 'General').split('|');
+                var lastParent = settingsTree;
+                var lastParentId = '';
+                _.each(paths, function (path, i) {
+                    lastParentId += '|' + path;
+                    if (!lastParent[path]) {
+                        var treeNode = { name: path, groupName: lastParentId.substring(1) }
+                        lastParent[path] = treeNode;
+                        if (setting.groupName && _.all(blade.allSettings, function (x) { return x.groupName !== treeNode.groupName; })) {
+                            blade.allSettings.push(treeNode);
+                        }
+                    }
+
+                    if (i < paths.length - 1) {
+                        if (!lastParent[path].children) {
+                            lastParent[path].children = {};
+                        }
+                        lastParent = lastParent[path].children;
+                    }
+                });
+            });
+
+            blade.isLoading = false;
+
+            // restore previous selection
+            if (blade.searchText) {
+                blade.currentEntities = settingsTree;
+            } else {
+                // reconstruct tree by breadCrumbs
+                var lastchildren = settingsTree;
+                for (var i = 1; i < blade.breadcrumbs.length; i++) {
+                    lastchildren = lastchildren[blade.breadcrumbs[i].name].children;
+                }
+                blade.currentEntities = lastchildren;
+            }
+
+            // open previous settings detail blade if possible
+            if ($scope.selectedNodeId) {
+                $scope.selectNode({ groupName: $scope.selectedNodeId }, disableOpenAnimation);
+            }
+        },
+        function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+    };
+
+    $scope.selectNode = function (node, disableOpenAnimation) {
+        bladeNavigationService.closeChildrenBlades(blade, function () {
+            $scope.selectedNodeId = node.groupName;
+            if (node.children) {
+                blade.searchText = null;
+                blade.currentEntities = node.children;
+
+                setBreadcrumbs(node);
+            } else {
+                var selectedSettings = _.filter(blade.allSettings, function (x) { return x.groupName === node.groupName || (node.groupName === 'General' && !x.groupName); });
+                var newBlade = {
+                    id: 'settingsSection',
+                    data: selectedSettings,
+                    title: 'platform.blades.settings-detail.title',
+                    disableOpenAnimation: disableOpenAnimation,
+                    controller: 'platformWebApp.settingsDetailController',
+                    template: '$(Platform)/Scripts/app/settings/blades/settings-detail.tpl.html'
+                };
+
+                bladeNavigationService.showBlade(newBlade, blade);
+            }
+        });
+    };
+
+    //Breadcrumbs
+    function setBreadcrumbs(node) {
+        blade.breadcrumbs.splice(1, blade.breadcrumbs.length - 1);
+
+        if (node.groupName) {
+            var lastParentId = '';
+            var lastchildren = settingsTree;
+            var paths = node.groupName.split('|');
+            _.each(paths, function (path) {
+                lastchildren = lastchildren[path].children;
+                lastParentId += '|' + path;
+                var breadCrumb = {
+                    id: lastParentId.substring(1),
+                    name: path,
+                    children: lastchildren,
+                    navigate: function () {
+                        $scope.selectNode({ groupName: this.id, children: this.children });
+                    }
+                };
+
+                blade.breadcrumbs.push(breadCrumb);
+            });
+        }
+    }
+
+    blade.breadcrumbs = [{
+        id: null,
+        name: "platform.navigation.bread-crumb-top",
+        navigate: function () {
+            $scope.selectNode({ groupName: null, children: settingsTree });
+        }
+    }];
+
+    blade.headIcon = 'fa-wrench';
+
+    $scope.$watch('blade.searchText', function (newVal) {
+        if (newVal) {
+            blade.currentEntities = settingsTree;
+            setBreadcrumbs({ groupName: null });
+        }
+    });
+
+    blade.toolbarCommands = [
+          {
+              name: "platform.commands.restart", icon: 'fa fa-bolt',
+              executeMethod: function () { restart(); },
+              canExecuteMethod: function () { return !blade.isLoading; },
+              permission: 'platform:module:manage'
+          }
+    ];
+
+    function restart() {
+        var dialog = {
+            id: "confirmRestart",
+            title: "platform.dialogs.app-restart.title",
+            message: "platform.dialogs.app-restart.message",
+            callback: function (confirm) {
+                if (confirm) {
+                    blade.isLoading = true;
+                    modules.restart(function () {
+                        $window.location.reload();
+                    });
+                }
+            }
+        }
+        dialogService.showConfirmationDialog(dialog);
+    }
+
+    // actions on load
+    blade.refresh();
+}]);
+angular.module('platformWebApp')
+.controller('platformWebApp.settingsDetailController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', function ($scope, dialogService, settingsHelper, bladeNavigationService, settings) {
+    var blade = $scope.blade;
+    blade.updatePermission = 'platform:setting:update';
+
+    blade.refresh = function () {
+        if (blade.moduleId && !blade.data) {
+            blade.isLoading = true;
+
+            settings.getSettings({ id: blade.moduleId }, initializeBlade);
+        } else {
+            initializeBlade(angular.copy(blade.data));
+        }
+    }
+
+    function initializeBlade(results) {
+        settingsHelper.fixValues(results);
+
+        _.each(results, function (setting) {
+            // set group names to show.
+            if (setting.groupName) {
+                var paths = setting.groupName.split('|');
+                setting.groupName = paths.pop();
+            }
+
+            // transform to va-generic-value-input suitable structure
+            setting.isDictionary = _.any(setting.allowedValues);
+            setting.values = setting.isDictionary ? [{ value: { id: setting.value, name: setting.value } }] : [{ id: setting.value, value: setting.value }];
+            if (setting.allowedValues) {
+                setting.allowedValues = _.map(setting.allowedValues, function (x) {
+                    return { id: x, name: x };
+                });
+            }
+        });
+
+
+        results = _.groupBy(results, 'groupName');
+        blade.groupNames = _.keys(results);
+        blade.currentEntities = angular.copy(results);
+        blade.origEntity = results;
+        blade.isLoading = false;
+    }
+
+    $scope.editArray = function (node) {
+        var newBlade = {
+            id: "settingDetailChild",
+            currentEntityId: node.name,
+            controller: 'platformWebApp.settingDictionaryController',
+            template: '$(Platform)/Scripts/app/settings/blades/setting-dictionary.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, blade);
+    }
+
+    var formScope;
+    $scope.setForm = function (form) { formScope = form; };
+
+    function isDirty() {
+        return !angular.equals(blade.currentEntities, blade.origEntity) && blade.hasUpdatePermission();
+    }
+
+    function canSave() {
+        return isDirty() && formScope && formScope.$valid;
+    }
+
+    function saveChanges() {
+        blade.isLoading = true;
+        var objects = _.flatten(_.map(blade.currentEntities, _.values));
+        objects = _.map(objects, function (x) {
+            x.value = x.isDictionary ? x.values[0].value.id : x.values[0].value;
+            x.values = undefined;
+            x.allowedValues = undefined;
+            return x;
+        });
+
+        settingsHelper.toApiFormat(objects);
+
+        //console.log('saveChanges3: ' + angular.toJson(objects, true));
+        settings.update({}, objects, function () {
+            if (blade.moduleId) {
+                blade.data = undefined;
+                blade.refresh();
+            } else {
+                blade.origEntity = blade.currentEntities;
+                blade.parentBlade.refresh(true);
+            }
+        });
+    };
+
+    blade.headIcon = 'fa-wrench';
+    blade.toolbarCommands = [
+        {
+            name: "platform.commands.save", icon: 'fa fa-save',
+            executeMethod: saveChanges,
+            canExecuteMethod: canSave
+        },
+        {
+            name: "platform.commands.reset", icon: 'fa fa-undo',
+            executeMethod: function () {
+                blade.currentEntities = angular.copy(blade.origEntity);
+            },
+            canExecuteMethod: isDirty
+        }
+    ];
+
+    blade.onClose = function (closeCallback) {
+        bladeNavigationService.showConfirmationIfNeeded(isDirty(), canSave(), blade, saveChanges, closeCallback, "platform.dialogs.settings-delete.title", "platform.dialogs.settings-delete.message");
+    };
+
+    $scope.getDictionaryValues = function (setting, callback) {
+        callback(setting.allowedValues);
+    };
+
+    // actions on load
+    blade.refresh();
+}]);
+
+angular.module('platformWebApp')
+.factory('platformWebApp.settings', ['$resource', function ($resource) {
+    return $resource('api/platform/settings/:id', { id: '@Id' }, {
+        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
+      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
+      	update: { method: 'POST', url: 'api/platform/settings' },
+        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
+    });
+}]);
+angular.module('platformWebApp')
+.controller('platformWebApp.entitySettingsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    var blade = $scope.blade;
+
+    $scope.openBlade = function () {
+        var newBlade = {
+            id: 'entitySettingList',
+            updatePermission: blade.updatePermission,
+            controller: 'platformWebApp.entitySettingListController',
+            template: '$(Platform)/Scripts/app/settings/blades/settings-detail.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, blade);
     };
 }]);
 angular.module('platformWebApp')

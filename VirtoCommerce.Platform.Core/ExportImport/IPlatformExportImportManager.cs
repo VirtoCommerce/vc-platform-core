@@ -10,7 +10,7 @@ namespace VirtoCommerce.Platform.Core.ExportImport
     {
         PlatformExportManifest GetNewExportManifest(string author);
         PlatformExportManifest ReadExportManifest(Stream stream);
-        Task ExportAsync(Stream outStream, PlatformExportManifest exportOptions, Action<ExportImportProgressInfo> progressCallback, ICancellationToken token);
-        Task ImportAsync(Stream inputStream, PlatformExportManifest importOptions, Action<ExportImportProgressInfo> progressCallback, ICancellationToken token);
+        Task ExportAsync(Stream outStream, PlatformExportManifest exportOptions, Action<ExportImportProgressInfo> progressCallback, ICancellationToken сancellationToken);
+        Task ImportAsync(Stream inputStream, PlatformExportManifest importOptions, Action<ExportImportProgressInfo> progressCallback, ICancellationToken сancellationToken);
     }
 }

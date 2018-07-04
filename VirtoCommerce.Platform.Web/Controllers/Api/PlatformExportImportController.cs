@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using Hangfire.Server;
@@ -31,7 +32,6 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
     [ApiExplorerSettings(IgnoreApi = true)]
     public class PlatformExportImportController : Controller
     {
-        private static string _sampledataStateSetting = typeof(SampleDataState).FullName;
         private static string _stringSampleDataUrl;
 
         private readonly IPlatformExportImportManager _platformExportManager;
@@ -93,17 +93,16 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         {
             lock (_lockObject)
             {
-                var sampleDataState = EnumUtility.SafeParse(_settingsManager.GetValue(_sampledataStateSetting, SampleDataState.Undefined.ToString()), SampleDataState.Undefined);
+                var sampleDataState = EnumUtility.SafeParse(_settingsManager.GetValue(PlatformConstants.Settings.Setup.SampleDataState.Name, SampleDataState.Undefined.ToString()), SampleDataState.Undefined);
                 if (sampleDataState == SampleDataState.Undefined)
                 {
                     //Sample data initialization
                     if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
                     {
-                        _settingsManager.SetValue(_sampledataStateSetting, SampleDataState.Processing);
+                        _settingsManager.SetValue(PlatformConstants.Settings.Setup.SampleDataState.Name, SampleDataState.Processing);
                         var pushNotification = new SampleDataImportPushNotification(User.Identity.Name);
                         _pushNotifier.Send(pushNotification);
                         var jobId = BackgroundJob.Enqueue(() => SampleDataImportBackgroundAsync(new Uri(url), _hostEnv.MapPath(_platformOptions.LocalUploadFolderPath), pushNotification, JobCancellationToken.Null, null));
-
                         pushNotification.JobId = jobId;
 
                         return Ok(pushNotification);
@@ -125,7 +124,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [AllowAnonymous]
         public IActionResult GetSampleDataState()
         {
-            var state = EnumUtility.SafeParse(_settingsManager.GetValue(_sampledataStateSetting, string.Empty), SampleDataState.Undefined);
+            var state = EnumUtility.SafeParse(_settingsManager.GetValue(PlatformConstants.Settings.Setup.SampleDataState.Name, string.Empty), SampleDataState.Undefined);
             return Ok(state);
         }
 
@@ -170,7 +169,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             };
             _pushNotifier.Send(notification);
 
-            var jobId = BackgroundJob.Enqueue( () => PlatformExportBackgroundAsync(exportRequest, notification, JobCancellationToken.Null, null));
+            var jobId = BackgroundJob.Enqueue(() => PlatformExportBackgroundAsync(exportRequest, notification, JobCancellationToken.Null, null));
             notification.JobId = jobId;
             return Ok(notification);
         }
@@ -250,17 +249,14 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
         public async Task SampleDataImportBackgroundAsync(Uri url, string tmpPath, SampleDataImportPushNotification pushNotification, IJobCancellationToken cancellationToken, PerformContext context)
         {
-            Action<ExportImportProgressInfo> progressCallback = x =>
+            void progressCallback(ExportImportProgressInfo x)
             {
                 pushNotification.Path(x);
                 pushNotification.JobId = context.BackgroundJob.Id;
                 _pushNotifier.Send(pushNotification);
-            };
-
+            }
             try
             {
-                var cancellationTokenWrapper = new JobCancellationTokenWrapper(cancellationToken);
-
                 pushNotification.Description = "Start downloading from " + url;
                 await _pushNotifier.SendAsync(pushNotification);
 
@@ -285,7 +281,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                     var manifest = _platformExportManager.ReadExportManifest(stream);
                     if (manifest != null)
                     {
-                        await _platformExportManager.ImportAsync(stream, manifest, progressCallback, cancellationTokenWrapper);
+                        await _platformExportManager.ImportAsync(stream, manifest, progressCallback, new JobCancellationTokenWrapper(cancellationToken));
                     }
                 }
             }
@@ -299,7 +295,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             }
             finally
             {
-                _settingsManager.SetValue(_sampledataStateSetting, SampleDataState.Completed);
+                _settingsManager.SetValue(PlatformConstants.Settings.Setup.SampleDataState.Name, SampleDataState.Completed);
                 pushNotification.Description = "Import finished";
                 pushNotification.Finished = DateTime.UtcNow;
                 await _pushNotifier.SendAsync(pushNotification);
@@ -357,10 +353,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
             try
             {
-                var cancellationTokenWrapper = new JobCancellationTokenWrapper(cancellationToken);
-
                 const string relativeUrl = "tmp/exported_data.zip";
-                var localTmpFolder = _hostEnv.MapPath("~/App_Data/Uploads/tmp");
+                var localTmpFolder = _hostEnv.MapPath(Path.Combine(_platformOptions.LocalUploadFolderPath, "tmp"));
                 var localTmpPath = Path.Combine(localTmpFolder, "exported_data.zip");
                 if (!Directory.Exists(localTmpFolder))
                 {
@@ -370,7 +364,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 using (var stream = System.IO.File.Open(localTmpPath, FileMode.OpenOrCreate))
                 {
                     var manifest = exportRequest.ToManifest();
-                    _platformExportManager.ExportAsync(stream, manifest, progressCallback, cancellationTokenWrapper);
+                    await _platformExportManager.ExportAsync(stream, manifest, progressCallback, new JobCancellationTokenWrapper(cancellationToken));
                 }
                 //Copy export data to blob provider for get public download url
                 using (var localStream = System.IO.File.Open(localTmpPath, FileMode.Open))

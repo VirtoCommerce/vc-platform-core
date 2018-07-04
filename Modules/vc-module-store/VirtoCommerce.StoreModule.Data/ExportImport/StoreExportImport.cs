@@ -5,32 +5,36 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Model.Search;
 using VirtoCommerce.StoreModule.Core.Services;
 
-namespace VirtoCommerce.StoreModule.Web.ExportImport
+namespace VirtoCommerce.StoreModule.Data.ExportImport
 {
-    public sealed class StoreExportImport
+    public sealed class StoreExportImport : IExportSupport, IImportSupport
     {
         private readonly IStoreService _storeService;
         private readonly IStoreSearchService _storeSearchService;
         private readonly JsonSerializer _serializer;
         private readonly int BatchSize = 50;
 
-        public StoreExportImport(IStoreService storeService, JsonSerializer jsonSerializer)
+        public StoreExportImport(IStoreService storeService, IStoreSearchService storeSearchService, JsonSerializer jsonSerializer)
         {
             _storeService = storeService;
             _serializer = jsonSerializer;
+            _storeSearchService = storeSearchService;
         }
 
-        public async Task DoExport(Stream backupStream, Action<ExportImportProgressInfo> progressCallback)
+        public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var progressInfo = new ExportImportProgressInfo { Description = "The store are loading" };
             progressCallback(progressInfo);
 
-            using (var sw = new StreamWriter(backupStream, Encoding.UTF8))
+            using (var sw = new StreamWriter(outStream, Encoding.UTF8))
             using (var writer = new JsonTextWriter(sw))
             {
                 writer.WriteStartObject();
@@ -69,12 +73,14 @@ namespace VirtoCommerce.StoreModule.Web.ExportImport
             }
         }
 
-        public async Task DoImport(Stream backupStream, Action<ExportImportProgressInfo> progressCallback)
+        public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var progressInfo = new ExportImportProgressInfo();
             int storeTotalCount = 0;
 
-            using (var streamReader = new StreamReader(backupStream))
+            using (var streamReader = new StreamReader(inputStream))
             using (var reader = new JsonTextReader(streamReader))
             {
                 while (reader.Read())
@@ -103,7 +109,7 @@ namespace VirtoCommerce.StoreModule.Web.ExportImport
                                 var batchStores = stores.Skip(i).Take(BatchSize);
                                 foreach (var store in batchStores)
                                 {
-                                    await _storeService.SaveChangesAsync(new [] { store });
+                                    await _storeService.SaveChangesAsync(new[] { store });
                                 }
 
                                 if (storeCount > 0)
@@ -121,6 +127,5 @@ namespace VirtoCommerce.StoreModule.Web.ExportImport
                 }
             }
         }
-
     }
 }

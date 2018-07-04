@@ -10,12 +10,13 @@ using VirtoCommerce.InventoryModule.Core;
 using VirtoCommerce.InventoryModule.Core.Model;
 using VirtoCommerce.InventoryModule.Core.Model.Search;
 using VirtoCommerce.InventoryModule.Core.Services;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Settings;
 
-namespace VirtoCommerce.InventoryModule.Web.ExportImport
+namespace VirtoCommerce.InventoryModule.Data.ExportImport
 {
-    public sealed class InventoryExportImport
+    public sealed class InventoryExportImport : IExportSupport, IImportSupport
     {
         private readonly IInventoryService _inventoryService;
         private readonly IInventorySearchService _inventorySearchService;
@@ -35,7 +36,7 @@ namespace VirtoCommerce.InventoryModule.Web.ExportImport
                     _batchSize = _settingsManager.GetValue(ModuleConstants.Settings.General.PageSize.Name, 50);
                 }
 
-                return (int) _batchSize;
+                return (int)_batchSize;
             }
         }
 
@@ -56,13 +57,15 @@ namespace VirtoCommerce.InventoryModule.Web.ExportImport
             _serializer = serializer;
         }
 
-        public async Task DoExport(Stream backupStream, Action<ExportImportProgressInfo> progressCallback)
+        public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var progressInfo = new ExportImportProgressInfo { Description = "The fulfilmentCenters are loading" };
             progressCallback(progressInfo);
 
             //var backupObject = await GetBackupObject(progressCallback);
-            using (var sw = new StreamWriter(backupStream, Encoding.UTF8))
+            using (var sw = new StreamWriter(outStream, Encoding.UTF8))
             using (var writer = new JsonTextWriter(sw))
             {
                 writer.WriteStartObject();
@@ -115,13 +118,15 @@ namespace VirtoCommerce.InventoryModule.Web.ExportImport
             }
         }
 
-        public async Task DoImport(Stream backupStream, Action<ExportImportProgressInfo> progressCallback)
+        public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var progressInfo = new ExportImportProgressInfo();
             var fulfillmentCentersTotalCount = 0;
             var inventoriesTotalCount = 0;
 
-            using (var streamReader = new StreamReader(backupStream))
+            using (var streamReader = new StreamReader(inputStream))
             using (var reader = new JsonTextReader(streamReader))
             {
                 while (reader.Read())

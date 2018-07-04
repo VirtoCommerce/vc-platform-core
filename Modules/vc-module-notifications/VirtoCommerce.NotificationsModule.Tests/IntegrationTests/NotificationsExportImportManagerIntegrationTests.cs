@@ -6,11 +6,11 @@ using System.Threading;
 using Moq;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
+using VirtoCommerce.NotificationsModule.Data.ExportImport;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Services;
 using VirtoCommerce.NotificationsModule.Tests.NotificationTypes;
-using VirtoCommerce.NotificationsModule.Web.ExportImport;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.Events;
@@ -86,7 +86,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             _repositoryMock.Setup(r => r.GetByTypeAsync(nameof(RegistrationEmailNotification), null, null, NotificationResponseGroup.Full.ToString())).ReturnsAsync(entity);
 
             //Act
-            _notificationsExportImportManager.DoExport(fileStream, manifest, exportImportProgressInfo => { }, CancellationToken.None);
+            _notificationsExportImportManager.ExportAsync(fileStream, null, exportImportProgressInfo => { }, new CancellationTokenWrapper(CancellationToken.None));
 
             //Assert
             fileStream.Close();
@@ -100,7 +100,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             var fileStream = new FileStream(Path.GetFullPath("export_test.json"), FileMode.Open);
 
             //Act
-            _notificationsExportImportManager.DoImport(fileStream, manifest, exportImportProgressInfo => { }, CancellationToken.None);
+            _notificationsExportImportManager.ImportAsync(fileStream, null, exportImportProgressInfo => { }, new CancellationTokenWrapper(CancellationToken.None));
 
             //Assert
             fileStream.Close();

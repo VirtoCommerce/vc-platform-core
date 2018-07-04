@@ -1,5 +1,7 @@
 using System;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +11,7 @@ using Microsoft.Extensions.Options;
 using VirtoCommerce.NotificationsModule.Core;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
+using VirtoCommerce.NotificationsModule.Data.ExportImport;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Senders;
@@ -18,15 +21,17 @@ using VirtoCommerce.NotificationsModule.SendGrid;
 using VirtoCommerce.NotificationsModule.Smtp;
 using VirtoCommerce.NotificationsModule.Web.Infrastructure;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Notifications;
 using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.NotificationsModule.Web
 {
-    public class Module : IModule
+    public class Module : IModule, IExportSupport, IImportSupport
     {
         public ManifestModuleInfo ModuleInfo { get; set; }
+        private IApplicationBuilder _appBuilder;
 
         public void Initialize(IServiceCollection serviceCollection)
         {
@@ -45,7 +50,7 @@ namespace VirtoCommerce.NotificationsModule.Web
             serviceCollection.AddTransient<INotificationMessageSender, SmtpEmailNotificationMessageSender>();
             serviceCollection.AddTransient<INotificationMessageSender, SendGridEmailNotificationMessageSender>();
             serviceCollection.AddTransient<IEmailSender, EmailNotificationMessageSender>();
-
+            serviceCollection.AddSingleton<NotificationsExportImportManager>();
             serviceCollection.Configure<EmailSendingOptions>(configuration.GetSection("Notifications"));
             serviceCollection.Configure<SmtpSenderOptions>(configuration.GetSection("Notifications:Smtp"));
             serviceCollection.Configure<SendGridSenderOptions>(configuration.GetSection("Notifications:SendGrid"));
@@ -53,6 +58,7 @@ namespace VirtoCommerce.NotificationsModule.Web
 
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
+            _appBuilder = appBuilder;
             AbstractTypeFactory<Notification>.RegisterType<EmailNotification>().MapToType<NotificationEntity>();
             AbstractTypeFactory<Notification>.RegisterType<SmsNotification>().MapToType<NotificationEntity>();
             AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>().MapToType<NotificationTemplateEntity>();
@@ -100,6 +106,16 @@ namespace VirtoCommerce.NotificationsModule.Web
 
         public void Uninstall()
         {
+        }
+
+        public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
+        {
+            await _appBuilder.ApplicationServices.GetRequiredService<NotificationsExportImportManager>().ExportAsync(outStream, options, progressCallback, cancellationToken);
+        }
+
+        public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
+        {
+            await _appBuilder.ApplicationServices.GetRequiredService<NotificationsExportImportManager>().ImportAsync(inputStream, options, progressCallback, cancellationToken);
         }
     }
 }

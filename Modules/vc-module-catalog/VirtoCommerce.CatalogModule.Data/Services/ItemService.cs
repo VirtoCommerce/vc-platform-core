@@ -78,7 +78,8 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 var outlineItems = productsWithVariationsList.Where(p => p.Outlines != null)
                                          .SelectMany(p => p.Outlines.SelectMany(o => o.Items));
                 objectsWithSeo.AddRange(outlineItems);
-                _commerceService.LoadSeoForObjects(objectsWithSeo.ToArray());
+                //TODO: convert to async
+                _commerceService.LoadSeoForObjectsAsync(objectsWithSeo.ToArray());
             }
 
             //Reduce details according to response group
@@ -154,7 +155,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
             //Update SEO 
             var productsWithVariations = products.Concat(products.Where(x => x.Variations != null).SelectMany(x => x.Variations)).OfType<ISeoSupport>().ToArray();
-            _commerceService.UpsertSeoForObjects(productsWithVariations);
+            _commerceService.UpsertSeoForObjectsAsync(productsWithVariations);
         }
 
         public virtual void LoadDependencies(IEnumerable<CatalogProduct> products)
