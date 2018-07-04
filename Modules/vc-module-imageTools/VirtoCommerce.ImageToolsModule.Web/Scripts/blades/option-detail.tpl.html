@@ -1,0 +1,115 @@
+﻿<div class="blade-content __medium-wide">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form name="detailForm">
+                <fieldset ng-init="setForm(detailForm)">
+                    <div class="form-group">
+                        <div class="column">
+                            <div class="form-group __info list">
+                                <label class="form-label">{{ 'imageTools.blades.setting-detail.labels.name' | translate }}</label>
+                                <div class="form-input">
+                                    <input ng-class="{'error': detailForm.name.$invalid && !detailForm.name.$pristine}" required placeholder="{{ 'imageTools.blades.setting-detail.placeholders.name' | translate }}" class="form-control" ng-model="blade.currentEntity.name" name="name" type="text" />
+                                </div>
+                                <div class="list-descr">{{ 'imageTools.blades.setting-detail.discription.name' | translate }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="column">
+                            <div class="form-group ">
+                                <div class="column">
+                                    <div class="form-group __info list">
+                                        <label class="form-label">{{ 'imageTools.blades.setting-detail.labels.file-suffix' | translate }}</label>
+                                        <div class="form-input">
+                                            <input ng-class="{'error': detailForm.fileSuffix.$invalid && !detailForm.fileSuffix.$pristine}" required class="form-control" ng-model="blade.currentEntity.fileSuffix" name="fileSuffix" placeholder="{{ 'imageTools.blades.setting-detail.placeholders.file-suffix' | translate }}" />
+                                        </div>
+                                        <div class="list-descr">{{ 'imageTools.blades.setting-detail.discription.file-suffix' | translate }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="form-group ">
+                                <div class="column">
+                                    <div class="form-group __info list">
+                                        <label class="form-label">{{ 'imageTools.blades.setting-detail.labels.resize-method' | translate }}</label>
+                                        <div class="form-input">
+                                            <ui-select ng-model="blade.currentEntity.resizeMethod">
+                                                <ui-select-match>{{$select.selected.value}}</ui-select-match>
+                                                <ui-select-choices repeat="x.value as x in blade.resizeMethodTypes | filter: $select.search">
+                                                    <div>{{ x.title |translate }}</div>
+                                                </ui-select-choices>
+                                            </ui-select>
+                                        </div>
+                                        <div class="list-descr">{{ 'imageTools.blades.setting-detail.discription.resize-method' | translate }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="column">
+                            <div class="form-group ">
+                                <div class="column">
+                                    <div class="form-group __info list">
+                                        <label class="form-label">{{'imageTools.blades.setting-detail.labels.width' | translate}}</label>
+                                        <div class="form-input __number">
+                                            <input smart-float num-type="integer" ng-pattern="positiveNum" required ng-model="blade.currentEntity.width" placeholder="{{ 'imageTools.blades.setting-detail.placeholders.width' | translate }}" />
+                                        </div>
+                                        <div class="list-descr">{{ 'imageTools.blades.setting-detail.discription.width' | translate }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="form-group ">
+                                <div class="column">
+                                    <div class="form-group __info list">
+                                        <label class="form-label">{{'imageTools.blades.setting-detail.labels.height' | translate}}</label>
+                                        <div class="form-input __number">
+                                            <input smart-float num-type="integer" ng-pattern="positiveNum" required ng-model="blade.currentEntity.height" placeholder="{{ 'imageTools.blades.setting-detail.placeholders.height' | translate }}" />
+                                        </div>
+                                        <div class="list-descr">{{ 'imageTools.blades.setting-detail.discription.height' | translate }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="column">
+                            <div class="form-group ">
+                                <div class="column">
+                                    <div class="form-group __info list">
+                                        <label class="form-label">{{ 'imageTools.blades.setting-detail.labels.background-color' | translate }}</label>
+                                        <div class="form-input">
+                                            <input placeholder="{{ 'imageTools.blades.setting-detail.placeholders.background-color' | translate }}" class="form-control" ng-model="blade.currentEntity.backgroundColor" name="backgroundColor" type="text" />
+                                        </div>
+                                        <div class="list-descr">{{ 'imageTools.blades.setting-detail.discription.background-color' | translate }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="form-group ">
+                                <div class="column">
+                                    <div class="form-group __info list">
+                                        <label class="form-label">{{ 'imageTools.blades.setting-detail.labels.anchor-position' | translate }}</label>
+                                        <div class="form-input">
+                                            <ui-select ng-model="blade.currentEntity.anchorPosition">
+                                                <ui-select-match>{{$select.selected.value}}</ui-select-match>
+                                                <ui-select-choices repeat="x.value as x in blade.anchorPositionTypes | filter: $select.search">
+                                                    <div>{{ x.title | translate }}</div>
+                                                </ui-select-choices>
+                                            </ui-select>
+                                        </div>
+                                        <div class="list-descr">{{ 'imageTools.blades.setting-detail.discription.anchor-position' | translate }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>
