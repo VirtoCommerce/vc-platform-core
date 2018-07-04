@@ -1,0 +1,40 @@
+{
+  "inventory": {
+    "blades": {
+      "inventory-detail": {
+        "labels": {
+          "in-stock": "Auf Lager",
+          "reserved": "Reserviert",
+          "reorder-min-quantity": "Mindestbestellmenge.",
+          "allow-preorder": "Vorbestellung zulassen",
+          "reorder-quantity": "Menge vorbestellen.",
+          "preorder-availability-date": "Vorbestellung möglich ab Datum",
+          "allow-backorder": "Rückstand zulassen",
+          "backorder-quantity": "Rückstand Anz.",
+          "backorder-availability-date": "Rückstand Verfügbarkeitsdatum"
+        }
+      },
+      "inventory-fulfillmentcenters-list": {
+        "labels": {
+          "no-fulfillment-centers": "Keine Erfüllungszentren verfügbar"
+        }
+      }
+    },
+    "dialogs": {
+      "inventory-delete": {
+        "title": "Bestätigung löschen",
+        "message": "Möchten Sie dieses Angebot wirklich löschen?"
+      },
+      "inventory-save": {
+        "title": "Änderungen speichern",
+        "message": "Inventar wurde geändert. Möchten Sie die Änderungen speichern?"
+      }
+    },
+    "widgets": {
+      "inventoryWidget": {
+        "title": "Lager",
+        "blade-subtitle": "Wählen Sie das Erfüllungszentrum aus, um das Inventar zu bearbeiten"
+      }
+    }
+  }
+}

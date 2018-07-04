@@ -87,6 +87,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.LicensingModu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.LicensingModule.Data", "Modules\vc-module-licensing\VirtoCommerce.LicensingModule.Data\VirtoCommerce.LicensingModule.Data.csproj", "{D8E113CD-BF29-4B0A-9F1C-A1BBC24FA02E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vc-module-inventory", "vc-module-inventory", "{D59080BD-4C98-4DEE-98D7-89737B725719}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.InventoryModule.Web", "Modules\vc-module-inventory\VirtoCommerce.InventoryModule.Web\VirtoCommerce.InventoryModule.Web.csproj", "{B709A686-444E-4C6A-9FFF-264D936674C1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.InventoryModule.Core", "Modules\vc-module-inventory\VirtoCommerce.InventoryModule.Core\VirtoCommerce.InventoryModule.Core.csproj", "{6530F554-4E02-493D-A0E4-D7766E9FC0FC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.InventoryModule.Data", "Modules\vc-module-inventory\VirtoCommerce.InventoryModule.Data\VirtoCommerce.InventoryModule.Data.csproj", "{26CE7C87-98D4-44EE-AC07-10601F0549D5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -201,6 +209,18 @@ Global
 		{E9934719-6D4C-4041-BE90-9F67EE5140F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9934719-6D4C-4041-BE90-9F67EE5140F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9934719-6D4C-4041-BE90-9F67EE5140F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B709A686-444E-4C6A-9FFF-264D936674C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B709A686-444E-4C6A-9FFF-264D936674C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B709A686-444E-4C6A-9FFF-264D936674C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B709A686-444E-4C6A-9FFF-264D936674C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6530F554-4E02-493D-A0E4-D7766E9FC0FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6530F554-4E02-493D-A0E4-D7766E9FC0FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6530F554-4E02-493D-A0E4-D7766E9FC0FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6530F554-4E02-493D-A0E4-D7766E9FC0FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26CE7C87-98D4-44EE-AC07-10601F0549D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26CE7C87-98D4-44EE-AC07-10601F0549D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26CE7C87-98D4-44EE-AC07-10601F0549D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26CE7C87-98D4-44EE-AC07-10601F0549D5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F6350FEE-E3E5-41E9-8C35-FA96B253421F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F6350FEE-E3E5-41E9-8C35-FA96B253421F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F6350FEE-E3E5-41E9-8C35-FA96B253421F}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -267,6 +287,10 @@ Global
 		{F2CA48A2-8CC7-4CD6-A03B-6AE826FDF3F7} = {3EF8A012-05A5-4830-B089-502078ABF596}
 		{5D91D3EE-B042-4077-9685-D7035B9B3556} = {3EF8A012-05A5-4830-B089-502078ABF596}
 		{D8E113CD-BF29-4B0A-9F1C-A1BBC24FA02E} = {3EF8A012-05A5-4830-B089-502078ABF596}
+		{D59080BD-4C98-4DEE-98D7-89737B725719} = {7052A390-9A84-46DA-BD3B-556FD74DEC97}
+		{B709A686-444E-4C6A-9FFF-264D936674C1} = {D59080BD-4C98-4DEE-98D7-89737B725719}
+		{6530F554-4E02-493D-A0E4-D7766E9FC0FC} = {D59080BD-4C98-4DEE-98D7-89737B725719}
+		{26CE7C87-98D4-44EE-AC07-10601F0549D5} = {D59080BD-4C98-4DEE-98D7-89737B725719}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {80F99D88-A3B2-4ED2-9148-43D43EBFFFC3}

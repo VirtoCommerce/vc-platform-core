@@ -1,4 +1,5 @@
 using System.Linq;
+using Hangfire;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,18 +41,7 @@ namespace VirtoCommerce.SearchModule.Web
 
             serviceCollection.AddSingleton<IIndexingManager, IndexingManager>();
 
-            var configuration = snapshot.GetService<IConfiguration>();
-            var searchConnectionString = configuration.GetConnectionString("SearchConnectionString");
-
-            if (string.IsNullOrEmpty(searchConnectionString))
-            {
-                searchConnectionString = settingsManager.GetValue(ModuleConstants.Settings.General.SearchConnectionString.Name, string.Empty);
-            }
-
-            if (!string.IsNullOrEmpty(searchConnectionString))
-            {
-                serviceCollection.AddSingleton<ISearchConnection>(new SearchConnection(searchConnectionString));
-            }
+            
 
             //TODO delete it after implementation in the modules
             var productIndexingConfiguration = new IndexDocumentConfiguration
@@ -86,7 +76,7 @@ namespace VirtoCommerce.SearchModule.Web
             if (scheduleJobs)
             {
                 var cronExpression = settingsManager.GetValue(ModuleConstants.Settings.General.IndexingJobs.CronExpression.Name, ModuleConstants.Settings.General.IndexingJobs.CronExpression.DefaultValue);
-                //RecurringJob.AddOrUpdate<IndexingJobs>(j => j.IndexChangesJob(null, JobCancellationToken.Null), cronExpression);
+                RecurringJob.AddOrUpdate<IndexingJobs>(j => j.IndexChangesJob(null, JobCancellationToken.Null), cronExpression);
             }
         }
 
