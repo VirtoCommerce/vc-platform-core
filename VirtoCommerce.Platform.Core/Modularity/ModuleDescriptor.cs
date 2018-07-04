@@ -7,10 +7,37 @@ namespace VirtoCommerce.Platform.Core.Modularity
 {
     public class ModuleDescriptor : Entity
     {
+        public ModuleDescriptor(ManifestModuleInfo moduleInfo)
+            : this()
+        {
+            Id = moduleInfo.Id;
+            Title = moduleInfo.Title;
+            Description = moduleInfo.Description;
+            Authors = moduleInfo.Authors;
+            Owners = moduleInfo.Owners;
+            LicenseUrl = moduleInfo.LicenseUrl;
+            ProjectUrl = moduleInfo.ProjectUrl;
+            IconUrl = moduleInfo.IconUrl;
+            Version = moduleInfo.Version.ToString();
+            RequireLicenseAcceptance = moduleInfo.RequireLicenseAcceptance;
+            ReleaseNotes = moduleInfo.ReleaseNotes;
+            Copyright = moduleInfo.Copyright;
+            IsRemovable = moduleInfo.IsRemovable;
+            IsInstalled = moduleInfo.IsInstalled;
+            PlatformVersion = moduleInfo.PlatformVersion.ToString();
+            Groups = moduleInfo.Groups;
+            if (moduleInfo.Dependencies != null)
+            {
+                Dependencies = moduleInfo.Dependencies.Select(x => new ModuleIdentity(x.Id, x.Version)).ToList();
+            }
+            ValidationErrors = moduleInfo.Errors;
+        }
+
         public ModuleDescriptor()
         {
             ValidationErrors = new List<string>();
         }
+
         [JsonIgnore]
         public ModuleIdentity Identity
         {
@@ -39,32 +66,6 @@ namespace VirtoCommerce.Platform.Core.Modularity
         public bool IsRemovable { get; set; }
         public bool IsInstalled { get; set; }
         public ModuleIdentity InstalledVersion { get; set; }
-
-        public virtual ModuleDescriptor FromModel(ManifestModuleInfo moduleInfo)
-        {
-            Id = moduleInfo.Id;
-            Title = moduleInfo.Title;
-            Description = moduleInfo.Description;
-            Authors = moduleInfo.Authors;
-            Owners = moduleInfo.Owners;
-            LicenseUrl = moduleInfo.LicenseUrl;
-            ProjectUrl = moduleInfo.ProjectUrl;
-            IconUrl = moduleInfo.IconUrl;
-            Version = moduleInfo.Version.ToString();
-            RequireLicenseAcceptance = moduleInfo.RequireLicenseAcceptance;
-            ReleaseNotes = moduleInfo.ReleaseNotes;
-            Copyright = moduleInfo.Copyright;
-            IsRemovable = moduleInfo.IsRemovable;
-            IsInstalled = moduleInfo.IsInstalled;
-            PlatformVersion = moduleInfo.PlatformVersion.ToString();
-            Groups = moduleInfo.Groups;
-            if (moduleInfo.Dependencies != null)
-            {
-                Dependencies = moduleInfo.Dependencies.Select(x => new ModuleIdentity(x.Id, x.Version)).ToList();
-            }
-            ValidationErrors = moduleInfo.Errors;
-            return this;
-        }
 
     }
 }

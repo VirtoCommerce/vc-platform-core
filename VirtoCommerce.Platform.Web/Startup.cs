@@ -44,6 +44,7 @@ using VirtoCommerce.Platform.Web.Infrastructure;
 using VirtoCommerce.Platform.Web.JsonConverters;
 using VirtoCommerce.Platform.Web.Middelware;
 using VirtoCommerce.Platform.Web.Swagger;
+using VirtoCommerce.Platform.Core;
 
 namespace VirtoCommerce.Platform.Web
 {
@@ -102,10 +103,9 @@ namespace VirtoCommerce.Platform.Web
                 options.DiscoveryPath = modulesDiscoveryPath;
                 options.ProbingPath = "App_Data/Modules";
             });
-            services.AddExternalModules(options =>
-            {
-                options.ModulesManifestUrl = new Uri(@"https://raw.githubusercontent.com/VirtoCommerce/vc-modules/master/modules.json");
-            });
+
+            services.Configure<ExternalModuleCatalogOptions>(Configuration.GetSection("ExternalModules"));
+            services.AddExternalModules();
 
             services.AddDbContext<SecurityDbContext>(options =>
             {
@@ -208,7 +208,7 @@ namespace VirtoCommerce.Platform.Web
             // register the AuthorizationPolicyProvider which dynamically registers authorization policies for each permission defined in module manifest
             services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
             //Platform authorization handler for policies based on permissions 
-            services.AddTransient<IAuthorizationHandler, PermissionAuthorizationHandler>();
+            services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
             // Add memory cache services
             services.AddMemoryCache();
@@ -219,8 +219,13 @@ namespace VirtoCommerce.Platform.Web
             // Register the Swagger generator
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info { Title = "VirtoCommerce Solution REST API documentation", Version = "v1", Description = "For this sample, you can use the"
-                    , Contact = new Contact
+                c.SwaggerDoc("v1", new Info
+                {
+                    Title = "VirtoCommerce Solution REST API documentation",
+                    Version = "v1",
+                    Description = "For this sample, you can use the"
+                    ,
+                    Contact = new Contact
                     {
                         Email = "support@virtocommerce.com",
                         Name = "Virto Commerce",
@@ -323,7 +328,7 @@ namespace VirtoCommerce.Platform.Web
             app.UseDefaultFiles();
 
 
-            
+
 
             app.UseAuthentication();
 
@@ -370,7 +375,14 @@ namespace VirtoCommerce.Platform.Web
                 c.ShowExtensions();
                 c.DocExpansion(DocExpansion.None);
             });
-            
+
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions { Authorization = new[] { new HangfireAuthorizationHandler() } });
+            app.UseHangfireServer(new BackgroundJobServerOptions
+            {
+                // Create some queues for job prioritization.
+                // Normal equals 'default', because Hangfire depends on it.
+                Queues = new[] { JobPriority.High, JobPriority.Normal, JobPriority.Low }
+            });
 
             app.UseDbTriggers();
             //Register platform settings
@@ -388,13 +400,7 @@ namespace VirtoCommerce.Platform.Web
             //Seed default users
             app.UseDefaultUsersAsync().GetAwaiter().GetResult();
 
-            app.UseHangfireDashboard("/hangfire", new DashboardOptions { Authorization = new[] { new HangfireAuthorizationHandler() } });
-            app.UseHangfireServer(new BackgroundJobServerOptions
-            {
-                // Create some queues for job prioritization.
-                // Normal equals 'default', because Hangfire depends on it.
-                Queues = new[] { JobPriority.High, JobPriority.Normal, JobPriority.Low }
-            });
+            
 
         }
     }

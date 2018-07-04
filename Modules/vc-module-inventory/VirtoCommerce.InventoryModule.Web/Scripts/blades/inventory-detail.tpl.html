@@ -1,0 +1,79 @@
+<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form class="form" name="detailForm">
+                <div class="columns __inline clearfix">
+                    <div class="form-group" ng-init="setForm(detailForm)">
+                        <label class="form-label">{{ 'inventory.blades.inventory-detail.labels.in-stock' | translate }}</label>
+                        <div class="form-input __mini __number">
+                            <input smart-float num-type="float" ng-model="blade.currentEntity.inStockQuantity" type="text" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">{{ 'inventory.blades.inventory-detail.labels.reserved' | translate }}</label>
+                        <div class="form-input __mini __number">
+                            <input smart-float num-type="float" ng-model="blade.currentEntity.reservedQuantity">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">{{ 'inventory.blades.inventory-detail.labels.reorder-min-quantity' | translate }}</label>
+                        <div class="form-input __mini __number">
+                            <input smart-float num-type="float" ng-model="blade.currentEntity.reorderMinQuantity">
+                        </div>
+                    </div>
+                </div>
+                <div class="columns clearfix">
+                    <div class="form-group">
+                        <label class="form-label">{{ 'inventory.blades.inventory-detail.labels.allow-preorder' | translate }}</label>
+                        <div class="form-input">
+                            <label class="form-label __switch">
+                                <input type="checkbox" ng-model="blade.currentEntity.allowPreorder">
+                                <span class="switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-class="{'__disabled': !blade.currentEntity.allowPreorder}">
+                        <label class="form-label">{{ 'inventory.blades.inventory-detail.labels.reorder-quantity' | translate }}</label>
+                        <div class="form-input">
+                            <input smart-float num-type="float" ng-model="blade.currentEntity.preorderQuantity" type="text" ng-disabled="!blade.currentEntity.allowPreorder">
+                        </div>
+                    </div>
+                    <div class="form-group" ng-class="{'__disabled': !blade.currentEntity.allowPreorder}">
+                        <label class="form-label">{{ 'inventory.blades.inventory-detail.labels.preorder-availability-date' | translate }}</label>
+                        <div class="form-input __calendar">
+                            <input type="text" class="form-control" ng-model="blade.currentEntity.preorderAvailabilityDate" datepicker-popup name="pod" is-open="datepickers.pod" min-date="today" ng-disabled="!blade.currentEntity.allowPreorder" placeholder="{{ 'platform.genericValueInput.placeholders.date-time' | translate}}" />
+                            <button class="btn" type="button" ng-click="open($event,'pod')">
+                                <i class="btn-ico fa fa-calendar"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">{{ 'inventory.blades.inventory-detail.labels.allow-backorder' | translate }}</label>
+                        <div class="form-input">
+                            <label class="form-label __switch">
+                                <input type="checkbox" ng-model="blade.currentEntity.allowBackorder">
+                                <span class="switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-class="{'__disabled': !blade.currentEntity.allowBackorder}">
+                        <label class="form-label">{{ 'inventory.blades.inventory-detail.labels.backorder-quantity' | translate }}</label>
+                        <div class="form-input">
+                            <input smart-float num-type="float" ng-model="blade.currentEntity.backorderQuantity" ng-disabled="!blade.currentEntity.allowBackorder">
+                        </div>
+                    </div>
+                    <div class="form-group" ng-class="{'__disabled': !blade.currentEntity.allowBackorder}">
+                        <label class="form-label">{{ 'inventory.blades.inventory-detail.labels.backorder-availability-date' | translate }}</label>
+                        <div class="form-input __calendar">
+                            <input type="text" class="form-control" ng-model="blade.currentEntity.backorderAvailabilityDate" datepicker-popup name="bod" is-open="datepickers.bod" min-date="minDate" ng-disabled="!blade.currentEntity.allowBackorder" placeholder="{{ 'platform.genericValueInput.placeholders.date-time' | translate}}" />
+                            <button class="btn" type="button" ng-click="open($event,'bod')">
+                                <i class="btn-ico fa fa-calendar"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <va-metaform blade="blade" registered-inputs="blade.metaFields"></va-metaform>
+            </form>
+        </div>
+    </div>
+</div>
