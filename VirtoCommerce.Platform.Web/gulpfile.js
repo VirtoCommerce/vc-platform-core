@@ -104,6 +104,12 @@ gulp.task("min:css", function () {
         .pipe(gulp.dest('wwwroot/css'));
 });
 
+// Watch Task
+gulp.task('watch', function () {
+    var watch_patch = ['wwwroot/js/**/*.js', '!wwwroot/js/**/*.min.js', '!wwwroot/js/allPackages.js', '!wwwroot/js/platform.js'];
+    gulp.watch(watch_patch, ['min:js']);
+});
+
 gulp.task("clean", function () {
     var files = ['wwwroot/css/allPackages.css', 'wwwroot/css/platform.css', 'wwwroot/js/allPackages.min.js', 'wwwroot/js/allPackages.js', 'wwwroot/js/platform.min.js', 'wwwroot/js/platform.js'];
     return del(files);
