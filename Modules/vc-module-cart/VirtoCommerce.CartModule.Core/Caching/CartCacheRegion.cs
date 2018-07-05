@@ -5,7 +5,7 @@ using Microsoft.Extensions.Primitives;
 using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.Platform.Core.Caching;
 
-namespace VirtoCommerce.CartModule.Core.Cashing
+namespace VirtoCommerce.CartModule.Core.Caching
 {
     public class CartCacheRegion : CancellableCacheRegion<CartCacheRegion>
     {

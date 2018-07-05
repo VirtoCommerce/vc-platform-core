@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using VirtoCommerce.CartModule.Core.Cashing;
+using VirtoCommerce.CartModule.Core.Caching;
 using VirtoCommerce.CartModule.Core.Events;
 using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CartModule.Core.Services;
@@ -122,7 +122,7 @@ namespace VirtoCommerce.CartModule.Data.Services
 
                 await repository.RemoveCartsAsync(cartIds);
 
-                repository.UnitOfWork.Commit();
+                await repository.UnitOfWork.CommitAsync();
                 //Raise domain events after deletion
                 await _eventPublisher.Publish(new CartChangedEvent(changedEntries));
             }
