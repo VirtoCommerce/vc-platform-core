@@ -8,6 +8,7 @@ using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.InventoryModule.Core.Events;
 using VirtoCommerce.InventoryModule.Core.Model;
 using VirtoCommerce.InventoryModule.Core.Services;
+using VirtoCommerce.InventoryModule.Data.Caching;
 using VirtoCommerce.InventoryModule.Data.Cashing;
 using VirtoCommerce.InventoryModule.Data.Model;
 using VirtoCommerce.InventoryModule.Data.Repositories;
@@ -44,7 +45,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                     return entity.Select(e =>
                     {
                         var result = e.ToModel(AbstractTypeFactory<InventoryInfo>.TryCreateInstance());
-                        cacheEntry.AddExpirationToken(InventoryCacheRegion.CreateChangeToken(result));
+                        cacheEntry.AddExpirationToken(InventoryDictionaryCacheRegion.CreateChangeToken(result));
                         return result;
                     });
                 }
@@ -66,7 +67,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                     retVal.AddRange(entities.Select(x =>
                     {
                         var result = x.ToModel(AbstractTypeFactory<InventoryInfo>.TryCreateInstance());
-                        cacheEntry.AddExpirationToken(InventoryCacheRegion.CreateChangeToken(result));
+                        cacheEntry.AddExpirationToken(InventoryDictionaryCacheRegion.CreateChangeToken(result));
                         return result;
                     }));
                 }
@@ -113,9 +114,11 @@ namespace VirtoCommerce.InventoryModule.Data.Services
 
         private void ClearCache(IEnumerable<InventoryInfo> inventories)
         {
+            InventoryCacheRegion.ExpireRegion();
+
             foreach (var inventory in inventories)
             {
-                InventoryCacheRegion.ExpireInventory(inventory);
+                InventoryDictionaryCacheRegion.ExpireInventory(inventory);
             }
         }
 

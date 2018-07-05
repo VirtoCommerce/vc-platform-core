@@ -4,11 +4,10 @@ using System.Threading;
 using Microsoft.Extensions.Primitives;
 using VirtoCommerce.InventoryModule.Core.Model;
 using VirtoCommerce.Platform.Core.Caching;
-using VirtoCommerce.Platform.Core.Settings;
 
-namespace VirtoCommerce.InventoryModule.Data.Cashing
+namespace VirtoCommerce.InventoryModule.Data.Caching
 {
-    public class InventoryCacheRegion : CancellableCacheRegion<InventoryCacheRegion>
+    public class InventoryDictionaryCacheRegion : CancellableCacheRegion<InventoryDictionaryCacheRegion>
     {
         private static readonly ConcurrentDictionary<string, CancellationTokenSource> _inventoryRegionTokenLookup = new ConcurrentDictionary<string, CancellationTokenSource>();
 
