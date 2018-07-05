@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +10,7 @@ using VirtoCommerce.ImageToolsModule.Core;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.ImageToolsModule.Core.Services;
 using VirtoCommerce.ImageToolsModule.Core.ThumbnailGeneration;
+using VirtoCommerce.ImageToolsModule.Data.ExportImport;
 using VirtoCommerce.ImageToolsModule.Data.Models;
 using VirtoCommerce.ImageToolsModule.Data.Repositories;
 using VirtoCommerce.ImageToolsModule.Data.Services;
@@ -21,9 +22,10 @@ using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.ImageToolsModule.Web
 {
-    public class Module : IModule, ISupportExportImportModule
+    public class Module : IModule, IExportSupport, IImportSupport
     {
         public ManifestModuleInfo ModuleInfo { get; set; }
+        private IApplicationBuilder _appBuilder;
         public void Initialize(IServiceCollection serviceCollection)
         {
             var snapshot = serviceCollection.BuildServiceProvider();
@@ -46,10 +48,14 @@ namespace VirtoCommerce.ImageToolsModule.Web
             serviceCollection.AddSingleton<IThumbnailGenerator, DefaultThumbnailGenerator>();
             serviceCollection.AddSingleton<IThumbnailGenerationProcessor, ThumbnailGenerationProcessor>();
             serviceCollection.AddSingleton<IImagesChangesProvider, BlobImagesChangesProvider>();
+            serviceCollection.AddSingleton<ThumbnailsExportImport>();
+
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
+            _appBuilder = appBuilder;
+
             AbstractTypeFactory<ThumbnailOption>.RegisterType<ThumbnailOption>().MapToType<ThumbnailOptionEntity>();
             AbstractTypeFactory<ThumbnailTask>.RegisterType<ThumbnailTask>().MapToType<ThumbnailTaskEntity>();
 
@@ -78,18 +84,14 @@ namespace VirtoCommerce.ImageToolsModule.Web
         {
         }
 
-        #region ISupportExportImportModule Members
-
-        public void DoExport(Stream outStream, PlatformExportManifest manifest, Action<ExportImportProgressInfo> progressCallback, CancellationToken cancellationToken)
+        public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            await _appBuilder.ApplicationServices.GetRequiredService<ThumbnailsExportImport>().ExportAsync(outStream, options, progressCallback, cancellationToken);
         }
 
-        public void DoImport(Stream inputStream, PlatformExportManifest manifest, Action<ExportImportProgressInfo> progressCallback, CancellationToken cancellationToken)
+        public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            await _appBuilder.ApplicationServices.GetRequiredService<ThumbnailsExportImport>().ImportAsync(inputStream, options, progressCallback, cancellationToken);
         }
-
-        #endregion
     }
 }
