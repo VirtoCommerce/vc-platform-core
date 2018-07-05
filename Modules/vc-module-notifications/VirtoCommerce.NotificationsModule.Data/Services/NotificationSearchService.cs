@@ -1,7 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Data.Model;
@@ -18,9 +18,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             _repositoryFactory = repositoryFactory;
         }
 
-        
-
-        public  GenericSearchResult<Notification> SearchNotifications(NotificationSearchCriteria criteria)
+        public async  Task<GenericSearchResult<Notification>> SearchNotificationsAsync(NotificationSearchCriteria criteria)
         {
             var query = AbstractTypeFactory<Notification>.AllTypeInfos
                 .Where(t => t.AllSubclasses.Any(s => s != t.Type && s.IsSubclassOf(typeof(Notification))))
@@ -41,18 +39,21 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             }
 
             var collection = query.OrderBySortInfos(sortInfos).Skip(criteria.Skip).Take(criteria.Take).ToList();
-            
+
+            NotificationEntity[] entities;
+
+            using (var repository = _repositoryFactory())
+            {
+                entities = await repository.GetByTypesAsync(collection.Select(c => c.Name).ToArray(), criteria.TenantId, criteria.TenantType, criteria.ResponseGroup);
+            }
+
             var list = collection.Select(t =>
             {
                 var result = AbstractTypeFactory<Notification>.TryCreateInstance(t.Name);
-                NotificationEntity notificationEntity;
-                using (var repository = _repositoryFactory())
-                {
-                    notificationEntity = repository.GetByTypeAsync(t.Name, criteria.TenantId, criteria.TenantType, criteria.ResponseGroup).GetAwaiter().GetResult();
-                }
+                var notificationEntity = entities.FirstOrDefault(e => e.Type.Equals(t.Name));
                 return notificationEntity != null ? notificationEntity.ToModel(result) : result;
             }).ToList();
-
+            
             return new GenericSearchResult<Notification>
             {
                 Results = list,

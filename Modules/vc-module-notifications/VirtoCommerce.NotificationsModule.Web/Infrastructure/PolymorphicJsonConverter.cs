@@ -23,7 +23,12 @@ namespace VirtoCommerce.NotificationsModule.Web.Infrastructure
         {
             object retVal = null;
             var obj = JObject.Load(reader);
-            if (objectType == typeof(Notification) || objectType == typeof(NotificationTemplate))
+            if (objectType == typeof(Notification))
+            {
+                var type = obj["type"].Value<string>();
+                retVal = AbstractTypeFactory<Notification>.TryCreateInstance(type);
+            }
+            else if (objectType == typeof(NotificationTemplate))
             {
                 var tryCreateInstance = typeof(AbstractTypeFactory<>).MakeGenericType(objectType).GetMethods()
                     .FirstOrDefault(x => x.Name.EqualsInvariant("TryCreateInstance") && x.GetParameters().Length == 0);
