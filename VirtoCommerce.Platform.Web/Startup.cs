@@ -250,27 +250,17 @@ namespace VirtoCommerce.Platform.Web
 
 
             var assetsProvider = Configuration.GetSection("Assets:Provider").Value;
-
-            if (assetsProvider.EqualsInvariant("AzureBlobStorage"))
+            if (assetsProvider.EqualsInvariant(AzureBlobProvider.ProviderName))
             {
-                var azureBlobOptions = new AzureBlobContentOptions();
-                Configuration.GetSection("Assets:AzureBlobStorage").Bind(azureBlobOptions);
-
-                services.AddAzureBlobProvider(options =>
-                {
-                    options.ConnectionString = azureBlobOptions.ConnectionString;
-                    options.CdnUrl = azureBlobOptions.CdnUrl;
-                });
+                services.Configure<AzureBlobContentOptions>(Configuration.GetSection("Assets:AzureBlobStorage"));
+                services.AddAzureBlobProvider();
             }
             else
             {
-                var fileSystemBlobOptions = new FileSystemBlobContentOptions();
-                Configuration.GetSection("Assets:FileSystem").Bind(fileSystemBlobOptions);
-
+                services.Configure<FileSystemBlobContentOptions>(Configuration.GetSection("Assets:FileSystem"));
                 services.AddFileSystemBlobProvider(options =>
                 {
-                    options.RootPath = HostingEnvironment.MapPath(fileSystemBlobOptions.RootPath);
-                    options.PublicUrl = fileSystemBlobOptions.PublicUrl;
+                    options.RootPath = HostingEnvironment.MapPath(options.RootPath);
                 });
             }
 
@@ -326,9 +316,6 @@ namespace VirtoCommerce.Platform.Web
             }
 
             app.UseDefaultFiles();
-
-
-
 
             app.UseAuthentication();
 
@@ -400,7 +387,7 @@ namespace VirtoCommerce.Platform.Web
             //Seed default users
             app.UseDefaultUsersAsync().GetAwaiter().GetResult();
 
-            
+
 
         }
     }
