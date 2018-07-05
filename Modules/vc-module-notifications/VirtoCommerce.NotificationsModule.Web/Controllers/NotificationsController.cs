@@ -39,9 +39,9 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(GenericSearchResult<Notification>), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
-        public IActionResult GetNotifications(NotificationSearchCriteria searchCriteria)
+        public async Task<IActionResult> GetNotifications(NotificationSearchCriteria searchCriteria)
         {
-            var notifications = _notificationSearchService.SearchNotifications(searchCriteria);
+            var notifications = await _notificationSearchService.SearchNotificationsAsync(searchCriteria);
 
             return Ok(notifications);
         }

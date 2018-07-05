@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using VirtoCommerce.Platform.Core.Modularity;
+
 namespace VirtoCommerce.NotificationsModule.Core
 {
     public static class ModuleConstants
@@ -19,6 +22,31 @@ namespace VirtoCommerce.NotificationsModule.Core
                 public static string[] AllPermissions = new[] { Read, Create, Access, Update, Delete, Export, Import, ReadTemplates, CreateTemplate };
             }
         }
-        
+
+        public static class Settings
+        {
+            public static class General
+            {
+                public static ModuleSetting Languages = new ModuleSetting
+                {
+                    Name = "VirtoCommerce.Notifications.General.Languages",
+                    ValueType = ModuleSetting.TypeString,
+                    IsArray = true,
+                    DefaultValue = "en-US",
+                    ArrayValues = new[] { "en-US", "de-DE" }
+                };
+
+                public static IEnumerable<ModuleSetting> AllSettings
+                {
+                    get
+                    {
+                        yield return Languages;
+                    }
+                }
+            }
+
+            
+        }
+
     }
 }

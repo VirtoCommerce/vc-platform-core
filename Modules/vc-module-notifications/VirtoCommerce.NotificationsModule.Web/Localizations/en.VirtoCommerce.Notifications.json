@@ -143,9 +143,9 @@
                     "name": "How will you call this filter?"
                 }
             },
-            "notifications-template-render":{
+            "notifications-template-render": {
                 "title": "Preview form",
-                "subtitle": "The form renders a template",
+                "subtitle": "The form renders a template"
             }
         },
         "widgets": {
@@ -163,7 +163,7 @@
                 "title": "Attachments",
                 "blade-title": "Attachments",
                 "blade-subtitle": "Attachments"
-            } 
+            }
         },
         "dialogs": {
             "unknown-kind": {
@@ -175,64 +175,81 @@
                 "message": "The notification template has been modified. Do you want to save changes?"
             }
         }
-        
+
     },
     "notificationTypes": {
-            "RegistrationEmailNotification": {
-                "displayName": "Registration notification",
-                "description": "This notification is sent by email to a client when he finishes registration"
-            },
-            "ResetPasswordEmailNotification" : {
-                "displayName": "Reset password notification",
-                "description": "This notification is sent by email to a client upon reset password request"
-            },
-            "TwoFactorEmailNotification": {
-                "displayName": "Two factor authentication",
-                "description": "This notification contains a security token for two factor authentication"
-            },
-            "TwoFactorSmsNotification": {
-                "displayName": "Two factor authentication",
-                "description": "This notification contains a security token for two factor authentication"
-            },
-            "ConfirmationEmailNotification": {
-                "displayName": "Email confirmation notification",
-                "description": "This e-mail notification is for confirmation a new registered user e-mail"
-            },
-            "StoreDynamicEmailNotification": {
-                "displayName": "Sending custom form from storefront",
-                "description": "This notification sends by email to client when he complite some form on storefront, for example contact us form"
-            },
-            "OrderCreateEmailNotification": {
-                "displayName": "Create order notification",
-                "description": "This notification sends by email to client when he complite some form on storefront, for example contact us form"
-            },
-            "OrderPaidEmailNotification": {
-                "displayName": "Order paid notification",
-                "description": "This notification sends by email to client when all payments of order has status paid"
-            },
-            "OrderSentEmailNotification": {
-                "displayName": "Order sent notification",
-                "description": "This notification sends by email to client when all shipments gets status sent"
-            },
-            "NewOrderStatusEmailNotification": {
-                "displayName": "New order status notification",
-                "description": "This notification sends by email to client when status of orders has been changed"
-            },
-            "CancelOrderEmailNotification": {
-                "displayName": "Cancel order notification",
-                "description": "This notification sends by email to client when order canceled"
-            },
-            "InvoiceEmailNotification": {
-                "displayName": "The invoice for customer order",
-                "description": "The template for for customer order invoice (used for PDF generation)"
-            },
-            "NewSubscriptionEmailNotification": {
-                "displayName": "New subscription notification",
-                "description": "This notification sends by email to client when created new subscription"
-            },
-            "SubscriptionCanceledEmailNotification": {
-                "displayName": "Subscription canceled notification",
-                "description": "This notification sends by email to client when subscription was canceled"
-            }
+        "RegistrationEmailNotification": {
+            "displayName": "Registration notification",
+            "description": "This notification is sent by email to a client when he finishes registration"
+        },
+        "ResetPasswordEmailNotification": {
+            "displayName": "Reset password notification",
+            "description": "This notification is sent by email to a client upon reset password request"
+        },
+        "TwoFactorEmailNotification": {
+            "displayName": "Two factor authentication",
+            "description": "This notification contains a security token for two factor authentication"
+        },
+        "TwoFactorSmsNotification": {
+            "displayName": "Two factor authentication",
+            "description": "This notification contains a security token for two factor authentication"
+        },
+        "ConfirmationEmailNotification": {
+            "displayName": "Email confirmation notification",
+            "description": "This e-mail notification is for confirmation a new registered user e-mail"
+        },
+        "StoreDynamicEmailNotification": {
+            "displayName": "Sending custom form from storefront",
+            "description": "This notification sends by email to client when he complite some form on storefront, for example contact us form"
+        },
+        "OrderCreateEmailNotification": {
+            "displayName": "Create order notification",
+            "description": "This notification sends by email to client when he complite some form on storefront, for example contact us form"
+        },
+        "OrderPaidEmailNotification": {
+            "displayName": "Order paid notification",
+            "description": "This notification sends by email to client when all payments of order has status paid"
+        },
+        "OrderSentEmailNotification": {
+            "displayName": "Order sent notification",
+            "description": "This notification sends by email to client when all shipments gets status sent"
+        },
+        "NewOrderStatusEmailNotification": {
+            "displayName": "New order status notification",
+            "description": "This notification sends by email to client when status of orders has been changed"
+        },
+        "CancelOrderEmailNotification": {
+            "displayName": "Cancel order notification",
+            "description": "This notification sends by email to client when order canceled"
+        },
+        "InvoiceEmailNotification": {
+            "displayName": "The invoice for customer order",
+            "description": "The template for for customer order invoice (used for PDF generation)"
+        },
+        "NewSubscriptionEmailNotification": {
+            "displayName": "New subscription notification",
+            "description": "This notification sends by email to client when created new subscription"
+        },
+        "SubscriptionCanceledEmailNotification": {
+            "displayName": "Subscription canceled notification",
+            "description": "This notification sends by email to client when subscription was canceled"
         }
+    },
+    "permissions": {
+        "notifications:read": "Read notifications related data",
+        "notifications:create": "Create notifications related data",
+        "notifications:update": "Update notifications related data",
+        "notifications:delete": "Delete notifications related data",
+        "notifications:access": "Access notifications related data",
+        "notifications:export": "Export notifications related data",
+        "notifications:import": "Import notifications related data",
+        "notifications:templates:read": "Read templates related data",
+        "notifications:templates:create": "Create templates related data"
+    },
+    "settings": {
+        "VirtoCommerce.Notifications.General.Languages": {
+            "description": "Languages available in the Notifications",
+            "title": "Languages"
+        }
+    }
 }

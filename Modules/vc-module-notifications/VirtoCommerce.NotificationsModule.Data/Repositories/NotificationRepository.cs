@@ -51,6 +51,52 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             return notifications;
         }
 
+        public virtual async Task<NotificationEntity[]> GetByTypesAsync(string[] types, string tenantId, string tenantType, string responseGroup)
+        {
+            var query = Notifications;
+
+            query = query.Where(x => types.Contains(x.Type));
+
+            if (!string.IsNullOrEmpty(tenantId))
+            {
+                query = query.Where(q => q.TenantId.Equals(tenantId));
+            }
+
+            if (!string.IsNullOrEmpty(tenantType))
+            {
+                query = query.Where(q => q.TenantType.Equals(tenantType));
+            }
+
+            query = query.Include(n => n.Templates);
+
+            var result = await query.ToArrayAsync();
+
+            if (result != null)
+            {
+                foreach (var entity in result)
+                {
+                    var notificaionResponseGroup = EnumUtility.SafeParse(responseGroup, NotificationResponseGroup.Full);
+
+                    if ((notificaionResponseGroup & NotificationResponseGroup.WithTemplates) == NotificationResponseGroup.WithTemplates)
+                    {
+                        var templates = await DbContext.Set<NotificationTemplateEntity>().Where(t => t.NotificationId.Equals(entity.Id)).ToListAsync();
+                    }
+
+                    if ((notificaionResponseGroup & NotificationResponseGroup.WithAttachments) == NotificationResponseGroup.WithAttachments)
+                    {
+                        var attachments = await DbContext.Set<EmailAttachmentEntity>().Where(t => t.NotificationId.Equals(entity.Id)).ToListAsync();
+                    }
+
+                    if ((notificaionResponseGroup & NotificationResponseGroup.WithRecipients) == NotificationResponseGroup.WithRecipients)
+                    {
+                        var recipients = await DbContext.Set<NotificationEmailRecipientEntity>().Where(t => t.NotificationId.Equals(entity.Id)).ToListAsync();
+                    }
+                }
+            }
+
+            return result;
+        }
+
         public virtual async Task<NotificationEntity> GetByTypeAsync(string type, string tenantId, string tenantType, string responseGroup)
         {
             var query = Notifications;
@@ -64,8 +110,6 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             {
                 query = query.Where(q => q.TenantType.Equals(tenantType));
             }
-
-            query = query.Include(n => n.Templates);
 
             var result = await query.FirstOrDefaultAsync(n => n.Type.Equals(type));
 
