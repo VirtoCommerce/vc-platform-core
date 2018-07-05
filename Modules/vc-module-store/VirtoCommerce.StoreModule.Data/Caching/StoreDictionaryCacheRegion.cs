@@ -5,9 +5,9 @@ using Microsoft.Extensions.Primitives;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.StoreModule.Core.Model;
 
-namespace VirtoCommerce.StoreModule.Data
+namespace VirtoCommerce.StoreModule.Data.Caching
 {
-    public class StoreCacheRegion : CancellableCacheRegion<StoreCacheRegion>
+    public class StoreDictionaryCacheRegion : CancellableCacheRegion<StoreDictionaryCacheRegion>
     {
         private static readonly ConcurrentDictionary<string, CancellationTokenSource> _dirRegionTokenLookup = new ConcurrentDictionary<string, CancellationTokenSource>();
 
