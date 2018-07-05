@@ -269,16 +269,12 @@ namespace VirtoCommerce.Platform.Assets.AzureBlobStorage
 
         public virtual void Move(string oldUrl, string newUrl)
         {
-            Task.Factory
-                .StartNew(() => MoveAsync(oldUrl, newUrl), CancellationToken.None, TaskCreationOptions.None,
-                    TaskScheduler.Default).Unwrap().GetAwaiter().GetResult();
+            MoveAsync(oldUrl, newUrl).GetAwaiter().GetResult();
         }
 
         public virtual void Copy(string oldUrl, string newUrl)
         {
-            Task.Factory
-                .StartNew(() => MoveAsync(oldUrl, newUrl, true), CancellationToken.None, TaskCreationOptions.None,
-                    TaskScheduler.Default).Unwrap().GetAwaiter().GetResult();
+            MoveAsync(oldUrl, newUrl, true).GetAwaiter().GetResult();
         }
 
         protected virtual async Task MoveAsync(string oldUrl, string newUrl, bool isCopy = false)

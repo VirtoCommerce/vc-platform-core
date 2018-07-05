@@ -57,7 +57,7 @@ namespace VirtoCommerce.Platform.Data.PushNotifications
 
         public void Send(PushNotification notification)
         {
-            Task.Factory.StartNew(() => SendAsync(notification), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default).Unwrap().GetAwaiter().GetResult();
+            SendAsync(notification).GetAwaiter().GetResult();
         }
 
         public async Task SendAsync(PushNotification notification)
