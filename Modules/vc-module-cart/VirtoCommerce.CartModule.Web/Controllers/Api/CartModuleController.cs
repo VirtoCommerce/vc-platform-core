@@ -11,6 +11,7 @@ using VirtoCommerce.CartModule.Core.Model.Search;
 using VirtoCommerce.CartModule.Core.Services;
 using VirtoCommerce.CoreModule.Core.Model.Cart;
 using VirtoCommerce.CoreModule.Core.Model.Shipping;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CartModule.Web.Controllers.Api
@@ -35,7 +36,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         [ProducesResponseType(typeof(ShoppingCart), 200)]
         public async Task<IActionResult> GetCart(string storeId, string customerId, string cartName, string currency, string cultureName)
         {
-            using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(string.Join(":", storeId, customerId, cartName, currency))).LockAsync())
+            using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(ShoppingCart), string.Join(":", storeId, customerId, cartName, currency))).LockAsync())
             {
                 await _cartBuilder.GetOrCreateCartAsync(storeId, customerId, cartName, currency, cultureName);
             }
@@ -57,7 +58,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 200)]
         public async Task<IActionResult> AddItemToCart(string cartId, [FromBody] LineItem lineItem)
         {
-            using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(cartId)).LockAsync())
+            using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(ShoppingCart), cartId)).LockAsync())
             {
                 var cart = await _shoppingCartService.GetByIdAsync(cartId);
                 await _cartBuilder.TakeCart(cart).AddItem(lineItem).SaveAsync();
@@ -70,7 +71,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 200)]
         public async Task<IActionResult> ChangeCartItem(string cartId, string lineItemId, int quantity)
         {
-            using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(cartId)).LockAsync())
+            using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(ShoppingCart), cartId)).LockAsync())
             {
                 var cart = await _shoppingCartService.GetByIdAsync(cartId);
                 _cartBuilder.TakeCart(cart);
@@ -89,7 +90,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         [ProducesResponseType(typeof(int), 200)]
         public async Task<IActionResult> RemoveCartItem(string cartId, string lineItemId)
         {
-            using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(cartId)).LockAsync())
+            using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(ShoppingCart), cartId)).LockAsync())
             {
                 var cart = await _shoppingCartService.GetByIdAsync(cartId);
                 await _cartBuilder.TakeCart(cart).RemoveItem(lineItemId).SaveAsync();
@@ -102,7 +103,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 200)]
         public async Task<IActionResult> ClearCart(string cartId)
         {
-            using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(cartId)).LockAsync())
+            using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(ShoppingCart), cartId)).LockAsync())
             {
                 var cart = await _shoppingCartService.GetByIdAsync(cartId);
                 await _cartBuilder.TakeCart(cart).Clear().SaveAsync();
@@ -115,7 +116,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 200)]
         public async Task<IActionResult> MergeWithCart(string cartId, [FromBody]ShoppingCart otherCart)
         {
-            using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(cartId)).LockAsync())
+            using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(ShoppingCart), cartId)).LockAsync())
             {
                 var cart = await _shoppingCartService.GetByIdAsync(cartId);
                 var builder = await _cartBuilder.TakeCart(cart).MergeWithCartAsync(otherCart);
@@ -158,7 +159,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 200)]
         public async Task<IActionResult> AddCartCoupon(string cartId, string couponCode)
         {
-            using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(cartId)).LockAsync())
+            using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(ShoppingCart), cartId)).LockAsync())
             {
                 var cart = await _shoppingCartService.GetByIdAsync(cartId);
                 await _cartBuilder.TakeCart(cart).AddCoupon(couponCode).SaveAsync();
@@ -171,7 +172,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 200)]
         public async Task<IActionResult> RemoveCartCoupon(string cartId, string couponCode)
         {
-            using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(cartId)).LockAsync())
+            using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(ShoppingCart), cartId)).LockAsync())
             {
                 var cart = await _shoppingCartService.GetByIdAsync(cartId);
                 await _cartBuilder.TakeCart(cart).RemoveCoupon().SaveAsync();
@@ -184,7 +185,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 200)]
         public async Task<IActionResult> AddOrUpdateCartShipment(string cartId, [FromBody] Shipment shipment)
         {
-            using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(cartId)).LockAsync())
+            using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(ShoppingCart), cartId)).LockAsync())
             {
                 var cart = await _shoppingCartService.GetByIdAsync(cartId);
                 await _cartBuilder.TakeCart(cart).AddOrUpdateShipment(shipment).SaveAsync();
@@ -197,7 +198,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 200)]
         public async Task<IActionResult> AddOrUpdateCartPayment(string cartId, [FromBody] Payment payment)
         {
-            using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(cartId)).LockAsync())
+            using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(ShoppingCart), cartId)).LockAsync())
             {
                 var cart = await _shoppingCartService.GetByIdAsync(cartId);
                 await _cartBuilder.TakeCart(cart).AddOrUpdatePayment(payment).SaveAsync();
@@ -257,7 +258,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         [Authorize(ModuleConstants.Security.Permissions.Update)]
         public async Task<IActionResult> Update(ShoppingCart cart)
         {
-            using (await AsyncLock.GetLockByKey(GetAsyncLockCartKey(cart.Id)).LockAsync())
+            using (await AsyncLock.GetLockByKey(CacheKey.With(cart.GetType(), cart.Id)).LockAsync())
             {
                 await _shoppingCartService.SaveChangesAsync(new[] { cart });
             }
@@ -278,11 +279,5 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
             await _shoppingCartService.DeleteAsync(ids);
             return Ok();
         }
-
-        private static string GetAsyncLockCartKey(string cartId)
-        {
-            return "Cart:" + cartId;
-        }
-
     }
 }

@@ -1,7 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using VirtoCommerce.CoreModule.Core.Commerce.Model;
-using VirtoCommerce.Domain.Commerce.Model;
+using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CartModule.Data.Model
