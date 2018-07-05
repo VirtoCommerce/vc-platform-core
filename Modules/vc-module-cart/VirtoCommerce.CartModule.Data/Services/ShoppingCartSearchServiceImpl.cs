@@ -3,10 +3,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using VirtoCommerce.CartModule.Core.Caching;
 using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CartModule.Core.Model.Search;
 using VirtoCommerce.CartModule.Core.Services;
+using VirtoCommerce.CartModule.Data.Caching;
 using VirtoCommerce.CartModule.Data.Model;
 using VirtoCommerce.CartModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;
@@ -31,6 +31,7 @@ namespace VirtoCommerce.CartModule.Data.Services
             var cacheKey = CacheKey.With(GetType(), "SearchCartAsync", criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
+                cacheEntry.AddExpirationToken(CartCacheRegion.CreateChangeToken());
                 using (var repository = _repositoryFactory())
                 {
                     var query = repository.ShoppingCarts;
@@ -93,13 +94,7 @@ namespace VirtoCommerce.CartModule.Data.Services
                     retVal.TotalCount = await query.CountAsync();
 
                     var carts = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                    retVal.Results = carts.Select(x =>
-                        {
-                            var result = x.ToModel(AbstractTypeFactory<ShoppingCart>.TryCreateInstance());
-                            cacheEntry.AddExpirationToken(CartCacheRegion.CreateChangeToken(result));
-                            return result;
-                        })
-                        .ToList();
+                    retVal.Results = carts.Select(x => x.ToModel(AbstractTypeFactory<ShoppingCart>.TryCreateInstance())).ToList();
 
                     return retVal;
                 }

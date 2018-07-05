@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using VirtoCommerce.CartModule.Core.Caching;
+using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CartModule.Core.Events;
 using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CartModule.Core.Services;
+using VirtoCommerce.CartModule.Data.Caching;
 using VirtoCommerce.CartModule.Data.Model;
 using VirtoCommerce.CartModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;
@@ -57,6 +58,7 @@ namespace VirtoCommerce.CartModule.Data.Services
                             _totalsCalculator.CalculateTotals(cart);
                         }
                         retVal.Add(cart);
+                        cacheEntry.AddExpirationToken(CartDictionaryCacheRegion.CreateChangeToken(cart));
                     }
                 }
 
@@ -132,9 +134,11 @@ namespace VirtoCommerce.CartModule.Data.Services
 
         private void ClearCache(IEnumerable<ShoppingCart> entities)
         {
+            CartCacheRegion.ExpireRegion();
+
             foreach (var entity in entities)
             {
-                CartCacheRegion.ExpireInventory(entity);
+                CartDictionaryCacheRegion.ExpireInventory(entity);
             }
         }
 
