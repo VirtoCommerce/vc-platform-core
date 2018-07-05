@@ -68,6 +68,12 @@ namespace VirtoCommerce.NotificationsModule.Web
             AbstractTypeFactory<NotificationEntity>.RegisterType<EmailNotificationEntity>();
             AbstractTypeFactory<NotificationEntity>.RegisterType<SmsNotificationEntity>();
 
+            ModuleInfo.Settings.Add(new ModuleSettingsGroup
+            {
+                Name = "Notifications|General",
+                Settings = ModuleConstants.Settings.General.AllSettings.ToArray()
+            });
+
             var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IKnownPermissionsProvider>();
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
                 new Permission()
@@ -89,6 +95,7 @@ namespace VirtoCommerce.NotificationsModule.Web
                 }
             }
 
+            //TODO move to impl. projects
             var configuration = appBuilder.ApplicationServices.GetService<IConfiguration>();
             var notificationGateway = configuration.GetSection("Notifications:Gateway").Value;
             var notificationMessageSenderProviderFactory = appBuilder.ApplicationServices.GetService<INotificationMessageSenderProviderFactory>();

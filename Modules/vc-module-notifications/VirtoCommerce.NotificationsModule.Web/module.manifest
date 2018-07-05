@@ -7,6 +7,7 @@
     <description>description</description>
     <authors>
         <author>Eugeny Tatarincev</author>
+        <author>Andrei Kostyrin</author>
     </authors>
     <owners>
         <owner>Virto Commerce</owner>
@@ -26,36 +27,5 @@
     <scripts>
         <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
     </scripts> 
-	
-	<permissions>
-        <group name="Notifications">
-            <permission id="notifications:access" name="Open notifications menu" description=""/>
-            <permission id="notifications:create" name="Create notifications related data" description=""/>
-            <permission id="notifications:read" name="View notifications related data" description=""/>
-            <permission id="notifications:update" name="Update notifications related data" description=""/>
-            <permission id="notifications:delete" name="Delete notifications related data" description=""/>
-            <permission id="notifications:export" name="Export notifications data" description=""/>
-            <permission id="notifications:import" name="Import notifications data" description=""/>
-			<permission id="notifications:templates:read" name="View template related data" description=""/>
-			<permission id="notifications:template:create" name="Create template related data" description=""/>
-        </group>
-    </permissions>
-    <settings>
-        <group name="Notifications|General">
-            <setting>
-                <name>VirtoCommerce.Notifications.General.Languages</name>
-                <valueType>string</valueType>
-                <defaultValue>en-US</defaultValue>
-                <title>Languages</title>
-                <description>Languages available in the Notifications</description>
-                <isArray>true</isArray>
-                <arrayValues>
-                    <value>en-US</value>
-                    <value>de-DE</value>
-                </arrayValues>
-            </setting>
-            
-        </group>
-    </settings>
     
 </module>

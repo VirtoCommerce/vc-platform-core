@@ -52,7 +52,7 @@ namespace VirtoCommerce.NotificationsModule.Data.ExportImport
             };
         }
 
-        public Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
+        public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -67,7 +67,7 @@ namespace VirtoCommerce.NotificationsModule.Data.ExportImport
                 progressInfo.Description = "Notifications exporting...";
                 progressCallback(progressInfo);
 
-                var notificationsResult = _notificationSearchService.SearchNotifications(new NotificationSearchCriteria { Take = Int32.MaxValue, ResponseGroup = NotificationResponseGroup.Default.ToString() });
+                var notificationsResult = await _notificationSearchService.SearchNotificationsAsync(new NotificationSearchCriteria { Take = Int32.MaxValue, ResponseGroup = NotificationResponseGroup.Default.ToString() });
                 writer.WritePropertyName("NotificationsTotalCount");
                 writer.WriteValue(notificationsResult.TotalCount);
 
@@ -75,7 +75,7 @@ namespace VirtoCommerce.NotificationsModule.Data.ExportImport
                 writer.WriteStartArray();
                 for (var i = 0; i < notificationsResult.TotalCount; i += _batchSize)
                 {
-                    var searchResponse = _notificationSearchService.SearchNotifications(new NotificationSearchCriteria { Skip = i, Take = _batchSize, ResponseGroup = NotificationResponseGroup.Full.ToString() });
+                    var searchResponse = await _notificationSearchService.SearchNotificationsAsync(new NotificationSearchCriteria { Skip = i, Take = _batchSize, ResponseGroup = NotificationResponseGroup.Full.ToString() });
 
                     foreach (var notification in searchResponse.Results)
                     {
@@ -90,8 +90,6 @@ namespace VirtoCommerce.NotificationsModule.Data.ExportImport
                 writer.WriteEndObject();
                 writer.Flush();
             }
-
-            return Task.CompletedTask;
         }
 
         public Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
