@@ -73,7 +73,7 @@ namespace VirtoCommerce.CartModule.Data.Services
 
                 await _shoppingCartService.SaveChangesAsync(new[] { Cart });
 
-                Cart = _shoppingCartService.GetByIdsAsync(new[] { Cart.Id }).GetAwaiter().GetResult().FirstOrDefault();
+                Cart = await _shoppingCartService.GetByIdAsync(Cart.Id);
             }
 
             return this;

@@ -37,7 +37,7 @@ namespace VirtoCommerce.CartModule.Data.Services
 
         #region IShoppingCartService Members
 
-        public virtual async Task<ShoppingCart[]> GetByIdsAsync(string[] cartIds, string responseGroup = null)
+        public virtual async Task<IEnumerable<ShoppingCart>> GetByIdsAsync(string[] cartIds, string responseGroup = null)
         {
             var retVal = new List<ShoppingCart>();
             var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", cartIds), responseGroup);
@@ -58,13 +58,13 @@ namespace VirtoCommerce.CartModule.Data.Services
                             _totalsCalculator.CalculateTotals(cart);
                         }
                         retVal.Add(cart);
-                        cacheEntry.AddExpirationToken(CartDictionaryCacheRegion.CreateChangeToken(cart));
+                        cacheEntry.AddExpirationToken(CartCacheRegion.CreateChangeToken(cart));
                     }
                 }
 
                 await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal.ToArray<IHasDynamicProperties>());
 
-                return retVal.ToArray();
+                return retVal;
             });
         }
 
@@ -134,11 +134,11 @@ namespace VirtoCommerce.CartModule.Data.Services
 
         private void ClearCache(IEnumerable<ShoppingCart> entities)
         {
-            CartCacheRegion.ExpireRegion();
+            CartSearchCacheRegion.ExpireRegion();
 
             foreach (var entity in entities)
             {
-                CartDictionaryCacheRegion.ExpireInventory(entity);
+                CartCacheRegion.ExpireInventory(entity);
             }
         }
 

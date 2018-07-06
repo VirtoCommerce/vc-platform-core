@@ -31,7 +31,7 @@ namespace VirtoCommerce.CartModule.Data.Services
             var cacheKey = CacheKey.With(GetType(), "SearchCartAsync", criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                cacheEntry.AddExpirationToken(CartCacheRegion.CreateChangeToken());
+                cacheEntry.AddExpirationToken(CartSearchCacheRegion.CreateChangeToken());
                 using (var repository = _repositoryFactory())
                 {
                     var query = repository.ShoppingCarts;
