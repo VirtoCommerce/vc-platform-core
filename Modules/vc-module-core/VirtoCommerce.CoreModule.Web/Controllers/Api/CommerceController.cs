@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using VirtoCommerce.Domain.Commerce.Model;
 using Microsoft.AspNetCore.Mvc;
-using VirtoCommerce.CoreModule.Core.Commerce.Model;
 using VirtoCommerce.CoreModule.Core.Commerce.Services;
+using VirtoCommerce.CoreModule.Core.Model;
 
 namespace VirtoCommerce.CoreModule.Web.Controllers.Api
 {

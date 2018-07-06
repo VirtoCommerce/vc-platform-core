@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using VirtoCommerce.CoreModule.Core.Model.Payment;
 using VirtoCommerce.CoreModule.Core.Model.Shipping;
 using VirtoCommerce.CoreModule.Core.Model.Tax;
+using VirtoCommerce.CoreModule.Core.Registrars;
 using VirtoCommerce.CoreModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.StoreModule.Core.Model;
