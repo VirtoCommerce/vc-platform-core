@@ -9,12 +9,10 @@ using VirtoCommerce.InventoryModule.Core.Events;
 using VirtoCommerce.InventoryModule.Core.Model;
 using VirtoCommerce.InventoryModule.Core.Services;
 using VirtoCommerce.InventoryModule.Data.Caching;
-using VirtoCommerce.InventoryModule.Data.Cashing;
 using VirtoCommerce.InventoryModule.Data.Model;
 using VirtoCommerce.InventoryModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Data.Infrastructure;
 
@@ -45,7 +43,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                     return entity.Select(e =>
                     {
                         var result = e.ToModel(AbstractTypeFactory<InventoryInfo>.TryCreateInstance());
-                        cacheEntry.AddExpirationToken(InventoryDictionaryCacheRegion.CreateChangeToken(result));
+                        cacheEntry.AddExpirationToken(InventoryCacheRegion.CreateChangeToken(result));
                         return result;
                     });
                 }
@@ -67,7 +65,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                     retVal.AddRange(entities.Select(x =>
                     {
                         var result = x.ToModel(AbstractTypeFactory<InventoryInfo>.TryCreateInstance());
-                        cacheEntry.AddExpirationToken(InventoryDictionaryCacheRegion.CreateChangeToken(result));
+                        cacheEntry.AddExpirationToken(InventoryCacheRegion.CreateChangeToken(result));
                         return result;
                     }));
                 }
@@ -114,11 +112,11 @@ namespace VirtoCommerce.InventoryModule.Data.Services
 
         private void ClearCache(IEnumerable<InventoryInfo> inventories)
         {
-            InventoryCacheRegion.ExpireRegion();
+            InventorySearchCacheRegion.ExpireRegion();
 
             foreach (var inventory in inventories)
             {
-                InventoryDictionaryCacheRegion.ExpireInventory(inventory);
+                InventoryCacheRegion.ExpireInventory(inventory);
             }
         }
 

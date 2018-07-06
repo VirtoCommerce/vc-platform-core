@@ -75,7 +75,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
                         store.Settings = await _settingManager.GetModuleSettingsAsync("VirtoCommerce.Store");
                         await _settingManager.LoadEntitySettingsValuesAsync(store);
                         stores.Add(store);
-                        cacheEntry.AddExpirationToken(StoreDictionaryCacheRegion.CreateChangeToken(store));
+                        cacheEntry.AddExpirationToken(StoreCacheRegion.CreateChangeToken(store));
                     }
                 }
 
@@ -185,11 +185,11 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
         private void ClearCache(IEnumerable<Store> stores)
         {
-            StoreCacheRegion.ExpireRegion();
+            StoreSearchCacheRegion.ExpireRegion();
 
             foreach (var store in stores)
             {
-                StoreDictionaryCacheRegion.ExpireInventory(store);
+                StoreCacheRegion.ExpireInventory(store);
             }
         }
 
