@@ -38,7 +38,8 @@
         "underscore": "1.8.3",
         "angular-filter": "0.5.8",
         "uikit": "2.27.5",
-        "marked": "0.3.6"
+        "marked": "0.3.6",
+        "yamljs": "0.1.5"
     },
   "resolutions": {
     "angular": "1.4.4",

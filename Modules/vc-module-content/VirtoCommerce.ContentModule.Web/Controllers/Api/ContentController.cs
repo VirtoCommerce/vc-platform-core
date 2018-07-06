@@ -56,8 +56,6 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         {
             var contentStorageProvider = _contentStorageProviderFactory("");
 
-            var store = await _storeService.GetByIdAsync(storeId);
-
             //var cacheKey = CacheKey.With(GetType(), "GetStoreContentStatsAsync", $"content-{storeId}", TimeSpan.FromMinutes(1).ToString());
 
             //var pagesCount = _memoryCache.GetOrCreateExclusive(cacheKey, (cacheEntry) => {
@@ -66,8 +64,15 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
 
             //});
 
-            var themes = await contentStorageProvider.SearchAsync(GetContentBasePath("themes", storeId), null);
-            var blogs = await contentStorageProvider.SearchAsync(GetContentBasePath("blogs", storeId), null);
+            var storeTask = _storeService.GetByIdAsync(storeId);
+            var themesTask = contentStorageProvider.SearchAsync(GetContentBasePath("themes", storeId), null);
+            var blogsTask =  contentStorageProvider.SearchAsync(GetContentBasePath("blogs", storeId), null);
+
+            await Task.WhenAll(storeTask, themesTask, blogsTask);
+
+            var store = storeTask.Result;
+            var themes = themesTask.Result;
+            var blogs = blogsTask.Result;
 
             var retVal = new ContentStatistic
             {
@@ -76,6 +81,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
                 BlogsCount = themes.Results.Count(x => x.Type.EqualsInvariant("folder")),
                 PagesCount = 10 //pagesCount
             };
+
             return Ok(retVal);
         }
 
@@ -211,7 +217,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
                 {
                     if (!entry.FullName.EndsWith("/"))
                     {
-                        var fileName = String.Join("/", entry.FullName.Split('/').Skip(1));
+                        var fileName = string.Join("/", entry.FullName.Split('/').Skip(1));
                         using (var entryStream = entry.Open())
                         using (var targetStream = storageProvider.OpenWrite(destPath + "/" + fileName))
                         {
@@ -302,7 +308,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
                 var section = await reader.ReadNextSectionAsync();
                 if (section != null)
                 {
-                    var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out ContentDispositionHeaderValue contentDisposition);
+                    var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out var contentDisposition);
 
                     if (hasContentDispositionHeader)
                     {
