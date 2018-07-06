@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="ExportImport\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VirtoCommerce.SitemapsModule.Core\VirtoCommerce.SitemapsModule.Core.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.SitemapsModule.Data\VirtoCommerce.SitemapsModule.Data.csproj" />
+  </ItemGroup>
+
+</Project>

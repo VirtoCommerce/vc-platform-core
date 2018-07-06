@@ -1,0 +1,40 @@
+﻿<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <div class="form">
+                <div class="block">
+                    <div>
+                        <p class="text" ng-bind="blade.notification.description"></p>
+                    </div>
+                </div>
+                <div class="block" ng-if="blade.notification.created || blade.notification.finished">
+                    <p ng-if="blade.notification.created" ng-class="{ 'no-data': blade.notification.created }" class="text">{{ 'sitemapsModule.blades.download.labels.start' | translate }} — <i class="fa fa-clock-o"></i>&nbsp;{{ blade.notification.created | amParse | date:'mediumTime' }}</p>
+                    <p ng-if="blade.notification.finished" ng-class="{ 'no-data': blade.notification.finished }" class="text">{{ 'sitemapsModule.blades.download.labels.end' | translate }} — <i class="fa fa-clock-o"></i>&nbsp;{{ blade.notification.finished | amParse | date:'mediumTime' }}</p>
+                </div>
+                <div class="block" ng-if="blade.notification.totalCount || blade.notification.processedCount || blade.notification.errorCount">
+                    <ul class="list __info">
+                        <li class="list-item">
+                            <div class="list-t">{{ 'sitemapsModule.blades.download.labels.total' | translate }}</div>
+                            <div class="list-descr">{{ blade.notification.totalCount | number:0 }}</div>
+                        </li>
+                        <li class="list-item">
+                            <div class="list-t">{{ 'sitemapsModule.blades.download.labels.processed' | translate }}</div>
+                            <div class="list-descr">{{ blade.notification.processedCount | number:0 }}</div>
+                        </li>
+                        <li class="list-item">
+                            <div class="list-t">{{ 'sitemapsModule.blades.download.labels.errors-count' | translate }}</div>
+                            <div class="list-descr">{{ blade.notification.errorCount | number:0 }}</div>
+                        </li>
+                    </ul>
+                </div>
+                <div ng-if="blade.notification.errorCount > 0">
+                    <span class="sub-t">{{ 'sitemapsModule.blades.download.labels.errors' | translate }}</span>
+                    <div class="log">
+                        <p ng-repeat="error in blade.notification.errors track by $index" class="error">{{error}}</p>
+                    </div>
+                </div>
+                <p class="text" ng-if="blade.notification.downloadUrl">{{ 'catalog.blades.catalog-CSV-export.labels.download-url' | translate }}: <a href="{{ blade.notification.downloadUrl }}" target="_blank" ng-bind="blade.notification.downloadUrl"></a></p>
+            </div>
+        </div>
+    </div>
+</div>
