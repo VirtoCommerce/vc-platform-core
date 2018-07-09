@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.CoreModule.Core.Model;
+using VirtoCommerce.CoreModule.Core.Model.Tax;
 using VirtoCommerce.CoreModule.Core.Services;
+using VirtoCommerce.StoreModule.Core.Services;
 
 namespace VirtoCommerce.CoreModule.Web.Controllers.Api
 {
@@ -14,42 +15,44 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
     {
         private readonly ISeoService _seoService;
         private readonly ICurrencyService _currencyService;
-        //private readonly IStoreService _storeService;
-        //private readonly ISeoDuplicatesDetector _seoDuplicateDetector;
+        private readonly IPackageTypesService _packageTypesService;
+        private readonly IStoreService _storeService;
+        private readonly ISeoDuplicatesDetector _seoDuplicateDetector;
 
-        public CommerceController(ISeoService seoService, ICurrencyService currencyService/*, IStoreService storeService, ISeoDuplicatesDetector seoDuplicateDetector*/)
+        public CommerceController(ISeoService seoService, ICurrencyService currencyService, IPackageTypesService packageTypesService, IStoreService storeService, ISeoDuplicatesDetector seoDuplicateDetector)
         {
             _seoService = seoService;
             _currencyService = currencyService;
-            //_storeService = storeService;
-            //_seoDuplicateDetector = seoDuplicateDetector;
+            _packageTypesService = packageTypesService;
+            _storeService = storeService;
+            _seoDuplicateDetector = seoDuplicateDetector;
         }
 
 
-        ///// <summary>
-        ///// Evaluate and return all tax rates for specified store and evaluation context 
-        ///// </summary>
-        ///// <param name="storeId"></param>
-        ///// <param name="evalContext"></param>
-        ///// <returns></returns>
-        //[HttpPost]
-        //[ResponseType(typeof(coreTaxModel.TaxRate[]))]
-        //[Route("taxes/{storeId}/evaluate")]
-        //public IHttpActionResult EvaluateTaxes(string storeId, [FromBody]coreTaxModel.TaxEvaluationContext evalContext)
-        //{
-        //    var retVal = new List<coreTaxModel.TaxRate>();
-        //    var store = _storeService.GetById(storeId);
-        //    if (store != null)
-        //    {
-        //        var activeTaxProvider = store.TaxProviders.FirstOrDefault(x => x.IsActive);
-        //        if (activeTaxProvider != null)
-        //        {
-        //            evalContext.Store = store;
-        //            retVal.AddRange(activeTaxProvider.CalculateRates(evalContext));
-        //        }
-        //    }
-        //    return Ok(retVal);
-        //}
+        /// <summary>
+        /// Evaluate and return all tax rates for specified store and evaluation context 
+        /// </summary>
+        /// <param name="storeId"></param>
+        /// <param name="evalContext"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ProducesResponseType(typeof(TaxRate[]), 200)]
+        [Route("taxes/{storeId}/evaluate")]
+        public async Task<IActionResult> EvaluateTaxes(string storeId, [FromBody]TaxEvaluationContext evalContext)
+        {
+            var retVal = new List<TaxRate>();
+            var store = await _storeService.GetByIdAsync(storeId);
+            if (store != null)
+            {
+                var activeTaxProvider = store.TaxProviders.FirstOrDefault(x => x.IsActive);
+                if (activeTaxProvider != null)
+                {
+                    evalContext.StoreId = store.Id;
+                    retVal.AddRange(activeTaxProvider.CalculateRates(evalContext));
+                }
+            }
+            return Ok(retVal);
+        }
 
         /// <summary>
         /// Batch create or update seo infos
@@ -68,12 +71,11 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         [HttpGet]
         [ProducesResponseType(typeof(SeoInfo[]), 200)]
         [Route("seoinfos/duplicates")]
-        public IActionResult GetSeoDuplicates(string objectId, string objectType)
+        public async Task<IActionResult> GetSeoDuplicates(string objectId, string objectType)
         {
-            //TODO
-            return Ok(new SeoInfo[] { });
-            //var retVal = _seoDuplicateDetector.DetectSeoDuplicates(objectType, objectId, _commerceService.GetAllSeoDuplicates());
-            //return Ok(retVal.ToArray());
+            var seoDuplicates = await _seoService.GetAllSeoDuplicatesAsync();
+            var retVal = _seoDuplicateDetector.DetectSeoDuplicates(objectType, objectId, seoDuplicates);
+            return Ok(retVal.ToArray());
         }
 
         /// <summary>
@@ -147,58 +149,58 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         }
 
 
-        ///// <summary>
-        ///// Return all package types registered in the system
-        ///// </summary>
-        //[HttpGet]
-        //[ResponseType(typeof(coreModel.PackageType[]))]
-        //[Route("packageTypes")]
-        //public IHttpActionResult GetAllPackageTypes()
-        //{
-        //    var retVal = _commerceService.GetAllPackageTypes().ToArray();
-        //    return Ok(retVal);
-        //}
+        /// <summary>
+        /// Return all package types registered in the system
+        /// </summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(PackageType[]), 200)]
+        [Route("packageTypes")]
+        public async Task<IActionResult> GetAllPackageTypes()
+        {
+            var retVal = await _packageTypesService.GetAllPackageTypesAsync();
+            return Ok(retVal.ToArray());
+        }
 
-        ///// <summary>
-        /////  Update a existing package type 
-        ///// </summary>
-        ///// <param name="packageType">package type</param>
-        //[HttpPut]
-        //[ResponseType(typeof(void))]
-        //[Route("packageTypes")]
+        /// <summary>
+        ///  Update a existing package type 
+        /// </summary>
+        /// <param name="packageType">package type</param>
+        [HttpPut]
+        [ProducesResponseType(typeof(void), 200)]
+        [Route("packageTypes")]
         //[CheckPermission(Permission = CommercePredefinedPermissions.PackageTypeUpdate)]
-        //public IHttpActionResult UpdatePackageType(coreModel.PackageType packageType)
-        //{
-        //    _commerceService.UpsertPackageTypes(new[] { packageType });
-        //    return StatusCode(HttpStatusCode.NoContent);
-        //}
+        public async Task<IActionResult> UpdatePackageType([FromBody]PackageType packageType)
+        {
+            await _packageTypesService.SaveChangesAsync(new[] { packageType });
+            return Ok();
+        }
 
-        ///// <summary>
-        /////  Create new package type 
-        ///// </summary>
-        ///// <param name="packageType">package type</param>
-        //[HttpPost]
-        //[ResponseType(typeof(void))]
-        //[Route("packageTypes")]
+        /// <summary>
+        ///  Create new package type 
+        /// </summary>
+        /// <param name="packageType">package type</param>
+        [HttpPost]
+        [ProducesResponseType(typeof(void), 200)]
+        [Route("packageTypes")]
         //[CheckPermission(Permission = CommercePredefinedPermissions.PackageTypeCreate)]
-        //public IHttpActionResult CreatePackageType(coreModel.PackageType packageType)
-        //{
-        //    _commerceService.UpsertPackageTypes(new[] { packageType });
-        //    return StatusCode(HttpStatusCode.NoContent);
-        //}
+        public async Task<IActionResult> CreatePackageType(PackageType packageType)
+        {
+            await _packageTypesService.SaveChangesAsync(new[] { packageType });
+            return Ok();
+        }
 
-        ///// <summary>
-        /////  Delete package types 
-        ///// </summary>
-        ///// <param name="ids">package type ids</param>
-        //[HttpDelete]
-        //[ResponseType(typeof(void))]
-        //[Route("packageTypes")]
-        //[CheckPermission(Permission = CommercePredefinedPermissions.PackageTypeDelete)]
-        //public IHttpActionResult DeletePackageTypes([FromUri] string[] ids)
-        //{
-        //    _commerceService.DeletePackageTypes(ids);
-        //    return StatusCode(HttpStatusCode.NoContent);
-        //}
+        /// <summary>
+        ///  Delete package types 
+        /// </summary>
+        /// <param name="ids">package type ids</param>
+        [HttpDelete]
+        [ProducesResponseType(typeof(void), 200)]
+        [Route("packageTypes")]
+        //[ProducesResponseType(Permission = CommercePredefinedPermissions.PackageTypeDelete)]
+        public async Task<IActionResult> DeletePackageTypes([FromQuery] string[] ids)
+        {
+            await _packageTypesService.DeletePackageTypesAsync(ids);
+            return Ok();
+        }
     }
 }

@@ -1,0 +1,272 @@
+{
+    "core": {
+        "commands": {
+            "apply-filter": "Save & apply",
+            "rebuild-index": "Build Index"
+        },
+        "main-menu-title": {
+            "search-index":  "Search index" 
+        },
+        "blades": {
+            "index-progress": {
+                "labels": {
+                    "start": "Start",
+                    "end": "End",
+                    "errors": "Errors",
+                    "stats": "Indexed - {{ processedCount }} of {{ totalCount }} documents"
+                }
+            },
+            "index-detail": {
+                "title": "Search index",
+                "title-new": "Search index missing",
+                "subtitle": "Search index details",
+                "labels": {
+                    "no-index": "Index not found",
+                    "build-date": "Last indexed",
+                    "content": "Index content"
+                }
+            },
+            "address-list": {
+                "labels": {
+                    "no-addresses": "No Addresses yet"
+                }
+            },
+            "address-detail": {
+                "subtitle": "Edit address",
+                "labels": {
+                    "name":  "Address Name", 
+                    "address-type": "Address type",
+                    "first-name": "First name",
+                    "last-name": "Last name",
+                    "country": "Country",
+                    "region": "Region",
+                    "city": "City",
+                    "address1": "Address line 1",
+                    "address2": "Address line 2",
+                    "zip-code": "Zip code",
+                    "email": "Email",
+                    "phone": "Phone"
+                },
+                "placeholders": {
+                    "address-type": "Select...",
+                    "country": "Select..."
+                }
+            },
+            "currency-list": {
+                "title": "Currencies",
+                "subtitle": "Manage system currencies",
+                "labels": {
+                    "exchange-rate": "Exchange rate:",
+                    "no-currencies": "No currencies"
+                }
+            },
+            "currency-detail": {
+                "new-title": "New currency",
+                "new-subtitle": "Enter currency details",
+                "subtitle": "Edit currency details",
+                "labels": {
+                    "code": "Code",
+                    "name": "Name",
+                    "is-primary": "Is primary",
+                    "exchange-rate": "Exchange rate",
+                    "symbol": "Symbol",
+                    "custom-formatting": "Currency custom formatting"
+                },
+                "descriptions": {
+                    "code": "The currency code. Use 3 letter ISO 4217 code, if it exists.",
+                    "name": "The name of the currency.",
+                    "is-primary": "Is this the primary currency? Only one currency can by primary.",
+                    "exchange-rate": "The exchange rate against the primary exchange rate currency",
+                    "symbol": "Short currency symbol",
+                    "custom-formatting": "Custom formatting to be applied to the currency value"
+                },
+                "placeholders": {
+                    "symbol": "Enter symbol or leave empty for default culture",
+                    "code": "Enter currency code",
+                    "name": "Enter currency name",
+                    "exchange-rate": "Enter exchange rate against the primary currency",
+                    "custom-formatting": "0,0.000"
+                },
+                "validation": {
+                    "maxlength": "Currency code must have only 3 symbols"
+                } 
+            },
+            "fulfillment-center-contact": {
+                "labels": {
+                    "country": "Country",
+                    "region": "Region",
+                    "city": "City",
+                    "address": "Address",
+                    "zip-code": "Zip code",
+                    "phone": "Phone"
+                },
+                "placeholders": {
+                    "country": "Select...",
+                    "region": "Enter region",
+                    "city": "Enter city",
+                    "address1": "Enter address line 1",
+                    "address2": "Enter address line 2",
+                    "zip-code": "Enter postal code",
+                    "phone": "Enter phone number"
+                }
+            },
+            "fulfillment-center-detail": {
+                "subtitle": "Edit Fulfillment center",
+                "labels": {
+                    "name": "Name",
+                    "description": "Description",
+                    "max-releases": "Max. releases per pick batch",
+                    "pick-delay": "Pick delay"
+                }
+            },
+            "fulfillment-center-list": {
+                "title": "Fulfillment centers",
+                "subtitle": "Manage Fulfillment centers"
+            },
+            "seo-list": {
+                "subtitle": "Manage SEOs",
+                "labels": {
+                    "duplicates-found": "There are {{count}} conflicting Semantic URLs!",
+                    "resolve-duplicates": "Resolve conflicts",
+                    "language-code": "Language",
+                    "container": "Store",
+                    "semanticUrl": "Semantic URL"
+                }
+            },
+            "seo-detail": {
+                "title-new": "New SEO",
+                "subtitle": "SEO details",
+                "labels": {
+                    "is-active": "Is active",
+                    "store": "Store",
+                    "language": "Language",
+                    "url-keyword": "URL keyword",
+                    "page-title": "Page title",
+                    "meta-description": "Meta description",
+                    "alternative-text": "Image alternative text"
+                },
+                "placeholders": {
+                    "store": "Select Store",
+                    "language": "Select Language",
+                    "url-keyword": "Enter keyword",
+                    "page-title": "Enter title",
+                    "meta-description": "Enter description",
+                    "alternative-text": "Enter text"
+                },
+                "validations": {
+                    "url-keyword-required": "Required",
+                    "url-keyword-invalid": "Invalid characters in URL found",
+                    "url-keyword-duplicate": "Duplicate URL found"
+                }
+            },
+            "seo-duplicates": {
+                "subtitle": "SEO conflicts",
+                "labels": {
+                    "semanticUrl": "Semantic URL",
+                    "container": "Store"
+                }
+            },
+            "package-type-list": {
+                "title": "Predefined package size dimensions",
+                "subtitle": "Manage system packages types",
+                "labels": {
+                    "no-packages": "No predefined packages"
+                }
+            },
+            "package-type-detail": {
+                "new-title": "New package type",
+                "new-subtitle": "Enter package size values",
+                "subtitle": "Edit package size details",
+                "labels": {
+                    "name": "Package type name",
+                    "name-description": "will be used for identification",
+                    "name-placeholder": "Enter package type name",
+                    "measureUnit": "Measure unit",
+                    "measureUnit-description": "will be used as primary measure unit for sizes",
+                    "measureUnit-placeholder": "Choose measure unit or define new",
+                    "width": "Width",
+                    "height": "Height",
+                    "length": "Length"
+                }
+            },
+            "document-type-list": {
+                "title": "Document types",
+                "labels": {
+                    "document-type": "Document type",
+                    "indexed-docs-total": "Docs count",
+                    "provider": "Provider",
+                    "scope": "Scope",
+                    "last-indexation-date": "Last indexed",
+                    "build-index": "Build index",
+                    "rebuild-index": "Rebuild index"
+                }
+            }
+        },
+        "dialogs": {
+            "reindex": {
+                "title": "Build Search Index",
+                "msg1": "Choose how to update the Search Index. Options:",
+                "msg2": "Build: index for all data without recreating.",
+                "msg3": "Delete + build: Current search index will be deleted and built from scratch. Note that there WON'T BE ANY SEARCH RESULTS until the build process finishes.",
+                "index": "Build",
+                "reindex": "Delete + build"
+            },
+            "address-delete": {
+                "title": "Delete confirmation",
+                "message": "Are you sure you want to delete this Address?"
+            },
+            "address-save": {
+                "title": "Save changes",
+                "message": "The Address has been modified. Do you want to save changes?"
+            },
+            "currency-delete": {
+                "title": "Delete confirmation",
+                "message": "Are you sure you want to delete this Currency?"
+            },
+            "currency-save": {
+                "title": "Save changes",
+                "message": "The Currency has been modified. Do you want to save changes?"
+            },
+            "fulfillment-delete": {
+                "title": "Delete confirmation",
+                "message": "Are you sure you want to delete this Fulfillment center?"
+            },
+            "fulfillments-save": {
+                "title": "Save changes",
+                "message": "The fulfillments has been modified. Do you want to save changes?"
+            },
+            "seo-save": {
+                "title": "Save changes",
+                "message": "The SEO information has been modified. Do you want to save changes?"
+            },
+            "package-type-save": {
+                "title": "Save changes",
+                "message": "The package type information has been modified. Do you want to save changes?"
+            },
+            "package-type-delete": {
+                "title": "Delete confirmation",
+                "message": "Are you sure you want to delete this package type?"
+            }
+        },
+        "widgets": {
+            "index": {
+                "index-ok": "Indexed <span am-time-ago='indexDate'></span>",
+                "index-old": "Outdated. Index was built <span am-time-ago='indexDate'>",
+                "no-index": "Search index missing"
+            },
+            "currency": {
+                "title": "Currencies"
+            },
+            "fulfillmentCenterContact": {
+                "blade-subtitle": "Contact information",
+                "title": "Contact information"
+            },
+            "fulfillment": {
+                "title": "Fulfillment centers"
+            },
+            "seo": {
+                "title": "SEO"
+            }
+        }
+    }
+}
