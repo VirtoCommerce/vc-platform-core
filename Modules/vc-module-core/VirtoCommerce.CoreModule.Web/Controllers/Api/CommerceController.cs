@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.CoreModule.Core;
 using VirtoCommerce.CoreModule.Core.Model;
 using VirtoCommerce.CoreModule.Core.Model.Tax;
 using VirtoCommerce.CoreModule.Core.Services;
@@ -110,8 +112,7 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         [HttpPut]
         [ProducesResponseType(typeof(void), 200)]
         [Route("currencies")]
-        //TODO
-        //[CheckPermission(Permission = CommercePredefinedPermissions.CurrencyUpdate)]
+        [Authorize(ModuleConstants.Security.Permissions.CurrencyUpdate)]
         public async Task<IActionResult> UpdateCurrency([FromBody]Currency currency)
         {
             await _currencyService.SaveChangesAsync(new[] { currency });
@@ -125,8 +126,7 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         [HttpPost]
         [ProducesResponseType(typeof(void), 200)]
         [Route("currencies")]
-        //TODO
-        //[CheckPermission(Permission = CommercePredefinedPermissions.CurrencyCreate)]
+        [Authorize(ModuleConstants.Security.Permissions.CurrencyCreate)]
         public async Task<IActionResult> CreateCurrency([FromBody]Currency currency)
         {
             await _currencyService.SaveChangesAsync(new[] { currency });
@@ -140,8 +140,7 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         [HttpDelete]
         [ProducesResponseType(typeof(void), 200)]
         [Route("currencies")]
-        //TODO
-        //[CheckPermission(Permission = CommercePredefinedPermissions.CurrencyDelete)]
+        [Authorize(ModuleConstants.Security.Permissions.CurrencyDelete)]
         public async Task<IActionResult> DeleteCurrencies([FromQuery] string[] codes)
         {
             await _currencyService.DeleteCurrenciesAsync(codes);
@@ -168,7 +167,7 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         [HttpPut]
         [ProducesResponseType(typeof(void), 200)]
         [Route("packageTypes")]
-        //[CheckPermission(Permission = CommercePredefinedPermissions.PackageTypeUpdate)]
+        [Authorize(ModuleConstants.Security.Permissions.PackageTypeUpdate)]
         public async Task<IActionResult> UpdatePackageType([FromBody]PackageType packageType)
         {
             await _packageTypesService.SaveChangesAsync(new[] { packageType });
@@ -182,7 +181,7 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         [HttpPost]
         [ProducesResponseType(typeof(void), 200)]
         [Route("packageTypes")]
-        //[CheckPermission(Permission = CommercePredefinedPermissions.PackageTypeCreate)]
+        [Authorize(ModuleConstants.Security.Permissions.PackageTypeCreate)]
         public async Task<IActionResult> CreatePackageType(PackageType packageType)
         {
             await _packageTypesService.SaveChangesAsync(new[] { packageType });
@@ -196,7 +195,7 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         [HttpDelete]
         [ProducesResponseType(typeof(void), 200)]
         [Route("packageTypes")]
-        //[ProducesResponseType(Permission = CommercePredefinedPermissions.PackageTypeDelete)]
+        [Authorize(ModuleConstants.Security.Permissions.PackageTypeDelete)]
         public async Task<IActionResult> DeletePackageTypes([FromQuery] string[] ids)
         {
             await _packageTypesService.DeletePackageTypesAsync(ids);

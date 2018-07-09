@@ -5,7 +5,7 @@
             "rebuild-index": "Build Index"
         },
         "main-menu-title": {
-            "search-index":  "Search index" 
+            "search-index": "Search index"
         },
         "blades": {
             "index-progress": {
@@ -34,7 +34,7 @@
             "address-detail": {
                 "subtitle": "Edit address",
                 "labels": {
-                    "name":  "Address Name", 
+                    "name": "Address Name",
                     "address-type": "Address type",
                     "first-name": "First name",
                     "last-name": "Last name",
@@ -89,7 +89,7 @@
                 },
                 "validation": {
                     "maxlength": "Currency code must have only 3 symbols"
-                } 
+                }
             },
             "fulfillment-center-contact": {
                 "labels": {
@@ -267,6 +267,44 @@
             "seo": {
                 "title": "SEO"
             }
+        }
+    },
+    "permissions": {
+        "core:packageType:create": "core:packageType:create",
+        "core:packageType:update": "core:packageType:update",
+        "core:packageType:delete": "Update inventory related data",
+        "core:currency:create": "Delete inventory related data",
+        "core:currency:update": "Access inventory related data",
+        "core:currency:delete": "Manage fulfillment centers"
+    },
+    "settings": {
+        "VirtoCommerce.Core.General.TaxTypes": {
+            "description": "Tax types available in system",
+            "title": "Tax types"
+        },
+        "VirtoCommerce.Core.General.WeightUnits": {
+            "description": "Mass units available for physical goods weighting",
+            "title": "Mass units"
+        },
+        "VirtoCommerce.Core.General.MeasureUnits": {
+            "description": "Measure units available for measuring length",
+            "title": "Units of length"
+        },
+        "VirtoCommerce.Core.General.Languages": {
+            "description": "Languages available in the platform",
+            "title": "Languages"
+        },
+        "VirtoCommerce.Core.FixedRateShippingMethod.Ground.Rate": {
+            "description": "Fixed Ground shipping rate",
+            "title": "Ground shipping rate"
+        },
+        "VirtoCommerce.Core.FixedRateShippingMethod.Air.Rate": {
+            "description": "Fixed Air shipping rate",
+            "title": "Air shipping rate"
+        },
+        "VirtoCommerce.Core.FixedTaxRateProvider.Rate": {
+            "description": "Fixed tax rate",
+            "title": "Fixed tax rate %"
         }
     }
 }

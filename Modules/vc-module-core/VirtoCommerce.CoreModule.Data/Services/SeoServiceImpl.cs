@@ -7,7 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.CoreModule.Core.Events;
 using VirtoCommerce.CoreModule.Core.Model;
 using VirtoCommerce.CoreModule.Core.Services;
+using VirtoCommerce.CoreModule.Data.Caching;
 using VirtoCommerce.CoreModule.Data.Repositories;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 
@@ -17,56 +19,40 @@ namespace VirtoCommerce.CoreModule.Data.Services
     {
         private readonly Func<ICoreRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public SeoServiceImpl(Func<ICoreRepository> repositoryFactory, IEventPublisher eventPublisher)
+        public SeoServiceImpl(Func<ICoreRepository> repositoryFactory, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
+            _platformMemoryCache = platformMemoryCache;
         }
 
         public async Task LoadSeoForObjectsAsync(ISeoSupport[] seoSupportObjects)
         {
-            using (var repository = _repositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), "LoadSeoForObjectsAsync", string.Join("-", seoSupportObjects.Select(x => x.Id).Distinct()));
+            await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                var objectIds = seoSupportObjects.Where(x => x.Id != null).Select(x => x.Id).Distinct().ToArray();
-
-                var seoInfosEntities = await repository.SeoUrlKeywords.Where(x => objectIds.Contains(x.ObjectId)).ToArrayAsync();
-                var seoInfos = seoInfosEntities.Select(x => x.ToModel(AbstractTypeFactory<SeoInfo>.TryCreateInstance())).ToList();
-
-                foreach (var seoSupportObject in seoSupportObjects)
+                
+                using (var repository = _repositoryFactory())
                 {
-                    seoSupportObject.SeoInfos = seoInfos.Where(x => x.ObjectId == seoSupportObject.Id && x.ObjectType == seoSupportObject.SeoObjectType).ToList();
+                    var objectIds = seoSupportObjects.Where(x => x.Id != null).Select(x => x.Id).Distinct().ToArray();
+
+                    var seoInfosEntities = await repository.SeoUrlKeywords.Where(x => objectIds.Contains(x.ObjectId))
+                        .ToArrayAsync();
+                    var seoInfos = seoInfosEntities
+                        .Select(x => x.ToModel(AbstractTypeFactory<SeoInfo>.TryCreateInstance())).ToList();
+
+                    foreach (var seoSupportObject in seoSupportObjects)
+                    {
+                        seoSupportObject.SeoInfos = seoInfos.Where(x =>
+                                x.ObjectId == seoSupportObject.Id && x.ObjectType == seoSupportObject.SeoObjectType)
+                            .ToList();
+                        SeoCacheRegion.CreateChangeToken(seoSupportObject);
+                    }
                 }
-            }
-        }
-
-        public async Task SaveSeoInfosAsync(SeoInfo[] seoinfos)
-        {
-            var pkMap = new PrimaryKeyResolvingMap();
-            var changedEntries = new List<GenericChangedEntry<SeoInfo>>();
-            using (var repository = _repositoryFactory())
-            {
-                var alreadyExistSeoInfos = await repository.GetSeoByIdsAsync(seoinfos.Select(x => x.Id).ToArray());
-                var target = new { SeoInfos = new ObservableCollection<Model.SeoUrlKeywordEntity>(alreadyExistSeoInfos) };
-                var source = new
-                {
-                    SeoInfos = new ObservableCollection<Model.SeoUrlKeywordEntity>(seoinfos.Select(x =>
-                        AbstractTypeFactory<Model.SeoUrlKeywordEntity>.TryCreateInstance().FromModel(x, pkMap)))
-                };
-
-                source.SeoInfos.Patch(target.SeoInfos, (sourceSeoUrlKeyword, targetSeoUrlKeyword) =>
-                {
-                    changedEntries.Add(new GenericChangedEntry<SeoInfo>(
-                        sourceSeoUrlKeyword.ToModel(AbstractTypeFactory<SeoInfo>.TryCreateInstance()),
-                        targetSeoUrlKeyword.ToModel(AbstractTypeFactory<SeoInfo>.TryCreateInstance()),
-                        EntryState.Modified));
-                    sourceSeoUrlKeyword.Patch(targetSeoUrlKeyword);
-                });
-
-                await repository.UnitOfWork.CommitAsync();
-                pkMap.ResolvePrimaryKeys();
-                await _eventPublisher.Publish(new SeoInfoChangedEvent(changedEntries));
-            }
+                return Task.CompletedTask;
+            });
         }
 
         public async Task SaveSeoForObjectsAsync(ISeoSupport[] seoSupportObjects)
@@ -126,6 +112,7 @@ namespace VirtoCommerce.CoreModule.Data.Services
                     await repository.UnitOfWork.CommitAsync();
                     pkMap.ResolvePrimaryKeys();
                     await _eventPublisher.Publish(new SeoInfoChangedEvent(changedEntries));
+                    SeoCacheRegion.ExpireSeoSupport(seoObject);
                 }
             }
         }
@@ -159,27 +146,40 @@ namespace VirtoCommerce.CoreModule.Data.Services
                     await repository.UnitOfWork.CommitAsync();
                     await _eventPublisher.Publish(new SeoInfoChangedEvent(changedEntries));
                 }
+
+                SeoCacheRegion.ExpireSeoSupport(seoSupportObject);
             }
         }
 
         public async Task<IEnumerable<SeoInfo>> GetAllSeoDuplicatesAsync()
         {
-            var retVal = new List<SeoInfo>();
-            using (var repository = _repositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), "GetAllSeoDuplicatesAsync");
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                var dublicateSeoRecords = await repository.SeoUrlKeywords.GroupBy(x => x.Keyword + ":" + x.StoreId)
-                                                    .Where(x => x.Count() > 1)
-                                                    .SelectMany(x => x)
-                                                    .ToArrayAsync();
-                retVal.AddRange(dublicateSeoRecords.Select(x => x.ToModel(AbstractTypeFactory<SeoInfo>.TryCreateInstance())));
-            }
-            return retVal;
+                var retVal = new List<SeoInfo>();
+                using (var repository = _repositoryFactory())
+                {
+                    var dublicateSeoRecords = await repository.SeoUrlKeywords.GroupBy(x => x.Keyword + ":" + x.StoreId)
+                        .Where(x => x.Count() > 1)
+                        .SelectMany(x => x)
+                        .ToArrayAsync();
+                    retVal.AddRange(dublicateSeoRecords.Select(x =>
+                    {
+                        var result = x.ToModel(AbstractTypeFactory<SeoInfo>.TryCreateInstance());
+                        SeoInfoCacheRegion.CreateChangeToken(result);
+                        return result;
+                    }));
+                }
+                return retVal;
+            });
         }
-
 
         public async Task<IEnumerable<SeoInfo>> GetSeoByKeywordAsync(string keyword)
         {
-            using (var repository = _repositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), "GetSeoByKeywordAsync", keyword);
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            {
+                using (var repository = _repositoryFactory())
             {
                 // Find seo entries for specified keyword. Also add other seo entries related to found object.
                 var query = await repository.SeoUrlKeywords
@@ -187,8 +187,51 @@ namespace VirtoCommerce.CoreModule.Data.Services
                     .Join(repository.SeoUrlKeywords, x => new { x.ObjectId, x.ObjectType }, y => new { y.ObjectId, y.ObjectType }, (x, y) => y)
                     .ToArrayAsync();
 
-                var result = query.Select(x => x.ToModel(AbstractTypeFactory<SeoInfo>.TryCreateInstance())).ToList();
+                var result = query.Select(x =>
+                {
+                    var seoInfo = x.ToModel(AbstractTypeFactory<SeoInfo>.TryCreateInstance());
+                    SeoInfoCacheRegion.CreateChangeToken(seoInfo);
+                    return seoInfo;
+                }).ToList();
                 return result;
+            }});
+        }
+
+        public async Task SaveSeoInfosAsync(SeoInfo[] seoinfos)
+        {
+            var pkMap = new PrimaryKeyResolvingMap();
+            var changedEntries = new List<GenericChangedEntry<SeoInfo>>();
+            using (var repository = _repositoryFactory())
+            {
+                var alreadyExistSeoInfos = await repository.GetSeoByIdsAsync(seoinfos.Select(x => x.Id).ToArray());
+                var target = new { SeoInfos = new ObservableCollection<Model.SeoUrlKeywordEntity>(alreadyExistSeoInfos) };
+                var source = new
+                {
+                    SeoInfos = new ObservableCollection<Model.SeoUrlKeywordEntity>(seoinfos.Select(x =>
+                        AbstractTypeFactory<Model.SeoUrlKeywordEntity>.TryCreateInstance().FromModel(x, pkMap)))
+                };
+
+                source.SeoInfos.Patch(target.SeoInfos, (sourceSeoUrlKeyword, targetSeoUrlKeyword) =>
+                {
+                    changedEntries.Add(new GenericChangedEntry<SeoInfo>(
+                        sourceSeoUrlKeyword.ToModel(AbstractTypeFactory<SeoInfo>.TryCreateInstance()),
+                        targetSeoUrlKeyword.ToModel(AbstractTypeFactory<SeoInfo>.TryCreateInstance()),
+                        EntryState.Modified));
+                    sourceSeoUrlKeyword.Patch(targetSeoUrlKeyword);
+                });
+
+                await repository.UnitOfWork.CommitAsync();
+                pkMap.ResolvePrimaryKeys();
+                await _eventPublisher.Publish(new SeoInfoChangedEvent(changedEntries));
+                ClearCache(seoinfos);
+            }
+        }
+
+        private void ClearCache(IEnumerable<SeoInfo> seoInfos)
+        {
+            foreach (var seoInfo in seoInfos)
+            {
+                SeoInfoCacheRegion.CreateChangeToken(seoInfo);
             }
         }
     }

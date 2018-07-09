@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CoreModule.Core.Model;
 using VirtoCommerce.CoreModule.Core.Services;
+using VirtoCommerce.CoreModule.Data.Caching;
 using VirtoCommerce.CoreModule.Data.Repositories;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 
@@ -15,22 +18,29 @@ namespace VirtoCommerce.CoreModule.Data.Services
     {
         private readonly Func<ICoreRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public CurrencyServiceImpl(Func<ICoreRepository> repositoryFactory, IEventPublisher eventPublisher)
+        public CurrencyServiceImpl(Func<ICoreRepository> repositoryFactory, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
+            _platformMemoryCache = platformMemoryCache;
         }
 
         public async Task<IEnumerable<Currency>> GetAllCurrenciesAsync()
         {
-            using (var repository = _repositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), "GetAllCurrenciesAsync");
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                var currencyEntities = await repository.Currencies.OrderByDescending(x => x.IsPrimary).ThenBy(x => x.Code).ToArrayAsync();
-                var result = currencyEntities.Select(x => x.ToModel(AbstractTypeFactory<Currency>.TryCreateInstance())).ToList();
+                cacheEntry.AddExpirationToken(CurrencyCacheRegion.CreateChangeToken());
+                using (var repository = _repositoryFactory())
+                {
+                    var currencyEntities = await repository.Currencies.OrderByDescending(x => x.IsPrimary).ThenBy(x => x.Code).ToArrayAsync();
+                    var result = currencyEntities.Select(x => x.ToModel(AbstractTypeFactory<Currency>.TryCreateInstance())).ToList();
 
-                return result;
-            }
+                    return result;
+                }
+            });
         }
 
         public async Task SaveChangesAsync(Currency[] currencies)
@@ -70,6 +80,8 @@ namespace VirtoCommerce.CoreModule.Data.Services
                 }
 
                 await repository.UnitOfWork.CommitAsync();
+
+                CurrencyCacheRegion.ExpireRegion();
             }
         }
 
@@ -89,6 +101,8 @@ namespace VirtoCommerce.CoreModule.Data.Services
                 }
 
                 await repository.UnitOfWork.CommitAsync();
+
+                CurrencyCacheRegion.ExpireRegion();
             }
         }
     }

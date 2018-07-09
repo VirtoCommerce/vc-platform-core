@@ -1,8 +1,9 @@
+using System;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CoreModule.Core.Model.Tax
 {
-   public class Address : ValueObject
+   public class Address : ValueObject, ICloneable
 	{
 		public AddressType AddressType { get; set; }
 		public string Name { get; set; }
@@ -21,6 +22,10 @@ namespace VirtoCommerce.CoreModule.Core.Model.Tax
 		public string LastName { get; set; }
 		public string Phone { get; set; }
 		public string Email { get; set; }
+	    public object Clone()
+	    {
+	        return MemberwiseClone() as Address;
+        }
 	}
 
 }

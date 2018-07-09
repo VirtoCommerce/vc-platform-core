@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.CoreModule.Core.Model;
 using VirtoCommerce.CoreModule.Core.Services;
+using VirtoCommerce.CoreModule.Data.Caching;
 using VirtoCommerce.CoreModule.Data.Repositories;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 
@@ -16,21 +18,29 @@ namespace VirtoCommerce.CoreModule.Data.Services
 
         private readonly Func<ICoreRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public PackageTypesServiceImpl(Func<ICoreRepository> repositoryFactory, IEventPublisher eventPublisher)
+        public PackageTypesServiceImpl(Func<ICoreRepository> repositoryFactory, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
+            _platformMemoryCache = platformMemoryCache;
         }
 
         public async Task<IEnumerable<PackageType>> GetAllPackageTypesAsync()
         {
-            using (var repository = _repositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), "GetAllPackageTypesAsync");
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                var packageTypes = await repository.PackageTypes.OrderBy(x => x.Name).ToArrayAsync();
-                var result = packageTypes.Select(x => x.ToModel(AbstractTypeFactory<PackageType>.TryCreateInstance()));
-                return result;
-            }
+                PackageTypeCacheRegion.CreateChangeToken();
+                using (var repository = _repositoryFactory())
+                {
+                    var packageTypes = await repository.PackageTypes.OrderBy(x => x.Name).ToArrayAsync();
+                    var result = packageTypes.Select(x =>
+                        x.ToModel(AbstractTypeFactory<PackageType>.TryCreateInstance()));
+                    return result;
+                }
+            });
         }
 
         public async Task SaveChangesAsync(PackageType[] packageTypes)
@@ -57,6 +67,7 @@ namespace VirtoCommerce.CoreModule.Data.Services
                     }
                 }
                 await repository.UnitOfWork.CommitAsync();
+                PackageTypeCacheRegion.ExpireRegion();
             }
         }
 
@@ -70,6 +81,7 @@ namespace VirtoCommerce.CoreModule.Data.Services
                     repository.Remove(packageType);
                 }
                 await repository.UnitOfWork.CommitAsync();
+                PackageTypeCacheRegion.ExpireRegion();
             }
         }
     }
