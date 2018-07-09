@@ -4,7 +4,7 @@ using VirtoCommerce.Platform.Core.Events;
 
 namespace VirtoCommerce.CoreModule.Data.Handlers
 {
-    //TODO
+    //TODO after member module
     ///// <summary>
     ///// Send welcome registration email notification when storefront user registered
     ///// </summary>
