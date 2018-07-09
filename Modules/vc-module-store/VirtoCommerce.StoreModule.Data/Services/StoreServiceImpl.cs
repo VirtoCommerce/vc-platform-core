@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
 using Microsoft.Extensions.Caching.Memory;
-using VirtoCommerce.CoreModule.Core.Commerce.Services;
 using VirtoCommerce.CoreModule.Core.Registrars;
 using VirtoCommerce.CoreModule.Core.Services;
 using VirtoCommerce.Platform.Core.Caching;
@@ -27,7 +26,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
     public class StoreServiceImpl : IStoreService
     {
         private readonly Func<IStoreRepository> _repositoryFactory;
-        private readonly ICommerceService _commerceService;
+        private readonly ISeoService _seoService;
         private readonly ISettingsManager _settingManager;
         private readonly IDynamicPropertyService _dynamicPropertyService;
         private readonly IShippingMethodsRegistrar _shippingService;
@@ -36,13 +35,13 @@ namespace VirtoCommerce.StoreModule.Data.Services
         private readonly IEventPublisher _eventPublisher;
         private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public StoreServiceImpl(Func<IStoreRepository> repositoryFactory, ICommerceService commerceService, ISettingsManager settingManager,
+        public StoreServiceImpl(Func<IStoreRepository> repositoryFactory, ISeoService seoService, ISettingsManager settingManager,
                                 IDynamicPropertyService dynamicPropertyService, IShippingMethodsRegistrar shippingService, IPaymentMethodsRegistrar paymentService,
                                 ITaxRegistrar taxService, IEventPublisher eventPublisher
             , IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
-            _commerceService = commerceService;
+            _seoService = seoService;
             _settingManager = settingManager;
             _dynamicPropertyService = dynamicPropertyService;
             _shippingService = shippingService;
@@ -81,7 +80,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
                 var result = stores.ToArray();
                 var taskLoadDynamicPropertyValues = _dynamicPropertyService.LoadDynamicPropertyValuesAsync(result);
-                var taskLoadSeoForObjects = _commerceService.LoadSeoForObjectsAsync(result);
+                var taskLoadSeoForObjects = _seoService.LoadSeoForObjectsAsync(result);
                 await Task.WhenAll(taskLoadDynamicPropertyValues, taskLoadSeoForObjects);
 
                 return result;

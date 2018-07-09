@@ -14,10 +14,10 @@ namespace VirtoCommerce.CoreModule.Data.Services
     public class PackageTypesServiceImpl : IPackageTypesService
     {
 
-        private readonly Func<ICommerceRepository> _repositoryFactory;
+        private readonly Func<ICoreRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
 
-        public PackageTypesServiceImpl(Func<ICommerceRepository> repositoryFactory, IEventPublisher eventPublisher)
+        public PackageTypesServiceImpl(Func<ICoreRepository> repositoryFactory, IEventPublisher eventPublisher)
         {
             _repositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
@@ -33,7 +33,7 @@ namespace VirtoCommerce.CoreModule.Data.Services
             }
         }
 
-        public async Task UpsertPackageTypesAsync(PackageType[] packageTypes)
+        public async Task SaveChangesAsync(PackageType[] packageTypes)
         {
             if (packageTypes == null)
             {

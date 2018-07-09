@@ -15,10 +15,10 @@ namespace VirtoCommerce.CoreModule.Data.Services
 {
     public class SeoServiceImpl : ISeoService
     {
-        private readonly Func<ICommerceRepository> _repositoryFactory;
+        private readonly Func<ICoreRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
 
-        public SeoServiceImpl(Func<ICommerceRepository> repositoryFactory, IEventPublisher eventPublisher)
+        public SeoServiceImpl(Func<ICoreRepository> repositoryFactory, IEventPublisher eventPublisher)
         {
             _repositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
@@ -40,7 +40,7 @@ namespace VirtoCommerce.CoreModule.Data.Services
             }
         }
 
-        public async Task UpsertSeoInfosAsync(SeoInfo[] seoinfos)
+        public async Task SaveSeoInfosAsync(SeoInfo[] seoinfos)
         {
             var pkMap = new PrimaryKeyResolvingMap();
             var changedEntries = new List<GenericChangedEntry<SeoInfo>>();
@@ -69,7 +69,7 @@ namespace VirtoCommerce.CoreModule.Data.Services
             }
         }
 
-        public async Task UpsertSeoForObjectsAsync(ISeoSupport[] seoSupportObjects)
+        public async Task SaveSeoForObjectsAsync(ISeoSupport[] seoSupportObjects)
         {
             if (seoSupportObjects == null)
             {

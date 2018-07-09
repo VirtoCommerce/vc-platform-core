@@ -13,21 +13,19 @@ namespace VirtoCommerce.CoreModule.Data.Repositories
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<SeoUrlKeywordEntity>().HasKey(x => x.Id);
-            modelBuilder.Entity<SeoUrlKeywordEntity>().ToTable("SeoUrlKeyword");
+            modelBuilder.Entity<SeoUrlKeywordEntity>().ToTable("SeoUrlKeyword").HasKey(x => x.Id);
+            modelBuilder.Entity<SeoUrlKeywordEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<SeoUrlKeywordEntity>().HasIndex(x => new { x.Keyword, x.StoreId }).HasName("IX_KeywordStoreId");
             modelBuilder.Entity<SeoUrlKeywordEntity>().HasIndex(x => new { x.ObjectId, x.ObjectType }).HasName("IX_ObjectIdAndObjectType");
 
-            modelBuilder.Entity<SequenceEntity>().HasKey(x => x.ObjectType);
-            modelBuilder.Entity<SequenceEntity>().ToTable("Sequence");
+            modelBuilder.Entity<SequenceEntity>().ToTable("Sequence").HasKey(x => x.ObjectType);
 
-
-            modelBuilder.Entity<CurrencyEntity>().HasKey(x => x.Id);
-            modelBuilder.Entity<CurrencyEntity>().ToTable("Currency");
+            modelBuilder.Entity<CurrencyEntity>().ToTable("Currency").HasKey(x => x.Id);
+            modelBuilder.Entity<CurrencyEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<CurrencyEntity>().HasIndex(x => x.Code).HasName("IX_Code");
 
-            modelBuilder.Entity<PackageTypeEntity>().HasKey(x => x.Id);
-            modelBuilder.Entity<PackageTypeEntity>().ToTable("PackageType");
+            modelBuilder.Entity<PackageTypeEntity>().ToTable("PackageType").HasKey(x => x.Id);
+            modelBuilder.Entity<PackageTypeEntity>().Property(x => x.Id).HasMaxLength(128);
 
             base.OnModelCreating(modelBuilder);
         }

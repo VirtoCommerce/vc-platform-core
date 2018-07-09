@@ -1,14 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using VirtoCommerce.CoreModule.Core.Services;
 using VirtoCommerce.CoreModule.Data.Model;
 using VirtoCommerce.CoreModule.Data.Repositories;
-using VirtoCommerce.Domain.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CoreModule.Data.Services
 {
-    public class SequenceUniqueNumberGeneratorServiceImpl : ServiceBase, IUniqueNumberGenerator
+    public class SequenceUniqueNumberGeneratorServiceImpl : IUniqueNumberGenerator
     {
         #region Private fields
 
@@ -16,14 +17,14 @@ namespace VirtoCommerce.CoreModule.Data.Services
         public const int SequenceReservationRange = 100;
         public const int DefaultSequenceStartValue = 1;
 
-        private readonly Func<ICommerceRepository> _repositoryFactory;
+        private readonly Func<ICoreRepository> _repositoryFactory;
         private static readonly object _sequenceLock = new object();
         private static readonly InMemorySequenceList _inMemorySequences = new InMemorySequenceList();
 
         #endregion
 
 
-        public SequenceUniqueNumberGeneratorServiceImpl(Func<ICommerceRepository> repositoryFactory)
+        public SequenceUniqueNumberGeneratorServiceImpl(Func<ICoreRepository> repositoryFactory)
         {
             _repositoryFactory = repositoryFactory;
         }
@@ -51,7 +52,7 @@ namespace VirtoCommerce.CoreModule.Data.Services
                             _inMemorySequences[numberTemplate].Pregenerate(startCounter, endCounter, numberTemplate);
                             break;
                         }
-                        catch (System.Data.Entity.Infrastructure.DbUpdateException)
+                        catch (DbUpdateException)
                         {
                         }
                     }
@@ -80,9 +81,10 @@ namespace VirtoCommerce.CoreModule.Data.Services
                 }
 
 
-                CommitChanges(repository);
+                repository.UnitOfWork.Commit();
+                //TODO will check it
                 //Refresh data to make sure we have latest value in case another transaction was locked
-                repository.Refresh(repository.Sequences);
+                //repository.Refresh(repository.Sequences);
                 sequence = repository.Sequences.Single(s => s.ObjectType.Equals(objectType, StringComparison.OrdinalIgnoreCase));
                 startCounter = sequence.Value;
 
@@ -105,7 +107,7 @@ namespace VirtoCommerce.CoreModule.Data.Services
 
                 sequence.Value = endCounter;
                 //sequence.LastModified = DateTime.UtcNow;
-                CommitChanges(repository);
+                repository.UnitOfWork.Commit();
             }
         }
 

@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using VirtoCommerce.Domain.Tax.Model;
+using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Model.Tax;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
 
@@ -13,7 +12,6 @@ namespace VirtoCommerce.CoreModule.Data.Tax
     public class FixedTaxRateProvider : TaxProvider
     {
         public FixedTaxRateProvider()
-            : base("FixedRate")
         {
         }
 
@@ -37,7 +35,7 @@ namespace VirtoCommerce.CoreModule.Data.Tax
             }
         }
 
-        public override IEnumerable<TaxRate> CalculateRates(Domain.Common.IEvaluationContext context)
+        public override IEnumerable<TaxRate> CalculateRates(IEvaluationContext context)
         {
             var taxEvalContext = context as TaxEvaluationContext;
             if (taxEvalContext == null)

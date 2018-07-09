@@ -8,9 +8,9 @@ namespace VirtoCommerce.CoreModule.Core.Services
     {
         Task<IEnumerable<SeoInfo>> GetAllSeoDuplicatesAsync();
         Task<IEnumerable<SeoInfo>> GetSeoByKeywordAsync(string keyword);
-        Task UpsertSeoInfosAsync(SeoInfo[] seoinfos);
+        Task SaveSeoInfosAsync(SeoInfo[] seoinfos);
         Task LoadSeoForObjectsAsync(ISeoSupport[] seoSupportObjects);
-        Task UpsertSeoForObjectsAsync(ISeoSupport[] seoSupportObjects);
+        Task SaveSeoForObjectsAsync(ISeoSupport[] seoSupportObjects);
         Task DeleteSeoForObjectAsync(ISeoSupport seoSupportObject);
     }
 }

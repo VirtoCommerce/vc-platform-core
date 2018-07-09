@@ -13,10 +13,10 @@ namespace VirtoCommerce.CoreModule.Data.Services
 {
     public class CurrencyServiceImpl : ICurrencyService
     {
-        private readonly Func<ICommerceRepository> _repositoryFactory;
+        private readonly Func<ICoreRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
 
-        public CurrencyServiceImpl(Func<ICommerceRepository> repositoryFactory, IEventPublisher eventPublisher)
+        public CurrencyServiceImpl(Func<ICoreRepository> repositoryFactory, IEventPublisher eventPublisher)
         {
             _repositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
@@ -33,7 +33,7 @@ namespace VirtoCommerce.CoreModule.Data.Services
             }
         }
 
-        public async Task UpsertCurrenciesAsync(Currency[] currencies)
+        public async Task SaveChangesAsync(Currency[] currencies)
         {
             if (currencies == null)
             {

@@ -7,9 +7,9 @@ using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CoreModule.Data.Repositories
 {
-    public class CommerceRepositoryImpl : DbContextRepositoryBase<CoreDbContext>, ICommerceRepository
+    public class CoreRepositoryImpl : DbContextRepositoryBase<CoreDbContext>, ICoreRepository
     {
-        public CommerceRepositoryImpl(CoreDbContext dbContext, IUnitOfWork unitOfWork = null) : base(dbContext, unitOfWork)
+        public CoreRepositoryImpl(CoreDbContext dbContext, IUnitOfWork unitOfWork = null) : base(dbContext, unitOfWork)
         {
         }
 

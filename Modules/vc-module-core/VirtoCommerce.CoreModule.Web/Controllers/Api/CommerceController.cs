@@ -4,21 +4,23 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using VirtoCommerce.CoreModule.Core.Commerce.Services;
 using VirtoCommerce.CoreModule.Core.Model;
+using VirtoCommerce.CoreModule.Core.Services;
 
 namespace VirtoCommerce.CoreModule.Web.Controllers.Api
 {
     [Route("api")]
     public class CommerceController : Controller
     {
-        private readonly ICommerceService _commerceService;
+        private readonly ISeoService _seoService;
+        private readonly ICurrencyService _currencyService;
         //private readonly IStoreService _storeService;
         //private readonly ISeoDuplicatesDetector _seoDuplicateDetector;
 
-        public CommerceController(ICommerceService commerceService/*, IStoreService storeService, ISeoDuplicatesDetector seoDuplicateDetector*/)
+        public CommerceController(ISeoService seoService, ICurrencyService currencyService/*, IStoreService storeService, ISeoDuplicatesDetector seoDuplicateDetector*/)
         {
-            _commerceService = commerceService;
+            _seoService = seoService;
+            _currencyService = currencyService;
             //_storeService = storeService;
             //_seoDuplicateDetector = seoDuplicateDetector;
         }
@@ -59,7 +61,7 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         [Route("seoinfos/batchupdate")]
         public async Task<IActionResult> BatchUpdateSeoInfos(SeoInfo[] seoInfos)
         {
-            await _commerceService.UpsertSeoInfosAsync(seoInfos);
+            await _seoService.SaveSeoInfosAsync(seoInfos);
             return Ok();
         }
 
@@ -81,10 +83,10 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         [HttpGet]
         [ProducesResponseType(typeof(SeoInfo[]), 200)]
         [Route("seoinfos/{slug}")]
-        public IActionResult GetSeoInfoBySlug(string slug)
+        public async Task<IActionResult> GetSeoInfoBySlug(string slug)
         {
-            var retVal = _commerceService.GetSeoByKeyword(slug).ToArray();
-            return Ok(retVal);
+            var retVal = await _seoService.GetSeoByKeywordAsync(slug);
+            return Ok(retVal.ToArray());
         }
 
         /// <summary>
@@ -93,10 +95,10 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         [HttpGet]
         [ProducesResponseType(typeof(Currency[]), 200)]
         [Route("currencies")]
-        public IActionResult GetAllCurrencies()
+        public async Task<IActionResult> GetAllCurrencies()
         {
-            var retVal = _commerceService.GetAllCurrencies().ToArray();
-            return Ok(retVal);
+            var retVal = await _currencyService.GetAllCurrenciesAsync();
+            return Ok(retVal.ToArray());
         }
 
         /// <summary>
@@ -108,9 +110,9 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         [Route("currencies")]
         //TODO
         //[CheckPermission(Permission = CommercePredefinedPermissions.CurrencyUpdate)]
-        public IActionResult UpdateCurrency([FromBody]Currency currency)
+        public async Task<IActionResult> UpdateCurrency([FromBody]Currency currency)
         {
-            _commerceService.UpsertCurrencies(new[] { currency });
+            await _currencyService.SaveChangesAsync(new[] { currency });
             return Ok();
         }
 
@@ -123,9 +125,9 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         [Route("currencies")]
         //TODO
         //[CheckPermission(Permission = CommercePredefinedPermissions.CurrencyCreate)]
-        public IActionResult CreateCurrency([FromBody]Currency currency)
+        public async Task<IActionResult> CreateCurrency([FromBody]Currency currency)
         {
-            _commerceService.UpsertCurrencies(new[] { currency });
+            await _currencyService.SaveChangesAsync(new[] { currency });
             return Ok();
         }
 
@@ -138,9 +140,9 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         [Route("currencies")]
         //TODO
         //[CheckPermission(Permission = CommercePredefinedPermissions.CurrencyDelete)]
-        public IActionResult DeleteCurrencies([FromQuery] string[] codes)
+        public async Task<IActionResult> DeleteCurrencies([FromQuery] string[] codes)
         {
-            _commerceService.DeleteCurrencies(codes);
+            await _currencyService.DeleteCurrenciesAsync(codes);
             return Ok();
         }
 

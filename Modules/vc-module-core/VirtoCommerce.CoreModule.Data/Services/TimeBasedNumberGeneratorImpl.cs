@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using VirtoCommerce.Domain.Common;
+using VirtoCommerce.CoreModule.Core.Services;
 
 namespace VirtoCommerce.CoreModule.Data.Services
 {

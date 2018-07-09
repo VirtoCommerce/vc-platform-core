@@ -10,8 +10,8 @@ using VirtoCommerce.CatalogModule.Data.Caching;
 using VirtoCommerce.CatalogModule.Data.Model;
 using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.CatalogModule.Data.Validation;
-using VirtoCommerce.CoreModule.Core.Commerce.Services;
 using VirtoCommerce.CoreModule.Core.Model;
+using VirtoCommerce.CoreModule.Core.Services;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
@@ -23,7 +23,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 {
     public class CategoryService : ICategoryService
     {
-        private readonly ICommerceService _commerceService;
+        private readonly ISeoService _seoService;
         private readonly IOutlineService _outlineService;
         private readonly IPlatformMemoryCache _memoryCache;
         private readonly AbstractValidator<IHasProperties> _hasPropertyValidator;
@@ -32,13 +32,13 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         private readonly IEventPublisher _eventPublisher;
         private readonly IBlobUrlResolver _blobUrlResolver;
 
-        public CategoryService(Func<ICatalogRepository> catalogRepositoryFactory, ICommerceService commerceService, IOutlineService outlineService, ICatalogService catalogService, IPlatformMemoryCache memoryCache,
+        public CategoryService(Func<ICatalogRepository> catalogRepositoryFactory, ISeoService seoService, IOutlineService outlineService, ICatalogService catalogService, IPlatformMemoryCache memoryCache,
                                    AbstractValidator<IHasProperties> hasPropertyValidator, IEventPublisher eventPublisher, IBlobUrlResolver blobUrlResolver)
         {
             _repositoryFactory = catalogRepositoryFactory;
             _memoryCache = memoryCache;
             _hasPropertyValidator = hasPropertyValidator;
-            _commerceService = commerceService;
+            _seoService = seoService;
             _outlineService = outlineService;
             _catalogService = catalogService;
             _eventPublisher = eventPublisher;
@@ -106,7 +106,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 CatalogCacheRegion.ExpireRegion();
             }
             //Need add seo separately
-            _commerceService.UpsertSeoForObjectsAsync(categories.OfType<ISeoSupport>().ToArray());
+            _seoService.SaveSeoForObjectsAsync(categories.OfType<ISeoSupport>().ToArray());
         }
 
 
@@ -155,7 +155,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 var outlineItems = result.Values.Where(c => c.Outlines != null).SelectMany(c => c.Outlines.SelectMany(o => o.Items));
                 objectsWithSeo.AddRange(outlineItems);
                 //TODO: convert to async
-                _commerceService.LoadSeoForObjectsAsync(objectsWithSeo.ToArray());
+                _seoService.LoadSeoForObjectsAsync(objectsWithSeo.ToArray());
                 return result;
             });
         }

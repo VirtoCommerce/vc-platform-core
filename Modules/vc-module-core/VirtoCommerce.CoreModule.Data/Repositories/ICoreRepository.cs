@@ -6,7 +6,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CoreModule.Data.Repositories
 {
-    public interface ICommerceRepository : IRepository
+    public interface ICoreRepository : IRepository
     {
         IQueryable<SeoUrlKeywordEntity> SeoUrlKeywords { get; }
         IQueryable<SequenceEntity> Sequences { get; }

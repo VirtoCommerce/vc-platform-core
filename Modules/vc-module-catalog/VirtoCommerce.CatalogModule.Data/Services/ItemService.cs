@@ -8,8 +8,8 @@ using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.Model;
 using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.CatalogModule.Data.Validation;
-using VirtoCommerce.CoreModule.Core.Commerce.Services;
 using VirtoCommerce.CoreModule.Core.Model;
+using VirtoCommerce.CoreModule.Core.Services;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
@@ -22,19 +22,19 @@ namespace VirtoCommerce.CatalogModule.Data.Services
     {
         private readonly ICategoryService _categoryService;
         private readonly ICatalogService _catalogService;
-        private readonly ICommerceService _commerceService;
+        private readonly ISeoService _seoService;
         private readonly IOutlineService _outlineService;
         private readonly Func<ICatalogRepository> _repositoryFactory;
         private readonly AbstractValidator<IHasProperties> _hasPropertyValidator;
         private readonly IEventPublisher _eventPublisher;
         private readonly IBlobUrlResolver _blobUrlResolver;
         private readonly ISkuGenerator _skuGenerator;
-        public ItemService(Func<ICatalogRepository> catalogRepositoryFactory, ICommerceService commerceService, IOutlineService outlineService, ICatalogService catalogService,
+        public ItemService(Func<ICatalogRepository> catalogRepositoryFactory, ISeoService seoService, IOutlineService outlineService, ICatalogService catalogService,
                                ICategoryService categoryService, AbstractValidator<IHasProperties> hasPropertyValidator, IEventPublisher eventPublisher, IBlobUrlResolver blobUrlResolver, ISkuGenerator skuGenerator)
         {
             _catalogService = catalogService;
             _categoryService = categoryService;
-            _commerceService = commerceService;
+            _seoService = seoService;
             _outlineService = outlineService;
             _repositoryFactory = catalogRepositoryFactory;
             _hasPropertyValidator = hasPropertyValidator;
@@ -78,7 +78,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                                          .SelectMany(p => p.Outlines.SelectMany(o => o.Items));
                 objectsWithSeo.AddRange(outlineItems);
                 //TODO: convert to async
-                _commerceService.LoadSeoForObjectsAsync(objectsWithSeo.ToArray());
+                _seoService.LoadSeoForObjectsAsync(objectsWithSeo.ToArray());
             }
 
             //Reduce details according to response group
@@ -154,7 +154,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
             //Update SEO 
             var productsWithVariations = products.Concat(products.Where(x => x.Variations != null).SelectMany(x => x.Variations)).OfType<ISeoSupport>().ToArray();
-            _commerceService.UpsertSeoForObjectsAsync(productsWithVariations);
+            _seoService.SaveSeoForObjectsAsync(productsWithVariations);
         }
 
         public virtual void LoadDependencies(IEnumerable<CatalogProduct> products)
