@@ -79,15 +79,13 @@
 
 	blade.initialize = function () {
 		blade.isLoading = true;
-        if (blade.languageCode || blade.languageCode === null) {
-            var found = _.findWhere(blade.notification.templates, { languageCode: blade.languageCode });
-            if (found){
-                blade.currentEntity = angular.copy(found);        
-                blade.origEntity = angular.copy(blade.currentEntity);
-                blade.orightml = blade.currentEntity.body;
-            }
+        var found = _.find(blade.notification.templates, function(templ){ return templ.languageCode === blade.languageCode });
+        if (found){
+            blade.currentEntity = angular.copy(found);        
+            blade.origEntity = angular.copy(blade.currentEntity);
+            blade.orightml = blade.currentEntity.body;
         }
-            
+
         setTemplate(blade.currentEntity);
 	};
 

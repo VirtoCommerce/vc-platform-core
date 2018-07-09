@@ -6,7 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.InventoryModule.Core.Events;
 using VirtoCommerce.InventoryModule.Core.Model;
 using VirtoCommerce.InventoryModule.Core.Services;
-using VirtoCommerce.InventoryModule.Data.Cashing;
+using VirtoCommerce.InventoryModule.Data.Caching;
 using VirtoCommerce.InventoryModule.Data.Model;
 using VirtoCommerce.InventoryModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;

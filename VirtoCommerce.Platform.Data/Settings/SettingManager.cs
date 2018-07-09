@@ -305,7 +305,7 @@ namespace VirtoCommerce.Platform.Data.Settings
 
         public virtual T[] GetArray<T>(string name, T[] defaultValue)
         {
-            return Task.Factory.StartNew(() => GetArrayAsync(name, defaultValue), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default).Unwrap().GetAwaiter().GetResult();
+            return GetArrayAsync(name, defaultValue).GetAwaiter().GetResult();
         }
         public virtual async Task<T[]> GetArrayAsync<T>(string name, T[] defaultValue)
         {
@@ -334,7 +334,7 @@ namespace VirtoCommerce.Platform.Data.Settings
 
         public virtual T GetValue<T>(string name, T defaultValue)
         {
-            return Task.Factory.StartNew(() => GetValueAsync(name, defaultValue), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default).Unwrap().GetAwaiter().GetResult();
+            return GetValueAsync(name, defaultValue).GetAwaiter().GetResult();
         }
 
         public virtual async Task<T> GetValueAsync<T>(string name, T defaultValue)
@@ -353,7 +353,7 @@ namespace VirtoCommerce.Platform.Data.Settings
 
         public virtual void SetValue<T>(string name, T value)
         {
-            Task.Factory.StartNew(() => SetValueAsync(name, value), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default).Unwrap().GetAwaiter().GetResult();
+            SetValueAsync(name, value).GetAwaiter().GetResult();
         }
 
         public virtual async Task SetValueAsync<T>(string name, T value)

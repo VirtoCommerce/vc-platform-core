@@ -87,7 +87,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                     //Raise domain events
                     await _eventPublisher.Publish(new NotificationChangingEvent(changedEntries));
                     //Save changes in database
-                    repository.UnitOfWork.Commit();
+                    await repository.UnitOfWork.CommitAsync();
                     pkMap.ResolvePrimaryKeys();
                     await _eventPublisher.Publish(new NotificationChangedEvent(changedEntries));
                 }

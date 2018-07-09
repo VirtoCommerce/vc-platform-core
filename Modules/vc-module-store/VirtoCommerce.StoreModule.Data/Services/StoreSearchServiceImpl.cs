@@ -8,6 +8,7 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Model.Search;
 using VirtoCommerce.StoreModule.Core.Services;
+using VirtoCommerce.StoreModule.Data.Caching;
 using VirtoCommerce.StoreModule.Data.Repositories;
 
 namespace VirtoCommerce.StoreModule.Data.Services
@@ -28,6 +29,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
             var cacheKey = CacheKey.With(GetType(), "SearchStoresAsync", criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
+                cacheEntry.AddExpirationToken(StoreSearchCacheRegion.CreateChangeToken());
                 var result = new GenericSearchResult<Store>();
                 using (var repository = _repositoryFactory())
                 {
@@ -56,12 +58,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
                     result.TotalCount = await query.CountAsync();
                     var list = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                    result.Results = list.Select(x =>
-                    {
-                        var store = x.ToModel(AbstractTypeFactory<Store>.TryCreateInstance());
-                        cacheEntry.AddExpirationToken(StoreCacheRegion.CreateChangeToken(store));
-                        return store;
-                    }).ToList();
+                    result.Results = list.Select(x => x.ToModel(AbstractTypeFactory<Store>.TryCreateInstance())).ToList();
                 }
                 return result;
             });

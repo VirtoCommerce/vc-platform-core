@@ -17,6 +17,7 @@ using VirtoCommerce.StoreModule.Core.Events;
 using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Model.Search;
 using VirtoCommerce.StoreModule.Core.Services;
+using VirtoCommerce.StoreModule.Data.Caching;
 using VirtoCommerce.StoreModule.Data.Model;
 using VirtoCommerce.StoreModule.Data.Repositories;
 using VirtoCommerce.StoreModule.Data.Services.Validation;
@@ -184,6 +185,8 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
         private void ClearCache(IEnumerable<Store> stores)
         {
+            StoreSearchCacheRegion.ExpireRegion();
+
             foreach (var store in stores)
             {
                 StoreCacheRegion.ExpireInventory(store);

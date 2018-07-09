@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
@@ -17,7 +19,7 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
         private readonly string _basePublicUrl;
         private readonly FileSystemBlobContentOptions _options;
 
-        public FileSystemBlobProvider(IOptions<FileSystemBlobContentOptions> options)
+        public FileSystemBlobProvider(IOptions<FileSystemBlobContentOptions> options, IHttpContextAccessor httpContext)
         {
             _options = options.Value;
             if (_options.RootPath == null)
@@ -26,11 +28,8 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
             }
             _storagePath = _options.RootPath.TrimEnd('\\');
 
-            _basePublicUrl = _options.PublicUrl;
-            if (_basePublicUrl != null)
-            {
-                _basePublicUrl = _basePublicUrl.TrimEnd('/');
-            }
+            var request = httpContext.HttpContext.Request;
+            _basePublicUrl = new Uri($"{ request.Scheme}://{ request.Host.Value }/{ _options.PublicPath}").ToString();
         }
 
         #region IBlobStorageProvider members
