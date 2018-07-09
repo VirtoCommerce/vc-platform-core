@@ -2,26 +2,31 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using VirtoCommerce.ContentModule.Core.Events;
 using VirtoCommerce.ContentModule.Core.Model;
 using VirtoCommerce.ContentModule.Core.Services;
 using VirtoCommerce.ContentModule.Data.Converters;
+using VirtoCommerce.ContentModule.Data.Model;
 using VirtoCommerce.ContentModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Events;
 
 namespace VirtoCommerce.ContentModule.Data.Services
 {
-    public class MenuService :  IMenuService
+    public class MenuService : IMenuService
     {
         private readonly Func<IMenuRepository> _menuRepositoryFactory;
+        private readonly IEventPublisher _eventPublisher;
 
-        public MenuService(Func<IMenuRepository> menuRepositoryFactory)
+        public MenuService(Func<IMenuRepository> menuRepositoryFactory, IEventPublisher eventPublisher)
         {
             _menuRepositoryFactory = menuRepositoryFactory;
+            _eventPublisher = eventPublisher;
         }
 
         public async Task<IEnumerable<MenuLinkList>> GetAllLinkListsAsync()
         {
-            var entities =  await _menuRepositoryFactory().GetAllLinkListsAsync();
+            var entities = await _menuRepositoryFactory().GetAllLinkListsAsync();
             return entities.Select(x => x.ToModel(AbstractTypeFactory<MenuLinkList>.TryCreateInstance()));
         }
 
@@ -44,25 +49,54 @@ namespace VirtoCommerce.ContentModule.Data.Services
 
             using (var repository = _menuRepositoryFactory())
             {
-                if (!list.IsTransient())
-                {
-                    var existList = await repository.GetListByIdAsync(list.Id);
+                var changedEntries = new List<GenericChangedEntry<MenuLinkList>>();
+                var pkMap = new PrimaryKeyResolvingMap();
 
-                    if (existList != null)
-                    {
-                        existList.Patch(list.FromModel());
-                    }
-                    else
-                    {
-                        repository.Add(list.FromModel());
-                    }
+                var targetEntity = await repository.GetListByIdAsync(list.Id);
+                var sourceEntity = AbstractTypeFactory<MenuLinkListEntity>.TryCreateInstance().FromModel(list, pkMap);
+
+
+                if (targetEntity != null)
+                {
+                    changedEntries.Add(new GenericChangedEntry<MenuLinkList>(list, targetEntity.ToModel(AbstractTypeFactory<MenuLinkList>.TryCreateInstance()),
+                        EntryState.Modified));
+                    sourceEntity.Patch(targetEntity);
                 }
                 else
                 {
-                    repository.Add(list.FromModel());
+                    repository.Add(sourceEntity);
+                    changedEntries.Add(new GenericChangedEntry<MenuLinkList>(list, EntryState.Added));
                 }
 
                 await repository.UnitOfWork.CommitAsync();
+                pkMap.ResolvePrimaryKeys();
+                await _eventPublisher.Publish(new MenuLinkListChangedEvent(changedEntries));
+
+                //if (list == null)
+                //    throw new ArgumentNullException(nameof(list));
+
+                //using (var repository = _menuRepositoryFactory())
+                //{
+                //    if (!list.IsTransient())
+                //    {
+                //        var existList = await repository.GetListByIdAsync(list.Id);
+
+                //        if (existList != null)
+                //        {
+                //            existList.Patch(list.FromModel());
+                //        }
+                //        else
+                //        {
+                //            repository.Add(list.FromModel());
+                //        }
+                //    }
+                //    else
+                //    {
+                //        repository.Add(list.FromModel());
+                //    }
+
+                //    await repository.UnitOfWork.CommitAsync();
+                //}
             }
         }
 

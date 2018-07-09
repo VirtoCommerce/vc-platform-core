@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -21,13 +22,13 @@ namespace VirtoCommerce.ContentModule.Data.Model
         {
             Language = target.Language;
             Name = target.Name;
+            StoreId = target.StoreId;
 
-            if( !MenuLinks.IsNullCollection())
+            if (!MenuLinks.IsNullCollection())
             {
                 MenuLinks.Patch(target.MenuLinks, (sourceLink, targetLink) => sourceLink.Patch(targetLink));
             }
         }
-
 
         public MenuLinkList ToModel(MenuLinkList menuLinkList)
         {
@@ -42,6 +43,28 @@ namespace VirtoCommerce.ContentModule.Data.Model
             }
 
             return menuLinkList;
+        }
+
+        public MenuLinkListEntity FromModel(MenuLinkList menuLinkList, PrimaryKeyResolvingMap pkMap)
+        {
+            if (menuLinkList == null)
+                throw new ArgumentNullException(nameof(menuLinkList));
+
+            pkMap.AddPair(menuLinkList, this);
+
+            Id = menuLinkList.Id;
+            StoreId = menuLinkList.StoreId;
+            Name = menuLinkList.Name;
+            Language = menuLinkList.Language;
+            ModifiedDate = menuLinkList.ModifiedDate;
+            ModifiedBy = menuLinkList.ModifiedBy;
+
+            foreach (var link in menuLinkList.MenuLinks)
+            {
+                MenuLinks.Add(link.FromModel());
+            }
+
+            return this;
         }
     }
 }
