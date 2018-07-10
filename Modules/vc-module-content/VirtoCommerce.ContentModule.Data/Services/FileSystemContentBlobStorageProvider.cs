@@ -12,7 +12,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ContentModule.Data.Services
 {
-    public class FileSystemContentBlobStorageProvider : FileSystemBlobProvider, IContentBlobStorageProvider
+    public class FileSystemContentBlobStorageProvider : FileSystemBlobProvider, IContentStorageProviderFactory
     {
         public FileSystemContentBlobStorageProvider(IOptions<FileSystemBlobContentOptions> options, IHttpContextAccessor httpContext)
             : base(options, httpContext)
@@ -61,15 +61,15 @@ namespace VirtoCommerce.ContentModule.Data.Services
                 Directory.CreateDirectory(destPath);
             }
 
-            foreach (string file in Directory.GetFiles(sourcePath))
+            foreach (var file in Directory.GetFiles(sourcePath))
             {
-                string dest = Path.Combine(destPath, Path.GetFileName(file));
+                var dest = Path.Combine(destPath, Path.GetFileName(file));
                 File.Copy(file, dest);
             }
 
-            foreach (string folder in Directory.GetDirectories(sourcePath))
+            foreach (var folder in Directory.GetDirectories(sourcePath))
             {
-                string dest = Path.Combine(destPath, Path.GetFileName(folder));
+                var dest = Path.Combine(destPath, Path.GetFileName(folder));
                 CopyDirectoryRecursive(folder, dest);
             }
         }

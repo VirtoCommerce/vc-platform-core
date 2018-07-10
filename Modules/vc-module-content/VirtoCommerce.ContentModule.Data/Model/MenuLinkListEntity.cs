@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using VirtoCommerce.ContentModule.Core.Model;
-using VirtoCommerce.ContentModule.Data.Converters;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ContentModule.Data.Model
@@ -20,9 +19,9 @@ namespace VirtoCommerce.ContentModule.Data.Model
 
         public void Patch(MenuLinkListEntity target)
         {
-            Language = target.Language;
-            Name = target.Name;
-            StoreId = target.StoreId;
+            target.Language = Language;
+            target.Name = Name;
+            target.StoreId = StoreId;
 
             if (!MenuLinks.IsNullCollection())
             {
@@ -39,7 +38,7 @@ namespace VirtoCommerce.ContentModule.Data.Model
 
             if (MenuLinks.Any())
             {
-                menuLinkList.MenuLinks = MenuLinks.OrderByDescending(l => l.Priority).Select(s => s.ToModel()).ToArray();
+                menuLinkList.MenuLinks = MenuLinks.OrderByDescending(l => l.Priority).Select(s => s.ToModel(AbstractTypeFactory<MenuLink>.TryCreateInstance())).ToArray();
             }
 
             return menuLinkList;
@@ -61,7 +60,7 @@ namespace VirtoCommerce.ContentModule.Data.Model
 
             foreach (var link in menuLinkList.MenuLinks)
             {
-                MenuLinks.Add(link.FromModel());
+                MenuLinks.Add(AbstractTypeFactory<MenuLinkEntity>.TryCreateInstance().FromModel(link));
             }
 
             return this;

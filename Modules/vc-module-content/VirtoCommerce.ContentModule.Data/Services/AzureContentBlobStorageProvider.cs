@@ -12,7 +12,7 @@ using Microsoft.Extensions.Options;
 
 namespace VirtoCommerce.ContentModule.Data.Services
 {
-    public class AzureContentBlobStorageProvider : AzureBlobProvider, IContentBlobStorageProvider
+    public class AzureContentBlobStorageProvider : AzureBlobProvider, IContentStorageProviderFactory
     {
         private readonly string _chrootPath;
 

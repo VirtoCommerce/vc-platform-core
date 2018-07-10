@@ -26,13 +26,43 @@ namespace VirtoCommerce.ContentModule.Data.Model
 
         public void Patch(MenuLinkEntity target)
         {
-            Title = target.Title;
-            Url = target.Url;
-            Priority = target.Priority;
+            target.Title = Title;
+            target.Url = Url;
+            target.Priority = Priority;
 
-            AssociatedObjectId = target.AssociatedObjectId;
-            AssociatedObjectName = target.AssociatedObjectName;
-            AssociatedObjectType = target.AssociatedObjectType;
+            target.AssociatedObjectId = AssociatedObjectId;
+            target.AssociatedObjectName = AssociatedObjectName;
+            target.AssociatedObjectType = AssociatedObjectType;
         }
+
+        public MenuLink ToModel(MenuLink link)
+        {
+            link.Id = Id;
+            link.Title = Title;
+            link.Url = Url;
+            link.Priority = Priority;
+            link.MenuLinkListId = MenuLinkListId;
+            link.AssociatedObjectId = AssociatedObjectId;
+            link.AssociatedObjectName = AssociatedObjectName;
+            link.AssociatedObjectType = AssociatedObjectType;
+
+            return link;
+        }
+
+
+        public MenuLinkEntity FromModel(MenuLink link)
+        {
+            Id = link.Id;
+            Title = link.Title;
+            Url = link.Url;
+            Priority = link.Priority;
+            MenuLinkListId = link.MenuLinkListId;
+            AssociatedObjectId = link.AssociatedObjectId;
+            AssociatedObjectName = link.AssociatedObjectName;
+            AssociatedObjectType = link.AssociatedObjectType;
+
+            return this;
+        }
+
     }
 }

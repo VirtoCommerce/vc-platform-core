@@ -6,22 +6,22 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Net.Http.Headers;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Net.Http.Headers;
 using VirtoCommerce.ContentModule.Core.Model;
 using VirtoCommerce.ContentModule.Core.Services;
+using VirtoCommerce.ContentModule.Data.Extension;
 using VirtoCommerce.ContentModule.Data.Model;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Data.Helpers;
-using VirtoCommerce.StoreModule.Core.Services;
-using VirtoCommerce.ContentModule.Data.Extension;
 using VirtoCommerce.Platform.Web.Helpers;
-
+using VirtoCommerce.StoreModule.Core.Services;
 using Permissions = VirtoCommerce.ContentModule.Core.ContentConstants.Security.Permissions;
 
 namespace VirtoCommerce.ContentModule.Web.Controllers.Api
@@ -29,18 +29,18 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
     [Route("api/content/{contentType}/{storeId}")]
     public class ContentController : Controller
     {
-        private readonly Func<string, IContentBlobStorageProvider> _contentStorageProviderFactory;
+        private readonly Func<string, IContentStorageProviderFactory> _contentStorageProviderFactory;
         private readonly IBlobUrlResolver _urlResolver;
         private readonly IStoreService _storeService;
-        private readonly IPlatformMemoryCache _memoryCache;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
         private static readonly FormOptions _defaultFormOptions = new FormOptions();
 
-        public ContentController(Func<string, IContentBlobStorageProvider> contentStorageProviderFactory, IBlobUrlResolver urlResolver, IStoreService storeService, IPlatformMemoryCache memoryCache)
+        public ContentController(Func<string, IContentStorageProviderFactory> contentStorageProviderFactory, IBlobUrlResolver urlResolver, IStoreService storeService, IPlatformMemoryCache platformMemoryCache)
         {
             _storeService = storeService;
             _contentStorageProviderFactory = contentStorageProviderFactory;
             _urlResolver = urlResolver;
-            _memoryCache = memoryCache;
+            _platformMemoryCache = platformMemoryCache;
         }
 
         /// <summary>
@@ -56,17 +56,17 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         {
             var contentStorageProvider = _contentStorageProviderFactory("");
 
-            //var cacheKey = CacheKey.With(GetType(), "GetStoreContentStatsAsync", $"content-{storeId}", TimeSpan.FromMinutes(1).ToString());
-
-            //var pagesCount = _memoryCache.GetOrCreateExclusive(cacheKey, (cacheEntry) => {
-
-            //    return CountContentItemsRecursive(GetContentBasePath("pages", storeId), contentStorageProvider, GetContentBasePath("blogs", storeId));
-
-            //});
+            var cacheKey = CacheKey.With(GetType(), "pagesCount", $"content-{storeId}");
+            int pagesCount = _platformMemoryCache.GetOrCreateExclusive(cacheKey, cacheEntry =>
+            {
+                cacheEntry.AddExpirationToken(ContentCacheRegion.CreateChangeToken($"content-{storeId}"));
+                var result = CountContentItemsRecursive(GetContentBasePath("pages", storeId), contentStorageProvider, GetContentBasePath("blogs", storeId));
+                return result;
+            });
 
             var storeTask = _storeService.GetByIdAsync(storeId);
             var themesTask = contentStorageProvider.SearchAsync(GetContentBasePath("themes", storeId), null);
-            var blogsTask =  contentStorageProvider.SearchAsync(GetContentBasePath("blogs", storeId), null);
+            var blogsTask = contentStorageProvider.SearchAsync(GetContentBasePath("blogs", storeId), null);
 
             await Task.WhenAll(storeTask, themesTask, blogsTask);
 
@@ -79,7 +79,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
                 ActiveThemeName = store.GetDynamicPropertyValue("DefaultThemeName", "not set"),
                 ThemesCount = themes.Results.Count(x => x.Type.EqualsInvariant("folder")),
                 BlogsCount = themes.Results.Count(x => x.Type.EqualsInvariant("folder")),
-                PagesCount = 10 //pagesCount
+                PagesCount = pagesCount
             };
 
             return Ok(retVal);
@@ -332,9 +332,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
                 }
             }
 
-            //ToDo Reset cached items
-            //_cacheManager.ClearRegion($"content-{storeId}");
-            ContentCacheRegion.ExpireRegion();
+            ContentCacheRegion.ExpireContent(($"content-{storeId}"));
 
             return Ok(retVal.ToArray());
         }
@@ -357,13 +355,13 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
             return retVal;
         }
 
-        private int CountContentItemsRecursive(string folderUrl, IContentBlobStorageProvider _contentStorageProvider, string excludedFolderUrl = null)
+        private int CountContentItemsRecursive(string folderUrl, IContentStorageProviderFactory _contentStorageProviderFactory, string excludedFolderUrl = null)
         {
-            var searchResult = _contentStorageProvider.SearchAsync(folderUrl, null).GetAwaiter().GetResult();
+            var searchResult = _contentStorageProviderFactory.SearchAsync(folderUrl, null).GetAwaiter().GetResult();
             var retVal = searchResult.TotalCount
                         + searchResult.Results.OfType<BlobFolder>()
                             .Where(x => excludedFolderUrl == null || !x.RelativeUrl.EndsWith(excludedFolderUrl, StringComparison.InvariantCultureIgnoreCase))
-                            .Select(x => CountContentItemsRecursive(x.RelativeUrl, _contentStorageProvider))
+                            .Select(x => CountContentItemsRecursive(x.RelativeUrl, _contentStorageProviderFactory))
                             .Sum();
 
             return retVal;

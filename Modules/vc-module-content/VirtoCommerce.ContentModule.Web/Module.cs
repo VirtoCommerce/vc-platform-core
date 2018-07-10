@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.ContentModule.Core;
 using VirtoCommerce.ContentModule.Core.Services;
+using VirtoCommerce.ContentModule.Data.ExportImport;
 using VirtoCommerce.ContentModule.Data.Repositories;
 using VirtoCommerce.ContentModule.Data.Services;
 using VirtoCommerce.ContentModule.Web.Infrastructure;
@@ -18,15 +20,18 @@ using VirtoCommerce.Platform.Assets.AzureBlobStorage;
 using VirtoCommerce.Platform.Assets.FileSystem;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
+using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Web.Extensions;
 
 namespace VirtoCommerce.ContentModule.Web
 {
-    public class Module : IModule
+    public class Module : IModule, IExportSupport, IImportSupport
     {
+        private IApplicationBuilder _appBuilder;
         public ManifestModuleInfo ModuleInfo { get; set; }
+
 
         public void Initialize(IServiceCollection serviceCollection)
         {
@@ -39,6 +44,8 @@ namespace VirtoCommerce.ContentModule.Web
             serviceCollection.AddSingleton<Func<IMenuRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IMenuRepository>());
 
             serviceCollection.AddSingleton<IMenuService, MenuService>();
+
+            serviceCollection.AddSingleton<ContentExportImport>();
 
             var contentProvider = configuration.GetSection("Content:Provider").Value;
 
@@ -54,7 +61,7 @@ namespace VirtoCommerce.ContentModule.Web
 
                 serviceCollection.AddTransient<AzureContentBlobStorageProvider>().Configure<AzureContentBlobStorageProvider>(configuration.GetSection("Content:AzureBlobStorage"));
 
-                serviceCollection.AddTransient<Func<string, IContentBlobStorageProvider>>(provider => (path) =>
+                serviceCollection.AddTransient<Func<string, IContentStorageProviderFactory>>(provider => (path) =>
                 {
                     options.Value.RootPath = Path.Combine(rootPath, path);
 
@@ -74,7 +81,7 @@ namespace VirtoCommerce.ContentModule.Web
 
                 serviceCollection.AddTransient<FileSystemContentBlobStorageProvider>().Configure<FileSystemBlobContentOptions>(configuration.GetSection("Content:LocalStorage"));
 
-                serviceCollection.AddTransient<Func<string, IContentBlobStorageProvider>>(provider => (path) =>
+                serviceCollection.AddTransient<Func<string, IContentStorageProviderFactory>>(provider => (path) =>
                 {
                     var httpContextAccessor= provider.GetService<IHttpContextAccessor>();
                     options.Value.RootPath = Path.Combine(rootPath, path.Replace("/", "\\"));
@@ -87,6 +94,8 @@ namespace VirtoCommerce.ContentModule.Web
 
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
+            _appBuilder = appBuilder;
+
             var dynamicPropertyRegistrar = appBuilder.ApplicationServices.GetRequiredService<IDynamicPropertyRegistrar>();
             dynamicPropertyRegistrar.RegisterType<FrontMatterHeaders>();
 
@@ -111,6 +120,16 @@ namespace VirtoCommerce.ContentModule.Web
 
         public void Uninstall()
         {
+        }
+
+        public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
+        {
+            await _appBuilder.ApplicationServices.GetRequiredService<ContentExportImport>().ExportAsync(outStream, options, progressCallback, cancellationToken);
+        }
+
+        public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
+        {
+            await _appBuilder.ApplicationServices.GetRequiredService<ContentExportImport>().ImportAsync(inputStream, options, progressCallback, cancellationToken);
         }
 
     }

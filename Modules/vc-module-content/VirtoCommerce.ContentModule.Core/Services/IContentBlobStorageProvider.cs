@@ -8,7 +8,7 @@ namespace VirtoCommerce.ContentModule.Core.Services
     /// <summary>
     /// Represent functionality to  cms blob content access 
     /// </summary>
-    public interface IContentBlobStorageProvider : IBlobStorageProvider
+    public interface IContentStorageProviderFactory : IBlobStorageProvider
     {
         void MoveContent(string srcUrl, string destUrl);
         void CopyContent(string srcUrl, string destUrl);
