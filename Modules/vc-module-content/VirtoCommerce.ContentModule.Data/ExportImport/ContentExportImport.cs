@@ -18,6 +18,7 @@ namespace VirtoCommerce.ContentModule.Data.ExportImport
         private readonly IMenuService _menuService;
         private readonly IContentStorageProviderFactory _contentStorageProviderFactory;
         private readonly JsonSerializer _serializer;
+        private readonly int BatchSize = 50;
 
         public ContentExportImport(IMenuService menuService, Func<string, IContentStorageProviderFactory> themesStorageProviderFactory, JsonSerializer jsonSerializer)
         {
@@ -32,16 +33,41 @@ namespace VirtoCommerce.ContentModule.Data.ExportImport
         {
             cancellationToken.ThrowIfCancellationRequested();
 
+            var progressInfo = new ExportImportProgressInfo();
+
             //ToDo make export import
             using (var sw = new StreamWriter(outStream, Encoding.UTF8))
             using (var writer = new JsonTextWriter(sw))
             {
-                writer.WriteStartObject();
-                writer.WriteStartArray();
                 var backupObject = await GetBackupObjectAsync(progressCallback, options.HandleBinaryData);
-                _serializer.Serialize(writer, backupObject);
 
+                writer.WriteStartObject();
+
+                //Export menu link list
+                var countLinkList = backupObject.MenuLinkLists.Count;
+
+                writer.WriteStartArray();
+                writer.WritePropertyName("MenuLinkLists");
+
+                for (int i = BatchSize; i < countLinkList; i += BatchSize)
+                {
+                    progressInfo.Description = $"{i} of {countLinkList} menu link lists have been loaded";
+                    progressCallback(progressInfo);
+
+                    foreach (var list in backupObject.MenuLinkLists)
+                    {
+                        _serializer.Serialize(writer, list);
+                    }
+
+                    writer.Flush();
+                    progressInfo.Description = $"{ Math.Min(countLinkList, i + BatchSize) } of { countLinkList } menu link lists exported";
+                    progressCallback(progressInfo);
+
+                }
                 writer.WriteEndArray();
+
+
+
                 writer.WriteEndObject();
                 writer.Flush();
             }
