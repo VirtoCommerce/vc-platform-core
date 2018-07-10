@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="AutoCompare.Core" Version="1.0.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.1.0" />
+    </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
+    <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Data\VirtoCommerce.Platform.Data.csproj" />
+    <ProjectReference Include="..\..\vc-module-inventory\VirtoCommerce.InventoryModule.Core\VirtoCommerce.InventoryModule.Core.csproj" />
+    <ProjectReference Include="..\..\vc-module-notifications\VirtoCommerce.NotificationsModule.Core\VirtoCommerce.NotificationsModule.Core.csproj" />
+    <ProjectReference Include="..\..\vc-module-store\VirtoCommerce.StoreModule.Core\VirtoCommerce.StoreModule.Core.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.OrderModule.Core\VirtoCommerce.OrderModule.Core.csproj" />
+  </ItemGroup>
+
+</Project>
