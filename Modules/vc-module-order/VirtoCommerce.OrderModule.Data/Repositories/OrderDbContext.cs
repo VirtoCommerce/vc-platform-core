@@ -17,16 +17,17 @@ namespace VirtoCommerce.OrderModule.Data.Repositories
 
             #region Operation
 
-            modelBuilder.Entity<OperationEntity>().HasKey(x => x.Id);
+            modelBuilder.Entity<OperationEntity>().ToTable("OrderOperation").HasKey(x => x.Id);
             modelBuilder.Entity<OperationEntity>().Property(x => x.Id).HasMaxLength(128); ;
-            modelBuilder.Entity<OperationEntity>().ToTable("OrderOperation");
             #endregion
 
             #region CustomerOrder
-            modelBuilder.Entity<CustomerOrderEntity>().HasKey(x => x.Id);
-            modelBuilder.Entity<CustomerOrderEntity>().Property(x => x.Id).HasMaxLength(128); ;
-            modelBuilder.Entity<CustomerOrderEntity>().Property(x => x.TaxPercentRate).HasColumnType("decimal(18,4)");
+            //modelBuilder.Entity<CustomerOrderEntity>().ToTable("CustomerOrder").HasKey(x => x.Id);
+            //modelBuilder.Entity<CustomerOrderEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<CustomerOrderEntity>().ToTable("CustomerOrder");
+            modelBuilder.Entity<CustomerOrderEntity>().HasBaseType<OperationEntity>();
+            modelBuilder.Entity<CustomerOrderEntity>().Property(x => x.TaxPercentRate).HasColumnType("decimal(18,4)");
+            
             #endregion
 
             #region LineItem
@@ -48,7 +49,6 @@ namespace VirtoCommerce.OrderModule.Data.Repositories
             modelBuilder.Entity<ShipmentItemEntity>().HasKey(x => x.Id);
             modelBuilder.Entity<ShipmentItemEntity>().Property(x => x.Id).HasMaxLength(128); ;
 
-
             modelBuilder.Entity<ShipmentItemEntity>().HasOne(x => x.LineItem)
                                        .WithMany()
                                        .HasForeignKey(x => x.LineItemId).OnDelete(DeleteBehavior.Cascade);
@@ -59,7 +59,7 @@ namespace VirtoCommerce.OrderModule.Data.Repositories
 
             modelBuilder.Entity<ShipmentItemEntity>().HasOne(x => x.ShipmentPackage)
                                        .WithMany(x => x.Items)
-                                       .HasForeignKey(x => x.ShipmentPackageId).OnDelete(DeleteBehavior.Cascade);
+                                       .HasForeignKey(x => x.ShipmentPackageId).OnDelete(DeleteBehavior.Restrict);
 
 
             modelBuilder.Entity<ShipmentItemEntity>().ToTable("OrderShipmentItem");
@@ -69,8 +69,7 @@ namespace VirtoCommerce.OrderModule.Data.Repositories
 
             modelBuilder.Entity<ShipmentPackageEntity>().HasKey(x => x.Id);
             modelBuilder.Entity<ShipmentPackageEntity>().Property(x => x.Id).HasMaxLength(128); ;
-
-
+            
             modelBuilder.Entity<ShipmentPackageEntity>().HasOne(x => x.Shipment)
                                        .WithMany(x => x.Packages)
                                        .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Cascade);
@@ -81,16 +80,15 @@ namespace VirtoCommerce.OrderModule.Data.Repositories
 
             #region Shipment
 
-            modelBuilder.Entity<ShipmentEntity>().HasKey(x => x.Id);
-            modelBuilder.Entity<ShipmentEntity>().Property(x => x.Id).HasMaxLength(128); ;
+            //modelBuilder.Entity<ShipmentEntity>().HasKey(x => x.Id);
+            //modelBuilder.Entity<ShipmentEntity>().Property(x => x.Id).HasMaxLength(128); ;
 
             modelBuilder.Entity<ShipmentEntity>().Property(x => x.TaxPercentRate).HasColumnType("decimal(18,4)");
             modelBuilder.Entity<ShipmentEntity>().HasOne(x => x.CustomerOrder)
                                            .WithMany(x => x.Shipments)
-                                           .HasForeignKey(x => x.CustomerOrderId).OnDelete(DeleteBehavior.Cascade);
+                                           .HasForeignKey(x => x.CustomerOrderId).OnDelete(DeleteBehavior.Restrict);
 
-
-
+            modelBuilder.Entity<ShipmentEntity>().HasBaseType<OperationEntity>();
             modelBuilder.Entity<ShipmentEntity>().ToTable("OrderShipment");
             #endregion
 
@@ -119,8 +117,8 @@ namespace VirtoCommerce.OrderModule.Data.Repositories
 
             #region PaymentIn
 
-            modelBuilder.Entity<PaymentInEntity>().HasKey(x => x.Id);
-            modelBuilder.Entity<PaymentInEntity>().Property(x => x.Id).HasMaxLength(128); ;
+            //modelBuilder.Entity<PaymentInEntity>().HasKey(x => x.Id);
+            //modelBuilder.Entity<PaymentInEntity>().Property(x => x.Id).HasMaxLength(128);
 
             modelBuilder.Entity<PaymentInEntity>().Property(x => x.TaxPercentRate).HasColumnType("decimal(18,4)");
             modelBuilder.Entity<PaymentInEntity>().HasOne(x => x.CustomerOrder)
@@ -132,7 +130,7 @@ namespace VirtoCommerce.OrderModule.Data.Repositories
                                        .WithMany(x => x.InPayments)
                                        .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Restrict);
 
-
+            modelBuilder.Entity<PaymentInEntity>().HasBaseType<OperationEntity>();
             modelBuilder.Entity<PaymentInEntity>().ToTable("OrderPaymentIn");
             #endregion
 
