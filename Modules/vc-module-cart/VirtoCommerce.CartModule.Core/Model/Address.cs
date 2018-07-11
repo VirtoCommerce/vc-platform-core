@@ -1,4 +1,4 @@
-using VirtoCommerce.Domain.Commerce.Model;
+using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CartModule.Core.Model

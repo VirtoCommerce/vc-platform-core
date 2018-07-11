@@ -9,8 +9,8 @@ using VirtoCommerce.CartModule.Core;
 using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CartModule.Core.Model.Search;
 using VirtoCommerce.CartModule.Core.Services;
-using VirtoCommerce.CoreModule.Core.Model.Cart;
-using VirtoCommerce.CoreModule.Core.Model.Shipping;
+using VirtoCommerce.CoreModule.Core.Payment;
+using VirtoCommerce.CoreModule.Core.Shipping;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -146,7 +146,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
 
         [HttpGet]
         [Route("{cartId}/availpaymentmethods")]
-        [ProducesResponseType(typeof(ICollection<CoreModule.Core.Model.Payment.PaymentMethod>), 200)]
+        [ProducesResponseType(typeof(ICollection<PaymentMethod>), 200)]
         public async Task<IActionResult> GetAvailablePaymentMethods(string cartId)
         {
             var cart = await _shoppingCartService.GetByIdAsync(cartId);

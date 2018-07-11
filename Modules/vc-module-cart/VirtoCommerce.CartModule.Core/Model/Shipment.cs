@@ -1,12 +1,12 @@
 using System.Collections.Generic;
-using VirtoCommerce.CoreModule.Core.Commerce.Model;
-using VirtoCommerce.Domain.Commerce.Model;
+using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.CartModule.Core.Model
 {
-	public class Shipment : AuditableEntity, IHaveTaxDetalization, ITaxable, IHasDiscounts, IHasDynamicProperties
+	public class Shipment : AuditableEntity, IHasTaxDetalization, ITaxable, IHasDiscounts, IHasDynamicProperties
     {
 		public string ShipmentMethodCode { get; set; }
         public string ShipmentMethodOption { get; set; }

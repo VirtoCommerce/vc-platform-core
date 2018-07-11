@@ -1,5 +1,6 @@
 using System.Collections.Generic;
-using VirtoCommerce.CoreModule.Core.Commerce.Model;
+using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CartModule.Core.Model

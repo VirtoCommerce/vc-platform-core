@@ -4,7 +4,8 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using VirtoCommerce.CartModule.Core.Model;
-using VirtoCommerce.CoreModule.Core.Commerce.Model;
+using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
 using Address = VirtoCommerce.CartModule.Core.Model.Address;
 

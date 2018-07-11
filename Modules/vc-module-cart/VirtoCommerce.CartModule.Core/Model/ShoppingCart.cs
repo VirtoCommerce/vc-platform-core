@@ -1,11 +1,12 @@
 using System.Collections.Generic;
-using VirtoCommerce.CoreModule.Core.Commerce.Model;
+using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.CartModule.Core.Model
 {
-	public class ShoppingCart : AuditableEntity, IHaveTaxDetalization, IHasDynamicProperties, ITaxable, IHasDiscounts
+	public class ShoppingCart : AuditableEntity, IHasTaxDetalization, IHasDynamicProperties, ITaxable, IHasDiscounts
     {
 		public string Name { get; set; }
 		public string StoreId { get; set; }

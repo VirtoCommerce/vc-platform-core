@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using VirtoCommerce.CartModule.Core.Model;
-using VirtoCommerce.CoreModule.Core.Model.Payment;
-using VirtoCommerce.CoreModule.Core.Model.Shipping;
+using VirtoCommerce.CoreModule.Core.Payment;
+using VirtoCommerce.CoreModule.Core.Shipping;
 
 namespace VirtoCommerce.CartModule.Core.Services
 {
