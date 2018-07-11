@@ -41,14 +41,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             {
                 var userProfile = AbstractTypeFactory<UserProfile>.TryCreateInstance();
                 userProfile.Id = currentUser.Id;
-                foreach (var module in _moduleCatalog.Modules.OfType<ManifestModuleInfo>())
-                {
-                    //TODO: move Platform|User Profile to constants
-                    var moduleSetings = (await _settingsManager.GetModuleSettingsAsync(module.Id))
-                                            .Where(setting => setting.GroupName == "Platform|User Profile");
-                    userProfile.Settings = userProfile.Settings.Concat(moduleSetings).Distinct().ToList();
-                }
-                await _settingsManager.LoadEntitySettingsValuesAsync(userProfile);
+                userProfile.Settings = _settingsManager.AllRegisteredSettings.Where(x => x.GroupName == "Platform|User Profile").Select(x => new ObjectSettingEntry(x)).ToList();
+                await _settingsManager.DeepLoadSettingsAsync(userProfile);
                 return Ok(userProfile);
             }
             return Ok();
@@ -71,7 +65,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             }
             using (await AsyncLock.GetLockByKey(userProfile.ToString()).LockAsync())
             {
-                await _settingsManager.SaveEntitySettingsValuesAsync(userProfile);
+                await _settingsManager.DeepSaveSettingsAsync(userProfile);
             }
             return Ok();
         }

@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Linq;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.StoreModule.Core
 {
@@ -24,23 +26,25 @@ namespace VirtoCommerce.StoreModule.Core
         {
             public static class General
             {
-                public static ModuleSetting States = new ModuleSetting
+                public static SettingDescriptor States = new SettingDescriptor
                 {
                     Name = "Stores.States",
-                    ValueType = ModuleSetting.TypeString,
-                    IsArray = true,
+                    ValueType = SettingValueType.ShortText,
+                    GroupName = "Store|General",
+                    IsDictionary = true,
                     DefaultValue = "Open",
-                    ArrayValues = new [] { "Open", "Closed", "RestrictedAccess" }
+                    AllowedValues = new[] { "Open", "Closed", "RestrictedAccess" }
                 };
 
-                public static ModuleSetting TaxCalculationEnabled = new ModuleSetting
+                public static SettingDescriptor TaxCalculationEnabled = new SettingDescriptor
                 {
                     Name = "Stores.TaxCalculationEnabled",
-                    ValueType = ModuleSetting.TypeBoolean,
-                    DefaultValue = true.ToString(),
+                    GroupName = "Store|General",
+                    ValueType = SettingValueType.Boolean,
+                    DefaultValue = true,
                 };
 
-                public static IEnumerable<ModuleSetting> AllSettings
+                public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {
@@ -52,21 +56,28 @@ namespace VirtoCommerce.StoreModule.Core
 
             public static class SEO
             {
-                public static ModuleSetting SeoLinksType = new ModuleSetting
+                public static SettingDescriptor SeoLinksType = new SettingDescriptor
                 {
                     Name = "Stores.SeoLinksType",
-                    ValueType = ModuleSetting.TypeString,
-                    IsArray = true,
+                    GroupName = "Store|SEO",
+                    ValueType = SettingValueType.ShortText,
                     DefaultValue = "Collapsed",
                     AllowedValues = new[] { "None", "Short", "Collapsed", "Long" }
                 };
 
-                public static IEnumerable<ModuleSetting> AllSettings
+                public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {
                         yield return SeoLinksType;
                     }
+                }
+            }
+            public static IEnumerable<SettingDescriptor> AllSettings
+            {
+                get
+                {
+                    return General.AllSettings.Concat(SEO.AllSettings);
                 }
             }
         }

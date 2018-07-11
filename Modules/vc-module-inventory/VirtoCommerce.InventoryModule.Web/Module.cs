@@ -20,6 +20,7 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.InventoryModule.Web
@@ -48,13 +49,10 @@ namespace VirtoCommerce.InventoryModule.Web
         {
             _appBuilder = appBuilder;
 
-            ModuleInfo.Settings.Add(new ModuleSettingsGroup
-            {
-                Name = "Inventory|General",
-                Settings = ModuleConstants.Settings.General.AllSettings.ToArray()
-            });
+            var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
+            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
 
-            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IKnownPermissionsProvider>();
+            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x => new Permission() { GroupName = "Inventory", Name = x }).ToArray());
 
             //Force migrations

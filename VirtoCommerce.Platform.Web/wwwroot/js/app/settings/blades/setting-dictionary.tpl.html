@@ -1,4 +1,4 @@
-﻿<div class="blade-content">
+<div class="blade-content">
     <div class="blade-inner">
         <div class="inner-block">
             <form class="form" ng-submit="add(pdForm)" name="pdForm" novalidate autocomplete="off">
@@ -22,7 +22,7 @@
                     </div>
                 </fieldset>
             </form>
-            <fieldset ng-if="blade.currentEntity.arrayValues.length > 0">
+            <fieldset ng-if="blade.currentEntity.allowedValues.length > 0">
                 <legend>{{ 'platform.blades.setting-dictionary.labels.current-values' | translate }}</legend>
                 <div class="table-wrapper">
                     <form name="formScope" class="form">
@@ -39,7 +39,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr class="table-item" ng-repeat="data in blade.currentEntity.arrayValues" ng-class="{'__selected': data === selectedItem}" context-menu data-target="pd_menu_{{$index}}" ng-click='selectItem(data)'>
+                                <tr class="table-item" ng-repeat="data in blade.currentEntity.allowedValues" ng-class="{'__selected': data === selectedItem}" context-menu data-target="pd_menu_{{$index}}" ng-click='selectItem(data)'>
                                     <td class="table-col">
                                         <label class="form-control __checkbox">
                                             <input type="checkbox" ng-model="data._selected">

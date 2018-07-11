@@ -11,7 +11,7 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Security;
 
-using Permission = VirtoCommerce.ImageToolsModule.Core.ThumbnailConstants.Security.Permissions;
+using Permission = VirtoCommerce.ImageToolsModule.Core.ModuleConstants.Security.Permissions;
 
 namespace VirtoCommerce.ImageToolsModule.Web.Controllers.Api
 {

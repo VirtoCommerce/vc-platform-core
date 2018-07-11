@@ -11,7 +11,7 @@ namespace VirtoCommerce.Platform.Web.JsonConverters
 {
     public class PolymorphJsonConverter : JsonConverter
     {
-        private static readonly Type[] _knowTypes = { typeof(SettingEntry), typeof(DynamicProperty), typeof(ApplicationUser), typeof(Role) };
+        private static readonly Type[] _knowTypes = { typeof(ObjectSettingEntry), typeof(DynamicProperty), typeof(ApplicationUser), typeof(Role) };
 
         public override bool CanWrite => false;
         public override bool CanRead => true;
