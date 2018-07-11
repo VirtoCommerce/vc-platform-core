@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using VirtoCommerce.CoreModule.Core.Commerce.Model;
+using VirtoCommerce.CoreModule.Core.Model;
 using VirtoCommerce.CoreModule.Core.Model.Payment;
 using VirtoCommerce.CoreModule.Core.Model.Shipping;
 using VirtoCommerce.CoreModule.Core.Model.Tax;

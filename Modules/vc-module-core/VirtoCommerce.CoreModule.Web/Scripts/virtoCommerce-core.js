@@ -1,4 +1,4 @@
-﻿var moduleName = "virtoCommerce.coreModule";
+var moduleName = "virtoCommerce.coreModule";
 
 if (AppDependencies != undefined) {
     AppDependencies.push(moduleName);
@@ -7,7 +7,6 @@ if (AppDependencies != undefined) {
 angular.module(moduleName, [
     'virtoCommerce.coreModule.packageType',
     'virtoCommerce.coreModule.currency',
-    'virtoCommerce.coreModule.fulfillment',
     'virtoCommerce.coreModule.seo',
     'virtoCommerce.coreModule.common'
 ]);

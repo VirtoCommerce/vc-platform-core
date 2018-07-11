@@ -1,35 +1,99 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using VirtoCommerce.CoreModule.Core.Commerce.Model;
-using VirtoCommerce.CoreModule.Core.Commerce.Services;
+using Microsoft.Extensions.Options;
+using VirtoCommerce.CoreModule.Core;
+using VirtoCommerce.CoreModule.Core.Model;
+using VirtoCommerce.CoreModule.Core.Registrars;
 using VirtoCommerce.CoreModule.Core.Services;
+using VirtoCommerce.CoreModule.Data.Registrars;
+using VirtoCommerce.CoreModule.Data.Repositories;
 using VirtoCommerce.CoreModule.Data.Services;
-using VirtoCommerce.Domain.Commerce.Model;
+using VirtoCommerce.CoreModule.Web.ExportImport;
+using VirtoCommerce.CoreModule.Web.JsonConverters;
+using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.CoreModule.Web
 {
-    public class Module : IModule
+    public class Module : IModule, IExportSupport, IImportSupport
     {
         public ManifestModuleInfo ModuleInfo { get; set; }
+        private IApplicationBuilder _appBuilder;
 
         public void Initialize(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<ICommerceService, CommerceService>();
+            var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
+            serviceCollection.AddTransient<ICoreRepository, CoreRepositoryImpl>();
+            var connectionString = configuration.GetConnectionString("VirtoCommerce.Core") ?? configuration.GetConnectionString("VirtoCommerce");
+            serviceCollection.AddDbContext<CoreDbContext>(options => options.UseSqlServer(connectionString));
+            serviceCollection.AddSingleton<Func<ICoreRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICoreRepository>());
+            serviceCollection.AddSingleton<ISeoService, SeoServiceImpl>();
+            serviceCollection.AddSingleton<ICurrencyService, CurrencyServiceImpl>();
+            serviceCollection.AddSingleton<IPackageTypesService, PackageTypesServiceImpl>();
+            serviceCollection.AddSingleton<ISeoDuplicatesDetector, MockSeoDuplicatesDetector>();
             serviceCollection.AddSingleton<IShippingMethodsRegistrar>(new ShippingMethodsRegistrarImpl());
             serviceCollection.AddSingleton<IPaymentMethodsRegistrar>(new PaymentMethodsRegistrarImpl());
             serviceCollection.AddSingleton<ITaxRegistrar>(new TaxRegistrarImpl());
+            serviceCollection.AddSingleton<CoreExportImport>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
+            _appBuilder = appBuilder;
+
+            ModuleInfo.Settings.Add(new ModuleSettingsGroup
+            {
+                Name = "Core|General",
+                Settings = ModuleConstants.Settings.General.AllSettings.ToArray()
+            });
+
+            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IKnownPermissionsProvider>();
+            permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x => new Permission() { GroupName = "Core", Name = x }).ToArray());
+
+            var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
+            mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicJsonConverter());
+
+            using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
+            {
+                var dbContext = serviceScope.ServiceProvider.GetRequiredService<CoreDbContext>();
+                dbContext.Database.EnsureCreated();
+                dbContext.Database.Migrate();
+            }
+            
         }
 
         public void Uninstall()
         {
+        }
+
+        public Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
+            ICancellationToken cancellationToken)
+        {
+            return _appBuilder.ApplicationServices.GetRequiredService<CoreExportImport>().ExportAsync(outStream, options, progressCallback, cancellationToken);
+        }
+
+        public Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
+            ICancellationToken cancellationToken)
+        {
+            return _appBuilder.ApplicationServices.GetRequiredService<CoreExportImport>().ImportAsync(inputStream, options, progressCallback, cancellationToken);
+        }
+    }
+
+    public class MockSeoDuplicatesDetector : ISeoDuplicatesDetector
+    {
+        public IEnumerable<SeoInfo> DetectSeoDuplicates(string objectType, string objectId, IEnumerable<SeoInfo> allSeoDuplicates)
+        {
+            return Enumerable.Empty<SeoInfo>();
         }
     }
 }
