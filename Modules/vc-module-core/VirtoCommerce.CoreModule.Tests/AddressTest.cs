@@ -1,5 +1,4 @@
-using VirtoCommerce.CoreModule.Core.Model;
-using VirtoCommerce.CoreModule.Core.Model.Tax;
+using VirtoCommerce.CoreModule.Core.Common;
 using Xunit;
 
 namespace VirtoCommerce.CoreModule.Tests
@@ -35,6 +34,6 @@ namespace VirtoCommerce.CoreModule.Tests
             Assert.Equal(address1, address2);
             address2.City = "City2";
             Assert.NotEqual(address1, address2);
-        }        
+        }
     }
 }

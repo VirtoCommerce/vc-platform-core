@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using VirtoCommerce.CoreModule.Core;
 using VirtoCommerce.CoreModule.Core.Common;
-using VirtoCommerce.CoreModule.Core.Model.Shipping;
+using VirtoCommerce.CoreModule.Core.Shipping;
 using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.CoreModule.Data.Shipping

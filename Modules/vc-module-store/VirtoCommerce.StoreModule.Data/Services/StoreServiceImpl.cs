@@ -4,8 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
 using Microsoft.Extensions.Caching.Memory;
-using VirtoCommerce.CoreModule.Core.Registrars;
-using VirtoCommerce.CoreModule.Core.Services;
+using VirtoCommerce.CoreModule.Core.Payment;
+using VirtoCommerce.CoreModule.Core.Seo;
+using VirtoCommerce.CoreModule.Core.Shipping;
+using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
@@ -14,7 +16,6 @@ using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.StoreModule.Core.Events;
 using VirtoCommerce.StoreModule.Core.Model;
-using VirtoCommerce.StoreModule.Core.Model.Search;
 using VirtoCommerce.StoreModule.Core.Services;
 using VirtoCommerce.StoreModule.Data.Caching;
 using VirtoCommerce.StoreModule.Data.Model;
@@ -31,13 +32,13 @@ namespace VirtoCommerce.StoreModule.Data.Services
         private readonly IDynamicPropertyService _dynamicPropertyService;
         private readonly IShippingMethodsRegistrar _shippingService;
         private readonly IPaymentMethodsRegistrar _paymentService;
-        private readonly ITaxRegistrar _taxService;
+        private readonly ITaxProviderRegistrar _taxService;
         private readonly IEventPublisher _eventPublisher;
         private readonly IPlatformMemoryCache _platformMemoryCache;
 
         public StoreServiceImpl(Func<IStoreRepository> repositoryFactory, ISeoService seoService, ISettingsManager settingManager,
                                 IDynamicPropertyService dynamicPropertyService, IShippingMethodsRegistrar shippingService, IPaymentMethodsRegistrar paymentService,
-                                ITaxRegistrar taxService, IEventPublisher eventPublisher
+                                ITaxProviderRegistrar taxService, IEventPublisher eventPublisher
             , IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
@@ -89,7 +90,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
         public async Task<Store> GetByIdAsync(string id)
         {
-            var stores = await GetByIdsAsync(new[] {id});
+            var stores = await GetByIdsAsync(new[] { id });
             return stores.FirstOrDefault();
         }
 
@@ -169,7 +170,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
             if (user.StoreId != null)
             {
-                var stores = await GetByIdsAsync(new []{ user.StoreId });
+                var stores = await GetByIdsAsync(new[] { user.StoreId });
                 foreach (var store in stores)
                 {
                     retVal.Add(store.Id);

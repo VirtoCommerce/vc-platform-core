@@ -1,17 +1,17 @@
 
 using System;
-using VirtoCommerce.CoreModule.Core.Model;
+using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-	public class EditorialReview : AuditableEntity, IHasLanguage, ICloneable, IInheritable
-	{
-		public string Content { get; set; }
-		public string ReviewType { get; set; }
+    public class EditorialReview : AuditableEntity, IHasLanguage, ICloneable, IInheritable
+    {
+        public string Content { get; set; }
+        public string ReviewType { get; set; }
 
-		#region ILanguageSupport Members
+        #region ILanguageSupport Members
         public string LanguageCode { get; set; }
         #endregion
 

@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using VirtoCommerce.CoreModule.Core.Model;
-using VirtoCommerce.CoreModule.Core.Model.Payment;
-using VirtoCommerce.CoreModule.Core.Model.Shipping;
-using VirtoCommerce.CoreModule.Core.Model.Tax;
+using VirtoCommerce.CoreModule.Core.Payment;
+using VirtoCommerce.CoreModule.Core.Seo;
+using VirtoCommerce.CoreModule.Core.Shipping;
+using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Security;

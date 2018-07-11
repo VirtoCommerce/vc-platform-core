@@ -8,8 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using VirtoCommerce.CoreModule.Core.Registrars;
-using VirtoCommerce.CoreModule.Core.Services;
+using VirtoCommerce.CoreModule.Core.Payment;
+using VirtoCommerce.CoreModule.Core.Shipping;
+using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
@@ -82,7 +83,7 @@ namespace VirtoCommerce.StoreModule.Web
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             var paymentMethodsRegistrar = appBuilder.ApplicationServices.GetService<IPaymentMethodsRegistrar>();
             var shippingMethodsRegistrar = appBuilder.ApplicationServices.GetService<IShippingMethodsRegistrar>();
-            var taxRegistrar = appBuilder.ApplicationServices.GetService<ITaxRegistrar>();
+            var taxRegistrar = appBuilder.ApplicationServices.GetService<ITaxProviderRegistrar>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicStoreJsonConverter(paymentMethodsRegistrar, shippingMethodsRegistrar, taxRegistrar));
 
             var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();

@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using VirtoCommerce.CoreModule.Core.Model;
+using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model

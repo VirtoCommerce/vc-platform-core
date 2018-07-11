@@ -3,17 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using VirtoCommerce.CoreModule.Core.Model;
 using Newtonsoft.Json;
-using VirtoCommerce.CoreModule.Core.Services;
+using VirtoCommerce.CoreModule.Core.Currency;
+using VirtoCommerce.CoreModule.Core.Package;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 
 namespace VirtoCommerce.CoreModule.Web.ExportImport
 {
-    
 
-	public sealed class CoreExportImport : IExportSupport, IImportSupport
+    public sealed class CoreExportImport : IExportSupport, IImportSupport
     {
         private const int _batchSize = 50;
         private readonly JsonSerializer _serializer;
@@ -62,7 +61,7 @@ namespace VirtoCommerce.CoreModule.Web.ExportImport
                 writer.Flush();
                 progressInfo.Description = $"{currencyResult.Count()} currencies exported";
                 progressCallback(progressInfo);
-                
+
                 writer.WriteEndArray();
 
                 var packageTypesResult = await _packageTypesService.GetAllPackageTypesAsync();
@@ -95,7 +94,6 @@ namespace VirtoCommerce.CoreModule.Web.ExportImport
 
             var progressInfo = new ExportImportProgressInfo();
             var currencyTotalCount = 0;
-            var packeageTypesTotalCount = 0;
 
             using (var streamReader = new StreamReader(inputStream))
             using (var reader = new JsonTextReader(streamReader))
