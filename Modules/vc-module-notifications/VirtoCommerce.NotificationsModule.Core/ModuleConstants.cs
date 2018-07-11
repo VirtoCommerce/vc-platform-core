@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.NotificationsModule.Core
 {
@@ -27,16 +28,17 @@ namespace VirtoCommerce.NotificationsModule.Core
         {
             public static class General
             {
-                public static ModuleSetting Languages = new ModuleSetting
+                public static SettingDescriptor Languages = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Notifications.General.Languages",
-                    ValueType = ModuleSetting.TypeString,
-                    IsArray = true,
+                    GroupName = "Notifications|General",
+                    ValueType = SettingValueType.ShortText,
+                    IsDictionary = true,
                     DefaultValue = "en-US",
-                    ArrayValues = new[] { "en-US", "de-DE" }
+                    AllowedValues = new[] { "en-US", "de-DE" }
                 };
 
-                public static IEnumerable<ModuleSetting> AllSettings
+                public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {
@@ -45,7 +47,13 @@ namespace VirtoCommerce.NotificationsModule.Core
                 }
             }
 
-            
+            public static IEnumerable<SettingDescriptor> AllSettings
+            {
+                get
+                {
+                    return General.AllSettings;
+                }
+            }
         }
 
     }

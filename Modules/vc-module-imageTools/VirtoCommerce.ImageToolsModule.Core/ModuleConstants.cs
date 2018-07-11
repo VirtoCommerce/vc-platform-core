@@ -1,11 +1,9 @@
-using System;
 using System.Collections.Generic;
-using System.Text;
-using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.ImageToolsModule.Core
 {
-    public static class ThumbnailConstants
+    public static class ModuleConstants
     {
         public static class Security
         {
@@ -25,28 +23,31 @@ namespace VirtoCommerce.ImageToolsModule.Core
         {
             public static class General
             {
-                public static ModuleSetting EnableImageProcessJob = new ModuleSetting
+                public static SettingDescriptor EnableImageProcessJob = new SettingDescriptor
                 {
                     Name = "ImageTools.Thumbnails.EnableImageProcessJob",
-                    ValueType = ModuleSetting.TypeBoolean,
-                    DefaultValue = false.ToString(),
+                    GroupName = "Thumbnail|General",
+                    ValueType = SettingValueType.Boolean,
+                    DefaultValue = false,
                 };
 
-                public static ModuleSetting ImageProcessJobCronExpression = new ModuleSetting
+                public static SettingDescriptor ImageProcessJobCronExpression = new SettingDescriptor
                 {
                     Name = "ImageTools.Thumbnails.ImageProcessJobCronExpression",
-                    ValueType = ModuleSetting.TypeString,
+                    GroupName = "Thumbnail|General",
+                    ValueType = SettingValueType.ShortText,
                     DefaultValue = "0 0 * * *"
                 };
 
-                public static ModuleSetting ProcessBacthSize = new ModuleSetting
+                public static SettingDescriptor ProcessBacthSize = new SettingDescriptor
                 {
                     Name = "ImageTools.Thumbnails.ProcessBacthSize",
-                    ValueType = ModuleSetting.TypeInteger,
+                    GroupName = "Thumbnail|General",
+                    ValueType = SettingValueType.Integer,
                     DefaultValue = "50"
                 };
 
-                public static IEnumerable<ModuleSetting> AllSettings
+                public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {
@@ -54,6 +55,13 @@ namespace VirtoCommerce.ImageToolsModule.Core
                         yield return ImageProcessJobCronExpression;
                         yield return ProcessBacthSize;
                     }
+                }
+            }
+            public static IEnumerable<SettingDescriptor> AllSettings
+            {
+                get
+                {
+                    return General.AllSettings;
                 }
             }
         }

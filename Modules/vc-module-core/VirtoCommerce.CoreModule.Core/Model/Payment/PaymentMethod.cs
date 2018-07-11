@@ -8,28 +8,28 @@ using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.CoreModule.Core.Model.Payment
 {
-	public abstract class PaymentMethod : Entity, IHaveSettings, IHaveTaxDetalization, ITaxable
+    public abstract class PaymentMethod : Entity, IHasSettings, IHaveTaxDetalization, ITaxable
     {
         private PaymentMethod()
         {
             Id = Guid.NewGuid().ToString("N");
         }
-		public PaymentMethod(string code)
-            :this()
-		{
-			Code = code;
-		}
+        public PaymentMethod(string code)
+            : this()
+        {
+            Code = code;
+        }
 
-		/// <summary>
-		/// Method identity property (system name)
-		/// </summary>
-		public string Code { get; set; }
+        /// <summary>
+        /// Method identity property (system name)
+        /// </summary>
+        public string Code { get; set; }
 
-		public string Name { get; set; }
-		public string Description { get; set; }
-		public string LogoUrl { get; set; }
-		public bool IsActive { get; set; }
-		public int Priority { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public string LogoUrl { get; set; }
+        public bool IsActive { get; set; }
+        public int Priority { get; set; }
 
         public bool IsAvailableForPartial { get; set; }
 
@@ -70,14 +70,14 @@ namespace VirtoCommerce.CoreModule.Core.Model.Payment
         }
 
 
-        #region IHaveSettings Members
+        #region IHasSettings Members
 
         public virtual string TypeName => GetType().Name;
 
         /// <summary>
         /// Settings of payment method
         /// </summary>
-        public ICollection<SettingEntry> Settings { get; set; }
+        public ICollection<ObjectSettingEntry> Settings { get; set; }
 
         #endregion
 
@@ -86,7 +86,7 @@ namespace VirtoCommerce.CoreModule.Core.Model.Payment
         /// <summary>
         /// Tax category or type
         /// </summary>
-        public  string TaxType { get; set; }
+        public string TaxType { get; set; }
 
         public decimal TaxTotal
         {
@@ -113,40 +113,40 @@ namespace VirtoCommerce.CoreModule.Core.Model.Payment
         /// </summary>
         public abstract PaymentMethodType PaymentMethodType { get; }
 
-		/// <summary>
-		/// Type of payment method group
-		/// </summary>
-		public abstract PaymentMethodGroupType PaymentMethodGroupType { get; }
+        /// <summary>
+        /// Type of payment method group
+        /// </summary>
+        public abstract PaymentMethodGroupType PaymentMethodGroupType { get; }
 
-		/// <summary>
-		/// Method that contains logic of registration payment in external payment system
-		/// </summary>
-		/// <param name="context"></param>
-		/// <returns>Result of registration payment in external payment system</returns>
-		public abstract ProcessPaymentResult ProcessPayment(ProcessPaymentEvaluationContext context);
+        /// <summary>
+        /// Method that contains logic of registration payment in external payment system
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns>Result of registration payment in external payment system</returns>
+        public abstract ProcessPaymentResult ProcessPayment(ProcessPaymentEvaluationContext context);
 
-		/// <summary>
-		/// Method that contains logic of checking payment status of payment in external payment system
-		/// </summary>
-		/// <param name="context"></param>
-		/// <returns>Result of checking payment in external payment system</returns>
-		public abstract PostProcessPaymentResult PostProcessPayment(PostProcessPaymentEvaluationContext context);
+        /// <summary>
+        /// Method that contains logic of checking payment status of payment in external payment system
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns>Result of checking payment in external payment system</returns>
+        public abstract PostProcessPaymentResult PostProcessPayment(PostProcessPaymentEvaluationContext context);
 
-		/// <summary>
-		/// Voids the payment
-		/// </summary>
-		/// <param name="context"></param>
-		/// <returns>Result of voiding payment in external payment system</returns>
-		public abstract VoidProcessPaymentResult VoidProcessPayment(VoidProcessPaymentEvaluationContext context);
+        /// <summary>
+        /// Voids the payment
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns>Result of voiding payment in external payment system</returns>
+        public abstract VoidProcessPaymentResult VoidProcessPayment(VoidProcessPaymentEvaluationContext context);
 
-		/// <summary>
-		/// Capture authorized payment
-		/// </summary>
-		/// <param name="context"></param>
-		/// <returns>Result of capturing payment in external system</returns>
-		public abstract CaptureProcessPaymentResult CaptureProcessPayment(CaptureProcessPaymentEvaluationContext context);
+        /// <summary>
+        /// Capture authorized payment
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns>Result of capturing payment in external system</returns>
+        public abstract CaptureProcessPaymentResult CaptureProcessPayment(CaptureProcessPaymentEvaluationContext context);
 
-		public abstract RefundProcessPaymentResult RefundProcessPayment(RefundProcessPaymentEvaluationContext context);
+        public abstract RefundProcessPaymentResult RefundProcessPayment(RefundProcessPaymentEvaluationContext context);
 
         /// <summary>
         /// Method that validates parameters in querystring of request to push URL
@@ -155,10 +155,6 @@ namespace VirtoCommerce.CoreModule.Core.Model.Payment
         /// <returns>Validation result</returns>
         public abstract ValidatePostProcessRequestResult ValidatePostProcessRequest(NameValueCollection queryString);
 
-		public string GetSetting(string settingName)
-		{
-			var setting = Settings.FirstOrDefault(s => s.Name == settingName);            
-			return setting != null ? setting.Value : string.Empty;
-		}
-	}
+
+    }
 }

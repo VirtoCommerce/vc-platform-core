@@ -71,8 +71,8 @@ namespace VirtoCommerce.StoreModule.Data.Services
                         PopulateStore(store, dbStore);
 
                         //Set default settings for store it can be override by store instance setting in LoadEntitySettingsValues
-                        store.Settings = await _settingManager.GetModuleSettingsAsync("VirtoCommerce.Store");
-                        await _settingManager.LoadEntitySettingsValuesAsync(store);
+                        store.Settings = _settingManager.AllRegisteredSettings.Where(x => x.ModuleId == "VirtoCommerce.Store").Select(x => new ObjectSettingEntry(x)).ToList();
+                        await _settingManager.DeepLoadSettingsAsync(store);
                         stores.Add(store);
                         cacheEntry.AddExpirationToken(StoreCacheRegion.CreateChangeToken(store));
                     }
@@ -89,7 +89,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
         public async Task<Store> GetByIdAsync(string id)
         {
-            var stores = await GetByIdsAsync(new[] {id});
+            var stores = await GetByIdsAsync(new[] { id });
             return stores.FirstOrDefault();
         }
 
@@ -169,7 +169,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
             if (user.StoreId != null)
             {
-                var stores = await GetByIdsAsync(new []{ user.StoreId });
+                var stores = await GetByIdsAsync(new[] { user.StoreId });
                 foreach (var store in stores)
                 {
                     retVal.Add(store.Id);

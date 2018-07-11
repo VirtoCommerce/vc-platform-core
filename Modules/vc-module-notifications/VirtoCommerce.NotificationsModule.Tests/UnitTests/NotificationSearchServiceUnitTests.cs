@@ -43,7 +43,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _notificationRegistrar.RegisterNotification<OrderSentEmailNotification>();
 
             //Act
-            var result = _notificationSearchService.SearchNotifications(searchCriteria);
+            var result = _notificationSearchService.SearchNotificationsAsync(searchCriteria).GetAwaiter().GetResult();
 
             //Assert
             Assert.NotEmpty(result.Results);
@@ -63,7 +63,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             };
 
             //Act
-            var result = _notificationSearchService.SearchNotifications(searchCriteria);
+            var result = _notificationSearchService.SearchNotificationsAsync(searchCriteria).GetAwaiter().GetResult();
 
             //Assert
             Assert.Equal(2, result.Results.Count);
@@ -82,7 +82,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                 .ReturnsAsync(new EmailNotificationEntity { IsActive = true });
 
             //Act
-            var result = _notificationSearchService.SearchNotifications(searchCriteria);
+            var result = _notificationSearchService.SearchNotificationsAsync(searchCriteria).GetAwaiter().GetResult();
 
             //Assert
             Assert.Contains(result.Results, n => n.IsActive);

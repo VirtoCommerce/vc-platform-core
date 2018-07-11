@@ -10,7 +10,7 @@ namespace VirtoCommerce.CoreModule.Core.Model.Tax
     /// <summary>
     /// Represent base class for all potential tax calculation integrations
     /// </summary>
-    public abstract class TaxProvider : Entity, IHaveSettings
+    public abstract class TaxProvider : Entity, IHasSettings
     {
         /// <summary>
         /// Method identity property (System name)
@@ -25,17 +25,11 @@ namespace VirtoCommerce.CoreModule.Core.Model.Tax
         public abstract IEnumerable<TaxRate> CalculateRates(IEvaluationContext context);
         public virtual string TypeName => GetType().Name;
 
-        #region IHaveSettings Members
+        #region IHasSettings Members
 
-        public ICollection<SettingEntry> Settings { get; set; }
+        public ICollection<ObjectSettingEntry> Settings { get; set; }
 
         #endregion
 
-        public string GetSetting(string settingName)
-        {
-            var setting = Settings.FirstOrDefault(s => s.Name == settingName);
-                        
-            return setting != null ? setting.Value : string.Empty;
-        }
     }
 }

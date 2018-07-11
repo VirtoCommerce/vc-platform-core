@@ -30,11 +30,13 @@ namespace VirtoCommerce.Platform.Data.Extensions
             services.AddDbContext<PlatformDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("VirtoCommerce")));
             services.AddTransient<IPlatformRepository, PlatformRepository>();
             services.AddSingleton<Func<IPlatformRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IPlatformRepository>());
-            services.AddSingleton<ISettingsManager, SettingsManager>();
+
+            services.AddSettings();
+
+            services.AddDynamicProperties();
+
             services.AddSingleton<IPushNotificationManager, PushNotificationManager>();
-            services.AddSingleton<IDynamicPropertyService, DynamicPropertyService>();
-            services.AddSingleton<IDynamicPropertySearchService, DynamicPropertySearchService>();
-            services.AddSingleton<IDynamicPropertyRegistrar, DynamicPropertyService>();
+
             var inProcessBus = new InProcessBus();
             services.AddSingleton<IHandlerRegistrar>(inProcessBus);
             services.AddSingleton<IEventPublisher>(inProcessBus);

@@ -73,7 +73,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             var criteria = new NotificationSearchCriteria() { Take = int.MaxValue };
 
             //Act
-            var result = _notificationSearchService.SearchNotifications(criteria);
+            var result = _notificationSearchService.SearchNotificationsAsync(criteria).GetAwaiter().GetResult();
 
             //Assert
             Assert.Contains(result.Results, n => n.Type == nameof(PostTwitterNotification) && n.IsActive);
@@ -84,14 +84,14 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
         {
             //Arrange
             var criteria = new NotificationSearchCriteria() { Take = int.MaxValue };
-            var notification = _notificationSearchService.SearchNotifications(criteria).Results.FirstOrDefault();
+            var notification = (await _notificationSearchService.SearchNotificationsAsync(criteria)).Results.FirstOrDefault();
             if (notification is TwitterNotification twitterNotification)
             {
                 twitterNotification.Post = $"Post {DateTime.Now}";
             }
 
             //Act
-            await _notificationService.SaveChangesAsync(new [] { notification });
+            await _notificationService.SaveChangesAsync(new[] { notification });
 
             //Assert
         }

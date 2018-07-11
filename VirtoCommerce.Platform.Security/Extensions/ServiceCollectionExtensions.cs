@@ -17,7 +17,7 @@ namespace VirtoCommerce.Platform.Security.Extensions
         public static IServiceCollection AddSecurityServices(this IServiceCollection services, Action<SecurityOptions> setupAction = null)
         {
             services.AddScoped<IUserNameResolver, HttpContextUserResolver>();
-            services.AddSingleton<IKnownPermissionsProvider, DefaultPermissionProvider>();
+            services.AddSingleton<IPermissionsRegistrar, DefaultPermissionProvider>();
             services.AddScoped<IRoleSearchService, RoleSearchService>();
             services.AddScoped<IUserSearchService, UserSearchService>();
             //Identity dependencies override

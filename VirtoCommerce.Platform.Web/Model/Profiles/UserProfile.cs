@@ -4,9 +4,9 @@ using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.Platform.Web.Model.Profiles
 {
-    public class UserProfile : Entity, IHaveSettings
+    public class UserProfile : Entity, IHasSettings
     {
-        public virtual ICollection<SettingEntry> Settings { get; set; } = new List<SettingEntry>();
+        public virtual ICollection<ObjectSettingEntry> Settings { get; set; } = new List<ObjectSettingEntry>();
         public virtual string TypeName => GetType().Name;
     }
 }

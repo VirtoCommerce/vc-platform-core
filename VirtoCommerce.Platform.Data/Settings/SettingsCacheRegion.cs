@@ -9,9 +9,9 @@ namespace VirtoCommerce.Platform.Data.Settings
 {
     public class SettingsCacheRegion : CancellableCacheRegion<SettingsCacheRegion>
     {
-        private static readonly ConcurrentDictionary<SettingEntry, CancellationTokenSource> _settingsRegionTokenLookup =  new ConcurrentDictionary<SettingEntry, CancellationTokenSource>();
+        private static readonly ConcurrentDictionary<ObjectSettingEntry, CancellationTokenSource> _settingsRegionTokenLookup = new ConcurrentDictionary<ObjectSettingEntry, CancellationTokenSource>();
 
-        public static IChangeToken CreateChangeToken(SettingEntry settingEntry)
+        public static IChangeToken CreateChangeToken(ObjectSettingEntry settingEntry)
         {
             if (settingEntry == null)
             {
@@ -21,7 +21,7 @@ namespace VirtoCommerce.Platform.Data.Settings
             return new CompositeChangeToken(new[] { CreateChangeToken(), new CancellationChangeToken(cancellationTokenSource.Token) });
         }
 
-        public static void ExpireSetting(SettingEntry settingEntry)
+        public static void ExpireSetting(ObjectSettingEntry settingEntry)
         {
             if (_settingsRegionTokenLookup.TryRemove(settingEntry, out CancellationTokenSource token))
             {

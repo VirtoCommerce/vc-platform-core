@@ -29,21 +29,21 @@ namespace VirtoCommerce.StoreModule.Data.Handlers
                 {
                     var taskUpsertSeoForObjects = _commerceService.UpsertSeoForObjectsAsync(new[] { changedEntry.NewEntry });
                     var taskSaveDynamicPropertyValues = _dynamicPropertyService.SaveDynamicPropertyValuesAsync(changedEntry.NewEntry);
-                    var taskSaveEntitySettingsValues = _settingManager.SaveEntitySettingsValuesAsync(changedEntry.NewEntry);
+                    var taskSaveEntitySettingsValues = _settingManager.DeepSaveSettingsAsync(changedEntry.NewEntry);
                     await Task.WhenAll(taskUpsertSeoForObjects, taskSaveDynamicPropertyValues, taskSaveEntitySettingsValues);
                 }
                 else if (changedEntry.EntryState == EntryState.Modified)
                 {
                     var taskUpsertSeoForObjects = _commerceService.UpsertSeoForObjectsAsync(new[] { changedEntry.NewEntry });
                     var taskSaveDynamicPropertyValues = _dynamicPropertyService.SaveDynamicPropertyValuesAsync(changedEntry.NewEntry);
-                    var taskSaveEntitySettingsValues = _settingManager.SaveEntitySettingsValuesAsync(changedEntry.NewEntry);
+                    var taskSaveEntitySettingsValues = _settingManager.DeepSaveSettingsAsync(changedEntry.NewEntry);
                     await Task.WhenAll(taskUpsertSeoForObjects, taskSaveDynamicPropertyValues, taskSaveEntitySettingsValues);
                 }
                 else if (changedEntry.EntryState == EntryState.Deleted)
                 {
                     var taskDeleteSeoForObject = _commerceService.DeleteSeoForObjectAsync(changedEntry.NewEntry);
                     var taskDeleteDynamicPropertyValues = _dynamicPropertyService.DeleteDynamicPropertyValuesAsync(changedEntry.NewEntry);
-                    var taskRemoveEntitySettingsValues = _settingManager.RemoveEntitySettingsAsync(changedEntry.NewEntry);
+                    var taskRemoveEntitySettingsValues = _settingManager.DeepRemoveSettingsAsync(changedEntry.NewEntry);
                     await Task.WhenAll(taskDeleteSeoForObject, taskDeleteDynamicPropertyValues, taskRemoveEntitySettingsValues);
                 }
             }

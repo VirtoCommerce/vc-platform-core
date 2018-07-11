@@ -24,10 +24,10 @@ namespace VirtoCommerce.LuceneSearchModule.Web
 
             var searchConnectionString = configuration.GetValue<string>("Search:Lucene:SearchConnectionString");
 
-            if (string.IsNullOrEmpty(searchConnectionString))
-            {
-                searchConnectionString = settingsManager.GetValue(ModuleConstants.Settings.General.SearchConnectionString.Name, string.Empty);
-            }
+            //if (string.IsNullOrEmpty(searchConnectionString))
+            //{
+            //    searchConnectionString = settingsManager.GetValue(ModuleConstants.Settings.General.SearchConnectionString.Name, string.Empty);
+            //}
 
             var searchConnection = new SearchConnection(searchConnectionString);
 

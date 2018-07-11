@@ -15,6 +15,7 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.StoreModule.Core;
 using VirtoCommerce.StoreModule.Core.Events;
 using VirtoCommerce.StoreModule.Core.Notifications;
@@ -51,18 +52,10 @@ namespace VirtoCommerce.StoreModule.Web
         {
             _appBuilder = appBuilder;
 
-            ModuleInfo.Settings.Add(new ModuleSettingsGroup
-            {
-                Name = "Store|General",
-                Settings = ModuleConstants.Settings.General.AllSettings.ToArray()
-            });
-            ModuleInfo.Settings.Add(new ModuleSettingsGroup
-            {
-                Name = "Store|SEO",
-                Settings = ModuleConstants.Settings.SEO.AllSettings.ToArray()
-            });
+            var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
+            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
 
-            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IKnownPermissionsProvider>();
+            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
                 new Permission()
                 {
