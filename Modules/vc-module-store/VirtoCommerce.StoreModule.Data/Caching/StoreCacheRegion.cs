@@ -5,7 +5,7 @@ using Microsoft.Extensions.Primitives;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.StoreModule.Core.Model;
 
-namespace VirtoCommerce.StoreModule.Data
+namespace VirtoCommerce.StoreModule.Data.Caching
 {
     public class StoreCacheRegion : CancellableCacheRegion<StoreCacheRegion>
     {
@@ -21,7 +21,7 @@ namespace VirtoCommerce.StoreModule.Data
             return new CompositeChangeToken(new[] { CreateChangeToken(), new CancellationChangeToken(cancellationTokenSource.Token) });
         }
 
-        public static void ExpireInventory(Store store)
+        public static void ExpireStore(Store store)
         {
             if (_dirRegionTokenLookup.TryRemove(store.Id, out CancellationTokenSource token))
             {

@@ -67,13 +67,13 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
         }
 
         [Fact]
-        public void SearchNotifications_ContainsTwitterNotification()
+        public async Task SearchNotifications_ContainsTwitterNotification()
         {
             //Arrange
             var criteria = new NotificationSearchCriteria() { Take = int.MaxValue };
 
             //Act
-            var result = _notificationSearchService.SearchNotificationsAsync(criteria).GetAwaiter().GetResult();
+            var result = await _notificationSearchService.SearchNotificationsAsync(criteria);
 
             //Assert
             Assert.Contains(result.Results, n => n.Type == nameof(PostTwitterNotification) && n.IsActive);
@@ -84,7 +84,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
         {
             //Arrange
             var criteria = new NotificationSearchCriteria() { Take = int.MaxValue };
-            var notification = (await _notificationSearchService.SearchNotificationsAsync(criteria)).Results.FirstOrDefault();
+            var notifications = await _notificationSearchService.SearchNotificationsAsync(criteria);
+            var notification = notifications.Results.FirstOrDefault();
             if (notification is TwitterNotification twitterNotification)
             {
                 twitterNotification.Post = $"Post {DateTime.Now}";

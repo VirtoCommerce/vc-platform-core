@@ -34,7 +34,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         }
 
         [Fact]
-        public void SearchNotificationsAsync_GetNotifications()
+        public async Task SearchNotificationsAsync_GetNotifications()
         {
             //Arrange
             var searchCriteria = new NotificationSearchCriteria();
@@ -43,14 +43,14 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _notificationRegistrar.RegisterNotification<OrderSentEmailNotification>();
 
             //Act
-            var result = _notificationSearchService.SearchNotificationsAsync(searchCriteria).GetAwaiter().GetResult();
+            var result = await _notificationSearchService.SearchNotificationsAsync(searchCriteria);
 
             //Assert
             Assert.NotEmpty(result.Results);
         }
 
         [Fact]
-        public void SearchNotificationsAsync_Get2Items()
+        public async Task SearchNotificationsAsync_Get2Items()
         {
             //Arrange
             _notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
@@ -63,14 +63,14 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             };
 
             //Act
-            var result = _notificationSearchService.SearchNotificationsAsync(searchCriteria).GetAwaiter().GetResult();
+            var result = await _notificationSearchService.SearchNotificationsAsync(searchCriteria);
 
             //Assert
             Assert.Equal(2, result.Results.Count);
         }
 
         [Fact]
-        public void SearchNotificationsAsync_ContainsActiveNotications()
+        public async Task SearchNotificationsAsync_ContainsActiveNotications()
         {
             //Arrange
             _notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
@@ -82,7 +82,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                 .ReturnsAsync(new EmailNotificationEntity { IsActive = true });
 
             //Act
-            var result = _notificationSearchService.SearchNotificationsAsync(searchCriteria).GetAwaiter().GetResult();
+            var result = await _notificationSearchService.SearchNotificationsAsync(searchCriteria);
 
             //Assert
             Assert.Contains(result.Results, n => n.IsActive);
