@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.CoreModule.Core.Shipping
 {
-    public abstract class ShippingMethod : Entity, IHaveSettings
+    public abstract class ShippingMethod : Entity, IHasSettings
     {
         /// <summary>
         /// Method identity property (System name)
@@ -19,9 +19,9 @@ namespace VirtoCommerce.CoreModule.Core.Shipping
         public string TaxType { get; set; }
 
 
-        #region IHaveSettings Members
+        #region IHasSettings Members
 
-        public ICollection<SettingEntry> Settings { get; set; }
+        public ICollection<ObjectSettingEntry> Settings { get; set; }
 
         #endregion
 

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace VirtoCommerce.Platform.Core.Security
 {
-    public interface IKnownPermissionsProvider
+    public interface IPermissionsRegistrar
     {
         void RegisterPermissions(Permission[] permissions);
         IEnumerable<Permission> GetAllPermissions();

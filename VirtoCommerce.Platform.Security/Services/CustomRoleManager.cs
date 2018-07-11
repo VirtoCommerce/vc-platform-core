@@ -17,9 +17,9 @@ namespace VirtoCommerce.Platform.Security.Services
 {
     public class CustomRoleManager : AspNetRoleManager<Role>
     {
-        private readonly IKnownPermissionsProvider _knownPermissions;
+        private readonly IPermissionsRegistrar _knownPermissions;
         private readonly IPlatformMemoryCache _memoryCache;
-        public CustomRoleManager(IKnownPermissionsProvider knownPermissions, IPlatformMemoryCache memoryCache, IRoleStore<Role> store, IEnumerable<IRoleValidator<Role>> roleValidators,
+        public CustomRoleManager(IPermissionsRegistrar knownPermissions, IPlatformMemoryCache memoryCache, IRoleStore<Role> store, IEnumerable<IRoleValidator<Role>> roleValidators,
                                  ILookupNormalizer keyNormalizer, IdentityErrorDescriber errors, ILogger<RoleManager<Role>> logger, IHttpContextAccessor contextAccessor)
             : base(store, roleValidators, keyNormalizer, errors, logger, contextAccessor)
         {

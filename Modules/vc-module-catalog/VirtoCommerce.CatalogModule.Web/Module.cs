@@ -13,6 +13,7 @@ using VirtoCommerce.CatalogModule.Data.Services;
 using VirtoCommerce.CatalogModule.Data.Validation;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.CatalogModule.Web
 {
@@ -45,19 +46,11 @@ namespace VirtoCommerce.CatalogModule.Web
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
             //Register module settings
-            ModuleInfo.Settings.Add(new ModuleSettingsGroup
-            {
-                Name = "Catalog|General",
-                Settings = ModuleConstants.Settings.General.AllSettings.ToArray()
-            });
-            ModuleInfo.Settings.Add(new ModuleSettingsGroup
-            {
-                Name = "Catalog|Search",
-                Settings = ModuleConstants.Settings.Search.AllSettings.ToArray()
-            });
+            var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
+            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
 
             //Register module permissions
-            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IKnownPermissionsProvider>();
+            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x => new Permission() { GroupName = "Catalog", Name = x }).ToArray());
 
             //Force migrations

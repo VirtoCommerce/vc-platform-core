@@ -52,7 +52,7 @@ namespace VirtoCommerce.Platform.Data.Caching
                     {
                         if (_absoluteExpiration == null)
                         {
-                            _absoluteExpiration = TimeSpan.Parse(_settingManager.GetValue(PlatformConstants.Settings.Cache.AbsoluteExpiration.Name, PlatformConstants.Settings.Cache.AbsoluteExpiration.DefaultValue));
+                            _absoluteExpiration = TimeSpan.Parse(_settingManager.GetValue(PlatformConstants.Settings.Cache.AbsoluteExpiration.Name, (string)PlatformConstants.Settings.Cache.AbsoluteExpiration.DefaultValue));
                         }
                     }
                 }

@@ -59,16 +59,7 @@ namespace VirtoCommerce.Platform.Data.Repositories
             return retVal;
         }
 
-
-
-        public virtual async Task<SettingEntity> GetSettingByNameAsync(string name)
-        {
-            var result = await Settings.Include(x => x.SettingValues)
-                                       .FirstOrDefaultAsync(x => x.Name == name && x.ObjectId == null && x.ObjectType == null);
-            return result;
-        }
-
-        public virtual async Task<SettingEntity[]> GetAllObjectSettingsAsync(string objectType, string objectId)
+        public virtual async Task<SettingEntity[]> GetObjectSettingsAsync(string objectType, string objectId)
         {
             var result = await Settings.Include(x => x.SettingValues)
                                  .Where(x => x.ObjectId == objectId && x.ObjectType == objectType)

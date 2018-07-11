@@ -13,14 +13,14 @@ namespace VirtoCommerce.Platform.Data.ExportImport
         public PlatformExportEntries()
         {
             Users = new List<ApplicationUser>();
-            Settings = new List<SettingEntry>();
+            Settings = new List<ObjectSettingEntry>();
             DynamicPropertyDictionaryItems = new List<DynamicPropertyDictionaryItem>();
         }
 
         public bool IsNotEmpty => Users.Any() || Settings.Any();
         public ICollection<ApplicationUser> Users { get; set; }
         public ICollection<Role> Roles { get; set; }
-        public ICollection<SettingEntry> Settings { get; set; }
+        public ICollection<ObjectSettingEntry> Settings { get; set; }
         public ICollection<DynamicPropertyDictionaryItem> DynamicPropertyDictionaryItems { get; set; }
         public ICollection<DynamicProperty> DynamicProperties { get; set; }
 

@@ -10,7 +10,7 @@ using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.StoreModule.Core.Model
 {
-    public class Store : AuditableEntity, IHasDynamicProperties, IHaveSettings, ISeoSupport, ISupportSecurityScopes
+    public class Store : AuditableEntity, IHasDynamicProperties, IHasSettings, ISeoSupport, ISupportSecurityScopes
     {
         public string Name { get; set; }
         public string Description { get; set; }
@@ -91,7 +91,7 @@ namespace VirtoCommerce.StoreModule.Core.Model
         #endregion
 
         #region IHaveSettings Members
-        public ICollection<SettingEntry> Settings { get; set; }
+        public ICollection<ObjectSettingEntry> Settings { get; set; }
         public virtual string TypeName => GetType().Name;
         #endregion
 

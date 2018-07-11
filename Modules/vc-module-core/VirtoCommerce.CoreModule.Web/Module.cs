@@ -29,6 +29,7 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.CoreModule.Web
 {
@@ -58,14 +59,11 @@ namespace VirtoCommerce.CoreModule.Web
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
             _appBuilder = appBuilder;
+            var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
+            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
 
-            ModuleInfo.Settings.Add(new ModuleSettingsGroup
-            {
-                Name = "Core|General",
-                Settings = ModuleConstants.Settings.General.AllSettings.ToArray()
-            });
 
-            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IKnownPermissionsProvider>();
+            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x => new Permission() { GroupName = "Core", Name = x }).ToArray());
 
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();

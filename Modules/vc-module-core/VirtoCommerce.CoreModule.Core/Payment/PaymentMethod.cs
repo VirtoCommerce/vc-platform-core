@@ -8,7 +8,7 @@ using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.CoreModule.Core.Payment
 {
-    public abstract class PaymentMethod : Entity, IHaveSettings, IHasTaxDetalization, ITaxable
+    public abstract class PaymentMethod : Entity, IHasSettings, IHasTaxDetalization, ITaxable
     {
         private PaymentMethod()
         {
@@ -70,14 +70,14 @@ namespace VirtoCommerce.CoreModule.Core.Payment
         }
 
 
-        #region IHaveSettings Members
+        #region IHasSettings Members
 
         public virtual string TypeName => GetType().Name;
 
         /// <summary>
         /// Settings of payment method
         /// </summary>
-        public ICollection<SettingEntry> Settings { get; set; }
+        public ICollection<ObjectSettingEntry> Settings { get; set; }
 
         #endregion
 
@@ -99,8 +99,6 @@ namespace VirtoCommerce.CoreModule.Core.Payment
         public decimal TaxPercentRate { get; set; }
 
         #endregion
-
-
 
         #region ITaxDetailSupport Members
 
@@ -155,10 +153,5 @@ namespace VirtoCommerce.CoreModule.Core.Payment
         /// <returns>Validation result</returns>
         public abstract ValidatePostProcessRequestResult ValidatePostProcessRequest(NameValueCollection queryString);
 
-        public string GetSetting(string settingName)
-        {
-            var setting = Settings.FirstOrDefault(s => s.Name == settingName);
-            return setting != null ? setting.Value : string.Empty;
-        }
     }
 }

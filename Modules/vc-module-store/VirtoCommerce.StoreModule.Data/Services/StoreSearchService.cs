@@ -13,12 +13,12 @@ using VirtoCommerce.StoreModule.Data.Repositories;
 
 namespace VirtoCommerce.StoreModule.Data.Services
 {
-    public class StoreSearchServiceImpl : IStoreSearchService
+    public class StoreSearchService : IStoreSearchService
     {
         private readonly Func<IStoreRepository> _repositoryFactory;
         private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public StoreSearchServiceImpl(Func<IStoreRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache)
+        public StoreSearchService(Func<IStoreRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _platformMemoryCache = platformMemoryCache;

@@ -92,7 +92,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             }
 
             //Act
-            await _notificationService.SaveChangesAsync(new [] { notification });
+            await _notificationService.SaveChangesAsync(new[] { notification });
 
             //Assert
         }

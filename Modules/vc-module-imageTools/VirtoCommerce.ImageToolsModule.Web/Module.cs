@@ -19,6 +19,7 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.ImageToolsModule.Web
 {
@@ -61,15 +62,12 @@ namespace VirtoCommerce.ImageToolsModule.Web
 
 
             //Register module settings
-            ModuleInfo.Settings.Add(new ModuleSettingsGroup
-            {
-                Name = "Thumbnail|General",
-                Settings = ThumbnailConstants.Settings.General.AllSettings.ToArray()
-            });
+            var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
+            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
 
             //Register module permissions
-            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IKnownPermissionsProvider>();
-            permissionsProvider.RegisterPermissions(ThumbnailConstants.Security.Permissions.AllPermissions.Select(x => new Permission() { GroupName = "Thumbnail", Name = x }).ToArray());
+            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
+            permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x => new Permission() { GroupName = "Thumbnail", Name = x }).ToArray());
 
             //Force migrations
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())

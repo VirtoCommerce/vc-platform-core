@@ -3,7 +3,7 @@ using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.Platform.Security
 {
-    public class DefaultPermissionProvider : IKnownPermissionsProvider
+    public class DefaultPermissionProvider : IPermissionsRegistrar
     {
         private readonly List<Permission> _permissions = new List<Permission>();
 

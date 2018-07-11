@@ -1,11 +1,12 @@
+using System;
 using System.Collections.Generic;
+using System.Text;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Core.Settings
 {
-    public interface IHaveSettings : IEntity
+    public class SettingsSearchCriteria : SearchCriteriaBase
     {
-        string TypeName { get; }
-        ICollection<SettingEntry> Settings { get; set; }
+        public string ModuleId { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿angular.module('platformWebApp')
+angular.module('platformWebApp')
 .controller('platformWebApp.settingsDetailController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', function ($scope, dialogService, settingsHelper, bladeNavigationService, settings) {
     var blade = $scope.blade;
     blade.updatePermission = 'platform:setting:update';
@@ -24,16 +24,13 @@
             }
 
             // transform to va-generic-value-input suitable structure
-            setting.isDictionary = _.any(setting.allowedValues);
             setting.values = setting.isDictionary ? [{ value: { id: setting.value, name: setting.value } }] : [{ id: setting.value, value: setting.value }];
             if (setting.allowedValues) {
                 setting.allowedValues = _.map(setting.allowedValues, function (x) {
-                    return { id: x, name: x };
+                    return { value: x };
                 });
             }
         });
-
-
         results = _.groupBy(results, 'groupName');
         blade.groupNames = _.keys(results);
         blade.currentEntities = angular.copy(results);
@@ -67,8 +64,6 @@
         var objects = _.flatten(_.map(blade.currentEntities, _.values));
         objects = _.map(objects, function (x) {
             x.value = x.isDictionary ? x.values[0].value.id : x.values[0].value;
-            x.values = undefined;
-            x.allowedValues = undefined;
             return x;
         });
 

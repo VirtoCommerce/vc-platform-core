@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.LicensingModule.Core
 {
@@ -24,28 +25,37 @@ namespace VirtoCommerce.LicensingModule.Core
         {
             public static class General
             {
-                public static ModuleSetting LicenseType = new ModuleSetting
+                public static SettingDescriptor LicenseType = new SettingDescriptor
                 {
                     Name = "Licensing.LicenseType",
-                    ValueType = ModuleSetting.TypeString,
-                    IsArray = true,
+                    GroupName = "Licensing|General",
+                    ValueType = SettingValueType.ShortText,
+                    IsDictionary = true,
                     DefaultValue = "Commerce",
-                    ArrayValues = new [] { "Commerce", "Community deployment" }
+                    AllowedValues = new[] { "Commerce", "Community deployment" }
                 };
 
-                public static ModuleSetting SignaturePrivateKey = new ModuleSetting
+                public static SettingDescriptor SignaturePrivateKey = new SettingDescriptor
                 {
                     Name = "Licensing.SignaturePrivateKey",
-                    ValueType = ModuleSetting.TypeText
+                    GroupName = "Licensing|General",
+                    ValueType = SettingValueType.ShortText
                 };
 
-                public static IEnumerable<ModuleSetting> AllSettings
+                public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {
                         yield return LicenseType;
                         yield return SignaturePrivateKey;
                     }
+                }
+            }
+            public static IEnumerable<SettingDescriptor> AllSettings
+            {
+                get
+                {
+                    return General.AllSettings;
                 }
             }
         }

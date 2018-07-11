@@ -24,19 +24,19 @@ using VirtoCommerce.StoreModule.Data.Services.Validation;
 
 namespace VirtoCommerce.StoreModule.Data.Services
 {
-    public class StoreServiceImpl : IStoreService
+    public class StoreService : IStoreService
     {
         private readonly Func<IStoreRepository> _repositoryFactory;
         private readonly ISeoService _seoService;
         private readonly ISettingsManager _settingManager;
         private readonly IDynamicPropertyService _dynamicPropertyService;
-        private readonly IShippingMethodsRegistrar _shippingService;
-        private readonly IPaymentMethodsRegistrar _paymentService;
-        private readonly ITaxProviderRegistrar _taxService;
+        private readonly IShippingMethodsRegistrar _shippingMethodRegistrar;
+        private readonly IPaymentMethodsRegistrar _paymentMethodRegistrar;
+        private readonly ITaxProviderRegistrar _taxProviderRegistrar;
         private readonly IEventPublisher _eventPublisher;
         private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public StoreServiceImpl(Func<IStoreRepository> repositoryFactory, ISeoService seoService, ISettingsManager settingManager,
+        public StoreService(Func<IStoreRepository> repositoryFactory, ISeoService seoService, ISettingsManager settingManager,
                                 IDynamicPropertyService dynamicPropertyService, IShippingMethodsRegistrar shippingService, IPaymentMethodsRegistrar paymentService,
                                 ITaxProviderRegistrar taxService, IEventPublisher eventPublisher
             , IPlatformMemoryCache platformMemoryCache)
@@ -45,9 +45,9 @@ namespace VirtoCommerce.StoreModule.Data.Services
             _seoService = seoService;
             _settingManager = settingManager;
             _dynamicPropertyService = dynamicPropertyService;
-            _shippingService = shippingService;
-            _paymentService = paymentService;
-            _taxService = taxService;
+            _shippingMethodRegistrar = shippingService;
+            _paymentMethodRegistrar = paymentService;
+            _taxProviderRegistrar = taxService;
             _eventPublisher = eventPublisher;
             _platformMemoryCache = platformMemoryCache;
         }
@@ -71,9 +71,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
                         PopulateStore(store, dbStore);
 
-                        //Set default settings for store it can be override by store instance setting in LoadEntitySettingsValues
-                        store.Settings = await _settingManager.GetModuleSettingsAsync("VirtoCommerce.Store");
-                        await _settingManager.LoadEntitySettingsValuesAsync(store);
+                        await _settingManager.DeepLoadSettingsAsync(store);
                         stores.Add(store);
                         cacheEntry.AddExpirationToken(StoreCacheRegion.CreateChangeToken(store));
                     }
@@ -189,7 +187,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
             foreach (var store in stores)
             {
-                StoreCacheRegion.ExpireInventory(store);
+                StoreCacheRegion.ExpireStore(store);
             }
         }
 
@@ -210,39 +208,34 @@ namespace VirtoCommerce.StoreModule.Data.Services
         private void PopulateStore(Store store, StoreEntity dbStore)
         {
             //Return all registered methods with store settings 
-            store.PaymentMethods = _paymentService.GetAllPaymentMethods();
+            store.PaymentMethods = _paymentMethodRegistrar.GetAllPaymentMethods();
             foreach (var paymentMethod in store.PaymentMethods)
             {
-                var dbStoredPaymentMethod =
-                    dbStore.PaymentMethods.FirstOrDefault(x => x.Code.EqualsInvariant(paymentMethod.Code));
+                var dbStoredPaymentMethod = dbStore.PaymentMethods.FirstOrDefault(x => x.Code.EqualsInvariant(paymentMethod.Code));
                 if (dbStoredPaymentMethod != null)
                 {
                     dbStoredPaymentMethod.ToModel(paymentMethod);
                 }
             }
-            store.ShippingMethods = _shippingService.GetAllShippingMethods();
+            store.ShippingMethods = _shippingMethodRegistrar.GetAllShippingMethods();
             foreach (var shippingMethod in store.ShippingMethods)
             {
-                var dbStoredShippingMethod =
-                    dbStore.ShippingMethods.FirstOrDefault(x =>
-                        x.Code.EqualsInvariant(shippingMethod.Code));
+                var dbStoredShippingMethod = dbStore.ShippingMethods.FirstOrDefault(x => x.Code.EqualsInvariant(shippingMethod.Code));
                 if (dbStoredShippingMethod != null)
                 {
                     dbStoredShippingMethod.ToModel(shippingMethod);
                 }
             }
-            store.TaxProviders = _taxService.GetAllTaxProviders();
+            store.TaxProviders = _taxProviderRegistrar.GetAllTaxProviders();
             foreach (var taxProvider in store.TaxProviders)
             {
-                var dbStoredTaxProvider =
-                    dbStore.TaxProviders.FirstOrDefault(x => x.Code.EqualsInvariant(taxProvider.Code));
+                var dbStoredTaxProvider = dbStore.TaxProviders.FirstOrDefault(x => x.Code.EqualsInvariant(taxProvider.Code));
                 if (dbStoredTaxProvider != null)
                 {
                     dbStoredTaxProvider.ToModel(taxProvider);
                 }
             }
         }
-
         #endregion
     }
 }
