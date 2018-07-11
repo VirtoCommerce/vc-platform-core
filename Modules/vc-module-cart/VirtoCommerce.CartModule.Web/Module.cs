@@ -43,7 +43,7 @@ namespace VirtoCommerce.CartModule.Web
 
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
-            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IKnownPermissionsProvider>();
+            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
                 new Permission()
                 {

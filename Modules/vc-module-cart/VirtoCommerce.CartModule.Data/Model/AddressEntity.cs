@@ -72,7 +72,7 @@ namespace VirtoCommerce.CartModule.Data.Model
             //TODO
             //address.Key = Id;
             //address.Name
-            address.AddressType = EnumUtility.SafeParse(AddressType, Domain.Commerce.Model.AddressType.BillingAndShipping);
+            address.AddressType = EnumUtility.SafeParse(AddressType, CoreModule.Core.Common.AddressType.BillingAndShipping);
             address.City = City;
             address.CountryCode = CountryCode;
             address.CountryName = CountryName;
