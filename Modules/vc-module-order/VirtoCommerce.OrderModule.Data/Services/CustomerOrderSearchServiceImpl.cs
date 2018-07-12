@@ -17,6 +17,11 @@ namespace VirtoCommerce.OrderModule.Data.Services
     {
         private readonly Func<IOrderRepository> _repositoryFactory;
 
+        public CustomerOrderSearchServiceImpl(Func<IOrderRepository> repositoryFactory)
+        {
+            _repositoryFactory = repositoryFactory;
+        }
+
         public virtual async Task<GenericSearchResult<CustomerOrder>> SearchCustomerOrdersAsync(CustomerOrderSearchCriteria criteria)
         {
             using (var repository = _repositoryFactory())

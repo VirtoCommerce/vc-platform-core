@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
-using VirtoCommerce.CoreModule.Core.Model.Payment;
-using VirtoCommerce.Domain.Commerce.Model;
+using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Payment;
+using VirtoCommerce.CoreModule.Core.Tax;
 
 namespace VirtoCommerce.OrderModule.Core.Model
 {
-	public class PaymentIn : OrderOperation, IHaveTaxDetalization, ITaxable, IHasDiscounts
+	public class PaymentIn : OrderOperation, IHasTaxDetalization, ITaxable, IHasDiscounts
     {
 		public string Purpose { get; set; }
         /// <summary>

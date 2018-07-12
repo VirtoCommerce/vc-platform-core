@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using VirtoCommerce.CoreModule.Core.Model.Payment;
+using Microsoft.AspNetCore.Identity;
+using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.OrderModule.Core.Events;
@@ -22,19 +23,19 @@ namespace VirtoCommerce.OrderModule.Data.Handlers
         private readonly IStoreService _storeService;
         //private readonly IMemberService _memberService;
         private readonly ISettingsManager _settingsManager;
-        //private readonly ISecurityService _securityService;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public SendNotificationsOrderChangedEventHandler(INotificationSender notificationSender, IStoreService storeService
             //, IMemberService memberService
             , ISettingsManager settingsManager
-            //, ISecurityService securityService
+            , UserManager<ApplicationUser> userManager
             )
         {
             _notificationSender = notificationSender;
             _storeService = storeService;
             //_memberService = memberService;
             _settingsManager = settingsManager;
-            //_securityService = securityService;
+            _userManager = userManager;
         }
 
         public virtual async Task Handle(OrderChangedEvent message)
@@ -188,7 +189,7 @@ namespace VirtoCommerce.OrderModule.Data.Handlers
         {
             return Task.FromResult(string.Empty);
             //TODO
-            //var user = await _securityService.FindByIdAsync(customerId, UserDetails.Reduced);
+            //var user = await _userManager.FindByIdAsync(customerId);
 
             //var contact = user != null
             //    ? _memberService.GetByIds(new[] { user.MemberId }).OfType<Contact>().FirstOrDefault()
@@ -196,6 +197,7 @@ namespace VirtoCommerce.OrderModule.Data.Handlers
 
             //var email = contact?.Emails?.FirstOrDefault(x => !string.IsNullOrEmpty(x)) ?? user?.Email;
             //return email;
+
         }
     }
 }

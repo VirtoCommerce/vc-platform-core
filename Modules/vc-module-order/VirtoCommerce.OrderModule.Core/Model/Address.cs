@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.Domain.Commerce.Model;
+using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrderModule.Core.Model

@@ -1,10 +1,11 @@
 using System.Collections.Generic;
-using VirtoCommerce.CoreModule.Core.Model.Shipping;
-using VirtoCommerce.Domain.Commerce.Model;
+using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Shipping;
+using VirtoCommerce.CoreModule.Core.Tax;
 
 namespace VirtoCommerce.OrderModule.Core.Model
 {
-	public class Shipment : OrderOperation, IHaveTaxDetalization, ISupportCancellation, ITaxable, IHasDiscounts
+	public class Shipment : OrderOperation, IHasTaxDetalization, ISupportCancellation, ITaxable, IHasDiscounts
 	{
 		public string OrganizationId { get; set; }
 		public string OrganizationName { get; set; }

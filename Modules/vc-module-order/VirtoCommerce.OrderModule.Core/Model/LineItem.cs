@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using VirtoCommerce.CatalogModule.Core.Model;
-using VirtoCommerce.Domain.Commerce.Model;
+using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.OrderModule.Core.Model
 {
-    public class LineItem : AuditableEntity, IHaveTaxDetalization, ISupportCancellation, IHaveDimension, IHasDynamicProperties, ITaxable, IHasDiscounts
+    public class LineItem : AuditableEntity, IHasTaxDetalization, ISupportCancellation, IHasDimension, IHasDynamicProperties, ITaxable, IHasDiscounts
     {
         /// <summary>
         /// Price id

@@ -1,11 +1,12 @@
 using System.Collections.Generic;
-using VirtoCommerce.Domain.Commerce.Model;
+using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.OrderModule.Core.Model
 {
-    public class CustomerOrder : OrderOperation, IHaveTaxDetalization, ISupportSecurityScopes, ITaxable, IHasLanguage, IHasDiscounts
+    public class CustomerOrder : OrderOperation, IHasTaxDetalization, ISupportSecurityScopes, ITaxable, IHasLanguage, IHasDiscounts
     {
         public string CustomerId { get; set; }
         public string CustomerName { get; set; }

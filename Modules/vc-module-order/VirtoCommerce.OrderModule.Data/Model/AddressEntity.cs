@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.OrderModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
+using Address = VirtoCommerce.OrderModule.Core.Model.Address;
 
 namespace VirtoCommerce.OrderModule.Data.Model
 {
@@ -69,7 +70,7 @@ namespace VirtoCommerce.OrderModule.Data.Model
             address.LastName = LastName;
             address.Line1 = Line1;
             address.Line2 = Line2;
-            address.AddressType = EnumUtility.SafeParse(AddressType, Domain.Commerce.Model.AddressType.BillingAndShipping);
+            address.AddressType = EnumUtility.SafeParse(AddressType, CoreModule.Core.Common.AddressType.BillingAndShipping);
             return address;
         }
 

@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Payment;
+using VirtoCommerce.CoreModule.Core.Shipping;
 using VirtoCommerce.OrderModule.Core.Events;
 using VirtoCommerce.OrderModule.Core.Model;
 using VirtoCommerce.OrderModule.Core.Model.Search;
@@ -26,25 +29,26 @@ namespace VirtoCommerce.OrderModule.Data.Services
         private readonly IDynamicPropertyService _dynamicPropertyService;
         private readonly IStoreService _storeService;
 
-        //protected IUniqueNumberGenerator UniqueNumberGenerator { get; }
-        //protected IPaymentMethodsService PaymentMethodsService { get; }
-        //protected IShippingMethodsService ShippingMethodsService { get; }
+        private readonly IUniqueNumberGenerator _uniqueNumberGenerator;
+        private readonly IPaymentMethodsRegistrar _paymentMethodsRegistrar;
+        private readonly IShippingMethodsRegistrar _shippingMethodsRegistrar;
         private readonly IChangeLogService _changeLogService;
         private readonly ICustomerOrderTotalsCalculator _totalsCalculator;
 
-        public CustomerOrderServiceImpl(Func<IOrderRepository> orderRepositoryFactory/*, IUniqueNumberGenerator uniqueNumberGenerator*/, IDynamicPropertyService dynamicPropertyService,
-            //, IShippingMethodsService shippingMethodsService, IPaymentMethodsService paymentMethodsService,
-                                       IStoreService storeService, IChangeLogService changeLogService, IEventPublisher eventPublisher, ICustomerOrderTotalsCalculator totalsCalculator)
+        public CustomerOrderServiceImpl(Func<IOrderRepository> orderRepositoryFactory, IUniqueNumberGenerator uniqueNumberGenerator
+            , IDynamicPropertyService dynamicPropertyService, IStoreService storeService, IChangeLogService changeLogService
+            , IEventPublisher eventPublisher, ICustomerOrderTotalsCalculator totalsCalculator
+            , IShippingMethodsRegistrar shippingMethodsRegistrar, IPaymentMethodsRegistrar paymentMethodsRegistrar)
         {
             _repositoryFactory = orderRepositoryFactory;
-            //UniqueNumberGenerator = uniqueNumberGenerator;
             _eventPublisher = eventPublisher;
             _dynamicPropertyService = dynamicPropertyService;
-            //ShippingMethodsService = shippingMethodsService;
-            //PaymentMethodsService = paymentMethodsService;
             _storeService = storeService;
             _changeLogService = changeLogService;
             _totalsCalculator = totalsCalculator;
+            _shippingMethodsRegistrar = shippingMethodsRegistrar;
+            _paymentMethodsRegistrar = paymentMethodsRegistrar;
+            _uniqueNumberGenerator = uniqueNumberGenerator;
         }
 
         
@@ -157,34 +161,33 @@ namespace VirtoCommerce.OrderModule.Data.Services
 
         protected virtual void LoadOrderDependencies(CustomerOrder order)
         {
-            //TODO
-            //if (order == null)
-            //{
-            //    throw new ArgumentNullException(nameof(order));
-            //}
-            //var shippingMethods = ShippingMethodsService.GetAllShippingMethods();
-            //if (!shippingMethods.IsNullOrEmpty())
-            //{
-            //    foreach (var shipment in order.Shipments)
-            //    {
-            //        shipment.ShippingMethod = shippingMethods.FirstOrDefault(x => x.Code.EqualsInvariant(shipment.ShipmentMethodCode));
-            //    }
-            //}
-            //var paymentMethods = PaymentMethodsService.GetAllPaymentMethods();
-            //if (!paymentMethods.IsNullOrEmpty())
-            //{
-            //    foreach (var payment in order.InPayments)
-            //    {
-            //        payment.PaymentMethod = paymentMethods.FirstOrDefault(x => x.Code.EqualsInvariant(payment.GatewayCode));
-            //    }
-            //}
+            if (order == null)
+            {
+                throw new ArgumentNullException(nameof(order));
+            }
+            var shippingMethods = _shippingMethodsRegistrar.GetAllShippingMethods();
+            if (!shippingMethods.IsNullOrEmpty())
+            {
+                foreach (var shipment in order.Shipments)
+                {
+                    shipment.ShippingMethod = shippingMethods.FirstOrDefault(x => x.Code.EqualsInvariant(shipment.ShipmentMethodCode));
+                }
+            }
+            var paymentMethods = _paymentMethodsRegistrar.GetAllPaymentMethods();
+            if (!paymentMethods.IsNullOrEmpty())
+            {
+                foreach (var payment in order.InPayments)
+                {
+                    payment.PaymentMethod = paymentMethods.FirstOrDefault(x => x.Code.EqualsInvariant(payment.GatewayCode));
+                }
+            }
         }
 
         protected virtual async Task EnsureThatAllOperationsHaveNumber(CustomerOrder order)
         {
             var store = await _storeService.GetByIdAsync(order.StoreId);
 
-            foreach (var operation in order.GetFlatObjectsListWithInterface<Domain.Commerce.Model.IOperation>())
+            foreach (var operation in order.GetFlatObjectsListWithInterface<IOperation>())
             {
                 if (operation.Number == null)
                 {
@@ -203,8 +206,7 @@ namespace VirtoCommerce.OrderModule.Data.Services
                         numberTemplate = store.Settings.GetSettingValue("Order." + objectTypeName + "NewNumberTemplate", numberTemplate);
                     }
 
-                    //TODO
-                    //operation.Number = UniqueNumberGenerator.GenerateNumber(numberTemplate);
+                    operation.Number = _uniqueNumberGenerator.GenerateNumber(numberTemplate);
                 }
             }
         }

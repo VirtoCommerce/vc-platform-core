@@ -4,7 +4,7 @@ namespace VirtoCommerce.OrderModule.Data.Services
 {
     public interface ICustomerOrderBuilder
     {
-        //TODO
+        //TODO wait cartModule
         //CustomerOrder PlaceCustomerOrderFromCart(ShoppingCart cart);
     }
 }

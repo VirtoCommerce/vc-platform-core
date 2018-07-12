@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using VirtoCommerce.CoreModule.Core.Model.Payment;
+using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.OrderModule.Core.Events;
 using VirtoCommerce.OrderModule.Core.Model;
 using VirtoCommerce.OrderModule.Core.Services;

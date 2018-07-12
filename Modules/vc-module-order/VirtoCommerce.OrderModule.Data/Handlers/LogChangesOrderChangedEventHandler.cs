@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using VirtoCommerce.Domain.Commerce.Model;
+using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.OrderModule.Core.Events;
 using VirtoCommerce.OrderModule.Core.Model;
 using VirtoCommerce.Platform.Core.ChangeLog;
@@ -107,7 +107,7 @@ namespace VirtoCommerce.OrderModule.Data.Handlers
                 var employeeName = "none";
                 if (!string.IsNullOrEmpty(modifiedOrder.EmployeeId))
                 {
-                    //TODO
+                    //TODO wait MemberModule
                     //var employee = _memberService.GetByIds(new[] { modifiedOrder.EmployeeId }).OfType<Employee>().FirstOrDefault();
                     //employeeName = employee != null ? employee.FullName : employeeName;
                 }

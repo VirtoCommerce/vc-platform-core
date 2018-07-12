@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.CoreModule.Core.Model.Payment;
-using VirtoCommerce.Domain.Commerce.Model;
+using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.OrderModule.Core.Model;
 using VirtoCommerce.OrderModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;

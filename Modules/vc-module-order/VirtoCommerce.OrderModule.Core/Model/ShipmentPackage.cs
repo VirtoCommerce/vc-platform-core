@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using VirtoCommerce.Domain.Commerce.Model;
+using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrderModule.Core.Model
 {
-	public class ShipmentPackage : AuditableEntity, IHaveDimension
+	public class ShipmentPackage : AuditableEntity, IHasDimension
 	{
 		public string BarCode { get; set; }
 		public string PackageType { get; set; }
