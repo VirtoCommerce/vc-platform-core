@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.CoreModule.Core.Model;
+using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 
@@ -61,7 +62,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         public virtual void TryInheritFrom(IEntity parent)
         {
             if (parent is AssetBase parentAssetBase)
-            {             
+            {
                 Id = null;
                 IsInherited = true;
                 LanguageCode = parentAssetBase.LanguageCode;
@@ -89,7 +90,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
                 result.SeoInfos = SeoInfos.Select(x => x.Clone()).OfType<SeoInfo>().ToList();
             }
             return result;
-        } 
+        }
         #endregion
     }
 }

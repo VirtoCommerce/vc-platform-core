@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
@@ -25,89 +24,56 @@ namespace VirtoCommerce.Platform.Data.Model
         [StringLength(128)]
         public string Name { get; set; }
 
-        [StringLength(1024)]
-        public string Description { get; set; }
-
-        public bool IsSystem { get; set; }
-
-        [Required]
-        [StringLength(64)]
-        public string SettingValueType { get; set; }
-
-        public bool IsEnum { get; set; }
-        public bool IsMultiValue { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this instance is locale dependent. If true, the locale must be specified for the values.
-        /// </summary>
-        /// <value>
-        /// 	<c>true</c> if this instance is locale dependent; otherwise, <c>false</c>.
-        /// </value>
-        public bool IsLocaleDependant { get; set; }
-
         public virtual ObservableCollection<SettingValueEntity> SettingValues { get; set; }
 
 
-        public virtual SettingEntry ToModel(SettingEntry settingEntry)
+        public virtual ObjectSettingEntry ToModel(ObjectSettingEntry objSetting)
         {
-            if (settingEntry == null)
-                throw new ArgumentNullException(nameof(settingEntry));
-
-            settingEntry.ObjectType = ObjectType;
-            settingEntry.ObjectId = ObjectId;
-            settingEntry.Name = Name;
-            settingEntry.Description = Description;
-            settingEntry.IsArray = IsEnum;
-            settingEntry.ValueType = EnumUtility.SafeParse(SettingValueType, Core.Settings.SettingValueType.LongText);
-            var stringValues = SettingValues.Select(x => x.ToString(settingEntry.ValueType, CultureInfo.InvariantCulture)).ToArray();
-            var rawValues = SettingValues.Select(x => x.GetValue(settingEntry.ValueType)).ToArray();
-            if (IsEnum)
+            if (objSetting == null)
             {
-                settingEntry.ArrayValues = stringValues;
-                settingEntry.RawArrayValues = rawValues;
+                throw new ArgumentNullException(nameof(objSetting));
+            }
+            objSetting.Name = Name;
+            objSetting.ObjectType = ObjectType;
+            objSetting.ObjectId = ObjectId;
+            var values = SettingValues.Select(x => x.GetValue()).ToArray();
+            if (objSetting.IsDictionary)
+            {
+                objSetting.AllowedValues = values;
             }
             else
             {
-                if (stringValues.Any())
-                {
-                    settingEntry.Value = stringValues.First();
-                    settingEntry.RawValue = rawValues.First();
-                }
+                objSetting.Value = values.FirstOrDefault();
             }
-            return settingEntry;
+            return objSetting;
         }
 
-        public virtual SettingEntity FromModel(SettingEntry settingEntry)
+        public virtual SettingEntity FromModel(ObjectSettingEntry objectSettingEntry)
         {
-            if (settingEntry == null)
-                throw new ArgumentNullException(nameof(settingEntry));
-
-            ObjectType = settingEntry.ObjectType;
-            ObjectId = settingEntry.ObjectId;
-            Name = settingEntry.Name;
-            Description = settingEntry.Description;
-            SettingValueType = settingEntry.ValueType.ToString();
-            IsEnum = settingEntry.IsArray;
-
-            var valueEntities = new List<string>();
-            if (settingEntry.ArrayValues != null)
+            if (objectSettingEntry == null)
             {
-                valueEntities.AddRange(settingEntry.ArrayValues);
+                throw new ArgumentNullException(nameof(objectSettingEntry));
             }
-            else if (settingEntry.Value != null)
+            ObjectType = objectSettingEntry.ObjectType;
+            ObjectId = objectSettingEntry.ObjectId;
+            Name = objectSettingEntry.Name;
+            if (objectSettingEntry.IsDictionary)
             {
-                valueEntities.Add(settingEntry.Value);
+                SettingValues = new ObservableCollection<SettingValueEntity>(objectSettingEntry.AllowedValues.Select(x => new SettingValueEntity { }.SetValue(objectSettingEntry.ValueType, x)));
             }
-
-            SettingValues = new ObservableCollection<SettingValueEntity>(valueEntities.Select(x => AbstractTypeFactory<SettingValueEntity>.TryCreateInstance().SetValue(settingEntry.ValueType, x)));
-
+            else
+            {
+                SettingValues = new ObservableCollection<SettingValueEntity>(new[] { new SettingValueEntity { }.SetValue(objectSettingEntry.ValueType, objectSettingEntry.Value) });
+            }
             return this;
         }
 
         public virtual void Patch(SettingEntity target)
         {
             if (target == null)
-                throw new ArgumentNullException("target");
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
 
             if (!SettingValues.IsNullCollection())
             {

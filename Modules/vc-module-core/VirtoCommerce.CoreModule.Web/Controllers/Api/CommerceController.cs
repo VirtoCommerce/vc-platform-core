@@ -5,9 +5,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.CoreModule.Core;
-using VirtoCommerce.CoreModule.Core.Model;
-using VirtoCommerce.CoreModule.Core.Model.Tax;
-using VirtoCommerce.CoreModule.Core.Services;
+using VirtoCommerce.CoreModule.Core.Currency;
+using VirtoCommerce.CoreModule.Core.Package;
+using VirtoCommerce.CoreModule.Core.Seo;
+using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.StoreModule.Core.Services;
 
 namespace VirtoCommerce.CoreModule.Web.Controllers.Api

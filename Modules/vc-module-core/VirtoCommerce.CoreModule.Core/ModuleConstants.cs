@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.CoreModule.Core
 {
@@ -24,63 +24,69 @@ namespace VirtoCommerce.CoreModule.Core
         {
             public static class General
             {
-                public static ModuleSetting TaxTypes = new ModuleSetting
+                public static SettingDescriptor TaxTypes = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Core.General.TaxTypes",
-                    ValueType = ModuleSetting.TypeString,
-                    DefaultValue = "Default",
-                    IsArray = true,
+                    GroupName = "Core|General",
+                    ValueType = SettingValueType.ShortText,
+                    IsDictionary = true,
                 };
 
-                public static ModuleSetting WeightUnits = new ModuleSetting
+                public static SettingDescriptor WeightUnits = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Core.General.WeightUnits",
-                    ValueType = ModuleSetting.TypeString,
+                    GroupName = "Core|General",
+                    ValueType = SettingValueType.ShortText,
                     DefaultValue = "gram",
-                    IsArray = true,
-                    ArrayValues = new string[] { "gram", "ounce", "pound" }
+                    IsDictionary = true,
+                    AllowedValues = new string[] { "gram", "ounce", "pound" }
                 };
 
-                public static ModuleSetting MeasureUnits = new ModuleSetting
+                public static SettingDescriptor MeasureUnits = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Core.General.MeasureUnits",
-                    ValueType = ModuleSetting.TypeString,
+                    GroupName = "Core|General",
+                    ValueType = SettingValueType.ShortText,
                     DefaultValue = "mm",
-                    IsArray = true,
-                    ArrayValues = new string[] { "m", "mm", "ft", "in" }
+                    IsDictionary = true,
+                    AllowedValues = new string[] { "m", "mm", "ft", "in" }
                 };
 
-                public static ModuleSetting Languages = new ModuleSetting
+                public static SettingDescriptor Languages = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Core.General.Languages",
-                    ValueType = ModuleSetting.TypeString,
+                    GroupName = "Core|General",
+                    ValueType = SettingValueType.ShortText,
                     DefaultValue = "en-US",
-                    IsArray = true,
-                    ArrayValues = new string[] { "en-US", "fr-FR", "de-DE", "ja-JP" }
+                    IsDictionary = true,
+                    AllowedValues = new string[] { "en-US", "fr-FR", "de-DE", "ja-JP" }
                 };
 
-                public static ModuleSetting FixedRateShippingMethodGroundRate = new ModuleSetting
+                public static SettingDescriptor FixedRateShippingMethodGroundRate = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Core.FixedRateShippingMethod.Ground.Rate",
-                    ValueType = ModuleSetting.TypeDecimal,
-                    DefaultValue = "0.00",
+                    GroupName = "Core|General",
+                    ValueType = SettingValueType.Decimal,
+                    DefaultValue = 0.00m,
                 };
 
-                public static ModuleSetting FixedRateShippingMethodAirRate = new ModuleSetting
+                public static SettingDescriptor FixedRateShippingMethodAirRate = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Core.FixedRateShippingMethod.Air.Rate",
-                    ValueType = ModuleSetting.TypeDecimal,
-                    DefaultValue = "0.00",
+                    GroupName = "Core|General",
+                    ValueType = SettingValueType.Decimal,
+                    DefaultValue = 0.00m,
                 };
 
-                public static ModuleSetting FixedTaxRateProviderRate = new ModuleSetting
+                public static SettingDescriptor FixedTaxRateProviderRate = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Core.FixedTaxRateProvider.Rate",
-                    ValueType = ModuleSetting.TypeDecimal,
-                    DefaultValue = "0.00",
+                    GroupName = "Core|General",
+                    ValueType = SettingValueType.Decimal,
+                    DefaultValue = 0.00m,
                 };
 
-                public static IEnumerable<ModuleSetting> AllSettings
+                public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {
@@ -94,8 +100,16 @@ namespace VirtoCommerce.CoreModule.Core
                     }
                 }
             }
+
+            public static IEnumerable<SettingDescriptor> AllSettings
+            {
+                get
+                {
+                    return General.AllSettings;
+                }
+            }
         }
     }
 
-    
+
 }

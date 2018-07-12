@@ -1,7 +1,10 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using VirtoCommerce.CoreModule.Data.Currency;
 using VirtoCommerce.CoreModule.Data.Model;
+using VirtoCommerce.CoreModule.Data.Package;
+using VirtoCommerce.CoreModule.Data.Seo;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CoreModule.Data.Repositories

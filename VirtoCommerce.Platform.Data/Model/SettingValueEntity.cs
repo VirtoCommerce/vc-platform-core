@@ -22,17 +22,12 @@ namespace VirtoCommerce.Platform.Data.Model
 
         public DateTime? DateTimeValue { get; set; }
 
-
-        [StringLength(64)]
-        public string Locale { get; set; }
-
         public string SettingId { get; set; }
         public virtual SettingEntity Setting { get; set; }
 
-
-        public virtual object GetValue(SettingValueType valueType)
+        public object GetValue()
         {
-            switch (valueType)
+            switch (EnumUtility.SafeParse<SettingValueType>(ValueType, SettingValueType.LongText))
             {
                 case SettingValueType.Boolean:
                     return BooleanValue;
@@ -50,7 +45,7 @@ namespace VirtoCommerce.Platform.Data.Model
             }
         }
 
-        public virtual SettingValueEntity SetValue(SettingValueType valueType, string value)
+        public SettingValueEntity SetValue(SettingValueType valueType, object value)
         {
             ValueType = valueType.ToString();
 
@@ -72,20 +67,23 @@ namespace VirtoCommerce.Platform.Data.Model
             }
             else if (valueType == SettingValueType.LongText)
             {
-                LongTextValue = value;
+                LongTextValue = Convert.ToString(value);
             }
             else if (valueType == SettingValueType.Json)
             {
-                LongTextValue = value;
+                LongTextValue = Convert.ToString(value);
             }
             else if (valueType == SettingValueType.SecureString)
             {
-                ShortTextValue = value;
+                ShortTextValue = Convert.ToString(value);
             }
             else
             {
-                ShortTextValue = value;
+                ShortTextValue = Convert.ToString(value);
             }
+
+            ShortTextValue = string.IsNullOrWhiteSpace(ShortTextValue) ? null : ShortTextValue;
+            LongTextValue = string.IsNullOrWhiteSpace(LongTextValue) ? null : LongTextValue;
             return this;
         }
 

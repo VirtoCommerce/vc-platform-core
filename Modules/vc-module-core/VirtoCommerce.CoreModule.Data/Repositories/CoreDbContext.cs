@@ -1,6 +1,9 @@
 using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
+using VirtoCommerce.CoreModule.Data.Currency;
 using VirtoCommerce.CoreModule.Data.Model;
+using VirtoCommerce.CoreModule.Data.Package;
+using VirtoCommerce.CoreModule.Data.Seo;
 
 namespace VirtoCommerce.CoreModule.Data.Repositories
 {

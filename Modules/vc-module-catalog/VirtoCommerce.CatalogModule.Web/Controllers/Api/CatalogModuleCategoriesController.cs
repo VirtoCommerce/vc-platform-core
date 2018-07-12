@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Services;
-using VirtoCommerce.CoreModule.Core.Model;
-using VirtoCommerce.Platform.Core.Assets;
+using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
@@ -33,7 +31,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [ProducesResponseType(typeof(Category), 200)]
         public ActionResult Get(string id, [FromQuery] string respGroup = null)
         {
-            var category = _categoryService.GetByIds(new[] { id }, respGroup);       
+            var category = _categoryService.GetByIds(new[] { id }, respGroup);
             return Ok(category);
         }
 
@@ -49,8 +47,8 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         {
             var categories = _categoryService.GetByIds(ids, respGroup);
 
-           //TODO:
-           // CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Read, categories);           
+            //TODO:
+            // CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Read, categories);           
             //foreach (var category in retVal)
             //{
             //    category.SecurityScopes = GetObjectPermissionScopeStrings(category);
@@ -140,7 +138,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         {
             var categories = _categoryService.GetByIds(ids, CategoryResponseGroup.WithParents.ToString());
             //TODO:
-           // CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Delete, categories);
+            // CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Delete, categories);
 
             _categoryService.Delete(ids);
             return Ok();

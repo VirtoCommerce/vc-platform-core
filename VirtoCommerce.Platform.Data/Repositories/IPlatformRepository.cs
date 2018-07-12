@@ -8,8 +8,8 @@ using VirtoCommerce.Platform.Data.Model;
 namespace VirtoCommerce.Platform.Data.Repositories
 {
     public interface IPlatformRepository : IRepository
-	{
-	    IQueryable<AssetEntryEntity> AssetEntries { get; }
+    {
+        IQueryable<AssetEntryEntity> AssetEntries { get; }
         IQueryable<SettingEntity> Settings { get; }
 
         IQueryable<DynamicPropertyEntity> DynamicProperties { get; }
@@ -21,9 +21,8 @@ namespace VirtoCommerce.Platform.Data.Repositories
         Task<DynamicPropertyEntity[]> GetDynamicPropertiesByIdsAsync(string[] ids);
         Task<DynamicPropertyEntity[]> GetObjectDynamicPropertiesAsync(string[] objectTypes, string[] objectIds);
 
-	    Task<SettingEntity> GetSettingByNameAsync(string name);
-	    Task<SettingEntity[]> GetAllObjectSettingsAsync(string objectType, string objectId);
+        Task<SettingEntity[]> GetObjectSettingsAsync(string objectType, string objectId);
 
-	    Task<AssetEntryEntity[]> GetAssetsByIdsAsync(IEnumerable<string> ids);
+        Task<AssetEntryEntity[]> GetAssetsByIdsAsync(IEnumerable<string> ids);
     }
 }

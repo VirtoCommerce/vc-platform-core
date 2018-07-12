@@ -25,6 +25,7 @@ using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Notifications;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.NotificationsModule.Web
 {
@@ -68,13 +69,10 @@ namespace VirtoCommerce.NotificationsModule.Web
             AbstractTypeFactory<NotificationEntity>.RegisterType<EmailNotificationEntity>();
             AbstractTypeFactory<NotificationEntity>.RegisterType<SmsNotificationEntity>();
 
-            ModuleInfo.Settings.Add(new ModuleSettingsGroup
-            {
-                Name = "Notifications|General",
-                Settings = ModuleConstants.Settings.General.AllSettings.ToArray()
-            });
+            var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
+            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
 
-            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IKnownPermissionsProvider>();
+            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
                 new Permission()
                 {

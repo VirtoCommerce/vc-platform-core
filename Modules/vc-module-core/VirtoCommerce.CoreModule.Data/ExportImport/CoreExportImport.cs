@@ -3,27 +3,29 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using VirtoCommerce.CoreModule.Core.Model;
 using Newtonsoft.Json;
-using VirtoCommerce.CoreModule.Core.Services;
+using VirtoCommerce.CoreModule.Core.Currency;
+using VirtoCommerce.CoreModule.Core.Package;
+using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 
 namespace VirtoCommerce.CoreModule.Web.ExportImport
 {
-    
 
-	public sealed class CoreExportImport : IExportSupport, IImportSupport
+    public sealed class CoreExportImport : IExportSupport, IImportSupport
     {
         private const int _batchSize = 50;
         private readonly JsonSerializer _serializer;
         private readonly ICurrencyService _currencyService;
         private readonly IPackageTypesService _packageTypesService;
+        private readonly ISeoService _seoService;
 
-        public CoreExportImport(ICurrencyService currencyService, IPackageTypesService packageTypesService)
+        public CoreExportImport(ICurrencyService currencyService, IPackageTypesService packageTypesService, ISeoService seoService)
         {
             _currencyService = currencyService;
             _packageTypesService = packageTypesService;
+            _seoService = seoService;
             _serializer = new JsonSerializer
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
@@ -62,7 +64,7 @@ namespace VirtoCommerce.CoreModule.Web.ExportImport
                 writer.Flush();
                 progressInfo.Description = $"{currencyResult.Count()} currencies exported";
                 progressCallback(progressInfo);
-                
+
                 writer.WriteEndArray();
 
                 var packageTypesResult = await _packageTypesService.GetAllPackageTypesAsync();
@@ -80,6 +82,23 @@ namespace VirtoCommerce.CoreModule.Web.ExportImport
                 writer.Flush();
                 progressInfo.Description = $"{packageTypesResult.Count()} package types exported";
                 progressCallback(progressInfo);
+                writer.WriteEndArray();
+
+                var seoResult = await _seoService.GetAllSeoDuplicatesAsync();
+                writer.WritePropertyName("SeoInfoTotalCount");
+                writer.WriteValue(seoResult.Count());
+
+                writer.WritePropertyName("SeoInfos");
+                writer.WriteStartArray();
+
+                foreach (var seoInfo in seoResult)
+                {
+                    _serializer.Serialize(writer, seoInfo);
+                }
+
+                writer.Flush();
+                progressInfo.Description = $"{seoResult.Count()} seo info exported";
+                progressCallback(progressInfo);
 
                 writer.WriteEndArray();
 
@@ -95,7 +114,8 @@ namespace VirtoCommerce.CoreModule.Web.ExportImport
 
             var progressInfo = new ExportImportProgressInfo();
             var currencyTotalCount = 0;
-            var packeageTypesTotalCount = 0;
+            var packageTypeTotalCount = 0;
+            var seoInfoTotalCount = 0;
 
             using (var streamReader = new StreamReader(inputStream))
             using (var reader = new JsonTextReader(streamReader))
@@ -141,7 +161,7 @@ namespace VirtoCommerce.CoreModule.Web.ExportImport
                         }
                         else if (reader.Value.ToString() == "PackageTypeTotalCount")
                         {
-                            currencyTotalCount = reader.ReadAsInt32() ?? 0;
+                            packageTypeTotalCount = reader.ReadAsInt32() ?? 0;
                         }
                         else if (reader.Value.ToString() == "PackageTypes")
                         {
@@ -168,7 +188,42 @@ namespace VirtoCommerce.CoreModule.Web.ExportImport
                                     await _packageTypesService.SaveChangesAsync(packageTypes.ToArray());
                                     packageTypes.Clear();
 
-                                    progressInfo.Description = $"{ packageTypeCount } Currencies imported";
+                                    progressInfo.Description = $"{ packageTypeCount } Package Types imported";
+
+                                    progressCallback(progressInfo);
+                                }
+                            }
+                        }
+                        else if (reader.Value.ToString() == "SeoInfoTotalCount")
+                        {
+                            seoInfoTotalCount = reader.ReadAsInt32() ?? 0;
+                        }
+                        else if (reader.Value.ToString() == "SeoInfos")
+                        {
+                            reader.Read();
+                            if (reader.TokenType == JsonToken.StartArray)
+                            {
+                                reader.Read();
+
+                                var seoInfos = new List<SeoInfo>();
+                                var seoInfoCount = 0;
+
+                                while (reader.TokenType != JsonToken.EndArray)
+                                {
+                                    var seoInfo = _serializer.Deserialize<SeoInfo>(reader);
+                                    seoInfos.Add(seoInfo);
+                                    seoInfoCount++;
+
+                                    reader.Read();
+                                }
+                                cancellationToken.ThrowIfCancellationRequested();
+
+                                if (seoInfoCount % _batchSize == 0 || reader.TokenType == JsonToken.EndArray)
+                                {
+                                    await _seoService.SaveSeoInfosAsync(seoInfos.ToArray());
+                                    seoInfos.Clear();
+
+                                    progressInfo.Description = $"{ seoInfoCount } SeoInfos imported";
 
                                     progressCallback(progressInfo);
                                 }

@@ -2,9 +2,9 @@ using System;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.CoreModule.Core.Model.Tax;
-
 namespace VirtoCommerce.CoreModule.Web.JsonConverters
 {
     public class PolymorphicJsonConverter : JsonConverter
@@ -25,7 +25,7 @@ namespace VirtoCommerce.CoreModule.Web.JsonConverters
             var result = tryCreateInstance?.Invoke(null, null);
 
             serializer.Populate(JObject.Load(reader).CreateReader(), result);
-           
+
             return result;
         }
 

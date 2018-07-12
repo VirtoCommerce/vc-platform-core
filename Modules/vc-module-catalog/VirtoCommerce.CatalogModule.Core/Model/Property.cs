@@ -1,37 +1,37 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.CoreModule.Core.Model;
+using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-	public class Property : AuditableEntity, IInheritable, ICloneable
+    public class Property : AuditableEntity, IInheritable, ICloneable
     {
-		public string CatalogId { get; set; }
-		public Catalog Catalog { get; set; }
-		public string CategoryId { get; set; }
-		public Category Category { get; set; }
-		public string Name { get; set; }
-		public bool Required { get; set; }
-		public bool Dictionary { get; set; }
-		public bool Multivalue { get; set; }
-		public bool Multilanguage { get; set; }
-		public PropertyValueType ValueType { get; set; }
-		public PropertyType Type { get; set; }
-		public IList<PropertyAttribute> Attributes { get; set; }
-		public IList<PropertyDictionaryValue> DictionaryValues { get; set; }
-		public IList<PropertyDisplayName> DisplayNames { get; set; }
+        public string CatalogId { get; set; }
+        public Catalog Catalog { get; set; }
+        public string CategoryId { get; set; }
+        public Category Category { get; set; }
+        public string Name { get; set; }
+        public bool Required { get; set; }
+        public bool Dictionary { get; set; }
+        public bool Multivalue { get; set; }
+        public bool Multilanguage { get; set; }
+        public PropertyValueType ValueType { get; set; }
+        public PropertyType Type { get; set; }
+        public IList<PropertyAttribute> Attributes { get; set; }
+        public IList<PropertyDictionaryValue> DictionaryValues { get; set; }
+        public IList<PropertyDisplayName> DisplayNames { get; set; }
         public IList<PropertyValidationRule> ValidationRules { get; set; }
         public IList<PropertyValue> Values { get; set; }
 
         public virtual bool IsSame(Property other, params PropertyType[] additionalTypes)
         {
-            if(other == null)
+            if (other == null)
             {
                 throw new ArgumentNullException(nameof(other));
             }
-            var result = Name.EqualsInvariant(other.Name) && ValueType == other.ValueType && (Type == other.Type || (additionalTypes?.Any(x=> x == other.Type) ?? false));
+            var result = Name.EqualsInvariant(other.Name) && ValueType == other.ValueType && (Type == other.Type || (additionalTypes?.Any(x => x == other.Type) ?? false));
             return result;
         }
         /// <summary>
@@ -84,9 +84,9 @@ namespace VirtoCommerce.CatalogModule.Core.Model
                         Values.Add(localizedDictValue);
                     }
                 }
-            }        
+            }
         }
-      
+
         #region IInheritable Members
         public bool IsInherited { get; private set; }
         public virtual void TryInheritFrom(IEntity parent)
@@ -122,7 +122,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
                 }
             }
 
-            if(parent is Catalog catalog)
+            if (parent is Catalog catalog)
             {
                 var displayNamesForCatalogLanguages = catalog.Languages.Select(x => new PropertyDisplayName { LanguageCode = x.LanguageCode }).ToList();
                 //Leave display names only with catalog languages
@@ -137,7 +137,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         public virtual object Clone()
         {
             var result = MemberwiseClone() as Property;
-            if(Attributes != null)
+            if (Attributes != null)
             {
                 result.Attributes = Attributes.Select(x => x.Clone()).OfType<PropertyAttribute>().ToList();
             }
