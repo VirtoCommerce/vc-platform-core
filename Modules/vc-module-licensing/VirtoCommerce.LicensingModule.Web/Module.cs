@@ -16,6 +16,7 @@ using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Security.Events;
+using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.LicensingModule.Web
 {
@@ -40,13 +41,10 @@ namespace VirtoCommerce.LicensingModule.Web
 
         public void PostInitialize(IApplicationBuilder applicationBuilder)
         {
-            ModuleInfo.Settings.Add(new ModuleSettingsGroup
-            {
-                Name = "Licensing|General",
-                Settings = ModuleConstants.Settings.General.AllSettings.ToArray()
-            });
+            var settingsRegistrar = applicationBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
+            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
 
-            var permissionsProvider = applicationBuilder.ApplicationServices.GetRequiredService<IKnownPermissionsProvider>();
+            var permissionsProvider = applicationBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
                 new Permission()
                 {

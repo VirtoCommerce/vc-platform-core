@@ -1,38 +1,37 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using VirtoCommerce.CoreModule.Core.Model.Shipping;
+using VirtoCommerce.CoreModule.Core.Shipping;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.StoreModule.Core.Model;
 
 namespace VirtoCommerce.StoreModule.Data.Model
 {
-	public class StoreShippingMethodEntity : Entity
-	{
-		[Required]
-		[StringLength(128)]
-		public string Code { get; set; }
+    public class StoreShippingMethodEntity : Entity
+    {
+        [Required]
+        [StringLength(128)]
+        public string Code { get; set; }
 
-		public int Priority { get; set; }
+        public int Priority { get; set; }
 
-		[StringLength(128)]
-		public string Name { get; set; }
+        [StringLength(128)]
+        public string Name { get; set; }
 
-		public string Description { get; set; }
+        public string Description { get; set; }
 
-		[StringLength(2048)]
-		public string LogoUrl { get; set; }
+        [StringLength(2048)]
+        public string LogoUrl { get; set; }
 
-		[StringLength(64)]
-		public string TaxType { get; set; }
+        [StringLength(64)]
+        public string TaxType { get; set; }
 
-		public bool IsActive { get; set; }
+        public bool IsActive { get; set; }
 
 
-		#region Navigation Properties
+        #region Navigation Properties
 
-		public string StoreId { get; set; }
+        public string StoreId { get; set; }
 
-		public StoreEntity Store { get; set; }
+        public StoreEntity Store { get; set; }
 
         #endregion
 

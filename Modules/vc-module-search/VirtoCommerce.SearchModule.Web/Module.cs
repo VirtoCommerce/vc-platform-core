@@ -21,27 +21,24 @@ namespace VirtoCommerce.SearchModule.Web
 
         public void Initialize(IServiceCollection serviceCollection)
         {
-            var snapshot = serviceCollection.BuildServiceProvider();
-            var settingsManager = snapshot.GetService<ISettingsManager>();
-
             serviceCollection.AddSingleton<ISearchPhraseParser, SearchPhraseParser>();
-
-            // Allow scale out of indexation through background worker, if opted-in.
-            if (settingsManager.GetValue(ModuleConstants.Settings.General.IndexingJobs.ScaleOut.Name, false))
+            serviceCollection.AddSingleton<IIndexingWorker>(context =>
             {
-                serviceCollection.AddSingleton<IIndexingWorker>(new HangfireIndexingWorker
+                var settingsManager = context.GetService<ISettingsManager>();
+                if (settingsManager.GetValue(ModuleConstants.Settings.IndexingJobs.ScaleOut.Name, false))
                 {
-                    ThrottleQueueCount = settingsManager.GetValue(ModuleConstants.Settings.General.IndexingJobs.MaxQueueSize.Name, 25)
-                });
-            }
-            else
-            {
-                serviceCollection.AddSingleton<IIndexingWorker>(c => null);
-            }
+                    return new HangfireIndexingWorker
+                    {
+                        ThrottleQueueCount = settingsManager.GetValue(ModuleConstants.Settings.IndexingJobs.MaxQueueSize.Name, 25)
+                    };
+                }
+                else
+                {
+                    return null;
+                }
+            });
 
             serviceCollection.AddSingleton<IIndexingManager, IndexingManager>();
-
-            
 
             //TODO delete it after implementation in the modules
             var productIndexingConfiguration = new IndexDocumentConfiguration
@@ -50,19 +47,14 @@ namespace VirtoCommerce.SearchModule.Web
                 DocumentSource = new IndexDocumentSource()
             };
             serviceCollection.AddSingleton(new[] { productIndexingConfiguration });
-
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
-            ModuleInfo.Settings.Add(new ModuleSettingsGroup
-            {
-                Name = "Search|General",
-                Settings = ModuleConstants.Settings.General.AllSettings.ToArray()
-            });
+            var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
+            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
 
-
-            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IKnownPermissionsProvider>();
+            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
                 new Permission()
                 {
@@ -72,10 +64,10 @@ namespace VirtoCommerce.SearchModule.Web
                 }).ToArray());
 
             var settingsManager = appBuilder.ApplicationServices.GetService<ISettingsManager>();
-            var scheduleJobs = settingsManager.GetValue(ModuleConstants.Settings.General.IndexingJobs.Enable.Name, true);
+            var scheduleJobs = settingsManager.GetValue(ModuleConstants.Settings.IndexingJobs.Enable.Name, true);
             if (scheduleJobs)
             {
-                var cronExpression = settingsManager.GetValue(ModuleConstants.Settings.General.IndexingJobs.CronExpression.Name, ModuleConstants.Settings.General.IndexingJobs.CronExpression.DefaultValue);
+                var cronExpression = settingsManager.GetValue(ModuleConstants.Settings.IndexingJobs.CronExpression.Name, (string)ModuleConstants.Settings.IndexingJobs.CronExpression.DefaultValue);
                 RecurringJob.AddOrUpdate<IndexingJobs>(j => j.IndexChangesJob(null, JobCancellationToken.Null), cronExpression);
             }
         }

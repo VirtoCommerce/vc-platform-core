@@ -13,10 +13,7 @@ namespace Module1.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<SettingEntity2>(entity =>
-            {
-                entity.ToTable("PlatformSetting");
-            });
+
         }
     }
 }

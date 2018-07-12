@@ -1,13 +1,11 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Data.Settings;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api
 {
@@ -17,12 +15,12 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
     public class SettingController : Controller
     {
         private readonly ISettingsManager _settingsManager;
-        private readonly ILocalModuleCatalog _moduleCatalog;
+        private readonly ISettingsSearchService _settingsSearchService;
 
-        public SettingController(ISettingsManager settingsManager, ILocalModuleCatalog moduleCatalog)
+        public SettingController(ISettingsManager settingsManager, ISettingsSearchService settingsSearchService)
         {
             _settingsManager = settingsManager;
-            _moduleCatalog = moduleCatalog;
+            _settingsSearchService = settingsSearchService;
         }
 
         /// <summary>
@@ -31,15 +29,9 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <returns></returns>
         [HttpGet]
         [Route("")]
-        [ProducesResponseType(typeof(SettingEntry[]), 200)]
-        public async Task<IActionResult> GetAllSettingsAsync()
+        public async Task<ActionResult<ObjectSettingEntry>> GetAllGlobalSettings()
         {
-            var modules = _moduleCatalog.Modules.OfType<ManifestModuleInfo>();
-            var result = new List<SettingEntry>();
-            foreach (var module in modules)
-            {
-                result.AddRange((await _settingsManager.GetModuleSettingsAsync(module.Id)).Where(x => !x.IsRuntime));
-            }
+            var result = await _settingsManager.GetObjectSettingsAsync(_settingsManager.AllRegisteredSettings.Select(x => x.Name));
             return Ok(result);
         }
 
@@ -50,12 +42,16 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <returns></returns>
         [HttpGet]
         [Route("modules/{id}")]
-        [ProducesResponseType(typeof(SettingEntry[]), 200)]
         [Authorize(PlatformConstants.Security.Permissions.SettingQuery)]
-        public async Task<IActionResult> GetModuleSettingsAsync(string id)
+        public async Task<ActionResult<ObjectSettingEntry[]>> GetGlobalModuleSettingsAsync(string id)
         {
-            var result = await _settingsManager.GetModuleSettingsAsync(id);
-            return Ok(result);
+            var criteria = new SettingsSearchCriteria
+            {
+                ModuleId = id,
+                Take = int.MaxValue
+            };
+            var result = await _settingsSearchService.SearchSettingsAsync(criteria);
+            return Ok(result.Results);
         }
 
         /// <summary>
@@ -65,27 +61,25 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <returns></returns>
         [HttpGet]
         [Route("{name}")]
-        [ProducesResponseType(typeof(SettingEntry), 200)]
         [Authorize(PlatformConstants.Security.Permissions.SettingAccess)]
-        public async Task<IActionResult> GetSettingAsync(string name)
+        public async Task<ActionResult<ObjectSettingEntry>> GetGlobalSettingAsync(string name)
         {
-            var result = await _settingsManager.GetSettingByNameAsync(name);
+            var result = await _settingsManager.GetObjectSettingAsync(name);
             return Ok(result);
         }
 
         /// <summary>
         /// Update settings values
         /// </summary>
-        /// <param name="settings"></param>
+        /// <param name="objectSettings"></param>
         [HttpPost]
         [Route("")]
-        [ProducesResponseType(typeof(void), 200)]
         [Authorize(PlatformConstants.Security.Permissions.SettingUpdate)]
-        public async Task<IActionResult> UpdateAsync([FromBody] SettingEntry[] settings)
+        public async Task<ActionResult> UpdateAsync([FromBody] ObjectSettingEntry[] objectSettings)
         {
             using (await AsyncLock.GetLockByKey("settings").LockAsync())
             {
-                await _settingsManager.SaveSettingsAsync(settings);
+                await _settingsManager.SaveObjectSettingsAsync(objectSettings);
             }
             return Ok();
         }
@@ -97,11 +91,10 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <returns></returns>
         [HttpGet]
         [Route("values/{name}")]
-        [ProducesResponseType(typeof(object[]), 200)]
         [ApiExplorerSettings(IgnoreApi = true)]
-        public async Task<IActionResult> GetArrayAsync(string name)
+        public async Task<ActionResult<object[]>> GetArrayAsync(string name)
         {
-            var result = await _settingsManager.GetArrayAsync<object>(name, null);
+            var result = (await _settingsManager.GetObjectSettingAsync(name)).AllowedValues;
             return Ok(result);
         }
 
@@ -112,10 +105,9 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpGet]
         [AllowAnonymous]
         [Route("ui/customization")]
-        [ProducesResponseType(typeof(SettingEntry), 200)]
-        public async Task<IActionResult> GetUICustomizationSetting()
+        public async Task<ActionResult<ObjectSettingEntry>> GetUICustomizationSetting()
         {
-            var result = await _settingsManager.GetSettingByNameAsync(PlatformConstants.Settings.UserInterface.Customization.Name);
+            var result = await _settingsManager.GetObjectSettingAsync(PlatformConstants.Settings.UserInterface.Customization.Name);
             return Ok(result);
         }
     }

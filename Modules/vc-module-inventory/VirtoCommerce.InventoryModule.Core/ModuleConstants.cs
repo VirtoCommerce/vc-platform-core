@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.InventoryModule.Core
 {
@@ -25,19 +26,27 @@ namespace VirtoCommerce.InventoryModule.Core
         {
             public static class General
             {
-                public static ModuleSetting PageSize = new ModuleSetting
+                public static SettingDescriptor PageSize = new SettingDescriptor
                 {
                     Name = "Inventory.ExportImport.PageSize",
-                    ValueType = ModuleSetting.TypeInteger,
+                    GroupName = "Inventory | General",
+                    ValueType = SettingValueType.Integer,
                     DefaultValue = "50",
                 };
 
-                public static IEnumerable<ModuleSetting> AllSettings
+                public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {
                         yield return PageSize;
                     }
+                }
+            }
+            public static IEnumerable<SettingDescriptor> AllSettings
+            {
+                get
+                {
+                    return General.AllSettings;
                 }
             }
         }

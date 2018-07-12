@@ -18060,43 +18060,36 @@ angular.module("platformWebApp")
 
     retVal.fixValues = function (settings) {
         // parse values as they all are strings
-        var selectedSettings = _.where(settings, { valueType: 'Integer' });
-        _.forEach(selectedSettings, function (setting) {
-            setting.value = parseInt(setting.value, 10);
-            if (setting.allowedValues) {
-                setting.allowedValues = _.map(setting.allowedValues, function (value) { return parseInt(value, 10); });
-            }
-        });
+        //var selectedSettings = _.where(settings, { valueType: 'Integer' });
+        //_.forEach(selectedSettings, function (setting) {
+        //    setting.value = parseInt(setting.value, 10);
+        //    if (setting.allowedValues) {
+        //        setting.allowedValues = _.map(setting.allowedValues, function (value) { return parseInt(value, 10); });
+        //    }
+        //});
 
-        selectedSettings = _.where(settings, { valueType: 'Decimal' });
-        _.forEach(selectedSettings, function (setting) {
-            setting.value = parseFloat(setting.value);
-            if (setting.allowedValues) {
-                setting.allowedValues = _.map(setting.allowedValues, function (value) { return parseFloat(value); });
-            }
-        });
+        //selectedSettings = _.where(settings, { valueType: 'Decimal' });
+        //_.forEach(selectedSettings, function (setting) {
+        //    setting.value = parseFloat(setting.value);
+        //    if (setting.allowedValues) {
+        //        setting.allowedValues = _.map(setting.allowedValues, function (value) { return parseFloat(value); });
+        //    }
+        //});
 
-        selectedSettings = _.where(settings, { valueType: 'Boolean' });
-        _.forEach(selectedSettings, function (setting) {
-            setting.value = setting.value && setting.value.toLowerCase() === 'true';
-            if (setting.allowedValues) {
-                setting.allowedValues = _.map(setting.allowedValues, function (value) { return value.toLowerCase() === 'true'; });
-            }
-        });
-
-        selectedSettings = _.where(settings, { isArray: true });
-        _.forEach(selectedSettings, function (setting) {
-            if (setting.arrayValues) {
-                setting.arrayValues = _.map(setting.arrayValues, function (x) { return { value: x }; });
-            }
-        });
+        //selectedSettings = _.where(settings, { valueType: 'Boolean' });
+        //_.forEach(selectedSettings, function (setting) {
+        //    setting.value = setting.value && setting.value.toLowerCase() === 'true';
+        //    if (setting.allowedValues) {
+        //        setting.allowedValues = _.map(setting.allowedValues, function (value) { return value.toLowerCase() === 'true'; });
+        //    }
+        //});  
     };
 
     retVal.toApiFormat = function (settings) {
-        var selectedSettings = _.where(settings, { isArray: true });
+        var selectedSettings = _.where(settings, { isDictionary: true });
         _.forEach(selectedSettings, function (setting) {
-            if (setting.arrayValues) {
-                setting.arrayValues = _.pluck(setting.arrayValues, 'value');
+            if (setting.allowedValues) {
+                setting.allowedValues = _.pluck(setting.allowedValues, 'value');
             }
         });
     };
@@ -18112,6 +18105,7 @@ function DictionarySettingDetailBlade(settingName) {
     this.controller = 'platformWebApp.settingDictionaryController';
     this.template = '$(Platform)/Scripts/app/settings/blades/setting-dictionary.tpl.html';
 }
+
 angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
 	$stateProvider
@@ -23770,29 +23764,6 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
-.controller('platformWebApp.dynamicPropertyWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-	$scope.blade = $scope.widget.blade;
-	$scope.openBlade = function () {
-        var blade = {
-        	id: "dynamicPropertiesList",
-        	currentEntity: $scope.blade.currentEntity,
-            controller: 'platformWebApp.propertyValueListController',
-            template: '$(Platform)/Scripts/app/dynamicProperties/blades/propertyValue-list.tpl.html'
-        };
-
-        bladeNavigationService.showBlade(blade, $scope.blade);
-    };
-
-
-	$scope.$watch('widget.blade.currentEntity', function (entity) {
-		if (angular.isDefined(entity)) {
-			var groupedByProperty = _.groupBy(entity.dynamicProperties, function (x) { return x.id; });
-			$scope.dynamicPropertyCount = _.keys(groupedByProperty).length;
-		}
-	});
-
-}]);
-angular.module('platformWebApp')
 .factory('platformWebApp.dynamicProperties.api', ['$resource', function ($resource) {
     return $resource('api/platform/dynamic/properties', {}, {
         queryTypes: { url: 'api/platform/dynamic/types', isArray: true },
@@ -23856,6 +23827,29 @@ angular.module('platformWebApp')
     };
 });
 
+angular.module('platformWebApp')
+.controller('platformWebApp.dynamicPropertyWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+	$scope.blade = $scope.widget.blade;
+	$scope.openBlade = function () {
+        var blade = {
+        	id: "dynamicPropertiesList",
+        	currentEntity: $scope.blade.currentEntity,
+            controller: 'platformWebApp.propertyValueListController',
+            template: '$(Platform)/Scripts/app/dynamicProperties/blades/propertyValue-list.tpl.html'
+        };
+
+        bladeNavigationService.showBlade(blade, $scope.blade);
+    };
+
+
+	$scope.$watch('widget.blade.currentEntity', function (entity) {
+		if (angular.isDefined(entity)) {
+			var groupedByProperty = _.groupBy(entity.dynamicProperties, function (x) { return x.id; });
+			$scope.dynamicPropertyCount = _.keys(groupedByProperty).length;
+		}
+	});
+
+}]);
 angular.module('platformWebApp')
     .controller('platformWebApp.exportImport.exportMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'platformWebApp.authService', 'platformWebApp.toolbarService', function ($scope, bladeNavigationService, exportImportResourse, authService, toolbarService
 ) {
@@ -25410,6 +25404,24 @@ angular.module('platformWebApp')
     }
 }]);
 angular.module('platformWebApp')
+.factory('platformWebApp.notifications', ['$resource', function ($resource) {
+
+	return $resource('api/platform/notification/:id', { id: '@Id' }, {
+		getNotificationList: { method: 'GET', url: 'api/platform/notification', isArray: true },
+		getTemplateById: { method: 'GET', url: 'api/platform/notification/template/:id' },
+		getTemplate: { method: 'GET', url: 'api/platform/notification/template' },
+		getTemplates: { method: 'GET', url: 'api/platform/notification/templates', isArray: true },
+		updateTemplate: { method: 'POST', url: 'api/platform/notification/template' },
+		deleteTemplate: { method: 'DELETE', url: 'api/platform/notification/template/:id' },
+		prepareTestData: { method: 'GET', url: 'api/platform/notification/template/:type/getTestingParameters', isArray: true },
+		resolveNotification: { method: 'POST', url: 'api/platform/notification/template/rendernotificationcontent' },
+		sendNotification: { method: 'POST', url: 'api/platform/notification/template/sendnotification' },
+		getNotificationJournalList: { method: 'GET', url: 'api/platform/notification/journal/:objectId/:objectTypeId' },
+		getNotificationJournalDetails: { method: 'GET', url: 'api/platform/notification/notification/:id' },
+		stopSendingNotifications: { method: 'POST', url: 'api/platform/notification/stopnotifications' }
+	});
+}]);
+angular.module('platformWebApp')
 .controller('platformWebApp.notificationsJournalDetailtsController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.notifications', function ($scope, bladeNavigationService, notifications) {
 	var blade = $scope.blade;
 
@@ -26237,24 +26249,6 @@ angular.module('platformWebApp')
 	}
 }]);
 angular.module('platformWebApp')
-.factory('platformWebApp.notifications', ['$resource', function ($resource) {
-
-	return $resource('api/platform/notification/:id', { id: '@Id' }, {
-		getNotificationList: { method: 'GET', url: 'api/platform/notification', isArray: true },
-		getTemplateById: { method: 'GET', url: 'api/platform/notification/template/:id' },
-		getTemplate: { method: 'GET', url: 'api/platform/notification/template' },
-		getTemplates: { method: 'GET', url: 'api/platform/notification/templates', isArray: true },
-		updateTemplate: { method: 'POST', url: 'api/platform/notification/template' },
-		deleteTemplate: { method: 'DELETE', url: 'api/platform/notification/template/:id' },
-		prepareTestData: { method: 'GET', url: 'api/platform/notification/template/:type/getTestingParameters', isArray: true },
-		resolveNotification: { method: 'POST', url: 'api/platform/notification/template/rendernotificationcontent' },
-		sendNotification: { method: 'POST', url: 'api/platform/notification/template/sendnotification' },
-		getNotificationJournalList: { method: 'GET', url: 'api/platform/notification/journal/:objectId/:objectTypeId' },
-		getNotificationJournalDetails: { method: 'GET', url: 'api/platform/notification/notification/:id' },
-		stopSendingNotifications: { method: 'POST', url: 'api/platform/notification/stopnotifications' }
-	});
-}]);
-angular.module('platformWebApp')
 .controller('platformWebApp.pushNotificationsHistoryController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
 function ($scope, bladeNavigationService, eventTemplateResolver, notifications) {
     var blade = $scope.blade;
@@ -26338,6 +26332,75 @@ angular.module('platformWebApp')
 	});
 }]);
 
+angular.module('platformWebApp')
+.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
+	return {
+		link: function (scope, element, attrs) {
+
+			if (attrs.vaPermission) {
+				var permissionValue = attrs.vaPermission.trim();
+			
+				//modelObject is a scope property of the parent/current scope
+				scope.$watch(attrs.securityScopes, function (value) {
+					if (value) {
+						toggleVisibilityBasedOnPermission(value);
+					}
+				});
+			
+				function toggleVisibilityBasedOnPermission(securityScopes) {
+					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
+					if (hasPermission)
+						element.show();
+					else
+						element.hide();
+				}
+
+				toggleVisibilityBasedOnPermission();
+				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
+			}
+		}
+	};
+}]);
+angular.module('platformWebApp')
+.directive('vaLoginToolbar', ['$document', '$timeout', '$state', 'platformWebApp.authService', function ($document, $timeout, $state, authService) {
+    return {
+        templateUrl: '$(Platform)/Scripts/app/security/login/loginToolbar.tpl.html',
+        restrict: 'E',
+        replace: true,
+        scope: true,
+        link: function ($scope, $element, $attrs, $controller) {
+            $scope.openProfile = function () {
+                $state.go('workspace.userProfile');
+            };
+
+            //$scope.isAuthenticated = authService.isAuthenticated;
+            $scope.logout = authService.logout;
+            $scope.$watch(function () {
+                return authService.userLogin;
+            }, function (userLogin) {
+                $scope.userLogin = userLogin;
+                $scope.fullName = authService.fullName;
+            });
+
+            // menu stuff
+            var onDocumentClick = function (event) {
+                //$scope.isMenuVisible = false;
+                $scope.$apply("isMenuVisible = false");
+                $document.off("click", onDocumentClick);
+            };
+
+            $scope.showMenu = function () {
+                $document.off("click", onDocumentClick);
+                $scope.isMenuVisible = !$scope.isMenuVisible;
+                if ($scope.isMenuVisible) {
+                    $timeout(function () {
+                        $document.on("click", onDocumentClick);
+                    });
+                }
+            }
+        }
+    }
+}])
 angular.module('platformWebApp')
 .controller('platformWebApp.accountApiListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
@@ -27488,75 +27551,6 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
-.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
-	return {
-		link: function (scope, element, attrs) {
-
-			if (attrs.vaPermission) {
-				var permissionValue = attrs.vaPermission.trim();
-			
-				//modelObject is a scope property of the parent/current scope
-				scope.$watch(attrs.securityScopes, function (value) {
-					if (value) {
-						toggleVisibilityBasedOnPermission(value);
-					}
-				});
-			
-				function toggleVisibilityBasedOnPermission(securityScopes) {
-					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
-					if (hasPermission)
-						element.show();
-					else
-						element.hide();
-				}
-
-				toggleVisibilityBasedOnPermission();
-				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
-			}
-		}
-	};
-}]);
-angular.module('platformWebApp')
-.directive('vaLoginToolbar', ['$document', '$timeout', '$state', 'platformWebApp.authService', function ($document, $timeout, $state, authService) {
-    return {
-        templateUrl: '$(Platform)/Scripts/app/security/login/loginToolbar.tpl.html',
-        restrict: 'E',
-        replace: true,
-        scope: true,
-        link: function ($scope, $element, $attrs, $controller) {
-            $scope.openProfile = function () {
-                $state.go('workspace.userProfile');
-            };
-
-            //$scope.isAuthenticated = authService.isAuthenticated;
-            $scope.logout = authService.logout;
-            $scope.$watch(function () {
-                return authService.userLogin;
-            }, function (userLogin) {
-                $scope.userLogin = userLogin;
-                $scope.fullName = authService.fullName;
-            });
-
-            // menu stuff
-            var onDocumentClick = function (event) {
-                //$scope.isMenuVisible = false;
-                $scope.$apply("isMenuVisible = false");
-                $document.off("click", onDocumentClick);
-            };
-
-            $scope.showMenu = function () {
-                $document.off("click", onDocumentClick);
-                $scope.isMenuVisible = !$scope.isMenuVisible;
-                if ($scope.isMenuVisible) {
-                    $timeout(function () {
-                        $document.on("click", onDocumentClick);
-                    });
-                }
-            }
-        }
-    }
-}])
-angular.module('platformWebApp')
 .factory('platformWebApp.accounts', ['$resource', function ($resource) {
     return $resource('api/platform/security/users/:id', { id: '@Id' }, {
         search: { method: 'POST' },
@@ -27725,6 +27719,15 @@ angular.module('platformWebApp')
     };
 }]);
 angular.module('platformWebApp')
+.factory('platformWebApp.settings', ['$resource', function ($resource) {
+    return $resource('api/platform/settings/:id', { id: '@Id' }, {
+        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
+      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
+      	update: { method: 'POST', url: 'api/platform/settings' },
+        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
+    });
+}]);
+angular.module('platformWebApp')
 .controller('platformWebApp.entitySettingListController', ['$scope', 'platformWebApp.settings.helper', 'platformWebApp.bladeNavigationService', function ($scope, settingsHelper, bladeNavigationService) {
     var blade = $scope.blade;
     // blade.updatePermission = // Use predefined (parent) permission
@@ -27841,11 +27844,11 @@ angular.module('platformWebApp')
     blade.refresh = function (parentRefresh) {
         settings.get({ id: blade.currentEntityId }, function (setting) {
             if (parentRefresh && blade.parentRefresh) {
-                blade.parentRefresh(setting.arrayValues);
+                blade.parentRefresh(setting.allowedValues);
             }
 
-            setting.arrayValues = _.map(setting.arrayValues, function (x) { return { value: x }; });
-            blade.origEntity = angular.copy(setting.arrayValues);
+            setting.allowedValues = _.map(setting.allowedValues, function (x) { return { value: x }; });
+            blade.origEntity = angular.copy(setting.allowedValues);
             initializeBlade(setting);
         });
     }
@@ -27853,7 +27856,7 @@ angular.module('platformWebApp')
     function initializeBlade(data) {
         blade.title = data.title;
         blade.currentEntity = data;
-        currentEntities = blade.currentEntity.arrayValues;
+        currentEntities = blade.currentEntity.allowedValues;
         blade.isLoading = false;
     }
 
@@ -27912,7 +27915,7 @@ angular.module('platformWebApp')
         function saveChanges() {
             blade.selectedAll = false;
             blade.isLoading = true;
-            blade.currentEntity.arrayValues = _.pluck(blade.currentEntity.arrayValues, 'value');
+            blade.currentEntity.allowedValues = _.pluck(blade.currentEntity.allowedValues, 'value');
 
             settings.update(null, [blade.currentEntity], blade.refresh,
                 function (error) { bladeNavigationService.setError('Error ' + error.status, $scope.blade); });
@@ -27982,6 +27985,7 @@ angular.module('platformWebApp')
     // on load
     resetNewValue();
 }]);
+
 angular.module('platformWebApp')
 .controller('platformWebApp.settingGroupListController', ['$window', 'platformWebApp.modules', '$scope', 'platformWebApp.settings', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService',
 function ($window, modules, $scope, settings, bladeNavigationService, dialogService) {
@@ -28160,16 +28164,13 @@ angular.module('platformWebApp')
             }
 
             // transform to va-generic-value-input suitable structure
-            setting.isDictionary = _.any(setting.allowedValues);
             setting.values = setting.isDictionary ? [{ value: { id: setting.value, name: setting.value } }] : [{ id: setting.value, value: setting.value }];
             if (setting.allowedValues) {
                 setting.allowedValues = _.map(setting.allowedValues, function (x) {
-                    return { id: x, name: x };
+                    return { value: x };
                 });
             }
         });
-
-
         results = _.groupBy(results, 'groupName');
         blade.groupNames = _.keys(results);
         blade.currentEntities = angular.copy(results);
@@ -28203,8 +28204,6 @@ angular.module('platformWebApp')
         var objects = _.flatten(_.map(blade.currentEntities, _.values));
         objects = _.map(objects, function (x) {
             x.value = x.isDictionary ? x.values[0].value.id : x.values[0].value;
-            x.values = undefined;
-            x.allowedValues = undefined;
             return x;
         });
 
@@ -28251,15 +28250,6 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
-.factory('platformWebApp.settings', ['$resource', function ($resource) {
-    return $resource('api/platform/settings/:id', { id: '@Id' }, {
-        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
-      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
-      	update: { method: 'POST', url: 'api/platform/settings' },
-        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
-    });
-}]);
-angular.module('platformWebApp')
 .controller('platformWebApp.entitySettingsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
 
@@ -28272,6 +28262,13 @@ angular.module('platformWebApp')
         };
         bladeNavigationService.showBlade(newBlade, blade);
     };
+}]);
+angular.module('platformWebApp')
+.factory('platformWebApp.userProfileApi', ['$resource', function ($resource) {
+    return $resource('api/platform/profiles/currentuser', { }, {
+        getLocales: { url: 'api/platform/localization/locales', isArray: true },
+        getRegionalFormats: { url: 'api/platform/localization/regionalformats', isArray: true }
+    }); 
 }]);
 angular.module('platformWebApp')
 .controller('platformWebApp.userProfile.userProfileController', ['$rootScope', '$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', 'platformWebApp.settings.helper',
@@ -28390,13 +28387,6 @@ angular.module('platformWebApp')
         }
 }]);
 
-angular.module('platformWebApp')
-.factory('platformWebApp.userProfileApi', ['$resource', function ($resource) {
-    return $resource('api/platform/profiles/currentuser', { }, {
-        getLocales: { url: 'api/platform/localization/locales', isArray: true },
-        getRegionalFormats: { url: 'api/platform/localization/regionalformats', isArray: true }
-    }); 
-}]);
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 

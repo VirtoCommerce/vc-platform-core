@@ -44,8 +44,8 @@ namespace Module1.Web
                     platformDbContext.Database.Migrate();
                 }
             }
-            AbstractTypeFactory<SettingEntity>.OverrideType<SettingEntity, SettingEntity2>();
-            AbstractTypeFactory<SettingEntry>.OverrideType<SettingEntry, SettingEntry2>();
+            //AbstractTypeFactory<SettingEntity>.OverrideType<SettingEntity, SettingEntity2>();
+            //AbstractTypeFactory<SettingEntry>.OverrideType<SettingEntry, SettingEntry2>();
         }
 
         public void Uninstall()

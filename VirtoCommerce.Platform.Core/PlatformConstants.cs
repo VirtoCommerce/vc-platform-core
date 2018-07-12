@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.Platform.Core
 {
@@ -63,23 +65,25 @@ namespace VirtoCommerce.Platform.Core
         {
             public static class Cache
             {
-                public static ModuleSetting CacheEnabled = new ModuleSetting
+                public static SettingDescriptor CacheEnabled = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Platform.Cache.Enabled",
-                    ValueType = ModuleSetting.TypeBoolean,
-                    DefaultValue = true.ToString(),
+                    ValueType = SettingValueType.Boolean,
+                    GroupName = "Platform|Cache",
+                    DefaultValue = true,
                     RestartRequired = true
 
                 };
-                public static ModuleSetting AbsoluteExpiration = new ModuleSetting
+                public static SettingDescriptor AbsoluteExpiration = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Platform.Cache.AbsoulteExpiration",
-                    ValueType = ModuleSetting.TypeString,
+                    GroupName = "Platform|Cache",
+                    ValueType = SettingValueType.ShortText,
                     DefaultValue = TimeSpan.FromDays(1).ToString(),
                     RestartRequired = true
                 };
 
-                public static IEnumerable<ModuleSetting> AllSettings
+                public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {
@@ -91,16 +95,17 @@ namespace VirtoCommerce.Platform.Core
 
             public static class Security
             {
-                public static ModuleSetting SecurityAccountTypes = new ModuleSetting
+                public static SettingDescriptor SecurityAccountTypes = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Platform.Security.AccountTypes",
-                    ValueType = ModuleSetting.TypeString,
-                    IsArray = true,
-                    ArrayValues = Enum.GetNames(typeof(UserType)),
-                    DefaultValue = UserType.Manager.ToString()
+                    GroupName = "Platform|Security",
+                    ValueType = SettingValueType.ShortText,
+                    IsDictionary = true,
+                    AllowedValues = Enum.GetNames(typeof(UserType)),
+                    DefaultValue = UserType.Manager
                 };
 
-                public static IEnumerable<ModuleSetting> AllSettings
+                public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {
@@ -111,93 +116,94 @@ namespace VirtoCommerce.Platform.Core
 
             public static class Setup
             {
-                public static ModuleSetting SampleDataState = new ModuleSetting
+                public static SettingDescriptor SetupStep = new SettingDescriptor
+                {
+                    Name = "VirtoCommerce.SetupStep",
+                    GroupName = "Platform|Setup",
+                    ValueType = SettingValueType.ShortText,
+                    DefaultValue = null
+                };
+
+                public static SettingDescriptor SampleDataState = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.SampleDataState",
-                    ValueType = ModuleSetting.TypeString,
-                    DefaultValue = ExportImport.SampleDataState.Undefined.ToString()
+                    GroupName = "Platform|Setup",
+                    ValueType = SettingValueType.ShortText,
+                    DefaultValue = ExportImport.SampleDataState.Undefined
                 };
-                public static ModuleSetting ModulesAutoInstallState = new ModuleSetting
+                public static SettingDescriptor ModulesAutoInstallState = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.ModulesAutoInstallState",
-                    ValueType = ModuleSetting.TypeString,
-                    DefaultValue = AutoInstallState.Undefined.ToString()
+                    GroupName = "Platform|Setup",
+                    ValueType = SettingValueType.ShortText,
+                    DefaultValue = AutoInstallState.Undefined
                 };
 
-                public static ModuleSetting ModulesAutoInstalled = new ModuleSetting
+                public static SettingDescriptor ModulesAutoInstalled = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.ModulesAutoInstalled",
-                    ValueType = ModuleSetting.TypeBoolean,
-                    DefaultValue = false.ToString()
+                    GroupName = "Platform|Setup",
+                    ValueType = SettingValueType.Boolean,
+                    DefaultValue = false
                 };
-
-                public static IEnumerable<ModuleSetting> AllSettings
+                public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {
-                        yield return ModulesAutoInstalled;
-                        yield return ModulesAutoInstallState;
+                        yield return SetupStep;
                         yield return SampleDataState;
+                        yield return ModulesAutoInstallState;
+                        yield return ModulesAutoInstalled;
                     }
                 }
             }
 
-            public static class Modularity
-            {
-                public static ModuleSetting ModulesAutoInstalled = new ModuleSetting
-                {
-                    Name = "VirtoCommerce.ModulesAutoInstalled",
-                    ValueType = ModuleSetting.TypeBoolean,
-                    DefaultValue = false.ToString()
-                };
-                public static ModuleSetting ModulesAutoInstallState = new ModuleSetting
-                {
-                    Name = "VirtoCommerce.ModulesAutoInstallState",
-                    ValueType = ModuleSetting.TypeSecureString,
-                    DefaultValue = AutoInstallState.Undefined.ToString()
-                };
-
-            }
-
             public static class UserProfile
             {
-                public static ModuleSetting MainMenuState = new ModuleSetting
+                public static SettingDescriptor MainMenuState = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Platform.UI.MainMenu.State",
-                    ValueType = ModuleSetting.TypeJson,
+                    GroupName = "Platform|User Profile",
+                    ValueType = SettingValueType.Json,
                 };
-                public static ModuleSetting Language = new ModuleSetting
+                public static SettingDescriptor Language = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Platform.UI.Language",
-                    ValueType = ModuleSetting.TypeString,
+                    GroupName = "Platform|User Profile",
+                    ValueType = SettingValueType.ShortText,
                     DefaultValue = "en"
                 };
-                public static ModuleSetting RegionalFormat = new ModuleSetting
+                public static SettingDescriptor RegionalFormat = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Platform.UI.RegionalFormat",
-                    ValueType = ModuleSetting.TypeString,
+                    GroupName = "Platform|User Profile",
+                    ValueType = SettingValueType.ShortText,
                     DefaultValue = "en"
                 };
-                public static ModuleSetting TimeZone = new ModuleSetting
+                public static SettingDescriptor TimeZone = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Platform.UI.TimeZone",
-                    ValueType = ModuleSetting.TypeString
+                    GroupName = "Platform|User Profile",
+                    ValueType = SettingValueType.ShortText
                 };
-                public static ModuleSetting UseTimeAgo = new ModuleSetting
+                public static SettingDescriptor UseTimeAgo = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Platform.UI.UseTimeAgo",
-                    ValueType = ModuleSetting.TypeBoolean,
-                    DefaultValue = true.ToString()
+                    GroupName = "Platform|User Profile",
+                    ValueType = SettingValueType.Boolean,
+                    DefaultValue = true
                 };
-                public static ModuleSetting FullDateThreshold = new ModuleSetting
+                public static SettingDescriptor FullDateThreshold = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Platform.UI.FullDateThreshold",
-                    ValueType = ModuleSetting.TypeInteger
+                    GroupName = "Platform|User Profile",
+                    ValueType = SettingValueType.Integer,
                 };
-                public static ModuleSetting FullDateThresholdUnit = new ModuleSetting
+                public static SettingDescriptor FullDateThresholdUnit = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Platform.UI.FullDateThresholdUnit",
-                    ValueType = ModuleSetting.TypeString,
+                    ValueType = SettingValueType.ShortText,
+                    GroupName = "Platform|User Profile",
                     DefaultValue = "Never",
                     AllowedValues = new[]
                                 {
@@ -213,14 +219,15 @@ namespace VirtoCommerce.Platform.Core
                                 }
                 };
 
-                public static ModuleSetting ShowMeridian = new ModuleSetting
+                public static SettingDescriptor ShowMeridian = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Platform.UI.ShowMeridian",
-                    ValueType = ModuleSetting.TypeBoolean,
-                    DefaultValue = true.ToString()
+                    GroupName = "Platform|User Profile",
+                    ValueType = SettingValueType.Boolean,
+                    DefaultValue = true
                 };
 
-                public static IEnumerable<ModuleSetting> AllSettings
+                public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {
@@ -235,24 +242,34 @@ namespace VirtoCommerce.Platform.Core
                     }
                 }
             }
+
             public static class UserInterface
             {
-                public static ModuleSetting Customization = new ModuleSetting
+                public static SettingDescriptor Customization = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Platform.UI.Customization",
-                    ValueType = ModuleSetting.TypeJson,
+                    GroupName = "Platform|User Interface",
+                    ValueType = SettingValueType.Json,
                     DefaultValue = "{\n" +
                                                "  \"title\": \"Virto Commerce\",\n" +
                                                "  \"logo\": \"/images/logo.png\",\n" +
                                                "  \"contrast_logo\": \"/images/contrast-logo.png\"\n" +
                                                "}"
                 };
-                public static IEnumerable<ModuleSetting> AllSettings
+                public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {
                         yield return Customization;
                     }
+                }
+            }
+            public static IEnumerable<SettingDescriptor> AllSettings
+            {
+                get
+                {
+                    return Cache.AllSettings.Concat(Security.AllSettings).Concat(Setup.AllSettings)
+                                            .Concat(UserProfile.AllSettings).Concat(UserInterface.AllSettings);
                 }
             }
         }

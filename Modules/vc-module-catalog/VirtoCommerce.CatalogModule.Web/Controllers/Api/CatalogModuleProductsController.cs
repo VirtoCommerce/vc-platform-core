@@ -2,8 +2,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Services;
-using VirtoCommerce.CoreModule.Core.Commerce.Model;
-using VirtoCommerce.Domain.Commerce.Model;
+using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
@@ -29,10 +28,10 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         ///<param name="respGroup">Response group.</param>
         [HttpGet]
         [Route("{id}")]
-        [ProducesResponseType(typeof(CatalogProduct),200)]
+        [ProducesResponseType(typeof(CatalogProduct), 200)]
         public ActionResult GetProductById(string id, [FromQuery] string responseGroup = null)
         {
-            var result = _itemsService.GetByIds(new[] { id }, responseGroup);          
+            var result = _itemsService.GetByIds(new[] { id }, responseGroup);
             //TODO:
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Read, item);
             //retVal.SecurityScopes = GetObjectPermissionScopeStrings(item);
@@ -110,7 +109,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                 CategoryId = categoryId,
                 CatalogId = catalogId,
                 IsActive = true,
-                SeoInfos = new SeoInfo [] { }
+                SeoInfos = new SeoInfo[] { }
             };
 
             //TODO:
@@ -216,10 +215,10 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [ProducesResponseType(typeof(GenericSearchResult<ProductAssociation>), 200)]
         public ActionResult SearchProductAssociations(ProductAssociationSearchCriteria criteria)
         {
-            var result = _productAssociationSearchService.SearchProductAssociations(criteria);          
+            var result = _productAssociationSearchService.SearchProductAssociations(criteria);
             return Ok(result);
         }
 
-       
+
     }
 }

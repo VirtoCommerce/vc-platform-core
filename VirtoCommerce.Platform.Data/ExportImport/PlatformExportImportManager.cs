@@ -31,9 +31,9 @@ namespace VirtoCommerce.Platform.Data.ExportImport
         private readonly IDynamicPropertyService _dynamicPropertyService;
         private readonly IDynamicPropertySearchService _dynamicPropertySearchService;
         private readonly IPlatformMemoryCache _memoryCache;
-        private readonly IKnownPermissionsProvider _permissionsProvider;
+        private readonly IPermissionsRegistrar _permissionsProvider;
 
-        public PlatformExportImportManager(UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager, IKnownPermissionsProvider permissionsProvider, ISettingsManager settingsManager,
+        public PlatformExportImportManager(UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager, IPermissionsRegistrar permissionsProvider, ISettingsManager settingsManager,
                 IDynamicPropertyService dynamicPropertyService, IDynamicPropertySearchService dynamicPropertySearchService, ILocalModuleCatalog moduleCatalog, IPlatformMemoryCache memoryCache)
         {
             _dynamicPropertyService = dynamicPropertyService;
@@ -178,7 +178,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
 
                     foreach (var module in manifest.Modules)
                     {
-                        await _settingsManager.SaveSettingsAsync(platformEntries.Settings.Where(x => x.ModuleId == module.Id).ToArray());
+                        await _settingsManager.SaveObjectSettingsAsync(platformEntries.Settings.Where(x => x.ModuleId == module.Id).ToArray());
                     }
                 }
             }
@@ -223,7 +223,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                 progressCallback(progressInfo);
                 foreach (var module in manifest.Modules)
                 {
-                    var moduleSettings = await _settingsManager.GetModuleSettingsAsync(module.Id);
+                    var moduleSettings = await _settingsManager.GetObjectSettingsAsync(_settingsManager.AllRegisteredSettings.Where(x => x.ModuleId == module.Id).Select(x => x.Name));
                     platformExportObj.Settings = platformExportObj.Settings.Concat(moduleSettings).ToList();
                 }
             }
