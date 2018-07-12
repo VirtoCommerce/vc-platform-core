@@ -4,4 +4,15 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Controllers\Api\OrderModuleController.cs" />
+    <Compile Remove="JsonConverters\PolymorphicOperationJsonConverter.cs" />
+    <Compile Remove="Module.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\Api\" />
+    <Folder Include="JsonConverters\" />
+  </ItemGroup>
+
 </Project>

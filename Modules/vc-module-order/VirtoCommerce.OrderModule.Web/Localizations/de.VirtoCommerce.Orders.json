@@ -1,0 +1,243 @@
+{
+  "orders": {
+	"main-menu-title": "Bestellungen",
+    "blades": {
+      "customerOrder-detail": {
+        "title": "Bestellung von {{customer}}",
+        "subtitle": "Bearbeiten Sie die Details und die damit zusammenhängenden Dokumente an.",
+        "labels": {
+          "approved": "Genehmigt",
+          "employee": "Zugewiesen zu",
+          "order-number": "Bestellnummer",
+          "status": "Status",
+          "store": "Store",
+          "from": "Von",
+          "channel": "Kanal",
+          "customer": "Kunde",
+          "invoice": "Erhalten Sie die Rechnung als PDF"
+        },
+        "placeholders": {
+          "employee": "Wählen Sie den Zuständiger aus",
+          "status": "Wählen Sie aus...",
+          "store": "Wählen Sie aus..."
+        }
+      },
+      "customerOrder-items": {
+        "labels": {
+          "item": "Artikel",
+          "quantity": "Anz.",
+          "available": "Frei",
+          "await": "Warten auf",
+          "price": "Einheit Preis (exkl. Mwst.)",
+          "tax": "Steuern",
+          "priceWithTax": "Einheit Preis (inkl. Mwst.)",
+          "discount": "Rabatt (exkl. Mwst.)",
+          "discountWithTax": "Rabatt (inkl. Mwst.)",
+          "total": "Total",
+          "dynamic-properties": "Dynamische Eigenschaften",
+          "sub-total": "Zwischensumme",
+          "discount-total": "Rabatt total",
+          "tax-total": "Gesamtbetrag Steuern"
+        }
+      },
+      "customerOrder-list": {
+        "title": "Bestellungen",
+        "labels": {
+          "new-filter": "Neuen Filter hinzufügen",
+          "unnamed-filter": "Unbenannter Filter",
+          "number": "Bestellnummer",
+          "customer": "Kunde",
+          "confirmed": "Bestätigt",
+          "status": "Status",
+          "total": "Total",
+          "currency": "Währung",
+          "store": "Store",
+          "created": "Erstellt"
+        },
+        "placeholders": {
+          "select-filter": "Wählen Sie den Filter."
+        }
+      },
+      "filter-detail": {
+        "subtitle": "Filter bearbeiten",
+        "new-title": "Neuen Filter",
+        "new-subtitle": "Neuen Filter erstellen",
+        "labels": {
+          "name": "Name des Filters",
+          "name_": "Wie werden Sie diesen Filter?",
+          "criteria": "Filterkriterien",
+          "from": "Erstellt von",
+          "to": "Bis erstellt"
+        },
+        "placeholders": {
+          "all": "Nicht angegeben"
+        }
+      },
+      "operation-comment": {
+        "labels": {
+          "comments": "Kommentare"
+        }
+      },
+      "payment-detail": {
+        "title": "Zahlungseingang #{{number}}",
+        "title-new": "Neu eingehende Zahlung",
+        "subtitle": "Zahlung bearbeiten Details und zugehörige Dokumente",
+        "labels": {
+          "approved": "Genehmigt",
+          "payment-number": "Zahlungsnummer",
+          "status": "Status",
+          "amount": "Betrag",
+          "from": "Von",
+          "payment-gateway": "Zahlungsgateway",
+          "payment-purpose": "Zahlung",
+          "price": "Zahlung Gebühren",
+          "price-with-tax": "Zahlung Gebühren (inkl. Mwst.)"
+        },
+        "placeholders": {
+          "status": "Wählen Sie aus...",
+          "payment-gateway": "Wählen Sie aus..."
+        }
+      },
+      "transactions-list": {
+        "title": "Zahlungsgateway Transaktionen",
+        "subtitle": "Liste aller Zahlungsgateway Interaktionen"
+      },
+      "transaction-detail": {
+        "title": "Transaktionsdetails",
+        "subtitle": "Raw Transaktionsdaten"
+      },
+      "shipment-detail": {
+        "title": "Lieferungsnummer #{{number}}",
+        "title-new": "Neue Lieferung",
+        "subtitle": "Versanddetails eingeben",
+        "labels": {
+          "shipment-method": "Versandart",
+          "approved": "Genehmigt",
+          "shipment-number": "Sendungsnummer",
+          "status": "Status",
+          "fulfillment-center": "Erfüllungszentrum",
+          "from": "Von",
+          "employee": "Zugewiesen zu",
+          "price": "Versandmenge",
+          "price-with-tax": "Versandbetrag mit Steuer"
+        },
+        "placeholders": {
+          "status": "Wählen Sie aus...",
+          "shipment-method": "Wählen Sie aus...",
+          "fulfillment-center": "Wählen Sie Oder suchen Sie ein Zentrum..."
+        }
+      },
+      "shipment-items": {
+        "title": "{{title}} Einzelposten",
+        "subtitle": "Bearbeiten von Sendungsposten",
+        "labels": {
+          "item": "Artikel",
+          "quantity": "Anz.",
+          "price": "Preis",
+          "total": "Total"
+        }
+      },
+      "catalog-items-select": {
+        "title": "Artikel zur Bestellung hinzufügen"
+      },
+      "newOperation-wizard": {
+        "title": "Neue Maßnahme",
+        "subtitle": "Funktion auswählen",
+        "menu": {
+          "shipment-operation": {
+            "description": "Versand Dokument"
+          },
+          "payment-operation": {
+            "description": "Eingehende zahlung Dokument"
+          }
+        }
+      }
+    },
+    "widgets": {
+      "customerOrder-address": {
+        "title": "Adressen",
+        "blade-title": "Adressen verwalten"
+      },
+      "customerOrder-items": {
+        "title": "Artikel",
+        "blade-title": "{{title}} Positionen",
+        "blade-subtitle": "Positionen Einzelposten"
+      },
+      "customerOrder-totals": {
+        "sub-total": "Zwischensumme",
+        "shipping-total": "Versandkosten Gesamtpreis",
+        "shipping-sub-total": "Versandkosten Zwischensumme",
+        "payment-sub-total": "Zahlung Gebühren",
+        "tax-total": "Gesamtbetrag Steuern",
+        "discount": "Rabatt",
+        "discount-total": "Rabatt total",
+        "discount-total-with-tax": "Rabatt gesamt mit Steuer",
+        "total": "Total"
+      },
+      "operation-comment": {
+        "no-comments": "Keine Kommentare",
+        "blade-title": "Kommentare schreiben"
+      },
+      "shipment-address": {
+        "blade-title": "Verwalten der Lieferadresse",
+        "title": "Lieferadresse"
+      },
+      "shipment-items": {
+        "title": "Versand Produkte"
+      },
+      "shipment-totals": {
+        "tax-total": "Gesamtbetrag Steuern",
+        "shipment-total": "Versand gesamt",
+        "shipment-price": "Liefer- und Versandkosten",
+        "discount-total": "Rabatt total",
+        "total": "Total"
+      },
+      "payment-totals": {
+        "tax-total": "Gesamtbetrag Steuern",
+        "payment-total": "Zahlungen total",
+        "payment-price": "Zahlung Preis",
+        "discount-total": "Rabatt total",
+        "total": "Total"
+      },
+      "payment-address": {
+        "blade-title": "Verwalten der Rechnungsadresse",
+        "title": "Zahlungsadresse"
+      },
+      "statistics-templates": {
+        "revenue": "Einnahmen",
+        "customers-with-orders": "Kunden mit Bestellungen",
+        "average-order-value": "Durchschnittliche Auftragswert",
+        "items-purchased": "Die Anzahl der gekauften Artikel",
+        "lines-per-order": "Zeilen pro Bestellung",
+        "revenue-per-customer": "Umsatz pro Kunde"
+      }
+    },
+    "dialogs": {
+      "orders-delete": {
+        "title": "Bestätigung löschen",
+        "message": "Möchten Sie die ausgewählten Bestellungen wirklich löschen?"
+      },
+      "operation-save": {
+        "title": "Änderungen speichern",
+        "message": "Die Operation wurde geändert. Möchten Sie die Änderungen speichern?"
+      },
+      "operation-delete": {
+        "title": "Bestätigung löschen",
+        "message": "Sind Sie sicher, dass Sie den aktuellen Vorgang wirklich löschen?"
+      },
+      "operation-cancel": {
+        "title": "Vorgang abbrechen",
+        "message": "Möchten Sie das Dokument wirklich abbrechen?",
+        "placeholders": {
+          "reason": "Bitte geben Sie einen Grund hier abzubrechen..."
+        }
+      }
+    },
+    "commands": {
+      "new-document": "Neues Dokument",
+      "cancel-document": "Beleg stornieren",
+      "add-selected": "Ausgewählte hinzufügen",
+      "add-item": "Artikel hinzufügen"
+    }
+  }
+}

@@ -88,6 +88,138 @@ namespace VirtoCommerce.OrderModule.Data.Migrations
                     b.ToTable("OrderAddress");
                 });
 
+            modelBuilder.Entity("VirtoCommerce.OrderModule.Data.Model.CustomerOrderEntity", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
+
+                    b.Property<string>("CancelReason")
+                        .HasMaxLength(2048);
+
+                    b.Property<DateTime?>("CancelledDate");
+
+                    b.Property<string>("ChannelId")
+                        .HasMaxLength(64);
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(2048);
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(64);
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3);
+
+                    b.Property<string>("CustomerId")
+                        .IsRequired()
+                        .HasMaxLength(64);
+
+                    b.Property<string>("CustomerName")
+                        .HasMaxLength(255);
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("Money");
+
+                    b.Property<decimal>("DiscountTotal")
+                        .HasColumnType("Money");
+
+                    b.Property<decimal>("DiscountTotalWithTax")
+                        .HasColumnType("Money");
+
+                    b.Property<string>("EmployeeId")
+                        .HasMaxLength(64);
+
+                    b.Property<string>("EmployeeName")
+                        .HasMaxLength(255);
+
+                    b.Property<decimal>("HandlingTotal")
+                        .HasColumnType("Money");
+
+                    b.Property<decimal>("HandlingTotalWithTax")
+                        .HasColumnType("Money");
+
+                    b.Property<bool>("IsApproved");
+
+                    b.Property<bool>("IsCancelled");
+
+                    b.Property<bool>("IsPrototype");
+
+                    b.Property<string>("LanguageCode")
+                        .HasMaxLength(16);
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(64);
+
+                    b.Property<DateTime?>("ModifiedDate");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasMaxLength(64);
+
+                    b.Property<string>("OrganizationId")
+                        .HasMaxLength(64);
+
+                    b.Property<string>("OrganizationName")
+                        .HasMaxLength(255);
+
+                    b.Property<decimal>("PaymentTotal")
+                        .HasColumnType("Money");
+
+                    b.Property<decimal>("PaymentTotalWithTax")
+                        .HasColumnType("Money");
+
+                    b.Property<decimal>("ShippingTotal")
+                        .HasColumnType("Money");
+
+                    b.Property<decimal>("ShippingTotalWithTax")
+                        .HasColumnType("Money");
+
+                    b.Property<string>("ShoppingCartId")
+                        .HasMaxLength(128);
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(64);
+
+                    b.Property<string>("StoreId")
+                        .IsRequired()
+                        .HasMaxLength(64);
+
+                    b.Property<string>("StoreName")
+                        .HasMaxLength(255);
+
+                    b.Property<decimal>("SubTotal")
+                        .HasColumnType("Money");
+
+                    b.Property<decimal>("SubTotalWithTax")
+                        .HasColumnType("Money");
+
+                    b.Property<string>("SubscriptionId")
+                        .HasMaxLength(64);
+
+                    b.Property<string>("SubscriptionNumber")
+                        .HasMaxLength(64);
+
+                    b.Property<decimal>("Sum")
+                        .HasColumnType("Money");
+
+                    b.Property<decimal>("TaxPercentRate")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<decimal>("TaxTotal")
+                        .HasColumnType("Money");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("Money");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CustomerOrder");
+                });
+
             modelBuilder.Entity("VirtoCommerce.OrderModule.Data.Model.DiscountEntity", b =>
                 {
                     b.Property<string>("Id")
@@ -251,58 +383,6 @@ namespace VirtoCommerce.OrderModule.Data.Migrations
                     b.ToTable("OrderLineItem");
                 });
 
-            modelBuilder.Entity("VirtoCommerce.OrderModule.Data.Model.OperationEntity", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(128);
-
-                    b.Property<string>("CancelReason")
-                        .HasMaxLength(2048);
-
-                    b.Property<DateTime?>("CancelledDate");
-
-                    b.Property<string>("Comment")
-                        .HasMaxLength(2048);
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(64);
-
-                    b.Property<DateTime>("CreatedDate");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasMaxLength(3);
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired();
-
-                    b.Property<bool>("IsApproved");
-
-                    b.Property<bool>("IsCancelled");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasMaxLength(64);
-
-                    b.Property<DateTime?>("ModifiedDate");
-
-                    b.Property<string>("Number")
-                        .IsRequired()
-                        .HasMaxLength(64);
-
-                    b.Property<string>("Status")
-                        .HasMaxLength(64);
-
-                    b.Property<decimal>("Sum")
-                        .HasColumnType("Money");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("OrderOperation");
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("OperationEntity");
-                });
-
             modelBuilder.Entity("VirtoCommerce.OrderModule.Data.Model.PaymentGatewayTransactionEntity", b =>
                 {
                     b.Property<string>("Id")
@@ -360,6 +440,236 @@ namespace VirtoCommerce.OrderModule.Data.Migrations
                     b.HasIndex("PaymentInId");
 
                     b.ToTable("OrderPaymentGatewayTransaction");
+                });
+
+            modelBuilder.Entity("VirtoCommerce.OrderModule.Data.Model.PaymentInEntity", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
+
+                    b.Property<DateTime?>("AuthorizedDate");
+
+                    b.Property<string>("CancelReason")
+                        .HasMaxLength(2048);
+
+                    b.Property<DateTime?>("CancelledDate");
+
+                    b.Property<DateTime?>("CapturedDate");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(2048);
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(64);
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3);
+
+                    b.Property<string>("CustomerId")
+                        .IsRequired()
+                        .HasMaxLength(64);
+
+                    b.Property<string>("CustomerName")
+                        .HasMaxLength(255);
+
+                    b.Property<string>("CustomerOrderId");
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("Money");
+
+                    b.Property<decimal>("DiscountAmountWithTax")
+                        .HasColumnType("Money");
+
+                    b.Property<string>("GatewayCode")
+                        .HasMaxLength(64);
+
+                    b.Property<DateTime?>("IncomingDate");
+
+                    b.Property<bool>("IsApproved");
+
+                    b.Property<bool>("IsCancelled");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(64);
+
+                    b.Property<DateTime?>("ModifiedDate");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasMaxLength(64);
+
+                    b.Property<string>("OrganizationId")
+                        .HasMaxLength(64);
+
+                    b.Property<string>("OrganizationName")
+                        .HasMaxLength(255);
+
+                    b.Property<string>("OuterId")
+                        .HasMaxLength(128);
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("Money");
+
+                    b.Property<decimal>("PriceWithTax")
+                        .HasColumnType("Money");
+
+                    b.Property<string>("Purpose")
+                        .HasMaxLength(1024);
+
+                    b.Property<string>("ShipmentId");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(64);
+
+                    b.Property<decimal>("Sum")
+                        .HasColumnType("Money");
+
+                    b.Property<decimal>("TaxPercentRate")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<decimal>("TaxTotal")
+                        .HasColumnType("Money");
+
+                    b.Property<string>("TaxType")
+                        .HasMaxLength(64);
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("Money");
+
+                    b.Property<decimal>("TotalWithTax")
+                        .HasColumnType("Money");
+
+                    b.Property<DateTime?>("VoidedDate");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerOrderId");
+
+                    b.HasIndex("ShipmentId");
+
+                    b.ToTable("OrderPaymentIn");
+                });
+
+            modelBuilder.Entity("VirtoCommerce.OrderModule.Data.Model.ShipmentEntity", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
+
+                    b.Property<string>("CancelReason")
+                        .HasMaxLength(2048);
+
+                    b.Property<DateTime?>("CancelledDate");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(2048);
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(64);
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3);
+
+                    b.Property<string>("CustomerOrderId");
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("Money");
+
+                    b.Property<decimal>("DiscountAmountWithTax")
+                        .HasColumnType("Money");
+
+                    b.Property<string>("EmployeeId")
+                        .HasMaxLength(64);
+
+                    b.Property<string>("EmployeeName")
+                        .HasMaxLength(255);
+
+                    b.Property<string>("FulfillmentCenterId")
+                        .HasMaxLength(64);
+
+                    b.Property<string>("FulfillmentCenterName")
+                        .HasMaxLength(255);
+
+                    b.Property<decimal?>("Height");
+
+                    b.Property<bool>("IsApproved");
+
+                    b.Property<bool>("IsCancelled");
+
+                    b.Property<decimal?>("Length");
+
+                    b.Property<string>("MeasureUnit")
+                        .HasMaxLength(32);
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(64);
+
+                    b.Property<DateTime?>("ModifiedDate");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasMaxLength(64);
+
+                    b.Property<string>("OrganizationId")
+                        .HasMaxLength(64);
+
+                    b.Property<string>("OrganizationName")
+                        .HasMaxLength(255);
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("Money");
+
+                    b.Property<decimal>("PriceWithTax")
+                        .HasColumnType("Money");
+
+                    b.Property<string>("ShipmentMethodCode")
+                        .HasMaxLength(64);
+
+                    b.Property<string>("ShipmentMethodOption")
+                        .HasMaxLength(64);
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(64);
+
+                    b.Property<decimal>("Sum")
+                        .HasColumnType("Money");
+
+                    b.Property<decimal>("TaxPercentRate")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<decimal>("TaxTotal")
+                        .HasColumnType("Money");
+
+                    b.Property<string>("TaxType")
+                        .HasMaxLength(64);
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("Money");
+
+                    b.Property<decimal>("TotalWithTax")
+                        .HasColumnType("Money");
+
+                    b.Property<decimal?>("VolumetricWeight");
+
+                    b.Property<decimal?>("Weight");
+
+                    b.Property<string>("WeightUnit")
+                        .HasMaxLength(32);
+
+                    b.Property<decimal?>("Width");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerOrderId");
+
+                    b.ToTable("OrderShipment");
                 });
 
             modelBuilder.Entity("VirtoCommerce.OrderModule.Data.Model.ShipmentItemEntity", b =>
@@ -480,276 +790,6 @@ namespace VirtoCommerce.OrderModule.Data.Migrations
                     b.ToTable("OrderTaxDetail");
                 });
 
-            modelBuilder.Entity("VirtoCommerce.OrderModule.Data.Model.CustomerOrderEntity", b =>
-                {
-                    b.HasBaseType("VirtoCommerce.OrderModule.Data.Model.OperationEntity");
-
-                    b.Property<string>("ChannelId")
-                        .HasMaxLength(64);
-
-                    b.Property<string>("CustomerId")
-                        .IsRequired()
-                        .HasMaxLength(64);
-
-                    b.Property<string>("CustomerName")
-                        .HasMaxLength(255);
-
-                    b.Property<decimal>("DiscountAmount")
-                        .HasColumnType("Money");
-
-                    b.Property<decimal>("DiscountTotal")
-                        .HasColumnType("Money");
-
-                    b.Property<decimal>("DiscountTotalWithTax")
-                        .HasColumnType("Money");
-
-                    b.Property<string>("EmployeeId")
-                        .HasMaxLength(64);
-
-                    b.Property<string>("EmployeeName")
-                        .HasMaxLength(255);
-
-                    b.Property<decimal>("HandlingTotal")
-                        .HasColumnType("Money");
-
-                    b.Property<decimal>("HandlingTotalWithTax")
-                        .HasColumnType("Money");
-
-                    b.Property<bool>("IsPrototype");
-
-                    b.Property<string>("LanguageCode")
-                        .HasMaxLength(16);
-
-                    b.Property<string>("OrganizationId")
-                        .HasMaxLength(64);
-
-                    b.Property<string>("OrganizationName")
-                        .HasMaxLength(255);
-
-                    b.Property<decimal>("PaymentTotal")
-                        .HasColumnType("Money");
-
-                    b.Property<decimal>("PaymentTotalWithTax")
-                        .HasColumnType("Money");
-
-                    b.Property<decimal>("ShippingTotal")
-                        .HasColumnType("Money");
-
-                    b.Property<decimal>("ShippingTotalWithTax")
-                        .HasColumnType("Money");
-
-                    b.Property<string>("ShoppingCartId")
-                        .HasMaxLength(128);
-
-                    b.Property<string>("StoreId")
-                        .IsRequired()
-                        .HasMaxLength(64);
-
-                    b.Property<string>("StoreName")
-                        .HasMaxLength(255);
-
-                    b.Property<decimal>("SubTotal")
-                        .HasColumnType("Money");
-
-                    b.Property<decimal>("SubTotalWithTax")
-                        .HasColumnType("Money");
-
-                    b.Property<string>("SubscriptionId")
-                        .HasMaxLength(64);
-
-                    b.Property<string>("SubscriptionNumber")
-                        .HasMaxLength(64);
-
-                    b.Property<decimal>("TaxPercentRate")
-                        .HasColumnType("decimal(18,4)");
-
-                    b.Property<decimal>("TaxTotal")
-                        .HasColumnType("Money");
-
-                    b.Property<decimal>("Total")
-                        .HasColumnType("Money");
-
-                    b.ToTable("CustomerOrder");
-
-                    b.HasDiscriminator().HasValue("CustomerOrderEntity");
-                });
-
-            modelBuilder.Entity("VirtoCommerce.OrderModule.Data.Model.PaymentInEntity", b =>
-                {
-                    b.HasBaseType("VirtoCommerce.OrderModule.Data.Model.OperationEntity");
-
-                    b.Property<DateTime?>("AuthorizedDate");
-
-                    b.Property<DateTime?>("CapturedDate");
-
-                    b.Property<string>("CustomerId")
-                        .IsRequired()
-                        .HasColumnName("PaymentInEntity_CustomerId")
-                        .HasMaxLength(64);
-
-                    b.Property<string>("CustomerName")
-                        .HasColumnName("PaymentInEntity_CustomerName")
-                        .HasMaxLength(255);
-
-                    b.Property<string>("CustomerOrderId");
-
-                    b.Property<decimal>("DiscountAmount")
-                        .HasColumnName("PaymentInEntity_DiscountAmount")
-                        .HasColumnType("Money");
-
-                    b.Property<decimal>("DiscountAmountWithTax")
-                        .HasColumnType("Money");
-
-                    b.Property<string>("GatewayCode")
-                        .HasMaxLength(64);
-
-                    b.Property<DateTime?>("IncomingDate");
-
-                    b.Property<string>("OrganizationId")
-                        .HasColumnName("PaymentInEntity_OrganizationId")
-                        .HasMaxLength(64);
-
-                    b.Property<string>("OrganizationName")
-                        .HasColumnName("PaymentInEntity_OrganizationName")
-                        .HasMaxLength(255);
-
-                    b.Property<string>("OuterId")
-                        .HasMaxLength(128);
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("Money");
-
-                    b.Property<decimal>("PriceWithTax")
-                        .HasColumnType("Money");
-
-                    b.Property<string>("Purpose")
-                        .HasMaxLength(1024);
-
-                    b.Property<string>("ShipmentId");
-
-                    b.Property<decimal>("TaxPercentRate")
-                        .HasColumnName("PaymentInEntity_TaxPercentRate")
-                        .HasColumnType("decimal(18,4)");
-
-                    b.Property<decimal>("TaxTotal")
-                        .HasColumnName("PaymentInEntity_TaxTotal")
-                        .HasColumnType("Money");
-
-                    b.Property<string>("TaxType")
-                        .HasMaxLength(64);
-
-                    b.Property<decimal>("Total")
-                        .HasColumnName("PaymentInEntity_Total")
-                        .HasColumnType("Money");
-
-                    b.Property<decimal>("TotalWithTax")
-                        .HasColumnType("Money");
-
-                    b.Property<DateTime?>("VoidedDate");
-
-                    b.HasIndex("CustomerOrderId");
-
-                    b.HasIndex("ShipmentId");
-
-                    b.ToTable("OrderPaymentIn");
-
-                    b.HasDiscriminator().HasValue("PaymentInEntity");
-                });
-
-            modelBuilder.Entity("VirtoCommerce.OrderModule.Data.Model.ShipmentEntity", b =>
-                {
-                    b.HasBaseType("VirtoCommerce.OrderModule.Data.Model.OperationEntity");
-
-                    b.Property<string>("CustomerOrderId")
-                        .HasColumnName("ShipmentEntity_CustomerOrderId");
-
-                    b.Property<decimal>("DiscountAmount")
-                        .HasColumnName("ShipmentEntity_DiscountAmount")
-                        .HasColumnType("Money");
-
-                    b.Property<decimal>("DiscountAmountWithTax")
-                        .HasColumnName("ShipmentEntity_DiscountAmountWithTax")
-                        .HasColumnType("Money");
-
-                    b.Property<string>("EmployeeId")
-                        .HasColumnName("ShipmentEntity_EmployeeId")
-                        .HasMaxLength(64);
-
-                    b.Property<string>("EmployeeName")
-                        .HasColumnName("ShipmentEntity_EmployeeName")
-                        .HasMaxLength(255);
-
-                    b.Property<string>("FulfillmentCenterId")
-                        .HasMaxLength(64);
-
-                    b.Property<string>("FulfillmentCenterName")
-                        .HasMaxLength(255);
-
-                    b.Property<decimal?>("Height");
-
-                    b.Property<decimal?>("Length");
-
-                    b.Property<string>("MeasureUnit")
-                        .HasMaxLength(32);
-
-                    b.Property<string>("OrganizationId")
-                        .HasColumnName("ShipmentEntity_OrganizationId")
-                        .HasMaxLength(64);
-
-                    b.Property<string>("OrganizationName")
-                        .HasColumnName("ShipmentEntity_OrganizationName")
-                        .HasMaxLength(255);
-
-                    b.Property<decimal>("Price")
-                        .HasColumnName("ShipmentEntity_Price")
-                        .HasColumnType("Money");
-
-                    b.Property<decimal>("PriceWithTax")
-                        .HasColumnName("ShipmentEntity_PriceWithTax")
-                        .HasColumnType("Money");
-
-                    b.Property<string>("ShipmentMethodCode")
-                        .HasMaxLength(64);
-
-                    b.Property<string>("ShipmentMethodOption")
-                        .HasMaxLength(64);
-
-                    b.Property<decimal>("TaxPercentRate")
-                        .HasColumnName("ShipmentEntity_TaxPercentRate")
-                        .HasColumnType("decimal(18,4)");
-
-                    b.Property<decimal>("TaxTotal")
-                        .HasColumnName("ShipmentEntity_TaxTotal")
-                        .HasColumnType("Money");
-
-                    b.Property<string>("TaxType")
-                        .HasColumnName("ShipmentEntity_TaxType")
-                        .HasMaxLength(64);
-
-                    b.Property<decimal>("Total")
-                        .HasColumnName("ShipmentEntity_Total")
-                        .HasColumnType("Money");
-
-                    b.Property<decimal>("TotalWithTax")
-                        .HasColumnName("ShipmentEntity_TotalWithTax")
-                        .HasColumnType("Money");
-
-                    b.Property<decimal?>("VolumetricWeight");
-
-                    b.Property<decimal?>("Weight");
-
-                    b.Property<string>("WeightUnit")
-                        .HasMaxLength(32);
-
-                    b.Property<decimal?>("Width");
-
-                    b.HasIndex("CustomerOrderId");
-
-                    b.ToTable("OrderShipment");
-
-                    b.HasDiscriminator().HasValue("ShipmentEntity");
-                });
-
             modelBuilder.Entity("VirtoCommerce.OrderModule.Data.Model.AddressEntity", b =>
                 {
                     b.HasOne("VirtoCommerce.OrderModule.Data.Model.CustomerOrderEntity", "CustomerOrder")
@@ -807,6 +847,27 @@ namespace VirtoCommerce.OrderModule.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("VirtoCommerce.OrderModule.Data.Model.PaymentInEntity", b =>
+                {
+                    b.HasOne("VirtoCommerce.OrderModule.Data.Model.CustomerOrderEntity", "CustomerOrder")
+                        .WithMany("InPayments")
+                        .HasForeignKey("CustomerOrderId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("VirtoCommerce.OrderModule.Data.Model.ShipmentEntity", "Shipment")
+                        .WithMany("InPayments")
+                        .HasForeignKey("ShipmentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("VirtoCommerce.OrderModule.Data.Model.ShipmentEntity", b =>
+                {
+                    b.HasOne("VirtoCommerce.OrderModule.Data.Model.CustomerOrderEntity", "CustomerOrder")
+                        .WithMany("Shipments")
+                        .HasForeignKey("CustomerOrderId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
             modelBuilder.Entity("VirtoCommerce.OrderModule.Data.Model.ShipmentItemEntity", b =>
                 {
                     b.HasOne("VirtoCommerce.OrderModule.Data.Model.LineItemEntity", "LineItem")
@@ -853,27 +914,6 @@ namespace VirtoCommerce.OrderModule.Data.Migrations
                     b.HasOne("VirtoCommerce.OrderModule.Data.Model.ShipmentEntity", "Shipment")
                         .WithMany("TaxDetails")
                         .HasForeignKey("ShipmentId")
-                        .OnDelete(DeleteBehavior.Restrict);
-                });
-
-            modelBuilder.Entity("VirtoCommerce.OrderModule.Data.Model.PaymentInEntity", b =>
-                {
-                    b.HasOne("VirtoCommerce.OrderModule.Data.Model.CustomerOrderEntity", "CustomerOrder")
-                        .WithMany("InPayments")
-                        .HasForeignKey("CustomerOrderId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("VirtoCommerce.OrderModule.Data.Model.ShipmentEntity", "Shipment")
-                        .WithMany("InPayments")
-                        .HasForeignKey("ShipmentId")
-                        .OnDelete(DeleteBehavior.Restrict);
-                });
-
-            modelBuilder.Entity("VirtoCommerce.OrderModule.Data.Model.ShipmentEntity", b =>
-                {
-                    b.HasOne("VirtoCommerce.OrderModule.Data.Model.CustomerOrderEntity", "CustomerOrder")
-                        .WithMany("Shipments")
-                        .HasForeignKey("CustomerOrderId")
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 #pragma warning restore 612, 618

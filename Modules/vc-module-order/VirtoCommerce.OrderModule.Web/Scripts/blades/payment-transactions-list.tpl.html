@@ -1,0 +1,21 @@
+﻿<div class="blade-content __medium-wide">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <div class="table-wrapper" ng-init="setGridOptions({
+                data: 'blade.currentEntity.transactions',
+                rowTemplate: 'list.row.html',
+                columnDefs: [
+                    { name: 'actions', displayName: '', enableColumnResizing: false, enableSorting: false, width: 30, cellTemplate: 'list-actions.cell.html', pinnedLeft:true },
+                    { name: 'requestData' },
+                    { name: 'responseCode' },
+                    { name: 'createdDate', width: 87 }
+                ]})">
+                <div ng-if="blade.currentEntity.transactions.length" ui-grid="gridOptions" ui-grid-auto-resize ui-grid-save-state ui-grid-selection ui-grid-resize-columns ui-grid-move-columns ui-grid-pinning ui-grid-height></div>
+            </div>
+            <div class="note" ng-if="!blade.currentEntity.transactions.length">{{ 'platform.list.no-data' | translate }}</div>
+        </div>
+    </div>
+</div>
+<script type="text/ng-template" id="list.row.html">
+<div ng-click='grid.appScope.selectNode(row.entity)' ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" ui-grid-one-bind-id-grid="rowRenderIndex + '-' + col.uid + '-cell'" class="ui-grid-cell" ng-class="{'ui-grid-row-header-cell': col.isRowHeader, '__hovered': grid.appScope.contextMenuEntity === row.entity, '__selected': row.entity.id===grid.appScope.selectedNodeId }" role="{{col.isRowHeader ? 'rowheader' : 'gridcell' }}" ui-grid-cell context-menu="grid.appScope.contextMenuEntity = row.entity" data-target="pas_menu"></div>
+</script>

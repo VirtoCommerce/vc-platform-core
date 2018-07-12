@@ -1,0 +1,119 @@
+﻿<div class="blade-static __bottom" ng-include="'$(Platform)/Scripts/common/templates/ok-cancel2.tpl.html'"></div>
+<div class="blade-content __medium-wide">
+    <div class="blade-inner">
+        <div class="inner-block" ng-controller="virtoCommerce.orderModule.shipmentDetailController">
+            <div class="order-status" ng-if="blade.currentEntity.status">
+                <div class="status" ng-bind="blade.currentEntity | statusTranslate"></div>
+                <div class="reason" ng-bind="blade.currentEntity.cancelReason" ng-if="blade.currentEntity.isCancelled"></div>
+            </div>
+            <div class="order-brand" ng-if="!blade.isNew">
+                <div class="brand-image">
+                    <img class="brand-logo" ng-src="{{blade.currentEntity.shippingMethod.logoUrl}}" alt="" ng-if="blade.currentEntity.shippingMethod.logoUrl">
+                </div>
+                <div class="brand-t" title="{{blade.currentEntity.shippingMethod.description}}">{{blade.currentEntity.shippingMethod.name}}</div>
+                <div class="brand-descr" title="{{blade.currentEntity.shippingMethod.optionDescription}}" ng-if="blade.currentEntity.shippingMethod.optionName">{{blade.currentEntity.shippingMethod.optionName}}</div>
+            </div>
+
+            <form class="form" name="detailForm">
+                <fieldset ng-disabled="blade.isLocked">
+                    <div class="form-group" ng-if="blade.isNew">
+                        <label class="form-label">{{ 'orders.blades.shipment-detail.labels.shipment-method' | translate }}</label>
+                        <div class="form-input">
+                            <ui-select ng-model="blade.currentEntity.shippingMethod" required ng-disabled="blade.isLocked">
+                                <ui-select-match placeholder="{{ 'orders.blades.shipment-detail.placeholders.shipment-method' | translate }}">{{$select.selected.name}}</ui-select-match>
+                                <ui-select-choices repeat="x in blade.currentStore.shippingMethods | filter: { name: $select.search }">
+                                    <span ng-bind-html="x.name | highlight: $select.search"></span>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-init="setForm(detailForm)">
+                        <label class="form-label">{{ 'orders.blades.shipment-detail.labels.approved' | translate }}</label>
+                        <div class="form-input">
+                            <label class="form-label __switch">
+                                <input type="checkbox" ng-model="blade.currentEntity.isApproved" />
+                                <span class="switch"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <va-metaform registered-inputs="blade.metaFields" blade="blade" column-count="2"></va-metaform>
+
+                    <div class="form columns">
+                        <div class="column">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    {{ 'orders.blades.shipment-detail.labels.fulfillment-center' | translate }}
+                                    <a href="" ng-click="blade.openFulfillmentCentersList()" class="form-edit"><i class="form-ico fa fa-pencil"></i></a>
+                                </label>
+                                <div class="form-input">
+                                    <ui-select ng-model="blade.currentEntity.fulfillmentCenterId" ng-disabled="blade.isLocked">
+                                        <ui-select-match placeholder="{{ 'orders.blades.shipment-detail.placeholders.fulfillment-center' | translate }}">{{$select.selected.name}}</ui-select-match>
+                                        <ui-select-choices repeat="center.id as center in blade.fulfillmentCenters | filter: { name: $select.search }">
+                                            <span ng-bind-html="center.name | highlight: $select.search"></span>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div style="height:60px">&nbsp;</div>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+
+            <va-widget-container group="shipmentDetailWidgets" blade="blade" gridster-opts="{width: 526}"></va-widget-container>
+        </div>
+    </div>
+</div>
+
+<script type="text/ng-template" id="createdDate.html">
+    <div class="form-input __calendar">
+        <input ng-model="blade.currentEntity.createdDate"
+               datepicker-popup="medium"
+               disabled="disabled">
+        <button type="button" class="btn" disabled="disabled">
+            <i class="btn-ico fa fa-calendar"></i>
+        </button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="statusSelector.html">
+    <label class="form-label">
+        {{ 'orders.blades.shipment-detail.labels.status' | translate }}
+        <a href="" ng-click="blade.openStatusSettingManagement()" class="form-edit"><i class="form-ico fa fa-pencil"></i></a>
+    </label>
+    <div class="form-input">
+        <ui-select ng-model="blade.currentEntity.status" ng-disabled="blade.isLocked">
+            <ui-select-match placeholder="{{ 'orders.blades.shipment-detail.placeholders.status' | translate }}">{{$select.selected.value}}</ui-select-match>
+            <ui-select-choices repeat="x.key as x in blade.statuses | filter: {'value': $select.search}">
+                <span ng-bind-html="x.value | highlight: $select.search"></span>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+</script>
+
+<script type="text/ng-template" id="shipment-employeeSelector.html">
+    <div class="form-input">
+        <ui-select ng-model="blade.currentEntity.employeeId" ng-change="blade.currentEntity.employeeName = $select.selected ? $select.selected.fullName : undefined" ng-disabled="blade.isLocked">
+            <ui-select-match allow-clear placeholder="{{ 'orders.blades.customerOrder-detail.placeholders.employee' | translate }}">{{$select.selected.fullName}}</ui-select-match>
+            <ui-select-choices repeat="x.id as x in blade.employees | filter: { fullName: $select.search }">
+                <span ng-bind-html="x.fullName | highlight: $select.search"></span>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+</script>
+
+<script type="text/ng-template" id="price.html">
+    <div class="form-input __currency">
+        <span class="currency">{{blade.currentEntity.currency}}</span>
+        <input money required ng-model="blade.currentEntity.price" ng-change="blade.updateRecalculationFlag()">
+    </div>
+</script>
+<script type="text/ng-template" id="priceWithTax.html">
+    <div class="form-input __currency">
+        <span class="currency">{{blade.currentEntity.currency}}</span>
+        <input money required ng-model="blade.currentEntity.priceWithTax" ng-change="blade.updateRecalculationFlag()">
+    </div>
+</script>

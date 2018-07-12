@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<module>
+    <id>VirtoCommerce.Orders</id>
+    <version>3.0.0</version>
+    <platformVersion>3.0.0</platformVersion>
+    <dependencies>
+        <dependency id="VirtoCommerce.Core" version="3.0.0" />
+        <dependency id="VirtoCommerce.Catalog" version="3.0.0" />
+        <dependency id="VirtoCommerce.Pricing" version="3.0.0" />
+        <dependency id="VirtoCommerce.Customer" version="3.0.0" />
+        <dependency id="VirtoCommerce.Store" version="3.0.0" />
+    </dependencies>
+
+    <title>Order module</title>
+    <description>Document based flexible orders management system</description>
+    <authors>
+        <author>Virto Commerce</author>
+    </authors>
+    <owners>
+        <owner>Virto Commerce</owner>
+    </owners>
+    <projectUrl>https://virtocommerce.com/apps/extensions/virto-orders-module</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/VirtoCommerce/vc-module-order/master/VirtoCommerce.OrderModule.Web/Content/logo.png</iconUrl>
+    <releaseNotes>First version.</releaseNotes>
+    <copyright>Copyright © 2011-2018 Virto Commerce. All rights reserved</copyright>
+    <tags>order system</tags>
+
+    <assemblyFile>VirtoCommerce.OrderModule.Web.dll</assemblyFile>
+    <moduleType>VirtoCommerce.OrderModule.Web.Module, VirtoCommerce.OrderModule.Web</moduleType>
+
+    <styles>
+        <directory virtualPath="$/Content/css" searchPattern="*.css" searchSubdirectories="true" />
+    </styles>
+    <scripts>
+        <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
+    </scripts>
+
+    <settings>
+        <group name="Orders|General">
+            <setting>
+                <name>Order.Status</name>
+                <valueType>string</valueType>
+                <defaultValue>New</defaultValue>
+                <title>Customer order statuses</title>
+                <description>Customer order statuses</description>
+                <isArray>true</isArray>
+                <arrayValues>
+                    <value>New</value>
+                    <value>Not payed</value>
+                    <value>Pending</value>
+                    <value>Processing</value>
+                    <value>Ready to send</value>
+                    <value>Cancelled</value>
+                    <value>Partially sent</value>                    
+                    <value>Completed</value>
+                </arrayValues>
+            </setting>
+            <setting>
+                <name>Shipment.Status</name>
+                <valueType>string</valueType>
+                <defaultValue>New</defaultValue>
+                <title>Shipment statuses</title>
+                <description>Shipment statuses</description>
+                <isArray>true</isArray>
+                <arrayValues>
+                    <value>New</value>
+                    <value>PickPack</value>
+                    <value>Cancelled</value>
+                    <value>ReadyToSend</value>
+                    <value>Sent</value>
+                </arrayValues>
+            </setting>
+            <setting>
+                <name>PaymentIn.Status</name>
+                <valueType>string</valueType>
+                <defaultValue>New</defaultValue>
+                <title>Payment statuses</title>
+                <description>Incoming payment statuses</description>
+                <isArray>true</isArray>
+                <arrayValues>
+                    <value>New</value>
+                    <value>Pending</value>
+                    <value>Authorized</value>
+                    <value>Paid</value>
+                    <value>PartiallyRefunded</value>
+                    <value>Refunded</value>
+                    <value>Voided</value>
+                    <value>Custom</value>
+                    <value>Cancelled</value>
+                </arrayValues>
+            </setting>
+            <setting>
+                <name>Order.CustomerOrderNewNumberTemplate</name>
+                <valueType>string</valueType>
+                <defaultValue>CO{0:yyMMdd}-{1:D5}</defaultValue>
+                <title>Order number template</title>
+                <description>The template (pattern) that will be used to generate the number for new Customer Order. Parameters: 0 - date (the UTC time of number generation); 1 - the sequence number.</description>
+            </setting>
+            <setting>
+                <name>Order.ShipmentNewNumberTemplate</name>
+                <valueType>string</valueType>
+                <defaultValue>SH{0:yyMMdd}-{1:D5}</defaultValue>
+                <title>Order shipment number template</title>
+                <description>The template (pattern) that will be used to generate the number for new Shipment. Parameters: 0 - date (the UTC time of number generation); 1 - the sequence number.</description>
+            </setting>
+            <setting>
+                <name>Order.PaymentInNewNumberTemplate</name>
+                <valueType>string</valueType>
+                <defaultValue>PI{0:yyMMdd}-{1:D5}</defaultValue>
+                <title>Order payment number template</title>
+                <description>The template (pattern) that will be used to generate the number for new incoming Payment. Parameters: 0 - date (the UTC time of number generation); 1 - the sequence number.</description>
+            </setting>
+            <setting>
+                <name>Order.SendOrderNotifications</name>
+                <valueType>boolean</valueType>
+                <defaultValue>true</defaultValue>
+                <title>Enable notifications for orders</title>
+                <description>Send notification when order state changed.</description>
+            </setting>
+            <setting>
+              <name>Order.AdjustInventory</name>
+              <valueType>boolean</valueType>
+              <defaultValue>true</defaultValue>
+              <title>Adjust inventory for orders</title>
+              <description>Adjust inventory when order state changed.</description>
+            </setting>
+            <setting>
+                <name>Order.ExportImport.Description</name>
+                <valueType>string</valueType>
+                <defaultValue>Export/Import customer orders with all related objects (line items, shipments, payments etc)</defaultValue>
+                <title>Export/Import description</title>
+                <description>Module description in platform export/import wizard</description>
+            </setting>
+        </group>
+    </settings>
+    
+</module>
