@@ -48,7 +48,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                     }
                 }
 
-                return Task.FromResult(sitemap);
+                return await Task.FromResult(sitemap);
             }
         }
 

@@ -12,6 +12,8 @@
     <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
     <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Data\VirtoCommerce.Platform.Data.csproj" />
     <ProjectReference Include="..\..\vc-module-catalog\VirtoCommerce.CatalogModule.Core\VirtoCommerce.CatalogModule.Core.csproj" />
+    <ProjectReference Include="..\..\vc-module-content\VirtoCommerce.ContentModule.Core\VirtoCommerce.ContentModule.Core.csproj" />
+    <ProjectReference Include="..\..\vc-module-core\VirtoCommerce.Tools\VirtoCommerce.Tools.csproj" />
     <ProjectReference Include="..\VirtoCommerce.SitemapsModule.Core\VirtoCommerce.SitemapsModule.Core.csproj" />
   </ItemGroup>
 

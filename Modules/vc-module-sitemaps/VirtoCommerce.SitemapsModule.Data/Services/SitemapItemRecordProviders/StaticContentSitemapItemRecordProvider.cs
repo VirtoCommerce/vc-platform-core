@@ -4,23 +4,26 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using VirtoCommerce.ContentModule.Core.Services;
+using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SitemapsModule.Core.Models;
 using VirtoCommerce.SitemapsModule.Core.Services;
 using VirtoCommerce.StoreModule.Core.Model;
+using VirtoCommerce.Tools;
 using YamlDotNet.RepresentationModel;
 
 namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
 {
     public class StaticContentSitemapItemRecordProvider : SitemapItemRecordProviderBase, ISitemapItemRecordProvider
     {
-        private readonly Func<string, IContentBlobStorageProvider> _contentStorageProviderFactory;
+        private readonly Func<string, IContentStorageProviderFactory> _contentStorageProviderFactory;
         private static readonly Regex _headerRegExp = new Regex(@"(?s:^---(.*?)---)");
 
         public StaticContentSitemapItemRecordProvider(ISitemapUrlBuilder urlBuilder, ISettingsManager settingsManager,
-            Func<string, IContentBlobStorageProvider> contentStorageProviderFactory)
+            Func<string, IContentStorageProviderFactory> contentStorageProviderFactory)
             : base(settingsManager, urlBuilder)
         {
             _contentStorageProviderFactory = contentStorageProviderFactory;
@@ -56,8 +59,8 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
                 var urls = new List<string>();
                 if (sitemapItem.ObjectType.EqualsInvariant(SitemapItemTypes.Folder))
                 {
-                    var searchResult = storageProvider.Search(sitemapItem.UrlTemplate, null);
-                    var itemUrls = GetItemUrls(storageProvider, searchResult);
+                    var searchResult = await storageProvider.SearchAsync(sitemapItem.UrlTemplate, null);
+                    var itemUrls = await GetItemUrlsAsync(storageProvider, searchResult);
                     foreach (var itemUrl in itemUrls)
                     {
                         var itemExtension = Path.GetExtension(itemUrl);
@@ -71,7 +74,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
                 }
                 else if (sitemapItem.ObjectType.EqualsInvariant(SitemapItemTypes.ContentItem))
                 {
-                    var item = storageProvider.GetBlobInfo(sitemapItem.UrlTemplate);
+                    var item = await storageProvider.GetBlobInfoAsync(sitemapItem.UrlTemplate);
                     if (item != null)
                     {
                         urls.Add(item.RelativeUrl);
@@ -102,18 +105,18 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
             }
         }
 
-        private static ICollection<string> GetItemUrls(IContentBlobStorageProvider storageProvider, BlobSearchResult searchResult)
+        private static async Task<ICollection<string>> GetItemUrlsAsync(IContentStorageProviderFactory storageProvider, GenericSearchResult<BlobEntry> searchResult)
         {
             var urls = new List<string>();
 
-            foreach (var item in searchResult.Items)
+            foreach (var item in searchResult.Results)
             {
                 urls.Add(item.RelativeUrl);
             }
-            foreach (var folder in searchResult.Folders)
+            foreach (var folder in searchResult.Results.OfType<BlobFolder>())
             {
-                var folderSearchResult = storageProvider.Search(folder.RelativeUrl, null);
-                urls.AddRange(GetItemUrls(storageProvider, folderSearchResult));
+                var folderSearchResult = await storageProvider.SearchAsync(folder.RelativeUrl, null);
+                urls.AddRange(await GetItemUrlsAsync(storageProvider, folderSearchResult));
             }
 
             return urls;

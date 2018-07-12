@@ -1,14 +1,14 @@
-using System;
-using System.Collections.Generic;
+
 using System.Linq;
-using System.Text;
 using VirtoCommerce.CatalogModule.Core.Model;
-using VirtoCommerce.CoreModule.Core.Commerce.Model;
+using VirtoCommerce.CoreModule.Core.Seo;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SitemapsModule.Core.Models;
 using VirtoCommerce.SitemapsModule.Core.Services;
 using VirtoCommerce.SitemapsModule.Data.Converters;
 using VirtoCommerce.SitemapsModule.Data.Extensions;
 using VirtoCommerce.StoreModule.Core.Model;
+using VirtoCommerce.Tools;
 
 namespace VirtoCommerce.SitemapsModule.Data.Services
 {

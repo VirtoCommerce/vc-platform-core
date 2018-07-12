@@ -1,39 +1,14 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.StoreModule.Core.Model;
 
 namespace VirtoCommerce.SitemapsModule.Data.Converters
 {
-    //ToDo use virtocommerce.tools here
-    public enum SeoLinksType
-    {
-        None = 0,
-        Short = 1,
-        Long = 2,
-        Collapsed = 3
-    }
-
-    public class Store
-    {
-
-        public string Id { get; set; }
-        public string Url { get; set; }
-        public string SecureUrl { get; set; }
-        public string Catalog { get; set; }
-        public string DefaultLanguage { get; set; }
-        public SeoLinksType SeoLinksType { get; set; }
-        public IList<string> Languages { get; set; }
-    }
-
     public static class ToolsConverter
     {
-
-        public static Store ToToolsStore(this VirtoCommerce.StoreModule.Core.Model.Store store, string baseUrl)
+        public static Tools.Models.Store ToToolsStore(this Store store, string baseUrl)
         {
-            return new Store
+            return new Tools.Models.Store
             {
                 Catalog = store.Catalog,
                 DefaultLanguage = store.DefaultLanguage,
@@ -45,16 +20,16 @@ namespace VirtoCommerce.SitemapsModule.Data.Converters
             };
         }
 
-        private static SeoLinksType GetSeoLinksType(VirtoCommerce.StoreModule.Core.Model.Store store)
+        private static Tools.Models.SeoLinksType GetSeoLinksType(Store store)
         {
-            var seoLinksType = SeoLinksType.Collapsed;
+            var seoLinksType = Tools.Models.SeoLinksType.Collapsed;
 
             if (store.Settings != null)
-            {
+            { 
                 var seoLinksTypeSetting = store.Settings.FirstOrDefault(s => s.Name == "Stores.SeoLinksType");
                 if (seoLinksTypeSetting != null)
                 {
-                    seoLinksType = EnumUtility.SafeParse(seoLinksTypeSetting.Value, SeoLinksType.Collapsed);
+                    seoLinksType = EnumUtility.SafeParse(seoLinksTypeSetting.Value.ToString(), Tools.Models.SeoLinksType.Collapsed);
                 }
             }
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.SitemapsModule.Core
 {
@@ -22,35 +23,35 @@ namespace VirtoCommerce.SitemapsModule.Core
         {
             public static class General
             {
-                public static ModuleSetting RecordsLimitPerFile = new ModuleSetting
+                public static SettingDescriptor RecordsLimitPerFile = new SettingDescriptor
                 {
                     Name = "Sitemap.RecordsLimitPerFile",
-                    ValueType = ModuleSetting.TypeInteger,
+                    ValueType = SettingValueType.Integer,
                     DefaultValue = "10000"
                 };
 
-                public static ModuleSetting FilenameSeparator = new ModuleSetting
+                public static SettingDescriptor FilenameSeparator = new SettingDescriptor
                 {
                     Name = "Sitemap.FilenameSeparator",
-                    ValueType = ModuleSetting.TypeString,
+                    ValueType = SettingValueType.ShortText,
                     DefaultValue = "--"
                 };
 
-                public static ModuleSetting SearchBunchSize = new ModuleSetting
+                public static SettingDescriptor SearchBunchSize = new SettingDescriptor
                 {
                     Name = "Sitemap.SearchBunchSize",
-                    ValueType = ModuleSetting.TypeInteger,
+                    ValueType = SettingValueType.Integer,
                     DefaultValue = "500"
                 };
 
-                public static ModuleSetting AcceptedFilenameExtensions = new ModuleSetting
+                public static SettingDescriptor AcceptedFilenameExtensions = new SettingDescriptor
                 {
                     Name = "Sitemap.AcceptedFilenameExtensions",
-                    ValueType = ModuleSetting.TypeString,
+                    ValueType = SettingValueType.ShortText,
                     DefaultValue = ".md,.html"
                 };
 
-                public static IEnumerable<ModuleSetting> AllSettings
+                public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {
@@ -64,23 +65,23 @@ namespace VirtoCommerce.SitemapsModule.Core
 
             public static class ProductLinks
             {
-                public static ModuleSetting ProductPageUpdateFrequency = new ModuleSetting
+                public static SettingDescriptor ProductPageUpdateFrequency = new SettingDescriptor
                 {
                     Name = "Sitemap.ProductPageUpdateFrequency",
-                    ValueType = ModuleSetting.TypeString,
-                    IsArray = true,
-                    ArrayValues = new string[] { "always", "hourly", "daily", "weekly", "monthly", "yearly", "never" },
+                    ValueType = SettingValueType.ShortText,
+                    IsDictionary = true,
+                    AllowedValues = new string[] { "always", "hourly", "daily", "weekly", "monthly", "yearly", "never" },
                     DefaultValue = "daily"
                 };
 
-                public static ModuleSetting ProductPagePriority = new ModuleSetting
+                public static SettingDescriptor ProductPagePriority = new SettingDescriptor
                 {
                     Name = "Sitemap.ProductPagePriority",
-                    ValueType = ModuleSetting.TypeDecimal,
+                    ValueType = SettingValueType.Decimal,
                     DefaultValue = "1.0"
                 };
 
-                public static IEnumerable<ModuleSetting> AllSettings
+                public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {
@@ -92,24 +93,24 @@ namespace VirtoCommerce.SitemapsModule.Core
 
             public static class CategoryLinks
             {
-                public static ModuleSetting CategoryPageUpdateFrequency = new ModuleSetting
+                public static SettingDescriptor CategoryPageUpdateFrequency = new SettingDescriptor
                 {
                     Name = "Sitemap.CategoryPageUpdateFrequency",
-                    ValueType = ModuleSetting.TypeString,
-                    IsArray = true,
-                    ArrayValues = new string[] { "always", "hourly", "daily", "weekly", "monthly", "yearly", "never" },
+                    ValueType = SettingValueType.ShortText,
+                    IsDictionary = true,
+                    AllowedValues = new string[] { "always", "hourly", "daily", "weekly", "monthly", "yearly", "never" },
                     DefaultValue = "weekly"
                 };
 
-                public static ModuleSetting CategoryPagePriority = new ModuleSetting
+                public static SettingDescriptor CategoryPagePriority = new SettingDescriptor
                 {
                    
                     Name = "Sitemap.CategoryPagePriority",
-                    ValueType = ModuleSetting.TypeDecimal,
+                    ValueType = SettingValueType.Decimal,
                     DefaultValue = "0.7"
                 };
 
-                public static IEnumerable<ModuleSetting> AllSettings
+                public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {

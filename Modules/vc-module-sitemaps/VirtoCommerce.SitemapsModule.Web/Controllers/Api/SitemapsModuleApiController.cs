@@ -253,7 +253,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
                 }
 
                 //Import first to local tmp folder because Azure blob storage doesn't support some special file access mode 
-                using (var stream = File.Open(localTmpPath, FileMode.OpenOrCreate))
+                using (var stream = System.IO.File.Open(localTmpPath, FileMode.OpenOrCreate))
                 {
                     using (var zipPackage = ZipPackage.Open(stream, FileMode.Create))
                     {
@@ -270,7 +270,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
                     }
                 }
                 //Copy export data to blob provider for get public download url
-                using (var localStream = File.Open(localTmpPath, FileMode.Open))
+                using (var localStream = System.IO.File.Open(localTmpPath, FileMode.Open))
                 using (var blobStream = _blobStorageProvider.OpenWrite(relativeUrl))
                 {
                     localStream.CopyTo(blobStream);
