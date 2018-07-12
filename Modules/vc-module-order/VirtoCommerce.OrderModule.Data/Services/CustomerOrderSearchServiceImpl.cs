@@ -3,11 +3,14 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.OrderModule.Core.Model;
 using VirtoCommerce.OrderModule.Core.Model.Search;
 using VirtoCommerce.OrderModule.Core.Services;
+using VirtoCommerce.OrderModule.Data.Caching;
 using VirtoCommerce.OrderModule.Data.Model;
 using VirtoCommerce.OrderModule.Data.Repositories;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
 
@@ -16,36 +19,53 @@ namespace VirtoCommerce.OrderModule.Data.Services
     public class CustomerOrderSearchServiceImpl : ICustomerOrderSearchService
     {
         private readonly Func<IOrderRepository> _repositoryFactory;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public CustomerOrderSearchServiceImpl(Func<IOrderRepository> repositoryFactory)
+        public CustomerOrderSearchServiceImpl(Func<IOrderRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
+            _platformMemoryCache = platformMemoryCache;
         }
 
         public virtual async Task<GenericSearchResult<CustomerOrder>> SearchCustomerOrdersAsync(CustomerOrderSearchCriteria criteria)
         {
-            using (var repository = _repositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), "SearchCustomerOrdersAsync", criteria.GetCacheKey());
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                repository.DisableChangesTracking();
-                var retVal = new GenericSearchResult<CustomerOrder>();
-                var orderResponseGroup = EnumUtility.SafeParse(criteria.ResponseGroup, CustomerOrderResponseGroup.Full);
-
-                var query = GetOrdersQuery(repository, criteria);
-
-                var sortInfos = criteria.SortInfos;
-                if (sortInfos.IsNullOrEmpty())
+                cacheEntry.AddExpirationToken(OrderSearchCacheRegion.CreateChangeToken());
+                using (var repository = _repositoryFactory())
                 {
-                    sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<CustomerOrderEntity>(x => x.CreatedDate), SortDirection = SortDirection.Descending } };
+                    repository.DisableChangesTracking();
+                    var retVal = new GenericSearchResult<CustomerOrder>();
+                    var orderResponseGroup = EnumUtility.SafeParse(criteria.ResponseGroup, CustomerOrderResponseGroup.Full);
+
+                    var query = GetOrdersQuery(repository, criteria);
+
+                    var sortInfos = criteria.SortInfos;
+                    if (sortInfos.IsNullOrEmpty())
+                    {
+                        sortInfos = new[]
+                        {
+                            new SortInfo
+                            {
+                                SortColumn = ReflectionUtility.GetPropertyName<CustomerOrderEntity>(x => x.CreatedDate),
+                                SortDirection = SortDirection.Descending
+                            }
+                        };
+                    }
+                    query = query.OrderBySortInfos(sortInfos);
+
+                    retVal.TotalCount = await query.CountAsync();
+                    var orderIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+
+                    var list = await repository.GetCustomerOrdersByIdsAsync(orderIds, orderResponseGroup);
+
+                    retVal.Results = list.Select(x =>
+                        x.ToModel(AbstractTypeFactory<CustomerOrder>.TryCreateInstance()) as CustomerOrder).ToList();
+
+                    return retVal;
                 }
-                query = query.OrderBySortInfos(sortInfos);
-
-                retVal.TotalCount = await query.CountAsync();
-                var list = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-
-                retVal.Results = list.Select(x => x.ToModel(AbstractTypeFactory<CustomerOrder>.TryCreateInstance()) as CustomerOrder).ToList();
-
-                return retVal;
-            }
+            });
         }
 
         protected virtual IQueryable<CustomerOrderEntity> GetOrdersQuery(IOrderRepository repository, CustomerOrderSearchCriteria criteria)

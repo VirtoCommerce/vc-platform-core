@@ -1,200 +1,102 @@
-﻿using Microsoft.Practices.Unity;
 using System;
+using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Web.Http;
-using VirtoCommerce.CoreModule.Data.Services;
-using VirtoCommerce.Domain.Common;
-using VirtoCommerce.Domain.Order.Events;
-using VirtoCommerce.Domain.Order.Model;
-using VirtoCommerce.Domain.Order.Services;
-using VirtoCommerce.Domain.Payment.Services;
-using VirtoCommerce.Domain.Shipping.Services;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using VirtoCommerce.NotificationsModule.Core.Services;
+using VirtoCommerce.OrderModule.Core;
+using VirtoCommerce.OrderModule.Core.Events;
+using VirtoCommerce.OrderModule.Core.Notifications;
+using VirtoCommerce.OrderModule.Core.Services;
+using VirtoCommerce.OrderModule.Data.ExportImport;
 using VirtoCommerce.OrderModule.Data.Handlers;
-using VirtoCommerce.OrderModule.Data.Notifications;
 using VirtoCommerce.OrderModule.Data.Repositories;
 using VirtoCommerce.OrderModule.Data.Services;
-using VirtoCommerce.OrderModule.Web.ExportImport;
-using VirtoCommerce.OrderModule.Web.JsonConverters;
-using VirtoCommerce.OrderModule.Web.Model;
-using VirtoCommerce.OrderModule.Web.Resources;
-using VirtoCommerce.OrderModule.Web.Security;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.Platform.Core.Notifications;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
-using VirtoCommerce.Platform.Data.Infrastructure;
-using VirtoCommerce.Platform.Data.Infrastructure.Interceptors;
+
 
 namespace VirtoCommerce.OrderModule.Web
 {
-    public class Module : ModuleBase, ISupportExportImportModule
+    public class Module : IModule, IExportSupport, IImportSupport
     {
-        private readonly string _connectionString = ConfigurationHelper.GetConnectionStringValue("VirtoCommerce.Orders") ?? ConfigurationHelper.GetConnectionStringValue("VirtoCommerce");
-        private readonly IUnityContainer _container; 
-
-        public Module(IUnityContainer container)
+        public ManifestModuleInfo ModuleInfo { get; set; }
+        private IApplicationBuilder _appBuilder;
+        public void Initialize(IServiceCollection serviceCollection)
         {
-            _container = container;
+            var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
+            serviceCollection.AddTransient<IOrderRepository, OrderRepositoryImpl>();
+            var connectionString = configuration.GetConnectionString("VirtoCommerce.Orders") ?? configuration.GetConnectionString("VirtoCommerce");
+            serviceCollection.AddDbContext<OrderDbContext>(options => options.UseSqlServer(connectionString));
+            serviceCollection.AddSingleton<Func<IOrderRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IOrderRepository>());
+            serviceCollection.AddSingleton<ICustomerOrderSearchService, CustomerOrderSearchServiceImpl>();
+            serviceCollection.AddSingleton<ICustomerOrderService, CustomerOrderServiceImpl>();
+            serviceCollection.AddSingleton<ICustomerOrderBuilder, CustomerOrderBuilderImpl>();
+            serviceCollection.AddSingleton<ICustomerOrderTotalsCalculator, DefaultCustomerOrderTotalsCalculator>();
+            serviceCollection.AddSingleton<OrderExportImport>();
+            serviceCollection.AddSingleton<OrderChangedEvent>();
         }
 
-        #region IModule Members
-
-        public override void SetupDatabase()
+        public void PostInitialize(IApplicationBuilder appBuilder)
         {
-            using (var context = new OrderRepositoryImpl(_connectionString, _container.Resolve<AuditableInterceptor>()))
+            _appBuilder = appBuilder;
+
+            var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
+            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.General.AllSettings, ModuleInfo.Id);
+
+            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
+            permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
+                new Permission()
+                {
+                    GroupName = "Orders",
+                    ModuleId = ModuleInfo.Id,
+                    Name = x
+                }).ToArray());
+
+            var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
+            inProcessBus.RegisterHandler<OrderChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<AdjustInventoryOrderChangedEventHandler>().Handle(message));
+            inProcessBus.RegisterHandler<OrderChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<CancelPaymentOrderChangedEventHandler>().Handle(message));
+            inProcessBus.RegisterHandler<OrderChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<LogChangesOrderChangedEventHandler>().Handle(message));
+            inProcessBus.RegisterHandler<OrderChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<SendNotificationsOrderChangedEventHandler>().Handle(message));
+
+            using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
-                var initializer = new SetupDatabaseInitializer<OrderRepositoryImpl, Data.Migrations.Configuration>();
-                initializer.InitializeDatabase(context);
+                var dbContext = serviceScope.ServiceProvider.GetRequiredService<OrderDbContext>();
+                dbContext.Database.EnsureCreated();
+                dbContext.Database.Migrate();
             }
+
+            var notificationRegistrar = appBuilder.ApplicationServices.GetService<INotificationRegistrar>();
+            notificationRegistrar.RegisterNotification<CancelOrderEmailNotification>();
+            notificationRegistrar.RegisterNotification<InvoiceEmailNotification>();
+            notificationRegistrar.RegisterNotification<NewOrderStatusEmailNotification>();
+            notificationRegistrar.RegisterNotification<OrderCreateEmailNotification>();
+            notificationRegistrar.RegisterNotification<OrderEmailNotificationBase>();
+            notificationRegistrar.RegisterNotification<OrderPaidEmailNotification>();
+            notificationRegistrar.RegisterNotification<OrderSentEmailNotification>();
         }
 
-        public override void Initialize()
+        public void Uninstall()
         {
-            var eventHandlerRegistrar = _container.Resolve<IHandlerRegistrar>();
-
-            //Registration welcome email notification.
-            eventHandlerRegistrar.RegisterHandler<OrderChangedEvent>(async (message, token) => await _container.Resolve<AdjustInventoryOrderChangedEventHandler>().Handle(message));
-            eventHandlerRegistrar.RegisterHandler<OrderChangedEvent>(async (message, token) => await _container.Resolve<CancelPaymentOrderChangedEventHandler>().Handle(message));
-            eventHandlerRegistrar.RegisterHandler<OrderChangedEvent>(async (message, token) => await _container.Resolve<LogChangesOrderChangedEventHandler>().Handle(message));
-            eventHandlerRegistrar.RegisterHandler<OrderChangedEvent>(async (message, token) => await _container.Resolve<SendNotificationsOrderChangedEventHandler>().Handle(message));
-
-            _container.RegisterType<IOrderRepository>(new InjectionFactory(c => new OrderRepositoryImpl(_connectionString, _container.Resolve<AuditableInterceptor>(), new EntityPrimaryKeyGeneratorInterceptor())));
-            _container.RegisterType<IUniqueNumberGenerator, SequenceUniqueNumberGeneratorServiceImpl>();
-
-            _container.RegisterType<ICustomerOrderService, CustomerOrderServiceImpl>();
-            _container.RegisterType<ICustomerOrderSearchService, CustomerOrderServiceImpl>();
-            _container.RegisterType<ICustomerOrderBuilder, CustomerOrderBuilderImpl>();
-
-            _container.RegisterType<ICustomerOrderTotalsCalculator, DefaultCustomerOrderTotalsCalculator>(new ContainerControlledLifetimeManager());
         }
 
-        public override void PostInitialize()
+        public Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
+            ICancellationToken cancellationToken)
         {
-            base.PostInitialize();
-
-            //Add order numbers formats settings  to store module allows to use individual number formats in each store
-            var settingManager = _container.Resolve<ISettingsManager>();
-            var numberFormatSettings = settingManager.GetModuleSettings("VirtoCommerce.Orders").Where(x => x.Name.EndsWith("NewNumberTemplate")).ToArray();
-            settingManager.RegisterModuleSettings("VirtoCommerce.Store", numberFormatSettings);
-
-            var notificationManager = _container.Resolve<INotificationManager>();
-            notificationManager.RegisterNotificationType(() => new OrderCreateEmailNotification(_container.Resolve<IEmailNotificationSendingGateway>())
-            {
-                DisplayName = "Create order notification",
-                Description = "This notification sends by email to client when he create order",
-                NotificationTemplate = new NotificationTemplate
-                {
-                    Body = OrderNotificationResource.CreateOrderNotificationBody,
-                    Subject = OrderNotificationResource.CreateOrderNotificationSubject,
-                    Language = "en-US"
-                }
-            });
-
-            notificationManager.RegisterNotificationType(() => new OrderPaidEmailNotification(_container.Resolve<IEmailNotificationSendingGateway>())
-            {
-                DisplayName = "Order paid notification",
-                Description = "This notification sends by email to client when all payments of order has status paid",
-                NotificationTemplate = new NotificationTemplate
-                {
-                    Body = OrderNotificationResource.OrderPaidNotificationBody,
-                    Subject = OrderNotificationResource.OrderPaidNotificationSubject,
-                    Language = "en-US"
-                }
-            });
-
-            notificationManager.RegisterNotificationType(() => new OrderSentEmailNotification(_container.Resolve<IEmailNotificationSendingGateway>())
-            {
-                DisplayName = "Order sent notification",
-                Description = "This notification sends by email to client when all shipments gets status sent",
-                NotificationTemplate = new NotificationTemplate
-                {
-                    Body = OrderNotificationResource.OrderSentNotificationBody,
-                    Subject = OrderNotificationResource.OrderSentNotificationSubject,
-                    Language = "en-US"
-                }
-            });
-
-            notificationManager.RegisterNotificationType(() => new NewOrderStatusEmailNotification(_container.Resolve<IEmailNotificationSendingGateway>())
-            {
-                DisplayName = "New order status notification",
-                Description = "This notification sends by email to client when status of orders has been changed",
-                NotificationTemplate = new NotificationTemplate
-                {
-                    Body = OrderNotificationResource.NewOrderStatusNotificationBody,
-                    Subject = OrderNotificationResource.NewOrderStatusNotificatonSubject,
-                    Language = "en-US"
-                }
-            });
-
-            notificationManager.RegisterNotificationType(() => new CancelOrderEmailNotification(_container.Resolve<IEmailNotificationSendingGateway>())
-            {
-                DisplayName = "Cancel order notification",
-                Description = "This notification sends by email to client when order canceled",
-                NotificationTemplate = new NotificationTemplate
-                {
-                    Body = OrderNotificationResource.CancelOrderNotificationBody,
-                    Subject = OrderNotificationResource.CancelOrderNotificationSubject,
-                    Language = "en-US"
-                }
-            });
-
-            notificationManager.RegisterNotificationType(() => new InvoiceEmailNotification(_container.Resolve<IEmailNotificationSendingGateway>())
-            {
-                Description = "The template for for customer order invoice (used for PDF generation)",
-                DisplayName = "The invoice for customer order",
-                NotificationTemplate = new NotificationTemplate
-                {
-                    Body = InvoiceResource.Body,
-                    Subject = InvoiceResource.Subject,
-                    Language = "en-US"
-                }
-            });
-
-            var securityScopeService = _container.Resolve<IPermissionScopeService>();
-            securityScopeService.RegisterSope(() => new OrderStoreScope());
-            securityScopeService.RegisterSope(() => new OrderResponsibleScope());
-
-            //Next lines allow to use polymorph types in API controller methods
-            var httpConfiguration = _container.Resolve<HttpConfiguration>();
-            httpConfiguration.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new PolymorphicOperationJsonConverter(_container.Resolve<IPaymentMethodsService>(), _container.Resolve<IShippingMethodsService>()));
-
-            //Next lines need to correct XML serialization for orders models
-            var allShippingmethodTypes = _container.Resolve<IShippingMethodsService>().GetAllShippingMethods().Select(x => x.GetType()).ToArray();
-            var allPaymentMethodTypes = _container.Resolve<IPaymentMethodsService>().GetAllPaymentMethods().Select(x => x.GetType()).ToArray();
-            var allOrderKnownTypes = new[] { typeof(Shipment), typeof(PaymentIn), typeof(CustomerOrder) }.Concat(allPaymentMethodTypes).Concat(allShippingmethodTypes).ToArray();
-            httpConfiguration.Formatters.XmlFormatter.SetSerializer<CustomerOrder>(new DataContractSerializer(typeof(CustomerOrder), allOrderKnownTypes));
-            httpConfiguration.Formatters.XmlFormatter.SetSerializer<CustomerOrderSearchResult>(new DataContractSerializer(typeof(CustomerOrderSearchResult), allOrderKnownTypes));
+            return _appBuilder.ApplicationServices.GetRequiredService<OrderExportImport>().ExportAsync(outStream, options, progressCallback, cancellationToken);
         }
 
-        #endregion
-
-        #region ISupportExportImportModule Members
-
-        public void DoExport(System.IO.Stream outStream, PlatformExportManifest manifest, Action<ExportImportProgressInfo> progressCallback)
+        public Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
+            ICancellationToken cancellationToken)
         {
-            var job = _container.Resolve<OrderExportImport>();
-            job.DoExport(outStream, progressCallback);
+            return _appBuilder.ApplicationServices.GetRequiredService<OrderExportImport>().ImportAsync(inputStream, options, progressCallback, cancellationToken);
         }
-
-        public void DoImport(System.IO.Stream inputStream, PlatformExportManifest manifest, Action<ExportImportProgressInfo> progressCallback)
-        {
-            var job = _container.Resolve<OrderExportImport>();
-            job.DoImport(inputStream, progressCallback);
-        }
-
-        public string ExportDescription
-        {
-            get
-            {
-                var settingManager = _container.Resolve<ISettingsManager>();
-                return settingManager.GetValue("Order.ExportImport.Description", string.Empty);
-            }
-        }
-
-        #endregion
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.CoreModule.Core.Shipping;
@@ -10,8 +11,10 @@ using VirtoCommerce.OrderModule.Core.Events;
 using VirtoCommerce.OrderModule.Core.Model;
 using VirtoCommerce.OrderModule.Core.Model.Search;
 using VirtoCommerce.OrderModule.Core.Services;
+using VirtoCommerce.OrderModule.Data.Caching;
 using VirtoCommerce.OrderModule.Data.Model;
 using VirtoCommerce.OrderModule.Data.Repositories;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
@@ -34,11 +37,12 @@ namespace VirtoCommerce.OrderModule.Data.Services
         private readonly IShippingMethodsRegistrar _shippingMethodsRegistrar;
         private readonly IChangeLogService _changeLogService;
         private readonly ICustomerOrderTotalsCalculator _totalsCalculator;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
 
         public CustomerOrderServiceImpl(Func<IOrderRepository> orderRepositoryFactory, IUniqueNumberGenerator uniqueNumberGenerator
             , IDynamicPropertyService dynamicPropertyService, IStoreService storeService, IChangeLogService changeLogService
             , IEventPublisher eventPublisher, ICustomerOrderTotalsCalculator totalsCalculator
-            , IShippingMethodsRegistrar shippingMethodsRegistrar, IPaymentMethodsRegistrar paymentMethodsRegistrar)
+            , IShippingMethodsRegistrar shippingMethodsRegistrar, IPaymentMethodsRegistrar paymentMethodsRegistrar, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = orderRepositoryFactory;
             _eventPublisher = eventPublisher;
@@ -48,13 +52,51 @@ namespace VirtoCommerce.OrderModule.Data.Services
             _totalsCalculator = totalsCalculator;
             _shippingMethodsRegistrar = shippingMethodsRegistrar;
             _paymentMethodsRegistrar = paymentMethodsRegistrar;
+            _platformMemoryCache = platformMemoryCache;
             _uniqueNumberGenerator = uniqueNumberGenerator;
         }
 
-        
-        
+
+
 
         #region ICustomerOrderService Members
+
+        public virtual async Task<CustomerOrder[]> GetByIdsAsync(string[] orderIds, string responseGroup = null)
+        {
+            var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", orderIds), responseGroup);
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            {
+                var retVal = new List<CustomerOrder>();
+                var orderResponseGroup = EnumUtility.SafeParse(responseGroup, CustomerOrderResponseGroup.Full);
+
+                using (var repository = _repositoryFactory())
+                {
+                    repository.DisableChangesTracking();
+
+                    var orderEntities = await repository.GetCustomerOrdersByIdsAsync(orderIds, orderResponseGroup);
+                    foreach (var orderEntity in orderEntities)
+                    {
+                        var customerOrder = AbstractTypeFactory<CustomerOrder>.TryCreateInstance();
+                        if (customerOrder != null)
+                        {
+                            customerOrder = orderEntity.ToModel(customerOrder) as CustomerOrder;
+
+                            //Calculate totals only for full responseGroup
+                            if (orderResponseGroup == CustomerOrderResponseGroup.Full)
+                            {
+                                _totalsCalculator.CalculateTotals(customerOrder);
+                            }
+                            LoadOrderDependencies(customerOrder);
+                            retVal.Add(customerOrder);
+                            cacheEntry.AddExpirationToken(OrderCacheRegion.CreateChangeToken(customerOrder));
+                        }
+                    }
+                }
+
+                await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal.ToArray<IHasDynamicProperties>());
+                return retVal.ToArray();
+            });
+        }
 
         public virtual async Task SaveChangesAsync(CustomerOrder[] orders)
         {
@@ -99,38 +141,7 @@ namespace VirtoCommerce.OrderModule.Data.Services
             }
             //Raise domain events
             await _eventPublisher.Publish(new OrderChangedEvent(changedEntries));
-        }
-
-        public virtual async Task<CustomerOrder[]> GetByIdsAsync(string[] orderIds, string responseGroup = null)
-        {
-            var retVal = new List<CustomerOrder>();
-            var orderResponseGroup = EnumUtility.SafeParse(responseGroup, CustomerOrderResponseGroup.Full);
-
-            using (var repository = _repositoryFactory())
-            {
-                repository.DisableChangesTracking();
-
-                var orderEntities = await repository.GetCustomerOrdersByIdsAsync(orderIds, orderResponseGroup);
-                foreach (var orderEntity in orderEntities)
-                {
-                    var customerOrder = AbstractTypeFactory<CustomerOrder>.TryCreateInstance();
-                    if (customerOrder != null)
-                    {
-                        customerOrder = orderEntity.ToModel(customerOrder) as CustomerOrder;
-
-                        //Calculate totals only for full responseGroup
-                        if (orderResponseGroup == CustomerOrderResponseGroup.Full)
-                        {
-                            _totalsCalculator.CalculateTotals(customerOrder);
-                        }
-                        LoadOrderDependencies(customerOrder);
-                        retVal.Add(customerOrder);
-                    }
-                }
-            }
-
-            await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal.ToArray<IHasDynamicProperties>());
-            return retVal.ToArray();
+            ClearCache(orders);
         }
 
         public virtual async Task DeleteAsync(string[] ids)
@@ -153,6 +164,7 @@ namespace VirtoCommerce.OrderModule.Data.Services
                 //Raise domain events after deletion
                 await _eventPublisher.Publish(new OrderChangedEvent(changedEntries));
             }
+            ClearCache(orders);
         }
 
         
@@ -208,6 +220,16 @@ namespace VirtoCommerce.OrderModule.Data.Services
 
                     operation.Number = _uniqueNumberGenerator.GenerateNumber(numberTemplate);
                 }
+            }
+        }
+
+        private void ClearCache(IEnumerable<CustomerOrder> orders)
+        {
+            OrderSearchCacheRegion.ExpireRegion();
+
+            foreach (var order in orders)
+            {
+                OrderCacheRegion.ExpireOrder(order);
             }
         }
     }

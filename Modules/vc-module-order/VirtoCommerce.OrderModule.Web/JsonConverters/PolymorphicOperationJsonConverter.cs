@@ -1,13 +1,12 @@
-﻿using System;
+using System;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using VirtoCommerce.Domain.Commerce.Model;
-using VirtoCommerce.Domain.Order.Model;
-using VirtoCommerce.Domain.Payment.Model;
-using VirtoCommerce.Domain.Payment.Services;
-using VirtoCommerce.Domain.Shipping.Model;
-using VirtoCommerce.Domain.Shipping.Services;
+using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Payment;
+using VirtoCommerce.CoreModule.Core.Shipping;
+using VirtoCommerce.OrderModule.Core.Model;
+using VirtoCommerce.OrderModule.Core.Model.Search;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrderModule.Web.JsonConverters
@@ -16,12 +15,12 @@ namespace VirtoCommerce.OrderModule.Web.JsonConverters
     {
         private static readonly Type[] _knowTypes = { typeof(IOperation), typeof(LineItem), typeof(CustomerOrderSearchCriteria), typeof(PaymentMethod), typeof(ShippingMethod) };
 
-        private readonly IPaymentMethodsService _paymentMethodsService;
-        private readonly IShippingMethodsService _shippingMethodsService;
-        public PolymorphicOperationJsonConverter(IPaymentMethodsService paymentMethodsService, IShippingMethodsService shippingMethodsService)
+        private readonly IPaymentMethodsRegistrar _paymentMethodsRegistrar;
+        private readonly IShippingMethodsRegistrar _shippingMethodsRegistrar;
+        public PolymorphicOperationJsonConverter(IPaymentMethodsRegistrar paymentMethodsRegistrar, IShippingMethodsRegistrar shippingMethodsRegistrar)
         {
-            _paymentMethodsService = paymentMethodsService;
-            _shippingMethodsService = shippingMethodsService;
+            _paymentMethodsRegistrar = paymentMethodsRegistrar;
+            _shippingMethodsRegistrar = shippingMethodsRegistrar;
         }
 
         public override bool CanWrite => false;
@@ -40,12 +39,12 @@ namespace VirtoCommerce.OrderModule.Web.JsonConverters
             if (objectType == typeof(PaymentMethod))
             {
                 var paymentGatewayCode = obj["code"].Value<string>();
-                retVal = _paymentMethodsService.GetAllPaymentMethods().FirstOrDefault(x => x.Code.EqualsInvariant(paymentGatewayCode));
+                retVal = _paymentMethodsRegistrar.GetAllPaymentMethods().FirstOrDefault(x => x.Code.EqualsInvariant(paymentGatewayCode));
             }
             else if (objectType == typeof(ShippingMethod))
             {
                 var shippingGatewayCode = obj["code"].Value<string>();
-                retVal = _shippingMethodsService.GetAllShippingMethods().FirstOrDefault(x => x.Code.EqualsInvariant(shippingGatewayCode));
+                retVal = _shippingMethodsRegistrar.GetAllShippingMethods().FirstOrDefault(x => x.Code.EqualsInvariant(shippingGatewayCode));
             }
             else
             {

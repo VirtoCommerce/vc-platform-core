@@ -1,4 +1,3 @@
-using CacheManager.Core;
 using System;
 using System.Collections.Specialized;
 using System.IO;
@@ -7,35 +6,29 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web;
-using System.Web.Http;
-using System.Web.Http.Description;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using TheArtOfDev.HtmlRenderer.PdfSharp;
-using VirtoCommerce.Domain.Cart.Services;
-using VirtoCommerce.Domain.Common;
-using VirtoCommerce.Domain.Order.Model;
-using VirtoCommerce.Domain.Order.Services;
-using VirtoCommerce.Domain.Payment.Model;
-using VirtoCommerce.Domain.Store.Services;
-using VirtoCommerce.OrderModule.Data.Notifications;
+using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Payment;
+using VirtoCommerce.OrderModule.Core;
+using VirtoCommerce.OrderModule.Core.Model;
+using VirtoCommerce.OrderModule.Core.Model.Search;
+using VirtoCommerce.OrderModule.Core.Notifications;
+using VirtoCommerce.OrderModule.Core.Services;
 using VirtoCommerce.OrderModule.Data.Repositories;
 using VirtoCommerce.OrderModule.Data.Services;
-using VirtoCommerce.OrderModule.Web.BackgroundJobs;
-using VirtoCommerce.OrderModule.Web.Model;
-using VirtoCommerce.OrderModule.Web.Security;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Notifications;
 using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.Platform.Core.Settings;
-using VirtoCommerce.Platform.Core.Web.Security;
-using VirtoCommerce.Platform.Data.Common;
-using webModel = VirtoCommerce.OrderModule.Web.Model;
+using VirtoCommerce.StoreModule.Core.Services;
+
 
 namespace VirtoCommerce.OrderModule.Web.Controllers.Api
 {
-    [RoutePrefix("api/order/customerOrders")]
-    public class OrderModuleController : ApiController
+    [Route("api/order/customerOrders")]
+    public class OrderModuleController : Controller
     {
         private readonly ICustomerOrderService _customerOrderService;
         private readonly ICustomerOrderSearchService _searchService;
@@ -43,7 +36,7 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
         private readonly IStoreService _storeService;
         private readonly ICacheManager<object> _cacheManager;
         private readonly Func<IOrderRepository> _repositoryFactory;
-        private readonly ISecurityService _securityService;
+        //private readonly ISecurityService _securityService;
         private readonly IPermissionScopeService _permissionScopeService;
         private readonly ICustomerOrderBuilder _customerOrderBuilder;
         private readonly IShoppingCartService _cartService;
@@ -52,10 +45,15 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
         private readonly IChangeLogService _changeLogService;
         private static readonly object _lockObject = new object();
 
-        public OrderModuleController(ICustomerOrderService customerOrderService, ICustomerOrderSearchService searchService, IStoreService storeService, IUniqueNumberGenerator numberGenerator,
-                                     ICacheManager<object> cacheManager, Func<IOrderRepository> repositoryFactory, IPermissionScopeService permissionScopeService, ISecurityService securityService,
-                                     ICustomerOrderBuilder customerOrderBuilder, IShoppingCartService cartService, INotificationManager notificationManager,
-                                     INotificationTemplateResolver notificationTemplateResolver, IChangeLogService changeLogService)
+        public OrderModuleController(ICustomerOrderService customerOrderService, ICustomerOrderSearchService searchService, IStoreService storeService
+            , IUniqueNumberGenerator numberGenerator
+            , ICacheManager<object> cacheManager
+            , Func<IOrderRepository> repositoryFactory
+            //, IPermissionScopeService permissionScopeService
+            //, ISecurityService securityService
+            , ICustomerOrderBuilder customerOrderBuilder
+            //, IShoppingCartService cartService, INotificationManager notificationManager,INotificationTemplateResolver notificationTemplateResolver
+            , IChangeLogService changeLogService)
         {
             _customerOrderService = customerOrderService;
             _searchService = searchService;
@@ -63,12 +61,12 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
             _storeService = storeService;
             _cacheManager = cacheManager;
             _repositoryFactory = repositoryFactory;
-            _securityService = securityService;
-            _permissionScopeService = permissionScopeService;
+            //_securityService = securityService;
+            //_permissionScopeService = permissionScopeService;
             _customerOrderBuilder = customerOrderBuilder;
-            _cartService = cartService;
-            _notificationManager = notificationManager;
-            _notificationTemplateResolver = notificationTemplateResolver;
+            //_cartService = cartService;
+            //_notificationManager = notificationManager;
+            //_notificationTemplateResolver = notificationTemplateResolver;
             _changeLogService = changeLogService;
         }
 
@@ -78,19 +76,14 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
         /// <param name="criteria">criteria</param>
         [HttpPost]
         [Route("search")]
-        [ResponseType(typeof(webModel.CustomerOrderSearchResult))]
-        public IHttpActionResult Search(CustomerOrderSearchCriteria criteria)
+        public async Task<ActionResult<GenericSearchResult<CustomerOrder>>> Search(CustomerOrderSearchCriteria criteria)
         {
             //Scope bound ACL filtration
-            criteria = FilterOrderSearchCriteria(HttpContext.Current.User.Identity.Name, criteria);
+            criteria = FilterOrderSearchCriteria(User.Identity.Name, criteria);
 
-            var result = _searchService.SearchCustomerOrders(criteria);
-            var retVal = new webModel.CustomerOrderSearchResult
-            {
-                CustomerOrders = result.Results.ToList(),
-                TotalCount = result.TotalCount
-            };
-            return Ok(retVal);
+            var result = await _searchService.SearchCustomerOrdersAsync(criteria);
+            
+            return Ok(result);
         }
 
         /// <summary>
@@ -101,26 +94,27 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
         /// <param name="respGroup"></param>
         [HttpGet]
         [Route("number/{number}")]
-        [ResponseType(typeof(CustomerOrder))]
-        public IHttpActionResult GetByNumber(string number, [FromUri] string respGroup = null)
+        public async Task<ActionResult<CustomerOrder>> GetByNumber(string number, [FromRoute] string respGroup = null)
         {
             var searchCriteria = AbstractTypeFactory<CustomerOrderSearchCriteria>.TryCreateInstance();
             searchCriteria.Number = number;
             searchCriteria.ResponseGroup = respGroup;
 
-            var result = _searchService.SearchCustomerOrders(searchCriteria);
+            var result = await _searchService.SearchCustomerOrdersAsync(searchCriteria);
 
             var retVal = result.Results.FirstOrDefault();
-            if (retVal != null)
-            {
-                var scopes = _permissionScopeService.GetObjectPermissionScopeStrings(retVal).ToArray();
-                if (!_securityService.UserHasAnyPermission(User.Identity.Name, scopes, OrderPredefinedPermissions.Read))
-                {
-                    throw new HttpResponseException(HttpStatusCode.Unauthorized);
-                }
-                //Set scopes for UI scope bounded ACL checking
-                retVal.Scopes = scopes;
-            }
+
+            //TODO Resource based auth
+            //if (retVal != null)
+            //{
+            //    var scopes = _permissionScopeService.GetObjectPermissionScopeStrings(retVal).ToArray();
+            //    if (!_securityService.UserHasAnyPermission(User.Identity.Name, scopes, ModuleConstants.Security.Permissions.Read))
+            //    {
+            //        return Unauthorized();
+            //    }
+            //    //Set scopes for UI scope bounded ACL checking
+            //    retVal.Scopes = scopes;
+            //}
             return Ok(retVal);
         }
 
@@ -133,24 +127,25 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
         /// <param name="respGroup"></param>
         [HttpGet]
         [Route("{id}")]
-        [ResponseType(typeof(CustomerOrder))]
-        public IHttpActionResult GetById(string id, [FromUri] string respGroup = null)
+        public async Task<ActionResult<CustomerOrder>> GetById(string id, [FromRoute] string respGroup = null)
         {
-            var retVal = _customerOrderService.GetByIds(new[] { id }, respGroup).FirstOrDefault();
+            var orders = await _customerOrderService.GetByIdsAsync(new[] {id}, respGroup);
+            var retVal = orders.FirstOrDefault();
             if (retVal == null)
             {
                 return NotFound();
             }
 
-            //Scope bound security check
-            var scopes = _permissionScopeService.GetObjectPermissionScopeStrings(retVal).ToArray();
-            if (!_securityService.UserHasAnyPermission(User.Identity.Name, scopes, OrderPredefinedPermissions.Read))
-            {
-                throw new HttpResponseException(HttpStatusCode.Unauthorized);
-            }
+            //TODO
+            ////Scope bound security check
+            //var scopes = _permissionScopeService.GetObjectPermissionScopeStrings(retVal).ToArray();
+            //if (!_securityService.UserHasAnyPermission(User.Identity.Name, scopes, OrderPredefinedPermissions.Read))
+            //{
+            //    throw new HttpResponseException(HttpStatusCode.Unauthorized);
+            //}
 
-            //Set scopes for UI scope bounded ACL checking
-            retVal.Scopes = scopes;
+            ////Set scopes for UI scope bounded ACL checking
+            //retVal.Scopes = scopes;
 
             return Ok(retVal);
         }
@@ -162,8 +157,7 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
 		/// <param name="order">Customer order</param>
         [HttpPut]
         [Route("recalculate")]
-        [ResponseType(typeof(CustomerOrder))]
-        public IHttpActionResult CalculateTotals(CustomerOrder order)
+        public ActionResult<CustomerOrder> CalculateTotals(CustomerOrder order)
         {
             //Nothing to do special because all order totals will be evaluated in domain CustomerOrder properties transiently        
             return Ok(order);
@@ -179,8 +173,7 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
         /// <param name="bankCardInfo">banking card information</param>
         [HttpPost]
         [Route("{orderId}/processPayment/{paymentId}")]
-        [ResponseType(typeof(ProcessPaymentResult))]
-        public IHttpActionResult ProcessOrderPayments(string orderId, string paymentId, [SwaggerOptional] BankCardInfo bankCardInfo)
+        public ActionResult<ProcessPaymentResult> ProcessOrderPayments(string orderId, string paymentId, [SwaggerOptional] BankCardInfo bankCardInfo)
         {
             var order = _customerOrderService.GetByIds(new[] { orderId }, CustomerOrderResponseGroup.Full.ToString()).FirstOrDefault();
 

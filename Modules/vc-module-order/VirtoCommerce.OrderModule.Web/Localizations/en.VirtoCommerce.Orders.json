@@ -282,9 +282,37 @@
         "order:access": "Access order related data"
     },
     "settings": {
-        "Inventory.ExportImport.PageSize": {
-            "description": "High value may will cause slow performance",
-            "title": "The page size being used for Export / Import"
+        "Order.Status": {
+            "description": "Customer order statuses",
+            "title": "Customer order statuses"
+        },
+        "Shipment.Status": {
+            "description": "Shipment statuses",
+            "title": "Shipment statuses"
+        },
+        "PaymentIn.Status": {
+            "description": "Incoming payment statuses",
+            "title": "Payment statuses"
+        },
+        "Order.CustomerOrderNewNumberTemplate": {
+            "description": "The template (pattern) that will be used to generate the number for new Customer Order. Parameters: 0 - date (the UTC time of number generation); 1 - the sequence number.",
+            "title": "Order number template"
+        },
+        "Order.ShipmentNewNumberTemplate": {
+            "description": "The template (pattern) that will be used to generate the number for new Shipment. Parameters: 0 - date (the UTC time of number generation); 1 - the sequence number.",
+            "title": "Order shipment number template"
+        },
+        "Order.PaymentInNewNumberTemplate": {
+            "description": "The template (pattern) that will be used to generate the number for new incoming Payment. Parameters: 0 - date (the UTC time of number generation); 1 - the sequence number.",
+            "title": "Order payment number template"
+        },
+        "Order.SendOrderNotifications": {
+            "description": "Send notification when order state changed.",
+            "title": "Enable notifications for orders"
+        },
+        "Order.AdjustInventory": {
+            "description": "Adjust inventory when order state changed.",
+            "title": "Adjust inventory for orders"
         }
     }
 }
