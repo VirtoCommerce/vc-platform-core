@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using Microsoft.Extensions.Logging;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Settings;
@@ -18,31 +19,26 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
 {
     public class SitemapXmlGenerator : ISitemapXmlGenerator
     {
-        public SitemapXmlGenerator(
-            ISitemapService sitemapService,
-            ISitemapItemService sitemapItemService,
-            ISitemapUrlBuilder sitemapUrlBuilder,
-            ISitemapItemRecordProvider[] sitemapItemRecordProviders,
-            ISettingsManager settingsManager,
-            ILog logging,
-            IStoreService storeService)
-        {
-            SitemapService = sitemapService;
-            SitemapItemService = sitemapItemService;
-            SitemapUrlBuilder = sitemapUrlBuilder;
-            SitemapItemRecordProviders = sitemapItemRecordProviders;
-            SettingsManager = settingsManager;
-            Logging = logging;
-            StoreService = storeService;
-        }
-
-        protected ILog Logging { get; private set; }
+        protected ILogger _logger { get; private set; }
         protected ISitemapService SitemapService { get; private set; }
         protected ISitemapItemService SitemapItemService { get; private set; }
         protected ISitemapUrlBuilder SitemapUrlBuilder { get; private set; }
         protected ISitemapItemRecordProvider[] SitemapItemRecordProviders { get; private set; }
         protected ISettingsManager SettingsManager { get; private set; }
         protected IStoreService StoreService { get; private set; }
+
+        public SitemapXmlGenerator(ISitemapService sitemapService, ISitemapItemService sitemapItemService, ISitemapUrlBuilder sitemapUrlBuilder,
+            ISitemapItemRecordProvider[] sitemapItemRecordProviders, ISettingsManager settingsManager, ILogger logger, IStoreService storeService)
+        {
+            SitemapService = sitemapService;
+            SitemapItemService = sitemapItemService;
+            SitemapUrlBuilder = sitemapUrlBuilder;
+            SitemapItemRecordProviders = sitemapItemRecordProviders;
+            SettingsManager = settingsManager;
+            _logger = logger;
+            StoreService = storeService;
+        }
+
 
         public virtual async Task<ICollection<string>> GetSitemapUrlsAsync(string storeId)
         {
@@ -54,7 +50,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
             var sitemapUrls = new List<string>();
 
             var store = await StoreService.GetByIdAsync(storeId);
-            var sitemaps = LoadAllStoreSitemaps(store, "");
+            var sitemaps = await LoadAllStoreSitemapsAsync(store, "");
             foreach (var sitemap in sitemaps)
             {
                 sitemapUrls.AddRange(sitemap.PagedLocations);
@@ -87,7 +83,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                     });
                 }
 
-                var allStoreSitemaps = LoadAllStoreSitemaps(store, baseUrl);
+                var allStoreSitemaps = await LoadAllStoreSitemapsAsync(store, baseUrl);
                 var sitemapIndexXmlRecord = new SitemapIndexXmlRecord();
                 foreach (var sitemap in allStoreSitemaps)
                 {
@@ -107,7 +103,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                 var sitemap = sitemapSearchResult.Results.FirstOrDefault();
                 if (sitemap != null)
                 {
-                    LoadSitemapRecordsAsync(store, sitemap, baseUrl, progressCallback);
+                    await LoadSitemapRecordsAsync(store, sitemap, baseUrl, progressCallback);
                     var distinctRecords = sitemap.Items.SelectMany(x => x.ItemsRecords).GroupBy(x => x.Url).Select(x => x.FirstOrDefault());
                     var sitemapItemRecords = distinctRecords.Skip((sitemapLocation.PageNumber - 1) * recordsLimitPerFile).Take(recordsLimitPerFile).ToArray();
                     var sitemapRecord = new SitemapXmlRecord
@@ -125,7 +121,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
             return stream;
         }
 
-        private ICollection<Sitemap> LoadAllStoreSitemaps(Store store, string baseUrl)
+        private async Task<ICollection<Sitemap>> LoadAllStoreSitemapsAsync(Store store, string baseUrl)
         {
             var result = new List<Sitemap>();
             var sitemapSearchCriteria = new SitemapSearchCriteria
@@ -134,10 +130,10 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                 Skip = 0,
                 Take = int.MaxValue
             };
-            var sitemapSearchResult = SitemapService.Search(sitemapSearchCriteria);
+            var sitemapSearchResult = await SitemapService.SearchAsync(sitemapSearchCriteria);
             foreach (var sitemap in sitemapSearchResult.Results)
             {
-                LoadSitemapRecords(store, sitemap, baseUrl);
+                await LoadSitemapRecordsAsync(store, sitemap, baseUrl);
                 result.Add(sitemap);
             }
             return result;
@@ -162,11 +158,11 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                 //Log exceptions to prevent fail whole sitemap.xml generation
                 try
                 {
-                    recordProvider.LoadSitemapItemRecords(store, sitemap, baseUrl, progressCallback);
+                    recordProvider.LoadSitemapItemRecordsAsync(store, sitemap, baseUrl, progressCallback);
                 }
                 catch (Exception ex)
                 {
-                    Logging.Error(ex.ToString());
+                    _logger.LogError(ex.ToString());
                 }
             }
             sitemap.PagedLocations.Clear();

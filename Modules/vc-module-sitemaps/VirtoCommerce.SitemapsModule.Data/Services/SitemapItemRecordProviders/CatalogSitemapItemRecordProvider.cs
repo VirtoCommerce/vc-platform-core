@@ -1,45 +1,50 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 using VirtoCommerce.CatalogModule.Core.Services;
+using VirtoCommerce.Platform.Core.ExportImport;
+using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Data.Settings;
+using VirtoCommerce.SitemapsModule.Core.Models;
 using VirtoCommerce.SitemapsModule.Core.Services;
+using VirtoCommerce.StoreModule.Core.Model;
 
 namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
 {
     public class CatalogSitemapItemRecordProvider : SitemapItemRecordProviderBase, ISitemapItemRecordProvider
     {
+        protected ICategoryService _сategoryService { get; private set; }
+        protected IItemService _itemService { get; private set; }
+        //ToDo after make after migrate catalog module to core
+        //protected ICatalogSearchService CatalogSearchService { get; private set; }
+
         public CatalogSitemapItemRecordProvider(
             ICategoryService categoryService,
             IItemService itemService,
-            ICatalogSearchService catalogSearchService,
+            //ICatalogSearchService catalogSearchService,
             ISitemapUrlBuilder urlBuilder,
             ISettingsManager settingsManager)
             : base(settingsManager, urlBuilder)
         {
             CategoryService = categoryService;
-            ItemService = itemService;
-            CatalogSearchService = catalogSearchService;
+            _itemService = itemService;
+            //CatalogSearchService = catalogSearchService;
         }
 
-        protected ICategoryService CategoryService { get; private set; }
-        protected IItemService ItemService { get; private set; }
-        protected ICatalogSearchService CatalogSearchService { get; private set; }
 
-        public virtual void LoadSitemapItemRecords(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
+        public virtual void LoadSitemapItemRecordsAsync(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
         {
             var progressInfo = new ExportImportProgressInfo();
 
             var categoryOptions = new SitemapItemOptions
             {
-                Priority = SettingsManager.GetValue("Sitemap.CategoryPagePriority", .7M),
-                UpdateFrequency = SettingsManager.GetValue("Sitemap.CategoryPageUpdateFrequency", UpdateFrequency.Weekly)
+                Priority = _settingsManager.GetValue("Sitemap.CategoryPagePriority", .7M),
+                UpdateFrequency = _settingsManager.GetValue("Sitemap.CategoryPageUpdateFrequency", UpdateFrequency.Weekly)
             };
             var productOptions = new SitemapItemOptions
             {
-                Priority = SettingsManager.GetValue("Sitemap.ProductPagePriority", 1.0M),
-                UpdateFrequency = SettingsManager.GetValue("Sitemap.ProductPageUpdateFrequency", UpdateFrequency.Daily)
+                Priority = _settingsManager.GetValue("Sitemap.ProductPagePriority", 1.0M),
+                UpdateFrequency = _settingsManager.GetValue("Sitemap.ProductPageUpdateFrequency", UpdateFrequency.Daily)
             };
-            var searchBunchSize = SettingsManager.GetValue("Sitemap.SearchBunchSize", 500);
+            var searchBunchSize = _settingsManager.GetValue("Sitemap.SearchBunchSize", 500);
 
             var categorySitemapItems = sitemap.Items.Where(x => x.ObjectType.EqualsInvariant(SitemapItemTypes.Category));
             var categoryIds = categorySitemapItems.Select(x => x.ObjectId).ToArray();

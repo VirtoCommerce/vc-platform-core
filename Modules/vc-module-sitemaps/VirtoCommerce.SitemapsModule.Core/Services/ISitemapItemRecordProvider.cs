@@ -7,6 +7,6 @@ namespace VirtoCommerce.SitemapsModule.Core.Services
 {
     public interface ISitemapItemRecordProvider
     {
-        void LoadSitemapItemRecords(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null);
+        void LoadSitemapItemRecordsAsync(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null);
     }
 }

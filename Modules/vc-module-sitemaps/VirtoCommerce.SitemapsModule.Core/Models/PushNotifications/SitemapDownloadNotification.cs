@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json;
+using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.PushNotifications;
 
 namespace VirtoCommerce.SitemapsModule.Core.Models.PushNotifications
@@ -38,5 +39,16 @@ namespace VirtoCommerce.SitemapsModule.Core.Models.PushNotifications
 
         [JsonProperty("downloadUrl")]
         public string DownloadUrl { get; set; }
+
+        public SitemapDownloadNotification Path(ExportImportProgressInfo sourse)
+        {
+            Description = sourse.Description;
+            Errors = sourse.Errors;
+            ProcessedCount = sourse.ProcessedCount;
+            TotalCount = sourse.TotalCount;
+
+            return this;
+        }
     }
 }
+

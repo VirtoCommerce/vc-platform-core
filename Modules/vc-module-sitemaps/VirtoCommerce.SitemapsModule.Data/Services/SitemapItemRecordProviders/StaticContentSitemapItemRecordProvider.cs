@@ -1,24 +1,32 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.ExportImport;
+using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.SitemapsModule.Core.Models;
+using VirtoCommerce.SitemapsModule.Core.Services;
+using VirtoCommerce.StoreModule.Core.Model;
+using YamlDotNet.RepresentationModel;
 
 namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
 {
     public class StaticContentSitemapItemRecordProvider : SitemapItemRecordProviderBase, ISitemapItemRecordProvider
     {
-        public StaticContentSitemapItemRecordProvider(
-            ISitemapUrlBuilder urlBuilder,
-            ISettingsManager settingsManager,
+        private readonly Func<string, IContentBlobStorageProvider> _contentStorageProviderFactory;
+        private static readonly Regex _headerRegExp = new Regex(@"(?s:^---(.*?)---)");
+
+        public StaticContentSitemapItemRecordProvider(ISitemapUrlBuilder urlBuilder, ISettingsManager settingsManager,
             Func<string, IContentBlobStorageProvider> contentStorageProviderFactory)
             : base(settingsManager, urlBuilder)
         {
             _contentStorageProviderFactory = contentStorageProviderFactory;
         }
 
-        private readonly Func<string, IContentBlobStorageProvider> _contentStorageProviderFactory;
-        private static readonly Regex _headerRegExp = new Regex(@"(?s:^---(.*?)---)");
-
-        public virtual void LoadSitemapItemRecords(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
+        public virtual async Task LoadSitemapItemRecordsAsync(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
         {
             var progressInfo = new ExportImportProgressInfo();
 
@@ -32,7 +40,9 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
             var totalCount = staticContentSitemapItems.Count;
             var processedCount = 0;
 
-            var acceptedFilenameExtensions = SettingsManager.GetValue("Sitemap.AcceptedFilenameExtensions", ".md,.html")
+            var awsdasd = await _settingsManager.GetValueAsync("Sitemap.AcceptedFilenameExtensions", ".md,.html");
+
+            var acceptedFilenameExtensions = awsdasd
                 .Split(',')
                 .Select(i => i.Trim())
                 .Where(i => !string.IsNullOrEmpty(i))

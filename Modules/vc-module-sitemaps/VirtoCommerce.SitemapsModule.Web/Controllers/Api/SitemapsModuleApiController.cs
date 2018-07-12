@@ -1,20 +1,26 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.IO;
+using System.Threading.Tasks;
+using Hangfire;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.SitemapsModule.Core.Models;
+using VirtoCommerce.SitemapsModule.Core.Models.PushNotifications;
 using VirtoCommerce.SitemapsModule.Core.Services;
 using VirtoCommerce.SitemapsModule.Data.Services;
+
+using Permission = VirtoCommerce.SitemapsModule.Core.SitemapsConstants.Security.Permissions;
 
 namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
 {
     [Route("api/sitemaps")]
-    [CheckPermission(Permission = SitemapsPredefinedPermissions.Read)]
-    public class SitemapsModuleApiController : ApiController
+    [Authorize(Permission.Read)]
+    public class SitemapsModuleApiController : Controller
     {
         private readonly ISitemapService _sitemapService;
         private readonly ISitemapItemService _sitemapItemService;
@@ -49,16 +55,20 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
         public IActionResult SearchSitemaps(SitemapSearchCriteria request)
         {
             if (request == null)
-                return BadRequest();
+            {
+                return BadRequest("request is null");
+            }
 
-            var sitemapSearchResponse = _sitemapService.Search(request);
+            var sitemapSearchResponse = _sitemapService.SearchAsync(request);
 
             return Ok(sitemapSearchResponse);
         }
 
         [HttpGet]
         [Route("{id}")]
-        [ProducesResponseType(typeof(Sitemap))]
+        [ProducesResponseType(typeof(Sitemap), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
         public IActionResult GetSitemapById(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -66,7 +76,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
                 return BadRequest("id is null");
             }
 
-            var sitemap = _sitemapService.GetById(id);
+            var sitemap = _sitemapService.GetByIdAsync(id);
 
             if (sitemap == null)
             {
@@ -78,76 +88,76 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
 
         [HttpPost]
         [Route("")]
-        [ProducesResponseType(typeof(void))]
-        [CheckPermission(Permission = SitemapsPredefinedPermissions.Create)]
+        [ProducesResponseType(typeof(Sitemap), 200)]
+        [Authorize(Permission.Create)]
         public IActionResult AddSitemap(Sitemap sitemap)
         {
             if (sitemap == null)
-            {
                 return BadRequest("sitemap is null");
-            }
 
-            _sitemapService.SaveChanges(new[] { sitemap });
+            _sitemapService.SaveChangesAsync(new[] { sitemap });
 
             return Ok(sitemap);
         }
 
         [HttpPut]
         [Route("")]
-        [ProducesResponseType(typeof(void))]
-        [CheckPermission(Permission = SitemapsPredefinedPermissions.Update)]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        [Authorize(Permission.Update)]
         public IActionResult UpdateSitemap(Sitemap sitemap)
         {
             if (sitemap == null)
-            {
                 return BadRequest("sitemap is null");
-            }
 
-            _sitemapService.SaveChanges(new[] { sitemap });
+            _sitemapService.SaveChangesAsync(new[] { sitemap });
 
-            return StatusCode(HttpStatusCode.NoContent);
+            return Ok();
         }
 
         [HttpDelete]
         [Route("")]
-        [ProducesResponseType(typeof(void))]
-        [CheckPermission(Permission = SitemapsPredefinedPermissions.Delete)]
-        public IActionResult DeleteSitemap([FromUri]string[] ids)
+        [ProducesResponseType(200)]
+        [Authorize(Permission.Delete)]
+        public IActionResult DeleteSitemap([FromQuery]string[] ids)
         {
             if (ids == null)
             {
                 return BadRequest("ids is null");
             }
 
-            _sitemapService.Remove(ids);
+            _sitemapService.RemoveAsync(ids);
 
-            return StatusCode(HttpStatusCode.NoContent);
+            return Ok();
         }
 
         [HttpPost]
         [Route("items/search")]
-        [ProducesResponseType(typeof(GenericSearchResult<SitemapItem>))]
-        public IActionResult SearchSitemapItems(SitemapItemSearchCriteria request)
+        [ProducesResponseType(typeof(GenericSearchResult<SitemapItem>), 200)]
+        [ProducesResponseType(400)]
+        public IActionResult SearchSitemapItems([FromBody]SitemapItemSearchCriteria request)
         {
             if (request == null)
             {
                 return BadRequest("request is null");
             }
 
-            var searchSitemapItemResponse = _sitemapItemService.Search(request);
+            var searchSitemapItemResponse = _sitemapItemService.SearchAsync(request);
 
             return Ok(searchSitemapItemResponse);
         }
 
         [HttpPost]
         [Route("{sitemapId}/items")]
-        [ProducesResponseType(typeof(void))]
-        public IActionResult AddSitemapItems(string sitemapId, [FromBody]SitemapItem[] items)
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public IActionResult AddSitemapItems([FromRoute]string sitemapId, [FromBody]SitemapItem[] items)
         {
             if (string.IsNullOrEmpty(sitemapId))
             {
-                return BadRequest("sitemapId is null");
+                return BadRequest();
             }
+
             if (items == null)
             {
                 return BadRequest("items is null");
@@ -157,29 +167,32 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
             {
                 item.SitemapId = sitemapId;
             }
-            _sitemapItemService.SaveChanges(items);
+
+            _sitemapItemService.SaveChangesAsync(items);
 
             return Ok();
         }
 
         [HttpDelete]
         [Route("items")]
-        [ProducesResponseType(typeof(void))]
-        public IActionResult RemoveSitemapItems([FromUri]string[] itemIds)
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public IActionResult RemoveSitemapItems([FromQuery]string[] itemIds)
         {
             if (itemIds == null)
             {
                 return BadRequest("itemIds is null");
             }
 
-            _sitemapItemService.Remove(itemIds);
+            _sitemapItemService.RemoveAsync(itemIds);
 
-            return StatusCode(HttpStatusCode.NoContent);
+            return Ok();
         }
 
         [HttpGet]
         [Route("schema")]
-        [ProducesResponseType(typeof(string[]))]
+        [ProducesResponseType(typeof(string[]), 200)]
+        [ProducesResponseType(400)]
         public IActionResult GetSitemapsSchema(string storeId)
         {
             if (string.IsNullOrEmpty(storeId))
@@ -187,7 +200,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
                 return BadRequest("storeId is empty");
             }
 
-            var sitemapUrls = _sitemapXmlGenerator.GetSitemapUrls(storeId);
+            var sitemapUrls = _sitemapXmlGenerator.GetSitemapUrlsAsync(storeId);
 
             return Ok(sitemapUrls);
         }
@@ -195,20 +208,17 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
         [HttpGet]
         [Route("generate")]
         [SwaggerFileResponse]
-        public HttpResponseMessage GenerateSitemap(string storeId, string baseUrl, string sitemapUrl)
+        [ProducesResponseType(typeof(byte[]), 200)]
+        public async Task<IActionResult> GenerateSitemapAsync(string storeId, string baseUrl, string sitemapUrl)
         {
-            var stream = _sitemapXmlGenerator.GenerateSitemapXml(storeId, baseUrl, sitemapUrl);
-
-            var result = new HttpResponseMessage(HttpStatusCode.OK) { Content = new StreamContent(stream) };
-            result.Content.Headers.ContentType = new MediaTypeHeaderValue("text/xml");
-
-            return result;
+            var stream = await _sitemapXmlGenerator.GenerateSitemapXmlAsync(storeId, baseUrl, sitemapUrl);
+            return File(stream, "text/xml");
         }
 
         [HttpGet]
         [Route("download")]
-        [ProducesResponseType(typeof(SitemapDownloadNotification))]
-        public IActionResult DownloadSitemap(string storeId, string baseUrl)
+        [ProducesResponseType(typeof(SitemapDownloadNotification), 200)]
+        public async Task<IActionResult> DownloadSitemapAsync(string storeId, string baseUrl)
         {
             var notification = new SitemapDownloadNotification(_userNameResolver.GetCurrentUserName())
             {
@@ -216,20 +226,20 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
                 Description = "Processing download sitemaps..."
             };
 
-            _notifier.Upsert(notification);
+            await _notifier.SendAsync(notification);
 
-            BackgroundJob.Enqueue(() => BackgroundDownload(storeId, baseUrl, notification));
+            BackgroundJob.Enqueue(() => BackgroundDownloadAsync(storeId, baseUrl, notification));
 
             return Ok(notification);
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
-        public void BackgroundDownload(string storeId, string baseUrl, SitemapDownloadNotification notification)
+        public async Task BackgroundDownloadAsync(string storeId, string baseUrl, SitemapDownloadNotification notification)
         {
-            Action<ExportImportProgressInfo> progressCallback = c =>
+            Action<ExportImportProgressInfo> progressCallback = async c =>
             {
-                notification.InjectFrom(c);
-                _notifier.Upsert(notification);
+                notification.Path(c);
+                await _notifier.SendAsync(notification);
             };
 
             try
@@ -249,7 +259,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
                     {
                         CreateSitemapPart(zipPackage, storeId, baseUrl, "sitemap.xml", progressCallback);
 
-                        var sitemapUrls = _sitemapXmlGenerator.GetSitemapUrls(storeId);
+                        var sitemapUrls = await _sitemapXmlGenerator.GetSitemapUrlsAsync(storeId);
                         foreach (var sitemapUrl in sitemapUrls)
                         {
                             if (!string.IsNullOrEmpty(sitemapUrl))
@@ -276,7 +286,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
             finally
             {
                 notification.Finished = DateTime.UtcNow;
-                _notifier.Upsert(notification);
+                await _notifier.SendAsync(notification);
             }
         }
 

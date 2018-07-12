@@ -1,23 +1,31 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.DynamicProperties;
+using VirtoCommerce.Platform.Core.ExportImport;
+using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.SitemapsModule.Core.Models;
+using VirtoCommerce.SitemapsModule.Core.Services;
+using VirtoCommerce.StoreModule.Core.Model;
 
 namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
 {
+
     public class VendorSitemapItemRecordProvider : SitemapItemRecordProviderBase, ISitemapItemRecordProvider
     {
-        public VendorSitemapItemRecordProvider(
-            ISitemapUrlBuilder urlBuilder,
-            ISettingsManager settingsManager,
-            IMemberService memberService)
+        //ToDo dependency Customer
+        protected IMemberService _memberService;
+
+        public VendorSitemapItemRecordProvider(ISitemapUrlBuilder urlBuilder, ISettingsManager settingsManager, IMemberService memberService)
             : base(settingsManager, urlBuilder)
         {
-            MemberService = memberService;
+            _memberService = memberService;
         }
 
-        protected IMemberService MemberService { get; private set; }
 
-        public virtual void LoadSitemapItemRecords(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
+
+        public virtual void LoadSitemapItemRecordsAsync(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
         {
             var progressInfo = new ExportImportProgressInfo();
 
@@ -26,7 +34,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
 
             var vendorSitemapItems = sitemap.Items.Where(x => x.ObjectType.EqualsInvariant(SitemapItemTypes.Vendor));
             var vendorIds = vendorSitemapItems.Select(x => x.ObjectId).ToArray();
-            var members = MemberService.GetByIds(vendorIds);
+            var members = _memberService.GetByIds(vendorIds);
 
             var totalCount = members.Count();
             var processedCount = 0;

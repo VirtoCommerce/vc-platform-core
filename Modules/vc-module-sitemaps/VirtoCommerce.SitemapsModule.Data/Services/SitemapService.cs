@@ -11,16 +11,14 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
 {
     public class SitemapService :  ISitemapService
     {
-        public SitemapService(
-            Func<ISitemapRepository> repositoryFactory,
-            ISitemapItemService sitemapItemService)
-        {
-            RepositoryFactory = repositoryFactory;
-            SitemapItemService = sitemapItemService;
-        }
+        protected Func<ISitemapRepository> _repositoryFactory { get; private set; }
+        protected ISitemapItemService _sitemapItemService { get; private set; }
 
-        protected Func<ISitemapRepository> RepositoryFactory { get; private set; }
-        protected ISitemapItemService SitemapItemService { get; private set; }
+        public SitemapService(Func<ISitemapRepository> repositoryFactory, ISitemapItemService sitemapItemService)
+        {
+            _repositoryFactory = repositoryFactory;
+            _sitemapItemService = sitemapItemService;
+        }
 
         public virtual async Task<Sitemap> GetByIdAsync(string id)
         {
@@ -29,17 +27,17 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                 throw new ArgumentException("id");
             }
 
-            using (var repository = RepositoryFactory())
-            {
-                Sitemap sitemap = null;
+            Sitemap sitemap = null;
 
+            using (var repository = _repositoryFactory())
+            {
                 var sitemapEntity = repository.Sitemaps.FirstOrDefault(s => s.Id == id);
                 if (sitemapEntity != null)
                 {
                     sitemap = AbstractTypeFactory<Sitemap>.TryCreateInstance();
                     if (sitemap != null)
                     {
-                        var sitemapItemsSearchResponse = await SitemapItemService.SearchAsync(new SitemapItemSearchCriteria
+                        var sitemapItemsSearchResponse = await _sitemapItemService.SearchAsync(new SitemapItemSearchCriteria
                         {
                             SitemapId = sitemap.Id
                         });
@@ -50,7 +48,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                     }
                 }
 
-                return sitemap;
+                return Task.FromResult(sitemap);
             }
         }
 
@@ -59,7 +57,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
             if (request == null)
                 throw new ArgumentNullException("request");
 
-            using (var repository = RepositoryFactory())
+            using (var repository = _repositoryFactory())
             {
                 var searchResponse = new GenericSearchResult<Sitemap>();
 
@@ -81,7 +79,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                     var sitemap = AbstractTypeFactory<Sitemap>.TryCreateInstance();
                     if (sitemap != null)
                     {
-                        var sitemapItemsSearchResponse = await SitemapItemService.SearchAsync(new SitemapItemSearchCriteria
+                        var sitemapItemsSearchResponse = await _sitemapItemService.SearchAsync(new SitemapItemSearchCriteria
                         {
                             SitemapId = sitemapEntity.Id
                         });
@@ -103,7 +101,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
 
             var pkMap = new PrimaryKeyResolvingMap();
 
-            using (var repository = RepositoryFactory())
+            using (var repository = _repositoryFactory())
             {
                 var sitemapIds = sitemaps.Where(s => !s.IsTransient()).Select(s => s.Id);
                 var sitemapExistEntities = repository.Sitemaps.Where(s => sitemapIds.Contains(s.Id));
@@ -135,7 +133,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
             if (ids == null)
                 throw new ArgumentNullException("ids");
             
-            using (var repository = RepositoryFactory())
+            using (var repository = _repositoryFactory())
             {
                 var sitemapEntities = repository.Sitemaps.Where(s => ids.Contains(s.Id));
                 foreach (var sitemapEntity in sitemapEntities)
