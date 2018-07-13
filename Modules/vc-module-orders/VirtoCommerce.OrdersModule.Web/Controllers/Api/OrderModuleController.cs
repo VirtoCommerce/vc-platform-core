@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DinkToPdf;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.CartModule.Core.Services;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.NotificationsModule.Core.Model;
@@ -39,7 +40,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         //private readonly ISecurityService _securityService;
         //private readonly IPermissionScopeService _permissionScopeService;
         private readonly ICustomerOrderBuilder _customerOrderBuilder;
-        //private readonly IShoppingCartService _cartService;
+        private readonly IShoppingCartService _cartService;
         private readonly INotificationSender _notificationSender;
 
         private readonly INotificationTemplateRenderer _notificationTemplateRenderer;
@@ -53,7 +54,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             //, IPermissionScopeService permissionScopeService
             //, ISecurityService securityService
             , ICustomerOrderBuilder customerOrderBuilder
-            //, IShoppingCartService cartService
+            , IShoppingCartService cartService
             , INotificationSender notificationSender
             , IChangeLogService changeLogService, INotificationTemplateRenderer notificationTemplateRenderer)
         {
@@ -66,7 +67,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             //_securityService = securityService;
             //_permissionScopeService = permissionScopeService;
             _customerOrderBuilder = customerOrderBuilder;
-            //_cartService = cartService;
+            _cartService = cartService;
             _notificationSender = notificationSender;
             _changeLogService = changeLogService;
             _notificationTemplateRenderer = notificationTemplateRenderer;
@@ -239,9 +240,8 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
 
             using (await AsyncLock.GetLockByKey(cartId).LockAsync())
             {
-                //TODO
-                //var cart = _cartService.GetByIds(new[] { cartId }).FirstOrDefault();
-                //retVal = _customerOrderBuilder.PlaceCustomerOrderFromCart(cart);
+                var cart = await _cartService.GetByIdAsync(cartId);
+                retVal = await _customerOrderBuilder.PlaceCustomerOrderFromCartAsync(cart);
             }
 
             return Ok(retVal);

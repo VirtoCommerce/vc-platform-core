@@ -1,9 +1,17 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
+using Address = VirtoCommerce.OrdersModule.Core.Model.Address;
+using LineItem = VirtoCommerce.OrdersModule.Core.Model.LineItem;
+using Shipment = VirtoCommerce.OrdersModule.Core.Model.Shipment;
+using ShipmentItem = VirtoCommerce.OrdersModule.Core.Model.ShipmentItem;
 
 namespace VirtoCommerce.OrdersModule.Data.Services
 {
@@ -16,109 +24,107 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             _customerOrderService = customerOrderService;
         }
 
-        //TODO after CartModule
-        //#region ICustomerOrderConverter Members
+        #region ICustomerOrderConverter Members
 
+        public virtual async Task<CustomerOrder> PlaceCustomerOrderFromCartAsync(ShoppingCart cart)
+        {
+            var customerOrder = ConvertCartToOrder(cart);
+            await _customerOrderService.SaveChangesAsync(new[] { customerOrder });
+            return customerOrder;
+        }
 
-        //public virtual CustomerOrder PlaceCustomerOrderFromCart(ShoppingCart cart)
-        //{
-        //    var customerOrder = ConvertCartToOrder(cart);
-        //    _customerOrderService.SaveChanges(new[] { customerOrder });
-        //    return customerOrder;
-        //}
+        #endregion
+        protected virtual CustomerOrder ConvertCartToOrder(ShoppingCart cart)
+        {
+            var retVal = AbstractTypeFactory<CustomerOrder>.TryCreateInstance();
+            retVal.ShoppingCartId = cart.Id;
+            retVal.Comment = cart.Comment;
+            retVal.Currency = cart.Currency;
+            retVal.ChannelId = cart.ChannelId;
+            retVal.CustomerId = cart.CustomerId;
+            retVal.CustomerName = cart.CustomerName;
+            retVal.DiscountAmount = cart.DiscountAmount;
+            retVal.OrganizationId = cart.OrganizationId;
+            retVal.StoreId = cart.StoreId;
+            retVal.TaxPercentRate = cart.TaxPercentRate;
+            retVal.TaxType = cart.TaxType;
+            retVal.LanguageCode = cart.LanguageCode;
 
-        //#endregion
-        //protected virtual CustomerOrder ConvertCartToOrder(ShoppingCart cart)
-        //{
-        //    var retVal = AbstractTypeFactory<CustomerOrder>.TryCreateInstance();
-        //    retVal.ShoppingCartId = cart.Id;
-        //    retVal.Comment = cart.Comment;
-        //    retVal.Currency = cart.Currency;
-        //    retVal.ChannelId = cart.ChannelId;
-        //    retVal.CustomerId = cart.CustomerId;
-        //    retVal.CustomerName = cart.CustomerName;
-        //    retVal.DiscountAmount = cart.DiscountAmount;
-        //    retVal.OrganizationId = cart.OrganizationId;
-        //    retVal.StoreId = cart.StoreId;
-        //    retVal.TaxPercentRate = cart.TaxPercentRate;
-        //    retVal.TaxType = cart.TaxType;
-        //    retVal.LanguageCode = cart.LanguageCode;
+            retVal.Status = "New";
 
-        //    retVal.Status = "New";
+            var cartLineItemsMap = new Dictionary<string, LineItem>();
+            if (cart.Items != null)
+            {
+                retVal.Items = new List<LineItem>();
+                foreach (var cartLineItem in cart.Items)
+                {
+                    var orderLineItem = ToOrderModel(cartLineItem);
+                    retVal.Items.Add(orderLineItem);
+                    cartLineItemsMap.Add(cartLineItem.Id, orderLineItem);
+                }
+            }
+            if (cart.Discounts != null)
+            {
+                retVal.Discounts = cart.Discounts.Select(ToOrderModel).ToList();
+            }
 
-        //    var cartLineItemsMap = new Dictionary<string, LineItem>();
-        //    if (cart.Items != null)
-        //    {
-        //        retVal.Items = new List<LineItem>();
-        //        foreach (var cartLineItem in cart.Items)
-        //        {
-        //            var orderLineItem = ToOrderModel(cartLineItem);
-        //            retVal.Items.Add(orderLineItem);
-        //            cartLineItemsMap.Add(cartLineItem.Id, orderLineItem);
-        //        }
-        //    }
-        //    if (cart.Discounts != null)
-        //    {
-        //        retVal.Discounts = cart.Discounts.Select(ToOrderModel).ToList();
-        //    }
+            if (cart.Addresses != null)
+            {
+                retVal.Addresses = cart.Addresses.Select(ToOrderModel).ToList();
+            }
 
-        //    if (cart.Addresses != null)
-        //    {
-        //        retVal.Addresses = cart.Addresses.ToList();
-        //    }
+            if (cart.Shipments != null)
+            {
+                retVal.Shipments = new List<Shipment>();
+                foreach (var cartShipment in cart.Shipments)
+                {
+                    var shipment = ToOrderModel(cartShipment);
+                    if (!cartShipment.Items.IsNullOrEmpty())
+                    {
+                        shipment.Items = new List<ShipmentItem>();
+                        foreach (var cartShipmentItem in cartShipment.Items)
+                        {
+                            var shipmentItem = ToOrderModel(cartShipmentItem);
+                            if (cartLineItemsMap.ContainsKey(cartShipmentItem.LineItemId))
+                            {
+                                shipmentItem.LineItem = cartLineItemsMap[cartShipmentItem.LineItemId];
+                                shipment.Items.Add(shipmentItem);
+                            }
+                        }
+                    }
+                    retVal.Shipments.Add(shipment);
+                }
+                //Add shipping address to order
+                retVal.Addresses.AddRange(retVal.Shipments.Where(x => x.DeliveryAddress != null).Select(x => x.DeliveryAddress));
 
-        //    if (cart.Shipments != null)
-        //    {
-        //        retVal.Shipments = new List<Shipment>();
-        //        foreach (var cartShipment in cart.Shipments)
-        //        {
-        //            var shipment = ToOrderModel(cartShipment);
-        //            if (!cartShipment.Items.IsNullOrEmpty())
-        //            {
-        //                shipment.Items = new List<ShipmentItem>();
-        //                foreach (var cartShipmentItem in cartShipment.Items)
-        //                {
-        //                    var shipmentItem = ToOrderModel(cartShipmentItem);
-        //                    if (cartLineItemsMap.ContainsKey(cartShipmentItem.LineItemId))
-        //                    {
-        //                        shipmentItem.LineItem = cartLineItemsMap[cartShipmentItem.LineItemId];
-        //                        shipment.Items.Add(shipmentItem);
-        //                    }
-        //                }
-        //            }
-        //            retVal.Shipments.Add(shipment);
-        //        }
-        //        //Add shipping address to order
-        //        retVal.Addresses.AddRange(retVal.Shipments.Where(x => x.DeliveryAddress != null).Select(x => x.DeliveryAddress));
+            }
+            if (cart.Payments != null)
+            {
+                retVal.InPayments = new List<PaymentIn>();
+                foreach (var payment in cart.Payments)
+                {
+                    var paymentIn = ToOrderModel(payment);
+                    paymentIn.CustomerId = cart.CustomerId;
+                    retVal.InPayments.Add(paymentIn);
+                    if (payment.BillingAddress != null)
+                    {
+                        retVal.Addresses.Add(ToOrderModel(payment.BillingAddress));
+                    }
+                }
+            }
 
-        //    }
-        //    if (cart.Payments != null)
-        //    {
-        //        retVal.InPayments = new List<PaymentIn>();
-        //        foreach (var payment in cart.Payments)
-        //        {
-        //            var paymentIn = ToOrderModel(payment);
-        //            paymentIn.CustomerId = cart.CustomerId;
-        //            retVal.InPayments.Add(paymentIn);
-        //            if (payment.BillingAddress != null)
-        //            {
-        //                retVal.Addresses.Add(payment.BillingAddress);
-        //            }
-        //        }
-        //    }
+            //Save only disctinct addresses for order
+            retVal.Addresses = retVal.Addresses.Distinct().ToList();
+            foreach (var address in retVal.Addresses)
+            {
+                //Reset primary key for addresses
+                address.Key = null;
+            }
+            retVal.TaxDetails = cart.TaxDetails;
+            return retVal;
+        }
 
-        //    //Save only disctinct addresses for order
-        //    retVal.Addresses = retVal.Addresses.Distinct().ToList();
-        //    foreach (var address in retVal.Addresses)
-        //    {
-        //        //Reset primary key for addresses
-        //        address.Key = null;
-        //    }
-        //    retVal.TaxDetails = cart.TaxDetails;
-        //    return retVal;
-        //}
-
-        protected virtual LineItem ToOrderModel(LineItem lineItem)
+        protected virtual LineItem ToOrderModel(CartModule.Core.Model.LineItem lineItem)
         {
             if (lineItem == null)
                 throw new ArgumentNullException(nameof(lineItem));
@@ -128,7 +134,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             retVal.CreatedDate = lineItem.CreatedDate;
             retVal.CatalogId = lineItem.CatalogId;
             retVal.CategoryId = lineItem.CategoryId;
-            retVal.Comment = lineItem.Comment;
+            retVal.Comment = lineItem.Note;
             retVal.Currency = lineItem.Currency;
             retVal.Height = lineItem.Height;
             retVal.ImageUrl = lineItem.ImageUrl;
@@ -150,7 +156,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             retVal.FulfillmentCenterName = lineItem.FulfillmentCenterName;
 
             retVal.DiscountAmount = lineItem.DiscountAmount;
-            retVal.Price = lineItem.Price;
+            retVal.Price = lineItem.SalePrice;
 
             retVal.FulfillmentLocationCode = lineItem.FulfillmentLocationCode;
             retVal.DynamicProperties = null; //to prevent copy dynamic properties from ShoppingCart LineItem to Order LineItem
@@ -179,7 +185,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             return retVal;
         }
 
-        protected virtual Shipment ToOrderModel(Shipment shipment)
+        protected virtual Shipment ToOrderModel(CartModule.Core.Model.Shipment shipment)
         {
             var retVal = AbstractTypeFactory<Shipment>.TryCreateInstance();
 
@@ -202,7 +208,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             retVal.Status = "New";
             if (shipment.DeliveryAddress != null)
             {
-                retVal.DeliveryAddress = shipment.DeliveryAddress;
+                retVal.DeliveryAddress = ToOrderModel(shipment.DeliveryAddress);
                 retVal.DeliveryAddress.Key = null;
             }
             if (shipment.Discounts != null)
@@ -213,7 +219,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             return retVal;
         }
 
-        protected virtual ShipmentItem ToOrderModel(ShipmentItem shipmentItem)
+        protected virtual ShipmentItem ToOrderModel(CartModule.Core.Model.ShipmentItem shipmentItem)
         {
             if (shipmentItem == null)
                 throw new ArgumentNullException(nameof(shipmentItem));
@@ -224,29 +230,52 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             return retVal;
         }
 
-        //TODO
-        //protected virtual PaymentIn ToOrderModel(Payment payment)
-        //{
-        //    if (payment == null)
-        //        throw new ArgumentNullException(nameof(payment));
+        protected virtual PaymentIn ToOrderModel(Payment payment)
+        {
+            if (payment == null)
+                throw new ArgumentNullException(nameof(payment));
 
-        //    var retVal = AbstractTypeFactory<PaymentIn>.TryCreateInstance();
-        //    retVal.Currency = payment.Currency;
-        //    retVal.DiscountAmount = payment.DiscountAmount;
-        //    retVal.Price = payment.Price;
-        //    retVal.TaxPercentRate = payment.TaxPercentRate;
-        //    retVal.TaxType = payment.TaxType;
+            var retVal = AbstractTypeFactory<PaymentIn>.TryCreateInstance();
+            retVal.Currency = payment.Currency;
+            retVal.DiscountAmount = payment.DiscountAmount;
+            retVal.Price = payment.Price;
+            retVal.TaxPercentRate = payment.TaxPercentRate;
+            retVal.TaxType = payment.TaxType;
 
-        //    retVal.GatewayCode = payment.PaymentGatewayCode;
-        //    retVal.Sum = payment.Amount;
-        //    retVal.PaymentStatus = PaymentStatus.New;
-        //    if (payment.BillingAddress != null)
-        //    {
-        //        retVal.BillingAddress = payment.BillingAddress;
-        //        retVal.BillingAddress.Key = null;
-        //    }
-        //    retVal.TaxDetails = payment.TaxDetails;
-        //    return retVal;
-        //}
+            retVal.GatewayCode = payment.PaymentGatewayCode;
+            retVal.Sum = payment.Amount;
+            retVal.PaymentStatus = PaymentStatus.New;
+            if (payment.BillingAddress != null)
+            {
+                retVal.BillingAddress = ToOrderModel(payment.BillingAddress);
+            }
+            retVal.TaxDetails = payment.TaxDetails;
+            return retVal;
+        }
+
+        protected virtual Address ToOrderModel(CoreModule.Core.Common.Address address)
+        {
+            if (address == null)
+                throw new ArgumentNullException(nameof(address));
+
+            var retVal = AbstractTypeFactory<Address>.TryCreateInstance();
+            retVal.Key = null;
+            retVal.City = address.City;
+            retVal.CountryCode = address.CountryCode;
+            retVal.CountryName = address.CountryName;
+            retVal.Phone = address.Phone;
+            retVal.PostalCode = address.PostalCode;
+            retVal.RegionId = address.RegionId;
+            retVal.RegionName = address.RegionName;
+            retVal.City = address.City;
+            retVal.Email = address.Email;
+            retVal.FirstName = address.FirstName;
+            retVal.LastName = address.LastName;
+            retVal.Line1 = address.Line1;
+            retVal.Line2 = address.Line2;
+            retVal.AddressType = address.AddressType;
+
+            return retVal;
+        }
     }
 }

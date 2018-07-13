@@ -1,8 +1,11 @@
+using System.Threading.Tasks;
+using VirtoCommerce.CartModule.Core.Model;
+using VirtoCommerce.OrdersModule.Core.Model;
+
 namespace VirtoCommerce.OrdersModule.Data.Services
 {
     public interface ICustomerOrderBuilder
     {
-        //TODO wait cartModule
-        //CustomerOrder PlaceCustomerOrderFromCart(ShoppingCart cart);
+        Task<CustomerOrder> PlaceCustomerOrderFromCartAsync(ShoppingCart cart);
     }
 }
