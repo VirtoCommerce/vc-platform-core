@@ -4500,14 +4500,14 @@ tags-input .tags.focused {
 
 /* Log */
 .log {
-  border: 1px solid #dee9f0;
-  font-size: 12px;
-  height: 300px;
-  line-height: 1.4;
-  margin: 15px 0;
-  overflow: auto;
-  padding: 20px;
-  white-space: nowrap; }
+    border: 1px solid #dee9f0;
+    font-size: 12px;
+    height: 300px;
+    line-height: 1.4;
+    margin: 15px 0;
+    overflow: auto;
+    padding: 20px;
+    overflow-wrap: break-word; }
 
 .log .__info {
   color: #43b0e6; }
