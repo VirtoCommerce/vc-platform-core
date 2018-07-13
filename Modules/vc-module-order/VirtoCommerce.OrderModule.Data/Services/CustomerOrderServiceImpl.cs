@@ -98,6 +98,12 @@ namespace VirtoCommerce.OrderModule.Data.Services
             });
         }
 
+        public virtual async Task<CustomerOrder> GetByIdAsync(string orderId, string responseGroup = null)
+        {
+            var orders = await GetByIdsAsync(new[] {orderId}, responseGroup);
+            return orders.FirstOrDefault();
+        }
+
         public virtual async Task SaveChangesAsync(CustomerOrder[] orders)
         {
             var pkMap = new PrimaryKeyResolvingMap();

@@ -6,12 +6,14 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TheArtOfDev.HtmlRenderer.PdfSharp;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Payment;
+using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.OrderModule.Core;
 using VirtoCommerce.OrderModule.Core.Model;
 using VirtoCommerce.OrderModule.Core.Model.Search;
@@ -19,9 +21,13 @@ using VirtoCommerce.OrderModule.Core.Notifications;
 using VirtoCommerce.OrderModule.Core.Services;
 using VirtoCommerce.OrderModule.Data.Repositories;
 using VirtoCommerce.OrderModule.Data.Services;
+using VirtoCommerce.OrderModule.Web.BackgroundJobs;
+using VirtoCommerce.OrderModule.Web.Model;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.StoreModule.Core.Services;
 
 
@@ -34,39 +40,38 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
         private readonly ICustomerOrderSearchService _searchService;
         private readonly IUniqueNumberGenerator _uniqueNumberGenerator;
         private readonly IStoreService _storeService;
-        private readonly ICacheManager<object> _cacheManager;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
         private readonly Func<IOrderRepository> _repositoryFactory;
         //private readonly ISecurityService _securityService;
-        private readonly IPermissionScopeService _permissionScopeService;
+        //private readonly IPermissionScopeService _permissionScopeService;
         private readonly ICustomerOrderBuilder _customerOrderBuilder;
-        private readonly IShoppingCartService _cartService;
-        private readonly INotificationManager _notificationManager;
-        private readonly INotificationTemplateResolver _notificationTemplateResolver;
+        //private readonly IShoppingCartService _cartService;
+        private readonly INotificationSender _notificationSender;
         private readonly IChangeLogService _changeLogService;
         private static readonly object _lockObject = new object();
 
         public OrderModuleController(ICustomerOrderService customerOrderService, ICustomerOrderSearchService searchService, IStoreService storeService
             , IUniqueNumberGenerator numberGenerator
-            , ICacheManager<object> cacheManager
+            , IPlatformMemoryCache platformMemoryCache
             , Func<IOrderRepository> repositoryFactory
             //, IPermissionScopeService permissionScopeService
             //, ISecurityService securityService
             , ICustomerOrderBuilder customerOrderBuilder
-            //, IShoppingCartService cartService, INotificationManager notificationManager,INotificationTemplateResolver notificationTemplateResolver
+            //, IShoppingCartService cartService
+            , INotificationSender notificationSender
             , IChangeLogService changeLogService)
         {
             _customerOrderService = customerOrderService;
             _searchService = searchService;
             _uniqueNumberGenerator = numberGenerator;
             _storeService = storeService;
-            _cacheManager = cacheManager;
+            _platformMemoryCache = platformMemoryCache;
             _repositoryFactory = repositoryFactory;
             //_securityService = securityService;
             //_permissionScopeService = permissionScopeService;
             _customerOrderBuilder = customerOrderBuilder;
             //_cartService = cartService;
-            //_notificationManager = notificationManager;
-            //_notificationTemplateResolver = notificationTemplateResolver;
+            _notificationSender = notificationSender;
             _changeLogService = changeLogService;
         }
 
@@ -129,8 +134,7 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
         [Route("{id}")]
         public async Task<ActionResult<CustomerOrder>> GetById(string id, [FromRoute] string respGroup = null)
         {
-            var orders = await _customerOrderService.GetByIdsAsync(new[] {id}, respGroup);
-            var retVal = orders.FirstOrDefault();
+            var retVal = await _customerOrderService.GetByIdAsync(id, respGroup);
             if (retVal == null)
             {
                 return NotFound();
@@ -173,9 +177,9 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
         /// <param name="bankCardInfo">banking card information</param>
         [HttpPost]
         [Route("{orderId}/processPayment/{paymentId}")]
-        public ActionResult<ProcessPaymentResult> ProcessOrderPayments(string orderId, string paymentId, [SwaggerOptional] BankCardInfo bankCardInfo)
+        public async Task<ActionResult<ProcessPaymentResult>> ProcessOrderPayments(string orderId, string paymentId, [SwaggerOptional] BankCardInfo bankCardInfo)
         {
-            var order = _customerOrderService.GetByIds(new[] { orderId }, CustomerOrderResponseGroup.Full.ToString()).FirstOrDefault();
+            var order = await _customerOrderService.GetByIdAsync(orderId, CustomerOrderResponseGroup.Full.ToString());
 
             if (order == null)
             {
@@ -183,7 +187,8 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
                 searchCriteria.Number = orderId;
                 searchCriteria.ResponseGroup = CustomerOrderResponseGroup.Full.ToString();
 
-                order = _searchService.SearchCustomerOrders(searchCriteria).Results.FirstOrDefault();
+                var orders = await _searchService.SearchCustomerOrdersAsync(searchCriteria);
+                order = orders.Results.FirstOrDefault();
             }
 
             if (order == null)
@@ -197,7 +202,7 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
                 throw new InvalidOperationException($"Cannot find payment with ID {paymentId}");
             }
 
-            var store = _storeService.GetById(order.StoreId);
+            var store = await _storeService.GetByIdAsync(order.StoreId);
             var paymentMethod = store.PaymentMethods.FirstOrDefault(x => x.Code == payment.GatewayCode);
             if (paymentMethod == null)
             {
@@ -206,10 +211,11 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
 
             var context = new ProcessPaymentEvaluationContext
             {
-                Order = order,
-                Payment = payment,
-                Store = store,
-                BankCardInfo = bankCardInfo
+                OrderId = order.Id,
+                PaymentId = payment.Id,
+                //TODO
+                //Store = store,
+                //BankCardInfo = bankCardInfo
             };
 
             var result = paymentMethod.ProcessPayment(context);
@@ -218,7 +224,7 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
                 payment.OuterId = result.OuterId;
             }
 
-            _customerOrderService.SaveChanges(new[] { order });
+            await _customerOrderService.SaveChangesAsync(new[] { order });
 
             return Ok(result);
         }
@@ -228,17 +234,17 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
         /// </summary>
         /// <param name="cartId">shopping cart id</param>
         [HttpPost]
-        [ResponseType(typeof(CustomerOrder))]
         [Route("{cartId}")]
-        [CheckPermission(Permission = OrderPredefinedPermissions.Create)]
-        public async Task<IHttpActionResult> CreateOrderFromCart(string cartId)
+        [Authorize(ModuleConstants.Security.Permissions.Create)]
+        public async Task<ActionResult<CustomerOrder>> CreateOrderFromCart(string cartId)
         {
-            CustomerOrder retVal;
+            CustomerOrder retVal = null;
 
             using (await AsyncLock.GetLockByKey(cartId).LockAsync())
             {
-                var cart = _cartService.GetByIds(new[] { cartId }).FirstOrDefault();
-                retVal = _customerOrderBuilder.PlaceCustomerOrderFromCart(cart);
+                //TODO
+                //var cart = _cartService.GetByIds(new[] { cartId }).FirstOrDefault();
+                //retVal = _customerOrderBuilder.PlaceCustomerOrderFromCart(cart);
             }
 
             return Ok(retVal);
@@ -250,11 +256,10 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
         /// <param name="customerOrder">customer order</param>
         [HttpPost]
         [Route("")]
-        [ResponseType(typeof(CustomerOrder))]
-        [CheckPermission(Permission = OrderPredefinedPermissions.Create)]
-        public IHttpActionResult CreateOrder(CustomerOrder customerOrder)
+        [Authorize(ModuleConstants.Security.Permissions.Create)]
+        public async Task<ActionResult<CustomerOrder>> CreateOrder(CustomerOrder customerOrder)
         {
-            _customerOrderService.SaveChanges(new[] { customerOrder });
+            await _customerOrderService.SaveChangesAsync(new[] { customerOrder });
             return Ok(customerOrder);
         }
 
@@ -264,18 +269,19 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
         /// <param name="customerOrder">customer order</param>
         [HttpPut]
         [Route("")]
-        [ResponseType(typeof(void))]
-        public IHttpActionResult Update(CustomerOrder customerOrder)
+        public async Task<ActionResult> Update(CustomerOrder customerOrder)
         {
             //Check scope bound permission
             var scopes = _permissionScopeService.GetObjectPermissionScopeStrings(customerOrder).ToArray();
-            if (!_securityService.UserHasAnyPermission(User.Identity.Name, scopes, OrderPredefinedPermissions.Read))
-            {
-                throw new HttpResponseException(HttpStatusCode.Unauthorized);
-            }
 
-            _customerOrderService.SaveChanges(new[] { customerOrder });
-            return StatusCode(HttpStatusCode.NoContent);
+            //TODO
+            //if (!_securityService.UserHasAnyPermission(User.Identity.Name, scopes, OrderPredefinedPermissions.Read))
+            //{
+            //    return Unauthorized();
+            //}
+
+            await _customerOrderService.SaveChangesAsync(new[] { customerOrder });
+            return Ok();
         }
 
         /// <summary>
@@ -285,10 +291,9 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
         /// <param name="id">customer order id </param>
         [HttpGet]
         [Route("{id}/shipments/new")]
-        [ResponseType(typeof(Shipment))]
-        public IHttpActionResult GetNewShipment(string id)
+        public async Task<ActionResult<Shipment>> GetNewShipment(string id)
         {
-            var order = _customerOrderService.GetByIds(new[] { id }, CustomerOrderResponseGroup.Full.ToString()).FirstOrDefault();
+            var order = await _customerOrderService.GetByIdAsync( id , CustomerOrderResponseGroup.Full.ToString());
             if (order != null)
             {
                 var retVal = AbstractTypeFactory<Shipment>.TryCreateInstance();
@@ -297,9 +302,11 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
                 retVal.Currency = order.Currency;
                 retVal.Status = "New";
 
-                var store = _storeService.GetById(order.StoreId);
-                var numberTemplate = store.Settings.GetSettingValue("Order.ShipmentNewNumberTemplate", "SH{0:yyMMdd}-{1:D5}");
-                retVal.Number = _uniqueNumberGenerator.GenerateNumber(numberTemplate);
+                var store = await _storeService.GetByIdAsync(order.StoreId);
+                var numberTemplate = store.Settings.GetSettingValue(
+                    ModuleConstants.Settings.General.OrderShipmentNewNumberTemplate.Name,
+                    ModuleConstants.Settings.General.OrderShipmentNewNumberTemplate.DefaultValue);
+                retVal.Number = _uniqueNumberGenerator.GenerateNumber(numberTemplate.ToString());
 
                 return Ok(retVal);
 
@@ -323,10 +330,9 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
         /// <param name="id">customer order id </param>
         [HttpGet]
         [Route("{id}/payments/new")]
-        [ResponseType(typeof(PaymentIn))]
-        public IHttpActionResult GetNewPayment(string id)
+        public async Task<ActionResult<PaymentIn>> GetNewPayment(string id)
         {
-            var order = _customerOrderService.GetByIds(new[] { id }, CustomerOrderResponseGroup.Full.ToString()).FirstOrDefault();
+            var order = await _customerOrderService.GetByIdAsync(id , CustomerOrderResponseGroup.Full.ToString());
             if (order != null)
             {
                 var retVal = AbstractTypeFactory<PaymentIn>.TryCreateInstance();
@@ -335,9 +341,11 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
                 retVal.CustomerId = order.CustomerId;
                 retVal.Status = retVal.PaymentStatus.ToString();
 
-                var store = _storeService.GetById(order.StoreId);
-                var numberTemplate = store.Settings.GetSettingValue("Order.PaymentInNewNumberTemplate", "PI{0:yyMMdd}-{1:D5}");
-                retVal.Number = _uniqueNumberGenerator.GenerateNumber(numberTemplate);
+                var store = await _storeService.GetByIdAsync(order.StoreId);
+                var numberTemplate = store.Settings.GetSettingValue(
+                    ModuleConstants.Settings.General.OrderPaymentInNewNumberTemplate.Name,
+                    ModuleConstants.Settings.General.OrderPaymentInNewNumberTemplate.DefaultValue);
+                retVal.Number = _uniqueNumberGenerator.GenerateNumber(numberTemplate.ToString());
                 return Ok(retVal);
             }
 
@@ -350,12 +358,11 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
         /// <param name="ids">customer order ids for delete</param>
         [HttpDelete]
         [Route("")]
-        [ResponseType(typeof(void))]
-        [CheckPermission(Permission = OrderPredefinedPermissions.Delete)]
-        public IHttpActionResult DeleteOrdersByIds([FromUri] string[] ids)
+        [Authorize(ModuleConstants.Security.Permissions.Delete)]
+        public async Task<IActionResult> DeleteOrdersByIds([FromRoute] string[] ids)
         {
-            _customerOrderService.Delete(ids);
-            return StatusCode(HttpStatusCode.NoContent);
+            await _customerOrderService.DeleteAsync(ids);
+            return Ok();
         }
 
 
@@ -366,10 +373,9 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
         /// <param name="end">end interval date</param>
         [HttpGet]
         [Route("~/api/order/dashboardStatistics")]
-        [ResponseType(typeof(webModel.DashboardStatisticsResult))]
-        public IHttpActionResult GetDashboardStatistics([FromUri]DateTime? start = null, [FromUri]DateTime? end = null)
+        public ActionResult<DashboardStatisticsResult> GetDashboardStatistics([FromRoute]DateTime? start = null, [FromRoute]DateTime? end = null)
         {
-            webModel.DashboardStatisticsResult retVal;
+            DashboardStatisticsResult retVal;
             start = start ?? DateTime.UtcNow.AddYears(-1);
             end = end ?? DateTime.UtcNow;
 
@@ -378,7 +384,7 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
             var cacheKey = string.Join(":", "Statistic", start.Value.ToString("yyyy-MM-dd"), end.Value.ToString("yyyy-MM-dd"));
             lock (_lockObject)
             {
-                retVal = _cacheManager.Get(cacheKey, "OrderModuleRegion", () =>
+                retVal = _platformMemoryCache.Get(cacheKey, "OrderModuleRegion", () =>
                 {
                     var collectStaticJob = new CollectOrderStatisticJob(_repositoryFactory);
                     return collectStaticJob.CollectStatistics(start.Value, end.Value);
@@ -393,8 +399,7 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
         /// <param name="callback">payment callback parameters</param>
         [HttpPost]
         [Route("~/api/paymentcallback")]
-        [ResponseType(typeof(PostProcessPaymentResult))]
-        public IHttpActionResult PostProcessPayment(webModel.PaymentCallbackParameters callback)
+        public async Task<ActionResult<PostProcessPaymentResult>> PostProcessPayment([FromBody]PaymentCallbackParameters callback)
         {
             var parameters = new NameValueCollection();
             foreach (var param in callback?.Parameters ?? Array.Empty<KeyValuePair>())
@@ -412,7 +417,8 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
             searchCriteria.Number = orderId;
             searchCriteria.ResponseGroup = CustomerOrderResponseGroup.Full.ToString();
             //if order not found by order number search by order id
-            var order = _searchService.SearchCustomerOrders(searchCriteria).Results.FirstOrDefault() ?? _customerOrderService.GetByIds(new[] { orderId }, CustomerOrderResponseGroup.Full.ToString()).FirstOrDefault();
+            var orders = await _searchService.SearchCustomerOrdersAsync(searchCriteria);
+            var order = orders.Results.FirstOrDefault() ?? await _customerOrderService.GetByIdAsync(orderId, CustomerOrderResponseGroup.Full.ToString());
 
             if (order == null)
             {
@@ -420,7 +426,7 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
             }
 
             var orderPaymentsCodes = order.InPayments.Select(x => x.GatewayCode).Distinct().ToArray();
-            var store = _storeService.GetById(order.StoreId);
+            var store = await _storeService.GetByIdAsync(order.StoreId);
             var paymentMethodCode = parameters.Get("code");
             //Need to use concrete  payment method if it code passed otherwise use all order payment methods
             var paymentMethods = store.PaymentMethods.Where(x => x.IsActive)
@@ -444,16 +450,17 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
                     }
                     var context = new PostProcessPaymentEvaluationContext
                     {
-                        Order = order,
-                        Payment = payment,
-                        Store = store,
-                        OuterId = paymentOuterId,
+                        OrderId = order.Id,
+                        PaymentId = payment.Id,
+                        //TODO
+                        //Store = store,
+                        //OuterId = paymentOuterId,
                         Parameters = parameters
                     };
                     var retVal = paymentMethod.PostProcessPayment(context);
                     if (retVal != null)
                     {
-                        _customerOrderService.SaveChanges(new[] { order });
+                        await _customerOrderService.SaveChangesAsync(new[] { order });
 
                         // order Number is required
                         retVal.OrderId = order.Number;
@@ -467,23 +474,21 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
         [HttpGet]
         [Route("invoice/{orderNumber}")]
         [SwaggerFileResponse]
-        public IHttpActionResult GetInvoicePdf(string orderNumber)
+        public async Task<IActionResult> GetInvoicePdf(string orderNumber)
         {
             var searchCriteria = AbstractTypeFactory<CustomerOrderSearchCriteria>.TryCreateInstance();
             searchCriteria.Number = orderNumber;
             searchCriteria.Take = 1;
 
-            var order = _searchService.SearchCustomerOrders(searchCriteria).Results.FirstOrDefault();
+            var orders = await _searchService.SearchCustomerOrdersAsync(searchCriteria);
+            var order = orders.Results.FirstOrDefault();
 
             if (order == null)
             {
                 throw new InvalidOperationException($"Cannot find order with number {orderNumber}");
             }
 
-            var invoice = _notificationManager.GetNewNotification<InvoiceEmailNotification>(order.StoreId, "Store", order.LanguageCode);
-
-            invoice.CustomerOrder = order;
-            _notificationTemplateResolver.ResolveTemplate(invoice);
+            await _notificationSender.SendNotificationAsync(new InvoiceEmailNotification {CustomerOrder = order}, order.LanguageCode);
 
             var stream = new MemoryStream();
             var pdf = PdfGenerator.GeneratePdf(invoice.Body, PdfSharp.PageSize.A4);
@@ -499,11 +504,10 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
 
         [HttpGet]
         [Route("{id}/changes")]
-        [ResponseType(typeof(OperationLog[]))]
-        public IHttpActionResult GetOrderChanges(string id)
+        public async Task<ActionResult<OperationLog[]>> GetOrderChanges(string id)
         {
             var result = new OperationLog[] { };
-            var order = _customerOrderService.GetByIds(new[] { id }).FirstOrDefault();
+            var order = await _customerOrderService.GetByIdAsync(id);
             if (order != null)
             {
                 _changeLogService.LoadChangeLogs(order);
@@ -518,29 +522,29 @@ namespace VirtoCommerce.OrderModule.Web.Controllers.Api
         }
         private CustomerOrderSearchCriteria FilterOrderSearchCriteria(string userName, CustomerOrderSearchCriteria criteria)
         {
+            //TODO
+            //if (!_securityService.UserHasAnyPermission(userName, null, OrderPredefinedPermissions.Read))
+            //{
+            //    //Get defined user 'read' permission scopes
+            //    var readPermissionScopes = _securityService.GetUserPermissions(userName)
+            //        .Where(x => x.Id.StartsWith(OrderPredefinedPermissions.Read))
+            //        .SelectMany(x => x.AssignedScopes)
+            //        .ToList();
 
-            if (!_securityService.UserHasAnyPermission(userName, null, OrderPredefinedPermissions.Read))
-            {
-                //Get defined user 'read' permission scopes
-                var readPermissionScopes = _securityService.GetUserPermissions(userName)
-                    .Where(x => x.Id.StartsWith(OrderPredefinedPermissions.Read))
-                    .SelectMany(x => x.AssignedScopes)
-                    .ToList();
+            //    //Check user has a scopes
+            //    //Stores
+            //    criteria.StoreIds = readPermissionScopes.OfType<OrderStoreScope>()
+            //        .Select(x => x.Scope)
+            //        .Where(x => !string.IsNullOrEmpty(x))
+            //        .ToArray();
 
-                //Check user has a scopes
-                //Stores
-                criteria.StoreIds = readPermissionScopes.OfType<OrderStoreScope>()
-                    .Select(x => x.Scope)
-                    .Where(x => !string.IsNullOrEmpty(x))
-                    .ToArray();
-
-                var responsibleScope = readPermissionScopes.OfType<OrderResponsibleScope>().FirstOrDefault();
-                //employee id
-                if (responsibleScope != null)
-                {
-                    criteria.EmployeeId = userName;
-                }
-            }
+            //    var responsibleScope = readPermissionScopes.OfType<OrderResponsibleScope>().FirstOrDefault();
+            //    //employee id
+            //    if (responsibleScope != null)
+            //    {
+            //        criteria.EmployeeId = userName;
+            //    }
+            //}
             return criteria;
         }
     }
