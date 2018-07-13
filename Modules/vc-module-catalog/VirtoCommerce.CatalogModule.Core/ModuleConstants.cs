@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.CatalogModule.Core
 {
@@ -27,37 +29,41 @@ namespace VirtoCommerce.CatalogModule.Core
         {
             public static class General
             {
-                public static ModuleSetting AssociationGroups = new ModuleSetting
+                public static SettingDescriptor AssociationGroups = new SettingDescriptor
                 {
                     Name = "Catalog.AssociationGroups",
-                    ValueType = ModuleSetting.TypeString,
-                    IsArray = true,
-                    ArrayValues = new string[] { "Accessories", "Related Items" }
+                    ValueType = SettingValueType.ShortText,
+                    GroupName = "Catalog|General",
+                    IsDictionary = true,
+                    AllowedValues = new string[] { "Accessories", "Related Items" }
                 };
 
-                public static ModuleSetting EditorialReviewTypes = new ModuleSetting
+                public static SettingDescriptor EditorialReviewTypes = new SettingDescriptor
                 {
                     Name = "Catalog.EditorialReviewTypes",
-                    ValueType = ModuleSetting.TypeString,
-                    IsArray = true,
+                    ValueType = SettingValueType.ShortText,
+                    GroupName = "Catalog|General",
+                    IsDictionary = true,
                     DefaultValue = "QuickReview",
-                    ArrayValues = new string[] { "QuickReview", "FullReview" }
+                    AllowedValues = new string[] { "QuickReview", "FullReview" }
                 };
 
-                public static ModuleSetting CodesInOutline = new ModuleSetting
+                public static SettingDescriptor CodesInOutline = new SettingDescriptor
                 {
                     Name = "Catalog.CodesInOutline",
-                    ValueType = ModuleSetting.TypeBoolean,
-                    DefaultValue = false.ToString()
+                    GroupName = "Catalog|General",
+                    ValueType = SettingValueType.Boolean,
+                    DefaultValue = false
                 };
-                public static ModuleSetting ExposeAliasInDictionary = new ModuleSetting
+                public static SettingDescriptor ExposeAliasInDictionary = new SettingDescriptor
                 {
                     Name = "Catalog.ExposeAliasInDictionary",
-                    ValueType = ModuleSetting.TypeBoolean,
-                    DefaultValue = false.ToString()
+                    GroupName = "Catalog|General",
+                    ValueType = SettingValueType.Boolean,
+                    DefaultValue = false
                 };
 
-                public static IEnumerable<ModuleSetting> AllSettings
+                public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {
@@ -71,27 +77,37 @@ namespace VirtoCommerce.CatalogModule.Core
 
             public static class Search
             {
-                public static ModuleSetting UseCatalogIndexedSearchInManager = new ModuleSetting
+                public static SettingDescriptor UseCatalogIndexedSearchInManager = new SettingDescriptor
                 {
                     Name = "Catalog.Search.UseCatalogIndexedSearchInManager",
-                    ValueType = ModuleSetting.TypeBoolean,
-                    DefaultValue = true.ToString()
+                    GroupName = "Catalog|Search",
+                    ValueType = SettingValueType.Boolean,
+                    DefaultValue = true
                 };
 
-                public static ModuleSetting UseFullObjectIndexStoring = new ModuleSetting
+                public static SettingDescriptor UseFullObjectIndexStoring = new SettingDescriptor
                 {
                     Name = "Catalog.Search.UseFullObjectIndexStoring",
-                    ValueType = ModuleSetting.TypeBoolean,
-                    DefaultValue = false.ToString()
+                    GroupName = "Catalog|Search",
+                    ValueType = SettingValueType.Boolean,
+                    DefaultValue = false
                 };
 
-                public static IEnumerable<ModuleSetting> AllSettings
+                public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {
                         yield return UseCatalogIndexedSearchInManager;
                         yield return UseFullObjectIndexStoring;
                     }
+                }
+            }
+
+            public static IEnumerable<SettingDescriptor> AllSettings
+            {
+                get
+                {
+                    return General.AllSettings.Concat(Search.AllSettings);
                 }
             }
         }

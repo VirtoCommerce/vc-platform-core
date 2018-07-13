@@ -46,8 +46,7 @@ namespace VirtoCommerce.Platform.Core.Modularity
             {
                 Scripts.AddRange(manifest.Scripts);
             }
-            Permissions = new List<ModulePermissionGroup>();
-            Settings = new List<ModuleSettingsGroup>();
+
             Groups = new List<string>();
             if (manifest.Groups != null)
             {
@@ -89,8 +88,6 @@ namespace VirtoCommerce.Platform.Core.Modularity
         public string FullPhysicalPath { get; set; }
         public ICollection<ManifestBundleItem> Styles { get; private set; }
         public ICollection<ManifestBundleItem> Scripts { get; private set; }
-        public ICollection<ModulePermissionGroup> Permissions { get; private set; }
-        public ICollection<ModuleSettingsGroup> Settings { get; private set; }
         public ICollection<string> Errors { get; set; }
         public bool UseFullTypeNameInSwagger { get; set; }
 

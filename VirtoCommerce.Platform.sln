@@ -61,15 +61,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Module1.Data", "Modules\Module1\Module1.Data\Module1.Data.csproj", "{6C7C3624-8CF1-4890-83A9-AA073B93B369}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.ImageToolsModule.Web", "Modules\vc-module-imageTools\VirtoCommerce.ImageToolsModule.Web\VirtoCommerce.ImageToolsModule.Web.csproj", "{0B1DC88C-0E43-4B0F-933B-96638915034A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.ImageToolsModule.Web", "Modules\vc-module-imageTools\VirtoCommerce.ImageToolsModule.Web\VirtoCommerce.ImageToolsModule.Web.csproj", "{0B1DC88C-0E43-4B0F-933B-96638915034A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vc-module-imageTools", "vc-module-imageTools", "{B64532FA-C064-43CC-85E6-A6B975A49795}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.ImageToolsModule.Core", "Modules\vc-module-imageTools\VirtoCommerce.ImageToolsModule.Core\VirtoCommerce.ImageToolsModule.Core.csproj", "{77EF6D02-2A26-4EC5-AC77-E16AA4794386}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.ImageToolsModule.Core", "Modules\vc-module-imageTools\VirtoCommerce.ImageToolsModule.Core\VirtoCommerce.ImageToolsModule.Core.csproj", "{77EF6D02-2A26-4EC5-AC77-E16AA4794386}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.ImageToolsModule.Data", "Modules\vc-module-imageTools\VirtoCommerce.ImageToolsModule.Data\VirtoCommerce.ImageToolsModule.Data.csproj", "{00371C83-FE70-4991-9AC6-1933C92DFBA1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.ImageToolsModule.Data", "Modules\vc-module-imageTools\VirtoCommerce.ImageToolsModule.Data\VirtoCommerce.ImageToolsModule.Data.csproj", "{00371C83-FE70-4991-9AC6-1933C92DFBA1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.ImageToolsModule.Tests", "Modules\vc-module-imageTools\VirtoCommerce.ImageToolsModule.Tests\VirtoCommerce.ImageToolsModule.Tests.csproj", "{F422D33A-26B3-4B8F-AC2D-9636129A996A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.ImageToolsModule.Tests", "Modules\vc-module-imageTools\VirtoCommerce.ImageToolsModule.Tests\VirtoCommerce.ImageToolsModule.Tests.csproj", "{F422D33A-26B3-4B8F-AC2D-9636129A996A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vc-module-search", "vc-module-search", "{2CF3266F-AEA4-4EB3-B2CD-8A8B9A2CD42B}"
 EndProject
@@ -121,7 +121,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.StoreModule.C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.StoreModule.Data", "Modules\vc-module-store\VirtoCommerce.StoreModule.Data\VirtoCommerce.StoreModule.Data.csproj", "{C3194CF0-2CE5-4864-A1DA-2BE9D180A77D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.CoreModule.Data", "Modules\vc-module-core\VirtoCommerce.CoreModule.Data\VirtoCommerce.CoreModule.Data.csproj", "{6533D137-215A-4872-B291-F33914C026B3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CoreModule.Data", "Modules\vc-module-core\VirtoCommerce.CoreModule.Data\VirtoCommerce.CoreModule.Data.csproj", "{6533D137-215A-4872-B291-F33914C026B3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.Tools", "Modules\vc-module-core\VirtoCommerce.Tools\VirtoCommerce.Tools.csproj", "{169B0B3A-9C9B-456F-861B-B9C9B425EACA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.CoreModule.Tests", "Modules\vc-module-core\VirtoCommerce.CoreModule.Tests\VirtoCommerce.CoreModule.Tests.csproj", "{69E6A3FF-4B5A-48AB-8363-6DDC0D4307BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.Tools.Tests", "Modules\vc-module-core\VirtoCommerce.Tools.Tests\VirtoCommerce.Tools.Tests.csproj", "{F4A3A976-9349-4DF0-BDB6-A2F78DBAA72B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -321,6 +327,18 @@ Global
 		{6533D137-215A-4872-B291-F33914C026B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6533D137-215A-4872-B291-F33914C026B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6533D137-215A-4872-B291-F33914C026B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{169B0B3A-9C9B-456F-861B-B9C9B425EACA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{169B0B3A-9C9B-456F-861B-B9C9B425EACA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{169B0B3A-9C9B-456F-861B-B9C9B425EACA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{169B0B3A-9C9B-456F-861B-B9C9B425EACA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69E6A3FF-4B5A-48AB-8363-6DDC0D4307BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69E6A3FF-4B5A-48AB-8363-6DDC0D4307BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69E6A3FF-4B5A-48AB-8363-6DDC0D4307BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69E6A3FF-4B5A-48AB-8363-6DDC0D4307BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4A3A976-9349-4DF0-BDB6-A2F78DBAA72B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4A3A976-9349-4DF0-BDB6-A2F78DBAA72B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4A3A976-9349-4DF0-BDB6-A2F78DBAA72B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4A3A976-9349-4DF0-BDB6-A2F78DBAA72B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -377,6 +395,9 @@ Global
 		{1A6D17CC-1721-4AEC-BF7E-1C4D2777A493} = {2A84944B-224C-45A0-A4C4-693734053C6D}
 		{C3194CF0-2CE5-4864-A1DA-2BE9D180A77D} = {2A84944B-224C-45A0-A4C4-693734053C6D}
 		{6533D137-215A-4872-B291-F33914C026B3} = {CF81DDF0-221F-4CB7-9B89-5935C54B8D5B}
+		{169B0B3A-9C9B-456F-861B-B9C9B425EACA} = {CF81DDF0-221F-4CB7-9B89-5935C54B8D5B}
+		{69E6A3FF-4B5A-48AB-8363-6DDC0D4307BA} = {CF81DDF0-221F-4CB7-9B89-5935C54B8D5B}
+		{F4A3A976-9349-4DF0-BDB6-A2F78DBAA72B} = {CF81DDF0-221F-4CB7-9B89-5935C54B8D5B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {80F99D88-A3B2-4ED2-9148-43D43EBFFFC3}

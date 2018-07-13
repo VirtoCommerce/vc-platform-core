@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.CatalogModule.Core.Exceptions;
-using VirtoCommerce.CoreModule.Core.Commerce.Model;
-using VirtoCommerce.Domain.Commerce.Model;
+using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
@@ -21,7 +20,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         public Category Parent { get; set; }
         public string Code { get; set; }
         public string TaxType { get; set; }
-        public string Name { get; set; }       
+        public string Name { get; set; }
         public bool IsVirtual { get; set; }
         public int Level { get; set; }
         public IList<Category> Parents { get; set; }
@@ -36,11 +35,11 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         public IList<Category> Children { get; set; }
 
         #region IHasProperties members
-        public IList<Property> Properties { get; set; }      
+        public IList<Property> Properties { get; set; }
         #endregion
 
         #region ILinkSupport members
-        public IList<CategoryLink> Links { get; set; } 
+        public IList<CategoryLink> Links { get; set; }
         #endregion
 
         public string SeoObjectType { get { return GetType().Name; } }
@@ -102,7 +101,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
             {
                 //Properties inheritance
                 foreach (var parentProperty in hasProperties.Properties)
-                {                  
+                {
                     var existProperty = Properties.FirstOrDefault(x => x.IsSame(parentProperty, PropertyType.Product, PropertyType.Variation));
                     if (existProperty != null)
                     {
@@ -110,7 +109,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
                         existProperty.ActualizeValues();
                     }
                     else
-                    {                   
+                    {
                         Properties.Add(parentProperty);
                     }
                 }
@@ -130,7 +129,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         public virtual void Move(string catalogId, string categoryId)
         {
             CatalogId = catalogId;
-            ParentId = categoryId;          
+            ParentId = categoryId;
         }
 
         public virtual void ReduceDetails(string responseGroup)

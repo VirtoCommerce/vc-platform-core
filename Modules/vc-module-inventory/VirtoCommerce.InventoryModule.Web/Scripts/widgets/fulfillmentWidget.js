@@ -1,5 +1,5 @@
-﻿angular.module('virtoCommerce.inventoryModule')
-    .controller('virtoCommerce.inventoryModule.fulfillmentWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.coreModule.fulfillment.fulfillments', function ($scope, bladeNavigationService, fulfillments) {
+angular.module('virtoCommerce.inventoryModule')
+    .controller('virtoCommerce.inventoryModule.fulfillmentWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.inventoryModule.fulfillments', function ($scope, bladeNavigationService, fulfillments) {
     var blade = $scope.widget.blade;
 
     $scope.widget.refresh = function () {

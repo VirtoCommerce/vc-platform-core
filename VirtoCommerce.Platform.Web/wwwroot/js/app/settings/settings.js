@@ -1,4 +1,4 @@
-﻿angular.module("platformWebApp")
+angular.module("platformWebApp")
 .config(
   ['$stateProvider', function ($stateProvider) {
       $stateProvider
@@ -43,43 +43,36 @@
 
     retVal.fixValues = function (settings) {
         // parse values as they all are strings
-        var selectedSettings = _.where(settings, { valueType: 'Integer' });
-        _.forEach(selectedSettings, function (setting) {
-            setting.value = parseInt(setting.value, 10);
-            if (setting.allowedValues) {
-                setting.allowedValues = _.map(setting.allowedValues, function (value) { return parseInt(value, 10); });
-            }
-        });
+        //var selectedSettings = _.where(settings, { valueType: 'Integer' });
+        //_.forEach(selectedSettings, function (setting) {
+        //    setting.value = parseInt(setting.value, 10);
+        //    if (setting.allowedValues) {
+        //        setting.allowedValues = _.map(setting.allowedValues, function (value) { return parseInt(value, 10); });
+        //    }
+        //});
 
-        selectedSettings = _.where(settings, { valueType: 'Decimal' });
-        _.forEach(selectedSettings, function (setting) {
-            setting.value = parseFloat(setting.value);
-            if (setting.allowedValues) {
-                setting.allowedValues = _.map(setting.allowedValues, function (value) { return parseFloat(value); });
-            }
-        });
+        //selectedSettings = _.where(settings, { valueType: 'Decimal' });
+        //_.forEach(selectedSettings, function (setting) {
+        //    setting.value = parseFloat(setting.value);
+        //    if (setting.allowedValues) {
+        //        setting.allowedValues = _.map(setting.allowedValues, function (value) { return parseFloat(value); });
+        //    }
+        //});
 
-        selectedSettings = _.where(settings, { valueType: 'Boolean' });
-        _.forEach(selectedSettings, function (setting) {
-            setting.value = setting.value && setting.value.toLowerCase() === 'true';
-            if (setting.allowedValues) {
-                setting.allowedValues = _.map(setting.allowedValues, function (value) { return value.toLowerCase() === 'true'; });
-            }
-        });
-
-        selectedSettings = _.where(settings, { isArray: true });
-        _.forEach(selectedSettings, function (setting) {
-            if (setting.arrayValues) {
-                setting.arrayValues = _.map(setting.arrayValues, function (x) { return { value: x }; });
-            }
-        });
+        //selectedSettings = _.where(settings, { valueType: 'Boolean' });
+        //_.forEach(selectedSettings, function (setting) {
+        //    setting.value = setting.value && setting.value.toLowerCase() === 'true';
+        //    if (setting.allowedValues) {
+        //        setting.allowedValues = _.map(setting.allowedValues, function (value) { return value.toLowerCase() === 'true'; });
+        //    }
+        //});  
     };
 
     retVal.toApiFormat = function (settings) {
-        var selectedSettings = _.where(settings, { isArray: true });
+        var selectedSettings = _.where(settings, { isDictionary: true });
         _.forEach(selectedSettings, function (setting) {
-            if (setting.arrayValues) {
-                setting.arrayValues = _.pluck(setting.arrayValues, 'value');
+            if (setting.allowedValues) {
+                setting.allowedValues = _.pluck(setting.allowedValues, 'value');
             }
         });
     };

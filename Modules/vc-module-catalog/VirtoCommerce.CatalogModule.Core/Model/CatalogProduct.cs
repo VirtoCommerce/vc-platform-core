@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.CoreModule.Core.Commerce.Model;
-using VirtoCommerce.Domain.Commerce.Model;
+using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class CatalogProduct : AuditableEntity, IAggregateRoot, IHasLinks, ISeoSupport, IHasOutlines, IHaveDimension, IHasAssociations, IHasProperties, IHasImages, IHasAssets, IInheritable, IHasTaxType, ICloneable
+    public class CatalogProduct : AuditableEntity, IAggregateRoot, IHasLinks, ISeoSupport, IHasOutlines, IHasDimension, IHasAssociations, IHasProperties, IHasImages, IHasAssets, IInheritable, IHasTaxType, ICloneable
     {
         /// <summary>
         /// SKU code
@@ -118,11 +118,11 @@ namespace VirtoCommerce.CatalogModule.Core.Model
                 {
                     result = result.Concat(Images);
                 }
-                if(Assets != null)
+                if (Assets != null)
                 {
                     result = result.Concat(Assets);
                 }
-                return result;            
+                return result;
             }
         }
         #endregion
@@ -156,12 +156,12 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         public bool IsInherited { get; private set; }
 
         public virtual void TryInheritFrom(IEntity parent)
-        {         
+        {
             if (parent is IHasProperties hasProperties)
             {
                 //Properties inheritance
                 foreach (var parentProperty in hasProperties.Properties)
-                {               
+                {
                     var existProperty = Properties.FirstOrDefault(x => x.IsSame(parentProperty, PropertyType.Product, PropertyType.Variation));
                     if (existProperty != null)
                     {
@@ -192,7 +192,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
                 if (Images.IsNullOrEmpty() && !parentProduct.Images.IsNullOrEmpty())
                 {
                     Images = new List<Image>();
-                    foreach(var parentImage in parentProduct.Images)
+                    foreach (var parentImage in parentProduct.Images)
                     {
                         var image = AbstractTypeFactory<Image>.TryCreateInstance();
                         image.TryInheritFrom(parentImage);
@@ -224,10 +224,10 @@ namespace VirtoCommerce.CatalogModule.Core.Model
                     }
                 }
                 //inherit not overridden property values from main product
-                foreach(var parentProductProperty in parentProduct.Properties)
-                {                   
+                foreach (var parentProductProperty in parentProduct.Properties)
+                {
                     var existProperty = Properties.FirstOrDefault(x => x.IsSame(parentProductProperty, PropertyType.Product, PropertyType.Variation));
-                    if(existProperty == null)
+                    if (existProperty == null)
                     {
                         var property = AbstractTypeFactory<Property>.TryCreateInstance();
                         property.TryInheritFrom(parentProductProperty);
@@ -245,7 +245,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
 
                 if (!Variations.IsNullOrEmpty())
                 {
-                    foreach(var variation in Variations)
+                    foreach (var variation in Variations)
                     {
                         variation.TryInheritFrom(this);
                     }
@@ -253,17 +253,17 @@ namespace VirtoCommerce.CatalogModule.Core.Model
             }
         }
         #endregion
- 
+
         public virtual CatalogProduct GetCopy()
         {
             var result = Clone() as CatalogProduct;
-   
+
             // Clear ID for all related entities except properties
             var allEntities = this.GetFlatObjectsListWithInterface<ISeoSupport>();
             foreach (var entity in allEntities)
             {
                 var property = entity as Property;
-                if (property is  null)
+                if (property is null)
                 {
                     entity.SeoInfos.Clear();
                     entity.Id = null;
@@ -303,7 +303,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
             if (!productResponseGroup.HasFlag(ItemResponseGroup.ItemEditorialReviews))
             {
                 Reviews = null;
-            }         
+            }
             if (!productResponseGroup.HasFlag(ItemResponseGroup.ItemProperties))
             {
                 Properties = null;

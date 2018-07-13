@@ -1,4 +1,4 @@
-﻿angular.module('platformWebApp')
+angular.module('platformWebApp')
 .controller('platformWebApp.settingDictionaryController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', function ($scope, dialogService, bladeNavigationService, settings) {
     var blade = $scope.blade;
     blade.updatePermission = 'platform:setting:update';
@@ -7,11 +7,11 @@
     blade.refresh = function (parentRefresh) {
         settings.get({ id: blade.currentEntityId }, function (setting) {
             if (parentRefresh && blade.parentRefresh) {
-                blade.parentRefresh(setting.arrayValues);
+                blade.parentRefresh(setting.allowedValues);
             }
 
-            setting.arrayValues = _.map(setting.arrayValues, function (x) { return { value: x }; });
-            blade.origEntity = angular.copy(setting.arrayValues);
+            setting.allowedValues = _.map(setting.allowedValues, function (x) { return { value: x }; });
+            blade.origEntity = angular.copy(setting.allowedValues);
             initializeBlade(setting);
         });
     }
@@ -19,7 +19,7 @@
     function initializeBlade(data) {
         blade.title = data.title;
         blade.currentEntity = data;
-        currentEntities = blade.currentEntity.arrayValues;
+        currentEntities = blade.currentEntity.allowedValues;
         blade.isLoading = false;
     }
 
@@ -78,7 +78,7 @@
         function saveChanges() {
             blade.selectedAll = false;
             blade.isLoading = true;
-            blade.currentEntity.arrayValues = _.pluck(blade.currentEntity.arrayValues, 'value');
+            blade.currentEntity.allowedValues = _.pluck(blade.currentEntity.allowedValues, 'value');
 
             settings.update(null, [blade.currentEntity], blade.refresh,
                 function (error) { bladeNavigationService.setError('Error ' + error.status, $scope.blade); });

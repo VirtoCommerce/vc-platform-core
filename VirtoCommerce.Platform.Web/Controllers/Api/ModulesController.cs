@@ -271,17 +271,17 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 Finished = DateTime.UtcNow
             };
 
-            if (!_settingsManager.GetValue(PlatformConstants.Settings.Modularity.ModulesAutoInstalled.Name, false))
+            if (!_settingsManager.GetValue(PlatformConstants.Settings.Setup.ModulesAutoInstalled.Name, false))
             {
                 lock (_lockObject)
                 {
-                    if (!_settingsManager.GetValue(PlatformConstants.Settings.Modularity.ModulesAutoInstalled.Name, false))
+                    if (!_settingsManager.GetValue(PlatformConstants.Settings.Setup.ModulesAutoInstalled.Name, false))
                     {
                         var moduleBundles = _externalModuleCatalogOptions.AutoInstallModuleBundles;
                         if (!moduleBundles.IsNullOrEmpty())
                         {
-                            _settingsManager.SetValue(PlatformConstants.Settings.Modularity.ModulesAutoInstalled.Name, true);
-                            _settingsManager.SetValue(PlatformConstants.Settings.Modularity.ModulesAutoInstallState.Name, AutoInstallState.Processing);
+                            _settingsManager.SetValue(PlatformConstants.Settings.Setup.ModulesAutoInstalled.Name, true);
+                            _settingsManager.SetValue(PlatformConstants.Settings.Setup.ModulesAutoInstallState.Name, AutoInstallState.Processing);
 
                             EnsureModulesCatalogInitialized();
 
@@ -340,7 +340,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [AllowAnonymous]
         public ActionResult<string> GetAutoInstallState()
         {
-            var state = EnumUtility.SafeParse(_settingsManager.GetValue(PlatformConstants.Settings.Modularity.ModulesAutoInstallState.Name, string.Empty), AutoInstallState.Undefined);
+            var state = EnumUtility.SafeParse(_settingsManager.GetValue(PlatformConstants.Settings.Setup.ModulesAutoInstallState.Name, string.Empty), AutoInstallState.Undefined);
             return Ok(state);
         }
 
@@ -382,7 +382,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             }
             finally
             {
-                _settingsManager.SetValue(PlatformConstants.Settings.Modularity.ModulesAutoInstallState.Name, AutoInstallState.Completed);
+                _settingsManager.SetValue(PlatformConstants.Settings.Setup.ModulesAutoInstallState.Name, AutoInstallState.Completed);
 
                 notification.Finished = DateTime.UtcNow;
                 notification.ProgressLog.Add(new ProgressMessage

@@ -2,10 +2,9 @@ using System;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using VirtoCommerce.CoreModule.Core.Model.Payment;
-using VirtoCommerce.CoreModule.Core.Model.Shipping;
-using VirtoCommerce.CoreModule.Core.Model.Tax;
-using VirtoCommerce.CoreModule.Core.Services;
+using VirtoCommerce.CoreModule.Core.Payment;
+using VirtoCommerce.CoreModule.Core.Shipping;
+using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Model.Search;
@@ -18,8 +17,8 @@ namespace VirtoCommerce.StoreModule.Web.JsonConverters
 
         private readonly IPaymentMethodsRegistrar _paymentMethodsService;
         private readonly IShippingMethodsRegistrar _shippingMethodsService;
-        private readonly ITaxRegistrar _taxService;
-        public PolymorphicStoreJsonConverter(IPaymentMethodsRegistrar paymentMethodsService, IShippingMethodsRegistrar shippingMethodsService, ITaxRegistrar taxService)
+        private readonly ITaxProviderRegistrar _taxService;
+        public PolymorphicStoreJsonConverter(IPaymentMethodsRegistrar paymentMethodsService, IShippingMethodsRegistrar shippingMethodsService, ITaxProviderRegistrar taxService)
         {
             _paymentMethodsService = paymentMethodsService;
             _shippingMethodsService = shippingMethodsService;
@@ -38,11 +37,11 @@ namespace VirtoCommerce.StoreModule.Web.JsonConverters
         {
             object retVal = null;
             var obj = JObject.Load(reader);
-          
+
             if (typeof(Store).IsAssignableFrom(objectType))
             {
                 retVal = AbstractTypeFactory<Store>.TryCreateInstance();
-            }      
+            }
             else if (typeof(StoreSearchCriteria).IsAssignableFrom(objectType))
             {
                 retVal = AbstractTypeFactory<StoreSearchCriteria>.TryCreateInstance();
