@@ -115,19 +115,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.StoreModule.D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CoreModule.Data", "Modules\vc-module-core\VirtoCommerce.CoreModule.Data\VirtoCommerce.CoreModule.Data.csproj", "{6533D137-215A-4872-B291-F33914C026B3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.Tools", "Modules\vc-module-core\VirtoCommerce.Tools\VirtoCommerce.Tools.csproj", "{169B0B3A-9C9B-456F-861B-B9C9B425EACA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Tools", "Modules\vc-module-core\VirtoCommerce.Tools\VirtoCommerce.Tools.csproj", "{169B0B3A-9C9B-456F-861B-B9C9B425EACA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.CoreModule.Tests", "Modules\vc-module-core\VirtoCommerce.CoreModule.Tests\VirtoCommerce.CoreModule.Tests.csproj", "{69E6A3FF-4B5A-48AB-8363-6DDC0D4307BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CoreModule.Tests", "Modules\vc-module-core\VirtoCommerce.CoreModule.Tests\VirtoCommerce.CoreModule.Tests.csproj", "{69E6A3FF-4B5A-48AB-8363-6DDC0D4307BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.Tools.Tests", "Modules\vc-module-core\VirtoCommerce.Tools.Tests\VirtoCommerce.Tools.Tests.csproj", "{F4A3A976-9349-4DF0-BDB6-A2F78DBAA72B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Tools.Tests", "Modules\vc-module-core\VirtoCommerce.Tools.Tests\VirtoCommerce.Tools.Tests.csproj", "{F4A3A976-9349-4DF0-BDB6-A2F78DBAA72B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vc-module-order", "vc-module-order", "{BE0C4BE9-8E9F-4317-869D-659D7CBC9076}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.OrderModule.Data", "Modules\vc-module-order\VirtoCommerce.OrderModule.Data\VirtoCommerce.OrderModule.Data.csproj", "{29670A8D-1F32-43CA-9C5F-0407BE5C3C4A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.OrdersModule.Data", "Modules\vc-module-orders\VirtoCommerce.OrdersModule.Data\VirtoCommerce.OrdersModule.Data.csproj", "{29670A8D-1F32-43CA-9C5F-0407BE5C3C4A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.OrderModule.Core", "Modules\vc-module-order\VirtoCommerce.OrderModule.Core\VirtoCommerce.OrderModule.Core.csproj", "{A6693D3F-8915-43A2-9C47-64F3E3E1D645}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.OrdersModule.Core", "Modules\vc-module-orders\VirtoCommerce.OrdersModule.Core\VirtoCommerce.OrdersModule.Core.csproj", "{A6693D3F-8915-43A2-9C47-64F3E3E1D645}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.OrderModule.Web", "Modules\vc-module-order\VirtoCommerce.OrderModule.Web\VirtoCommerce.OrderModule.Web.csproj", "{100F5DBF-CEE7-4764-A8C6-95484D0BC6FD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.OrdersModule.Web", "Modules\vc-module-orders\VirtoCommerce.OrdersModule.Web\VirtoCommerce.OrdersModule.Web.csproj", "{100F5DBF-CEE7-4764-A8C6-95484D0BC6FD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
