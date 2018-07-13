@@ -1,0 +1,39 @@
+﻿{
+  "cart": {
+    "main-menu-title": "Корзины",
+    "blades": {
+      "carts-list": {
+        "title": "Корзины",
+        "labels": {
+          "customer": "Покупатель",
+          "items-count": "Количество элементов",
+          "created": "Создано",
+          "modified": "Изменено",
+          "total": "Итог"
+        }
+      },
+      "cart-detail": {
+        "title": "Корзина {{name}}",
+        "labels": {
+          "name": "Имя",
+          "price": "Цена",
+          "quantity": "Количество.",
+          "total": "Итог"
+        }
+      }
+    },
+    "dialogs": {
+      "carts-delete": {
+        "title": "Удалить подтверждение",
+        "message": "Вы уверены, что хотите удалить выбранные Корзины?"
+      },
+      "cart-save": {
+        "title": "Сохранить изменения",
+        "message": "Корзина была изменена. Вы хотите сохранить изменения?"
+      }
+    },
+    "commands": {
+      "open-in-store": "Открыть в Магазине"
+    }
+  }
+}
