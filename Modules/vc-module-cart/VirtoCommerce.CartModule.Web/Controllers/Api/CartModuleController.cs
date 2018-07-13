@@ -9,6 +9,7 @@ using VirtoCommerce.CartModule.Core;
 using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CartModule.Core.Model.Search;
 using VirtoCommerce.CartModule.Core.Services;
+using VirtoCommerce.CartModule.Data.Model;
 using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.CoreModule.Core.Shipping;
 using VirtoCommerce.Platform.Core.Caching;
@@ -33,8 +34,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
 
         [HttpGet]
         [Route("{storeId}/{customerId}/{cartName}/{currency}/{cultureName}/current")]
-        [ProducesResponseType(typeof(ShoppingCart), 200)]
-        public async Task<IActionResult> GetCart(string storeId, string customerId, string cartName, string currency, string cultureName)
+        public async Task<ActionResult<ShoppingCart>> GetCart(string storeId, string customerId, string cartName, string currency, string cultureName)
         {
             using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(ShoppingCart), string.Join(":", storeId, customerId, cartName, currency))).LockAsync())
             {
@@ -45,22 +45,20 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
 
         [HttpGet]
         [Route("{cartId}/itemscount")]
-        [ProducesResponseType(typeof(int), 200)]
-        public async Task<IActionResult> GetCartItemsCount(string cartId)
+        public async Task<ActionResult<int>> GetCartItemsCount(string cartId)
         {
-            var carts = await _shoppingCartService.GetByIdsAsync(new[] {cartId});
+            var carts = await _shoppingCartService.GetByIdsAsync(new[] {cartId}, CartResponseGroup.Default.ToString());
             var cart = carts.FirstOrDefault();
             return Ok(cart?.Items?.Count ?? 0);
         }
 
         [HttpPost]
         [Route("{cartId}/items")]
-        [ProducesResponseType(typeof(void), 200)]
-        public async Task<IActionResult> AddItemToCart(string cartId, [FromBody] LineItem lineItem)
+        public async Task<ActionResult> AddItemToCart(string cartId, [FromBody] LineItem lineItem)
         {
             using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(ShoppingCart), cartId)).LockAsync())
             {
-                var cart = await _shoppingCartService.GetByIdAsync(cartId);
+                var cart = await _shoppingCartService.GetByIdAsync(cartId, CartResponseGroup.Full.ToString());
                 await _cartBuilder.TakeCart(cart).AddItem(lineItem).SaveAsync();
             }
             return Ok();
@@ -68,12 +66,11 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
 
         [HttpPut]
         [Route("{cartId}/items")]
-        [ProducesResponseType(typeof(void), 200)]
-        public async Task<IActionResult> ChangeCartItem(string cartId, string lineItemId, int quantity)
+        public async Task<ActionResult> ChangeCartItem(string cartId, string lineItemId, int quantity)
         {
             using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(ShoppingCart), cartId)).LockAsync())
             {
-                var cart = await _shoppingCartService.GetByIdAsync(cartId);
+                var cart = await _shoppingCartService.GetByIdAsync(cartId, CartResponseGroup.Full.ToString());
                 _cartBuilder.TakeCart(cart);
                 var lineItem = _cartBuilder.Cart.Items.FirstOrDefault(i => i.Id == lineItemId);
                 if (lineItem != null)
@@ -87,12 +84,11 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
 
         [HttpDelete]
         [Route("{cartId}/items/{lineItemId}")]
-        [ProducesResponseType(typeof(int), 200)]
-        public async Task<IActionResult> RemoveCartItem(string cartId, string lineItemId)
+        public async Task<ActionResult<int>> RemoveCartItem(string cartId, string lineItemId)
         {
             using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(ShoppingCart), cartId)).LockAsync())
             {
-                var cart = await _shoppingCartService.GetByIdAsync(cartId);
+                var cart = await _shoppingCartService.GetByIdAsync(cartId, CartResponseGroup.Full.ToString());
                 await _cartBuilder.TakeCart(cart).RemoveItem(lineItemId).SaveAsync();
             }
             return Ok(_cartBuilder.Cart.Items.Count);
@@ -100,12 +96,11 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
 
         [HttpDelete]
         [Route("{cartId}/items")]
-        [ProducesResponseType(typeof(void), 200)]
-        public async Task<IActionResult> ClearCart(string cartId)
+        public async Task<ActionResult> ClearCart(string cartId)
         {
             using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(ShoppingCart), cartId)).LockAsync())
             {
-                var cart = await _shoppingCartService.GetByIdAsync(cartId);
+                var cart = await _shoppingCartService.GetByIdAsync(cartId, CartResponseGroup.Full.ToString());
                 await _cartBuilder.TakeCart(cart).Clear().SaveAsync();
             }
             return Ok();
@@ -113,12 +108,11 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
 
         [HttpPatch]
         [Route("{cartId}")]
-        [ProducesResponseType(typeof(void), 200)]
-        public async Task<IActionResult> MergeWithCart(string cartId, [FromBody]ShoppingCart otherCart)
+        public async Task<ActionResult> MergeWithCart(string cartId, [FromBody]ShoppingCart otherCart)
         {
             using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(ShoppingCart), cartId)).LockAsync())
             {
-                var cart = await _shoppingCartService.GetByIdAsync(cartId);
+                var cart = await _shoppingCartService.GetByIdAsync(cartId, CartResponseGroup.Full.ToString());
                 var builder = await _cartBuilder.TakeCart(cart).MergeWithCartAsync(otherCart);
                 await builder.SaveAsync();
             }
@@ -127,18 +121,16 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
 
         [HttpGet]
         [Route("{cartId}/availshippingrates")]
-        [ProducesResponseType(typeof(ICollection<ShippingRate>), 200)]
-        public async Task<IActionResult> GetAvailableShippingRates(string cartId)
+        public async Task<ActionResult<ICollection<ShippingRate>>> GetAvailableShippingRates(string cartId)
         {
-            var cart = await _shoppingCartService.GetByIdAsync(cartId);
+            var cart = await _shoppingCartService.GetByIdAsync(cartId, CartResponseGroup.WithShipments.ToString());
             var shippingRates = _cartBuilder.TakeCart(cart).GetAvailableShippingRates();
             return Ok(shippingRates);
         }
 
         [HttpPost]
         [Route("availshippingrates")]
-        [ProducesResponseType(typeof(ICollection<ShippingRate>), 200)]
-        public IActionResult GetAvailableShippingRatesByContext(ShippingEvaluationContext context)
+        public ActionResult<ICollection<ShippingRate>> GetAvailableShippingRatesByContext(ShippingEvaluationContext context)
         {
             var shippingRates = _cartBuilder.TakeCart(context.ShoppingCart).GetAvailableShippingRates();
             return Ok(shippingRates);
@@ -146,22 +138,20 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
 
         [HttpGet]
         [Route("{cartId}/availpaymentmethods")]
-        [ProducesResponseType(typeof(ICollection<PaymentMethod>), 200)]
-        public async Task<IActionResult> GetAvailablePaymentMethods(string cartId)
+        public async Task<ActionResult<ICollection<PaymentMethod>>> GetAvailablePaymentMethods(string cartId)
         {
-            var cart = await _shoppingCartService.GetByIdAsync(cartId);
+            var cart = await _shoppingCartService.GetByIdAsync(cartId, CartResponseGroup.WithPayments.ToString());
             var paymentMethods = _cartBuilder.TakeCart(cart).GetAvailablePaymentMethods();
             return Ok(paymentMethods);
         }
 
         [HttpPost]
         [Route("{cartId}/coupons/{couponCode}")]
-        [ProducesResponseType(typeof(void), 200)]
-        public async Task<IActionResult> AddCartCoupon(string cartId, string couponCode)
+        public async Task<ActionResult> AddCartCoupon(string cartId, string couponCode)
         {
             using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(ShoppingCart), cartId)).LockAsync())
             {
-                var cart = await _shoppingCartService.GetByIdAsync(cartId);
+                var cart = await _shoppingCartService.GetByIdAsync(cartId, CartResponseGroup.Default.ToString());
                 await _cartBuilder.TakeCart(cart).AddCoupon(couponCode).SaveAsync();
             }
             return Ok();
@@ -169,12 +159,11 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
 
         [HttpDelete]
         [Route("{cartId}/coupons/{couponCode}")]
-        [ProducesResponseType(typeof(void), 200)]
-        public async Task<IActionResult> RemoveCartCoupon(string cartId, string couponCode)
+        public async Task<ActionResult> RemoveCartCoupon(string cartId, string couponCode)
         {
             using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(ShoppingCart), cartId)).LockAsync())
             {
-                var cart = await _shoppingCartService.GetByIdAsync(cartId);
+                var cart = await _shoppingCartService.GetByIdAsync(cartId, CartResponseGroup.Default.ToString());
                 await _cartBuilder.TakeCart(cart).RemoveCoupon().SaveAsync();
             }
             return Ok();
@@ -182,12 +171,11 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
 
         [HttpPost]
         [Route("{cartId}/shipments")]
-        [ProducesResponseType(typeof(void), 200)]
-        public async Task<IActionResult> AddOrUpdateCartShipment(string cartId, [FromBody] Shipment shipment)
+        public async Task<ActionResult> AddOrUpdateCartShipment(string cartId, [FromBody] Shipment shipment)
         {
             using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(ShoppingCart), cartId)).LockAsync())
             {
-                var cart = await _shoppingCartService.GetByIdAsync(cartId);
+                var cart = await _shoppingCartService.GetByIdAsync(cartId, CartResponseGroup.WithShipments.ToString());
                 await _cartBuilder.TakeCart(cart).AddOrUpdateShipment(shipment).SaveAsync();
             }
             return Ok();
@@ -195,12 +183,11 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
 
         [HttpPost]
         [Route("{cartId}/payments")]
-        [ProducesResponseType(typeof(void), 200)]
-        public async Task<IActionResult> AddOrUpdateCartPayment(string cartId, [FromBody] Payment payment)
+        public async Task<ActionResult> AddOrUpdateCartPayment(string cartId, [FromBody] Payment payment)
         {
             using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(ShoppingCart), cartId)).LockAsync())
             {
-                var cart = await _shoppingCartService.GetByIdAsync(cartId);
+                var cart = await _shoppingCartService.GetByIdAsync(cartId, CartResponseGroup.WithPayments.ToString());
                 await _cartBuilder.TakeCart(cart).AddOrUpdatePayment(payment).SaveAsync();
             }
 
@@ -213,10 +200,9 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         /// <param name="cartId">Shopping cart id</param>
         [HttpGet]
         [Route("{cartId}")]
-        [ProducesResponseType(typeof(ShoppingCart), 200)]
-        public async Task<IActionResult> GetCartById(string cartId)
+        public async Task<ActionResult<ShoppingCart>> GetCartById(string cartId)
         {
-            var cart = await _shoppingCartService.GetByIdAsync(cartId);
+            var cart = await _shoppingCartService.GetByIdAsync(cartId, CartResponseGroup.Full.ToString());
             return Ok(cart);
         }
 
@@ -226,9 +212,8 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         /// <param name="criteria">Shopping cart search criteria</param>
         [HttpPost]
         [Route("search")]
-        [ProducesResponseType(typeof(GenericSearchResult<ShoppingCart>), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
-        public async Task<IActionResult> Search(ShoppingCartSearchCriteria criteria)
+        public async Task<ActionResult<GenericSearchResult<ShoppingCart>>> Search(ShoppingCartSearchCriteria criteria)
         {
             var result = await _searchService.SearchCartAsync(criteria);
             return Ok(result);
@@ -240,9 +225,8 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         /// <param name="cart">Shopping cart model</param>
         [HttpPost]
         [Route("")]
-        [ProducesResponseType(typeof(ShoppingCart), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
-        public async Task<IActionResult> Create(ShoppingCart cart)
+        public async Task<ActionResult<ShoppingCart>> Create(ShoppingCart cart)
         {
             await _shoppingCartService.SaveChangesAsync(new[] { cart });
             return Ok(cart);
@@ -254,9 +238,8 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         /// <param name="cart">Shopping cart model</param>
         [HttpPut]
         [Route("")]
-        [ProducesResponseType(typeof(ShoppingCart), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<IActionResult> Update(ShoppingCart cart)
+        public async Task<ActionResult<ShoppingCart>> Update(ShoppingCart cart)
         {
             using (await AsyncLock.GetLockByKey(CacheKey.With(cart.GetType(), cart.Id)).LockAsync())
             {
@@ -272,9 +255,8 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         /// <param name="ids">Array of shopping cart ids</param>
         [HttpDelete]
         [Route("")]
-        [ProducesResponseType(typeof(void), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
-        public async Task<IActionResult> DeleteCarts([FromRoute] string[] ids)
+        public async Task<ActionResult> DeleteCarts([FromRoute] string[] ids)
         {
             await _shoppingCartService.DeleteAsync(ids);
             return Ok();

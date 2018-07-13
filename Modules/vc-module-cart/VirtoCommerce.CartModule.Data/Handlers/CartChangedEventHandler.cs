@@ -29,7 +29,7 @@ namespace VirtoCommerce.CartModule.Data.Handlers
                 else if (changedEntry.EntryState == EntryState.Modified)
                 {
                     await _dynamicPropertyService.SaveDynamicPropertyValuesAsync(changedEntry.NewEntry);
-                    TryDeleteDynamicPropertiesForRemovedLineItems(changedEntry);
+                    await TryDeleteDynamicPropertiesForRemovedLineItems(changedEntry);
                 }
                 else if (changedEntry.EntryState == EntryState.Deleted)
                 {
@@ -39,7 +39,7 @@ namespace VirtoCommerce.CartModule.Data.Handlers
             }
         }
 
-        protected virtual void TryDeleteDynamicPropertiesForRemovedLineItems(GenericChangedEntry<ShoppingCart> changedEntry)
+        protected virtual async Task TryDeleteDynamicPropertiesForRemovedLineItems(GenericChangedEntry<ShoppingCart> changedEntry)
         {
             var originalDynPropOwners = changedEntry.OldEntry.GetFlatObjectsListWithInterface<IHasDynamicProperties>()
                                           .Distinct()
@@ -49,15 +49,18 @@ namespace VirtoCommerce.CartModule.Data.Handlers
                                          .ToList();
             var removingDynPropOwners = new List<IHasDynamicProperties>();
             var hasDynPropComparer = AnonymousComparer.Create((IHasDynamicProperties x) => x.Id);
-            modifiedDynPropOwners.CompareTo(originalDynPropOwners, hasDynPropComparer, async (state, changed, orig) =>
+            modifiedDynPropOwners.CompareTo(originalDynPropOwners, hasDynPropComparer, (state, changed, orig) =>
             {
                 if (state == EntryState.Deleted)
                 {
-                    await _dynamicPropertyService.DeleteDynamicPropertyValuesAsync(orig);
+                    removingDynPropOwners.Add(orig);
                 }
-
             });
 
+            foreach (var dynamicPropertiese in removingDynPropOwners)
+            {
+                await _dynamicPropertyService.DeleteDynamicPropertyValuesAsync(dynamicPropertiese);
+            }
         }
 
         public Task Handle(CartChangeEvent message)

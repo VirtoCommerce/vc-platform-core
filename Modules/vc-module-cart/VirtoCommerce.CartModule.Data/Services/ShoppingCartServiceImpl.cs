@@ -68,9 +68,9 @@ namespace VirtoCommerce.CartModule.Data.Services
             });
         }
 
-        public virtual async Task<ShoppingCart> GetByIdAsync(string id)
+        public virtual async Task<ShoppingCart> GetByIdAsync(string id, string responseGroup = null)
         {
-            var carts = await GetByIdsAsync(new[] {id});
+            var carts = await GetByIdsAsync(new[] {id}, responseGroup);
             return carts.FirstOrDefault();
         }
 
