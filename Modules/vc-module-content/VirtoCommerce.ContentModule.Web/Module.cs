@@ -103,7 +103,7 @@ namespace VirtoCommerce.ContentModule.Web
             dynamicPropertyService.SaveDynamicPropertiesAsync(DynamicProperties.AllDynamicProperties.ToArray()).GetAwaiter();
 
             //Register module permissions
-            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IKnownPermissionsProvider>();
+            var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
             permissionsProvider.RegisterPermissions(ContentConstants.Security.Permissions.AllPermissions.Select(x => new Permission() { GroupName = "Content", ModuleId = ModuleInfo.Id, Name = x }).ToArray());
 
 
