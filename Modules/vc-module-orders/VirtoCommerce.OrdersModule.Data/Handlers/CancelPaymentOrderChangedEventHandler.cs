@@ -64,8 +64,7 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
                 await _orderService.SaveChangesAsync(new[] { changedEntry.NewEntry });
             }
         }
-
-
+        
         protected virtual void TryToCancelOrderPayments(IEnumerable<PaymentIn> toCancelPayments)
         {
             foreach (var payment in toCancelPayments ?? Enumerable.Empty<PaymentIn>())

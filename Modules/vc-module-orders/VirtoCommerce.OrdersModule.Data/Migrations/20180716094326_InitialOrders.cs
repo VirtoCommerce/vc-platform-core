@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.OrdersModule.Data.Migrations
 {
-    public partial class InitialOrder : Migration
+    public partial class InitialOrders : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -88,7 +88,7 @@ namespace VirtoCommerce.OrdersModule.Data.Migrations
                     ImageUrl = table.Column<string>(maxLength: 1028, nullable: true),
                     IsGift = table.Column<bool>(nullable: false),
                     ShippingMethodCode = table.Column<string>(maxLength: 64, nullable: true),
-                    FulfilmentLocationCode = table.Column<string>(maxLength: 64, nullable: true),
+                    FulfillmentLocationCode = table.Column<string>(maxLength: 64, nullable: true),
                     WeightUnit = table.Column<string>(maxLength: 32, nullable: true),
                     Weight = table.Column<decimal>(nullable: true),
                     MeasureUnit = table.Column<string>(maxLength: 32, nullable: true),

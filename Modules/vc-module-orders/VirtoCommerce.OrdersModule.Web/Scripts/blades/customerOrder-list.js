@@ -32,7 +32,7 @@ function ($scope, $localStorage, customerOrders, bladeUtils, dialogService, auth
                 blade.isLoading = false;
 
                 $scope.pageSettings.totalItems = data.totalCount;
-                $scope.objects = data.customerOrders;
+                $scope.objects = data.results;
             });
         }
     };

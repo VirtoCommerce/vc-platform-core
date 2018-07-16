@@ -59,7 +59,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         [StringLength(64)]
         public string ShippingMethodCode { get; set; }
         [StringLength(64)]
-        public string FulfilmentLocationCode { get; set; }
+        public string FulfillmentLocationCode { get; set; }
 
         [StringLength(32)]
         public string WeightUnit { get; set; }
@@ -99,6 +99,18 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             lineItem.ModifiedDate = ModifiedDate;
             lineItem.ModifiedBy = ModifiedBy;
 
+            lineItem.PriceId = PriceId;
+            lineItem.CatalogId = CatalogId;
+            lineItem.CategoryId = CategoryId;
+            lineItem.Currency = Currency;
+            lineItem.ProductId = ProductId;
+            lineItem.Sku = Sku;
+            lineItem.ProductType = ProductType;
+            lineItem.Name = Name;
+            lineItem.ImageUrl = ImageUrl;
+            lineItem.ShippingMethodCode = ShippingMethodCode;
+            lineItem.FulfillmentLocationCode = FulfillmentLocationCode;
+
             lineItem.Price = Price;
             lineItem.PriceWithTax = PriceWithTax;
             lineItem.DiscountAmount = DiscountAmount;
@@ -137,6 +149,18 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             CreatedBy = lineItem.CreatedBy;
             ModifiedDate = lineItem.ModifiedDate;
             ModifiedBy = lineItem.ModifiedBy;
+
+            PriceId = lineItem.PriceId;
+            CatalogId = lineItem.CatalogId;
+            CategoryId = lineItem.CategoryId;
+            Currency = lineItem.Currency;
+            ProductId = lineItem.ProductId;
+            Sku = lineItem.Sku;
+            ProductType = lineItem.ProductType;
+            Name = lineItem.Name;
+            ImageUrl = lineItem.ImageUrl;
+            ShippingMethodCode = lineItem.ShippingMethodCode;
+            FulfillmentLocationCode = lineItem.FulfillmentLocationCode;
 
             Price = lineItem.Price;
             PriceWithTax = lineItem.PriceWithTax;

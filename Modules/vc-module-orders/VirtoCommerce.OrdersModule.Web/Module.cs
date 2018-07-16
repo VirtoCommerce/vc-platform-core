@@ -41,6 +41,10 @@ namespace VirtoCommerce.OrdersModule.Web
             serviceCollection.AddSingleton<ICustomerOrderTotalsCalculator, DefaultCustomerOrderTotalsCalculator>();
             serviceCollection.AddSingleton<OrderExportImport>();
             serviceCollection.AddSingleton<OrderChangedEvent>();
+            serviceCollection.AddSingleton<AdjustInventoryOrderChangedEventHandler>();
+            serviceCollection.AddSingleton<CancelPaymentOrderChangedEventHandler>();
+            serviceCollection.AddSingleton<LogChangesOrderChangedEventHandler>();
+            serviceCollection.AddSingleton<SendNotificationsOrderChangedEventHandler>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)

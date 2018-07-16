@@ -93,6 +93,34 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             if (order == null)
                 throw new ArgumentException(@"operation argument must be of type CustomerOrder", nameof(operation));
 
+            order.CustomerId = CustomerId;
+            order.CustomerName = CustomerName;
+            order.StoreId = StoreId;
+            order.StoreName = StoreName;
+            order.OrganizationId = OrganizationId;
+            order.OrganizationName = OrganizationName;
+            order.EmployeeId = EmployeeId;
+            order.EmployeeName = EmployeeName;
+            order.DiscountAmount = DiscountAmount;
+            order.Total = Total;
+            order.SubTotal = SubTotal;
+            order.SubTotalWithTax = SubTotalWithTax;
+            order.ShippingTotal = ShippingTotal;
+            order.ShippingTotalWithTax = ShippingTotalWithTax;
+            order.PaymentTotal = PaymentTotal;
+            order.PaymentTotalWithTax = PaymentTotalWithTax;
+            order.FeeTotal = HandlingTotal;
+            order.FeeTotalWithTax = HandlingTotalWithTax;
+            order.DiscountTotal = DiscountTotal;
+            order.DiscountTotalWithTax = DiscountTotalWithTax;
+            order.DiscountAmount = DiscountAmount;
+            order.TaxTotal = TaxTotal;
+            order.IsPrototype = IsPrototype;
+            order.SubscriptionNumber = SubscriptionNumber;
+            order.SubscriptionId = SubscriptionId;
+            order.LanguageCode = LanguageCode;
+            order.TaxPercentRate = TaxPercentRate;
+
             order.Discounts = Discounts.Select(x => x.ToModel(AbstractTypeFactory<Discount>.TryCreateInstance())).ToList();
             order.Items = Items.Select(x => x.ToModel(AbstractTypeFactory<LineItem>.TryCreateInstance())).ToList();
             order.Addresses = Addresses.Select(x => x.ToModel(AbstractTypeFactory<Address>.TryCreateInstance())).ToList();
@@ -114,6 +142,34 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 throw new ArgumentException(@"operation argument must be of type CustomerOrder", nameof(operation));
 
             base.FromModel(order, pkMap);
+
+            CustomerId = order.CustomerId;
+            CustomerName = order.CustomerName;
+            StoreId = order.StoreId;
+            StoreName = order.StoreName;
+            OrganizationId = order.OrganizationId;
+            OrganizationName = order.OrganizationName;
+            EmployeeId = order.EmployeeId;
+            EmployeeName = order.EmployeeName;
+            DiscountAmount = order.DiscountAmount;
+            Total = order.Total;
+            SubTotal = order.SubTotal;
+            SubTotalWithTax = order.SubTotalWithTax;
+            ShippingTotal = order.ShippingTotal;
+            ShippingTotalWithTax = order.ShippingTotalWithTax;
+            PaymentTotal = order.PaymentTotal;
+            PaymentTotalWithTax = order.PaymentTotalWithTax;
+            HandlingTotal = order.FeeTotal;
+            HandlingTotalWithTax = order.FeeTotalWithTax;
+            DiscountTotal = order.DiscountTotal;
+            DiscountTotalWithTax = order.DiscountTotalWithTax;
+            DiscountAmount = order.DiscountAmount;
+            TaxTotal = order.TaxTotal;
+            IsPrototype = order.IsPrototype;
+            SubscriptionNumber = order.SubscriptionNumber;
+            SubscriptionId = order.SubscriptionId;
+            LanguageCode = order.LanguageCode;
+            TaxPercentRate = order.TaxPercentRate;
 
             if (order.Addresses != null)
             {

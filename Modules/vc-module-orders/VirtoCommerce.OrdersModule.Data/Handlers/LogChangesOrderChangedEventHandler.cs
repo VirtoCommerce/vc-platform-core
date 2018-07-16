@@ -107,7 +107,7 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
                 var employeeName = "none";
                 if (!string.IsNullOrEmpty(modifiedOrder.EmployeeId))
                 {
-                    //TODO wait MemberModule
+                    //TODO wait CustomerModule
                     //var employee = _memberService.GetByIds(new[] { modifiedOrder.EmployeeId }).OfType<Employee>().FirstOrDefault();
                     //employeeName = employee != null ? employee.FullName : employeeName;
                 }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
+using VirtoCommerce.OrdersModule.Core;
 using VirtoCommerce.OrdersModule.Core.Events;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Notifications;
@@ -18,28 +19,28 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
 {
     public class SendNotificationsOrderChangedEventHandler : IEventHandler<OrderChangedEvent>
     {
+        private readonly INotificationService _notificationService;
         private readonly INotificationSender _notificationSender;
         private readonly IStoreService _storeService;
         //private readonly IMemberService _memberService;
         private readonly ISettingsManager _settingsManager;
-        private readonly UserManager<ApplicationUser> _userManager;
 
         public SendNotificationsOrderChangedEventHandler(INotificationSender notificationSender, IStoreService storeService
             //, IMemberService memberService
             , ISettingsManager settingsManager
-            , UserManager<ApplicationUser> userManager
+            , INotificationService notificationService
             )
         {
             _notificationSender = notificationSender;
             _storeService = storeService;
             //_memberService = memberService;
             _settingsManager = settingsManager;
-            _userManager = userManager;
+            _notificationService = notificationService;
         }
 
         public virtual async Task Handle(OrderChangedEvent message)
         {
-            if (_settingsManager.GetValue("Order.SendOrderNotifications", true))
+            if (_settingsManager.GetValue(ModuleConstants.Settings.General.SendOrderNotifications.Name, true))
             {
                 foreach (var changedEntry in message.ChangedEntries)
                 {
@@ -55,38 +56,54 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
 
             if (IsOrderCanceled(changedEntry))
             {
-                var notification = new CancelOrderEmailNotification { CustomerOrder = changedEntry.NewEntry };
-                notifications.Add(notification);
+                var originalNotification = await _notificationService.GetByTypeAsync(nameof(CancelOrderEmailNotification));
+                if (originalNotification is CancelOrderEmailNotification notification)
+                {
+                    notification.CustomerOrder = changedEntry.NewEntry;
+                    notifications.Add(notification);
+                }
             }
 
             if (changedEntry.EntryState == EntryState.Added && !changedEntry.NewEntry.IsPrototype)
             {
-                var notification = new OrderCreateEmailNotification { CustomerOrder = changedEntry.NewEntry };
-                notifications.Add(notification);
+                var originalNotification = await _notificationService.GetByTypeAsync(nameof(OrderCreateEmailNotification));
+                if (originalNotification is OrderCreateEmailNotification notification)
+                {
+                    notification.CustomerOrder = changedEntry.NewEntry;
+                    notifications.Add(notification);
+                }
             }
 
             if (HasNewStatus(changedEntry))
             {
-                var notification = new NewOrderStatusEmailNotification
+                var originalNotification = await _notificationService.GetByTypeAsync(nameof(NewOrderStatusEmailNotification));
+                if (originalNotification is NewOrderStatusEmailNotification notification)
                 {
-                    CustomerOrder = changedEntry.NewEntry,
-                    NewStatus = changedEntry.NewEntry.Status,
-                    OldStatus = changedEntry.OldEntry.Status
-                };
-
-                notifications.Add(notification);
+                    notification.CustomerOrder = changedEntry.NewEntry;
+                    notification.NewStatus = changedEntry.NewEntry.Status;
+                    notification.OldStatus = changedEntry.OldEntry.Status;
+                    notifications.Add(notification);
+                }
             }
 
             if (IsOrderPaid(changedEntry))
             {
-                var notification = new OrderPaidEmailNotification { CustomerOrder = changedEntry.NewEntry };
-                notifications.Add(notification);
+                var originalNotification = await _notificationService.GetByTypeAsync(nameof(OrderPaidEmailNotification));
+                if (originalNotification is OrderCreateEmailNotification notification)
+                {
+                    notification.CustomerOrder = changedEntry.NewEntry;
+                    notifications.Add(notification);
+                }
             }
 
             if (IsOrderSent(changedEntry))
             {
-                var notification = new OrderSentEmailNotification { CustomerOrder = changedEntry.NewEntry };
-                notifications.Add(notification);
+                var originalNotification = await _notificationService.GetByTypeAsync(nameof(OrderSentEmailNotification));
+                if (originalNotification is OrderCreateEmailNotification notification)
+                {
+                    notification.CustomerOrder = changedEntry.NewEntry;
+                    notifications.Add(notification);
+                }
             }
 
             foreach (var notification in notifications)
@@ -187,7 +204,7 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
         protected virtual Task<string> GetCustomerEmailAsync(string customerId)
         {
             return Task.FromResult(string.Empty);
-            //TODO
+            //TODO wait CustomerModule
             //var user = await _userManager.FindByIdAsync(customerId);
 
             //var contact = user != null

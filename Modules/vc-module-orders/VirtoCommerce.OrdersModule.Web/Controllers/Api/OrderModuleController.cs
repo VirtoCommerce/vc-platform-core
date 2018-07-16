@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DinkToPdf;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CartModule.Core.Services;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Payment;
@@ -16,6 +17,7 @@ using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.OrdersModule.Core.Notifications;
 using VirtoCommerce.OrdersModule.Core.Services;
+using VirtoCommerce.OrdersModule.Data.Caching;
 using VirtoCommerce.OrdersModule.Data.Repositories;
 using VirtoCommerce.OrdersModule.Data.Services;
 using VirtoCommerce.OrdersModule.Web.BackgroundJobs;
@@ -79,7 +81,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         /// <param name="criteria">criteria</param>
         [HttpPost]
         [Route("search")]
-        public async Task<ActionResult<GenericSearchResult<CustomerOrder>>> Search(CustomerOrderSearchCriteria criteria)
+        public async Task<ActionResult<GenericSearchResult<CustomerOrder>>> Search([FromBody]CustomerOrderSearchCriteria criteria)
         {
             //Scope bound ACL filtration
             criteria = FilterOrderSearchCriteria(User.Identity.Name, criteria);
@@ -159,7 +161,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
 		/// <param name="order">Customer order</param>
         [HttpPut]
         [Route("recalculate")]
-        public ActionResult<CustomerOrder> CalculateTotals(CustomerOrder order)
+        public ActionResult<CustomerOrder> CalculateTotals([FromBody]CustomerOrder order)
         {
             //Nothing to do special because all order totals will be evaluated in domain CustomerOrder properties transiently        
             return Ok(order);
@@ -254,7 +256,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         [HttpPost]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
-        public async Task<ActionResult<CustomerOrder>> CreateOrder(CustomerOrder customerOrder)
+        public async Task<ActionResult<CustomerOrder>> CreateOrder([FromBody]CustomerOrder customerOrder)
         {
             await _customerOrderService.SaveChangesAsync(new[] { customerOrder });
             return Ok(customerOrder);
@@ -266,7 +268,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         /// <param name="customerOrder">customer order</param>
         [HttpPut]
         [Route("")]
-        public async Task<ActionResult> Update(CustomerOrder customerOrder)
+        public async Task<ActionResult> Update([FromBody]CustomerOrder customerOrder)
         {
             //Check scope bound permission
             //var scopes = _permissionScopeService.GetObjectPermissionScopeStrings(customerOrder).ToArray();
@@ -356,7 +358,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         [HttpDelete]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
-        public async Task<IActionResult> DeleteOrdersByIds([FromRoute] string[] ids)
+        public async Task<IActionResult> DeleteOrdersByIds([FromQuery] string[] ids)
         {
             await _customerOrderService.DeleteAsync(ids);
             return Ok();
@@ -370,7 +372,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         /// <param name="end">end interval date</param>
         [HttpGet]
         [Route("~/api/order/dashboardStatistics")]
-        public ActionResult<DashboardStatisticsResult> GetDashboardStatistics([FromRoute]DateTime? start = null, [FromRoute]DateTime? end = null)
+        public async Task<ActionResult<DashboardStatisticsResult>> GetDashboardStatisticsAsync([FromRoute]DateTime? start = null, [FromRoute]DateTime? end = null)
         {
             DashboardStatisticsResult retVal;
             start = start ?? DateTime.UtcNow.AddYears(-1);
@@ -378,15 +380,15 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
 
             // Hack: to compinsate for incorrect Local dates to UTC
             end = end.Value.AddDays(2);
-            var cacheKey = CacheKey.With(GetType(), "OrderModuleRegion", string.Join(":", "Statistic", start.Value.ToString("yyyy-MM-dd"), end.Value.ToString("yyyy-MM-dd")));
-            lock (_lockObject)
+            var cacheKey = CacheKey.With(GetType(), string.Join(":", "Statistic", start.Value.ToString("yyyy-MM-dd"), end.Value.ToString("yyyy-MM-dd")));
+            retVal = await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                retVal = _platformMemoryCache.GetOrCreateExclusive(cacheKey, (cacheEntry) =>
-                {
-                    var collectStaticJob = new CollectOrderStatisticJob(_repositoryFactory);
-                    return collectStaticJob.CollectStatistics(start.Value, end.Value);
-                });
-            }
+                cacheEntry.AddExpirationToken(OrderSearchCacheRegion.CreateChangeToken());
+                var collectStaticJob = new CollectOrderStatisticJob(_repositoryFactory);
+                var result = await collectStaticJob.CollectStatisticsAsync(start.Value, end.Value);
+                return result;
+            });
+
             return Ok(retVal);
         }
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.InventoryModule.Core.Model;
 using VirtoCommerce.InventoryModule.Core.Services;
+using VirtoCommerce.OrdersModule.Core;
 using VirtoCommerce.OrdersModule.Core.Events;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
@@ -30,16 +31,15 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
         }
 
 
-        public virtual Task Handle(OrderChangedEvent message)
+        public virtual async Task Handle(OrderChangedEvent message)
         {
-            if (_settingsManager.GetValue("Order.AdjustInventory", true))
+            if (_settingsManager.GetValue(ModuleConstants.Settings.General.OrderAdjustInventory.Name, true))
             {
                 foreach (var changedEntry in message.ChangedEntries)
                 {
-                    TryAdjustOrderInventory(changedEntry);
+                    await TryAdjustOrderInventory(changedEntry);
                 }
             }
-            return Task.CompletedTask;
         }
 
         protected virtual async Task TryAdjustOrderInventory(GenericChangedEntry<CustomerOrder> changedEntry)

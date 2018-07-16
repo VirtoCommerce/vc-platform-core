@@ -53,10 +53,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             _platformMemoryCache = platformMemoryCache;
             _uniqueNumberGenerator = uniqueNumberGenerator;
         }
-
-
-
-
+        
         #region ICustomerOrderService Members
 
         public virtual async Task<CustomerOrder[]> GetByIdsAsync(string[] orderIds, string responseGroup = null)
@@ -170,9 +167,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             }
             ClearCache(orders);
         }
-
         
-
         #endregion
 
         protected virtual void LoadOrderDependencies(CustomerOrder order)
