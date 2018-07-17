@@ -83,6 +83,32 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 payment.BillingAddress = Addresses.First().ToModel(AbstractTypeFactory<Address>.TryCreateInstance());
             }
 
+            payment.Price = Price;
+            payment.PriceWithTax = PriceWithTax;
+            payment.DiscountAmount = DiscountAmount;
+            payment.DiscountAmountWithTax = DiscountAmountWithTax;
+            payment.TaxType = TaxType;
+            payment.TaxPercentRate = TaxPercentRate;
+            payment.TaxTotal = TaxTotal;
+            payment.Total = Total;
+            payment.TotalWithTax = TotalWithTax;
+
+            payment.CustomerId = CustomerId;
+            payment.CustomerName = CustomerName;
+            payment.OrganizationId = OrganizationId;
+            payment.OrganizationName = OrganizationName;
+            payment.GatewayCode = GatewayCode;
+            payment.Purpose = Purpose;
+            payment.OuterId = OuterId;
+            payment.Status = Status;
+            payment.AuthorizedDate = AuthorizedDate;
+            payment.CapturedDate = CapturedDate;
+            payment.VoidedDate = VoidedDate;
+            payment.IsCancelled = IsCancelled;
+            payment.CancelledDate = CancelledDate;
+            payment.CancelReason = CancelReason;
+            payment.Sum = Sum;
+
             payment.Transactions = Transactions.Select(x => x.ToModel(AbstractTypeFactory<PaymentGatewayTransaction>.TryCreateInstance())).ToList();
             payment.TaxDetails = TaxDetails.Select(x => x.ToModel(AbstractTypeFactory<TaxDetail>.TryCreateInstance())).ToList();
             payment.Discounts = Discounts.Select(x => x.ToModel(AbstractTypeFactory<Discount>.TryCreateInstance())).ToList();
@@ -101,6 +127,32 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 throw new ArgumentException(@"operation argument must be of type PaymentIn", nameof(operation));
 
             base.FromModel(payment, pkMap);
+
+            Price = payment.Price;
+            PriceWithTax = payment.PriceWithTax;
+            DiscountAmount = payment.DiscountAmount;
+            DiscountAmountWithTax = payment.DiscountAmountWithTax;
+            TaxType = payment.TaxType;
+            TaxPercentRate = payment.TaxPercentRate;
+            TaxTotal = payment.TaxTotal;
+            Total = payment.Total;
+            TotalWithTax = payment.TotalWithTax;
+
+            CustomerId = payment.CustomerId;
+            CustomerName = payment.CustomerName;
+            OrganizationId = payment.OrganizationId;
+            OrganizationName = payment.OrganizationName;
+            GatewayCode = payment.GatewayCode;
+            Purpose = payment.Purpose;
+            OuterId = payment.OuterId;
+            Status = payment.Status;
+            AuthorizedDate = payment.AuthorizedDate;
+            CapturedDate = payment.CapturedDate;
+            VoidedDate = payment.VoidedDate;
+            IsCancelled = payment.IsCancelled;
+            CancelledDate = payment.CancelledDate;
+            CancelReason = payment.CancelReason;
+            Sum = payment.Sum;
 
             if (payment.PaymentMethod != null)
             {

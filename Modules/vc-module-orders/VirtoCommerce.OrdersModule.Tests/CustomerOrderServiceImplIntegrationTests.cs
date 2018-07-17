@@ -2,17 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Payment;
+using VirtoCommerce.CoreModule.Core.Shipping;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.OrdersModule.Data.Repositories;
 using VirtoCommerce.OrdersModule.Data.Services;
 using VirtoCommerce.OrdersModule.Web.Controllers.Api;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
+using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.Platform.Data.Repositories;
 using VirtoCommerce.StoreModule.Core.Services;
 using Xunit;
@@ -22,20 +27,42 @@ using DesignTimeDbContextFactory = VirtoCommerce.OrdersModule.Data.Repositories.
 namespace VirtoCommerce.OrdersModule.Tests
 {
     // [Trait("Category", "CI")]
-    public class CRUDScenarios// : FunctionalTestBase
+    public class CustomerOrderServiceImplIntegrationTests// : FunctionalTestBase
     {
+        private readonly Mock<IStoreService> _storeServiceMock;
+        private readonly Mock<IShippingMethodsRegistrar> _shippingMethodRegistrarMock;
+        private readonly Mock<IPaymentMethodsRegistrar> _paymentMethodRegistrarMock;
+        private readonly Mock<ICustomerOrderTotalsCalculator> _customerOrderTotalsCalculatorMock;
+        private readonly Mock<IEventPublisher> _eventPublisherMock;
+        private readonly Mock<IDynamicPropertyService> _dynamicPropertyServiceMock;
+        private readonly Mock<IPlatformMemoryCache> _platformMemoryCacheMock;
+        private readonly Mock<ICacheEntry> _cacheEntryMock;
+        private static IUnitOfWork _unitOfWorkMock;
         private readonly ICustomerOrderService _customerOrderService;
-
-        public CRUDScenarios()
+        
+        public CustomerOrderServiceImplIntegrationTests()
         {
-            _customerOrderService = new CustomerOrderServiceImpl(GetOrderRepositoryFactory(), null, null, null, null, null, null, null, null, null);
+            _storeServiceMock = new Mock<IStoreService>();
+            _shippingMethodRegistrarMock = new Mock<IShippingMethodsRegistrar>();
+            _paymentMethodRegistrarMock = new Mock<IPaymentMethodsRegistrar>();
+            _customerOrderTotalsCalculatorMock = new Mock<ICustomerOrderTotalsCalculator>();
+            _eventPublisherMock = new Mock<IEventPublisher>();
+            _dynamicPropertyServiceMock = new Mock<IDynamicPropertyService>();
+            _platformMemoryCacheMock = new Mock<IPlatformMemoryCache>();
+            _cacheEntryMock = new Mock<ICacheEntry>();
+            
+            _customerOrderService = new Data.Services.CustomerOrderServiceImpl(GetOrderRepositoryFactory(), null, _dynamicPropertyServiceMock.Object,
+                _storeServiceMock.Object, null, _eventPublisherMock.Object, _customerOrderTotalsCalculatorMock.Object,
+                _shippingMethodRegistrarMock.Object, _paymentMethodRegistrarMock.Object, _platformMemoryCacheMock.Object);
         }
 
         [Fact]
         public async Task SaveChangesAsync_CreateNewOrder()
         {
             //Arrange
-            var order = GetTestOrder("order");
+            var order = GetTestOrder($"order{DateTime.Now:O}");
+            var cacheKey = CacheKey.With(_customerOrderService.GetType(), "GetByIdsAsync", string.Join("-", order.Id), null);
+            _platformMemoryCacheMock.Setup(pmc => pmc.CreateEntry(cacheKey)).Returns(_cacheEntryMock.Object);
 
             //Act
             await _customerOrderService.SaveChangesAsync(new[] { order });
@@ -120,7 +147,7 @@ namespace VirtoCommerce.OrdersModule.Tests
             };
             var item1 = new LineItem
             {
-                Id = "shoes",
+                Id = Guid.NewGuid().ToString(),
                 Sku = "shoes",
                 Price = 10,
                 ProductId = "shoes",
@@ -141,7 +168,7 @@ namespace VirtoCommerce.OrdersModule.Tests
             };
             var item2 = new LineItem
             {
-                Id = "t-shirt",
+                Id = Guid.NewGuid().ToString(),
                 Sku = "t-shirt",
                 Price = 100,
                 ProductId = "t-shirt",
@@ -206,12 +233,11 @@ namespace VirtoCommerce.OrdersModule.Tests
 
         private static Func<IOrderRepository> GetOrderRepositoryFactory()
         {
-            Func<IOrderRepository> orderRepositoryFactory = () =>
-            {
-                string[] args = null;
-                var factory = new DesignTimeDbContextFactory();
-                return new OrderRepositoryImpl(factory.CreateDbContext(args));
-            };
+            var factory = new DesignTimeDbContextFactory();
+            string[] args = null;
+            var dbContext = factory.CreateDbContext(args);
+            IUnitOfWork unitOfWork = new DbContextUnitOfWork(dbContext);
+            Func<IOrderRepository> orderRepositoryFactory = () => new OrderRepositoryImpl(dbContext, unitOfWork);
             return orderRepositoryFactory;
         }
 
