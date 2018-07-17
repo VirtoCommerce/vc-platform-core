@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<module>
+    <id>VirtoCommerce.Customer</id>
+    <version>3.0.0</version>
+    <platformVersion>3.0.0</platformVersion>
+    <dependencies>
+        <dependency id="VirtoCommerce.Core" version="3.0.0" />
+        <dependency id="VirtoCommerce.Search" version="3.0.0" />
+    </dependencies>
+
+    <title>Customer management module</title>
+    <description>Managing customers contacts and organizations</description>
+    <authors>
+        <author>Virto Commerce</author>
+        <author>Artem Dudarev</author>
+        <author>Egidijus Mažeika</author>
+    </authors>
+    <owners>
+        <owner>Virto Commerce</owner>
+    </owners>
+    <projectUrl>https://virtocommerce.com/apps/extensions/virto-customer-module</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/VirtoCommerce/vc-module-customer/master/VirtoCommerce.CustomerModule.Web/Content/logo.png</iconUrl>
+    <releaseNotes>First version.</releaseNotes>
+    <copyright>Copyright © 2011-2018 Virto Commerce. All rights reserved</copyright>
+    <tags>customer</tags>
+
+    <assemblyFile>VirtoCommerce.CustomerModule.Web.dll</assemblyFile>
+    <moduleType>VirtoCommerce.CustomerModule.Web.Module, VirtoCommerce.CustomerModule.Web</moduleType>
+
+    <scripts>
+        <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
+    </scripts>
+
+    <settings>
+        <group name="Customer|General">
+            <setting>
+                <name>Customer.ExportImport.Description</name>
+                <valueType>string</valueType>
+                <defaultValue>Export/Import contacts and organizations</defaultValue>
+                <title>Export/Import description</title>
+                <description>Module description in platform export/import wizard</description>
+            </setting>
+            <setting>
+                <name>Customer.MemberGroups</name>
+                <valueType>string</valueType>
+                <defaultValue>New</defaultValue>
+                <title>Member groups dictionary</title>
+                <description>All available members groups values</description>
+                <isArray>true</isArray>
+                <arrayValues>
+                    <value>VIP</value>
+                    <value>Wholesaler</value>
+                </arrayValues>
+            </setting>
+            <setting>
+              <name>Customer.ExportImport.PageSize</name>
+              <valueType>integer</valueType>
+              <defaultValue>50</defaultValue>
+              <title>The page size being used for Export / Import</title>
+              <description>High value may will cause slow performance</description>
+            </setting>
+        </group>
+    </settings>
+
+    <permissions>
+        <group name="Customers">
+            <permission id="customer:access" name="Open customers menu" description=""/>
+            <permission id="customer:create" name="Create a customer" description=""/>
+            <permission id="customer:read" name="View customer data" description=""/>
+            <permission id="customer:update" name="Update customer" description=""/>
+            <permission id="customer:delete" name="Delete customer" description=""/>
+        </group>
+    </permissions>
+</module>
