@@ -270,12 +270,12 @@
         }
     },
     "permissions": {
-        "core:packageType:create": "core:packageType:create",
-        "core:packageType:update": "core:packageType:update",
-        "core:packageType:delete": "Update inventory related data",
-        "core:currency:create": "Delete inventory related data",
-        "core:currency:update": "Access inventory related data",
-        "core:currency:delete": "Manage fulfillment centers"
+        "core:packageType:create": "Create packageType related data",
+        "core:packageType:update": "Update packageType related data",
+        "core:packageType:delete": "Delete packageType related data",
+        "core:currency:create": "Create currency related data",
+        "core:currency:update": "Update currency related data",
+        "core:currency:delete": "Delete currency related data"
     },
     "settings": {
         "VirtoCommerce.Core.General.TaxTypes": {

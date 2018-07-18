@@ -4,11 +4,14 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Model.Search;
 using VirtoCommerce.CustomerModule.Core.Services;
+using VirtoCommerce.CustomerModule.Data.Caching;
 using VirtoCommerce.CustomerModule.Data.Model;
 using VirtoCommerce.CustomerModule.Data.Repositories;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Data.Infrastructure;
@@ -19,11 +22,13 @@ namespace VirtoCommerce.CustomerModule.Data.Services
     {
         private readonly Func<IMemberRepository> _repositoryFactory;
         private readonly IMemberService _memberService;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public MemberSearchServiceBase(Func<IMemberRepository> repositoryFactory, IMemberService memberService)
+        public MemberSearchServiceBase(Func<IMemberRepository> repositoryFactory, IMemberService memberService, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _memberService = memberService;
+            _platformMemoryCache = platformMemoryCache;
         }
 
         #region IMemberSearchService Members
@@ -34,59 +39,64 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         /// <returns></returns>
         public virtual async Task<GenericSearchResult<Member>> SearchMembersAsync(MembersSearchCriteria criteria)
         {
-            using (var repository = _repositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), "SearchMembersAsync", criteria.GetCacheKey());
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                repository.DisableChangesTracking();
-
-                var query = LinqKit.Extensions.AsExpandable(repository.Members);
-
-                if (!criteria.MemberTypes.IsNullOrEmpty())
+                cacheEntry.AddExpirationToken(CustomerSearchCacheRegion.CreateChangeToken());
+                using (var repository = _repositoryFactory())
                 {
-                    query = query.Where(m => criteria.MemberTypes.Contains(m.MemberType));
-                }
+                    repository.DisableChangesTracking();
 
-                if (!criteria.Groups.IsNullOrEmpty())
-                {
-                    query = query.Where(m => m.Groups.Any(g => criteria.Groups.Contains(g.Group)));
-                }
+                    var query = LinqKit.Extensions.AsExpandable(repository.Members);
 
-                if (criteria.MemberId != null)
-                {
-                    //TODO: DeepSearch in specified member
-                    query = query.Where(m => m.MemberRelations.Any(r => r.AncestorId == criteria.MemberId));
-                }
-                else if (!criteria.DeepSearch)
-                {
-                    query = query.Where(m => !m.MemberRelations.Any());
-                }
+                    if (!criteria.MemberTypes.IsNullOrEmpty())
+                    {
+                        query = query.Where(m => criteria.MemberTypes.Contains(m.MemberType));
+                    }
 
-                //Get extra predicates (where clause)
-                var predicate = GetQueryPredicate(criteria);
-                query = query.Where(LinqKit.Extensions.Expand(predicate));
+                    if (!criteria.Groups.IsNullOrEmpty())
+                    {
+                        query = query.Where(m => m.Groups.Any(g => criteria.Groups.Contains(g.Group)));
+                    }
 
-                var sortInfos = criteria.SortInfos;
-                if (sortInfos.IsNullOrEmpty())
-                {
-                    sortInfos = new[] {
-                        new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Member>(m => m.MemberType), SortDirection = SortDirection.Descending },
-                        new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Member>(m => m.Name), SortDirection = SortDirection.Ascending },
+                    if (criteria.MemberId != null)
+                    {
+                        //TODO: DeepSearch in specified member
+                        query = query.Where(m => m.MemberRelations.Any(r => r.AncestorId == criteria.MemberId));
+                    }
+                    else if (!criteria.DeepSearch)
+                    {
+                        query = query.Where(m => !m.MemberRelations.Any());
+                    }
+
+                    //Get extra predicates (where clause)
+                    var predicate = GetQueryPredicate(criteria);
+                    query = query.Where(LinqKit.Extensions.Expand(predicate));
+
+                    var sortInfos = criteria.SortInfos;
+                    if (sortInfos.IsNullOrEmpty())
+                    {
+                        sortInfos = new[] {
+                            new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Member>(m => m.MemberType), SortDirection = SortDirection.Descending },
+                            new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Member>(m => m.Name), SortDirection = SortDirection.Ascending },
+                        };
+                    }
+
+                    query = query.OrderBySortInfos(sortInfos);
+
+                    var totalCount = query.Count();
+                    var memberIds = query.Select(m => m.Id).Skip(criteria.Skip).Take(criteria.Take).ToList();
+                    var members = await _memberService.GetByIdsAsync(memberIds.ToArray(), criteria.ResponseGroup, criteria.MemberTypes);
+
+                    var result = new GenericSearchResult<Member>
+                    {
+                        TotalCount = totalCount,
+                        Results = members.OrderBy(m => memberIds.IndexOf(m.Id)).ToList(),
                     };
+
+                    return result;
                 }
-
-                query = query.OrderBySortInfos(sortInfos);
-
-                var totalCount = query.Count();
-                var memberIds = query.Select(m => m.Id).Skip(criteria.Skip).Take(criteria.Take).ToList();
-                var members = await _memberService.GetByIdsAsync(memberIds.ToArray(), criteria.ResponseGroup, criteria.MemberTypes);
-
-                var result = new GenericSearchResult<Member>
-                {
-                    TotalCount = totalCount,
-                    Results = members.OrderBy(m => memberIds.IndexOf(m.Id)).ToList(),
-                };
-
-                return result;
-            }
+            });
         }
         #endregion
 

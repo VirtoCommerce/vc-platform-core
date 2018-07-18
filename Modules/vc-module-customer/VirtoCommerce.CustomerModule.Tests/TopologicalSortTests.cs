@@ -1,15 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http.Results;
 using VirtoCommerce.CustomerModule.Data.Common;
-using VirtoCommerce.CustomerModule.Web.Controllers.Api;
-using VirtoCommerce.Domain.Commerce.Model;
-using VirtoCommerce.Domain.Commerce.Model.Search;
-using VirtoCommerce.Domain.Customer.Model;
 using Xunit;
 
-namespace VirtoCommerce.CustomerModule.Test
+namespace VirtoCommerce.CustomerModule.Tests
 {
     public class TopologicalSortTests
     {

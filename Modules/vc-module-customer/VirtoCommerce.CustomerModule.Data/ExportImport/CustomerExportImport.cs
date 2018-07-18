@@ -3,23 +3,25 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
-using VirtoCommerce.CustomerModule.Data.Common;
-using VirtoCommerce.Domain.Customer.Model;
-using VirtoCommerce.Domain.Customer.Services;
+using VirtoCommerce.CustomerModule.Core.Model;
+using VirtoCommerce.CustomerModule.Core.Model.Search;
+using VirtoCommerce.CustomerModule.Core.Services;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Settings;
+using TopologicalSort = VirtoCommerce.CustomerModule.Data.Common.TopologicalSort;
 
-namespace VirtoCommerce.CustomerModule.Web.ExportImport
+namespace VirtoCommerce.CustomerModule.Data.ExportImport
 {
-    public sealed class CustomerExportImport
+    public sealed class CustomerExportImport : IExportSupport, IImportSupport
     {
         private readonly IMemberService _memberService;
         private readonly IMemberSearchService _memberSearchService;
         private readonly ISettingsManager _settingsManager;
         private readonly JsonSerializer _serializer;
-
-        private int? _batchSize;
+        private const int _batchSize = 50;
 
         public CustomerExportImport(
             IMemberService memberService,
@@ -33,24 +35,13 @@ namespace VirtoCommerce.CustomerModule.Web.ExportImport
             _serializer = new JsonSerializer { TypeNameHandling = TypeNameHandling.All };
         }
 
-        private int BatchSize
+        public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
-            get
-            {
-                if (_batchSize == null)
-                {
-                    _batchSize = _settingsManager.GetValue("Customer.ExportImport.PageSize", 50);
-                }
-                return (int)_batchSize;
-            }
-        }
-
-        public void DoExport(Stream backupStream, Action<ExportImportProgressInfo> progressCallback)
-        {
+            cancellationToken.ThrowIfCancellationRequested();
             var progressInfo = new ExportImportProgressInfo { Description = "loading data..." };
             progressCallback(progressInfo);
 
-            using (var sw = new StreamWriter(backupStream, Encoding.UTF8))
+            using (var sw = new StreamWriter(outStream, Encoding.UTF8))
             using (var writer = new JsonTextWriter(sw))
             {
                 writer.WriteStartObject();
@@ -58,22 +49,25 @@ namespace VirtoCommerce.CustomerModule.Web.ExportImport
                 progressInfo.Description = "Members exporting...";
                 progressCallback(progressInfo);
 
-                var memberCount = _memberSearchService.SearchMembers(new MembersSearchCriteria { Take = 0, DeepSearch = true }).TotalCount;
+                var members = await _memberSearchService.SearchMembersAsync(new MembersSearchCriteria { Take = 0, DeepSearch = true });
+                var memberCount = members.TotalCount;
                 writer.WritePropertyName("MembersTotalCount");
                 writer.WriteValue(memberCount);
+
+                cancellationToken.ThrowIfCancellationRequested();
 
                 writer.WritePropertyName("Members");
                 writer.WriteStartArray();
 
-                for (var i = 0; i < memberCount; i += BatchSize)
+                for (var i = 0; i < memberCount; i += _batchSize)
                 {
-                    var searchResponse = _memberSearchService.SearchMembers(new MembersSearchCriteria { Skip = i, Take = BatchSize, DeepSearch = true });
+                    var searchResponse = await _memberSearchService.SearchMembersAsync(new MembersSearchCriteria { Skip = i, Take = _batchSize, DeepSearch = true });
                     foreach (var member in searchResponse.Results)
                     {
                         _serializer.Serialize(writer, member);
                     }
                     writer.Flush();
-                    progressInfo.Description = $"{ Math.Min(memberCount, i + BatchSize) } of { memberCount } members exported";
+                    progressInfo.Description = $"{ Math.Min(memberCount, i + _batchSize) } of { memberCount } members exported";
                     progressCallback(progressInfo);
                 }
                 writer.WriteEndArray();
@@ -83,12 +77,14 @@ namespace VirtoCommerce.CustomerModule.Web.ExportImport
             }
         }
 
-        public void DoImport(Stream backupStream, Action<ExportImportProgressInfo> progressCallback)
+        public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
+            ICancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var progressInfo = new ExportImportProgressInfo();
             var membersTotalCount = 0;
 
-            using (var streamReader = new StreamReader(backupStream))
+            using (var streamReader = new StreamReader(inputStream))
             using (var reader = new JsonTextReader(streamReader))
             {
                 while (reader.Read())
@@ -101,6 +97,7 @@ namespace VirtoCommerce.CustomerModule.Web.ExportImport
                         }
                         else if (reader.Value.ToString() == "Members")
                         {
+                            cancellationToken.ThrowIfCancellationRequested();
                             reader.Read();
                             if (reader.TokenType == JsonToken.StartArray)
                             {
@@ -117,6 +114,8 @@ namespace VirtoCommerce.CustomerModule.Web.ExportImport
 
                                     reader.Read();
                                 }
+
+                                cancellationToken.ThrowIfCancellationRequested();
                                 //Need to import by topological sort order, because Organizations have a graph structure and here references integrity must be preserved 
                                 var organizations = members.OfType<Organization>();
                                 var nodes = new HashSet<string>(organizations.Select(x => x.Id));
@@ -124,9 +123,9 @@ namespace VirtoCommerce.CustomerModule.Web.ExportImport
                                 var orgsTopologicalSortedList = TopologicalSort.Sort(nodes, edges);
                                 members = members.OrderByDescending(x => orgsTopologicalSortedList.IndexOf(x.Id)).ToList();
 
-                                for (int i = 0; i < membersCount; i += BatchSize)
+                                for (int i = 0; i < membersCount; i += _batchSize)
                                 {
-                                    _memberService.SaveChanges(members.Skip(i).Take(BatchSize).ToArray());
+                                    await _memberService.SaveChangesAsync(members.Skip(i).Take(_batchSize).ToArray());
 
                                     if (membersTotalCount > 0)
                                     {

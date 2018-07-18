@@ -1,4 +1,4 @@
-﻿{
+{
     "customer": {
         "main-menu-title": "Contacts",
         "blades": {
@@ -194,6 +194,19 @@
                 "title": "Save changes",
                 "message": "The Phone number has been modified. Do you want to save changes?"
             }
+        }
+    },
+    "permissions": {
+        "customer:access": "Open customers menu",
+        "customer:create": "Create customer related data",
+        "customer:read": "View customer related data",
+        "customer:update": "Update customer related data",
+        "customer:delete": "Delete customer related data"
+    },
+    "settings": {
+        "Customer.MemberGroups": {
+            "description": "All available members groups values",
+            "title": "Member groups dictionary"
         }
     }
 }

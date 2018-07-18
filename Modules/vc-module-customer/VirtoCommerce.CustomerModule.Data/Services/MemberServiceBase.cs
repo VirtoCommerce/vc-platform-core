@@ -2,12 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.CustomerModule.Core.Events;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Services;
+using VirtoCommerce.CustomerModule.Data.Caching;
 using VirtoCommerce.CustomerModule.Data.Model;
 using VirtoCommerce.CustomerModule.Data.Repositories;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
@@ -24,13 +27,15 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         private readonly IEventPublisher _eventPublisher;
         private readonly IDynamicPropertyService _dynamicPropertyService;
         private readonly ISeoService _seoService;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        protected MemberServiceBase(Func<IMemberRepository> repositoryFactory,IEventPublisher eventPublisher, IDynamicPropertyService dynamicPropertyService, ISeoService seoService)
+        protected MemberServiceBase(Func<IMemberRepository> repositoryFactory,IEventPublisher eventPublisher, IDynamicPropertyService dynamicPropertyService, ISeoService seoService, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
             _dynamicPropertyService = dynamicPropertyService;
             _seoService = seoService;
+            _platformMemoryCache = platformMemoryCache;
         }
         
         #region IMemberService Members
@@ -44,36 +49,47 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         /// <returns></returns>
         public virtual async Task<Member[]> GetByIdsAsync(string[] memberIds, string responseGroup = null, string[] memberTypes = null)
         {
-            var retVal = new List<Member>();
-            using (var repository = _repositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", memberIds), responseGroup, string.Join("-", memberTypes));
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                repository.DisableChangesTracking();
-                //There is loading for all corresponding members conceptual model entities types
-                //query performance when TPT inheritance used it is too slow, for improve performance we are passing concrete member types in to the repository
-                var memberTypeInfos = AbstractTypeFactory<Member>.AllTypeInfos.Where(t => t.MappedType != null);
-                if (memberTypes != null)
+                var retVal = new List<Member>();
+                using (var repository = _repositoryFactory())
                 {
-                    memberTypeInfos = memberTypeInfos.Where(x => memberTypes.Any(mt => x.IsAssignableTo(mt)));
-                }
-                memberTypes = memberTypeInfos.Select(t => t.MappedType.AssemblyQualifiedName).Distinct().ToArray();
-
-                var dataMembers = await repository.GetMembersByIdsAsync(memberIds, responseGroup, memberTypes);
-                foreach (var dataMember in dataMembers)
-                {
-                    var member = AbstractTypeFactory<Member>.TryCreateInstance(dataMember.MemberType);
-                    if (member != null)
+                    repository.DisableChangesTracking();
+                    //There is loading for all corresponding members conceptual model entities types
+                    //query performance when TPT inheritance used it is too slow, for improve performance we are passing concrete member types in to the repository
+                    var memberTypeInfos = AbstractTypeFactory<Member>.AllTypeInfos.Where(t => t.MappedType != null);
+                    if (memberTypes != null)
                     {
-                        dataMember.ToModel(member);
-                        retVal.Add(member);
+                        memberTypeInfos = memberTypeInfos.Where(x => memberTypes.Any(mt => x.IsAssignableTo(mt)));
+                    }
+                    memberTypes = memberTypeInfos.Select(t => t.MappedType.AssemblyQualifiedName).Distinct().ToArray();
+
+                    var dataMembers = await repository.GetMembersByIdsAsync(memberIds, responseGroup, memberTypes);
+                    foreach (var dataMember in dataMembers)
+                    {
+                        var member = AbstractTypeFactory<Member>.TryCreateInstance(dataMember.MemberType);
+                        if (member != null)
+                        {
+                            dataMember.ToModel(member);
+                            retVal.Add(member);
+                            cacheEntry.AddExpirationToken(CustomerCacheRegion.CreateChangeToken(member));
+                        }
                     }
                 }
-            }
 
-            var taskDynamicProperty = _dynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal.ToArray<IHasDynamicProperties>());
-            var taskSeo = _seoService.LoadSeoForObjectsAsync(retVal.OfType<ISeoSupport>().ToArray());
-            await Task.WhenAll(taskDynamicProperty, taskSeo);
+                var taskDynamicProperty = _dynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal.ToArray<IHasDynamicProperties>());
+                var taskSeo = _seoService.LoadSeoForObjectsAsync(retVal.OfType<ISeoSupport>().ToArray());
+                await Task.WhenAll(taskDynamicProperty, taskSeo);
 
-            return retVal.ToArray();
+                return retVal.ToArray();
+            });
+        }
+
+        public async Task<Member> GetByIdAsync(string memberId, string responseGroup = null, string memberType = null)
+        {
+            var members = await GetByIdsAsync(new[] {memberId}, responseGroup, new[] {memberType});
+            return members.FirstOrDefault();
         }
 
         /// <summary>
@@ -120,6 +136,8 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                 await _eventPublisher.Publish(new MemberChangedEvent(changedEntries));
             }
 
+            ClearCache(members);
+
             //TODO move to handler
             ////Save dynamic properties
             //foreach (var member in members)
@@ -155,10 +173,22 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                     //}
                     await _eventPublisher.Publish(new MemberChangedEvent(changedEntries));
                 }
+
+                ClearCache(members);
+            }
+        }
+
+        private void ClearCache(IEnumerable<Member> entities)
+        {
+            CustomerSearchCacheRegion.ExpireRegion();
+
+            foreach (var entity in entities)
+            {
+                CustomerCacheRegion.ExpireInventory(entity);
             }
         }
         #endregion
 
-        
+
     }
 }

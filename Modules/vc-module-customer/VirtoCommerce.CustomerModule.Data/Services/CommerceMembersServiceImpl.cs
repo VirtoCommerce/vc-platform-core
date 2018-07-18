@@ -7,6 +7,7 @@ using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Model.Search;
 using VirtoCommerce.CustomerModule.Data.Model;
 using VirtoCommerce.CustomerModule.Data.Repositories;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
@@ -19,8 +20,9 @@ namespace VirtoCommerce.CustomerModule.Data.Services
     public class CommerceMembersServiceImpl : MemberServiceBase
     {
         //private readonly ISecurityService _securityService;
-        public CommerceMembersServiceImpl(Func<ICustomerRepository> repositoryFactory, IEventPublisher eventPublisher, IDynamicPropertyService dynamicPropertyService, ISeoService seoService)
-            : base(repositoryFactory, eventPublisher, dynamicPropertyService, seoService)
+        public CommerceMembersServiceImpl(Func<ICustomerRepository> repositoryFactory, IEventPublisher eventPublisher
+            , IDynamicPropertyService dynamicPropertyService, ISeoService seoService, IPlatformMemoryCache platformMemoryCache)
+            : base(repositoryFactory, eventPublisher, dynamicPropertyService, seoService, platformMemoryCache)
         {
         //    _securityService = securityService;
         }

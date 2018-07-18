@@ -1,23 +1,21 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Web.Http;
-using System.Web.Http.Description;
-using Microsoft.Practices.ObjectBuilder2;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.CustomerModule.Core;
+using VirtoCommerce.CustomerModule.Core.Model;
+using VirtoCommerce.CustomerModule.Core.Model.Search;
+using VirtoCommerce.CustomerModule.Core.Services;
 using VirtoCommerce.CustomerModule.Web.Model;
-using VirtoCommerce.CustomerModule.Web.Security;
-using VirtoCommerce.Domain.Commerce.Model;
-using VirtoCommerce.Domain.Commerce.Model.Search;
-using VirtoCommerce.Domain.Customer.Model;
-using VirtoCommerce.Domain.Customer.Services;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Web.Security;
 
 namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
 {
-    [RoutePrefix("api")]
-    [CheckPermission(Permission = CustomerPredefinedPermissions.Read)]
-    public class CustomerModuleController : ApiController
+    [Route("api")]
+    
+    public class CustomerModuleController : Controller
     {
         private readonly IMemberService _memberService;
         private readonly IMemberSearchService _memberSearchService;
@@ -34,8 +32,8 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// <remarks>Get array of all organizations.</remarks>
         [HttpGet]
         [Route("members/organizations")]
-        [ResponseType(typeof(Organization[]))]
-        public IHttpActionResult ListOrganizations()
+        [Authorize(ModuleConstants.Security.Permissions.Access)]
+        public async Task<ActionResult<Organization[]>> ListOrganizations()
         {
             var searchCriteria = new MembersSearchCriteria
             {
@@ -43,7 +41,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
                 DeepSearch = true,
                 Take = int.MaxValue
             };
-            var result = _memberSearchService.SearchMembers(searchCriteria);
+            var result = await _memberSearchService.SearchMembersAsync(searchCriteria);
 
             return Ok(result.Results.OfType<Organization>());
         }
@@ -55,10 +53,10 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// <param name="criteria">concrete instance of SearchCriteria type type will be created by using PolymorphicMemberSearchCriteriaJsonConverter</param>
         [HttpPost]
         [Route("members/search")]
-        [ResponseType(typeof(GenericSearchResult<Member>))]
-        public IHttpActionResult Search(MembersSearchCriteria criteria)
+        [Authorize(ModuleConstants.Security.Permissions.Access)]
+        public async Task<ActionResult<GenericSearchResult<Member>>> Search(MembersSearchCriteria criteria)
         {
-            var result = _memberSearchService.SearchMembers(criteria);
+            var result = await _memberSearchService.SearchMembersAsync(criteria);
             return Ok(result);
         }
 
@@ -70,11 +68,11 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// <param name="memberType">member type</param>
         [HttpGet]
         [Route("members/{id}")]
-        [ResponseType(typeof(Member))]
-        public IHttpActionResult GetMemberById(string id, string responseGroup = null, string memberType = null)
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
+        public async Task<ActionResult<Member>> GetMemberById(string id, string responseGroup = null, string memberType = null)
         {
             //pass member type name for better perfomance
-            var retVal = _memberService.GetByIds(new[] { id }, responseGroup, memberType != null ? new[] { memberType } : null).FirstOrDefault();
+            var retVal = await _memberService.GetByIdAsync(id, responseGroup, memberType);
             if (retVal != null)
             {
                 // Casting to dynamic fixes a serialization error in XML formatter when the returned object type is derived from the Member class.
@@ -85,11 +83,11 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
 
         [HttpGet]
         [Route("members")]
-        [ResponseType(typeof(Member))]
-        public IHttpActionResult GetMembersByIds([FromUri] string[] ids, string responseGroup = null, string[] memberTypes = null)
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
+        public async Task<ActionResult<Member[]>> GetMembersByIds([FromQuery] string[] ids, string responseGroup = null, string[] memberTypes = null)
         {
             //pass member types name for better perfomance
-            var retVal = _memberService.GetByIds(ids, responseGroup, memberTypes != null ? memberTypes : null);
+            var retVal = await _memberService.GetByIdsAsync(ids, responseGroup, memberTypes != null ? memberTypes : null);
             if (retVal != null)
             {
                 // Casting to dynamic fixes a serialization error in XML formatter when the returned object type is derived from the Member class.
@@ -105,12 +103,11 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("members")]
-        [ResponseType(typeof(Member))]
-        [CheckPermission(Permission = CustomerPredefinedPermissions.Create)]
-        public IHttpActionResult CreateMember([FromBody] Member member)
+        [Authorize(ModuleConstants.Security.Permissions.Create)]
+        public async Task<ActionResult<Member>> CreateMember([FromBody] Member member)
         {
-            _memberService.SaveChanges(new[] { member });
-            var retVal = _memberService.GetByIds(new[] { member.Id }, null, new[] { member.MemberType }).FirstOrDefault();
+            await _memberService.SaveChangesAsync(new[] { member });
+            var retVal = _memberService.GetByIdAsync(member.Id, null, member.MemberType);
 
             // Casting to dynamic fixes a serialization error in XML formatter when the returned object type is derived from the Member class.
             return Ok((dynamic)retVal);
@@ -122,12 +119,11 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// <param name="member">concrete instance of abstract member type will be created by using PolymorphicMemberJsonConverter</param>
         [HttpPut]
         [Route("members")]
-        [ResponseType(typeof(void))]
-        [CheckPermission(Permission = CustomerPredefinedPermissions.Update)]
-        public IHttpActionResult UpdateMember(Member member)
+        [Authorize(ModuleConstants.Security.Permissions.Update)]
+        public async Task<ActionResult> UpdateMember(Member member)
         {
-            _memberService.SaveChanges(new[] { member });
-            return StatusCode(HttpStatusCode.NoContent);
+            await _memberService.SaveChangesAsync(new[] { member });
+            return Ok();
         }
 
         /// <summary>
@@ -137,12 +133,11 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// <param name="ids">An array of members ids</param>
         [HttpDelete]
         [Route("members")]
-        [ResponseType(typeof(void))]
-        [CheckPermission(Permission = CustomerPredefinedPermissions.Delete)]
-        public IHttpActionResult DeleteMembers([FromUri] string[] ids)
+        [Authorize(ModuleConstants.Security.Permissions.Delete)]
+        public async Task<ActionResult> DeleteMembers([FromQuery] string[] ids)
         {
-            _memberService.Delete(ids);
-            return StatusCode(HttpStatusCode.NoContent);
+            await _memberService.DeleteAsync(ids);
+            return Ok();
         }
 
         /// <summary>
@@ -152,31 +147,34 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// <param name="criteria">concrete instance of SearchCriteria type will be created by using PolymorphicMemberSearchCriteriaJsonConverter</param>
         [HttpPost]
         [Route("members/delete")]
-        [ResponseType(typeof(void))]
-        [CheckPermission(Permission = CustomerPredefinedPermissions.Delete)]
-        public IHttpActionResult BulkDeleteMembersBySearchCriteria(MembersSearchCriteria criteria)
+        [Authorize(ModuleConstants.Security.Permissions.Delete)]
+        public async Task<ActionResult> BulkDeleteMembersBySearchCriteria(MembersSearchCriteria criteria)
         {
             bool hasSearchCriteriaMembers;
             var listIds = new List<string>();
             do
             {
-                var searchResult = _memberSearchService.SearchMembers(criteria);
+                var searchResult = await _memberSearchService.SearchMembersAsync(criteria);
                 hasSearchCriteriaMembers = searchResult.Results.Any();
                 if (hasSearchCriteriaMembers)
                 {
-                    searchResult.Results.ForEach(res => listIds.Add(res.Id));
+                    foreach (var member in searchResult.Results)
+                    {
+                        listIds.Add(member.Id);
+                    }
+                    
                     criteria.Skip += criteria.Take;
                 }
             }
             while (hasSearchCriteriaMembers);
 
-            listIds.ProcessWithPaging(criteria.Take, (ids, currentItem, totalCount) =>
+            listIds.ProcessWithPaging(criteria.Take, async (ids, currentItem, totalCount) =>
             {
-                _memberService.Delete(ids.ToArray());
+                await _memberService.DeleteAsync(ids.ToArray());
             });
             
 
-            return StatusCode(HttpStatusCode.NoContent);
+            return Ok();
         }
 
         #region Special members for storefront C# API client  (because it not support polymorph types)
@@ -186,9 +184,8 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// </summary>
         [HttpPost]
         [Route("contacts")]
-        [ResponseType(typeof(Contact))]
-        [CheckPermission(Permission = CustomerPredefinedPermissions.Create)]
-        public IHttpActionResult CreateContact(Contact contact)
+        [Authorize(ModuleConstants.Security.Permissions.Create)]
+        public Task<ActionResult<Member>> CreateContact(Contact contact)
         {
             return CreateMember(contact);
         }
@@ -198,9 +195,8 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// </summary>
         [HttpPut]
         [Route("contacts")]
-        [ResponseType(typeof(void))]
-        [CheckPermission(Permission = CustomerPredefinedPermissions.Update)]
-        public IHttpActionResult UpdateContact(Contact contact)
+        [Authorize(ModuleConstants.Security.Permissions.Update)]
+        public Task<ActionResult> UpdateContact(Contact contact)
         {
             return UpdateMember(contact);
         }
@@ -210,9 +206,8 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// </summary>
         [HttpPost]
         [Route("organizations")]
-        [ResponseType(typeof(Organization))]
-        [CheckPermission(Permission = CustomerPredefinedPermissions.Create)]
-        public IHttpActionResult CreateOrganization(Organization organization)
+        [Authorize(ModuleConstants.Security.Permissions.Create)]
+        public Task<ActionResult<Member>> CreateOrganization(Organization organization)
         {
             return CreateMember(organization);
         }
@@ -222,9 +217,8 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// </summary>
         [HttpPut]
         [Route("organizations")]
-        [ResponseType(typeof(void))]
-        [CheckPermission(Permission = CustomerPredefinedPermissions.Update)]
-        public IHttpActionResult UpdateOrganization(Organization organization)
+        [Authorize(ModuleConstants.Security.Permissions.Update)]
+        public Task<ActionResult> UpdateOrganization(Organization organization)
         {
             return UpdateMember(organization);
         }
@@ -236,9 +230,8 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// <param name="ids">An array of organizations ids</param>
         [HttpDelete]
         [Route("organizations")]
-        [ResponseType(typeof(void))]
-        [CheckPermission(Permission = CustomerPredefinedPermissions.Delete)]
-        public IHttpActionResult DeleteOrganizations([FromUri] string[] ids)
+        [Authorize(ModuleConstants.Security.Permissions.Delete)]
+        public Task<ActionResult> DeleteOrganizations([FromQuery] string[] ids)
         {
             return DeleteMembers(ids);
         }
@@ -250,9 +243,8 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// <param name="ids">An array of contacts ids</param>
         [HttpDelete]
         [Route("contacts")]
-        [ResponseType(typeof(void))]
-        [CheckPermission(Permission = CustomerPredefinedPermissions.Delete)]
-        public IHttpActionResult DeleteContacts([FromUri] string[] ids)
+        [Authorize(ModuleConstants.Security.Permissions.Delete)]
+        public Task<ActionResult> DeleteContacts([FromQuery] string[] ids)
         {
             return DeleteMembers(ids);
         }
@@ -263,8 +255,8 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// <param name="id">Organization id</param>
         [HttpGet]
         [Route("organizations/{id}")]
-        [ResponseType(typeof(Organization))]
-        public IHttpActionResult GetOrganizationById(string id)
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
+        public Task<ActionResult<Member>> GetOrganizationById(string id)
         {
             return GetMemberById(id, null, typeof(Organization).Name);
         }
@@ -275,8 +267,8 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// <param name="ids">Organization ids</param>
         [HttpGet]
         [Route("organizations")]
-        [ResponseType(typeof(Organization))]
-        public IHttpActionResult GetOrganizationsByIds([FromUri]string[] ids)
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
+        public Task<ActionResult<Member[]>> GetOrganizationsByIds([FromQuery]string[] ids)
         {
             return GetMembersByIds(ids, null, new[] { typeof(Organization).Name });
         }
@@ -287,8 +279,8 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// <param name="id">Contact ID</param>
         [HttpGet]
         [Route("contacts/{id}")]
-        [ResponseType(typeof(Contact))]
-        public IHttpActionResult GetContactById(string id)
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
+        public Task<ActionResult<Member>> GetContactById(string id)
         {
             return GetMemberById(id, null, typeof(Contact).Name);
         }
@@ -300,8 +292,8 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// <param name="ids">contact IDs</param>
         [HttpGet]
         [Route("contacts")]
-        [ResponseType(typeof(Contact[]))]
-        public IHttpActionResult GetContactsByIds([FromUri]string[] ids)
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
+        public Task<ActionResult<Member[]>> GetContactsByIds([FromQuery]string[] ids)
         {          
             return GetMembersByIds(ids, null, new[] { typeof(Contact).Name });
         }
@@ -312,8 +304,8 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// <param name="id">Vendor ID</param>
         [HttpGet]
         [Route("vendors/{id}")]
-        [ResponseType(typeof(Vendor))]
-        public IHttpActionResult GetVendorById(string id)
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
+        public Task<ActionResult<Member>> GetVendorById(string id)
         {
             return GetMemberById(id, null, typeof(Vendor).Name);
         }
@@ -324,8 +316,8 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// <param name="ids">Vendors IDs</param>
         [HttpGet]
         [Route("vendors")]
-        [ResponseType(typeof(Vendor[]))]
-        public IHttpActionResult GetVendorsByIds([FromUri]string[] ids)
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
+        public Task<ActionResult<Member[]>> GetVendorsByIds([FromQuery]string[] ids)
         {
             return GetMembersByIds(ids, null, new[] { typeof(Vendor).Name });
         }
@@ -337,8 +329,8 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// <param name="criteria">concrete instance of SearchCriteria type type will be created by using PolymorphicMemberSearchCriteriaJsonConverter</param>
         [HttpPost]
         [Route("vendors/search")]
-        [ResponseType(typeof(VendorSearchResult))]
-        public IHttpActionResult SearchVendors(MembersSearchCriteria criteria)
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
+        public async Task<ActionResult<GenericSearchResult<Vendor>>> SearchVendors(MembersSearchCriteria criteria)
         {
             if (criteria == null)
             {
@@ -346,12 +338,12 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
             }
 
             criteria.MemberType = typeof(Vendor).Name;
-            var searchResult = _memberSearchService.SearchMembers(criteria);
+            var searchResult = await _memberSearchService.SearchMembersAsync(criteria);
 
-            var result = new VendorSearchResult
+            var result = new GenericSearchResult<Vendor>
             {
                 TotalCount = searchResult.TotalCount,
-                Vendors = searchResult.Results.OfType<Vendor>().ToList()
+                Results = searchResult.Results.OfType<Vendor>().ToList()
             };
 
             return Ok(result);
@@ -359,17 +351,16 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
 
         [HttpPut]
         [Route("addresses")]
-        [ResponseType(typeof(void))]
-        [CheckPermission(Permission = CustomerPredefinedPermissions.Update)]
-        public IHttpActionResult UpdateAddesses(string memberId, [FromBody] IEnumerable<Address> addresses)
+        [Authorize(ModuleConstants.Security.Permissions.Update)]
+        public async Task<ActionResult> UpdateAddesses(string memberId, [FromBody] IEnumerable<Address> addresses)
         {
-            var member = _memberService.GetByIds(new[] { memberId }).FirstOrDefault();
+            var member = await _memberService.GetByIdAsync(memberId);
             if (member != null)
             {
                 member.Addresses = addresses.ToList();
-                _memberService.SaveChanges(new[] { member });
+                await _memberService.SaveChangesAsync(new[] { member });
             }
-            return StatusCode(HttpStatusCode.NoContent);
+            return Ok();
         }
 
         /// <summary>
@@ -377,9 +368,8 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// </summary>
         [HttpPost]
         [Route("employees")]
-        [ResponseType(typeof(Employee))]
-        [CheckPermission(Permission = CustomerPredefinedPermissions.Create)]
-        public IHttpActionResult CreateEmployee(Employee employee)
+        [Authorize(ModuleConstants.Security.Permissions.Create)]
+        public Task<ActionResult<Member>> CreateEmployee(Employee employee)
         {
             return CreateMember(employee);
         }
@@ -390,8 +380,8 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// <param name="ids">contact IDs</param>
         [HttpGet]
         [Route("employees")]
-        [ResponseType(typeof(Employee[]))]
-        public IHttpActionResult GetEmployeesByIds([FromUri]string[] ids)
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
+        public Task<ActionResult<Member[]>> GetEmployeesByIds([FromQuery]string[] ids)
         {
             return GetMembersByIds(ids, null, new[] { typeof(Employee).Name });
         }
@@ -402,10 +392,11 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         /// <param name="id">member Id</param>
         [HttpGet]
         [Route("members/{id}/organizations")]
-        [ResponseType(typeof(Organization[]))]
-        public IHttpActionResult GetMemberOrganizations([FromUri] string id)
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
+        public async Task<ActionResult<Member[]>> GetMemberOrganizations([FromQuery] string id)
         {
-            var member = _memberService.GetByIds(new[] { id  }, null, new[] { typeof(Employee).Name, typeof(Contact).Name }).FirstOrDefault();
+            var members = await _memberService.GetByIdsAsync(new[] { id  }, null, new[] { typeof(Employee).Name, typeof(Contact).Name });
+            var member = members.FirstOrDefault();
             var organizationsIds = new List<string>();
             if (member != null)
             {
@@ -418,7 +409,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
                     organizationsIds = employee.Organizations?.ToList();
                 }
             }
-            return GetOrganizationsByIds(organizationsIds.ToArray());
+            return await GetOrganizationsByIds(organizationsIds.ToArray());
         }
         #endregion
     }

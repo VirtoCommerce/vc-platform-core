@@ -4,16 +4,11 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Controllers\Api\CustomerModuleController.cs" />
-    <Compile Remove="ExportImport\CustomerExportImport.cs" />
-    <Compile Remove="Module.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\Api\" />
-    <Folder Include="ExportImport\" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore" Version="2.1.0" />
+        <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.1.0" />
+    </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\VirtoCommerce.CustomerModule.Core\VirtoCommerce.CustomerModule.Core.csproj" />
