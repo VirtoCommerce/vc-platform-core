@@ -1,8 +1,5 @@
-﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using VirtoCommerce.Domain.Customer.Model;
+using VirtoCommerce.CustomerModule.Core.Model;
 
 namespace VirtoCommerce.CustomerModule.Web.Model
 {

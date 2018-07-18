@@ -10,7 +10,6 @@ namespace VirtoCommerce.CustomerModule.Data.Model
     {
         [EmailAddress]
         [StringLength(254)]
-        //[Index(IsUnique = false)]
         public string Address { get; set; }
 
         public bool IsValidated { get; set; }

@@ -6,6 +6,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 {
     public class VendorDataEntity : MemberDataEntity
     {
+        [StringLength(256)]
         public string Description { get; set; }
         [StringLength(2048)]
         public string SiteUrl { get; set; }

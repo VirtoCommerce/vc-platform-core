@@ -20,11 +20,9 @@ namespace VirtoCommerce.CustomerModule.Data.Model
         }
 
         [StringLength(64)]
-        //[Index(IsUnique = false)]
         public string MemberType { get; set; }
         
         [StringLength(128)]
-        //[Index(IsUnique = false)]
         public string Name { get; set; }
 
         #region NavigationProperties
