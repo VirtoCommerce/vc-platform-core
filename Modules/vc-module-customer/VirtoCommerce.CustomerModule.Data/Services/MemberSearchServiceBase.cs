@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Model.Search;
@@ -18,7 +19,7 @@ using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CustomerModule.Data.Services
 {
-    public class MemberSearchServiceBase : IMemberSearchService
+    public class MemberSearchServiceBase
     {
         private readonly Func<IMemberRepository> _repositoryFactory;
         private readonly IMemberService _memberService;
@@ -46,6 +47,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                 using (var repository = _repositoryFactory())
                 {
                     repository.DisableChangesTracking();
+                    var result = new GenericSearchResult<Member>();
 
                     var query = LinqKit.Extensions.AsExpandable(repository.Members);
 
@@ -84,15 +86,10 @@ namespace VirtoCommerce.CustomerModule.Data.Services
 
                     query = query.OrderBySortInfos(sortInfos);
 
-                    var totalCount = query.Count();
-                    var memberIds = query.Select(m => m.Id).Skip(criteria.Skip).Take(criteria.Take).ToList();
-                    var members = await _memberService.GetByIdsAsync(memberIds.ToArray(), criteria.ResponseGroup, criteria.MemberTypes);
+                    result.TotalCount = await query.CountAsync();
 
-                    var result = new GenericSearchResult<Member>
-                    {
-                        TotalCount = totalCount,
-                        Results = members.OrderBy(m => memberIds.IndexOf(m.Id)).ToList(),
-                    };
+                    var members = await query.Skip(criteria.Skip).Take(criteria.Take).ToListAsync();
+                    result.Results = members.Select(m => m.ToModel(AbstractTypeFactory<Member>.TryCreateInstance(m.MemberType))).ToList();
 
                     return result;
                 }

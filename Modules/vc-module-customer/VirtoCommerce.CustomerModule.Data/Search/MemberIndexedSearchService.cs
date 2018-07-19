@@ -13,11 +13,11 @@ namespace VirtoCommerce.CustomerModule.Data.Search
 {
     public class MemberIndexedSearchService
     {
-        private readonly ISearchRequestBuilder[] _searchRequestBuilders;
+        private readonly IEnumerable<ISearchRequestBuilder> _searchRequestBuilders;
         private readonly ISearchProvider _searchProvider;
         private readonly IMemberService _memberService;
 
-        public MemberIndexedSearchService(ISearchRequestBuilder[] searchRequestBuilders, ISearchProvider searchProvider, IMemberService memberService)
+        public MemberIndexedSearchService(IEnumerable<ISearchRequestBuilder> searchRequestBuilders, ISearchProvider searchProvider, IMemberService memberService)
         {
             _searchRequestBuilders = searchRequestBuilders;
             _searchProvider = searchProvider;

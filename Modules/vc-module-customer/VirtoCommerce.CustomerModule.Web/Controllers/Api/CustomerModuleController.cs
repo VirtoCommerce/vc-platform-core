@@ -8,7 +8,6 @@ using VirtoCommerce.CustomerModule.Core;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Model.Search;
 using VirtoCommerce.CustomerModule.Core.Services;
-using VirtoCommerce.CustomerModule.Web.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
@@ -54,7 +53,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         [HttpPost]
         [Route("members/search")]
         [Authorize(ModuleConstants.Security.Permissions.Access)]
-        public async Task<ActionResult<GenericSearchResult<Member>>> Search(MembersSearchCriteria criteria)
+        public async Task<ActionResult<GenericSearchResult<Member>>> Search([FromBody]MembersSearchCriteria criteria)
         {
             var result = await _memberSearchService.SearchMembersAsync(criteria);
             return Ok(result);
@@ -107,7 +106,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         public async Task<ActionResult<Member>> CreateMember([FromBody] Member member)
         {
             await _memberService.SaveChangesAsync(new[] { member });
-            var retVal = _memberService.GetByIdAsync(member.Id, null, member.MemberType);
+            var retVal = await _memberService.GetByIdAsync(member.Id, null, member.MemberType);
 
             // Casting to dynamic fixes a serialization error in XML formatter when the returned object type is derived from the Member class.
             return Ok((dynamic)retVal);
@@ -120,7 +119,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         [HttpPut]
         [Route("members")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<ActionResult> UpdateMember(Member member)
+        public async Task<ActionResult> UpdateMember([FromBody] Member member)
         {
             await _memberService.SaveChangesAsync(new[] { member });
             return Ok();
@@ -148,7 +147,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         [HttpPost]
         [Route("members/delete")]
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
-        public async Task<ActionResult> BulkDeleteMembersBySearchCriteria(MembersSearchCriteria criteria)
+        public async Task<ActionResult> BulkDeleteMembersBySearchCriteria([FromBody]MembersSearchCriteria criteria)
         {
             bool hasSearchCriteriaMembers;
             var listIds = new List<string>();
@@ -185,7 +184,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         [HttpPost]
         [Route("contacts")]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
-        public Task<ActionResult<Member>> CreateContact(Contact contact)
+        public Task<ActionResult<Member>> CreateContact([FromBody]Contact contact)
         {
             return CreateMember(contact);
         }
@@ -196,7 +195,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         [HttpPut]
         [Route("contacts")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public Task<ActionResult> UpdateContact(Contact contact)
+        public Task<ActionResult> UpdateContact([FromBody]Contact contact)
         {
             return UpdateMember(contact);
         }
@@ -207,7 +206,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         [HttpPost]
         [Route("organizations")]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
-        public Task<ActionResult<Member>> CreateOrganization(Organization organization)
+        public Task<ActionResult<Member>> CreateOrganization([FromBody]Organization organization)
         {
             return CreateMember(organization);
         }
@@ -218,7 +217,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         [HttpPut]
         [Route("organizations")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public Task<ActionResult> UpdateOrganization(Organization organization)
+        public Task<ActionResult> UpdateOrganization([FromBody]Organization organization)
         {
             return UpdateMember(organization);
         }
@@ -330,7 +329,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         [HttpPost]
         [Route("vendors/search")]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
-        public async Task<ActionResult<GenericSearchResult<Vendor>>> SearchVendors(MembersSearchCriteria criteria)
+        public async Task<ActionResult<GenericSearchResult<Vendor>>> SearchVendors([FromBody]MembersSearchCriteria criteria)
         {
             if (criteria == null)
             {
@@ -369,7 +368,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         [HttpPost]
         [Route("employees")]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
-        public Task<ActionResult<Member>> CreateEmployee(Employee employee)
+        public Task<ActionResult<Member>> CreateEmployee([FromBody]Employee employee)
         {
             return CreateMember(employee);
         }

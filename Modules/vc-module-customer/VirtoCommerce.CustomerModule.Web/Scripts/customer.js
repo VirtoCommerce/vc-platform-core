@@ -76,9 +76,9 @@ angular.module(moduleName, [])
       // register WIDGETS
       var indexWidget = {
           documentType: 'Member',
-          controller: 'virtoCommerce.coreModule.searchIndex.indexWidgetController',
+          controller: 'virtoCommerce.searchModule.indexWidgetController',
           // size: [3, 1],
-          template: 'Modules/$(VirtoCommerce.Core)/Scripts/SearchIndex/widgets/index-widget.tpl.html',
+          template: 'Modules/$(VirtoCommerce.Search)/Scripts/widgets/index-widget.tpl.html',
           isVisible: function (blade) { return !blade.isNew; }
       };
 

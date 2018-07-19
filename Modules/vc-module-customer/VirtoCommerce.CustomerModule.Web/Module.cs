@@ -10,15 +10,18 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.CustomerModule.Core;
+using VirtoCommerce.CustomerModule.Core.Events;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Services;
 using VirtoCommerce.CustomerModule.Data.ExportImport;
+using VirtoCommerce.CustomerModule.Data.Handlers;
 using VirtoCommerce.CustomerModule.Data.Model;
 using VirtoCommerce.CustomerModule.Data.Repositories;
 using VirtoCommerce.CustomerModule.Data.Search;
 using VirtoCommerce.CustomerModule.Data.Search.Indexing;
 using VirtoCommerce.CustomerModule.Data.Services;
 using VirtoCommerce.CustomerModule.Web.JsonConverters;
+using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -46,6 +49,8 @@ namespace VirtoCommerce.CustomerModule.Web
             serviceCollection.AddSingleton<IMemberService, CommerceMembersServiceImpl>();
 
             serviceCollection.AddSingleton<ISearchRequestBuilder, MemberSearchRequestBuilder>();
+            serviceCollection.AddSingleton<MemberSearchServiceBase>();
+            serviceCollection.AddSingleton<MemberIndexedSearchService>();
             serviceCollection.AddSingleton<IMemberSearchService, MemberSearchServiceDecorator>();
             var snapshot = serviceCollection.BuildServiceProvider();
 
@@ -60,6 +65,7 @@ namespace VirtoCommerce.CustomerModule.Web
             };
 
             serviceCollection.AddSingleton(memberIndexingConfiguration);
+            serviceCollection.AddSingleton<MemberChangedEventHandler>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -84,6 +90,10 @@ namespace VirtoCommerce.CustomerModule.Web
 
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicMemberJsonConverter());
+
+            var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
+            inProcessBus.RegisterHandler<MemberChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<MemberChangedEventHandler>().Handle(message));
+            inProcessBus.RegisterHandler<MemberChangingEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<MemberChangedEventHandler>().Handle(message));
 
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {

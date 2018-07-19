@@ -137,15 +137,6 @@ namespace VirtoCommerce.CustomerModule.Data.Services
             }
 
             ClearCache(members);
-
-            //TODO move to handler
-            ////Save dynamic properties
-            //foreach (var member in members)
-            //{
-            //    DynamicPropertyService.SaveDynamicPropertyValues(member);
-            //}
-
-            //CommerceService.UpsertSeoForObjects(members.OfType<ISeoSupport>().ToArray());
         }
 
         public virtual async Task DeleteAsync(string[] ids, string[] memberTypes = null)
@@ -161,16 +152,6 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                     await repository.RemoveMembersByIdsAsync(members.Select(m => m.Id).ToArray());
                     await repository.UnitOfWork.CommitAsync();
 
-                    //TODO move to handler
-                    //foreach (var member in members)
-                    //{
-                    //    DynamicPropertyService.DeleteDynamicPropertyValues(member);
-                    //    var seoObject = member as ISeoSupport;
-                    //    if (seoObject != null)
-                    //    {
-                    //        CommerceService.DeleteSeoForObject(seoObject);
-                    //    }
-                    //}
                     await _eventPublisher.Publish(new MemberChangedEvent(changedEntries));
                 }
 
