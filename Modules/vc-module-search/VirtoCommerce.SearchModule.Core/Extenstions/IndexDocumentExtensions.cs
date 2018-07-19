@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.SearchModule.Core.Model;
 
-namespace VirtoCommerce.CustomerModule.Data.Search.Indexing
+namespace VirtoCommerce.SearchModule.Core.Extenstions
 {
     public static class IndexDocumentExtensions
     {
