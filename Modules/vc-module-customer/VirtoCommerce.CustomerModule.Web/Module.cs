@@ -51,6 +51,7 @@ namespace VirtoCommerce.CustomerModule.Web
             serviceCollection.AddSingleton<ISearchRequestBuilder, MemberSearchRequestBuilder>();
             serviceCollection.AddSingleton<MemberSearchServiceBase>();
             serviceCollection.AddSingleton<MemberIndexedSearchService>();
+            serviceCollection.AddSingleton<CommerceMembersSearchServiceImpl>();
             serviceCollection.AddSingleton<IMemberSearchService, MemberSearchServiceDecorator>();
             var snapshot = serviceCollection.BuildServiceProvider();
 

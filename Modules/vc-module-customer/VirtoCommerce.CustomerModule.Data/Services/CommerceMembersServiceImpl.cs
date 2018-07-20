@@ -49,26 +49,6 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         }
         #endregion
 
-        //TODO 
-        //[SuppressMessage("ReSharper", "TryCastAlwaysSucceeds")]
-        //protected override Expression<Func<MemberDataEntity, bool>> GetQueryPredicate(MembersSearchCriteria criteria)
-        //{
-        //    var retVal = base.GetQueryPredicate(criteria);
-
-        //    if (!string.IsNullOrEmpty(criteria.Keyword))
-        //    {
-        //        //where x or (y1 or y2)
-        //        var predicate = PredicateBuilder.False<MemberDataEntity>();
-        //        //search in special properties
-        //        // do NOT use explicit conversion (also called direct or unsafe) cast i.e. (T(x)). EF doesn't support that
-        //        predicate = predicate.Or(x => x is ContactDataEntity && (x as ContactDataEntity).FullName.Contains(criteria.Keyword));
-        //        predicate = predicate.Or(x => x is EmployeeDataEntity && (x as EmployeeDataEntity).FullName.Contains(criteria.Keyword));
-        //        //Should use Expand() to all predicates to prevent EF error
-        //        //http://stackoverflow.com/questions/2947820/c-sharp-predicatebuilder-entities-the-parameter-f-was-not-bound-in-the-specif?rq=1
-        //        retVal = LinqKit.Extensions.Expand(retVal.Or(LinqKit.Extensions.Expand(predicate)));
-        //    }
-
-        //    return retVal;
-        //}
+        
     }
 }

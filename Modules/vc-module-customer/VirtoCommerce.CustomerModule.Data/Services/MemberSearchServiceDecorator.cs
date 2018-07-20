@@ -9,10 +9,10 @@ namespace VirtoCommerce.CustomerModule.Data.Services
 {
     public class MemberSearchServiceDecorator : IMemberSearchService
     {
-        private readonly MemberSearchServiceBase _memberSearchService;
+        private readonly CommerceMembersSearchServiceImpl _memberSearchService;
         private readonly MemberIndexedSearchService _memberIndexedSearchService;
 
-        public MemberSearchServiceDecorator(MemberSearchServiceBase memberSearchService, MemberIndexedSearchService memberIndexedSearchService)
+        public MemberSearchServiceDecorator(CommerceMembersSearchServiceImpl memberSearchService, MemberIndexedSearchService memberIndexedSearchService)
         {
             _memberSearchService = memberSearchService;
             _memberIndexedSearchService = memberIndexedSearchService;

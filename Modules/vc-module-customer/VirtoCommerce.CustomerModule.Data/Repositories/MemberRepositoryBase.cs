@@ -12,11 +12,15 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
 {
     public abstract class MemberRepositoryBase : DbContextRepositoryBase<CustomerDbContext>, IMemberRepository
     {
-        private readonly MethodInfo _genericGetMembersMethodInfo;
+        private static MethodInfo _genericGetMembersMethodInfo;
+
+        static MemberRepositoryBase()
+        {
+            _genericGetMembersMethodInfo = typeof(MemberRepositoryBase).GetMethod("InnerGetMembersByIds");
+        }
 
         public MemberRepositoryBase(CustomerDbContext dbContext) : base(dbContext)
         {
-            _genericGetMembersMethodInfo = typeof(MemberRepositoryBase).GetMethod("InnerGetMembersByIds");
         }
 
         #region IMemberRepository Members
@@ -37,24 +41,25 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
                 return new MemberEntity[] { };
             }
 
-            var result = new List<MemberEntity>();         
-            if (!memberTypes.IsNullOrEmpty())
-            {
-                foreach (var memberType in memberTypes)
-                {
-                    //Use special dynamically constructed inner generic method for each passed member type 
-                    //for better query performance
-                    var gm = _genericGetMembersMethodInfo.MakeGenericMethod(Type.GetType(memberType));
-                    var members = gm.Invoke(this, new object[] { ids, responseGroup }) as MemberEntity[];
-                    result.AddRange(members);
-                    //Stop process other types
-                    if (result.Count() == ids.Count())
-                    {
-                        break;
-                    }
-                }
-            }         
-            else
+            var result = new List<MemberEntity>();
+            //TODO It doesn't work
+            //if (!memberTypes.IsNullOrEmpty())
+            //{
+            //    foreach (var memberType in memberTypes)
+            //    {
+            //        //Use special dynamically constructed inner generic method for each passed member type 
+            //        //for better query performance
+            //        var gm = _genericGetMembersMethodInfo.MakeGenericMethod(Type.GetType(memberType));
+            //        var members = gm.Invoke(this, new object[] { ids, responseGroup }) as MemberEntity[];
+            //        result.AddRange(members);
+            //        //Stop process other types
+            //        if (result.Count() == ids.Count())
+            //        {
+            //            break;
+            //        }
+            //    }
+            //}         
+            //else
             {
                 var members = await InnerGetMembersByIds<MemberEntity>(ids, responseGroup);
                 result.AddRange(members);
@@ -81,7 +86,7 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
             //Use OfType() clause very much accelerates the query performance when used TPT inheritance
             var query = Members.OfType<T>().Where(x => ids.Contains(x.Id));
            
-            var retVal = query.ToArray();
+            var retVal = await query.ToArrayAsync();
             ids = retVal.Select(x => x.Id).ToArray();
             if (!ids.IsNullOrEmpty())
             {
@@ -91,13 +96,34 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
                 {
                     var ancestors = await Members.Where(x => ancestorIds.Contains(x.Id)).ToArrayAsync();
                 }
-                var notes = Notes.Where(x => ids.Contains(x.MemberId)).ToArrayAsync();
-                var emails = Emails.Where(x => ids.Contains(x.MemberId)).ToArrayAsync();
-                var addresses = Addresses.Where(x => ids.Contains(x.MemberId)).ToArrayAsync();
-                var phones = Phones.Where(x => ids.Contains(x.MemberId)).ToArrayAsync();
-                var groups = Groups.Where(x => ids.Contains(x.MemberId)).ToArrayAsync();
 
-                await Task.WhenAll(notes, emails, addresses, phones, groups);
+                var memberResponseGroup = EnumUtility.SafeParse(responseGroup, MemberResponseGroup.Full);
+
+                if (memberResponseGroup.HasFlag(MemberResponseGroup.WithNotes))
+                {
+                    var notes = await Notes.Where(x => ids.Contains(x.MemberId)).ToArrayAsync();
+                }
+
+                if (memberResponseGroup.HasFlag(MemberResponseGroup.WithEmails))
+                {
+                    var emails = await Emails.Where(x => ids.Contains(x.MemberId)).ToArrayAsync();
+                }
+
+                if (memberResponseGroup.HasFlag(MemberResponseGroup.WithAddresses))
+                {
+                    var addresses = await Addresses.Where(x => ids.Contains(x.MemberId)).ToArrayAsync();
+                }
+
+                if (memberResponseGroup.HasFlag(MemberResponseGroup.WithPhones))
+                {
+                    var phones = await Phones.Where(x => ids.Contains(x.MemberId)).ToArrayAsync();
+                }
+
+                if (memberResponseGroup.HasFlag(MemberResponseGroup.WithGroups))
+                {
+                    var groups = await Groups.Where(x => ids.Contains(x.MemberId)).ToArrayAsync();
+                }
+
             }
 
             return retVal;
