@@ -86,7 +86,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
             });
         }
 
-        public async Task<Member> GetByIdAsync(string memberId, string responseGroup = null, string memberType = null)
+        public virtual async Task<Member> GetByIdAsync(string memberId, string responseGroup = null, string memberType = null)
         {
             var members = await GetByIdsAsync(new[] {memberId}, responseGroup, new[] {memberType});
             return members.FirstOrDefault();
@@ -110,7 +110,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                     var memberEntityType = AbstractTypeFactory<Member>.AllTypeInfos.Where(t => t.MappedType != null && t.IsAssignableTo(member.MemberType)).Select(t => t.MappedType).FirstOrDefault();
                     if (memberEntityType != null)
                     {
-                        var dataSourceMember = AbstractTypeFactory<MemberDataEntity>.TryCreateInstance(memberEntityType.Name);
+                        var dataSourceMember = AbstractTypeFactory<MemberEntity>.TryCreateInstance(memberEntityType.Name);
                         if (dataSourceMember != null)
                         {
                             dataSourceMember.FromModel(member, pkMap);

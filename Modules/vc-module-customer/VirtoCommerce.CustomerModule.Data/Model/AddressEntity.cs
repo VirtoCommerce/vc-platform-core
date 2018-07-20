@@ -6,7 +6,7 @@ using Address = VirtoCommerce.CustomerModule.Core.Model.Address;
 
 namespace VirtoCommerce.CustomerModule.Data.Model
 {
-    public class AddressDataEntity : AuditableEntity
+    public class AddressEntity : AuditableEntity
     {
         [StringLength(2048)]
 		public string Name { get; set; }
@@ -74,7 +74,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
 		public string MemberId { get; set; }
 
-		public virtual MemberDataEntity Member { get; set; }
+		public virtual MemberEntity Member { get; set; }
 
 		#endregion
 
@@ -110,7 +110,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             return address;
         }
 
-        public virtual AddressDataEntity FromModel(Address address)
+        public virtual AddressEntity FromModel(Address address)
         {
             if (address == null)
                 throw new ArgumentNullException("address");
@@ -134,7 +134,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             return this;
         }
 
-        public virtual void Patch(AddressDataEntity target)
+        public virtual void Patch(AddressEntity target)
         {
             target.City = City;
             target.CountryCode = CountryCode;

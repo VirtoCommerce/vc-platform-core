@@ -9,7 +9,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CustomerModule.Data.Model
 {
-    public class MemberGroupDataEntity : Entity
+    public class MemberGroupEntity : Entity
     {           
         [StringLength(64)]
         //[Index(IsUnique = false)]
@@ -17,7 +17,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
         #region Navigation Properties
         public string MemberId { get; set; }
-        public virtual MemberDataEntity Member { get; set; }
+        public virtual MemberEntity Member { get; set; }
         #endregion
      
     }

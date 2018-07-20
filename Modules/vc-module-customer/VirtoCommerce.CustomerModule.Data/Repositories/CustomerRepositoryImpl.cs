@@ -11,10 +11,10 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
 
 
         #region ICustomerRepository Members
-        public IQueryable<OrganizationDataEntity> Organizations => DbContext.Set<OrganizationDataEntity>();
-        public IQueryable<ContactDataEntity> Contacts => DbContext.Set<ContactDataEntity>();
-        public IQueryable<EmployeeDataEntity> Employees => DbContext.Set<EmployeeDataEntity>();
-        public IQueryable<VendorDataEntity> Vendors => DbContext.Set<VendorDataEntity>();
+        public IQueryable<OrganizationEntity> Organizations => DbContext.Set<OrganizationEntity>();
+        public IQueryable<ContactEntity> Contacts => DbContext.Set<ContactEntity>();
+        public IQueryable<EmployeeEntity> Employees => DbContext.Set<EmployeeEntity>();
+        public IQueryable<VendorEntity> Vendors => DbContext.Set<VendorEntity>();
         #endregion
 
         

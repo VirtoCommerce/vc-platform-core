@@ -6,7 +6,7 @@ using VirtoCommerce.Platform.Core.Common;
 namespace VirtoCommerce.CustomerModule.Data.Model
 {
 
-    public class EmailDataEntity : Entity
+    public class EmailEntity : Entity
     {
         [EmailAddress]
         [StringLength(254)]
@@ -22,7 +22,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
         public string MemberId { get; set; }
 
-        public virtual MemberDataEntity Member { get; set; }
+        public virtual MemberEntity Member { get; set; }
 
 
         #endregion

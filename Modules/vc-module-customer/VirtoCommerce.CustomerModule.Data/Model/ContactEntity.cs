@@ -7,9 +7,9 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CustomerModule.Data.Model
 {
-    public class ContactDataEntity : MemberDataEntity
+    public class ContactEntity : MemberEntity
     {
-        public ContactDataEntity()
+        public ContactEntity()
         {
             BirthDate = DateTime.Now;
         }
@@ -72,13 +72,13 @@ namespace VirtoCommerce.CustomerModule.Data.Model
                 contact.PreferredCommunication = this.PreferredCommunication;
                 contact.PreferredDelivery = this.PreferredDelivery;
                 contact.PhotoUrl = this.PhotoUrl;
-                contact.Organizations = this.MemberRelations.Select(x => x.Ancestor).OfType<OrganizationDataEntity>().Select(x => x.Id).ToList();
+                contact.Organizations = this.MemberRelations.Select(x => x.Ancestor).OfType<OrganizationEntity>().Select(x => x.Id).ToList();
                 contact.Name = contact.FullName;
             }
             return member;
         }
 
-        public override MemberDataEntity FromModel(Member member, PrimaryKeyResolvingMap pkMap)
+        public override MemberEntity FromModel(Member member, PrimaryKeyResolvingMap pkMap)
         {
             var contact = member as Contact;
             if (contact != null)
@@ -103,10 +103,10 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
                 if (contact.Organizations != null)
                 {
-                    this.MemberRelations = new ObservableCollection<MemberRelationDataEntity>();
+                    this.MemberRelations = new ObservableCollection<MemberRelationEntity>();
                     foreach (var organization in contact.Organizations)
                     {
-                        var memberRelation = new MemberRelationDataEntity
+                        var memberRelation = new MemberRelationEntity
                         {
                             AncestorId = organization,
                             AncestorSequence = 1,
@@ -120,9 +120,9 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             return base.FromModel(member, pkMap);
         }
 
-        public override void Patch(MemberDataEntity memberDataEntity)
+        public override void Patch(MemberEntity memberDataEntity)
         {
-            var target = memberDataEntity as ContactDataEntity;
+            var target = memberDataEntity as ContactEntity;
 
             target.FirstName = this.FirstName;
             target.MiddleName = this.MiddleName;

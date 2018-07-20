@@ -22,22 +22,22 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
         #region IMemberRepository Members
 
 
-        public IQueryable<AddressDataEntity> Addresses => DbContext.Set<AddressDataEntity>(); 
-        public IQueryable<EmailDataEntity> Emails => DbContext.Set<EmailDataEntity>();
-        public IQueryable<MemberGroupDataEntity> Groups => DbContext.Set<MemberGroupDataEntity>();
-        public IQueryable<NoteDataEntity> Notes => DbContext.Set<NoteDataEntity>(); 
-        public IQueryable<PhoneDataEntity> Phones => DbContext.Set<PhoneDataEntity>();
-        public IQueryable<MemberDataEntity> Members => DbContext.Set<MemberDataEntity>(); 
-        public IQueryable<MemberRelationDataEntity> MemberRelations => DbContext.Set<MemberRelationDataEntity>(); 
+        public IQueryable<AddressEntity> Addresses => DbContext.Set<AddressEntity>(); 
+        public IQueryable<EmailEntity> Emails => DbContext.Set<EmailEntity>();
+        public IQueryable<MemberGroupEntity> Groups => DbContext.Set<MemberGroupEntity>();
+        public IQueryable<NoteEntity> Notes => DbContext.Set<NoteEntity>(); 
+        public IQueryable<PhoneEntity> Phones => DbContext.Set<PhoneEntity>();
+        public IQueryable<MemberEntity> Members => DbContext.Set<MemberEntity>(); 
+        public IQueryable<MemberRelationEntity> MemberRelations => DbContext.Set<MemberRelationEntity>(); 
 
-        public virtual async Task<MemberDataEntity[]> GetMembersByIdsAsync(string[] ids,  string responseGroup = null, string[] memberTypes = null)
+        public virtual async Task<MemberEntity[]> GetMembersByIdsAsync(string[] ids, string responseGroup = null, string[] memberTypes = null)
         {         
             if(ids.IsNullOrEmpty())
             {
-                return new MemberDataEntity[] { };
+                return new MemberEntity[] { };
             }
 
-            var result = new List<MemberDataEntity>();         
+            var result = new List<MemberEntity>();         
             if (!memberTypes.IsNullOrEmpty())
             {
                 foreach (var memberType in memberTypes)
@@ -45,7 +45,7 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
                     //Use special dynamically constructed inner generic method for each passed member type 
                     //for better query performance
                     var gm = _genericGetMembersMethodInfo.MakeGenericMethod(Type.GetType(memberType));
-                    var members = gm.Invoke(this, new object[] { ids, responseGroup }) as MemberDataEntity[];
+                    var members = gm.Invoke(this, new object[] { ids, responseGroup }) as MemberEntity[];
                     result.AddRange(members);
                     //Stop process other types
                     if (result.Count() == ids.Count())
@@ -56,7 +56,7 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
             }         
             else
             {
-                var members = await InnerGetMembersByIds<MemberDataEntity>(ids, responseGroup);
+                var members = await InnerGetMembersByIds<MemberEntity>(ids, responseGroup);
                 result.AddRange(members);
             }
             return result.ToArray();
@@ -76,7 +76,7 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
         }
         #endregion
 
-        public async Task<T[]> InnerGetMembersByIds<T>(string[] ids, string responseGroup = null) where T: MemberDataEntity
+        public async Task<T[]> InnerGetMembersByIds<T>(string[] ids, string responseGroup = null) where T: MemberEntity
         {
             //Use OfType() clause very much accelerates the query performance when used TPT inheritance
             var query = Members.OfType<T>().Where(x => ids.Contains(x.Id));

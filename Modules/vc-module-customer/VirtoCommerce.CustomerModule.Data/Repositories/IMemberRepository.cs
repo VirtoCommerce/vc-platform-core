@@ -10,14 +10,14 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
 {
     public interface IMemberRepository : IRepository
     {
-        IQueryable<MemberDataEntity> Members { get; }
-        IQueryable<AddressDataEntity> Addresses { get; }
-        IQueryable<EmailDataEntity> Emails { get; }
-        IQueryable<NoteDataEntity> Notes { get; }
-        IQueryable<PhoneDataEntity> Phones { get; }
-        IQueryable<MemberRelationDataEntity> MemberRelations { get; }
+        IQueryable<MemberEntity> Members { get; }
+        IQueryable<AddressEntity> Addresses { get; }
+        IQueryable<EmailEntity> Emails { get; }
+        IQueryable<NoteEntity> Notes { get; }
+        IQueryable<PhoneEntity> Phones { get; }
+        IQueryable<MemberRelationEntity> MemberRelations { get; }
         
-        Task<MemberDataEntity[]> GetMembersByIdsAsync(string[] ids, string responseGroup = null, string[] memberTypes = null);
+        Task<MemberEntity[]> GetMembersByIdsAsync(string[] ids, string responseGroup = null, string[] memberTypes = null);
         Task RemoveMembersByIdsAsync(string[] ids, string[] memberTypes = null);
     }
 }

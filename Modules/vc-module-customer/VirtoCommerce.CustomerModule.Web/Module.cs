@@ -71,15 +71,15 @@ namespace VirtoCommerce.CustomerModule.Web
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
             _appBuilder = appBuilder;
-            AbstractTypeFactory<Member>.RegisterType<Organization>().MapToType<OrganizationDataEntity>();
-            AbstractTypeFactory<Member>.RegisterType<Contact>().MapToType<ContactDataEntity>();
-            AbstractTypeFactory<Member>.RegisterType<Vendor>().MapToType<VendorDataEntity>();
-            AbstractTypeFactory<Member>.RegisterType<Employee>().MapToType<EmployeeDataEntity>();
+            AbstractTypeFactory<Member>.RegisterType<Organization>().MapToType<OrganizationEntity>();
+            AbstractTypeFactory<Member>.RegisterType<Contact>().MapToType<ContactEntity>();
+            AbstractTypeFactory<Member>.RegisterType<Vendor>().MapToType<VendorEntity>();
+            AbstractTypeFactory<Member>.RegisterType<Employee>().MapToType<EmployeeEntity>();
 
-            AbstractTypeFactory<MemberDataEntity>.RegisterType<ContactDataEntity>();
-            AbstractTypeFactory<MemberDataEntity>.RegisterType<OrganizationDataEntity>();
-            AbstractTypeFactory<MemberDataEntity>.RegisterType<VendorDataEntity>();
-            AbstractTypeFactory<MemberDataEntity>.RegisterType<EmployeeDataEntity>();
+            AbstractTypeFactory<MemberEntity>.RegisterType<ContactEntity>();
+            AbstractTypeFactory<MemberEntity>.RegisterType<OrganizationEntity>();
+            AbstractTypeFactory<MemberEntity>.RegisterType<VendorEntity>();
+            AbstractTypeFactory<MemberEntity>.RegisterType<EmployeeEntity>();
 
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);

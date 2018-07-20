@@ -133,13 +133,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CartModule.Co
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vc-module-customer", "vc-module-customer", "{B70175BB-3753-44A7-BBC6-A7A8A8BC0E22}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.CustomerModule.Core", "Modules\vc-module-customer\VirtoCommerce.CustomerModule.Core\VirtoCommerce.CustomerModule.Core.csproj", "{B0876C51-232D-465C-9E14-404BBADB355B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CustomerModule.Core", "Modules\vc-module-customer\VirtoCommerce.CustomerModule.Core\VirtoCommerce.CustomerModule.Core.csproj", "{B0876C51-232D-465C-9E14-404BBADB355B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.CustomerModule.Data", "Modules\vc-module-customer\VirtoCommerce.CustomerModule.Data\VirtoCommerce.CustomerModule.Data.csproj", "{DA625461-6C39-42C8-8E8E-BF097903DCDF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CustomerModule.Data", "Modules\vc-module-customer\VirtoCommerce.CustomerModule.Data\VirtoCommerce.CustomerModule.Data.csproj", "{DA625461-6C39-42C8-8E8E-BF097903DCDF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.CustomerModule.Tests", "Modules\vc-module-customer\VirtoCommerce.CustomerModule.Tests\VirtoCommerce.CustomerModule.Tests.csproj", "{04423085-0E77-4C94-8D3A-C0D1023FF6EC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CustomerModule.Tests", "Modules\vc-module-customer\VirtoCommerce.CustomerModule.Tests\VirtoCommerce.CustomerModule.Tests.csproj", "{04423085-0E77-4C94-8D3A-C0D1023FF6EC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.CustomerModule.Web", "Modules\vc-module-customer\VirtoCommerce.CustomerModule.Web\VirtoCommerce.CustomerModule.Web.csproj", "{641129B4-7402-48EF-A37F-6E45780E0B9C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CustomerModule.Web", "Modules\vc-module-customer\VirtoCommerce.CustomerModule.Web\VirtoCommerce.CustomerModule.Web.csproj", "{641129B4-7402-48EF-A37F-6E45780E0B9C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CustomerSampleModule.Web", "Modules\vc-module-customer\VirtoCommerce.CustomerSampleModule.Web\VirtoCommerce.CustomerSampleModule.Web.csproj", "{10360676-BD99-4BFA-A84A-40F8ABF0EE99}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -371,6 +373,10 @@ Global
 		{641129B4-7402-48EF-A37F-6E45780E0B9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{641129B4-7402-48EF-A37F-6E45780E0B9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{641129B4-7402-48EF-A37F-6E45780E0B9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10360676-BD99-4BFA-A84A-40F8ABF0EE99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10360676-BD99-4BFA-A84A-40F8ABF0EE99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10360676-BD99-4BFA-A84A-40F8ABF0EE99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10360676-BD99-4BFA-A84A-40F8ABF0EE99}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -436,6 +442,7 @@ Global
 		{DA625461-6C39-42C8-8E8E-BF097903DCDF} = {B70175BB-3753-44A7-BBC6-A7A8A8BC0E22}
 		{04423085-0E77-4C94-8D3A-C0D1023FF6EC} = {B70175BB-3753-44A7-BBC6-A7A8A8BC0E22}
 		{641129B4-7402-48EF-A37F-6E45780E0B9C} = {B70175BB-3753-44A7-BBC6-A7A8A8BC0E22}
+		{10360676-BD99-4BFA-A84A-40F8ABF0EE99} = {B70175BB-3753-44A7-BBC6-A7A8A8BC0E22}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {80F99D88-A3B2-4ED2-9148-43D43EBFFFC3}

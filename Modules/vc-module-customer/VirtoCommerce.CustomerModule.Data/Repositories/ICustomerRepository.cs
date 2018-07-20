@@ -5,9 +5,9 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
 {
     public interface ICustomerRepository : IMemberRepository
     {
-        IQueryable<OrganizationDataEntity> Organizations { get; }
-        IQueryable<ContactDataEntity> Contacts { get; }
-        IQueryable<VendorDataEntity> Vendors { get; }
-        IQueryable<EmployeeDataEntity> Employees { get; }
+        IQueryable<OrganizationEntity> Organizations { get; }
+        IQueryable<ContactEntity> Contacts { get; }
+        IQueryable<VendorEntity> Vendors { get; }
+        IQueryable<EmployeeEntity> Employees { get; }
     }
 }

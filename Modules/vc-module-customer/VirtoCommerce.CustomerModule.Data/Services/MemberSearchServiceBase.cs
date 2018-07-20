@@ -102,17 +102,17 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         /// </summary>
         /// <param name="criteria"></param>
         /// <returns></returns>
-        protected virtual Expression<Func<MemberDataEntity, bool>> GetQueryPredicate(MembersSearchCriteria criteria)
+        protected virtual Expression<Func<MemberEntity, bool>> GetQueryPredicate(MembersSearchCriteria criteria)
         {
             if (!string.IsNullOrEmpty(criteria.Keyword))
             {
-                var predicate = PredicateBuilder.False<MemberDataEntity>();
+                var predicate = PredicateBuilder.False<MemberEntity>();
                 predicate = predicate.Or(m => m.Name.Contains(criteria.Keyword) || m.Emails.Any(e => e.Address.Contains(criteria.Keyword)));
                 //Should use Expand() to all predicates to prevent EF error
                 //http://stackoverflow.com/questions/2947820/c-sharp-predicatebuilder-entities-the-parameter-f-was-not-bound-in-the-specif?rq=1
                 return LinqKit.Extensions.Expand(predicate);
             }
-            return PredicateBuilder.True<MemberDataEntity>();
+            return PredicateBuilder.True<MemberEntity>();
         }
     }
 }

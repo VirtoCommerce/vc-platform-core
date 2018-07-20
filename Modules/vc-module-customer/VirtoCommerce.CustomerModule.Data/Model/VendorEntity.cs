@@ -4,7 +4,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CustomerModule.Data.Model
 {
-    public class VendorDataEntity : MemberDataEntity
+    public class VendorEntity : MemberEntity
     {
         [StringLength(256)]
         public string Description { get; set; }
@@ -31,7 +31,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             return member;
         }
 
-        public override MemberDataEntity FromModel(Member member, PrimaryKeyResolvingMap pkMap)
+        public override MemberEntity FromModel(Member member, PrimaryKeyResolvingMap pkMap)
         {
             if (member is Vendor vendor)
             {
@@ -44,9 +44,9 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             return base.FromModel(member, pkMap);
         }
 
-        public override void Patch(MemberDataEntity memberEntity)
+        public override void Patch(MemberEntity memberEntity)
         {
-            var target = memberEntity as VendorDataEntity;
+            var target = memberEntity as VendorEntity;
 
             target.SiteUrl = this.SiteUrl;
             target.LogoUrl = this.LogoUrl;

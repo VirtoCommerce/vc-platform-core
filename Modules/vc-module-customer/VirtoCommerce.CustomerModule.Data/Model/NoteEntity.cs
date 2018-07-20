@@ -5,7 +5,7 @@ using VirtoCommerce.CustomerModule.Core.Model;
 
 namespace VirtoCommerce.CustomerModule.Data.Model
 {
-	public class NoteDataEntity : AuditableEntity
+	public class NoteEntity : AuditableEntity
 	{
 
 		[StringLength(128)]
@@ -23,7 +23,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
 		#region Navigation Properties
 		public string MemberId { get; set; }
-        public virtual MemberDataEntity Member { get; set; }
+        public virtual MemberEntity Member { get; set; }
 
         #endregion
 
@@ -44,7 +44,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             return note;
         }
 
-        public virtual NoteDataEntity FromModel(Note note)
+        public virtual NoteEntity FromModel(Note note)
         {
             if (note == null)
                 throw new ArgumentNullException("note");
@@ -60,7 +60,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             return this;
         }
 
-        public virtual void Patch(NoteDataEntity target)
+        public virtual void Patch(NoteEntity target)
         {
             target.Body = this.Body;
             target.Title = this.Title;

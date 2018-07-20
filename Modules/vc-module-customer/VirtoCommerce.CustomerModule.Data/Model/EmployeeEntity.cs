@@ -7,7 +7,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CustomerModule.Data.Model
 {
-    public class EmployeeDataEntity : MemberDataEntity
+    public class EmployeeEntity : MemberEntity
     {
         [StringLength(64)]
         public string Type { get; set; }
@@ -56,12 +56,12 @@ namespace VirtoCommerce.CustomerModule.Data.Model
                 employee.EmployeeType = this.Type;
                 employee.TimeZone = this.TimeZone;
                 employee.PhotoUrl = this.PhotoUrl;
-                employee.Organizations = this.MemberRelations.Select(x => x.Ancestor).OfType<OrganizationDataEntity>().Select(x => x.Id).ToList();
+                employee.Organizations = this.MemberRelations.Select(x => x.Ancestor).OfType<OrganizationEntity>().Select(x => x.Id).ToList();
             }
             return member;
         }
 
-        public override MemberDataEntity FromModel(Member member, PrimaryKeyResolvingMap pkMap)
+        public override MemberEntity FromModel(Member member, PrimaryKeyResolvingMap pkMap)
         {
             var employee = member as Employee;
             if (employee != null)
@@ -80,10 +80,10 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
                 if (employee.Organizations != null)
                 {
-                    this.MemberRelations = new ObservableCollection<MemberRelationDataEntity>();
+                    this.MemberRelations = new ObservableCollection<MemberRelationEntity>();
                     foreach (var organization in employee.Organizations)
                     {
-                        var memberRelation = new MemberRelationDataEntity
+                        var memberRelation = new MemberRelationEntity
                         {
                             AncestorId = organization,
                             AncestorSequence = 1,
@@ -97,9 +97,9 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             return base.FromModel(member, pkMap);
         }
 
-        public override void Patch(MemberDataEntity memberEntity)
+        public override void Patch(MemberEntity memberEntity)
         {
-            if (memberEntity is EmployeeDataEntity target)
+            if (memberEntity is EmployeeEntity target)
             {
                 target.FirstName = this.FirstName;
                 target.MiddleName = this.MiddleName;

@@ -7,7 +7,7 @@ using VirtoCommerce.CustomerModule.Core.Model;
 
 namespace VirtoCommerce.CustomerModule.Data.Model
 {
-    public class OrganizationDataEntity : MemberDataEntity
+    public class OrganizationEntity : MemberEntity
 	{
  		[StringLength(256)]
 		public string Description { get; set; }
@@ -38,7 +38,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             return member;
         }
 
-        public override MemberDataEntity FromModel(Member member, PrimaryKeyResolvingMap pkMap)
+        public override MemberEntity FromModel(Member member, PrimaryKeyResolvingMap pkMap)
         {
             var organization = member as Organization;
          
@@ -48,8 +48,8 @@ namespace VirtoCommerce.CustomerModule.Data.Model
                 OwnerId = organization.OwnerId;
                 BusinessCategory = organization.BusinessCategory;
 
-                this.MemberRelations = new ObservableCollection<MemberRelationDataEntity>();
-                var memberRelation = new MemberRelationDataEntity
+                this.MemberRelations = new ObservableCollection<MemberRelationEntity>();
+                var memberRelation = new MemberRelationEntity
                 {
                     AncestorId = organization.ParentId,
                     DescendantId = organization.Id,
@@ -62,9 +62,9 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             return base.FromModel(member, pkMap);
         }
 
-        public override void Patch(MemberDataEntity memberEntity)
+        public override void Patch(MemberEntity memberEntity)
         {
-            var target = memberEntity as OrganizationDataEntity;
+            var target = memberEntity as OrganizationEntity;
 
             target.Name = this.Name;
             target.Description = this.Description;

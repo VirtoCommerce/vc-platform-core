@@ -7,16 +7,16 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CustomerModule.Data.Model
 {
-	public abstract class MemberDataEntity : AuditableEntity
+	public abstract class MemberEntity : AuditableEntity
 	{
-		public MemberDataEntity()
+		public MemberEntity()
 		{
-			Notes = new NullCollection<NoteDataEntity>();
-			Addresses = new NullCollection<AddressDataEntity>();
-			MemberRelations = new NullCollection<MemberRelationDataEntity>();
-			Phones = new NullCollection<PhoneDataEntity>();
-			Emails = new NullCollection<EmailDataEntity>();
-            Groups = new NullCollection<MemberGroupDataEntity>();
+			Notes = new NullCollection<NoteEntity>();
+			Addresses = new NullCollection<AddressEntity>();
+			MemberRelations = new NullCollection<MemberRelationEntity>();
+			Phones = new NullCollection<PhoneEntity>();
+			Emails = new NullCollection<EmailEntity>();
+            Groups = new NullCollection<MemberGroupEntity>();
         }
 
         [StringLength(64)]
@@ -27,17 +27,17 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
         #region NavigationProperties
 
-        public ObservableCollection<NoteDataEntity> Notes { get; set; }
+        public ObservableCollection<NoteEntity> Notes { get; set; }
 
-		public ObservableCollection<AddressDataEntity> Addresses { get; set; }
+		public ObservableCollection<AddressEntity> Addresses { get; set; }
 
-		public ObservableCollection<MemberRelationDataEntity> MemberRelations { get; set; }
+		public ObservableCollection<MemberRelationEntity> MemberRelations { get; set; }
 
-		public ObservableCollection<PhoneDataEntity> Phones { get; set; }
+		public ObservableCollection<PhoneEntity> Phones { get; set; }
 
-		public ObservableCollection<EmailDataEntity> Emails { get; set; }
+		public ObservableCollection<EmailEntity> Emails { get; set; }
 
-        public ObservableCollection<MemberGroupDataEntity> Groups { get; set; }
+        public ObservableCollection<MemberGroupEntity> Groups { get; set; }
 
         #endregion
 
@@ -63,7 +63,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
         }
 
 
-        public virtual MemberDataEntity FromModel(Member member, PrimaryKeyResolvingMap pkMap)
+        public virtual MemberEntity FromModel(Member member, PrimaryKeyResolvingMap pkMap)
         {
             if (member == null)
                 throw new ArgumentNullException("member");
@@ -80,10 +80,10 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
             if (member.Phones != null)
             {
-                this.Phones = new ObservableCollection<PhoneDataEntity>();
+                this.Phones = new ObservableCollection<PhoneEntity>();
                 foreach(var phone in member.Phones)
                 {
-                    var phoneEntity = AbstractTypeFactory<PhoneDataEntity>.TryCreateInstance();
+                    var phoneEntity = AbstractTypeFactory<PhoneEntity>.TryCreateInstance();
                     phoneEntity.Number = phone;
                     phoneEntity.MemberId = member.Id;
                     this.Phones.Add(phoneEntity);
@@ -92,10 +92,10 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
             if (member.Groups != null)
             {
-                this.Groups = new ObservableCollection<MemberGroupDataEntity>();
+                this.Groups = new ObservableCollection<MemberGroupEntity>();
                 foreach (var group in member.Groups)
                 {
-                    var groupEntity = AbstractTypeFactory<MemberGroupDataEntity>.TryCreateInstance();
+                    var groupEntity = AbstractTypeFactory<MemberGroupEntity>.TryCreateInstance();
                     groupEntity.Group = group;
                     groupEntity.MemberId = member.Id;
                     this.Groups.Add(groupEntity);
@@ -104,10 +104,10 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
             if (member.Emails != null)
             {
-                this.Emails = new ObservableCollection<EmailDataEntity>();
+                this.Emails = new ObservableCollection<EmailEntity>();
                 foreach (var email in member.Emails)
                 {
-                    var emailEntity = AbstractTypeFactory<EmailDataEntity>.TryCreateInstance();
+                    var emailEntity = AbstractTypeFactory<EmailEntity>.TryCreateInstance();
                     emailEntity.Address = email;
                     emailEntity.MemberId = member.Id;
                     this.Emails.Add(emailEntity);
@@ -116,7 +116,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
             if (member.Addresses != null)
             {
-                this.Addresses = new ObservableCollection<AddressDataEntity>(member.Addresses.Select(x => AbstractTypeFactory<AddressDataEntity>.TryCreateInstance().FromModel(x)));
+                this.Addresses = new ObservableCollection<AddressEntity>(member.Addresses.Select(x => AbstractTypeFactory<AddressEntity>.TryCreateInstance().FromModel(x)));
                 foreach (var address in this.Addresses)
                 {
                     address.MemberId = member.Id;
@@ -125,7 +125,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
             if (member.Notes != null)
             {
-                this.Notes = new ObservableCollection<NoteDataEntity>(member.Notes.Select(x => AbstractTypeFactory<NoteDataEntity>.TryCreateInstance().FromModel(x)));
+                this.Notes = new ObservableCollection<NoteEntity>(member.Notes.Select(x => AbstractTypeFactory<NoteEntity>.TryCreateInstance().FromModel(x)));
                 foreach (var note in this.Notes)
                 {
                     note.MemberId = member.Id;
@@ -135,26 +135,26 @@ namespace VirtoCommerce.CustomerModule.Data.Model
         }
 
       
-        public virtual void Patch(MemberDataEntity target)
+        public virtual void Patch(MemberEntity target)
         {
             target.Name = Name;
             target.MemberType = MemberType;
 
             if (!this.Phones.IsNullCollection())
             {
-                var phoneComparer = AnonymousComparer.Create((PhoneDataEntity x) => x.Number);
+                var phoneComparer = AnonymousComparer.Create((PhoneEntity x) => x.Number);
                 this.Phones.Patch(target.Phones, phoneComparer, (sourcePhone, targetPhone) => targetPhone.Number = sourcePhone.Number);
             }
 
             if (!this.Emails.IsNullCollection())
             {
-                var addressComparer = AnonymousComparer.Create((EmailDataEntity x) => x.Address);
+                var addressComparer = AnonymousComparer.Create((EmailEntity x) => x.Address);
                 this.Emails.Patch(target.Emails, addressComparer, (sourceEmail, targetEmail) => targetEmail.Address = sourceEmail.Address);
             }
 
             if (!this.Groups.IsNullCollection())
             {
-                var groupComparer = AnonymousComparer.Create((MemberGroupDataEntity x) => x.Group);
+                var groupComparer = AnonymousComparer.Create((MemberGroupEntity x) => x.Group);
                 this.Groups.Patch(target.Groups, groupComparer, (sourceGroup, targetGroup) => targetGroup.Group = sourceGroup.Group);
             }
 
@@ -165,13 +165,13 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
             if (!this.Notes.IsNullCollection())
             {
-                var noteComparer = AnonymousComparer.Create((NoteDataEntity x) => x.Id ?? x.Body);
+                var noteComparer = AnonymousComparer.Create((NoteEntity x) => x.Id ?? x.Body);
                 this.Notes.Patch(target.Notes, noteComparer, (sourceNote, targetNote) => sourceNote.Patch(targetNote));
             }
 
             if (!this.MemberRelations.IsNullCollection())
             {
-                var relationComparer = AnonymousComparer.Create((MemberRelationDataEntity x) => x.AncestorId);
+                var relationComparer = AnonymousComparer.Create((MemberRelationEntity x) => x.AncestorId);
                 this.MemberRelations.Patch(target.MemberRelations, relationComparer, (sourceRel, targetRel) => { /*Nothing todo*/ });
             }
         }
