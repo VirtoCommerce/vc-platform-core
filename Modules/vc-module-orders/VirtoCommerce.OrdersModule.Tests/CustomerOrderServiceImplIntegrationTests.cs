@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Primitives;
 using Moq;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Payment;
@@ -60,6 +61,7 @@ namespace VirtoCommerce.OrdersModule.Tests
             _dynamicPropertyServiceMock = new Mock<IDynamicPropertyService>();
             _platformMemoryCacheMock = new Mock<IPlatformMemoryCache>();
             _cacheEntryMock = new Mock<ICacheEntry>();
+            _cacheEntryMock.SetupGet(c => c.ExpirationTokens).Returns(new List<IChangeToken>());
             _changeLogServiceMock = new Mock<IChangeLogService>();
 
             var container = new ServiceCollection();
@@ -97,7 +99,6 @@ namespace VirtoCommerce.OrdersModule.Tests
 
             //Assert
             Assert.Equal(PaymentStatus.Pending, order.InPayments.First().PaymentStatus);
-            Assert.Null(order.InPayments.First().Status);
             Assert.NotNull(order);
             Assert.Equal(PaymentStatus.Pending, order.InPayments.First().PaymentStatus);
             Assert.NotNull(order.InPayments.First().Status);
@@ -107,14 +108,14 @@ namespace VirtoCommerce.OrdersModule.Tests
         public async Task SaveChangesAsync_UpdateOrder()
         {
             //Arrange
-            var criteria = new CustomerOrderSearchCriteria() { Take = 1 };
+            var criteria = new CustomerOrderSearchCriteria() { Take = 1, Status = "Pending" };
             var cacheKeySearch = CacheKey.With(_customerOrderSearchService.GetType(), "SearchCustomerOrdersAsync", criteria.GetCacheKey()); 
             _platformMemoryCacheMock.Setup(pmc => pmc.CreateEntry(cacheKeySearch)).Returns(_cacheEntryMock.Object);
             var orders = await _customerOrderSearchService.SearchCustomerOrdersAsync(criteria);
             var order = orders.Results.FirstOrDefault();
             var cacheKey = CacheKey.With(_customerOrderService.GetType(), "GetByIdsAsync", string.Join("-", order.Id), null);
             _platformMemoryCacheMock.Setup(pmc => pmc.CreateEntry(cacheKey)).Returns(_cacheEntryMock.Object);
-            order.Status = "Pending";
+            order.Status = "Authorized";
 
             //Act
             await _customerOrderService.SaveChangesAsync(new[] { order });
@@ -122,41 +123,8 @@ namespace VirtoCommerce.OrdersModule.Tests
 
             //Assert
             Assert.NotNull(order);
-            Assert.Equal("Pending", order.Status);
+            Assert.Equal("Authorized", order.Status);
         }
-
-        //[Fact]
-        //public void Can_update_order_status()
-        //{
-        //    //arrange
-        //    var order = GetTestOrder("order");
-        //    var _customerOrderService = GetCustomerOrderService();
-
-        //    //act
-        //    order = _customerOrderService.GetByIds(new[] { "order" }).FirstOrDefault();
-
-        //    _customerOrderService.SaveChanges(new[] { order });
-
-        //    ////assert
-        //    //Assert.Equal("", GetErrors(payResponse.error));
-        //}
-
-        //protected CommerceRepositoryImpl GetRepository()
-        //{
-        //    var repository = new CommerceRepositoryImpl(ConnectionString, new EntityPrimaryKeyGeneratorInterceptor(), new AuditableInterceptor(null));
-        //    EnsureDatabaseInitialized(() => new CommerceRepositoryImpl(ConnectionString), () => Database.SetInitializer(new SetupDatabaseInitializer<CommerceRepositoryImpl, Configuration>()));
-        //    return repository;
-        //}
-
-        //public override void Dispose()
-        //{
-        //    // Ensure LocalDb databases are deleted after use so that LocalDb doesn't throw if
-        //    // the temp location in which they are stored is later cleaned.
-        //    using (var context = new CommerceRepositoryImpl(ConnectionString))
-        //    {
-        //        context.Database.Delete();
-        //    }
-        //}
 
         private static CustomerOrder GetTestOrder(string id)
         {

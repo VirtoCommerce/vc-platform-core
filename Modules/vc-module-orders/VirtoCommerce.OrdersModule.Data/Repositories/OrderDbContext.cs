@@ -11,6 +11,11 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
         {
         }
 
+        protected OrderDbContext(DbContextOptions options)
+            : base(options)
+        {
+        }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
