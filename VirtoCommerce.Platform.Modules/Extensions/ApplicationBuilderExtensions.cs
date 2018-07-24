@@ -51,10 +51,10 @@ namespace VirtoCommerce.Platform.Modules.Extensions
                     .OfType<ManifestBundleDirectory>()
                     .SelectMany(s =>
                         env.IsDevelopment() ?
-                            new WebFileFolder(modulesOptions.DiscoveryPath, s.VirtualPath, module.ModuleName)
+                            new WebFileFolder(modulesOptions.DiscoveryPath, s.VirtualPath, module.ModuleName, module.Assembly.GetName().Name)
                                 .AllWebFilesForDevelopment<JavaScriptFile>(s.SearchPattern,
                                     s.SearchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly) :
-                        new WebFileFolder(modulesOptions.DiscoveryPath, s.VirtualPath, module.ModuleName)
+                        new WebFileFolder(modulesOptions.DiscoveryPath, s.VirtualPath)
                             .AllWebFilesWithRequestRoot<JavaScriptFile>(s.SearchPattern,
                                 s.SearchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)));
             });
@@ -96,6 +96,7 @@ namespace VirtoCommerce.Platform.Modules.Extensions
         private readonly string _rootPath;
         private readonly string _path;
         private readonly string _moduleName;
+        private readonly string _moduleFolder;
 
         public WebFileFolder(string rootPath, string path)
         {
@@ -103,11 +104,12 @@ namespace VirtoCommerce.Platform.Modules.Extensions
             _path = path;
         }
 
-        public WebFileFolder(string rootPath, string path, string moduleName)
+        public WebFileFolder(string rootPath, string path, string moduleName, string moduleFolder)
         {
             _rootPath = rootPath;
             _path = path;
             _moduleName = moduleName;
+            _moduleFolder = moduleFolder;
         }
 
         public T[] AllWebFiles<T>(string pattern, SearchOption search) where T : IWebFile, new()
@@ -152,7 +154,7 @@ namespace VirtoCommerce.Platform.Modules.Extensions
             return fullPath.Replace(_rootPath, "")
                 .Replace(moduleFolder, "Modules")
                 .Replace("\\", "/")
-                .Replace($"{_moduleName}Module.Web", $"$({_moduleName})");
+                .Replace($"{_moduleFolder}", $"$({_moduleName})");
         }
 
         string GetRootFolder(string path)
