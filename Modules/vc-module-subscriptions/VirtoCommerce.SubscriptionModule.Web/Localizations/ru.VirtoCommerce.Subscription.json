@@ -1,0 +1,124 @@
+﻿{
+    "subscription": {
+        "main-menu-title": "Подписки",
+        "blades": {
+            "subscription-list": {
+                "title": "Подписки",
+                "labels": {
+                    "new-filter": "Добавить новый фильтр",
+                    "unnamed-filter": "Фильтр по умолчанию",
+                    "number": "Номер",
+                    "status": "Статус",
+                    "balance": "Баланс",
+                    "customer": "Подписчик",
+                    "startDate": "Начало Периода",
+                    "endDate": "Конец Периода"
+                },
+                "placeholders": {
+                    "select-filter": "Выбрать фильтр"
+                }
+            },
+            "filter-detail": {
+                "subtitle": "Редактировать фильтр",
+                "new-title": "Новый фильтр",
+                "new-subtitle": "Создать новый фильтр",
+                "labels": {
+                    "name": "Название",
+                    "name_": "Как Вы назовете этот фильтр?",
+                    "criteria": "Критерии фильтра",
+                    "from": "Активен с",
+                    "to": "Активен до",
+                    "outer-id": "Внешний идентификатор" 
+                },
+                "placeholders": {
+                    "all": "Не определен"
+                }
+            },
+            "subscription-detail": {
+                "title": "Подписка {{number}}",
+                "subtitle": "Сведения о подписке и соответствующие документы",
+                "labels": {
+                    "status": "Статус",
+                    "balance": "Баланс",
+                    "billing-date": "Следующая дата оплаты",
+                    "trial-expiration": "Дата окончания пробного периода",
+                    "expiration": "Срок действия подписки",
+                    "employee": "Поручить новый заказ",
+                    "number": "Номер",
+                    "coupon-code": "Код купона",
+                    "prorate": "Изменения пропорциональности"
+                }
+            },
+            "schedule-detail": {
+                "title": "Расписание авто-заказа",
+                "title-new": "Новое расписание авто-заказа",
+                "subtitle-new": "Создать новое расписание",
+                "labels": {
+                    "charge-every": "Заказ каждые",
+                    "trial-period": "Пробный период (дней)",
+                    "charge-count": "Подписка заканчивается после количества Заказов",
+                    "grace-period": "Льготный период (дней)"
+                },
+                "placeholders": {
+                    "select": "Выбрать..."
+                }
+            },
+            "subscriptionOrder-list": {
+                "title": "Заказы по Подпискам"
+            }
+        },
+        "widgets": {
+            "subscription-orders": {
+                "title": "Заказы"
+            },
+            "orderDynamicProperty": {
+                "title": "Динамические Свойства Заказа"
+            },
+            "product-schedule": {
+                "no-schedule": "Расписание авто-заказа не определено",
+                "info": "Автоматический заказ каждые {{intervalCount}} {{interval}}"
+            },
+            "order-subscription": {
+                "title": "Открыть Подписку {{ number }}",
+                "title-no": "Не по подписке"
+            },
+            "notificationsWidget": {
+                "title": "Уведомления",
+                "blade-subtitle": "Служба уведомлений",
+                "blade-title": "Список типов уведомлений для подписки"
+            },
+            "notificationsLogWidget": {
+                "title": "Журнал уведомлений",
+                "blade-subtitle": "Журнал уведомлений",
+                "blade-title": "Журнал отправки уведомлений о подписке"
+            }
+        },
+        "dialogs": {
+            "subscription-delete": {
+                "title": "Подтверждение удаления",
+                "message": "Вы уверены, что хотите удалить выбранные подписки?",
+                "warning": "ПРЕДУПРЕЖДЕНИЕ: это изменение является постоянным и не может быть отменено впоследствии. Это может привести к потере данных.",
+                "instruction": "Введите 'да', чтобы удалить"
+            },
+            "subscription-save": {
+                "title": "Сохранение изменений",
+                "message": "Подписка была изменена. Вы хотите сохранить изменения?"
+            },
+            "schedule-delete": {
+                "title": "Подтверждение удаления",
+                "message": "Вы уверены, что хотите удалить выбранные Расписания Заказов?"
+            },
+            "schedule-save": {
+                "title": "Сохранение изменений",
+                "message": "Расписание было изменено. Вы хотите сохранить изменения?"
+            },
+            "new-order": {
+                "title": "Подтверждение",
+                "message": "Создать новый Заказ для данной Подписки?"
+            }
+        },
+        "commands": {
+            "new-order": "Создать Заказ"
+        }
+    }
+}

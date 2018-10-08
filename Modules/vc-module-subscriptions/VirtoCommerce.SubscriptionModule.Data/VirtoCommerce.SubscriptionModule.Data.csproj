@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
+    <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Data\VirtoCommerce.Platform.Data.csproj" />
+    <ProjectReference Include="..\..\vc-module-notifications\VirtoCommerce.NotificationsModule.Core\VirtoCommerce.NotificationsModule.Core.csproj" />
+    <ProjectReference Include="..\..\vc-module-store\VirtoCommerce.StoreModule.Core\VirtoCommerce.StoreModule.Core.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.SubscriptionModule.Core\VirtoCommerce.SubscriptionModule.Core.csproj" />
+  </ItemGroup>
+
+</Project>

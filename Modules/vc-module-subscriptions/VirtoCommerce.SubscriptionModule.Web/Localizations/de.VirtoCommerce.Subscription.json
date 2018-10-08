@@ -1,0 +1,123 @@
+{
+  "subscription": {
+  "main-menu-title": "Abonnemente",
+    "blades": {
+      "subscription-list": {
+        "title": "Abonnements",
+        "labels": {
+          "new-filter": "Neuen Filter hinzufügen",
+          "unnamed-filter": "Unbenannter Filter",
+          "number": "Anzahl",
+          "status": "Status",
+          "balance": "Kontostand",
+          "customer": "Teilnehmer",
+          "startDate": "Periodenstart",
+          "endDate": "Periodende"
+        },
+        "placeholders": {
+          "select-filter": "Filter wählen"
+        }
+      },
+      "filter-detail": {
+        "subtitle": "Filter bearbeiten",
+        "new-title": "Neuer Filter",
+        "new-subtitle": "Neuen Filter erstellen",
+        "labels": {
+          "name": "Name des Filters",
+          "name_": "Wie werden Sie diesen Filter nennen?",
+          "criteria": "Filterkriterien",
+          "from": "Aktiv ab",
+          "to": "Aktiv bis"
+        },
+        "placeholders": {
+          "all": "Nicht angegeben"
+        }
+      },
+      "subscription-detail": {
+        "title": "Abonnement {{number}}",
+        "subtitle": "Abonnementdetails und zugehörige Dokumente",
+        "labels": {
+          "status": "Status",
+          "balance": "Kontostand",
+          "billing-date": "Nächster Rechnungsdatum",
+          "trial-expiration": "Ablauf des Verfallsdatums",
+          "expiration": "Ablaufdatum des Abonnements",
+          "employee": "Neue Bestellung zuordnen zu",
+          "number": "Anzahl",
+          "coupon-code": "Gutscheincode",
+          "prorate": "Prorate Änderungen"
+        }
+      },
+      "schedule-detail": {
+        "title": "Auto-Auftragsablaufplan",
+        "title-new": "Neue automatische auftragsablaufplan",
+        "subtitle-new": "Neue automatische Erstellung Auftragsablaufplan",
+        "labels": {
+          "charge-every": "Bestellen jede",
+          "trial-period": "Zeitraum (Tage)",
+          "charge-count": "Abonnement endet nach Anzahl der Bestellungen",
+          "grace-period": "Frist (in Tagen)"
+        },
+        "placeholders": {
+          "select": "Wählen Sie aus..."
+        }
+      },
+      "subscriptionOrder-list": {
+        "title": "Abonnement Bestellungen"
+      }
+    },
+    "widgets": {
+      "subscription-orders": {
+        "title": "Bestellungen"
+      },
+      "orderDynamicProperty": {
+        "title": "Um dynamische Eigenschaften"
+      },
+      "product-schedule": {
+        "no-schedule": "Auto-auftragsablaufplan nicht definiert",
+        "info": "Auto - um jeden {{intervalCount}} {{interval}}"
+      },
+      "order-subscription": {
+        "title": "Öffene Abonnement {{ number }}",
+        "title-no": "Nicht im Abonnement"
+      },
+      "notificationsWidget": {
+        "title": "Benachrichtigung",
+        "blade-subtitle": "Benachrichtigungsservice",
+        "blade-title": "Abonnement Benachrichtigungstypliste"
+      },
+      "notificationsLogWidget": {
+        "title": "Benachrichtigungsprotokoll",
+        "blade-subtitle": "Benachrichtigungsprotokoll",
+        "blade-title": "Abonnement das Senden von Benachrichtigungen anmelden"
+      }
+    },
+    "dialogs": {
+      "subscription-delete": {
+        "title": "Bestätigung löschen",
+        "message": "Möchten Sie die ausgewählten Abonnements löschen?",
+        "warning": "WARNUNG: Diese Änderung ist endgültig und kann nicht rückgängig gemacht werden. Es kann zu Datenverlust führen.",
+        "instruction": "Geben Sie 'Ja' ein um zu löschen."
+      },
+      "subscription-save": {
+        "title": "Änderungen speichern",
+        "message": "Das Abonnement wurde geändert. Möchten Sie die Änderungen speichern?"
+      },
+      "schedule-delete": {
+        "title": "Bestätigung löschen",
+        "message": "Möchten Sie diese Bestellung Zeitplan wirklich löschen?"
+      },
+      "schedule-save": {
+        "title": "Änderungen speichern",
+        "message": "Der Zeitplan wurde geändert. Möchten Sie die Änderungen speichern?"
+      },
+      "new-order": {
+        "title": "Bestätigung",
+        "message": "Eine neue Bestellung für dieses Abonnement anlegen?"
+      }
+    },
+    "commands": {
+      "new-order": "Bestellung anlegen"
+    }
+  }
+}

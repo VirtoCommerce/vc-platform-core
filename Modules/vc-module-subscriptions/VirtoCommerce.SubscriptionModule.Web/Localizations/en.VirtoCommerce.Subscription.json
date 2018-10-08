@@ -1,0 +1,124 @@
+﻿{
+    "subscription": {
+        "main-menu-title": "Subscriptions",
+        "blades": {
+            "subscription-list": {
+                "title": "Subscriptions",
+                "labels": {
+                    "new-filter": "Add new filter",
+                    "unnamed-filter": "Unnamed filter",
+                    "number": "Number",
+                    "status": "Status",
+                    "balance": "Balance",
+                    "customer": "Subscriber",
+                    "startDate": "Period Start",
+                    "endDate": "Period End"
+                },
+                "placeholders": {
+                    "select-filter": "Select filter"
+                }
+            },
+            "filter-detail": {
+                "subtitle": "Edit filter",
+                "new-title": "New filter",
+                "new-subtitle": "Create new filter",
+                "labels": {
+                    "name": "Filter name",
+                    "name_": "How will you call this filter?",
+                    "criteria": "Filter criteria",
+                    "from": "Active from",
+                    "to": "Active till",
+                    "outer-id": "Outer Id" 
+                },
+                "placeholders": {
+                    "all": "Not specified"
+                }
+            },
+            "subscription-detail": {
+                "title": "Subscription {{number}}",
+                "subtitle": "Subscription details and related documents",
+                "labels": {
+                    "status": "Status",
+                    "balance": "Balance",
+                    "billing-date": "Next billing date",
+                    "trial-expiration": "Trial expiration date",
+                    "expiration": "Subscription expiration date",
+                    "employee": "Assign new order to",
+                    "number": "Number",
+                    "coupon-code": "Coupon code",
+                    "prorate": "Prorate changes"
+                }
+            },
+            "schedule-detail": {
+                "title": "Auto-order schedule",
+                "title-new": "New auto-order schedule",
+                "subtitle-new": "Create new auto-order schedule",
+                "labels": {
+                    "charge-every": "Order every",
+                    "trial-period": "Trial period (days)",
+                    "charge-count": "Subscription ends after number of Orders",
+                    "grace-period": "Grace period (days)"
+                },
+                "placeholders": {
+                    "select": "Select..."
+                }
+            },
+            "subscriptionOrder-list": {
+                "title": "Subscription Orders"
+            }
+        },
+        "widgets": {
+            "subscription-orders": {
+                "title": "Orders"
+            },
+            "orderDynamicProperty": {
+                "title": "Order Dynamic Properties"
+            },
+            "product-schedule": {
+                "no-schedule": "Auto-order schedule not defined",
+                "info": "Auto-order every {{intervalCount}} {{interval}}"
+            },
+            "order-subscription": {
+                "title": "Open Subscription {{ number }}",
+                "title-no": "Not by subscription"
+            },
+            "notificationsWidget": {
+                "title": "Notification",
+                "blade-subtitle": "Notifications service",
+                "blade-title": "Subscription notification types list"
+            },
+            "notificationsLogWidget": {
+                "title": "Notification log",
+                "blade-subtitle": "Notifications log",
+                "blade-title": "Subscription notification sending log"
+            }
+        },
+        "dialogs": {
+            "subscription-delete": {
+                "title": "Delete confirmation",
+                "message": "Are you sure you want to delete selected subscriptions?",
+                "warning": "WARNING: this change is permanent and can't be undone afterwards. It can lead to data loss.",
+                "instruction": "Enter 'yes' to delete"
+            },
+            "subscription-save": {
+                "title": "Save changes",
+                "message": "The Subscription has been modified. Do you want to save changes?"
+            },
+            "schedule-delete": {
+                "title": "Delete confirmation",
+                "message": "Are you sure you want to delete this Order Schedule?"
+            },
+            "schedule-save": {
+                "title": "Save changes",
+                "message": "The Schedule has been modified. Do you want to save changes?"
+            },
+            "new-order": {
+                "title": "Confirmation",
+                "message": "Create a new Order for this Subscription?"
+            }
+        },
+        "commands": {
+            "new-order": "Create Order"
+        }
+    }
+}
