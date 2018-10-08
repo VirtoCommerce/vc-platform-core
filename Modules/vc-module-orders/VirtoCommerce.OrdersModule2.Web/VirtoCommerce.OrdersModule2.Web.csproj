@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.1.0" />
+    </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Data\VirtoCommerce.Platform.Data.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.OrdersModule.Core\VirtoCommerce.OrdersModule.Core.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.OrdersModule.Data\VirtoCommerce.OrdersModule.Data.csproj" />
+  </ItemGroup>
+
+</Project>

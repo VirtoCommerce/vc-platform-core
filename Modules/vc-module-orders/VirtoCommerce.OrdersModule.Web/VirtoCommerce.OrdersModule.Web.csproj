@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp2.1</TargetFramework>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <NoWarn>1701;1702;1705;1591</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="DinkToPdf" Version="1.0.8" />
+        <PackageReference Include="Microsoft.AspNetCore" Version="2.1.0" />
+        <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.0" />
+    </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
+    <ProjectReference Include="..\..\vc-module-notifications\VirtoCommerce.NotificationsModule.Core\VirtoCommerce.NotificationsModule.Core.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.OrdersModule.Core\VirtoCommerce.OrdersModule.Core.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.OrdersModule.Data\VirtoCommerce.OrdersModule.Data.csproj" />
+  </ItemGroup>
+
+</Project>

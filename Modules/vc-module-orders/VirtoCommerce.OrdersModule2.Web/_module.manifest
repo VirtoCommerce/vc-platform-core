@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<module>
+    <id>VirtoCommerce.Orders2</id>
+    <version>3.0.0</version>
+    <platformVersion>3.0.0</platformVersion>
+    <dependencies>
+        <dependency id="VirtoCommerce.Core" version="3.0.0" />
+        <dependency id="VirtoCommerce.Orders" version="3.0.0" />
+    </dependencies>
+
+    <title>Order extension sample module</title>
+    <description>Demo</description>
+    <authors>
+        <author>eugeney tatarincev</author>
+    </authors>
+    <owners>
+        <owner>Virto Commerce</owner>
+    </owners>
+    <projectUrl>http://virtocommerce.com/</projectUrl>
+    <iconUrl>Modules/$(VirtoCommerce.Orders)/Content/logo.png</iconUrl>
+    <releaseNotes>First version.</releaseNotes>
+    <copyright>Copyright © 2011-2017 Virto Commerce. All rights reserved</copyright>
+    <tags>orders</tags>
+
+    <assemblyFile>VirtoCommerce.OrdersModule2.Web.dll</assemblyFile>
+    <moduleType>VirtoCommerce.OrdersModule2.Web.Module, VirtoCommerce.OrdersModule2.Web</moduleType>
+    <!--<styles>
+    <directory virtualPath="$/Content/css" searchPattern="*.css" searchSubdirectories="true" />
+  </styles>-->
+    <scripts>
+        <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
+    </scripts>
+
+    <settings>
+        <group name="Orders|General">
+            <setting>
+                <name>Invoice.Status</name>
+                <valueType>string</valueType>
+                <defaultValue>New</defaultValue>
+                <title>Invoice statuses</title>
+                <description>sample Invoice statuses</description>
+                <isArray>true</isArray>
+                <arrayValues>
+                    <value>New</value>
+                    <value>Pending</value>
+                    <value>Authorized</value>
+                    <value>Cancelled</value>
+                    <value>Sample2</value>
+                    <value>Sample3</value>
+                </arrayValues>
+            </setting>
+        </group>
+    </settings>
+
+    <permissions>
+
+    </permissions>
+</module>
