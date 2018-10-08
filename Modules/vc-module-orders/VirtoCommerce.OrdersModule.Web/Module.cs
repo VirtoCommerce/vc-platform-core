@@ -3,9 +3,11 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.OrdersModule.Core;
 using VirtoCommerce.OrdersModule.Core.Events;
@@ -15,6 +17,7 @@ using VirtoCommerce.OrdersModule.Data.ExportImport;
 using VirtoCommerce.OrdersModule.Data.Handlers;
 using VirtoCommerce.OrdersModule.Data.Repositories;
 using VirtoCommerce.OrdersModule.Data.Services;
+using VirtoCommerce.OrdersModule.Web.JsonConverters;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -45,6 +48,7 @@ namespace VirtoCommerce.OrdersModule.Web
             serviceCollection.AddSingleton<CancelPaymentOrderChangedEventHandler>();
             serviceCollection.AddSingleton<LogChangesOrderChangedEventHandler>();
             serviceCollection.AddSingleton<SendNotificationsOrderChangedEventHandler>();
+            serviceCollection.AddSingleton<PolymorphicOperationJsonConverter>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -83,6 +87,10 @@ namespace VirtoCommerce.OrdersModule.Web
             notificationRegistrar.RegisterNotification<OrderCreateEmailNotification>();
             notificationRegistrar.RegisterNotification<OrderPaidEmailNotification>();
             notificationRegistrar.RegisterNotification<OrderSentEmailNotification>();
+
+            // enable polymorphic types in API controller methods
+            var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
+            mvcJsonOptions.Value.SerializerSettings.Converters.Add(appBuilder.ApplicationServices.GetService<PolymorphicOperationJsonConverter>());
         }
 
         public void Uninstall()

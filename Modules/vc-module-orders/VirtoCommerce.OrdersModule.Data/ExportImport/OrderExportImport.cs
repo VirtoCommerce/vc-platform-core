@@ -32,6 +32,7 @@ namespace VirtoCommerce.OrdersModule.Data.ExportImport
             };
         }
 
+
         public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
             ICancellationToken cancellationToken)
         {
@@ -45,11 +46,11 @@ namespace VirtoCommerce.OrdersModule.Data.ExportImport
             {
                 writer.WriteStartObject();
 
-                var orders = await _customerOrderSearchService.SearchCustomerOrdersAsync(new CustomerOrderSearchCriteria{ Take = int.MaxValue });
+                var orders = await _customerOrderSearchService.SearchCustomerOrdersAsync(new CustomerOrderSearchCriteria { Take = int.MaxValue });
                 writer.WritePropertyName("OrderTotalCount");
                 writer.WriteValue(orders.TotalCount);
 
-                writer.WritePropertyName("Orders");
+                writer.WritePropertyName("CustomerOrders");
                 writer.WriteStartArray();
 
                 foreach (var order in orders.Results)
@@ -67,6 +68,7 @@ namespace VirtoCommerce.OrdersModule.Data.ExportImport
         public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
             ICancellationToken cancellationToken)
         {
+            //TDODO: Use AbstractTypeFactory for deserialization of the derived types
             cancellationToken.ThrowIfCancellationRequested();
 
             var progressInfo = new ExportImportProgressInfo();
@@ -83,38 +85,45 @@ namespace VirtoCommerce.OrdersModule.Data.ExportImport
                         {
                             orderTotalCount = reader.ReadAsInt32() ?? 0;
                         }
-                        else if (reader.Value.ToString() == "Orders")
+                        else if (reader.Value.ToString() == "CustomerOrders")
                         {
-                            var orders = new List<CustomerOrder>();
-                            var orderCount = 0;
-                            while (reader.TokenType != JsonToken.EndArray)
+                            reader.Read();
+                            if (reader.TokenType == JsonToken.StartArray)
                             {
-                                var order = _serializer.Deserialize<CustomerOrder>(reader);
-                                orders.Add(order);
-                                orderCount++;
-
                                 reader.Read();
-                            }
 
-                            for (int i = 0; i < orderCount; i += _batchSize)
-                            {
-                                await _customerOrderService.SaveChangesAsync(orders.Skip(i).Take(_batchSize).ToArray());
+                                var orders = new List<CustomerOrder>();
+                                var orderCount = 0;
+                                while (reader.TokenType != JsonToken.EndArray)
+                                {
+                                    var order = _serializer.Deserialize<CustomerOrder>(reader);
+                                    orders.Add(order);
+                                    orderCount++;
 
-                                if (orderCount > 0)
-                                {
-                                    progressInfo.Description = $"{ i } of { orderCount } orders imported";
+                                    reader.Read();
                                 }
-                                else
+
+                                for (var i = 0; i < orderCount; i += _batchSize)
                                 {
-                                    progressInfo.Description = $"{ i } fulfillment centers imported";
+                                    await _customerOrderService.SaveChangesAsync(orders.Skip(i).Take(_batchSize).ToArray());
+
+                                    if (orderCount > 0)
+                                    {
+                                        progressInfo.Description = $"{ i } of { orderCount } orders have been imported";
+                                    }
+                                    else
+                                    {
+                                        progressInfo.Description = $"{ i } orders have been imported";
+                                    }
+                                    progressCallback(progressInfo);
                                 }
-                                progressCallback(progressInfo);
                             }
 
                         }
                     }
                 }
             }
+
         }
     }
 }

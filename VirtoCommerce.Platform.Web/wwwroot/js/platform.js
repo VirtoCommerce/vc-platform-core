@@ -22640,34 +22640,6 @@ angular.module('platformWebApp')
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["公元前","公元"],ERAS:["BC","AD"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"d/M/yy ah:mm",shortDate:"d/M/yy",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-hk",pluralCat:function(e,m){return E.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["西元前","西元"],ERAS:["西元前","西元"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日 EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"y/M/d ah:mm",shortDate:"y/M/d",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"NT$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-tw",pluralCat:function(e,m){return E.OTHER}})}]);
 angular.module('platformWebApp')
-.controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    
-    $scope.blade.isLoading = false;
-    // ui-grid
-    $scope.setGridOptions = function (gridOptions) {
-        $scope.gridOptions = gridOptions;
-    };
-}]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    var blade = $scope.blade;
-
-    $scope.openBlade = function () {
-        var newBlade = {
-            id: "changesChildBlade",
-            currentEntities: blade.currentEntity.operationsLog,
-            headIcon: blade.headIcon,
-            title: blade.title,
-            subtitle: 'platform.widgets.operations.blade-subtitle',
-            isExpandable: true,
-            controller: 'platformWebApp.changeLog.operationListController',
-            template: '$(Platform)/Scripts/app/changeLog/blades/operation-list.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, blade);
-    };
-}]);
-angular.module('platformWebApp')
     .controller('platformWebApp.assets.assetListController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', '$sessionStorage', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
         function ($scope, assets, bladeNavigationService, dialogService, $storage, bladeUtils, uiGridHelper) {
             var blade = $scope.blade;
@@ -23149,6 +23121,34 @@ angular.module('platformWebApp')
 }]);
 
 
+angular.module('platformWebApp')
+.controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    
+    $scope.blade.isLoading = false;
+    // ui-grid
+    $scope.setGridOptions = function (gridOptions) {
+        $scope.gridOptions = gridOptions;
+    };
+}]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    var blade = $scope.blade;
+
+    $scope.openBlade = function () {
+        var newBlade = {
+            id: "changesChildBlade",
+            currentEntities: blade.currentEntity.operationsLog,
+            headIcon: blade.headIcon,
+            title: blade.title,
+            subtitle: 'platform.widgets.operations.blade-subtitle',
+            isExpandable: true,
+            controller: 'platformWebApp.changeLog.operationListController',
+            template: '$(Platform)/Scripts/app/changeLog/blades/operation-list.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, blade);
+    };
+}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.dynamicObjectListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dynamicProperties.api', function ($scope, bladeNavigationService, dynamicPropertiesApi) {
 	var blade = $scope.blade;
@@ -28380,13 +28380,6 @@ angular.module('platformWebApp')
         }
 }]);
 
-angular.module('platformWebApp')
-.factory('platformWebApp.userProfileApi', ['$resource', function ($resource) {
-    return $resource('api/platform/profiles/currentuser', { }, {
-        getLocales: { url: 'api/platform/localization/locales', isArray: true },
-        getRegionalFormats: { url: 'api/platform/localization/regionalformats', isArray: true }
-    }); 
-}]);
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -28473,6 +28466,13 @@ CodeMirror.overlayMode = function(base, overlay, combine) {
 
 });
 
+angular.module('platformWebApp')
+.factory('platformWebApp.userProfileApi', ['$resource', function ($resource) {
+    return $resource('api/platform/profiles/currentuser', { }, {
+        getLocales: { url: 'api/platform/localization/locales', isArray: true },
+        getRegionalFormats: { url: 'api/platform/localization/regionalformats', isArray: true }
+    }); 
+}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.moduleInstallProgressController', ['$scope', '$window', 'platformWebApp.bladeNavigationService', 'platformWebApp.modules', function ($scope, $window, bladeNavigationService, modules) {
     var blade = $scope.blade;

@@ -56,12 +56,13 @@ namespace VirtoCommerce.OrdersModule.Web.JsonConverters
             if (operation != null)
             {
                 obj.Remove("childrenOperations");
+                obj.Remove("ChildrenOperations");
             }
 
             var payment = operation as PaymentIn;
             if (payment != null)
             {
-                var paymentStatus = obj["paymentStatus"].Value<string>();
+                var paymentStatus = (obj["paymentStatus"] ?? obj["PaymentStatus"]).Value<string>();
                 var hasStatusValue = Enum.IsDefined(typeof(PaymentStatus), paymentStatus);
                 if (!hasStatusValue)
                 {
