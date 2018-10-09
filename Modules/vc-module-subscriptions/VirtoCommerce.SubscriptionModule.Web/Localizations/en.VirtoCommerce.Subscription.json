@@ -1,4 +1,4 @@
-﻿{
+{
     "subscription": {
         "main-menu-title": "Subscriptions",
         "blades": {
@@ -28,7 +28,7 @@
                     "criteria": "Filter criteria",
                     "from": "Active from",
                     "to": "Active till",
-                    "outer-id": "Outer Id" 
+                    "outer-id": "Outer Id"
                 },
                 "placeholders": {
                     "all": "Not specified"
@@ -119,6 +119,54 @@
         },
         "commands": {
             "new-order": "Create Order"
+        }
+    },
+
+    "permissions": {
+        "subscription:access": "Open subscriptions menu",
+        "subscription:create": "Create subscription data",
+        "subscription:read": "View subscription data",
+        "subscription:update": "Update subscription data",
+        "subscription:delete": "Delete subscription",
+        "paymentplan:manage": "Payment plan manage"
+    },
+
+    "settings": {
+        "Subscription.EnableSubscriptions": {
+            "title": "Enable subscriptions",
+            "description": "Flag for activating subscriptions in store"
+        },
+        "Subscription.Status": {
+            "title": "Subscription statuses",
+            "description": "Subscription statuses"
+        },
+        "Subscription.SubscriptionNewNumberTemplate": {
+            "title": "Subscription number template",
+            "description": "The template (pattern) that will be used to generate the number for new Subscription. Parameters: 0 - date (the UTC time of number generation); 1 - the sequence number."
+        },
+        "Subscription.EnableSubscriptionProcessJob": {
+            "title": "Enable subscription process",
+            "description": "Flag for activating automatic subscription process (requires restart)"
+        },
+        "Subscription.EnableSubscriptionOrdersCreateJob": {
+            "title": "Enable subscription order creation",
+            "description": "Flag for activating automatic order creation for subscription (requires restart)"
+        },
+        "Subscription.CronExpression": {
+            "title": "Cron expression for scheduling subscription processing job execution (requires restart)",
+            "description": "The value is a regular CRON expression.\nTo run task every X minutes please use \"0/x * * * *\".\nTo run it every X hours at 00 minutes use \"0 */X * * *\". You can also specify minutes: \"15 */x * * *\"\nTo run it every X days at midnight use \"0 0 */x * *\""
+        },
+        "Subscription.CronExpressionOrdersJob": {
+            "title": "Cron expression for scheduling subscription order creation job execution (requires restart)",
+            "description": "The value is a regular CRON expression.\nTo run task every X minutes please use \"0/x * * * *\".\nTo run it every X hours at 00 minutes use \"0 */X * * *\". You can also specify minutes: \"15 */x * * *\"\nTo run it every X days at midnight use \"0 0 */x * *\""
+        },
+        "Subscription.PastDue.Delay": {
+            "title": "Past due delay in days",
+            "description": "Delay in days when unpaid subscription obtain PastDue status"
+        },
+        "Subscription.ExportImport.Description": {
+            "title": "Export/Import description",
+            "description": "Module description in platform export/import wizard"
         }
     }
 }
