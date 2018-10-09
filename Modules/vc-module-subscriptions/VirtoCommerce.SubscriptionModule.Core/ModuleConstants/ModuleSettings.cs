@@ -93,6 +93,7 @@ namespace VirtoCommerce.SubscriptionModule.Core.ModuleConstants
                 yield return EnableSubscriptionProcessJob;
                 yield return EnableSubscriptionOrdersCreateJob;
                 yield return CronExpression;
+                yield return CronExpressionOrdersJob;
                 yield return PastDueDelay;
                 yield return ExportImportDescription;
             }
