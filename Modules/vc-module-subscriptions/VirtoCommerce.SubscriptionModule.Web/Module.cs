@@ -137,13 +137,15 @@ namespace VirtoCommerce.SubscriptionModule.Web
         public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
             ICancellationToken cancellationToken)
         {
-            await _applicationBuilder.ApplicationServices.GetRequiredService<SubscriptionExportImport>().DoExportAsync(outStream, progressCallback);
+            await _applicationBuilder.ApplicationServices.GetRequiredService<SubscriptionExportImport>().DoExportAsync(outStream,
+                progressCallback, cancellationToken);
         }
 
         public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
             ICancellationToken cancellationToken)
         {
-            await _applicationBuilder.ApplicationServices.GetRequiredService<SubscriptionExportImport>().DoImportAsync(inputStream, progressCallback);
+            await _applicationBuilder.ApplicationServices.GetRequiredService<SubscriptionExportImport>().DoImportAsync(inputStream,
+                progressCallback, cancellationToken);
         }
     }
 }

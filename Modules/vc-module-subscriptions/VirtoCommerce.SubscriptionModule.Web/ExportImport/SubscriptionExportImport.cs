@@ -31,7 +31,8 @@ namespace VirtoCommerce.SubscriptionModule.Web.ExportImport
         private readonly IPaymentPlanSearchService _paymentPlanSearchService;
         private readonly IPaymentPlanService _paymentPlanService;
 
-        public SubscriptionExportImport(ISubscriptionService subscriptionService, ISubscriptionSearchService subscriptionSearchService, IPaymentPlanSearchService planSearchService, IPaymentPlanService paymentPlanService)
+        public SubscriptionExportImport(ISubscriptionService subscriptionService, ISubscriptionSearchService subscriptionSearchService,
+            IPaymentPlanSearchService planSearchService, IPaymentPlanService paymentPlanService)
         {
             _subscriptionService = subscriptionService;
             _subscriptionSearchService = subscriptionSearchService;
@@ -40,14 +41,20 @@ namespace VirtoCommerce.SubscriptionModule.Web.ExportImport
         }
 
 
-        public async Task DoExportAsync(Stream backupStream, Action<ExportImportProgressInfo> progressCallback)
+        public async Task DoExportAsync(Stream backupStream, Action<ExportImportProgressInfo> progressCallback,
+            ICancellationToken cancellationToken)
         {
-            var backupObject = await GetBackupObject(progressCallback);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var backupObject = await GetBackupObject(progressCallback, cancellationToken);
             backupObject.SerializeJson(backupStream);
         }
 
-        public async Task DoImportAsync(Stream backupStream, Action<ExportImportProgressInfo> progressCallback)
+        public async Task DoImportAsync(Stream backupStream, Action<ExportImportProgressInfo> progressCallback,
+            ICancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var backupObject = backupStream.DeserializeJson<BackupObject>();
 
             var progressInfo = new ExportImportProgressInfo();
@@ -55,6 +62,8 @@ namespace VirtoCommerce.SubscriptionModule.Web.ExportImport
             var take = 20;
             for (int skip = 0; skip < totalCount; skip += take)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 await _subscriptionService.SaveSubscriptionsAsync(backupObject.Subscriptions.Skip(skip).Take(take).ToArray());
                 progressInfo.Description = String.Format("{0} of {1} subscriptions imported", Math.Min(skip + take, totalCount), totalCount);
                 progressCallback(progressInfo);
@@ -63,13 +72,15 @@ namespace VirtoCommerce.SubscriptionModule.Web.ExportImport
             totalCount = backupObject.PaymentPlans.Count();
             for (int skip = 0; skip < totalCount; skip += take)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 await _paymentPlanService.SavePlansAsync(backupObject.PaymentPlans.Skip(skip).Take(take).ToArray());
                 progressInfo.Description = String.Format("{0} of {1} payment plans imported", Math.Min(skip + take, totalCount), totalCount);
                 progressCallback(progressInfo);
             }
         }
 
-        private async Task<BackupObject> GetBackupObject(Action<ExportImportProgressInfo> progressCallback)
+        private async Task<BackupObject> GetBackupObject(Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
             var retVal = new BackupObject();
             var progressInfo = new ExportImportProgressInfo();
@@ -80,6 +91,8 @@ namespace VirtoCommerce.SubscriptionModule.Web.ExportImport
 
             for (int skip = 0; skip < searchResponse.TotalCount; skip += take)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 searchResponse = await _subscriptionSearchService.SearchSubscriptionsAsync(new SubscriptionSearchCriteria { Skip = skip, Take = take, ResponseGroup = SubscriptionResponseGroup.Default.ToString() });
 
                 progressInfo.Description = String.Format("{0} of {1} subscriptions loading", Math.Min(skip + take, searchResponse.TotalCount), searchResponse.TotalCount);
@@ -91,6 +104,8 @@ namespace VirtoCommerce.SubscriptionModule.Web.ExportImport
 
             for (int skip = 0; skip < paymentPlanSearchResponse.TotalCount; skip += take)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 paymentPlanSearchResponse = await _paymentPlanSearchService.SearchPlansAsync(new PaymentPlanSearchCriteria { Skip = skip, Take = take });
 
                 progressInfo.Description = String.Format("{0} of {1} payment plans loading", Math.Min(skip + take, paymentPlanSearchResponse.TotalCount), paymentPlanSearchResponse.TotalCount);
