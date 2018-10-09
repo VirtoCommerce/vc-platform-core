@@ -33,10 +33,11 @@ namespace VirtoCommerce.SubscriptionModule.Core.ModuleConstants
 
         public static readonly SettingDescriptor EnableSubscriptionProcessJob = new SettingDescriptor
         {
-            Name = "Subscription.EnableSubscriptionProccessJob",
+            Name = "Subscription.EnableSubscriptionProcessJob",
             GroupName = "Subscriptions|General",
             ValueType = SettingValueType.Boolean,
-            DefaultValue = true
+            DefaultValue = true,
+            RestartRequired = true
         };
 
         public static readonly SettingDescriptor EnableSubscriptionOrdersCreateJob = new SettingDescriptor
@@ -44,7 +45,8 @@ namespace VirtoCommerce.SubscriptionModule.Core.ModuleConstants
             Name = "Subscription.EnableSubscriptionOrdersCreateJob",
             GroupName = "Subscriptions|General",
             ValueType = SettingValueType.Boolean,
-            DefaultValue = true
+            DefaultValue = true,
+            RestartRequired = true
         };
 
         public static readonly SettingDescriptor CronExpression = new SettingDescriptor
@@ -52,7 +54,8 @@ namespace VirtoCommerce.SubscriptionModule.Core.ModuleConstants
             Name = "Subscription.CronExpression",
             GroupName = "Subscriptions|General",
             ValueType = SettingValueType.ShortText,
-            DefaultValue = "0 */1 * * *"
+            DefaultValue = "0 */1 * * *",
+            RestartRequired = true
         };
 
         public static readonly SettingDescriptor CronExpressionOrdersJob = new SettingDescriptor
@@ -60,7 +63,8 @@ namespace VirtoCommerce.SubscriptionModule.Core.ModuleConstants
             Name = "Subscription.CronExpressionOrdersJob",
             GroupName = "Subscriptions|General",
             ValueType = SettingValueType.ShortText,
-            DefaultValue = "0 0 */1 * *"
+            DefaultValue = "0 0 */1 * *",
+            RestartRequired = true
         };
 
         public static readonly SettingDescriptor PastDueDelay = new SettingDescriptor
