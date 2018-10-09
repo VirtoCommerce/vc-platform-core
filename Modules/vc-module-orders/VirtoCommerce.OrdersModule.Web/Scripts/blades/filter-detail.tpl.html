@@ -1,0 +1,62 @@
+﻿<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block clearfix">
+            <form class="form" name="formScope">
+                <legend>{{ 'orders.blades.filter-detail.labels.criteria' | translate }}</legend>
+
+                <div class="form-group" ng-init="setForm(formScope)">
+                    <label class="form-label">{{ 'orders.blades.filter-detail.labels.name' | translate }}</label>
+                    <div class="form-input">
+                        <input ng-model="blade.currentEntity.name" required placeholder="{{ 'orders.blades.filter-detail.labels.name_' | translate }}" />
+                    </div>
+                </div>
+
+                <va-metaform registered-inputs="blade.metaFields" blade="blade"></va-metaform>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="text/ng-template" id="statusesSelector.html">
+    <div class="form-input">
+        <ui-select multiple ng-model="blade.currentEntity.statuses">
+            <ui-select-match placeholder="{{ 'orders.blades.filter-detail.placeholders.all' | translate }}">{{$item.value}}</ui-select-match>
+            <ui-select-choices repeat="x.key as x in blade.statuses | filter: {'value': $select.search}">
+                <span ng-bind-html="x.value | highlight: $select.search"></span>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+</script>
+
+<script type="text/ng-template" id="storeSelector.html">
+    <div class="form-input">
+        <ui-select multiple ng-model="blade.currentEntity.storeIds">
+            <ui-select-match placeholder="{{ 'orders.blades.filter-detail.placeholders.all' | translate }}">{{$item.name}}</ui-select-match>
+            <ui-select-choices repeat="store.id as store in blade.stores | filter: { name: $select.search }">
+                <span ng-bind-html="store.name | highlight: $select.search"></span>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+</script>
+
+<script type="text/ng-template" id="customerSelector.html">
+    <div class="form-input">
+        <ui-select ng-model="blade.currentEntity.customerId">
+            <ui-select-match allow-clear placeholder="{{ 'orders.blades.filter-detail.placeholders.all' | translate }}">{{$select.selected.fullName}}</ui-select-match>
+            <ui-select-choices repeat="x.id as x in blade.contacts | filter: { fullName: $select.search }">
+                <span ng-bind-html="x.fullName | highlight: $select.search"></span>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+</script>
+
+<script type="text/ng-template" id="filter-employeeSelector.html">
+    <div class="form-input">
+        <ui-select ng-model="blade.currentEntity.employeeId">
+            <ui-select-match allow-clear placeholder="{{ 'orders.blades.filter-detail.placeholders.all' | translate }}">{{$select.selected.fullName}}</ui-select-match>
+            <ui-select-choices repeat="x.id as x in blade.employees | filter: { fullName: $select.search }">
+                <span ng-bind-html="x.fullName | highlight: $select.search"></span>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+</script>

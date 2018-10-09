@@ -1,0 +1,26 @@
+﻿<script type="text/ng-template" id="invoiceOperation.tpl.html">
+    <div class="tree-block" ng-click="selectOperation(node)" ng-class="{'__selected': currentOperationId == node.operation.id}" style="background: lightgreen">
+        <div class="inner">
+            <div class="tree-el __title">
+                <i class="tree-ico fa fa-info-circle"></i>
+                {{node.operation.operationType +' #'+node.operation.number}}
+            </div>
+            <div class="tree-el __date">
+                <i class="tree-ico fa fa-calendar"></i>
+                {{node.operation.createdDate | date}}
+            </div>
+            <div class="tree-el __price">
+                <i class="tree-ico fa fa-money"></i>
+                {{node.operation.sum +' '+node.operation.currency}}
+            </div>
+            <div class="tree-el __canceled" ng-if="node.operation.status">
+                {{node.operation.status}}
+            </div>
+        </div>
+    </div>
+    <ul class="tree-node" ng-class="{'__empty': node.childrenNodes.length == 1}" ng-if="node.childrenNodes.length > 0">
+        <li class="tree-item" ng-repeat="node in node.childrenNodes" ng-include="node.treeTemplateUrl ? node.treeTemplateUrl : 'orderOperationDefault.tpl.html'"></li>
+    </ul>
+</script>
+
+

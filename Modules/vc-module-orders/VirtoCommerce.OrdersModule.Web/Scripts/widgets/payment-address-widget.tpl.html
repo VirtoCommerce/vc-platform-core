@@ -1,0 +1,10 @@
+﻿<div class="gridster-cnt" ng-click="openBlade()">
+    <div class="cnt-inner" ng-if="!operation.billingAddress">
+        <div class="list-count">{{'platform.placeholders.n-a' | translate}}</div>
+        <div class="list-t">{{'orders.widgets.payment-address.title' | translate}}</div>
+    </div>
+    <div class="cnt-inner" ng-if="operation.billingAddress">
+        <div class="list-t">{{'orders.widgets.payment-address.title' | translate}}</div>
+        <div class="list-price">{{ getAddressName(operation.billingAddress) | limitTo :40 }}</div>
+    </div>
+</div>

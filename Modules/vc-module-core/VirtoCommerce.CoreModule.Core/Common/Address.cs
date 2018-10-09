@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CoreModule.Core.Common
@@ -25,6 +26,11 @@ namespace VirtoCommerce.CoreModule.Core.Common
         public object Clone()
         {
             return MemberwiseClone() as Address;
+        }
+
+        public override string ToString()
+        {
+            return string.Join(", ", new[] { FirstName, LastName, Line1, City, RegionName, PostalCode ?? Zip, CountryName }.Where(x=> !string.IsNullOrWhiteSpace(x)));
         }
     }
 
