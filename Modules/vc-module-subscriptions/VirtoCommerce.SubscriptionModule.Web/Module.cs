@@ -32,10 +32,7 @@ namespace VirtoCommerce.SubscriptionModule.Web
 {
     public class Module : IModule, IExportSupport, IImportSupport
     {
-        private const string _connectionStringName = "VirtoCommerce";
-
         private IApplicationBuilder _applicationBuilder;
-        
 
         #region IModule Members
 
@@ -44,16 +41,9 @@ namespace VirtoCommerce.SubscriptionModule.Web
         public void Initialize(IServiceCollection serviceCollection)
         {
             var serviceProvider = serviceCollection.BuildServiceProvider();
-
-            //Registration welcome email notification.
-            var eventHandlerRegistrar = serviceProvider.GetRequiredService<IHandlerRegistrar>();
-            eventHandlerRegistrar.RegisterHandler<OrderChangedEvent>(async (message, token) => await serviceProvider.GetRequiredService<CreateSubscriptionOrderChangedEventHandler>().Handle(message));
-            eventHandlerRegistrar.RegisterHandler<OrderChangedEvent>(async (message, token) => await serviceProvider.GetRequiredService<LogChangesSubscriptionChangedEventHandler>().Handle(message));
-            eventHandlerRegistrar.RegisterHandler<SubscriptionChangedEvent>(async (message, token) => await serviceProvider.GetRequiredService<LogChangesSubscriptionChangedEventHandler>().Handle(message));
-            eventHandlerRegistrar.RegisterHandler<SubscriptionChangedEvent>(async (message, token) => await serviceProvider.GetRequiredService<SendNotificationsSubscriptionChangedEventHandler>().Handle(message));
-
             var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-            serviceCollection.AddDbContext<SubscriptionDbContext>(options => options.UseSqlServer(configuration.GetConnectionString(_connectionStringName)));
+            var connectionString = configuration.GetConnectionString("VirtoCommerce.Subscription") ?? configuration.GetConnectionString("VirtoCommerce");
+            serviceCollection.AddDbContext<SubscriptionDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddTransient<ISubscriptionRepository, SubscriptionRepositoryImpl>();
             serviceCollection.AddSingleton<Func<ISubscriptionRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ISubscriptionRepository>());
          
@@ -63,32 +53,44 @@ namespace VirtoCommerce.SubscriptionModule.Web
             serviceCollection.AddTransient<IPaymentPlanSearchService, PaymentPlanService>();
             serviceCollection.AddTransient<ISubscriptionBuilder, SubscriptionBuilderImpl>();
 
+            serviceCollection.AddSingleton<CreateSubscriptionOrderChangedEventHandler>();
+            serviceCollection.AddSingleton<LogChangesSubscriptionChangedEventHandler>();
+            serviceCollection.AddSingleton<SendNotificationsSubscriptionChangedEventHandler>();
+
             serviceCollection.AddSingleton<SubscriptionExportImport>();
         }
 
-        public void PostInitialize(IApplicationBuilder applicationBuilder)
+        public void PostInitialize(IApplicationBuilder appBuilder)
         {
-            _applicationBuilder = applicationBuilder;
+            _applicationBuilder = appBuilder;
 
             // Register module permissions
-            var permissionsRegistrar = applicationBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
-            var permissions = ModulePermissions.AllPermissions.Select(permissionName => new Permission()
+            var permissionsRegistrar = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
+            var permissions = ModulePermissions.AllPermissions.Select(permissionName => new Permission
             {
+                ModuleId = ModuleInfo.Id,
                 GroupName = "Subscription",
                 Name = permissionName
             });
             permissionsRegistrar.RegisterPermissions(permissions.ToArray());
 
             //Register setting in the store level
-            var settingsRegistrar = applicationBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
+            var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleSettings.AllSettings, ModuleInfo.Id);
 
             // TODO: how to simulate this?
             //var storeLevelSettings = new[] { "Subscription.EnableSubscriptions" };
             //settingsManager.RegisterModuleSettings("VirtoCommerce.Store", settingsManager.GetModuleSettings(ModuleInfo.Id).Where(x => storeLevelSettings.Contains(x.Name)).ToArray());
 
+            //Registration welcome email notification.
+            var handlerRegistrar = appBuilder.ApplicationServices.GetRequiredService<IHandlerRegistrar>();
+            handlerRegistrar.RegisterHandler<OrderChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetRequiredService<CreateSubscriptionOrderChangedEventHandler>().Handle(message));
+            handlerRegistrar.RegisterHandler<OrderChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetRequiredService<LogChangesSubscriptionChangedEventHandler>().Handle(message));
+            handlerRegistrar.RegisterHandler<SubscriptionChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetRequiredService<LogChangesSubscriptionChangedEventHandler>().Handle(message));
+            handlerRegistrar.RegisterHandler<SubscriptionChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetRequiredService<SendNotificationsSubscriptionChangedEventHandler>().Handle(message));
+
             //Schedule periodic subscription processing job
-            var settingsManager = applicationBuilder.ApplicationServices.GetRequiredService<ISettingsManager>();
+            var settingsManager = appBuilder.ApplicationServices.GetRequiredService<ISettingsManager>();
             var processJobEnable = settingsManager.GetValue(ModuleSettings.EnableSubscriptionProcessJob.Name, true);
             if (processJobEnable)
             {
@@ -111,15 +113,15 @@ namespace VirtoCommerce.SubscriptionModule.Web
                 RecurringJob.RemoveIfExists("ProcessSubscriptionOrdersJob");
             }
 
-            var notificationRegistrar = applicationBuilder.ApplicationServices.GetService<INotificationRegistrar>();
+            var notificationRegistrar = appBuilder.ApplicationServices.GetService<INotificationRegistrar>();
             notificationRegistrar.RegisterNotification<NewSubscriptionEmailNotification>();
             notificationRegistrar.RegisterNotification<SubscriptionCanceledEmailNotification>();
 
             //Next lines allow to use polymorph types in API controller methods
-            var mvcJsonOptions = applicationBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
+            var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicSubscriptionJsonConverter());
 
-            using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
+            using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
                 var subscriptionDbContext = serviceScope.ServiceProvider.GetRequiredService<SubscriptionDbContext>();
                 subscriptionDbContext.Database.EnsureCreated();
