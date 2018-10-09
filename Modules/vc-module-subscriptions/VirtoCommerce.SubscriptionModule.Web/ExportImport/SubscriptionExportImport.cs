@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.SubscriptionModule.Core.Model;
@@ -58,7 +57,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.ExportImport
             var backupObject = backupStream.DeserializeJson<BackupObject>();
 
             var progressInfo = new ExportImportProgressInfo();
-            var totalCount = backupObject.Subscriptions.Count();
+            var totalCount = backupObject.Subscriptions.Count;
             var take = 20;
             for (int skip = 0; skip < totalCount; skip += take)
             {
@@ -69,7 +68,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.ExportImport
                 progressCallback(progressInfo);
             }
 
-            totalCount = backupObject.PaymentPlans.Count();
+            totalCount = backupObject.PaymentPlans.Count;
             for (int skip = 0; skip < totalCount; skip += take)
             {
                 cancellationToken.ThrowIfCancellationRequested();
