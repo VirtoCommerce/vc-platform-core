@@ -3,6 +3,8 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.OrdersModule.Core.Model;
+using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.SubscriptionModule.Core.Model;
 using VirtoCommerce.SubscriptionModule.Core.Model.Search;
 using VirtoCommerce.SubscriptionModule.Core.Services;
@@ -84,7 +86,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
         {
             var subscriptionBuilder = await _subscriptionBuilder.TakeSubscription(subscription).ActualizeAsync();
             var order = await subscriptionBuilder.TryToCreateRecurrentOrderAsync(forceCreation: true);
-            _customerOrderService.SaveChanges(new[] { order });
+            await _customerOrderService.SaveChangesAsync(new[] { order });
             return Ok(order);
         }
 
