@@ -13,7 +13,7 @@ namespace VirtoCommerce.SubscriptionModule.Core.Model.Search
         /// Search by subscription number
         /// </summary>
         public string Number { get; set; }
-        public string Keyword { get; set; }
+
         /// <summary>
         /// Search subscription for related order id
         /// </summary>
