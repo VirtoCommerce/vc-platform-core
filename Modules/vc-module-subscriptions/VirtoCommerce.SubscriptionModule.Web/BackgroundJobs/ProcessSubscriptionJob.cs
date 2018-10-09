@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Threading.Tasks;
 using Hangfire;
 using VirtoCommerce.SubscriptionModule.Core.Model;
 using VirtoCommerce.SubscriptionModule.Core.Model.Search;
@@ -20,26 +21,26 @@ namespace VirtoCommerce.SubscriptionModule.Web.BackgroundJobs
         }
 
         [DisableConcurrentExecution(60 * 60 * 24)]
-        public void Process()
+        public async Task Process()
         {
             var criteria = new SubscriptionSearchCriteria
             {
                 Statuses = new[] { SubscriptionStatus.Active, SubscriptionStatus.PastDue, SubscriptionStatus.Trialing, SubscriptionStatus.Unpaid }.Select(x => x.ToString()).ToArray(),
                 Take = 0
             };
-            var result = _subscriptionSearchService.SearchSubscriptions(criteria);
+            var result = await _subscriptionSearchService.SearchSubscriptionsAsync(criteria);
             var batchSize = 20;
             for (var i = 0; i < result.TotalCount; i += batchSize)
             {
                 criteria.Skip = i;
                 criteria.Take = batchSize;
-                result = _subscriptionSearchService.SearchSubscriptions(criteria);
-                var subscriptions = _subscriptionService.GetByIds(result.Results.Select(x => x.Id).ToArray());
+                result = await _subscriptionSearchService.SearchSubscriptionsAsync(criteria);
+                var subscriptions = await _subscriptionService.GetByIdsAsync(result.Results.Select(x => x.Id).ToArray());
                 foreach (var subscription in subscriptions)
                 {
-                    _subscriptionBuilder.TakeSubscription(subscription).Actualize();
+                    await _subscriptionBuilder.TakeSubscription(subscription).ActualizeAsync();
                 }
-                _subscriptionService.SaveSubscriptions(subscriptions);
+                await _subscriptionService.SaveSubscriptionsAsync(subscriptions);
             }
         }
 
