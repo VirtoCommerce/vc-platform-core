@@ -45,7 +45,6 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
             var changedEntries = new List<GenericChangedEntry<PaymentPlan>>();
 
             using (var repository = _subscriptionRepositoryFactory())
-            using (var changeTracker = GetChangeTracker(repository))
             {
                 var existPlanEntities = repository.GetPaymentPlansByIds(plans.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var paymentPlan in plans)
@@ -57,7 +56,6 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                         var targetPlanEntity = existPlanEntities.FirstOrDefault(x => x.Id == paymentPlan.Id);
                         if (targetPlanEntity != null)
                         {
-                            changeTracker.Attach(targetPlanEntity);
                             changedEntries.Add(new GenericChangedEntry<PaymentPlan>(paymentPlan, targetPlanEntity.ToModel(AbstractTypeFactory<PaymentPlan>.TryCreateInstance()), EntryState.Modified));
                             sourcePlanEntity.Patch(targetPlanEntity);
                         }
@@ -75,6 +73,8 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                 pkMap.ResolvePrimaryKeys();
                 await _eventPublisher.Publish(new PaymentPlanChangedEvent(changedEntries));
             }
+
+            // TODO: cache management
         }
 
         public async Task DeleteAsync(string[] ids)

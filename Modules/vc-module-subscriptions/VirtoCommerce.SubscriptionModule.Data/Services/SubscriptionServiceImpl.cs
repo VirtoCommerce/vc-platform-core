@@ -109,7 +109,6 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
             var changedEntries = new List<GenericChangedEntry<Subscription>>();
 
             using (var repository = _subscriptionRepositoryFactory())
-            using (var changeTracker = GetChangeTracker(repository))
             {
                 var existEntities = repository.GetSubscriptionsByIds(subscriptions.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var subscription in subscriptions)
@@ -135,7 +134,6 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                                                                                  .FromModel(subscription, pkMap) as SubscriptionEntity;
                     if (originalEntity != null)
                     {
-                        changeTracker.Attach(originalEntity);
                         changedEntries.Add(new GenericChangedEntry<Subscription>(subscription, originalEntity.ToModel(AbstractTypeFactory<Subscription>.TryCreateInstance()), EntryState.Modified));
                         modifiedEntity.Patch(originalEntity);
                         //force the subscription.ModifiedDate update, because the subscription object may not have any changes in its properties
@@ -153,6 +151,8 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
                 await _eventPublisher.Publish(new SubscriptionChangedEvent(changedEntries));
+
+                // TODO: cache management
             }
         }
 
