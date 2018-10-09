@@ -10,7 +10,7 @@
     </dependencies>
 
     <title>Subscription module</title>
-    <description>Represent recurrent orders functionality</description>
+    <description>Represent recurrent subscriptions functionality</description>
     <authors>
         <author>Egidijus Mažeika</author>
         <author>Eugeney Tatarincev</author>

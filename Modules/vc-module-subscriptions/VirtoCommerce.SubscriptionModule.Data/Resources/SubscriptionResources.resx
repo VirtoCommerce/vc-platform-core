@@ -130,10 +130,10 @@
     <value>Billing interval count changed from '{0}' to '{1}'</value>
   </data>
   <data name="NewRecurringOrderCreated" xml:space="preserve">
-    <value>New  recurring order '{0}' created</value>
+    <value>New  recurring subscription '{0}' created</value>
   </data>
   <data name="NewSubscriptionEmailNotificationBody" xml:space="preserve">
-    <value>Subscription {{subscription.number}} with amount {{subscription.customer_order_prototype.total |  round: 2}}{{subscription.customer_order_prototype.currency}} successfully created.</value>
+    <value>Subscription {{subscription.number}} with amount {{subscription.customer_subscription_prototype.total |  round: 2}}{{subscription.customer_subscription_prototype.currency}} successfully created.</value>
   </data>
   <data name="NewSubscriptionEmailNotificationSubject" xml:space="preserve">
     <value>You are successfully subscribed to new subscription &lt;strong&gt; {{ subscription.number }} &lt;/strong&gt;</value>

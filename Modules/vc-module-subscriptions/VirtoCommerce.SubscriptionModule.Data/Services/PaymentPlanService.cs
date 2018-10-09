@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Data.Infrastructure;
@@ -9,6 +11,7 @@ using VirtoCommerce.SubscriptionModule.Core.Events;
 using VirtoCommerce.SubscriptionModule.Core.Model;
 using VirtoCommerce.SubscriptionModule.Core.Model.Search;
 using VirtoCommerce.SubscriptionModule.Core.Services;
+using VirtoCommerce.SubscriptionModule.Data.Caching;
 using VirtoCommerce.SubscriptionModule.Data.Model;
 using VirtoCommerce.SubscriptionModule.Data.Repositories;
 
@@ -18,25 +21,46 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
     {
         private readonly IEventPublisher _eventPublisher;
         private readonly Func<ISubscriptionRepository> _subscriptionRepositoryFactory;
-        public PaymentPlanService(Func<ISubscriptionRepository> subscriptionRepositoryFactory, IEventPublisher eventPublisher)
+        private readonly IPlatformMemoryCache _platformMemoryCache;
+
+        public PaymentPlanService(Func<ISubscriptionRepository> subscriptionRepositoryFactory, IEventPublisher eventPublisher,
+            IPlatformMemoryCache platformMemoryCache)
         {
             _subscriptionRepositoryFactory = subscriptionRepositoryFactory;
             _eventPublisher = eventPublisher;
+            _platformMemoryCache = platformMemoryCache;
         }
 
         #region IPaymentPlanService Members
 
-        public Task<PaymentPlan[]> GetByIdsAsync(string[] planIds, string responseGroup = null)
+        public async Task<PaymentPlan[]> GetByIdsAsync(string[] planIds, string responseGroup = null)
         {
-            var retVal = new List<PaymentPlan>();
-
-            using (var repository = _subscriptionRepositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), nameof(GetByIdsAsync), string.Join("-", planIds), responseGroup);
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, cacheEntry =>
             {
-                repository.DisableChangesTracking();
+                cacheEntry.AddExpirationToken(PaymentPlanCacheRegion.CreateChangeToken());
 
-                retVal = repository.GetPaymentPlansByIds(planIds).Select(x => x.ToModel(AbstractTypeFactory<PaymentPlan>.TryCreateInstance())).ToList();
-            }
-            return Task.FromResult(retVal.ToArray());
+                var retVal = new List<PaymentPlan>();
+
+                using (var repository = _subscriptionRepositoryFactory())
+                {
+                    repository.DisableChangesTracking();
+
+                    var paymentPlanEntities = repository.GetPaymentPlansByIds(planIds);
+                    foreach (var paymentPlanEntity in paymentPlanEntities)
+                    {
+                        var paymentPlan = AbstractTypeFactory<PaymentPlan>.TryCreateInstance();
+                        if (paymentPlan != null)
+                        {
+                            paymentPlan = paymentPlanEntity.ToModel(paymentPlan);
+                            retVal.Add(paymentPlan);
+
+                            cacheEntry.AddExpirationToken(PaymentPlanCacheRegion.CreateChangeToken(paymentPlan));
+                        }
+                    }
+                }
+                return Task.FromResult(retVal.ToArray());
+            });
         }
 
         public async Task SavePlansAsync(PaymentPlan[] plans)
@@ -74,7 +98,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                 await _eventPublisher.Publish(new PaymentPlanChangedEvent(changedEntries));
             }
 
-            // TODO: cache management
+            ClearCacheFor(plans);
         }
 
         public async Task DeleteAsync(string[] ids)
@@ -92,6 +116,8 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
 
                     await _eventPublisher.Publish(new PaymentPlanChangedEvent(changedEntries));
                 }
+
+                ClearCacheFor(paymentPlans);
             }
         }
 
@@ -101,35 +127,50 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
         #region IPaymentPlanSearchService members
         public async Task<GenericSearchResult<PaymentPlan>> SearchPlansAsync(PaymentPlanSearchCriteria criteria)
         {
-            var retVal = new GenericSearchResult<PaymentPlan>();
-            using (var repository = _subscriptionRepositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), nameof(SearchPlansAsync), criteria.GetCacheKey());
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
             {
-                repository.DisableChangesTracking();
+                cacheEntry.AddExpirationToken(PaymentPlanSearchCacheRegion.CreateChangeToken());
 
-                var query = repository.PaymentPlans;
-
-                var sortInfos = criteria.SortInfos;
-                if (sortInfos.IsNullOrEmpty())
+                var retVal = new GenericSearchResult<PaymentPlan>();
+                using (var repository = _subscriptionRepositoryFactory())
                 {
-                    sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<PaymentPlan>(x => x.CreatedDate), SortDirection = SortDirection.Descending } };
+                    repository.DisableChangesTracking();
+
+                    var query = repository.PaymentPlans;
+
+                    var sortInfos = criteria.SortInfos;
+                    if (sortInfos.IsNullOrEmpty())
+                    {
+                        sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<PaymentPlan>(x => x.CreatedDate), SortDirection = SortDirection.Descending } };
+                    }
+                    query = query.OrderBySortInfos(sortInfos);
+
+                    retVal.TotalCount = query.Count();
+
+                    var paymentPlanIds = query.Skip(criteria.Skip)
+                        .Take(criteria.Take)
+                        .ToArray()
+                        .Select(x => x.Id)
+                        .ToArray();
+
+                    //Load subscriptions with preserving sorting order
+                    var unorderedResults = await GetByIdsAsync(paymentPlanIds, criteria.ResponseGroup);
+                    retVal.Results = unorderedResults.OrderBy(x => Array.IndexOf(paymentPlanIds, x.Id)).ToArray();
+                    return retVal;
                 }
-                query = query.OrderBySortInfos(sortInfos);
-
-                retVal.TotalCount = query.Count();
-
-                var paymentPlanIds = query.Skip(criteria.Skip)
-                                            .Take(criteria.Take)
-                                            .ToArray()
-                                            .Select(x => x.Id)
-                                            .ToArray();
-
-                //Load subscriptions with preserving sorting order
-                var unorderedResults = await GetByIdsAsync(paymentPlanIds, criteria.ResponseGroup);
-                retVal.Results = unorderedResults.OrderBy(x => Array.IndexOf(paymentPlanIds, x.Id)).ToArray();
-                return retVal;
-            }
+            });
         }
         #endregion
 
+        protected virtual void ClearCacheFor(PaymentPlan[] paymentPlans)
+        {
+            foreach (var paymentPlan in paymentPlans)
+            {
+                PaymentPlanCacheRegion.ExpirePaymentPlan(paymentPlan);
+            }
+
+            PaymentPlanSearchCacheRegion.ExpireRegion();
+        }
     }
 }

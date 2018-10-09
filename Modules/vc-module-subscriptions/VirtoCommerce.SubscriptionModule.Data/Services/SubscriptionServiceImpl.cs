@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.OrdersModule.Core.Services;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.SubscriptionModule.Core.Model;
 using VirtoCommerce.SubscriptionModule.Core.Model.Search;
 using VirtoCommerce.SubscriptionModule.Core.Services;
@@ -18,6 +20,7 @@ using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.SubscriptionModule.Core.Events;
 using VirtoCommerce.StoreModule.Core.Services;
+using VirtoCommerce.SubscriptionModule.Data.Caching;
 
 namespace VirtoCommerce.SubscriptionModule.Data.Services
 {
@@ -30,9 +33,12 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
         private readonly IUniqueNumberGenerator _uniqueNumberGenerator;
         private readonly IChangeLogService _changeLogService;
         private readonly IEventPublisher _eventPublisher;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public SubscriptionServiceImpl(Func<ISubscriptionRepository> subscriptionRepositoryFactory, ICustomerOrderService customerOrderService, ICustomerOrderSearchService customerOrderSearchService,
-                                       IStoreService storeService, IUniqueNumberGenerator uniqueNumberGenerator, IChangeLogService changeLogService, IEventPublisher eventPublisher)
+        public SubscriptionServiceImpl(Func<ISubscriptionRepository> subscriptionRepositoryFactory, ICustomerOrderService customerOrderService,
+                                       ICustomerOrderSearchService customerOrderSearchService, IStoreService storeService,
+                                       IUniqueNumberGenerator uniqueNumberGenerator, IChangeLogService changeLogService, IEventPublisher eventPublisher,
+                                       IPlatformMemoryCache platformMemoryCache)
         {
             _customerOrderSearchService = customerOrderSearchService;
             _subscriptionRepositoryFactory = subscriptionRepositoryFactory;
@@ -41,66 +47,73 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
             _uniqueNumberGenerator = uniqueNumberGenerator;
             _changeLogService = changeLogService;
             _eventPublisher = eventPublisher;
+            _platformMemoryCache = platformMemoryCache;
         }
 
         #region ISubscriptionService members
 
         public async Task<Subscription[]> GetByIdsAsync(string[] subscriptionIds, string responseGroup = null)
         {
-            var retVal = new List<Subscription>();
-            var subscriptionResponseGroup = EnumUtility.SafeParse(responseGroup, SubscriptionResponseGroup.Full);
-            using (var repository = _subscriptionRepositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), nameof(GetByIdsAsync), string.Join("-", subscriptionIds, responseGroup));
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
             {
-                repository.DisableChangesTracking();
-
-                var subscriptionEntities = repository.GetSubscriptionsByIds(subscriptionIds, responseGroup);
-                foreach (var subscriptionEntity in subscriptionEntities)
+                var retVal = new List<Subscription>();
+                var subscriptionResponseGroup = EnumUtility.SafeParse(responseGroup, SubscriptionResponseGroup.Full);
+                using (var repository = _subscriptionRepositoryFactory())
                 {
-                    var subscription = AbstractTypeFactory<Subscription>.TryCreateInstance();
-                    if (subscription != null)
+                    repository.DisableChangesTracking();
+
+                    var subscriptionEntities = repository.GetSubscriptionsByIds(subscriptionIds, responseGroup);
+                    foreach (var subscriptionEntity in subscriptionEntities)
                     {
-                        subscription = subscriptionEntity.ToModel(subscription) as Subscription;
-                        if (subscriptionResponseGroup.HasFlag(SubscriptionResponseGroup.WithChangeLog))
+                        var subscription = AbstractTypeFactory<Subscription>.TryCreateInstance();
+                        if (subscription != null)
                         {
-                            //Load change log by separate request
-                            _changeLogService.LoadChangeLogs(subscription);
+                            subscription = subscriptionEntity.ToModel(subscription) as Subscription;
+                            if (subscriptionResponseGroup.HasFlag(SubscriptionResponseGroup.WithChangeLog))
+                            {
+                                //Load change log by separate request
+                                _changeLogService.LoadChangeLogs(subscription);
+                            }
+                            retVal.Add(subscription);
                         }
-                        retVal.Add(subscription);
                     }
                 }
-            }
 
-            CustomerOrder[] orderPrototypes = null;
-            CustomerOrder[] subscriptionOrders = null;
+                CustomerOrder[] orderPrototypes = null;
+                CustomerOrder[] subscriptionOrders = null;
 
-            if (subscriptionResponseGroup.HasFlag(SubscriptionResponseGroup.WithOrderPrototype))
-            {
-                orderPrototypes = await _customerOrderService.GetByIdsAsync(retVal.Select(x => x.CustomerOrderPrototypeId).ToArray());
-            }
-            if (subscriptionResponseGroup.HasFlag(SubscriptionResponseGroup.WithRelatedOrders))
-            {
-                //Loads customer order prototypes and related orders for each subscription via order service
-                var criteria = new CustomerOrderSearchCriteria
+                if (subscriptionResponseGroup.HasFlag(SubscriptionResponseGroup.WithOrderPrototype))
                 {
-                    SubscriptionIds = subscriptionIds
-                };
-                subscriptionOrders = (await _customerOrderSearchService.SearchCustomerOrdersAsync(criteria)).Results.ToArray();
-            }
-
-            foreach (var subscription in retVal)
-            {
-                if (!orderPrototypes.IsNullOrEmpty())
-                {
-                    subscription.CustomerOrderPrototype = orderPrototypes.FirstOrDefault(x => x.Id == subscription.CustomerOrderPrototypeId);
+                    orderPrototypes = await _customerOrderService.GetByIdsAsync(retVal.Select(x => x.CustomerOrderPrototypeId).ToArray());
                 }
-                if (!subscriptionOrders.IsNullOrEmpty())
+                if (subscriptionResponseGroup.HasFlag(SubscriptionResponseGroup.WithRelatedOrders))
                 {
-                    subscription.CustomerOrders = subscriptionOrders.Where(x => x.SubscriptionId == subscription.Id).ToList();
-                    subscription.CustomerOrdersIds = subscription.CustomerOrders.Select(x => x.Id).ToArray();
+                    //Loads customer order prototypes and related orders for each subscription via order service
+                    var criteria = new CustomerOrderSearchCriteria
+                    {
+                        SubscriptionIds = subscriptionIds
+                    };
+                    subscriptionOrders = (await _customerOrderSearchService.SearchCustomerOrdersAsync(criteria)).Results.ToArray();
                 }
-            }
 
-            return retVal.ToArray();
+                foreach (var subscription in retVal)
+                {
+                    if (!orderPrototypes.IsNullOrEmpty())
+                    {
+                        subscription.CustomerOrderPrototype = orderPrototypes.FirstOrDefault(x => x.Id == subscription.CustomerOrderPrototypeId);
+                    }
+                    if (!subscriptionOrders.IsNullOrEmpty())
+                    {
+                        subscription.CustomerOrders = subscriptionOrders.Where(x => x.SubscriptionId == subscription.Id).ToList();
+                        subscription.CustomerOrdersIds = subscription.CustomerOrders.Select(x => x.Id).ToArray();
+                    }
+
+                    cacheEntry.AddExpirationToken(SubscriptionCacheRegion.CreateChangeToken(subscription));
+                }
+
+                return retVal.ToArray();
+            });
         }
 
         public async Task SaveSubscriptionsAsync(Subscription[] subscriptions)
@@ -151,9 +164,9 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
                 await _eventPublisher.Publish(new SubscriptionChangedEvent(changedEntries));
-
-                // TODO: cache management
             }
+
+            ClearCacheFor(subscriptions);
         }
 
         public async Task DeleteAsync(string[] ids)
@@ -174,6 +187,8 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                     await repository.UnitOfWork.CommitAsync();
 
                     await _eventPublisher.Publish(new SubscriptionChangedEvent(changedEntries));
+
+                    ClearCacheFor(subscriptions);
                 }
             }
         }
@@ -182,89 +197,113 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
         #region ISubscriptionSearchService members
         public async Task<GenericSearchResult<Subscription>> SearchSubscriptionsAsync(SubscriptionSearchCriteria criteria)
         {
-            var retVal = new GenericSearchResult<Subscription>();
-            using (var repository = _subscriptionRepositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), nameof(SearchSubscriptionsAsync), criteria.GetCacheKey());
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
             {
-                repository.DisableChangesTracking();
+                cacheEntry.AddExpirationToken(SubscriptionSearchCacheRegion.CreateChangeToken());
 
-                var query = repository.Subscriptions;
-
-                if (!string.IsNullOrEmpty(criteria.Number))
+                var retVal = new GenericSearchResult<Subscription>();
+                using (var repository = _subscriptionRepositoryFactory())
                 {
-                    query = query.Where(x => x.Number == criteria.Number);
-                }
-                else if (criteria.Keyword != null)
-                {
-                    query = query.Where(x => x.Number.Contains(criteria.Keyword));
-                }
+                    repository.DisableChangesTracking();
 
-                if (criteria.CustomerId != null)
-                {
-                    query = query.Where(x => x.CustomerId == criteria.CustomerId);
-                }
-                if (criteria.Statuses != null && criteria.Statuses.Any())
-                {
-                    query = query.Where(x => criteria.Statuses.Contains(x.Status));
-                }
-                if (criteria.StoreId != null)
-                {
-                    query = query.Where(x => criteria.StoreId == x.StoreId);
-                }
+                    var query = await GetSubscriptionsQueryForCriteria(repository, criteria);
 
-                if (criteria.StartDate != null)
-                {
-                    query = query.Where(x => x.CreatedDate >= criteria.StartDate);
+                    retVal.TotalCount = query.Count();
+
+                    var subscriptionsIds = query.Skip(criteria.Skip)
+                        .Take(criteria.Take)
+                        .ToArray()
+                        .Select(x => x.Id)
+                        .ToArray();
+
+                    //Load subscriptions with preserving sorting order
+                    var unorderedResults = await GetByIdsAsync(subscriptionsIds, criteria.ResponseGroup);
+                    retVal.Results = unorderedResults.OrderBy(x => Array.IndexOf(subscriptionsIds, x.Id)).ToArray();
+                    return retVal;
                 }
-
-                if (criteria.EndDate != null)
-                {
-                    query = query.Where(x => x.CreatedDate <= criteria.EndDate);
-                }
-
-                if (criteria.ModifiedSinceDate != null)
-                {
-                    query = query.Where(x => x.ModifiedDate >= criteria.ModifiedSinceDate);
-                }
-
-                if (!string.IsNullOrEmpty(criteria.CustomerOrderId))
-                {
-                    var order = (await _customerOrderService.GetByIdsAsync(new[] { criteria.CustomerOrderId })).FirstOrDefault();
-                    if (order != null && !string.IsNullOrEmpty(order.SubscriptionId))
-                    {
-                        query = query.Where(x => x.Id == order.SubscriptionId);
-                    }
-                    else
-                    {
-                        query = query.Where(x => false);
-                    }
-                }
-
-                if (criteria.OuterId != null)
-                {
-                    query = query.Where(x => x.OuterId == criteria.OuterId);
-                }
-
-                var sortInfos = criteria.SortInfos;
-                if (sortInfos.IsNullOrEmpty())
-                {
-                    sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Subscription>(x => x.CreatedDate), SortDirection = SortDirection.Descending } };
-                }
-                query = query.OrderBySortInfos(sortInfos);
-
-                retVal.TotalCount = query.Count();
-
-                var subscriptionsIds = query.Skip(criteria.Skip)
-                                            .Take(criteria.Take)
-                                            .ToArray()
-                                            .Select(x => x.Id)
-                                            .ToArray();
-
-                //Load subscriptions with preserving sorting order
-                var unorderedResults = await GetByIdsAsync(subscriptionsIds, criteria.ResponseGroup);
-                retVal.Results = unorderedResults.OrderBy(x => Array.IndexOf(subscriptionsIds, x.Id)).ToArray();
-                return retVal;
-            }
+            });
         }
         #endregion
+
+        protected virtual async Task<IQueryable<SubscriptionEntity>> GetSubscriptionsQueryForCriteria(
+            ISubscriptionRepository repository, SubscriptionSearchCriteria criteria)
+        {
+            var query = repository.Subscriptions;
+
+            if (!string.IsNullOrEmpty(criteria.Number))
+            {
+                query = query.Where(x => x.Number == criteria.Number);
+            }
+            else if (criteria.Keyword != null)
+            {
+                query = query.Where(x => x.Number.Contains(criteria.Keyword));
+            }
+
+            if (criteria.CustomerId != null)
+            {
+                query = query.Where(x => x.CustomerId == criteria.CustomerId);
+            }
+            if (criteria.Statuses != null && criteria.Statuses.Any())
+            {
+                query = query.Where(x => criteria.Statuses.Contains(x.Status));
+            }
+            if (criteria.StoreId != null)
+            {
+                query = query.Where(x => criteria.StoreId == x.StoreId);
+            }
+
+            if (criteria.StartDate != null)
+            {
+                query = query.Where(x => x.CreatedDate >= criteria.StartDate);
+            }
+
+            if (criteria.EndDate != null)
+            {
+                query = query.Where(x => x.CreatedDate <= criteria.EndDate);
+            }
+
+            if (criteria.ModifiedSinceDate != null)
+            {
+                query = query.Where(x => x.ModifiedDate >= criteria.ModifiedSinceDate);
+            }
+
+            if (!string.IsNullOrEmpty(criteria.CustomerOrderId))
+            {
+                var order = (await _customerOrderService.GetByIdsAsync(new[] { criteria.CustomerOrderId })).FirstOrDefault();
+                if (order != null && !string.IsNullOrEmpty(order.SubscriptionId))
+                {
+                    query = query.Where(x => x.Id == order.SubscriptionId);
+                }
+                else
+                {
+                    query = query.Where(x => false);
+                }
+            }
+
+            if (criteria.OuterId != null)
+            {
+                query = query.Where(x => x.OuterId == criteria.OuterId);
+            }
+
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Subscription>(x => x.CreatedDate), SortDirection = SortDirection.Descending } };
+            }
+            query = query.OrderBySortInfos(sortInfos);
+
+            return query;
+        }
+
+        protected virtual void ClearCacheFor(Subscription[] subscriptions)
+        {
+            foreach (var subscription in subscriptions)
+            {
+                SubscriptionCacheRegion.ExpireSubscription(subscription);
+            }
+
+            SubscriptionSearchCacheRegion.ExpireRegion();
+        }
     }
 }
