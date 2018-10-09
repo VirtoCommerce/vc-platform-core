@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.OrdersModule.Core.Model;
+using VirtoCommerce.OrdersModule.Core.Model.Search;
+using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.SubscriptionModule.Core.Model;
 using VirtoCommerce.SubscriptionModule.Core.Model.Search;
 using VirtoCommerce.SubscriptionModule.Core.Services;
@@ -81,7 +84,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                 {
                     SubscriptionIds = subscriptionIds
                 };
-                subscriptionOrders = await _customerOrderSearchService.SearchCustomerOrdersAsync(criteria).Results.ToArray();
+                subscriptionOrders = (await _customerOrderSearchService.SearchCustomerOrdersAsync(criteria)).Results.ToArray();
             }
 
             foreach (var subscription in retVal)
@@ -225,7 +228,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
 
                 if (!string.IsNullOrEmpty(criteria.CustomerOrderId))
                 {
-                    var order = await _customerOrderService.GetByIdsAsync(new[] { criteria.CustomerOrderId }).FirstOrDefault();
+                    var order = (await _customerOrderService.GetByIdsAsync(new[] { criteria.CustomerOrderId })).FirstOrDefault();
                     if (order != null && !string.IsNullOrEmpty(order.SubscriptionId))
                     {
                         query = query.Where(x => x.Id == order.SubscriptionId);
