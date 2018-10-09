@@ -1,0 +1,318 @@
+{
+    "orders": {
+        "main-menu-title": "Orders",
+        "blades": {
+            "customerOrder-detail": {
+                "title": "{{customer}}'s order",
+                "subtitle": "Edit order details and related documents",
+                "labels": {
+                    "approved": "Approved",
+                    "employee": "Assigned to",
+                    "order-number": "Customer order number",
+                    "status": "Status",
+                    "store": "Store",
+                    "from": "From",
+                    "channel": "Channel",
+                    "customer": "Customer",
+                    "invoice": "Get invoice PDF"
+                },
+                "placeholders": {
+                    "employee": "Select assignee",
+                    "status": "Select...",
+                    "store": "Select..."
+                }
+            },
+            "customerOrder-items": {
+                "labels": {
+                    "item": "Item",
+                    "quantity": "Qty",
+                    "available": "Avail",
+                    "await": "Await",
+                    "price": "Unit price (excl. tax)",
+                    "tax": "Tax",
+                    "priceWithTax": "Unit price (incl. tax)",
+                    "discount": "Discount (excl. tax)",
+                    "discountWithTax": "Discount (incl. tax)",
+                    "total": "Line items total",
+                    "dynamic-properties": "Dynamic properties",
+                    "sub-total": "Subtotal",
+                    "discount-total": "Discount total",
+                    "tax-total": "Tax total"
+                }
+            },
+            "customerOrder-list": {
+                "title": "Customer orders",
+                "labels": {
+                    "new-filter": "Add new filter",
+                    "unnamed-filter": "Unnamed filter",
+                    "number": "Order number",
+                    "customer": "Customer",
+                    "confirmed": "Confirmed",
+                    "status": "Status",
+                    "total": "Total",
+                    "currency": "Currency",
+                    "store": "Store",
+                    "created": "Created"
+                },
+                "placeholders": {
+                    "select-filter": "Select filter"
+                }
+            },
+            "filter-detail": {
+                "subtitle": "Edit filter",
+                "new-title": "New filter",
+                "new-subtitle": "Create new filter",
+                "labels": {
+                    "name": "Filter name",
+                    "name_": "How will you call this filter?",
+                    "criteria": "Filter criteria",
+                    "from": "Created from",
+                    "to": "Created till"
+                },
+                "placeholders": {
+                    "all": "Not specified"
+                }
+            },
+            "operation-comment": {
+                "labels": {
+                    "comments": "Comments"
+                }
+            },
+            "payment-detail": {
+                "title": "Incoming payment #{{number}}",
+                "title-new": "New Incoming payment",
+                "subtitle": "Edit payment details and related documents",
+                "labels": {
+                    "approved": "Approved",
+                    "payment-number": "Payment number",
+                    "status": "Status",
+                    "amount": "Amount",
+                    "from": "From",
+                    "payment-gateway": "Payment gateway",
+                    "payment-purpose": "Payment purpose",
+                    "price": "Payment fees",
+                    "price-with-tax": "Payment fees (inc tax)"
+                },
+                "placeholders": {
+                    "status": "Select...",
+                    "payment-gateway": "Select..."
+                }
+            },
+            "transactions-list": {
+                "title": "Payment gateway transactions",
+                "subtitle": "List of all payment gateway interactions"
+            },
+            "transaction-detail": {
+                "title": "Transaction detail",
+                "subtitle": "Raw transaction data "
+            },
+            "shipment-detail": {
+                "title": "Shipment #{{number}}",
+                "title-new": "New Shipment",
+                "subtitle": "Edit shipment details",
+                "labels": {
+                    "shipment-method": "Shipment method",
+                    "approved": "Approved",
+                    "shipment-number": "Shipment number",
+                    "status": "Status",
+                    "fulfillment-center": "Fulfillment center",
+                    "from": "From",
+                    "employee": "Assigned to",
+                    "price": "Shipment amount",
+                    "price-with-tax": "Shipment amount with tax"
+                },
+                "placeholders": {
+                    "status": "Select...",
+                    "shipment-method": "Select...",
+                    "fulfillment-center": "Select or search a center..."
+                }
+            },
+            "shipment-items": {
+                "title": "{{title}} line items",
+                "subtitle": "Edit shipment items",
+                "labels": {
+                    "item": "Item",
+                    "quantity": "Qty",
+                    "price": "Price",
+                    "total": "Total"
+                }
+            },
+            "catalog-items-select": {
+                "title": "Add item to order"
+            },
+            "newOperation-wizard": {
+                "title": "New operation",
+                "subtitle": "Select operation type",
+                "menu": {
+                    "shipment-operation": {
+                        "description": "Shipment document"
+                    },
+                    "payment-operation": {
+                        "description": "Incoming payment document"
+                    }
+                }
+            }
+        },
+        "widgets": {
+            "notifications": {
+                "title": "Notifications feed",
+                "subtitle": "Order notifications feed"
+            },
+            "customerOrder-address": {
+                "title": "Addresses",
+                "blade-title": "Manage addresses"
+            },
+            "customerOrder-items": {
+                "title": "Line items",
+                "blade-title": "{{title}} line items",
+                "blade-subtitle": "Edit line items"
+            },
+            "customerOrder-totals": {
+                "sub-total": "Subtotal",
+                "shipping-total": "Shipping total",
+                "shipping-sub-total": "Shipping sub total",
+                "payment-sub-total": "Payment fees",
+                "tax-total": "Tax total",
+                "discount": "Discount",
+                "discount-total": "Discount total",
+                "discount-total-with-tax": "Discount total with tax",
+                "total": "Total"
+            },
+            "operation-comment": {
+                "no-comments": "no comments",
+                "blade-title": "Write comments"
+            },
+            "shipment-address": {
+                "blade-title": "Manage delivery address",
+                "title": "Delivery address"
+            },
+            "shipment-items": {
+                "title": "Shipment items"
+            },
+            "shipment-totals": {
+                "tax-total": "Tax total",
+                "shipment-total": "Shipment total",
+                "shipment-price": "Shipping price",
+                "discount-total": "Discount total",
+                "total": "Total"
+            },
+            "payment-totals": {
+                "tax-total": "Tax total",
+                "payment-total": "Payment total",
+                "payment-price": "Payment price",
+                "discount-total": "Discount total",
+                "total": "Total"
+            },
+            "payment-address": {
+                "blade-title": "Manage billing address",
+                "title": "Payment address"
+            },
+            "statistics-templates": {
+                "revenue": "Revenue",
+                "customers-with-orders": "Customers with orders",
+                "average-order-value": "Average order value",
+                "items-purchased": "Items purchased",
+                "lines-per-order": "Lines per order",
+                "revenue-per-customer": "Revenue per customer"
+            }
+        },
+        "dialogs": {
+            "orders-delete": {
+                "title": "Delete confirmation",
+                "message": "Are you sure you want to delete selected customer orders?"
+            },
+            "operation-save": {
+                "title": "Save changes",
+                "message": "The operation has been modified. Do you want to save changes?"
+            },
+            "operation-delete": {
+                "title": "Delete confirmation",
+                "message": "Are you sure you want to delete current operation?"
+            },
+            "operation-cancel": {
+                "title": "Cancel operation",
+                "message": "Are you sure you want to cancel the document?",
+                "placeholders": {
+                    "reason": "Please enter cancel reason here..."
+                }
+            }
+        },
+        "settings": {
+            "customerorder-status": {
+                "new": "New",
+                "not payed": "Not payed",
+                "pending": "Pending",
+                "processing": "Processing",
+                "ready to send": "Ready to send",
+                "cancelled": "Cancelled",
+                "partially sent": "Partially sent",
+                "completed": "Completed"
+            },
+            "shipment-status": {
+                "new": "New",
+                "pickpack": "Pick Pack",
+                "cancelled": "Cancelled",
+                "readytosend": "Ready to send",
+                "sent": "Sent"
+            },
+            "paymentin-status": {
+                "new": "New",
+                "pending": "Pending",
+                "authorized": "Authorized",
+                "paid": "Paid",
+                "partiallyrefunded": "Partially Refunded",
+                "refunded": "Refunded",
+                "voided": "Voided",
+                "custom": "Custom",
+                "cancelled": "Cancelled"
+            }
+        },
+        "commands": {
+            "new-document": "New document",
+            "cancel-document": "Cancel document",
+            "add-selected": "Add selected",
+            "add-item": "Add item"
+        }
+    },
+    "permissions": {
+        "order:read": "Read order related data",
+        "order:create": "Create order related data",
+        "order:update": "Update order related data",
+        "order:delete": "Delete order related data",
+        "order:access": "Access order related data"
+    },
+    "settings": {
+        "Order.Status": {
+            "description": "Customer order statuses",
+            "title": "Customer order statuses"
+        },
+        "Shipment.Status": {
+            "description": "Shipment statuses",
+            "title": "Shipment statuses"
+        },
+        "PaymentIn.Status": {
+            "description": "Incoming payment statuses",
+            "title": "Payment statuses"
+        },
+        "Order.CustomerOrderNewNumberTemplate": {
+            "description": "The template (pattern) that will be used to generate the number for new Customer Order. Parameters: 0 - date (the UTC time of number generation); 1 - the sequence number.",
+            "title": "Order number template"
+        },
+        "Order.ShipmentNewNumberTemplate": {
+            "description": "The template (pattern) that will be used to generate the number for new Shipment. Parameters: 0 - date (the UTC time of number generation); 1 - the sequence number.",
+            "title": "Order shipment number template"
+        },
+        "Order.PaymentInNewNumberTemplate": {
+            "description": "The template (pattern) that will be used to generate the number for new incoming Payment. Parameters: 0 - date (the UTC time of number generation); 1 - the sequence number.",
+            "title": "Order payment number template"
+        },
+        "Order.SendOrderNotifications": {
+            "description": "Send notification when order state changed.",
+            "title": "Enable notifications for orders"
+        },
+        "Order.AdjustInventory": {
+            "description": "Adjust inventory when order state changed.",
+            "title": "Adjust inventory for orders"
+        }
+    }
+}

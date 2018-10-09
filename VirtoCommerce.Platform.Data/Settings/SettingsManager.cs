@@ -25,7 +25,8 @@ namespace VirtoCommerce.Platform.Data.Settings
     {
         private readonly Func<IPlatformRepository> _repositoryFactory;
         private readonly IMemoryCache _memoryCache;
-        private readonly Dictionary<string, SettingDescriptor> _registeredSettings = new Dictionary<string, SettingDescriptor>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, SettingDescriptor> _registeredSettingsLookup = new Dictionary<string, SettingDescriptor>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, IEnumerable<SettingDescriptor>> _registeredTypeSettingsLookup = new Dictionary<string, IEnumerable<SettingDescriptor>>(StringComparer.OrdinalIgnoreCase);
 
         public SettingsManager(Func<IPlatformRepository> repositoryFactory, IMemoryCache memoryCache)
         {
@@ -37,15 +38,24 @@ namespace VirtoCommerce.Platform.Data.Settings
         #region ISettingsRegistrar Members
         public void RegisterSettingsForType(IEnumerable<SettingDescriptor> settings, string typeName)
         {
-            throw new NotImplementedException();
+            if (settings == null)
+            {
+                throw new ArgumentNullException(nameof(settings));
+            }
+            foreach (var setting in settings)
+            {
+                _registeredTypeSettingsLookup[setting.Name] = settings;
+            }
         }
 
         public IEnumerable<SettingDescriptor> GetSettingsForType(string typeName)
         {
-            throw new NotImplementedException();
+            var result = Enumerable.Empty<SettingDescriptor>();
+            _registeredTypeSettingsLookup.TryGetValue(typeName, out result);
+            return result;
         }
 
-        public IEnumerable<SettingDescriptor> AllRegisteredSettings => _registeredSettings.Values;
+        public IEnumerable<SettingDescriptor> AllRegisteredSettings => _registeredSettingsLookup.Values;
 
         public void RegisterSettings(IEnumerable<SettingDescriptor> settings, string moduleId = null)
         {
@@ -56,7 +66,7 @@ namespace VirtoCommerce.Platform.Data.Settings
             foreach (var setting in settings)
             {
                 setting.ModuleId = moduleId;
-                _registeredSettings[setting.Name] = setting;
+                _registeredSettingsLookup[setting.Name] = setting;
             }
         }
         #endregion
@@ -92,7 +102,7 @@ namespace VirtoCommerce.Platform.Data.Settings
 
                 foreach (var name in names)
                 {
-                    _registeredSettings.TryGetValue(name, out var settingDescriptor);
+                    _registeredSettingsLookup.TryGetValue(name, out var settingDescriptor);
                     if (settingDescriptor == null)
                     {
                         throw new PlatformException($"Setting with name {name} not registered");

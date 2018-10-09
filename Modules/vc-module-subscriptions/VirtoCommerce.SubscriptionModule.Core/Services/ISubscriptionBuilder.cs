@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.SubscriptionModule.Core.Model;
 
 namespace VirtoCommerce.SubscriptionModule.Core.Services

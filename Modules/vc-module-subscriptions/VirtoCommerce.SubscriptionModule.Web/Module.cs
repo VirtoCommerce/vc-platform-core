@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.NotificationsModule.Core.Services;
+using VirtoCommerce.OrdersModule.Core.Events;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -43,16 +44,15 @@ namespace VirtoCommerce.SubscriptionModule.Web
         public void Initialize(IServiceCollection serviceCollection)
         {
             var serviceProvider = serviceCollection.BuildServiceProvider();
-            var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-
-            var eventHandlerRegistrar = serviceProvider.GetRequiredService<IHandlerRegistrar>();
 
             //Registration welcome email notification.
+            var eventHandlerRegistrar = serviceProvider.GetRequiredService<IHandlerRegistrar>();
             eventHandlerRegistrar.RegisterHandler<OrderChangedEvent>(async (message, token) => await serviceProvider.GetRequiredService<CreateSubscriptionOrderChangedEventHandler>().Handle(message));
             eventHandlerRegistrar.RegisterHandler<OrderChangedEvent>(async (message, token) => await serviceProvider.GetRequiredService<LogChangesSubscriptionChangedEventHandler>().Handle(message));
             eventHandlerRegistrar.RegisterHandler<SubscriptionChangedEvent>(async (message, token) => await serviceProvider.GetRequiredService<LogChangesSubscriptionChangedEventHandler>().Handle(message));
             eventHandlerRegistrar.RegisterHandler<SubscriptionChangedEvent>(async (message, token) => await serviceProvider.GetRequiredService<SendNotificationsSubscriptionChangedEventHandler>().Handle(message));
 
+            var configuration = serviceProvider.GetRequiredService<IConfiguration>();
             serviceCollection.AddDbContext<SubscriptionDbContext>(options => options.UseSqlServer(configuration.GetConnectionString(_connectionStringName)));
             serviceCollection.AddTransient<ISubscriptionRepository, SubscriptionRepositoryImpl>();
             serviceCollection.AddSingleton<Func<ISubscriptionRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ISubscriptionRepository>());

@@ -1,12 +1,15 @@
-﻿namespace VirtoCommerce.Platform.Core.DynamicProperties
+namespace VirtoCommerce.Platform.Core.DynamicProperties
 {
     public enum DynamicPropertyValueType
     {
+        Undefined,
         ShortText,
         LongText,
         Integer,
         Decimal,
         DateTime,
-        Boolean
+        Boolean,
+        Html,
+        Image
     }
 }
