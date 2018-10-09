@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <module>
     <id>VirtoCommerce.Subscription</id>
-    <version>1.1.8</version>
-    <platformVersion>2.13.26</platformVersion>
+    <version>1.2.0</version>
+    <platformVersion>3.0.0</platformVersion>
     <dependencies>
-        <dependency id="VirtoCommerce.Core" version="2.25.0" />
-        <dependency id="VirtoCommerce.Orders" version="2.17.10" />
-        <dependency id="VirtoCommerce.Store" version="2.11.0" />
+        <dependency id="VirtoCommerce.Core" version="3.0.0" />
+        <dependency id="VirtoCommerce.Orders" version="3.0.0" />
+        <dependency id="VirtoCommerce.Store" version="3.0.0" />
     </dependencies>
 
     <title>Subscription module</title>
@@ -28,103 +28,4 @@
     <scripts>
         <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
     </scripts>
-
-    <settings>
-        <group name="Subscriptions|General">
-            <setting>
-                <name>Subscription.EnableSubscriptions</name>
-                <valueType>boolean</valueType>
-                <defaultValue>True</defaultValue>
-                <title>Enable subscriptions</title>
-                <description>Flag for activating subscriptions in store</description>
-            </setting>
-            <setting>
-                <name>Subscription.Status</name>
-                <valueType>string</valueType>
-                <defaultValue>Active</defaultValue>
-                <title>Subscription statuses</title>
-                <description>Subscription statuses</description>
-                <isArray>true</isArray>
-                <arrayValues>
-                    <value>Trialling</value>
-                    <value>Active</value>
-                    <value>PastDue</value>
-                    <value>Unpaid</value>
-                    <value>Cancelled</value>
-                </arrayValues>
-            </setting>
-            <setting>
-                <name>Subscription.SubscriptionNewNumberTemplate</name>
-                <valueType>string</valueType>
-                <defaultValue>SU{0:yyMMdd}-{1:D5}</defaultValue>
-                <title>Subscription number template</title>
-                <description>The template (pattern) that will be used to generate the number for new Subscription. Parameters: 0 - date (the UTC time of number generation); 1 - the sequence number.</description>
-            </setting>
-            <setting>
-                <name>Subscription.EnableSubscriptionProccessJob</name>
-                <valueType>boolean</valueType>
-                <defaultValue>True</defaultValue>
-                <title>Enable subscription process</title>
-                <description>Flag for activating automatic subscription process (requires restart)</description>
-            </setting>
-            <setting>
-                <name>Subscription.EnableSubscriptionOrdersCreatejob</name>
-                <valueType>boolean</valueType>
-                <defaultValue>True</defaultValue>
-                <title>Enable subscription order creation</title>
-                <description>Flag for activating automatic order creataion for subscription (requires restart)</description>
-            </setting>
-            <setting>
-                <name>Subscription.CronExpression</name>
-                <valueType>string</valueType>
-                <defaultValue>0 */1 * * *</defaultValue>
-                <title>Cron expression for scheduling subscription processing job execution (requires restart)</title>
-                <description>
-                    <![CDATA[ 
-                    x minutes use "0/x * * * *"
-                    x hours use "0 */x * * *" you can set minutes also "15 */x * * *"
-                    x days "0 0 */x * *"   
-                    ]]>
-                </description>
-            </setting>
-            <setting>
-                <name>Subscription.CronExpressionOrdersJob</name>
-                <valueType>string</valueType>
-                <defaultValue>0 0 */1 * *</defaultValue>
-                <title>Cron expression for scheduling subscription order creation job execution (requires restart)</title>
-                <description>
-                    <![CDATA[ 
-                    x minutes use "0/x * * * *"
-                    x hours use "0 */x * * *" you can set minutes also "15 */x * * *"
-                    x days "0 0 */x * *"   
-                    ]]>
-                </description>
-            </setting>
-            <setting>
-                <name>Subscription.PastDue.Delay</name>
-                <valueType>integer</valueType>
-                <defaultValue>7</defaultValue>
-                <title>Past due delay in days</title>
-                <description>Delay in days when unpaid subscription obtain PastDue status</description>
-            </setting>
-            <setting>
-                <name>Subscription.ExportImport.Description</name>
-                <valueType>string</valueType>
-                <defaultValue>Export/Import of subscriptions</defaultValue>
-                <title>Export/Import description</title>
-                <description>Module description in platform export/import wizard</description>
-            </setting>
-        </group>
-    </settings>
-
-    <permissions>
-        <group name="Subscription">
-            <permission id="subscription:access" name="Open subscriptions menu" description="Permission to open subscriptions menu."/>
-            <permission id="subscription:create" name="Create subscription data" description="Permission to create subscription data."/>
-            <permission id="subscription:read" name="View subscription data" description="Permission to browse and view subscription data."/>
-            <permission id="subscription:update" name="Update subscription data" description="Permission to update subscription data."/>
-            <permission id="subscription:delete" name="Delete subscription" description="Permission to delete subscriptions."/>
-            <permission id="paymentplan:manage" name="Payment plan manage" description="Payment plan manage"/>          
-        </group>
-    </permissions>
 </module>
