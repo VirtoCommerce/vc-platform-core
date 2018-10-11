@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,9 @@ using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.SitemapsModule.Core.ModuleConstants;
 using VirtoCommerce.SitemapsModule.Core.Services;
 using VirtoCommerce.SitemapsModule.Data.Repositories;
 using VirtoCommerce.SitemapsModule.Data.Services;
@@ -57,9 +61,17 @@ namespace VirtoCommerce.SitemapsModule.Web
                 dbContext.Database.Migrate();
             }
 
-            // TODO: register settings
+            var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
+            settingsRegistrar.RegisterSettings(ModuleSettings.AllSettings, ModuleInfo.Id);
 
-            // TODO: register permissions
+            var allPermissions = ModulePermissions.AllPermissions.Select(permissionName => new Permission
+            {
+                Name = permissionName,
+                GroupName = "Sitemaps",
+                ModuleId = ModuleInfo.Id
+            }).ToArray();
+            var permissionsRegistrar = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
+            permissionsRegistrar.RegisterPermissions(allPermissions);
         }
 
         public void Uninstall()
