@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SitemapsModule.Core.Models;
 
@@ -5,10 +6,10 @@ namespace VirtoCommerce.SitemapsModule.Core.Services
 {
     public interface ISitemapItemService
     {
-        GenericSearchResult<SitemapItem> Search(SitemapItemSearchCriteria criteria);
+        Task<GenericSearchResult<SitemapItem>> SearchAsync(SitemapItemSearchCriteria criteria);
 
-        void SaveChanges(SitemapItem[] items);
+        Task SaveChangesAsync(SitemapItem[] items);
 
-        void Remove(string[] itemIds);
+        Task RemoveAsync(string[] itemIds);
     }
 }

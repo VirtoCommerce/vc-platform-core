@@ -4,4 +4,23 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Common.Logging" Version="3.4.1" />
+    <PackageReference Include="YamlDotNet" Version="5.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Data\VirtoCommerce.Platform.Data.csproj" />
+    <ProjectReference Include="..\..\vc-module-catalog\VirtoCommerce.CatalogModule.Core\VirtoCommerce.CatalogModule.Core.csproj" />
+    <ProjectReference Include="..\..\vc-module-core\VirtoCommerce.Tools\VirtoCommerce.Tools.csproj" />
+    <ProjectReference Include="..\..\vc-module-store\VirtoCommerce.StoreModule.Core\VirtoCommerce.StoreModule.Core.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.SitemapsModule.Core\VirtoCommerce.SitemapsModule.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="EntityFrameworkCore.Triggers">
+      <HintPath>C:\Users\A_Vas\.nuget\packages\entityframeworkcore.triggers\1.1.1\lib\netstandard2.0\EntityFrameworkCore.Triggers.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
