@@ -1,0 +1,113 @@
+{
+  "sitemapsModule": {
+    "blades": {
+      "sitemapList": {
+        "title": "Sitemaps",
+        "subtitle": "Verwalten von sitemaps, um sie in den Index sitemap.xml aufzunehmen",
+        "toolbar": {
+          "download": "Sitemaps herunterladen"
+        },
+        "gridHeaders": {
+          "location": "Lage",
+          "itemsCount": "Artikelanzahl"
+        },
+        "noSitemapsMessage": "Es gibt keine Sitemaps noch"
+      },
+      "sitemap": {
+        "newSitemapTitle": "Neue sitemap",
+        "toolbar": {
+          "addItems": "Einträge hinzufügen",
+          "removeItems": "Artikel entfernen"
+        },
+        "formSitemap": {
+          "labelSitemapLocation": "Sitemap Standort",
+          "descriptionSitemapLocation": "Die Sitemap-Standort sollte eine relative Sitemap-URL sein, die im Kontext der Index-Sitemap eindeutig ist, d. H .: 'categories / electronics.xml', 'products.xml', etc. Bitte vermeiden Sie die Verwendung von 'sitemap.xml' im Sitemappfad.",
+          "sitemapIndexErrorMessage": "Bitte vermeiden Sie die Verwendung von 'sitemap.xml' als Sitemap",
+          "sitemapSitemapLocationExistErrorMessage": "Diese Sitemap Standort wird bereits verwendet",
+          "labelSitemapItemsLocation": "Sitemap Artikellage",
+          "descriptionSitemapItemsLocation": "Zur Erzeugung einer Sitemap-Item-URL können die nächsten Muster verwendet werden: {language} - wird durch Sprachcode ersetzt (d.h. en-US), {slug} - wird durch SEO semantischen URL-Teil ersetzt",
+          "labelSitemapItems": "Sitemap Reihen"
+        },
+        "gridHeaders": {
+          "img": "Bild",
+          "title": "Titel",
+          "type": "Typ"
+        },
+        "noSitemapsIemsMessage": "Es gibt noch keine Sitemap"
+      },
+      "addItems": {
+        "title": "Einträge hinzufügen",
+        "addCatalogItem": {
+          "title": "Katalogartikel",
+          "description": "Enthalten Produkt- und Kategorien"
+        },
+        "addVendorItem": {
+          "title": "Anbieter Produkte",
+          "description": "Anbieter gehören"
+        },
+        "addStaticContentItem": {
+          "title": "Statische Inhalte",
+          "description": "Fügen Sie die Seiten und Blogs"
+        },
+        "addCustomItem": {
+          "title": "Benutzerdefinierte Position",
+          "description": "Artikel mit benutzerdefinierte URL"
+        }
+      },
+      "addCatalogItems": {
+        "title": "Katalogartikel hinzufügen",
+        "toolbar": {
+          "addSelected": "Ausgewählte hinzufügen"
+        }
+      },
+      "addCustomItem": {
+        "title": "Benutzerdefinierte Artikel hinzufügen",
+        "toolbar": {
+          "save": "Speichern"
+        },
+        "formCustomSitemapItem": {
+          "labelUrlTemplate": "URL Vorlage",
+          "descriptionUrlTemplate": "Die konkrete relative URL für benutzerdefinierte Artikel, i.e .: / about-us, / my-folder / my-page"
+        }
+      },
+      "addVendorItems": {
+        "title": "Anbieter Artikel hinzufügen",
+        "toolbar": {
+          "addSelected": "Ausgewählte hinzufügen"
+        }
+      },
+      "addStaticContentItems": {
+        "title": "Statischer Inhalt Artikel hinzufügen",
+        "toolbar": {
+          "addSelected": "Ausgewählte hinzufügen"
+        }
+      }
+    },
+    "contextMenu": {
+      "manage": "Verwalten",
+      "remove": "Entfernen"
+    },
+    "dialogs": {
+      "sitemap-delete": {
+        "title": "Bestätigung löschen",
+        "message": "Möchten Sie die ausgewählten Sitemaps löschen?"
+      },
+      "sitemapItems-delete": {
+        "title": "Bestätigung entfernen",
+        "message": "Sind Sie sicher, dass Sie ausgewählte Artikel aus der Sitemap entfernen möchten?"
+      },
+      "confirmBaseUrl": {
+        "title": "Basis-URL",
+        "messageNoBaseUrl": "Geben Sie die Basis-URL für Sitemaps",
+        "messageConfirmBaseUrl": "Bitte bestätigen Sie Basis-URL für Sitemaps"
+      },
+      "discardChanges": {
+        "title": "Änderungen speichern",
+        "message": "Die Sitemap wurde geändert. Möchten Sie die Änderungen speichern?"
+      }
+    },
+    "errorMessages": {
+      "filenameNotUnique": "Sitemap Mit dieser Dateiname ist bereits vorhanden"
+    }
+  }
+}

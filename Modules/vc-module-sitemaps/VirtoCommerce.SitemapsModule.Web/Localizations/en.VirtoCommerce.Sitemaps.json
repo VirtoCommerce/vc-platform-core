@@ -1,0 +1,129 @@
+﻿{
+  "sitemapsModule": {
+    "widgets": {
+      "storeSitemaps": {
+        "title": "Sitemaps"
+      }
+    },
+    "blades": {
+      "sitemapList": {
+        "title": "Sitemaps",
+        "subtitle": "Manage sitemaps to include them into index sitemap.xml",
+        "toolbar": {
+          "download": "Download sitemaps"
+        },
+        "gridHeaders": {
+            "location": "Location",
+            "itemsCount": "Items count"
+        },
+        "noSitemapsMessage": "There are no sitemaps yet"
+      },
+      "sitemap": {
+        "newSitemapTitle": "New sitemap",
+        "toolbar": {
+          "addItems": "Add items",
+          "removeItems": "Remove items"
+        },
+        "formSitemap": {
+          "labelSitemapLocation": "Sitemap location",
+          "descriptionSitemapLocation": "Sitemap location should be a relative sitemap URL unique in context of index sitemap, i.e.: 'categories/electronics.xml', 'products.xml', etc. Please avoid using 'sitemap.xml' in sitemap path.",
+          "sitemapIndexErrorMessage": "Please avoid using \"sitemap.xml\" as sitemap location",
+          "sitemapSitemapLocationExistErrorMessage": "This sitemap location is already used",
+          "labelSitemapItemsLocation": "Sitemap items location",
+          "descriptionSitemapItemsLocation": "To generate a sitemap item URL can be used the next patterns: {slug} - will be replaced with SEO semantic URL part constructed depend on store SEO 'Links settings' rules. E.g /my-page/{slug}",
+          "labelSitemapItems": "Sitemap items"
+        },
+        "gridHeaders": {
+          "img": "Pic.",
+          "title": "Title",
+          "type": "Type"
+        },
+        "noSitemapsIemsMessage": "There are no sitemap items yet"
+      },
+      "addItems": {
+        "title": "Add items",
+        "addCatalogItem": {
+          "title": "Catalog items",
+          "description": "Include product and categories"
+        },
+        "addVendorItem": {
+          "title": "Vendor items",
+          "description": "Include vendors"
+        },
+        "addStaticContentItem": {
+          "title": "Static content items",
+          "description": "Include pages and blogs"
+        },
+        "addCustomItem": {
+          "title": "Custom item",
+          "description": "Item with custom URL"
+        }
+      },
+      "addCatalogItems": {
+        "title": "Add catalog items",
+        "toolbar": {
+          "addSelected": "Add selected"
+        }
+      },
+      "addCustomItem": {
+        "title": "Add custom item",
+        "toolbar": {
+          "save": "Save"
+        },
+        "formCustomSitemapItem": {
+          "labelUrlTemplate": "URL template",
+          "descriptionUrlTemplate": "The concrete relative URL  for custom items, i.e.: /about-us, /my-folder/my-page"
+        }
+      },
+      "addVendorItems": {
+        "title": "Add vendor items",
+        "toolbar": {
+          "addSelected": "Add selected"
+        }
+      },
+      "addStaticContentItems": {
+        "title": "Add static content items",
+        "toolbar": {
+          "addSelected": "Add selected"
+        }
+      },
+      "download": {
+        "title": "Download sitemap",
+        "labels": {
+          "start": "Start",
+          "end": "End",
+          "total": "Total",
+          "processed": "Processed",
+          "errors-count": "Errors count",
+          "errors": "Errors"
+        }
+      }
+    },
+    "contextMenu": {
+      "manage": "Manage",
+      "remove": "Remove"
+    },
+    "dialogs": {
+        "sitemap-delete": {
+            "title": "Delete confirmation",
+            "message": "Are you sure you want to delete selected sitemaps?"
+        },
+        "sitemapItems-delete": {
+            "title": "Remove confirmation",
+            "message": "Are you sure you want to remove selected items from sitemap?"
+        },
+        "confirmBaseUrl": {
+            "title": "Base URL",
+            "messageNoBaseUrl": "Please enter base URL for sitemaps",
+            "messageConfirmBaseUrl": "Please confirm base URL for sitemaps"
+        },
+        "discardChanges": {
+            "title": "Save changes",
+            "message": "The sitemap has been modified. Do you want to save changes?"
+        }
+    },
+    "errorMessages": {
+      "filenameNotUnique": "Sitemap with this filename already exists"
+    }
+  }
+}

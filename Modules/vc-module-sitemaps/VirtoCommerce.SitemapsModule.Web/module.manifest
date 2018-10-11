@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<module>
+    <id>VirtoCommerce.Sitemaps</id>
+    <version>1.1.6</version>
+    <platformVersion>2.12.5</platformVersion>
+    <dependencies>
+        <dependency id="VirtoCommerce.Core" version="2.19.2" />
+        <dependency id="VirtoCommerce.Catalog" version="2.16.0" />
+        <dependency id="VirtoCommerce.Content" version="2.13.0" />
+        <dependency id="VirtoCommerce.Customer" version="2.13.0" />
+        <dependency id="VirtoCommerce.Store" version="2.13.0" />
+    </dependencies>
+    <title>Sitemaps module</title>
+    <description>Sitemaps generation management for stores</description>
+    <authors>
+        <author>Andrey Orlov</author>
+    </authors>
+    <owners>
+        <owner>Virto Commerce</owner>
+    </owners>
+    <projectUrl>https://virtocommerce.com/apps/extensions/automatic-sitemaps-module</projectUrl>
+    <iconUrl>https://github.com/VirtoCommerce/vc-module-sitemaps/raw/master/VirtoCommerce.SitemapsModule.Web/Content/logo.png</iconUrl>
+    <releaseNotes>First version.</releaseNotes>
+    <copyright>Copyright © 2011-2016 Virto Commerce. All rights reserved</copyright>
+    <tags>sitemaps</tags>
+    <assemblyFile>VirtoCommerce.SitemapsModule.Web.dll</assemblyFile>
+    <moduleType>VirtoCommerce.SitemapsModule.Web.Module, VirtoCommerce.SitemapsModule.Web</moduleType>
+
+    <scripts>
+        <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
+    </scripts>
+    <settings>
+        <group name="Sitemap|General">
+            <setting>
+                <name>Sitemap.ExportImport.Description</name>
+                <title>Export/Import description</title>
+                <description>Module description in platform export/import wizard</description>
+                <valueType>string</valueType>
+                <defaultValue>Export/Import sitemaps with all sitemap items</defaultValue>
+            </setting>
+            <setting>
+                <name>Sitemap.RecordsLimitPerFile</name>
+                <title>Records limit</title>
+                <description>Records limit per each sitemap file. Note that search engine crawlers are accept sitemap files which contain less than 50000 URL records and filesize is less than 10 Mb</description>
+                <valueType>integer</valueType>
+                <defaultValue>10000</defaultValue>
+            </setting>
+            <setting>
+                <name>Sitemap.FilenameSeparator</name>
+                <title>Filename separator</title>
+                <description>The separator for sitemap filename and its part in case of sitemap items count is greater than records limit per file</description>
+                <valueType>string</valueType>
+                <defaultValue>--</defaultValue>
+            </setting>
+            <setting>
+                <name>Sitemap.SearchBunchSize</name>
+                <title>Search bunch size</title>
+                <description>The bunch size for search items (i.e. catalog search)</description>
+                <valueType>integer</valueType>
+                <defaultValue>500</defaultValue>
+            </setting>
+            <setting>
+                <name>Sitemap.AcceptedFilenameExtensions</name>
+                <title>Accepted static content file extensions </title>
+                <description>This field contains the comma separated list of static content filename extensions which will be included to the sitemap. I.e.: .md,.html</description>
+                <valueType>string</valueType>
+                <defaultValue>.md,.html</defaultValue>
+            </setting>
+        </group>
+        <group name="Sitemap|Product Links">
+            <setting>
+                <name>Sitemap.ProductPageUpdateFrequency</name>
+                <title>Product page update frequency</title>
+                <description>How frequently the product page is likely to change. This value provides general information to search engines and may not correlate exactly to how often they crawl the page.</description>
+                <valueType>string</valueType>
+                <allowedValues>
+                    <value>always</value>
+                    <value>hourly</value>
+                    <value>daily</value>
+                    <value>weekly</value>
+                    <value>monthly</value>
+                    <value>yearly</value>
+                    <value>never</value>
+                </allowedValues>
+                <defaultValue>daily</defaultValue>
+            </setting>
+            <setting>
+                <name>Sitemap.ProductPagePriority</name>
+                <title>Product page priority</title>
+                <description>The priority of URL relative to other URLs on site. Valid values range from 0.0 to 1.0. This value does not affect how pages are compared to pages on other sites — it only lets the search engines know which pages deem most important for the crawlers.</description>
+                <valueType>decimal</valueType>
+                <defaultValue>1.0</defaultValue>
+            </setting>
+        </group>
+        <group name="Sitemap|Category Links">
+            <setting>
+                <name>Sitemap.CategoryPageUpdateFrequency</name>
+                <title>Category page update frequency</title>
+                <description>How frequently the category page is likely to change. This value provides general information to search engines and may not correlate exactly to how often they crawl the page.</description>
+                <valueType>string</valueType>
+                <allowedValues>
+                    <value>always</value>
+                    <value>hourly</value>
+                    <value>daily</value>
+                    <value>weekly</value>
+                    <value>monthly</value>
+                    <value>yearly</value>
+                    <value>never</value>
+                </allowedValues>
+                <defaultValue>weekly</defaultValue>
+            </setting>
+            <setting>
+                <name>Sitemap.CategoryPagePriority</name>
+                <title>Category page priority</title>
+                <description>The priority of URL relative to other URLs on site. Valid values range from 0.0 to 1.0. This value does not affect how pages are compared to pages on other sites — it only lets the search engines know which pages deem most important for the crawlers.</description>
+                <valueType>decimal</valueType>
+                <defaultValue>0.7</defaultValue>
+            </setting>
+        </group>
+    </settings>
+    <permissions>
+        <group name="Sitemap">
+            <permission id="sitemaps:access" name="Access to open a sitemaps blade" />
+            <permission id="sitemaps:create" name="Access to create a sitemap"/>
+            <permission id="sitemaps:read" name="Access to view a sitemap details"/>
+            <permission id="sitemaps:update" name="Access to update a sitemap"/>
+            <permission id="sitemaps:delete" name="Access to delete a sitemap"/>
+        </group>
+    </permissions>
+</module>

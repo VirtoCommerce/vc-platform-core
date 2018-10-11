@@ -1,0 +1,129 @@
+﻿{
+  "sitemapsModule": {
+    "widgets": {
+      "storeSitemaps": {
+        "title": "Sitemaps"
+      }
+    },
+    "blades": {
+      "sitemapList": {
+        "title": "Sitemaps",
+        "subtitle": "Управление sitemaps для включения их в индекс sitemap.xml",
+        "toolbar": {
+          "download": "Скачать sitemaps"
+        },
+        "gridHeaders": {
+            "location": "Местонахождение",
+            "itemsCount": "Количество элементов"
+        },
+        "noSitemapsMessage": "Пока нет sitemaps"
+      },
+      "sitemap": {
+        "newSitemapTitle": "Новый sitemap",
+        "toolbar": {
+          "addItems": "Добавить элементы",
+          "removeItems": "Удалить элементы"
+        },
+        "formSitemap": {
+          "labelSitemapLocation": "Местонахождение Sitemap",
+          "descriptionSitemapLocation": "Местонахождение Sitemap должно быть уникальным относительно URL-адреса sitemap в контексте индекса sitemap, то есть: 'категории/электроника.xml', 'продукты.xml' и т.д. Пожалуйста, избегайте использования 'sitemap.xml' в пути к sitemap.",
+          "sitemapIndexErrorMessage": "Пожалуйста, не используйте \"sitemap.xml\" как адрес местонахождения sitemap",
+          "sitemapSitemapLocationExistErrorMessage": "Это местонахождение sitemap уже используется",
+          "labelSitemapItemsLocation": "Местонахождение элементов Sitemap",
+          "descriptionSitemapItemsLocation": "Для создания URL-адреса элементов sitemap могут быть использованы следующие шаблоны: {slug} - будет заменен частью семантической SEO в URL-адресе, построенной в зависимости от SEO правил 'Настроек ссылок'. Например, /моя-страница/{slug}",
+          "labelSitemapItems": "Элементы Sitemap"
+        },
+        "gridHeaders": {
+          "img": "Изображение",
+          "title": "Заголовок",
+          "type": "Тип"
+        },
+        "noSitemapsIemsMessage": "Пока нет элементов sitemap"
+      },
+      "addItems": {
+        "title": "Добавить элементы",
+        "addCatalogItem": {
+          "title": "Элементы каталога",
+          "description": "Содержит продукт и категории"
+        },
+        "addVendorItem": {
+          "title": "Товары продавца",
+          "description": "Включая продавцов"
+        },
+        "addStaticContentItem": {
+          "title": "Статистические элементы контента",
+          "description": "Включая страницы и блоги"
+        },
+        "addCustomItem": {
+          "title": "Произвольные элементы",
+          "description": "Элементы с произвольным URL-адресом"
+        }
+      },
+      "addCatalogItems": {
+        "title": "Добавить элементы каталога",
+        "toolbar": {
+          "addSelected": "Добавить выбранные"
+        }
+      },
+      "addCustomItem": {
+        "title": "Добавить произвольные элементы",
+        "toolbar": {
+          "save": "Сохранить"
+        },
+        "formCustomSitemapItem": {
+          "labelUrlTemplate": "Шаблон URL",
+          "descriptionUrlTemplate": "Конкретный URL-адрес для произвольных элементов, то есть: /о-нас, /моя-папка/моя-страница"
+        }
+      },
+      "addVendorItems": {
+        "title": "Добавить элементы поставщика",
+        "toolbar": {
+          "addSelected": "Добавить выбранные"
+        }
+      },
+      "addStaticContentItems": {
+        "title": "Добавить элементы статического содержимого",
+        "toolbar": {
+          "addSelected": "Добавить выбранные"
+        }
+      },
+      "download": {
+        "title": "Скачать sitemap",
+        "labels": {
+          "start": "Начало",
+          "end": "Окончание",
+          "total": "Итог",
+          "processed": "Обработано",
+          "errors-count": "Количество ошибок",
+          "errors": "Ошибки"
+        }
+      }
+    },
+    "contextMenu": {
+      "manage": "Управление",
+      "remove": "Удаление"
+    },
+    "dialogs": {
+        "sitemap-delete": {
+            "title": "Подтверждение удаления",
+            "message": "Вы уверены, что хотите удалить выбранные sitemaps?"
+        },
+        "sitemapItems-delete": {
+            "title": "Подтверждение удаления",
+            "message": "Вы уверены, что хотите удалить выбранные элементы из sitemap?"
+        },
+        "confirmBaseUrl": {
+            "title": "Базовый URL",
+            "messageNoBaseUrl": "Пожалуйста, введите базовый URL для sitemaps",
+            "messageConfirmBaseUrl": "Пожалуйста, подтвердите базовый URL для sitemaps"
+        },
+        "discardChanges": {
+            "title": "Сохранение изменений",
+            "message": "Sitemap был изменен. Вы хотите сохранить изменения?"
+        }
+    },
+    "errorMessages": {
+      "filenameNotUnique": "Sitemap с этим именем уже существует"
+    }
+  }
+}
