@@ -6,7 +6,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Repositories
 {
     public class SitemapDbContext : DbContextWithTriggers
     {
-        public SitemapDbContext(DbContextOptions options)
+        public SitemapDbContext(DbContextOptions<SitemapDbContext> options)
             : base(options)
         {
         }

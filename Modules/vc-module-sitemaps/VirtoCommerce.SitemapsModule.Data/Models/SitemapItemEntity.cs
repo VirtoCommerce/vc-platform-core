@@ -21,7 +21,6 @@ namespace VirtoCommerce.SitemapsModule.Data.Models
         [StringLength(128)]
         public string ObjectType { get; set; }
 
-        [StringLength(128)]
         public string SitemapId { get; set; }
 
         [StringLength(256)]
