@@ -6,8 +6,9 @@
     <dependencies>
         <dependency id="VirtoCommerce.Core" version="3.0.0" />
         <dependency id="VirtoCommerce.Catalog" version="3.0.0" />
-        <dependency id="VirtoCommerce.Content" version="3.0.0" />
-        <dependency id="VirtoCommerce.Customer" version="3.0.0" />
+        <!--TODO: these modules are not ported to VC platform 3.x yet.-->
+        <!--<dependency id="VirtoCommerce.Content" version="3.0.0" />-->
+        <!--<dependency id="VirtoCommerce.Customer" version="3.0.0" />-->
         <dependency id="VirtoCommerce.Store" version="3.0.0" />
     </dependencies>
     <title>Sitemaps module</title>
