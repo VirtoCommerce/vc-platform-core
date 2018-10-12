@@ -2,9 +2,12 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SitemapsModule.Core.Models;
 using VirtoCommerce.SitemapsModule.Core.Services;
+using VirtoCommerce.SitemapsModule.Data.Caching;
 using VirtoCommerce.SitemapsModule.Data.Models;
 using VirtoCommerce.SitemapsModule.Data.Repositories;
 
@@ -12,12 +15,14 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
 {
     public class SitemapItemService : ISitemapItemService
     {
-        public SitemapItemService(Func<ISitemapRepository> repositoryFactory)
+        public SitemapItemService(Func<ISitemapRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache)
         {
             RepositoryFactory = repositoryFactory;
+            PlatformMemoryCache = platformMemoryCache;
         }
 
         protected Func<ISitemapRepository> RepositoryFactory { get; }
+        protected IPlatformMemoryCache PlatformMemoryCache { get; }
 
         public virtual async Task<GenericSearchResult<SitemapItem>> SearchAsync(SitemapItemSearchCriteria criteria)
         {
@@ -26,44 +31,60 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                 throw new ArgumentNullException(nameof(criteria));
             }
 
-            // TODO: add caching
-
-            using (var repository = RepositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), nameof(SearchAsync), criteria.GetCacheKey());
+            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
             {
-                var searchResponse = new GenericSearchResult<SitemapItem>();
-                var query = repository.SitemapItems;
-                if(!string.IsNullOrEmpty(criteria.SitemapId))
-                {
-                    query = query.Where(x => x.SitemapId == criteria.SitemapId);
-                }
-                if (criteria.ObjectTypes != null)
-                {
-                    query = query.Where(i => criteria.ObjectTypes.Contains(i.ObjectType, StringComparer.OrdinalIgnoreCase));
-                }
-                if (!string.IsNullOrEmpty(criteria.ObjectType))
-                {
-                    query = query.Where(i => i.ObjectType.EqualsInvariant(criteria.ObjectType));
-                }
+                cacheEntry.AddExpirationToken(SitemapItemSearchCacheRegion.CreateChangeToken());
 
-                var sortInfos = criteria.SortInfos;
-                if (sortInfos.IsNullOrEmpty())
+                using (var repository = RepositoryFactory())
                 {
-                    sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<SitemapItemEntity>(x => x.CreatedDate), SortDirection = SortDirection.Descending } };
-                }
-                query = query.OrderBySortInfos(sortInfos);
-                searchResponse.TotalCount = await query.CountAsync();
-
-                var matchingSitemapItems = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                foreach (var sitemapItemEntity in matchingSitemapItems)
-                {
-                    var sitemapItem = AbstractTypeFactory<SitemapItem>.TryCreateInstance();
-                    if (sitemapItem != null)
+                    var searchResponse = new GenericSearchResult<SitemapItem>();
+                    var query = repository.SitemapItems;
+                    if (!string.IsNullOrEmpty(criteria.SitemapId))
                     {
-                        searchResponse.Results.Add(sitemapItemEntity.ToModel(sitemapItem));
+                        query = query.Where(x => x.SitemapId == criteria.SitemapId);
                     }
-                }            
-                return searchResponse;
-            }
+
+                    if (criteria.ObjectTypes != null)
+                    {
+                        query = query.Where(i =>
+                            criteria.ObjectTypes.Contains(i.ObjectType, StringComparer.OrdinalIgnoreCase));
+                    }
+
+                    if (!string.IsNullOrEmpty(criteria.ObjectType))
+                    {
+                        query = query.Where(i => i.ObjectType.EqualsInvariant(criteria.ObjectType));
+                    }
+
+                    var sortInfos = criteria.SortInfos;
+                    if (sortInfos.IsNullOrEmpty())
+                    {
+                        sortInfos = new[]
+                        {
+                            new SortInfo
+                            {
+                                SortColumn = ReflectionUtility.GetPropertyName<SitemapItemEntity>(x => x.CreatedDate),
+                                SortDirection = SortDirection.Descending
+                            }
+                        };
+                    }
+
+                    query = query.OrderBySortInfos(sortInfos);
+                    searchResponse.TotalCount = await query.CountAsync();
+
+                    var matchingSitemapItems = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                    foreach (var sitemapItemEntity in matchingSitemapItems)
+                    {
+                        var sitemapItem = AbstractTypeFactory<SitemapItem>.TryCreateInstance();
+                        if (sitemapItem != null)
+                        {
+                            searchResponse.Results.Add(sitemapItemEntity.ToModel(sitemapItem));
+                        }
+                    }
+
+                    return searchResponse;
+                }
+            });
         }
 
         public virtual async Task SaveChangesAsync(SitemapItem[] sitemapItems)
@@ -96,7 +117,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                 pkMap.ResolvePrimaryKeys();
             }
 
-            // TODO: add cache invalidation
+            SitemapItemSearchCacheRegion.ExpireRegion();
         }
 
         public virtual async Task RemoveAsync(string[] itemIds)
@@ -119,7 +140,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                 }
             }
 
-            // TODO: add cache invalidation
+            SitemapItemSearchCacheRegion.ExpireRegion();
         }
     }
 }
