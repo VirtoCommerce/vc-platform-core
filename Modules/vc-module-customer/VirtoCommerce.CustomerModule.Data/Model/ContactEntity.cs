@@ -60,19 +60,19 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             var contact = member as Contact;
             if (contact != null)
             {
-                contact.FirstName = this.FirstName;
-                contact.MiddleName = this.MiddleName;
-                contact.LastName = this.LastName;
-                contact.BirthDate = this.BirthDate;
-                contact.DefaultLanguage = this.DefaultLanguage;
-                contact.FullName = this.FullName;
-                contact.Salutation = this.Salutation;
-                contact.TimeZone = this.TimeZone;
-                contact.TaxPayerId = this.TaxpayerId;
-                contact.PreferredCommunication = this.PreferredCommunication;
-                contact.PreferredDelivery = this.PreferredDelivery;
-                contact.PhotoUrl = this.PhotoUrl;
-                contact.Organizations = this.MemberRelations.Select(x => x.Ancestor).OfType<OrganizationEntity>().Select(x => x.Id).ToList();
+                contact.FirstName = FirstName;
+                contact.MiddleName = MiddleName;
+                contact.LastName = LastName;
+                contact.BirthDate = BirthDate;
+                contact.DefaultLanguage = DefaultLanguage;
+                contact.FullName = FullName;
+                contact.Salutation = Salutation;
+                contact.TimeZone = TimeZone;
+                contact.TaxPayerId = TaxpayerId;
+                contact.PreferredCommunication = PreferredCommunication;
+                contact.PreferredDelivery = PreferredDelivery;
+                contact.PhotoUrl = PhotoUrl;
+                contact.Organizations = MemberRelations.Select(x => x.Ancestor).OfType<OrganizationEntity>().Select(x => x.Id).ToList();
                 contact.Name = contact.FullName;
             }
             return member;
@@ -96,23 +96,23 @@ namespace VirtoCommerce.CustomerModule.Data.Model
                 PreferredDelivery = contact.PreferredDelivery;
                 PhotoUrl = contact.PhotoUrl;
 
-                if (string.IsNullOrEmpty(this.Name))
+                if (string.IsNullOrEmpty(Name))
                 {
-                    this.Name = contact.FullName;
+                    Name = contact.FullName;
                 }
 
                 if (contact.Organizations != null)
                 {
-                    this.MemberRelations = new ObservableCollection<MemberRelationEntity>();
+                    MemberRelations = new ObservableCollection<MemberRelationEntity>();
                     foreach (var organization in contact.Organizations)
                     {
                         var memberRelation = new MemberRelationEntity
                         {
                             AncestorId = organization,
                             AncestorSequence = 1,
-                            DescendantId = this.Id,
+                            DescendantId = Id,
                         };
-                        this.MemberRelations.Add(memberRelation);
+                        MemberRelations.Add(memberRelation);
                     }
                 }
             }
@@ -124,18 +124,18 @@ namespace VirtoCommerce.CustomerModule.Data.Model
         {
             var target = memberDataEntity as ContactEntity;
 
-            target.FirstName = this.FirstName;
-            target.MiddleName = this.MiddleName;
-            target.LastName = this.LastName;
-            target.BirthDate = this.BirthDate;
-            target.DefaultLanguage = this.DefaultLanguage;
-            target.FullName = this.FullName;
-            target.Salutation = this.Salutation;
-            target.TimeZone = this.TimeZone;
-            target.TaxpayerId = this.TaxpayerId;
-            target.PreferredCommunication = this.PreferredCommunication;
-            target.PreferredDelivery = this.PreferredDelivery;
-            target.PhotoUrl = this.PhotoUrl;
+            target.FirstName = FirstName;
+            target.MiddleName = MiddleName;
+            target.LastName = LastName;
+            target.BirthDate = BirthDate;
+            target.DefaultLanguage = DefaultLanguage;
+            target.FullName = FullName;
+            target.Salutation = Salutation;
+            target.TimeZone = TimeZone;
+            target.TaxpayerId = TaxpayerId;
+            target.PreferredCommunication = PreferredCommunication;
+            target.PreferredDelivery = PreferredDelivery;
+            target.PhotoUrl = PhotoUrl;
 
             base.Patch(target);
         }

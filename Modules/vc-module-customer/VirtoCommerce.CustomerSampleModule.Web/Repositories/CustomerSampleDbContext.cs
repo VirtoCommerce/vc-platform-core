@@ -12,9 +12,8 @@ namespace VirtoCommerce.CustomerSampleModule.Web.Repositories
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<SupplierEntity>().ToTable("Member2");
-
-            modelBuilder.Entity<Contact2Entity>().ToTable("Contact2");
+            modelBuilder.Entity<SupplierEntity>();
+            modelBuilder.Entity<Contact2Entity>();
 
             base.OnModelCreating(modelBuilder);
         }

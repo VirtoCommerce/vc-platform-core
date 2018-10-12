@@ -22,12 +22,12 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
             if (member is Vendor vendor)
             {
-                vendor.SiteUrl = this.SiteUrl;
-                vendor.LogoUrl = this.LogoUrl;
-                vendor.GroupName = this.GroupName;
-                vendor.Description = this.Description;
+                vendor.SiteUrl = SiteUrl;
+                vendor.LogoUrl = LogoUrl;
+                vendor.GroupName = GroupName;
+                vendor.Description = Description;
             }
-            
+
             return member;
         }
 
@@ -48,11 +48,11 @@ namespace VirtoCommerce.CustomerModule.Data.Model
         {
             var target = memberEntity as VendorEntity;
 
-            target.SiteUrl = this.SiteUrl;
-            target.LogoUrl = this.LogoUrl;
-            target.GroupName = this.GroupName;
-            target.Description = this.Description;
-                   
+            target.SiteUrl = SiteUrl;
+            target.LogoUrl = LogoUrl;
+            target.GroupName = GroupName;
+            target.Description = Description;
+
             base.Patch(target);
         }
     }

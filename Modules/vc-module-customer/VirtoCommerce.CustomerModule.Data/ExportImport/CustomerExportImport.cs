@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Model.Search;
@@ -11,7 +13,6 @@ using VirtoCommerce.CustomerModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Settings;
-using TopologicalSort = VirtoCommerce.CustomerModule.Data.Common.TopologicalSort;
 
 namespace VirtoCommerce.CustomerModule.Data.ExportImport
 {
@@ -23,16 +24,12 @@ namespace VirtoCommerce.CustomerModule.Data.ExportImport
         private readonly JsonSerializer _serializer;
         private const int _batchSize = 50;
 
-        public CustomerExportImport(
-            IMemberService memberService,
-            IMemberSearchService memberSearchService,
-            ISettingsManager settingsManager
-            )
+        public CustomerExportImport(IMemberService memberService, IMemberSearchService memberSearchService, ISettingsManager settingsManager, IOptions<MvcJsonOptions> jsonOptions)
         {
             _memberService = memberService;
             _memberSearchService = memberSearchService;
             _settingsManager = settingsManager;
-            _serializer = new JsonSerializer { TypeNameHandling = TypeNameHandling.All };
+            _serializer = JsonSerializer.Create(jsonOptions.Value.SerializerSettings);
         }
 
         public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
@@ -91,11 +88,11 @@ namespace VirtoCommerce.CustomerModule.Data.ExportImport
                 {
                     if (reader.TokenType == JsonToken.PropertyName)
                     {
-                        if (reader.Value.ToString() == "MembersTotalCount")
+                        if (reader.Value.ToString().EqualsInvariant("MembersTotalCount"))
                         {
                             membersTotalCount = reader.ReadAsInt32() ?? 0;
                         }
-                        else if (reader.Value.ToString() == "Members")
+                        else if (reader.Value.ToString().EqualsInvariant("Members"))
                         {
                             cancellationToken.ThrowIfCancellationRequested();
                             reader.Read();

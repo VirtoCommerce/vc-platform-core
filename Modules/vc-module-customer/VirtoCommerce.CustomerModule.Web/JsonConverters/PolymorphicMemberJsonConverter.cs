@@ -27,7 +27,7 @@ namespace VirtoCommerce.CustomerModule.Web.JsonConverters
             if (typeof(Member).IsAssignableFrom(objectType))
             {
                 var memberType = objectType.Name;
-                var pt = obj["memberType"];
+                var pt = obj["memberType"] ?? obj["MemberType"];
                 if (pt != null)
                 {
                     memberType = pt.Value<string>();

@@ -11,7 +11,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
     {
         [StringLength(64)]
         public string Type { get; set; }
-   
+
         public bool IsActive { get; set; }
 
         [StringLength(128)]
@@ -46,17 +46,17 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             var employee = member as Employee;
             if (employee != null)
             {
-                employee.FirstName = this.FirstName;
-                employee.MiddleName = this.MiddleName;
-                employee.LastName = this.LastName;
-                employee.BirthDate = this.BirthDate;
-                employee.DefaultLanguage = this.DefaultLanguage;
-                employee.FullName = this.FullName;
-                employee.IsActive = this.IsActive;
-                employee.EmployeeType = this.Type;
-                employee.TimeZone = this.TimeZone;
-                employee.PhotoUrl = this.PhotoUrl;
-                employee.Organizations = this.MemberRelations.Select(x => x.Ancestor).OfType<OrganizationEntity>().Select(x => x.Id).ToList();
+                employee.FirstName = FirstName;
+                employee.MiddleName = MiddleName;
+                employee.LastName = LastName;
+                employee.BirthDate = BirthDate;
+                employee.DefaultLanguage = DefaultLanguage;
+                employee.FullName = FullName;
+                employee.IsActive = IsActive;
+                employee.EmployeeType = Type;
+                employee.TimeZone = TimeZone;
+                employee.PhotoUrl = PhotoUrl;
+                employee.Organizations = MemberRelations.Select(x => x.Ancestor).OfType<OrganizationEntity>().Select(x => x.Id).ToList();
             }
             return member;
         }
@@ -80,16 +80,16 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
                 if (employee.Organizations != null)
                 {
-                    this.MemberRelations = new ObservableCollection<MemberRelationEntity>();
+                    MemberRelations = new ObservableCollection<MemberRelationEntity>();
                     foreach (var organization in employee.Organizations)
                     {
                         var memberRelation = new MemberRelationEntity
                         {
                             AncestorId = organization,
                             AncestorSequence = 1,
-                            DescendantId = this.Id,
+                            DescendantId = Id,
                         };
-                        this.MemberRelations.Add(memberRelation);
+                        MemberRelations.Add(memberRelation);
                     }
                 }
             }

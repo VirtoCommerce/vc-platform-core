@@ -53,6 +53,8 @@ namespace VirtoCommerce.CustomerModule.Web
             serviceCollection.AddSingleton<MemberIndexedSearchService>();
             serviceCollection.AddSingleton<CommerceMembersSearchServiceImpl>();
             serviceCollection.AddSingleton<IMemberSearchService, MemberSearchServiceDecorator>();
+            serviceCollection.AddSingleton<CustomerExportImport>();
+
             var snapshot = serviceCollection.BuildServiceProvider();
 
             var memberIndexingConfiguration = new IndexDocumentConfiguration
@@ -102,6 +104,7 @@ namespace VirtoCommerce.CustomerModule.Web
                 dbContext.Database.EnsureCreated();
                 dbContext.Database.Migrate();
             }
+
         }
 
         public void Uninstall()

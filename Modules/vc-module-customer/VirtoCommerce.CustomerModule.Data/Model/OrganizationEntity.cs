@@ -8,15 +8,15 @@ using VirtoCommerce.CustomerModule.Core.Model;
 namespace VirtoCommerce.CustomerModule.Data.Model
 {
     public class OrganizationEntity : MemberEntity
-	{
- 		[StringLength(256)]
-		public string Description { get; set; }
+    {
+        [StringLength(256)]
+        public string Description { get; set; }
 
- 		[StringLength(64)]
-		public string BusinessCategory { get; set; }
+        [StringLength(64)]
+        public string BusinessCategory { get; set; }
 
-  		[StringLength(128)]
-		public string OwnerId { get; set; }
+        [StringLength(128)]
+        public string OwnerId { get; set; }
 
         public override Member ToModel(Member member)
         {
@@ -26,14 +26,14 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             var organization = member as Organization;
             if (organization != null)
             {
-                organization.Description = this.Description;
-                organization.OwnerId = this.OwnerId;
-                organization.BusinessCategory = this.BusinessCategory;
+                organization.Description = Description;
+                organization.OwnerId = OwnerId;
+                organization.BusinessCategory = BusinessCategory;
                 if (MemberRelations.Any())
                 {
                     organization.ParentId = MemberRelations.FirstOrDefault().AncestorId;
                 }
-                
+
             }
             return member;
         }
@@ -41,21 +41,21 @@ namespace VirtoCommerce.CustomerModule.Data.Model
         public override MemberEntity FromModel(Member member, PrimaryKeyResolvingMap pkMap)
         {
             var organization = member as Organization;
-         
+
             if (organization != null && organization.ParentId != null)
             {
                 Description = organization.Description;
                 OwnerId = organization.OwnerId;
                 BusinessCategory = organization.BusinessCategory;
 
-                this.MemberRelations = new ObservableCollection<MemberRelationEntity>();
+                MemberRelations = new ObservableCollection<MemberRelationEntity>();
                 var memberRelation = new MemberRelationEntity
                 {
                     AncestorId = organization.ParentId,
                     DescendantId = organization.Id,
                     AncestorSequence = 1
                 };
-                this.MemberRelations.Add(memberRelation);
+                MemberRelations.Add(memberRelation);
             }
 
             //Call base converter
@@ -66,10 +66,10 @@ namespace VirtoCommerce.CustomerModule.Data.Model
         {
             var target = memberEntity as OrganizationEntity;
 
-            target.Name = this.Name;
-            target.Description = this.Description;
-            target.OwnerId = this.OwnerId;
-            target.BusinessCategory = this.BusinessCategory;
+            target.Name = Name;
+            target.Description = Description;
+            target.OwnerId = OwnerId;
+            target.BusinessCategory = BusinessCategory;
 
             base.Patch(target);
         }

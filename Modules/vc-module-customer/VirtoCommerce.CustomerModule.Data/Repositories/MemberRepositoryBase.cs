@@ -12,13 +12,6 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
 {
     public abstract class MemberRepositoryBase : DbContextRepositoryBase<CustomerDbContext>, IMemberRepository
     {
-        private static MethodInfo _genericGetMembersMethodInfo;
-
-        static MemberRepositoryBase()
-        {
-            _genericGetMembersMethodInfo = typeof(MemberRepositoryBase).GetMethod("InnerGetMembersByIds");
-        }
-
         public MemberRepositoryBase(CustomerDbContext dbContext) : base(dbContext)
         {
         }
@@ -26,23 +19,24 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
         #region IMemberRepository Members
 
 
-        public IQueryable<AddressEntity> Addresses => DbContext.Set<AddressEntity>(); 
+        public IQueryable<AddressEntity> Addresses => DbContext.Set<AddressEntity>();
         public IQueryable<EmailEntity> Emails => DbContext.Set<EmailEntity>();
         public IQueryable<MemberGroupEntity> Groups => DbContext.Set<MemberGroupEntity>();
-        public IQueryable<NoteEntity> Notes => DbContext.Set<NoteEntity>(); 
+        public IQueryable<NoteEntity> Notes => DbContext.Set<NoteEntity>();
         public IQueryable<PhoneEntity> Phones => DbContext.Set<PhoneEntity>();
-        public IQueryable<MemberEntity> Members => DbContext.Set<MemberEntity>(); 
-        public IQueryable<MemberRelationEntity> MemberRelations => DbContext.Set<MemberRelationEntity>(); 
+        public IQueryable<MemberEntity> Members => DbContext.Set<MemberEntity>();
+        public IQueryable<MemberRelationEntity> MemberRelations => DbContext.Set<MemberRelationEntity>();
 
         public virtual async Task<MemberEntity[]> GetMembersByIdsAsync(string[] ids, string responseGroup = null, string[] memberTypes = null)
-        {         
-            if(ids.IsNullOrEmpty())
+        {
+            if (ids.IsNullOrEmpty())
             {
                 return new MemberEntity[] { };
             }
 
             var result = new List<MemberEntity>();
-            //TODO It doesn't work
+            //TODO It doesn't work. Maybe these performance changes don't needed anymore.
+            // Because EF used TPH inheritance mode and there all will be fast.
             //if (!memberTypes.IsNullOrEmpty())
             //{
             //    foreach (var memberType in memberTypes)
@@ -81,51 +75,51 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
         }
         #endregion
 
-        public async Task<T[]> InnerGetMembersByIds<T>(string[] ids, string responseGroup = null) where T: MemberEntity
+        public async Task<T[]> InnerGetMembersByIds<T>(string[] ids, string responseGroup = null) where T : MemberEntity
         {
             //Use OfType() clause very much accelerates the query performance when used TPT inheritance
             var query = Members.OfType<T>().Where(x => ids.Contains(x.Id));
-           
+
             var retVal = await query.ToArrayAsync();
             ids = retVal.Select(x => x.Id).ToArray();
+            var tasks = new List<Task>();
             if (!ids.IsNullOrEmpty())
             {
                 var relations = await MemberRelations.Where(x => ids.Contains(x.DescendantId)).ToArrayAsync();
                 var ancestorIds = relations.Select(x => x.AncestorId).ToArray();
                 if (!ancestorIds.IsNullOrEmpty())
                 {
-                    var ancestors = await Members.Where(x => ancestorIds.Contains(x.Id)).ToArrayAsync();
+                    tasks.Add(Members.Where(x => ancestorIds.Contains(x.Id)).ToArrayAsync());
                 }
 
                 var memberResponseGroup = EnumUtility.SafeParse(responseGroup, MemberResponseGroup.Full);
 
                 if (memberResponseGroup.HasFlag(MemberResponseGroup.WithNotes))
                 {
-                    var notes = await Notes.Where(x => ids.Contains(x.MemberId)).ToArrayAsync();
+                    tasks.Add(Notes.Where(x => ids.Contains(x.MemberId)).ToArrayAsync());
                 }
 
                 if (memberResponseGroup.HasFlag(MemberResponseGroup.WithEmails))
                 {
-                    var emails = await Emails.Where(x => ids.Contains(x.MemberId)).ToArrayAsync();
+                    tasks.Add(Emails.Where(x => ids.Contains(x.MemberId)).ToArrayAsync());
                 }
 
                 if (memberResponseGroup.HasFlag(MemberResponseGroup.WithAddresses))
                 {
-                    var addresses = await Addresses.Where(x => ids.Contains(x.MemberId)).ToArrayAsync();
+                    tasks.Add(Addresses.Where(x => ids.Contains(x.MemberId)).ToArrayAsync());
                 }
 
                 if (memberResponseGroup.HasFlag(MemberResponseGroup.WithPhones))
                 {
-                    var phones = await Phones.Where(x => ids.Contains(x.MemberId)).ToArrayAsync();
+                    tasks.Add(Phones.Where(x => ids.Contains(x.MemberId)).ToArrayAsync());
                 }
 
                 if (memberResponseGroup.HasFlag(MemberResponseGroup.WithGroups))
                 {
-                    var groups = await Groups.Where(x => ids.Contains(x.MemberId)).ToArrayAsync();
+                    tasks.Add(Groups.Where(x => ids.Contains(x.MemberId)).ToArrayAsync());
                 }
-
             }
-
+            await Task.WhenAll(tasks);
             return retVal;
         }
 
