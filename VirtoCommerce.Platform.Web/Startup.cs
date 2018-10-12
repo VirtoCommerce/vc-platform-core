@@ -72,7 +72,23 @@ namespace VirtoCommerce.Platform.Web
             services.AddPlatformServices(Configuration);
             services.AddSecurityServices();
 
-            var mvcBuilder = services.AddMvc().AddJsonOptions(options =>
+            var mvcBuilder = services.AddMvc(mvcOptions =>
+                {
+                    // NOTE: combining multiple Authorize attributes when using a custom IAuthorizationPolicyProvider
+                    //       with ASP.NET Core MVC 2.1 causes an ArgumentNullException when calling an action.
+                    //       For more information, please see https://github.com/aspnet/Mvc/issues/7809
+                    //
+                    // Currently this issue affects following controllers:
+                    // - VirtoCommerce.Platform.Web.Controllers.Api.DynamicPropertiesController
+                    // - VirtoCommerce.SitemapsModule.Web.Controllers.Api.SitemapsModuleApiController
+                    // - probably some other controllers in modules not ported to VC Platform 3.x yet...
+                    //
+                    // This issue is fixed in ASP.NET Core MVC 2.2. The following line is a workaround for 2.1.
+                    // TODO: remove the following workaround after migrating to ASP.NET Core MVC 2.2
+                    mvcOptions.AllowCombiningAuthorizeFilters = false;
+                }
+            )
+            .AddJsonOptions(options =>
                 {
                     //Next line needs to represent custom derived types in the resulting swagger doc definitions. Because default SwaggerProvider used global JSON serialization settings
                     //we should register this converter globally.
