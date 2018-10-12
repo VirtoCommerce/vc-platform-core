@@ -5,26 +5,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VirtoCommerce.SitemapsModule.Core\VirtoCommerce.SitemapsModule.Core.csproj" />
-    <ProjectReference Include="..\VirtoCommerce.SitemapsModule.Data\VirtoCommerce.SitemapsModule.Data.csproj" />
+    <PackageReference Include="Hangfire" Version="1.6.19" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.1.0" />
+    <PackageReference Include="System.IO.Packaging" Version="4.5.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Hangfire.Core">
-      <HintPath>C:\Users\A_Vas\.nuget\packages\hangfire.core\1.6.19\lib\netstandard1.3\Hangfire.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.AspNetCore.Authorization">
-      <HintPath>C:\Users\A_Vas\.nuget\packages\microsoft.aspnetcore.authorization\2.1.0\lib\netstandard2.0\Microsoft.AspNetCore.Authorization.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.AspNetCore.Mvc.Core">
-      <HintPath>C:\Users\A_Vas\.nuget\packages\microsoft.aspnetcore.mvc.core\2.1.0\lib\netstandard2.0\Microsoft.AspNetCore.Mvc.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.AspNetCore.Mvc.ViewFeatures">
-      <HintPath>C:\Users\A_Vas\.nuget\packages\microsoft.aspnetcore.mvc.viewfeatures\2.1.0\lib\netstandard2.0\Microsoft.AspNetCore.Mvc.ViewFeatures.dll</HintPath>
-    </Reference>
-    <Reference Include="System.IO.Packaging">
-      <HintPath>C:\Users\A_Vas\.nuget\packages\system.io.packaging\4.5.0\ref\netstandard2.0\System.IO.Packaging.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\VirtoCommerce.SitemapsModule.Core\VirtoCommerce.SitemapsModule.Core.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.SitemapsModule.Data\VirtoCommerce.SitemapsModule.Data.csproj" />
   </ItemGroup>
 
 </Project>

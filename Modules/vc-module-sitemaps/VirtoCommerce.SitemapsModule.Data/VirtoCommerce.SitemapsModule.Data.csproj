@@ -18,10 +18,4 @@
     <ProjectReference Include="..\VirtoCommerce.SitemapsModule.Core\VirtoCommerce.SitemapsModule.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="EntityFrameworkCore.Triggers">
-      <HintPath>C:\Users\A_Vas\.nuget\packages\entityframeworkcore.triggers\1.1.1\lib\netstandard2.0\EntityFrameworkCore.Triggers.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>
