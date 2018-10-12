@@ -18,13 +18,15 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
 {
     public class SitemapXmlGenerator : ISitemapXmlGenerator
     {
+        // TODO: set up logging in module initialization code and uncomment it or remove it completely
+
         public SitemapXmlGenerator(
             ISitemapService sitemapService,
             ISitemapItemService sitemapItemService,
             ISitemapUrlBuilder sitemapUrlBuilder,
-            ISitemapItemRecordProvider[] sitemapItemRecordProviders,
+            IEnumerable<ISitemapItemRecordProvider> sitemapItemRecordProviders,
             ISettingsManager settingsManager,
-            ILog logging,
+            //ILog logging,
             IStoreService storeService)
         {
             SitemapService = sitemapService;
@@ -32,15 +34,15 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
             SitemapUrlBuilder = sitemapUrlBuilder;
             SitemapItemRecordProviders = sitemapItemRecordProviders;
             SettingsManager = settingsManager;
-            Logging = logging;
+            //Logging = logging;
             StoreService = storeService;
         }
 
-        protected ILog Logging { get; }
+        //protected ILog Logging { get; }
         protected ISitemapService SitemapService { get; }
         protected ISitemapItemService SitemapItemService { get; }
         protected ISitemapUrlBuilder SitemapUrlBuilder { get; }
-        protected ISitemapItemRecordProvider[] SitemapItemRecordProviders { get; }
+        protected IEnumerable<ISitemapItemRecordProvider> SitemapItemRecordProviders { get; }
         protected ISettingsManager SettingsManager { get; }
         protected IStoreService StoreService { get; }
 
@@ -160,7 +162,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                 }
                 catch (Exception ex)
                 {
-                    Logging.Error(ex.ToString());
+                    //Logging.Error(ex.ToString());
                 }
             }
             sitemap.PagedLocations.Clear();
