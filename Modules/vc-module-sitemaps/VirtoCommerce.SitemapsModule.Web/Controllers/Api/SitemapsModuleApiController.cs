@@ -63,7 +63,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
         [Route("search")]
         [ProducesResponseType(typeof(GenericSearchResult<Sitemap>), 200)]
         [ProducesResponseType(typeof(string), 400)]
-        public async Task<IActionResult> SearchSitemaps(SitemapSearchCriteria request)
+        public async Task<IActionResult> SearchSitemaps([FromBody]SitemapSearchCriteria request)
         {
             if (request == null)
             {
@@ -101,7 +101,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
         [Route("")]
         [ProducesResponseType(typeof(Sitemap), 200)]
         [Authorize(ModulePermissions.Create)]
-        public async Task<IActionResult> AddSitemap(Sitemap sitemap)
+        public async Task<IActionResult> AddSitemap([FromBody]Sitemap sitemap)
         {
             if (sitemap == null)
             {
@@ -117,7 +117,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
         [Route("")]
         [ProducesResponseType(typeof(void), 204)]
         [Authorize(ModulePermissions.Update)]
-        public async Task<IActionResult> UpdateSitemap(Sitemap sitemap)
+        public async Task<IActionResult> UpdateSitemap([FromBody]Sitemap sitemap)
         {
             if (sitemap == null)
             {
@@ -148,7 +148,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
         [HttpPost]
         [Route("items/search")]
         [ProducesResponseType(typeof(GenericSearchResult<SitemapItem>), 200)]
-        public async Task<IActionResult> SearchSitemapItems(SitemapItemSearchCriteria request)
+        public async Task<IActionResult> SearchSitemapItems([FromBody]SitemapItemSearchCriteria request)
         {
             if (request == null)
             {
