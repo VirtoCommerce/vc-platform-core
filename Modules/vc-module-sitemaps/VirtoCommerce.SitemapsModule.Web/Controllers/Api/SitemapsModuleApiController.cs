@@ -18,16 +18,16 @@ using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.SitemapsModule.Core.Models;
+using VirtoCommerce.SitemapsModule.Core.ModuleConstants;
 using VirtoCommerce.SitemapsModule.Core.Services;
 using VirtoCommerce.SitemapsModule.Data.Services;
 using VirtoCommerce.SitemapsModule.Web.Model.PushNotifications;
-using VirtoCommerce.SitemapsModule.Web.Security;
 using SystemFile = System.IO.File;
 
 namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
 {
     [Route("api/sitemaps")]
-    [Authorize(SitemapsPredefinedPermissions.Read)]
+    [Authorize(ModulePermissions.Read)]
     public class SitemapsModuleApiController : Controller
     {
         private readonly ISitemapService _sitemapService;
@@ -100,7 +100,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
         [HttpPost]
         [Route("")]
         [ProducesResponseType(typeof(Sitemap), 200)]
-        [Authorize(SitemapsPredefinedPermissions.Create)]
+        [Authorize(ModulePermissions.Create)]
         public async Task<IActionResult> AddSitemap(Sitemap sitemap)
         {
             if (sitemap == null)
@@ -116,7 +116,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
         [HttpPut]
         [Route("")]
         [ProducesResponseType(typeof(void), 204)]
-        [Authorize(SitemapsPredefinedPermissions.Update)]
+        [Authorize(ModulePermissions.Update)]
         public async Task<IActionResult> UpdateSitemap(Sitemap sitemap)
         {
             if (sitemap == null)
@@ -132,7 +132,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
         [HttpDelete]
         [Route("")]
         [ProducesResponseType(typeof(void), 204)]
-        [Authorize(SitemapsPredefinedPermissions.Delete)]
+        [Authorize(ModulePermissions.Delete)]
         public async Task<IActionResult> DeleteSitemap(string[] ids)
         {
             if (ids == null)
