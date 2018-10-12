@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
-using Common.Logging;
+using Microsoft.Extensions.Logging;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Settings;
@@ -26,7 +26,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
             ISitemapUrlBuilder sitemapUrlBuilder,
             IEnumerable<ISitemapItemRecordProvider> sitemapItemRecordProviders,
             ISettingsManager settingsManager,
-            //ILog logging,
+            ILogger<SitemapXmlGenerator> logger,
             IStoreService storeService)
         {
             SitemapService = sitemapService;
@@ -34,11 +34,11 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
             SitemapUrlBuilder = sitemapUrlBuilder;
             SitemapItemRecordProviders = sitemapItemRecordProviders;
             SettingsManager = settingsManager;
-            //Logging = logging;
+            Logger = logger;
             StoreService = storeService;
         }
 
-        //protected ILog Logging { get; }
+        protected ILogger Logger { get; }
         protected ISitemapService SitemapService { get; }
         protected ISitemapItemService SitemapItemService { get; }
         protected ISitemapUrlBuilder SitemapUrlBuilder { get; }
@@ -162,7 +162,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                 }
                 catch (Exception ex)
                 {
-                    //Logging.Error(ex.ToString());
+                    Logger.LogError(ex, $"Failed to load sitemap item records for store #{store.Id}, sitemap #{sitemap.Id} and baseURL '{baseUrl}'");
                 }
             }
             sitemap.PagedLocations.Clear();

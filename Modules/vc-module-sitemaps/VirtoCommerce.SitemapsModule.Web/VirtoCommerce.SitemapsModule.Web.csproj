@@ -5,10 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Common.Logging" Version="3.4.1" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\VirtoCommerce.SitemapsModule.Core\VirtoCommerce.SitemapsModule.Core.csproj" />
     <ProjectReference Include="..\VirtoCommerce.SitemapsModule.Data\VirtoCommerce.SitemapsModule.Data.csproj" />
   </ItemGroup>
