@@ -18,8 +18,6 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
 {
     public class SitemapXmlGenerator : ISitemapXmlGenerator
     {
-        // TODO: set up logging in module initialization code and uncomment it or remove it completely
-
         public SitemapXmlGenerator(
             ISitemapService sitemapService,
             ISitemapItemService sitemapItemService,
