@@ -25,7 +25,7 @@
 
   <ItemGroup>
     <None Update="_module.manifest">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
