@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.OrdersModule.Core.Model;
@@ -63,7 +64,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                 {
                     repository.DisableChangesTracking();
 
-                    var subscriptionEntities = repository.GetSubscriptionsByIds(subscriptionIds, responseGroup);
+                    var subscriptionEntities = await repository.GetSubscriptionsByIdsAsync(subscriptionIds, responseGroup);
                     foreach (var subscriptionEntity in subscriptionEntities)
                     {
                         var subscription = AbstractTypeFactory<Subscription>.TryCreateInstance();
@@ -123,7 +124,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
 
             using (var repository = _subscriptionRepositoryFactory())
             {
-                var existEntities = repository.GetSubscriptionsByIds(subscriptions.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
+                var existEntities = await repository.GetSubscriptionsByIdsAsync(subscriptions.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var subscription in subscriptions)
                 {
                     //Generate numbers for new subscriptions
@@ -143,8 +144,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                     var originalEntity = existEntities.FirstOrDefault(x => x.Id == subscription.Id);
                     var originalSubscription = originalEntity != null ? originalEntity.ToModel(AbstractTypeFactory<Subscription>.TryCreateInstance()) : subscription;
 
-                    var modifiedEntity = AbstractTypeFactory<SubscriptionEntity>.TryCreateInstance()
-                                                                                 .FromModel(subscription, pkMap) as SubscriptionEntity;
+                    var modifiedEntity = AbstractTypeFactory<SubscriptionEntity>.TryCreateInstance().FromModel(subscription, pkMap);
                     if (originalEntity != null)
                     {
                         changedEntries.Add(new GenericChangedEntry<Subscription>(subscription, originalEntity.ToModel(AbstractTypeFactory<Subscription>.TryCreateInstance()), EntryState.Modified));
@@ -183,7 +183,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                     var orderPrototypesIds = repository.Subscriptions.Where(x => ids.Contains(x.Id)).Select(x => x.CustomerOrderPrototypeId).ToArray();
                     await _customerOrderService.DeleteAsync(orderPrototypesIds);
 
-                    repository.RemoveSubscriptionsByIds(ids);
+                    await repository.RemoveSubscriptionsByIdsAsync(ids);
                     await repository.UnitOfWork.CommitAsync();
 
                     await _eventPublisher.Publish(new SubscriptionChangedEvent(changedEntries));
@@ -209,13 +209,10 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
 
                     var query = await GetSubscriptionsQueryForCriteria(repository, criteria);
 
-                    retVal.TotalCount = query.Count();
+                    retVal.TotalCount = await query.CountAsync();
 
-                    var subscriptionsIds = query.Skip(criteria.Skip)
-                        .Take(criteria.Take)
-                        .ToArray()
-                        .Select(x => x.Id)
-                        .ToArray();
+                    var subscriptionEntities = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                    var subscriptionsIds = subscriptionEntities.Select(x => x.Id).ToArray();
 
                     //Load subscriptions with preserving sorting order
                     var unorderedResults = await GetByIdsAsync(subscriptionsIds, criteria.ResponseGroup);

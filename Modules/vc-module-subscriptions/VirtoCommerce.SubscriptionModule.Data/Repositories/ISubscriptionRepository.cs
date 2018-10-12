@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Threading.Tasks;
 using VirtoCommerce.SubscriptionModule.Data.Model;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -9,10 +10,10 @@ namespace VirtoCommerce.SubscriptionModule.Data.Repositories
         IQueryable<PaymentPlanEntity> PaymentPlans { get; }
         IQueryable<SubscriptionEntity> Subscriptions { get; }
     
-        PaymentPlanEntity[] GetPaymentPlansByIds(string[] ids);
-        void RemovePaymentPlansByIds(string[] ids);
+        Task<PaymentPlanEntity[]> GetPaymentPlansByIdsAsync(string[] ids);
+        Task RemovePaymentPlansByIdsAsync(string[] ids);
 
-        SubscriptionEntity[] GetSubscriptionsByIds(string[] ids, string responseGroup = null);
-        void RemoveSubscriptionsByIds(string[] ids);
+        Task<SubscriptionEntity[]> GetSubscriptionsByIdsAsync(string[] ids, string responseGroup = null);
+        Task RemoveSubscriptionsByIdsAsync(string[] ids);
     }
 }

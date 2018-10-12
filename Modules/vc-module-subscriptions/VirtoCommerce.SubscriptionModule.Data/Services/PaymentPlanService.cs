@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
@@ -36,7 +37,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
         public async Task<PaymentPlan[]> GetByIdsAsync(string[] planIds, string responseGroup = null)
         {
             var cacheKey = CacheKey.With(GetType(), nameof(GetByIdsAsync), string.Join("-", planIds), responseGroup);
-            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, cacheEntry =>
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
             {
                 cacheEntry.AddExpirationToken(PaymentPlanCacheRegion.CreateChangeToken());
 
@@ -46,7 +47,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                 {
                     repository.DisableChangesTracking();
 
-                    var paymentPlanEntities = repository.GetPaymentPlansByIds(planIds);
+                    var paymentPlanEntities = await repository.GetPaymentPlansByIdsAsync(planIds);
                     foreach (var paymentPlanEntity in paymentPlanEntities)
                     {
                         var paymentPlan = AbstractTypeFactory<PaymentPlan>.TryCreateInstance();
@@ -59,7 +60,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                         }
                     }
                 }
-                return Task.FromResult(retVal.ToArray());
+                return retVal.ToArray();
             });
         }
 
@@ -70,7 +71,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
 
             using (var repository = _subscriptionRepositoryFactory())
             {
-                var existPlanEntities = repository.GetPaymentPlansByIds(plans.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
+                var existPlanEntities = await repository.GetPaymentPlansByIdsAsync(plans.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var paymentPlan in plans)
                 {
                     var sourcePlanEntity = AbstractTypeFactory<PaymentPlanEntity>.TryCreateInstance();
@@ -111,7 +112,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                     var changedEntries = paymentPlans.Select(x => new GenericChangedEntry<PaymentPlan>(x, EntryState.Deleted));
                     await _eventPublisher.Publish(new PaymentPlanChangingEvent(changedEntries));
 
-                    repository.RemovePaymentPlansByIds(ids);
+                    await repository.RemovePaymentPlansByIdsAsync(ids);
                     await repository.UnitOfWork.CommitAsync();
 
                     await _eventPublisher.Publish(new PaymentPlanChangedEvent(changedEntries));
@@ -146,13 +147,10 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                     }
                     query = query.OrderBySortInfos(sortInfos);
 
-                    retVal.TotalCount = query.Count();
+                    retVal.TotalCount = await query.CountAsync();
 
-                    var paymentPlanIds = query.Skip(criteria.Skip)
-                        .Take(criteria.Take)
-                        .ToArray()
-                        .Select(x => x.Id)
-                        .ToArray();
+                    var paymentPlanEntities = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                    var paymentPlanIds = paymentPlanEntities.Select(x => x.Id).ToArray();
 
                     //Load subscriptions with preserving sorting order
                     var unorderedResults = await GetByIdsAsync(paymentPlanIds, criteria.ResponseGroup);
