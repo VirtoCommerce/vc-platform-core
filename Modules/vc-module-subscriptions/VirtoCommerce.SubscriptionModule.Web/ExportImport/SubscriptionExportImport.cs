@@ -128,20 +128,8 @@ namespace VirtoCommerce.SubscriptionModule.Web.ExportImport
                     {
                         if (jsonReader.Value.ToString() == "PaymentPlans")
                         {
-                            jsonReader.Read();
-                            if (jsonReader.TokenType == JsonToken.StartArray)
+                            if (TryReadCollectionOf<PaymentPlan>(jsonReader, out var paymentPlans))
                             {
-                                jsonReader.Read();
-
-                                var paymentPlans = new List<PaymentPlan>();
-                                while (jsonReader.TokenType != JsonToken.EndArray)
-                                {
-                                    var paymentPlan = _jsonSerializer.Deserialize<PaymentPlan>(jsonReader);
-                                    paymentPlans.Add(paymentPlan);
-
-                                    jsonReader.Read();
-                                }
-
                                 var totalCount = paymentPlans.Count;
                                 for (int skip = 0; skip < totalCount; skip += BatchSize)
                                 {
@@ -155,20 +143,8 @@ namespace VirtoCommerce.SubscriptionModule.Web.ExportImport
                         }
                         else if (jsonReader.Value.ToString() == "Subscriptions")
                         {
-                            jsonReader.Read();
-                            if (jsonReader.TokenType == JsonToken.StartArray)
+                            if (TryReadCollectionOf<Subscription>(jsonReader, out var subscriptions))
                             {
-                                jsonReader.Read();
-
-                                var subscriptions = new List<Subscription>();
-                                while (jsonReader.TokenType != JsonToken.EndArray)
-                                {
-                                    var subscription = _jsonSerializer.Deserialize<Subscription>(jsonReader);
-                                    subscriptions.Add(subscription);
-
-                                    jsonReader.Read();
-                                }
-
                                 var totalCount = subscriptions.Count;
                                 for (int skip = 0; skip < totalCount; skip += BatchSize)
                                 {
@@ -183,6 +159,30 @@ namespace VirtoCommerce.SubscriptionModule.Web.ExportImport
                     }
                 }
             }
+        }
+
+        private bool TryReadCollectionOf<TValue>(JsonReader jsonReader, out IReadOnlyCollection<TValue> values)
+        {
+            jsonReader.Read();
+            if (jsonReader.TokenType == JsonToken.StartArray)
+            {
+                jsonReader.Read();
+
+                var items = new List<TValue>();
+                while (jsonReader.TokenType != JsonToken.EndArray)
+                {
+                    var item = _jsonSerializer.Deserialize<TValue>(jsonReader);
+                    items.Add(item);
+
+                    jsonReader.Read();
+                }
+
+                values = items;
+                return true;
+            }
+
+            values = new TValue[0];
+            return false;
         }
     }
 }
