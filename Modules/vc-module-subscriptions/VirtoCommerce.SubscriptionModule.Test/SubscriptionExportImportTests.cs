@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using Moq;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.SubscriptionModule.Core.Model;
@@ -214,16 +217,24 @@ namespace VirtoCommerce.SubscriptionModule.Test
             string actualJson;
 
             using (var targetStream = new MemoryStream())
-            using (var textReader = new StreamReader(targetStream))
             {
                 await _subscriptionExportImport.DoExportAsync(targetStream, IgnoreProgressInfo, _cancellationToken.Object);
 
-                targetStream.Seek(0, SeekOrigin.Begin);
-                actualJson = await textReader.ReadToEndAsync();
+                // DoExportAsync() closes targetStream, so extracting data from it is a bit tricky...
+                var streamContents = targetStream.ToArray();
+                using (var copiedStream = new MemoryStream(streamContents))
+                using (var textReader = new StreamReader(copiedStream))
+                {
+                    actualJson = await textReader.ReadToEndAsync();
+                }
             }
 
             // Assert
-            Assert.Equal(expectedJson, actualJson);
+            // NOTE: whitespace characters and indentation may vary, so comparing JSON as text will not work well.
+            //       To overcome it, we compare JSON tokens here.
+            var expectedJObject = JsonConvert.DeserializeObject<JObject>(expectedJson);
+            var actualJObject = JsonConvert.DeserializeObject<JObject>(actualJson);
+            Assert.True(JToken.DeepEquals(expectedJObject, actualJObject));
         }
 
         [Fact]
