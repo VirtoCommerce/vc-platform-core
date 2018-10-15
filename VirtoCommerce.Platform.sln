@@ -145,11 +145,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.OrdersModule2
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vc-module-subscriptions", "vc-module-subscriptions", "{B80ACEF3-FCE2-4D61-BDF6-041ACAB7DBA0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.SubscriptionModule.Core", "Modules\vc-module-subscriptions\VirtoCommerce.SubscriptionModule.Core\VirtoCommerce.SubscriptionModule.Core.csproj", "{A10D6030-5091-481A-800E-B9CC768160A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.SubscriptionModule.Core", "Modules\vc-module-subscriptions\VirtoCommerce.SubscriptionModule.Core\VirtoCommerce.SubscriptionModule.Core.csproj", "{A10D6030-5091-481A-800E-B9CC768160A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.SubscriptionModule.Data", "Modules\vc-module-subscriptions\VirtoCommerce.SubscriptionModule.Data\VirtoCommerce.SubscriptionModule.Data.csproj", "{61230D9E-173B-4949-ACA8-83B4238A34E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.SubscriptionModule.Data", "Modules\vc-module-subscriptions\VirtoCommerce.SubscriptionModule.Data\VirtoCommerce.SubscriptionModule.Data.csproj", "{61230D9E-173B-4949-ACA8-83B4238A34E1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.SubscriptionModule.Web", "Modules\vc-module-subscriptions\VirtoCommerce.SubscriptionModule.Web\VirtoCommerce.SubscriptionModule.Web.csproj", "{B5CFF5D8-EB98-478B-8471-9ED2F50C1167}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.SubscriptionModule.Web", "Modules\vc-module-subscriptions\VirtoCommerce.SubscriptionModule.Web\VirtoCommerce.SubscriptionModule.Web.csproj", "{B5CFF5D8-EB98-478B-8471-9ED2F50C1167}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.SubscriptionModule.Test", "Modules\vc-module-subscriptions\VirtoCommerce.SubscriptionModule.Test\VirtoCommerce.SubscriptionModule.Test.csproj", "{A3C4668C-B7F1-42CA-9C9A-0357C2BC6667}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -397,6 +399,10 @@ Global
 		{B5CFF5D8-EB98-478B-8471-9ED2F50C1167}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B5CFF5D8-EB98-478B-8471-9ED2F50C1167}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B5CFF5D8-EB98-478B-8471-9ED2F50C1167}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3C4668C-B7F1-42CA-9C9A-0357C2BC6667}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3C4668C-B7F1-42CA-9C9A-0357C2BC6667}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3C4668C-B7F1-42CA-9C9A-0357C2BC6667}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3C4668C-B7F1-42CA-9C9A-0357C2BC6667}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -467,6 +473,7 @@ Global
 		{A10D6030-5091-481A-800E-B9CC768160A3} = {B80ACEF3-FCE2-4D61-BDF6-041ACAB7DBA0}
 		{61230D9E-173B-4949-ACA8-83B4238A34E1} = {B80ACEF3-FCE2-4D61-BDF6-041ACAB7DBA0}
 		{B5CFF5D8-EB98-478B-8471-9ED2F50C1167} = {B80ACEF3-FCE2-4D61-BDF6-041ACAB7DBA0}
+		{A3C4668C-B7F1-42CA-9C9A-0357C2BC6667} = {B80ACEF3-FCE2-4D61-BDF6-041ACAB7DBA0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {80F99D88-A3B2-4ED2-9148-43D43EBFFFC3}
