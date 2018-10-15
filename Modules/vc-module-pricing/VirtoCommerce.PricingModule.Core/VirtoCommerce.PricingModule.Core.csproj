@@ -4,4 +4,13 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
+    <ProjectReference Include="..\..\vc-module-core\VirtoCommerce.CoreModule.Core\VirtoCommerce.CoreModule.Core.csproj" />
+  </ItemGroup>
+
 </Project>
