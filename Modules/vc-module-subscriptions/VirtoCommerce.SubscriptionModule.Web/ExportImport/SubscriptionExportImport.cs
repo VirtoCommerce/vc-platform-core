@@ -152,41 +152,6 @@ namespace VirtoCommerce.SubscriptionModule.Web.ExportImport
                 progressCallback(progressInfo);
             }
         }
-
-        private async Task<BackupObject> GetBackupObject(Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
-        {
-            var retVal = new BackupObject();
-            var progressInfo = new ExportImportProgressInfo();
-
-            var take = BatchSize;
-
-            var searchResponse = await _subscriptionSearchService.SearchSubscriptionsAsync(new SubscriptionSearchCriteria { Take = 0, ResponseGroup = SubscriptionResponseGroup.Default.ToString() });
-
-            for (int skip = 0; skip < searchResponse.TotalCount; skip += take)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                searchResponse = await _subscriptionSearchService.SearchSubscriptionsAsync(new SubscriptionSearchCriteria { Skip = skip, Take = take, ResponseGroup = SubscriptionResponseGroup.Default.ToString() });
-
-                progressInfo.Description = string.Format("{0} of {1} subscriptions loading", Math.Min(skip + take, searchResponse.TotalCount), searchResponse.TotalCount);
-                progressCallback(progressInfo);
-                retVal.Subscriptions.AddRange(searchResponse.Results);
-            }
-
-            var paymentPlanSearchResponse = await _paymentPlanSearchService.SearchPlansAsync(new PaymentPlanSearchCriteria { Take = 0 });
-
-            for (int skip = 0; skip < paymentPlanSearchResponse.TotalCount; skip += take)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                paymentPlanSearchResponse = await _paymentPlanSearchService.SearchPlansAsync(new PaymentPlanSearchCriteria { Skip = skip, Take = take });
-
-                progressInfo.Description = string.Format("{0} of {1} payment plans loading", Math.Min(skip + take, paymentPlanSearchResponse.TotalCount), paymentPlanSearchResponse.TotalCount);
-                progressCallback(progressInfo);
-                retVal.PaymentPlans.AddRange(paymentPlanSearchResponse.Results);
-            }
-            return retVal;
-        }
     }
 
 }
