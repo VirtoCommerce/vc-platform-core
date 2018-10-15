@@ -126,34 +126,30 @@ namespace VirtoCommerce.SubscriptionModule.Web.ExportImport
                 {
                     if (jsonReader.TokenType == JsonToken.PropertyName)
                     {
-                        if (jsonReader.Value.ToString() == "PaymentPlans")
+                        if (jsonReader.Value.ToString() == "PaymentPlans" &&
+                            TryReadCollectionOf<PaymentPlan>(jsonReader, out var paymentPlans))
                         {
-                            if (TryReadCollectionOf<PaymentPlan>(jsonReader, out var paymentPlans))
+                            var totalCount = paymentPlans.Count;
+                            for (int skip = 0; skip < totalCount; skip += BatchSize)
                             {
-                                var totalCount = paymentPlans.Count;
-                                for (int skip = 0; skip < totalCount; skip += BatchSize)
-                                {
-                                    var currentPaymentPlans = paymentPlans.Skip(skip).Take(BatchSize).ToArray();
-                                    await _paymentPlanService.SavePlansAsync(currentPaymentPlans);
+                                var currentPaymentPlans = paymentPlans.Skip(skip).Take(BatchSize).ToArray();
+                                await _paymentPlanService.SavePlansAsync(currentPaymentPlans);
 
-                                    progressInfo.Description = $"{Math.Min(skip + BatchSize, totalCount)} of {totalCount} payment plans have been imported.";
-                                    progressCallback(progressInfo);
-                                }
+                                progressInfo.Description = $"{Math.Min(skip + BatchSize, totalCount)} of {totalCount} payment plans have been imported.";
+                                progressCallback(progressInfo);
                             }
                         }
-                        else if (jsonReader.Value.ToString() == "Subscriptions")
+                        else if (jsonReader.Value.ToString() == "Subscriptions" &&
+                                 TryReadCollectionOf<Subscription>(jsonReader, out var subscriptions))
                         {
-                            if (TryReadCollectionOf<Subscription>(jsonReader, out var subscriptions))
+                            var totalCount = subscriptions.Count;
+                            for (int skip = 0; skip < totalCount; skip += BatchSize)
                             {
-                                var totalCount = subscriptions.Count;
-                                for (int skip = 0; skip < totalCount; skip += BatchSize)
-                                {
-                                    var currentSubscriptions = subscriptions.Skip(skip).Take(BatchSize).ToArray();
-                                    await _subscriptionService.SaveSubscriptionsAsync(currentSubscriptions);
+                                var currentSubscriptions = subscriptions.Skip(skip).Take(BatchSize).ToArray();
+                                await _subscriptionService.SaveSubscriptionsAsync(currentSubscriptions);
 
-                                    progressInfo.Description = $"{Math.Min(skip + BatchSize, totalCount)} of {totalCount} subscriptions have been imported.";
-                                    progressCallback(progressInfo);
-                                }
+                                progressInfo.Description = $"{Math.Min(skip + BatchSize, totalCount)} of {totalCount} subscriptions have been imported.";
+                                progressCallback(progressInfo);
                             }
                         }
                     }
