@@ -13,18 +13,6 @@ using VirtoCommerce.SubscriptionModule.Core.Services;
 
 namespace VirtoCommerce.SubscriptionModule.Web.ExportImport
 {
-    public sealed class BackupObject
-    {
-        public BackupObject()
-        {
-            Subscriptions = new List<Subscription>();
-            PaymentPlans = new List<PaymentPlan>();
-        }
-        public ICollection<PaymentPlan> PaymentPlans { get; set; }
-        public ICollection<Subscription> Subscriptions { get; set; }
-    }
-
-
     public sealed class SubscriptionExportImport
     {
         private const int BatchSize = 20;
@@ -128,30 +116,73 @@ namespace VirtoCommerce.SubscriptionModule.Web.ExportImport
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var backupObject = backupStream.DeserializeJson<BackupObject>();
+            var progressInfo = new ExportImportProgressInfo("Preparing for import");
+            progressCallback(progressInfo);
 
-            var progressInfo = new ExportImportProgressInfo();
-            var totalCount = backupObject.Subscriptions.Count;
-            var take = BatchSize;
-            for (int skip = 0; skip < totalCount; skip += take)
+            using (var streamReader = new StreamReader(backupStream, Encoding.UTF8))
+            using (var jsonReader = new JsonTextReader(streamReader))
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                while (jsonReader.Read())
+                {
+                    if (jsonReader.TokenType == JsonToken.PropertyName)
+                    {
+                        if (jsonReader.Value.ToString() == "PaymentPlans")
+                        {
+                            jsonReader.Read();
+                            if (jsonReader.TokenType == JsonToken.StartArray)
+                            {
+                                jsonReader.Read();
 
-                await _subscriptionService.SaveSubscriptionsAsync(backupObject.Subscriptions.Skip(skip).Take(take).ToArray());
-                progressInfo.Description = string.Format("{0} of {1} subscriptions imported", Math.Min(skip + take, totalCount), totalCount);
-                progressCallback(progressInfo);
-            }
+                                var paymentPlans = new List<PaymentPlan>();
+                                while (jsonReader.TokenType != JsonToken.EndArray)
+                                {
+                                    var paymentPlan = _jsonSerializer.Deserialize<PaymentPlan>(jsonReader);
+                                    paymentPlans.Add(paymentPlan);
 
-            totalCount = backupObject.PaymentPlans.Count;
-            for (int skip = 0; skip < totalCount; skip += take)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
+                                    jsonReader.Read();
+                                }
 
-                await _paymentPlanService.SavePlansAsync(backupObject.PaymentPlans.Skip(skip).Take(take).ToArray());
-                progressInfo.Description = string.Format("{0} of {1} payment plans imported", Math.Min(skip + take, totalCount), totalCount);
-                progressCallback(progressInfo);
+                                var totalCount = paymentPlans.Count;
+                                for (int skip = 0; skip < totalCount; skip += BatchSize)
+                                {
+                                    var currentPaymentPlans = paymentPlans.Skip(skip).Take(BatchSize).ToArray();
+                                    await _paymentPlanService.SavePlansAsync(currentPaymentPlans);
+
+                                    progressInfo.Description = $"{Math.Min(skip + BatchSize, totalCount)} of {totalCount} payment plans have been imported.";
+                                    progressCallback(progressInfo);
+                                }
+                            }
+                        }
+                        else if (jsonReader.Value.ToString() == "Subscriptions")
+                        {
+                            jsonReader.Read();
+                            if (jsonReader.TokenType == JsonToken.StartArray)
+                            {
+                                jsonReader.Read();
+
+                                var subscriptions = new List<Subscription>();
+                                while (jsonReader.TokenType != JsonToken.EndArray)
+                                {
+                                    var subscription = _jsonSerializer.Deserialize<Subscription>(jsonReader);
+                                    subscriptions.Add(subscription);
+
+                                    jsonReader.Read();
+                                }
+
+                                var totalCount = subscriptions.Count;
+                                for (int skip = 0; skip < totalCount; skip += BatchSize)
+                                {
+                                    var currentSubscriptions = subscriptions.Skip(skip).Take(BatchSize).ToArray();
+                                    await _subscriptionService.SaveSubscriptionsAsync(currentSubscriptions);
+
+                                    progressInfo.Description = $"{Math.Min(skip + BatchSize, totalCount)} of {totalCount} subscriptions have been imported.";
+                                    progressCallback(progressInfo);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
-
 }
