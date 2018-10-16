@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VirtoCommerce.SubscriptionModule.Web\VirtoCommerce.SubscriptionModule.Web.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.SubscriptionModule.Data\VirtoCommerce.SubscriptionModule.Data.csproj" />
   </ItemGroup>
 
 </Project>

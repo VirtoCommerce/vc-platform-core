@@ -20,12 +20,12 @@ using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SubscriptionModule.Core.Events;
 using VirtoCommerce.SubscriptionModule.Core.ModuleConstants;
 using VirtoCommerce.SubscriptionModule.Core.Services;
+using VirtoCommerce.SubscriptionModule.Data.ExportImport;
 using VirtoCommerce.SubscriptionModule.Data.Handlers;
 using VirtoCommerce.SubscriptionModule.Data.Notifications;
 using VirtoCommerce.SubscriptionModule.Data.Repositories;
 using VirtoCommerce.SubscriptionModule.Data.Services;
 using VirtoCommerce.SubscriptionModule.Web.BackgroundJobs;
-using VirtoCommerce.SubscriptionModule.Web.ExportImport;
 using VirtoCommerce.SubscriptionModule.Web.JsonConverters;
 
 namespace VirtoCommerce.SubscriptionModule.Web

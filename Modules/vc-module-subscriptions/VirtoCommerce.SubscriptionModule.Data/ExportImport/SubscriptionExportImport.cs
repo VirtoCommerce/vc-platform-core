@@ -11,7 +11,7 @@ using VirtoCommerce.SubscriptionModule.Core.Model;
 using VirtoCommerce.SubscriptionModule.Core.Model.Search;
 using VirtoCommerce.SubscriptionModule.Core.Services;
 
-namespace VirtoCommerce.SubscriptionModule.Web.ExportImport
+namespace VirtoCommerce.SubscriptionModule.Data.ExportImport
 {
     public sealed class SubscriptionExportImport
     {

@@ -11,7 +11,7 @@ using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.SubscriptionModule.Core.Model;
 using VirtoCommerce.SubscriptionModule.Core.Model.Search;
 using VirtoCommerce.SubscriptionModule.Core.Services;
-using VirtoCommerce.SubscriptionModule.Web.ExportImport;
+using VirtoCommerce.SubscriptionModule.Data.ExportImport;
 using Xunit;
 
 namespace VirtoCommerce.SubscriptionModule.Test
