@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.SitemapsModule.Core.Models;
@@ -26,71 +27,130 @@ namespace VirtoCommerce.SitemapsModule.Data.ExportImport
         private readonly ISitemapService _sitemapService;
         private readonly ISitemapItemService _sitemapItemService;
 
+        private readonly JsonSerializer _jsonSerializer;
+
         public SitemapExportImport(ISitemapService sitemapService, ISitemapItemService sitemapItemService)
         {
             _sitemapService = sitemapService;
             _sitemapItemService = sitemapItemService;
+
+            _jsonSerializer = new JsonSerializer
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                Formatting = Formatting.Indented,
+                NullValueHandling = NullValueHandling.Ignore
+            };
         }
 
         public async Task DoExportAsync(Stream backupStream, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
-            var backupObject = await GetBackupObject(progressCallback, cancellationToken);
-
             cancellationToken.ThrowIfCancellationRequested();
-            backupObject.SerializeJson(backupStream);
+
+            var progressInfo = new ExportImportProgressInfo();
+
+            using (var textWriter = new StreamWriter(backupStream))
+            using (var jsonTextWriter = new JsonTextWriter(textWriter))
+            {
+                await jsonTextWriter.WriteStartObjectAsync();
+
+                progressInfo.Description = "Sitemaps loading...";
+                progressCallback(progressInfo);
+
+                //Load sitemaps
+                var sitemapSearchCriteria = new SitemapSearchCriteria
+                {
+                    Skip = 0,
+                    Take = int.MaxValue
+                };
+                var sitemapSearchResult = await _sitemapService.SearchAsync(sitemapSearchCriteria);
+
+                await jsonTextWriter.WritePropertyNameAsync("Sitemaps");
+                await jsonTextWriter.WriteStartArrayAsync();
+                foreach (var sitemap in sitemapSearchResult.Results)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    _jsonSerializer.Serialize(jsonTextWriter, sitemap);
+                }
+                await jsonTextWriter.WriteEndArrayAsync();
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                progressInfo.Description = "Sitemaps items loading...";
+                progressCallback(progressInfo);
+
+                // Load sitemap items
+                var sitemapItemsSearchCriteria = new SitemapItemSearchCriteria
+                {
+                    Skip = 0,
+                    Take = int.MaxValue
+                };
+                var sitemapItemsSearchResult = await _sitemapItemService.SearchAsync(sitemapItemsSearchCriteria);
+
+                await jsonTextWriter.WritePropertyNameAsync("SitemapItems");
+                await jsonTextWriter.WriteStartArrayAsync();
+                foreach (var sitemapItem in sitemapItemsSearchResult.Results)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    _jsonSerializer.Serialize(jsonTextWriter, sitemapItem);
+                }
+                await jsonTextWriter.WriteEndArrayAsync();
+
+                await jsonTextWriter.WriteEndObjectAsync();
+            }
         }
 
         public async Task DoImportAsync(Stream backupStream, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var backupObject = backupStream.DeserializeJson<BackupObject>();
             var progressInfo = new ExportImportProgressInfo();
 
-            cancellationToken.ThrowIfCancellationRequested();
-
-            progressInfo.Description = "Sitemaps importing...";
-            progressCallback(progressInfo);
-            await _sitemapService.SaveChangesAsync(backupObject.Sitemaps.ToArray());
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            progressInfo.Description = "Sitemaps items importing...";
-            progressCallback(progressInfo);
-            await _sitemapItemService.SaveChangesAsync(backupObject.SitemapItems.ToArray());
+            using (var textReader = new StreamReader(backupStream))
+            using (var jsonTextReader = new JsonTextReader(textReader))
+            {
+                while (jsonTextReader.Read())
+                {
+                    if (jsonTextReader.TokenType == JsonToken.PropertyName)
+                    {
+                        if (jsonTextReader.Value.ToString() == "Sitemaps" &&
+                            TryReadCollectionOf<Sitemap>(jsonTextReader, out var sitemaps))
+                        {
+                            progressInfo.Description = "Sitemaps importing...";
+                            progressCallback(progressInfo);
+                            await _sitemapService.SaveChangesAsync(sitemaps.ToArray());
+                        }
+                        else if (jsonTextReader.Value.ToString() == "SitemapItems" &&
+                                 TryReadCollectionOf<SitemapItem>(jsonTextReader, out var sitemapItems))
+                        {
+                            progressInfo.Description = "Sitemaps items importing...";
+                            progressCallback(progressInfo);
+                            await _sitemapItemService.SaveChangesAsync(sitemapItems.ToArray());
+                        }
+                    }
+                }
+            }
         }
 
-        private async Task<BackupObject> GetBackupObject(Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
+        private bool TryReadCollectionOf<TValue>(JsonReader jsonReader, out IReadOnlyCollection<TValue> values)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var backupObject = new BackupObject();
-            var progressInfo = new ExportImportProgressInfo();
-
-            progressInfo.Description = "Sitemaps loading...";
-            progressCallback(progressInfo);
-            //Load sitemaps
-            var sitemapSearchCriteria = new SitemapSearchCriteria {
-                Skip = 0,
-                Take = int.MaxValue
-            };
-            var sitemapSearchResult = await _sitemapService.SearchAsync(sitemapSearchCriteria);
-            backupObject.Sitemaps = sitemapSearchResult.Results;
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            progressInfo.Description = "Sitemaps items loading...";
-            progressCallback(progressInfo);
-            var sitemapItemsSearchCriteria = new SitemapItemSearchCriteria
+            jsonReader.Read();
+            if (jsonReader.TokenType == JsonToken.StartArray)
             {
-                Skip = 0,
-                Take = int.MaxValue
-            };
-            var sitemapItemsSearchResult = await _sitemapItemService.SearchAsync(sitemapItemsSearchCriteria);
-            backupObject.SitemapItems = sitemapItemsSearchResult.Results;
+                jsonReader.Read();
 
-            return backupObject;
-        } 
-      
+                var items = new List<TValue>();
+                while (jsonReader.TokenType != JsonToken.EndArray)
+                {
+                    var item = _jsonSerializer.Deserialize<TValue>(jsonReader);
+                    items.Add(item);
+
+                    jsonReader.Read();
+                }
+
+                values = items;
+                return true;
+            }
+
+            values = new TValue[0];
+            return false;
+        }
     }
 }
