@@ -1,0 +1,177 @@
+﻿{
+    "pricing": {
+        "main-menu-title": "Ценообразование",
+        "blades": {
+            "pricing-main": {
+                "title": "Ценообразование",
+                "subtitle": "Управление товарами",
+                "menu": {
+                    "pricelist-list": {
+                        "title": "Прайс-лист"
+                    },
+                    "pricelist-assignment-list": {
+                        "title": "Назначение прайс-листов"
+                    }
+                }
+            },
+            "pricelist-list": {
+                "subtitle": "Управление Прайс-листами",
+                "labels": {
+                    "name": "Название",
+                    "currency": "Валюта",
+                    "last-modified": "Изменено"
+                }
+            },
+            "pricelist-detail": {
+                "title-new": "Новый Прайс-лист",
+                "labels": {
+                    "name": "Название",
+                    "currency": "Валюта",
+                    "description": "Описание"
+                },
+                "placeholders": {
+                    "name": "Введите название",
+                    "currency": "Выбрать...",
+                    "description": "Введите описание"
+                }
+            },
+            "pricelist-item-list": {
+                "subtitle": "Выберите Продукт для управления Ценами",
+                "labels": {
+                    "picture": "Картинка",
+                    "item-name": "Название продукта",
+                    "item-code": "Код продукта",
+                    "price-range": "Ценовой диапазон",
+                    "prices-count": "Общее значение цен"
+                },
+                "placeholders": {
+                    "search-item": "Поиск товара по названию..."
+                }
+            },
+            "prices-list": {
+                "title": "Цены {{name}}",
+                "subtitle": "Редактировать цены",
+                "labels": {
+                    "currency": "Валюта",
+                    "list-price": "Цена по прайс-листу",
+                    "sale-price": "Цена со скидкой",
+                    "min-quantity": "Минимальное количество",
+                    "last-modified": "Изменено"
+                }
+            },
+            "pricelist-assignment-list": {
+                "subtitle": "Управление установленными каталогами",
+                "labels": {
+                    "assignment-name": "Присвоенное название",
+                    "catalog": "Каталог",
+                    "priority": "Приоритет"
+                }
+            },
+            "assignment-list": {
+                "subtitle": "Управление товарными запасами",
+                "labels": {
+                    "name": "Название",
+                    "catalog": "Каталог",
+                    "pricelist": "Прайс-лист",
+                    "pricelist-currency":  "Валюта",
+                    "priority": "Приоритет",
+                    "last-modified": "Изменено",
+                    "modified-by": "Изменено"
+                }
+            },
+            "assignment-detail": {
+                "new-title": "Назначение нового прайс-листа",
+                "subtitle": "Редактировать назначение каталога",
+                "labels": {
+                    "assignment-name": "Присвоенное название",
+                    "price-list": "Прайс-лист",
+                    "catalog": "Каталог",
+                    "priority": "Приоритет",
+                    "priority-description": "Более высокий будет использован в первую очередь",
+                    "description": "Описание",
+                    "enable-date": "Срок действия",
+                    "enable-date-description": "Оставьте пустым, если доступен всегда",
+                    "expiration-date": "Дата окончания",
+                    "expiration-date-description": "Оставьте пустым, если доступен всегда",
+                    "eligible-shoppers": "Желательные покупатели"
+                },
+                "placeholders": {
+                    "assignment-name": "Введите название",
+                    "price-list": "Выбрать...",
+                    "catalog": "Выбрать...",
+                    "description": "Введите описание"
+                }
+            },
+            "item-pricelists-list": {
+                "subtitle": "Выбрать Прайс-лист для управления ценами",
+                "labels": {
+                    "name": "Прайс-лист",
+                    "currency": "Валюта",
+                    "priority": "Приоритет",
+                    "prices-count": "Общее значение цен"
+                },
+                "no-assignments": "В каталоге нет указанных прайс-листов. Пожалуйста, укажите прайс-лист, следуя данной ссылке ",
+                "manage-pricelists": "Управление ценообразованием"
+            },
+            "item-prices": {
+                "title": "Цены для {{name}}",
+                "subtitle": "Редактировать цены",
+                "head-label": "Прайс-лист для новой цены",
+                "pricelist-select-placeholder": "Выбрать прайс-лист для добавления новой цены...",
+                "labels": {
+                    "name": "Прайс-лист",
+                    "currency": "Валюта",
+                    "catalog": "Каталог",
+                    "list-price": "Цена по прайс-листу",
+                    "sale-price": "Цена со скидкой",
+                    "min-quantity": "Минимальное количество"
+                }
+            }
+        },
+        "widgets": {
+            "assignments": {
+                "title": "Назначение"
+            },
+            "itemPricesWidget": {
+                "title": "Цена",
+                "assign-pricelist": "Назначить прайс-лист"
+            },
+            "prices": {
+                "title": "Цены"
+            }
+        },
+        "dialogs": {
+            "assignments-delete": {
+                "title": "Подтверждение удаления",
+                "message": "Вы уверены, что хотите удалить выбранные установленные прайс-листы?"
+            },
+            "pricelists-delete": {
+                "title": "Подтверждение удаления",
+                "message": "Вы уверены, что хотите удалить выбранные Прайс-листы?"
+            },
+            "pricelist-item-list-delete": {
+                "title": "Подтверждение удаления",
+                "message": "Вы уверены, что хотите удалить ВСЕ цены для выбранных Продуктов в этом Прайс-листе?"
+            },
+            "item-prices-delete": {
+                "title": "Подтверждение удаления",
+                "message": "Вы уверены, что хотите удалить выбранные Цены?"
+            },
+            "prices-save": {
+                "title": "Сохранение изменений",
+                "message": "Цены были изменены. Вы хотите сохранить изменения?"
+            },
+            "pricelist-save": {
+                "title": "Сохранение изменений",
+                "message": "Прайс-лист был изменен. Вы хотите сохранить изменения?"
+            },
+            "assignment-save": {
+                "title": "Сохранение изменений",
+                "message": "Назначение каталога было изменено. Вы хотите сохранить изменения?"
+            }
+        },
+        "commands": {
+            "add-selected": "Добавить выбранное"
+        }
+    }
+}

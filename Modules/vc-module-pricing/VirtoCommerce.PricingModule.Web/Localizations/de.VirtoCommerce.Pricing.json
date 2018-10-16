@@ -1,0 +1,156 @@
+{
+  "pricing": {
+  "main-menu-title": "Preise",
+    "blades": {
+      "pricing-main": {
+        "title": "Preise",
+        "subtitle": "Warenwirtschaft",
+        "menu": {
+          "pricelist-list": {
+            "title": "Preislisten"
+          },
+          "pricelist-assignment-list": {
+            "title": "Preisliste Zuordnungen"
+          }
+        }
+      },
+      "pricelist-list": {
+        "subtitle": "Preislisten verwalten",
+        "labels": {
+          "name": "Name",
+          "currency": "Währung",
+          "last-modified": "Geändert"
+        }
+      },
+      "pricelist-detail": {
+        "title-new": "Neue Preisliste",
+        "labels": {
+          "name": "Name",
+          "currency": "Währung",
+          "description": "Beschreibung"
+        },
+        "placeholders": {
+          "name": "Name eingeben",
+          "currency": "Wählen Sie aus...",
+          "description": "Beschreibung eingeben"
+        }
+      },
+      "pricelist-item-list": {
+        "subtitle": "Wählen Sie das Produkt, um die Preise zu verwalten",
+        "labels": {
+          "picture": "Bild",
+          "item-name": "Artikelname",
+          "item-code": "Artikelcode",
+          "price-range": "Preisspanne",
+          "prices-count": "Preise zählen"
+        },
+        "placeholders": {
+          "search-item": "Suchen Sie den Artikel bei Namen..."
+        }
+      },
+      "prices-list": {
+        "title": "Preise für {{name}}",
+        "subtitle": "Bearbeiten Sie die Preise",
+        "labels": {
+          "currency": "Währung",
+          "list-price": "Listenpreis",
+          "sale-price": "Sonderangebot",
+          "min-quantity": "Min. Menge",
+          "last-modified": "Geändert"
+        }
+      },
+      "pricelist-assignment-list": {
+        "subtitle": "Zugewiesene Kataloge verwalten",
+        "labels": {
+          "assignment-name": "Zuordnungsname",
+          "catalog": "Katalog",
+          "priority": "Priorität"
+        }
+      },
+      "assignment-list": {
+        "subtitle": "Warenwirtschaft",
+        "labels": {
+          "name": "Name",
+          "catalog": "Katalog",
+          "pricelist": "Preisliste",
+          "pricelist-currency": "Währung",
+          "priority": "Priorität",
+          "last-modified": "Geändert",
+          "modified-by": "Geändert von"
+        }
+      },
+      "assignment-detail": {
+        "new-title": "Neue Preislistenzuordnung",
+        "subtitle": "Katalogzuordnung bearbeiten",
+        "labels": {
+          "assignment-name": "Zuordnungsname",
+          "price-list": "Preisliste",
+          "catalog": "Katalog",
+          "priority": "Priorität",
+          "description": "Beschreibung",
+          "enable-date": "Datum aktivieren (leer lassen, wenn Immer verfügbar)",
+          "expiration-date": "Ablaufdatum (leer lassen, wenn Immer verfügbar)",
+          "eligible-shoppers": "Berechtigte Kunden"
+        },
+        "placeholders": {
+          "assignment-name": "Namen eingeben",
+          "price-list": "Wählen Sie aus...",
+          "catalog": "Wählen Sie aus...",
+          "description": "Beschreibung eingeben"
+        }
+      },
+      "item-pricelists-list": {
+        "subtitle": "Preisliste auswählen zu verwalten",
+        "labels": {
+          "name": "Preis Liste",
+          "currency": "Währung",
+          "priority": "Priorität",
+          "prices-count": "Preise zählen"
+        },
+        "no-assignments": "Katalog nicht belegt Preislisten. Bitte weisen Sie eine Preisliste unter folgendem Link",
+        "manage-pricelists": "Verwalten Preise"
+      }
+    },
+    "widgets": {
+      "assignments": {
+        "title": "Zuweisungen"
+      },
+      "itemPricesWidget": {
+        "title": "Preis",
+        "assign-pricelist": "Preis Liste zuweisen"
+      },
+      "prices": {
+        "title": "Preise"
+      }
+    },
+    "dialogs": {
+      "assignments-delete": {
+        "title": "Bestätigung löschen",
+        "message": "Sind Sie sicher, dass Sie ausgewählte Preislistenzuordnungen löschen möchten?"
+      },
+      "pricelists-delete": {
+        "title": "Bestätigung löschen",
+        "message": "Sind Sie sicher, dass Sie ausgewählte Preislisten löschen möchten?"
+      },
+      "pricelist-item-list-delete": {
+        "title": "Bestätigung löschen",
+        "message": "Sind Sie sicher, dass Sie alle Preise für ausgewählte Produkte in dieser Preisliste löschen möchten?"
+      },
+      "prices-save": {
+        "title": "Änderungen speichern",
+        "message": "Die Preise wurde geändert. Möchten Sie die Änderungen speichern?"
+      },
+      "pricelist-save": {
+        "title": "Änderungen speichern",
+        "message": "Die Preisliste wurde geändert. Möchten Sie die Änderungen speichern?"
+      },
+      "assignment-save": {
+        "title": "Änderungen speichern",
+        "message": "Der Katalog Zuordnung wurde geändert. Möchten Sie die Änderungen speichern?"
+      }
+    },
+    "commands": {
+      "add-selected": "Ausgewählte hinzufügen"
+    }
+  }
+}

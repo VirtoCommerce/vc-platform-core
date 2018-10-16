@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<module>
+    <id>VirtoCommerce.Pricing</id>
+    <version>2.17.9</version>
+    <platformVersion>2.13.9</platformVersion>
+    <dependencies>
+        <dependency id="VirtoCommerce.Core" version="2.24.28" />
+        <dependency id="VirtoCommerce.Catalog" version="2.17.0" />
+    </dependencies>
+
+    <title>Pricing module</title>
+    <description>Robust pricing management functionality based on price list and dynamic evaluation</description>
+    <authors>
+        <author>Eugeney Tatarincev</author>
+    </authors>
+    <owners>
+        <owner>Virto Commerce</owner>
+    </owners>
+    <projectUrl>https://virtocommerce.com/apps/extensions/virto-pricing-module</projectUrl>
+    <iconUrl>https://github.com/VirtoCommerce/vc-module-pricing/raw/master/VirtoCommerce.PricingModule.Web/Content/logo.png</iconUrl>
+    <releaseNotes>First version.</releaseNotes>
+    <copyright>Copyright © 2011-2018 Virto Commerce. All rights reserved</copyright>
+    <tags>price pricelist merchandise</tags>
+
+    <assemblyFile>VirtoCommerce.PricingModule.Web.dll</assemblyFile>
+    <moduleType>VirtoCommerce.PricingModule.Web.Module, VirtoCommerce.PricingModule.Web</moduleType>
+
+    <styles>
+      <directory virtualPath="$/Content/css" searchPattern="*.css" searchSubdirectories="true" />
+    </styles>
+    <scripts>
+        <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
+    </scripts>
+
+    <settings>
+        <group name="Pricing|General">
+            <setting>
+                <name>Pricing.ExportImport.Description</name>
+                <valueType>string</valueType>
+                <defaultValue>Export/Import price lists, assignments and prices</defaultValue>
+                <title>Export/Import description</title>
+                <description>Module description in platform export/import wizard</description>
+            </setting>
+            <setting>
+                <name>Pricing.ExportImport.PageSize</name>
+                <valueType>integer</valueType>
+                <defaultValue>50</defaultValue>
+                <title>The page size being used for Export / Import</title>
+                <description>High value may will cause slow performance</description>
+            </setting>
+        </group>
+    </settings>
+
+    <permissions>
+        <group name="Pricing">
+            <permission id="pricing:access" name="Open pricing menu" description=""/>
+            <permission id="pricing:create" name="Create pricing data" description=""/>
+            <permission id="pricing:read" name="View pricing data" description=""/>
+            <permission id="pricing:update" name="Update pricing data" description=""/>
+            <permission id="pricing:delete" name="Delete pricing data" description=""/>
+        </group>
+    </permissions>
+</module>
