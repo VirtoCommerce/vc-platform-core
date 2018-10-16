@@ -3,15 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Serialization;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Services;
+using VirtoCommerce.PricingModule.Data.Caching;
 using VirtoCommerce.PricingModule.Data.Model;
 using VirtoCommerce.PricingModule.Data.Repositories;
 
@@ -21,18 +25,19 @@ namespace VirtoCommerce.PricingModule.Data.Services
     {
         private readonly Func<IPricingRepository> _repositoryFactory;
         private readonly IItemService _productService;
-        private readonly ILog _logger;
-        private readonly ICacheManager<object> _cacheManager;
+        private readonly ILogger<PricingServiceImpl> _logger;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
         private readonly IExpressionSerializer _expressionSerializer;
         private readonly IPricingExtensionManager _extensionManager;
 
-        public PricingServiceImpl(Func<IPricingRepository> repositoryFactory, IItemService productService, ILog logger, ICacheManager<object> cacheManager, IExpressionSerializer expressionSerializer,
-                                  IPricingExtensionManager extensionManager)
+        public PricingServiceImpl(Func<IPricingRepository> repositoryFactory, IItemService productService,
+            ILogger<PricingServiceImpl> logger, IPlatformMemoryCache platformMemoryCache, IExpressionSerializer expressionSerializer,
+            IPricingExtensionManager extensionManager)
         {
             _repositoryFactory = repositoryFactory;
             _productService = productService;
             _logger = logger;
-            _cacheManager = cacheManager;
+            _platformMemoryCache = platformMemoryCache;
             _expressionSerializer = expressionSerializer;
             _extensionManager = extensionManager;
         }
@@ -45,8 +50,12 @@ namespace VirtoCommerce.PricingModule.Data.Services
         /// <returns></returns>
         public virtual async Task<IEnumerable<Pricelist>> EvaluatePriceListsAsync(PriceEvaluationContext evalContext)
         {
-            Func<Task<PricelistAssignment[]>> assignemntsGetters = async () =>
+            // TODO: include something that identifies evalContext?
+            var cacheKey = CacheKey.With(GetType(), nameof(EvaluatePriceListsAsync));
+            var priceListAssignments = await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
             {
+                cacheEntry.AddExpirationToken(PricingCacheRegion.CreateChangeToken());
+
                 using (var repository = _repositoryFactory())
                 {
                     // TODO: replace Include with separate query
@@ -60,21 +69,14 @@ namespace VirtoCommerce.PricingModule.Data.Services
                         }
                         catch (Exception ex)
                         {
-                            _logger.Error(ex);
+                            _logger.LogError(ex, "Failed to deserialize an expression.");
                         }
                     }
                     return allAssignments;
                 };
-            };
-            IQueryable<PricelistAssignment> query = null;
-            if (_cacheManager != null)
-            {
-                query = _cacheManager.Get("PricingServiceImpl.EvaluatePriceLists", "PricingModuleRegion", assignemntsGetters).AsQueryable();
-            }
-            else
-            {
-                query = assignemntsGetters().AsQueryable();
-            }
+            });
+
+            var query = priceListAssignments.AsQueryable();
 
             if (evalContext.CatalogId != null)
             {
@@ -110,7 +112,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(ex);
+                    _logger.LogError(ex, "Failed to evaluate price assignment condition.");
                 }
             }
 
@@ -199,7 +201,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
                 //Need find products without price it may be a variation without implicitly price defined and try to get price from main product
                 if (productIdsWithoutPrice.Any())
                 {
-                    var variations = _productService.GetByIds(productIdsWithoutPrice, ItemResponseGroup.ItemInfo).Where(x => x.MainProductId != null).ToList();
+                    var variations = _productService.GetByIds(productIdsWithoutPrice, ItemResponseGroup.ItemInfo.ToString()).Where(x => x.MainProductId != null).ToList();
                     evalContext.ProductIds = variations.Select(x => x.MainProductId).Distinct().ToArray();
 
                     var inheritedPrices = await EvaluateProductPricesAsync(evalContext);
@@ -451,11 +453,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
         private void ResetCache()
         {
             //Clear cache (Smart cache implementation) 
-            _cacheManager.ClearRegion("PricingModuleRegion");
+            PricingCacheRegion.ExpireRegion();
         }
-
-
     }
-
-
 }

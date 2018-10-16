@@ -62,7 +62,7 @@ namespace VirtoCommerce.PricingModule.Data.Repositories
         protected virtual async Task ExecuteStoreCommand(string commandTemplate, IEnumerable<string> parameterValues)
         {
             var command = CreateCommand(commandTemplate, parameterValues);
-            await ObjectContext.ExecuteStoreCommand(command.Text, command.Parameters);
+            await DbContext.Database.ExecuteSqlCommandAsync(command.Text, command.Parameters);
         }
 
         protected virtual Command CreateCommand(string commandTemplate, IEnumerable<string> parameterValues)

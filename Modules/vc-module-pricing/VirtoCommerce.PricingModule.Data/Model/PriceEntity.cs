@@ -13,7 +13,6 @@ namespace VirtoCommerce.PricingModule.Data.Model
 		public decimal List { get; set; }
 
 		[StringLength(128)]
-        [Index("ProductIdAndPricelistId", 1)]
         public string ProductId { get; set; }
 
 		[StringLength(1024)]
@@ -22,8 +21,8 @@ namespace VirtoCommerce.PricingModule.Data.Model
 		public decimal MinQuantity { get; set; }
 
         #region Navigation Properties
-        [Index("ProductIdAndPricelistId", 2)]
-        public string PricelistId { get; set; }
+
+	    public string PricelistId { get; set; }
 
 		public virtual PricelistEntity Pricelist { get; set; }
 

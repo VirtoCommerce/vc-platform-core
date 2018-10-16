@@ -4,18 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using VirtoCommerce.CatalogModule.Core.Model;
-using VirtoCommerce.Domain.Catalog.Model;
-using VirtoCommerce.Domain.Catalog.Services;
-using VirtoCommerce.Domain.Pricing.Model.Search;
-using VirtoCommerce.Domain.Pricing.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Serialization;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
 using VirtoCommerce.PricingModule.Core.Services;
 using VirtoCommerce.PricingModule.Data.Repositories;
-using coreModel = VirtoCommerce.Domain.Pricing.Model;
-using dataModel = VirtoCommerce.PricingModule.Data.Model;
 
 namespace VirtoCommerce.PricingModule.Data.Services
 {
@@ -68,7 +62,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
                     query = query.Where(x => x.ModifiedDate >= criteria.ModifiedSince);
                 }
 
-                var sortInfos = criteria.SortInfos;
+                var sortInfos = criteria.SortInfos.ToArray();
                 if (sortInfos.IsNullOrEmpty())
                 {
                     sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Price>(x => x.List) } };

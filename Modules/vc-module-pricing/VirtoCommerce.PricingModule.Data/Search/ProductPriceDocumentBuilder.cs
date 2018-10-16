@@ -18,16 +18,16 @@ namespace VirtoCommerce.PricingModule.Data.Search
             _pricingService = pricingService;
         }
 
-        public virtual Task<IList<IndexDocument>> GetDocumentsAsync(IList<string> documentIds)
+        public virtual async Task<IList<IndexDocument>> GetDocumentsAsync(IList<string> documentIds)
         {
-            var prices = GetProductPrices(documentIds);
+            var prices = await GetProductPrices(documentIds);
 
             IList<IndexDocument> result = prices
                 .GroupBy(p => p.ProductId)
                 .Select(g => CreateDocument(g.Key, g.ToArray()))
                 .ToArray();
 
-            return Task.FromResult(result);
+            return result;
         }
 
 
@@ -52,12 +52,12 @@ namespace VirtoCommerce.PricingModule.Data.Search
             return document;
         }
 
-        protected virtual IList<Price> GetProductPrices(IList<string> productIds)
+        protected virtual async Task<IList<Price>> GetProductPrices(IList<string> productIds)
         {
             var evalContext = AbstractTypeFactory<PriceEvaluationContext>.TryCreateInstance();
             evalContext.ProductIds = productIds.ToArray();
 
-            return _pricingService.EvaluateProductPrices(evalContext).ToList();
+            return (await _pricingService.EvaluateProductPricesAsync(evalContext)).ToList();
         }
     }
 }

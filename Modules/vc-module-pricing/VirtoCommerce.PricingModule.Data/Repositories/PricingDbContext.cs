@@ -16,6 +16,7 @@ namespace VirtoCommerce.PricingModule.Data.Repositories
             modelBuilder.Entity<PriceEntity>().ToTable("Price").HasKey(x => x.Id);
             modelBuilder.Entity<PriceEntity>().Property(x => x.Id);
             modelBuilder.Entity<PriceEntity>().HasOne(x => x.Pricelist).WithMany(x => x.Prices).IsRequired().HasForeignKey(x => x.PricelistId);
+            modelBuilder.Entity<PriceEntity>().HasIndex(x => new { x.ProductId, x.PricelistId }).HasName("ProductIdAndPricelistId");
             modelBuilder.Entity<PriceEntity>();
 
             modelBuilder.Entity<PricelistEntity>().ToTable("Pricelist").HasKey(x => x.Id);
