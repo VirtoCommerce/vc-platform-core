@@ -13,10 +13,10 @@ using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SitemapsModule.Core.ModuleConstants;
 using VirtoCommerce.SitemapsModule.Core.Services;
+using VirtoCommerce.SitemapsModule.Data.ExportImport;
 using VirtoCommerce.SitemapsModule.Data.Repositories;
 using VirtoCommerce.SitemapsModule.Data.Services;
 using VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders;
-using VirtoCommerce.SitemapsModule.Web.ExportImport;
 using VirtoCommerce.Tools;
 
 namespace VirtoCommerce.SitemapsModule.Web

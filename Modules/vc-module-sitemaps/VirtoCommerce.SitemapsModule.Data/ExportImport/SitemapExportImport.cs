@@ -8,7 +8,7 @@ using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.SitemapsModule.Core.Models;
 using VirtoCommerce.SitemapsModule.Core.Services;
 
-namespace VirtoCommerce.SitemapsModule.Web.ExportImport
+namespace VirtoCommerce.SitemapsModule.Data.ExportImport
 {
     public sealed class BackupObject
     {
