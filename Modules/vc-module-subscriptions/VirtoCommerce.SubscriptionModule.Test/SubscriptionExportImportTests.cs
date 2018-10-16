@@ -142,7 +142,7 @@ namespace VirtoCommerce.SubscriptionModule.Test
         {
         }
 
-        private static Stream ReadEmbeddedResourceAsync(string filePath)
+        private static Stream ReadEmbeddedResource(string filePath)
         {
             var currentAssembly = typeof(SubscriptionExportImportTests).Assembly;
             var resourcePath = $"{currentAssembly.GetName().Name}.{filePath}";
@@ -207,7 +207,7 @@ namespace VirtoCommerce.SubscriptionModule.Test
                 .ReturnsAsync(secondPaymentPlanResult);
 
             string expectedJson;
-            using (var resourceStream = ReadEmbeddedResourceAsync("Resources.SerializedSubscriptionData.json"))
+            using (var resourceStream = ReadEmbeddedResource("Resources.SerializedSubscriptionData.json"))
             using (var textReader = new StreamReader(resourceStream))
             {
                 expectedJson = await textReader.ReadToEndAsync();
@@ -252,7 +252,7 @@ namespace VirtoCommerce.SubscriptionModule.Test
                 .Returns(Task.CompletedTask);
 
             // Act
-            using (var resourceStream = ReadEmbeddedResourceAsync("Resources.SerializedSubscriptionData.json"))
+            using (var resourceStream = ReadEmbeddedResource("Resources.SerializedSubscriptionData.json"))
             {
                 await _subscriptionExportImport.DoImportAsync(resourceStream, IgnoreProgressInfo, _cancellationToken.Object);
             }
