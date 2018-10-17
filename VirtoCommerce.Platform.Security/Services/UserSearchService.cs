@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
@@ -31,12 +31,17 @@ namespace VirtoCommerce.Platform.Security.Services
             var query = _userManager.Users;
             if (criteria.Keyword != null)
             {
-                query = query.Where(r => r.UserName.Contains(criteria.Keyword));
+                query = query.Where(x => x.UserName.Contains(criteria.Keyword));
             }
 
-            if(!string.IsNullOrEmpty(criteria.MemberId))
+            if (!string.IsNullOrEmpty(criteria.MemberId))
             {
-                query = query.Where(r => r.MemberId == criteria.MemberId);
+                query = query.Where(x => x.MemberId == criteria.MemberId);
+            }
+
+            if (!criteria.MemberIds.IsNullOrEmpty())
+            {
+                query = query.Where(x => criteria.MemberIds.Contains(x.MemberId));
             }
             result.TotalCount = await query.CountAsync();
 
