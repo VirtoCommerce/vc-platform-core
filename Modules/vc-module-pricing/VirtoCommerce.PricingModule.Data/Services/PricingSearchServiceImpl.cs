@@ -16,13 +16,14 @@ namespace VirtoCommerce.PricingModule.Data.Services
     public class PricingSearchServiceImpl : IPricingSearchService
     {
         private readonly Func<IPricingRepository> _repositoryFactory;
-        private readonly ICatalogSearchService _catalogSearchService;
+        //private readonly ICatalogSearchService _catalogSearchService;
         private readonly IPricingService _pricingService;
         private readonly Dictionary<string, string> _pricesSortingAliases = new Dictionary<string, string>();
-        public PricingSearchServiceImpl(Func<IPricingRepository> repositoryFactory, ICatalogSearchService catalogSearchService, IPricingService pricingService)
+
+        public PricingSearchServiceImpl(Func<IPricingRepository> repositoryFactory, IPricingService pricingService)
         {
             _repositoryFactory = repositoryFactory;
-            _catalogSearchService = catalogSearchService;
+            //_catalogSearchService = catalogSearchService;
             _pricesSortingAliases["prices"] = ReflectionUtility.GetPropertyName<Price>(x => x.List);
             _pricingService = pricingService;
         }
@@ -30,67 +31,71 @@ namespace VirtoCommerce.PricingModule.Data.Services
 
         #region IPricingSearchService Members
 
-        public virtual async Task<PricingSearchResult<Price>> SearchPricesAsync(PricesSearchCriteria criteria)
+        public virtual Task<PricingSearchResult<Price>> SearchPricesAsync(PricesSearchCriteria criteria)
         {
-            var retVal = new PricingSearchResult<Price>();
-            ICollection<CatalogProduct> products = new List<CatalogProduct>();
-            using (var repository = _repositoryFactory())
-            {
-                var query = repository.Prices;
+            return Task.FromResult(new PricingSearchResult<Price>());
 
-                if (!criteria.PriceListIds.IsNullOrEmpty())
-                {
-                    query = query.Where(x => criteria.PriceListIds.Contains(x.PricelistId));
-                }
+            // TODO: uncomment the following implementation when the ICatalogSearchService will become available in CatalogModule
 
-                if (!criteria.ProductIds.IsNullOrEmpty())
-                {
-                    query = query.Where(x => criteria.ProductIds.Contains(x.ProductId));
-                }
+            //var retVal = new PricingSearchResult<Price>();
+            //ICollection<CatalogProduct> products = new List<CatalogProduct>();
+            //using (var repository = _repositoryFactory())
+            //{
+            //    var query = repository.Prices;
 
-                if (!string.IsNullOrEmpty(criteria.Keyword))
-                {
-                    var catalogSearchResult = _catalogSearchService.Search(new Domain.Catalog.Model.SearchCriteria { Keyword = criteria.Keyword, Skip = criteria.Skip, Take = criteria.Take, Sort = criteria.Sort.Replace("product.", string.Empty), ResponseGroup = Domain.Catalog.Model.SearchResponseGroup.WithProducts });
-                    var productIds = catalogSearchResult.Products.Select(x => x.Id).ToArray();
-                    query = query.Where(x => productIds.Contains(x.ProductId));
-                    //preserve resulting products for future assignment to prices
-                    products = catalogSearchResult.Products;
-                }
+            //    if (!criteria.PriceListIds.IsNullOrEmpty())
+            //    {
+            //        query = query.Where(x => criteria.PriceListIds.Contains(x.PricelistId));
+            //    }
 
-                if (criteria.ModifiedSince.HasValue)
-                {
-                    query = query.Where(x => x.ModifiedDate >= criteria.ModifiedSince);
-                }
+            //    if (!criteria.ProductIds.IsNullOrEmpty())
+            //    {
+            //        query = query.Where(x => criteria.ProductIds.Contains(x.ProductId));
+            //    }
 
-                var sortInfos = criteria.SortInfos.ToArray();
-                if (sortInfos.IsNullOrEmpty())
-                {
-                    sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Price>(x => x.List) } };
-                }
-                //Try to replace sorting columns names
-                TryTransformSortingInfoColumnNames(_pricesSortingAliases, sortInfos);
+            //    if (!string.IsNullOrEmpty(criteria.Keyword))
+            //    {
+            //        var catalogSearchResult = _catalogSearchService.Search(new Domain.Catalog.Model.SearchCriteria { Keyword = criteria.Keyword, Skip = criteria.Skip, Take = criteria.Take, Sort = criteria.Sort.Replace("product.", string.Empty), ResponseGroup = Domain.Catalog.Model.SearchResponseGroup.WithProducts });
+            //        var productIds = catalogSearchResult.Products.Select(x => x.Id).ToArray();
+            //        query = query.Where(x => productIds.Contains(x.ProductId));
+            //        //preserve resulting products for future assignment to prices
+            //        products = catalogSearchResult.Products;
+            //    }
+
+            //    if (criteria.ModifiedSince.HasValue)
+            //    {
+            //        query = query.Where(x => x.ModifiedDate >= criteria.ModifiedSince);
+            //    }
+
+            //    var sortInfos = criteria.SortInfos.ToArray();
+            //    if (sortInfos.IsNullOrEmpty())
+            //    {
+            //        sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Price>(x => x.List) } };
+            //    }
+            //    //Try to replace sorting columns names
+            //    TryTransformSortingInfoColumnNames(_pricesSortingAliases, sortInfos);
 
 
-                query = query.OrderBySortInfos(sortInfos);
+            //    query = query.OrderBySortInfos(sortInfos);
 
-                if (criteria.GroupByProducts)
-                {
-                    var groupedQuery = query.GroupBy(x => x.ProductId).OrderBy(x => 1);
-                    retVal.TotalCount = groupedQuery.Count();
-                    query = groupedQuery.Skip(criteria.Skip).Take(criteria.Take).SelectMany(x => x);
-                }
-                else
-                {
-                    retVal.TotalCount = query.Count();
-                    query = query.Skip(criteria.Skip).Take(criteria.Take);
-                }
+            //    if (criteria.GroupByProducts)
+            //    {
+            //        var groupedQuery = query.GroupBy(x => x.ProductId).OrderBy(x => 1);
+            //        retVal.TotalCount = groupedQuery.Count();
+            //        query = groupedQuery.Skip(criteria.Skip).Take(criteria.Take).SelectMany(x => x);
+            //    }
+            //    else
+            //    {
+            //        retVal.TotalCount = query.Count();
+            //        query = query.Skip(criteria.Skip).Take(criteria.Take);
+            //    }
 
-                var pricesIds = query.Select(x => x.Id).ToList();
-                retVal.Results = (await _pricingService.GetPricesByIdAsync(pricesIds.ToArray()))
-                                            .OrderBy(x => pricesIds.IndexOf(x.Id))
-                                            .ToList();
-            }
-            return retVal;
+            //    var pricesIds = query.Select(x => x.Id).ToList();
+            //    retVal.Results = (await _pricingService.GetPricesByIdAsync(pricesIds.ToArray()))
+            //                                .OrderBy(x => pricesIds.IndexOf(x.Id))
+            //                                .ToList();
+            //}
+            //return retVal;
         }
 
         public virtual async Task<PricingSearchResult<Pricelist>> SearchPricelistsAsync(PricelistSearchCriteria criteria)

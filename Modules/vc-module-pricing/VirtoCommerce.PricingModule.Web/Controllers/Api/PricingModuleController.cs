@@ -160,7 +160,8 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
                 var product = products.FirstOrDefault(x => x.Id == productPricesGroup.Key);
                 if (product != null)
                 {
-                    productPrice.Product = product.ToWebModel(_blobUrlResolver);
+                    // TODO: uncomment this line when Product will become available in VirtoCommerce.CatalogModule.Web.Model
+                    //productPrice.Product = product.ToWebModel(_blobUrlResolver);
                 }
                 retVal.Results.Add(productPrice);
             }
