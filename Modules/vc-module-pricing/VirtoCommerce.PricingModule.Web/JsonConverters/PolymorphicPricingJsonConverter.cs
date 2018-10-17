@@ -26,7 +26,7 @@ namespace VirtoCommerce.PricingModule.Web.JsonConverters
         {
             var obj = JObject.Load(reader);
 
-            var tryCreateInstance = typeof(AbstractTypeFactory<>).MakeGenericType(objectType).GetMethods().First(x => x.Name.EqualsInvariant("TryCreateInstance") && x.GetParameters().Any());
+            var tryCreateInstance = typeof(AbstractTypeFactory<>).MakeGenericType(objectType).GetMethods().First(x => x.Name.EqualsInvariant("TryCreateInstance") && !x.GetParameters().Any());
             var retVal = tryCreateInstance.Invoke(null, null);
 
             serializer.Populate(obj.CreateReader(), retVal);
