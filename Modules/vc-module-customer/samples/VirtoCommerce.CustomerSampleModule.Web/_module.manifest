@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<module>
+    <id>VirtoCommerce.CustomerSample</id>
+    <version>3.0.0</version>
+    <platformVersion>3.0.0</platformVersion>
+    <dependencies>
+        <dependency id="VirtoCommerce.Core" version="3.0.0" />
+        <dependency id="VirtoCommerce.Search" version="3.0.0" />
+        <dependency id="VirtoCommerce.Customer" version="3.0.0" />
+    </dependencies>
+
+    <title>Member extension sample module</title>
+    <description>Demo</description>
+    <authors>
+        <author>Virto Commerce</author>
+    </authors>
+    <owners>
+        <owner>Virto Commerce</owner>
+    </owners>
+    <projectUrl>https://virtocommerce.com/apps/extensions/virto-customer-module</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/VirtoCommerce/vc-module-customer/master/VirtoCommerce.CustomerModule.Web/Content/logo.png</iconUrl>
+    <releaseNotes>First version.</releaseNotes>
+    <copyright>Copyright © 2011-2018 Virto Commerce. All rights reserved</copyright>
+    <tags>customer</tags>
+
+    <assemblyFile>VirtoCommerce.CustomerSampleModule.Web.dll</assemblyFile>
+    <moduleType>VirtoCommerce.CustomerSampleModule.Web.Module, VirtoCommerce.CustomerSampleModule.Web</moduleType>
+
+    <scripts>
+        <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
+    </scripts>
+</module>

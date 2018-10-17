@@ -1,0 +1,199 @@
+﻿{
+    "customer": {
+        "main-menu-title": "Контакты",
+        "blades": {
+            "contact-detail": {
+                "title-new": "Новый Покупатель",
+                "subtitle": "Информация о Покупателе",
+                "labels": {
+                    "first-name": "Имя",
+                    "middle-name": "Второе имя",
+                    "last-name": "Фамилия",
+                    "groups": "Пользовательские группы",
+                    "full-name": "Полное имя",
+                    "birthday": "День рождения",
+                    "salutation": "Приветствие",
+                    "defaultLanguage": "Язык по умолчанию",
+                    "organizations": "Организация(ии)",
+                    "taxpayerId": "Идентификатор налогоплательщика",
+                    "preferred-communication": "Предпочтительный тип коммуникации",
+                    "preferred-delivery": "Предпочтительный способ доставки",
+                    "timezone": "Часовой пояс"
+                },
+                "placeholders": {
+                    "groups": "Выбрать пользовательские группы",
+                    "first-name": "Введите значение",
+                    "middle-name": "Введите значение",
+                    "last-name": "Введите значение",
+                    "full-name": "Введите значение",
+                    "birthday": "Введите значение",
+                    "salutation": "Введите значение",
+                    "defaultLanguage": "Введите значение",
+                    "preferred-communication": "Введите значение",
+                    "preferred-delivery": "Введите значение",
+                    "taxpayerId": "Введите значение",
+                    "organizations": "Выбрать организацию",
+                    "timezone": "Выбрать"
+                }
+            },
+            "employee-detail": {
+                "title-new": "Новый Сотрудник",
+                "subtitle": "Информация о Сотруднике",
+                "labels": {
+                    "is-active": "Активен",
+                    "first-name": "Имя",
+                    "middle-name": "Второе имя",
+                    "last-name": "Фамилия",
+                    "full-name": "Полное имя",
+                    "type": "Тип занятости",
+                    "birthday": "День рождения",
+                    "photo-url": "URL-адрес фотографии",
+                    "defaultLanguage": "Язык по умолчанию",
+                    "organizations": "Организация(ии)",
+                    "timezone": "Часовой пояс"
+                },
+                "placeholders": {
+                    "first-name": "Введите значение",
+                    "middle-name": "Введите значение",
+                    "last-name": "Введите значение",
+                    "full-name": "Введите значение",
+                    "type": "Введите значение",
+                    "birthday": "Введите значение",
+                    "photo-url": "Введите URL",
+                    "defaultLanguage": "Введите значение",
+                    "organizations": "Выбрать организацию",
+                    "timezone": "Выбрать"
+                }
+            },
+            "pick-store-list": {
+                "title": "Новый Аккаунт",
+                "subtitle": "Выбрать магазин для нового Аккаунта",
+                "labels": {
+                    "name": "Название магазина"
+                }
+            },
+            "organization-detail": {
+                "title-new": "Новая Организация",
+                "subtitle": "Информация об Организации",
+                "labels": {
+                    "name": "Название",
+                    "description": "Описание",
+                    "business-category": "Бизнес-категория"
+                },
+                "placeholders": {
+                    "name": "Введите название",
+                    "description": "Введите описание"
+                }
+            },
+            "vendor-detail": {
+                "title-new": "Новый Продавец",
+                "subtitle": "Информация о Продавце",
+                "labels": {
+                    "name": "Название",
+                    "site-url": "URL-адрес сайта",
+                    "logo-url": "URL-адрес логотипа",
+                    "group-name": "Название группы",
+                    "description": "Описание"
+                },
+                "placeholders": {
+                    "name": "Введите название",
+                    "site-url": "Введите URL",
+                    "logo-url": "Введите URL",
+                    "group-name": "Введите значение",
+                    "description": "Введите описание"
+                }
+            },
+            "member-add": {
+                "title": "Новый контакт",
+                "subtitle": "Выбрать тип контакта",
+                "organization": {
+                    "description": "Хранилище для других Организаций и Покупателей."
+                },
+                "employee": {
+                    "description": "Сотрудник Организации."
+                },
+                "contact": {
+                    "description": "Покупатель магазина. Может действовать от Организации или представлять индивидуального покупателя."
+                },
+                "vendor": {
+                    "description": "Продавец магазина."
+                }
+            },
+            "member-emails-list": {
+                "labels": {
+                    "no-emails": "Нет почтовых адресов",
+                    "name": "Имя",
+                    "address": "Адрес",
+                    "Email": "Почтовый адрес"
+                },
+                "placeholders": {
+                    "email": "Введите значение"
+                }
+            },
+            "member-list": {
+                "title": "Организации & Контакты",
+                "subtitle": "Загрузка '{{name}}'",
+                "labels": {
+                    "type": "Тип",
+                    "name": "Имя",
+                    "address": "Адрес",
+                    "email": "Почтовый адрес"
+                }
+            },
+            "member-phones-list": {
+                "labels": {
+                    "no-phones": "Нет телефонных номеров"
+                },
+                "placeholders": {
+                    "phone": "Введите номер телефона"
+                }
+            },
+            "customer-accounts-list": {
+                "commands": {
+                    "link": "Ссылка на аккаунт",
+                    "unlink": "Удалить ссылку на аккаунт"
+                }
+            }
+        },
+        "widgets": {
+            "address-list": {
+                "title": "Адреса",
+                "blade-subtitle": "Управление адресами"
+            },
+            "member-emails-list": {
+                "title": "Почтовые адреса",
+                "blade-subtitle": "Управление почтовыми адресами"
+            },
+            "member-phones-list": {
+                "title": "Телефонные номера",
+                "blade-subtitle": "Управление телефонными номерами"
+            },
+            "customer-accounts-list": {
+                "title": "Аккаунты",
+                "blade-subtitle": "Управление аккаунтами покупателей"
+            }
+        },
+        "dialogs": {
+            "members-delete": {
+                "title": "Подтверждение удаления",
+                "message": "Вы уверены, что хотите удалить выбранные Организации или Контакты?"
+            },
+            "unknown-member-type": {
+                "title": "Ошибка",
+                "message": "Редактирование неизвестного типа участника '{{memberType}}' невозможно."
+            },
+            "member-save": {
+                "title": "Сохранение изменений",
+                "message": "Контакт был изменен. Вы хотите сохранить изменения?"
+            },
+            "email-save": {
+                "title": "Сохранение изменений",
+                "message": "Почтовый адрес был изменен. Вы хотите сохранить изменения?"
+            },
+            "phone-number-save": {
+                "title": "Сохранение изменений",
+                "message": "Номер телефона был изменен. Вы хотите сохранить изменения?"
+            }
+        }
+    }
+}

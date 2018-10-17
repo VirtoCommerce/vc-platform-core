@@ -17,11 +17,13 @@ namespace VirtoCommerce.StoreModule.Data.Services
     {
         private readonly Func<IStoreRepository> _repositoryFactory;
         private readonly IPlatformMemoryCache _platformMemoryCache;
+        private readonly IStoreService _storeService;
 
-        public StoreSearchService(Func<IStoreRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache)
+        public StoreSearchService(Func<IStoreRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache, IStoreService storeService)
         {
             _repositoryFactory = repositoryFactory;
             _platformMemoryCache = platformMemoryCache;
+            _storeService = storeService;
         }
 
         public async Task<GenericSearchResult<Store>> SearchStoresAsync(StoreSearchCriteria criteria)
@@ -57,8 +59,11 @@ namespace VirtoCommerce.StoreModule.Data.Services
                     query = query.OrderBySortInfos(sortInfos);
 
                     result.TotalCount = await query.CountAsync();
-                    var list = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                    result.Results = list.Select(x => x.ToModel(AbstractTypeFactory<Store>.TryCreateInstance())).ToList();
+                    if (criteria.Take > 0)
+                    {
+                        var storeIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                        result.Results = (await _storeService.GetByIdsAsync(storeIds)).AsQueryable().OrderBySortInfos(sortInfos).ToList();
+                    }
                 }
                 return result;
             });

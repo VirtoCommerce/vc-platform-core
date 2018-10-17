@@ -19,7 +19,9 @@ namespace VirtoCommerce.Platform.Security.Extensions
             services.AddScoped<IUserNameResolver, HttpContextUserResolver>();
             services.AddSingleton<IPermissionsRegistrar, DefaultPermissionProvider>();
             services.AddScoped<IRoleSearchService, RoleSearchService>();
-            services.AddScoped<IUserSearchService, UserSearchService>();
+            //Register as singleton because this abstraction can be used as dependency in singleton services
+            services.AddSingleton<IUserSearchService>(provider => new UserSearchService(provider.CreateScope().ServiceProvider.GetService<UserManager<ApplicationUser>>()));
+
             //Identity dependencies override
             services.TryAddScoped<RoleManager<Role>, CustomRoleManager>();
             services.TryAddScoped<UserManager<ApplicationUser>, CustomUserManager>();
@@ -33,7 +35,7 @@ namespace VirtoCommerce.Platform.Security.Extensions
 
             var providerSnapshot = services.BuildServiceProvider();
             var inProcessBus = providerSnapshot.GetService<IHandlerRegistrar>();
-            inProcessBus.RegisterHandler<UserChangedEvent>(async (message, token) => await providerSnapshot.GetService<LogChangesUserChangedEventHandler> ().Handle(message));
+            inProcessBus.RegisterHandler<UserChangedEvent>(async (message, token) => await providerSnapshot.GetService<LogChangesUserChangedEventHandler>().Handle(message));
             inProcessBus.RegisterHandler<UserPasswordChangedEvent>(async (message, token) => await providerSnapshot.GetService<LogChangesUserChangedEventHandler>().Handle(message));
             inProcessBus.RegisterHandler<UserResetPasswordEvent>(async (message, token) => await providerSnapshot.GetService<LogChangesUserChangedEventHandler>().Handle(message));
             inProcessBus.RegisterHandler<UserLoginEvent>(async (message, token) => await providerSnapshot.GetService<LogChangesUserChangedEventHandler>().Handle(message));
