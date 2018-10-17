@@ -100,7 +100,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// </summary>
         /// <remarks>Get all pricelists for all catalogs.</remarks>
         [HttpGet]
-        [ProducesResponseType(typeof(PricingSearchResult<Pricelist>), 200)]
+        [ProducesResponseType(typeof(GenericSearchResult<Pricelist>), 200)]
         [Route("api/pricing/pricelists")]
         public async Task<IActionResult> SearchPricelists(PricelistSearchCriteria criteria)
         {
@@ -117,7 +117,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// </summary>
         /// <remarks>Search price list assignments by given criteria</remarks>
         [HttpGet]
-        [ProducesResponseType(typeof(PricingSearchResult<PricelistAssignment>), 200)]
+        [ProducesResponseType(typeof(GenericSearchResult<PricelistAssignment>), 200)]
         [Route("api/pricing/assignments")]
         public async Task<IActionResult> SearchPricelistAssignments(PricelistAssignmentsSearchCriteria criteria)
         {
@@ -134,7 +134,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// </summary>
         /// <remarks>Search product prices</remarks>
         [HttpGet]
-        [ProducesResponseType(typeof(PricingSearchResult<webModel.ProductPrice>), 200)]
+        [ProducesResponseType(typeof(GenericSearchResult<webModel.ProductPrice>), 200)]
         [Route("api/catalog/products/prices/search")]
         public async Task<IActionResult> SearchProductPrices(PricesSearchCriteria criteria)
         {
@@ -143,7 +143,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
                 criteria = new PricesSearchCriteria();
             }
             var result = await _pricingSearchService.SearchPricesAsync(criteria);
-            var retVal = new PricingSearchResult<webModel.ProductPrice>
+            var retVal = new GenericSearchResult<webModel.ProductPrice>
             {
                 TotalCount = result.TotalCount,
                 Results = new List<webModel.ProductPrice>()

@@ -31,9 +31,10 @@ namespace VirtoCommerce.PricingModule.Data.Services
 
         #region IPricingSearchService Members
 
-        public virtual Task<PricingSearchResult<Price>> SearchPricesAsync(PricesSearchCriteria criteria)
+        public virtual Task<GenericSearchResult<Price>> SearchPricesAsync(PricesSearchCriteria criteria)
         {
-            return Task.FromResult(new PricingSearchResult<Price>());
+            var result = new GenericSearchResult<Price>();
+            return Task.FromResult(result);
 
             // TODO: uncomment the following implementation when the ICatalogSearchService will become available in CatalogModule
 
@@ -98,9 +99,9 @@ namespace VirtoCommerce.PricingModule.Data.Services
             //return retVal;
         }
 
-        public virtual async Task<PricingSearchResult<Pricelist>> SearchPricelistsAsync(PricelistSearchCriteria criteria)
+        public virtual async Task<GenericSearchResult<Pricelist>> SearchPricelistsAsync(PricelistSearchCriteria criteria)
         {
-            var retVal = new PricingSearchResult<Pricelist>();
+            var retVal = new GenericSearchResult<Pricelist>();
             using (var repository = _repositoryFactory())
             {
                 var query = repository.Pricelists;
@@ -129,9 +130,9 @@ namespace VirtoCommerce.PricingModule.Data.Services
 
 
 
-        public virtual async Task<PricingSearchResult<PricelistAssignment>> SearchPricelistAssignmentsAsync(PricelistAssignmentsSearchCriteria criteria)
+        public virtual async Task<GenericSearchResult<PricelistAssignment>> SearchPricelistAssignmentsAsync(PricelistAssignmentsSearchCriteria criteria)
         {
-            var retVal = new PricingSearchResult<PricelistAssignment>();
+            var retVal = new GenericSearchResult<PricelistAssignment>();
             using (var repository = _repositoryFactory())
             {
                 var query = repository.PricelistAssignments;
