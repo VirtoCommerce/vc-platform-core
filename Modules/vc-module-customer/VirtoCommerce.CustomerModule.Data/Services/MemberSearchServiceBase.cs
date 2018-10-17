@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -14,7 +12,6 @@ using VirtoCommerce.CustomerModule.Data.Model;
 using VirtoCommerce.CustomerModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CustomerModule.Data.Services
@@ -87,15 +84,17 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                     query = query.OrderBySortInfos(sortInfos);
 
                     result.TotalCount = await query.CountAsync();
-
-                    var members = await query.Skip(criteria.Skip).Take(criteria.Take).ToListAsync();
-                    result.Results = members.Select(m => m.ToModel(AbstractTypeFactory<Member>.TryCreateInstance(m.MemberType))).ToList();
-
+                    if (criteria.Take > 0)
+                    {
+                        var memberIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                        result.Results = (await _memberService.GetByIdsAsync(memberIds, criteria.ResponseGroup)).AsQueryable().OrderBySortInfos(sortInfos).ToList();
+                    }
                     return result;
                 }
             });
         }
         #endregion
+
 
         /// <summary>
         /// Used to define extra where clause for members search
