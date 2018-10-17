@@ -46,7 +46,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         [HttpPost]
         [ProducesResponseType(typeof(Price[]), 200)]
         [Route("api/pricing/evaluate")]
-        public async Task<IActionResult> EvaluatePrices(PriceEvaluationContext evalContext)
+        public async Task<IActionResult> EvaluatePrices([FromBody]PriceEvaluationContext evalContext)
         {
             var retVal = (await _pricingService.EvaluateProductPricesAsync(evalContext)).ToArray();
 
@@ -62,7 +62,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         [HttpPost]
         [ProducesResponseType(typeof(Pricelist[]), 200)]
         [Route("api/pricing/pricelists/evaluate")]
-        public async Task<IActionResult> EvaluatePriceLists(PriceEvaluationContext evalContext)
+        public async Task<IActionResult> EvaluatePriceLists([FromBody]PriceEvaluationContext evalContext)
         {
             var retVal = (await _pricingService.EvaluatePriceListsAsync(evalContext)).ToArray();
             return Ok(retVal);
@@ -216,7 +216,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         [ProducesResponseType(typeof(PricelistAssignment), 200)]
         [Route("api/pricing/assignments")]
         [Authorize(PricingPredefinedPermissions.Create)]
-        public async Task<IActionResult> CreatePricelistAssignment(PricelistAssignment assignment)
+        public async Task<IActionResult> CreatePricelistAssignment([FromBody]PricelistAssignment assignment)
         {
             await _pricingService.SavePricelistAssignmentsAsync(new[] { assignment });
             return Ok(assignment);
@@ -231,7 +231,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 204)]
         [Route("api/pricing/assignments")]
         [Authorize(PricingPredefinedPermissions.Update)]
-        public async Task<IActionResult> UpdatePriceListAssignment(PricelistAssignment assignment)
+        public async Task<IActionResult> UpdatePriceListAssignment([FromBody]PricelistAssignment assignment)
         {
             await _pricingService.SavePricelistAssignmentsAsync(new[] { assignment });
             return NoContent();
@@ -241,7 +241,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 204)]
         [Route("api/products/prices")]
         [Authorize(PricingPredefinedPermissions.Update)]
-        public async Task<IActionResult> UpdateProductsPrices(webModel.ProductPrice[] productPrices)
+        public async Task<IActionResult> UpdateProductsPrices([FromBody]webModel.ProductPrice[] productPrices)
         {
             var result = await _pricingSearchService.SearchPricesAsync(new PricesSearchCriteria
             {
@@ -290,7 +290,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 204)]
         [Route("api/products/{productId}/prices")]
         [Authorize(PricingPredefinedPermissions.Update)]
-        public async Task<IActionResult> UpdateProductPrices(webModel.ProductPrice productPrice)
+        public async Task<IActionResult> UpdateProductPrices([FromBody]webModel.ProductPrice productPrice)
         {
             return await UpdateProductsPrices(new[] { productPrice });
         }
@@ -335,7 +335,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         [ProducesResponseType(typeof(Pricelist), 200)]
         [Route("api/pricing/pricelists")]
         [Authorize(PricingPredefinedPermissions.Create)]
-        public async Task<IActionResult> CreatePriceList(Pricelist priceList)
+        public async Task<IActionResult> CreatePriceList([FromBody]Pricelist priceList)
         {
             await _pricingService.SavePricelistsAsync(new[] { priceList });
             return Ok(priceList);
@@ -348,7 +348,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 204)]
         [Route("api/pricing/pricelists")]
         [Authorize(PricingPredefinedPermissions.Update)]
-        public async Task<IActionResult> UpdatePriceList(Pricelist priceList)
+        public async Task<IActionResult> UpdatePriceList([FromBody]Pricelist priceList)
         {
             await _pricingService.SavePricelistsAsync(new[] { priceList });
             return NoContent();
