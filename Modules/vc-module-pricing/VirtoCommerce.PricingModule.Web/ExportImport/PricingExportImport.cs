@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.PricingModule.Core.Model;
@@ -57,8 +58,10 @@ namespace VirtoCommerce.PricingModule.Web.ExportImport
             }
         }
 
-        public async Task DoExportAsync(Stream backupStream, Action<ExportImportProgressInfo> progressCallback)
+        public async Task DoExportAsync(Stream backupStream, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var progressInfo = new ExportImportProgressInfo { Description = "loading data..." };
             progressCallback(progressInfo);
 
@@ -80,6 +83,8 @@ namespace VirtoCommerce.PricingModule.Web.ExportImport
 
                 for (var i = 0; i < totalCount; i += BatchSize)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     var searchResponse = await _pricingSearchService.SearchPricelistsAsync(new PricelistSearchCriteria { Skip = i, Take = BatchSize });
                     foreach (var priceList in searchResponse.Results)
                     {
@@ -103,6 +108,8 @@ namespace VirtoCommerce.PricingModule.Web.ExportImport
 
                 for (var i = 0; i < totalCount; i += BatchSize)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     var searchResponse = await _pricingSearchService.SearchPricelistAssignmentsAsync(new PricelistAssignmentsSearchCriteria { Skip = i, Take = BatchSize });
                     foreach (var assignment in searchResponse.Results)
                     {
@@ -128,6 +135,8 @@ namespace VirtoCommerce.PricingModule.Web.ExportImport
 
                 for (var i = 0; i < totalCount; i += BatchSize)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     var searchResponse = await _pricingSearchService.SearchPricesAsync(new PricesSearchCriteria { Skip = i, Take = BatchSize });
                     foreach (var price in searchResponse.Results)
                     {
@@ -146,8 +155,12 @@ namespace VirtoCommerce.PricingModule.Web.ExportImport
             }
         }
 
-        public async Task DoImportAsync(Stream stream, Action<ExportImportProgressInfo> progressCallback)
+        public async Task DoImportAsync(Stream stream, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // TODO: add cancellation checks during import
+
             var progressInfo = new ExportImportProgressInfo();
 
             using (var streamReader = new StreamReader(stream))

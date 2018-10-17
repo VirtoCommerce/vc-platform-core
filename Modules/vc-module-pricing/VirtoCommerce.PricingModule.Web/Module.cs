@@ -1,78 +1,90 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Http;
-using Microsoft.Practices.Unity;
-using VirtoCommerce.Domain.Pricing.Services;
-using VirtoCommerce.Domain.Search;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Infrastructure;
-using VirtoCommerce.Platform.Data.Infrastructure.Interceptors;
 using VirtoCommerce.Platform.Data.Repositories;
+using VirtoCommerce.PricingModule.Core.ModuleConstants;
+using VirtoCommerce.PricingModule.Core.Services;
 using VirtoCommerce.PricingModule.Data.Model;
 using VirtoCommerce.PricingModule.Data.Repositories;
 using VirtoCommerce.PricingModule.Data.Search;
 using VirtoCommerce.PricingModule.Data.Services;
 using VirtoCommerce.PricingModule.Web.ExportImport;
 using VirtoCommerce.PricingModule.Web.JsonConverters;
+using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Web
 {
-    public class Module : ModuleBase, ISupportExportImportModule
+    public class Module : IModule, IExportSupport, IImportSupport
     {
-        private readonly string _connectionString = ConfigurationHelper.GetConnectionStringValue("VirtoCommerce.Pricing") ?? ConfigurationHelper.GetConnectionStringValue("VirtoCommerce");
-        private readonly IUnityContainer _container; 
-
-        public Module(IUnityContainer container)
-        {
-            _container = container;
-        }
+        private IApplicationBuilder _applicationBuilder;
 
         #region IModule Members
 
-        public override void SetupDatabase()
+        public ManifestModuleInfo ModuleInfo { get; set; }
+
+        public void Initialize(IServiceCollection serviceCollection)
         {
-            using (var context = new PricingRepositoryImpl(_connectionString, _container.Resolve<AuditableInterceptor>()))
+            var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
+            var connectionString = configuration.GetConnectionString("VirtoCommerce.Pricing") ?? configuration.GetConnectionString("VirtoCommerce");
+            serviceCollection.AddDbContext<PricingDbContext>(options => options.UseSqlServer(connectionString));
+
+            serviceCollection.AddTransient<IPricingService, PricingServiceImpl>();
+            serviceCollection.AddTransient<IPricingSearchService, PricingSearchServiceImpl>();
+            serviceCollection.AddSingleton<IPricingExtensionManager, DefaultPricingExtensionManagerImpl>();
+            serviceCollection.AddSingleton<PricingExportImport>();
+            serviceCollection.AddSingleton<PolymorphicPricingJsonConverter>();
+        }
+
+        public void PostInitialize(IApplicationBuilder appBuilder)
+        {
+            _applicationBuilder = appBuilder;
+
+            var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
+            settingsRegistrar.RegisterSettings(ModuleSettings.AllSettings, ModuleInfo.Id);
+
+            var modulePermissions = ModulePermissions.AllPermissions.Select(p => new Permission
             {
-                var initializer = new SetupDatabaseInitializer<PricingRepositoryImpl, Data.Migrations.Configuration>();
-                initializer.InitializeDatabase(context);
+                Name = p,
+                GroupName = "Pricing",
+                ModuleId = ModuleInfo.Id
+            }).ToArray();
+            var permissionsRegistrar = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
+            permissionsRegistrar.RegisterPermissions(modulePermissions);
+
+            using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
+            {
+                var dbContext = serviceScope.ServiceProvider.GetRequiredService<PricingDbContext>();
+                dbContext.Database.EnsureCreated();
+                dbContext.Database.Migrate();
             }
-        }
-
-        public override void Initialize()
-        {
-            var extensionManager = new DefaultPricingExtensionManagerImpl();
-            _container.RegisterInstance<IPricingExtensionManager>(extensionManager);
-
-            _container.RegisterType<IPricingRepository>(new InjectionFactory(c => new PricingRepositoryImpl(_connectionString, new EntityPrimaryKeyGeneratorInterceptor(), _container.Resolve<AuditableInterceptor>()
-                , new ChangeLogInterceptor(_container.Resolve<Func<IPlatformRepository>>(), ChangeLogPolicy.Cumulative, new[] { nameof(PriceEntity) }))));
-
-            _container.RegisterType<IPricingService, PricingServiceImpl>();
-            _container.RegisterType<IPricingSearchService, PricingSearchServiceImpl>();
-        }
-
-        public override void PostInitialize()
-        {
-            base.PostInitialize();
 
             // Next lines allow to use polymorph types in API controller methods
-            var httpConfiguration = _container.Resolve<HttpConfiguration>();
-            var storeJsonConverter = _container.Resolve<PolymorphicPricingJsonConverter>();
-            httpConfiguration.Formatters.JsonFormatter.SerializerSettings.Converters.Add(storeJsonConverter);
-
-            #region Search
+            var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
+            mvcJsonOptions.Value.SerializerSettings.Converters.Add(appBuilder.ApplicationServices.GetService<PolymorphicPricingJsonConverter>());
 
             // Add price document source to the product indexing configuration
-            var productIndexingConfigurations = _container.Resolve<IndexDocumentConfiguration[]>();
+            var productIndexingConfigurations = appBuilder.ApplicationServices.GetRequiredService<IndexDocumentConfiguration[]>();
             if (productIndexingConfigurations != null)
             {
                 var productPriceDocumentSource = new IndexDocumentSource
                 {
-                    ChangesProvider = _container.Resolve<ProductPriceDocumentChangesProvider>(),
-                    DocumentBuilder = _container.Resolve<ProductPriceDocumentBuilder>(),
+                    ChangesProvider = appBuilder.ApplicationServices.GetRequiredService<ProductPriceDocumentChangesProvider>(),
+                    DocumentBuilder = appBuilder.ApplicationServices.GetRequiredService<ProductPriceDocumentBuilder>()
                 };
 
                 foreach (var configuration in productIndexingConfigurations.Where(c => c.DocumentType == KnownDocumentTypes.Product))
@@ -85,33 +97,28 @@ namespace VirtoCommerce.PricingModule.Web
                     configuration.RelatedSources.Add(productPriceDocumentSource);
                 }
             }
+        }
 
-            #endregion
+        public void Uninstall()
+        {
         }
 
         #endregion
 
         #region ISupportExportImportModule Members
 
-        public void DoExport(System.IO.Stream outStream, PlatformExportManifest manifest, Action<ExportImportProgressInfo> progressCallback)
+        public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
+            ICancellationToken cancellationToken)
         {
-            var exportJob = _container.Resolve<PricingExportImport>();
-            exportJob.DoExport(outStream, progressCallback);
+            var exportJob = _applicationBuilder.ApplicationServices.GetRequiredService<PricingExportImport>();
+            await exportJob.DoExportAsync(outStream, progressCallback, cancellationToken);
         }
 
-        public void DoImport(System.IO.Stream inputStream, PlatformExportManifest manifest, Action<ExportImportProgressInfo> progressCallback)
+        public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
+            ICancellationToken cancellationToken)
         {
-            var exportJob = _container.Resolve<PricingExportImport>();
-            exportJob.DoImport(inputStream, progressCallback);
-        }
-
-        public string ExportDescription
-        {
-            get
-            {
-                var settingManager = _container.Resolve<ISettingsManager>();
-                return settingManager.GetValue("Pricing.ExportImport.Description", string.Empty);
-            }
+            var importJob = _applicationBuilder.ApplicationServices.GetRequiredService<PricingExportImport>();
+            await importJob.DoImportAsync(inputStream, progressCallback, cancellationToken);
         }
 
         #endregion

@@ -1,6 +1,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Moq;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.PricingModule.Core.Model;
@@ -26,7 +27,8 @@ namespace VirtoCommerce.PricingModule.Test
 
             var importProcessor = GetImportExportProcessor(pricingService.Object, settingsManager.Object);
 
-            await importProcessor.DoImportAsync(data, GetProgressCallback);
+            var cancellationTokenMock = new Mock<ICancellationToken>();
+            await importProcessor.DoImportAsync(data, GetProgressCallback, cancellationTokenMock.Object);
 
             pricingService.Verify(p => p.SavePricesAsync(It.IsAny<Price[]>()), Times.Exactly(2));
             pricingService.Verify(p => p.SavePricelistsAsync(It.IsAny<Pricelist[]>()), Times.Exactly(1));
