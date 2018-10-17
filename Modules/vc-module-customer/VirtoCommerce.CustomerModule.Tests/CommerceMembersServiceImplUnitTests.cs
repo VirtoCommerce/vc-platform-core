@@ -15,6 +15,7 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
+using VirtoCommerce.Platform.Core.Security.Search;
 using Xunit;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
@@ -30,6 +31,7 @@ namespace VirtoCommerce.CustomerModule.Tests
         private readonly Mock<ISeoService> _seoSericeMock;
         private readonly Mock<IPlatformMemoryCache> _platformMemoryCacheMock;
         private readonly Mock<ICacheEntry> _сacheEntryMock;
+        private readonly Mock<IUserSearchService> _userSearchMock;
         private readonly CommerceMembersServiceImpl _commerceMembersServiceImpl;
 
         public CommerceMembersServiceImplUnitTests()
@@ -43,8 +45,9 @@ namespace VirtoCommerce.CustomerModule.Tests
             _repositoryFactory = () => _repositoryMock.Object;
             _platformMemoryCacheMock = new Mock<IPlatformMemoryCache>();
             _сacheEntryMock = new Mock<ICacheEntry>();
+            _userSearchMock = new Mock<IUserSearchService>();
             _сacheEntryMock.SetupGet(c => c.ExpirationTokens).Returns(new List<IChangeToken>());
-            _commerceMembersServiceImpl = new CommerceMembersServiceImpl(_repositoryFactory, _eventPublisherMock.Object, _dynamicPropertyServiceMock.Object, _seoSericeMock.Object, _platformMemoryCacheMock.Object);
+            _commerceMembersServiceImpl = new CommerceMembersServiceImpl(_repositoryFactory, _eventPublisherMock.Object, _dynamicPropertyServiceMock.Object, _seoSericeMock.Object, _platformMemoryCacheMock.Object, _userSearchMock.Object);
 
             AbstractTypeFactory<Member>.RegisterType<Organization>().MapToType<OrganizationEntity>();
             AbstractTypeFactory<Member>.RegisterType<Contact>().MapToType<ContactEntity>();
@@ -62,16 +65,16 @@ namespace VirtoCommerce.CustomerModule.Tests
         {
             //arrange
             var id = Guid.NewGuid().ToString();
-            var ids = new[] {id};
+            var ids = new[] { id };
 
             var member = AbstractTypeFactory<MemberEntity>.TryCreateInstance(nameof(EmployeeEntity));
             member.Id = id;
             member.Name = "TestEmployee";
             member.MemberType = nameof(Employee);
             var memberTypes = Enumerable.Empty<string>().ToArray();
-            _repositoryMock.Setup(r => r.GetMembersByIdsAsync(ids, null, memberTypes)).ReturnsAsync(new [] {member});
+            _repositoryMock.Setup(r => r.GetMembersByIdsAsync(ids, null, memberTypes)).ReturnsAsync(new[] { member });
             var cacheKey = CacheKey.With(_commerceMembersServiceImpl.GetType(), "GetByIdsAsync", string.Join("-", ids), null, string.Join("-", memberTypes));
-            
+
             _platformMemoryCacheMock.Setup(pmc => pmc.CreateEntry(cacheKey)).Returns(_сacheEntryMock.Object);
 
             //act
@@ -93,7 +96,7 @@ namespace VirtoCommerce.CustomerModule.Tests
             member.Id = id;
 
             //act
-            await _commerceMembersServiceImpl.SaveChangesAsync(new[] {member});
+            await _commerceMembersServiceImpl.SaveChangesAsync(new[] { member });
 
             //assert
         }

@@ -11,6 +11,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
         WithAddresses = 1 << 2,
         WithPhones = 1 << 3,
         WithGroups = 1 << 4,
-        Full = WithNotes | WithEmails | WithEmails | WithAddresses | WithPhones | WithGroups
+        WithSecurityAccounts = 1 << 5,
+        Full = WithNotes | WithEmails | WithEmails | WithAddresses | WithPhones | WithGroups | WithSecurityAccounts
     }
 }

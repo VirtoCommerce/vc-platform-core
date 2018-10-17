@@ -27,7 +27,7 @@ namespace VirtoCommerce.CustomerModule.Core.Model
         /// <summary>
         /// All security accounts associated with this contact
         /// </summary>
-        public ICollection<ApplicationUser> SecurityAccounts { get; } = new List<ApplicationUser>();
+        public ICollection<ApplicationUser> SecurityAccounts { get; set; } = new List<ApplicationUser>();
 
         #endregion
     }

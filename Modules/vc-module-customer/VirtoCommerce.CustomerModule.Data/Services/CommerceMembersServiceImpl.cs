@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using VirtoCommerce.CoreModule.Core.Seo;
@@ -11,6 +12,8 @@ using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
+using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Core.Security.Search;
 
 namespace VirtoCommerce.CustomerModule.Data.Services
 {
@@ -19,12 +22,12 @@ namespace VirtoCommerce.CustomerModule.Data.Services
     /// </summary>
     public class CommerceMembersServiceImpl : MemberServiceBase
     {
-        //private readonly ISecurityService _securityService;
+        private readonly IUserSearchService _userSearchService;
         public CommerceMembersServiceImpl(Func<ICustomerRepository> repositoryFactory, IEventPublisher eventPublisher
-            , IDynamicPropertyService dynamicPropertyService, ISeoService seoService, IPlatformMemoryCache platformMemoryCache)
+            , IDynamicPropertyService dynamicPropertyService, ISeoService seoService, IPlatformMemoryCache platformMemoryCache, IUserSearchService userSearchService)
             : base(repositoryFactory, eventPublisher, dynamicPropertyService, seoService, platformMemoryCache)
         {
-        //    _securityService = securityService;
+            _userSearchService = userSearchService;
         }
 
 
@@ -32,23 +35,26 @@ namespace VirtoCommerce.CustomerModule.Data.Services
 
         public override async Task<Member[]> GetByIdsAsync(string[] memberIds, string responseGroup = null, string[] memberTypes = null)
         {
-            var retVal = await base.GetByIdsAsync(memberIds, responseGroup, memberTypes);
-            //TODO
-            //Parallel.ForEach(retVal, new ParallelOptions { MaxDegreeOfParallelism = 10 }, member =>
-            //{
-            //    //Load security accounts for members which support them 
-            //    var hasSecurityAccounts = member as IHasSecurityAccounts;
-            //    if (hasSecurityAccounts != null)
-            //    {
-            //        //Load all security accounts associated with this contact
-            //        var result = Task.Run(() => _securityService.SearchUsersAsync(new UserSearchRequest { MemberId = member.Id, TakeCount = int.MaxValue })).Result;
-            //        hasSecurityAccounts.SecurityAccounts.AddRange(result.Users);
-            //    }
-            //});
-            return retVal;
+            var result = await base.GetByIdsAsync(memberIds, responseGroup, memberTypes);
+            var memberRespGroup = EnumUtility.SafeParse(responseGroup, MemberResponseGroup.Full);
+            //Load member security accounts by separate request
+            if (memberRespGroup.HasFlag(MemberResponseGroup.WithSecurityAccounts))
+            {
+                var hasSecurityAccountMembers = result.OfType<IHasSecurityAccounts>();
+                if (hasSecurityAccountMembers.Any())
+                {
+                    var usersSearchResult = await _userSearchService.SearchUsersAsync(new UserSearchCriteria { MemberIds = hasSecurityAccountMembers.Select(x => x.Id).ToList(), Take = int.MaxValue });
+                    foreach (var hasAccountMember in hasSecurityAccountMembers)
+                    {
+                        hasAccountMember.SecurityAccounts = usersSearchResult.Results.Where(x => x.MemberId.EqualsInvariant(hasAccountMember.Id)).ToList();
+                    }
+                }
+            }
+
+            return result;
         }
         #endregion
 
-        
+
     }
 }

@@ -36,7 +36,7 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
 
             var result = new List<MemberEntity>();
             //TODO It doesn't work. Maybe these performance changes don't needed anymore.
-            // Because EF used TPH inheritance mode and there all will be fast.
+            // Because EF Core uses TPH inheritance mode and now all these queries should be fast.
             //if (!memberTypes.IsNullOrEmpty())
             //{
             //    foreach (var memberType in memberTypes)
