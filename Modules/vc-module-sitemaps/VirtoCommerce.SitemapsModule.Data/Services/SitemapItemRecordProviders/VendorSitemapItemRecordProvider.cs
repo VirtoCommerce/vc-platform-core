@@ -37,7 +37,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
             var vendorIds = vendorSitemapItems.Select(x => x.ObjectId).ToArray();
             var members = await MemberService.GetByIdsAsync(vendorIds);
 
-            var totalCount = members.Count();
+            var totalCount = members.Length;
             var processedCount = 0;
             progressInfo.Description = $"Vendor: start generating {totalCount} records for vendors";
             progressCallback?.Invoke(progressInfo);
