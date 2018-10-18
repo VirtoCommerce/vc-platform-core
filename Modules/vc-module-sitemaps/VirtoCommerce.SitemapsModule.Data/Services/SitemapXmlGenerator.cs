@@ -156,7 +156,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                 //Log exceptions to prevent fail whole sitemap.xml generation
                 try
                 {
-                    recordProvider.LoadSitemapItemRecords(store, sitemap, baseUrl, progressCallback);
+                    await recordProvider.LoadSitemapItemRecordsAsync(store, sitemap, baseUrl, progressCallback);
                 }
                 catch (Exception ex)
                 {
