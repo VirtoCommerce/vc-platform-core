@@ -18,11 +18,13 @@ namespace VirtoCommerce.CartModule.Data.Services
     {
         private readonly Func<ICartRepository> _repositoryFactory;
         private readonly IPlatformMemoryCache _platformMemoryCache;
+        private readonly IShoppingCartService _cartService;
 
-        public ShoppingCartSearchServiceImpl(Func<ICartRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache)
+        public ShoppingCartSearchServiceImpl(Func<ICartRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache, IShoppingCartService cartService)
         {
             _repositoryFactory = repositoryFactory;
             _platformMemoryCache = platformMemoryCache;
+            _cartService = cartService;
         }
 
         public async Task<GenericSearchResult<ShoppingCart>> SearchCartAsync(ShoppingCartSearchCriteria criteria)
@@ -92,9 +94,11 @@ namespace VirtoCommerce.CartModule.Data.Services
                     query = query.OrderBySortInfos(sortInfos);
 
                     retVal.TotalCount = await query.CountAsync();
-
-                    var carts = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                    retVal.Results = carts.Select(x => x.ToModel(AbstractTypeFactory<ShoppingCart>.TryCreateInstance())).ToList();
+                    if (criteria.Take > 0)
+                    {
+                        var cartIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                        retVal.Results = (await _cartService.GetByIdsAsync(cartIds, criteria.ResponseGroup)).AsQueryable().OrderBySortInfos(sortInfos).ToArray();
+                    }
 
                     return retVal;
                 }
