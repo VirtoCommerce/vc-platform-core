@@ -100,22 +100,25 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
 
                     searchResponse.TotalCount = await sitemapEntities.CountAsync();
 
-                    var matchingEntities = await sitemapEntities.OrderByDescending(s => s.CreatedDate)
-                        .Skip(request.Skip).Take(request.Take).ToArrayAsync();
-                    foreach (var sitemapEntity in matchingEntities)
+                    if (request.Take > 0)
                     {
-                        var sitemap = AbstractTypeFactory<Sitemap>.TryCreateInstance();
-                        if (sitemap != null)
+                        var matchingEntities = await sitemapEntities.OrderByDescending(s => s.CreatedDate)
+                            .Skip(request.Skip).Take(request.Take).ToArrayAsync();
+                        foreach (var sitemapEntity in matchingEntities)
                         {
-                            var sitemapItemsSearchResponse = await SitemapItemService.SearchAsync(
-                                new SitemapItemSearchCriteria
-                                {
-                                    SitemapId = sitemapEntity.Id
-                                });
+                            var sitemap = AbstractTypeFactory<Sitemap>.TryCreateInstance();
+                            if (sitemap != null)
+                            {
+                                var sitemapItemsSearchResponse = await SitemapItemService.SearchAsync(
+                                    new SitemapItemSearchCriteria
+                                    {
+                                        SitemapId = sitemapEntity.Id
+                                    });
 
-                            sitemap = sitemapEntity.ToModel(sitemap);
-                            sitemap.TotalItemsCount = sitemapItemsSearchResponse.TotalCount;
-                            searchResponse.Results.Add(sitemap);
+                                sitemap = sitemapEntity.ToModel(sitemap);
+                                sitemap.TotalItemsCount = sitemapItemsSearchResponse.TotalCount;
+                                searchResponse.Results.Add(sitemap);
+                            }
                         }
                     }
 

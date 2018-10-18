@@ -72,13 +72,16 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                     query = query.OrderBySortInfos(sortInfos);
                     searchResponse.TotalCount = await query.CountAsync();
 
-                    var matchingSitemapItems = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                    foreach (var sitemapItemEntity in matchingSitemapItems)
+                    if (criteria.Take > 0)
                     {
-                        var sitemapItem = AbstractTypeFactory<SitemapItem>.TryCreateInstance();
-                        if (sitemapItem != null)
+                        var matchingSitemapItems = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                        foreach (var sitemapItemEntity in matchingSitemapItems)
                         {
-                            searchResponse.Results.Add(sitemapItemEntity.ToModel(sitemapItem));
+                            var sitemapItem = AbstractTypeFactory<SitemapItem>.TryCreateInstance();
+                            if (sitemapItem != null)
+                            {
+                                searchResponse.Results.Add(sitemapItemEntity.ToModel(sitemapItem));
+                            }
                         }
                     }
 
