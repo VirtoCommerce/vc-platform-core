@@ -20,9 +20,10 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
         {
         }
 
-        public void LoadSitemapItemRecords(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
+        public Task LoadSitemapItemRecordsAsync(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
         {
             // TODO: this implementation uses ICatalogSearchService which is not included to the CatalogModule yet, so this method does nothing.
+            return Task.CompletedTask;
         }
 
         // TODO: uncomment the proper implementation after adding ICatalogSearchService to the CatalogModule
@@ -44,7 +45,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
         //protected IItemService ItemService { get; }
         //protected ICatalogSearchService CatalogSearchService { get; }
 
-        //public virtual void LoadSitemapItemRecords(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
+        //public virtual Task LoadSitemapItemRecordsAsync(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
         //{
         //    var progressInfo = new ExportImportProgressInfo();
 
@@ -139,6 +140,8 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
         //        var itemRecords = GetSitemapItemRecords(store, productOptions, sitemap.UrlTemplate, baseUrl, product);
         //        sitemapItem.ItemsRecords.AddRange(itemRecords);
         //    }
+        //
+        //    return Task.CompletedTask;
         //}
     }
 }

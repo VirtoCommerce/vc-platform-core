@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SitemapsModule.Core.Models;
@@ -14,9 +15,10 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
         {
         }
 
-        public void LoadSitemapItemRecords(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
+        public Task LoadSitemapItemRecordsAsync(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
         {
             // TODO: this implementation relies on ContentModule (which is not ported yet), so this method left blank.
+            return Task.CompletedTask;
         }
 
         // TODO: uncomment the proper implementation after porting the Content module to VC platform 3.x
@@ -33,7 +35,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
         //    _contentStorageProviderFactory = contentStorageProviderFactory;
         //}
 
-        //public virtual void LoadSitemapItemRecords(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
+        //public virtual Task LoadSitemapItemRecordsAsync(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
         //{
         //    var progressInfo = new ExportImportProgressInfo();
 
@@ -105,6 +107,8 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
         //            }
         //        }
         //    }
+        //
+        //    return Task.CompletedTask;
         //}
 
         //private static ICollection<string> GetItemUrls(IContentBlobStorageProvider storageProvider, BlobSearchResult searchResult)
