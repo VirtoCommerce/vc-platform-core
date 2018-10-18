@@ -7,7 +7,7 @@
         <dependency id="VirtoCommerce.Core" version="3.0.0" />
         <dependency id="VirtoCommerce.Orders" version="3.0.0" />
         <dependency id="VirtoCommerce.Store" version="3.0.0" />
-        <!--TODO: add PricingModule dependency when it will be available-->
+        <dependency id="VirtoCommerce.Customer" version="3.0.0" />
     </dependencies>
 
     <title>Subscription module</title>
