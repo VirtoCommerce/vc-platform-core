@@ -211,12 +211,16 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
 
                     retVal.TotalCount = await query.CountAsync();
 
-                    var subscriptionEntities = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                    var subscriptionsIds = subscriptionEntities.Select(x => x.Id).ToArray();
+                    if (criteria.Take > 0)
+                    {
+                        var subscriptionEntities = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                        var subscriptionsIds = subscriptionEntities.Select(x => x.Id).ToArray();
 
-                    //Load subscriptions with preserving sorting order
-                    var unorderedResults = await GetByIdsAsync(subscriptionsIds, criteria.ResponseGroup);
-                    retVal.Results = unorderedResults.OrderBy(x => Array.IndexOf(subscriptionsIds, x.Id)).ToArray();
+                        //Load subscriptions with preserving sorting order
+                        var unorderedResults = await GetByIdsAsync(subscriptionsIds, criteria.ResponseGroup);
+                        retVal.Results = unorderedResults.OrderBy(x => Array.IndexOf(subscriptionsIds, x.Id)).ToArray();
+                    }
+
                     return retVal;
                 }
             });

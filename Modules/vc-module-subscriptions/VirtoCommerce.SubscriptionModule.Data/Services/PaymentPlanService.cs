@@ -149,12 +149,16 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
 
                     retVal.TotalCount = await query.CountAsync();
 
-                    var paymentPlanEntities = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                    var paymentPlanIds = paymentPlanEntities.Select(x => x.Id).ToArray();
+                    if (criteria.Take > 0)
+                    {
+                        var paymentPlanEntities = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                        var paymentPlanIds = paymentPlanEntities.Select(x => x.Id).ToArray();
 
-                    //Load subscriptions with preserving sorting order
-                    var unorderedResults = await GetByIdsAsync(paymentPlanIds, criteria.ResponseGroup);
-                    retVal.Results = unorderedResults.OrderBy(x => Array.IndexOf(paymentPlanIds, x.Id)).ToArray();
+                        //Load subscriptions with preserving sorting order
+                        var unorderedResults = await GetByIdsAsync(paymentPlanIds, criteria.ResponseGroup);
+                        retVal.Results = unorderedResults.OrderBy(x => Array.IndexOf(paymentPlanIds, x.Id)).ToArray();
+                    }
+
                     return retVal;
                 }
             });
