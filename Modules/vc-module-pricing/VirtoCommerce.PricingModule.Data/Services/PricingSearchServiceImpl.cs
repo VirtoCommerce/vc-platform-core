@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Serialization;
@@ -79,6 +80,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
 
             //    query = query.OrderBySortInfos(sortInfos);
 
+            //    // TODO: add checks for criteria.Take being greater than 0
             //    if (criteria.GroupByProducts)
             //    {
             //        var groupedQuery = query.GroupBy(x => x.ProductId).OrderBy(x => 1);
@@ -118,17 +120,18 @@ namespace VirtoCommerce.PricingModule.Data.Services
 
                 query = query.OrderBySortInfos(sortInfos);
 
-                retVal.TotalCount = query.Count();
-                query = query.Skip(criteria.Skip).Take(criteria.Take);
+                retVal.TotalCount = await query.CountAsync();
 
-                var pricelistsIds = query.Select(x => x.Id).ToList();
-                retVal.Results = (await _pricingService.GetPricelistsByIdAsync(pricelistsIds.ToArray()))
-                                                .OrderBy(x => pricelistsIds.IndexOf(x.Id)).ToList();
+                if (criteria.Take > 0)
+                {
+                    query = query.Skip(criteria.Skip).Take(criteria.Take);
+                    var pricelistsIds = await query.Select(x => x.Id).ToListAsync();
+                    retVal.Results = (await _pricingService.GetPricelistsByIdAsync(pricelistsIds.ToArray()))
+                        .OrderBy(x => pricelistsIds.IndexOf(x.Id)).ToList();
+                }
             }
             return retVal;
         }
-
-
 
         public virtual async Task<GenericSearchResult<PricelistAssignment>> SearchPricelistAssignmentsAsync(PricelistAssignmentsSearchCriteria criteria)
         {
@@ -155,13 +158,18 @@ namespace VirtoCommerce.PricingModule.Data.Services
 
                 query = query.OrderBySortInfos(sortInfos);
 
-                retVal.TotalCount = query.Count();
-                query = query.Skip(criteria.Skip).Take(criteria.Take);
+                retVal.TotalCount = await query.CountAsync();
 
-                var pricelistAssignmentsIds = query.Select(x => x.Id).ToList();
-                retVal.Results = (await _pricingService.GetPricelistAssignmentsByIdAsync(pricelistAssignmentsIds.ToArray()))
-                                                .OrderBy(x => pricelistAssignmentsIds.IndexOf(x.Id))
-                                                .ToList();
+                if (criteria.Take > 0)
+                {
+                    query = query.Skip(criteria.Skip).Take(criteria.Take);
+
+                    var pricelistAssignmentsIds = await query.Select(x => x.Id).ToListAsync();
+                    retVal.Results =
+                        (await _pricingService.GetPricelistAssignmentsByIdAsync(pricelistAssignmentsIds.ToArray()))
+                        .OrderBy(x => pricelistAssignmentsIds.IndexOf(x.Id))
+                        .ToList();
+                }
             }
             return retVal;
         }
