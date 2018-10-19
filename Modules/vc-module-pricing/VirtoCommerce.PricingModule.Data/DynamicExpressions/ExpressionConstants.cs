@@ -1,4 +1,4 @@
-namespace VirtoCommerce.DynamicExpressionsModule.Data
+namespace VirtoCommerce.PricingModule.Data.DynamicExpressions
 {
     public static class ExpressionConstants
     {

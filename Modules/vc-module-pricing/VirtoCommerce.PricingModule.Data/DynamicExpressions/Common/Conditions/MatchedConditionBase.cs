@@ -1,7 +1,6 @@
 using System;
 using System.Reflection;
 using VirtoCommerce.CoreModule.Core.Common;
-using VirtoCommerce.DynamicExpressionsModule.Data;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.PricingModule.Core.Model.CommonExpressions;
 using linq = System.Linq.Expressions;
