@@ -1,6 +1,7 @@
 using System;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.PricingModule.Core.Model.CommonExpressions;
 
 namespace VirtoCommerce.PricingModule.Core.Model
 {

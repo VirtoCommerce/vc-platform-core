@@ -1,7 +1,7 @@
 using System;
 using VirtoCommerce.CoreModule.Core.Common;
 
-namespace VirtoCommerce.PricingModule.Core.Services
+namespace VirtoCommerce.PricingModule.Core.Model.CommonExpressions
 {
     public interface IConditionExpression
     {

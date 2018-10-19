@@ -3,9 +3,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.PricingModule.Core.Services;
 
-namespace VirtoCommerce.PricingModule.Core.Model
+namespace VirtoCommerce.PricingModule.Core.Model.CommonExpressions
 {
     public class ConditionExpressionTree : DynamicExpression, IConditionExpression
     {

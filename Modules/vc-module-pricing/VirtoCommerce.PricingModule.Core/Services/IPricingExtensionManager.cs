@@ -1,4 +1,4 @@
-using VirtoCommerce.PricingModule.Core.Model;
+using VirtoCommerce.PricingModule.Core.Model.CommonExpressions;
 
 namespace VirtoCommerce.PricingModule.Core.Services
 {

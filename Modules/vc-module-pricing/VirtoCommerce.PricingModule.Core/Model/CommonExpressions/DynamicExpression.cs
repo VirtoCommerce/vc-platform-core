@@ -1,12 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.PricingModule.Core.Services;
 
-namespace VirtoCommerce.PricingModule.Core.Model
+namespace VirtoCommerce.PricingModule.Core.Model.CommonExpressions
 {
     public abstract class DynamicExpression : IDynamicExpression
     {

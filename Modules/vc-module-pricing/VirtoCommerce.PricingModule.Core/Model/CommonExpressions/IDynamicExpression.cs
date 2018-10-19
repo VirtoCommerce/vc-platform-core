@@ -1,4 +1,4 @@
-namespace VirtoCommerce.PricingModule.Core.Services
+namespace VirtoCommerce.PricingModule.Core.Model.CommonExpressions
 {
     public interface IDynamicExpression
     {
