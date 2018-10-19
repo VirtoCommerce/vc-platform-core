@@ -235,7 +235,7 @@ angular.module(moduleName, [])
                 displayName: 'User groups contains []'
             });
 
-            $http.get('Modules/$(VirtoCommerce.DynamicExpressions)/Scripts/all-templates.html').then(function (response) {
+            $http.get('Modules/$(VirtoCommerce.Pricing)/Scripts/all-templates.html').then(function (response) {
                 // compile the response, which will put stuff into the cache
                 $compile(response.data);
             });
