@@ -1,4 +1,4 @@
-﻿{
+{
     "pricing": {
         "main-menu-title": "Pricing",
         "blades": {
@@ -73,7 +73,7 @@
                     "name": "Name",
                     "catalog": "Catalog",
                     "pricelist": "Price list",
-                    "pricelist-currency":  "Currency",
+                    "pricelist-currency": "Currency",
                     "priority": "Priority",
                     "last-modified": "Modified",
                     "modified-by": "Modified by"
@@ -110,7 +110,8 @@
                     "priority": "Priority",
                     "prices-count": "Prices count"
                 },
-                "no-assignments": "Catalog does not have assigned price lists. Please assign a price list by following this link ",
+                "no-assignments":
+                    "Catalog does not have assigned price lists. Please assign a price list by following this link ",
                 "manage-pricelists": "Manage pricing"
             },
             "item-prices": {
@@ -173,5 +174,20 @@
         "commands": {
             "add-selected": "Add selected"
         }
+    },
+
+    "permissions": {
+        "pricing:access": "Open pricing menu",
+        "pricing:create": "Create pricing data",
+        "pricing:read": "View pricing data",
+        "pricing:update": "Update pricing data",
+        "pricing:delete": "Delete pricing data"
+    },
+
+    "settings": {
+        "Pricing.ExportImport.PageSize": {
+            "title": "The page size being used for Export / Import",
+            "description": "High value may will cause slow performance"
+        } 
     }
 }

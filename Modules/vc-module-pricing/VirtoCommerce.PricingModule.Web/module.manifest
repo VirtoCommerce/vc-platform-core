@@ -31,33 +31,4 @@
     <scripts>
         <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
     </scripts>
-
-    <settings>
-        <group name="Pricing|General">
-            <setting>
-                <name>Pricing.ExportImport.Description</name>
-                <valueType>string</valueType>
-                <defaultValue>Export/Import price lists, assignments and prices</defaultValue>
-                <title>Export/Import description</title>
-                <description>Module description in platform export/import wizard</description>
-            </setting>
-            <setting>
-                <name>Pricing.ExportImport.PageSize</name>
-                <valueType>integer</valueType>
-                <defaultValue>50</defaultValue>
-                <title>The page size being used for Export / Import</title>
-                <description>High value may will cause slow performance</description>
-            </setting>
-        </group>
-    </settings>
-
-    <permissions>
-        <group name="Pricing">
-            <permission id="pricing:access" name="Open pricing menu" description=""/>
-            <permission id="pricing:create" name="Create pricing data" description=""/>
-            <permission id="pricing:read" name="View pricing data" description=""/>
-            <permission id="pricing:update" name="Update pricing data" description=""/>
-            <permission id="pricing:delete" name="Delete pricing data" description=""/>
-        </group>
-    </permissions>
 </module>
