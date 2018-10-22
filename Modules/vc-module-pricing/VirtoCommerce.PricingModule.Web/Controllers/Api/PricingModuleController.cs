@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,14 +9,14 @@ using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
+using VirtoCommerce.PricingModule.Core.ModuleConstants;
 using VirtoCommerce.PricingModule.Core.Services;
-using VirtoCommerce.PricingModule.Web.Security;
 using webModel = VirtoCommerce.PricingModule.Web.Model;
 
 namespace VirtoCommerce.PricingModule.Web.Controllers.Api
 {
     [Route("")]
-    [Authorize(PricingPredefinedPermissions.Read)]
+    [Authorize(ModulePermissions.Read)]
     public class PricingModuleController : Controller
     {
         private readonly IPricingService _pricingService;
@@ -215,7 +214,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         [HttpPost]
         [ProducesResponseType(typeof(PricelistAssignment), 200)]
         [Route("api/pricing/assignments")]
-        [Authorize(PricingPredefinedPermissions.Create)]
+        [Authorize(ModulePermissions.Create)]
         public async Task<IActionResult> CreatePricelistAssignment([FromBody]PricelistAssignment assignment)
         {
             await _pricingService.SavePricelistAssignmentsAsync(new[] { assignment });
@@ -230,7 +229,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         [HttpPut]
         [ProducesResponseType(typeof(void), 204)]
         [Route("api/pricing/assignments")]
-        [Authorize(PricingPredefinedPermissions.Update)]
+        [Authorize(ModulePermissions.Update)]
         public async Task<IActionResult> UpdatePriceListAssignment([FromBody]PricelistAssignment assignment)
         {
             await _pricingService.SavePricelistAssignmentsAsync(new[] { assignment });
@@ -240,7 +239,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         [HttpPut]
         [ProducesResponseType(typeof(void), 204)]
         [Route("api/products/prices")]
-        [Authorize(PricingPredefinedPermissions.Update)]
+        [Authorize(ModulePermissions.Update)]
         public async Task<IActionResult> UpdateProductsPrices([FromBody]webModel.ProductPrice[] productPrices)
         {
             var result = await _pricingSearchService.SearchPricesAsync(new PricesSearchCriteria
@@ -289,7 +288,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         [HttpPut]
         [ProducesResponseType(typeof(void), 204)]
         [Route("api/products/{productId}/prices")]
-        [Authorize(PricingPredefinedPermissions.Update)]
+        [Authorize(ModulePermissions.Update)]
         public async Task<IActionResult> UpdateProductPrices([FromBody]webModel.ProductPrice productPrice)
         {
             return await UpdateProductsPrices(new[] { productPrice });
@@ -334,7 +333,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         [HttpPost]
         [ProducesResponseType(typeof(Pricelist), 200)]
         [Route("api/pricing/pricelists")]
-        [Authorize(PricingPredefinedPermissions.Create)]
+        [Authorize(ModulePermissions.Create)]
         public async Task<IActionResult> CreatePriceList([FromBody]Pricelist priceList)
         {
             await _pricingService.SavePricelistsAsync(new[] { priceList });
@@ -347,7 +346,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         [HttpPut]
         [ProducesResponseType(typeof(void), 204)]
         [Route("api/pricing/pricelists")]
-        [Authorize(PricingPredefinedPermissions.Update)]
+        [Authorize(ModulePermissions.Update)]
         public async Task<IActionResult> UpdatePriceList([FromBody]Pricelist priceList)
         {
             await _pricingService.SavePricelistsAsync(new[] { priceList });
@@ -363,7 +362,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         [HttpDelete]
         [ProducesResponseType(typeof(void), 204)]
         [Route("api/pricing/assignments")]
-        [Authorize(PricingPredefinedPermissions.Delete)]
+        [Authorize(ModulePermissions.Delete)]
         public async Task<IActionResult> DeleteAssignments(string[] ids)
         {
             await _pricingService.DeletePricelistsAssignmentsAsync(ids);
@@ -379,7 +378,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         [HttpDelete]
         [ProducesResponseType(typeof(void), 204)]
         [Route("api/pricing/pricelists/{pricelistId}/products/prices")]
-        [Authorize(PricingPredefinedPermissions.Update)]
+        [Authorize(ModulePermissions.Update)]
         public async Task<IActionResult> DeleteProductPrices(string pricelistId, string[] productIds)
         {
             var result = await _pricingSearchService.SearchPricesAsync(new PricesSearchCriteria { PriceListId = pricelistId, ProductIds = productIds, Take = int.MaxValue });
@@ -395,7 +394,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         [HttpDelete]
         [ProducesResponseType(typeof(void), 204)]
         [Route("api/pricing/products/prices")]
-        [Authorize(PricingPredefinedPermissions.Delete)]
+        [Authorize(ModulePermissions.Delete)]
         public async Task<IActionResult> DeleteProductPrice(string[] priceIds)
         {
             await _pricingService.DeletePricesAsync(priceIds);
@@ -410,7 +409,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         [HttpDelete]
         [ProducesResponseType(typeof(void), 204)]
         [Route("api/pricing/pricelists")]
-        [Authorize(PricingPredefinedPermissions.Delete)]
+        [Authorize(ModulePermissions.Delete)]
         public async Task<IActionResult> DeletePricelists(string[] ids)
         {
             await _pricingService.DeletePricelistsAsync(ids);
