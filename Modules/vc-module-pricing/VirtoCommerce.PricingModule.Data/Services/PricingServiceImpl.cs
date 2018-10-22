@@ -51,7 +51,6 @@ namespace VirtoCommerce.PricingModule.Data.Services
         /// <returns></returns>
         public virtual async Task<IEnumerable<Pricelist>> EvaluatePriceListsAsync(PriceEvaluationContext evalContext)
         {
-            // TODO: include something that identifies evalContext?
             var cacheKey = CacheKey.With(GetType(), nameof(EvaluatePriceListsAsync));
             var priceListAssignments = await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
             {
@@ -59,7 +58,6 @@ namespace VirtoCommerce.PricingModule.Data.Services
 
                 using (var repository = _repositoryFactory())
                 {
-                    // TODO: replace Include with separate query
                     var allAssignments = (await repository.PricelistAssignments.Include(x => x.Pricelist).ToArrayAsync()).Select(x => x.ToModel(AbstractTypeFactory<PricelistAssignment>.TryCreateInstance())).ToArray();
                     foreach (var assignment in allAssignments.Where(x => !string.IsNullOrEmpty(x.ConditionExpression)))
                     {
@@ -347,9 +345,11 @@ namespace VirtoCommerce.PricingModule.Data.Services
             {
                 var pricelistsIds = priceLists.Select(x => x.Id).Where(x => x != null).Distinct().ToArray();
 
-                // TODO: replace Include with separate query
-                var alreadyExistEntities = await repository.Pricelists.Include(x => x.Assignments)
-                                                     .Where(x => pricelistsIds.Contains(x.Id)).ToArrayAsync();
+                var existingPricelistsTask = repository.Pricelists.Where(x => pricelistsIds.Contains(x.Id)).ToArrayAsync();
+                var pricelistAssignmentsTask = repository.PricelistAssignments.Where(x => pricelistsIds.Contains(x.PricelistId)).ToArrayAsync();
+                Task.WaitAll(existingPricelistsTask, pricelistAssignmentsTask);
+
+                var alreadyExistEntities = existingPricelistsTask.Result;
                 foreach (var pricelist in priceLists)
                 {
                     var sourceEntity = AbstractTypeFactory<PricelistEntity>.TryCreateInstance().FromModel(pricelist, pkMap);
