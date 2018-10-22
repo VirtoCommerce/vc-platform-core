@@ -187,7 +187,7 @@
     "settings": {
         "Pricing.ExportImport.PageSize": {
             "title": "The page size being used for Export / Import",
-            "description": "High value may will cause slow performance"
+            "description": "High value may cause slow performance"
         } 
     }
 }
