@@ -20,13 +20,11 @@ namespace VirtoCommerce.PricingModule.Data.Services
         public T DeserializeExpression<T>(string serializedExpression)
         {
             var serializer = GetSerializer();
-            var expression = serializer.DeserializeText(serializedExpression);
+            var rawExpression = serializer.DeserializeText(serializedExpression);
 
-            // TODO: how to convert Expression to Expression<T> to Compile() it?
-            //var result = expression.Compile();
-            //return result;
-
-            throw new NotImplementedException();
+            var typedExpression = (Expression<T>)rawExpression;
+            var result = typedExpression.Compile();
+            return result;
         }
 
 
