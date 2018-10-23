@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using VirtoCommerce.CartModule.Core.Model;
+using VirtoCommerce.CartModule.Data.Model;
 using VirtoCommerce.CartModule.Data.Services;
 using Xunit;
 
@@ -87,6 +89,51 @@ namespace VirtoCommerce.CartModule.Test.UnitTests
             Assert.Equal(15.28m, cart.FeeTotalWithTax);
             Assert.Equal(14.68m, cart.FeeWithTax);
             Assert.Equal(1413.18m, cart.Total);
+        }
+
+        [Fact]
+        public void CouponsPatch()
+        {
+            var originalEntity = new ShoppingCartEntity
+            {
+                Coupons = new ObservableCollection<CouponEntity>
+                {
+                    new CouponEntity { Code = "12345", Id = "aa"},
+                    new CouponEntity { Code = "abcde", Id = "ab" },
+                    new CouponEntity { Code = "AA-BB-CC", Id = "ac" },
+                    new CouponEntity { Code = "00-11-22", Id = "ad" },
+                    new CouponEntity { Code = "ABCDE", Id = "ae" },
+                }
+            };
+
+            var modifiedEntity = new ShoppingCartEntity
+            {
+                Coupons = new ObservableCollection<CouponEntity>
+                {
+                    new CouponEntity { Code = "abcde", Id = "ba" },
+                    new CouponEntity { Code = "AA-BB-CC", Id = "bb" },
+                    new CouponEntity { Code = "00-11-22", Id = "bc" },
+                    new CouponEntity { Code = "ABCDE", Id = "bd" },
+                    new CouponEntity { Code = "FGHIJ", Id = "be" },
+                    new CouponEntity { Code = "KLMNO", Id = "bf" },
+                }
+            };
+
+            modifiedEntity.Patch(originalEntity);
+
+            Assert.Equal(6, originalEntity.Coupons.Count);
+            Assert.Equal("abcde", originalEntity.Coupons[0].Code);
+            Assert.Equal("ab", originalEntity.Coupons[0].Id);
+            Assert.Equal("AA-BB-CC", originalEntity.Coupons[1].Code);
+            Assert.Equal("ac", originalEntity.Coupons[1].Id);
+            Assert.Equal("00-11-22", originalEntity.Coupons[2].Code);
+            Assert.Equal("ad", originalEntity.Coupons[2].Id);
+            Assert.Equal("ABCDE", originalEntity.Coupons[3].Code);
+            Assert.Equal("ae", originalEntity.Coupons[3].Id);
+            Assert.Equal("FGHIJ", originalEntity.Coupons[4].Code);
+            Assert.Equal("be", originalEntity.Coupons[4].Id);
+            Assert.Equal("KLMNO", originalEntity.Coupons[5].Code);
+            Assert.Equal("bf", originalEntity.Coupons[5].Id);
         }
     }
 }
