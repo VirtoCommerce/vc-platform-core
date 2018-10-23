@@ -3830,454 +3830,6 @@ controller('platformWebApp.appCtrl', ['$rootScope', '$scope', '$window', 'platfo
         });
     }]);
 
-angular.module('platformWebApp')
- .factory('platformWebApp.bladeUtils', ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
-     function initializePagination($scope, skipDefaultWatch) {
-         //pagination settings
-         $scope.pageSettings = {};
-         $scope.pageSettings.totalItems = 0;
-         $scope.pageSettings.currentPage = 1;
-         $scope.pageSettings.numPages = 5;
-         $scope.pageSettings.itemsPerPageCount = 20;
-
-         if (!skipDefaultWatch)
-             $scope.$watch('pageSettings.currentPage', $scope.blade.refresh);
-     }
-
-     return {
-         bladeNavigationService: bladeNavigationService,
-         initializePagination: initializePagination
-     };
- }]);
-
-angular.module('platformWebApp')
-    .filter('boolToValue', function () {
-        return function (input, trueValue, falseValue) {
-            return input ? trueValue : falseValue;
-        };
-    })
-    .filter('slice', function () {
-        return function (arr, start, end) {
-            return (arr || []).slice(start, end);
-        };
-    })
-    .filter('readablesize', function () {
-        return function (input) {
-            if (!input)
-                return null;
-
-            var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-            var order = 0;
-            while (input >= 1024 && order + 1 < sizes.length) {
-                order++;
-                input = input / 1024;
-            }
-            return Math.round(input) + ' ' + sizes[order];
-        };
-    })
-    // translate the given properties in the input array
-    .filter('translateArray', ['$translate', function ($translate) {
-        return function (inputArray, propertiesList) {
-            _.each(inputArray, function (inputItem) {
-                _.each(propertiesList, function (prop) {
-                    if (angular.isString(inputItem[prop])) {
-                        var translateKey = inputItem[prop].toLowerCase();
-                        var result = $translate.instant(translateKey);
-                        if (result !== translateKey) inputItem[prop] = result;
-                    }
-                });
-            });
-            return inputArray;
-        }
-    }])
-    // translation with fall-back value if key not found
-    .filter('fallbackTranslate', ['$translate', function ($translate) {
-        return function (translateKey, fallbackValue) {
-            var result = $translate.instant(translateKey);
-            return result === translateKey ? fallbackValue : result;
-        };
-    }]);
-angular.module('platformWebApp')
-.factory('platformWebApp.objCompareService', function () {
-
-	//https://stamat.wordpress.com/2013/06/22/javascript-object-comparison/
-
-	var specialChars = [ '$', '_' ];
-	//Returns the object's class, Array, Date, RegExp, Object are of interest to us
-	var getClass = function (val) {
-		return Object.prototype.toString.call(val)
-			.match(/^\[object\s(.*)\]$/)[1];
-	};
-
-	//Defines the type of the value, extended typeof
-	var whatis = function (val) {
-
-		if (val === undefined)
-			return 'undefined';
-		if (val === null)
-			return 'null';
-
-		var type = typeof val;
-
-		if (type === 'object')
-			type = getClass(val).toLowerCase();
-
-		if (type === 'number') {
-			if (val.toString().indexOf('.') > 0)
-				return 'float';
-			else
-				return 'integer';
-		}
-
-		return type;
-	};
-
-	var compareObjects = function (a, b) {
-		if (a === b)
-			return true;
-
-		if (Object.keys(a).length < Object.keys(b).length)
-		{
-			var tmp = a;
-			a = b;
-			b = tmp;
-		}
-
-		for (var i in a) {
-			//ignore system properties and functions
-			if (!_.contains(specialChars, i.charAt(0)) && whatis(a[i]) != 'function') {
-				if (b.hasOwnProperty(i)) {
-					if (!equal(a[i], b[i]))
-						return false;
-				} else {
-					return false;
-				}
-			}
-		}
-
-		//for (var i in b) {
-		//	if (!a.hasOwnProperty(i)) {
-		//		return false;
-		//	}
-		//}
-		return true;
-	};
-
-	var compareArrays = function (a, b) {
-		if (a === b)
-			return true;
-		if (a.length !== b.length)
-			return false;
-		for (var i = 0; i < a.length; i++) {
-			if (!equal(a[i], b[i])) return false;
-		};
-		return true;
-	};
-
-	var _equal = {};
-	_equal.array = compareArrays;
-	_equal.object = compareObjects;
-	_equal.date = function (a, b) {
-		return a.getTime() === b.getTime();
-	};
-	_equal.regexp = function (a, b) {
-		return a.toString() === b.toString();
-	};
-	//	uncoment to support function as string compare
-	//	_equal.fucntion =  _equal.regexp;
-	/*
-	* Are two values equal, deep compare for objects and arrays.
-	* @param a {any}
-	* @param b {any}
-	* @return {boolean} Are equal?
-	*/
-	var equal = function (a, b) {
-		var retVal = a === b;
-		if (!retVal) {
-			var atype = whatis(a), btype = whatis(b);
-			if (atype === btype)
-			{
-				retVal = _equal.hasOwnProperty(atype) ? _equal[atype](a, b) : a == b;
-			}
-		}
-
-		return retVal;
-	}
-
-	return {
-		equal: equal
-	};
-});
-
-angular.module('platformWebApp')
-    .config(['$provide', 'uiGridConstants', function ($provide, uiGridConstants) {
-        $provide.decorator('GridOptions', ['$delegate', '$localStorage', '$translate', 'platformWebApp.bladeNavigationService', function ($delegate, $localStorage, $translate, bladeNavigationService) {
-            var gridOptions = angular.copy($delegate);
-            gridOptions.initialize = function (options) {
-                var initOptions = $delegate.initialize(options);
-                var blade = bladeNavigationService.currentBlade;
-                var $scope = blade.$scope;
-
-                // restore saved state, if any
-                var savedState = $localStorage['gridState:' + blade.template];
-                if (savedState) {
-                    // extend saved columns with custom columnDef information (e.g. cellTemplate, displayName)
-                    var foundDef;
-                    _.each(savedState.columns, function (x) {
-                        if (foundDef = _.findWhere(initOptions.columnDefs, { name: x.name })) {
-                            foundDef.sort = x.sort;
-                            foundDef.width = x.width || foundDef.width;
-                            foundDef.visible = x.visible;
-                            // prevent loading outdated cellTemplate
-                            delete x.cellTemplate;
-                            _.extend(x, foundDef);
-                            x.wasPredefined = true;
-                            initOptions.columnDefs.splice(initOptions.columnDefs.indexOf(foundDef), 1);
-                        } else {
-                            x.wasPredefined = false;
-                        }
-                    });
-                    // savedState.columns = _.reject(savedState.columns, function (x) { return x.cellTemplate && !x.wasPredefined; }); // not sure why was this, but it rejected custom templated fields
-                    initOptions.columnDefs = _.union(initOptions.columnDefs, savedState.columns);
-                } else {
-                    // mark predefined columns
-                    _.each(initOptions.columnDefs, function (x) {
-                        x.visible = angular.isDefined(x.visible) ? x.visible : true;
-                        x.wasPredefined = true;
-                    });
-                }
-
-                // translate headers
-                _.each(initOptions.columnDefs, function (x) { x.headerCellFilter = 'translate'; });
-
-                var customOnRegisterApiCallback = initOptions.onRegisterApi;
-
-                angular.extend(initOptions, {
-                    rowHeight: initOptions.rowHeight === 30 ? 40 : initOptions.rowHeight,
-                    enableGridMenu: true,
-                    //enableVerticalScrollbar: uiGridConstants.scrollbars.NEVER,
-                    //enableHorizontalScrollbar: uiGridConstants.scrollbars.NEVER,
-                    saveFocus: false,
-                    saveFilter: false,
-                    saveGrouping: false,
-                    savePinning: false,
-                    saveSelection: false,
-                    gridMenuTitleFilter: $translate,
-                    onRegisterApi: function (gridApi) {
-                        //set gridApi on scope
-                        $scope.gridApi = gridApi;
-
-                        if (gridApi.saveState) {
-                            if (savedState) {
-                                //$timeout(function () {
-                                gridApi.saveState.restore($scope, savedState);
-                                //}, 10);
-                            }
-
-                            if (gridApi.colResizable)
-                                gridApi.colResizable.on.columnSizeChanged($scope, saveState);
-                            if (gridApi.colMovable)
-                                gridApi.colMovable.on.columnPositionChanged($scope, saveState);
-                            gridApi.core.on.columnVisibilityChanged($scope, saveState);
-                            gridApi.core.on.sortChanged($scope, saveState);
-                            function saveState() {
-                                $localStorage['gridState:' + blade.template] = gridApi.saveState.save();
-                            }
-                        }
-
-                        gridApi.grid.registerDataChangeCallback(processMissingColumns, [uiGridConstants.dataChange.ROW]);
-                        gridApi.grid.registerDataChangeCallback(autoFormatColumns, [uiGridConstants.dataChange.ROW]);
-
-                        if (customOnRegisterApiCallback) {
-                            customOnRegisterApiCallback(gridApi);
-                        }
-                    },
-                    onCollapse: function () {
-                        updateColumnsVisibility(this, true);
-                    },
-                    onExpand: function () {
-                        updateColumnsVisibility(this, false);
-                    }
-                });
-
-                return initOptions;
-            };
-
-            function processMissingColumns(grid) {
-                var gridOptions = grid.options;
-
-                if (!gridOptions.columnDefsGenerated && _.any(grid.rows)) {
-                    var filteredColumns = _.filter(_.pairs(grid.rows[0].entity), function (x) {
-                        return !x[0].startsWith('$$') && (!_.isObject(x[1]) || _.isDate(x[1]));
-                    });
-
-                    var allKeysFromEntity = _.map(filteredColumns, function (x) {
-                        return x[0];
-                    });
-                    // remove non-existing columns
-                    _.each(gridOptions.columnDefs.slice(), function (x) {
-                        if (!_.contains(allKeysFromEntity, x.name) && !x.wasPredefined) {
-                            gridOptions.columnDefs = _.reject(gridOptions.columnDefs, function (d) {
-                                return d.name == x.name;
-                            });
-                        }
-                    });
-
-                    // generate columnDefs for each undefined property
-                    _.each(allKeysFromEntity, function (x) {
-                        if (!_.findWhere(gridOptions.columnDefs, { name: x })) {
-                            gridOptions.columnDefs.push({ name: x, visible: false });
-                        }
-                    });
-                    gridOptions.columnDefsGenerated = true;
-                    grid.api.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
-                }
-            }
-
-            // Configure automatic formatting of columns/
-            // Column with type number will use numberFilter to correct display of values
-            // Column with type date will use predefined template with am-time-ago directive to display date in human-readable format
-            function autoFormatColumns(grid) {
-                var gridOptions = grid.options;
-                grid.buildColumns();
-                var columnDefs = angular.copy(gridOptions.columnDefs);
-                for (var i = 0; i < columnDefs.length; i++) {
-                    var columnDef = columnDefs[i];
-                    for (var j = 0; j < grid.rows.length; j++) {
-                        var value = grid.getCellValue(grid.rows[j], grid.getColumn(columnDef.name));
-                        if (angular.isDefined(value)) {
-                            if (angular.isNumber(value)) {
-                                columnDef.cellFilter = columnDef.cellFilter || 'number';
-                            }
-                            // Default template for columns with dates
-                            else if (angular.isDate(value) || angular.isString(value) && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d+)?Z/.test(value)) {
-                                columnDef.cellTemplate = columnDef.cellTemplate || '$(Platform)/Scripts/common/templates/ui-grid/am-time-ago.cell.html';
-                            }
-                            break;
-                        }
-                    }
-                    gridOptions.columnDefs[i] = columnDef;
-                }
-                grid.options.columnDefs = columnDefs;
-                grid.api.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
-            }
-
-            function updateColumnsVisibility(gridOptions, isCollapsed) {
-                var blade = bladeNavigationService.currentBlade;
-                var $scope = blade.$scope;
-                _.each(gridOptions.columnDefs, function (x) {
-                    // normal: visible, if column was predefined
-                    // collapsed: visible only if we must display column always
-                    if (isCollapsed) {
-                        x.wasVisible = !!x.wasPredefined && x.visible !== false || !!x.visible;
-                    }
-                    x.visible = !isCollapsed ? !!x.wasVisible : !!x.displayAlways;
-                });
-                if ($scope && $scope.gridApi)
-                    $scope.gridApi.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
-            }
-
-            return gridOptions;
-        }]);
-    }])
-
-    .factory('platformWebApp.uiGridHelper', ['$localStorage', '$timeout', 'uiGridConstants', '$translate', function ($localStorage, $timeout, uiGridConstants, $translate) {
-        var retVal = {};
-        retVal.uiGridConstants = uiGridConstants;
-        retVal.initialize = function ($scope, gridOptions, externalRegisterApiCallback) {
-            $scope.gridOptions = angular.extend({
-                data: _.any(gridOptions.data) ? gridOptions.data : 'blade.currentEntities',
-                onRegisterApi: function (gridApi) {
-                    if (externalRegisterApiCallback) {
-                        externalRegisterApiCallback(gridApi);
-                    }
-                }
-            }, gridOptions);
-        };
-
-        retVal.getSortExpression = function ($scope) {
-            var columnDefs;
-            if ($scope.gridApi) {
-                columnDefs = $scope.gridApi.grid.columns;
-            } else {
-                var savedState = $localStorage['gridState:' + $scope.blade.template];
-                columnDefs = savedState ? savedState.columns : $scope.gridOptions.columnDefs;
-            }
-
-            var sorts = _.filter(columnDefs, function (x) {
-                return x.name !== '$path' && x.sort && (x.sort.direction === uiGridConstants.ASC || x.sort.direction === uiGridConstants.DESC);
-            });
-            sorts = _.sortBy(sorts, function (x) {
-                return x.sort.priority;
-            });
-            sorts = _.map(sorts, function (x) {
-                return (x.field ? x.field : x.name) + ':' + (x.sort.direction === uiGridConstants.ASC ? 'asc' : 'desc');
-            });
-            return sorts.join(';');
-        };
-
-        retVal.bindRefreshOnSortChanged = function ($scope) {
-            $scope.gridApi.core.on.sortChanged($scope, function () {
-                if (!$scope.blade.isLoading) $scope.blade.refresh();
-            });
-        };
-
-        return retVal;
-    }])
-
-    // ui-grid extension service. Used for extension grid options from other modules
-    .factory('platformWebApp.ui-grid.extension', [function () {
-        return {
-            extensionsMap: [],
-            registerExtension: function (gridId, extensionFn) {
-                this.extensionsMap[gridId] = extensionFn;
-            },
-            tryExtendGridOptions: function (gridId, gridOptions) {
-                if (this.extensionsMap[gridId]) {
-                    this.extensionsMap[gridId](gridOptions);
-                }
-            }
-        };
-    }])
-
-    // auto height and additional class for ui-grid
-    .directive('uiGridHeight', ['$timeout', '$window', function ($timeout, $window) {
-        return {
-            restrict: 'A',
-            link: {
-                pre: function (scope, element) {
-                    var bladeInner = $(element).parents('.blade-inner');
-                    bladeInner.addClass('ui-grid-no-scroll');
-
-                    var setGridHeight = function () {
-                        $timeout(function () {
-                            $(element).height(bladeInner.height());
-                        });
-                    };
-                    scope.$watch('blade.isExpanded', setGridHeight);
-                    scope.$watch('pageSettings.totalItems', setGridHeight);
-                    angular.element($window).bind('resize', setGridHeight);
-                }
-            }
-        };
-    }])
-    .run(['$templateRequest', function ($templateRequest) {
-        // Pre-load default templates, because we inject templates to grid options dynamically, so they not loaded by default
-        $templateRequest('$(Platform)/Scripts/common/templates/ui-grid/am-time-ago.cell.html');
-    }]);
-
-angular.module('platformWebApp')
- .factory('platformWebApp.validators', [function () {
-     function webSafeFileNameValidator(value) {
-         var pattern = /^[\w.-]+$/;
-         return pattern.test(value);
-     }
-
-     return {
-         webSafeFileNameValidator: webSafeFileNameValidator
-     };
- }]);
-
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -17187,6 +16739,454 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
+ .factory('platformWebApp.bladeUtils', ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
+     function initializePagination($scope, skipDefaultWatch) {
+         //pagination settings
+         $scope.pageSettings = {};
+         $scope.pageSettings.totalItems = 0;
+         $scope.pageSettings.currentPage = 1;
+         $scope.pageSettings.numPages = 5;
+         $scope.pageSettings.itemsPerPageCount = 20;
+
+         if (!skipDefaultWatch)
+             $scope.$watch('pageSettings.currentPage', $scope.blade.refresh);
+     }
+
+     return {
+         bladeNavigationService: bladeNavigationService,
+         initializePagination: initializePagination
+     };
+ }]);
+
+angular.module('platformWebApp')
+    .filter('boolToValue', function () {
+        return function (input, trueValue, falseValue) {
+            return input ? trueValue : falseValue;
+        };
+    })
+    .filter('slice', function () {
+        return function (arr, start, end) {
+            return (arr || []).slice(start, end);
+        };
+    })
+    .filter('readablesize', function () {
+        return function (input) {
+            if (!input)
+                return null;
+
+            var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+            var order = 0;
+            while (input >= 1024 && order + 1 < sizes.length) {
+                order++;
+                input = input / 1024;
+            }
+            return Math.round(input) + ' ' + sizes[order];
+        };
+    })
+    // translate the given properties in the input array
+    .filter('translateArray', ['$translate', function ($translate) {
+        return function (inputArray, propertiesList) {
+            _.each(inputArray, function (inputItem) {
+                _.each(propertiesList, function (prop) {
+                    if (angular.isString(inputItem[prop])) {
+                        var translateKey = inputItem[prop].toLowerCase();
+                        var result = $translate.instant(translateKey);
+                        if (result !== translateKey) inputItem[prop] = result;
+                    }
+                });
+            });
+            return inputArray;
+        }
+    }])
+    // translation with fall-back value if key not found
+    .filter('fallbackTranslate', ['$translate', function ($translate) {
+        return function (translateKey, fallbackValue) {
+            var result = $translate.instant(translateKey);
+            return result === translateKey ? fallbackValue : result;
+        };
+    }]);
+angular.module('platformWebApp')
+.factory('platformWebApp.objCompareService', function () {
+
+	//https://stamat.wordpress.com/2013/06/22/javascript-object-comparison/
+
+	var specialChars = [ '$', '_' ];
+	//Returns the object's class, Array, Date, RegExp, Object are of interest to us
+	var getClass = function (val) {
+		return Object.prototype.toString.call(val)
+			.match(/^\[object\s(.*)\]$/)[1];
+	};
+
+	//Defines the type of the value, extended typeof
+	var whatis = function (val) {
+
+		if (val === undefined)
+			return 'undefined';
+		if (val === null)
+			return 'null';
+
+		var type = typeof val;
+
+		if (type === 'object')
+			type = getClass(val).toLowerCase();
+
+		if (type === 'number') {
+			if (val.toString().indexOf('.') > 0)
+				return 'float';
+			else
+				return 'integer';
+		}
+
+		return type;
+	};
+
+	var compareObjects = function (a, b) {
+		if (a === b)
+			return true;
+
+		if (Object.keys(a).length < Object.keys(b).length)
+		{
+			var tmp = a;
+			a = b;
+			b = tmp;
+		}
+
+		for (var i in a) {
+			//ignore system properties and functions
+			if (!_.contains(specialChars, i.charAt(0)) && whatis(a[i]) != 'function') {
+				if (b.hasOwnProperty(i)) {
+					if (!equal(a[i], b[i]))
+						return false;
+				} else {
+					return false;
+				}
+			}
+		}
+
+		//for (var i in b) {
+		//	if (!a.hasOwnProperty(i)) {
+		//		return false;
+		//	}
+		//}
+		return true;
+	};
+
+	var compareArrays = function (a, b) {
+		if (a === b)
+			return true;
+		if (a.length !== b.length)
+			return false;
+		for (var i = 0; i < a.length; i++) {
+			if (!equal(a[i], b[i])) return false;
+		};
+		return true;
+	};
+
+	var _equal = {};
+	_equal.array = compareArrays;
+	_equal.object = compareObjects;
+	_equal.date = function (a, b) {
+		return a.getTime() === b.getTime();
+	};
+	_equal.regexp = function (a, b) {
+		return a.toString() === b.toString();
+	};
+	//	uncoment to support function as string compare
+	//	_equal.fucntion =  _equal.regexp;
+	/*
+	* Are two values equal, deep compare for objects and arrays.
+	* @param a {any}
+	* @param b {any}
+	* @return {boolean} Are equal?
+	*/
+	var equal = function (a, b) {
+		var retVal = a === b;
+		if (!retVal) {
+			var atype = whatis(a), btype = whatis(b);
+			if (atype === btype)
+			{
+				retVal = _equal.hasOwnProperty(atype) ? _equal[atype](a, b) : a == b;
+			}
+		}
+
+		return retVal;
+	}
+
+	return {
+		equal: equal
+	};
+});
+
+angular.module('platformWebApp')
+    .config(['$provide', 'uiGridConstants', function ($provide, uiGridConstants) {
+        $provide.decorator('GridOptions', ['$delegate', '$localStorage', '$translate', 'platformWebApp.bladeNavigationService', function ($delegate, $localStorage, $translate, bladeNavigationService) {
+            var gridOptions = angular.copy($delegate);
+            gridOptions.initialize = function (options) {
+                var initOptions = $delegate.initialize(options);
+                var blade = bladeNavigationService.currentBlade;
+                var $scope = blade.$scope;
+
+                // restore saved state, if any
+                var savedState = $localStorage['gridState:' + blade.template];
+                if (savedState) {
+                    // extend saved columns with custom columnDef information (e.g. cellTemplate, displayName)
+                    var foundDef;
+                    _.each(savedState.columns, function (x) {
+                        if (foundDef = _.findWhere(initOptions.columnDefs, { name: x.name })) {
+                            foundDef.sort = x.sort;
+                            foundDef.width = x.width || foundDef.width;
+                            foundDef.visible = x.visible;
+                            // prevent loading outdated cellTemplate
+                            delete x.cellTemplate;
+                            _.extend(x, foundDef);
+                            x.wasPredefined = true;
+                            initOptions.columnDefs.splice(initOptions.columnDefs.indexOf(foundDef), 1);
+                        } else {
+                            x.wasPredefined = false;
+                        }
+                    });
+                    // savedState.columns = _.reject(savedState.columns, function (x) { return x.cellTemplate && !x.wasPredefined; }); // not sure why was this, but it rejected custom templated fields
+                    initOptions.columnDefs = _.union(initOptions.columnDefs, savedState.columns);
+                } else {
+                    // mark predefined columns
+                    _.each(initOptions.columnDefs, function (x) {
+                        x.visible = angular.isDefined(x.visible) ? x.visible : true;
+                        x.wasPredefined = true;
+                    });
+                }
+
+                // translate headers
+                _.each(initOptions.columnDefs, function (x) { x.headerCellFilter = 'translate'; });
+
+                var customOnRegisterApiCallback = initOptions.onRegisterApi;
+
+                angular.extend(initOptions, {
+                    rowHeight: initOptions.rowHeight === 30 ? 40 : initOptions.rowHeight,
+                    enableGridMenu: true,
+                    //enableVerticalScrollbar: uiGridConstants.scrollbars.NEVER,
+                    //enableHorizontalScrollbar: uiGridConstants.scrollbars.NEVER,
+                    saveFocus: false,
+                    saveFilter: false,
+                    saveGrouping: false,
+                    savePinning: false,
+                    saveSelection: false,
+                    gridMenuTitleFilter: $translate,
+                    onRegisterApi: function (gridApi) {
+                        //set gridApi on scope
+                        $scope.gridApi = gridApi;
+
+                        if (gridApi.saveState) {
+                            if (savedState) {
+                                //$timeout(function () {
+                                gridApi.saveState.restore($scope, savedState);
+                                //}, 10);
+                            }
+
+                            if (gridApi.colResizable)
+                                gridApi.colResizable.on.columnSizeChanged($scope, saveState);
+                            if (gridApi.colMovable)
+                                gridApi.colMovable.on.columnPositionChanged($scope, saveState);
+                            gridApi.core.on.columnVisibilityChanged($scope, saveState);
+                            gridApi.core.on.sortChanged($scope, saveState);
+                            function saveState() {
+                                $localStorage['gridState:' + blade.template] = gridApi.saveState.save();
+                            }
+                        }
+
+                        gridApi.grid.registerDataChangeCallback(processMissingColumns, [uiGridConstants.dataChange.ROW]);
+                        gridApi.grid.registerDataChangeCallback(autoFormatColumns, [uiGridConstants.dataChange.ROW]);
+
+                        if (customOnRegisterApiCallback) {
+                            customOnRegisterApiCallback(gridApi);
+                        }
+                    },
+                    onCollapse: function () {
+                        updateColumnsVisibility(this, true);
+                    },
+                    onExpand: function () {
+                        updateColumnsVisibility(this, false);
+                    }
+                });
+
+                return initOptions;
+            };
+
+            function processMissingColumns(grid) {
+                var gridOptions = grid.options;
+
+                if (!gridOptions.columnDefsGenerated && _.any(grid.rows)) {
+                    var filteredColumns = _.filter(_.pairs(grid.rows[0].entity), function (x) {
+                        return !x[0].startsWith('$$') && (!_.isObject(x[1]) || _.isDate(x[1]));
+                    });
+
+                    var allKeysFromEntity = _.map(filteredColumns, function (x) {
+                        return x[0];
+                    });
+                    // remove non-existing columns
+                    _.each(gridOptions.columnDefs.slice(), function (x) {
+                        if (!_.contains(allKeysFromEntity, x.name) && !x.wasPredefined) {
+                            gridOptions.columnDefs = _.reject(gridOptions.columnDefs, function (d) {
+                                return d.name == x.name;
+                            });
+                        }
+                    });
+
+                    // generate columnDefs for each undefined property
+                    _.each(allKeysFromEntity, function (x) {
+                        if (!_.findWhere(gridOptions.columnDefs, { name: x })) {
+                            gridOptions.columnDefs.push({ name: x, visible: false });
+                        }
+                    });
+                    gridOptions.columnDefsGenerated = true;
+                    grid.api.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
+                }
+            }
+
+            // Configure automatic formatting of columns/
+            // Column with type number will use numberFilter to correct display of values
+            // Column with type date will use predefined template with am-time-ago directive to display date in human-readable format
+            function autoFormatColumns(grid) {
+                var gridOptions = grid.options;
+                grid.buildColumns();
+                var columnDefs = angular.copy(gridOptions.columnDefs);
+                for (var i = 0; i < columnDefs.length; i++) {
+                    var columnDef = columnDefs[i];
+                    for (var j = 0; j < grid.rows.length; j++) {
+                        var value = grid.getCellValue(grid.rows[j], grid.getColumn(columnDef.name));
+                        if (angular.isDefined(value)) {
+                            if (angular.isNumber(value)) {
+                                columnDef.cellFilter = columnDef.cellFilter || 'number';
+                            }
+                            // Default template for columns with dates
+                            else if (angular.isDate(value) || angular.isString(value) && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d+)?Z/.test(value)) {
+                                columnDef.cellTemplate = columnDef.cellTemplate || '$(Platform)/Scripts/common/templates/ui-grid/am-time-ago.cell.html';
+                            }
+                            break;
+                        }
+                    }
+                    gridOptions.columnDefs[i] = columnDef;
+                }
+                grid.options.columnDefs = columnDefs;
+                grid.api.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
+            }
+
+            function updateColumnsVisibility(gridOptions, isCollapsed) {
+                var blade = bladeNavigationService.currentBlade;
+                var $scope = blade.$scope;
+                _.each(gridOptions.columnDefs, function (x) {
+                    // normal: visible, if column was predefined
+                    // collapsed: visible only if we must display column always
+                    if (isCollapsed) {
+                        x.wasVisible = !!x.wasPredefined && x.visible !== false || !!x.visible;
+                    }
+                    x.visible = !isCollapsed ? !!x.wasVisible : !!x.displayAlways;
+                });
+                if ($scope && $scope.gridApi)
+                    $scope.gridApi.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
+            }
+
+            return gridOptions;
+        }]);
+    }])
+
+    .factory('platformWebApp.uiGridHelper', ['$localStorage', '$timeout', 'uiGridConstants', '$translate', function ($localStorage, $timeout, uiGridConstants, $translate) {
+        var retVal = {};
+        retVal.uiGridConstants = uiGridConstants;
+        retVal.initialize = function ($scope, gridOptions, externalRegisterApiCallback) {
+            $scope.gridOptions = angular.extend({
+                data: _.any(gridOptions.data) ? gridOptions.data : 'blade.currentEntities',
+                onRegisterApi: function (gridApi) {
+                    if (externalRegisterApiCallback) {
+                        externalRegisterApiCallback(gridApi);
+                    }
+                }
+            }, gridOptions);
+        };
+
+        retVal.getSortExpression = function ($scope) {
+            var columnDefs;
+            if ($scope.gridApi) {
+                columnDefs = $scope.gridApi.grid.columns;
+            } else {
+                var savedState = $localStorage['gridState:' + $scope.blade.template];
+                columnDefs = savedState ? savedState.columns : $scope.gridOptions.columnDefs;
+            }
+
+            var sorts = _.filter(columnDefs, function (x) {
+                return x.name !== '$path' && x.sort && (x.sort.direction === uiGridConstants.ASC || x.sort.direction === uiGridConstants.DESC);
+            });
+            sorts = _.sortBy(sorts, function (x) {
+                return x.sort.priority;
+            });
+            sorts = _.map(sorts, function (x) {
+                return (x.field ? x.field : x.name) + ':' + (x.sort.direction === uiGridConstants.ASC ? 'asc' : 'desc');
+            });
+            return sorts.join(';');
+        };
+
+        retVal.bindRefreshOnSortChanged = function ($scope) {
+            $scope.gridApi.core.on.sortChanged($scope, function () {
+                if (!$scope.blade.isLoading) $scope.blade.refresh();
+            });
+        };
+
+        return retVal;
+    }])
+
+    // ui-grid extension service. Used for extension grid options from other modules
+    .factory('platformWebApp.ui-grid.extension', [function () {
+        return {
+            extensionsMap: [],
+            registerExtension: function (gridId, extensionFn) {
+                this.extensionsMap[gridId] = extensionFn;
+            },
+            tryExtendGridOptions: function (gridId, gridOptions) {
+                if (this.extensionsMap[gridId]) {
+                    this.extensionsMap[gridId](gridOptions);
+                }
+            }
+        };
+    }])
+
+    // auto height and additional class for ui-grid
+    .directive('uiGridHeight', ['$timeout', '$window', function ($timeout, $window) {
+        return {
+            restrict: 'A',
+            link: {
+                pre: function (scope, element) {
+                    var bladeInner = $(element).parents('.blade-inner');
+                    bladeInner.addClass('ui-grid-no-scroll');
+
+                    var setGridHeight = function () {
+                        $timeout(function () {
+                            $(element).height(bladeInner.height());
+                        });
+                    };
+                    scope.$watch('blade.isExpanded', setGridHeight);
+                    scope.$watch('pageSettings.totalItems', setGridHeight);
+                    angular.element($window).bind('resize', setGridHeight);
+                }
+            }
+        };
+    }])
+    .run(['$templateRequest', function ($templateRequest) {
+        // Pre-load default templates, because we inject templates to grid options dynamically, so they not loaded by default
+        $templateRequest('$(Platform)/Scripts/common/templates/ui-grid/am-time-ago.cell.html');
+    }]);
+
+angular.module('platformWebApp')
+ .factory('platformWebApp.validators', [function () {
+     function webSafeFileNameValidator(value) {
+         var pattern = /^[\w.-]+$/;
+         return pattern.test(value);
+     }
+
+     return {
+         webSafeFileNameValidator: webSafeFileNameValidator
+     };
+ }]);
+
+angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
     $stateProvider
         .state('workspace.assets', {
@@ -17215,6 +17215,65 @@ angular.module('platformWebApp')
       };
       mainMenuService.addMenuItem(menuItem);
   }]);
+angular.module('platformWebApp')
+.config(['$stateProvider', function ($stateProvider) {
+    $stateProvider
+        .state('workspace.dynamicProperties', {
+            url: '/dynamicProperties',
+            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+            controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+                var blade = {
+                    id: 'dynamicPropertiesTypes',
+                    controller: 'platformWebApp.dynamicObjectListController',
+                    template: '$(Platform)/Scripts/app/dynamicProperties/blades/dynamicObject-list.tpl.html',
+                    isClosingDisabled: true
+                };
+                bladeNavigationService.showBlade(blade);
+            }
+            ]
+        });
+}]
+)
+.run(
+  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', function ($rootScope, mainMenuService, widgetService, $state) {
+      var menuItem = {
+          path: 'configuration/dynamicProperties',
+          icon: 'fa fa-pencil-square-o',
+          title: 'platform.menu.dynamic-properties',
+          priority: 2,
+          action: function () { $state.go('workspace.dynamicProperties'); },
+          permission: 'platform:dynamic_properties:access'
+      };
+      mainMenuService.addMenuItem(menuItem);
+  }])
+.filter('dynamicPropertyValueTypeToText', function () {
+    return function (input) {
+        var retVal;
+        switch (input) {
+            case 'ShortText': retVal = 'platform.properties.short-text.title'; break;
+            case 'LongText': retVal = 'platform.properties.long-text.title'; break;
+            case 'Integer': retVal = 'platform.properties.integer.title'; break;
+            case 'Decimal': retVal = 'platform.properties.decimal.title'; break;
+            case 'DateTime': retVal = 'platform.properties.date-time.title'; break;
+            case 'Boolean': retVal = 'platform.properties.boolean.title'; break;
+            case 'Html': retVal = 'platform.properties.html.title'; break;
+            default:
+                retVal = input ? input : 'platform.properties.undefined.title';
+        }
+        return retVal;
+    }
+})
+//Filter for showing localized display name in current user language
+.filter('localizeDynamicPropertyName', function () {
+    return function (input, lang) {
+        var retVal = input.name;
+        var displayName = _.find(input.displayNames, function (obj) { return obj && obj.locale.startsWith(lang); });
+        if (displayName && displayName.name)
+            retVal += ' (' + displayName.name + ')';
+
+        return retVal;
+    }
+});
 angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
 	$stateProvider
@@ -17358,65 +17417,6 @@ angular.module('platformWebApp')
 
   }]);
 
-angular.module('platformWebApp')
-.config(['$stateProvider', function ($stateProvider) {
-    $stateProvider
-        .state('workspace.dynamicProperties', {
-            url: '/dynamicProperties',
-            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-            controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-                var blade = {
-                    id: 'dynamicPropertiesTypes',
-                    controller: 'platformWebApp.dynamicObjectListController',
-                    template: '$(Platform)/Scripts/app/dynamicProperties/blades/dynamicObject-list.tpl.html',
-                    isClosingDisabled: true
-                };
-                bladeNavigationService.showBlade(blade);
-            }
-            ]
-        });
-}]
-)
-.run(
-  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', function ($rootScope, mainMenuService, widgetService, $state) {
-      var menuItem = {
-          path: 'configuration/dynamicProperties',
-          icon: 'fa fa-pencil-square-o',
-          title: 'platform.menu.dynamic-properties',
-          priority: 2,
-          action: function () { $state.go('workspace.dynamicProperties'); },
-          permission: 'platform:dynamic_properties:access'
-      };
-      mainMenuService.addMenuItem(menuItem);
-  }])
-.filter('dynamicPropertyValueTypeToText', function () {
-    return function (input) {
-        var retVal;
-        switch (input) {
-            case 'ShortText': retVal = 'platform.properties.short-text.title'; break;
-            case 'LongText': retVal = 'platform.properties.long-text.title'; break;
-            case 'Integer': retVal = 'platform.properties.integer.title'; break;
-            case 'Decimal': retVal = 'platform.properties.decimal.title'; break;
-            case 'DateTime': retVal = 'platform.properties.date-time.title'; break;
-            case 'Boolean': retVal = 'platform.properties.boolean.title'; break;
-            case 'Html': retVal = 'platform.properties.html.title'; break;
-            default:
-                retVal = input ? input : 'platform.properties.undefined.title';
-        }
-        return retVal;
-    }
-})
-//Filter for showing localized display name in current user language
-.filter('localizeDynamicPropertyName', function () {
-    return function (input, lang) {
-        var retVal = input.name;
-        var displayName = _.find(input.displayNames, function (obj) { return obj && obj.locale.startsWith(lang); });
-        if (displayName && displayName.name)
-            retVal += ' (' + displayName.name + ')';
-
-        return retVal;
-    }
-});
 angular.module('platformWebApp')
 .controller('platformWebApp.licenseDetailController', ['$scope', '$window', 'FileUploader', '$http', 'platformWebApp.bladeNavigationService', function ($scope, $window, FileUploader, $http, bladeNavigationService) {
     var blade = $scope.blade;
@@ -18015,79 +18015,6 @@ angular.module('platformWebApp')
         }, 'accountDetail');
     }]);
 
-angular.module('platformWebApp')
-.config(['$stateProvider', function ($stateProvider) {
-	$stateProvider
-        .state('setupWizard', {
-        	url: '/setupWizard',
-        	templateUrl: '$(Platform)/Scripts/app/setup/templates/setupWizard.tpl.html',
-            controller: ['$scope', '$state', '$stateParams', 'platformWebApp.setupWizard', function ($scope, $state, $stateParams, setupWizard) {}]
-        });
-}])
-.factory('platformWebApp.setupWizard', ['$state', 'platformWebApp.settings', function ($state, settings) {	
-	var wizardSteps = [];
-	var wizard =
-	{
-		//switches the current step in the wizard to passed or next on the current
-        showStep: function (step) {
-            var state = step ? step.state : "workspace";
-            if (wizard.currentStep != step) {
-                wizard.currentStep = step;
-                settings.update([{ name: 'VirtoCommerce.SetupStep', value: state }], function () {
-                    $state.go(state);
-                });
-            }
-            else {
-                $state.go(state);
-            }  
-		},
-
-		findStepByState : function (state) {
-			return _.find(wizardSteps, function (x) { return x.state == state; });
-		},
-
-		//registered step in the wizard
-		registerStep : function (wizardStep) {
-			wizardSteps.push(wizardStep);
-			wizardSteps = _.sortBy(wizardSteps, function (x) { return x.priority; });
-			var nextStep = undefined;
-			for (var i = wizardSteps.length; i-- > 0;) {
-				wizardSteps[i].nextStep = nextStep;
-				nextStep = wizardSteps[i];
-			}
-        },
-		load : function () {
-			//Initial step
-            wizard.currentStep = wizardSteps[0];
-            //load  saved setup step
-            return settings.getValues({ id: "VirtoCommerce.SetupStep" }).$promise.then(function (data) {
-				if (angular.isArray(data) && data.length > 0) {
-                    wizard.currentStep = wizard.findStepByState(data[0]);
-                    wizard.isCompleted = wizard.currentStep === undefined;
-                }
-                return wizard;
-			});
-        },
-        currentStep: undefined,
-        isCompleted: false
-	};
-	return wizard;
-}])
-.run(
-  ['$rootScope', '$state', 'platformWebApp.setupWizard', 'platformWebApp.settings', '$timeout', function ($rootScope, $state, setupWizard, settings, $timeout) {
-  	//Try to run setup wizard
-  	$rootScope.$on('loginStatusChanged', function (event, authContext) {
-  		if (authContext.isAuthenticated) {
-  			//timeout need because $state not fully loading in run method and need to wait little time
-                $timeout(function () {
-                    setupWizard.load().then(
-                        function (wizard) { if (!wizard.isCompleted) { wizard.showStep(wizard.currentStep); } });
-                }, 500);
-  		}
-  	});
-
-  }]);
-
 angular.module("platformWebApp")
 .config(
   ['$stateProvider', function ($stateProvider) {
@@ -18181,6 +18108,79 @@ function DictionarySettingDetailBlade(settingName) {
 
 angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
+	$stateProvider
+        .state('setupWizard', {
+        	url: '/setupWizard',
+        	templateUrl: '$(Platform)/Scripts/app/setup/templates/setupWizard.tpl.html',
+            controller: ['$scope', '$state', '$stateParams', 'platformWebApp.setupWizard', function ($scope, $state, $stateParams, setupWizard) {}]
+        });
+}])
+.factory('platformWebApp.setupWizard', ['$state', 'platformWebApp.settings', function ($state, settings) {	
+	var wizardSteps = [];
+	var wizard =
+	{
+		//switches the current step in the wizard to passed or next on the current
+        showStep: function (step) {
+            var state = step ? step.state : "workspace";
+            if (wizard.currentStep != step) {
+                wizard.currentStep = step;
+                settings.update([{ name: 'VirtoCommerce.SetupStep', value: state }], function () {
+                    $state.go(state);
+                });
+            }
+            else {
+                $state.go(state);
+            }  
+		},
+
+		findStepByState : function (state) {
+			return _.find(wizardSteps, function (x) { return x.state == state; });
+		},
+
+		//registered step in the wizard
+		registerStep : function (wizardStep) {
+			wizardSteps.push(wizardStep);
+			wizardSteps = _.sortBy(wizardSteps, function (x) { return x.priority; });
+			var nextStep = undefined;
+			for (var i = wizardSteps.length; i-- > 0;) {
+				wizardSteps[i].nextStep = nextStep;
+				nextStep = wizardSteps[i];
+			}
+        },
+		load : function () {
+			//Initial step
+            wizard.currentStep = wizardSteps[0];
+            //load  saved setup step
+            return settings.getValues({ id: "VirtoCommerce.SetupStep" }).$promise.then(function (data) {
+				if (angular.isArray(data) && data.length > 0) {
+                    wizard.currentStep = wizard.findStepByState(data[0]);
+                    wizard.isCompleted = wizard.currentStep === undefined;
+                }
+                return wizard;
+			});
+        },
+        currentStep: undefined,
+        isCompleted: false
+	};
+	return wizard;
+}])
+.run(
+  ['$rootScope', '$state', 'platformWebApp.setupWizard', 'platformWebApp.settings', '$timeout', function ($rootScope, $state, setupWizard, settings, $timeout) {
+  	//Try to run setup wizard
+  	$rootScope.$on('loginStatusChanged', function (event, authContext) {
+  		if (authContext.isAuthenticated) {
+  			//timeout need because $state not fully loading in run method and need to wait little time
+                $timeout(function () {
+                    setupWizard.load().then(
+                        function (wizard) { if (!wizard.isCompleted) { wizard.showStep(wizard.currentStep); } });
+                }, 500);
+  		}
+  	});
+
+  }]);
+
+angular.module('platformWebApp')
+.config(['$stateProvider', function ($stateProvider) {
     $stateProvider
         .state('workspace.userProfile', {
             url: '/userProfile',
@@ -18268,6 +18268,1869 @@ angular.module('platformWebApp')
     mainMenuService.addMenuItem(menuItem);
 }]);
 
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+"use strict";
+
+CodeMirror.registerHelper("fold", "brace", function(cm, start) {
+  var line = start.line, lineText = cm.getLine(line);
+  var startCh, tokenType;
+
+  function findOpening(openCh) {
+    for (var at = start.ch, pass = 0;;) {
+      var found = at <= 0 ? -1 : lineText.lastIndexOf(openCh, at - 1);
+      if (found == -1) {
+        if (pass == 1) break;
+        pass = 1;
+        at = lineText.length;
+        continue;
+      }
+      if (pass == 1 && found < start.ch) break;
+      tokenType = cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1));
+      if (!/^(comment|string)/.test(tokenType)) return found + 1;
+      at = found - 1;
+    }
+  }
+
+  var startToken = "{", endToken = "}", startCh = findOpening("{");
+  if (startCh == null) {
+    startToken = "[", endToken = "]";
+    startCh = findOpening("[");
+  }
+
+  if (startCh == null) return;
+  var count = 1, lastLine = cm.lastLine(), end, endCh;
+  outer: for (var i = line; i <= lastLine; ++i) {
+    var text = cm.getLine(i), pos = i == line ? startCh : 0;
+    for (;;) {
+      var nextOpen = text.indexOf(startToken, pos), nextClose = text.indexOf(endToken, pos);
+      if (nextOpen < 0) nextOpen = text.length;
+      if (nextClose < 0) nextClose = text.length;
+      pos = Math.min(nextOpen, nextClose);
+      if (pos == text.length) break;
+      if (cm.getTokenTypeAt(CodeMirror.Pos(i, pos + 1)) == tokenType) {
+        if (pos == nextOpen) ++count;
+        else if (!--count) { end = i; endCh = pos; break outer; }
+      }
+      ++pos;
+    }
+  }
+  if (end == null || line == end && endCh == startCh) return;
+  return {from: CodeMirror.Pos(line, startCh),
+          to: CodeMirror.Pos(end, endCh)};
+});
+
+CodeMirror.registerHelper("fold", "import", function(cm, start) {
+  function hasImport(line) {
+    if (line < cm.firstLine() || line > cm.lastLine()) return null;
+    var start = cm.getTokenAt(CodeMirror.Pos(line, 1));
+    if (!/\S/.test(start.string)) start = cm.getTokenAt(CodeMirror.Pos(line, start.end + 1));
+    if (start.type != "keyword" || start.string != "import") return null;
+    // Now find closing semicolon, return its position
+    for (var i = line, e = Math.min(cm.lastLine(), line + 10); i <= e; ++i) {
+      var text = cm.getLine(i), semi = text.indexOf(";");
+      if (semi != -1) return {startCh: start.end, end: CodeMirror.Pos(i, semi)};
+    }
+  }
+
+  var start = start.line, has = hasImport(start), prev;
+  if (!has || hasImport(start - 1) || ((prev = hasImport(start - 2)) && prev.end.line == start - 1))
+    return null;
+  for (var end = has.end;;) {
+    var next = hasImport(end.line + 1);
+    if (next == null) break;
+    end = next.end;
+  }
+  return {from: cm.clipPos(CodeMirror.Pos(start, has.startCh + 1)), to: end};
+});
+
+CodeMirror.registerHelper("fold", "include", function(cm, start) {
+  function hasInclude(line) {
+    if (line < cm.firstLine() || line > cm.lastLine()) return null;
+    var start = cm.getTokenAt(CodeMirror.Pos(line, 1));
+    if (!/\S/.test(start.string)) start = cm.getTokenAt(CodeMirror.Pos(line, start.end + 1));
+    if (start.type == "meta" && start.string.slice(0, 8) == "#include") return start.start + 8;
+  }
+
+  var start = start.line, has = hasInclude(start);
+  if (has == null || hasInclude(start - 1) != null) return null;
+  for (var end = start;;) {
+    var next = hasInclude(end + 1);
+    if (next == null) break;
+    ++end;
+  }
+  return {from: CodeMirror.Pos(start, has + 1),
+          to: cm.clipPos(CodeMirror.Pos(end))};
+});
+
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+"use strict";
+
+CodeMirror.registerGlobalHelper("fold", "comment", function(mode) {
+  return mode.blockCommentStart && mode.blockCommentEnd;
+}, function(cm, start) {
+  var mode = cm.getModeAt(start), startToken = mode.blockCommentStart, endToken = mode.blockCommentEnd;
+  if (!startToken || !endToken) return;
+  var line = start.line, lineText = cm.getLine(line);
+
+  var startCh;
+  for (var at = start.ch, pass = 0;;) {
+    var found = at <= 0 ? -1 : lineText.lastIndexOf(startToken, at - 1);
+    if (found == -1) {
+      if (pass == 1) return;
+      pass = 1;
+      at = lineText.length;
+      continue;
+    }
+    if (pass == 1 && found < start.ch) return;
+    if (/comment/.test(cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1)))) {
+      startCh = found + startToken.length;
+      break;
+    }
+    at = found - 1;
+  }
+
+  var depth = 1, lastLine = cm.lastLine(), end, endCh;
+  outer: for (var i = line; i <= lastLine; ++i) {
+    var text = cm.getLine(i), pos = i == line ? startCh : 0;
+    for (;;) {
+      var nextOpen = text.indexOf(startToken, pos), nextClose = text.indexOf(endToken, pos);
+      if (nextOpen < 0) nextOpen = text.length;
+      if (nextClose < 0) nextClose = text.length;
+      pos = Math.min(nextOpen, nextClose);
+      if (pos == text.length) break;
+      if (pos == nextOpen) ++depth;
+      else if (!--depth) { end = i; endCh = pos; break outer; }
+      ++pos;
+    }
+  }
+  if (end == null || line == end && endCh == startCh) return;
+  return {from: CodeMirror.Pos(line, startCh),
+          to: CodeMirror.Pos(end, endCh)};
+});
+
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+  "use strict";
+
+  function doFold(cm, pos, options, force) {
+    if (options && options.call) {
+      var finder = options;
+      options = null;
+    } else {
+      var finder = getOption(cm, options, "rangeFinder");
+    }
+    if (typeof pos == "number") pos = CodeMirror.Pos(pos, 0);
+    var minSize = getOption(cm, options, "minFoldSize");
+
+    function getRange(allowFolded) {
+      var range = finder(cm, pos);
+      if (!range || range.to.line - range.from.line < minSize) return null;
+      var marks = cm.findMarksAt(range.from);
+      for (var i = 0; i < marks.length; ++i) {
+        if (marks[i].__isFold && force !== "fold") {
+          if (!allowFolded) return null;
+          range.cleared = true;
+          marks[i].clear();
+        }
+      }
+      return range;
+    }
+
+    var range = getRange(true);
+    if (getOption(cm, options, "scanUp")) while (!range && pos.line > cm.firstLine()) {
+      pos = CodeMirror.Pos(pos.line - 1, 0);
+      range = getRange(false);
+    }
+    if (!range || range.cleared || force === "unfold") return;
+
+    var myWidget = makeWidget(cm, options);
+    CodeMirror.on(myWidget, "mousedown", function(e) {
+      myRange.clear();
+      CodeMirror.e_preventDefault(e);
+    });
+    var myRange = cm.markText(range.from, range.to, {
+      replacedWith: myWidget,
+      clearOnEnter: true,
+      __isFold: true
+    });
+    myRange.on("clear", function(from, to) {
+      CodeMirror.signal(cm, "unfold", cm, from, to);
+    });
+    CodeMirror.signal(cm, "fold", cm, range.from, range.to);
+  }
+
+  function makeWidget(cm, options) {
+    var widget = getOption(cm, options, "widget");
+    if (typeof widget == "string") {
+      var text = document.createTextNode(widget);
+      widget = document.createElement("span");
+      widget.appendChild(text);
+      widget.className = "CodeMirror-foldmarker";
+    }
+    return widget;
+  }
+
+  // Clumsy backwards-compatible interface
+  CodeMirror.newFoldFunction = function(rangeFinder, widget) {
+    return function(cm, pos) { doFold(cm, pos, {rangeFinder: rangeFinder, widget: widget}); };
+  };
+
+  // New-style interface
+  CodeMirror.defineExtension("foldCode", function(pos, options, force) {
+    doFold(this, pos, options, force);
+  });
+
+  CodeMirror.defineExtension("isFolded", function(pos) {
+    var marks = this.findMarksAt(pos);
+    for (var i = 0; i < marks.length; ++i)
+      if (marks[i].__isFold) return true;
+  });
+
+  CodeMirror.commands.toggleFold = function(cm) {
+    cm.foldCode(cm.getCursor());
+  };
+  CodeMirror.commands.fold = function(cm) {
+    cm.foldCode(cm.getCursor(), null, "fold");
+  };
+  CodeMirror.commands.unfold = function(cm) {
+    cm.foldCode(cm.getCursor(), null, "unfold");
+  };
+  CodeMirror.commands.foldAll = function(cm) {
+    cm.operation(function() {
+      for (var i = cm.firstLine(), e = cm.lastLine(); i <= e; i++)
+        cm.foldCode(CodeMirror.Pos(i, 0), null, "fold");
+    });
+  };
+  CodeMirror.commands.unfoldAll = function(cm) {
+    cm.operation(function() {
+      for (var i = cm.firstLine(), e = cm.lastLine(); i <= e; i++)
+        cm.foldCode(CodeMirror.Pos(i, 0), null, "unfold");
+    });
+  };
+
+  CodeMirror.registerHelper("fold", "combine", function() {
+    var funcs = Array.prototype.slice.call(arguments, 0);
+    return function(cm, start) {
+      for (var i = 0; i < funcs.length; ++i) {
+        var found = funcs[i](cm, start);
+        if (found) return found;
+      }
+    };
+  });
+
+  CodeMirror.registerHelper("fold", "auto", function(cm, start) {
+    var helpers = cm.getHelpers(start, "fold");
+    for (var i = 0; i < helpers.length; i++) {
+      var cur = helpers[i](cm, start);
+      if (cur) return cur;
+    }
+  });
+
+  var defaultOptions = {
+    rangeFinder: CodeMirror.fold.auto,
+    widget: "\u2194",
+    minFoldSize: 0,
+    scanUp: false
+  };
+
+  CodeMirror.defineOption("foldOptions", null);
+
+  function getOption(cm, options, name) {
+    if (options && options[name] !== undefined)
+      return options[name];
+    var editorOptions = cm.options.foldOptions;
+    if (editorOptions && editorOptions[name] !== undefined)
+      return editorOptions[name];
+    return defaultOptions[name];
+  }
+
+  CodeMirror.defineExtension("foldOption", function(options, name) {
+    return getOption(this, options, name);
+  });
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"), require("./foldcode"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror", "./foldcode"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+  "use strict";
+
+  CodeMirror.defineOption("foldGutter", false, function(cm, val, old) {
+    if (old && old != CodeMirror.Init) {
+      cm.clearGutter(cm.state.foldGutter.options.gutter);
+      cm.state.foldGutter = null;
+      cm.off("gutterClick", onGutterClick);
+      cm.off("change", onChange);
+      cm.off("viewportChange", onViewportChange);
+      cm.off("fold", onFold);
+      cm.off("unfold", onFold);
+      cm.off("swapDoc", updateInViewport);
+    }
+    if (val) {
+      cm.state.foldGutter = new State(parseOptions(val));
+      updateInViewport(cm);
+      cm.on("gutterClick", onGutterClick);
+      cm.on("change", onChange);
+      cm.on("viewportChange", onViewportChange);
+      cm.on("fold", onFold);
+      cm.on("unfold", onFold);
+      cm.on("swapDoc", updateInViewport);
+    }
+  });
+
+  var Pos = CodeMirror.Pos;
+
+  function State(options) {
+    this.options = options;
+    this.from = this.to = 0;
+  }
+
+  function parseOptions(opts) {
+    if (opts === true) opts = {};
+    if (opts.gutter == null) opts.gutter = "CodeMirror-foldgutter";
+    if (opts.indicatorOpen == null) opts.indicatorOpen = "CodeMirror-foldgutter-open";
+    if (opts.indicatorFolded == null) opts.indicatorFolded = "CodeMirror-foldgutter-folded";
+    return opts;
+  }
+
+  function isFolded(cm, line) {
+    var marks = cm.findMarksAt(Pos(line));
+    for (var i = 0; i < marks.length; ++i)
+      if (marks[i].__isFold && marks[i].find().from.line == line) return marks[i];
+  }
+
+  function marker(spec) {
+    if (typeof spec == "string") {
+      var elt = document.createElement("div");
+      elt.className = spec + " CodeMirror-guttermarker-subtle";
+      return elt;
+    } else {
+      return spec.cloneNode(true);
+    }
+  }
+
+  function updateFoldInfo(cm, from, to) {
+    var opts = cm.state.foldGutter.options, cur = from;
+    var minSize = cm.foldOption(opts, "minFoldSize");
+    var func = cm.foldOption(opts, "rangeFinder");
+    cm.eachLine(from, to, function(line) {
+      var mark = null;
+      if (isFolded(cm, cur)) {
+        mark = marker(opts.indicatorFolded);
+      } else {
+        var pos = Pos(cur, 0);
+        var range = func && func(cm, pos);
+        if (range && range.to.line - range.from.line >= minSize)
+          mark = marker(opts.indicatorOpen);
+      }
+      cm.setGutterMarker(line, opts.gutter, mark);
+      ++cur;
+    });
+  }
+
+  function updateInViewport(cm) {
+    var vp = cm.getViewport(), state = cm.state.foldGutter;
+    if (!state) return;
+    cm.operation(function() {
+      updateFoldInfo(cm, vp.from, vp.to);
+    });
+    state.from = vp.from; state.to = vp.to;
+  }
+
+  function onGutterClick(cm, line, gutter) {
+    var state = cm.state.foldGutter;
+    if (!state) return;
+    var opts = state.options;
+    if (gutter != opts.gutter) return;
+    var folded = isFolded(cm, line);
+    if (folded) folded.clear();
+    else cm.foldCode(Pos(line, 0), opts.rangeFinder);
+  }
+
+  function onChange(cm) {
+    var state = cm.state.foldGutter;
+    if (!state) return;
+    var opts = state.options;
+    state.from = state.to = 0;
+    clearTimeout(state.changeUpdate);
+    state.changeUpdate = setTimeout(function() { updateInViewport(cm); }, opts.foldOnChangeTimeSpan || 600);
+  }
+
+  function onViewportChange(cm) {
+    var state = cm.state.foldGutter;
+    if (!state) return;
+    var opts = state.options;
+    clearTimeout(state.changeUpdate);
+    state.changeUpdate = setTimeout(function() {
+      var vp = cm.getViewport();
+      if (state.from == state.to || vp.from - state.to > 20 || state.from - vp.to > 20) {
+        updateInViewport(cm);
+      } else {
+        cm.operation(function() {
+          if (vp.from < state.from) {
+            updateFoldInfo(cm, vp.from, state.from);
+            state.from = vp.from;
+          }
+          if (vp.to > state.to) {
+            updateFoldInfo(cm, state.to, vp.to);
+            state.to = vp.to;
+          }
+        });
+      }
+    }, opts.updateViewportTimeSpan || 400);
+  }
+
+  function onFold(cm, from) {
+    var state = cm.state.foldGutter;
+    if (!state) return;
+    var line = from.line;
+    if (line >= state.from && line < state.to)
+      updateFoldInfo(cm, line, line + 1);
+  }
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+"use strict";
+
+CodeMirror.registerHelper("fold", "indent", function(cm, start) {
+  var tabSize = cm.getOption("tabSize"), firstLine = cm.getLine(start.line);
+  if (!/\S/.test(firstLine)) return;
+  var getIndent = function(line) {
+    return CodeMirror.countColumn(line, null, tabSize);
+  };
+  var myIndent = getIndent(firstLine);
+  var lastLineInFold = null;
+  // Go through lines until we find a line that definitely doesn't belong in
+  // the block we're folding, or to the end.
+  for (var i = start.line + 1, end = cm.lastLine(); i <= end; ++i) {
+    var curLine = cm.getLine(i);
+    var curIndent = getIndent(curLine);
+    if (curIndent > myIndent) {
+      // Lines with a greater indent are considered part of the block.
+      lastLineInFold = i;
+    } else if (!/\S/.test(curLine)) {
+      // Empty lines might be breaks within the block we're trying to fold.
+    } else {
+      // A non-empty line at an indent equal to or less than ours marks the
+      // start of another block.
+      break;
+    }
+  }
+  if (lastLineInFold) return {
+    from: CodeMirror.Pos(start.line, firstLine.length),
+    to: CodeMirror.Pos(lastLineInFold, cm.getLine(lastLineInFold).length)
+  };
+});
+
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+"use strict";
+
+CodeMirror.registerHelper("fold", "markdown", function(cm, start) {
+  var maxDepth = 100;
+
+  function isHeader(lineNo) {
+    var tokentype = cm.getTokenTypeAt(CodeMirror.Pos(lineNo, 0));
+    return tokentype && /\bheader\b/.test(tokentype);
+  }
+
+  function headerLevel(lineNo, line, nextLine) {
+    var match = line && line.match(/^#+/);
+    if (match && isHeader(lineNo)) return match[0].length;
+    match = nextLine && nextLine.match(/^[=\-]+\s*$/);
+    if (match && isHeader(lineNo + 1)) return nextLine[0] == "=" ? 1 : 2;
+    return maxDepth;
+  }
+
+  var firstLine = cm.getLine(start.line), nextLine = cm.getLine(start.line + 1);
+  var level = headerLevel(start.line, firstLine, nextLine);
+  if (level === maxDepth) return undefined;
+
+  var lastLineNo = cm.lastLine();
+  var end = start.line, nextNextLine = cm.getLine(end + 2);
+  while (end < lastLineNo) {
+    if (headerLevel(end + 1, nextLine, nextNextLine) <= level) break;
+    ++end;
+    nextLine = nextNextLine;
+    nextNextLine = cm.getLine(end + 2);
+  }
+
+  return {
+    from: CodeMirror.Pos(start.line, firstLine.length),
+    to: CodeMirror.Pos(end, cm.getLine(end).length)
+  };
+});
+
+});
+
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+  "use strict";
+
+  var Pos = CodeMirror.Pos;
+  function cmp(a, b) { return a.line - b.line || a.ch - b.ch; }
+
+  var nameStartChar = "A-Z_a-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD";
+  var nameChar = nameStartChar + "\-\:\.0-9\\u00B7\\u0300-\\u036F\\u203F-\\u2040";
+  var xmlTagStart = new RegExp("<(/?)([" + nameStartChar + "][" + nameChar + "]*)", "g");
+
+  function Iter(cm, line, ch, range) {
+    this.line = line; this.ch = ch;
+    this.cm = cm; this.text = cm.getLine(line);
+    this.min = range ? range.from : cm.firstLine();
+    this.max = range ? range.to - 1 : cm.lastLine();
+  }
+
+  function tagAt(iter, ch) {
+    var type = iter.cm.getTokenTypeAt(Pos(iter.line, ch));
+    return type && /\btag\b/.test(type);
+  }
+
+  function nextLine(iter) {
+    if (iter.line >= iter.max) return;
+    iter.ch = 0;
+    iter.text = iter.cm.getLine(++iter.line);
+    return true;
+  }
+  function prevLine(iter) {
+    if (iter.line <= iter.min) return;
+    iter.text = iter.cm.getLine(--iter.line);
+    iter.ch = iter.text.length;
+    return true;
+  }
+
+  function toTagEnd(iter) {
+    for (;;) {
+      var gt = iter.text.indexOf(">", iter.ch);
+      if (gt == -1) { if (nextLine(iter)) continue; else return; }
+      if (!tagAt(iter, gt + 1)) { iter.ch = gt + 1; continue; }
+      var lastSlash = iter.text.lastIndexOf("/", gt);
+      var selfClose = lastSlash > -1 && !/\S/.test(iter.text.slice(lastSlash + 1, gt));
+      iter.ch = gt + 1;
+      return selfClose ? "selfClose" : "regular";
+    }
+  }
+  function toTagStart(iter) {
+    for (;;) {
+      var lt = iter.ch ? iter.text.lastIndexOf("<", iter.ch - 1) : -1;
+      if (lt == -1) { if (prevLine(iter)) continue; else return; }
+      if (!tagAt(iter, lt + 1)) { iter.ch = lt; continue; }
+      xmlTagStart.lastIndex = lt;
+      iter.ch = lt;
+      var match = xmlTagStart.exec(iter.text);
+      if (match && match.index == lt) return match;
+    }
+  }
+
+  function toNextTag(iter) {
+    for (;;) {
+      xmlTagStart.lastIndex = iter.ch;
+      var found = xmlTagStart.exec(iter.text);
+      if (!found) { if (nextLine(iter)) continue; else return; }
+      if (!tagAt(iter, found.index + 1)) { iter.ch = found.index + 1; continue; }
+      iter.ch = found.index + found[0].length;
+      return found;
+    }
+  }
+  function toPrevTag(iter) {
+    for (;;) {
+      var gt = iter.ch ? iter.text.lastIndexOf(">", iter.ch - 1) : -1;
+      if (gt == -1) { if (prevLine(iter)) continue; else return; }
+      if (!tagAt(iter, gt + 1)) { iter.ch = gt; continue; }
+      var lastSlash = iter.text.lastIndexOf("/", gt);
+      var selfClose = lastSlash > -1 && !/\S/.test(iter.text.slice(lastSlash + 1, gt));
+      iter.ch = gt + 1;
+      return selfClose ? "selfClose" : "regular";
+    }
+  }
+
+  function findMatchingClose(iter, tag) {
+    var stack = [];
+    for (;;) {
+      var next = toNextTag(iter), end, startLine = iter.line, startCh = iter.ch - (next ? next[0].length : 0);
+      if (!next || !(end = toTagEnd(iter))) return;
+      if (end == "selfClose") continue;
+      if (next[1]) { // closing tag
+        for (var i = stack.length - 1; i >= 0; --i) if (stack[i] == next[2]) {
+          stack.length = i;
+          break;
+        }
+        if (i < 0 && (!tag || tag == next[2])) return {
+          tag: next[2],
+          from: Pos(startLine, startCh),
+          to: Pos(iter.line, iter.ch)
+        };
+      } else { // opening tag
+        stack.push(next[2]);
+      }
+    }
+  }
+  function findMatchingOpen(iter, tag) {
+    var stack = [];
+    for (;;) {
+      var prev = toPrevTag(iter);
+      if (!prev) return;
+      if (prev == "selfClose") { toTagStart(iter); continue; }
+      var endLine = iter.line, endCh = iter.ch;
+      var start = toTagStart(iter);
+      if (!start) return;
+      if (start[1]) { // closing tag
+        stack.push(start[2]);
+      } else { // opening tag
+        for (var i = stack.length - 1; i >= 0; --i) if (stack[i] == start[2]) {
+          stack.length = i;
+          break;
+        }
+        if (i < 0 && (!tag || tag == start[2])) return {
+          tag: start[2],
+          from: Pos(iter.line, iter.ch),
+          to: Pos(endLine, endCh)
+        };
+      }
+    }
+  }
+
+  CodeMirror.registerHelper("fold", "xml", function(cm, start) {
+    var iter = new Iter(cm, start.line, 0);
+    for (;;) {
+      var openTag = toNextTag(iter), end;
+      if (!openTag || iter.line != start.line || !(end = toTagEnd(iter))) return;
+      if (!openTag[1] && end != "selfClose") {
+        var start = Pos(iter.line, iter.ch);
+        var close = findMatchingClose(iter, openTag[2]);
+        return close && {from: start, to: close.from};
+      }
+    }
+  });
+  CodeMirror.findMatchingTag = function(cm, pos, range) {
+    var iter = new Iter(cm, pos.line, pos.ch, range);
+    if (iter.text.indexOf(">") == -1 && iter.text.indexOf("<") == -1) return;
+    var end = toTagEnd(iter), to = end && Pos(iter.line, iter.ch);
+    var start = end && toTagStart(iter);
+    if (!end || !start || cmp(iter, pos) > 0) return;
+    var here = {from: Pos(iter.line, iter.ch), to: to, tag: start[2]};
+    if (end == "selfClose") return {open: here, close: null, at: "open"};
+
+    if (start[1]) { // closing tag
+      return {open: findMatchingOpen(iter, start[2]), close: here, at: "close"};
+    } else { // opening tag
+      iter = new Iter(cm, to.line, to.ch, range);
+      return {open: here, close: findMatchingClose(iter, start[2]), at: "open"};
+    }
+  };
+
+  CodeMirror.findEnclosingTag = function(cm, pos, range) {
+    var iter = new Iter(cm, pos.line, pos.ch, range);
+    for (;;) {
+      var open = findMatchingOpen(iter);
+      if (!open) break;
+      var forward = new Iter(cm, pos.line, pos.ch, range);
+      var close = findMatchingClose(forward, open.tag);
+      if (close) return {open: open, close: close};
+    }
+  };
+
+  // Used by addon/edit/closetag.js
+  CodeMirror.scanForClosingTag = function(cm, pos, name, end) {
+    var iter = new Iter(cm, pos.line, pos.ch, end ? {from: 0, to: end} : null);
+    return findMatchingClose(iter, name);
+  };
+});
+
+// Full list of countries defined by ISO 3166-1 alpha-3
+// based on https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
+angular.module('platformWebApp')
+.factory('platformWebApp.common.countries', function () {
+    return {
+        get: function (id) {
+            return _.findWhere(this.query(), { id: this.normalize(id) });
+        },
+        contains: function (id) {
+            return _.map(this.query(), function (entry) { return entry.id }).includes(this.normalize(id));
+        },
+        normalize: function(id) {
+            var result = undefined;
+            if (!!id) {
+                result = id.toUpperCase();
+            }
+            return result;
+        },
+        query: function () {
+            return [
+    { id: "AFG", name: "Afghanistan" },
+    { id: "ALA", name: "Åland Islands" },
+    { id: "ALB", name: "Albania" },
+    { id: "DZA", name: "Algeria" },
+    { id: "ASM", name: "American Samoa" },
+    { id: "AND", name: "Andorra" },
+    { id: "AGO", name: "Angola" },
+    { id: "AIA", name: "Anguilla" },
+    { id: "ATA", name: "Antarctica" },
+    { id: "ATG", name: "Antigua and Barbuda" },
+    { id: "ARG", name: "Argentina" },
+    { id: "ARM", name: "Armenia" },
+    { id: "ABW", name: "Aruba" },
+    { id: "AUS", name: "Australia" },
+    { id: "AUT", name: "Austria" },
+    { id: "AZE", name: "Azerbaijan" },
+    { id: "BHS", name: "Bahamas" },
+    { id: "BHR", name: "Bahrain" },
+    { id: "BGD", name: "Bangladesh" },
+    { id: "BRB", name: "Barbados" },
+    { id: "BLR", name: "Belarus" },
+    { id: "BEL", name: "Belgium" },
+    { id: "BLZ", name: "Belize" },
+    { id: "BEN", name: "Benin" },
+    { id: "BMU", name: "Bermuda" },
+    { id: "BTN", name: "Bhutan" },
+    { id: "BOL", name: "Bolivia, Plurinational State of" },
+    { id: "BES", name: "Bonaire, Sint Eustatius and Saba" },
+    { id: "BIH", name: "Bosnia and Herzegovina" },
+    { id: "BWA", name: "Botswana" },
+    { id: "BVT", name: "Bouvet Island" },
+    { id: "BRA", name: "Brazil" },
+    { id: "IOT", name: "British Indian Ocean Territory" },
+    { id: "BRN", name: "Brunei Darussalam" },
+    { id: "BGR", name: "Bulgaria" },
+    { id: "BFA", name: "Burkina Faso" },
+    { id: "BDI", name: "Burundi" },
+    { id: "KHM", name: "Cambodia" },
+    { id: "CMR", name: "Cameroon" },
+    { id: "CAN", name: "Canada" },
+    { id: "CPV", name: "Cape Verde" },
+    { id: "CYM", name: "Cayman Islands" },
+    { id: "CAF", name: "Central African Republic" },
+    { id: "TCD", name: "Chad" },
+    { id: "CHL", name: "Chile" },
+    { id: "CHN", name: "China" },
+    { id: "CXR", name: "Christmas Island" },
+    { id: "CCK", name: "Cocos (Keeling) Islands" },
+    { id: "COL", name: "Colombia" },
+    { id: "COM", name: "Comoros" },
+    { id: "COG", name: "Congo" },
+    { id: "COD", name: "Congo, the Democratic Republic of the" },
+    { id: "COK", name: "Cook Islands" },
+    { id: "CRI", name: "Costa Rica" },
+    { id: "CIV", name: "Côte d'Ivoire" },
+    { id: "HRV", name: "Croatia" },
+    { id: "CUB", name: "Cuba" },
+    { id: "CUW", name: "Curaçao" },
+    { id: "CYP", name: "Cyprus" },
+    { id: "CZE", name: "Czech Republic" },
+    { id: "DNK", name: "Denmark" },
+    { id: "DJI", name: "Djibouti" },
+    { id: "DMA", name: "Dominica" },
+    { id: "DOM", name: "Dominican Republic" },
+    { id: "ECU", name: "Ecuador" },
+    { id: "EGY", name: "Egypt" },
+    { id: "SLV", name: "El Salvador" },
+    { id: "GNQ", name: "Equatorial Guinea" },
+    { id: "ERI", name: "Eritrea" },
+    { id: "EST", name: "Estonia" },
+    { id: "ETH", name: "Ethiopia" },
+    { id: "FLK", name: "Falkland Islands (Malvinas)" },
+    { id: "FRO", name: "Faroe Islands" },
+    { id: "FJI", name: "Fiji" },
+    { id: "FIN", name: "Finland" },
+    { id: "FRA", name: "France" },
+    { id: "GUF", name: "French Guiana" },
+    { id: "PYF", name: "French Polynesia" },
+    { id: "ATF", name: "French Southern Territories" },
+    { id: "GAB", name: "Gabon" },
+    { id: "GMB", name: "Gambia" },
+    { id: "GEO", name: "Georgia" },
+    { id: "DEU", name: "Germany" },
+    { id: "GHA", name: "Ghana" },
+    { id: "GIB", name: "Gibraltar" },
+    { id: "GRC", name: "Greece" },
+    { id: "GRL", name: "Greenland" },
+    { id: "GRD", name: "Grenada" },
+    { id: "GLP", name: "Guadeloupe" },
+    { id: "GUM", name: "Guam" },
+    { id: "GTM", name: "Guatemala" },
+    { id: "GGY", name: "Guernsey" },
+    { id: "GIN", name: "Guinea" },
+    { id: "GNB", name: "Guinea-Bissau" },
+    { id: "GUY", name: "Guyana" },
+    { id: "HTI", name: "Haiti" },
+    { id: "HMD", name: "Heard Island and McDonald Islands" },
+    { id: "VAT", name: "Holy See (Vatican City State)" },
+    { id: "HND", name: "Honduras" },
+    { id: "HKG", name: "Hong Kong" },
+    { id: "HUN", name: "Hungary" },
+    { id: "ISL", name: "Iceland" },
+    { id: "IND", name: "India" },
+    { id: "IDN", name: "Indonesia" },
+    { id: "IRN", name: "Iran, Islamic Republic of" },
+    { id: "IRQ", name: "Iraq" },
+    { id: "IRL", name: "Ireland" },
+    { id: "IMN", name: "Isle of Man" },
+    { id: "ISR", name: "Israel" },
+    { id: "ITA", name: "Italy" },
+    { id: "JAM", name: "Jamaica" },
+    { id: "JPN", name: "Japan" },
+    { id: "JEY", name: "Jersey" },
+    { id: "JOR", name: "Jordan" },
+    { id: "KAZ", name: "Kazakhstan" },
+    { id: "KEN", name: "Kenya" },
+    { id: "KIR", name: "Kiribati" },
+    { id: "PRK", name: "Korea, Democratic People's Republic of" },
+    { id: "KOR", name: "Korea, Republic of" },
+    { id: "KWT", name: "Kuwait" },
+    { id: "KGZ", name: "Kyrgyzstan" },
+    { id: "LAO", name: "Lao People's Democratic Republic" },
+    { id: "LVA", name: "Latvia" },
+    { id: "LBN", name: "Lebanon" },
+    { id: "LSO", name: "Lesotho" },
+    { id: "LBR", name: "Liberia" },
+    { id: "LBY", name: "Libya" },
+    { id: "LIE", name: "Liechtenstein" },
+    { id: "LTU", name: "Lithuania" },
+    { id: "LUX", name: "Luxembourg" },
+    { id: "MAC", name: "Macao" },
+    { id: "MKD", name: "Macedonia, the former Yugoslav Republic of" },
+    { id: "MDG", name: "Madagascar" },
+    { id: "MWI", name: "Malawi" },
+    { id: "MYS", name: "Malaysia" },
+    { id: "MDV", name: "Maldives" },
+    { id: "MLI", name: "Mali" },
+    { id: "MLT", name: "Malta" },
+    { id: "MHL", name: "Marshall Islands" },
+    { id: "MTQ", name: "Martinique" },
+    { id: "MRT", name: "Mauritania" },
+    { id: "MUS", name: "Mauritius" },
+    { id: "MYT", name: "Mayotte" },
+    { id: "MEX", name: "Mexico" },
+    { id: "FSM", name: "Micronesia, Federated States of" },
+    { id: "MDA", name: "Moldova, Republic of" },
+    { id: "MCO", name: "Monaco" },
+    { id: "MNG", name: "Mongolia" },
+    { id: "MNE", name: "Montenegro" },
+    { id: "MSR", name: "Montserrat" },
+    { id: "MAR", name: "Morocco" },
+    { id: "MOZ", name: "Mozambique" },
+    { id: "MMR", name: "Myanmar" },
+    { id: "NAM", name: "Namibia" },
+    { id: "NRU", name: "Nauru" },
+    { id: "NPL", name: "Nepal" },
+    { id: "NLD", name: "Netherlands" },
+    { id: "NCL", name: "New Caledonia" },
+    { id: "NZL", name: "New Zealand" },
+    { id: "NIC", name: "Nicaragua" },
+    { id: "NER", name: "Niger" },
+    { id: "NGA", name: "Nigeria" },
+    { id: "NIU", name: "Niue" },
+    { id: "NFK", name: "Norfolk Island" },
+    { id: "MNP", name: "Northern Mariana Islands" },
+    { id: "NOR", name: "Norway" },
+    { id: "OMN", name: "Oman" },
+    { id: "PAK", name: "Pakistan" },
+    { id: "PLW", name: "Palau" },
+    { id: "PSE", name: "Palestinian Territory, Occupied" },
+    { id: "PAN", name: "Panama" },
+    { id: "PNG", name: "Papua New Guinea" },
+    { id: "PRY", name: "Paraguay" },
+    { id: "PER", name: "Peru" },
+    { id: "PHL", name: "Philippines" },
+    { id: "PCN", name: "Pitcairn" },
+    { id: "POL", name: "Poland" },
+    { id: "PRT", name: "Portugal" },
+    { id: "PRI", name: "Puerto Rico" },
+    { id: "QAT", name: "Qatar" },
+    { id: "REU", name: "Réunion" },
+    { id: "ROU", name: "Romania" },
+    { id: "RUS", name: "Russian Federation" },
+    { id: "RWA", name: "Rwanda" },
+    { id: "BLM", name: "Saint Barthélemy" },
+    { id: "SHN", name: "Saint Helena, Ascension and Tristan da Cunha" },
+    { id: "KNA", name: "Saint Kitts and Nevis" },
+    { id: "LCA", name: "Saint Lucia" },
+    { id: "MAF", name: "Saint Martin (French part)" },
+    { id: "SPM", name: "Saint Pierre and Miquelon" },
+    { id: "VCT", name: "Saint Vincent and the Grenadines" },
+    { id: "WSM", name: "Samoa" },
+    { id: "SMR", name: "San Marino" },
+    { id: "STP", name: "Sao Tome and Principe" },
+    { id: "SAU", name: "Saudi Arabia" },
+    { id: "SEN", name: "Senegal" },
+    { id: "SRB", name: "Serbia" },
+    { id: "SYC", name: "Seychelles" },
+    { id: "SLE", name: "Sierra Leone" },
+    { id: "SGP", name: "Singapore" },
+    { id: "SXM", name: "Sint Maarten (Dutch part)" },
+    { id: "SVK", name: "Slovakia" },
+    { id: "SVN", name: "Slovenia" },
+    { id: "SLB", name: "Solomon Islands" },
+    { id: "SOM", name: "Somalia" },
+    { id: "ZAF", name: "South Africa" },
+    { id: "SGS", name: "South Georgia and the South Sandwich Islands" },
+    { id: "SSD", name: "South Sudan" },
+    { id: "ESP", name: "Spain" },
+    { id: "LKA", name: "Sri Lanka" },
+    { id: "SDN", name: "Sudan" },
+    { id: "SUR", name: "Suriname" },
+    { id: "SJM", name: "Svalbard and Jan Mayen" },
+    { id: "SWZ", name: "Swaziland" },
+    { id: "SWE", name: "Sweden" },
+    { id: "CHE", name: "Switzerland" },
+    { id: "SYR", name: "Syrian Arab Republic" },
+    { id: "TWN", name: "Taiwan, Province of China" },
+    { id: "TJK", name: "Tajikistan" },
+    { id: "TZA", name: "Tanzania, United Republic of" },
+    { id: "THA", name: "Thailand" },
+    { id: "TLS", name: "Timor-Leste" },
+    { id: "TGO", name: "Togo" },
+    { id: "TKL", name: "Tokelau" },
+    { id: "TON", name: "Tonga" },
+    { id: "TTO", name: "Trinidad and Tobago" },
+    { id: "TUN", name: "Tunisia" },
+    { id: "TUR", name: "Turkey" },
+    { id: "TKM", name: "Turkmenistan" },
+    { id: "TCA", name: "Turks and Caicos Islands" },
+    { id: "TUV", name: "Tuvalu" },
+    { id: "UGA", name: "Uganda" },
+    { id: "UKR", name: "Ukraine" },
+    { id: "ARE", name: "United Arab Emirates" },
+    { id: "GBR", name: "United Kingdom" },
+    { id: "USA", name: "United States" },
+    { id: "UMI", name: "United States Minor Outlying Islands" },
+    { id: "URY", name: "Uruguay" },
+    { id: "UZB", name: "Uzbekistan" },
+    { id: "VUT", name: "Vanuatu" },
+    { id: "VEN", name: "Venezuela, Bolivarian Republic of" },
+    { id: "VNM", name: "Viet Nam" },
+    { id: "VGB", name: "Virgin Islands, British" },
+    { id: "VIR", name: "Virgin Islands, U.S." },
+    { id: "WLF", name: "Wallis and Futuna" },
+    { id: "ESH", name: "Western Sahara" },
+    { id: "YEM", name: "Yemen" },
+    { id: "ZMB", name: "Zambia" },
+    { id: "ZWE", name: "Zimbabwe" }
+            ];
+        }
+    };
+});
+// Full list of languages defined by ISO 639-1
+// based on https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
+angular.module('platformWebApp')
+.factory('platformWebApp.common.languages', function () {
+    return {
+        get: function (id) {
+            return _.findWhere(this.query(), { id: this.normalize(id) });
+        },
+        contains: function (id) {
+            return _.map(this.query(), function (entry) { return entry.id }).includes(this.normalize(id));
+        },
+        normalize: function(id) {
+            var result = undefined;
+            if (!!id) {
+                result = id.toLowerCase();
+            }
+            return result;
+        },
+        query: function () {
+            return [
+      { id: "ab", name: "Abkhaz", nativeName: "аҧсуа" },
+      { id: "aa", name: "Afar", nativeName: "Afaraf" },
+      { id: "af", name: "Afrikaans", nativeName: "Afrikaans" },
+      { id: "ak", name: "Akan", nativeName: "Akan" },
+      { id: "sq", name: "Albanian", nativeName: "Shqip" },
+      { id: "am", name: "Amharic", nativeName: "አማርኛ" },
+      { id: "ar", name: "Arabic", nativeName: "العربية" },
+      { id: "an", name: "Aragonese", nativeName: "Aragonés" },
+      { id: "hy", name: "Armenian", nativeName: "Հայերեն" },
+      { id: "as", name: "Assamese", nativeName: "অসমীয়া" },
+      { id: "av", name: "Avaric", nativeName: "авар мацӀ, магӀарул мацӀ" },
+      { id: "ae", name: "Avestan", nativeName: "avesta" },
+      { id: "ay", name: "Aymara", nativeName: "aymar aru" },
+      { id: "az", name: "Azerbaijani", nativeName: "azərbaycan dili" },
+      { id: "bm", name: "Bambara", nativeName: "bamanankan" },
+      { id: "ba", name: "Bashkir", nativeName: "башҡорт теле" },
+      { id: "eu", name: "Basque", nativeName: "euskara, euskera" },
+      { id: "be", name: "Belarusian", nativeName: "Беларуская" },
+      { id: "bn", name: "Bengali", nativeName: "বাংলা" },
+      { id: "bh", name: "Bihari", nativeName: "भोजपुरी" },
+      { id: "bi", name: "Bislama", nativeName: "Bislama" },
+      { id: "bs", name: "Bosnian", nativeName: "bosanski jezik" },
+      { id: "br", name: "Breton", nativeName: "brezhoneg" },
+      { id: "bg", name: "Bulgarian", nativeName: "български език" },
+      { id: "my", name: "Burmese", nativeName: "ဗမာစာ" },
+      { id: "ca", name: "Catalan; Valencian", nativeName: "Català" },
+      { id: "ch", name: "Chamorro", nativeName: "Chamoru" },
+      { id: "ce", name: "Chechen", nativeName: "нохчийн мотт" },
+      { id: "ny", name: "Chichewa; Chewa; Nyanja", nativeName: "chiCheŵa, chinyanja" },
+      { id: "zh", name: "Chinese", nativeName: "中文 (Zhōngwén), 汉语, 漢語" },
+      { id: "cv", name: "Chuvash", nativeName: "чӑваш чӗлхи" },
+      { id: "kw", name: "Cornish", nativeName: "Kernewek" },
+      { id: "co", name: "Corsican", nativeName: "corsu, lingua corsa" },
+      { id: "cr", name: "Cree", nativeName: "ᓀᐦᐃᔭᐍᐏᐣ" },
+      { id: "hr", name: "Croatian", nativeName: "hrvatski" },
+      { id: "cs", name: "Czech", nativeName: "česky, čeština" },
+      { id: "da", name: "Danish", nativeName: "dansk" },
+      { id: "dv", name: "Divehi; Dhivehi; Maldivian;", nativeName: "ދިވެހި" },
+      { id: "nl", name: "Dutch", nativeName: "Nederlands, Vlaams" },
+      { id: "dz", name: "Dzongkha", nativeName: "རྫོང་ཁ" },
+      { id: "en", name: "English", nativeName: "English" },
+      { id: "eo", name: "Esperanto", nativeName: "Esperanto" },
+      { id: "et", name: "Estonian", nativeName: "eesti, eesti keel" },
+      { id: "ee", name: "Ewe", nativeName: "Eʋegbe" },
+      { id: "fo", name: "Faroese", nativeName: "føroyskt" },
+      { id: "fj", name: "Fijian", nativeName: "vosa Vakaviti" },
+      { id: "fi", name: "Finnish", nativeName: "suomi, suomen kieli" },
+      { id: "fr", name: "French", nativeName: "français, langue française" },
+      { id: "ff", name: "Fula; Fulah; Pulaar; Pular", nativeName: "Fulfulde, Pulaar, Pular" },
+      { id: "gl", name: "Galician", nativeName: "Galego" },
+      { id: "ka", name: "Georgian", nativeName: "ქართული" },
+      { id: "de", name: "German", nativeName: "Deutsch" },
+      { id: "el", name: "Greek, Modern", nativeName: "Ελληνικά" },
+      { id: "gn", name: "Guaraní", nativeName: "Avañeẽ" },
+      { id: "gu", name: "Gujarati", nativeName: "ગુજરાતી" },
+      { id: "ht", name: "Haitian; Haitian Creole", nativeName: "Kreyòl ayisyen" },
+      { id: "ha", name: "Hausa", nativeName: "Hausa, هَوُسَ" },
+      { id: "he", name: "Hebrew (modern)", nativeName: "עברית" },
+      { id: "hz", name: "Herero", nativeName: "Otjiherero" },
+      { id: "hi", name: "Hindi", nativeName: "हिन्दी, हिंदी" },
+      { id: "ho", name: "Hiri Motu", nativeName: "Hiri Motu" },
+      { id: "hu", name: "Hungarian", nativeName: "Magyar" },
+      { id: "ia", name: "Interlingua", nativeName: "Interlingua" },
+      { id: "id", name: "Indonesian", nativeName: "Bahasa Indonesia" },
+      { id: "ie", name: "Interlingue", nativeName: "Originally called Occidental; then Interlingue after WWII" },
+      { id: "ga", name: "Irish", nativeName: "Gaeilge" },
+      { id: "ig", name: "Igbo", nativeName: "Asụsụ Igbo" },
+      { id: "ik", name: "Inupiaq", nativeName: "Iñupiaq, Iñupiatun" },
+      { id: "io", name: "Ido", nativeName: "Ido" },
+      { id: "is", name: "Icelandic", nativeName: "Íslenska" },
+      { id: "it", name: "Italian", nativeName: "Italiano" },
+      { id: "iu", name: "Inuktitut", nativeName: "ᐃᓄᒃᑎᑐᑦ" },
+      { id: "ja", name: "Japanese", nativeName: "日本語 (にほんご／にっぽんご)" },
+      { id: "jv", name: "Javanese", nativeName: "basa Jawa" },
+      { id: "kl", name: "Kalaallisut, Greenlandic", nativeName: "kalaallisut, kalaallit oqaasii" },
+      { id: "kn", name: "Kannada", nativeName: "ಕನ್ನಡ" },
+      { id: "kr", name: "Kanuri", nativeName: "Kanuri" },
+      { id: "ks", name: "Kashmiri", nativeName: "कश्मीरी, كشميري‎" },
+      { id: "kk", name: "Kazakh", nativeName: "Қазақ тілі" },
+      { id: "km", name: "Khmer", nativeName: "ភាសាខ្មែរ" },
+      { id: "ki", name: "Kikuyu, Gikuyu", nativeName: "Gĩkũyũ" },
+      { id: "rw", name: "Kinyarwanda", nativeName: "Ikinyarwanda" },
+      { id: "ky", name: "Kirghiz, Kyrgyz", nativeName: "кыргыз тили" },
+      { id: "kv", name: "Komi", nativeName: "коми кыв" },
+      { id: "kg", name: "Kongo", nativeName: "KiKongo" },
+      { id: "ko", name: "Korean", nativeName: "한국어 (韓國語), 조선말 (朝鮮語)" },
+      { id: "ku", name: "Kurdish", nativeName: "Kurdî, كوردی‎" },
+      { id: "kj", name: "Kwanyama, Kuanyama", nativeName: "Kuanyama" },
+      { id: "la", name: "Latin", nativeName: "latine, lingua latina" },
+      { id: "lb", name: "Luxembourgish, Letzeburgesch", nativeName: "Lëtzebuergesch" },
+      { id: "lg", name: "Luganda", nativeName: "Luganda" },
+      { id: "li", name: "Limburgish, Limburgan, Limburger", nativeName: "Limburgs" },
+      { id: "ln", name: "Lingala", nativeName: "Lingála" },
+      { id: "lo", name: "Lao", nativeName: "ພາສາລາວ" },
+      { id: "lt", name: "Lithuanian", nativeName: "lietuvių kalba" },
+      { id: "lu", name: "Luba-Katanga", nativeName: "" },
+      { id: "lv", name: "Latvian", nativeName: "latviešu valoda" },
+      { id: "gv", name: "Manx", nativeName: "Gaelg, Gailck" },
+      { id: "mk", name: "Macedonian", nativeName: "македонски јазик" },
+      { id: "mg", name: "Malagasy", nativeName: "Malagasy fiteny" },
+      { id: "ms", name: "Malay", nativeName: "bahasa Melayu, بهاس ملايو‎" },
+      { id: "ml", name: "Malayalam", nativeName: "മലയാളം" },
+      { id: "mt", name: "Maltese", nativeName: "Malti" },
+      { id: "mi", name: "Māori", nativeName: "te reo Māori" },
+      { id: "mr", name: "Marathi (Marāṭhī)", nativeName: "मराठी" },
+      { id: "mh", name: "Marshallese", nativeName: "Kajin M̧ajeļ" },
+      { id: "mn", name: "Mongolian", nativeName: "монгол" },
+      { id: "na", name: "Nauru", nativeName: "Ekakairũ Naoero" },
+      { id: "nv", name: "Navajo, Navaho", nativeName: "Diné bizaad, Dinékʼehǰí" },
+      { id: "nb", name: "Norwegian Bokmål", nativeName: "Norsk bokmål" },
+      { id: "nd", name: "North Ndebele", nativeName: "isiNdebele" },
+      { id: "ne", name: "Nepali", nativeName: "नेपाली" },
+      { id: "ng", name: "Ndonga", nativeName: "Owambo" },
+      { id: "nn", name: "Norwegian Nynorsk", nativeName: "Norsk nynorsk" },
+      { id: "no", name: "Norwegian", nativeName: "Norsk" },
+      { id: "ii", name: "Nuosu", nativeName: "ꆈꌠ꒿ Nuosuhxop" },
+      { id: "nr", name: "South Ndebele", nativeName: "isiNdebele" },
+      { id: "oc", name: "Occitan", nativeName: "Occitan" },
+      { id: "oj", name: "Ojibwe, Ojibwa", nativeName: "ᐊᓂᔑᓈᐯᒧᐎᓐ" },
+      { id: "cu", name: "Old Church Slavonic, Church Slavic, Church Slavonic, Old Bulgarian, Old Slavonic", nativeName: "ѩзыкъ словѣньскъ" },
+      { id: "om", name: "Oromo", nativeName: "Afaan Oromoo" },
+      { id: "or", name: "Oriya", nativeName: "ଓଡ଼ିଆ" },
+      { id: "os", name: "Ossetian, Ossetic", nativeName: "ирон æвзаг" },
+      { id: "pa", name: "Panjabi, Punjabi", nativeName: "ਪੰਜਾਬੀ, پنجابی‎" },
+      { id: "pi", name: "Pāli", nativeName: "पाऴि" },
+      { id: "fa", name: "Persian", nativeName: "فارسی" },
+      { id: "pl", name: "Polish", nativeName: "polski" },
+      { id: "ps", name: "Pashto, Pushto", nativeName: "پښتو" },
+      { id: "pt", name: "Portuguese", nativeName: "Português" },
+      { id: "qu", name: "Quechua", nativeName: "Runa Simi, Kichwa" },
+      { id: "rm", name: "Romansh", nativeName: "rumantsch grischun" },
+      { id: "rn", name: "Kirundi", nativeName: "kiRundi" },
+      { id: "ro", name: "Romanian, Moldavian, Moldovan", nativeName: "română" },
+      { id: "ru", name: "Russian", nativeName: "русский язык" },
+      { id: "sa", name: "Sanskrit (Saṁskṛta)", nativeName: "संस्कृतम्" },
+      { id: "sc", name: "Sardinian", nativeName: "sardu" },
+      { id: "sd", name: "Sindhi", nativeName: "सिन्धी, سنڌي، سندھی‎" },
+      { id: "se", name: "Northern Sami", nativeName: "Davvisámegiella" },
+      { id: "sm", name: "Samoan", nativeName: "gagana faa Samoa" },
+      { id: "sg", name: "Sango", nativeName: "yângâ tî sängö" },
+      { id: "sr", name: "Serbian", nativeName: "српски језик" },
+      { id: "gd", name: "Scottish Gaelic; Gaelic", nativeName: "Gàidhlig" },
+      { id: "sn", name: "Shona", nativeName: "chiShona" },
+      { id: "si", name: "Sinhala, Sinhalese", nativeName: "සිංහල" },
+      { id: "sk", name: "Slovak", nativeName: "slovenčina" },
+      { id: "sl", name: "Slovene", nativeName: "slovenščina" },
+      { id: "so", name: "Somali", nativeName: "Soomaaliga, af Soomaali" },
+      { id: "st", name: "Southern Sotho", nativeName: "Sesotho" },
+      { id: "es", name: "Spanish; Castilian", nativeName: "español, castellano" },
+      { id: "su", name: "Sundanese", nativeName: "Basa Sunda" },
+      { id: "sw", name: "Swahili", nativeName: "Kiswahili" },
+      { id: "ss", name: "Swati", nativeName: "SiSwati" },
+      { id: "sv", name: "Swedish", nativeName: "svenska" },
+      { id: "ta", name: "Tamil", nativeName: "தமிழ்" },
+      { id: "te", name: "Telugu", nativeName: "తెలుగు" },
+      { id: "tg", name: "Tajik", nativeName: "тоҷикӣ, toğikī, تاجیکی‎" },
+      { id: "th", name: "Thai", nativeName: "ไทย" },
+      { id: "ti", name: "Tigrinya", nativeName: "ትግርኛ" },
+      { id: "bo", name: "Tibetan Standard, Tibetan, Central", nativeName: "བོད་ཡིག" },
+      { id: "tk", name: "Turkmen", nativeName: "Türkmen, Түркмен" },
+      { id: "tl", name: "Tagalog", nativeName: "Wikang Tagalog, ᜏᜒᜃᜅ᜔ ᜆᜄᜎᜓᜄ᜔" },
+      { id: "tn", name: "Tswana", nativeName: "Setswana" },
+      { id: "to", name: "Tonga (Tonga Islands)", nativeName: "faka Tonga" },
+      { id: "tr", name: "Turkish", nativeName: "Türkçe" },
+      { id: "ts", name: "Tsonga", nativeName: "Xitsonga" },
+      { id: "tt", name: "Tatar", nativeName: "татарча, tatarça, تاتارچا‎" },
+      { id: "tw", name: "Twi", nativeName: "Twi" },
+      { id: "ty", name: "Tahitian", nativeName: "Reo Tahiti" },
+      { id: "ug", name: "Uighur, Uyghur", nativeName: "Uyƣurqə, ئۇيغۇرچە‎" },
+      { id: "uk", name: "Ukrainian", nativeName: "українська" },
+      { id: "ur", name: "Urdu", nativeName: "اردو" },
+      { id: "uz", name: "Uzbek", nativeName: "zbek, Ўзбек, أۇزبېك‎" },
+      { id: "ve", name: "Venda", nativeName: "Tshivenḓa" },
+      { id: "vi", name: "Vietnamese", nativeName: "Tiếng Việt" },
+      { id: "vo", name: "Volapük", nativeName: "Volapük" },
+      { id: "wa", name: "Walloon", nativeName: "Walon" },
+      { id: "cy", name: "Welsh", nativeName: "Cymraeg" },
+      { id: "wo", name: "Wolof", nativeName: "Wollof" },
+      { id: "fy", name: "Western Frisian", nativeName: "Frysk" },
+      { id: "xh", name: "Xhosa", nativeName: "isiXhosa" },
+      { id: "yi", name: "Yiddish", nativeName: "ייִדיש" },
+      { id: "yo", name: "Yoruba", nativeName: "Yorùbá" },
+      { id: "za", name: "Zhuang, Chuang", nativeName: "Saɯ cueŋƅ, Saw cuengh" },
+      { id: "zu", name: "Zulu", nativeName: "isiZulu" }
+            ];
+        }
+    };
+});
+// Subset of list of locales defined by CLDR
+// based on https://github.com/umpirsky/locale-list
+angular.module('platformWebApp')
+.factory('platformWebApp.common.locales', function () {
+    return {
+        get: function (id) {
+            return _.findWhere(this.query(), { id: this.normalize(id) });
+        },
+        contains: function (id) {
+            return _.map(this.query(), function (entry) { return entry.id }).includes(this.normalize(id));
+        },
+        normalize: function(id) {
+            var result = undefined;
+            if (!!id) {
+                var parts = id.split(/[-_]/g);
+                parts[0] = parts[0].toLowerCase();
+                if (parts.length > 1) {
+                    parts[1] = parts[1].length === 2 ? parts[1].toUpperCase() : parts[1].capitalize();
+                }
+                if (parts.length > 2) {
+                    parts[2] = parts[2].toUpperCase();
+                }
+                result = parts.join('_');
+            }
+            return result;
+        },
+        query: function () {
+            return [
+    { id: "af", name: "Afrikaans", nativeName: "Afrikaans" },
+    { id: "af_NA", name: "Afrikaans (Namibia)", nativeName: "Afrikaans (Namibië)" },
+    { id: "af_ZA", name: "Afrikaans (South Africa)", nativeName: "Afrikaans (Suid-Afrika)" },
+    { id: "ak", name: "Akan", nativeName: "Akan" },
+    { id: "ak_GH", name: "Akan (Ghana)", nativeName: "Akan (Gaana)" },
+    { id: "sq", name: "Albanian", nativeName: "shqip" },
+    { id: "sq_AL", name: "Albanian (Albania)", nativeName: "shqip (Shqipëri)" },
+    { id: "sq_XK", name: "Albanian (Kosovo)", nativeName: "shqip (Kosovë)" },
+    { id: "sq_MK", name: "Albanian (Macedonia)", nativeName: "shqip (Maqedoni)" },
+    { id: "am", name: "Amharic", nativeName: "አማርኛ" },
+    { id: "am_ET", name: "Amharic (Ethiopia)", nativeName: "አማርኛ (ኢትዮጵያ)" },
+    { id: "ar", name: "Arabic", nativeName: "العربية" },
+    { id: "ar_DZ", name: "Arabic (Algeria)", nativeName: "العربية (الجزائر)" },
+    { id: "ar_BH", name: "Arabic (Bahrain)", nativeName: "العربية (البحرين)" },
+    { id: "ar_TD", name: "Arabic (Chad)", nativeName: "العربية (تشاد)" },
+    { id: "ar_KM", name: "Arabic (Comoros)", nativeName: "العربية (جزر القمر)" },
+    { id: "ar_DJ", name: "Arabic (Djibouti)", nativeName: "العربية (جيبوتي)" },
+    { id: "ar_EG", name: "Arabic (Egypt)", nativeName: "العربية (مصر)" },
+    { id: "ar_ER", name: "Arabic (Eritrea)", nativeName: "العربية (أريتريا)" },
+    { id: "ar_IQ", name: "Arabic (Iraq)", nativeName: "العربية (العراق)" },
+    { id: "ar_IL", name: "Arabic (Israel)", nativeName: "العربية (إسرائيل)" },
+    { id: "ar_JO", name: "Arabic (Jordan)", nativeName: "العربية (الأردن)" },
+    { id: "ar_KW", name: "Arabic (Kuwait)", nativeName: "العربية (الكويت)" },
+    { id: "ar_LB", name: "Arabic (Lebanon)", nativeName: "العربية (لبنان)" },
+    { id: "ar_LY", name: "Arabic (Libya)", nativeName: "العربية (ليبيا)" },
+    { id: "ar_MR", name: "Arabic (Mauritania)", nativeName: "العربية (موريتانيا)" },
+    { id: "ar_MA", name: "Arabic (Morocco)", nativeName: "العربية (المغرب)" },
+    { id: "ar_OM", name: "Arabic (Oman)", nativeName: "العربية (عُمان)" },
+    { id: "ar_PS", name: "Arabic (Palestinian Territories)", nativeName: "العربية (الأراضي الفلسطينية)" },
+    { id: "ar_QA", name: "Arabic (Qatar)", nativeName: "العربية (قطر)" },
+    { id: "ar_SA", name: "Arabic (Saudi Arabia)", nativeName: "العربية (المملكة العربية السعودية)" },
+    { id: "ar_SO", name: "Arabic (Somalia)", nativeName: "العربية (الصومال)" },
+    { id: "ar_SS", name: "Arabic (South Sudan)", nativeName: "العربية (جنوب السودان)" },
+    { id: "ar_SD", name: "Arabic (Sudan)", nativeName: "العربية (السودان)" },
+    { id: "ar_SY", name: "Arabic (Syria)", nativeName: "العربية (سوريا)" },
+    { id: "ar_TN", name: "Arabic (Tunisia)", nativeName: "العربية (تونس)" },
+    { id: "ar_AE", name: "Arabic (United Arab Emirates)", nativeName: "العربية (الإمارات العربية المتحدة)" },
+    { id: "ar_EH", name: "Arabic (Western Sahara)", nativeName: "العربية (الصحراء الغربية)" },
+    { id: "ar_YE", name: "Arabic (Yemen)", nativeName: "العربية (اليمن)" },
+    { id: "hy", name: "Armenian", nativeName: "հայերեն" },
+    { id: "hy_AM", name: "Armenian (Armenia)", nativeName: "հայերեն (Հայաստան)" },
+    { id: "as", name: "Assamese", nativeName: "অসমীয়া" },
+    { id: "as_IN", name: "Assamese (India)", nativeName: "অসমীয়া (ভাৰত)" },
+    { id: "az", name: "Azerbaijani", nativeName: "azərbaycan" },
+    { id: "az_AZ", name: "Azerbaijani (Azerbaijan)", nativeName: "azərbaycan (Azərbaycan)" },
+    { id: "az_Cyrl_AZ", name: "Azerbaijani (Cyrillic, Azerbaijan)", nativeName: "Азәрбајҹан (kiril, Азәрбајҹан)" },
+    { id: "az_Cyrl", name: "Azerbaijani (Cyrillic)", nativeName: "Азәрбајҹан (kiril)" },
+    { id: "az_Latn_AZ", name: "Azerbaijani (Latin, Azerbaijan)", nativeName: "azərbaycan (latın, Azərbaycan)" },
+    { id: "az_Latn", name: "Azerbaijani (Latin)", nativeName: "azərbaycan (latın)" },
+    { id: "bm", name: "Bambara", nativeName: "bamanakan" },
+    { id: "bm_Latn_ML", name: "Bambara (Latin, Mali)", nativeName: "Bambara (Latin, Mali)" },
+    { id: "bm_Latn", name: "Bambara (Latin)", nativeName: "Bambara (Latin)" },
+    { id: "eu", name: "Basque", nativeName: "euskara" },
+    { id: "eu_ES", name: "Basque (Spain)", nativeName: "euskara (Espainia)" },
+    { id: "be", name: "Belarusian", nativeName: "беларуская" },
+    { id: "be_BY", name: "Belarusian (Belarus)", nativeName: "беларуская (Беларусь)" },
+    { id: "bn", name: "Bengali", nativeName: "বাংলা" },
+    { id: "bn_BD", name: "Bengali (Bangladesh)", nativeName: "বাংলা (বাংলাদেশ)" },
+    { id: "bn_IN", name: "Bengali (India)", nativeName: "বাংলা (ভারত)" },
+    { id: "bs", name: "Bosnian", nativeName: "bosanski" },
+    { id: "bs_BA", name: "Bosnian (Bosnia & Herzegovina)", nativeName: "bosanski (Bosna i Hercegovina)" },
+    { id: "bs_Cyrl_BA", name: "Bosnian (Cyrillic, Bosnia & Herzegovina)", nativeName: "босански (Ћирилица, Босна и Херцеговина)" },
+    { id: "bs_Cyrl", name: "Bosnian (Cyrillic)", nativeName: "босански (Ћирилица)" },
+    { id: "bs_Latn_BA", name: "Bosnian (Latin, Bosnia & Herzegovina)", nativeName: "bosanski (latinica, Bosna i Hercegovina)" },
+    { id: "bs_Latn", name: "Bosnian (Latin)", nativeName: "bosanski (latinica)" },
+    { id: "br", name: "Breton", nativeName: "brezhoneg" },
+    { id: "br_FR", name: "Breton (France)", nativeName: "brezhoneg (Frañs)" },
+    { id: "bg", name: "Bulgarian", nativeName: "български" },
+    { id: "bg_BG", name: "Bulgarian (Bulgaria)", nativeName: "български (България)" },
+    { id: "my", name: "Burmese", nativeName: "ဗမာ" },
+    { id: "my_MM", name: "Burmese (Myanmar (Burma))", nativeName: "ဗမာ (မြန်မာ)" },
+    { id: "ca", name: "Catalan", nativeName: "català" },
+    { id: "ca_AD", name: "Catalan (Andorra)", nativeName: "català (Andorra)" },
+    { id: "ca_FR", name: "Catalan (France)", nativeName: "català (França)" },
+    { id: "ca_IT", name: "Catalan (Italy)", nativeName: "català (Itàlia)" },
+    { id: "ca_ES", name: "Catalan (Spain)", nativeName: "català (Espanya)" },
+    { id: "zh", name: "Chinese", nativeName: "中文" },
+    { id: "zh_CN", name: "Chinese (China)", nativeName: "中文 (中国)" },
+    { id: "zh_HK", name: "Chinese (Hong Kong SAR China)", nativeName: "中文 (中国香港特别行政区)" },
+    { id: "zh_MO", name: "Chinese (Macau SAR China)", nativeName: "中文 (中国澳门特别行政区)" },
+    { id: "zh_Hans_CN", name: "Chinese (Simplified, China)", nativeName: "中文 (简体中文, 中国)" },
+    { id: "zh_Hans_HK", name: "Chinese (Simplified, Hong Kong SAR China)", nativeName: "中文 (简体中文, 中国香港特别行政区)" },
+    { id: "zh_Hans_MO", name: "Chinese (Simplified, Macau SAR China)", nativeName: "中文 (简体中文, 中国澳门特别行政区)" },
+    { id: "zh_Hans_SG", name: "Chinese (Simplified, Singapore)", nativeName: "中文 (简体中文, 新加坡)" },
+    { id: "zh_Hans", name: "Chinese (Simplified)", nativeName: "中文 (简体中文)" },
+    { id: "zh_SG", name: "Chinese (Singapore)", nativeName: "中文 (新加坡)" },
+    { id: "zh_TW", name: "Chinese (Taiwan)", nativeName: "中文 (台湾)" },
+    { id: "zh_Hant_HK", name: "Chinese (Traditional, Hong Kong SAR China)", nativeName: "中文 (繁體字, 中華人民共和國香港特別行政區)" },
+    { id: "zh_Hant_MO", name: "Chinese (Traditional, Macau SAR China)", nativeName: "中文 (繁體, 中華人民共和國澳門特別行政區)" },
+    { id: "zh_Hant_TW", name: "Chinese (Traditional, Taiwan)", nativeName: "中文 (繁體, 台灣)" },
+    { id: "zh_Hant", name: "Chinese (Traditional)", nativeName: "中文 (繁體)" },
+    { id: "kw", name: "Cornish", nativeName: "kernewek" },
+    { id: "kw_GB", name: "Cornish (United Kingdom)", nativeName: "kernewek (Rywvaneth Unys)" },
+    { id: "hr", name: "Croatian", nativeName: "hrvatski" },
+    { id: "hr_BA", name: "Croatian (Bosnia & Herzegovina)", nativeName: "hrvatski (Bosna i Hercegovina)" },
+    { id: "hr_HR", name: "Croatian (Croatia)", nativeName: "hrvatski (Hrvatska)" },
+    { id: "cs", name: "Czech", nativeName: "čeština" },
+    { id: "cs_CZ", name: "Czech (Czech Republic)", nativeName: "čeština (Česká republika)" },
+    { id: "da", name: "Danish", nativeName: "dansk" },
+    { id: "da_DK", name: "Danish (Denmark)", nativeName: "dansk (Danmark)" },
+    { id: "da_GL", name: "Danish (Greenland)", nativeName: "dansk (Grønland)" },
+    { id: "nl", name: "Dutch", nativeName: "Nederlands" },
+    { id: "nl_AW", name: "Dutch (Aruba)", nativeName: "Nederlands (Aruba)" },
+    { id: "nl_BE", name: "Dutch (Belgium)", nativeName: "Nederlands (België)" },
+    { id: "nl_BQ", name: "Dutch (Caribbean Netherlands)", nativeName: "Nederlands (Caribisch Nederland)" },
+    { id: "nl_CW", name: "Dutch (Curaçao)", nativeName: "Nederlands (Curaçao)" },
+    { id: "nl_NL", name: "Dutch (Netherlands)", nativeName: "Nederlands (Nederland)" },
+    { id: "nl_SX", name: "Dutch (Sint Maarten)", nativeName: "Nederlands (Sint-Maarten)" },
+    { id: "nl_SR", name: "Dutch (Suriname)", nativeName: "Nederlands (Suriname)" },
+    { id: "dz", name: "Dzongkha", nativeName: "རྫོང་ཁ" },
+    { id: "dz_BT", name: "Dzongkha (Bhutan)", nativeName: "རྫོང་ཁ (འབྲུག)" },
+    { id: "en", name: "English", nativeName: "English" },
+    { id: "en_AS", name: "English (American Samoa)", nativeName: "English (American Samoa)" },
+    { id: "en_AI", name: "English (Anguilla)", nativeName: "English (Anguilla)" },
+    { id: "en_AG", name: "English (Antigua & Barbuda)", nativeName: "English (Antigua & Barbuda)" },
+    { id: "en_AU", name: "English (Australia)", nativeName: "English (Australia)" },
+    { id: "en_BS", name: "English (Bahamas)", nativeName: "English (Bahamas)" },
+    { id: "en_BB", name: "English (Barbados)", nativeName: "English (Barbados)" },
+    { id: "en_BE", name: "English (Belgium)", nativeName: "English (Belgium)" },
+    { id: "en_BZ", name: "English (Belize)", nativeName: "English (Belize)" },
+    { id: "en_BM", name: "English (Bermuda)", nativeName: "English (Bermuda)" },
+    { id: "en_BW", name: "English (Botswana)", nativeName: "English (Botswana)" },
+    { id: "en_IO", name: "English (British Indian Ocean Territory)", nativeName: "English (British Indian Ocean Territory)" },
+    { id: "en_VG", name: "English (British Virgin Islands)", nativeName: "English (British Virgin Islands)" },
+    { id: "en_CM", name: "English (Cameroon)", nativeName: "English (Cameroon)" },
+    { id: "en_CA", name: "English (Canada)", nativeName: "English (Canada)" },
+    { id: "en_KY", name: "English (Cayman Islands)", nativeName: "English (Cayman Islands)" },
+    { id: "en_CX", name: "English (Christmas Island)", nativeName: "English (Christmas Island)" },
+    { id: "en_CC", name: "English (Cocos (Keeling) Islands)", nativeName: "English (Cocos (Keeling) Islands)" },
+    { id: "en_CK", name: "English (Cook Islands)", nativeName: "English (Cook Islands)" },
+    { id: "en_DG", name: "English (Diego Garcia)", nativeName: "English (Diego Garcia)" },
+    { id: "en_DM", name: "English (Dominica)", nativeName: "English (Dominica)" },
+    { id: "en_ER", name: "English (Eritrea)", nativeName: "English (Eritrea)" },
+    { id: "en_FK", name: "English (Falkland Islands)", nativeName: "English (Falkland Islands)" },
+    { id: "en_FJ", name: "English (Fiji)", nativeName: "English (Fiji)" },
+    { id: "en_GM", name: "English (Gambia)", nativeName: "English (Gambia)" },
+    { id: "en_GH", name: "English (Ghana)", nativeName: "English (Ghana)" },
+    { id: "en_GI", name: "English (Gibraltar)", nativeName: "English (Gibraltar)" },
+    { id: "en_GD", name: "English (Grenada)", nativeName: "English (Grenada)" },
+    { id: "en_GU", name: "English (Guam)", nativeName: "English (Guam)" },
+    { id: "en_GG", name: "English (Guernsey)", nativeName: "English (Guernsey)" },
+    { id: "en_GY", name: "English (Guyana)", nativeName: "English (Guyana)" },
+    { id: "en_HK", name: "English (Hong Kong SAR China)", nativeName: "English (Hong Kong SAR China)" },
+    { id: "en_IN", name: "English (India)", nativeName: "English (India)" },
+    { id: "en_IE", name: "English (Ireland)", nativeName: "English (Ireland)" },
+    { id: "en_IM", name: "English (Isle of Man)", nativeName: "English (Isle of Man)" },
+    { id: "en_JM", name: "English (Jamaica)", nativeName: "English (Jamaica)" },
+    { id: "en_JE", name: "English (Jersey)", nativeName: "English (Jersey)" },
+    { id: "en_KE", name: "English (Kenya)", nativeName: "English (Kenya)" },
+    { id: "en_KI", name: "English (Kiribati)", nativeName: "English (Kiribati)" },
+    { id: "en_LS", name: "English (Lesotho)", nativeName: "English (Lesotho)" },
+    { id: "en_LR", name: "English (Liberia)", nativeName: "English (Liberia)" },
+    { id: "en_MO", name: "English (Macau SAR China)", nativeName: "English (Macau SAR China)" },
+    { id: "en_MG", name: "English (Madagascar)", nativeName: "English (Madagascar)" },
+    { id: "en_MW", name: "English (Malawi)", nativeName: "English (Malawi)" },
+    { id: "en_MY", name: "English (Malaysia)", nativeName: "English (Malaysia)" },
+    { id: "en_MT", name: "English (Malta)", nativeName: "English (Malta)" },
+    { id: "en_MH", name: "English (Marshall Islands)", nativeName: "English (Marshall Islands)" },
+    { id: "en_MU", name: "English (Mauritius)", nativeName: "English (Mauritius)" },
+    { id: "en_FM", name: "English (Micronesia)", nativeName: "English (Micronesia)" },
+    { id: "en_MS", name: "English (Montserrat)", nativeName: "English (Montserrat)" },
+    { id: "en_NA", name: "English (Namibia)", nativeName: "English (Namibia)" },
+    { id: "en_NR", name: "English (Nauru)", nativeName: "English (Nauru)" },
+    { id: "en_NZ", name: "English (New Zealand)", nativeName: "English (New Zealand)" },
+    { id: "en_NG", name: "English (Nigeria)", nativeName: "English (Nigeria)" },
+    { id: "en_NU", name: "English (Niue)", nativeName: "English (Niue)" },
+    { id: "en_NF", name: "English (Norfolk Island)", nativeName: "English (Norfolk Island)" },
+    { id: "en_MP", name: "English (Northern Mariana Islands)", nativeName: "English (Northern Mariana Islands)" },
+    { id: "en_PK", name: "English (Pakistan)", nativeName: "English (Pakistan)" },
+    { id: "en_PW", name: "English (Palau)", nativeName: "English (Palau)" },
+    { id: "en_PG", name: "English (Papua New Guinea)", nativeName: "English (Papua New Guinea)" },
+    { id: "en_PH", name: "English (Philippines)", nativeName: "English (Philippines)" },
+    { id: "en_PN", name: "English (Pitcairn Islands)", nativeName: "English (Pitcairn Islands)" },
+    { id: "en_PR", name: "English (Puerto Rico)", nativeName: "English (Puerto Rico)" },
+    { id: "en_RW", name: "English (Rwanda)", nativeName: "English (Rwanda)" },
+    { id: "en_WS", name: "English (Samoa)", nativeName: "English (Samoa)" },
+    { id: "en_SC", name: "English (Seychelles)", nativeName: "English (Seychelles)" },
+    { id: "en_SL", name: "English (Sierra Leone)", nativeName: "English (Sierra Leone)" },
+    { id: "en_SG", name: "English (Singapore)", nativeName: "English (Singapore)" },
+    { id: "en_SX", name: "English (Sint Maarten)", nativeName: "English (Sint Maarten)" },
+    { id: "en_SB", name: "English (Solomon Islands)", nativeName: "English (Solomon Islands)" },
+    { id: "en_ZA", name: "English (South Africa)", nativeName: "English (South Africa)" },
+    { id: "en_SS", name: "English (South Sudan)", nativeName: "English (South Sudan)" },
+    { id: "en_SH", name: "English (St. Helena)", nativeName: "English (St. Helena)" },
+    { id: "en_KN", name: "English (St. Kitts & Nevis)", nativeName: "English (St. Kitts & Nevis)" },
+    { id: "en_LC", name: "English (St. Lucia)", nativeName: "English (St. Lucia)" },
+    { id: "en_VC", name: "English (St. Vincent & Grenadines)", nativeName: "English (St. Vincent & Grenadines)" },
+    { id: "en_SD", name: "English (Sudan)", nativeName: "English (Sudan)" },
+    { id: "en_SZ", name: "English (Swaziland)", nativeName: "English (Swaziland)" },
+    { id: "en_TZ", name: "English (Tanzania)", nativeName: "English (Tanzania)" },
+    { id: "en_TK", name: "English (Tokelau)", nativeName: "English (Tokelau)" },
+    { id: "en_TO", name: "English (Tonga)", nativeName: "English (Tonga)" },
+    { id: "en_TT", name: "English (Trinidad & Tobago)", nativeName: "English (Trinidad & Tobago)" },
+    { id: "en_TC", name: "English (Turks & Caicos Islands)", nativeName: "English (Turks & Caicos Islands)" },
+    { id: "en_TV", name: "English (Tuvalu)", nativeName: "English (Tuvalu)" },
+    { id: "en_UM", name: "English (U.S. Outlying Islands)", nativeName: "English (U.S. Outlying Islands)" },
+    { id: "en_VI", name: "English (U.S. Virgin Islands)", nativeName: "English (U.S. Virgin Islands)" },
+    { id: "en_UG", name: "English (Uganda)", nativeName: "English (Uganda)" },
+    { id: "en_GB", name: "English (United Kingdom)", nativeName: "English (United Kingdom)" },
+    { id: "en_US", name: "English (United States)", nativeName: "English (United States)" },
+    { id: "en_VU", name: "English (Vanuatu)", nativeName: "English (Vanuatu)" },
+    { id: "en_ZM", name: "English (Zambia)", nativeName: "English (Zambia)" },
+    { id: "en_ZW", name: "English (Zimbabwe)", nativeName: "English (Zimbabwe)" },
+    { id: "eo", name: "Esperanto", nativeName: "esperanto" },
+    { id: "et", name: "Estonian", nativeName: "eesti" },
+    { id: "et_EE", name: "Estonian (Estonia)", nativeName: "eesti (Eesti)" },
+    { id: "ee", name: "Ewe", nativeName: "eʋegbe" },
+    { id: "ee_GH", name: "Ewe (Ghana)", nativeName: "eʋegbe (Ghana nutome)" },
+    { id: "ee_TG", name: "Ewe (Togo)", nativeName: "eʋegbe (Togo nutome)" },
+    { id: "fo", name: "Faroese", nativeName: "føroyskt" },
+    { id: "fo_FO", name: "Faroese (Faroe Islands)", nativeName: "føroyskt (Føroyar)" },
+    { id: "fi", name: "Finnish", nativeName: "suomi" },
+    { id: "fi_FI", name: "Finnish (Finland)", nativeName: "suomi (Suomi)" },
+    { id: "fr", name: "French", nativeName: "français" },
+    { id: "fr_DZ", name: "French (Algeria)", nativeName: "français (Algérie)" },
+    { id: "fr_BE", name: "French (Belgium)", nativeName: "français (Belgique)" },
+    { id: "fr_BJ", name: "French (Benin)", nativeName: "français (Bénin)" },
+    { id: "fr_BF", name: "French (Burkina Faso)", nativeName: "français (Burkina Faso)" },
+    { id: "fr_BI", name: "French (Burundi)", nativeName: "français (Burundi)" },
+    { id: "fr_CM", name: "French (Cameroon)", nativeName: "français (Cameroun)" },
+    { id: "fr_CA", name: "French (Canada)", nativeName: "français (Canada)" },
+    { id: "fr_CF", name: "French (Central African Republic)", nativeName: "français (République centrafricaine)" },
+    { id: "fr_TD", name: "French (Chad)", nativeName: "français (Tchad)" },
+    { id: "fr_KM", name: "French (Comoros)", nativeName: "français (Comores)" },
+    { id: "fr_CG", name: "French (Congo - Brazzaville)", nativeName: "français (Congo-Brazzaville)" },
+    { id: "fr_CD", name: "French (Congo - Kinshasa)", nativeName: "français (Congo-Kinshasa)" },
+    { id: "fr_CI", name: "French (Côte d’Ivoire)", nativeName: "français (Côte d’Ivoire)" },
+    { id: "fr_DJ", name: "French (Djibouti)", nativeName: "français (Djibouti)" },
+    { id: "fr_GQ", name: "French (Equatorial Guinea)", nativeName: "français (Guinée équatoriale)" },
+    { id: "fr_FR", name: "French (France)", nativeName: "français (France)" },
+    { id: "fr_GF", name: "French (French Guiana)", nativeName: "français (Guyane française)" },
+    { id: "fr_PF", name: "French (French Polynesia)", nativeName: "français (Polynésie française)" },
+    { id: "fr_GA", name: "French (Gabon)", nativeName: "français (Gabon)" },
+    { id: "fr_GP", name: "French (Guadeloupe)", nativeName: "français (Guadeloupe)" },
+    { id: "fr_GN", name: "French (Guinea)", nativeName: "français (Guinée)" },
+    { id: "fr_HT", name: "French (Haiti)", nativeName: "français (Haïti)" },
+    { id: "fr_LU", name: "French (Luxembourg)", nativeName: "français (Luxembourg)" },
+    { id: "fr_MG", name: "French (Madagascar)", nativeName: "français (Madagascar)" },
+    { id: "fr_ML", name: "French (Mali)", nativeName: "français (Mali)" },
+    { id: "fr_MQ", name: "French (Martinique)", nativeName: "français (Martinique)" },
+    { id: "fr_MR", name: "French (Mauritania)", nativeName: "français (Mauritanie)" },
+    { id: "fr_MU", name: "French (Mauritius)", nativeName: "français (Maurice)" },
+    { id: "fr_YT", name: "French (Mayotte)", nativeName: "français (Mayotte)" },
+    { id: "fr_MC", name: "French (Monaco)", nativeName: "français (Monaco)" },
+    { id: "fr_MA", name: "French (Morocco)", nativeName: "français (Maroc)" },
+    { id: "fr_NC", name: "French (New Caledonia)", nativeName: "français (Nouvelle-Calédonie)" },
+    { id: "fr_NE", name: "French (Niger)", nativeName: "français (Niger)" },
+    { id: "fr_RE", name: "French (Réunion)", nativeName: "français (La Réunion)" },
+    { id: "fr_RW", name: "French (Rwanda)", nativeName: "français (Rwanda)" },
+    { id: "fr_SN", name: "French (Senegal)", nativeName: "français (Sénégal)" },
+    { id: "fr_SC", name: "French (Seychelles)", nativeName: "français (Seychelles)" },
+    { id: "fr_BL", name: "French (St. Barthélemy)", nativeName: "français (Saint-Barthélemy)" },
+    { id: "fr_MF", name: "French (St. Martin)", nativeName: "français (Saint-Martin (partie française))" },
+    { id: "fr_PM", name: "French (St. Pierre & Miquelon)", nativeName: "français (Saint-Pierre-et-Miquelon)" },
+    { id: "fr_CH", name: "French (Switzerland)", nativeName: "français (Suisse)" },
+    { id: "fr_SY", name: "French (Syria)", nativeName: "français (Syrie)" },
+    { id: "fr_TG", name: "French (Togo)", nativeName: "français (Togo)" },
+    { id: "fr_TN", name: "French (Tunisia)", nativeName: "français (Tunisie)" },
+    { id: "fr_VU", name: "French (Vanuatu)", nativeName: "français (Vanuatu)" },
+    { id: "fr_WF", name: "French (Wallis & Futuna)", nativeName: "français (Wallis-et-Futuna)" },
+    { id: "ff", name: "Fulah", nativeName: "Pulaar" },
+    { id: "ff_CM", name: "Fulah (Cameroon)", nativeName: "Pulaar (Kameruun)" },
+    { id: "ff_GN", name: "Fulah (Guinea)", nativeName: "Pulaar (Gine)" },
+    { id: "ff_MR", name: "Fulah (Mauritania)", nativeName: "Pulaar (Muritani)" },
+    { id: "ff_SN", name: "Fulah (Senegal)", nativeName: "Pulaar (Senegaal)" },
+    { id: "gl", name: "Galician", nativeName: "galego" },
+    { id: "gl_ES", name: "Galician (Spain)", nativeName: "galego (España)" },
+    { id: "lg", name: "Ganda", nativeName: "Luganda" },
+    { id: "lg_UG", name: "Ganda (Uganda)", nativeName: "Luganda (Yuganda)" },
+    { id: "ka", name: "Georgian", nativeName: "ქართული" },
+    { id: "ka_GE", name: "Georgian (Georgia)", nativeName: "ქართული (საქართველო)" },
+    { id: "de", name: "German", nativeName: "Deutsch" },
+    { id: "de_AT", name: "German (Austria)", nativeName: "Deutsch (Österreich)" },
+    { id: "de_BE", name: "German (Belgium)", nativeName: "Deutsch (Belgien)" },
+    { id: "de_DE", name: "German (Germany)", nativeName: "Deutsch (Deutschland)" },
+    { id: "de_LI", name: "German (Liechtenstein)", nativeName: "Deutsch (Liechtenstein)" },
+    { id: "de_LU", name: "German (Luxembourg)", nativeName: "Deutsch (Luxemburg)" },
+    { id: "de_CH", name: "German (Switzerland)", nativeName: "Deutsch (Schweiz)" },
+    { id: "el", name: "Greek", nativeName: "Ελληνικά" },
+    { id: "el_CY", name: "Greek (Cyprus)", nativeName: "Ελληνικά (Κύπρος)" },
+    { id: "el_GR", name: "Greek (Greece)", nativeName: "Ελληνικά (Ελλάδα)" },
+    { id: "gu", name: "Gujarati", nativeName: "ગુજરાતી" },
+    { id: "gu_IN", name: "Gujarati (India)", nativeName: "ગુજરાતી (ભારત)" },
+    { id: "ha", name: "Hausa", nativeName: "Hausa" },
+    { id: "ha_GH", name: "Hausa (Ghana)", nativeName: "Hausa (Gana)" },
+    { id: "ha_Latn_GH", name: "Hausa (Latin, Ghana)", nativeName: "Hausa (Latin, Ghana)" },
+    { id: "ha_Latn_NE", name: "Hausa (Latin, Niger)", nativeName: "Hausa (Latin, Niger)" },
+    { id: "ha_Latn_NG", name: "Hausa (Latin, Nigeria)", nativeName: "Hausa (Latin, Nigeria)" },
+    { id: "ha_Latn", name: "Hausa (Latin)", nativeName: "Hausa (Latin)" },
+    { id: "ha_NE", name: "Hausa (Niger)", nativeName: "Hausa (Nijar)" },
+    { id: "ha_NG", name: "Hausa (Nigeria)", nativeName: "Hausa (Najeriya)" },
+    { id: "he", name: "Hebrew", nativeName: "עברית" },
+    { id: "he_IL", name: "Hebrew (Israel)", nativeName: "עברית (ישראל)" },
+    { id: "hi", name: "Hindi", nativeName: "हिंदी" },
+    { id: "hi_IN", name: "Hindi (India)", nativeName: "हिंदी (भारत)" },
+    { id: "hu", name: "Hungarian", nativeName: "magyar" },
+    { id: "hu_HU", name: "Hungarian (Hungary)", nativeName: "magyar (Magyarország)" },
+    { id: "is", name: "Icelandic", nativeName: "íslenska" },
+    { id: "is_IS", name: "Icelandic (Iceland)", nativeName: "íslenska (Ísland)" },
+    { id: "ig", name: "Igbo", nativeName: "Igbo" },
+    { id: "ig_NG", name: "Igbo (Nigeria)", nativeName: "Igbo (Nigeria)" },
+    { id: "id", name: "Indonesian", nativeName: "Bahasa Indonesia" },
+    { id: "id_ID", name: "Indonesian (Indonesia)", nativeName: "Bahasa Indonesia (Indonesia)" },
+    { id: "ga", name: "Irish", nativeName: "Gaeilge" },
+    { id: "ga_IE", name: "Irish (Ireland)", nativeName: "Gaeilge (Éire)" },
+    { id: "it", name: "Italian", nativeName: "italiano" },
+    { id: "it_IT", name: "Italian (Italy)", nativeName: "italiano (Italia)" },
+    { id: "it_SM", name: "Italian (San Marino)", nativeName: "italiano (San Marino)" },
+    { id: "it_CH", name: "Italian (Switzerland)", nativeName: "italiano (Svizzera)" },
+    { id: "ja", name: "Japanese", nativeName: "日本語" },
+    { id: "ja_JP", name: "Japanese (Japan)", nativeName: "日本語 (日本)" },
+    { id: "kl", name: "Kalaallisut", nativeName: "kalaallisut" },
+    { id: "kl_GL", name: "Kalaallisut (Greenland)", nativeName: "kalaallisut (Kalaallit Nunaat)" },
+    { id: "kn", name: "Kannada", nativeName: "ಕನ್ನಡ" },
+    { id: "kn_IN", name: "Kannada (India)", nativeName: "ಕನ್ನಡ (ಭಾರತ)" },
+    { id: "ks", name: "Kashmiri", nativeName: "کٲشُر" },
+    { id: "ks_Arab_IN", name: "Kashmiri (Arabic, India)", nativeName: "کٲشُر (اَربی, ہِنٛدوستان)" },
+    { id: "ks_Arab", name: "Kashmiri (Arabic)", nativeName: "کٲشُر (اَربی)" },
+    { id: "ks_IN", name: "Kashmiri (India)", nativeName: "کٲشُر (ہِنٛدوستان)" },
+    { id: "kk", name: "Kazakh", nativeName: "қазақ тілі" },
+    { id: "kk_Cyrl_KZ", name: "Kazakh (Cyrillic, Kazakhstan)", nativeName: "қазақ тілі (кирилл жазуы, Қазақстан)" },
+    { id: "kk_Cyrl", name: "Kazakh (Cyrillic)", nativeName: "қазақ тілі (кирилл жазуы)" },
+    { id: "kk_KZ", name: "Kazakh (Kazakhstan)", nativeName: "қазақ тілі (Қазақстан)" },
+    { id: "km", name: "Khmer", nativeName: "ខ្មែរ" },
+    { id: "km_KH", name: "Khmer (Cambodia)", nativeName: "ខ្មែរ (កម្ពុជា)" },
+    { id: "ki", name: "Kikuyu", nativeName: "Gikuyu" },
+    { id: "ki_KE", name: "Kikuyu (Kenya)", nativeName: "Gikuyu (Kenya)" },
+    { id: "rw", name: "Kinyarwanda", nativeName: "Kinyarwanda" },
+    { id: "rw_RW", name: "Kinyarwanda (Rwanda)", nativeName: "Kinyarwanda (Rwanda)" },
+    { id: "ko", name: "Korean", nativeName: "한국어" },
+    { id: "ko_KP", name: "Korean (North Korea)", nativeName: "한국어 (조선 민주주의 인민 공화국)" },
+    { id: "ko_KR", name: "Korean (South Korea)", nativeName: "한국어 (대한민국)" },
+    { id: "ky", name: "Kyrgyz", nativeName: "кыргызча" },
+    { id: "ky_Cyrl_KG", name: "Kyrgyz (Cyrillic, Kyrgyzstan)", nativeName: "кыргызча (Кирилик, Кыргызстан)" },
+    { id: "ky_Cyrl", name: "Kyrgyz (Cyrillic)", nativeName: "кыргызча (Кирилик)" },
+    { id: "ky_KG", name: "Kyrgyz (Kyrgyzstan)", nativeName: "кыргызча (Кыргызстан)" },
+    { id: "lo", name: "Lao", nativeName: "ລາວ" },
+    { id: "lo_LA", name: "Lao (Laos)", nativeName: "ລາວ (ລາວ)" },
+    { id: "lv", name: "Latvian", nativeName: "latviešu" },
+    { id: "lv_LV", name: "Latvian (Latvia)", nativeName: "latviešu (Latvija)" },
+    { id: "ln", name: "Lingala", nativeName: "lingála" },
+    { id: "ln_AO", name: "Lingala (Angola)", nativeName: "lingála (Angóla)" },
+    { id: "ln_CF", name: "Lingala (Central African Republic)", nativeName: "lingála (Repibiki ya Afríka ya Káti)" },
+    { id: "ln_CG", name: "Lingala (Congo - Brazzaville)", nativeName: "lingála (Kongo)" },
+    { id: "ln_CD", name: "Lingala (Congo - Kinshasa)", nativeName: "lingála (Repibiki demokratiki ya Kongó)" },
+    { id: "lt", name: "Lithuanian", nativeName: "lietuvių" },
+    { id: "lt_LT", name: "Lithuanian (Lithuania)", nativeName: "lietuvių (Lietuva)" },
+    { id: "lu", name: "Luba-Katanga", nativeName: "Tshiluba" },
+    { id: "lu_CD", name: "Luba-Katanga (Congo - Kinshasa)", nativeName: "Tshiluba (Ditunga wa Kongu)" },
+    { id: "lb", name: "Luxembourgish", nativeName: "Lëtzebuergesch" },
+    { id: "lb_LU", name: "Luxembourgish (Luxembourg)", nativeName: "Lëtzebuergesch (Lëtzebuerg)" },
+    { id: "mk", name: "Macedonian", nativeName: "македонски" },
+    { id: "mk_MK", name: "Macedonian (Macedonia)", nativeName: "македонски (Македонија)" },
+    { id: "mg", name: "Malagasy", nativeName: "Malagasy" },
+    { id: "mg_MG", name: "Malagasy (Madagascar)", nativeName: "Malagasy (Madagasikara)" },
+    { id: "ms", name: "Malay", nativeName: "Bahasa Melayu" },
+    { id: "ms_BN", name: "Malay (Brunei)", nativeName: "Bahasa Melayu (Brunei)" },
+    { id: "ms_Latn_BN", name: "Malay (Latin, Brunei)", nativeName: "Bahasa Melayu (Latin, Brunei)" },
+    { id: "ms_Latn_MY", name: "Malay (Latin, Malaysia)", nativeName: "Bahasa Melayu (Latin, Malaysia)" },
+    { id: "ms_Latn_SG", name: "Malay (Latin, Singapore)", nativeName: "Bahasa Melayu (Latin, Singapura)" },
+    { id: "ms_Latn", name: "Malay (Latin)", nativeName: "Bahasa Melayu (Latin)" },
+    { id: "ms_MY", name: "Malay (Malaysia)", nativeName: "Bahasa Melayu (Malaysia)" },
+    { id: "ms_SG", name: "Malay (Singapore)", nativeName: "Bahasa Melayu (Singapura)" },
+    { id: "ml", name: "Malayalam", nativeName: "മലയാളം" },
+    { id: "ml_IN", name: "Malayalam (India)", nativeName: "മലയാളം (ഇന്ത്യ)" },
+    { id: "mt", name: "Maltese", nativeName: "Malti" },
+    { id: "mt_MT", name: "Maltese (Malta)", nativeName: "Malti (Malta)" },
+    { id: "gv", name: "Manx", nativeName: "Gaelg" },
+    { id: "gv_IM", name: "Manx (Isle of Man)", nativeName: "Gaelg (Ellan Vannin)" },
+    { id: "mr", name: "Marathi", nativeName: "मराठी" },
+    { id: "mr_IN", name: "Marathi (India)", nativeName: "मराठी (भारत)" },
+    { id: "mn", name: "Mongolian", nativeName: "монгол" },
+    { id: "mn_Cyrl_MN", name: "Mongolian (Cyrillic, Mongolia)", nativeName: "монгол (кирил, Монгол)" },
+    { id: "mn_Cyrl", name: "Mongolian (Cyrillic)", nativeName: "монгол (кирил)" },
+    { id: "mn_MN", name: "Mongolian (Mongolia)", nativeName: "монгол (Монгол)" },
+    { id: "ne", name: "Nepali", nativeName: "नेपाली" },
+    { id: "ne_IN", name: "Nepali (India)", nativeName: "नेपाली (भारत)" },
+    { id: "ne_NP", name: "Nepali (Nepal)", nativeName: "नेपाली (नेपाल)" },
+    { id: "nd", name: "North Ndebele", nativeName: "isiNdebele" },
+    { id: "nd_ZW", name: "North Ndebele (Zimbabwe)", nativeName: "isiNdebele (Zimbabwe)" },
+    { id: "se", name: "Northern Sami", nativeName: "davvisámegiella" },
+    { id: "se_FI", name: "Northern Sami (Finland)", nativeName: "davvisámegiella (Suopma)" },
+    { id: "se_NO", name: "Northern Sami (Norway)", nativeName: "davvisámegiella (Norga)" },
+    { id: "se_SE", name: "Northern Sami (Sweden)", nativeName: "davvisámegiella (Ruoŧŧa)" },
+    { id: "no", name: "Norwegian", nativeName: "Norwegian" },
+    { id: "no_NO", name: "Norwegian (Norway)", nativeName: "Norwegian (Norway)" },
+    { id: "nb", name: "Norwegian Bokmål", nativeName: "norsk bokmål" },
+    { id: "nb_NO", name: "Norwegian Bokmål (Norway)", nativeName: "norsk bokmål (Norge)" },
+    { id: "nb_SJ", name: "Norwegian Bokmål (Svalbard & Jan Mayen)", nativeName: "norsk bokmål (Svalbard og Jan Mayen)" },
+    { id: "nn", name: "Norwegian Nynorsk", nativeName: "nynorsk" },
+    { id: "nn_NO", name: "Norwegian Nynorsk (Norway)", nativeName: "nynorsk (Noreg)" },
+    { id: "or", name: "Oriya", nativeName: "ଓଡ଼ିଆ" },
+    { id: "or_IN", name: "Oriya (India)", nativeName: "ଓଡ଼ିଆ (ଭାରତ)" },
+    { id: "om", name: "Oromo", nativeName: "Oromoo" },
+    { id: "om_ET", name: "Oromo (Ethiopia)", nativeName: "Oromoo (Itoophiyaa)" },
+    { id: "om_KE", name: "Oromo (Kenya)", nativeName: "Oromoo (Keeniyaa)" },
+    { id: "os", name: "Ossetic", nativeName: "ирон" },
+    { id: "os_GE", name: "Ossetic (Georgia)", nativeName: "ирон (Гуырдзыстон)" },
+    { id: "os_RU", name: "Ossetic (Russia)", nativeName: "ирон (Уӕрӕсе)" },
+    { id: "ps", name: "Pashto", nativeName: "پښتو" },
+    { id: "ps_AF", name: "Pashto (Afghanistan)", nativeName: "پښتو (افغانستان)" },
+    { id: "fa", name: "Persian", nativeName: "فارسی" },
+    { id: "fa_AF", name: "Persian (Afghanistan)", nativeName: "دری (افغانستان)" },
+    { id: "fa_IR", name: "Persian (Iran)", nativeName: "فارسی (ایران)" },
+    { id: "pl", name: "Polish", nativeName: "polski" },
+    { id: "pl_PL", name: "Polish (Poland)", nativeName: "polski (Polska)" },
+    { id: "pt", name: "Portuguese", nativeName: "português" },
+    { id: "pt_AO", name: "Portuguese (Angola)", nativeName: "português (Angola)" },
+    { id: "pt_BR", name: "Portuguese (Brazil)", nativeName: "português (Brasil)" },
+    { id: "pt_CV", name: "Portuguese (Cape Verde)", nativeName: "português (Cabo Verde)" },
+    { id: "pt_GW", name: "Portuguese (Guinea-Bissau)", nativeName: "português (Guiné Bissau)" },
+    { id: "pt_MO", name: "Portuguese (Macau SAR China)", nativeName: "português (Macau, RAE da China)" },
+    { id: "pt_MZ", name: "Portuguese (Mozambique)", nativeName: "português (Moçambique)" },
+    { id: "pt_PT", name: "Portuguese (Portugal)", nativeName: "português (Portugal)" },
+    { id: "pt_ST", name: "Portuguese (São Tomé & Príncipe)", nativeName: "português (São Tomé e Príncipe)" },
+    { id: "pt_TL", name: "Portuguese (Timor-Leste)", nativeName: "português (Timor-Leste)" },
+    { id: "pa", name: "Punjabi", nativeName: "ਪੰਜਾਬੀ" },
+    { id: "pa_Arab_PK", name: "Punjabi (Arabic, Pakistan)", nativeName: "پنجابی (عربی, پکستان)" },
+    { id: "pa_Arab", name: "Punjabi (Arabic)", nativeName: "پنجابی (عربی)" },
+    { id: "pa_Guru_IN", name: "Punjabi (Gurmukhi, India)", nativeName: "ਪੰਜਾਬੀ (ਗੁਰਮੁਖੀ, ਭਾਰਤ)" },
+    { id: "pa_Guru", name: "Punjabi (Gurmukhi)", nativeName: "ਪੰਜਾਬੀ (ਗੁਰਮੁਖੀ)" },
+    { id: "pa_IN", name: "Punjabi (India)", nativeName: "ਪੰਜਾਬੀ (ਭਾਰਤ)" },
+    { id: "pa_PK", name: "Punjabi (Pakistan)", nativeName: "ਪੰਜਾਬੀ (ਪਾਕਿਸਤਾਨ)" },
+    { id: "qu", name: "Quechua", nativeName: "Runasimi" },
+    { id: "qu_BO", name: "Quechua (Bolivia)", nativeName: "Runasimi (Bolivia)" },
+    { id: "qu_EC", name: "Quechua (Ecuador)", nativeName: "Runasimi (Ecuador)" },
+    { id: "qu_PE", name: "Quechua (Peru)", nativeName: "Runasimi (Perú)" },
+    { id: "ro", name: "Romanian", nativeName: "română" },
+    { id: "ro_MD", name: "Romanian (Moldova)", nativeName: "română (Republica Moldova)" },
+    { id: "ro_RO", name: "Romanian (Romania)", nativeName: "română (România)" },
+    { id: "rm", name: "Romansh", nativeName: "rumantsch" },
+    { id: "rm_CH", name: "Romansh (Switzerland)", nativeName: "rumantsch (Svizra)" },
+    { id: "rn", name: "Rundi", nativeName: "Ikirundi" },
+    { id: "rn_BI", name: "Rundi (Burundi)", nativeName: "Ikirundi (Uburundi)" },
+    { id: "ru", name: "Russian", nativeName: "русский" },
+    { id: "ru_BY", name: "Russian (Belarus)", nativeName: "русский (Беларусь)" },
+    { id: "ru_KZ", name: "Russian (Kazakhstan)", nativeName: "русский (Казахстан)" },
+    { id: "ru_KG", name: "Russian (Kyrgyzstan)", nativeName: "русский (Киргизия)" },
+    { id: "ru_MD", name: "Russian (Moldova)", nativeName: "русский (Молдова)" },
+    { id: "ru_RU", name: "Russian (Russia)", nativeName: "русский (Россия)" },
+    { id: "ru_UA", name: "Russian (Ukraine)", nativeName: "русский (Украина)" },
+    { id: "sg", name: "Sango", nativeName: "Sängö" },
+    { id: "sg_CF", name: "Sango (Central African Republic)", nativeName: "Sängö (Ködörösêse tî Bêafrîka)" },
+    { id: "gd", name: "Scottish Gaelic", nativeName: "Gàidhlig" },
+    { id: "gd_GB", name: "Scottish Gaelic (United Kingdom)", nativeName: "Gàidhlig (An Rìoghachd Aonaichte)" },
+    { id: "sr", name: "Serbian", nativeName: "српски" },
+    { id: "sr_BA", name: "Serbian (Bosnia & Herzegovina)", nativeName: "српски (Босна и Херцеговина)" },
+    { id: "sr_Cyrl_BA", name: "Serbian (Cyrillic, Bosnia & Herzegovina)", nativeName: "српски (ћирилица, Босна и Херцеговина)" },
+    { id: "sr_Cyrl_XK", name: "Serbian (Cyrillic, Kosovo)", nativeName: "српски (ћирилица, Косово)" },
+    { id: "sr_Cyrl_ME", name: "Serbian (Cyrillic, Montenegro)", nativeName: "српски (ћирилица, Црна Гора)" },
+    { id: "sr_Cyrl_RS", name: "Serbian (Cyrillic, Serbia)", nativeName: "српски (ћирилица, Србија)" },
+    { id: "sr_Cyrl", name: "Serbian (Cyrillic)", nativeName: "српски (ћирилица)" },
+    { id: "sr_XK", name: "Serbian (Kosovo)", nativeName: "српски (Косово)" },
+    { id: "sr_Latn_BA", name: "Serbian (Latin, Bosnia & Herzegovina)", nativeName: "srpski (latinica, Bosna i Hercegovina)" },
+    { id: "sr_Latn_XK", name: "Serbian (Latin, Kosovo)", nativeName: "srpski (latinica, Kosovo)" },
+    { id: "sr_Latn_ME", name: "Serbian (Latin, Montenegro)", nativeName: "srpski (latinica, Crna Gora)" },
+    { id: "sr_Latn_RS", name: "Serbian (Latin, Serbia)", nativeName: "srpski (latinica, Srbija)" },
+    { id: "sr_Latn", name: "Serbian (Latin)", nativeName: "srpski (latinica)" },
+    { id: "sr_ME", name: "Serbian (Montenegro)", nativeName: "српски (Црна Гора)" },
+    { id: "sr_RS", name: "Serbian (Serbia)", nativeName: "српски (Србија)" },
+    { id: "sh", name: "Serbo-Croatian", nativeName: "Serbo-Croatian" },
+    { id: "sh_BA", name: "Serbo-Croatian (Bosnia & Herzegovina)", nativeName: "Serbo-Croatian (Bosnia & Herzegovina)" },
+    { id: "sn", name: "Shona", nativeName: "chiShona" },
+    { id: "sn_ZW", name: "Shona (Zimbabwe)", nativeName: "chiShona (Zimbabwe)" },
+    { id: "ii", name: "Sichuan Yi", nativeName: "ꆈꌠꉙ" },
+    { id: "ii_CN", name: "Sichuan Yi (China)", nativeName: "ꆈꌠꉙ (ꍏꇩ)" },
+    { id: "si", name: "Sinhala", nativeName: "සිංහල" },
+    { id: "si_LK", name: "Sinhala (Sri Lanka)", nativeName: "සිංහල (ශ්‍රී ලංකාව)" },
+    { id: "sk", name: "Slovak", nativeName: "slovenčina" },
+    { id: "sk_SK", name: "Slovak (Slovakia)", nativeName: "slovenčina (Slovensko)" },
+    { id: "sl", name: "Slovenian", nativeName: "slovenščina" },
+    { id: "sl_SI", name: "Slovenian (Slovenia)", nativeName: "slovenščina (Slovenija)" },
+    { id: "so", name: "Somali", nativeName: "Soomaali" },
+    { id: "so_DJ", name: "Somali (Djibouti)", nativeName: "Soomaali (Jabuuti)" },
+    { id: "so_ET", name: "Somali (Ethiopia)", nativeName: "Soomaali (Itoobiya)" },
+    { id: "so_KE", name: "Somali (Kenya)", nativeName: "Soomaali (Kiiniya)" },
+    { id: "so_SO", name: "Somali (Somalia)", nativeName: "Soomaali (Soomaaliya)" },
+    { id: "es", name: "Spanish", nativeName: "español" },
+    { id: "es_AR", name: "Spanish (Argentina)", nativeName: "español (Argentina)" },
+    { id: "es_BO", name: "Spanish (Bolivia)", nativeName: "español (Bolivia)" },
+    { id: "es_IC", name: "Spanish (Canary Islands)", nativeName: "español (islas Canarias)" },
+    { id: "es_EA", name: "Spanish (Ceuta & Melilla)", nativeName: "español (Ceuta y Melilla)" },
+    { id: "es_CL", name: "Spanish (Chile)", nativeName: "español (Chile)" },
+    { id: "es_CO", name: "Spanish (Colombia)", nativeName: "español (Colombia)" },
+    { id: "es_CR", name: "Spanish (Costa Rica)", nativeName: "español (Costa Rica)" },
+    { id: "es_CU", name: "Spanish (Cuba)", nativeName: "español (Cuba)" },
+    { id: "es_DO", name: "Spanish (Dominican Republic)", nativeName: "español (República Dominicana)" },
+    { id: "es_EC", name: "Spanish (Ecuador)", nativeName: "español (Ecuador)" },
+    { id: "es_SV", name: "Spanish (El Salvador)", nativeName: "español (El Salvador)" },
+    { id: "es_GQ", name: "Spanish (Equatorial Guinea)", nativeName: "español (Guinea Ecuatorial)" },
+    { id: "es_GT", name: "Spanish (Guatemala)", nativeName: "español (Guatemala)" },
+    { id: "es_HN", name: "Spanish (Honduras)", nativeName: "español (Honduras)" },
+    { id: "es_MX", name: "Spanish (Mexico)", nativeName: "español (México)" },
+    { id: "es_NI", name: "Spanish (Nicaragua)", nativeName: "español (Nicaragua)" },
+    { id: "es_PA", name: "Spanish (Panama)", nativeName: "español (Panamá)" },
+    { id: "es_PY", name: "Spanish (Paraguay)", nativeName: "español (Paraguay)" },
+    { id: "es_PE", name: "Spanish (Peru)", nativeName: "español (Perú)" },
+    { id: "es_PH", name: "Spanish (Philippines)", nativeName: "español (Filipinas)" },
+    { id: "es_PR", name: "Spanish (Puerto Rico)", nativeName: "español (Puerto Rico)" },
+    { id: "es_ES", name: "Spanish (Spain)", nativeName: "español (España)" },
+    { id: "es_US", name: "Spanish (United States)", nativeName: "español (Estados Unidos)" },
+    { id: "es_UY", name: "Spanish (Uruguay)", nativeName: "español (Uruguay)" },
+    { id: "es_VE", name: "Spanish (Venezuela)", nativeName: "español (Venezuela)" },
+    { id: "sw", name: "Swahili", nativeName: "Kiswahili" },
+    { id: "sw_KE", name: "Swahili (Kenya)", nativeName: "Kiswahili (Kenya)" },
+    { id: "sw_TZ", name: "Swahili (Tanzania)", nativeName: "Kiswahili (Tanzania)" },
+    { id: "sw_UG", name: "Swahili (Uganda)", nativeName: "Kiswahili (Uganda)" },
+    { id: "sv", name: "Swedish", nativeName: "svenska" },
+    { id: "sv_AX", name: "Swedish (Åland Islands)", nativeName: "svenska (Åland)" },
+    { id: "sv_FI", name: "Swedish (Finland)", nativeName: "svenska (Finland)" },
+    { id: "sv_SE", name: "Swedish (Sweden)", nativeName: "svenska (Sverige)" },
+    { id: "tl", name: "Tagalog", nativeName: "Tagalog" },
+    { id: "tl_PH", name: "Tagalog (Philippines)", nativeName: "Tagalog (Philippines)" },
+    { id: "ta", name: "Tamil", nativeName: "தமிழ்" },
+    { id: "ta_IN", name: "Tamil (India)", nativeName: "தமிழ் (இந்தியா)" },
+    { id: "ta_MY", name: "Tamil (Malaysia)", nativeName: "தமிழ் (மலேஷியா)" },
+    { id: "ta_SG", name: "Tamil (Singapore)", nativeName: "தமிழ் (சிங்கப்பூர்)" },
+    { id: "ta_LK", name: "Tamil (Sri Lanka)", nativeName: "தமிழ் (இலங்கை)" },
+    { id: "te", name: "Telugu", nativeName: "తెలుగు" },
+    { id: "te_IN", name: "Telugu (India)", nativeName: "తెలుగు (భారత దేశం)" },
+    { id: "th", name: "Thai", nativeName: "ไทย" },
+    { id: "th_TH", name: "Thai (Thailand)", nativeName: "ไทย (ไทย)" },
+    { id: "bo", name: "Tibetan", nativeName: "བོད་སྐད་" },
+    { id: "bo_CN", name: "Tibetan (China)", nativeName: "བོད་སྐད་ (རྒྱ་ནག)" },
+    { id: "bo_IN", name: "Tibetan (India)", nativeName: "བོད་སྐད་ (རྒྱ་གར་)" },
+    { id: "ti", name: "Tigrinya", nativeName: "ትግርኛ" },
+    { id: "ti_ER", name: "Tigrinya (Eritrea)", nativeName: "Tigrinya (Eritrea)" },
+    { id: "ti_ET", name: "Tigrinya (Ethiopia)", nativeName: "Tigrinya (Ethiopia)" },
+    { id: "to", name: "Tongan", nativeName: "lea fakatonga" },
+    { id: "to_TO", name: "Tongan (Tonga)", nativeName: "lea fakatonga (Tonga)" },
+    { id: "tr", name: "Turkish", nativeName: "Türkçe" },
+    { id: "tr_CY", name: "Turkish (Cyprus)", nativeName: "Türkçe (Güney Kıbrıs Rum Kesimi)" },
+    { id: "tr_TR", name: "Turkish (Turkey)", nativeName: "Türkçe (Türkiye)" },
+    { id: "uk", name: "Ukrainian", nativeName: "українська" },
+    { id: "uk_UA", name: "Ukrainian (Ukraine)", nativeName: "українська (Україна)" },
+    { id: "ur", name: "Urdu", nativeName: "اردو" },
+    { id: "ur_IN", name: "Urdu (India)", nativeName: "اردو (بھارت)" },
+    { id: "ur_PK", name: "Urdu (Pakistan)", nativeName: "اردو (پاکستان)" },
+    { id: "ug", name: "Uyghur", nativeName: "ئۇيغۇرچە" },
+    { id: "ug_Arab_CN", name: "Uyghur (Arabic, China)", nativeName: "ئۇيغۇرچە (ئەرەب, جۇڭگو)" },
+    { id: "ug_Arab", name: "Uyghur (Arabic)", nativeName: "ئۇيغۇرچە (ئەرەب)" },
+    { id: "ug_CN", name: "Uyghur (China)", nativeName: "ئۇيغۇرچە (جۇڭگو)" },
+    { id: "uz", name: "Uzbek", nativeName: "oʻzbekcha" },
+    { id: "uz_AF", name: "Uzbek (Afghanistan)", nativeName: "oʻzbekcha (Afgʻoniston)" },
+    { id: "uz_Arab_AF", name: "Uzbek (Arabic, Afghanistan)", nativeName: "اوزبیک (عربی, افغانستان)" },
+    { id: "uz_Arab", name: "Uzbek (Arabic)", nativeName: "اوزبیک (عربی)" },
+    { id: "uz_Cyrl_UZ", name: "Uzbek (Cyrillic, Uzbekistan)", nativeName: "Ўзбек (Кирил, Ўзбекистон)" },
+    { id: "uz_Cyrl", name: "Uzbek (Cyrillic)", nativeName: "Ўзбек (Кирил)" },
+    { id: "uz_Latn_UZ", name: "Uzbek (Latin, Uzbekistan)", nativeName: "oʻzbekcha (Lotin, Oʻzbekiston)" },
+    { id: "uz_Latn", name: "Uzbek (Latin)", nativeName: "oʻzbekcha (Lotin)" },
+    { id: "uz_UZ", name: "Uzbek (Uzbekistan)", nativeName: "oʻzbekcha (Oʻzbekiston)" },
+    { id: "vi", name: "Vietnamese", nativeName: "Tiếng Việt" },
+    { id: "vi_VN", name: "Vietnamese (Vietnam)", nativeName: "Tiếng Việt (Việt Nam)" },
+    { id: "cy", name: "Welsh", nativeName: "Cymraeg" },
+    { id: "cy_GB", name: "Welsh (United Kingdom)", nativeName: "Cymraeg (Y Deyrnas Unedig)" },
+    { id: "fy", name: "Western Frisian", nativeName: "West-Frysk" },
+    { id: "fy_NL", name: "Western Frisian (Netherlands)", nativeName: "West-Frysk (Nederlân)" },
+    { id: "yi", name: "Yiddish", nativeName: "ייִדיש" },
+    { id: "yo", name: "Yoruba", nativeName: "Èdè Yorùbá" },
+    { id: "yo_BJ", name: "Yoruba (Benin)", nativeName: "Èdè Yorùbá (Orílɛ́ède Bɛ̀nɛ̀)" },
+    { id: "yo_NG", name: "Yoruba (Nigeria)", nativeName: "Èdè Yorùbá (Orílẹ́ède Nàìjíríà)" },
+    { id: "zu", name: "Zulu", nativeName: "isiZulu" },
+    { id: "zu_ZA", name: "Zulu (South Africa)", nativeName: "isiZulu (i-South Africa)" }
+            ];
+        }
+    };
+});
+// Full list of time zones defined in tz database
+// see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+angular.module('platformWebApp')
+.factory('platformWebApp.common.timeZones', ['moment', function(moment) {
+    var result = {
+        get: function(id) {
+            return _.find(this.query(), function(x) { return x.id.toLowerCase() === id.toLowerCase(); });
+        },
+        contains: function (id) {
+            return _.some(this.query(), function (x) { return x.id.toLowerCase() === id.toLowerCase(); });
+        },
+        utcOffset: function (id) {
+            var offset = moment.tz.zone(id).offset(moment().valueOf());
+            // UTC offset has inverted sign. Compare to zero to avoid -0
+            offset = offset === 0 ? 0 : offset * -1;
+            var minutes = offset % 60;
+            var hours = (offset - minutes) / 60;
+            // format: ±HHMM
+            var pad = function (n, withSign) {
+                var result = '';
+                if (withSign) {
+                    result = n >= 0 ? '+' : '-';
+                    n = n < 0 ? n * -1 : n;
+                }
+                result += n < 10 ? '0' + n : n;
+                return result;
+            }
+            return { hours: hours, minutes: minutes, formatted: pad(hours, true) + ':' + pad(minutes) };
+        },
+        query: function () {
+            // Get time zone from moment list of time zones, append UTC offset to name (UTC ±XX:XX Continent/City) and sort by UTC offset
+            return _.map(moment.tz.names(), function (x) {
+                var utcOffset = result.utcOffset(x);
+                return {
+                    id: x,
+                    utcOffset: utcOffset,
+                    name: '(UTC ' + utcOffset.formatted + ') ' + x
+                };
+            }).sort(function (a, b) {
+                if (!a.utcOffset || !b.utcOffset) {
+                    return !b.utcOffset ? -1 : !a.utcOffset ? 1 : 0;
+                }
+                return a.utcOffset.hours === b.utcOffset.hours ? a.utcOffset.minutes - b.utcOffset.minutes : a.utcOffset.hours - b.utcOffset.hours;
+            });
+        }
+    };
+    return result;
+}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.confirmDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
     angular.extend($scope, dialog);
@@ -20378,1869 +22241,6 @@ angular.module('platformWebApp').directive('vaTabs', function () {
         }
     }
 });
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-"use strict";
-
-CodeMirror.registerHelper("fold", "brace", function(cm, start) {
-  var line = start.line, lineText = cm.getLine(line);
-  var startCh, tokenType;
-
-  function findOpening(openCh) {
-    for (var at = start.ch, pass = 0;;) {
-      var found = at <= 0 ? -1 : lineText.lastIndexOf(openCh, at - 1);
-      if (found == -1) {
-        if (pass == 1) break;
-        pass = 1;
-        at = lineText.length;
-        continue;
-      }
-      if (pass == 1 && found < start.ch) break;
-      tokenType = cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1));
-      if (!/^(comment|string)/.test(tokenType)) return found + 1;
-      at = found - 1;
-    }
-  }
-
-  var startToken = "{", endToken = "}", startCh = findOpening("{");
-  if (startCh == null) {
-    startToken = "[", endToken = "]";
-    startCh = findOpening("[");
-  }
-
-  if (startCh == null) return;
-  var count = 1, lastLine = cm.lastLine(), end, endCh;
-  outer: for (var i = line; i <= lastLine; ++i) {
-    var text = cm.getLine(i), pos = i == line ? startCh : 0;
-    for (;;) {
-      var nextOpen = text.indexOf(startToken, pos), nextClose = text.indexOf(endToken, pos);
-      if (nextOpen < 0) nextOpen = text.length;
-      if (nextClose < 0) nextClose = text.length;
-      pos = Math.min(nextOpen, nextClose);
-      if (pos == text.length) break;
-      if (cm.getTokenTypeAt(CodeMirror.Pos(i, pos + 1)) == tokenType) {
-        if (pos == nextOpen) ++count;
-        else if (!--count) { end = i; endCh = pos; break outer; }
-      }
-      ++pos;
-    }
-  }
-  if (end == null || line == end && endCh == startCh) return;
-  return {from: CodeMirror.Pos(line, startCh),
-          to: CodeMirror.Pos(end, endCh)};
-});
-
-CodeMirror.registerHelper("fold", "import", function(cm, start) {
-  function hasImport(line) {
-    if (line < cm.firstLine() || line > cm.lastLine()) return null;
-    var start = cm.getTokenAt(CodeMirror.Pos(line, 1));
-    if (!/\S/.test(start.string)) start = cm.getTokenAt(CodeMirror.Pos(line, start.end + 1));
-    if (start.type != "keyword" || start.string != "import") return null;
-    // Now find closing semicolon, return its position
-    for (var i = line, e = Math.min(cm.lastLine(), line + 10); i <= e; ++i) {
-      var text = cm.getLine(i), semi = text.indexOf(";");
-      if (semi != -1) return {startCh: start.end, end: CodeMirror.Pos(i, semi)};
-    }
-  }
-
-  var start = start.line, has = hasImport(start), prev;
-  if (!has || hasImport(start - 1) || ((prev = hasImport(start - 2)) && prev.end.line == start - 1))
-    return null;
-  for (var end = has.end;;) {
-    var next = hasImport(end.line + 1);
-    if (next == null) break;
-    end = next.end;
-  }
-  return {from: cm.clipPos(CodeMirror.Pos(start, has.startCh + 1)), to: end};
-});
-
-CodeMirror.registerHelper("fold", "include", function(cm, start) {
-  function hasInclude(line) {
-    if (line < cm.firstLine() || line > cm.lastLine()) return null;
-    var start = cm.getTokenAt(CodeMirror.Pos(line, 1));
-    if (!/\S/.test(start.string)) start = cm.getTokenAt(CodeMirror.Pos(line, start.end + 1));
-    if (start.type == "meta" && start.string.slice(0, 8) == "#include") return start.start + 8;
-  }
-
-  var start = start.line, has = hasInclude(start);
-  if (has == null || hasInclude(start - 1) != null) return null;
-  for (var end = start;;) {
-    var next = hasInclude(end + 1);
-    if (next == null) break;
-    ++end;
-  }
-  return {from: CodeMirror.Pos(start, has + 1),
-          to: cm.clipPos(CodeMirror.Pos(end))};
-});
-
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-"use strict";
-
-CodeMirror.registerGlobalHelper("fold", "comment", function(mode) {
-  return mode.blockCommentStart && mode.blockCommentEnd;
-}, function(cm, start) {
-  var mode = cm.getModeAt(start), startToken = mode.blockCommentStart, endToken = mode.blockCommentEnd;
-  if (!startToken || !endToken) return;
-  var line = start.line, lineText = cm.getLine(line);
-
-  var startCh;
-  for (var at = start.ch, pass = 0;;) {
-    var found = at <= 0 ? -1 : lineText.lastIndexOf(startToken, at - 1);
-    if (found == -1) {
-      if (pass == 1) return;
-      pass = 1;
-      at = lineText.length;
-      continue;
-    }
-    if (pass == 1 && found < start.ch) return;
-    if (/comment/.test(cm.getTokenTypeAt(CodeMirror.Pos(line, found + 1)))) {
-      startCh = found + startToken.length;
-      break;
-    }
-    at = found - 1;
-  }
-
-  var depth = 1, lastLine = cm.lastLine(), end, endCh;
-  outer: for (var i = line; i <= lastLine; ++i) {
-    var text = cm.getLine(i), pos = i == line ? startCh : 0;
-    for (;;) {
-      var nextOpen = text.indexOf(startToken, pos), nextClose = text.indexOf(endToken, pos);
-      if (nextOpen < 0) nextOpen = text.length;
-      if (nextClose < 0) nextClose = text.length;
-      pos = Math.min(nextOpen, nextClose);
-      if (pos == text.length) break;
-      if (pos == nextOpen) ++depth;
-      else if (!--depth) { end = i; endCh = pos; break outer; }
-      ++pos;
-    }
-  }
-  if (end == null || line == end && endCh == startCh) return;
-  return {from: CodeMirror.Pos(line, startCh),
-          to: CodeMirror.Pos(end, endCh)};
-});
-
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-  "use strict";
-
-  function doFold(cm, pos, options, force) {
-    if (options && options.call) {
-      var finder = options;
-      options = null;
-    } else {
-      var finder = getOption(cm, options, "rangeFinder");
-    }
-    if (typeof pos == "number") pos = CodeMirror.Pos(pos, 0);
-    var minSize = getOption(cm, options, "minFoldSize");
-
-    function getRange(allowFolded) {
-      var range = finder(cm, pos);
-      if (!range || range.to.line - range.from.line < minSize) return null;
-      var marks = cm.findMarksAt(range.from);
-      for (var i = 0; i < marks.length; ++i) {
-        if (marks[i].__isFold && force !== "fold") {
-          if (!allowFolded) return null;
-          range.cleared = true;
-          marks[i].clear();
-        }
-      }
-      return range;
-    }
-
-    var range = getRange(true);
-    if (getOption(cm, options, "scanUp")) while (!range && pos.line > cm.firstLine()) {
-      pos = CodeMirror.Pos(pos.line - 1, 0);
-      range = getRange(false);
-    }
-    if (!range || range.cleared || force === "unfold") return;
-
-    var myWidget = makeWidget(cm, options);
-    CodeMirror.on(myWidget, "mousedown", function(e) {
-      myRange.clear();
-      CodeMirror.e_preventDefault(e);
-    });
-    var myRange = cm.markText(range.from, range.to, {
-      replacedWith: myWidget,
-      clearOnEnter: true,
-      __isFold: true
-    });
-    myRange.on("clear", function(from, to) {
-      CodeMirror.signal(cm, "unfold", cm, from, to);
-    });
-    CodeMirror.signal(cm, "fold", cm, range.from, range.to);
-  }
-
-  function makeWidget(cm, options) {
-    var widget = getOption(cm, options, "widget");
-    if (typeof widget == "string") {
-      var text = document.createTextNode(widget);
-      widget = document.createElement("span");
-      widget.appendChild(text);
-      widget.className = "CodeMirror-foldmarker";
-    }
-    return widget;
-  }
-
-  // Clumsy backwards-compatible interface
-  CodeMirror.newFoldFunction = function(rangeFinder, widget) {
-    return function(cm, pos) { doFold(cm, pos, {rangeFinder: rangeFinder, widget: widget}); };
-  };
-
-  // New-style interface
-  CodeMirror.defineExtension("foldCode", function(pos, options, force) {
-    doFold(this, pos, options, force);
-  });
-
-  CodeMirror.defineExtension("isFolded", function(pos) {
-    var marks = this.findMarksAt(pos);
-    for (var i = 0; i < marks.length; ++i)
-      if (marks[i].__isFold) return true;
-  });
-
-  CodeMirror.commands.toggleFold = function(cm) {
-    cm.foldCode(cm.getCursor());
-  };
-  CodeMirror.commands.fold = function(cm) {
-    cm.foldCode(cm.getCursor(), null, "fold");
-  };
-  CodeMirror.commands.unfold = function(cm) {
-    cm.foldCode(cm.getCursor(), null, "unfold");
-  };
-  CodeMirror.commands.foldAll = function(cm) {
-    cm.operation(function() {
-      for (var i = cm.firstLine(), e = cm.lastLine(); i <= e; i++)
-        cm.foldCode(CodeMirror.Pos(i, 0), null, "fold");
-    });
-  };
-  CodeMirror.commands.unfoldAll = function(cm) {
-    cm.operation(function() {
-      for (var i = cm.firstLine(), e = cm.lastLine(); i <= e; i++)
-        cm.foldCode(CodeMirror.Pos(i, 0), null, "unfold");
-    });
-  };
-
-  CodeMirror.registerHelper("fold", "combine", function() {
-    var funcs = Array.prototype.slice.call(arguments, 0);
-    return function(cm, start) {
-      for (var i = 0; i < funcs.length; ++i) {
-        var found = funcs[i](cm, start);
-        if (found) return found;
-      }
-    };
-  });
-
-  CodeMirror.registerHelper("fold", "auto", function(cm, start) {
-    var helpers = cm.getHelpers(start, "fold");
-    for (var i = 0; i < helpers.length; i++) {
-      var cur = helpers[i](cm, start);
-      if (cur) return cur;
-    }
-  });
-
-  var defaultOptions = {
-    rangeFinder: CodeMirror.fold.auto,
-    widget: "\u2194",
-    minFoldSize: 0,
-    scanUp: false
-  };
-
-  CodeMirror.defineOption("foldOptions", null);
-
-  function getOption(cm, options, name) {
-    if (options && options[name] !== undefined)
-      return options[name];
-    var editorOptions = cm.options.foldOptions;
-    if (editorOptions && editorOptions[name] !== undefined)
-      return editorOptions[name];
-    return defaultOptions[name];
-  }
-
-  CodeMirror.defineExtension("foldOption", function(options, name) {
-    return getOption(this, options, name);
-  });
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"), require("./foldcode"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror", "./foldcode"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-  "use strict";
-
-  CodeMirror.defineOption("foldGutter", false, function(cm, val, old) {
-    if (old && old != CodeMirror.Init) {
-      cm.clearGutter(cm.state.foldGutter.options.gutter);
-      cm.state.foldGutter = null;
-      cm.off("gutterClick", onGutterClick);
-      cm.off("change", onChange);
-      cm.off("viewportChange", onViewportChange);
-      cm.off("fold", onFold);
-      cm.off("unfold", onFold);
-      cm.off("swapDoc", updateInViewport);
-    }
-    if (val) {
-      cm.state.foldGutter = new State(parseOptions(val));
-      updateInViewport(cm);
-      cm.on("gutterClick", onGutterClick);
-      cm.on("change", onChange);
-      cm.on("viewportChange", onViewportChange);
-      cm.on("fold", onFold);
-      cm.on("unfold", onFold);
-      cm.on("swapDoc", updateInViewport);
-    }
-  });
-
-  var Pos = CodeMirror.Pos;
-
-  function State(options) {
-    this.options = options;
-    this.from = this.to = 0;
-  }
-
-  function parseOptions(opts) {
-    if (opts === true) opts = {};
-    if (opts.gutter == null) opts.gutter = "CodeMirror-foldgutter";
-    if (opts.indicatorOpen == null) opts.indicatorOpen = "CodeMirror-foldgutter-open";
-    if (opts.indicatorFolded == null) opts.indicatorFolded = "CodeMirror-foldgutter-folded";
-    return opts;
-  }
-
-  function isFolded(cm, line) {
-    var marks = cm.findMarksAt(Pos(line));
-    for (var i = 0; i < marks.length; ++i)
-      if (marks[i].__isFold && marks[i].find().from.line == line) return marks[i];
-  }
-
-  function marker(spec) {
-    if (typeof spec == "string") {
-      var elt = document.createElement("div");
-      elt.className = spec + " CodeMirror-guttermarker-subtle";
-      return elt;
-    } else {
-      return spec.cloneNode(true);
-    }
-  }
-
-  function updateFoldInfo(cm, from, to) {
-    var opts = cm.state.foldGutter.options, cur = from;
-    var minSize = cm.foldOption(opts, "minFoldSize");
-    var func = cm.foldOption(opts, "rangeFinder");
-    cm.eachLine(from, to, function(line) {
-      var mark = null;
-      if (isFolded(cm, cur)) {
-        mark = marker(opts.indicatorFolded);
-      } else {
-        var pos = Pos(cur, 0);
-        var range = func && func(cm, pos);
-        if (range && range.to.line - range.from.line >= minSize)
-          mark = marker(opts.indicatorOpen);
-      }
-      cm.setGutterMarker(line, opts.gutter, mark);
-      ++cur;
-    });
-  }
-
-  function updateInViewport(cm) {
-    var vp = cm.getViewport(), state = cm.state.foldGutter;
-    if (!state) return;
-    cm.operation(function() {
-      updateFoldInfo(cm, vp.from, vp.to);
-    });
-    state.from = vp.from; state.to = vp.to;
-  }
-
-  function onGutterClick(cm, line, gutter) {
-    var state = cm.state.foldGutter;
-    if (!state) return;
-    var opts = state.options;
-    if (gutter != opts.gutter) return;
-    var folded = isFolded(cm, line);
-    if (folded) folded.clear();
-    else cm.foldCode(Pos(line, 0), opts.rangeFinder);
-  }
-
-  function onChange(cm) {
-    var state = cm.state.foldGutter;
-    if (!state) return;
-    var opts = state.options;
-    state.from = state.to = 0;
-    clearTimeout(state.changeUpdate);
-    state.changeUpdate = setTimeout(function() { updateInViewport(cm); }, opts.foldOnChangeTimeSpan || 600);
-  }
-
-  function onViewportChange(cm) {
-    var state = cm.state.foldGutter;
-    if (!state) return;
-    var opts = state.options;
-    clearTimeout(state.changeUpdate);
-    state.changeUpdate = setTimeout(function() {
-      var vp = cm.getViewport();
-      if (state.from == state.to || vp.from - state.to > 20 || state.from - vp.to > 20) {
-        updateInViewport(cm);
-      } else {
-        cm.operation(function() {
-          if (vp.from < state.from) {
-            updateFoldInfo(cm, vp.from, state.from);
-            state.from = vp.from;
-          }
-          if (vp.to > state.to) {
-            updateFoldInfo(cm, state.to, vp.to);
-            state.to = vp.to;
-          }
-        });
-      }
-    }, opts.updateViewportTimeSpan || 400);
-  }
-
-  function onFold(cm, from) {
-    var state = cm.state.foldGutter;
-    if (!state) return;
-    var line = from.line;
-    if (line >= state.from && line < state.to)
-      updateFoldInfo(cm, line, line + 1);
-  }
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-"use strict";
-
-CodeMirror.registerHelper("fold", "indent", function(cm, start) {
-  var tabSize = cm.getOption("tabSize"), firstLine = cm.getLine(start.line);
-  if (!/\S/.test(firstLine)) return;
-  var getIndent = function(line) {
-    return CodeMirror.countColumn(line, null, tabSize);
-  };
-  var myIndent = getIndent(firstLine);
-  var lastLineInFold = null;
-  // Go through lines until we find a line that definitely doesn't belong in
-  // the block we're folding, or to the end.
-  for (var i = start.line + 1, end = cm.lastLine(); i <= end; ++i) {
-    var curLine = cm.getLine(i);
-    var curIndent = getIndent(curLine);
-    if (curIndent > myIndent) {
-      // Lines with a greater indent are considered part of the block.
-      lastLineInFold = i;
-    } else if (!/\S/.test(curLine)) {
-      // Empty lines might be breaks within the block we're trying to fold.
-    } else {
-      // A non-empty line at an indent equal to or less than ours marks the
-      // start of another block.
-      break;
-    }
-  }
-  if (lastLineInFold) return {
-    from: CodeMirror.Pos(start.line, firstLine.length),
-    to: CodeMirror.Pos(lastLineInFold, cm.getLine(lastLineInFold).length)
-  };
-});
-
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-"use strict";
-
-CodeMirror.registerHelper("fold", "markdown", function(cm, start) {
-  var maxDepth = 100;
-
-  function isHeader(lineNo) {
-    var tokentype = cm.getTokenTypeAt(CodeMirror.Pos(lineNo, 0));
-    return tokentype && /\bheader\b/.test(tokentype);
-  }
-
-  function headerLevel(lineNo, line, nextLine) {
-    var match = line && line.match(/^#+/);
-    if (match && isHeader(lineNo)) return match[0].length;
-    match = nextLine && nextLine.match(/^[=\-]+\s*$/);
-    if (match && isHeader(lineNo + 1)) return nextLine[0] == "=" ? 1 : 2;
-    return maxDepth;
-  }
-
-  var firstLine = cm.getLine(start.line), nextLine = cm.getLine(start.line + 1);
-  var level = headerLevel(start.line, firstLine, nextLine);
-  if (level === maxDepth) return undefined;
-
-  var lastLineNo = cm.lastLine();
-  var end = start.line, nextNextLine = cm.getLine(end + 2);
-  while (end < lastLineNo) {
-    if (headerLevel(end + 1, nextLine, nextNextLine) <= level) break;
-    ++end;
-    nextLine = nextNextLine;
-    nextNextLine = cm.getLine(end + 2);
-  }
-
-  return {
-    from: CodeMirror.Pos(start.line, firstLine.length),
-    to: CodeMirror.Pos(end, cm.getLine(end).length)
-  };
-});
-
-});
-
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-  "use strict";
-
-  var Pos = CodeMirror.Pos;
-  function cmp(a, b) { return a.line - b.line || a.ch - b.ch; }
-
-  var nameStartChar = "A-Z_a-z\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD";
-  var nameChar = nameStartChar + "\-\:\.0-9\\u00B7\\u0300-\\u036F\\u203F-\\u2040";
-  var xmlTagStart = new RegExp("<(/?)([" + nameStartChar + "][" + nameChar + "]*)", "g");
-
-  function Iter(cm, line, ch, range) {
-    this.line = line; this.ch = ch;
-    this.cm = cm; this.text = cm.getLine(line);
-    this.min = range ? range.from : cm.firstLine();
-    this.max = range ? range.to - 1 : cm.lastLine();
-  }
-
-  function tagAt(iter, ch) {
-    var type = iter.cm.getTokenTypeAt(Pos(iter.line, ch));
-    return type && /\btag\b/.test(type);
-  }
-
-  function nextLine(iter) {
-    if (iter.line >= iter.max) return;
-    iter.ch = 0;
-    iter.text = iter.cm.getLine(++iter.line);
-    return true;
-  }
-  function prevLine(iter) {
-    if (iter.line <= iter.min) return;
-    iter.text = iter.cm.getLine(--iter.line);
-    iter.ch = iter.text.length;
-    return true;
-  }
-
-  function toTagEnd(iter) {
-    for (;;) {
-      var gt = iter.text.indexOf(">", iter.ch);
-      if (gt == -1) { if (nextLine(iter)) continue; else return; }
-      if (!tagAt(iter, gt + 1)) { iter.ch = gt + 1; continue; }
-      var lastSlash = iter.text.lastIndexOf("/", gt);
-      var selfClose = lastSlash > -1 && !/\S/.test(iter.text.slice(lastSlash + 1, gt));
-      iter.ch = gt + 1;
-      return selfClose ? "selfClose" : "regular";
-    }
-  }
-  function toTagStart(iter) {
-    for (;;) {
-      var lt = iter.ch ? iter.text.lastIndexOf("<", iter.ch - 1) : -1;
-      if (lt == -1) { if (prevLine(iter)) continue; else return; }
-      if (!tagAt(iter, lt + 1)) { iter.ch = lt; continue; }
-      xmlTagStart.lastIndex = lt;
-      iter.ch = lt;
-      var match = xmlTagStart.exec(iter.text);
-      if (match && match.index == lt) return match;
-    }
-  }
-
-  function toNextTag(iter) {
-    for (;;) {
-      xmlTagStart.lastIndex = iter.ch;
-      var found = xmlTagStart.exec(iter.text);
-      if (!found) { if (nextLine(iter)) continue; else return; }
-      if (!tagAt(iter, found.index + 1)) { iter.ch = found.index + 1; continue; }
-      iter.ch = found.index + found[0].length;
-      return found;
-    }
-  }
-  function toPrevTag(iter) {
-    for (;;) {
-      var gt = iter.ch ? iter.text.lastIndexOf(">", iter.ch - 1) : -1;
-      if (gt == -1) { if (prevLine(iter)) continue; else return; }
-      if (!tagAt(iter, gt + 1)) { iter.ch = gt; continue; }
-      var lastSlash = iter.text.lastIndexOf("/", gt);
-      var selfClose = lastSlash > -1 && !/\S/.test(iter.text.slice(lastSlash + 1, gt));
-      iter.ch = gt + 1;
-      return selfClose ? "selfClose" : "regular";
-    }
-  }
-
-  function findMatchingClose(iter, tag) {
-    var stack = [];
-    for (;;) {
-      var next = toNextTag(iter), end, startLine = iter.line, startCh = iter.ch - (next ? next[0].length : 0);
-      if (!next || !(end = toTagEnd(iter))) return;
-      if (end == "selfClose") continue;
-      if (next[1]) { // closing tag
-        for (var i = stack.length - 1; i >= 0; --i) if (stack[i] == next[2]) {
-          stack.length = i;
-          break;
-        }
-        if (i < 0 && (!tag || tag == next[2])) return {
-          tag: next[2],
-          from: Pos(startLine, startCh),
-          to: Pos(iter.line, iter.ch)
-        };
-      } else { // opening tag
-        stack.push(next[2]);
-      }
-    }
-  }
-  function findMatchingOpen(iter, tag) {
-    var stack = [];
-    for (;;) {
-      var prev = toPrevTag(iter);
-      if (!prev) return;
-      if (prev == "selfClose") { toTagStart(iter); continue; }
-      var endLine = iter.line, endCh = iter.ch;
-      var start = toTagStart(iter);
-      if (!start) return;
-      if (start[1]) { // closing tag
-        stack.push(start[2]);
-      } else { // opening tag
-        for (var i = stack.length - 1; i >= 0; --i) if (stack[i] == start[2]) {
-          stack.length = i;
-          break;
-        }
-        if (i < 0 && (!tag || tag == start[2])) return {
-          tag: start[2],
-          from: Pos(iter.line, iter.ch),
-          to: Pos(endLine, endCh)
-        };
-      }
-    }
-  }
-
-  CodeMirror.registerHelper("fold", "xml", function(cm, start) {
-    var iter = new Iter(cm, start.line, 0);
-    for (;;) {
-      var openTag = toNextTag(iter), end;
-      if (!openTag || iter.line != start.line || !(end = toTagEnd(iter))) return;
-      if (!openTag[1] && end != "selfClose") {
-        var start = Pos(iter.line, iter.ch);
-        var close = findMatchingClose(iter, openTag[2]);
-        return close && {from: start, to: close.from};
-      }
-    }
-  });
-  CodeMirror.findMatchingTag = function(cm, pos, range) {
-    var iter = new Iter(cm, pos.line, pos.ch, range);
-    if (iter.text.indexOf(">") == -1 && iter.text.indexOf("<") == -1) return;
-    var end = toTagEnd(iter), to = end && Pos(iter.line, iter.ch);
-    var start = end && toTagStart(iter);
-    if (!end || !start || cmp(iter, pos) > 0) return;
-    var here = {from: Pos(iter.line, iter.ch), to: to, tag: start[2]};
-    if (end == "selfClose") return {open: here, close: null, at: "open"};
-
-    if (start[1]) { // closing tag
-      return {open: findMatchingOpen(iter, start[2]), close: here, at: "close"};
-    } else { // opening tag
-      iter = new Iter(cm, to.line, to.ch, range);
-      return {open: here, close: findMatchingClose(iter, start[2]), at: "open"};
-    }
-  };
-
-  CodeMirror.findEnclosingTag = function(cm, pos, range) {
-    var iter = new Iter(cm, pos.line, pos.ch, range);
-    for (;;) {
-      var open = findMatchingOpen(iter);
-      if (!open) break;
-      var forward = new Iter(cm, pos.line, pos.ch, range);
-      var close = findMatchingClose(forward, open.tag);
-      if (close) return {open: open, close: close};
-    }
-  };
-
-  // Used by addon/edit/closetag.js
-  CodeMirror.scanForClosingTag = function(cm, pos, name, end) {
-    var iter = new Iter(cm, pos.line, pos.ch, end ? {from: 0, to: end} : null);
-    return findMatchingClose(iter, name);
-  };
-});
-
-// Full list of countries defined by ISO 3166-1 alpha-3
-// based on https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
-angular.module('platformWebApp')
-.factory('platformWebApp.common.countries', function () {
-    return {
-        get: function (id) {
-            return _.findWhere(this.query(), { id: this.normalize(id) });
-        },
-        contains: function (id) {
-            return _.map(this.query(), function (entry) { return entry.id }).includes(this.normalize(id));
-        },
-        normalize: function(id) {
-            var result = undefined;
-            if (!!id) {
-                result = id.toUpperCase();
-            }
-            return result;
-        },
-        query: function () {
-            return [
-    { id: "AFG", name: "Afghanistan" },
-    { id: "ALA", name: "Åland Islands" },
-    { id: "ALB", name: "Albania" },
-    { id: "DZA", name: "Algeria" },
-    { id: "ASM", name: "American Samoa" },
-    { id: "AND", name: "Andorra" },
-    { id: "AGO", name: "Angola" },
-    { id: "AIA", name: "Anguilla" },
-    { id: "ATA", name: "Antarctica" },
-    { id: "ATG", name: "Antigua and Barbuda" },
-    { id: "ARG", name: "Argentina" },
-    { id: "ARM", name: "Armenia" },
-    { id: "ABW", name: "Aruba" },
-    { id: "AUS", name: "Australia" },
-    { id: "AUT", name: "Austria" },
-    { id: "AZE", name: "Azerbaijan" },
-    { id: "BHS", name: "Bahamas" },
-    { id: "BHR", name: "Bahrain" },
-    { id: "BGD", name: "Bangladesh" },
-    { id: "BRB", name: "Barbados" },
-    { id: "BLR", name: "Belarus" },
-    { id: "BEL", name: "Belgium" },
-    { id: "BLZ", name: "Belize" },
-    { id: "BEN", name: "Benin" },
-    { id: "BMU", name: "Bermuda" },
-    { id: "BTN", name: "Bhutan" },
-    { id: "BOL", name: "Bolivia, Plurinational State of" },
-    { id: "BES", name: "Bonaire, Sint Eustatius and Saba" },
-    { id: "BIH", name: "Bosnia and Herzegovina" },
-    { id: "BWA", name: "Botswana" },
-    { id: "BVT", name: "Bouvet Island" },
-    { id: "BRA", name: "Brazil" },
-    { id: "IOT", name: "British Indian Ocean Territory" },
-    { id: "BRN", name: "Brunei Darussalam" },
-    { id: "BGR", name: "Bulgaria" },
-    { id: "BFA", name: "Burkina Faso" },
-    { id: "BDI", name: "Burundi" },
-    { id: "KHM", name: "Cambodia" },
-    { id: "CMR", name: "Cameroon" },
-    { id: "CAN", name: "Canada" },
-    { id: "CPV", name: "Cape Verde" },
-    { id: "CYM", name: "Cayman Islands" },
-    { id: "CAF", name: "Central African Republic" },
-    { id: "TCD", name: "Chad" },
-    { id: "CHL", name: "Chile" },
-    { id: "CHN", name: "China" },
-    { id: "CXR", name: "Christmas Island" },
-    { id: "CCK", name: "Cocos (Keeling) Islands" },
-    { id: "COL", name: "Colombia" },
-    { id: "COM", name: "Comoros" },
-    { id: "COG", name: "Congo" },
-    { id: "COD", name: "Congo, the Democratic Republic of the" },
-    { id: "COK", name: "Cook Islands" },
-    { id: "CRI", name: "Costa Rica" },
-    { id: "CIV", name: "Côte d'Ivoire" },
-    { id: "HRV", name: "Croatia" },
-    { id: "CUB", name: "Cuba" },
-    { id: "CUW", name: "Curaçao" },
-    { id: "CYP", name: "Cyprus" },
-    { id: "CZE", name: "Czech Republic" },
-    { id: "DNK", name: "Denmark" },
-    { id: "DJI", name: "Djibouti" },
-    { id: "DMA", name: "Dominica" },
-    { id: "DOM", name: "Dominican Republic" },
-    { id: "ECU", name: "Ecuador" },
-    { id: "EGY", name: "Egypt" },
-    { id: "SLV", name: "El Salvador" },
-    { id: "GNQ", name: "Equatorial Guinea" },
-    { id: "ERI", name: "Eritrea" },
-    { id: "EST", name: "Estonia" },
-    { id: "ETH", name: "Ethiopia" },
-    { id: "FLK", name: "Falkland Islands (Malvinas)" },
-    { id: "FRO", name: "Faroe Islands" },
-    { id: "FJI", name: "Fiji" },
-    { id: "FIN", name: "Finland" },
-    { id: "FRA", name: "France" },
-    { id: "GUF", name: "French Guiana" },
-    { id: "PYF", name: "French Polynesia" },
-    { id: "ATF", name: "French Southern Territories" },
-    { id: "GAB", name: "Gabon" },
-    { id: "GMB", name: "Gambia" },
-    { id: "GEO", name: "Georgia" },
-    { id: "DEU", name: "Germany" },
-    { id: "GHA", name: "Ghana" },
-    { id: "GIB", name: "Gibraltar" },
-    { id: "GRC", name: "Greece" },
-    { id: "GRL", name: "Greenland" },
-    { id: "GRD", name: "Grenada" },
-    { id: "GLP", name: "Guadeloupe" },
-    { id: "GUM", name: "Guam" },
-    { id: "GTM", name: "Guatemala" },
-    { id: "GGY", name: "Guernsey" },
-    { id: "GIN", name: "Guinea" },
-    { id: "GNB", name: "Guinea-Bissau" },
-    { id: "GUY", name: "Guyana" },
-    { id: "HTI", name: "Haiti" },
-    { id: "HMD", name: "Heard Island and McDonald Islands" },
-    { id: "VAT", name: "Holy See (Vatican City State)" },
-    { id: "HND", name: "Honduras" },
-    { id: "HKG", name: "Hong Kong" },
-    { id: "HUN", name: "Hungary" },
-    { id: "ISL", name: "Iceland" },
-    { id: "IND", name: "India" },
-    { id: "IDN", name: "Indonesia" },
-    { id: "IRN", name: "Iran, Islamic Republic of" },
-    { id: "IRQ", name: "Iraq" },
-    { id: "IRL", name: "Ireland" },
-    { id: "IMN", name: "Isle of Man" },
-    { id: "ISR", name: "Israel" },
-    { id: "ITA", name: "Italy" },
-    { id: "JAM", name: "Jamaica" },
-    { id: "JPN", name: "Japan" },
-    { id: "JEY", name: "Jersey" },
-    { id: "JOR", name: "Jordan" },
-    { id: "KAZ", name: "Kazakhstan" },
-    { id: "KEN", name: "Kenya" },
-    { id: "KIR", name: "Kiribati" },
-    { id: "PRK", name: "Korea, Democratic People's Republic of" },
-    { id: "KOR", name: "Korea, Republic of" },
-    { id: "KWT", name: "Kuwait" },
-    { id: "KGZ", name: "Kyrgyzstan" },
-    { id: "LAO", name: "Lao People's Democratic Republic" },
-    { id: "LVA", name: "Latvia" },
-    { id: "LBN", name: "Lebanon" },
-    { id: "LSO", name: "Lesotho" },
-    { id: "LBR", name: "Liberia" },
-    { id: "LBY", name: "Libya" },
-    { id: "LIE", name: "Liechtenstein" },
-    { id: "LTU", name: "Lithuania" },
-    { id: "LUX", name: "Luxembourg" },
-    { id: "MAC", name: "Macao" },
-    { id: "MKD", name: "Macedonia, the former Yugoslav Republic of" },
-    { id: "MDG", name: "Madagascar" },
-    { id: "MWI", name: "Malawi" },
-    { id: "MYS", name: "Malaysia" },
-    { id: "MDV", name: "Maldives" },
-    { id: "MLI", name: "Mali" },
-    { id: "MLT", name: "Malta" },
-    { id: "MHL", name: "Marshall Islands" },
-    { id: "MTQ", name: "Martinique" },
-    { id: "MRT", name: "Mauritania" },
-    { id: "MUS", name: "Mauritius" },
-    { id: "MYT", name: "Mayotte" },
-    { id: "MEX", name: "Mexico" },
-    { id: "FSM", name: "Micronesia, Federated States of" },
-    { id: "MDA", name: "Moldova, Republic of" },
-    { id: "MCO", name: "Monaco" },
-    { id: "MNG", name: "Mongolia" },
-    { id: "MNE", name: "Montenegro" },
-    { id: "MSR", name: "Montserrat" },
-    { id: "MAR", name: "Morocco" },
-    { id: "MOZ", name: "Mozambique" },
-    { id: "MMR", name: "Myanmar" },
-    { id: "NAM", name: "Namibia" },
-    { id: "NRU", name: "Nauru" },
-    { id: "NPL", name: "Nepal" },
-    { id: "NLD", name: "Netherlands" },
-    { id: "NCL", name: "New Caledonia" },
-    { id: "NZL", name: "New Zealand" },
-    { id: "NIC", name: "Nicaragua" },
-    { id: "NER", name: "Niger" },
-    { id: "NGA", name: "Nigeria" },
-    { id: "NIU", name: "Niue" },
-    { id: "NFK", name: "Norfolk Island" },
-    { id: "MNP", name: "Northern Mariana Islands" },
-    { id: "NOR", name: "Norway" },
-    { id: "OMN", name: "Oman" },
-    { id: "PAK", name: "Pakistan" },
-    { id: "PLW", name: "Palau" },
-    { id: "PSE", name: "Palestinian Territory, Occupied" },
-    { id: "PAN", name: "Panama" },
-    { id: "PNG", name: "Papua New Guinea" },
-    { id: "PRY", name: "Paraguay" },
-    { id: "PER", name: "Peru" },
-    { id: "PHL", name: "Philippines" },
-    { id: "PCN", name: "Pitcairn" },
-    { id: "POL", name: "Poland" },
-    { id: "PRT", name: "Portugal" },
-    { id: "PRI", name: "Puerto Rico" },
-    { id: "QAT", name: "Qatar" },
-    { id: "REU", name: "Réunion" },
-    { id: "ROU", name: "Romania" },
-    { id: "RUS", name: "Russian Federation" },
-    { id: "RWA", name: "Rwanda" },
-    { id: "BLM", name: "Saint Barthélemy" },
-    { id: "SHN", name: "Saint Helena, Ascension and Tristan da Cunha" },
-    { id: "KNA", name: "Saint Kitts and Nevis" },
-    { id: "LCA", name: "Saint Lucia" },
-    { id: "MAF", name: "Saint Martin (French part)" },
-    { id: "SPM", name: "Saint Pierre and Miquelon" },
-    { id: "VCT", name: "Saint Vincent and the Grenadines" },
-    { id: "WSM", name: "Samoa" },
-    { id: "SMR", name: "San Marino" },
-    { id: "STP", name: "Sao Tome and Principe" },
-    { id: "SAU", name: "Saudi Arabia" },
-    { id: "SEN", name: "Senegal" },
-    { id: "SRB", name: "Serbia" },
-    { id: "SYC", name: "Seychelles" },
-    { id: "SLE", name: "Sierra Leone" },
-    { id: "SGP", name: "Singapore" },
-    { id: "SXM", name: "Sint Maarten (Dutch part)" },
-    { id: "SVK", name: "Slovakia" },
-    { id: "SVN", name: "Slovenia" },
-    { id: "SLB", name: "Solomon Islands" },
-    { id: "SOM", name: "Somalia" },
-    { id: "ZAF", name: "South Africa" },
-    { id: "SGS", name: "South Georgia and the South Sandwich Islands" },
-    { id: "SSD", name: "South Sudan" },
-    { id: "ESP", name: "Spain" },
-    { id: "LKA", name: "Sri Lanka" },
-    { id: "SDN", name: "Sudan" },
-    { id: "SUR", name: "Suriname" },
-    { id: "SJM", name: "Svalbard and Jan Mayen" },
-    { id: "SWZ", name: "Swaziland" },
-    { id: "SWE", name: "Sweden" },
-    { id: "CHE", name: "Switzerland" },
-    { id: "SYR", name: "Syrian Arab Republic" },
-    { id: "TWN", name: "Taiwan, Province of China" },
-    { id: "TJK", name: "Tajikistan" },
-    { id: "TZA", name: "Tanzania, United Republic of" },
-    { id: "THA", name: "Thailand" },
-    { id: "TLS", name: "Timor-Leste" },
-    { id: "TGO", name: "Togo" },
-    { id: "TKL", name: "Tokelau" },
-    { id: "TON", name: "Tonga" },
-    { id: "TTO", name: "Trinidad and Tobago" },
-    { id: "TUN", name: "Tunisia" },
-    { id: "TUR", name: "Turkey" },
-    { id: "TKM", name: "Turkmenistan" },
-    { id: "TCA", name: "Turks and Caicos Islands" },
-    { id: "TUV", name: "Tuvalu" },
-    { id: "UGA", name: "Uganda" },
-    { id: "UKR", name: "Ukraine" },
-    { id: "ARE", name: "United Arab Emirates" },
-    { id: "GBR", name: "United Kingdom" },
-    { id: "USA", name: "United States" },
-    { id: "UMI", name: "United States Minor Outlying Islands" },
-    { id: "URY", name: "Uruguay" },
-    { id: "UZB", name: "Uzbekistan" },
-    { id: "VUT", name: "Vanuatu" },
-    { id: "VEN", name: "Venezuela, Bolivarian Republic of" },
-    { id: "VNM", name: "Viet Nam" },
-    { id: "VGB", name: "Virgin Islands, British" },
-    { id: "VIR", name: "Virgin Islands, U.S." },
-    { id: "WLF", name: "Wallis and Futuna" },
-    { id: "ESH", name: "Western Sahara" },
-    { id: "YEM", name: "Yemen" },
-    { id: "ZMB", name: "Zambia" },
-    { id: "ZWE", name: "Zimbabwe" }
-            ];
-        }
-    };
-});
-// Full list of languages defined by ISO 639-1
-// based on https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
-angular.module('platformWebApp')
-.factory('platformWebApp.common.languages', function () {
-    return {
-        get: function (id) {
-            return _.findWhere(this.query(), { id: this.normalize(id) });
-        },
-        contains: function (id) {
-            return _.map(this.query(), function (entry) { return entry.id }).includes(this.normalize(id));
-        },
-        normalize: function(id) {
-            var result = undefined;
-            if (!!id) {
-                result = id.toLowerCase();
-            }
-            return result;
-        },
-        query: function () {
-            return [
-      { id: "ab", name: "Abkhaz", nativeName: "аҧсуа" },
-      { id: "aa", name: "Afar", nativeName: "Afaraf" },
-      { id: "af", name: "Afrikaans", nativeName: "Afrikaans" },
-      { id: "ak", name: "Akan", nativeName: "Akan" },
-      { id: "sq", name: "Albanian", nativeName: "Shqip" },
-      { id: "am", name: "Amharic", nativeName: "አማርኛ" },
-      { id: "ar", name: "Arabic", nativeName: "العربية" },
-      { id: "an", name: "Aragonese", nativeName: "Aragonés" },
-      { id: "hy", name: "Armenian", nativeName: "Հայերեն" },
-      { id: "as", name: "Assamese", nativeName: "অসমীয়া" },
-      { id: "av", name: "Avaric", nativeName: "авар мацӀ, магӀарул мацӀ" },
-      { id: "ae", name: "Avestan", nativeName: "avesta" },
-      { id: "ay", name: "Aymara", nativeName: "aymar aru" },
-      { id: "az", name: "Azerbaijani", nativeName: "azərbaycan dili" },
-      { id: "bm", name: "Bambara", nativeName: "bamanankan" },
-      { id: "ba", name: "Bashkir", nativeName: "башҡорт теле" },
-      { id: "eu", name: "Basque", nativeName: "euskara, euskera" },
-      { id: "be", name: "Belarusian", nativeName: "Беларуская" },
-      { id: "bn", name: "Bengali", nativeName: "বাংলা" },
-      { id: "bh", name: "Bihari", nativeName: "भोजपुरी" },
-      { id: "bi", name: "Bislama", nativeName: "Bislama" },
-      { id: "bs", name: "Bosnian", nativeName: "bosanski jezik" },
-      { id: "br", name: "Breton", nativeName: "brezhoneg" },
-      { id: "bg", name: "Bulgarian", nativeName: "български език" },
-      { id: "my", name: "Burmese", nativeName: "ဗမာစာ" },
-      { id: "ca", name: "Catalan; Valencian", nativeName: "Català" },
-      { id: "ch", name: "Chamorro", nativeName: "Chamoru" },
-      { id: "ce", name: "Chechen", nativeName: "нохчийн мотт" },
-      { id: "ny", name: "Chichewa; Chewa; Nyanja", nativeName: "chiCheŵa, chinyanja" },
-      { id: "zh", name: "Chinese", nativeName: "中文 (Zhōngwén), 汉语, 漢語" },
-      { id: "cv", name: "Chuvash", nativeName: "чӑваш чӗлхи" },
-      { id: "kw", name: "Cornish", nativeName: "Kernewek" },
-      { id: "co", name: "Corsican", nativeName: "corsu, lingua corsa" },
-      { id: "cr", name: "Cree", nativeName: "ᓀᐦᐃᔭᐍᐏᐣ" },
-      { id: "hr", name: "Croatian", nativeName: "hrvatski" },
-      { id: "cs", name: "Czech", nativeName: "česky, čeština" },
-      { id: "da", name: "Danish", nativeName: "dansk" },
-      { id: "dv", name: "Divehi; Dhivehi; Maldivian;", nativeName: "ދިވެހި" },
-      { id: "nl", name: "Dutch", nativeName: "Nederlands, Vlaams" },
-      { id: "dz", name: "Dzongkha", nativeName: "རྫོང་ཁ" },
-      { id: "en", name: "English", nativeName: "English" },
-      { id: "eo", name: "Esperanto", nativeName: "Esperanto" },
-      { id: "et", name: "Estonian", nativeName: "eesti, eesti keel" },
-      { id: "ee", name: "Ewe", nativeName: "Eʋegbe" },
-      { id: "fo", name: "Faroese", nativeName: "føroyskt" },
-      { id: "fj", name: "Fijian", nativeName: "vosa Vakaviti" },
-      { id: "fi", name: "Finnish", nativeName: "suomi, suomen kieli" },
-      { id: "fr", name: "French", nativeName: "français, langue française" },
-      { id: "ff", name: "Fula; Fulah; Pulaar; Pular", nativeName: "Fulfulde, Pulaar, Pular" },
-      { id: "gl", name: "Galician", nativeName: "Galego" },
-      { id: "ka", name: "Georgian", nativeName: "ქართული" },
-      { id: "de", name: "German", nativeName: "Deutsch" },
-      { id: "el", name: "Greek, Modern", nativeName: "Ελληνικά" },
-      { id: "gn", name: "Guaraní", nativeName: "Avañeẽ" },
-      { id: "gu", name: "Gujarati", nativeName: "ગુજરાતી" },
-      { id: "ht", name: "Haitian; Haitian Creole", nativeName: "Kreyòl ayisyen" },
-      { id: "ha", name: "Hausa", nativeName: "Hausa, هَوُسَ" },
-      { id: "he", name: "Hebrew (modern)", nativeName: "עברית" },
-      { id: "hz", name: "Herero", nativeName: "Otjiherero" },
-      { id: "hi", name: "Hindi", nativeName: "हिन्दी, हिंदी" },
-      { id: "ho", name: "Hiri Motu", nativeName: "Hiri Motu" },
-      { id: "hu", name: "Hungarian", nativeName: "Magyar" },
-      { id: "ia", name: "Interlingua", nativeName: "Interlingua" },
-      { id: "id", name: "Indonesian", nativeName: "Bahasa Indonesia" },
-      { id: "ie", name: "Interlingue", nativeName: "Originally called Occidental; then Interlingue after WWII" },
-      { id: "ga", name: "Irish", nativeName: "Gaeilge" },
-      { id: "ig", name: "Igbo", nativeName: "Asụsụ Igbo" },
-      { id: "ik", name: "Inupiaq", nativeName: "Iñupiaq, Iñupiatun" },
-      { id: "io", name: "Ido", nativeName: "Ido" },
-      { id: "is", name: "Icelandic", nativeName: "Íslenska" },
-      { id: "it", name: "Italian", nativeName: "Italiano" },
-      { id: "iu", name: "Inuktitut", nativeName: "ᐃᓄᒃᑎᑐᑦ" },
-      { id: "ja", name: "Japanese", nativeName: "日本語 (にほんご／にっぽんご)" },
-      { id: "jv", name: "Javanese", nativeName: "basa Jawa" },
-      { id: "kl", name: "Kalaallisut, Greenlandic", nativeName: "kalaallisut, kalaallit oqaasii" },
-      { id: "kn", name: "Kannada", nativeName: "ಕನ್ನಡ" },
-      { id: "kr", name: "Kanuri", nativeName: "Kanuri" },
-      { id: "ks", name: "Kashmiri", nativeName: "कश्मीरी, كشميري‎" },
-      { id: "kk", name: "Kazakh", nativeName: "Қазақ тілі" },
-      { id: "km", name: "Khmer", nativeName: "ភាសាខ្មែរ" },
-      { id: "ki", name: "Kikuyu, Gikuyu", nativeName: "Gĩkũyũ" },
-      { id: "rw", name: "Kinyarwanda", nativeName: "Ikinyarwanda" },
-      { id: "ky", name: "Kirghiz, Kyrgyz", nativeName: "кыргыз тили" },
-      { id: "kv", name: "Komi", nativeName: "коми кыв" },
-      { id: "kg", name: "Kongo", nativeName: "KiKongo" },
-      { id: "ko", name: "Korean", nativeName: "한국어 (韓國語), 조선말 (朝鮮語)" },
-      { id: "ku", name: "Kurdish", nativeName: "Kurdî, كوردی‎" },
-      { id: "kj", name: "Kwanyama, Kuanyama", nativeName: "Kuanyama" },
-      { id: "la", name: "Latin", nativeName: "latine, lingua latina" },
-      { id: "lb", name: "Luxembourgish, Letzeburgesch", nativeName: "Lëtzebuergesch" },
-      { id: "lg", name: "Luganda", nativeName: "Luganda" },
-      { id: "li", name: "Limburgish, Limburgan, Limburger", nativeName: "Limburgs" },
-      { id: "ln", name: "Lingala", nativeName: "Lingála" },
-      { id: "lo", name: "Lao", nativeName: "ພາສາລາວ" },
-      { id: "lt", name: "Lithuanian", nativeName: "lietuvių kalba" },
-      { id: "lu", name: "Luba-Katanga", nativeName: "" },
-      { id: "lv", name: "Latvian", nativeName: "latviešu valoda" },
-      { id: "gv", name: "Manx", nativeName: "Gaelg, Gailck" },
-      { id: "mk", name: "Macedonian", nativeName: "македонски јазик" },
-      { id: "mg", name: "Malagasy", nativeName: "Malagasy fiteny" },
-      { id: "ms", name: "Malay", nativeName: "bahasa Melayu, بهاس ملايو‎" },
-      { id: "ml", name: "Malayalam", nativeName: "മലയാളം" },
-      { id: "mt", name: "Maltese", nativeName: "Malti" },
-      { id: "mi", name: "Māori", nativeName: "te reo Māori" },
-      { id: "mr", name: "Marathi (Marāṭhī)", nativeName: "मराठी" },
-      { id: "mh", name: "Marshallese", nativeName: "Kajin M̧ajeļ" },
-      { id: "mn", name: "Mongolian", nativeName: "монгол" },
-      { id: "na", name: "Nauru", nativeName: "Ekakairũ Naoero" },
-      { id: "nv", name: "Navajo, Navaho", nativeName: "Diné bizaad, Dinékʼehǰí" },
-      { id: "nb", name: "Norwegian Bokmål", nativeName: "Norsk bokmål" },
-      { id: "nd", name: "North Ndebele", nativeName: "isiNdebele" },
-      { id: "ne", name: "Nepali", nativeName: "नेपाली" },
-      { id: "ng", name: "Ndonga", nativeName: "Owambo" },
-      { id: "nn", name: "Norwegian Nynorsk", nativeName: "Norsk nynorsk" },
-      { id: "no", name: "Norwegian", nativeName: "Norsk" },
-      { id: "ii", name: "Nuosu", nativeName: "ꆈꌠ꒿ Nuosuhxop" },
-      { id: "nr", name: "South Ndebele", nativeName: "isiNdebele" },
-      { id: "oc", name: "Occitan", nativeName: "Occitan" },
-      { id: "oj", name: "Ojibwe, Ojibwa", nativeName: "ᐊᓂᔑᓈᐯᒧᐎᓐ" },
-      { id: "cu", name: "Old Church Slavonic, Church Slavic, Church Slavonic, Old Bulgarian, Old Slavonic", nativeName: "ѩзыкъ словѣньскъ" },
-      { id: "om", name: "Oromo", nativeName: "Afaan Oromoo" },
-      { id: "or", name: "Oriya", nativeName: "ଓଡ଼ିଆ" },
-      { id: "os", name: "Ossetian, Ossetic", nativeName: "ирон æвзаг" },
-      { id: "pa", name: "Panjabi, Punjabi", nativeName: "ਪੰਜਾਬੀ, پنجابی‎" },
-      { id: "pi", name: "Pāli", nativeName: "पाऴि" },
-      { id: "fa", name: "Persian", nativeName: "فارسی" },
-      { id: "pl", name: "Polish", nativeName: "polski" },
-      { id: "ps", name: "Pashto, Pushto", nativeName: "پښتو" },
-      { id: "pt", name: "Portuguese", nativeName: "Português" },
-      { id: "qu", name: "Quechua", nativeName: "Runa Simi, Kichwa" },
-      { id: "rm", name: "Romansh", nativeName: "rumantsch grischun" },
-      { id: "rn", name: "Kirundi", nativeName: "kiRundi" },
-      { id: "ro", name: "Romanian, Moldavian, Moldovan", nativeName: "română" },
-      { id: "ru", name: "Russian", nativeName: "русский язык" },
-      { id: "sa", name: "Sanskrit (Saṁskṛta)", nativeName: "संस्कृतम्" },
-      { id: "sc", name: "Sardinian", nativeName: "sardu" },
-      { id: "sd", name: "Sindhi", nativeName: "सिन्धी, سنڌي، سندھی‎" },
-      { id: "se", name: "Northern Sami", nativeName: "Davvisámegiella" },
-      { id: "sm", name: "Samoan", nativeName: "gagana faa Samoa" },
-      { id: "sg", name: "Sango", nativeName: "yângâ tî sängö" },
-      { id: "sr", name: "Serbian", nativeName: "српски језик" },
-      { id: "gd", name: "Scottish Gaelic; Gaelic", nativeName: "Gàidhlig" },
-      { id: "sn", name: "Shona", nativeName: "chiShona" },
-      { id: "si", name: "Sinhala, Sinhalese", nativeName: "සිංහල" },
-      { id: "sk", name: "Slovak", nativeName: "slovenčina" },
-      { id: "sl", name: "Slovene", nativeName: "slovenščina" },
-      { id: "so", name: "Somali", nativeName: "Soomaaliga, af Soomaali" },
-      { id: "st", name: "Southern Sotho", nativeName: "Sesotho" },
-      { id: "es", name: "Spanish; Castilian", nativeName: "español, castellano" },
-      { id: "su", name: "Sundanese", nativeName: "Basa Sunda" },
-      { id: "sw", name: "Swahili", nativeName: "Kiswahili" },
-      { id: "ss", name: "Swati", nativeName: "SiSwati" },
-      { id: "sv", name: "Swedish", nativeName: "svenska" },
-      { id: "ta", name: "Tamil", nativeName: "தமிழ்" },
-      { id: "te", name: "Telugu", nativeName: "తెలుగు" },
-      { id: "tg", name: "Tajik", nativeName: "тоҷикӣ, toğikī, تاجیکی‎" },
-      { id: "th", name: "Thai", nativeName: "ไทย" },
-      { id: "ti", name: "Tigrinya", nativeName: "ትግርኛ" },
-      { id: "bo", name: "Tibetan Standard, Tibetan, Central", nativeName: "བོད་ཡིག" },
-      { id: "tk", name: "Turkmen", nativeName: "Türkmen, Түркмен" },
-      { id: "tl", name: "Tagalog", nativeName: "Wikang Tagalog, ᜏᜒᜃᜅ᜔ ᜆᜄᜎᜓᜄ᜔" },
-      { id: "tn", name: "Tswana", nativeName: "Setswana" },
-      { id: "to", name: "Tonga (Tonga Islands)", nativeName: "faka Tonga" },
-      { id: "tr", name: "Turkish", nativeName: "Türkçe" },
-      { id: "ts", name: "Tsonga", nativeName: "Xitsonga" },
-      { id: "tt", name: "Tatar", nativeName: "татарча, tatarça, تاتارچا‎" },
-      { id: "tw", name: "Twi", nativeName: "Twi" },
-      { id: "ty", name: "Tahitian", nativeName: "Reo Tahiti" },
-      { id: "ug", name: "Uighur, Uyghur", nativeName: "Uyƣurqə, ئۇيغۇرچە‎" },
-      { id: "uk", name: "Ukrainian", nativeName: "українська" },
-      { id: "ur", name: "Urdu", nativeName: "اردو" },
-      { id: "uz", name: "Uzbek", nativeName: "zbek, Ўзбек, أۇزبېك‎" },
-      { id: "ve", name: "Venda", nativeName: "Tshivenḓa" },
-      { id: "vi", name: "Vietnamese", nativeName: "Tiếng Việt" },
-      { id: "vo", name: "Volapük", nativeName: "Volapük" },
-      { id: "wa", name: "Walloon", nativeName: "Walon" },
-      { id: "cy", name: "Welsh", nativeName: "Cymraeg" },
-      { id: "wo", name: "Wolof", nativeName: "Wollof" },
-      { id: "fy", name: "Western Frisian", nativeName: "Frysk" },
-      { id: "xh", name: "Xhosa", nativeName: "isiXhosa" },
-      { id: "yi", name: "Yiddish", nativeName: "ייִדיש" },
-      { id: "yo", name: "Yoruba", nativeName: "Yorùbá" },
-      { id: "za", name: "Zhuang, Chuang", nativeName: "Saɯ cueŋƅ, Saw cuengh" },
-      { id: "zu", name: "Zulu", nativeName: "isiZulu" }
-            ];
-        }
-    };
-});
-// Subset of list of locales defined by CLDR
-// based on https://github.com/umpirsky/locale-list
-angular.module('platformWebApp')
-.factory('platformWebApp.common.locales', function () {
-    return {
-        get: function (id) {
-            return _.findWhere(this.query(), { id: this.normalize(id) });
-        },
-        contains: function (id) {
-            return _.map(this.query(), function (entry) { return entry.id }).includes(this.normalize(id));
-        },
-        normalize: function(id) {
-            var result = undefined;
-            if (!!id) {
-                var parts = id.split(/[-_]/g);
-                parts[0] = parts[0].toLowerCase();
-                if (parts.length > 1) {
-                    parts[1] = parts[1].length === 2 ? parts[1].toUpperCase() : parts[1].capitalize();
-                }
-                if (parts.length > 2) {
-                    parts[2] = parts[2].toUpperCase();
-                }
-                result = parts.join('_');
-            }
-            return result;
-        },
-        query: function () {
-            return [
-    { id: "af", name: "Afrikaans", nativeName: "Afrikaans" },
-    { id: "af_NA", name: "Afrikaans (Namibia)", nativeName: "Afrikaans (Namibië)" },
-    { id: "af_ZA", name: "Afrikaans (South Africa)", nativeName: "Afrikaans (Suid-Afrika)" },
-    { id: "ak", name: "Akan", nativeName: "Akan" },
-    { id: "ak_GH", name: "Akan (Ghana)", nativeName: "Akan (Gaana)" },
-    { id: "sq", name: "Albanian", nativeName: "shqip" },
-    { id: "sq_AL", name: "Albanian (Albania)", nativeName: "shqip (Shqipëri)" },
-    { id: "sq_XK", name: "Albanian (Kosovo)", nativeName: "shqip (Kosovë)" },
-    { id: "sq_MK", name: "Albanian (Macedonia)", nativeName: "shqip (Maqedoni)" },
-    { id: "am", name: "Amharic", nativeName: "አማርኛ" },
-    { id: "am_ET", name: "Amharic (Ethiopia)", nativeName: "አማርኛ (ኢትዮጵያ)" },
-    { id: "ar", name: "Arabic", nativeName: "العربية" },
-    { id: "ar_DZ", name: "Arabic (Algeria)", nativeName: "العربية (الجزائر)" },
-    { id: "ar_BH", name: "Arabic (Bahrain)", nativeName: "العربية (البحرين)" },
-    { id: "ar_TD", name: "Arabic (Chad)", nativeName: "العربية (تشاد)" },
-    { id: "ar_KM", name: "Arabic (Comoros)", nativeName: "العربية (جزر القمر)" },
-    { id: "ar_DJ", name: "Arabic (Djibouti)", nativeName: "العربية (جيبوتي)" },
-    { id: "ar_EG", name: "Arabic (Egypt)", nativeName: "العربية (مصر)" },
-    { id: "ar_ER", name: "Arabic (Eritrea)", nativeName: "العربية (أريتريا)" },
-    { id: "ar_IQ", name: "Arabic (Iraq)", nativeName: "العربية (العراق)" },
-    { id: "ar_IL", name: "Arabic (Israel)", nativeName: "العربية (إسرائيل)" },
-    { id: "ar_JO", name: "Arabic (Jordan)", nativeName: "العربية (الأردن)" },
-    { id: "ar_KW", name: "Arabic (Kuwait)", nativeName: "العربية (الكويت)" },
-    { id: "ar_LB", name: "Arabic (Lebanon)", nativeName: "العربية (لبنان)" },
-    { id: "ar_LY", name: "Arabic (Libya)", nativeName: "العربية (ليبيا)" },
-    { id: "ar_MR", name: "Arabic (Mauritania)", nativeName: "العربية (موريتانيا)" },
-    { id: "ar_MA", name: "Arabic (Morocco)", nativeName: "العربية (المغرب)" },
-    { id: "ar_OM", name: "Arabic (Oman)", nativeName: "العربية (عُمان)" },
-    { id: "ar_PS", name: "Arabic (Palestinian Territories)", nativeName: "العربية (الأراضي الفلسطينية)" },
-    { id: "ar_QA", name: "Arabic (Qatar)", nativeName: "العربية (قطر)" },
-    { id: "ar_SA", name: "Arabic (Saudi Arabia)", nativeName: "العربية (المملكة العربية السعودية)" },
-    { id: "ar_SO", name: "Arabic (Somalia)", nativeName: "العربية (الصومال)" },
-    { id: "ar_SS", name: "Arabic (South Sudan)", nativeName: "العربية (جنوب السودان)" },
-    { id: "ar_SD", name: "Arabic (Sudan)", nativeName: "العربية (السودان)" },
-    { id: "ar_SY", name: "Arabic (Syria)", nativeName: "العربية (سوريا)" },
-    { id: "ar_TN", name: "Arabic (Tunisia)", nativeName: "العربية (تونس)" },
-    { id: "ar_AE", name: "Arabic (United Arab Emirates)", nativeName: "العربية (الإمارات العربية المتحدة)" },
-    { id: "ar_EH", name: "Arabic (Western Sahara)", nativeName: "العربية (الصحراء الغربية)" },
-    { id: "ar_YE", name: "Arabic (Yemen)", nativeName: "العربية (اليمن)" },
-    { id: "hy", name: "Armenian", nativeName: "հայերեն" },
-    { id: "hy_AM", name: "Armenian (Armenia)", nativeName: "հայերեն (Հայաստան)" },
-    { id: "as", name: "Assamese", nativeName: "অসমীয়া" },
-    { id: "as_IN", name: "Assamese (India)", nativeName: "অসমীয়া (ভাৰত)" },
-    { id: "az", name: "Azerbaijani", nativeName: "azərbaycan" },
-    { id: "az_AZ", name: "Azerbaijani (Azerbaijan)", nativeName: "azərbaycan (Azərbaycan)" },
-    { id: "az_Cyrl_AZ", name: "Azerbaijani (Cyrillic, Azerbaijan)", nativeName: "Азәрбајҹан (kiril, Азәрбајҹан)" },
-    { id: "az_Cyrl", name: "Azerbaijani (Cyrillic)", nativeName: "Азәрбајҹан (kiril)" },
-    { id: "az_Latn_AZ", name: "Azerbaijani (Latin, Azerbaijan)", nativeName: "azərbaycan (latın, Azərbaycan)" },
-    { id: "az_Latn", name: "Azerbaijani (Latin)", nativeName: "azərbaycan (latın)" },
-    { id: "bm", name: "Bambara", nativeName: "bamanakan" },
-    { id: "bm_Latn_ML", name: "Bambara (Latin, Mali)", nativeName: "Bambara (Latin, Mali)" },
-    { id: "bm_Latn", name: "Bambara (Latin)", nativeName: "Bambara (Latin)" },
-    { id: "eu", name: "Basque", nativeName: "euskara" },
-    { id: "eu_ES", name: "Basque (Spain)", nativeName: "euskara (Espainia)" },
-    { id: "be", name: "Belarusian", nativeName: "беларуская" },
-    { id: "be_BY", name: "Belarusian (Belarus)", nativeName: "беларуская (Беларусь)" },
-    { id: "bn", name: "Bengali", nativeName: "বাংলা" },
-    { id: "bn_BD", name: "Bengali (Bangladesh)", nativeName: "বাংলা (বাংলাদেশ)" },
-    { id: "bn_IN", name: "Bengali (India)", nativeName: "বাংলা (ভারত)" },
-    { id: "bs", name: "Bosnian", nativeName: "bosanski" },
-    { id: "bs_BA", name: "Bosnian (Bosnia & Herzegovina)", nativeName: "bosanski (Bosna i Hercegovina)" },
-    { id: "bs_Cyrl_BA", name: "Bosnian (Cyrillic, Bosnia & Herzegovina)", nativeName: "босански (Ћирилица, Босна и Херцеговина)" },
-    { id: "bs_Cyrl", name: "Bosnian (Cyrillic)", nativeName: "босански (Ћирилица)" },
-    { id: "bs_Latn_BA", name: "Bosnian (Latin, Bosnia & Herzegovina)", nativeName: "bosanski (latinica, Bosna i Hercegovina)" },
-    { id: "bs_Latn", name: "Bosnian (Latin)", nativeName: "bosanski (latinica)" },
-    { id: "br", name: "Breton", nativeName: "brezhoneg" },
-    { id: "br_FR", name: "Breton (France)", nativeName: "brezhoneg (Frañs)" },
-    { id: "bg", name: "Bulgarian", nativeName: "български" },
-    { id: "bg_BG", name: "Bulgarian (Bulgaria)", nativeName: "български (България)" },
-    { id: "my", name: "Burmese", nativeName: "ဗမာ" },
-    { id: "my_MM", name: "Burmese (Myanmar (Burma))", nativeName: "ဗမာ (မြန်မာ)" },
-    { id: "ca", name: "Catalan", nativeName: "català" },
-    { id: "ca_AD", name: "Catalan (Andorra)", nativeName: "català (Andorra)" },
-    { id: "ca_FR", name: "Catalan (France)", nativeName: "català (França)" },
-    { id: "ca_IT", name: "Catalan (Italy)", nativeName: "català (Itàlia)" },
-    { id: "ca_ES", name: "Catalan (Spain)", nativeName: "català (Espanya)" },
-    { id: "zh", name: "Chinese", nativeName: "中文" },
-    { id: "zh_CN", name: "Chinese (China)", nativeName: "中文 (中国)" },
-    { id: "zh_HK", name: "Chinese (Hong Kong SAR China)", nativeName: "中文 (中国香港特别行政区)" },
-    { id: "zh_MO", name: "Chinese (Macau SAR China)", nativeName: "中文 (中国澳门特别行政区)" },
-    { id: "zh_Hans_CN", name: "Chinese (Simplified, China)", nativeName: "中文 (简体中文, 中国)" },
-    { id: "zh_Hans_HK", name: "Chinese (Simplified, Hong Kong SAR China)", nativeName: "中文 (简体中文, 中国香港特别行政区)" },
-    { id: "zh_Hans_MO", name: "Chinese (Simplified, Macau SAR China)", nativeName: "中文 (简体中文, 中国澳门特别行政区)" },
-    { id: "zh_Hans_SG", name: "Chinese (Simplified, Singapore)", nativeName: "中文 (简体中文, 新加坡)" },
-    { id: "zh_Hans", name: "Chinese (Simplified)", nativeName: "中文 (简体中文)" },
-    { id: "zh_SG", name: "Chinese (Singapore)", nativeName: "中文 (新加坡)" },
-    { id: "zh_TW", name: "Chinese (Taiwan)", nativeName: "中文 (台湾)" },
-    { id: "zh_Hant_HK", name: "Chinese (Traditional, Hong Kong SAR China)", nativeName: "中文 (繁體字, 中華人民共和國香港特別行政區)" },
-    { id: "zh_Hant_MO", name: "Chinese (Traditional, Macau SAR China)", nativeName: "中文 (繁體, 中華人民共和國澳門特別行政區)" },
-    { id: "zh_Hant_TW", name: "Chinese (Traditional, Taiwan)", nativeName: "中文 (繁體, 台灣)" },
-    { id: "zh_Hant", name: "Chinese (Traditional)", nativeName: "中文 (繁體)" },
-    { id: "kw", name: "Cornish", nativeName: "kernewek" },
-    { id: "kw_GB", name: "Cornish (United Kingdom)", nativeName: "kernewek (Rywvaneth Unys)" },
-    { id: "hr", name: "Croatian", nativeName: "hrvatski" },
-    { id: "hr_BA", name: "Croatian (Bosnia & Herzegovina)", nativeName: "hrvatski (Bosna i Hercegovina)" },
-    { id: "hr_HR", name: "Croatian (Croatia)", nativeName: "hrvatski (Hrvatska)" },
-    { id: "cs", name: "Czech", nativeName: "čeština" },
-    { id: "cs_CZ", name: "Czech (Czech Republic)", nativeName: "čeština (Česká republika)" },
-    { id: "da", name: "Danish", nativeName: "dansk" },
-    { id: "da_DK", name: "Danish (Denmark)", nativeName: "dansk (Danmark)" },
-    { id: "da_GL", name: "Danish (Greenland)", nativeName: "dansk (Grønland)" },
-    { id: "nl", name: "Dutch", nativeName: "Nederlands" },
-    { id: "nl_AW", name: "Dutch (Aruba)", nativeName: "Nederlands (Aruba)" },
-    { id: "nl_BE", name: "Dutch (Belgium)", nativeName: "Nederlands (België)" },
-    { id: "nl_BQ", name: "Dutch (Caribbean Netherlands)", nativeName: "Nederlands (Caribisch Nederland)" },
-    { id: "nl_CW", name: "Dutch (Curaçao)", nativeName: "Nederlands (Curaçao)" },
-    { id: "nl_NL", name: "Dutch (Netherlands)", nativeName: "Nederlands (Nederland)" },
-    { id: "nl_SX", name: "Dutch (Sint Maarten)", nativeName: "Nederlands (Sint-Maarten)" },
-    { id: "nl_SR", name: "Dutch (Suriname)", nativeName: "Nederlands (Suriname)" },
-    { id: "dz", name: "Dzongkha", nativeName: "རྫོང་ཁ" },
-    { id: "dz_BT", name: "Dzongkha (Bhutan)", nativeName: "རྫོང་ཁ (འབྲུག)" },
-    { id: "en", name: "English", nativeName: "English" },
-    { id: "en_AS", name: "English (American Samoa)", nativeName: "English (American Samoa)" },
-    { id: "en_AI", name: "English (Anguilla)", nativeName: "English (Anguilla)" },
-    { id: "en_AG", name: "English (Antigua & Barbuda)", nativeName: "English (Antigua & Barbuda)" },
-    { id: "en_AU", name: "English (Australia)", nativeName: "English (Australia)" },
-    { id: "en_BS", name: "English (Bahamas)", nativeName: "English (Bahamas)" },
-    { id: "en_BB", name: "English (Barbados)", nativeName: "English (Barbados)" },
-    { id: "en_BE", name: "English (Belgium)", nativeName: "English (Belgium)" },
-    { id: "en_BZ", name: "English (Belize)", nativeName: "English (Belize)" },
-    { id: "en_BM", name: "English (Bermuda)", nativeName: "English (Bermuda)" },
-    { id: "en_BW", name: "English (Botswana)", nativeName: "English (Botswana)" },
-    { id: "en_IO", name: "English (British Indian Ocean Territory)", nativeName: "English (British Indian Ocean Territory)" },
-    { id: "en_VG", name: "English (British Virgin Islands)", nativeName: "English (British Virgin Islands)" },
-    { id: "en_CM", name: "English (Cameroon)", nativeName: "English (Cameroon)" },
-    { id: "en_CA", name: "English (Canada)", nativeName: "English (Canada)" },
-    { id: "en_KY", name: "English (Cayman Islands)", nativeName: "English (Cayman Islands)" },
-    { id: "en_CX", name: "English (Christmas Island)", nativeName: "English (Christmas Island)" },
-    { id: "en_CC", name: "English (Cocos (Keeling) Islands)", nativeName: "English (Cocos (Keeling) Islands)" },
-    { id: "en_CK", name: "English (Cook Islands)", nativeName: "English (Cook Islands)" },
-    { id: "en_DG", name: "English (Diego Garcia)", nativeName: "English (Diego Garcia)" },
-    { id: "en_DM", name: "English (Dominica)", nativeName: "English (Dominica)" },
-    { id: "en_ER", name: "English (Eritrea)", nativeName: "English (Eritrea)" },
-    { id: "en_FK", name: "English (Falkland Islands)", nativeName: "English (Falkland Islands)" },
-    { id: "en_FJ", name: "English (Fiji)", nativeName: "English (Fiji)" },
-    { id: "en_GM", name: "English (Gambia)", nativeName: "English (Gambia)" },
-    { id: "en_GH", name: "English (Ghana)", nativeName: "English (Ghana)" },
-    { id: "en_GI", name: "English (Gibraltar)", nativeName: "English (Gibraltar)" },
-    { id: "en_GD", name: "English (Grenada)", nativeName: "English (Grenada)" },
-    { id: "en_GU", name: "English (Guam)", nativeName: "English (Guam)" },
-    { id: "en_GG", name: "English (Guernsey)", nativeName: "English (Guernsey)" },
-    { id: "en_GY", name: "English (Guyana)", nativeName: "English (Guyana)" },
-    { id: "en_HK", name: "English (Hong Kong SAR China)", nativeName: "English (Hong Kong SAR China)" },
-    { id: "en_IN", name: "English (India)", nativeName: "English (India)" },
-    { id: "en_IE", name: "English (Ireland)", nativeName: "English (Ireland)" },
-    { id: "en_IM", name: "English (Isle of Man)", nativeName: "English (Isle of Man)" },
-    { id: "en_JM", name: "English (Jamaica)", nativeName: "English (Jamaica)" },
-    { id: "en_JE", name: "English (Jersey)", nativeName: "English (Jersey)" },
-    { id: "en_KE", name: "English (Kenya)", nativeName: "English (Kenya)" },
-    { id: "en_KI", name: "English (Kiribati)", nativeName: "English (Kiribati)" },
-    { id: "en_LS", name: "English (Lesotho)", nativeName: "English (Lesotho)" },
-    { id: "en_LR", name: "English (Liberia)", nativeName: "English (Liberia)" },
-    { id: "en_MO", name: "English (Macau SAR China)", nativeName: "English (Macau SAR China)" },
-    { id: "en_MG", name: "English (Madagascar)", nativeName: "English (Madagascar)" },
-    { id: "en_MW", name: "English (Malawi)", nativeName: "English (Malawi)" },
-    { id: "en_MY", name: "English (Malaysia)", nativeName: "English (Malaysia)" },
-    { id: "en_MT", name: "English (Malta)", nativeName: "English (Malta)" },
-    { id: "en_MH", name: "English (Marshall Islands)", nativeName: "English (Marshall Islands)" },
-    { id: "en_MU", name: "English (Mauritius)", nativeName: "English (Mauritius)" },
-    { id: "en_FM", name: "English (Micronesia)", nativeName: "English (Micronesia)" },
-    { id: "en_MS", name: "English (Montserrat)", nativeName: "English (Montserrat)" },
-    { id: "en_NA", name: "English (Namibia)", nativeName: "English (Namibia)" },
-    { id: "en_NR", name: "English (Nauru)", nativeName: "English (Nauru)" },
-    { id: "en_NZ", name: "English (New Zealand)", nativeName: "English (New Zealand)" },
-    { id: "en_NG", name: "English (Nigeria)", nativeName: "English (Nigeria)" },
-    { id: "en_NU", name: "English (Niue)", nativeName: "English (Niue)" },
-    { id: "en_NF", name: "English (Norfolk Island)", nativeName: "English (Norfolk Island)" },
-    { id: "en_MP", name: "English (Northern Mariana Islands)", nativeName: "English (Northern Mariana Islands)" },
-    { id: "en_PK", name: "English (Pakistan)", nativeName: "English (Pakistan)" },
-    { id: "en_PW", name: "English (Palau)", nativeName: "English (Palau)" },
-    { id: "en_PG", name: "English (Papua New Guinea)", nativeName: "English (Papua New Guinea)" },
-    { id: "en_PH", name: "English (Philippines)", nativeName: "English (Philippines)" },
-    { id: "en_PN", name: "English (Pitcairn Islands)", nativeName: "English (Pitcairn Islands)" },
-    { id: "en_PR", name: "English (Puerto Rico)", nativeName: "English (Puerto Rico)" },
-    { id: "en_RW", name: "English (Rwanda)", nativeName: "English (Rwanda)" },
-    { id: "en_WS", name: "English (Samoa)", nativeName: "English (Samoa)" },
-    { id: "en_SC", name: "English (Seychelles)", nativeName: "English (Seychelles)" },
-    { id: "en_SL", name: "English (Sierra Leone)", nativeName: "English (Sierra Leone)" },
-    { id: "en_SG", name: "English (Singapore)", nativeName: "English (Singapore)" },
-    { id: "en_SX", name: "English (Sint Maarten)", nativeName: "English (Sint Maarten)" },
-    { id: "en_SB", name: "English (Solomon Islands)", nativeName: "English (Solomon Islands)" },
-    { id: "en_ZA", name: "English (South Africa)", nativeName: "English (South Africa)" },
-    { id: "en_SS", name: "English (South Sudan)", nativeName: "English (South Sudan)" },
-    { id: "en_SH", name: "English (St. Helena)", nativeName: "English (St. Helena)" },
-    { id: "en_KN", name: "English (St. Kitts & Nevis)", nativeName: "English (St. Kitts & Nevis)" },
-    { id: "en_LC", name: "English (St. Lucia)", nativeName: "English (St. Lucia)" },
-    { id: "en_VC", name: "English (St. Vincent & Grenadines)", nativeName: "English (St. Vincent & Grenadines)" },
-    { id: "en_SD", name: "English (Sudan)", nativeName: "English (Sudan)" },
-    { id: "en_SZ", name: "English (Swaziland)", nativeName: "English (Swaziland)" },
-    { id: "en_TZ", name: "English (Tanzania)", nativeName: "English (Tanzania)" },
-    { id: "en_TK", name: "English (Tokelau)", nativeName: "English (Tokelau)" },
-    { id: "en_TO", name: "English (Tonga)", nativeName: "English (Tonga)" },
-    { id: "en_TT", name: "English (Trinidad & Tobago)", nativeName: "English (Trinidad & Tobago)" },
-    { id: "en_TC", name: "English (Turks & Caicos Islands)", nativeName: "English (Turks & Caicos Islands)" },
-    { id: "en_TV", name: "English (Tuvalu)", nativeName: "English (Tuvalu)" },
-    { id: "en_UM", name: "English (U.S. Outlying Islands)", nativeName: "English (U.S. Outlying Islands)" },
-    { id: "en_VI", name: "English (U.S. Virgin Islands)", nativeName: "English (U.S. Virgin Islands)" },
-    { id: "en_UG", name: "English (Uganda)", nativeName: "English (Uganda)" },
-    { id: "en_GB", name: "English (United Kingdom)", nativeName: "English (United Kingdom)" },
-    { id: "en_US", name: "English (United States)", nativeName: "English (United States)" },
-    { id: "en_VU", name: "English (Vanuatu)", nativeName: "English (Vanuatu)" },
-    { id: "en_ZM", name: "English (Zambia)", nativeName: "English (Zambia)" },
-    { id: "en_ZW", name: "English (Zimbabwe)", nativeName: "English (Zimbabwe)" },
-    { id: "eo", name: "Esperanto", nativeName: "esperanto" },
-    { id: "et", name: "Estonian", nativeName: "eesti" },
-    { id: "et_EE", name: "Estonian (Estonia)", nativeName: "eesti (Eesti)" },
-    { id: "ee", name: "Ewe", nativeName: "eʋegbe" },
-    { id: "ee_GH", name: "Ewe (Ghana)", nativeName: "eʋegbe (Ghana nutome)" },
-    { id: "ee_TG", name: "Ewe (Togo)", nativeName: "eʋegbe (Togo nutome)" },
-    { id: "fo", name: "Faroese", nativeName: "føroyskt" },
-    { id: "fo_FO", name: "Faroese (Faroe Islands)", nativeName: "føroyskt (Føroyar)" },
-    { id: "fi", name: "Finnish", nativeName: "suomi" },
-    { id: "fi_FI", name: "Finnish (Finland)", nativeName: "suomi (Suomi)" },
-    { id: "fr", name: "French", nativeName: "français" },
-    { id: "fr_DZ", name: "French (Algeria)", nativeName: "français (Algérie)" },
-    { id: "fr_BE", name: "French (Belgium)", nativeName: "français (Belgique)" },
-    { id: "fr_BJ", name: "French (Benin)", nativeName: "français (Bénin)" },
-    { id: "fr_BF", name: "French (Burkina Faso)", nativeName: "français (Burkina Faso)" },
-    { id: "fr_BI", name: "French (Burundi)", nativeName: "français (Burundi)" },
-    { id: "fr_CM", name: "French (Cameroon)", nativeName: "français (Cameroun)" },
-    { id: "fr_CA", name: "French (Canada)", nativeName: "français (Canada)" },
-    { id: "fr_CF", name: "French (Central African Republic)", nativeName: "français (République centrafricaine)" },
-    { id: "fr_TD", name: "French (Chad)", nativeName: "français (Tchad)" },
-    { id: "fr_KM", name: "French (Comoros)", nativeName: "français (Comores)" },
-    { id: "fr_CG", name: "French (Congo - Brazzaville)", nativeName: "français (Congo-Brazzaville)" },
-    { id: "fr_CD", name: "French (Congo - Kinshasa)", nativeName: "français (Congo-Kinshasa)" },
-    { id: "fr_CI", name: "French (Côte d’Ivoire)", nativeName: "français (Côte d’Ivoire)" },
-    { id: "fr_DJ", name: "French (Djibouti)", nativeName: "français (Djibouti)" },
-    { id: "fr_GQ", name: "French (Equatorial Guinea)", nativeName: "français (Guinée équatoriale)" },
-    { id: "fr_FR", name: "French (France)", nativeName: "français (France)" },
-    { id: "fr_GF", name: "French (French Guiana)", nativeName: "français (Guyane française)" },
-    { id: "fr_PF", name: "French (French Polynesia)", nativeName: "français (Polynésie française)" },
-    { id: "fr_GA", name: "French (Gabon)", nativeName: "français (Gabon)" },
-    { id: "fr_GP", name: "French (Guadeloupe)", nativeName: "français (Guadeloupe)" },
-    { id: "fr_GN", name: "French (Guinea)", nativeName: "français (Guinée)" },
-    { id: "fr_HT", name: "French (Haiti)", nativeName: "français (Haïti)" },
-    { id: "fr_LU", name: "French (Luxembourg)", nativeName: "français (Luxembourg)" },
-    { id: "fr_MG", name: "French (Madagascar)", nativeName: "français (Madagascar)" },
-    { id: "fr_ML", name: "French (Mali)", nativeName: "français (Mali)" },
-    { id: "fr_MQ", name: "French (Martinique)", nativeName: "français (Martinique)" },
-    { id: "fr_MR", name: "French (Mauritania)", nativeName: "français (Mauritanie)" },
-    { id: "fr_MU", name: "French (Mauritius)", nativeName: "français (Maurice)" },
-    { id: "fr_YT", name: "French (Mayotte)", nativeName: "français (Mayotte)" },
-    { id: "fr_MC", name: "French (Monaco)", nativeName: "français (Monaco)" },
-    { id: "fr_MA", name: "French (Morocco)", nativeName: "français (Maroc)" },
-    { id: "fr_NC", name: "French (New Caledonia)", nativeName: "français (Nouvelle-Calédonie)" },
-    { id: "fr_NE", name: "French (Niger)", nativeName: "français (Niger)" },
-    { id: "fr_RE", name: "French (Réunion)", nativeName: "français (La Réunion)" },
-    { id: "fr_RW", name: "French (Rwanda)", nativeName: "français (Rwanda)" },
-    { id: "fr_SN", name: "French (Senegal)", nativeName: "français (Sénégal)" },
-    { id: "fr_SC", name: "French (Seychelles)", nativeName: "français (Seychelles)" },
-    { id: "fr_BL", name: "French (St. Barthélemy)", nativeName: "français (Saint-Barthélemy)" },
-    { id: "fr_MF", name: "French (St. Martin)", nativeName: "français (Saint-Martin (partie française))" },
-    { id: "fr_PM", name: "French (St. Pierre & Miquelon)", nativeName: "français (Saint-Pierre-et-Miquelon)" },
-    { id: "fr_CH", name: "French (Switzerland)", nativeName: "français (Suisse)" },
-    { id: "fr_SY", name: "French (Syria)", nativeName: "français (Syrie)" },
-    { id: "fr_TG", name: "French (Togo)", nativeName: "français (Togo)" },
-    { id: "fr_TN", name: "French (Tunisia)", nativeName: "français (Tunisie)" },
-    { id: "fr_VU", name: "French (Vanuatu)", nativeName: "français (Vanuatu)" },
-    { id: "fr_WF", name: "French (Wallis & Futuna)", nativeName: "français (Wallis-et-Futuna)" },
-    { id: "ff", name: "Fulah", nativeName: "Pulaar" },
-    { id: "ff_CM", name: "Fulah (Cameroon)", nativeName: "Pulaar (Kameruun)" },
-    { id: "ff_GN", name: "Fulah (Guinea)", nativeName: "Pulaar (Gine)" },
-    { id: "ff_MR", name: "Fulah (Mauritania)", nativeName: "Pulaar (Muritani)" },
-    { id: "ff_SN", name: "Fulah (Senegal)", nativeName: "Pulaar (Senegaal)" },
-    { id: "gl", name: "Galician", nativeName: "galego" },
-    { id: "gl_ES", name: "Galician (Spain)", nativeName: "galego (España)" },
-    { id: "lg", name: "Ganda", nativeName: "Luganda" },
-    { id: "lg_UG", name: "Ganda (Uganda)", nativeName: "Luganda (Yuganda)" },
-    { id: "ka", name: "Georgian", nativeName: "ქართული" },
-    { id: "ka_GE", name: "Georgian (Georgia)", nativeName: "ქართული (საქართველო)" },
-    { id: "de", name: "German", nativeName: "Deutsch" },
-    { id: "de_AT", name: "German (Austria)", nativeName: "Deutsch (Österreich)" },
-    { id: "de_BE", name: "German (Belgium)", nativeName: "Deutsch (Belgien)" },
-    { id: "de_DE", name: "German (Germany)", nativeName: "Deutsch (Deutschland)" },
-    { id: "de_LI", name: "German (Liechtenstein)", nativeName: "Deutsch (Liechtenstein)" },
-    { id: "de_LU", name: "German (Luxembourg)", nativeName: "Deutsch (Luxemburg)" },
-    { id: "de_CH", name: "German (Switzerland)", nativeName: "Deutsch (Schweiz)" },
-    { id: "el", name: "Greek", nativeName: "Ελληνικά" },
-    { id: "el_CY", name: "Greek (Cyprus)", nativeName: "Ελληνικά (Κύπρος)" },
-    { id: "el_GR", name: "Greek (Greece)", nativeName: "Ελληνικά (Ελλάδα)" },
-    { id: "gu", name: "Gujarati", nativeName: "ગુજરાતી" },
-    { id: "gu_IN", name: "Gujarati (India)", nativeName: "ગુજરાતી (ભારત)" },
-    { id: "ha", name: "Hausa", nativeName: "Hausa" },
-    { id: "ha_GH", name: "Hausa (Ghana)", nativeName: "Hausa (Gana)" },
-    { id: "ha_Latn_GH", name: "Hausa (Latin, Ghana)", nativeName: "Hausa (Latin, Ghana)" },
-    { id: "ha_Latn_NE", name: "Hausa (Latin, Niger)", nativeName: "Hausa (Latin, Niger)" },
-    { id: "ha_Latn_NG", name: "Hausa (Latin, Nigeria)", nativeName: "Hausa (Latin, Nigeria)" },
-    { id: "ha_Latn", name: "Hausa (Latin)", nativeName: "Hausa (Latin)" },
-    { id: "ha_NE", name: "Hausa (Niger)", nativeName: "Hausa (Nijar)" },
-    { id: "ha_NG", name: "Hausa (Nigeria)", nativeName: "Hausa (Najeriya)" },
-    { id: "he", name: "Hebrew", nativeName: "עברית" },
-    { id: "he_IL", name: "Hebrew (Israel)", nativeName: "עברית (ישראל)" },
-    { id: "hi", name: "Hindi", nativeName: "हिंदी" },
-    { id: "hi_IN", name: "Hindi (India)", nativeName: "हिंदी (भारत)" },
-    { id: "hu", name: "Hungarian", nativeName: "magyar" },
-    { id: "hu_HU", name: "Hungarian (Hungary)", nativeName: "magyar (Magyarország)" },
-    { id: "is", name: "Icelandic", nativeName: "íslenska" },
-    { id: "is_IS", name: "Icelandic (Iceland)", nativeName: "íslenska (Ísland)" },
-    { id: "ig", name: "Igbo", nativeName: "Igbo" },
-    { id: "ig_NG", name: "Igbo (Nigeria)", nativeName: "Igbo (Nigeria)" },
-    { id: "id", name: "Indonesian", nativeName: "Bahasa Indonesia" },
-    { id: "id_ID", name: "Indonesian (Indonesia)", nativeName: "Bahasa Indonesia (Indonesia)" },
-    { id: "ga", name: "Irish", nativeName: "Gaeilge" },
-    { id: "ga_IE", name: "Irish (Ireland)", nativeName: "Gaeilge (Éire)" },
-    { id: "it", name: "Italian", nativeName: "italiano" },
-    { id: "it_IT", name: "Italian (Italy)", nativeName: "italiano (Italia)" },
-    { id: "it_SM", name: "Italian (San Marino)", nativeName: "italiano (San Marino)" },
-    { id: "it_CH", name: "Italian (Switzerland)", nativeName: "italiano (Svizzera)" },
-    { id: "ja", name: "Japanese", nativeName: "日本語" },
-    { id: "ja_JP", name: "Japanese (Japan)", nativeName: "日本語 (日本)" },
-    { id: "kl", name: "Kalaallisut", nativeName: "kalaallisut" },
-    { id: "kl_GL", name: "Kalaallisut (Greenland)", nativeName: "kalaallisut (Kalaallit Nunaat)" },
-    { id: "kn", name: "Kannada", nativeName: "ಕನ್ನಡ" },
-    { id: "kn_IN", name: "Kannada (India)", nativeName: "ಕನ್ನಡ (ಭಾರತ)" },
-    { id: "ks", name: "Kashmiri", nativeName: "کٲشُر" },
-    { id: "ks_Arab_IN", name: "Kashmiri (Arabic, India)", nativeName: "کٲشُر (اَربی, ہِنٛدوستان)" },
-    { id: "ks_Arab", name: "Kashmiri (Arabic)", nativeName: "کٲشُر (اَربی)" },
-    { id: "ks_IN", name: "Kashmiri (India)", nativeName: "کٲشُر (ہِنٛدوستان)" },
-    { id: "kk", name: "Kazakh", nativeName: "қазақ тілі" },
-    { id: "kk_Cyrl_KZ", name: "Kazakh (Cyrillic, Kazakhstan)", nativeName: "қазақ тілі (кирилл жазуы, Қазақстан)" },
-    { id: "kk_Cyrl", name: "Kazakh (Cyrillic)", nativeName: "қазақ тілі (кирилл жазуы)" },
-    { id: "kk_KZ", name: "Kazakh (Kazakhstan)", nativeName: "қазақ тілі (Қазақстан)" },
-    { id: "km", name: "Khmer", nativeName: "ខ្មែរ" },
-    { id: "km_KH", name: "Khmer (Cambodia)", nativeName: "ខ្មែរ (កម្ពុជា)" },
-    { id: "ki", name: "Kikuyu", nativeName: "Gikuyu" },
-    { id: "ki_KE", name: "Kikuyu (Kenya)", nativeName: "Gikuyu (Kenya)" },
-    { id: "rw", name: "Kinyarwanda", nativeName: "Kinyarwanda" },
-    { id: "rw_RW", name: "Kinyarwanda (Rwanda)", nativeName: "Kinyarwanda (Rwanda)" },
-    { id: "ko", name: "Korean", nativeName: "한국어" },
-    { id: "ko_KP", name: "Korean (North Korea)", nativeName: "한국어 (조선 민주주의 인민 공화국)" },
-    { id: "ko_KR", name: "Korean (South Korea)", nativeName: "한국어 (대한민국)" },
-    { id: "ky", name: "Kyrgyz", nativeName: "кыргызча" },
-    { id: "ky_Cyrl_KG", name: "Kyrgyz (Cyrillic, Kyrgyzstan)", nativeName: "кыргызча (Кирилик, Кыргызстан)" },
-    { id: "ky_Cyrl", name: "Kyrgyz (Cyrillic)", nativeName: "кыргызча (Кирилик)" },
-    { id: "ky_KG", name: "Kyrgyz (Kyrgyzstan)", nativeName: "кыргызча (Кыргызстан)" },
-    { id: "lo", name: "Lao", nativeName: "ລາວ" },
-    { id: "lo_LA", name: "Lao (Laos)", nativeName: "ລາວ (ລາວ)" },
-    { id: "lv", name: "Latvian", nativeName: "latviešu" },
-    { id: "lv_LV", name: "Latvian (Latvia)", nativeName: "latviešu (Latvija)" },
-    { id: "ln", name: "Lingala", nativeName: "lingála" },
-    { id: "ln_AO", name: "Lingala (Angola)", nativeName: "lingála (Angóla)" },
-    { id: "ln_CF", name: "Lingala (Central African Republic)", nativeName: "lingála (Repibiki ya Afríka ya Káti)" },
-    { id: "ln_CG", name: "Lingala (Congo - Brazzaville)", nativeName: "lingála (Kongo)" },
-    { id: "ln_CD", name: "Lingala (Congo - Kinshasa)", nativeName: "lingála (Repibiki demokratiki ya Kongó)" },
-    { id: "lt", name: "Lithuanian", nativeName: "lietuvių" },
-    { id: "lt_LT", name: "Lithuanian (Lithuania)", nativeName: "lietuvių (Lietuva)" },
-    { id: "lu", name: "Luba-Katanga", nativeName: "Tshiluba" },
-    { id: "lu_CD", name: "Luba-Katanga (Congo - Kinshasa)", nativeName: "Tshiluba (Ditunga wa Kongu)" },
-    { id: "lb", name: "Luxembourgish", nativeName: "Lëtzebuergesch" },
-    { id: "lb_LU", name: "Luxembourgish (Luxembourg)", nativeName: "Lëtzebuergesch (Lëtzebuerg)" },
-    { id: "mk", name: "Macedonian", nativeName: "македонски" },
-    { id: "mk_MK", name: "Macedonian (Macedonia)", nativeName: "македонски (Македонија)" },
-    { id: "mg", name: "Malagasy", nativeName: "Malagasy" },
-    { id: "mg_MG", name: "Malagasy (Madagascar)", nativeName: "Malagasy (Madagasikara)" },
-    { id: "ms", name: "Malay", nativeName: "Bahasa Melayu" },
-    { id: "ms_BN", name: "Malay (Brunei)", nativeName: "Bahasa Melayu (Brunei)" },
-    { id: "ms_Latn_BN", name: "Malay (Latin, Brunei)", nativeName: "Bahasa Melayu (Latin, Brunei)" },
-    { id: "ms_Latn_MY", name: "Malay (Latin, Malaysia)", nativeName: "Bahasa Melayu (Latin, Malaysia)" },
-    { id: "ms_Latn_SG", name: "Malay (Latin, Singapore)", nativeName: "Bahasa Melayu (Latin, Singapura)" },
-    { id: "ms_Latn", name: "Malay (Latin)", nativeName: "Bahasa Melayu (Latin)" },
-    { id: "ms_MY", name: "Malay (Malaysia)", nativeName: "Bahasa Melayu (Malaysia)" },
-    { id: "ms_SG", name: "Malay (Singapore)", nativeName: "Bahasa Melayu (Singapura)" },
-    { id: "ml", name: "Malayalam", nativeName: "മലയാളം" },
-    { id: "ml_IN", name: "Malayalam (India)", nativeName: "മലയാളം (ഇന്ത്യ)" },
-    { id: "mt", name: "Maltese", nativeName: "Malti" },
-    { id: "mt_MT", name: "Maltese (Malta)", nativeName: "Malti (Malta)" },
-    { id: "gv", name: "Manx", nativeName: "Gaelg" },
-    { id: "gv_IM", name: "Manx (Isle of Man)", nativeName: "Gaelg (Ellan Vannin)" },
-    { id: "mr", name: "Marathi", nativeName: "मराठी" },
-    { id: "mr_IN", name: "Marathi (India)", nativeName: "मराठी (भारत)" },
-    { id: "mn", name: "Mongolian", nativeName: "монгол" },
-    { id: "mn_Cyrl_MN", name: "Mongolian (Cyrillic, Mongolia)", nativeName: "монгол (кирил, Монгол)" },
-    { id: "mn_Cyrl", name: "Mongolian (Cyrillic)", nativeName: "монгол (кирил)" },
-    { id: "mn_MN", name: "Mongolian (Mongolia)", nativeName: "монгол (Монгол)" },
-    { id: "ne", name: "Nepali", nativeName: "नेपाली" },
-    { id: "ne_IN", name: "Nepali (India)", nativeName: "नेपाली (भारत)" },
-    { id: "ne_NP", name: "Nepali (Nepal)", nativeName: "नेपाली (नेपाल)" },
-    { id: "nd", name: "North Ndebele", nativeName: "isiNdebele" },
-    { id: "nd_ZW", name: "North Ndebele (Zimbabwe)", nativeName: "isiNdebele (Zimbabwe)" },
-    { id: "se", name: "Northern Sami", nativeName: "davvisámegiella" },
-    { id: "se_FI", name: "Northern Sami (Finland)", nativeName: "davvisámegiella (Suopma)" },
-    { id: "se_NO", name: "Northern Sami (Norway)", nativeName: "davvisámegiella (Norga)" },
-    { id: "se_SE", name: "Northern Sami (Sweden)", nativeName: "davvisámegiella (Ruoŧŧa)" },
-    { id: "no", name: "Norwegian", nativeName: "Norwegian" },
-    { id: "no_NO", name: "Norwegian (Norway)", nativeName: "Norwegian (Norway)" },
-    { id: "nb", name: "Norwegian Bokmål", nativeName: "norsk bokmål" },
-    { id: "nb_NO", name: "Norwegian Bokmål (Norway)", nativeName: "norsk bokmål (Norge)" },
-    { id: "nb_SJ", name: "Norwegian Bokmål (Svalbard & Jan Mayen)", nativeName: "norsk bokmål (Svalbard og Jan Mayen)" },
-    { id: "nn", name: "Norwegian Nynorsk", nativeName: "nynorsk" },
-    { id: "nn_NO", name: "Norwegian Nynorsk (Norway)", nativeName: "nynorsk (Noreg)" },
-    { id: "or", name: "Oriya", nativeName: "ଓଡ଼ିଆ" },
-    { id: "or_IN", name: "Oriya (India)", nativeName: "ଓଡ଼ିଆ (ଭାରତ)" },
-    { id: "om", name: "Oromo", nativeName: "Oromoo" },
-    { id: "om_ET", name: "Oromo (Ethiopia)", nativeName: "Oromoo (Itoophiyaa)" },
-    { id: "om_KE", name: "Oromo (Kenya)", nativeName: "Oromoo (Keeniyaa)" },
-    { id: "os", name: "Ossetic", nativeName: "ирон" },
-    { id: "os_GE", name: "Ossetic (Georgia)", nativeName: "ирон (Гуырдзыстон)" },
-    { id: "os_RU", name: "Ossetic (Russia)", nativeName: "ирон (Уӕрӕсе)" },
-    { id: "ps", name: "Pashto", nativeName: "پښتو" },
-    { id: "ps_AF", name: "Pashto (Afghanistan)", nativeName: "پښتو (افغانستان)" },
-    { id: "fa", name: "Persian", nativeName: "فارسی" },
-    { id: "fa_AF", name: "Persian (Afghanistan)", nativeName: "دری (افغانستان)" },
-    { id: "fa_IR", name: "Persian (Iran)", nativeName: "فارسی (ایران)" },
-    { id: "pl", name: "Polish", nativeName: "polski" },
-    { id: "pl_PL", name: "Polish (Poland)", nativeName: "polski (Polska)" },
-    { id: "pt", name: "Portuguese", nativeName: "português" },
-    { id: "pt_AO", name: "Portuguese (Angola)", nativeName: "português (Angola)" },
-    { id: "pt_BR", name: "Portuguese (Brazil)", nativeName: "português (Brasil)" },
-    { id: "pt_CV", name: "Portuguese (Cape Verde)", nativeName: "português (Cabo Verde)" },
-    { id: "pt_GW", name: "Portuguese (Guinea-Bissau)", nativeName: "português (Guiné Bissau)" },
-    { id: "pt_MO", name: "Portuguese (Macau SAR China)", nativeName: "português (Macau, RAE da China)" },
-    { id: "pt_MZ", name: "Portuguese (Mozambique)", nativeName: "português (Moçambique)" },
-    { id: "pt_PT", name: "Portuguese (Portugal)", nativeName: "português (Portugal)" },
-    { id: "pt_ST", name: "Portuguese (São Tomé & Príncipe)", nativeName: "português (São Tomé e Príncipe)" },
-    { id: "pt_TL", name: "Portuguese (Timor-Leste)", nativeName: "português (Timor-Leste)" },
-    { id: "pa", name: "Punjabi", nativeName: "ਪੰਜਾਬੀ" },
-    { id: "pa_Arab_PK", name: "Punjabi (Arabic, Pakistan)", nativeName: "پنجابی (عربی, پکستان)" },
-    { id: "pa_Arab", name: "Punjabi (Arabic)", nativeName: "پنجابی (عربی)" },
-    { id: "pa_Guru_IN", name: "Punjabi (Gurmukhi, India)", nativeName: "ਪੰਜਾਬੀ (ਗੁਰਮੁਖੀ, ਭਾਰਤ)" },
-    { id: "pa_Guru", name: "Punjabi (Gurmukhi)", nativeName: "ਪੰਜਾਬੀ (ਗੁਰਮੁਖੀ)" },
-    { id: "pa_IN", name: "Punjabi (India)", nativeName: "ਪੰਜਾਬੀ (ਭਾਰਤ)" },
-    { id: "pa_PK", name: "Punjabi (Pakistan)", nativeName: "ਪੰਜਾਬੀ (ਪਾਕਿਸਤਾਨ)" },
-    { id: "qu", name: "Quechua", nativeName: "Runasimi" },
-    { id: "qu_BO", name: "Quechua (Bolivia)", nativeName: "Runasimi (Bolivia)" },
-    { id: "qu_EC", name: "Quechua (Ecuador)", nativeName: "Runasimi (Ecuador)" },
-    { id: "qu_PE", name: "Quechua (Peru)", nativeName: "Runasimi (Perú)" },
-    { id: "ro", name: "Romanian", nativeName: "română" },
-    { id: "ro_MD", name: "Romanian (Moldova)", nativeName: "română (Republica Moldova)" },
-    { id: "ro_RO", name: "Romanian (Romania)", nativeName: "română (România)" },
-    { id: "rm", name: "Romansh", nativeName: "rumantsch" },
-    { id: "rm_CH", name: "Romansh (Switzerland)", nativeName: "rumantsch (Svizra)" },
-    { id: "rn", name: "Rundi", nativeName: "Ikirundi" },
-    { id: "rn_BI", name: "Rundi (Burundi)", nativeName: "Ikirundi (Uburundi)" },
-    { id: "ru", name: "Russian", nativeName: "русский" },
-    { id: "ru_BY", name: "Russian (Belarus)", nativeName: "русский (Беларусь)" },
-    { id: "ru_KZ", name: "Russian (Kazakhstan)", nativeName: "русский (Казахстан)" },
-    { id: "ru_KG", name: "Russian (Kyrgyzstan)", nativeName: "русский (Киргизия)" },
-    { id: "ru_MD", name: "Russian (Moldova)", nativeName: "русский (Молдова)" },
-    { id: "ru_RU", name: "Russian (Russia)", nativeName: "русский (Россия)" },
-    { id: "ru_UA", name: "Russian (Ukraine)", nativeName: "русский (Украина)" },
-    { id: "sg", name: "Sango", nativeName: "Sängö" },
-    { id: "sg_CF", name: "Sango (Central African Republic)", nativeName: "Sängö (Ködörösêse tî Bêafrîka)" },
-    { id: "gd", name: "Scottish Gaelic", nativeName: "Gàidhlig" },
-    { id: "gd_GB", name: "Scottish Gaelic (United Kingdom)", nativeName: "Gàidhlig (An Rìoghachd Aonaichte)" },
-    { id: "sr", name: "Serbian", nativeName: "српски" },
-    { id: "sr_BA", name: "Serbian (Bosnia & Herzegovina)", nativeName: "српски (Босна и Херцеговина)" },
-    { id: "sr_Cyrl_BA", name: "Serbian (Cyrillic, Bosnia & Herzegovina)", nativeName: "српски (ћирилица, Босна и Херцеговина)" },
-    { id: "sr_Cyrl_XK", name: "Serbian (Cyrillic, Kosovo)", nativeName: "српски (ћирилица, Косово)" },
-    { id: "sr_Cyrl_ME", name: "Serbian (Cyrillic, Montenegro)", nativeName: "српски (ћирилица, Црна Гора)" },
-    { id: "sr_Cyrl_RS", name: "Serbian (Cyrillic, Serbia)", nativeName: "српски (ћирилица, Србија)" },
-    { id: "sr_Cyrl", name: "Serbian (Cyrillic)", nativeName: "српски (ћирилица)" },
-    { id: "sr_XK", name: "Serbian (Kosovo)", nativeName: "српски (Косово)" },
-    { id: "sr_Latn_BA", name: "Serbian (Latin, Bosnia & Herzegovina)", nativeName: "srpski (latinica, Bosna i Hercegovina)" },
-    { id: "sr_Latn_XK", name: "Serbian (Latin, Kosovo)", nativeName: "srpski (latinica, Kosovo)" },
-    { id: "sr_Latn_ME", name: "Serbian (Latin, Montenegro)", nativeName: "srpski (latinica, Crna Gora)" },
-    { id: "sr_Latn_RS", name: "Serbian (Latin, Serbia)", nativeName: "srpski (latinica, Srbija)" },
-    { id: "sr_Latn", name: "Serbian (Latin)", nativeName: "srpski (latinica)" },
-    { id: "sr_ME", name: "Serbian (Montenegro)", nativeName: "српски (Црна Гора)" },
-    { id: "sr_RS", name: "Serbian (Serbia)", nativeName: "српски (Србија)" },
-    { id: "sh", name: "Serbo-Croatian", nativeName: "Serbo-Croatian" },
-    { id: "sh_BA", name: "Serbo-Croatian (Bosnia & Herzegovina)", nativeName: "Serbo-Croatian (Bosnia & Herzegovina)" },
-    { id: "sn", name: "Shona", nativeName: "chiShona" },
-    { id: "sn_ZW", name: "Shona (Zimbabwe)", nativeName: "chiShona (Zimbabwe)" },
-    { id: "ii", name: "Sichuan Yi", nativeName: "ꆈꌠꉙ" },
-    { id: "ii_CN", name: "Sichuan Yi (China)", nativeName: "ꆈꌠꉙ (ꍏꇩ)" },
-    { id: "si", name: "Sinhala", nativeName: "සිංහල" },
-    { id: "si_LK", name: "Sinhala (Sri Lanka)", nativeName: "සිංහල (ශ්‍රී ලංකාව)" },
-    { id: "sk", name: "Slovak", nativeName: "slovenčina" },
-    { id: "sk_SK", name: "Slovak (Slovakia)", nativeName: "slovenčina (Slovensko)" },
-    { id: "sl", name: "Slovenian", nativeName: "slovenščina" },
-    { id: "sl_SI", name: "Slovenian (Slovenia)", nativeName: "slovenščina (Slovenija)" },
-    { id: "so", name: "Somali", nativeName: "Soomaali" },
-    { id: "so_DJ", name: "Somali (Djibouti)", nativeName: "Soomaali (Jabuuti)" },
-    { id: "so_ET", name: "Somali (Ethiopia)", nativeName: "Soomaali (Itoobiya)" },
-    { id: "so_KE", name: "Somali (Kenya)", nativeName: "Soomaali (Kiiniya)" },
-    { id: "so_SO", name: "Somali (Somalia)", nativeName: "Soomaali (Soomaaliya)" },
-    { id: "es", name: "Spanish", nativeName: "español" },
-    { id: "es_AR", name: "Spanish (Argentina)", nativeName: "español (Argentina)" },
-    { id: "es_BO", name: "Spanish (Bolivia)", nativeName: "español (Bolivia)" },
-    { id: "es_IC", name: "Spanish (Canary Islands)", nativeName: "español (islas Canarias)" },
-    { id: "es_EA", name: "Spanish (Ceuta & Melilla)", nativeName: "español (Ceuta y Melilla)" },
-    { id: "es_CL", name: "Spanish (Chile)", nativeName: "español (Chile)" },
-    { id: "es_CO", name: "Spanish (Colombia)", nativeName: "español (Colombia)" },
-    { id: "es_CR", name: "Spanish (Costa Rica)", nativeName: "español (Costa Rica)" },
-    { id: "es_CU", name: "Spanish (Cuba)", nativeName: "español (Cuba)" },
-    { id: "es_DO", name: "Spanish (Dominican Republic)", nativeName: "español (República Dominicana)" },
-    { id: "es_EC", name: "Spanish (Ecuador)", nativeName: "español (Ecuador)" },
-    { id: "es_SV", name: "Spanish (El Salvador)", nativeName: "español (El Salvador)" },
-    { id: "es_GQ", name: "Spanish (Equatorial Guinea)", nativeName: "español (Guinea Ecuatorial)" },
-    { id: "es_GT", name: "Spanish (Guatemala)", nativeName: "español (Guatemala)" },
-    { id: "es_HN", name: "Spanish (Honduras)", nativeName: "español (Honduras)" },
-    { id: "es_MX", name: "Spanish (Mexico)", nativeName: "español (México)" },
-    { id: "es_NI", name: "Spanish (Nicaragua)", nativeName: "español (Nicaragua)" },
-    { id: "es_PA", name: "Spanish (Panama)", nativeName: "español (Panamá)" },
-    { id: "es_PY", name: "Spanish (Paraguay)", nativeName: "español (Paraguay)" },
-    { id: "es_PE", name: "Spanish (Peru)", nativeName: "español (Perú)" },
-    { id: "es_PH", name: "Spanish (Philippines)", nativeName: "español (Filipinas)" },
-    { id: "es_PR", name: "Spanish (Puerto Rico)", nativeName: "español (Puerto Rico)" },
-    { id: "es_ES", name: "Spanish (Spain)", nativeName: "español (España)" },
-    { id: "es_US", name: "Spanish (United States)", nativeName: "español (Estados Unidos)" },
-    { id: "es_UY", name: "Spanish (Uruguay)", nativeName: "español (Uruguay)" },
-    { id: "es_VE", name: "Spanish (Venezuela)", nativeName: "español (Venezuela)" },
-    { id: "sw", name: "Swahili", nativeName: "Kiswahili" },
-    { id: "sw_KE", name: "Swahili (Kenya)", nativeName: "Kiswahili (Kenya)" },
-    { id: "sw_TZ", name: "Swahili (Tanzania)", nativeName: "Kiswahili (Tanzania)" },
-    { id: "sw_UG", name: "Swahili (Uganda)", nativeName: "Kiswahili (Uganda)" },
-    { id: "sv", name: "Swedish", nativeName: "svenska" },
-    { id: "sv_AX", name: "Swedish (Åland Islands)", nativeName: "svenska (Åland)" },
-    { id: "sv_FI", name: "Swedish (Finland)", nativeName: "svenska (Finland)" },
-    { id: "sv_SE", name: "Swedish (Sweden)", nativeName: "svenska (Sverige)" },
-    { id: "tl", name: "Tagalog", nativeName: "Tagalog" },
-    { id: "tl_PH", name: "Tagalog (Philippines)", nativeName: "Tagalog (Philippines)" },
-    { id: "ta", name: "Tamil", nativeName: "தமிழ்" },
-    { id: "ta_IN", name: "Tamil (India)", nativeName: "தமிழ் (இந்தியா)" },
-    { id: "ta_MY", name: "Tamil (Malaysia)", nativeName: "தமிழ் (மலேஷியா)" },
-    { id: "ta_SG", name: "Tamil (Singapore)", nativeName: "தமிழ் (சிங்கப்பூர்)" },
-    { id: "ta_LK", name: "Tamil (Sri Lanka)", nativeName: "தமிழ் (இலங்கை)" },
-    { id: "te", name: "Telugu", nativeName: "తెలుగు" },
-    { id: "te_IN", name: "Telugu (India)", nativeName: "తెలుగు (భారత దేశం)" },
-    { id: "th", name: "Thai", nativeName: "ไทย" },
-    { id: "th_TH", name: "Thai (Thailand)", nativeName: "ไทย (ไทย)" },
-    { id: "bo", name: "Tibetan", nativeName: "བོད་སྐད་" },
-    { id: "bo_CN", name: "Tibetan (China)", nativeName: "བོད་སྐད་ (རྒྱ་ནག)" },
-    { id: "bo_IN", name: "Tibetan (India)", nativeName: "བོད་སྐད་ (རྒྱ་གར་)" },
-    { id: "ti", name: "Tigrinya", nativeName: "ትግርኛ" },
-    { id: "ti_ER", name: "Tigrinya (Eritrea)", nativeName: "Tigrinya (Eritrea)" },
-    { id: "ti_ET", name: "Tigrinya (Ethiopia)", nativeName: "Tigrinya (Ethiopia)" },
-    { id: "to", name: "Tongan", nativeName: "lea fakatonga" },
-    { id: "to_TO", name: "Tongan (Tonga)", nativeName: "lea fakatonga (Tonga)" },
-    { id: "tr", name: "Turkish", nativeName: "Türkçe" },
-    { id: "tr_CY", name: "Turkish (Cyprus)", nativeName: "Türkçe (Güney Kıbrıs Rum Kesimi)" },
-    { id: "tr_TR", name: "Turkish (Turkey)", nativeName: "Türkçe (Türkiye)" },
-    { id: "uk", name: "Ukrainian", nativeName: "українська" },
-    { id: "uk_UA", name: "Ukrainian (Ukraine)", nativeName: "українська (Україна)" },
-    { id: "ur", name: "Urdu", nativeName: "اردو" },
-    { id: "ur_IN", name: "Urdu (India)", nativeName: "اردو (بھارت)" },
-    { id: "ur_PK", name: "Urdu (Pakistan)", nativeName: "اردو (پاکستان)" },
-    { id: "ug", name: "Uyghur", nativeName: "ئۇيغۇرچە" },
-    { id: "ug_Arab_CN", name: "Uyghur (Arabic, China)", nativeName: "ئۇيغۇرچە (ئەرەب, جۇڭگو)" },
-    { id: "ug_Arab", name: "Uyghur (Arabic)", nativeName: "ئۇيغۇرچە (ئەرەب)" },
-    { id: "ug_CN", name: "Uyghur (China)", nativeName: "ئۇيغۇرچە (جۇڭگو)" },
-    { id: "uz", name: "Uzbek", nativeName: "oʻzbekcha" },
-    { id: "uz_AF", name: "Uzbek (Afghanistan)", nativeName: "oʻzbekcha (Afgʻoniston)" },
-    { id: "uz_Arab_AF", name: "Uzbek (Arabic, Afghanistan)", nativeName: "اوزبیک (عربی, افغانستان)" },
-    { id: "uz_Arab", name: "Uzbek (Arabic)", nativeName: "اوزبیک (عربی)" },
-    { id: "uz_Cyrl_UZ", name: "Uzbek (Cyrillic, Uzbekistan)", nativeName: "Ўзбек (Кирил, Ўзбекистон)" },
-    { id: "uz_Cyrl", name: "Uzbek (Cyrillic)", nativeName: "Ўзбек (Кирил)" },
-    { id: "uz_Latn_UZ", name: "Uzbek (Latin, Uzbekistan)", nativeName: "oʻzbekcha (Lotin, Oʻzbekiston)" },
-    { id: "uz_Latn", name: "Uzbek (Latin)", nativeName: "oʻzbekcha (Lotin)" },
-    { id: "uz_UZ", name: "Uzbek (Uzbekistan)", nativeName: "oʻzbekcha (Oʻzbekiston)" },
-    { id: "vi", name: "Vietnamese", nativeName: "Tiếng Việt" },
-    { id: "vi_VN", name: "Vietnamese (Vietnam)", nativeName: "Tiếng Việt (Việt Nam)" },
-    { id: "cy", name: "Welsh", nativeName: "Cymraeg" },
-    { id: "cy_GB", name: "Welsh (United Kingdom)", nativeName: "Cymraeg (Y Deyrnas Unedig)" },
-    { id: "fy", name: "Western Frisian", nativeName: "West-Frysk" },
-    { id: "fy_NL", name: "Western Frisian (Netherlands)", nativeName: "West-Frysk (Nederlân)" },
-    { id: "yi", name: "Yiddish", nativeName: "ייִדיש" },
-    { id: "yo", name: "Yoruba", nativeName: "Èdè Yorùbá" },
-    { id: "yo_BJ", name: "Yoruba (Benin)", nativeName: "Èdè Yorùbá (Orílɛ́ède Bɛ̀nɛ̀)" },
-    { id: "yo_NG", name: "Yoruba (Nigeria)", nativeName: "Èdè Yorùbá (Orílẹ́ède Nàìjíríà)" },
-    { id: "zu", name: "Zulu", nativeName: "isiZulu" },
-    { id: "zu_ZA", name: "Zulu (South Africa)", nativeName: "isiZulu (i-South Africa)" }
-            ];
-        }
-    };
-});
-// Full list of time zones defined in tz database
-// see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-angular.module('platformWebApp')
-.factory('platformWebApp.common.timeZones', ['moment', function(moment) {
-    var result = {
-        get: function(id) {
-            return _.find(this.query(), function(x) { return x.id.toLowerCase() === id.toLowerCase(); });
-        },
-        contains: function (id) {
-            return _.some(this.query(), function (x) { return x.id.toLowerCase() === id.toLowerCase(); });
-        },
-        utcOffset: function (id) {
-            var offset = moment.tz.zone(id).offset(moment().valueOf());
-            // UTC offset has inverted sign. Compare to zero to avoid -0
-            offset = offset === 0 ? 0 : offset * -1;
-            var minutes = offset % 60;
-            var hours = (offset - minutes) / 60;
-            // format: ±HHMM
-            var pad = function (n, withSign) {
-                var result = '';
-                if (withSign) {
-                    result = n >= 0 ? '+' : '-';
-                    n = n < 0 ? n * -1 : n;
-                }
-                result += n < 10 ? '0' + n : n;
-                return result;
-            }
-            return { hours: hours, minutes: minutes, formatted: pad(hours, true) + ':' + pad(minutes) };
-        },
-        query: function () {
-            // Get time zone from moment list of time zones, append UTC offset to name (UTC ±XX:XX Continent/City) and sort by UTC offset
-            return _.map(moment.tz.names(), function (x) {
-                var utcOffset = result.utcOffset(x);
-                return {
-                    id: x,
-                    utcOffset: utcOffset,
-                    name: '(UTC ' + utcOffset.formatted + ') ' + x
-                };
-            }).sort(function (a, b) {
-                if (!a.utcOffset || !b.utcOffset) {
-                    return !b.utcOffset ? -1 : !a.utcOffset ? 1 : 0;
-                }
-                return a.utcOffset.hours === b.utcOffset.hours ? a.utcOffset.minutes - b.utcOffset.minutes : a.utcOffset.hours - b.utcOffset.hours;
-            });
-        }
-    };
-    return result;
-}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var a={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["vm.","nm."],DAY:["Sondag","Maandag","Dinsdag","Woensdag","Donderdag","Vrydag","Saterdag"],ERANAMES:["voor Christus","na Christus"],ERAS:["v.C.","n.C."],FIRSTDAYOFWEEK:0,MONTH:["Januarie","Februarie","Maart","April","Mei","Junie","Julie","Augustus","September","Oktober","November","Desember"],SHORTDAY:["So","Ma","Di","Wo","Do","Vr","Sa"],SHORTMONTH:["Jan.","Feb.","Mrt.","Apr","Mei","Jun","Jul","Aug","Sep","Okt","Nov","Des"],WEEKENDRANGE:[5,6],fullDate:"EEEE d MMMM y",longDate:"d MMMM y",medium:"d MMM y HH:mm:ss",mediumDate:"d MMM y",mediumTime:"HH:mm:ss",short:"y-MM-dd HH:mm",shortDate:"y-MM-dd",shortTime:"HH:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"$",DECIMAL_SEP:",",GROUP_SEP:" ",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"af-na",pluralCat:function(e,r){return 1==e?a.ONE:a.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var a={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["vm.","nm."],DAY:["Sondag","Maandag","Dinsdag","Woensdag","Donderdag","Vrydag","Saterdag"],ERANAMES:["voor Christus","na Christus"],ERAS:["v.C.","n.C."],FIRSTDAYOFWEEK:6,MONTH:["Januarie","Februarie","Maart","April","Mei","Junie","Julie","Augustus","September","Oktober","November","Desember"],SHORTDAY:["So","Ma","Di","Wo","Do","Vr","Sa"],SHORTMONTH:["Jan.","Feb.","Mrt.","Apr","Mei","Jun","Jul","Aug","Sep","Okt","Nov","Des"],WEEKENDRANGE:[5,6],fullDate:"EEEE, dd MMMM y",longDate:"dd MMMM y",medium:"dd MMM y h:mm:ss a",mediumDate:"dd MMM y",mediumTime:"h:mm:ss a",short:"y-MM-dd h:mm a",shortDate:"y-MM-dd",shortTime:"h:mm a"},NUMBER_FORMATS:{CURRENCY_SYM:"R",DECIMAL_SEP:",",GROUP_SEP:" ",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"af-za",pluralCat:function(e,r){return 1==e?a.ONE:a.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var a={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["vm.","nm."],DAY:["Sondag","Maandag","Dinsdag","Woensdag","Donderdag","Vrydag","Saterdag"],ERANAMES:["voor Christus","na Christus"],ERAS:["v.C.","n.C."],FIRSTDAYOFWEEK:6,MONTH:["Januarie","Februarie","Maart","April","Mei","Junie","Julie","Augustus","September","Oktober","November","Desember"],SHORTDAY:["So","Ma","Di","Wo","Do","Vr","Sa"],SHORTMONTH:["Jan.","Feb.","Mrt.","Apr","Mei","Jun","Jul","Aug","Sep","Okt","Nov","Des"],WEEKENDRANGE:[5,6],fullDate:"EEEE, dd MMMM y",longDate:"dd MMMM y",medium:"dd MMM y h:mm:ss a",mediumDate:"dd MMM y",mediumTime:"h:mm:ss a",short:"y-MM-dd h:mm a",shortDate:"y-MM-dd",shortTime:"h:mm a"},NUMBER_FORMATS:{CURRENCY_SYM:"R",DECIMAL_SEP:",",GROUP_SEP:" ",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"af",pluralCat:function(e,r){return 1==e?a.ONE:a.OTHER}})}]);
@@ -22639,45 +22639,6 @@ angular.module('platformWebApp')
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["公元前","公元"],ERAS:["公元前","公元"],FIRSTDAYOFWEEK:6,MONTH:["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"],SHORTDAY:["周日","周一","周二","周三","周四","周五","周六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"yy/M/d ah:mm",shortDate:"yy/M/d",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"¥",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤ ",negSuf:"",posPre:"¤ ",posSuf:""}]},id:"zh-cn",pluralCat:function(e,m){return E.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["公元前","公元"],ERAS:["BC","AD"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"d/M/yy ah:mm",shortDate:"d/M/yy",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-hk",pluralCat:function(e,m){return E.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["西元前","西元"],ERAS:["西元前","西元"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日 EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"y/M/d ah:mm",shortDate:"y/M/d",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"NT$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-tw",pluralCat:function(e,m){return E.OTHER}})}]);
-angular.module('platformWebApp')
-.controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    
-    $scope.blade.isLoading = false;
-    // ui-grid
-    $scope.setGridOptions = function (gridOptions) {
-        $scope.gridOptions = gridOptions;
-    };
-}]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    var blade = $scope.blade;
-
-    $scope.openBlade = function () {
-        var newBlade = {
-            id: "changesChildBlade",
-            currentEntities: blade.currentEntity.operationsLog,
-            headIcon: blade.headIcon,
-            title: blade.title,
-            subtitle: 'platform.widgets.operations.blade-subtitle',
-            isExpandable: true,
-            controller: 'platformWebApp.changeLog.operationListController',
-            template: '$(Platform)/Scripts/app/changeLog/blades/operation-list.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, blade);
-    };
-}]);
-angular.module('platformWebApp')
-.factory('platformWebApp.assets.api', ['$resource', function ($resource) {
-    return $resource('api/platform/assets', {}, {
-        search: { method: 'GET', url: 'api/platform/assets', isArray: false },
-        createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
-        move: { method: 'POST', url: 'api/platform/assets/move' },
-        uploadFromUrl: { method: 'POST', params: { url: '@url', folderUrl: '@folderUrl', name: '@name' }, isArray: true }
-    });
-}]);
-
-
 angular.module('platformWebApp')
     .controller('platformWebApp.assets.assetListController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', '$sessionStorage', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
         function ($scope, assets, bladeNavigationService, dialogService, $storage, bladeUtils, uiGridHelper) {
@@ -23150,260 +23111,44 @@ angular.module('platformWebApp')
     }]);
 
 angular.module('platformWebApp')
-    .controller('platformWebApp.exportImport.exportMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'platformWebApp.authService', 'platformWebApp.toolbarService', function ($scope, bladeNavigationService, exportImportResourse, authService, toolbarService
-) {
-    var blade = $scope.blade;
-    blade.headIcon = 'fa-upload';
-    blade.title = 'platform.blades.export-main.title';
-
-    $scope.exportRequest = {};
-
-    function initializeBlade() {
-        exportImportResourse.getNewExportManifest(function (data) {
-            $scope.exportRequest.exportManifest = data;
-            blade.isLoading = false;
-        });
-    };
-
-    $scope.$on("new-notification-event", function (event, notification) {
-        if (blade.notification && notification.id == blade.notification.id) {
-            angular.copy(notification, blade.notification);
-            if (notification.errorCount > 0) {
-                bladeNavigationService.setError('Export error', blade);
-            }
-        }
+.factory('platformWebApp.assets.api', ['$resource', function ($resource) {
+    return $resource('api/platform/assets', {}, {
+        search: { method: 'GET', url: 'api/platform/assets', isArray: false },
+        createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
+        move: { method: 'POST', url: 'api/platform/assets/move' },
+        uploadFromUrl: { method: 'POST', params: { url: '@url', folderUrl: '@folderUrl', name: '@name' }, isArray: true }
     });
-
-    $scope.canStartProcess = function () {
-        return authService.checkPermission('platform:exportImport:export') && (_.any($scope.exportRequest.modules) || $scope.exportRequest.handleSecurity || $scope.exportRequest.handleSettings);
-    }
-
-    $scope.updateModuleSelection = function () {
-        var selection = _.where($scope.exportRequest.exportManifest.modules, { isChecked: true });
-        $scope.exportRequest.modules = _.pluck(selection, 'id');
-    };
-
-    $scope.startExport = function() {
-        blade.isLoading = true;
-        exportImportResourse.runExport($scope.exportRequest,
-            function(data) {
-                blade.notification = data;
-                blade.isLoading = false;
-            });
-
-        blade.toolbarCommands.splice(0, 2, commandCancel);
-    };
-
-    var commandCancel = {
-        name: 'platform.commands.cancel',
-        icon: 'fa fa-times',
-        canExecuteMethod: function () {
-            return blade.notification && !blade.notification.finished;
-        },
-        executeMethod: function () {
-            exportImportResourse.taskCancel({ jobId: blade.notification.jobId }, null, function (data) {
-            });
-        }
-    };
-
-    blade.toolbarCommands = [
-		{
-		    name: "platform.commands.select-all", icon: 'fa fa-check-square-o',
-		    executeMethod: function () { selectAll(true) },
-		    canExecuteMethod: function () { return $scope.exportRequest.exportManifest && !blade.notification; }
-		},
-        {
-            name: "platform.commands.unselect-all", icon: 'fa fa-square-o',
-            executeMethod: function () { selectAll(false) },
-            canExecuteMethod: function () { return $scope.exportRequest.exportManifest && !blade.notification; }
-        }
-    ];
-
-    var selectAll = function (action) {
-        $scope.exportRequest.handleSecurity = action;
-        $scope.exportRequest.handleBinaryData = action;
-        $scope.exportRequest.handleSettings = action;
-        _.forEach($scope.exportRequest.exportManifest.modules, function (module) { module.isChecked = action; });
-
-        $scope.updateModuleSelection();
-    }
-
-        initializeBlade();
 }]);
 
+
 angular.module('platformWebApp')
-.controller('platformWebApp.exportImport.mainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.authService', function ($scope, bladeNavigationService, authService) {
-
-    $scope.export = function () {
-        $scope.selectedNodeId = 'export';
-
-        var newBlade = {
-            controller: 'platformWebApp.exportImport.exportMainController',
-            template: '$(Platform)/Scripts/app/exportImport/blades/export-main.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, $scope.blade);
-    };
-
-    $scope.import = function () {
-        if (authService.checkPermission('platform:exportImport:import')) {
-            $scope.selectedNodeId = 'import';
-
-            var newBlade = {
-                controller: 'platformWebApp.exportImport.importMainController',
-                template: '$(Platform)/Scripts/app/exportImport/blades/import-main.tpl.html'
-            };
-            bladeNavigationService.showBlade(newBlade, $scope.blade);
-        }
-    };
-
-    $scope.blade.headIcon = 'fa-database';
+.controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    
     $scope.blade.isLoading = false;
+    // ui-grid
+    $scope.setGridOptions = function (gridOptions) {
+        $scope.gridOptions = gridOptions;
+    };
 }]);
 
 angular.module('platformWebApp')
-.controller('platformWebApp.exportImport.importMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'FileUploader', function ($scope, bladeNavigationService, exportImportResourse, FileUploader) {
+.controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
-    blade.updatePermission = 'platform:exportImport:import';
-    blade.headIcon = 'fa-download';
-    blade.title = 'platform.blades.import-main.title';
-    blade.isLoading = false;
-    $scope.importRequest = {};
-    var origManifest;
 
-    $scope.$on("new-notification-event", function (event, notification) {
-        if (blade.notification && notification.id == blade.notification.id) {
-            angular.copy(notification, blade.notification);
-            if (notification.errorCount > 0) {
-                bladeNavigationService.setError('Import error', blade);
-            }
-        }
-    });
-
-    $scope.canStartProcess = function () {
-        return blade.hasUpdatePermission() && (_.any($scope.importRequest.modules) || $scope.importRequest.handleSecurity || $scope.importRequest.handleSettings || $scope.importRequest.handleBinaryData);
-    }
-
-    $scope.startProcess = function () {
-        blade.isLoading = true;
-        exportImportResourse.runImport($scope.importRequest,
-            function (data) { blade.notification = data; blade.isLoading = false; },
-            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
-
-        blade.toolbarCommands.splice(0, 2, commandCancel);
-    }
-
-    var commandCancel = {
-        name: 'platform.commands.cancel',
-        icon: 'fa fa-times',
-        canExecuteMethod: function () {
-            return blade.notification && !blade.notification.finished;
-        },
-        executeMethod: function () {
-            exportImportResourse.taskCancel({ jobId: blade.notification.jobId }, null, function (data) {
-            });
-        }
+    $scope.openBlade = function () {
+        var newBlade = {
+            id: "changesChildBlade",
+            currentEntities: blade.currentEntity.operationsLog,
+            headIcon: blade.headIcon,
+            title: blade.title,
+            subtitle: 'platform.widgets.operations.blade-subtitle',
+            isExpandable: true,
+            controller: 'platformWebApp.changeLog.operationListController',
+            template: '$(Platform)/Scripts/app/changeLog/blades/operation-list.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, blade);
     };
-
-    $scope.updateModuleSelection = function () {
-        var selection = _.where($scope.importRequest.exportManifest.modules, { isChecked: true });
-        $scope.importRequest.modules = _.pluck(selection, 'id');
-    };
-
-    if (!$scope.uploader) {
-        // create the uploader
-        var uploader = $scope.uploader = new FileUploader({
-            scope: $scope,
-            headers: { Accept: 'application/json' },
-            url: 'api/platform/assets/localstorage',
-            method: 'POST',
-            autoUpload: true,
-            removeAfterUpload: true
-        });
-
-        // ADDING FILTERS
-        // zip only
-        uploader.filters.push({
-            name: 'zipFilter',
-            fn: function (i /*{File|FileLikeObject}*/, options) {
-                return i.name.toLowerCase().endsWith('.zip');
-            }
-        });
-
-        uploader.onBeforeUploadItem = function (fileItem) {
-            blade.isLoading = true;
-            bladeNavigationService.setError(null, blade);
-        };
-
-        uploader.onErrorItem = function (item, response, status, headers) {
-            bladeNavigationService.setError(item._file.name + ' failed: ' + (response.message ? response.message : status), blade);
-        };
-
-        uploader.onSuccessItem = function (fileItem, asset, status, headers) {
-            $scope.importRequest.fileUrl = asset[0].url;
-            $scope.importRequest.fileName = asset[0].name;
-
-            exportImportResourse.loadExportManifest({ fileUrl: $scope.importRequest.fileUrl }, function (data) {
-                origManifest = angular.copy(data);
-
-                // select all available data for import
-                $scope.importRequest.handleSecurity = data.handleSecurity;
-                $scope.importRequest.handleSettings = data.handleSettings;
-                $scope.importRequest.handleBinaryData = data.handleBinaryData;
-
-                _.each(data.modules, function (x) { x.isChecked = true; });
-
-                $scope.importRequest.exportManifest = data;
-                $scope.updateModuleSelection();
-                blade.isLoading = false;
-            });
-        };
-    }
-
-
-    blade.toolbarCommands = [
-        {
-            name: "platform.commands.select-all", icon: 'fa fa-check-square-o',
-            executeMethod: function () { selectAll(true) },
-            canExecuteMethod: function () { return $scope.importRequest.exportManifest && !blade.notification; }
-        },
-        {
-            name: "platform.commands.unselect-all", icon: 'fa fa-square-o',
-            executeMethod: function () { selectAll(false) },
-            canExecuteMethod: function () { return $scope.importRequest.exportManifest && !blade.notification; }
-        }
-    ];
-
-    var selectAll = function (action) {
-        if (origManifest.handleSecurity)
-            $scope.importRequest.handleSecurity = action;
-        if (origManifest.handleBinaryData)
-            $scope.importRequest.handleBinaryData = action;
-        if (origManifest.handleSettings)
-            $scope.importRequest.handleSettings = action;
-
-        _.forEach($scope.importRequest.exportManifest.modules, function (module) { module.isChecked = action; });
-
-        $scope.updateModuleSelection();
-    }
 }]);
-
-angular.module('platformWebApp')
-.factory('platformWebApp.exportImport.resource', ['$resource', function ($resource) {
-
-    return $resource(null, {},
-        {
-            getNewExportManifest: { url: 'api/platform/export/manifest/new' },
-            runExport: { method: 'POST', url: 'api/platform/export' },
-
-            loadExportManifest: { url: 'api/platform/export/manifest/load' },
-            runImport: { method: 'POST', url: 'api/platform/import' },
-            sampleDataDiscover: { url: 'api/platform/sampledata/discover', isArray: true },
-            importSampleData: { method: 'POST', url: 'api/platform/sampledata/import', params: { url: '@url' } },
-
-            taskCancel: { method: 'POST', url: 'api/platform/exortimport/tasks/:jobId/cancel'}
-        });
-}]);
-
 angular.module('platformWebApp')
 .controller('platformWebApp.dynamicObjectListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dynamicProperties.api', function ($scope, bladeNavigationService, dynamicPropertiesApi) {
 	var blade = $scope.blade;
@@ -24106,6 +23851,261 @@ angular.module('platformWebApp')
 
 }]);
 angular.module('platformWebApp')
+    .controller('platformWebApp.exportImport.exportMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'platformWebApp.authService', 'platformWebApp.toolbarService', function ($scope, bladeNavigationService, exportImportResourse, authService, toolbarService
+) {
+    var blade = $scope.blade;
+    blade.headIcon = 'fa-upload';
+    blade.title = 'platform.blades.export-main.title';
+
+    $scope.exportRequest = {};
+
+    function initializeBlade() {
+        exportImportResourse.getNewExportManifest(function (data) {
+            $scope.exportRequest.exportManifest = data;
+            blade.isLoading = false;
+        });
+    };
+
+    $scope.$on("new-notification-event", function (event, notification) {
+        if (blade.notification && notification.id == blade.notification.id) {
+            angular.copy(notification, blade.notification);
+            if (notification.errorCount > 0) {
+                bladeNavigationService.setError('Export error', blade);
+            }
+        }
+    });
+
+    $scope.canStartProcess = function () {
+        return authService.checkPermission('platform:exportImport:export') && (_.any($scope.exportRequest.modules) || $scope.exportRequest.handleSecurity || $scope.exportRequest.handleSettings);
+    }
+
+    $scope.updateModuleSelection = function () {
+        var selection = _.where($scope.exportRequest.exportManifest.modules, { isChecked: true });
+        $scope.exportRequest.modules = _.pluck(selection, 'id');
+    };
+
+    $scope.startExport = function() {
+        blade.isLoading = true;
+        exportImportResourse.runExport($scope.exportRequest,
+            function(data) {
+                blade.notification = data;
+                blade.isLoading = false;
+            });
+
+        blade.toolbarCommands.splice(0, 2, commandCancel);
+    };
+
+    var commandCancel = {
+        name: 'platform.commands.cancel',
+        icon: 'fa fa-times',
+        canExecuteMethod: function () {
+            return blade.notification && !blade.notification.finished;
+        },
+        executeMethod: function () {
+            exportImportResourse.taskCancel({ jobId: blade.notification.jobId }, null, function (data) {
+            });
+        }
+    };
+
+    blade.toolbarCommands = [
+		{
+		    name: "platform.commands.select-all", icon: 'fa fa-check-square-o',
+		    executeMethod: function () { selectAll(true) },
+		    canExecuteMethod: function () { return $scope.exportRequest.exportManifest && !blade.notification; }
+		},
+        {
+            name: "platform.commands.unselect-all", icon: 'fa fa-square-o',
+            executeMethod: function () { selectAll(false) },
+            canExecuteMethod: function () { return $scope.exportRequest.exportManifest && !blade.notification; }
+        }
+    ];
+
+    var selectAll = function (action) {
+        $scope.exportRequest.handleSecurity = action;
+        $scope.exportRequest.handleBinaryData = action;
+        $scope.exportRequest.handleSettings = action;
+        _.forEach($scope.exportRequest.exportManifest.modules, function (module) { module.isChecked = action; });
+
+        $scope.updateModuleSelection();
+    }
+
+        initializeBlade();
+}]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.exportImport.mainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.authService', function ($scope, bladeNavigationService, authService) {
+
+    $scope.export = function () {
+        $scope.selectedNodeId = 'export';
+
+        var newBlade = {
+            controller: 'platformWebApp.exportImport.exportMainController',
+            template: '$(Platform)/Scripts/app/exportImport/blades/export-main.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, $scope.blade);
+    };
+
+    $scope.import = function () {
+        if (authService.checkPermission('platform:exportImport:import')) {
+            $scope.selectedNodeId = 'import';
+
+            var newBlade = {
+                controller: 'platformWebApp.exportImport.importMainController',
+                template: '$(Platform)/Scripts/app/exportImport/blades/import-main.tpl.html'
+            };
+            bladeNavigationService.showBlade(newBlade, $scope.blade);
+        }
+    };
+
+    $scope.blade.headIcon = 'fa-database';
+    $scope.blade.isLoading = false;
+}]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.exportImport.importMainController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'FileUploader', function ($scope, bladeNavigationService, exportImportResourse, FileUploader) {
+    var blade = $scope.blade;
+    blade.updatePermission = 'platform:exportImport:import';
+    blade.headIcon = 'fa-download';
+    blade.title = 'platform.blades.import-main.title';
+    blade.isLoading = false;
+    $scope.importRequest = {};
+    var origManifest;
+
+    $scope.$on("new-notification-event", function (event, notification) {
+        if (blade.notification && notification.id == blade.notification.id) {
+            angular.copy(notification, blade.notification);
+            if (notification.errorCount > 0) {
+                bladeNavigationService.setError('Import error', blade);
+            }
+        }
+    });
+
+    $scope.canStartProcess = function () {
+        return blade.hasUpdatePermission() && (_.any($scope.importRequest.modules) || $scope.importRequest.handleSecurity || $scope.importRequest.handleSettings || $scope.importRequest.handleBinaryData);
+    }
+
+    $scope.startProcess = function () {
+        blade.isLoading = true;
+        exportImportResourse.runImport($scope.importRequest,
+            function (data) { blade.notification = data; blade.isLoading = false; },
+            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+
+        blade.toolbarCommands.splice(0, 2, commandCancel);
+    }
+
+    var commandCancel = {
+        name: 'platform.commands.cancel',
+        icon: 'fa fa-times',
+        canExecuteMethod: function () {
+            return blade.notification && !blade.notification.finished;
+        },
+        executeMethod: function () {
+            exportImportResourse.taskCancel({ jobId: blade.notification.jobId }, null, function (data) {
+            });
+        }
+    };
+
+    $scope.updateModuleSelection = function () {
+        var selection = _.where($scope.importRequest.exportManifest.modules, { isChecked: true });
+        $scope.importRequest.modules = _.pluck(selection, 'id');
+    };
+
+    if (!$scope.uploader) {
+        // create the uploader
+        var uploader = $scope.uploader = new FileUploader({
+            scope: $scope,
+            headers: { Accept: 'application/json' },
+            url: 'api/platform/assets/localstorage',
+            method: 'POST',
+            autoUpload: true,
+            removeAfterUpload: true
+        });
+
+        // ADDING FILTERS
+        // zip only
+        uploader.filters.push({
+            name: 'zipFilter',
+            fn: function (i /*{File|FileLikeObject}*/, options) {
+                return i.name.toLowerCase().endsWith('.zip');
+            }
+        });
+
+        uploader.onBeforeUploadItem = function (fileItem) {
+            blade.isLoading = true;
+            bladeNavigationService.setError(null, blade);
+        };
+
+        uploader.onErrorItem = function (item, response, status, headers) {
+            bladeNavigationService.setError(item._file.name + ' failed: ' + (response.message ? response.message : status), blade);
+        };
+
+        uploader.onSuccessItem = function (fileItem, asset, status, headers) {
+            $scope.importRequest.fileUrl = asset[0].url;
+            $scope.importRequest.fileName = asset[0].name;
+
+            exportImportResourse.loadExportManifest({ fileUrl: $scope.importRequest.fileUrl }, function (data) {
+                origManifest = angular.copy(data);
+
+                // select all available data for import
+                $scope.importRequest.handleSecurity = data.handleSecurity;
+                $scope.importRequest.handleSettings = data.handleSettings;
+                $scope.importRequest.handleBinaryData = data.handleBinaryData;
+
+                _.each(data.modules, function (x) { x.isChecked = true; });
+
+                $scope.importRequest.exportManifest = data;
+                $scope.updateModuleSelection();
+                blade.isLoading = false;
+            });
+        };
+    }
+
+
+    blade.toolbarCommands = [
+        {
+            name: "platform.commands.select-all", icon: 'fa fa-check-square-o',
+            executeMethod: function () { selectAll(true) },
+            canExecuteMethod: function () { return $scope.importRequest.exportManifest && !blade.notification; }
+        },
+        {
+            name: "platform.commands.unselect-all", icon: 'fa fa-square-o',
+            executeMethod: function () { selectAll(false) },
+            canExecuteMethod: function () { return $scope.importRequest.exportManifest && !blade.notification; }
+        }
+    ];
+
+    var selectAll = function (action) {
+        if (origManifest.handleSecurity)
+            $scope.importRequest.handleSecurity = action;
+        if (origManifest.handleBinaryData)
+            $scope.importRequest.handleBinaryData = action;
+        if (origManifest.handleSettings)
+            $scope.importRequest.handleSettings = action;
+
+        _.forEach($scope.importRequest.exportManifest.modules, function (module) { module.isChecked = action; });
+
+        $scope.updateModuleSelection();
+    }
+}]);
+
+angular.module('platformWebApp')
+.factory('platformWebApp.exportImport.resource', ['$resource', function ($resource) {
+
+    return $resource(null, {},
+        {
+            getNewExportManifest: { url: 'api/platform/export/manifest/new' },
+            runExport: { method: 'POST', url: 'api/platform/export' },
+
+            loadExportManifest: { url: 'api/platform/export/manifest/load' },
+            runImport: { method: 'POST', url: 'api/platform/import' },
+            sampleDataDiscover: { url: 'api/platform/sampledata/discover', isArray: true },
+            importSampleData: { method: 'POST', url: 'api/platform/sampledata/import', params: { url: '@url' } },
+
+            taskCancel: { method: 'POST', url: 'api/platform/exortimport/tasks/:jobId/cancel'}
+        });
+}]);
+
+angular.module('platformWebApp')
 .factory('platformWebApp.jobs', ['$resource', function ($resource) {
 
     return $resource('api/platform/jobs', {}, {
@@ -24644,6 +24644,765 @@ angular.module('platformWebApp')
     });
 }]);
 
+angular.module('platformWebApp')
+.factory('platformWebApp.toolbarService', function () {
+    var toolbarCommandsMap = [];
+    return {
+        register: function (toolbarItem, toolbarController) {
+            var map = toolbarCommandsMap;
+            if (!map[toolbarController]) {
+                map[toolbarController] = [];
+            }
+
+            map[toolbarController].push(toolbarItem);
+            map[toolbarController].sort(function (a, b) {
+                return a.index - b.index;
+            });
+        },
+        resolve: function (bladeCommands, toolbarController) {
+            var externalCommands = toolbarCommandsMap[toolbarController];
+            if (externalCommands) {
+                bladeCommands = angular.copy(bladeCommands || []);
+
+                _.each(externalCommands, function (newCommand) {
+                    var overrideIndex = _.findIndex(bladeCommands, function (bladeCommand) {
+                        return bladeCommand.name === newCommand.name;
+                    });
+                    var deleteCount = overrideIndex >= 0 ? 1 : 0;
+                    overrideIndex = overrideIndex >= 0 ? overrideIndex : newCommand.index;
+
+                    bladeCommands.splice(overrideIndex, deleteCount, newCommand);
+                });
+            }
+
+            return bladeCommands;
+        }
+    };
+})
+.directive('vaBladeContainer', ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
+    return {
+        restrict: 'E',
+        replace: true,
+        templateUrl: '$(Platform)/Scripts/app/navigation/blade/bladeContainer.tpl.html',
+        link: function (scope) {
+            scope.blades = bladeNavigationService.stateBlades();
+        }
+    }
+}])
+.directive('vaBlade', ['$compile', 'platformWebApp.bladeNavigationService', 'platformWebApp.toolbarService', '$timeout', '$document', 'platformWebApp.dialogService', function ($compile, bladeNavigationService, toolbarService, $timeout, $document, dialogService) {
+    return {
+        terminal: true,
+        priority: 100,
+        link: function (scope, element) {
+            element.attr('ng-controller', scope.blade.controller);
+            element.attr('id', scope.blade.id);
+            element.attr('ng-model', "blade");
+            element.removeAttr("va-blade");
+            $compile(element)(scope);
+            scope.blade.$scope = scope;
+
+            var mainContent = $('.cnt');
+            var currentBlade = $(element).parent();
+            var parentBlade = currentBlade.prev();
+
+            if (!scope.blade.disableOpenAnimation) {
+                scope.blade.animated = true;
+                $timeout(function () {
+                    scope.blade.animated = false;
+                }, 250);
+            }
+
+            function scrollContent(scrollToBlade, scrollToElement) {
+                if (!scrollToBlade) {
+                    scrollToBlade = scope.blade;
+                }
+                if (!scrollToElement) {
+                    scrollToElement = currentBlade;
+                }
+
+                // we can't just get current blade position (because of animation) or calculate it
+                // via parent position + parent width (because we may open parent and child blade at the same time)
+                // instead, we need to use sum of width of all blades
+                var previousBlades = scrollToElement.prevAll();
+                var previousBladesWidthSum = 0;
+                previousBlades.each(function () {
+                    previousBladesWidthSum += $(this).outerWidth();
+                });
+                var scrollLeft = previousBladesWidthSum + scrollToElement.outerWidth(!(scrollToBlade.isExpanded || scrollToBlade.isMaximized)) - mainContent.width();
+                mainContent.animate({ scrollLeft: (scrollLeft > 0 ? scrollLeft : 0) }, 500);
+            }
+
+            var updateSize = function () {
+                var contentBlock = currentBlade.find(".blade-content");
+                var containerBlock = currentBlade.find(".blade-container");
+
+                var bladeWidth = "";
+                var bladeMinWidth = "";
+
+                if ((scope.blade.isExpandable && scope.blade.isExpanded) || (!scope.blade.isExpandable && scope.blade.isMaximized)) {
+                    // minimal required width + container padding
+                    bladeMinWidth = 'calc(' + contentBlock.css("min-width") + ' + ' + parseInt(containerBlock.outerWidth() - containerBlock.width()) + 'px)';
+                }
+
+                if (scope.blade.isExpandable && scope.blade.isExpanded) {
+                    var offset = parentBlade.length > 0 ? parentBlade.width() : 0;
+                    // free space of view - parent blade size (if exist)
+                    bladeWidth = 'calc(100% - ' + offset + 'px)';
+                } else if (!scope.blade.isExpandable && scope.blade.isMaximized) {
+                    currentBlade.attr('data-width', currentBlade.outerWidth());
+                    bladeWidth = '100%';
+                }
+
+                currentBlade.width(bladeWidth);
+                currentBlade.css('min-width', bladeMinWidth);
+
+                setVisibleToolsLimit();
+            }
+
+            scope.$watch('blade.isExpanded', function () {
+                // we must recalculate position only at next digest cycle,
+                // because at this time blade UI is not fully (re)initialized
+                // for example, ng-class set classes after this watch called
+                $timeout(updateSize, 0, false);
+            });
+
+            scope.$on('$includeContentLoaded', function (event, src) {
+                if (src === scope.blade.template) {
+                    // see above
+                    $timeout(function () {
+                        updateSize();
+                        scrollContent();
+                    }, 0, false);
+                }
+            });
+
+            scope.bladeMaximize = function () {
+                scope.blade.isMaximized = true;
+                updateSize();
+                scrollContent();
+            };
+
+            scope.bladeMinimize = function () {
+                scope.blade.isMaximized = false;
+                updateSize();
+            };
+
+            scope.bladeClose = function (onAfterClose) {
+                bladeNavigationService.closeBlade(scope.blade, onAfterClose, function (callback) {
+                    scope.blade.animated = true;
+                    scope.blade.closing = true;
+                    $timeout(function () {
+                        currentBlade.remove();
+                        scrollContent(scope.blade.parentBlade, parentBlade);
+                        callback();
+                    }, 125, false);
+                });
+            };
+
+            scope.$watch('blade.toolbarCommands', function (toolbarCommands) {
+                scope.resolvedToolbarCommands = toolbarService.resolve(toolbarCommands, scope.blade.controller);
+
+                setVisibleToolsLimit();
+            }, true);
+
+            var toolbar = currentBlade.find(".blade-toolbar .menu.__inline");
+
+            function setVisibleToolsLimit() {
+                scope.toolsPerLineCount = scope.resolvedToolbarCommands ? scope.resolvedToolbarCommands.length : 1;
+
+                $timeout(function () {
+                    if (toolbar.height() > 55 && scope.toolsPerLineCount > 1) {
+                        var maxToolbarWidth = toolbar.width() - 46; // the 'more' button is 46px wide
+                        //console.log(toolbar.width() + 'maxToolbarWidth: ' + maxToolbarWidth);
+                        var toolsWidth = 0;
+                        var lis = toolbar.find("li");
+                        var i = 0;
+                        while (maxToolbarWidth > toolsWidth && lis.length > i) {
+                            toolsWidth += lis[i].clientWidth;
+                            i++;
+                        }
+                        scope.toolsPerLineCount = i - 1;
+                    }
+                }, 220);
+            }
+
+            function handleClickEvent() {
+                setVisibleToolsLimit();
+                $document.unbind('click', handleClickEvent);
+            }
+
+            scope.showMoreTools = function (event) {
+                scope.toolsPerLineCount = scope.resolvedToolbarCommands.length;
+
+                event.stopPropagation();
+                $document.bind('click', handleClickEvent);
+            };
+
+            scope.showErrorDetails = function () {
+                var dialog = { id: "errorDetails" };
+                if (scope.blade.errorBody != undefined)
+                    dialog.message = scope.blade.errorBody;
+                dialogService.showDialog(dialog, '$(Platform)/Scripts/app/modularity/dialogs/errorDetails-dialog.tpl.html', 'platformWebApp.confirmDialogController');
+            };
+        }
+    }
+}])
+.factory('platformWebApp.bladeNavigationService', ['platformWebApp.authService', '$timeout', '$state', 'platformWebApp.dialogService', function (authService, $timeout, $state, dialogService) {
+
+    function showConfirmationIfNeeded(showConfirmation, canSave, blade, saveChangesCallback, closeCallback, saveTitle, saveMessage) {
+        if (showConfirmation) {
+            var dialog = { id: "confirmCurrentBladeClose" };
+
+            if (canSave) {
+                dialog.title = saveTitle;
+                dialog.message = saveMessage;
+            } else {
+                dialog.title = "Warning";
+                dialog.message = "Validation failed for this object. Will you continue editing and save later?";
+            }
+
+            dialog.callback = function (userChoseYes) {
+                if (canSave) {
+                    if (userChoseYes) {
+                        saveChangesCallback();
+                    }
+                    closeCallback();
+                } else if (!userChoseYes) {
+                    closeCallback();
+                }
+            };
+
+            dialogService.showConfirmationDialog(dialog);
+        }
+        else {
+            closeCallback();
+        }
+    }
+
+    var service = {
+        blades: [],
+        currentBlade: undefined,
+        showConfirmationIfNeeded: showConfirmationIfNeeded,
+        closeBlade: function (blade, callback, onBeforeClosing) {
+            //Need in case a copy was passed
+            blade = service.findBlade(blade.id) || blade;
+
+            // close all children
+            service.closeChildrenBlades(blade, function () {
+                var doCloseBlade = function () {
+                    if (angular.isFunction(onBeforeClosing)) {
+                        onBeforeClosing(doCloseBladeFinal);
+                    } else {
+                        doCloseBladeFinal();
+                    }
+                }
+
+                var doCloseBladeFinal = function () {
+                    var idx = service.stateBlades().indexOf(blade);
+                    if (idx >= 0) service.stateBlades().splice(idx, 1);
+
+                    //remove blade from children collection
+                    if (angular.isDefined(blade.parentBlade)) {
+                        var childIdx = blade.parentBlade.childrenBlades.indexOf(blade);
+                        if (childIdx >= 0) {
+                            blade.parentBlade.childrenBlades.splice(childIdx, 1);
+                        }
+                    }
+                    if (angular.isFunction(callback)) {
+                        callback();
+                    };
+                };
+
+                if (angular.isFunction(blade.onClose)) {
+                    blade.onClose(doCloseBlade);
+                }
+                else {
+                    doCloseBlade();
+                }
+            });
+
+            if (blade.parentBlade && blade.parentBlade.isExpandable) {
+                blade.parentBlade.isExpanded = true;
+                if (angular.isFunction(blade.parentBlade.onExpand)) {
+                    blade.parentBlade.onExpand();
+                }
+            }
+        },
+        closeChildrenBlades: function (blade, callback) {
+            if (blade && _.any(blade.childrenBlades)) {
+                angular.forEach(blade.childrenBlades.slice(), function (child) {
+                    service.closeBlade(child, function () {
+                        // show only when all children were closed
+                        if (blade.childrenBlades.length == 0 && angular.isFunction(callback)) {
+                            callback();
+                        }
+                    });
+                });
+            } else if (angular.isFunction(callback)) {
+                callback();
+            }
+        },
+        stateBlades: function (stateName) {
+            if (angular.isUndefined(stateName)) {
+                stateName = $state.current.name;
+            }
+
+            if (angular.isUndefined(service.blades[stateName])) {
+                service.blades[stateName] = [];
+            }
+
+            return service.blades[stateName];
+        },
+        findBlade: function (id) {
+            var found;
+            angular.forEach(service.stateBlades(), function (blade) {
+                if (blade.id == id) {
+                    found = blade;
+                }
+            });
+
+            return found;
+        },
+        showBlade: function (blade, parentBlade) {
+
+            //If it is first blade for state try to open saved blades
+            //var firstStateBlade = service.stateBlades($state.current.name)[0];
+            //if (angular.isDefined(firstStateBlade) && firstStateBlade.id == blade.id) {
+            //    service.currentBlade = firstStateBlade;
+            //    return;
+            //}
+            blade.errorBody = "";
+            blade.isLoading = true;
+            blade.parentBlade = parentBlade;
+            blade.childrenBlades = [];
+            if (parentBlade) {
+                blade.headIcon = parentBlade.headIcon;
+                blade.updatePermission = parentBlade.updatePermission;
+            }
+            //copy securityscopes from parent blade
+            if (parentBlade != null && parentBlade.securityScopes) {
+                //need merge scopes
+                if (angular.isArray(blade.securityScopes) && angular.isArray(parentBlade.securityScopes)) {
+                    blade.securityScopes = parentBlade.securityScopes.concat(blade.securityScopes);
+                }
+                else {
+                    blade.securityScopes = parentBlade.securityScopes;
+                }
+            }
+
+            var existingBlade = service.findBlade(blade.id);
+
+            //Show blade in previous location
+            if (existingBlade != undefined) {
+                //store prev blade x-index
+                blade.xindex = existingBlade.xindex;
+            } else if (!angular.isDefined(blade.xindex)) {
+                //Show blade as last one by default
+                blade.xindex = service.stateBlades().length;
+            }
+
+            var showBlade = function () {
+                if (angular.isDefined(parentBlade)) {
+                    blade.xindex = service.stateBlades().indexOf(parentBlade) + 1;
+                    parentBlade.childrenBlades.push(blade);
+                }
+                //show blade in same place where it was
+                service.stateBlades().splice(Math.min(blade.xindex, service.stateBlades().length), 0, blade);
+                service.currentBlade = blade;
+            };
+
+            if (angular.isDefined(parentBlade) && parentBlade.childrenBlades.length > 0) {
+                service.closeChildrenBlades(parentBlade, showBlade);
+            }
+            else if (angular.isDefined(existingBlade)) {
+                service.closeBlade(existingBlade, showBlade);
+            }
+            else {
+                $timeout(function() {
+                    showBlade();
+                });
+            }
+
+            if (parentBlade && parentBlade.isExpandable && parentBlade.isExpanded) {
+                parentBlade.isExpanded = false;
+                if (angular.isFunction(parentBlade.onCollapse)) {
+                    parentBlade.onCollapse();
+                }
+            }
+
+            if (blade.isExpandable) {
+                blade.isExpanded = true;
+                if (angular.isFunction(blade.onExpand)) {
+                    blade.onExpand();
+                }
+            }
+
+            blade.hasUpdatePermission = function () {
+                return authService.checkPermission(blade.updatePermission, blade.securityScopes);
+            };
+        },
+        checkPermission: authService.checkPermission,
+        setError: function (error, blade) {
+            if (blade && error) {
+                blade.isLoading = false;
+                blade.error = error.status && error.statusText ? error.status + ': ' + error.statusText : error;
+                blade.errorBody = error.data ? error.data.exceptionMessage : blade.errorBody;
+            }
+        }
+    };
+
+    return service;
+}]);
+
+angular.module('platformWebApp')
+    .directive('vaBreadcrumb', [
+        'platformWebApp.breadcrumbHistoryService', function (breadcrumbHistoryService) {
+            return {
+                restrict: 'E',
+                require: 'ngModel',
+                replace: true,
+                scope: {
+                    bladeId: '='
+                },
+        templateUrl: '$(Platform)/Scripts/app/navigation/breadcrumbs/breadcrumbs.tpl.html',
+                link: function (scope, element, attr, ngModelController) {
+                    scope.breadcrumbs = [];
+                    ngModelController.$render = function () {
+                        scope.breadcrumbs = ngModelController.$modelValue;
+                    };
+
+                    scope.innerNavigate = function (breadcrumb) {
+                        breadcrumb.navigate(breadcrumb);
+                    };
+
+                    scope.canNavigateBack = function () {
+                        return breadcrumbHistoryService.check(scope.bladeId);
+                    };
+
+                    scope.navigateBack = function () {
+                        if (scope.canNavigateBack()) {
+                            var breadcrumb = breadcrumbHistoryService.pop(scope.bladeId);
+                            breadcrumb.navigate(breadcrumb);
+                        }
+                    };
+                    scope.$watchCollection('breadcrumbs', function (newItems) {
+                        breadcrumbHistoryService.push(newItems, scope.bladeId);
+                    });
+                }
+            }
+        }
+    ])
+    .factory('platformWebApp.breadcrumbHistoryService', function () {
+        var map = {};
+
+        function breadcrumbsEqual(x,y) {
+            return x && y && x.id === y.id && x.name === y.name;
+        }
+
+        return {
+            push: function (breadcrumbs, id) {
+                var history = map[id];
+                if (!history) {
+                    map[id] = history = {
+                        ignoreNextAction: false,
+                        records: []
+                    };
+                }
+
+                var currentBreadcrumb = _.last(breadcrumbs);
+
+                if (history.ignoreNextAction) {
+                    history.ignoreNextAction = false;
+                } else if (history.currentBreadcrumb &&
+                            !breadcrumbsEqual(history.currentBreadcrumb, currentBreadcrumb) &&
+                            !breadcrumbsEqual(history.currentBreadcrumb, _.last(history.records))) {
+                    history.records.push(history.currentBreadcrumb);
+                }
+
+                if (currentBreadcrumb) {
+                    history.currentBreadcrumb = currentBreadcrumb;
+                }
+            },
+
+            check: function (id) {
+                return map[id] && _.any(map[id].records);
+            },
+
+            pop: function (id) {
+                var retVal = undefined;
+                var history = map[id];
+                if (_.any(history.records)) {
+                    retVal = history.records.pop();
+                    history.ignoreNextAction = true;
+                }
+
+                return retVal;
+            }
+        };
+    });
+angular.module('platformWebApp')
+.factory('platformWebApp.mainMenuService', [function () {
+
+    var menuItems = [];
+
+    function sortByGroupFirst(a, b) {
+        return a.path.split('/').length - b.path.split('/').length;
+    };
+
+    function sortByPriority(a, b) {
+        if (angular.isDefined(a.priority) && angular.isDefined(b.priority)) {
+            return a.priority < b.priority ? -1 : a.priority > b.priority ? 1 : 0;
+        }
+        return -1;
+    };
+
+    function constructList() {
+        angular.forEach(menuItems.sort(sortByGroupFirst), function (menuItem) {
+            if (!angular.isDefined(menuItem.group)) {
+                menuItem.group = null;
+            }
+            if (menuItem.group == null) {
+                var pathParts = menuItem.path.split('/');
+                var groupPath = null;
+                if (pathParts.length > 1) {
+                    pathParts.pop();
+                    groupPath = pathParts.join('/');
+                }
+                var group = _.find(menuItems, function (menuItem) { return menuItem.path === groupPath });
+                if (angular.isDefined(group)) {
+                    menuItem.group = group;
+                }
+            }
+        });
+        menuItems.sort(sortByPriority);
+    };
+
+    function addMenuItem(menuItem) {
+        resetMenuItemDefaults(menuItem);
+        menuItems.push(menuItem);
+        constructList();
+    }
+
+    function removeMenuItem(menuItem) {
+        var index = menuItems.indexOf(menuItem);
+        menuItems.splice(index, 1);
+        constructList();
+    }
+
+    function resetMenuItemDefaults(menuItem) {
+        // set defaults
+        if (!angular.isDefined(menuItem.priority)) {
+            menuItem.priority = Number.NaN;
+        }
+        if (!angular.isDefined(menuItem.children)) {
+            menuItem.children = [];
+        }
+        if (!angular.isDefined(menuItem.isAlwaysOnBar)) {
+            menuItem.isAlwaysOnBar = false;
+        }
+        menuItem.isCollapsed = false;
+        menuItem.isFavorite = false;
+            // place at the end
+        menuItem.order = Number.MAX_SAFE_INTEGER;
+    }
+
+    function findByPath(path) {
+        return _.find(menuItems, function (menuItem) { return menuItem.path === path });
+    };
+
+    var retVal = {
+        menuItems: menuItems,
+        addMenuItem: addMenuItem,
+        removeMenuItem: removeMenuItem,
+        resetMenuItemDefaults: resetMenuItemDefaults,
+        findByPath: findByPath
+    };
+    return retVal;
+}])
+.directive('vaMainMenu', ["$document",
+    function ($document) {
+
+    return {
+        restrict: 'E',
+        replace: true,
+        transclude: true,
+        require: 'ngModel',
+        scope: {
+            onMenuChanged: "&"
+        },
+        templateUrl: '$(Platform)/Scripts/app/navigation/menu/mainMenu.tpl.html',
+        link: function (scope, element, attr, ngModelController, linker) {
+            scope.menu = ngModelController.$modelValue;
+            ngModelController.$render = function () {
+                scope.menu = ngModelController.$modelValue;
+                updateFavorites();
+                scope.$watch(function () {
+                    return _.filter(scope.menu.items, function (x) { return x.isFavorite && !x.isAlwaysOnBar; });
+                }, function () { updateFavorites(); }, true);
+            };            
+
+            scope.selectItem = function (menuItem) {
+                if (scope.showSubMenu && scope.currentMenuItem === menuItem) {
+                    scope.showSubMenu = false;
+                } else {
+                    scope.currentMenuItem = menuItem;
+                    scope.showSubMenu = menuItem.children.length > 0 || menuItem.path === "more";
+                }
+                if (angular.isDefined(menuItem.action)) {
+                    menuItem.action();
+                }
+            };        
+         
+            function handleKeyUpEvent(event) {
+                if (scope.showSubMenu && event.keyCode === 27) {
+                    scope.$apply(function () {
+                        scope.showSubMenu = false;
+                    });
+                }
+            }
+
+            function handleClickEvent(event) {
+                var dropdownElement = $document.find('.nav-bar .dropdown');
+                var hadDropdownElement = $document.find('.__has-dropdown');
+                if (scope.showSubMenu && !(dropdownElement.is(event.target) || dropdownElement.has(event.target).length > 0 ||
+                                           hadDropdownElement.is(event.target) || hadDropdownElement.has(event.target).length > 0)) {
+                    scope.$apply(function () {
+                        scope.showSubMenu = false;
+                    });
+                }
+            }
+
+            $document.bind('keyup', handleKeyUpEvent);
+            $document.bind('click', handleClickEvent);
+
+            scope.$on('$destroy', function () {
+                $document.unbind('keyup', handleKeyUpEvent);
+                $document.unbind('click', handleClickEvent);
+            });
+
+            // required by ui-sortable: we can't use filters with it
+            // https://github.com/angular-ui/ui-sortable#usage
+            function updateFavorites() {
+                scope.dynamicMenuItems = _.sortBy(_.filter(scope.menu.items, function (x) { return x.isFavorite || x.path === "more"; }), function (x) { return x.order; });
+                raiseOnMenuChanged();
+            }
+
+            function raiseOnMenuChanged() {
+                _.throttle(scope.onMenuChanged({ menu: scope.menu }), 100);
+            };
+            scope.toggleCollapsed = function () {
+                scope.menu.isCollapsed = !scope.menu.isCollapsed;
+                raiseOnMenuChanged();
+            };
+
+            scope.toggleFavorite = function (menuItem) {
+                menuItem.isFavorite = !menuItem.isFavorite;
+                // clear order when removed from favorites
+                if (!menuItem.isFavorite) {
+                    menuItem.order = Number.MAX_SAFE_INTEGER;
+                }
+                var favorites = _.sortBy(_.filter(scope.menu.items, function (x) { return x.isFavorite }), function (x) { return x.order; });
+                // re-calculate order
+                for (var i = 0; i < favorites.length; i++) {
+                    favorites[i].order = i;
+                }
+                // Do not call the callback function to notify what favorites changed.
+                // We're already do that because we call updateFavorites (which call the calback) in ngModelController.$render
+            };
+
+            scope.sortableOptions = {
+                axis: "y",
+                cursor: "move",
+                // always use container with tolerance
+                // because otherwise draggable item can't replace top item:
+                // where is no space between top item and container top border
+                containment: ".outer-wrapper",
+                items: ".__draggable",
+                tolerance: "pointer",
+                stop: function (e, ui) {
+                    // re-calculate order for all favorites
+                    // we may use scope.favorites or source model of ui-sortable
+                    // I'm prefer last, to avoid dependence on directive's model
+                    var favorites = ui.item.sortable.sourceModel;
+                    for (var i = 0; i < favorites.length; i++) {
+                        favorites[i].order = i;
+                    }
+                }
+            };
+        }
+    }
+}]).directive('vaFavorites', function () {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attr) {
+            $(element).keydown(function (e) {
+                if (e.shiftKey && e.keyCode === 32) { // Shift + Space
+                    $(e.target).find(".list-fav").click();
+                }
+            });
+        }
+    }
+});
+
+angular.module('platformWebApp')
+.factory('platformWebApp.widgetService', function () {
+
+    var retVal = {
+        widgetsMap: [],
+        registerWidget: function (widget, containerName) {
+            if (!this.widgetsMap[containerName]) {
+                this.widgetsMap[containerName] = [];
+            }
+            this.widgetsMap[containerName].push(widget);
+        }
+
+    };
+    return retVal;
+})
+.directive('vaWidgetContainer', ['$compile', '$localStorage', 'platformWebApp.widgetService', function ($compile, $localStorage, widgetService) {
+    return {
+        restrict: 'E',
+        replace: true,
+        templateUrl: '$(Platform)/Scripts/app/navigation/widget/widgetContainer.tpl.html',
+        scope: {
+            data: '=?',
+            gridsterOpts: '=?',
+            group: '@',
+            blade: '='
+        },
+        link: function (scope, element, attr) {
+            if (!scope.gridsterOpts) { scope.gridsterOpts = {}; }
+            scope.$storage = $localStorage;
+
+            scope.$watch('gridsterOpts', function () {
+                var groupWidgets = _.filter(widgetService.widgetsMap[scope.group], function (w) { return !angular.isFunction(w.isVisible) || w.isVisible(scope.blade); });
+                scope.widgets = angular.copy(groupWidgets);
+                angular.forEach(scope.widgets, function (w) {
+                    w.blade = scope.blade;
+                    w.widgetsInContainer = scope.widgets;
+                });
+            }, true);
+
+            scope.getKey = function (prefix, widget) {
+                return (prefix + widget.controller + widget.template + scope.group).hashCode();
+            }
+        }
+    }
+}])
+.directive('vaWidget', ['$compile', 'platformWebApp.widgetService', 'platformWebApp.authService', function ($compile, widgetService, authService) {
+    return {
+        link: function (scope, element, attr) {
+
+            if (!scope.widget.permission || authService.checkPermission(scope.widget.permission)) {
+                element.attr('ng-controller', scope.widget.controller);
+                element.attr('ng-model', 'widget');
+                element.removeAttr("va-widget");
+                $compile(element)(scope);
+            }
+
+        }
+    }
+}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.notificationsJournalDetailtsController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.notifications', function ($scope, bladeNavigationService, notifications) {
 	var blade = $scope.blade;
@@ -25490,765 +26249,6 @@ angular.module('platformWebApp')
 	});
 }]);
 angular.module('platformWebApp')
-.factory('platformWebApp.toolbarService', function () {
-    var toolbarCommandsMap = [];
-    return {
-        register: function (toolbarItem, toolbarController) {
-            var map = toolbarCommandsMap;
-            if (!map[toolbarController]) {
-                map[toolbarController] = [];
-            }
-
-            map[toolbarController].push(toolbarItem);
-            map[toolbarController].sort(function (a, b) {
-                return a.index - b.index;
-            });
-        },
-        resolve: function (bladeCommands, toolbarController) {
-            var externalCommands = toolbarCommandsMap[toolbarController];
-            if (externalCommands) {
-                bladeCommands = angular.copy(bladeCommands || []);
-
-                _.each(externalCommands, function (newCommand) {
-                    var overrideIndex = _.findIndex(bladeCommands, function (bladeCommand) {
-                        return bladeCommand.name === newCommand.name;
-                    });
-                    var deleteCount = overrideIndex >= 0 ? 1 : 0;
-                    overrideIndex = overrideIndex >= 0 ? overrideIndex : newCommand.index;
-
-                    bladeCommands.splice(overrideIndex, deleteCount, newCommand);
-                });
-            }
-
-            return bladeCommands;
-        }
-    };
-})
-.directive('vaBladeContainer', ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
-    return {
-        restrict: 'E',
-        replace: true,
-        templateUrl: '$(Platform)/Scripts/app/navigation/blade/bladeContainer.tpl.html',
-        link: function (scope) {
-            scope.blades = bladeNavigationService.stateBlades();
-        }
-    }
-}])
-.directive('vaBlade', ['$compile', 'platformWebApp.bladeNavigationService', 'platformWebApp.toolbarService', '$timeout', '$document', 'platformWebApp.dialogService', function ($compile, bladeNavigationService, toolbarService, $timeout, $document, dialogService) {
-    return {
-        terminal: true,
-        priority: 100,
-        link: function (scope, element) {
-            element.attr('ng-controller', scope.blade.controller);
-            element.attr('id', scope.blade.id);
-            element.attr('ng-model', "blade");
-            element.removeAttr("va-blade");
-            $compile(element)(scope);
-            scope.blade.$scope = scope;
-
-            var mainContent = $('.cnt');
-            var currentBlade = $(element).parent();
-            var parentBlade = currentBlade.prev();
-
-            if (!scope.blade.disableOpenAnimation) {
-                scope.blade.animated = true;
-                $timeout(function () {
-                    scope.blade.animated = false;
-                }, 250);
-            }
-
-            function scrollContent(scrollToBlade, scrollToElement) {
-                if (!scrollToBlade) {
-                    scrollToBlade = scope.blade;
-                }
-                if (!scrollToElement) {
-                    scrollToElement = currentBlade;
-                }
-
-                // we can't just get current blade position (because of animation) or calculate it
-                // via parent position + parent width (because we may open parent and child blade at the same time)
-                // instead, we need to use sum of width of all blades
-                var previousBlades = scrollToElement.prevAll();
-                var previousBladesWidthSum = 0;
-                previousBlades.each(function () {
-                    previousBladesWidthSum += $(this).outerWidth();
-                });
-                var scrollLeft = previousBladesWidthSum + scrollToElement.outerWidth(!(scrollToBlade.isExpanded || scrollToBlade.isMaximized)) - mainContent.width();
-                mainContent.animate({ scrollLeft: (scrollLeft > 0 ? scrollLeft : 0) }, 500);
-            }
-
-            var updateSize = function () {
-                var contentBlock = currentBlade.find(".blade-content");
-                var containerBlock = currentBlade.find(".blade-container");
-
-                var bladeWidth = "";
-                var bladeMinWidth = "";
-
-                if ((scope.blade.isExpandable && scope.blade.isExpanded) || (!scope.blade.isExpandable && scope.blade.isMaximized)) {
-                    // minimal required width + container padding
-                    bladeMinWidth = 'calc(' + contentBlock.css("min-width") + ' + ' + parseInt(containerBlock.outerWidth() - containerBlock.width()) + 'px)';
-                }
-
-                if (scope.blade.isExpandable && scope.blade.isExpanded) {
-                    var offset = parentBlade.length > 0 ? parentBlade.width() : 0;
-                    // free space of view - parent blade size (if exist)
-                    bladeWidth = 'calc(100% - ' + offset + 'px)';
-                } else if (!scope.blade.isExpandable && scope.blade.isMaximized) {
-                    currentBlade.attr('data-width', currentBlade.outerWidth());
-                    bladeWidth = '100%';
-                }
-
-                currentBlade.width(bladeWidth);
-                currentBlade.css('min-width', bladeMinWidth);
-
-                setVisibleToolsLimit();
-            }
-
-            scope.$watch('blade.isExpanded', function () {
-                // we must recalculate position only at next digest cycle,
-                // because at this time blade UI is not fully (re)initialized
-                // for example, ng-class set classes after this watch called
-                $timeout(updateSize, 0, false);
-            });
-
-            scope.$on('$includeContentLoaded', function (event, src) {
-                if (src === scope.blade.template) {
-                    // see above
-                    $timeout(function () {
-                        updateSize();
-                        scrollContent();
-                    }, 0, false);
-                }
-            });
-
-            scope.bladeMaximize = function () {
-                scope.blade.isMaximized = true;
-                updateSize();
-                scrollContent();
-            };
-
-            scope.bladeMinimize = function () {
-                scope.blade.isMaximized = false;
-                updateSize();
-            };
-
-            scope.bladeClose = function (onAfterClose) {
-                bladeNavigationService.closeBlade(scope.blade, onAfterClose, function (callback) {
-                    scope.blade.animated = true;
-                    scope.blade.closing = true;
-                    $timeout(function () {
-                        currentBlade.remove();
-                        scrollContent(scope.blade.parentBlade, parentBlade);
-                        callback();
-                    }, 125, false);
-                });
-            };
-
-            scope.$watch('blade.toolbarCommands', function (toolbarCommands) {
-                scope.resolvedToolbarCommands = toolbarService.resolve(toolbarCommands, scope.blade.controller);
-
-                setVisibleToolsLimit();
-            }, true);
-
-            var toolbar = currentBlade.find(".blade-toolbar .menu.__inline");
-
-            function setVisibleToolsLimit() {
-                scope.toolsPerLineCount = scope.resolvedToolbarCommands ? scope.resolvedToolbarCommands.length : 1;
-
-                $timeout(function () {
-                    if (toolbar.height() > 55 && scope.toolsPerLineCount > 1) {
-                        var maxToolbarWidth = toolbar.width() - 46; // the 'more' button is 46px wide
-                        //console.log(toolbar.width() + 'maxToolbarWidth: ' + maxToolbarWidth);
-                        var toolsWidth = 0;
-                        var lis = toolbar.find("li");
-                        var i = 0;
-                        while (maxToolbarWidth > toolsWidth && lis.length > i) {
-                            toolsWidth += lis[i].clientWidth;
-                            i++;
-                        }
-                        scope.toolsPerLineCount = i - 1;
-                    }
-                }, 220);
-            }
-
-            function handleClickEvent() {
-                setVisibleToolsLimit();
-                $document.unbind('click', handleClickEvent);
-            }
-
-            scope.showMoreTools = function (event) {
-                scope.toolsPerLineCount = scope.resolvedToolbarCommands.length;
-
-                event.stopPropagation();
-                $document.bind('click', handleClickEvent);
-            };
-
-            scope.showErrorDetails = function () {
-                var dialog = { id: "errorDetails" };
-                if (scope.blade.errorBody != undefined)
-                    dialog.message = scope.blade.errorBody;
-                dialogService.showDialog(dialog, '$(Platform)/Scripts/app/modularity/dialogs/errorDetails-dialog.tpl.html', 'platformWebApp.confirmDialogController');
-            };
-        }
-    }
-}])
-.factory('platformWebApp.bladeNavigationService', ['platformWebApp.authService', '$timeout', '$state', 'platformWebApp.dialogService', function (authService, $timeout, $state, dialogService) {
-
-    function showConfirmationIfNeeded(showConfirmation, canSave, blade, saveChangesCallback, closeCallback, saveTitle, saveMessage) {
-        if (showConfirmation) {
-            var dialog = { id: "confirmCurrentBladeClose" };
-
-            if (canSave) {
-                dialog.title = saveTitle;
-                dialog.message = saveMessage;
-            } else {
-                dialog.title = "Warning";
-                dialog.message = "Validation failed for this object. Will you continue editing and save later?";
-            }
-
-            dialog.callback = function (userChoseYes) {
-                if (canSave) {
-                    if (userChoseYes) {
-                        saveChangesCallback();
-                    }
-                    closeCallback();
-                } else if (!userChoseYes) {
-                    closeCallback();
-                }
-            };
-
-            dialogService.showConfirmationDialog(dialog);
-        }
-        else {
-            closeCallback();
-        }
-    }
-
-    var service = {
-        blades: [],
-        currentBlade: undefined,
-        showConfirmationIfNeeded: showConfirmationIfNeeded,
-        closeBlade: function (blade, callback, onBeforeClosing) {
-            //Need in case a copy was passed
-            blade = service.findBlade(blade.id) || blade;
-
-            // close all children
-            service.closeChildrenBlades(blade, function () {
-                var doCloseBlade = function () {
-                    if (angular.isFunction(onBeforeClosing)) {
-                        onBeforeClosing(doCloseBladeFinal);
-                    } else {
-                        doCloseBladeFinal();
-                    }
-                }
-
-                var doCloseBladeFinal = function () {
-                    var idx = service.stateBlades().indexOf(blade);
-                    if (idx >= 0) service.stateBlades().splice(idx, 1);
-
-                    //remove blade from children collection
-                    if (angular.isDefined(blade.parentBlade)) {
-                        var childIdx = blade.parentBlade.childrenBlades.indexOf(blade);
-                        if (childIdx >= 0) {
-                            blade.parentBlade.childrenBlades.splice(childIdx, 1);
-                        }
-                    }
-                    if (angular.isFunction(callback)) {
-                        callback();
-                    };
-                };
-
-                if (angular.isFunction(blade.onClose)) {
-                    blade.onClose(doCloseBlade);
-                }
-                else {
-                    doCloseBlade();
-                }
-            });
-
-            if (blade.parentBlade && blade.parentBlade.isExpandable) {
-                blade.parentBlade.isExpanded = true;
-                if (angular.isFunction(blade.parentBlade.onExpand)) {
-                    blade.parentBlade.onExpand();
-                }
-            }
-        },
-        closeChildrenBlades: function (blade, callback) {
-            if (blade && _.any(blade.childrenBlades)) {
-                angular.forEach(blade.childrenBlades.slice(), function (child) {
-                    service.closeBlade(child, function () {
-                        // show only when all children were closed
-                        if (blade.childrenBlades.length == 0 && angular.isFunction(callback)) {
-                            callback();
-                        }
-                    });
-                });
-            } else if (angular.isFunction(callback)) {
-                callback();
-            }
-        },
-        stateBlades: function (stateName) {
-            if (angular.isUndefined(stateName)) {
-                stateName = $state.current.name;
-            }
-
-            if (angular.isUndefined(service.blades[stateName])) {
-                service.blades[stateName] = [];
-            }
-
-            return service.blades[stateName];
-        },
-        findBlade: function (id) {
-            var found;
-            angular.forEach(service.stateBlades(), function (blade) {
-                if (blade.id == id) {
-                    found = blade;
-                }
-            });
-
-            return found;
-        },
-        showBlade: function (blade, parentBlade) {
-
-            //If it is first blade for state try to open saved blades
-            //var firstStateBlade = service.stateBlades($state.current.name)[0];
-            //if (angular.isDefined(firstStateBlade) && firstStateBlade.id == blade.id) {
-            //    service.currentBlade = firstStateBlade;
-            //    return;
-            //}
-            blade.errorBody = "";
-            blade.isLoading = true;
-            blade.parentBlade = parentBlade;
-            blade.childrenBlades = [];
-            if (parentBlade) {
-                blade.headIcon = parentBlade.headIcon;
-                blade.updatePermission = parentBlade.updatePermission;
-            }
-            //copy securityscopes from parent blade
-            if (parentBlade != null && parentBlade.securityScopes) {
-                //need merge scopes
-                if (angular.isArray(blade.securityScopes) && angular.isArray(parentBlade.securityScopes)) {
-                    blade.securityScopes = parentBlade.securityScopes.concat(blade.securityScopes);
-                }
-                else {
-                    blade.securityScopes = parentBlade.securityScopes;
-                }
-            }
-
-            var existingBlade = service.findBlade(blade.id);
-
-            //Show blade in previous location
-            if (existingBlade != undefined) {
-                //store prev blade x-index
-                blade.xindex = existingBlade.xindex;
-            } else if (!angular.isDefined(blade.xindex)) {
-                //Show blade as last one by default
-                blade.xindex = service.stateBlades().length;
-            }
-
-            var showBlade = function () {
-                if (angular.isDefined(parentBlade)) {
-                    blade.xindex = service.stateBlades().indexOf(parentBlade) + 1;
-                    parentBlade.childrenBlades.push(blade);
-                }
-                //show blade in same place where it was
-                service.stateBlades().splice(Math.min(blade.xindex, service.stateBlades().length), 0, blade);
-                service.currentBlade = blade;
-            };
-
-            if (angular.isDefined(parentBlade) && parentBlade.childrenBlades.length > 0) {
-                service.closeChildrenBlades(parentBlade, showBlade);
-            }
-            else if (angular.isDefined(existingBlade)) {
-                service.closeBlade(existingBlade, showBlade);
-            }
-            else {
-                $timeout(function() {
-                    showBlade();
-                });
-            }
-
-            if (parentBlade && parentBlade.isExpandable && parentBlade.isExpanded) {
-                parentBlade.isExpanded = false;
-                if (angular.isFunction(parentBlade.onCollapse)) {
-                    parentBlade.onCollapse();
-                }
-            }
-
-            if (blade.isExpandable) {
-                blade.isExpanded = true;
-                if (angular.isFunction(blade.onExpand)) {
-                    blade.onExpand();
-                }
-            }
-
-            blade.hasUpdatePermission = function () {
-                return authService.checkPermission(blade.updatePermission, blade.securityScopes);
-            };
-        },
-        checkPermission: authService.checkPermission,
-        setError: function (error, blade) {
-            if (blade && error) {
-                blade.isLoading = false;
-                blade.error = error.status && error.statusText ? error.status + ': ' + error.statusText : error;
-                blade.errorBody = error.data ? error.data.exceptionMessage : blade.errorBody;
-            }
-        }
-    };
-
-    return service;
-}]);
-
-angular.module('platformWebApp')
-.factory('platformWebApp.mainMenuService', [function () {
-
-    var menuItems = [];
-
-    function sortByGroupFirst(a, b) {
-        return a.path.split('/').length - b.path.split('/').length;
-    };
-
-    function sortByPriority(a, b) {
-        if (angular.isDefined(a.priority) && angular.isDefined(b.priority)) {
-            return a.priority < b.priority ? -1 : a.priority > b.priority ? 1 : 0;
-        }
-        return -1;
-    };
-
-    function constructList() {
-        angular.forEach(menuItems.sort(sortByGroupFirst), function (menuItem) {
-            if (!angular.isDefined(menuItem.group)) {
-                menuItem.group = null;
-            }
-            if (menuItem.group == null) {
-                var pathParts = menuItem.path.split('/');
-                var groupPath = null;
-                if (pathParts.length > 1) {
-                    pathParts.pop();
-                    groupPath = pathParts.join('/');
-                }
-                var group = _.find(menuItems, function (menuItem) { return menuItem.path === groupPath });
-                if (angular.isDefined(group)) {
-                    menuItem.group = group;
-                }
-            }
-        });
-        menuItems.sort(sortByPriority);
-    };
-
-    function addMenuItem(menuItem) {
-        resetMenuItemDefaults(menuItem);
-        menuItems.push(menuItem);
-        constructList();
-    }
-
-    function removeMenuItem(menuItem) {
-        var index = menuItems.indexOf(menuItem);
-        menuItems.splice(index, 1);
-        constructList();
-    }
-
-    function resetMenuItemDefaults(menuItem) {
-        // set defaults
-        if (!angular.isDefined(menuItem.priority)) {
-            menuItem.priority = Number.NaN;
-        }
-        if (!angular.isDefined(menuItem.children)) {
-            menuItem.children = [];
-        }
-        if (!angular.isDefined(menuItem.isAlwaysOnBar)) {
-            menuItem.isAlwaysOnBar = false;
-        }
-        menuItem.isCollapsed = false;
-        menuItem.isFavorite = false;
-            // place at the end
-        menuItem.order = Number.MAX_SAFE_INTEGER;
-    }
-
-    function findByPath(path) {
-        return _.find(menuItems, function (menuItem) { return menuItem.path === path });
-    };
-
-    var retVal = {
-        menuItems: menuItems,
-        addMenuItem: addMenuItem,
-        removeMenuItem: removeMenuItem,
-        resetMenuItemDefaults: resetMenuItemDefaults,
-        findByPath: findByPath
-    };
-    return retVal;
-}])
-.directive('vaMainMenu', ["$document",
-    function ($document) {
-
-    return {
-        restrict: 'E',
-        replace: true,
-        transclude: true,
-        require: 'ngModel',
-        scope: {
-            onMenuChanged: "&"
-        },
-        templateUrl: '$(Platform)/Scripts/app/navigation/menu/mainMenu.tpl.html',
-        link: function (scope, element, attr, ngModelController, linker) {
-            scope.menu = ngModelController.$modelValue;
-            ngModelController.$render = function () {
-                scope.menu = ngModelController.$modelValue;
-                updateFavorites();
-                scope.$watch(function () {
-                    return _.filter(scope.menu.items, function (x) { return x.isFavorite && !x.isAlwaysOnBar; });
-                }, function () { updateFavorites(); }, true);
-            };            
-
-            scope.selectItem = function (menuItem) {
-                if (scope.showSubMenu && scope.currentMenuItem === menuItem) {
-                    scope.showSubMenu = false;
-                } else {
-                    scope.currentMenuItem = menuItem;
-                    scope.showSubMenu = menuItem.children.length > 0 || menuItem.path === "more";
-                }
-                if (angular.isDefined(menuItem.action)) {
-                    menuItem.action();
-                }
-            };        
-         
-            function handleKeyUpEvent(event) {
-                if (scope.showSubMenu && event.keyCode === 27) {
-                    scope.$apply(function () {
-                        scope.showSubMenu = false;
-                    });
-                }
-            }
-
-            function handleClickEvent(event) {
-                var dropdownElement = $document.find('.nav-bar .dropdown');
-                var hadDropdownElement = $document.find('.__has-dropdown');
-                if (scope.showSubMenu && !(dropdownElement.is(event.target) || dropdownElement.has(event.target).length > 0 ||
-                                           hadDropdownElement.is(event.target) || hadDropdownElement.has(event.target).length > 0)) {
-                    scope.$apply(function () {
-                        scope.showSubMenu = false;
-                    });
-                }
-            }
-
-            $document.bind('keyup', handleKeyUpEvent);
-            $document.bind('click', handleClickEvent);
-
-            scope.$on('$destroy', function () {
-                $document.unbind('keyup', handleKeyUpEvent);
-                $document.unbind('click', handleClickEvent);
-            });
-
-            // required by ui-sortable: we can't use filters with it
-            // https://github.com/angular-ui/ui-sortable#usage
-            function updateFavorites() {
-                scope.dynamicMenuItems = _.sortBy(_.filter(scope.menu.items, function (x) { return x.isFavorite || x.path === "more"; }), function (x) { return x.order; });
-                raiseOnMenuChanged();
-            }
-
-            function raiseOnMenuChanged() {
-                _.throttle(scope.onMenuChanged({ menu: scope.menu }), 100);
-            };
-            scope.toggleCollapsed = function () {
-                scope.menu.isCollapsed = !scope.menu.isCollapsed;
-                raiseOnMenuChanged();
-            };
-
-            scope.toggleFavorite = function (menuItem) {
-                menuItem.isFavorite = !menuItem.isFavorite;
-                // clear order when removed from favorites
-                if (!menuItem.isFavorite) {
-                    menuItem.order = Number.MAX_SAFE_INTEGER;
-                }
-                var favorites = _.sortBy(_.filter(scope.menu.items, function (x) { return x.isFavorite }), function (x) { return x.order; });
-                // re-calculate order
-                for (var i = 0; i < favorites.length; i++) {
-                    favorites[i].order = i;
-                }
-                // Do not call the callback function to notify what favorites changed.
-                // We're already do that because we call updateFavorites (which call the calback) in ngModelController.$render
-            };
-
-            scope.sortableOptions = {
-                axis: "y",
-                cursor: "move",
-                // always use container with tolerance
-                // because otherwise draggable item can't replace top item:
-                // where is no space between top item and container top border
-                containment: ".outer-wrapper",
-                items: ".__draggable",
-                tolerance: "pointer",
-                stop: function (e, ui) {
-                    // re-calculate order for all favorites
-                    // we may use scope.favorites or source model of ui-sortable
-                    // I'm prefer last, to avoid dependence on directive's model
-                    var favorites = ui.item.sortable.sourceModel;
-                    for (var i = 0; i < favorites.length; i++) {
-                        favorites[i].order = i;
-                    }
-                }
-            };
-        }
-    }
-}]).directive('vaFavorites', function () {
-    return {
-        restrict: 'A',
-        link: function (scope, element, attr) {
-            $(element).keydown(function (e) {
-                if (e.shiftKey && e.keyCode === 32) { // Shift + Space
-                    $(e.target).find(".list-fav").click();
-                }
-            });
-        }
-    }
-});
-
-angular.module('platformWebApp')
-    .directive('vaBreadcrumb', [
-        'platformWebApp.breadcrumbHistoryService', function (breadcrumbHistoryService) {
-            return {
-                restrict: 'E',
-                require: 'ngModel',
-                replace: true,
-                scope: {
-                    bladeId: '='
-                },
-        templateUrl: '$(Platform)/Scripts/app/navigation/breadcrumbs/breadcrumbs.tpl.html',
-                link: function (scope, element, attr, ngModelController) {
-                    scope.breadcrumbs = [];
-                    ngModelController.$render = function () {
-                        scope.breadcrumbs = ngModelController.$modelValue;
-                    };
-
-                    scope.innerNavigate = function (breadcrumb) {
-                        breadcrumb.navigate(breadcrumb);
-                    };
-
-                    scope.canNavigateBack = function () {
-                        return breadcrumbHistoryService.check(scope.bladeId);
-                    };
-
-                    scope.navigateBack = function () {
-                        if (scope.canNavigateBack()) {
-                            var breadcrumb = breadcrumbHistoryService.pop(scope.bladeId);
-                            breadcrumb.navigate(breadcrumb);
-                        }
-                    };
-                    scope.$watchCollection('breadcrumbs', function (newItems) {
-                        breadcrumbHistoryService.push(newItems, scope.bladeId);
-                    });
-                }
-            }
-        }
-    ])
-    .factory('platformWebApp.breadcrumbHistoryService', function () {
-        var map = {};
-
-        function breadcrumbsEqual(x,y) {
-            return x && y && x.id === y.id && x.name === y.name;
-        }
-
-        return {
-            push: function (breadcrumbs, id) {
-                var history = map[id];
-                if (!history) {
-                    map[id] = history = {
-                        ignoreNextAction: false,
-                        records: []
-                    };
-                }
-
-                var currentBreadcrumb = _.last(breadcrumbs);
-
-                if (history.ignoreNextAction) {
-                    history.ignoreNextAction = false;
-                } else if (history.currentBreadcrumb &&
-                            !breadcrumbsEqual(history.currentBreadcrumb, currentBreadcrumb) &&
-                            !breadcrumbsEqual(history.currentBreadcrumb, _.last(history.records))) {
-                    history.records.push(history.currentBreadcrumb);
-                }
-
-                if (currentBreadcrumb) {
-                    history.currentBreadcrumb = currentBreadcrumb;
-                }
-            },
-
-            check: function (id) {
-                return map[id] && _.any(map[id].records);
-            },
-
-            pop: function (id) {
-                var retVal = undefined;
-                var history = map[id];
-                if (_.any(history.records)) {
-                    retVal = history.records.pop();
-                    history.ignoreNextAction = true;
-                }
-
-                return retVal;
-            }
-        };
-    });
-angular.module('platformWebApp')
-.factory('platformWebApp.widgetService', function () {
-
-    var retVal = {
-        widgetsMap: [],
-        registerWidget: function (widget, containerName) {
-            if (!this.widgetsMap[containerName]) {
-                this.widgetsMap[containerName] = [];
-            }
-            this.widgetsMap[containerName].push(widget);
-        }
-
-    };
-    return retVal;
-})
-.directive('vaWidgetContainer', ['$compile', '$localStorage', 'platformWebApp.widgetService', function ($compile, $localStorage, widgetService) {
-    return {
-        restrict: 'E',
-        replace: true,
-        templateUrl: '$(Platform)/Scripts/app/navigation/widget/widgetContainer.tpl.html',
-        scope: {
-            data: '=?',
-            gridsterOpts: '=?',
-            group: '@',
-            blade: '='
-        },
-        link: function (scope, element, attr) {
-            if (!scope.gridsterOpts) { scope.gridsterOpts = {}; }
-            scope.$storage = $localStorage;
-
-            scope.$watch('gridsterOpts', function () {
-                var groupWidgets = _.filter(widgetService.widgetsMap[scope.group], function (w) { return !angular.isFunction(w.isVisible) || w.isVisible(scope.blade); });
-                scope.widgets = angular.copy(groupWidgets);
-                angular.forEach(scope.widgets, function (w) {
-                    w.blade = scope.blade;
-                    w.widgetsInContainer = scope.widgets;
-                });
-            }, true);
-
-            scope.getKey = function (prefix, widget) {
-                return (prefix + widget.controller + widget.template + scope.group).hashCode();
-            }
-        }
-    }
-}])
-.directive('vaWidget', ['$compile', 'platformWebApp.widgetService', 'platformWebApp.authService', function ($compile, widgetService, authService) {
-    return {
-        link: function (scope, element, attr) {
-
-            if (!scope.widget.permission || authService.checkPermission(scope.widget.permission)) {
-                element.attr('ng-controller', scope.widget.controller);
-                element.attr('ng-model', 'widget');
-                element.removeAttr("va-widget");
-                $compile(element)(scope);
-            }
-
-        }
-    }
-}]);
-angular.module('platformWebApp')
 .controller('platformWebApp.pushNotificationsHistoryController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
 function ($scope, bladeNavigationService, eventTemplateResolver, notifications) {
     var blade = $scope.blade;
@@ -26332,6 +26332,35 @@ angular.module('platformWebApp')
 	});
 }]);
 
+angular.module('platformWebApp')
+.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
+	return {
+		link: function (scope, element, attrs) {
+
+			if (attrs.vaPermission) {
+				var permissionValue = attrs.vaPermission.trim();
+			
+				//modelObject is a scope property of the parent/current scope
+				scope.$watch(attrs.securityScopes, function (value) {
+					if (value) {
+						toggleVisibilityBasedOnPermission(value);
+					}
+				});
+			
+				function toggleVisibilityBasedOnPermission(securityScopes) {
+					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
+					if (hasPermission)
+						element.show();
+					else
+						element.hide();
+				}
+
+				toggleVisibilityBasedOnPermission();
+				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
+			}
+		}
+	};
+}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.accountApiListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
@@ -27482,35 +27511,6 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
-.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
-	return {
-		link: function (scope, element, attrs) {
-
-			if (attrs.vaPermission) {
-				var permissionValue = attrs.vaPermission.trim();
-			
-				//modelObject is a scope property of the parent/current scope
-				scope.$watch(attrs.securityScopes, function (value) {
-					if (value) {
-						toggleVisibilityBasedOnPermission(value);
-					}
-				});
-			
-				function toggleVisibilityBasedOnPermission(securityScopes) {
-					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
-					if (hasPermission)
-						element.show();
-					else
-						element.hide();
-				}
-
-				toggleVisibilityBasedOnPermission();
-				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
-			}
-		}
-	};
-}]);
-angular.module('platformWebApp')
 .directive('vaLoginToolbar', ['$document', '$timeout', '$state', 'platformWebApp.authService', function ($document, $timeout, $state, authService) {
     return {
         templateUrl: '$(Platform)/Scripts/app/security/login/loginToolbar.tpl.html',
@@ -27716,29 +27716,6 @@ angular.module('platformWebApp')
             template: '$(Platform)/Scripts/app/security/blades/account-roles-list.tpl.html'
         };
         bladeNavigationService.showBlade(newBlade, $scope.blade);
-    };
-}]);
-angular.module('platformWebApp')
-.factory('platformWebApp.settings', ['$resource', function ($resource) {
-    return $resource('api/platform/settings/:id', { id: '@Id' }, {
-        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
-      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
-      	update: { method: 'POST', url: 'api/platform/settings' },
-        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
-    });
-}]);
-angular.module('platformWebApp')
-.controller('platformWebApp.entitySettingsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    var blade = $scope.blade;
-
-    $scope.openBlade = function () {
-        var newBlade = {
-            id: 'entitySettingList',
-            updatePermission: blade.updatePermission,
-            controller: 'platformWebApp.entitySettingListController',
-            template: '$(Platform)/Scripts/app/settings/blades/settings-detail.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, blade);
     };
 }]);
 angular.module('platformWebApp')
@@ -28263,6 +28240,29 @@ angular.module('platformWebApp')
     blade.refresh();
 }]);
 
+angular.module('platformWebApp')
+.factory('platformWebApp.settings', ['$resource', function ($resource) {
+    return $resource('api/platform/settings/:id', { id: '@Id' }, {
+        getSettings: { url: 'api/platform/settings/modules/:id', isArray: true },
+      	getValues: { url: 'api/platform/settings/values/:id', isArray: true },    	
+      	update: { method: 'POST', url: 'api/platform/settings' },
+        getUiCustomizationSetting: { url: 'api/platform/settings/ui/customization' }
+    });
+}]);
+angular.module('platformWebApp')
+.controller('platformWebApp.entitySettingsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    var blade = $scope.blade;
+
+    $scope.openBlade = function () {
+        var newBlade = {
+            id: 'entitySettingList',
+            updatePermission: blade.updatePermission,
+            controller: 'platformWebApp.entitySettingListController',
+            template: '$(Platform)/Scripts/app/settings/blades/settings-detail.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, blade);
+    };
+}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.userProfile.userProfileController', ['$rootScope', '$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.settings', 'platformWebApp.settings.helper',
     'platformWebApp.i18n', 'platformWebApp.userProfile', 'platformWebApp.common.languages', 'platformWebApp.common.locales', 'platformWebApp.common.timeZones', 'platformWebApp.userProfileApi',

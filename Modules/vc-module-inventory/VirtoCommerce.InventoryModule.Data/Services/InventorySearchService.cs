@@ -18,10 +18,12 @@ namespace VirtoCommerce.InventoryModule.Data.Services
     {
         private readonly Func<IInventoryRepository> _repositoryFactory;
         private readonly IPlatformMemoryCache _platformMemoryCache;
-        public InventorySearchService(Func<IInventoryRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache)
+        private readonly IInventoryService _inventoryService;
+        public InventorySearchService(Func<IInventoryRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache, IInventoryService inventoryService)
         {
             _repositoryFactory = repositoryFactory;
             _platformMemoryCache = platformMemoryCache;
+            _inventoryService = inventoryService;
         }
 
         public async Task<GenericSearchResult<InventoryInfo>> SearchInventoriesAsync(InventorySearchCriteria criteria)
@@ -59,8 +61,11 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                     query = query.OrderBySortInfos(sortInfos);
 
                     result.TotalCount = await query.CountAsync();
-                    var list = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                    result.Results = list.Select(x => x.ToModel(AbstractTypeFactory<InventoryInfo>.TryCreateInstance())).ToList();
+                    if (criteria.Take > 0)
+                    {
+                        var inventoryIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                        result.Results = (await _inventoryService.GetByIdsAsync(inventoryIds, criteria.ResponseGroup)).AsQueryable().OrderBySortInfos(sortInfos).ToArray();
+                    }
                 }
                 return result;
             });

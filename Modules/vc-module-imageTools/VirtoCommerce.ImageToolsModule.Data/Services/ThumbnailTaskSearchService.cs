@@ -12,15 +12,19 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
 {
     public class ThumbnailTaskSearchService : IThumbnailTaskSearchService
     {
+        private readonly IThumbnailTaskService _thumbnailTaskService;
         private readonly Func<IThumbnailRepository> _thumbnailRepositoryFactory;
 
-        public ThumbnailTaskSearchService(Func<IThumbnailRepository> thumbnailThumbnailRepositoryFactoryFactory)
+        public ThumbnailTaskSearchService(Func<IThumbnailRepository> thumbnailThumbnailRepositoryFactoryFactory, IThumbnailTaskService thumbnailTaskService)
         {
             _thumbnailRepositoryFactory = thumbnailThumbnailRepositoryFactoryFactory;
+            _thumbnailTaskService = thumbnailTaskService;
         }
 
         public async Task<GenericSearchResult<ThumbnailTask>> SearchAsync(ThumbnailTaskSearchCriteria criteria)
         {
+            var result = new GenericSearchResult<ThumbnailTask>();
+
             using (var repository = _thumbnailRepositoryFactory())
             {
                 var query = GetTasksQuery(repository, criteria);
@@ -37,20 +41,14 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
                     };
                 }
                 query = query.OrderBySortInfos(sortInfos);
-                var totalCount = await query.CountAsync();
-
-                var ids = await query.Skip(criteria.Skip).Take(criteria.Take).Select(x => x.Id).ToArrayAsync();
-                var thumbnailTasks = await repository.GetThumbnailTasksByIdsAsync(ids);
-                var results = thumbnailTasks.Select(t => t.ToModel(AbstractTypeFactory<ThumbnailTask>.TryCreateInstance())).ToArray();
-
-                var retVal = new GenericSearchResult<ThumbnailTask>
+                result.TotalCount = await query.CountAsync();
+                if (criteria.Take > 0)
                 {
-                    TotalCount = totalCount,
-                    Results = results.AsQueryable().OrderBySortInfos(sortInfos).ToList()
-                };
-
-                return retVal;
+                    var ids = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                    result.Results = (await _thumbnailTaskService.GetByIdsAsync(ids)).AsQueryable().OrderBySortInfos(sortInfos).ToArray();
+                }
             }
+            return result;
         }
 
         protected virtual IQueryable<ThumbnailTaskEntity> GetTasksQuery(IThumbnailRepository repository,
