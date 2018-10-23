@@ -9,7 +9,7 @@ namespace VirtoCommerce.CartModule.Data.Services
     /// <summary>
     /// Respond for totals values calculation for Shopping cart and all nested objects
     /// </summary>
-    public class DefaultShopingCartTotalsCalculator : IShopingCartTotalsCalculator
+    public class DefaultShoppingCartTotalsCalculator : IShoppingCartTotalsCalculator
     {
         /// <summary>
         /// Cart subtotal discount

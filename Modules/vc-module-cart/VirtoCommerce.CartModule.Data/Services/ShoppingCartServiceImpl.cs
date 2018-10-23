@@ -20,8 +20,8 @@ namespace VirtoCommerce.CartModule.Data.Services
     public class ShoppingCartServiceImpl : IShoppingCartService
     {
         public ShoppingCartServiceImpl(Func<ICartRepository> repositoryFactory, IDynamicPropertyService dynamicPropertyService,
-                                      IShopingCartTotalsCalculator totalsCalculator, IEventPublisher eventPublisher
-            , IPlatformMemoryCache platformMemoryCache)
+                                      IShoppingCartTotalsCalculator totalsCalculator, IEventPublisher eventPublisher,
+                                      IPlatformMemoryCache platformMemoryCache)
         {
             RepositoryFactory = repositoryFactory;
             EventPublisher = eventPublisher;
@@ -32,7 +32,7 @@ namespace VirtoCommerce.CartModule.Data.Services
 
         protected Func<ICartRepository> RepositoryFactory { get; }
         protected IDynamicPropertyService DynamicPropertyService { get; }
-        protected IShopingCartTotalsCalculator TotalsCalculator { get; }
+        protected IShoppingCartTotalsCalculator TotalsCalculator { get; }
         protected IEventPublisher EventPublisher { get; }
         protected IPlatformMemoryCache PlatformMemoryCache { get; }
 

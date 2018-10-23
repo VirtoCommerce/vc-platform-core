@@ -31,7 +31,7 @@ namespace VirtoCommerce.CartModule.Web
             serviceCollection.AddSingleton<Func<ICartRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICartRepository>());
             serviceCollection.AddSingleton<IShoppingCartService, ShoppingCartServiceImpl>();
             serviceCollection.AddSingleton<IShoppingCartSearchService, ShoppingCartSearchServiceImpl>();
-            serviceCollection.AddSingleton<IShoppingCartTotalsCalculator, DefaultShopingCartTotalsCalculator>();
+            serviceCollection.AddSingleton<IShoppingCartTotalsCalculator, DefaultShoppingCartTotalsCalculator>();
             serviceCollection.AddSingleton<IShoppingCartBuilder, ShoppingCartBuilderImpl>();
 
             serviceCollection.AddSingleton<CartChangedEventHandler>();

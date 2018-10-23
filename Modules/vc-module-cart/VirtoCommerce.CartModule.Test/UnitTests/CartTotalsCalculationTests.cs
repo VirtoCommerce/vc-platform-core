@@ -18,7 +18,7 @@ namespace VirtoCommerce.CartModule.Test.UnitTests
             {
                 Items = new List<LineItem> { item1 },
             };
-            var totalsCalculator = new DefaultShopingCartTotalsCalculator();
+            var totalsCalculator = new DefaultShoppingCartTotalsCalculator();
             totalsCalculator.CalculateTotals(cart);
 
             Assert.Equal(49.95m, cart.SubTotal);
@@ -44,7 +44,7 @@ namespace VirtoCommerce.CartModule.Test.UnitTests
                 Payments = new List<Payment> { payment },
                 Shipments = new List<Shipment> { shipment }
             };
-            var totalsCalculator = new DefaultShopingCartTotalsCalculator();
+            var totalsCalculator = new DefaultShoppingCartTotalsCalculator();
             totalsCalculator.CalculateTotals(cart);
 
             Assert.Equal(12.3088m, item1.ListPriceWithTax);
