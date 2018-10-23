@@ -19,21 +19,22 @@ namespace VirtoCommerce.CartModule.Data.Services
 {
     public class ShoppingCartServiceImpl : IShoppingCartService
     {
-        private readonly Func<ICartRepository> _repositoryFactory;
-        private readonly IDynamicPropertyService _dynamicPropertyService;
-        private readonly IShopingCartTotalsCalculator _totalsCalculator;
-        private readonly IEventPublisher _eventPublisher;
-        private readonly IPlatformMemoryCache _platformMemoryCache;
         public ShoppingCartServiceImpl(Func<ICartRepository> repositoryFactory, IDynamicPropertyService dynamicPropertyService,
                                       IShopingCartTotalsCalculator totalsCalculator, IEventPublisher eventPublisher
             , IPlatformMemoryCache platformMemoryCache)
-		{
-			_repositoryFactory = repositoryFactory;
-            _eventPublisher = eventPublisher;
-            _dynamicPropertyService = dynamicPropertyService;
-            _totalsCalculator = totalsCalculator;
-		    _platformMemoryCache = platformMemoryCache;
-		}
+        {
+            RepositoryFactory = repositoryFactory;
+            EventPublisher = eventPublisher;
+            DynamicPropertyService = dynamicPropertyService;
+            TotalsCalculator = totalsCalculator;
+            PlatformMemoryCache = platformMemoryCache;
+        }
+
+        protected Func<ICartRepository> RepositoryFactory { get; }
+        protected IDynamicPropertyService DynamicPropertyService { get; }
+        protected IShopingCartTotalsCalculator TotalsCalculator { get; }
+        protected IEventPublisher EventPublisher { get; }
+        protected IPlatformMemoryCache PlatformMemoryCache { get; }
 
         #region IShoppingCartService Members
 
@@ -41,9 +42,9 @@ namespace VirtoCommerce.CartModule.Data.Services
         {
             var retVal = new List<ShoppingCart>();
             var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", cartIds), responseGroup);
-            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                using (var repository = _repositoryFactory())
+                using (var repository = RepositoryFactory())
                 {
                     //Disable DBContext change tracking for better performance 
                     repository.DisableChangesTracking();
@@ -55,14 +56,14 @@ namespace VirtoCommerce.CartModule.Data.Services
                         //Calculate totals only for full responseGroup
                         if (responseGroup == null)
                         {
-                            _totalsCalculator.CalculateTotals(cart);
+                            TotalsCalculator.CalculateTotals(cart);
                         }
                         retVal.Add(cart);
                         cacheEntry.AddExpirationToken(CartCacheRegion.CreateChangeToken(cart));
                     }
                 }
 
-                await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal.ToArray<IHasDynamicProperties>());
+                await DynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal.ToArray<IHasDynamicProperties>());
 
                 return retVal;
             });
@@ -79,13 +80,13 @@ namespace VirtoCommerce.CartModule.Data.Services
             var pkMap = new PrimaryKeyResolvingMap();
             var changedEntries = new List<GenericChangedEntry<ShoppingCart>>();
 
-            using (var repository = _repositoryFactory())
+            using (var repository = RepositoryFactory())
             {
                 var dataExistCarts = await repository.GetShoppingCartsByIdsAsync(carts.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var cart in carts)
                 {
                     //Calculate cart totals before save
-                    _totalsCalculator.CalculateTotals(cart);
+                    TotalsCalculator.CalculateTotals(cart);
 
                     var originalEntity = dataExistCarts.FirstOrDefault(x => x.Id == cart.Id);
                     var modifiedEntity = AbstractTypeFactory<ShoppingCartEntity>.TryCreateInstance()
@@ -103,10 +104,10 @@ namespace VirtoCommerce.CartModule.Data.Services
                 }
 
                 //Raise domain events
-                await _eventPublisher.Publish(new CartChangeEvent(changedEntries));
+                await EventPublisher.Publish(new CartChangeEvent(changedEntries));
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
-                await _eventPublisher.Publish(new CartChangedEvent(changedEntries));
+                await EventPublisher.Publish(new CartChangedEvent(changedEntries));
             }
 
             ClearCache(carts);
@@ -116,23 +117,23 @@ namespace VirtoCommerce.CartModule.Data.Services
         {
             var carts = await GetByIdsAsync(cartIds);
 
-            using (var repository = _repositoryFactory())
+            using (var repository = RepositoryFactory())
             {
                 //Raise domain events before deletion
                 var changedEntries = carts.Select(x => new GenericChangedEntry<ShoppingCart>(x, EntryState.Deleted));
-                await _eventPublisher.Publish(new CartChangeEvent(changedEntries));
+                await EventPublisher.Publish(new CartChangeEvent(changedEntries));
 
                 await repository.RemoveCartsAsync(cartIds);
 
                 await repository.UnitOfWork.CommitAsync();
                 //Raise domain events after deletion
-                await _eventPublisher.Publish(new CartChangedEvent(changedEntries));
+                await EventPublisher.Publish(new CartChangedEvent(changedEntries));
             }
 
             ClearCache(carts);
         }
 
-        private void ClearCache(IEnumerable<ShoppingCart> entities)
+        protected virtual void ClearCache(IEnumerable<ShoppingCart> entities)
         {
             CartSearchCacheRegion.ExpireRegion();
 
