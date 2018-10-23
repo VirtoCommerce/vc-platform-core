@@ -4,12 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Serialization;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
 using VirtoCommerce.PricingModule.Core.Services;
+using VirtoCommerce.PricingModule.Data.Caching;
 using VirtoCommerce.PricingModule.Data.Repositories;
 
 namespace VirtoCommerce.PricingModule.Data.Services
@@ -20,158 +23,184 @@ namespace VirtoCommerce.PricingModule.Data.Services
         //private readonly ICatalogSearchService _catalogSearchService;
         private readonly IPricingService _pricingService;
         private readonly Dictionary<string, string> _pricesSortingAliases = new Dictionary<string, string>();
+        private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public PricingSearchServiceImpl(Func<IPricingRepository> repositoryFactory, IPricingService pricingService)
+        public PricingSearchServiceImpl(Func<IPricingRepository> repositoryFactory, IPricingService pricingService,
+            IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             //_catalogSearchService = catalogSearchService;
             _pricesSortingAliases["prices"] = ReflectionUtility.GetPropertyName<Price>(x => x.List);
             _pricingService = pricingService;
+            _platformMemoryCache = platformMemoryCache;
         }
 
 
         #region IPricingSearchService Members
 
-        public virtual Task<GenericSearchResult<Price>> SearchPricesAsync(PricesSearchCriteria criteria)
+        public virtual async Task<GenericSearchResult<Price>> SearchPricesAsync(PricesSearchCriteria criteria)
         {
-            var result = new GenericSearchResult<Price>();
-            return Task.FromResult(result);
+            var cacheKey = CacheKey.With(GetType(), nameof(SearchPricesAsync), criteria.GetCacheKey());
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, cacheEntry =>
+                {
+                    var result = new GenericSearchResult<Price>();
+                    return Task.FromResult(result);
 
-            // TODO: uncomment the following implementation when the ICatalogSearchService will become available in CatalogModule
+                    // TODO: uncomment the following implementation when the ICatalogSearchService will become available in CatalogModule
 
-            //var retVal = new PricingSearchResult<Price>();
-            //ICollection<CatalogProduct> products = new List<CatalogProduct>();
-            //using (var repository = _repositoryFactory())
-            //{
-            //    var query = repository.Prices;
+                    //var retVal = new PricingSearchResult<Price>();
+                    //ICollection<CatalogProduct> products = new List<CatalogProduct>();
+                    //using (var repository = _repositoryFactory())
+                    //{
+                    //    var query = repository.Prices;
 
-            //    if (!criteria.PriceListIds.IsNullOrEmpty())
-            //    {
-            //        query = query.Where(x => criteria.PriceListIds.Contains(x.PricelistId));
-            //    }
+                    //    if (!criteria.PriceListIds.IsNullOrEmpty())
+                    //    {
+                    //        query = query.Where(x => criteria.PriceListIds.Contains(x.PricelistId));
+                    //    }
 
-            //    if (!criteria.ProductIds.IsNullOrEmpty())
-            //    {
-            //        query = query.Where(x => criteria.ProductIds.Contains(x.ProductId));
-            //    }
+                    //    if (!criteria.ProductIds.IsNullOrEmpty())
+                    //    {
+                    //        query = query.Where(x => criteria.ProductIds.Contains(x.ProductId));
+                    //    }
 
-            //    if (!string.IsNullOrEmpty(criteria.Keyword))
-            //    {
-            //        var catalogSearchResult = _catalogSearchService.Search(new Domain.Catalog.Model.SearchCriteria { Keyword = criteria.Keyword, Skip = criteria.Skip, Take = criteria.Take, Sort = criteria.Sort.Replace("product.", string.Empty), ResponseGroup = Domain.Catalog.Model.SearchResponseGroup.WithProducts });
-            //        var productIds = catalogSearchResult.Products.Select(x => x.Id).ToArray();
-            //        query = query.Where(x => productIds.Contains(x.ProductId));
-            //        //preserve resulting products for future assignment to prices
-            //        products = catalogSearchResult.Products;
-            //    }
+                    //    if (!string.IsNullOrEmpty(criteria.Keyword))
+                    //    {
+                    //        var catalogSearchResult = _catalogSearchService.Search(new Domain.Catalog.Model.SearchCriteria { Keyword = criteria.Keyword, Skip = criteria.Skip, Take = criteria.Take, Sort = criteria.Sort.Replace("product.", string.Empty), ResponseGroup = Domain.Catalog.Model.SearchResponseGroup.WithProducts });
+                    //        var productIds = catalogSearchResult.Products.Select(x => x.Id).ToArray();
+                    //        query = query.Where(x => productIds.Contains(x.ProductId));
+                    //        //preserve resulting products for future assignment to prices
+                    //        products = catalogSearchResult.Products;
+                    //    }
 
-            //    if (criteria.ModifiedSince.HasValue)
-            //    {
-            //        query = query.Where(x => x.ModifiedDate >= criteria.ModifiedSince);
-            //    }
+                    //    if (criteria.ModifiedSince.HasValue)
+                    //    {
+                    //        query = query.Where(x => x.ModifiedDate >= criteria.ModifiedSince);
+                    //    }
 
-            //    var sortInfos = criteria.SortInfos.ToArray();
-            //    if (sortInfos.IsNullOrEmpty())
-            //    {
-            //        sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Price>(x => x.List) } };
-            //    }
-            //    //Try to replace sorting columns names
-            //    TryTransformSortingInfoColumnNames(_pricesSortingAliases, sortInfos);
+                    //    var sortInfos = criteria.SortInfos.ToArray();
+                    //    if (sortInfos.IsNullOrEmpty())
+                    //    {
+                    //        sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Price>(x => x.List) } };
+                    //    }
+                    //    //Try to replace sorting columns names
+                    //    TryTransformSortingInfoColumnNames(_pricesSortingAliases, sortInfos);
 
 
-            //    query = query.OrderBySortInfos(sortInfos);
+                    //    query = query.OrderBySortInfos(sortInfos);
 
-            //    // TODO: add checks for criteria.Take being greater than 0
-            //    if (criteria.GroupByProducts)
-            //    {
-            //        var groupedQuery = query.GroupBy(x => x.ProductId).OrderBy(x => 1);
-            //        retVal.TotalCount = groupedQuery.Count();
-            //        query = groupedQuery.Skip(criteria.Skip).Take(criteria.Take).SelectMany(x => x);
-            //    }
-            //    else
-            //    {
-            //        retVal.TotalCount = query.Count();
-            //        query = query.Skip(criteria.Skip).Take(criteria.Take);
-            //    }
+                    //    // TODO: add checks for criteria.Take being greater than 0
+                    //    if (criteria.GroupByProducts)
+                    //    {
+                    //        var groupedQuery = query.GroupBy(x => x.ProductId).OrderBy(x => 1);
+                    //        retVal.TotalCount = groupedQuery.Count();
+                    //        query = groupedQuery.Skip(criteria.Skip).Take(criteria.Take).SelectMany(x => x);
+                    //    }
+                    //    else
+                    //    {
+                    //        retVal.TotalCount = query.Count();
+                    //        query = query.Skip(criteria.Skip).Take(criteria.Take);
+                    //    }
 
-            //    var pricesIds = query.Select(x => x.Id).ToList();
-            //    retVal.Results = (await _pricingService.GetPricesByIdAsync(pricesIds.ToArray()))
-            //                                .OrderBy(x => pricesIds.IndexOf(x.Id))
-            //                                .ToList();
-            //}
-            //return retVal;
+                    //    var pricesIds = query.Select(x => x.Id).ToList();
+                    //    retVal.Results = (await _pricingService.GetPricesByIdAsync(pricesIds.ToArray()))
+                    //                                .OrderBy(x => pricesIds.IndexOf(x.Id))
+                    //                                .ToList();
+                    //}
+                    //return retVal;
+                });
         }
 
         public virtual async Task<GenericSearchResult<Pricelist>> SearchPricelistsAsync(PricelistSearchCriteria criteria)
         {
-            var retVal = new GenericSearchResult<Pricelist>();
-            using (var repository = _repositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), nameof(SearchPricelistsAsync), criteria.GetCacheKey());
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
             {
-                var query = repository.Pricelists;
-                if (!string.IsNullOrEmpty(criteria.Keyword))
+                cacheEntry.AddExpirationToken(PricingSearchCacheRegion.CreateChangeToken());
+
+                var retVal = new GenericSearchResult<Pricelist>();
+                using (var repository = _repositoryFactory())
                 {
-                    query = query.Where(x => x.Name.Contains(criteria.Keyword) || x.Description.Contains(criteria.Keyword));
+                    var query = repository.Pricelists;
+                    if (!string.IsNullOrEmpty(criteria.Keyword))
+                    {
+                        query = query.Where(x => x.Name.Contains(criteria.Keyword) || x.Description.Contains(criteria.Keyword));
+                    }
+
+                    var sortInfos = criteria.SortInfos;
+                    if (sortInfos.IsNullOrEmpty())
+                    {
+                        sortInfos = new[]
+                        {
+                            new SortInfo
+                            {
+                                SortColumn = ReflectionUtility.GetPropertyName<Pricelist>(x => x.Name)
+                            }
+                        };
+                    }
+
+                    query = query.OrderBySortInfos(sortInfos);
+
+                    retVal.TotalCount = await query.CountAsync();
+
+                    if (criteria.Take > 0)
+                    {
+                        query = query.Skip(criteria.Skip).Take(criteria.Take);
+                        var pricelistsIds = await query.Select(x => x.Id).ToListAsync();
+                        retVal.Results = (await _pricingService.GetPricelistsByIdAsync(pricelistsIds.ToArray()))
+                            .OrderBy(x => pricelistsIds.IndexOf(x.Id)).ToList();
+                    }
                 }
 
-                var sortInfos = criteria.SortInfos;
-                if (sortInfos.IsNullOrEmpty())
-                {
-                    sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Pricelist>(x => x.Name) } };
-                }
-
-                query = query.OrderBySortInfos(sortInfos);
-
-                retVal.TotalCount = await query.CountAsync();
-
-                if (criteria.Take > 0)
-                {
-                    query = query.Skip(criteria.Skip).Take(criteria.Take);
-                    var pricelistsIds = await query.Select(x => x.Id).ToListAsync();
-                    retVal.Results = (await _pricingService.GetPricelistsByIdAsync(pricelistsIds.ToArray()))
-                        .OrderBy(x => pricelistsIds.IndexOf(x.Id)).ToList();
-                }
-            }
-            return retVal;
+                return retVal;
+            });
         }
 
         public virtual async Task<GenericSearchResult<PricelistAssignment>> SearchPricelistAssignmentsAsync(PricelistAssignmentsSearchCriteria criteria)
         {
-            var retVal = new GenericSearchResult<PricelistAssignment>();
-            using (var repository = _repositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), nameof(SearchPricelistAssignmentsAsync), criteria.GetCacheKey());
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
             {
-                var query = repository.PricelistAssignments;
+                cacheEntry.AddExpirationToken(PricingSearchCacheRegion.CreateChangeToken());
 
-                if (!criteria.PriceListIds.IsNullOrEmpty())
+                var retVal = new GenericSearchResult<PricelistAssignment>();
+                using (var repository = _repositoryFactory())
                 {
-                    query = query.Where(x => criteria.PriceListIds.Contains(x.PricelistId));
+                    var query = repository.PricelistAssignments;
+
+                    if (!criteria.PriceListIds.IsNullOrEmpty())
+                    {
+                        query = query.Where(x => criteria.PriceListIds.Contains(x.PricelistId));
+                    }
+
+                    if (!string.IsNullOrEmpty(criteria.Keyword))
+                    {
+                        query.Where(x => x.Name.Contains(criteria.Keyword) || x.Description.Contains(criteria.Keyword));
+                    }
+
+                    var sortInfos = criteria.SortInfos;
+                    if (sortInfos.IsNullOrEmpty())
+                    {
+                        sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<PricelistAssignment>(x => x.Priority) } };
+                    }
+
+                    query = query.OrderBySortInfos(sortInfos);
+
+                    retVal.TotalCount = await query.CountAsync();
+
+                    if (criteria.Take > 0)
+                    {
+                        query = query.Skip(criteria.Skip).Take(criteria.Take);
+
+                        var pricelistAssignmentsIds = await query.Select(x => x.Id).ToListAsync();
+                        retVal.Results =
+                            (await _pricingService.GetPricelistAssignmentsByIdAsync(pricelistAssignmentsIds.ToArray()))
+                            .OrderBy(x => pricelistAssignmentsIds.IndexOf(x.Id))
+                            .ToList();
+                    }
                 }
-
-                if (!string.IsNullOrEmpty(criteria.Keyword))
-                {
-                    query.Where(x => x.Name.Contains(criteria.Keyword) || x.Description.Contains(criteria.Keyword));
-                }
-
-                var sortInfos = criteria.SortInfos;
-                if (sortInfos.IsNullOrEmpty())
-                {
-                    sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<PricelistAssignment>(x => x.Priority) } };
-                }
-
-                query = query.OrderBySortInfos(sortInfos);
-
-                retVal.TotalCount = await query.CountAsync();
-
-                if (criteria.Take > 0)
-                {
-                    query = query.Skip(criteria.Skip).Take(criteria.Take);
-
-                    var pricelistAssignmentsIds = await query.Select(x => x.Id).ToListAsync();
-                    retVal.Results =
-                        (await _pricingService.GetPricelistAssignmentsByIdAsync(pricelistAssignmentsIds.ToArray()))
-                        .OrderBy(x => pricelistAssignmentsIds.IndexOf(x.Id))
-                        .ToList();
-                }
-            }
-            return retVal;
+                return retVal;
+            });
         }
         #endregion
 

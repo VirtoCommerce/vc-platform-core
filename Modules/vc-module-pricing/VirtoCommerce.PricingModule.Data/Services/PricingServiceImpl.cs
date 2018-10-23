@@ -225,69 +225,101 @@ namespace VirtoCommerce.PricingModule.Data.Services
 
         public virtual async Task<Price[]> GetPricesByIdAsync(string[] ids)
         {
-            Price[] result = null;
-            if (ids != null)
+            var cacheKey = CacheKey.With(GetType(), nameof(GetPricesByIdAsync), string.Join("-", ids));
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
             {
-                using (var repository = _repositoryFactory())
+                Price[] result = null;
+                if (ids != null)
                 {
-                    result = (await repository.GetPricesByIdsAsync(ids)).Select(x => x.ToModel(AbstractTypeFactory<Price>.TryCreateInstance())).ToArray();
+                    using (var repository = _repositoryFactory())
+                    {
+                        result = (await repository.GetPricesByIdsAsync(ids)).Select(x => x.ToModel(AbstractTypeFactory<Price>.TryCreateInstance())).ToArray();
+
+                        foreach (var id in ids)
+                        {
+                            cacheEntry.AddExpirationToken(PricesCacheRegion.CreateChangeToken(id));
+                        }
+                    }
                 }
-            }
-            return result;
+
+                return result;
+            });
         }
 
         public virtual async Task<PricelistAssignment[]> GetPricelistAssignmentsByIdAsync(string[] ids)
         {
-            PricelistAssignment[] result = null;
-            if (ids != null)
+            var cacheKey = CacheKey.With(GetType(), nameof(GetPricelistAssignmentsByIdAsync), string.Join("-", ids));
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
             {
-                using (var repository = _repositoryFactory())
+                PricelistAssignment[] result = null;
+                if (ids != null)
                 {
-                    result = (await repository.GetPricelistAssignmentsByIdAsync(ids)).Select(x => x.ToModel(AbstractTypeFactory<PricelistAssignment>.TryCreateInstance())).ToArray();
-                }
-
-                //Prepare expression tree for resulting assignments and include available  nodes to expression tree
-                foreach (var assignment in result)
-                {
-                    var defaultExpressionTree = _extensionManager.ConditionExpressionTree;
-                    //Set default expression tree first
-                    assignment.DynamicExpression = defaultExpressionTree;
-                    if (!string.IsNullOrEmpty(assignment.PredicateVisualTreeSerialized))
+                    using (var repository = _repositoryFactory())
                     {
-                        assignment.DynamicExpression = JsonConvert.DeserializeObject<ConditionExpressionTree>(assignment.PredicateVisualTreeSerialized);
-                        if (defaultExpressionTree != null)
-                        {
-                            //Copy available elements from default tree because they not persisted
-                            var sourceBlocks = ((DynamicExpression)defaultExpressionTree).Traverse(x => x.Children);
-                            var targetBlocks = ((DynamicExpression)assignment.DynamicExpression).Traverse(x => x.Children).ToList();
+                        result = (await repository.GetPricelistAssignmentsByIdAsync(ids)).Select(x => x.ToModel(AbstractTypeFactory<PricelistAssignment>.TryCreateInstance())).ToArray();
+                    }
 
-                            foreach (var sourceBlock in sourceBlocks)
+                    //Prepare expression tree for resulting assignments and include available  nodes to expression tree
+                    foreach (var assignment in result)
+                    {
+                        cacheEntry.AddExpirationToken(PricelistAssignmentsCacheRegion.CreateChangeToken(assignment.Id));
+
+                        var defaultExpressionTree = _extensionManager.ConditionExpressionTree;
+                        //Set default expression tree first
+                        assignment.DynamicExpression = defaultExpressionTree;
+                        if (!string.IsNullOrEmpty(assignment.PredicateVisualTreeSerialized))
+                        {
+                            assignment.DynamicExpression = JsonConvert.DeserializeObject<ConditionExpressionTree>(assignment.PredicateVisualTreeSerialized);
+                            if (defaultExpressionTree != null)
                             {
-                                foreach (var targetBlock in targetBlocks.Where(x => x.Id == sourceBlock.Id))
+                                //Copy available elements from default tree because they not persisted
+                                var sourceBlocks = ((DynamicExpression)defaultExpressionTree).Traverse(x => x.Children);
+                                var targetBlocks = ((DynamicExpression)assignment.DynamicExpression).Traverse(x => x.Children).ToList();
+
+                                foreach (var sourceBlock in sourceBlocks)
                                 {
-                                    targetBlock.AvailableChildren = sourceBlock.AvailableChildren;
+                                    foreach (var targetBlock in targetBlocks.Where(x => x.Id == sourceBlock.Id))
+                                    {
+                                        targetBlock.AvailableChildren = sourceBlock.AvailableChildren;
+                                    }
                                 }
+                                //copy available elements from default expression tree
+                                assignment.DynamicExpression.AvailableChildren = defaultExpressionTree.AvailableChildren;
                             }
-                            //copy available elements from default expression tree
-                            assignment.DynamicExpression.AvailableChildren = defaultExpressionTree.AvailableChildren;
                         }
                     }
                 }
-            }
-            return result;
+                return result;
+            });
         }
 
         public virtual async Task<Pricelist[]> GetPricelistsByIdAsync(string[] ids)
         {
-            Pricelist[] result = null;
-            if (ids != null)
+            var cacheKey = CacheKey.With(GetType(), nameof(GetPricelistsByIdAsync), string.Join("-", ids));
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
             {
-                using (var repository = _repositoryFactory())
+                Pricelist[] result = null;
+                if (ids != null)
                 {
-                    result = (await repository.GetPricelistByIdsAsync(ids)).Select(x => x.ToModel(AbstractTypeFactory<Pricelist>.TryCreateInstance())).ToArray();
+                    using (var repository = _repositoryFactory())
+                    {
+                        var resultList = new List<Pricelist>(ids.Length);
+
+                        var pricelistEntities = await repository.GetPricelistByIdsAsync(ids);
+                        foreach (var pricelistEntity in pricelistEntities)
+                        {
+                            var pricelist = pricelistEntity.ToModel(AbstractTypeFactory<Pricelist>.TryCreateInstance());
+
+                            cacheEntry.AddExpirationToken(PricelistsCacheRegion.CreateChangeToken(pricelist.Id));
+                            resultList.Add(pricelist);
+                        }
+
+                        result = resultList.ToArray();
+                    }
                 }
-            }
-            return result;
+
+                return result;
+            });
         }
 
         public virtual async Task SavePricesAsync(Price[] prices)
@@ -334,6 +366,11 @@ namespace VirtoCommerce.PricingModule.Data.Services
 
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
+
+                foreach (var price in prices)
+                {
+                    PricesCacheRegion.ExpirePrice(price.Id);
+                }
                 ResetCache();
             }
         }
@@ -366,6 +403,11 @@ namespace VirtoCommerce.PricingModule.Data.Services
 
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
+
+                foreach (var pricelist in priceLists)
+                {
+                    PricelistsCacheRegion.ExpirePricelist(pricelist.Id);
+                }
                 ResetCache();
             }
         }
@@ -409,6 +451,11 @@ namespace VirtoCommerce.PricingModule.Data.Services
 
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
+
+                foreach (var assignment in assignments)
+                {
+                    PricelistAssignmentsCacheRegion.ExpirePricelistAssignment(assignment.Id);
+                }
                 ResetCache();
             }
         }
@@ -419,6 +466,11 @@ namespace VirtoCommerce.PricingModule.Data.Services
             {
                 await repository.DeletePricesAsync(ids);
                 await repository.UnitOfWork.CommitAsync();
+
+                foreach (var id in ids)
+                {
+                    PricesCacheRegion.ExpirePrice(id);
+                }
                 ResetCache();
             }
         }
@@ -428,6 +480,11 @@ namespace VirtoCommerce.PricingModule.Data.Services
             {
                 await repository.DeletePricelistsAsync(ids);
                 await repository.UnitOfWork.CommitAsync();
+
+                foreach (var id in ids)
+                {
+                    PricelistsCacheRegion.ExpirePricelist(id);
+                }
                 ResetCache();
             }
         }
@@ -438,6 +495,11 @@ namespace VirtoCommerce.PricingModule.Data.Services
             {
                 await repository.DeletePricelistAssignmentsAsync(ids);
                 await repository.UnitOfWork.CommitAsync();
+
+                foreach (var id in ids)
+                {
+                    PricelistAssignmentsCacheRegion.ExpirePricelistAssignment(id);
+                }
                 ResetCache();
             }
         }
@@ -455,6 +517,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
         {
             //Clear cache (Smart cache implementation) 
             PricingCacheRegion.ExpireRegion();
+            PricingSearchCacheRegion.ExpireRegion();
         }
     }
 }
