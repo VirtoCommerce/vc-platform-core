@@ -90,6 +90,7 @@ namespace VirtoCommerce.OrdersModule.Core.Model.Search
         /// </summary>
         public string OperationId { get; set; }
 
+        public string OrganizationId { get; set; }
         public string CustomerId { get; set; }
         public string EmployeeId { get; set; }
         public string[] StoreIds { get; set; }
