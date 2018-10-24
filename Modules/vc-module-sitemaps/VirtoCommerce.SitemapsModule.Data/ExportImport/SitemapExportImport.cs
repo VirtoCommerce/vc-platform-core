@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -29,17 +31,12 @@ namespace VirtoCommerce.SitemapsModule.Data.ExportImport
 
         private readonly JsonSerializer _jsonSerializer;
 
-        public SitemapExportImport(ISitemapService sitemapService, ISitemapItemService sitemapItemService)
+        public SitemapExportImport(ISitemapService sitemapService, ISitemapItemService sitemapItemService,
+            IOptions<MvcJsonOptions> mvcJsonOptions)
         {
             _sitemapService = sitemapService;
             _sitemapItemService = sitemapItemService;
-
-            _jsonSerializer = new JsonSerializer
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Formatting = Formatting.Indented,
-                NullValueHandling = NullValueHandling.Ignore
-            };
+            _jsonSerializer = JsonSerializer.Create(mvcJsonOptions.Value.SerializerSettings);
         }
 
         public async Task DoExportAsync(Stream backupStream, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
