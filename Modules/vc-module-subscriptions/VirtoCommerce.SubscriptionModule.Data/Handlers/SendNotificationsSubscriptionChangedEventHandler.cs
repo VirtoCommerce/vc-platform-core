@@ -1,9 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
+using VirtoCommerce.CustomerModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
+using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.StoreModule.Core.Services;
 using VirtoCommerce.SubscriptionModule.Core.Events;
 using VirtoCommerce.SubscriptionModule.Core.Model;
@@ -16,13 +19,17 @@ namespace VirtoCommerce.SubscriptionModule.Data.Handlers
         private readonly INotificationService _notificationService;
         private readonly INotificationSender _notificationSender;
         private readonly IStoreService _storeService;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IMemberService _memberService;
 
         public SendNotificationsSubscriptionChangedEventHandler(INotificationService notificationService, INotificationSender notificationSender,
-            IStoreService storeService)
+            IStoreService storeService, UserManager<ApplicationUser> userManager, IMemberService memberService)
         {
             _notificationService = notificationService;
             _notificationSender = notificationSender;
             _storeService = storeService;
+            _userManager = userManager;
+            _memberService = memberService;
         }
 
         public virtual async Task Handle(SubscriptionChangedEvent message)
@@ -102,23 +109,19 @@ namespace VirtoCommerce.SubscriptionModule.Data.Handlers
             return Task.FromResult(email);
         }
 
-        protected virtual Task<string> GetCustomerEmailAsync(string customerId)
+        protected virtual async Task<string> GetCustomerEmailAsync(string customerId)
         {
-            return Task.FromResult(string.Empty);
+            // try to find user
+            var user = await _userManager.FindByIdAsync(customerId);
 
-            // TODO: apparently, there is no way to get user email for now...
-            ////try to find user
-            //var user = await _securityService.FindByIdAsync(customerId, UserDetails.Reduced);
-            ////Try to find contact 
-            //var contact = _memberService.GetByIds(new[] { customerId }).OfType<Contact>().FirstOrDefault();
-            //if (contact == null && user != null)
-            //{
-            //    contact = _memberService.GetByIds(new[] { user.MemberId }).OfType<Contact>().FirstOrDefault();
-            //}
-            //email = contact?.Emails?.FirstOrDefault() ?? user?.Email;
-            //return email;
+            // Try to find contact
+            var contact = await _memberService.GetByIdAsync(customerId);
+            if (contact == null && user != null)
+            {
+                contact = await _memberService.GetByIdAsync(user.MemberId);
+            }
+
+            return contact?.Emails?.FirstOrDefault() ?? user?.Email;
         }
     }
-
-
 }
