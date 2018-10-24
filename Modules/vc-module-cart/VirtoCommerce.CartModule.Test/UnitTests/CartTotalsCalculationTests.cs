@@ -78,6 +78,8 @@ namespace VirtoCommerce.CartModule.Test.UnitTests
             Assert.Equal(161.47m, cart.SubTotalDiscount);
             Assert.Equal(180.85m, cart.SubTotalDiscountWithTax);
             Assert.Equal(1522.62m, cart.SubTotalWithTax);
+            Assert.Equal(17.00m, cart.ShippingTotal);
+            Assert.Equal(19.04m, cart.ShippingTotalWithTax);
             Assert.Equal(22.00m, cart.ShippingSubTotal);
             Assert.Equal(24.64m, cart.ShippingSubTotalWithTax);
             Assert.Equal(44.52m, cart.PaymentSubTotal);
