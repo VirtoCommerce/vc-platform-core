@@ -138,7 +138,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
         public async Task<IActionResult> DeleteSubscriptionsByIds([FromQuery] string[] ids)
         {
             await _subscriptionService.DeleteAsync(ids);
-            return StatusCode((int)HttpStatusCode.NoContent);
+            return NoContent();
         }
 
 
@@ -208,7 +208,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
         public async Task<IActionResult> DeletePlansByIds([FromQuery] string[] ids)
         {
             await _planService.DeleteAsync(ids);
-            return StatusCode((int)HttpStatusCode.NoContent);
+            return NoContent();
         }
 
     }
