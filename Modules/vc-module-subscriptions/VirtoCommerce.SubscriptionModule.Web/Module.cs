@@ -17,6 +17,7 @@ using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.SubscriptionModule.Core;
 using VirtoCommerce.SubscriptionModule.Core.Events;
 using VirtoCommerce.SubscriptionModule.Core.Services;
@@ -77,10 +78,7 @@ namespace VirtoCommerce.SubscriptionModule.Web
             //Register setting in the store level
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
-
-            // TODO: how to simulate this?
-            //var storeLevelSettings = new[] { "Subscription.EnableSubscriptions" };
-            //settingsManager.RegisterModuleSettings("VirtoCommerce.Store", settingsManager.GetModuleSettings(ModuleInfo.Id).Where(x => storeLevelSettings.Contains(x.Name)).ToArray());
+            settingsRegistrar.RegisterSettingsForType(ModuleConstants.Settings.StoreLevelSettings, typeof(Store).Name);
 
             //Registration welcome email notification.
             var handlerRegistrar = appBuilder.ApplicationServices.GetRequiredService<IHandlerRegistrar>();

@@ -102,6 +102,14 @@ namespace VirtoCommerce.SubscriptionModule.Core
                     DefaultValue = "Export/Import of subscriptions"
                 };
 
+                public static IEnumerable<SettingDescriptor> StoreLevelSettings
+                {
+                    get
+                    {
+                        yield return EnableSubscriptions;
+                    }
+                }
+
                 public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
@@ -119,6 +127,7 @@ namespace VirtoCommerce.SubscriptionModule.Core
                 }
             }
 
+            public static IEnumerable<SettingDescriptor> StoreLevelSettings => General.StoreLevelSettings;
             public static IEnumerable<SettingDescriptor> AllSettings => General.AllSettings;
         }
     }
