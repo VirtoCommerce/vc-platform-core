@@ -27,40 +27,40 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
 {
     public class SubscriptionServiceImpl : ISubscriptionService, ISubscriptionSearchService
     {
-        private readonly IStoreService _storeService;
-        private readonly ICustomerOrderService _customerOrderService;
-        private readonly ICustomerOrderSearchService _customerOrderSearchService;
-        private readonly Func<ISubscriptionRepository> _subscriptionRepositoryFactory;
-        private readonly IUniqueNumberGenerator _uniqueNumberGenerator;
-        private readonly IChangeLogService _changeLogService;
-        private readonly IEventPublisher _eventPublisher;
-        private readonly IPlatformMemoryCache _platformMemoryCache;
-
         public SubscriptionServiceImpl(Func<ISubscriptionRepository> subscriptionRepositoryFactory, ICustomerOrderService customerOrderService,
                                        ICustomerOrderSearchService customerOrderSearchService, IStoreService storeService,
                                        IUniqueNumberGenerator uniqueNumberGenerator, IChangeLogService changeLogService, IEventPublisher eventPublisher,
                                        IPlatformMemoryCache platformMemoryCache)
         {
-            _customerOrderSearchService = customerOrderSearchService;
-            _subscriptionRepositoryFactory = subscriptionRepositoryFactory;
-            _customerOrderService = customerOrderService;
-            _storeService = storeService;
-            _uniqueNumberGenerator = uniqueNumberGenerator;
-            _changeLogService = changeLogService;
-            _eventPublisher = eventPublisher;
-            _platformMemoryCache = platformMemoryCache;
+            CustomerOrderSearchService = customerOrderSearchService;
+            SubscriptionRepositoryFactory = subscriptionRepositoryFactory;
+            CustomerOrderService = customerOrderService;
+            StoreService = storeService;
+            UniqueNumberGenerator = uniqueNumberGenerator;
+            ChangeLogService = changeLogService;
+            EventPublisher = eventPublisher;
+            PlatformMemoryCache = platformMemoryCache;
         }
+
+        protected IStoreService StoreService { get; }
+        protected ICustomerOrderService CustomerOrderService { get; }
+        protected ICustomerOrderSearchService CustomerOrderSearchService { get; }
+        protected Func<ISubscriptionRepository> SubscriptionRepositoryFactory { get; }
+        protected IUniqueNumberGenerator UniqueNumberGenerator { get; }
+        protected IChangeLogService ChangeLogService { get; }
+        protected IEventPublisher EventPublisher { get; }
+        protected IPlatformMemoryCache PlatformMemoryCache { get; }
 
         #region ISubscriptionService members
 
-        public async Task<Subscription[]> GetByIdsAsync(string[] subscriptionIds, string responseGroup = null)
+        public virtual async Task<Subscription[]> GetByIdsAsync(string[] subscriptionIds, string responseGroup = null)
         {
             var cacheKey = CacheKey.With(GetType(), nameof(GetByIdsAsync), string.Join("-", subscriptionIds), responseGroup);
-            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
+            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
             {
                 var retVal = new List<Subscription>();
                 var subscriptionResponseGroup = EnumUtility.SafeParse(responseGroup, SubscriptionResponseGroup.Full);
-                using (var repository = _subscriptionRepositoryFactory())
+                using (var repository = SubscriptionRepositoryFactory())
                 {
                     repository.DisableChangesTracking();
 
@@ -74,7 +74,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                             if (subscriptionResponseGroup.HasFlag(SubscriptionResponseGroup.WithChangeLog))
                             {
                                 //Load change log by separate request
-                                _changeLogService.LoadChangeLogs(subscription);
+                                ChangeLogService.LoadChangeLogs(subscription);
                             }
                             retVal.Add(subscription);
                         }
@@ -86,7 +86,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
 
                 if (subscriptionResponseGroup.HasFlag(SubscriptionResponseGroup.WithOrderPrototype))
                 {
-                    orderPrototypes = await _customerOrderService.GetByIdsAsync(retVal.Select(x => x.CustomerOrderPrototypeId).ToArray());
+                    orderPrototypes = await CustomerOrderService.GetByIdsAsync(retVal.Select(x => x.CustomerOrderPrototypeId).ToArray());
                 }
                 if (subscriptionResponseGroup.HasFlag(SubscriptionResponseGroup.WithRelatedOrders))
                 {
@@ -95,7 +95,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                     {
                         SubscriptionIds = subscriptionIds
                     };
-                    subscriptionOrders = (await _customerOrderSearchService.SearchCustomerOrdersAsync(criteria)).Results.ToArray();
+                    subscriptionOrders = (await CustomerOrderSearchService.SearchCustomerOrdersAsync(criteria)).Results.ToArray();
                 }
 
                 foreach (var subscription in retVal)
@@ -117,12 +117,12 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
             });
         }
 
-        public async Task SaveSubscriptionsAsync(Subscription[] subscriptions)
+        public virtual async Task SaveSubscriptionsAsync(Subscription[] subscriptions)
         {
             var pkMap = new PrimaryKeyResolvingMap();
             var changedEntries = new List<GenericChangedEntry<Subscription>>();
 
-            using (var repository = _subscriptionRepositoryFactory())
+            using (var repository = SubscriptionRepositoryFactory())
             {
                 var existEntities = await repository.GetSubscriptionsByIdsAsync(subscriptions.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var subscription in subscriptions)
@@ -130,16 +130,16 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                     //Generate numbers for new subscriptions
                     if (string.IsNullOrEmpty(subscription.Number))
                     {
-                        var store = await _storeService.GetByIdAsync(subscription.StoreId);
+                        var store = await StoreService.GetByIdAsync(subscription.StoreId);
                         var numberTemplate = store.Settings.GetSettingValue("Subscription.SubscriptionNewNumberTemplate", "SU{0:yyMMdd}-{1:D5}");
-                        subscription.Number = _uniqueNumberGenerator.GenerateNumber(numberTemplate);
+                        subscription.Number = UniqueNumberGenerator.GenerateNumber(numberTemplate);
                     }
                     //Save subscription order prototype with same as subscription Number
                     if (subscription.CustomerOrderPrototype != null)
                     {
                         subscription.CustomerOrderPrototype.Number = subscription.Number;
                         subscription.CustomerOrderPrototype.IsPrototype = true;
-                        await _customerOrderService.SaveChangesAsync(new[] { subscription.CustomerOrderPrototype });
+                        await CustomerOrderService.SaveChangesAsync(new[] { subscription.CustomerOrderPrototype });
                     }
                     var originalEntity = existEntities.FirstOrDefault(x => x.Id == subscription.Id);
                     var originalSubscription = originalEntity != null ? originalEntity.ToModel(AbstractTypeFactory<Subscription>.TryCreateInstance()) : subscription;
@@ -160,33 +160,33 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                 }
 
                 //Raise domain events
-                await _eventPublisher.Publish(new SubscriptionChangingEvent(changedEntries));
+                await EventPublisher.Publish(new SubscriptionChangingEvent(changedEntries));
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
-                await _eventPublisher.Publish(new SubscriptionChangedEvent(changedEntries));
+                await EventPublisher.Publish(new SubscriptionChangedEvent(changedEntries));
             }
 
             ClearCacheFor(subscriptions);
         }
 
-        public async Task DeleteAsync(string[] ids)
+        public virtual async Task DeleteAsync(string[] ids)
         {
-            using (var repository = _subscriptionRepositoryFactory())
+            using (var repository = SubscriptionRepositoryFactory())
             {
                 var subscriptions = await GetByIdsAsync(ids);
                 if (!subscriptions.IsNullOrEmpty())
                 {
                     var changedEntries = subscriptions.Select(x => new GenericChangedEntry<Subscription>(x, EntryState.Deleted));
-                    await _eventPublisher.Publish(new SubscriptionChangingEvent(changedEntries));
+                    await EventPublisher.Publish(new SubscriptionChangingEvent(changedEntries));
 
                     //Remove subscription order prototypes
                     var orderPrototypesIds = repository.Subscriptions.Where(x => ids.Contains(x.Id)).Select(x => x.CustomerOrderPrototypeId).ToArray();
-                    await _customerOrderService.DeleteAsync(orderPrototypesIds);
+                    await CustomerOrderService.DeleteAsync(orderPrototypesIds);
 
                     await repository.RemoveSubscriptionsByIdsAsync(ids);
                     await repository.UnitOfWork.CommitAsync();
 
-                    await _eventPublisher.Publish(new SubscriptionChangedEvent(changedEntries));
+                    await EventPublisher.Publish(new SubscriptionChangedEvent(changedEntries));
 
                     ClearCacheFor(subscriptions);
                 }
@@ -195,15 +195,15 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
         #endregion
 
         #region ISubscriptionSearchService members
-        public async Task<GenericSearchResult<Subscription>> SearchSubscriptionsAsync(SubscriptionSearchCriteria criteria)
+        public virtual async Task<GenericSearchResult<Subscription>> SearchSubscriptionsAsync(SubscriptionSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), nameof(SearchSubscriptionsAsync), criteria.GetCacheKey());
-            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
+            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
             {
                 cacheEntry.AddExpirationToken(SubscriptionSearchCacheRegion.CreateChangeToken());
 
                 var retVal = new GenericSearchResult<Subscription>();
-                using (var repository = _subscriptionRepositoryFactory())
+                using (var repository = SubscriptionRepositoryFactory())
                 {
                     repository.DisableChangesTracking();
 
@@ -271,7 +271,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
 
             if (!string.IsNullOrEmpty(criteria.CustomerOrderId))
             {
-                var order = (await _customerOrderService.GetByIdsAsync(new[] { criteria.CustomerOrderId })).FirstOrDefault();
+                var order = (await CustomerOrderService.GetByIdsAsync(new[] { criteria.CustomerOrderId })).FirstOrDefault();
                 if (order != null && !string.IsNullOrEmpty(order.SubscriptionId))
                 {
                     query = query.Where(x => x.Id == order.SubscriptionId);
