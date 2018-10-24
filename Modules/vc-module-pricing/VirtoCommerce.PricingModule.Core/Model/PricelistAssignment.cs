@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.PricingModule.Core.Model.CommonExpressions;
@@ -38,6 +39,9 @@ namespace VirtoCommerce.PricingModule.Core.Model
         /// <summary>
         /// Deserialized conditional expression  used to evaluate current assignment availability 
         /// </summary>
+        // TECHDEBT: [JsonIgnore] attribute here is a workaround to exclude this property from Swagger documentation.
+        //           This property causes NSwag to include lots of types including MethodImplAttributes, which leads to the invalid Swagger JSON.
+        [JsonIgnore]
         public Func<IEvaluationContext, bool> Condition { get; set; }
 
         /// <summary>
