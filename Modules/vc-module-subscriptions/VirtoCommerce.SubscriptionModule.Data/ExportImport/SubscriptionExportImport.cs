@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -24,19 +26,14 @@ namespace VirtoCommerce.SubscriptionModule.Data.ExportImport
         private readonly JsonSerializer _jsonSerializer;
 
         public SubscriptionExportImport(ISubscriptionService subscriptionService, ISubscriptionSearchService subscriptionSearchService,
-            IPaymentPlanSearchService planSearchService, IPaymentPlanService paymentPlanService)
+            IPaymentPlanSearchService planSearchService, IPaymentPlanService paymentPlanService, IOptions<MvcJsonOptions> jsonOptions)
         {
             _subscriptionService = subscriptionService;
             _subscriptionSearchService = subscriptionSearchService;
             _paymentPlanSearchService = planSearchService;
             _paymentPlanService = paymentPlanService;
 
-            _jsonSerializer = new JsonSerializer
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                NullValueHandling = NullValueHandling.Ignore,
-                Formatting = Formatting.Indented
-            };
+            _jsonSerializer = JsonSerializer.Create(jsonOptions.Value.SerializerSettings);
         }
 
 
