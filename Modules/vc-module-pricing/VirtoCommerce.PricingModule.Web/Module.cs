@@ -15,8 +15,8 @@ using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Serialization;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.PricingModule.Core;
 using VirtoCommerce.PricingModule.Core.Model.CommonExpressions;
-using VirtoCommerce.PricingModule.Core.ModuleConstants;
 using VirtoCommerce.PricingModule.Core.Services;
 using VirtoCommerce.PricingModule.Data.DynamicExpressions.Common.Conditions;
 using VirtoCommerce.PricingModule.Data.DynamicExpressions.Common.Conditions.Browse;
@@ -63,9 +63,9 @@ namespace VirtoCommerce.PricingModule.Web
             _applicationBuilder = appBuilder;
 
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
-            settingsRegistrar.RegisterSettings(ModuleSettings.AllSettings, ModuleInfo.Id);
+            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
 
-            var modulePermissions = ModulePermissions.AllPermissions.Select(p => new Permission
+            var modulePermissions = ModuleConstants.Security.Permissions.AllPermissions.Select(p => new Permission
             {
                 Name = p,
                 GroupName = "Pricing",
