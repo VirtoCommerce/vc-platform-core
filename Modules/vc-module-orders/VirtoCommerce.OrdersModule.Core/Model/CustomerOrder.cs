@@ -19,6 +19,11 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         public string EmployeeName { get; set; }
 
         /// <summary>
+        /// The order identifier in an external system.
+        /// </summary>
+        public string OuterId { get; set; }
+
+        /// <summary>
         /// The basis shopping cart id of which the order was created
         /// </summary>
         public string ShoppingCartId { get; set; }
