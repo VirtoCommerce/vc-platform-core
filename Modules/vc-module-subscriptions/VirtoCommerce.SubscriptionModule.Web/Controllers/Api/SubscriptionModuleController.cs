@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Services;
+using VirtoCommerce.SubscriptionModule.Core;
 using VirtoCommerce.SubscriptionModule.Core.Model;
 using VirtoCommerce.SubscriptionModule.Core.Model.Search;
 using VirtoCommerce.SubscriptionModule.Core.Services;
 using VirtoCommerce.SubscriptionModule.Web.Model;
-using VirtoCommerce.SubscriptionModule.Web.Security;
 
 namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
 {
@@ -38,7 +38,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
         [HttpPost]
         [Route("search")]
         [ProducesResponseType(typeof(SubscriptionSearchResult), 200)]
-        [Authorize(SubscriptionPredefinedPermissions.Read)]
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
         public async Task<IActionResult> SearchSubscriptions(SubscriptionSearchCriteria criteria)
         {
             var result = await _subscriptionSearchService.SearchSubscriptionsAsync(criteria);
@@ -53,7 +53,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
         [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(Subscription), 200)]
-        [Authorize(SubscriptionPredefinedPermissions.Read)]
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
         public async Task<IActionResult> GetSubscriptionById(string id, [FromQuery] string respGroup = null)
         {
             var retVal = (await _subscriptionService.GetByIdsAsync(new[] { id }, respGroup)).FirstOrDefault();
@@ -67,7 +67,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
         [HttpGet]
         [Route("")]
         [ProducesResponseType(typeof(Subscription[]), 200)]
-        [Authorize(SubscriptionPredefinedPermissions.Read)]
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
         public async Task<IActionResult> GetSubscriptionByIds([FromQuery] string[] ids, [FromQuery] string respGroup = null)
         {
             var retVal = await _subscriptionService.GetByIdsAsync(ids, respGroup);
@@ -81,7 +81,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
         [HttpPost]
         [Route("order")]
         [ProducesResponseType(typeof(CustomerOrder), 200)]
-        [Authorize(SubscriptionPredefinedPermissions.Update)]
+        [Authorize(ModuleConstants.Security.Permissions.Update)]
         public async Task<IActionResult> CreateReccurentOrderForSubscription(Subscription subscription)
         {
             var subscriptionBuilder = await _subscriptionBuilder.TakeSubscription(subscription).ActualizeAsync();
@@ -93,7 +93,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
         [HttpPost]
         [Route("")]
         [ProducesResponseType(typeof(Subscription), 200)]
-        [Authorize(SubscriptionPredefinedPermissions.Create)]
+        [Authorize(ModuleConstants.Security.Permissions.Create)]
         public async Task<IActionResult> CreateSubscription(Subscription subscription)
         {
             await _subscriptionBuilder.TakeSubscription(subscription).ActualizeAsync();
@@ -104,7 +104,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
         [HttpPost]
         [Route("cancel")]
         [ProducesResponseType(typeof(Subscription), 200)]
-        [Authorize(SubscriptionPredefinedPermissions.Create)]
+        [Authorize(ModuleConstants.Security.Permissions.Create)]
         public async Task<IActionResult> CancelSubscription(SubscriptionCancelRequest cancelRequest)
         {
             var retVal = (await _subscriptionService.GetByIdsAsync(new[] { cancelRequest.SubscriptionId })).FirstOrDefault();
@@ -119,7 +119,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
         [HttpPut]
         [Route("")]
         [ProducesResponseType(typeof(Subscription), 200)]
-        [Authorize(SubscriptionPredefinedPermissions.Update)]
+        [Authorize(ModuleConstants.Security.Permissions.Update)]
         public async Task<IActionResult> UpdateSubscription(Subscription subscription)
         {
             await _subscriptionBuilder.TakeSubscription(subscription).ActualizeAsync();
@@ -134,7 +134,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
         [HttpDelete]
         [Route("")]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
-        [Authorize(SubscriptionPredefinedPermissions.Delete)]
+        [Authorize(ModuleConstants.Security.Permissions.Delete)]
         public async Task<IActionResult> DeleteSubscriptionsByIds([FromQuery] string[] ids)
         {
             await _subscriptionService.DeleteAsync(ids);
@@ -178,7 +178,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
         [HttpPost]
         [Route("plans")]
         [ProducesResponseType(typeof(PaymentPlan), 200)]
-        [Authorize(SubscriptionPredefinedPermissions.PlanManage)]
+        [Authorize(ModuleConstants.Security.Permissions.PlanManage)]
         public async Task<IActionResult> CreatePaymentPlan(PaymentPlan plan)
         {
             await _planService.SavePlansAsync(new[] { plan });
@@ -190,7 +190,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
         [HttpPut]
         [Route("plans")]
         [ProducesResponseType(typeof(PaymentPlan), 200)]
-        [Authorize(SubscriptionPredefinedPermissions.PlanManage)]
+        [Authorize(ModuleConstants.Security.Permissions.PlanManage)]
         public async Task<IActionResult> UpdatePaymentPlan(PaymentPlan plan)
         {
             await _planService.SavePlansAsync(new[] { plan });
@@ -204,7 +204,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
         [HttpDelete]
         [Route("plans")]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
-        [Authorize(SubscriptionPredefinedPermissions.PlanManage)]
+        [Authorize(ModuleConstants.Security.Permissions.PlanManage)]
         public async Task<IActionResult> DeletePlansByIds([FromQuery] string[] ids)
         {
             await _planService.DeleteAsync(ids);
