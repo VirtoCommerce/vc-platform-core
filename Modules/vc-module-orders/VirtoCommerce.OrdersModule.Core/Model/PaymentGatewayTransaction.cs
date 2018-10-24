@@ -34,6 +34,11 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         public string ResponseCode { get; set; }
 
         /// <summary>
+        /// Actual refund amount that have been received by client.
+        /// </summary>
+        public decimal? RefundAmount { get; set; }
+
+        /// <summary>
         /// Gateway IP address
         /// </summary>
         public string GatewayIpAddress { get; set; }
