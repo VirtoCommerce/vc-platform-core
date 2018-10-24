@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Moq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -132,8 +134,19 @@ namespace VirtoCommerce.SubscriptionModule.Test
             _paymentPlanService = new Mock<IPaymentPlanService>();
             _paymentPlanSearchService = new Mock<IPaymentPlanSearchService>();
 
+            var mvcJsonOptions = new MvcJsonOptions
+            {
+                SerializerSettings = 
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                    NullValueHandling = NullValueHandling.Ignore,
+                    Formatting = Formatting.Indented
+                }
+            };
+            var options = new OptionsWrapper<MvcJsonOptions>(mvcJsonOptions);
+
             _subscriptionExportImport = new SubscriptionExportImport(_subscriptionService.Object, _subscriptionSearchService.Object,
-                _paymentPlanSearchService.Object, _paymentPlanService.Object);
+                _paymentPlanSearchService.Object, _paymentPlanService.Object, options);
 
             _cancellationToken = new Mock<ICancellationToken>();
         }
