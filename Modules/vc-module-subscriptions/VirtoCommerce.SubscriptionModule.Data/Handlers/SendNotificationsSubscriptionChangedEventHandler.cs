@@ -79,9 +79,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Handlers
             notification.To = await GetSubscriptionRecipientEmailAsync(subscription);
 
             //Link notification to subscription to getting notification history for each subscription individually
-            // TODO: is there any way to do it in VirtoCommerce Platform 3.x?
-            //notification.ObjectId = subscription.Id;
-            //notification.ObjectTypeId = typeof(Subscription).Name;
+            notification.TenantIdentity = new TenantIdentity(subscription.Id, typeof(Subscription).Name);
         }
 
         protected virtual bool IsSubscriptionCanceled(GenericChangedEntry<Subscription> changedEntry)
