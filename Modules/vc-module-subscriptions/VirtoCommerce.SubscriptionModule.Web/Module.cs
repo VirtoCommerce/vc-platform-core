@@ -17,8 +17,8 @@ using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.SubscriptionModule.Core;
 using VirtoCommerce.SubscriptionModule.Core.Events;
-using VirtoCommerce.SubscriptionModule.Core.ModuleConstants;
 using VirtoCommerce.SubscriptionModule.Core.Services;
 using VirtoCommerce.SubscriptionModule.Data.ExportImport;
 using VirtoCommerce.SubscriptionModule.Data.Handlers;
@@ -66,7 +66,7 @@ namespace VirtoCommerce.SubscriptionModule.Web
 
             // Register module permissions
             var permissionsRegistrar = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
-            var permissions = ModulePermissions.AllPermissions.Select(permissionName => new Permission
+            var permissions = ModuleConstants.Security.Permissions.AllPermissions.Select(permissionName => new Permission
             {
                 ModuleId = ModuleInfo.Id,
                 GroupName = "Subscription",
@@ -76,7 +76,7 @@ namespace VirtoCommerce.SubscriptionModule.Web
 
             //Register setting in the store level
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
-            settingsRegistrar.RegisterSettings(ModuleSettings.AllSettings, ModuleInfo.Id);
+            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
 
             // TODO: how to simulate this?
             //var storeLevelSettings = new[] { "Subscription.EnableSubscriptions" };
@@ -91,10 +91,10 @@ namespace VirtoCommerce.SubscriptionModule.Web
 
             //Schedule periodic subscription processing job
             var settingsManager = appBuilder.ApplicationServices.GetRequiredService<ISettingsManager>();
-            var processJobEnable = settingsManager.GetValue(ModuleSettings.EnableSubscriptionProcessJob.Name, true);
+            var processJobEnable = settingsManager.GetValue(ModuleConstants.Settings.General.EnableSubscriptionProcessJob.Name, true);
             if (processJobEnable)
             {
-                var cronExpression = settingsManager.GetValue(ModuleSettings.CronExpression.Name, "0/5 * * * *");
+                var cronExpression = settingsManager.GetValue(ModuleConstants.Settings.General.CronExpression.Name, "0/5 * * * *");
                 RecurringJob.AddOrUpdate<ProcessSubscriptionJob>("ProcessSubscriptionJob", x => x.Process(), cronExpression);
             }
             else
@@ -102,10 +102,10 @@ namespace VirtoCommerce.SubscriptionModule.Web
                 RecurringJob.RemoveIfExists("ProcessSubscriptionJob");
             }
 
-            var createOrderJobEnable = settingsManager.GetValue(ModuleSettings.EnableSubscriptionOrdersCreateJob.Name, true);
+            var createOrderJobEnable = settingsManager.GetValue(ModuleConstants.Settings.General.EnableSubscriptionOrdersCreateJob.Name, true);
             if (createOrderJobEnable)
             {
-                var cronExpressionOrder = settingsManager.GetValue(ModuleSettings.CronExpressionOrdersJob.Name, "0/15 * * * *");
+                var cronExpressionOrder = settingsManager.GetValue(ModuleConstants.Settings.General.CronExpressionOrdersJob.Name, "0/15 * * * *");
                 RecurringJob.AddOrUpdate<CreateRecurrentOrdersJob>("ProcessSubscriptionOrdersJob", x => x.Process(), cronExpressionOrder);
             }
             else
