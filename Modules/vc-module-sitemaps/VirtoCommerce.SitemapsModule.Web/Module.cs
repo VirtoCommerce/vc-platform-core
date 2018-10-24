@@ -11,7 +11,7 @@ using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
-using VirtoCommerce.SitemapsModule.Core.ModuleConstants;
+using VirtoCommerce.SitemapsModule.Core;
 using VirtoCommerce.SitemapsModule.Core.Services;
 using VirtoCommerce.SitemapsModule.Data.ExportImport;
 using VirtoCommerce.SitemapsModule.Data.Repositories;
@@ -62,9 +62,9 @@ namespace VirtoCommerce.SitemapsModule.Web
             }
 
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
-            settingsRegistrar.RegisterSettings(ModuleSettings.AllSettings, ModuleInfo.Id);
+            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
 
-            var allPermissions = ModulePermissions.AllPermissions.Select(permissionName => new Permission
+            var allPermissions = ModuleConstants.Security.Permissions.AllPermissions.Select(permissionName => new Permission
             {
                 Name = permissionName,
                 GroupName = "Sitemaps",

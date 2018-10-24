@@ -17,8 +17,8 @@ using VirtoCommerce.Platform.Core.Exceptions;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.SitemapsModule.Core;
 using VirtoCommerce.SitemapsModule.Core.Models;
-using VirtoCommerce.SitemapsModule.Core.ModuleConstants;
 using VirtoCommerce.SitemapsModule.Core.Services;
 using VirtoCommerce.SitemapsModule.Data.Services;
 using VirtoCommerce.SitemapsModule.Web.Model.PushNotifications;
@@ -27,7 +27,7 @@ using SystemFile = System.IO.File;
 namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
 {
     [Route("api/sitemaps")]
-    [Authorize(ModulePermissions.Read)]
+    [Authorize(ModuleConstants.Security.Permissions.Read)]
     public class SitemapsModuleApiController : Controller
     {
         private readonly ISitemapService _sitemapService;
@@ -100,7 +100,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
         [HttpPost]
         [Route("")]
         [ProducesResponseType(typeof(Sitemap), 200)]
-        [Authorize(ModulePermissions.Create)]
+        [Authorize(ModuleConstants.Security.Permissions.Create)]
         public async Task<IActionResult> AddSitemap([FromBody]Sitemap sitemap)
         {
             if (sitemap == null)
@@ -116,7 +116,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
         [HttpPut]
         [Route("")]
         [ProducesResponseType(typeof(void), 204)]
-        [Authorize(ModulePermissions.Update)]
+        [Authorize(ModuleConstants.Security.Permissions.Update)]
         public async Task<IActionResult> UpdateSitemap([FromBody]Sitemap sitemap)
         {
             if (sitemap == null)
@@ -132,7 +132,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
         [HttpDelete]
         [Route("")]
         [ProducesResponseType(typeof(void), 204)]
-        [Authorize(ModulePermissions.Delete)]
+        [Authorize(ModuleConstants.Security.Permissions.Delete)]
         public async Task<IActionResult> DeleteSitemap(string[] ids)
         {
             if (ids == null)
@@ -246,7 +246,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
         [ApiExplorerSettings(IgnoreApi = true)]
         public async Task BackgroundDownload(string storeId, string baseUrl, SitemapDownloadNotification notification)
         {
-            Action<ExportImportProgressInfo> progressCallback = c =>
+            void SendNotificationWithProgressInfo(ExportImportProgressInfo c)
             {
                 // TODO: is there a better way to copy ExportImportProgressInfo properties to SitemapDownloadNotification without using ValueInjecter?
                 notification.Description = c.Description;
@@ -255,7 +255,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
                 notification.Errors = c.Errors?.ToList() ?? new List<string>();
 
                 _notifier.Send(notification);
-            };
+            }
 
             try
             {
@@ -272,14 +272,14 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
                 {
                     using (var zipPackage = ZipPackage.Open(stream, FileMode.Create))
                     {
-                        await CreateSitemapPartAsync(zipPackage, storeId, baseUrl, "sitemap.xml", progressCallback);
+                        await CreateSitemapPartAsync(zipPackage, storeId, baseUrl, "sitemap.xml", SendNotificationWithProgressInfo);
 
                         var sitemapUrls = await _sitemapXmlGenerator.GetSitemapUrlsAsync(storeId);
                         foreach (var sitemapUrl in sitemapUrls)
                         {
                             if (!string.IsNullOrEmpty(sitemapUrl))
                             {
-                                await CreateSitemapPartAsync(zipPackage, storeId, baseUrl, sitemapUrl, progressCallback);
+                                await CreateSitemapPartAsync(zipPackage, storeId, baseUrl, sitemapUrl, SendNotificationWithProgressInfo);
                             }
                         }
                     }
