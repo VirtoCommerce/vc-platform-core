@@ -86,6 +86,22 @@ fieldset {
   fieldset {
     display: table-cell; } }
 
+/* General classes for text */
+.text-error {
+    color: #a94442; }
+
+.text-success {
+    color: #3c763d; }
+
+.text-warning {
+    color: #8a6d3b; }
+
+.text-info {
+    color: #31708f; }
+
+.text-notify {
+    color: #999; }
+
 /* Lists */
 ul,
 ol {
