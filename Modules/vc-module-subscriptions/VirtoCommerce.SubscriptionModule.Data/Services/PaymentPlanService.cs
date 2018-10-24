@@ -156,7 +156,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
 
                         //Load subscriptions with preserving sorting order
                         var unorderedResults = await GetByIdsAsync(paymentPlanIds, criteria.ResponseGroup);
-                        retVal.Results = unorderedResults.OrderBy(x => Array.IndexOf(paymentPlanIds, x.Id)).ToArray();
+                        retVal.Results = unorderedResults.AsQueryable().OrderBySortInfos(sortInfos).ToArray();
                     }
 
                     return retVal;
