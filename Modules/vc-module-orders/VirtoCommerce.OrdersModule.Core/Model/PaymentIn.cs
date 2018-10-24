@@ -34,6 +34,11 @@ namespace VirtoCommerce.OrdersModule.Core.Model
 
         public ProcessPaymentResult ProcessPaymentResult { get; set; }
 
+        /// <summary>
+        /// The payment amount
+        /// </summary>
+        public virtual decimal Amount { get; set; }
+
         //the self cost of the payment method
         public virtual decimal Price { get; set; }
         public virtual decimal PriceWithTax { get; set; }
