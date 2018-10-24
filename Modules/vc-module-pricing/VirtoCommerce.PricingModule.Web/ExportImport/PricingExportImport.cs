@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -14,14 +16,6 @@ using VirtoCommerce.PricingModule.Core.Services;
 
 namespace VirtoCommerce.PricingModule.Web.ExportImport
 {
-    [Obsolete("This class was used by PricingExportImport and was not intended for usage by third-party code. Please use the PricingExportImport class instead.")]
-    public sealed class BackupObject
-    {
-        public ICollection<Pricelist> Pricelists { get; set; }
-        public ICollection<Price> Prices { get; set; }
-        public ICollection<PricelistAssignment> Assignments { get; set; }
-    }
-
     public sealed class PricingExportImport
     {
         private readonly IPricingService _pricingService;
@@ -31,18 +25,14 @@ namespace VirtoCommerce.PricingModule.Web.ExportImport
 
         private int? _batchSize;
 
-        public PricingExportImport(IPricingService pricingService, IPricingSearchService pricingSearchService, ISettingsManager settingsManager)
+        public PricingExportImport(IPricingService pricingService, IPricingSearchService pricingSearchService, ISettingsManager settingsManager,
+            IOptions<MvcJsonOptions> jsonOptions)
         {
             _pricingService = pricingService;
             _pricingSearchService = pricingSearchService;
             _settingsManager = settingsManager;
 
-            _jsonSerializer = new JsonSerializer
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Formatting = Formatting.Indented,
-                NullValueHandling = NullValueHandling.Ignore
-            };
+            _jsonSerializer = JsonSerializer.Create(jsonOptions.Value.SerializerSettings);
         }
 
         private int BatchSize
