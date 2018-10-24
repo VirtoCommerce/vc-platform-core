@@ -22,10 +22,10 @@ using VirtoCommerce.PricingModule.Data.DynamicExpressions.Common.Conditions;
 using VirtoCommerce.PricingModule.Data.DynamicExpressions.Common.Conditions.Browse;
 using VirtoCommerce.PricingModule.Data.DynamicExpressions.Common.Conditions.GeoConditions;
 using VirtoCommerce.PricingModule.Data.DynamicExpressions.Pricing;
+using VirtoCommerce.PricingModule.Data.ExportImport;
 using VirtoCommerce.PricingModule.Data.Repositories;
 using VirtoCommerce.PricingModule.Data.Search;
 using VirtoCommerce.PricingModule.Data.Services;
-using VirtoCommerce.PricingModule.Web.ExportImport;
 using VirtoCommerce.PricingModule.Web.JsonConverters;
 using VirtoCommerce.SearchModule.Core.Model;
 

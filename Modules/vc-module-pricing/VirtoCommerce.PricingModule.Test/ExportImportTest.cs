@@ -9,7 +9,7 @@ using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Services;
-using VirtoCommerce.PricingModule.Web.ExportImport;
+using VirtoCommerce.PricingModule.Data.ExportImport;
 using Xunit;
 
 namespace VirtoCommerce.PricingModule.Test

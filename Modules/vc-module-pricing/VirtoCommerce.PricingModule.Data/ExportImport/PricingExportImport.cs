@@ -14,7 +14,7 @@ using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
 using VirtoCommerce.PricingModule.Core.Services;
 
-namespace VirtoCommerce.PricingModule.Web.ExportImport
+namespace VirtoCommerce.PricingModule.Data.ExportImport
 {
     public sealed class PricingExportImport
     {
@@ -149,8 +149,6 @@ namespace VirtoCommerce.PricingModule.Web.ExportImport
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            // TODO: add cancellation checks during import
-
             var progressInfo = new ExportImportProgressInfo();
 
             using (var streamReader = new StreamReader(stream))
@@ -166,10 +164,14 @@ namespace VirtoCommerce.PricingModule.Web.ExportImport
                         {
                             reader.Read();
 
+                            cancellationToken.ThrowIfCancellationRequested();
+
                             var pricelists = _jsonSerializer.Deserialize<Pricelist[]>(reader);
 
-                            progressInfo.Description = $"{pricelists.Count()} price lists importing...";
+                            progressInfo.Description = $"{pricelists.Length} price lists importing...";
                             progressCallback(progressInfo);
+
+                            cancellationToken.ThrowIfCancellationRequested();
 
                             await _pricingService.SavePricelistsAsync(pricelists);
                         }
@@ -185,6 +187,8 @@ namespace VirtoCommerce.PricingModule.Web.ExportImport
 
                                 while (reader.TokenType != JsonToken.EndArray)
                                 {
+                                    cancellationToken.ThrowIfCancellationRequested();
+
                                     var price = _jsonSerializer.Deserialize<Price>(reader);
                                     pricesChunk.Add(price);
 
@@ -204,13 +208,16 @@ namespace VirtoCommerce.PricingModule.Web.ExportImport
                         }
                         else if (readerValue == "Assignments")
                         {
-
                             reader.Read();
+
+                            cancellationToken.ThrowIfCancellationRequested();
 
                             var assignments = _jsonSerializer.Deserialize<PricelistAssignment[]>(reader);
 
-                            progressInfo.Description = $"{assignments.Count()} assignments importing...";
+                            progressInfo.Description = $"{assignments.Length} assignments importing...";
                             progressCallback(progressInfo);
+
+                            cancellationToken.ThrowIfCancellationRequested();
 
                             await _pricingService.SavePricelistAssignmentsAsync(assignments);
                         }
