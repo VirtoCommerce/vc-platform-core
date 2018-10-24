@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+using System;
 using System.Linq;
-using System.Web;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VirtoCommerce.Platform.Core.Common;
@@ -13,10 +10,10 @@ namespace VirtoCommerce.SubscriptionModule.Web.JsonConverters
 {
     public class PolymorphicSubscriptionJsonConverter : JsonConverter
     {
-        private static Type[] _knowTypes = new[] { typeof(Subscription), typeof(PaymentPlan), typeof(SubscriptionSearchCriteria) };
+        private static Type[] _knowTypes = { typeof(Subscription), typeof(PaymentPlan), typeof(SubscriptionSearchCriteria) };
 
-        public override bool CanWrite { get { return false; } }
-        public override bool CanRead { get { return true; } }
+        public override bool CanWrite => false;
+        public override bool CanRead => true;
 
         public override bool CanConvert(Type objectType)
         {
@@ -25,22 +22,13 @@ namespace VirtoCommerce.SubscriptionModule.Web.JsonConverters
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            object retVal = null;
             var obj = JObject.Load(reader);
 
-            if (typeof(Subscription).IsAssignableFrom(objectType))
-            {
-                retVal = AbstractTypeFactory<Subscription>.TryCreateInstance();
-            }
-            else if (typeof(PaymentPlan).IsAssignableFrom(objectType))
-            {
-                retVal = AbstractTypeFactory<PaymentPlan>.TryCreateInstance();
-            }
-            else if (typeof(SubscriptionSearchCriteria).IsAssignableFrom(objectType))
-            {
-                retVal = AbstractTypeFactory<SubscriptionSearchCriteria>.TryCreateInstance();
-            }
-          
+            var tryCreateInstance = typeof(AbstractTypeFactory<>).MakeGenericType(objectType)
+                                                                 .GetMethods()
+                                                                 .FirstOrDefault(x => x.Name.EqualsInvariant("TryCreateInstance") && x.GetParameters().Length == 0);
+            var retVal = tryCreateInstance?.Invoke(null, null);
+
             serializer.Populate(obj.CreateReader(), retVal);
             return retVal;
         }
