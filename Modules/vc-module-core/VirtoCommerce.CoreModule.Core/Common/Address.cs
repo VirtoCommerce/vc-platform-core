@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -6,6 +7,9 @@ namespace VirtoCommerce.CoreModule.Core.Common
 {
     public class Address : ValueObject, ICloneable
     {
+        //Temporary workaround to be able make references to the address
+        public string Key { get; set; }
+
         public AddressType AddressType { get; set; }
         public string Name { get; set; }
         public string Organization { get; set; }
@@ -23,9 +27,26 @@ namespace VirtoCommerce.CoreModule.Core.Common
         public string LastName { get; set; }
         public string Phone { get; set; }
         public string Email { get; set; }
+
         public object Clone()
         {
             return MemberwiseClone() as Address;
+        }
+
+        protected override IEnumerable<object> GetEqualityComponents()
+        {
+            IEnumerable<object> result;
+
+            if (!string.IsNullOrEmpty(Key))
+            {
+                result = new[] { Key };
+            }
+            else
+            {
+                result = base.GetEqualityComponents();
+            }
+
+            return result;
         }
 
         public override string ToString()
