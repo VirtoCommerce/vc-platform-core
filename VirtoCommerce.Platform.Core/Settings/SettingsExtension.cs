@@ -27,7 +27,7 @@ namespace VirtoCommerce.Platform.Core.Settings
 
             //Deep load settings values for all object contains settings
             var hasSettingsObjects = entity.GetFlatObjectsListWithInterface<IHasSettings>();
-            foreach (var hasSettingsObject in hasSettingsObjects.Where(x => x.Settings != null))
+            foreach (var hasSettingsObject in hasSettingsObjects)
             {
                 var typeSettings = manager.GetSettingsForType(hasSettingsObject.TypeName);
                 if (!typeSettings.IsNullOrEmpty())

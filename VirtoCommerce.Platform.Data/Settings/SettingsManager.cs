@@ -42,10 +42,8 @@ namespace VirtoCommerce.Platform.Data.Settings
             {
                 throw new ArgumentNullException(nameof(settings));
             }
-            foreach (var setting in settings)
-            {
-                _registeredTypeSettingsLookup[setting.Name] = settings;
-            }
+            _registeredTypeSettingsLookup[typeName] = settings;
+
         }
 
         public IEnumerable<SettingDescriptor> GetSettingsForType(string typeName)
