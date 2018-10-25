@@ -120,7 +120,9 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                                                                                  .FromModel(order, pkMap) as CustomerOrderEntity;
                     if (originalEntity != null)
                     {
-                        changedEntries.Add(new GenericChangedEntry<CustomerOrder>(order, (CustomerOrder)originalEntity.ToModel(AbstractTypeFactory<CustomerOrder>.TryCreateInstance()), EntryState.Modified));
+                        var oldEntry = (CustomerOrder)originalEntity.ToModel(AbstractTypeFactory<CustomerOrder>.TryCreateInstance());
+                        await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(oldEntry);
+                        changedEntries.Add(new GenericChangedEntry<CustomerOrder>(order, oldEntry, EntryState.Modified));
                         modifiedEntity?.Patch(originalEntity);
                     }
                     else
@@ -222,7 +224,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             }
         }
 
-        private void ClearCache(IEnumerable<CustomerOrder> orders)
+        protected virtual void ClearCache(IEnumerable<CustomerOrder> orders)
         {
             OrderSearchCacheRegion.ExpireRegion();
 
