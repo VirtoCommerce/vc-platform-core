@@ -25,46 +25,46 @@ namespace VirtoCommerce.OrdersModule.Data.Services
 {
     public class CustomerOrderServiceImpl : ICustomerOrderService
     {
-        private readonly Func<IOrderRepository> _repositoryFactory;
-        private readonly IEventPublisher _eventPublisher;
-        private readonly IDynamicPropertyService _dynamicPropertyService;
-        private readonly IStoreService _storeService;
-
-        private readonly IUniqueNumberGenerator _uniqueNumberGenerator;
-        private readonly IPaymentMethodsRegistrar _paymentMethodsRegistrar;
-        private readonly IShippingMethodsRegistrar _shippingMethodsRegistrar;
-        private readonly IChangeLogService _changeLogService;
-        private readonly ICustomerOrderTotalsCalculator _totalsCalculator;
-        private readonly IPlatformMemoryCache _platformMemoryCache;
-
         public CustomerOrderServiceImpl(Func<IOrderRepository> orderRepositoryFactory, IUniqueNumberGenerator uniqueNumberGenerator
             , IDynamicPropertyService dynamicPropertyService, IStoreService storeService, IChangeLogService changeLogService
             , IEventPublisher eventPublisher, ICustomerOrderTotalsCalculator totalsCalculator
             , IShippingMethodsRegistrar shippingMethodsRegistrar, IPaymentMethodsRegistrar paymentMethodsRegistrar, IPlatformMemoryCache platformMemoryCache)
         {
-            _repositoryFactory = orderRepositoryFactory;
-            _eventPublisher = eventPublisher;
-            _dynamicPropertyService = dynamicPropertyService;
-            _storeService = storeService;
-            _changeLogService = changeLogService;
-            _totalsCalculator = totalsCalculator;
-            _shippingMethodsRegistrar = shippingMethodsRegistrar;
-            _paymentMethodsRegistrar = paymentMethodsRegistrar;
-            _platformMemoryCache = platformMemoryCache;
-            _uniqueNumberGenerator = uniqueNumberGenerator;
+            RepositoryFactory = orderRepositoryFactory;
+            EventPublisher = eventPublisher;
+            DynamicPropertyService = dynamicPropertyService;
+            StoreService = storeService;
+            ChangeLogService = changeLogService;
+            TotalsCalculator = totalsCalculator;
+            ShippingMethodsRegistrar = shippingMethodsRegistrar;
+            PaymentMethodsRegistrar = paymentMethodsRegistrar;
+            PlatformMemoryCache = platformMemoryCache;
+            UniqueNumberGenerator = uniqueNumberGenerator;
         }
-        
+
+        protected Func<IOrderRepository> RepositoryFactory { get; }
+        protected IEventPublisher EventPublisher { get; }
+        protected IDynamicPropertyService DynamicPropertyService { get; }
+        protected IStoreService StoreService { get; }
+
+        protected IUniqueNumberGenerator UniqueNumberGenerator { get; }
+        protected IPaymentMethodsRegistrar PaymentMethodsRegistrar { get; }
+        protected IShippingMethodsRegistrar ShippingMethodsRegistrar { get; }
+        protected IChangeLogService ChangeLogService { get; }
+        protected ICustomerOrderTotalsCalculator TotalsCalculator { get; }
+        protected IPlatformMemoryCache PlatformMemoryCache { get; }
+
         #region ICustomerOrderService Members
 
         public virtual async Task<CustomerOrder[]> GetByIdsAsync(string[] orderIds, string responseGroup = null)
         {
             var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", orderIds), responseGroup);
-            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 var retVal = new List<CustomerOrder>();
                 var orderResponseGroup = EnumUtility.SafeParse(responseGroup, CustomerOrderResponseGroup.Full);
 
-                using (var repository = _repositoryFactory())
+                using (var repository = RepositoryFactory())
                 {
                     repository.DisableChangesTracking();
 
@@ -79,7 +79,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                             //Calculate totals only for full responseGroup
                             if (orderResponseGroup == CustomerOrderResponseGroup.Full)
                             {
-                                _totalsCalculator.CalculateTotals(customerOrder);
+                                TotalsCalculator.CalculateTotals(customerOrder);
                             }
                             LoadOrderDependencies(customerOrder);
                             retVal.Add(customerOrder);
@@ -88,7 +88,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                     }
                 }
 
-                await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal.ToArray<IHasDynamicProperties>());
+                await DynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal.ToArray<IHasDynamicProperties>());
                 return retVal.ToArray();
             });
         }
@@ -104,7 +104,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             var pkMap = new PrimaryKeyResolvingMap();
             var changedEntries = new List<GenericChangedEntry<CustomerOrder>>();
 
-            using (var repository = _repositoryFactory())
+            using (var repository = RepositoryFactory())
             {
                 var dataExistOrders = await repository.GetCustomerOrdersByIdsAsync(orders.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray(), CustomerOrderResponseGroup.Full);
                 foreach (var order in orders)
@@ -114,14 +114,14 @@ namespace VirtoCommerce.OrdersModule.Data.Services
 
                     var originalEntity = dataExistOrders.FirstOrDefault(x => x.Id == order.Id);
                     //Calculate order totals
-                    _totalsCalculator.CalculateTotals(order);
+                    TotalsCalculator.CalculateTotals(order);
 
                     var modifiedEntity = AbstractTypeFactory<CustomerOrderEntity>.TryCreateInstance()
                                                                                  .FromModel(order, pkMap) as CustomerOrderEntity;
                     if (originalEntity != null)
                     {
                         var oldEntry = (CustomerOrder)originalEntity.ToModel(AbstractTypeFactory<CustomerOrder>.TryCreateInstance());
-                        await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(oldEntry);
+                        await DynamicPropertyService.LoadDynamicPropertyValuesAsync(oldEntry);
                         changedEntries.Add(new GenericChangedEntry<CustomerOrder>(order, oldEntry, EntryState.Modified));
                         modifiedEntity?.Patch(originalEntity);
                     }
@@ -132,7 +132,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                     }
                 }
                 //Raise domain events
-                await _eventPublisher.Publish(new OrderChangeEvent(changedEntries));
+                await EventPublisher.Publish(new OrderChangeEvent(changedEntries));
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
             }
@@ -140,32 +140,32 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             //Save dynamic properties
             foreach (var order in orders)
             {
-                await _dynamicPropertyService.SaveDynamicPropertyValuesAsync(order);
+                await DynamicPropertyService.SaveDynamicPropertyValuesAsync(order);
             }
             //Raise domain events
-            await _eventPublisher.Publish(new OrderChangedEvent(changedEntries));
+            await EventPublisher.Publish(new OrderChangedEvent(changedEntries));
             ClearCache(orders);
         }
 
         public virtual async Task DeleteAsync(string[] ids)
         {
             var orders = await GetByIdsAsync(ids, CustomerOrderResponseGroup.Full.ToString());
-            using (var repository = _repositoryFactory())
+            using (var repository = RepositoryFactory())
             {
                 //Raise domain events before deletion
                 var changedEntries = orders.Select(x => new GenericChangedEntry<CustomerOrder>(x, EntryState.Deleted));
-                await _eventPublisher.Publish(new OrderChangeEvent(changedEntries));
+                await EventPublisher.Publish(new OrderChangeEvent(changedEntries));
 
                 await repository.RemoveOrdersByIdsAsync(ids);
 
                 foreach (var order in orders)
                 {
-                    await _dynamicPropertyService.DeleteDynamicPropertyValuesAsync(order);
+                    await DynamicPropertyService.DeleteDynamicPropertyValuesAsync(order);
                 }
 
                 await repository.UnitOfWork.CommitAsync();
                 //Raise domain events after deletion
-                await _eventPublisher.Publish(new OrderChangedEvent(changedEntries));
+                await EventPublisher.Publish(new OrderChangedEvent(changedEntries));
             }
             ClearCache(orders);
         }
@@ -178,7 +178,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             {
                 throw new ArgumentNullException(nameof(order));
             }
-            var shippingMethods = _shippingMethodsRegistrar.GetAllShippingMethods();
+            var shippingMethods = ShippingMethodsRegistrar.GetAllShippingMethods();
             if (!shippingMethods.IsNullOrEmpty())
             {
                 foreach (var shipment in order.Shipments)
@@ -186,7 +186,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                     shipment.ShippingMethod = shippingMethods.FirstOrDefault(x => x.Code.EqualsInvariant(shipment.ShipmentMethodCode));
                 }
             }
-            var paymentMethods = _paymentMethodsRegistrar.GetAllPaymentMethods();
+            var paymentMethods = PaymentMethodsRegistrar.GetAllPaymentMethods();
             if (!paymentMethods.IsNullOrEmpty())
             {
                 foreach (var payment in order.InPayments)
@@ -198,7 +198,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
 
         protected virtual async Task EnsureThatAllOperationsHaveNumber(CustomerOrder order)
         {
-            var store = await _storeService.GetByIdAsync(order.StoreId);
+            var store = await StoreService.GetByIdAsync(order.StoreId);
 
             foreach (var operation in order.GetFlatObjectsListWithInterface<IOperation>())
             {
@@ -219,7 +219,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                         numberTemplate = store.Settings.GetSettingValue("Order." + objectTypeName + "NewNumberTemplate", numberTemplate);
                     }
 
-                    operation.Number = _uniqueNumberGenerator.GenerateNumber(numberTemplate);
+                    operation.Number = UniqueNumberGenerator.GenerateNumber(numberTemplate);
                 }
             }
         }
