@@ -18,22 +18,22 @@ namespace VirtoCommerce.OrdersModule.Data.Services
 {
     public class CustomerOrderSearchServiceImpl : ICustomerOrderSearchService
     {
-        private readonly Func<IOrderRepository> _repositoryFactory;
-        private readonly IPlatformMemoryCache _platformMemoryCache;
-
         public CustomerOrderSearchServiceImpl(Func<IOrderRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache)
         {
-            _repositoryFactory = repositoryFactory;
-            _platformMemoryCache = platformMemoryCache;
+            RepositoryFactory = repositoryFactory;
+            PlatformMemoryCache = platformMemoryCache;
         }
+
+        protected Func<IOrderRepository> RepositoryFactory { get; }
+        protected IPlatformMemoryCache PlatformMemoryCache { get; }
 
         public virtual async Task<GenericSearchResult<CustomerOrder>> SearchCustomerOrdersAsync(CustomerOrderSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), "SearchCustomerOrdersAsync", criteria.GetCacheKey());
-            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(OrderSearchCacheRegion.CreateChangeToken());
-                using (var repository = _repositoryFactory())
+                using (var repository = RepositoryFactory())
                 {
                     repository.DisableChangesTracking();
                     var retVal = new GenericSearchResult<CustomerOrder>();

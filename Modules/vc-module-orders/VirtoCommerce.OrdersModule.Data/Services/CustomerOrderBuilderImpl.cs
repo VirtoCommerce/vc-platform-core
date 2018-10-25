@@ -17,19 +17,19 @@ namespace VirtoCommerce.OrdersModule.Data.Services
 {
     public class CustomerOrderBuilderImpl : ICustomerOrderBuilder
     {
-        private readonly ICustomerOrderService _customerOrderService;
-
         public CustomerOrderBuilderImpl(ICustomerOrderService customerOrderService)
         {
-            _customerOrderService = customerOrderService;
+            CustomerOrderService = customerOrderService;
         }
+
+        protected ICustomerOrderService CustomerOrderService { get; }
 
         #region ICustomerOrderConverter Members
 
         public virtual async Task<CustomerOrder> PlaceCustomerOrderFromCartAsync(ShoppingCart cart)
         {
             var customerOrder = ConvertCartToOrder(cart);
-            await _customerOrderService.SaveChangesAsync(new[] { customerOrder });
+            await CustomerOrderService.SaveChangesAsync(new[] { customerOrder });
             return customerOrder;
         }
 
