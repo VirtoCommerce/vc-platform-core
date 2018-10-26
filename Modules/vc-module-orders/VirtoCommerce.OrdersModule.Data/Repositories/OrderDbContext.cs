@@ -35,7 +35,7 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
 
             modelBuilder.Entity<LineItemEntity>().Property(x => x.TaxPercentRate).HasColumnType("decimal(18,4)");
             modelBuilder.Entity<LineItemEntity>().HasOne(x => x.CustomerOrder).WithMany(x => x.Items)
-                        .HasForeignKey(x => x.CustomerOrderId).OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey(x => x.CustomerOrderId).OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<LineItemEntity>().ToTable("OrderLineItem");
             #endregion
@@ -63,7 +63,7 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
             modelBuilder.Entity<ShipmentPackageEntity>().Property(x => x.Id).HasMaxLength(128); ;
 
             modelBuilder.Entity<ShipmentPackageEntity>().HasOne(x => x.Shipment).WithMany(x => x.Packages)
-                        .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Cascade).IsRequired();
+                        .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Restrict).IsRequired();
 
 
             modelBuilder.Entity<ShipmentPackageEntity>().ToTable("OrderShipmentPackage");
@@ -76,7 +76,7 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
 
             modelBuilder.Entity<ShipmentEntity>().Property(x => x.TaxPercentRate).HasColumnType("decimal(18,4)");
             modelBuilder.Entity<ShipmentEntity>().HasOne(x => x.CustomerOrder).WithMany(x => x.Shipments)
-                        .HasForeignKey(x => x.CustomerOrderId).OnDelete(DeleteBehavior.Cascade).IsRequired();
+                        .HasForeignKey(x => x.CustomerOrderId).OnDelete(DeleteBehavior.Restrict).IsRequired();
 
             modelBuilder.Entity<ShipmentEntity>().ToTable("OrderShipment");
             #endregion
@@ -105,10 +105,10 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
 
             modelBuilder.Entity<PaymentInEntity>().Property(x => x.TaxPercentRate).HasColumnType("decimal(18,4)");
             modelBuilder.Entity<PaymentInEntity>().HasOne(x => x.CustomerOrder).WithMany(x => x.InPayments)
-                        .HasForeignKey(x => x.CustomerOrderId).OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey(x => x.CustomerOrderId).OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<PaymentInEntity>().HasOne(x => x.Shipment).WithMany(x => x.InPayments)
-                        .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey(x => x.ShipmentId).OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<PaymentInEntity>().ToTable("OrderPaymentIn");
             #endregion
