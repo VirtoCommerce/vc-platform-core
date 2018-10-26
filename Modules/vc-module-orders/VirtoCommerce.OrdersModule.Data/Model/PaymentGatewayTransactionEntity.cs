@@ -44,6 +44,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public virtual PaymentInEntity PaymentIn { get; set; }
         public string PaymentInId { get; set; }
 
+        [Column(TypeName = "Money")]
+        public decimal RefundAmount { get; set; }
 
         public virtual PaymentGatewayTransaction ToModel(PaymentGatewayTransaction transaction)
         {
@@ -63,6 +65,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             transaction.ProcessAttemptCount = ProcessAttemptCount;
             transaction.ProcessedDate = ProcessedDate;
             transaction.ProcessError = ProcessError;
+            transaction.RefundAmount = RefundAmount;
             transaction.RequestData = RequestData;
             transaction.ResponseCode = ResponseCode;
             transaction.ResponseData = ResponseData;
@@ -92,6 +95,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             ProcessAttemptCount = transaction.ProcessAttemptCount;
             ProcessedDate = transaction.ProcessedDate;
             ProcessError = transaction.ProcessError;
+            RefundAmount = transaction.RefundAmount ?? 0.0m;
             RequestData = transaction.RequestData;
             ResponseCode = transaction.ResponseCode;
             ResponseData = transaction.ResponseData;
@@ -116,6 +120,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             target.ProcessAttemptCount = ProcessAttemptCount;
             target.ProcessedDate = ProcessedDate;
             target.ProcessError = ProcessError;
+            target.RefundAmount = RefundAmount;
             target.RequestData = RequestData;
             target.ResponseCode = ResponseCode;
             target.ResponseData = ResponseData;
