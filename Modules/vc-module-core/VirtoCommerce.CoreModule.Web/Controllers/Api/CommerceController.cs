@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -8,8 +6,6 @@ using VirtoCommerce.CoreModule.Core;
 using VirtoCommerce.CoreModule.Core.Currency;
 using VirtoCommerce.CoreModule.Core.Package;
 using VirtoCommerce.CoreModule.Core.Seo;
-using VirtoCommerce.CoreModule.Core.Tax;
-using VirtoCommerce.StoreModule.Core.Services;
 
 namespace VirtoCommerce.CoreModule.Web.Controllers.Api
 {
@@ -19,43 +15,16 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         private readonly ISeoService _seoService;
         private readonly ICurrencyService _currencyService;
         private readonly IPackageTypesService _packageTypesService;
-        private readonly IStoreService _storeService;
         private readonly ISeoDuplicatesDetector _seoDuplicateDetector;
 
-        public CommerceController(ISeoService seoService, ICurrencyService currencyService, IPackageTypesService packageTypesService, IStoreService storeService, ISeoDuplicatesDetector seoDuplicateDetector)
+        public CommerceController(ISeoService seoService, ICurrencyService currencyService, IPackageTypesService packageTypesService, ISeoDuplicatesDetector seoDuplicateDetector)
         {
             _seoService = seoService;
             _currencyService = currencyService;
             _packageTypesService = packageTypesService;
-            _storeService = storeService;
             _seoDuplicateDetector = seoDuplicateDetector;
         }
 
-
-        /// <summary>
-        /// Evaluate and return all tax rates for specified store and evaluation context 
-        /// </summary>
-        /// <param name="storeId"></param>
-        /// <param name="evalContext"></param>
-        /// <returns></returns>
-        [HttpPost]
-        [ProducesResponseType(typeof(TaxRate[]), 200)]
-        [Route("taxes/{storeId}/evaluate")]
-        public async Task<IActionResult> EvaluateTaxes(string storeId, [FromBody]TaxEvaluationContext evalContext)
-        {
-            var retVal = new List<TaxRate>();
-            var store = await _storeService.GetByIdAsync(storeId);
-            if (store != null)
-            {
-                var activeTaxProvider = store.TaxProviders.FirstOrDefault(x => x.IsActive);
-                if (activeTaxProvider != null)
-                {
-                    evalContext.StoreId = store.Id;
-                    retVal.AddRange(activeTaxProvider.CalculateRates(evalContext));
-                }
-            }
-            return Ok(retVal);
-        }
 
         /// <summary>
         /// Batch create or update seo infos
