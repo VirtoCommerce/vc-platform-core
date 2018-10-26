@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VirtoCommerce.CartModule.Data.Repositories;
 
 namespace VirtoCommerce.CartModule.Data.Migrations
 {
     [DbContext(typeof(CartDbContext))]
-    partial class CartDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181023131138_AddressName")]
+    partial class AddressName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -89,25 +91,6 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     b.HasIndex("ShoppingCartId");
 
                     b.ToTable("CartAddress");
-                });
-
-            modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.CouponEntity", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(128);
-
-                    b.Property<string>("Code")
-                        .HasMaxLength(64);
-
-                    b.Property<string>("ShoppingCartId")
-                        .IsRequired();
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ShoppingCartId");
-
-                    b.ToTable("CartCoupon");
                 });
 
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.DiscountEntity", b =>
@@ -494,6 +477,9 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     b.Property<string>("Comment")
                         .HasMaxLength(2048);
 
+                    b.Property<string>("Coupon")
+                        .HasMaxLength(64);
+
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(64);
 
@@ -647,14 +633,6 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                         .WithMany("Addresses")
                         .HasForeignKey("ShoppingCartId")
                         .OnDelete(DeleteBehavior.Restrict);
-                });
-
-            modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.CouponEntity", b =>
-                {
-                    b.HasOne("VirtoCommerce.CartModule.Data.Model.ShoppingCartEntity", "ShoppingCart")
-                        .WithMany("Coupons")
-                        .HasForeignKey("ShoppingCartId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.DiscountEntity", b =>

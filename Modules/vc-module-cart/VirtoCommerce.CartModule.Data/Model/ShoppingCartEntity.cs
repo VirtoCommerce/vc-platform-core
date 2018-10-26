@@ -39,9 +39,6 @@ namespace VirtoCommerce.CartModule.Data.Model
         [StringLength(3)]
         public string Currency { get; set; }
 
-        [StringLength(64)]
-        public string Coupon { get; set; }
-
         [StringLength(16)]
         public string LanguageCode { get; set; }
 
@@ -114,6 +111,7 @@ namespace VirtoCommerce.CartModule.Data.Model
         public virtual ObservableCollection<PaymentEntity> Payments { get; set; } = new NullCollection<PaymentEntity>();
         public virtual ObservableCollection<ShipmentEntity> Shipments { get; set; } = new NullCollection<ShipmentEntity>();
         public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
+        public virtual ObservableCollection<CouponEntity> Coupons { get; set; } = new NullCollection<CouponEntity>();
 
 
         public virtual ShoppingCart ToModel(ShoppingCart cart)
@@ -152,7 +150,6 @@ namespace VirtoCommerce.CartModule.Data.Model
             cart.DiscountTotalWithTax = DiscountTotalWithTax;
             cart.DiscountAmount = DiscountAmount;
             cart.TaxTotal = TaxTotal;
-            cart.Coupon = Coupon;
             cart.TaxPercentRate = TaxPercentRate;
             cart.Type = Type;
             cart.Name = Name;
@@ -163,6 +160,10 @@ namespace VirtoCommerce.CartModule.Data.Model
             cart.Shipments = Shipments.Select(x => x.ToModel(AbstractTypeFactory<Shipment>.TryCreateInstance())).ToList();
             cart.Payments = Payments.Select(x => x.ToModel(AbstractTypeFactory<Payment>.TryCreateInstance())).ToList();
             cart.TaxDetails = TaxDetails.Select(x => x.ToModel(AbstractTypeFactory<TaxDetail>.TryCreateInstance())).ToList();
+            cart.Coupons = Coupons.Select(x => x.Code).ToList();
+
+            // Assigning single coupon to preserve backwards compatibility with previous versions of CartModule
+            cart.Coupon = cart.Coupons.FirstOrDefault();
 
             return cart;
         }
@@ -205,7 +206,6 @@ namespace VirtoCommerce.CartModule.Data.Model
             DiscountTotalWithTax = cart.DiscountTotalWithTax;
             DiscountAmount = cart.DiscountAmount;
             TaxTotal = cart.TaxTotal;
-            Coupon = cart.Coupon;
             TaxPercentRate = cart.TaxPercentRate;
             Type = cart.Type;
             Name = cart.Name;
@@ -245,6 +245,17 @@ namespace VirtoCommerce.CartModule.Data.Model
                 TaxDetails = new ObservableCollection<TaxDetailEntity>(cart.TaxDetails.Select(x => AbstractTypeFactory<TaxDetailEntity>.TryCreateInstance().FromModel(x)));
             }
 
+            // Extracting single coupon value to preserve backwards compatibility with previous versions of CartModule
+            if (cart.Coupon != null)
+            {
+                Coupons = new ObservableCollection<CouponEntity>(new[] { new CouponEntity { Code = cart.Coupon } });
+            }
+
+            if (cart.Coupons != null)
+            {
+                Coupons = new ObservableCollection<CouponEntity>(cart.Coupons.Select(x => new CouponEntity { Code = x }));
+            }
+
             return this;
         }
 
@@ -278,7 +289,6 @@ namespace VirtoCommerce.CartModule.Data.Model
             target.DiscountTotalWithTax = DiscountTotalWithTax;
             target.DiscountAmount = DiscountAmount;
             target.TaxTotal = TaxTotal;
-            target.Coupon = Coupon;
             target.TaxPercentRate = TaxPercentRate;
             target.Type = Type;
             target.Name = Name;
@@ -321,6 +331,12 @@ namespace VirtoCommerce.CartModule.Data.Model
             {
                 var discountComparer = AbstractTypeFactory<DiscountEntityComparer>.TryCreateInstance();
                 Discounts.Patch(target.Discounts, discountComparer, (sourceDiscount, targetDiscount) => sourceDiscount.Patch(targetDiscount));
+            }
+
+            if (!Coupons.IsNullCollection())
+            {
+                var couponComparer = AnonymousComparer.Create((CouponEntity x) => x.Code);
+                Coupons.Patch(target.Coupons, couponComparer, (sourceCoupon, targetCoupon) => { return; });
             }
         }
     }

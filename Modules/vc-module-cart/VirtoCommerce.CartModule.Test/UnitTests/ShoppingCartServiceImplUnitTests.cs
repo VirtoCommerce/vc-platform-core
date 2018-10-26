@@ -21,7 +21,7 @@ namespace VirtoCommerce.CartModule.Test.UnitTests
     public class ShoppingCartServiceImplUnitTests
     {
         private readonly Mock<IDynamicPropertyService> _dynamicPropertyServiceMock;
-        private readonly Mock<IShopingCartTotalsCalculator> _calculatorMock;
+        private readonly Mock<IShoppingCartTotalsCalculator> _calculatorMock;
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
         private readonly Mock<ICartRepository> _cartRepositoryMock;
         private readonly Func<ICartRepository> _repositoryFactory;
@@ -33,7 +33,7 @@ namespace VirtoCommerce.CartModule.Test.UnitTests
         public ShoppingCartServiceImplUnitTests()
         {
             _dynamicPropertyServiceMock = new Mock<IDynamicPropertyService>();
-            _calculatorMock = new Mock<IShopingCartTotalsCalculator>();
+            _calculatorMock = new Mock<IShoppingCartTotalsCalculator>();
             _cartRepositoryMock = new Mock<ICartRepository>();
             _repositoryFactory = () => _cartRepositoryMock.Object;
             _mockUnitOfWork = new Mock<IUnitOfWork>();

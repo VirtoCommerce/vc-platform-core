@@ -24,12 +24,15 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         private readonly IShoppingCartService _shoppingCartService;
         private readonly IShoppingCartSearchService _searchService;
         private readonly IShoppingCartBuilder _cartBuilder;
+        private readonly IShoppingCartTotalsCalculator _cartTotalsCalculator;
 
-        public CartModuleController(IShoppingCartService shoppingCartService, IShoppingCartSearchService searchService, IShoppingCartBuilder cartBuilder)
+        public CartModuleController(IShoppingCartService shoppingCartService, IShoppingCartSearchService searchService,
+                                    IShoppingCartBuilder cartBuilder, IShoppingCartTotalsCalculator cartTotalsCalculator)
         {
             _shoppingCartService = shoppingCartService;
             _searchService = searchService;
             _cartBuilder = cartBuilder;
+            _cartTotalsCalculator = cartTotalsCalculator;
         }
 
         [HttpGet]
@@ -260,6 +263,18 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         {
             await _shoppingCartService.DeleteAsync(ids);
             return Ok();
+        }
+
+        /// <summary>
+        /// Calculates totals for cart.
+        /// </summary>
+        /// <param name="cart">Shopping cart model</param>
+        [HttpPost]
+        [Route("recalculate")]
+        public ActionResult<ShoppingCart> RecalculateTotals(ShoppingCart cart)
+        {
+            _cartTotalsCalculator.CalculateTotals(cart);
+            return Ok(cart);
         }
     }
 }
