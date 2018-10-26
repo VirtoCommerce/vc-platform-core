@@ -47,7 +47,7 @@ namespace VirtoCommerce.SubscriptionModule.Web
             serviceCollection.AddDbContext<SubscriptionDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddTransient<ISubscriptionRepository, SubscriptionRepositoryImpl>();
             serviceCollection.AddSingleton<Func<ISubscriptionRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ISubscriptionRepository>());
-         
+
             serviceCollection.AddTransient<ISubscriptionService, SubscriptionServiceImpl>();
             serviceCollection.AddTransient<ISubscriptionSearchService, SubscriptionServiceImpl>();
             serviceCollection.AddTransient<IPaymentPlanService, PaymentPlanService>();
@@ -56,7 +56,8 @@ namespace VirtoCommerce.SubscriptionModule.Web
 
             serviceCollection.AddSingleton<CreateSubscriptionOrderChangedEventHandler>();
             serviceCollection.AddSingleton<LogChangesSubscriptionChangedEventHandler>();
-            serviceCollection.AddSingleton<SendNotificationsSubscriptionChangedEventHandler>();
+            //Register as scoped because we use UserManager<> as dependency in this implementation
+            serviceCollection.AddScoped<SendNotificationsSubscriptionChangedEventHandler>();
 
             serviceCollection.AddSingleton<SubscriptionExportImport>();
         }
@@ -85,7 +86,7 @@ namespace VirtoCommerce.SubscriptionModule.Web
             handlerRegistrar.RegisterHandler<OrderChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetRequiredService<CreateSubscriptionOrderChangedEventHandler>().Handle(message));
             handlerRegistrar.RegisterHandler<OrderChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetRequiredService<LogChangesSubscriptionChangedEventHandler>().Handle(message));
             handlerRegistrar.RegisterHandler<SubscriptionChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetRequiredService<LogChangesSubscriptionChangedEventHandler>().Handle(message));
-            handlerRegistrar.RegisterHandler<SubscriptionChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetRequiredService<SendNotificationsSubscriptionChangedEventHandler>().Handle(message));
+            handlerRegistrar.RegisterHandler<SubscriptionChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.CreateScope().ServiceProvider.GetRequiredService<SendNotificationsSubscriptionChangedEventHandler>().Handle(message));
 
             //Schedule periodic subscription processing job
             var settingsManager = appBuilder.ApplicationServices.GetRequiredService<ISettingsManager>();

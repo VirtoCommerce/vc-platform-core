@@ -39,7 +39,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
         [Route("search")]
         [ProducesResponseType(typeof(SubscriptionSearchResult), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
-        public async Task<IActionResult> SearchSubscriptions(SubscriptionSearchCriteria criteria)
+        public async Task<IActionResult> SearchSubscriptions([FromBody] SubscriptionSearchCriteria criteria)
         {
             var result = await _subscriptionSearchService.SearchSubscriptionsAsync(criteria);
             var retVal = new SubscriptionSearchResult
@@ -82,7 +82,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
         [Route("order")]
         [ProducesResponseType(typeof(CustomerOrder), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<IActionResult> CreateReccurentOrderForSubscription(Subscription subscription)
+        public async Task<IActionResult> CreateReccurentOrderForSubscription([FromBody] Subscription subscription)
         {
             var subscriptionBuilder = await _subscriptionBuilder.TakeSubscription(subscription).ActualizeAsync();
             var order = await subscriptionBuilder.TryToCreateRecurrentOrderAsync(forceCreation: true);
@@ -94,7 +94,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
         [Route("")]
         [ProducesResponseType(typeof(Subscription), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
-        public async Task<IActionResult> CreateSubscription(Subscription subscription)
+        public async Task<IActionResult> CreateSubscription([FromBody] Subscription subscription)
         {
             await _subscriptionBuilder.TakeSubscription(subscription).ActualizeAsync();
             await _subscriptionService.SaveSubscriptionsAsync(new[] { subscription });
@@ -105,7 +105,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
         [Route("cancel")]
         [ProducesResponseType(typeof(Subscription), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
-        public async Task<IActionResult> CancelSubscription(SubscriptionCancelRequest cancelRequest)
+        public async Task<IActionResult> CancelSubscription([FromBody] SubscriptionCancelRequest cancelRequest)
         {
             var retVal = (await _subscriptionService.GetByIdsAsync(new[] { cancelRequest.SubscriptionId })).FirstOrDefault();
             if (retVal != null)
@@ -120,7 +120,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
         [Route("")]
         [ProducesResponseType(typeof(Subscription), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<IActionResult> UpdateSubscription(Subscription subscription)
+        public async Task<IActionResult> UpdateSubscription([FromBody] Subscription subscription)
         {
             await _subscriptionBuilder.TakeSubscription(subscription).ActualizeAsync();
             await _subscriptionService.SaveSubscriptionsAsync(new[] { subscription });
@@ -179,7 +179,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
         [Route("plans")]
         [ProducesResponseType(typeof(PaymentPlan), 200)]
         [Authorize(ModuleConstants.Security.Permissions.PlanManage)]
-        public async Task<IActionResult> CreatePaymentPlan(PaymentPlan plan)
+        public async Task<IActionResult> CreatePaymentPlan([FromBody] PaymentPlan plan)
         {
             await _planService.SavePlansAsync(new[] { plan });
             return Ok(plan);
@@ -191,7 +191,7 @@ namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
         [Route("plans")]
         [ProducesResponseType(typeof(PaymentPlan), 200)]
         [Authorize(ModuleConstants.Security.Permissions.PlanManage)]
-        public async Task<IActionResult> UpdatePaymentPlan(PaymentPlan plan)
+        public async Task<IActionResult> UpdatePaymentPlan([FromBody] PaymentPlan plan)
         {
             await _planService.SavePlansAsync(new[] { plan });
             return Ok(plan);
