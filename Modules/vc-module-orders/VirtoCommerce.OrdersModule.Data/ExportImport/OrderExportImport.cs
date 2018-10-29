@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
@@ -20,16 +22,12 @@ namespace VirtoCommerce.OrdersModule.Data.ExportImport
         private readonly JsonSerializer _serializer;
         private const int _batchSize = 50;
 
-        public OrderExportImport(ICustomerOrderSearchService customerOrderSearchService, ICustomerOrderService customerOrderService)
+        public OrderExportImport(ICustomerOrderSearchService customerOrderSearchService, ICustomerOrderService customerOrderService,
+            IOptions<MvcJsonOptions> jsonOptions)
         {
             _customerOrderSearchService = customerOrderSearchService;
             _customerOrderService = customerOrderService;
-            _serializer = new JsonSerializer
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Formatting = Formatting.Indented,
-                NullValueHandling = NullValueHandling.Ignore
-            };
+            _serializer = JsonSerializer.Create(jsonOptions.Value.SerializerSettings);
         }
 
 
