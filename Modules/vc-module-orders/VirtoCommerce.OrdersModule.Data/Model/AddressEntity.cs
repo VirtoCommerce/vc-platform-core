@@ -7,6 +7,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 {
     public class AddressEntity : Entity
     {
+        [StringLength(2048)]
+        public string Name { get; set; }
         [StringLength(32)]
         public string AddressType { get; set; }
         [StringLength(64)]
@@ -56,6 +58,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 throw new ArgumentNullException(nameof(address));
 
             address.Key = Id;
+            address.Name = Name;
             address.City = City;
             address.CountryCode = CountryCode;
             address.CountryName = CountryName;
@@ -79,6 +82,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 throw new ArgumentNullException(nameof(address));
 
             Id = address.Key;
+            Name = address.Name;
             City = address.City;
             CountryCode = address.CountryCode;
             CountryName = address.CountryName;
@@ -98,6 +102,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
         public virtual void Patch(AddressEntity target)
         {
+            target.Name = Name;
             target.City = City;
             target.CountryCode = CountryCode;
             target.CountryName = CountryName;
