@@ -1,12 +1,8 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Reflection;
-using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.OrdersModule.Core.Model;
+using VirtoCommerce.OrdersModule.Data.Utilities;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrdersModule.Data.Model
@@ -52,7 +48,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             operation.CancelReason = CancelReason;
             operation.IsApproved = IsApproved;
             operation.Sum = Sum;
-            operation.ChildrenOperations = GetAllChildOperations(operation);
+            operation.ChildrenOperations = OperationUtilities.GetAllChildOperations(operation);
             return operation;
         }
 
@@ -96,38 +92,6 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             operation.CancelReason = CancelReason;
             operation.IsApproved = IsApproved;
             operation.Sum = Sum;
-        }
-
-        private static IEnumerable<IOperation> GetAllChildOperations(IOperation operation)
-        {
-            var retVal = new List<IOperation>();
-            var objectType = operation.GetType();
-
-            var properties = objectType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-            var childOperations = properties.Where(x => x.PropertyType.GetInterface(typeof(IOperation).Name) != null)
-                                    .Select(x => (IOperation)x.GetValue(operation)).Where(x => x != null).ToList();
-
-            foreach (var childOperation in childOperations)
-            {
-                retVal.Add(childOperation);
-            }
-
-            //Handle collection and arrays
-            var collections = properties.Where(p => p.GetIndexParameters().Length == 0)
-                                        .Select(x => x.GetValue(operation, null))
-                                        .Where(x => x is IEnumerable && !(x is string))
-                                        .Cast<IEnumerable>();
-
-            foreach (var collection in collections)
-            {
-                foreach (var childOperation in collection.OfType<IOperation>())
-                {
-                    retVal.Add(childOperation);
-                }
-            }
-
-            return retVal;
         }
     }
 }

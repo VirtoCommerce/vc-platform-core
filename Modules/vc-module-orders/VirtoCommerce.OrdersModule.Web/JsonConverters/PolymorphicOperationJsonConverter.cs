@@ -7,6 +7,7 @@ using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.CoreModule.Core.Shipping;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
+using VirtoCommerce.OrdersModule.Data.Utilities;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrdersModule.Web.JsonConverters
@@ -71,6 +72,13 @@ namespace VirtoCommerce.OrdersModule.Web.JsonConverters
             }
 
             serializer.Populate(obj.CreateReader(), retVal);
+
+            // The ChildrenOperations property was reset on lines 57-61, so now we rebuild it
+            if (operation != null)
+            {
+                operation.ChildrenOperations = OperationUtilities.GetAllChildOperations(operation);
+            }
+
             return retVal;
         }
 
