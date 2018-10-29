@@ -7,6 +7,9 @@ namespace VirtoCommerce.CartModule.Data.Model
 {
     public class AddressEntity : Entity
     {
+        [StringLength(2048)]
+        public string Name { get; set; }
+
         [StringLength(32)]
         public string AddressType { get; set; }
 
@@ -71,7 +74,7 @@ namespace VirtoCommerce.CartModule.Data.Model
 
             //TODO
             //address.Key = Id;
-            //address.Name
+            address.Name = Name;
             address.AddressType = EnumUtility.SafeParse(AddressType, CoreModule.Core.Common.AddressType.BillingAndShipping);
             address.City = City;
             address.CountryCode = CountryCode;
@@ -99,7 +102,7 @@ namespace VirtoCommerce.CartModule.Data.Model
 
             //TODO
             //Key = address.Id;
-            //address.Name
+            Name = address.Name;
             AddressType = address.AddressType.ToString();
             City = address.City;
             CountryCode = address.CountryCode;
@@ -122,6 +125,7 @@ namespace VirtoCommerce.CartModule.Data.Model
 
         public virtual void Patch(AddressEntity target)
         {
+            target.Name = Name;
             target.City = City;
             target.CountryCode = CountryCode;
             target.CountryName = CountryName;

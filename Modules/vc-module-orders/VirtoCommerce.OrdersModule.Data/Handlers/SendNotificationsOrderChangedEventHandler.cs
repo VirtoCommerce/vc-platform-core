@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using VirtoCommerce.CoreModule.Core.Payment;
-using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
@@ -24,23 +23,19 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
         private readonly INotificationService _notificationService;
         private readonly INotificationSender _notificationSender;
         private readonly IStoreService _storeService;
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMemberService _memberService;
         private readonly ISettingsManager _settingsManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public SendNotificationsOrderChangedEventHandler(INotificationSender notificationSender, IStoreService storeService
-            , UserManager<ApplicationUser> userManager
-            , IMemberService memberService
-            , ISettingsManager settingsManager
-            , INotificationService notificationService
-            )
+        public SendNotificationsOrderChangedEventHandler(INotificationSender notificationSender, IStoreService storeService, IMemberService memberService,
+                                                        ISettingsManager settingsManager, UserManager<ApplicationUser> userManager, INotificationService notificationService)
         {
             _notificationSender = notificationSender;
             _storeService = storeService;
-            _userManager = userManager;
             _memberService = memberService;
             _settingsManager = settingsManager;
             _notificationService = notificationService;
+            _userManager = userManager;
         }
 
         public virtual async Task Handle(OrderChangedEvent message)
@@ -208,14 +203,17 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
 
         protected virtual async Task<string> GetCustomerEmailAsync(string customerId)
         {
+            // try to find user
             var user = await _userManager.FindByIdAsync(customerId);
 
-            var contact = user != null
-                ? (await _memberService.GetByIdsAsync(new[] { user.MemberId })).OfType<Contact>().FirstOrDefault()
-                : (await _memberService.GetByIdsAsync(new[] { customerId })).OfType<Contact>().FirstOrDefault();
+            // Try to find contact
+            var contact = await _memberService.GetByIdAsync(customerId);
+            if (contact == null && user != null)
+            {
+                contact = await _memberService.GetByIdAsync(user.MemberId);
+            }
 
-            var email = contact?.Emails?.FirstOrDefault(x => !string.IsNullOrEmpty(x)) ?? user?.Email;
-            return email;
+            return contact?.Emails?.FirstOrDefault() ?? user?.Email;
         }
     }
 }

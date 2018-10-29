@@ -22,6 +22,7 @@ namespace VirtoCommerce.CartModule.Data.Repositories
         public IQueryable<ShipmentEntity> Shipments => DbContext.Set<ShipmentEntity>();
         protected IQueryable<DiscountEntity> Discounts => DbContext.Set<DiscountEntity>();
         protected IQueryable<TaxDetailEntity> TaxDetails => DbContext.Set<TaxDetailEntity>();
+        protected IQueryable<CouponEntity> Coupons => DbContext.Set<CouponEntity>();
 
         public virtual async Task<ShoppingCartEntity[]> GetShoppingCartsByIdsAsync(string[] ids, string responseGroup = null)
         {
@@ -32,7 +33,8 @@ namespace VirtoCommerce.CartModule.Data.Repositories
             var cartTaxDetails = TaxDetails.Where(x => ids.Contains(x.ShoppingCartId)).ToArrayAsync();
             var cartDiscounts = Discounts.Where(x => ids.Contains(x.ShoppingCartId)).ToArrayAsync();
             var cartAddresses = Addresses.Where(x => ids.Contains(x.ShoppingCartId)).ToArrayAsync();
-            await Task.WhenAll(cartTaxDetails, cartDiscounts, cartAddresses);
+            var cartCoupons = Coupons.Where(x => ids.Contains(x.ShoppingCartId)).ToArrayAsync();
+            await Task.WhenAll(cartTaxDetails, cartDiscounts, cartAddresses, cartCoupons);
 
             if ((cartResponseGroup & CartResponseGroup.WithPayments) == CartResponseGroup.WithPayments)
             {

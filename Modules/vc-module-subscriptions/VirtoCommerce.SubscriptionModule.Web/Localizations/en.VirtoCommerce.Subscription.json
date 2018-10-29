@@ -1,0 +1,172 @@
+{
+    "subscription": {
+        "main-menu-title": "Subscriptions",
+        "blades": {
+            "subscription-list": {
+                "title": "Subscriptions",
+                "labels": {
+                    "new-filter": "Add new filter",
+                    "unnamed-filter": "Unnamed filter",
+                    "number": "Number",
+                    "status": "Status",
+                    "balance": "Balance",
+                    "customer": "Subscriber",
+                    "startDate": "Period Start",
+                    "endDate": "Period End"
+                },
+                "placeholders": {
+                    "select-filter": "Select filter"
+                }
+            },
+            "filter-detail": {
+                "subtitle": "Edit filter",
+                "new-title": "New filter",
+                "new-subtitle": "Create new filter",
+                "labels": {
+                    "name": "Filter name",
+                    "name_": "How will you call this filter?",
+                    "criteria": "Filter criteria",
+                    "from": "Active from",
+                    "to": "Active till",
+                    "outer-id": "Outer Id"
+                },
+                "placeholders": {
+                    "all": "Not specified"
+                }
+            },
+            "subscription-detail": {
+                "title": "Subscription {{number}}",
+                "subtitle": "Subscription details and related documents",
+                "labels": {
+                    "status": "Status",
+                    "balance": "Balance",
+                    "billing-date": "Next billing date",
+                    "trial-expiration": "Trial expiration date",
+                    "expiration": "Subscription expiration date",
+                    "employee": "Assign new order to",
+                    "number": "Number",
+                    "coupon-code": "Coupon code",
+                    "prorate": "Prorate changes"
+                }
+            },
+            "schedule-detail": {
+                "title": "Auto-order schedule",
+                "title-new": "New auto-order schedule",
+                "subtitle-new": "Create new auto-order schedule",
+                "labels": {
+                    "charge-every": "Order every",
+                    "trial-period": "Trial period (days)",
+                    "charge-count": "Subscription ends after number of Orders",
+                    "grace-period": "Grace period (days)"
+                },
+                "placeholders": {
+                    "select": "Select..."
+                }
+            },
+            "subscriptionOrder-list": {
+                "title": "Subscription Orders"
+            }
+        },
+        "widgets": {
+            "subscription-orders": {
+                "title": "Orders"
+            },
+            "orderDynamicProperty": {
+                "title": "Order Dynamic Properties"
+            },
+            "product-schedule": {
+                "no-schedule": "Auto-order schedule not defined",
+                "info": "Auto-order every {{intervalCount}} {{interval}}"
+            },
+            "order-subscription": {
+                "title": "Open Subscription {{ number }}",
+                "title-no": "Not by subscription"
+            },
+            "notificationsWidget": {
+                "title": "Notification",
+                "blade-subtitle": "Notifications service",
+                "blade-title": "Subscription notification types list"
+            },
+            "notificationsLogWidget": {
+                "title": "Notification log",
+                "blade-subtitle": "Notifications log",
+                "blade-title": "Subscription notification sending log"
+            }
+        },
+        "dialogs": {
+            "subscription-delete": {
+                "title": "Delete confirmation",
+                "message": "Are you sure you want to delete selected subscriptions?",
+                "warning": "WARNING: this change is permanent and can't be undone afterwards. It can lead to data loss.",
+                "instruction": "Enter 'yes' to delete"
+            },
+            "subscription-save": {
+                "title": "Save changes",
+                "message": "The Subscription has been modified. Do you want to save changes?"
+            },
+            "schedule-delete": {
+                "title": "Delete confirmation",
+                "message": "Are you sure you want to delete this Order Schedule?"
+            },
+            "schedule-save": {
+                "title": "Save changes",
+                "message": "The Schedule has been modified. Do you want to save changes?"
+            },
+            "new-order": {
+                "title": "Confirmation",
+                "message": "Create a new Order for this Subscription?"
+            }
+        },
+        "commands": {
+            "new-order": "Create Order"
+        }
+    },
+
+    "permissions": {
+        "subscription:access": "Open subscriptions menu",
+        "subscription:create": "Create subscription data",
+        "subscription:read": "View subscription data",
+        "subscription:update": "Update subscription data",
+        "subscription:delete": "Delete subscription",
+        "paymentplan:manage": "Payment plan manage"
+    },
+
+    "settings": {
+        "Subscription.EnableSubscriptions": {
+            "title": "Enable subscriptions",
+            "description": "Flag for activating subscriptions in store"
+        },
+        "Subscription.Status": {
+            "title": "Subscription statuses",
+            "description": "Subscription statuses"
+        },
+        "Subscription.SubscriptionNewNumberTemplate": {
+            "title": "Subscription number template",
+            "description": "The template (pattern) that will be used to generate the number for new Subscription. Parameters: 0 - date (the UTC time of number generation); 1 - the sequence number."
+        },
+        "Subscription.EnableSubscriptionProcessJob": {
+            "title": "Enable subscription process",
+            "description": "Flag for activating automatic subscription process (requires restart)"
+        },
+        "Subscription.EnableSubscriptionOrdersCreateJob": {
+            "title": "Enable subscription order creation",
+            "description": "Flag for activating automatic order creation for subscription (requires restart)"
+        },
+        "Subscription.CronExpression": {
+            "title": "Cron expression for scheduling subscription processing job execution (requires restart)",
+            "description": "The value is a regular CRON expression.\nTo run task every X minutes please use \"0/x * * * *\".\nTo run it every X hours at 00 minutes use \"0 */X * * *\". You can also specify minutes: \"15 */x * * *\"\nTo run it every X days at midnight use \"0 0 */x * *\""
+        },
+        "Subscription.CronExpressionOrdersJob": {
+            "title": "Cron expression for scheduling subscription order creation job execution (requires restart)",
+            "description": "The value is a regular CRON expression.\nTo run task every X minutes please use \"0/x * * * *\".\nTo run it every X hours at 00 minutes use \"0 */X * * *\". You can also specify minutes: \"15 */x * * *\"\nTo run it every X days at midnight use \"0 0 */x * *\""
+        },
+        "Subscription.PastDue.Delay": {
+            "title": "Past due delay in days",
+            "description": "Delay in days when unpaid subscription obtain PastDue status"
+        },
+        "Subscription.ExportImport.Description": {
+            "title": "Export/Import description",
+            "description": "Module description in platform export/import wizard"
+        }
+    }
+}

@@ -1,0 +1,171 @@
+{
+    "subscription": {
+        "main-menu-title": "Abonnemente",
+        "blades": {
+            "subscription-list": {
+                "title": "Abonnements",
+                "labels": {
+                    "new-filter": "Neuen Filter hinzufügen",
+                    "unnamed-filter": "Unbenannter Filter",
+                    "number": "Anzahl",
+                    "status": "Status",
+                    "balance": "Kontostand",
+                    "customer": "Teilnehmer",
+                    "startDate": "Periodenstart",
+                    "endDate": "Periodende"
+                },
+                "placeholders": {
+                    "select-filter": "Filter wählen"
+                }
+            },
+            "filter-detail": {
+                "subtitle": "Filter bearbeiten",
+                "new-title": "Neuer Filter",
+                "new-subtitle": "Neuen Filter erstellen",
+                "labels": {
+                    "name": "Name des Filters",
+                    "name_": "Wie werden Sie diesen Filter nennen?",
+                    "criteria": "Filterkriterien",
+                    "from": "Aktiv ab",
+                    "to": "Aktiv bis"
+                },
+                "placeholders": {
+                    "all": "Nicht angegeben"
+                }
+            },
+            "subscription-detail": {
+                "title": "Abonnement {{number}}",
+                "subtitle": "Abonnementdetails und zugehörige Dokumente",
+                "labels": {
+                    "status": "Status",
+                    "balance": "Kontostand",
+                    "billing-date": "Nächster Rechnungsdatum",
+                    "trial-expiration": "Ablauf des Verfallsdatums",
+                    "expiration": "Ablaufdatum des Abonnements",
+                    "employee": "Neue Bestellung zuordnen zu",
+                    "number": "Anzahl",
+                    "coupon-code": "Gutscheincode",
+                    "prorate": "Prorate Änderungen"
+                }
+            },
+            "schedule-detail": {
+                "title": "Auto-Auftragsablaufplan",
+                "title-new": "Neue automatische auftragsablaufplan",
+                "subtitle-new": "Neue automatische Erstellung Auftragsablaufplan",
+                "labels": {
+                    "charge-every": "Bestellen jede",
+                    "trial-period": "Zeitraum (Tage)",
+                    "charge-count": "Abonnement endet nach Anzahl der Bestellungen",
+                    "grace-period": "Frist (in Tagen)"
+                },
+                "placeholders": {
+                    "select": "Wählen Sie aus..."
+                }
+            },
+            "subscriptionOrder-list": {
+                "title": "Abonnement Bestellungen"
+            }
+        },
+        "widgets": {
+            "subscription-orders": {
+                "title": "Bestellungen"
+            },
+            "orderDynamicProperty": {
+                "title": "Um dynamische Eigenschaften"
+            },
+            "product-schedule": {
+                "no-schedule": "Auto-auftragsablaufplan nicht definiert",
+                "info": "Auto - um jeden {{intervalCount}} {{interval}}"
+            },
+            "order-subscription": {
+                "title": "Öffene Abonnement {{ number }}",
+                "title-no": "Nicht im Abonnement"
+            },
+            "notificationsWidget": {
+                "title": "Benachrichtigung",
+                "blade-subtitle": "Benachrichtigungsservice",
+                "blade-title": "Abonnement Benachrichtigungstypliste"
+            },
+            "notificationsLogWidget": {
+                "title": "Benachrichtigungsprotokoll",
+                "blade-subtitle": "Benachrichtigungsprotokoll",
+                "blade-title": "Abonnement das Senden von Benachrichtigungen anmelden"
+            }
+        },
+        "dialogs": {
+            "subscription-delete": {
+                "title": "Bestätigung löschen",
+                "message": "Möchten Sie die ausgewählten Abonnements löschen?",
+                "warning": "WARNUNG: Diese Änderung ist endgültig und kann nicht rückgängig gemacht werden. Es kann zu Datenverlust führen.",
+                "instruction": "Geben Sie 'Ja' ein um zu löschen."
+            },
+            "subscription-save": {
+                "title": "Änderungen speichern",
+                "message": "Das Abonnement wurde geändert. Möchten Sie die Änderungen speichern?"
+            },
+            "schedule-delete": {
+                "title": "Bestätigung löschen",
+                "message": "Möchten Sie diese Bestellung Zeitplan wirklich löschen?"
+            },
+            "schedule-save": {
+                "title": "Änderungen speichern",
+                "message": "Der Zeitplan wurde geändert. Möchten Sie die Änderungen speichern?"
+            },
+            "new-order": {
+                "title": "Bestätigung",
+                "message": "Eine neue Bestellung für dieses Abonnement anlegen?"
+            }
+        },
+        "commands": {
+            "new-order": "Bestellung anlegen"
+        }
+    },
+
+    "permissions": {
+        "subscription:access": "Abonnement-Menü öffnen",
+        "subscription:create": "Erstellen Sie Abonnementdaten",
+        "subscription:read": "Abonnementdaten anzeigen",
+        "subscription:update": "Abonnementdaten aktualisieren",
+        "subscription:delete": "Abonnement löschen",
+        "paymentplan:manage": "Zahlungsplan verwalten"
+    },
+
+    "settings": {
+        "Subscription.EnableSubscriptions": {
+            "title": "Abonnements aktivieren",
+            "description": "Flag zum Aktivieren von Abonnements im Geschäft"
+        },
+        "Subscription.Status": {
+            "title": "Abonnementsstatus",
+            "description": "Abonnementsstatus"
+        },
+        "Subscription.SubscriptionNewNumberTemplate": {
+            "title": "Abonnementnummernvorlage",
+            "description": "Die Vorlage (Muster), die zum Generieren der Nummer für das neue Abonnement verwendet wird. Parameter: 0 - Datum (die UTC-Zeit der Nummerngenerierung); 1 - die Sequenznummer."
+        },
+        "Subscription.EnableSubscriptionProcessJob": {
+            "title": "Aktivieren Sie den Abonnementprozess",
+            "description": "Flag zum Aktivieren des automatischen Abonnementprozesses (Neustart erforderlich)"
+        },
+        "Subscription.EnableSubscriptionOrdersCreateJob": {
+            "title": "Aktivieren Sie die Erstellung von Abonnementbestellungen",
+            "description": "Flag zum Aktivieren der automatischen Auftragserstellung für die Subskription (Neustart erforderlich)"
+        },
+        "Subscription.CronExpression": {
+            "title": "Cron-Ausdruck zum Planen der Ausführung von Subskriptionsverarbeitungsjobs (Neustart erforderlich)",
+            "description": "Der Wert ist ein regulärer CRON-Ausdruck.\nUm alle x Minuten eine Aufgabe auszuführen, benutzen Sie \"0/x * * * *\".\nUm ihn alle X Stunden um 00 Minuten auszuführen, verwenden Sie \"0 */X * * *\". Sie können auch Minuten angeben: \"15 */x * * *\".\nUm es alle X Tage um Mitternacht auszuführen, benutzen Sie \"0 0 */x * *\"."
+        },
+        "Subscription.CronExpressionOrdersJob": {
+            "title": "Cron-Ausdruck für die Planung der Ausführung von Jobs zur Erstellung von Abonnementbestellungen (Neustart erforderlich)",
+            "description": "Der Wert ist ein regulärer CRON-Ausdruck.\nUm alle x Minuten eine Aufgabe auszuführen, benutzen Sie \"0/x * * * *\".\nUm ihn alle X Stunden um 00 Minuten auszuführen, verwenden Sie \"0 */X * * *\". Sie können auch Minuten angeben: \"15 */x * * *\".\nUm es alle X Tage um Mitternacht auszuführen, benutzen Sie \"0 0 */x * *\"."
+        },
+        "Subscription.PastDue.Delay": {
+            "title": "Überfällige Verzögerung in Tagen",
+            "description": "Verzögerung in Tagen, an denen unbezahlte Abonnements den PastDue-Status erhalten"
+        },
+        "Subscription.ExportImport.Description": {
+            "title": "Beschreibung exportieren/importieren",
+            "description": "Modulbeschreibung im Plattform-Export/Import-Assistenten"
+        }
+    }
+}

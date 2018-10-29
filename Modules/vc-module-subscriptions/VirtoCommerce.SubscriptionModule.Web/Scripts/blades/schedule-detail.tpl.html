@@ -1,0 +1,53 @@
+﻿<div class="blade-static __bottom" ng-include="'$(Platform)/Scripts/common/templates/create.tpl.html'" ng-if="blade.isNew"></div>
+<div class="blade-static __bottom" ng-include="'$(Platform)/Scripts/common/templates/ok-cancel2.tpl.html'" ng-if="!blade.isApiSave"></div>
+<div class="blade-content __tree">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form name="formScope">
+                <fieldset ng-disabled="blade.isLocked">
+                    <div class="clearfix" ng-init="setForm(formScope)">
+                        <div class="column">
+                            <div class="form-group">
+                                <label class="form-label">{{ 'subscription.blades.schedule-detail.labels.charge-every' | translate }}</label>
+                                <div class="form-input __number">
+                                    <input ng-model="blade.currentEntity.intervalCount" smart-float num-type="integer" required placeholder="{{ 'platform.genericValueInput.placeholders.integer' | translate}}" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="form-group">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="form-input">
+                                    <ui-select ng-model="blade.currentEntity.interval">
+                                        <ui-select-match placeholder="{{'subscription.blades.schedule-detail.placeholders.select' | translate}}">{{$select.selected}}</ui-select-match>
+                                        <ui-select-choices repeat="x in intervals | filter: $select.search">
+                                            <span ng-bind-html="x | highlight: $select.search"></span>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">{{ 'subscription.blades.schedule-detail.labels.trial-period' | translate }}</label>
+                        <div class="form-input __number">
+                            <input ng-model="blade.currentEntity.trialPeriodDays" smart-float num-type="integer" placeholder="{{ 'platform.genericValueInput.placeholders.integer' | translate}}" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">{{ 'subscription.blades.schedule-detail.labels.charge-count' | translate }}</label>
+                        <div class="form-input __number">
+                            <input ng-model="blade.currentEntity.intervalLimit" smart-float num-type="integer" placeholder="{{ 'platform.genericValueInput.placeholders.integer' | translate}}" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">{{ 'subscription.blades.schedule-detail.labels.grace-period' | translate }}</label>
+                        <div class="form-input __number">
+                            <input ng-model="blade.currentEntity.gracePeriodDays" smart-float num-type="integer" placeholder="{{ 'platform.genericValueInput.placeholders.integer' | translate}}" />
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>

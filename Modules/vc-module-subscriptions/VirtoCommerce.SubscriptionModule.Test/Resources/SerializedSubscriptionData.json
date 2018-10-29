@@ -1,0 +1,90 @@
+{
+  "PaymentPlans": [
+    {
+      "interval": 2,
+      "intervalCount": 1,
+      "trialPeriodDays": 0,
+      "createdDate": "2017-01-16T15:14:58.093",
+      "modifiedDate": "2017-01-16T15:14:58.093",
+      "createdBy": "alex@mail.com",
+      "modifiedBy": "alex@mail.com",
+      "id": "ceb9b71524664fbc8017bb412dbc48e8"
+    },
+    {
+      "interval": 2,
+      "intervalCount": 1,
+      "trialPeriodDays": 0,
+      "createdDate": "2017-01-16T14:33:37.697",
+      "modifiedDate": "2017-01-16T14:33:37.697",
+      "createdBy": "alex@mail.com",
+      "modifiedBy": "alex@mail.com",
+      "id": "3afde7c22e0a49f9b80deeff3b65670c"
+    },
+    {
+      "interval": 2,
+      "intervalCount": 1,
+      "trialPeriodDays": 0,
+      "createdDate": "2017-01-16T13:30:47.023",
+      "modifiedDate": "2017-01-16T13:30:47.023",
+      "createdBy": "alex@mail.com",
+      "modifiedBy": "alex@mail.com",
+      "id": "2ddc62ef321c44aba27a7a99efb1086d"
+    },
+    {
+      "interval": 2,
+      "intervalCount": 1,
+      "trialPeriodDays": 10,
+      "createdDate": "2017-01-16T10:26:05.47",
+      "modifiedDate": "2017-01-16T10:48:51.497",
+      "createdBy": "admin",
+      "modifiedBy": "admin",
+      "id": "1486f5a1a25f48a999189c081792a379"
+    }
+  ],
+  "Subscriptions": [
+    {
+      "storeId": "Electronics",
+      "customerId": "88c0ce58-49c9-4ff5-af0d-10f19d0e38bc",
+      "customerName": "alex@mail.com",
+      "balance": 1157.3900,
+      "number": "SU170116-00100",
+      "interval": 2,
+      "intervalCount": 1,
+      "trialPeriodDays": 0,
+      "subscriptionStatus": 4,
+      "customerOrderPrototypeId": "cc55ce11091446d5ab966364c4cb24a3",
+      "startDate": "2017-01-16T15:15:05.21",
+      "currentPeriodStart": "2017-01-16T15:15:05.21",
+      "currentPeriodEnd": "2017-02-16T15:15:05.21",
+      "isCancelled": false,
+      "createdDate": "2017-01-16T15:15:06.54",
+      "modifiedDate": "2018-10-01T05:05:03.757",
+      "createdBy": "alex@mail.com",
+      "modifiedBy": "unknown",
+      "id": "d52055595dbe43c181f00c192bcfcb5e"
+    },
+    {
+      "storeId": "Electronics",
+      "customerId": "88c0ce58-49c9-4ff5-af0d-10f19d0e38bc",
+      "customerName": "alex@mail.com",
+      "balance": 290.9400,
+      "number": "SU170116-00000",
+      "interval": 2,
+      "intervalCount": 1,
+      "trialPeriodDays": 10,
+      "subscriptionStatus": 4,
+      "customerOrderPrototypeId": "ecbf96fc665e48bbad257bcacf4b90a3",
+      "startDate": "2017-01-16T15:11:54.613",
+      "trialSart": "2017-01-16T15:11:54.613",
+      "trialEnd": "2017-01-26T15:11:54.613",
+      "currentPeriodStart": "2017-01-26T15:11:54.613",
+      "currentPeriodEnd": "2017-02-26T15:11:54.613",
+      "isCancelled": false,
+      "createdDate": "2017-01-16T15:11:55.463",
+      "modifiedDate": "2018-10-01T05:05:03.757",
+      "createdBy": "alex@mail.com",
+      "modifiedBy": "unknown",
+      "id": "75c80743dd0044ef9a306b7f58be64da"
+    }
+  ]
+}

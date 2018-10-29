@@ -1,0 +1,16 @@
+﻿<div class="modal-header">
+    <h3 class="modal-title">{{'subscription.dialogs.subscription-delete.title' | translate}}</h3>
+</div>
+<div class="modal-body">
+    <div class="form-error">{{ 'subscription.dialogs.subscription-delete.warning' | translate }}</div>
+    <p>{{'subscription.dialogs.subscription-delete.message' | translate}}</p>
+
+    {{ 'subscription.dialogs.subscription-delete.instruction' | translate }}:
+    <div class="form-input __mini">
+        <input ng-model="enteredText" ng-keyup="$event.which === 13 && 'yes' === enteredText && yes()" ng-trim="false" />
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn" ng-click="yes()" ng-class="{'__disabled': 'yes' !== enteredText}">{{'platform.commands.confirm' | translate}}</button>
+    <button class="btn" ng-click="cancel()">{{'platform.commands.cancel' | translate}}</button>
+</div>

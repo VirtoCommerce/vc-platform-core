@@ -47,6 +47,7 @@ namespace VirtoCommerce.OrdersModule.Web
             serviceCollection.AddSingleton<AdjustInventoryOrderChangedEventHandler>();
             serviceCollection.AddSingleton<CancelPaymentOrderChangedEventHandler>();
             serviceCollection.AddSingleton<LogChangesOrderChangedEventHandler>();
+            //Register as scoped because we use UserManager<> as dependency in this implementation
             serviceCollection.AddScoped<SendNotificationsOrderChangedEventHandler>();
             serviceCollection.AddSingleton<PolymorphicOperationJsonConverter>();
         }
