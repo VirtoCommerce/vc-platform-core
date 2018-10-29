@@ -26,7 +26,7 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
 
         public virtual async Task Handle(OrderChangedEvent message)
         {
-            foreach (var changedEntry in message.ChangedEntries.Where(x=>x.EntryState == EntryState.Modified))
+            foreach (var changedEntry in message.ChangedEntries.Where(x => x.EntryState == EntryState.Modified))
             {
                 await TryToCancelOrder(changedEntry);
             }
@@ -36,7 +36,7 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
         {
             var store = await _storeService.GetByIdAsync(changedEntry.NewEntry.StoreId);
             //Try to load payment methods for payments
-            foreach (var payment in changedEntry.NewEntry.InPayments)
+            foreach (var payment in changedEntry.NewEntry.InPayments ?? Enumerable.Empty<PaymentIn>())
             {
                 payment.PaymentMethod = store.PaymentMethods.FirstOrDefault(p => p.Code.EqualsInvariant(payment.GatewayCode));
             }

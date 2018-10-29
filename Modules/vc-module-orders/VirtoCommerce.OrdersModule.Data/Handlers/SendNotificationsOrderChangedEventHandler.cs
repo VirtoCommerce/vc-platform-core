@@ -143,8 +143,8 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
         /// <returns></returns>
         protected virtual bool IsOrderPaid(GenericChangedEntry<CustomerOrder> changedEntry)
         {
-            var oldPaidTotal = changedEntry.OldEntry.InPayments.Where(x => x.PaymentStatus == PaymentStatus.Paid).Sum(x => x.Sum);
-            var newPaidTotal = changedEntry.NewEntry.InPayments.Where(x => x.PaymentStatus == PaymentStatus.Paid).Sum(x => x.Sum);
+            var oldPaidTotal = changedEntry.OldEntry.InPayments?.Where(x => x.PaymentStatus == PaymentStatus.Paid).Sum(x => x.Sum) ?? 0;
+            var newPaidTotal = changedEntry.NewEntry.InPayments?.Where(x => x.PaymentStatus == PaymentStatus.Paid).Sum(x => x.Sum) ?? 0;
             return oldPaidTotal != newPaidTotal && changedEntry.NewEntry.Total <= newPaidTotal;
         }
 
@@ -155,8 +155,8 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
         /// <returns></returns>
         protected virtual bool IsOrderSent(GenericChangedEntry<CustomerOrder> changedEntry)
         {
-            var oldSentShipmentsCount = changedEntry.OldEntry.Shipments.Count(x => x.Status.EqualsInvariant("Send") || x.Status.EqualsInvariant("Sent"));
-            var newSentShipmentsCount = changedEntry.NewEntry.Shipments.Count(x => x.Status.EqualsInvariant("Send") || x.Status.EqualsInvariant("Sent"));
+            var oldSentShipmentsCount = changedEntry.OldEntry.Shipments?.Count(x => x.Status.EqualsInvariant("Send") || x.Status.EqualsInvariant("Sent")) ?? 0;
+            var newSentShipmentsCount = changedEntry.NewEntry.Shipments?.Count(x => x.Status.EqualsInvariant("Send") || x.Status.EqualsInvariant("Sent")) ?? 0;
             return oldSentShipmentsCount == 0 && newSentShipmentsCount > 0;
         }
 
@@ -213,7 +213,6 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
 
             //var email = contact?.Emails?.FirstOrDefault(x => !string.IsNullOrEmpty(x)) ?? user?.Email;
             //return email;
-
         }
     }
 }
