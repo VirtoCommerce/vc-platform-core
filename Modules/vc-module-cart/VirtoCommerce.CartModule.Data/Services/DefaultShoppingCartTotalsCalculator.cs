@@ -9,7 +9,7 @@ namespace VirtoCommerce.CartModule.Data.Services
     /// <summary>
     /// Respond for totals values calculation for Shopping cart and all nested objects
     /// </summary>
-    public class DefaultShopingCartTotalsCalculator : IShopingCartTotalsCalculator
+    public class DefaultShoppingCartTotalsCalculator : IShoppingCartTotalsCalculator
     {
         /// <summary>
         /// Cart subtotal discount
@@ -116,7 +116,7 @@ namespace VirtoCommerce.CartModule.Data.Services
             cart.FeeTotal = Math.Round(cart.FeeTotal, 2, MidpointRounding.AwayFromZero);
             cart.FeeTotalWithTax = Math.Round(cart.FeeTotalWithTax, 2, MidpointRounding.AwayFromZero);
             cart.ShippingTotal = Math.Round(cart.ShippingTotal, 2, MidpointRounding.AwayFromZero);
-            cart.ShippingTotalWithTax = Math.Round(cart.ShippingTotal, 2, MidpointRounding.AwayFromZero);
+            cart.ShippingTotalWithTax = Math.Round(cart.ShippingTotalWithTax, 2, MidpointRounding.AwayFromZero);
             cart.ShippingSubTotal = Math.Round(cart.ShippingSubTotal, 2, MidpointRounding.AwayFromZero);
             cart.ShippingSubTotalWithTax = Math.Round(cart.ShippingSubTotalWithTax, 2, MidpointRounding.AwayFromZero);
             cart.PaymentTotal = Math.Round(cart.PaymentTotal, 2, MidpointRounding.AwayFromZero);
