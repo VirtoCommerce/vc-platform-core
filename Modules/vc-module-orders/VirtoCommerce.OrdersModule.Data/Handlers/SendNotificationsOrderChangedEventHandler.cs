@@ -3,6 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using VirtoCommerce.CoreModule.Core.Payment;
+using VirtoCommerce.CustomerModule.Core.Model;
+using VirtoCommerce.CustomerModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.OrdersModule.Core;
@@ -22,18 +24,21 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
         private readonly INotificationService _notificationService;
         private readonly INotificationSender _notificationSender;
         private readonly IStoreService _storeService;
-        //private readonly IMemberService _memberService;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IMemberService _memberService;
         private readonly ISettingsManager _settingsManager;
 
         public SendNotificationsOrderChangedEventHandler(INotificationSender notificationSender, IStoreService storeService
-            //, IMemberService memberService
+            , UserManager<ApplicationUser> userManager
+            , IMemberService memberService
             , ISettingsManager settingsManager
             , INotificationService notificationService
             )
         {
             _notificationSender = notificationSender;
             _storeService = storeService;
-            //_memberService = memberService;
+            _userManager = userManager;
+            _memberService = memberService;
             _settingsManager = settingsManager;
             _notificationService = notificationService;
         }
@@ -201,18 +206,16 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
             return email;
         }
 
-        protected virtual Task<string> GetCustomerEmailAsync(string customerId)
+        protected virtual async Task<string> GetCustomerEmailAsync(string customerId)
         {
-            return Task.FromResult(string.Empty);
-            //TODO wait CustomerModule
-            //var user = await _userManager.FindByIdAsync(customerId);
+            var user = await _userManager.FindByIdAsync(customerId);
 
-            //var contact = user != null
-            //    ? _memberService.GetByIds(new[] { user.MemberId }).OfType<Contact>().FirstOrDefault()
-            //    : _memberService.GetByIds(new[] { customerId }).OfType<Contact>().FirstOrDefault();
+            var contact = user != null
+                ? (await _memberService.GetByIdsAsync(new[] { user.MemberId })).OfType<Contact>().FirstOrDefault()
+                : (await _memberService.GetByIdsAsync(new[] { customerId })).OfType<Contact>().FirstOrDefault();
 
-            //var email = contact?.Emails?.FirstOrDefault(x => !string.IsNullOrEmpty(x)) ?? user?.Email;
-            //return email;
+            var email = contact?.Emails?.FirstOrDefault(x => !string.IsNullOrEmpty(x)) ?? user?.Email;
+            return email;
         }
     }
 }

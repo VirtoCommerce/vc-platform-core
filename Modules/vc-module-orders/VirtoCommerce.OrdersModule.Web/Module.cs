@@ -47,7 +47,7 @@ namespace VirtoCommerce.OrdersModule.Web
             serviceCollection.AddSingleton<AdjustInventoryOrderChangedEventHandler>();
             serviceCollection.AddSingleton<CancelPaymentOrderChangedEventHandler>();
             serviceCollection.AddSingleton<LogChangesOrderChangedEventHandler>();
-            serviceCollection.AddSingleton<SendNotificationsOrderChangedEventHandler>();
+            serviceCollection.AddScoped<SendNotificationsOrderChangedEventHandler>();
             serviceCollection.AddSingleton<PolymorphicOperationJsonConverter>();
         }
 
@@ -71,7 +71,7 @@ namespace VirtoCommerce.OrdersModule.Web
             inProcessBus.RegisterHandler<OrderChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<AdjustInventoryOrderChangedEventHandler>().Handle(message));
             inProcessBus.RegisterHandler<OrderChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<CancelPaymentOrderChangedEventHandler>().Handle(message));
             inProcessBus.RegisterHandler<OrderChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<LogChangesOrderChangedEventHandler>().Handle(message));
-            inProcessBus.RegisterHandler<OrderChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<SendNotificationsOrderChangedEventHandler>().Handle(message));
+            inProcessBus.RegisterHandler<OrderChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.CreateScope().ServiceProvider.GetService<SendNotificationsOrderChangedEventHandler>().Handle(message));
 
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
