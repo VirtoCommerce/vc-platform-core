@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Moq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -235,7 +237,19 @@ namespace VirtoCommerce.SitemapsModule.Test
             _sitemapService = new Mock<ISitemapService>();
             _sitemapItemService = new Mock<ISitemapItemService>();
             _cancellationToken = new Mock<ICancellationToken>();
-            _sitemapExportImport = new SitemapExportImport(_sitemapService.Object, _sitemapItemService.Object);
+
+            var mvcJsonOptions = new MvcJsonOptions()
+            {
+                SerializerSettings =
+                {
+                    NullValueHandling = NullValueHandling.Ignore,
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                    Formatting = Formatting.Indented
+                }
+            };
+            var jsonOptions = new OptionsWrapper<MvcJsonOptions>(mvcJsonOptions);
+
+            _sitemapExportImport = new SitemapExportImport(_sitemapService.Object, _sitemapItemService.Object, jsonOptions);
         }
 
         private static Stream ReadEmbeddedResource(string filePath)
