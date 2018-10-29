@@ -42,6 +42,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         [StringLength(64)]
         public string SubscriptionNumber { get; set; }
 
+        [StringLength(64)]
+        public string OuterId { get; set; }
+
         public bool IsPrototype { get; set; }
 
         [Column(TypeName = "Money")]
@@ -120,6 +123,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             order.SubscriptionId = SubscriptionId;
             order.LanguageCode = LanguageCode;
             order.TaxPercentRate = TaxPercentRate;
+            order.OuterId = OuterId;
 
             order.Discounts = Discounts.Select(x => x.ToModel(AbstractTypeFactory<Discount>.TryCreateInstance())).ToList();
             order.Items = Items.Select(x => x.ToModel(AbstractTypeFactory<LineItem>.TryCreateInstance())).ToList();
@@ -170,6 +174,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             SubscriptionId = order.SubscriptionId;
             LanguageCode = order.LanguageCode;
             TaxPercentRate = order.TaxPercentRate;
+            OuterId = order.OuterId;
 
             if (order.Addresses != null)
             {
@@ -244,6 +249,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             target.SubscriptionId = SubscriptionId;
             target.LanguageCode = LanguageCode;
             target.TaxPercentRate = TaxPercentRate;
+            target.OuterId = OuterId;
 
             if (!Addresses.IsNullCollection())
             {
