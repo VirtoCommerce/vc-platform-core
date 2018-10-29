@@ -41,6 +41,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public string TaxType { get; set; }
 
         [Column(TypeName = "Money")]
+        public decimal Amount { get; set; }
+
+        [Column(TypeName = "Money")]
         public decimal Price { get; set; }
         [Column(TypeName = "Money")]
         public decimal PriceWithTax { get; set; }
@@ -83,6 +86,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
                 payment.BillingAddress = Addresses.First().ToModel(AbstractTypeFactory<Address>.TryCreateInstance());
             }
 
+            payment.Amount = Amount;
             payment.Price = Price;
             payment.PriceWithTax = PriceWithTax;
             payment.DiscountAmount = DiscountAmount;
@@ -128,6 +132,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
             base.FromModel(payment, pkMap);
 
+            Amount = payment.Amount;
             Price = payment.Price;
             PriceWithTax = payment.PriceWithTax;
             DiscountAmount = payment.DiscountAmount;
@@ -195,6 +200,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             if (target == null)
                 throw new ArgumentException(@"operation argument must be of type PaymentInEntity", nameof(operation));
 
+            target.Amount = Amount;
             target.Price = Price;
             target.PriceWithTax = PriceWithTax;
             target.DiscountAmount = DiscountAmount;

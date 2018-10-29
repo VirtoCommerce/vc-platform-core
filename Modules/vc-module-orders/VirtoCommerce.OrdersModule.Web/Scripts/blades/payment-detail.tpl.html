@@ -1,4 +1,4 @@
-﻿<div class="blade-static __bottom" ng-include="'$(Platform)/Scripts/common/templates/ok-cancel2.tpl.html'"></div>
+<div class="blade-static __bottom" ng-include="'$(Platform)/Scripts/common/templates/ok-cancel2.tpl.html'"></div>
 <div class="blade-content __medium-wide">
     <div class="blade-inner">
         <div class="inner-block" ng-controller="virtoCommerce.orderModule.paymentDetailController">
@@ -59,7 +59,7 @@
                                 <label class="form-label">{{ 'orders.blades.payment-detail.labels.amount' | translate }}</label>
                                 <div class="form-input __currency">
                                     <span class="currency">{{blade.currentEntity.currency}}</span>
-                                    <input money required type="text" ng-model="blade.currentEntity.sum">
+                                    <input money required type="text" ng-model="blade.currentEntity.amount">
                                 </div>
                             </div>
                         </div>

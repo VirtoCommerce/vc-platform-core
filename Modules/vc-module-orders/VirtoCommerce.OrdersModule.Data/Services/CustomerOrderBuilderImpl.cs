@@ -243,6 +243,8 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             retVal.TaxType = payment.TaxType;
 
             retVal.GatewayCode = payment.PaymentGatewayCode;
+            retVal.Amount = payment.Amount;
+            // To preserve backward compatibility, Sum property contains only payment amount instead of self total
             retVal.Sum = payment.Amount;
             retVal.PaymentStatus = PaymentStatus.New;
             if (payment.BillingAddress != null)

@@ -142,7 +142,8 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             payment.PriceWithTax = payment.Price * taxFactor;
             payment.DiscountAmountWithTax = payment.DiscountAmount * taxFactor;
             payment.TaxTotal = payment.Total * payment.TaxPercentRate;
-            payment.Sum = payment.Total;
+            // To preserve backward compatibility, Sum property contains only payment amount instead of self total
+            //payment.Sum = payment.Total;
         }
 
         protected virtual void CalculateShipmentTotals(Shipment shipment)
