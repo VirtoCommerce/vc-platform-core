@@ -116,7 +116,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             order.FeeTotal = Math.Round(order.FeeTotal, 2, MidpointRounding.AwayFromZero);
             order.FeeTotalWithTax = Math.Round(order.FeeTotalWithTax, 2, MidpointRounding.AwayFromZero);
             order.ShippingTotal = Math.Round(order.ShippingTotal, 2, MidpointRounding.AwayFromZero);
-            order.ShippingTotalWithTax = Math.Round(order.ShippingTotal, 2, MidpointRounding.AwayFromZero);
+            order.ShippingTotalWithTax = Math.Round(order.ShippingTotalWithTax, 2, MidpointRounding.AwayFromZero);
             order.ShippingSubTotal = Math.Round(order.ShippingSubTotal, 2, MidpointRounding.AwayFromZero);
             order.ShippingSubTotalWithTax = Math.Round(order.ShippingSubTotalWithTax, 2, MidpointRounding.AwayFromZero);
             order.PaymentTotal = Math.Round(order.PaymentTotal, 2, MidpointRounding.AwayFromZero);
