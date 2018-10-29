@@ -38,14 +38,14 @@ namespace VirtoCommerce.Platform.Modules
                 throw new FileNotFoundException(assemblyUri.LocalPath);
             }
 
-           var assembly = LoadWithAllReferencedAssebliesRecursive(assemblyUri.LocalPath);
+            var assembly = LoadWithAllReferencedAssebliesRecursive(assemblyUri.LocalPath);
             return assembly;
         }
 
         private Assembly LoadWithAllReferencedAssebliesRecursive(string assemblyPath)
-        {         
+        {
             Assembly assembly = null;
-  
+
             if (File.Exists(assemblyPath))
             {
                 // assembly = new AssemblyResolver(assemblyPath, _logger).Assembly;
@@ -55,7 +55,7 @@ namespace VirtoCommerce.Platform.Modules
                 var assemblyResolver = new CompositeCompilationAssemblyResolver
                                         (new ICompilationAssemblyResolver[]
                 {
-                        new AppBaseCompilationAssemblyResolver(Path.GetDirectoryName(assemblyPath)),
+                        new AppBaseCompilationAssemblyResolver(Path.GetDirectoryName(assemblyPath) + "\\"),
                         new ReferenceAssemblyPathResolver(),
                         new PackageCompilationAssemblyResolver()
                 });
@@ -74,7 +74,7 @@ namespace VirtoCommerce.Platform.Modules
                         if (result)
                         {
                             //Need to do an additional comparison by version because modules can use different versions
-                            if (Version.TryParse(runtime.Version, out Version version))
+                            if (Version.TryParse(runtime.Version, out var version))
                             {
                                 result = new SemanticVersion(assemblyName.Version).IsCompatibleWith(new SemanticVersion(version));
                             }
@@ -83,7 +83,11 @@ namespace VirtoCommerce.Platform.Modules
                     }
                     _logger.LogDebug($"Trying to resolve {assemblyName} in the {assembly.GetName().Name} dependencies");
 
+                    //TODO: The current dependency resolving approach tries find dependency only within the direct dependencies of the main modules libraries that usually have Web suffix in name, 
+                    // therefore  if any of these libraries doesn't have the searched  dependency then dependency won't be resolved.
+                    //E.g  Module.Data has the Dep1 nuget library as direct dependency but Module.Data.Web doesn't in result  the  Dep1 won't be resolved.
                     var library = dependencyContext.RuntimeLibraries.FirstOrDefault(assemblyPredicate);
+
                     if (library != null)
                     {
                         var wrapper = new CompilationLibrary(
@@ -106,10 +110,10 @@ namespace VirtoCommerce.Platform.Modules
                     }
                     return null;
                 };
-            }      
+            }
             return assembly;
         }
-        
+
         private static Uri GetFileUri(string filePath)
         {
             if (String.IsNullOrEmpty(filePath))

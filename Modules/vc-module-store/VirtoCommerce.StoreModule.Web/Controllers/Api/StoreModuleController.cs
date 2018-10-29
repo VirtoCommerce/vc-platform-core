@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Security;
@@ -35,6 +37,32 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
             _userManager = userManager;
             _notificationSender = notificationSender;
             //_permissionScopeService = permissionScopeService;
+        }
+
+        /// <summary>
+        /// Evaluate and return all tax rates for specified store and evaluation context 
+        /// </summary>
+        /// <param name="storeId"></param>
+        /// <param name="evalContext"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ProducesResponseType(typeof(TaxRate[]), 200)]
+        [Route("taxes/{storeId}/evaluate")]
+        public async Task<IActionResult> EvaluateTaxes(string storeId, [FromBody]TaxEvaluationContext evalContext)
+        {
+            //TODO: move to another module fromhere
+            var retVal = new List<TaxRate>();
+            var store = await _storeService.GetByIdAsync(storeId);
+            if (store != null)
+            {
+                var activeTaxProvider = store.TaxProviders.FirstOrDefault(x => x.IsActive);
+                if (activeTaxProvider != null)
+                {
+                    evalContext.StoreId = store.Id;
+                    retVal.AddRange(activeTaxProvider.CalculateRates(evalContext));
+                }
+            }
+            return Ok(retVal);
         }
 
         /// <summary>
@@ -112,7 +140,7 @@ namespace VirtoCommerce.StoreModule.Web.Controllers.Api
         [Authorize(ModuleConstants.Security.Permissions.Create)]
         public async Task<IActionResult> Create([FromBody]Store store)
         {
-            await _storeService.SaveChangesAsync(new [] {store});
+            await _storeService.SaveChangesAsync(new[] { store });
             return Ok(store);
         }
 

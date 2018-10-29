@@ -1,0 +1,55 @@
+﻿<div class="blade-static">
+	<div class="form-group">
+        <div class="form-input __search">
+            <input placeholder="{{'platform.placeholders.search-keyword' | translate}}" ng-model="filter.keyword" ng-keyup="$event.which === 13 && filter.criteriaChanged()" style="width: 190px">
+            <button class="btn __other" style="position: relative;right: 45px;">
+                <i class="btn-ico fa fa-remove" title="Clear" ng-click="filter.keyword=null;filter.criteriaChanged()"></i>
+            </button>
+            <ui-select ng-model="filter.current" ng-change="filter.change()" style="left: 220px;position: absolute;width: 190px;top: 0px;">
+                <ui-select-match allow-clear="true" placeholder="{{'subscription.blades.subscription-list.placeholders.select-filter' | translate}}">{{$select.selected.name | translate}}</ui-select-match>
+                <ui-select-choices repeat="x in $localStorage.subscriptionSearchFilters | filter: $select.search">
+                    <span ng-bind-html="x.name | translate | highlight: $select.search"></span>
+                </ui-select-choices>
+            </ui-select>
+        </div>
+        <a href="" ng-click="filter.edit()" style="left: 416px; top:25px; position:absolute;" class="form-edit"><i class="form-ico fa fa-pencil"></i></a>
+		<p class="form-count">{{'platform.list.count' | translate}}: <span class="count">{{pageSettings.totalItems}}</span></p>
+	</div>
+</div>
+<div class="blade-static __bottom" ng-if="pageSettings.itemsPerPageCount < pageSettings.totalItems" ng-include="'pagerTemplate.html'"></div>
+<div class="blade-content __medium-wide">
+	<div class="blade-inner">
+		<div class="inner-block" ng-init="setGridOptions({
+                    useExternalSorting: true,
+                    rowTemplate: 'list.row.html',
+                    columnDefs: [
+            { name: 'actions', displayName: '', enableColumnResizing: false, enableSorting: false, width: 30, cellTemplate: 'list-actions.cell.html', pinnedLeft:true },
+            { name: 'number', displayName: 'subscription.blades.subscription-list.labels.number', width: 120 },
+            { name: 'subscriptionStatus', displayName: 'subscription.blades.subscription-list.labels.status', width: 55 },
+            { name: 'balance', displayName: 'subscription.blades.subscription-list.labels.balance', width: 65, cellFilter: 'number:2' },
+            { name: 'customerName', displayName: 'subscription.blades.subscription-list.labels.customer' },
+            { name: 'startDate', displayName: 'subscription.blades.subscription-list.labels.startDate', width: 88, cellClass: 'table-date', cellFilter: 'date', sort: { direction: uiGridConstants.DESC } }            
+                    ]})">
+            <!--{ name: 'endDate', displayName: 'subscription.blades.subscription-list.labels.endDate', width: 86, cellClass: 'table-date', cellFilter: 'date' }-->
+			<div class="table-wrapper" ng-if="blade.currentEntities.length">
+				<div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-save-state ui-grid-selection ui-grid-resize-columns ui-grid-move-columns
+					ui-grid-pinning ui-grid-height></div>
+				<ul class="menu __context" role="menu" id="_menu">
+					<li class="menu-item" ng-click='deleteList([contextMenuEntity])' va-permission="subscription:delete">
+						<i class="menu-ico fa fa-trash-o"></i> {{'platform.commands.delete' | translate}}
+					</li>
+				</ul>
+			</div>
+			<div class="note" ng-if="!blade.currentEntities.length">{{ 'platform.list.no-data' | translate }}</div>
+		</div>
+	</div>
+</div>
+
+<script type="text/ng-template" id="list.row.html">
+    <div ng-click='grid.appScope.openDetailsBlade(row.entity)' ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" ui-grid-one-bind-id-grid="rowRenderIndex + '-' + col.uid + '-cell'" class="ui-grid-cell" ng-class="{'ui-grid-row-header-cell': col.isRowHeader, '__hovered': grid.appScope.contextMenuEntity === row.entity, '__selected': row.entity.id===grid.appScope.selectedNodeId }" role="{{col.isRowHeader ? 'rowheader' : 'gridcell' }}" ui-grid-cell context-menu="grid.appScope.contextMenuEntity = row.entity" data-target="_menu"></div>
+</script>
+<script type="text/ng-template" id="list-actions.cell.html">
+    <div class="ui-grid-actions" left-click-menu="grid.appScope.contextMenuEntity = row.entity" data-target="_menu">
+        <i class="fa fa-ellipsis-v"></i>
+    </div>
+</script>

@@ -1,0 +1,6 @@
+﻿<div class="gridster-cnt" ng-click="openBlade()">
+    <div class="cnt-inner">
+        <div class="list-count" ng-if="loading">...</div>
+        <div class="list-t" ng-if="!loading" translate="{{schedule.id ? 'subscription.widgets.product-schedule.info' : 'subscription.widgets.product-schedule.no-schedule' }}" translate-values="{{schedule}}"></div>
+    </div>
+</div>
