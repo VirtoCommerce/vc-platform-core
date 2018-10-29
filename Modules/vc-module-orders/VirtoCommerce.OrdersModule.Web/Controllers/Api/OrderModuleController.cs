@@ -44,9 +44,10 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         private readonly ICustomerOrderBuilder _customerOrderBuilder;
         private readonly IShoppingCartService _cartService;
         private readonly INotificationSender _notificationSender;
-
         private readonly INotificationTemplateRenderer _notificationTemplateRenderer;
         private readonly IChangeLogService _changeLogService;
+        private readonly ICustomerOrderTotalsCalculator _totalsCalculator;
+
         private static readonly object _lockObject = new object();
 
         public OrderModuleController(ICustomerOrderService customerOrderService, ICustomerOrderSearchService searchService, IStoreService storeService
@@ -58,7 +59,9 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             , ICustomerOrderBuilder customerOrderBuilder
             , IShoppingCartService cartService
             , INotificationSender notificationSender
-            , IChangeLogService changeLogService, INotificationTemplateRenderer notificationTemplateRenderer)
+            , IChangeLogService changeLogService
+            , INotificationTemplateRenderer notificationTemplateRenderer
+            , ICustomerOrderTotalsCalculator totalsCalculator)
         {
             _customerOrderService = customerOrderService;
             _searchService = searchService;
@@ -73,6 +76,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             _notificationSender = notificationSender;
             _changeLogService = changeLogService;
             _notificationTemplateRenderer = notificationTemplateRenderer;
+            _totalsCalculator = totalsCalculator;
         }
 
         /// <summary>
@@ -163,9 +167,8 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         [Route("recalculate")]
         public ActionResult<CustomerOrder> CalculateTotals([FromBody]CustomerOrder order)
         {
-            //Nothing to do special because all order totals will be evaluated in domain CustomerOrder properties transiently        
+            _totalsCalculator.CalculateTotals(order);
             return Ok(order);
-
         }
 
         /// <summary>
