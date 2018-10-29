@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -20,11 +22,11 @@ namespace VirtoCommerce.StoreModule.Data.ExportImport
         private readonly JsonSerializer _serializer;
         private readonly int BatchSize = 50;
 
-        public StoreExportImport(IStoreService storeService, IStoreSearchService storeSearchService, JsonSerializer jsonSerializer)
+        public StoreExportImport(IStoreService storeService, IStoreSearchService storeSearchService, IOptions<MvcJsonOptions> jsonOptions)
         {
             _storeService = storeService;
-            _serializer = jsonSerializer;
             _storeSearchService = storeSearchService;
+            _serializer = JsonSerializer.Create(jsonOptions.Value.SerializerSettings);
         }
 
         public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
@@ -91,36 +93,43 @@ namespace VirtoCommerce.StoreModule.Data.ExportImport
                         {
                             storeTotalCount = reader.ReadAsInt32() ?? 0;
                         }
-                        else if (reader.Value.ToString() == "Store")
+                        else if (reader.Value.ToString() == "Stores")
                         {
-                            var stores = new List<Store>();
-                            var storeCount = 0;
-                            while (reader.TokenType != JsonToken.EndArray)
+                            reader.Read();
+                            if (reader.TokenType == JsonToken.StartArray)
                             {
-                                var store = _serializer.Deserialize<Store>(reader);
-                                stores.Add(store);
-                                storeCount++;
-
                                 reader.Read();
-                            }
 
-                            for (int i = 0; i < storeCount; i += BatchSize)
-                            {
-                                var batchStores = stores.Skip(i).Take(BatchSize);
-                                foreach (var store in batchStores)
+                                var stores = new List<Store>();
+                                var storeCount = 0;
+                                while (reader.TokenType != JsonToken.EndArray)
                                 {
-                                    await _storeService.SaveChangesAsync(new[] { store });
+                                    var store = _serializer.Deserialize<Store>(reader);
+                                    stores.Add(store);
+                                    storeCount++;
+
+                                    reader.Read();
                                 }
 
-                                if (storeCount > 0)
+                                for (int i = 0; i < storeCount; i += BatchSize)
                                 {
-                                    progressInfo.Description = $"{i} of {storeCount} stores imported";
+                                    var batchStores = stores.Skip(i).Take(BatchSize);
+                                    foreach (var store in batchStores)
+                                    {
+                                        await _storeService.SaveChangesAsync(new[] {store});
+                                    }
+
+                                    if (storeCount > 0)
+                                    {
+                                        progressInfo.Description = $"{i} of {storeCount} stores imported";
+                                    }
+                                    else
+                                    {
+                                        progressInfo.Description = $"{i} stores imported";
+                                    }
+
+                                    progressCallback(progressInfo);
                                 }
-                                else
-                                {
-                                    progressInfo.Description = $"{i} stores imported";
-                                }
-                                progressCallback(progressInfo);
                             }
                         }
                     }
