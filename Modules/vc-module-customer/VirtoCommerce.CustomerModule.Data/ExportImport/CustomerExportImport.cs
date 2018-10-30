@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using VirtoCommerce.CustomerModule.Core;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Model.Search;
 using VirtoCommerce.CustomerModule.Core.Services;
@@ -22,7 +23,8 @@ namespace VirtoCommerce.CustomerModule.Data.ExportImport
         private readonly IMemberSearchService _memberSearchService;
         private readonly ISettingsManager _settingsManager;
         private readonly JsonSerializer _serializer;
-        private const int _batchSize = 50;
+
+        private int? _batchSize;
 
         public CustomerExportImport(IMemberService memberService, IMemberSearchService memberSearchService, ISettingsManager settingsManager, IOptions<MvcJsonOptions> jsonOptions)
         {
@@ -32,11 +34,25 @@ namespace VirtoCommerce.CustomerModule.Data.ExportImport
             _serializer = JsonSerializer.Create(jsonOptions.Value.SerializerSettings);
         }
 
+
+        private async Task<int> GetBatchSize()
+        {
+            if (_batchSize == null)
+            {
+                _batchSize = await _settingsManager.GetValueAsync(ModuleConstants.Settings.General.ExportImportPageSize.Name, 50);
+            }
+
+            return (int)_batchSize;
+        }
+
+
         public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             var progressInfo = new ExportImportProgressInfo { Description = "loading data..." };
             progressCallback(progressInfo);
+
+            var batchSize = await GetBatchSize();
 
             using (var sw = new StreamWriter(outStream, Encoding.UTF8))
             using (var writer = new JsonTextWriter(sw))
@@ -56,15 +72,15 @@ namespace VirtoCommerce.CustomerModule.Data.ExportImport
                 writer.WritePropertyName("Members");
                 writer.WriteStartArray();
 
-                for (var i = 0; i < memberCount; i += _batchSize)
+                for (var i = 0; i < memberCount; i += batchSize)
                 {
-                    var searchResponse = await _memberSearchService.SearchMembersAsync(new MembersSearchCriteria { Skip = i, Take = _batchSize, DeepSearch = true });
+                    var searchResponse = await _memberSearchService.SearchMembersAsync(new MembersSearchCriteria { Skip = i, Take = batchSize, DeepSearch = true });
                     foreach (var member in searchResponse.Results)
                     {
                         _serializer.Serialize(writer, member);
                     }
                     writer.Flush();
-                    progressInfo.Description = $"{ Math.Min(memberCount, i + _batchSize) } of { memberCount } members exported";
+                    progressInfo.Description = $"{ Math.Min(memberCount, i + batchSize) } of { memberCount } members exported";
                     progressCallback(progressInfo);
                 }
                 writer.WriteEndArray();
@@ -80,6 +96,8 @@ namespace VirtoCommerce.CustomerModule.Data.ExportImport
             cancellationToken.ThrowIfCancellationRequested();
             var progressInfo = new ExportImportProgressInfo();
             var membersTotalCount = 0;
+
+            var batchSize = await GetBatchSize();
 
             using (var streamReader = new StreamReader(inputStream))
             using (var reader = new JsonTextReader(streamReader))
@@ -120,9 +138,9 @@ namespace VirtoCommerce.CustomerModule.Data.ExportImport
                                 var orgsTopologicalSortedList = TopologicalSort.Sort(nodes, edges);
                                 members = members.OrderByDescending(x => orgsTopologicalSortedList.IndexOf(x.Id)).ToList();
 
-                                for (int i = 0; i < membersCount; i += _batchSize)
+                                for (int i = 0; i < membersCount; i += batchSize)
                                 {
-                                    await _memberService.SaveChangesAsync(members.Skip(i).Take(_batchSize).ToArray());
+                                    await _memberService.SaveChangesAsync(members.Skip(i).Take(batchSize).ToArray());
 
                                     if (membersTotalCount > 0)
                                     {
