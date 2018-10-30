@@ -41,7 +41,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
 
             progressCallback(progressInfo);
 
-            var pageSize = _settingsManager.GetValue(ModuleConstants.Settings.General.ProcessBacthSize.Name, 50);
+            var pageSize = _settingsManager.GetValue(ModuleConstants.Settings.General.ProcessBatchSize.Name, 50);
             foreach (var task in tasks)
             {
                 progressInfo.Message = $"Procesing task {task.Name}...";

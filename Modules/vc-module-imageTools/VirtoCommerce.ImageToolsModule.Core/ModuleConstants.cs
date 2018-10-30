@@ -39,9 +39,9 @@ namespace VirtoCommerce.ImageToolsModule.Core
                     DefaultValue = "0 0 * * *"
                 };
 
-                public static SettingDescriptor ProcessBacthSize = new SettingDescriptor
+                public static SettingDescriptor ProcessBatchSize = new SettingDescriptor
                 {
-                    Name = "ImageTools.Thumbnails.ProcessBacthSize",
+                    Name = "ImageTools.Thumbnails.ProcessBatchSize",
                     GroupName = "Thumbnail|General",
                     ValueType = SettingValueType.Integer,
                     DefaultValue = "50"
@@ -53,7 +53,7 @@ namespace VirtoCommerce.ImageToolsModule.Core
                     {
                         yield return EnableImageProcessJob;
                         yield return ImageProcessJobCronExpression;
-                        yield return ProcessBacthSize;
+                        yield return ProcessBatchSize;
                     }
                 }
             }
