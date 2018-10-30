@@ -140,9 +140,12 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             target.CountryCode = CountryCode;
             target.CountryName = CountryName;
             target.DaytimePhoneNumber = DaytimePhoneNumber;
+            target.EveningPhoneNumber = EveningPhoneNumber;
+            target.FaxNumber = FaxNumber;
             target.PostalCode = PostalCode;
             target.RegionId = RegionId;
             target.RegionName = RegionName;
+            target.StateProvince = StateProvince;
             target.Type = Type;
             target.City = City;
             target.Name = Name;
@@ -151,6 +154,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             target.LastName = LastName;
             target.Line1 = Line1;
             target.Line2 = Line2;
+            target.Organization = Organization;
         }    
     }
 }
