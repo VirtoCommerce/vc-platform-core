@@ -17,53 +17,67 @@ namespace VirtoCommerce.ImageToolsModule.Tests
         [Fact]
         public void Search_ThumbnailOptionSearchCriteria_ReturnsGenericSearchResponseOfTasksInExpectedOrder()
         {
-            var repoMock = GetTaskRepositoryMock();
-            var target = new ThumbnailTaskSearchService(() => repoMock.Object, (new Mock<IThumbnailTaskService>()).Object);
+            // Arrange
+            var target = CreateTargetService();
             var criteria = new ThumbnailTaskSearchCriteria { Sort = "Name:desc;WorkPath:desc" };
+            var expectedTasks = ThumbnailTaskEntitiesDataSource.Select(x => x.ToModel(new ThumbnailTask())).OrderByDescending(t => t.Name).ThenByDescending(t => t.WorkPath).ToArray();
+
+            // Act
             var resultTasks = target.SearchAsync(criteria);
 
-            var expectedTasks = ThumbnailTaskEntitysDataSource.Select(x => x.ToModel(new ThumbnailTask())).OrderByDescending(t => t.Name).ThenByDescending(t => t.WorkPath).ToArray();
+            // Assert
             Assert.Equal(expectedTasks, resultTasks.Result.Results);
         }
 
         [Fact]
         public void Search_SearchByExistingKeyword_TasksFound()
         {
+            // Arrange
             var keyword = "NameLong";
-            var repoMock = GetTaskRepositoryMock();
-            var target = new ThumbnailTaskSearchService(() => repoMock.Object, (new Mock<IThumbnailTaskService>()).Object);
+            var target = CreateTargetService();
+            var count = ThumbnailTaskEntitiesDataSource.Count(x => x.Name.Contains(keyword));
 
+            // Act
             var resultTasks = target.SearchAsync(new ThumbnailTaskSearchCriteria { Keyword = keyword });
 
-            var count = ThumbnailTaskEntitysDataSource.Count(x => x.Name.Contains(keyword));
-            Assert.Equal(resultTasks.Result.Results.Count(), count);
+            // Assert
+            Assert.Equal(resultTasks.Result.Results.Count, count);
         }
 
-        public Mock<IThumbnailRepository> GetTaskRepositoryMock()
+        private ThumbnailTaskSearchService CreateTargetService()
         {
-            var entites = ThumbnailTaskEntitysDataSource.ToList();
-            var entitesQuerableMock = TestUtils.CreateQuerableMock(entites);
+            var entities = ThumbnailTaskEntitiesDataSource.ToList();
+            var entitiesQueryableMock = TestUtils.CreateQueryableMock(entities);
             var repoMock = new Mock<IThumbnailRepository>();
 
-            repoMock.Setup(x => x.ThumbnailTasks).Returns(entitesQuerableMock.Object);
+            repoMock.Setup(x => x.ThumbnailTasks).Returns(entitiesQueryableMock);
 
-            repoMock.Setup(x => x.GetThumbnailTasksByIdsAsync(It.IsAny<string[]>()).Result)
-                .Returns((string[] ids) =>
+            repoMock.Setup(x => x.GetThumbnailTasksByIdsAsync(It.IsAny<string[]>()))
+                .ReturnsAsync((string[] ids) =>
                 {
-                    return entitesQuerableMock.Object.Where(t => ids.Contains(t.Id)).ToArray();
+                    return entitiesQueryableMock.Where(t => ids.Contains(t.Id)).ToArray();
                 });
 
-            return repoMock;
+            var thumbnailTaskServiceMock = new Mock<IThumbnailTaskService>();
+            thumbnailTaskServiceMock.Setup(x => x.GetByIdsAsync(It.IsAny<string[]>()))
+                .ReturnsAsync((string[] ids) =>
+                {
+                    return ThumbnailTaskEntitiesDataSource.Where(entity => ids.Contains(entity.Id))
+                        .Select(entity => entity.ToModel(new ThumbnailTask()))
+                        .ToArray();
+                });
+
+            return new ThumbnailTaskSearchService(() => repoMock.Object, thumbnailTaskServiceMock.Object);
         }
 
-        public IEnumerable<ThumbnailTaskEntity> ThumbnailTaskEntitysDataSource
+        private IEnumerable<ThumbnailTaskEntity> ThumbnailTaskEntitiesDataSource
         {
             get
             {
-                yield return new ThumbnailTaskEntity() { Id = "Task1", Name = "Name 1", WorkPath = "Path 4" };
-                yield return new ThumbnailTaskEntity() { Id = "Task2", Name = "NameLong 2", WorkPath = "Path 3" };
-                yield return new ThumbnailTaskEntity() { Id = "Task3", Name = "Name 3", WorkPath = "Path 2" };
-                yield return new ThumbnailTaskEntity() { Id = "Task4", Name = "NameLong 4", WorkPath = "Path 1" };
+                yield return new ThumbnailTaskEntity { Id = "Task1", Name = "Name 1", WorkPath = "Path 4" };
+                yield return new ThumbnailTaskEntity { Id = "Task2", Name = "NameLong 2", WorkPath = "Path 3" };
+                yield return new ThumbnailTaskEntity { Id = "Task3", Name = "Name 3", WorkPath = "Path 2" };
+                yield return new ThumbnailTaskEntity { Id = "Task4", Name = "NameLong 4", WorkPath = "Path 1" };
             }
         }
     }
