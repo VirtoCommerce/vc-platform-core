@@ -29,6 +29,7 @@ namespace VirtoCommerce.ImageToolsModule.Core
                     GroupName = "Thumbnail|General",
                     ValueType = SettingValueType.Boolean,
                     DefaultValue = false,
+                    RestartRequired = true
                 };
 
                 public static SettingDescriptor ImageProcessJobCronExpression = new SettingDescriptor
@@ -36,7 +37,8 @@ namespace VirtoCommerce.ImageToolsModule.Core
                     Name = "ImageTools.Thumbnails.ImageProcessJobCronExpression",
                     GroupName = "Thumbnail|General",
                     ValueType = SettingValueType.ShortText,
-                    DefaultValue = "0 0 * * *"
+                    DefaultValue = "0 0 * * *",
+                    RestartRequired = true
                 };
 
                 public static SettingDescriptor ProcessBatchSize = new SettingDescriptor
