@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using MockQueryable.Moq;
 using Moq;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.ImageToolsModule.Core.Services;
@@ -47,15 +48,15 @@ namespace VirtoCommerce.ImageToolsModule.Tests
         private ThumbnailTaskSearchService CreateTargetService()
         {
             var entities = ThumbnailTaskEntitiesDataSource.ToList();
-            var entitiesQueryableMock = TestUtils.CreateQueryableMock(entities);
+            var entitiesQueryableMock = entities.AsQueryable().BuildMock();
             var repoMock = new Mock<IThumbnailRepository>();
 
-            repoMock.Setup(x => x.ThumbnailTasks).Returns(entitiesQueryableMock);
+            repoMock.Setup(x => x.ThumbnailTasks).Returns(entitiesQueryableMock.Object);
 
             repoMock.Setup(x => x.GetThumbnailTasksByIdsAsync(It.IsAny<string[]>()))
                 .ReturnsAsync((string[] ids) =>
                 {
-                    return entitiesQueryableMock.Where(t => ids.Contains(t.Id)).ToArray();
+                    return entitiesQueryableMock.Object.Where(t => ids.Contains(t.Id)).ToArray();
                 });
 
             var thumbnailTaskServiceMock = new Mock<IThumbnailTaskService>();

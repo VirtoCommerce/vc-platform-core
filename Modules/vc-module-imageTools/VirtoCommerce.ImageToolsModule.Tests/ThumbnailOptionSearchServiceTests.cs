@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MockQueryable.Moq;
 using Moq;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.ImageToolsModule.Data.Models;
@@ -29,15 +30,15 @@ namespace VirtoCommerce.ImageToolsModule.Tests
         public Mock<IThumbnailRepository> GetOptionsRepositoryMock()
         {
             var entities = ThumbnailTaskEntitysDataSource.ToList();
-            var entitiesQueryableMock = TestUtils.CreateQueryableMock(entities);
+            var entitiesQueryableMock = entities.AsQueryable().BuildMock();
             var repoMock = new Mock<IThumbnailRepository>();
 
-            repoMock.Setup(x => x.ThumbnailOptions).Returns(entitiesQueryableMock);
+            repoMock.Setup(x => x.ThumbnailOptions).Returns(entitiesQueryableMock.Object);
 
             repoMock.Setup(x => x.GetThumbnailOptionsByIdsAsync(It.IsAny<string[]>()))
                 .Returns((string[] ids) =>
                 {
-                    return Task.FromResult(entitiesQueryableMock.Where(t => ids.Contains(t.Id)).ToArray());
+                    return Task.FromResult(entitiesQueryableMock.Object.Where(t => ids.Contains(t.Id)).ToArray());
                 });
 
             return repoMock;
