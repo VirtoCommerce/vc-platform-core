@@ -11,17 +11,17 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
 {
     public class ThumbnailOptionService : IThumbnailOptionService
     {
-        private readonly Func<IThumbnailRepository> _thumbnailRepositoryFactory;
-
         public ThumbnailOptionService(Func<IThumbnailRepository> thumbnailRepositoryFactory)
         {
-            _thumbnailRepositoryFactory = thumbnailRepositoryFactory;
+            ThumbnailRepositoryFactory = thumbnailRepositoryFactory;
         }
 
-        public async Task SaveOrUpdateAsync(ThumbnailOption[] options)
+        protected Func<IThumbnailRepository> ThumbnailRepositoryFactory { get; }
+
+        public virtual async Task SaveOrUpdateAsync(ThumbnailOption[] options)
         {
             var pkMap = new PrimaryKeyResolvingMap();
-            using (var repository = this._thumbnailRepositoryFactory())
+            using (var repository = this.ThumbnailRepositoryFactory())
             {
                 var existOptionEntities = await repository.GetThumbnailOptionsByIdsAsync(options.Select(t => t.Id).ToArray());
                 foreach (var option in options)
@@ -47,18 +47,18 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
             }
         }
 
-        public async Task<ThumbnailOption[]> GetByIdsAsync(string[] ids)
+        public virtual async Task<ThumbnailOption[]> GetByIdsAsync(string[] ids)
         {
-            using (var repository = this._thumbnailRepositoryFactory())
+            using (var repository = this.ThumbnailRepositoryFactory())
             {
                 var thumbnailOptions = await repository.GetThumbnailOptionsByIdsAsync(ids);
                 return thumbnailOptions.Select(x => x.ToModel(AbstractTypeFactory<ThumbnailOption>.TryCreateInstance())).ToArray();
             }
         }
 
-        public async Task RemoveByIdsAsync(string[] ids)
+        public virtual async Task RemoveByIdsAsync(string[] ids)
         {
-            using (var repository = this._thumbnailRepositoryFactory())
+            using (var repository = this.ThumbnailRepositoryFactory())
             {
                 await repository.RemoveThumbnailOptionsByIds(ids);
                 await repository.UnitOfWork.CommitAsync();
