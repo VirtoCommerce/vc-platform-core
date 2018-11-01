@@ -48,8 +48,6 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
 
             var result = new ThumbnailGenerationResult();
 
-            var format = _imageService.GetImageFormat(originalImage);
-
             //one process only can use an Image object at the same time.
             Image clone;
             lock (_progressLock)
@@ -64,7 +62,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
 
                 if (thumbnail != null)
                 {
-                    await _imageService.SaveImageAsync(thumbnailUrl, thumbnail, format);
+                    await _imageService.SaveImageAsync(thumbnailUrl, thumbnail, clone.RawFormat, option.JpegQuality);
                 }
                 else
                 {

@@ -55,7 +55,8 @@
                     "width": "Width (pixels)",
                     "height": "Height (pixels)",
                     "background-color": "Background color",
-                    "anchor-position": "Anchor Position"
+                    "anchor-position": "Anchor Position",
+                    "jpeg-quality": "Jpeg quality"
                 },
                 "placeholders": {
                     "name": "Enter option name",
@@ -71,7 +72,8 @@
                     "width": "Thumbnail width in pixels",
                     "height": "Thumbnail height in pixels",
                     "background-color": "Thumbnail background color i.e. #FFFFFF",
-                    "anchor-position": "Anchor position when cropping the image"
+                    "anchor-position": "Anchor position when cropping the image",
+                    "jpeg-quality": "Output Jpeg quality"
                 },
                 "resize-method": {
                     "fixed-size": "Fixed Size",
@@ -89,7 +91,12 @@
                     "bottom-left": "Bottom Left",
                     "bottom-center": "Bottom Center",
                     "bottom-right": "Bottom Right"
-
+                },
+                "jpeg-quality": {
+                    "low": "Low",
+                    "medium": "Medium",
+                    "high": "High",
+                    "very-high": "Very high"
                 }
             }
         },
