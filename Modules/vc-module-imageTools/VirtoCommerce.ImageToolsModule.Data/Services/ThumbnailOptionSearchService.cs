@@ -35,9 +35,14 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
                 var query = repository.ThumbnailOptions.OrderBySortInfos(sortInfos);
                 var totalCount = await query.CountAsync();
 
-                var ids = await query.Skip(criteria.Skip).Take(criteria.Take).Select(x => x.Id).ToArrayAsync();
-                var thumbnailOptions = await repository.GetThumbnailOptionsByIdsAsync(ids);
-                var results = thumbnailOptions.Select(t => t.ToModel(AbstractTypeFactory<ThumbnailOption>.TryCreateInstance())).ToArray();
+                var results = new ThumbnailOption[0];
+
+                if (criteria.Take > 0)
+                {
+                    var ids = await query.Skip(criteria.Skip).Take(criteria.Take).Select(x => x.Id).ToArrayAsync();
+                    var thumbnailOptions = await repository.GetThumbnailOptionsByIdsAsync(ids);
+                    results = thumbnailOptions.Select(t => t.ToModel(AbstractTypeFactory<ThumbnailOption>.TryCreateInstance())).ToArray();
+                }
 
                 var retVal = new GenericSearchResult<ThumbnailOption>
                 {
