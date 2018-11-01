@@ -99,7 +99,7 @@
                 "msg1": "Choose how to generate the thumbnails. Options:",
                 "msg2": "Process changes: generate thumbnails only for new or changed images",
                 "msg3": "Regenerate: force to generation process for all images",
-                "btn-changes": "Procsess changes",
+                "btn-changes": "Process changes",
                 "btn-regenerate": "Regenerate"
             },
             "select-folder": {
@@ -139,7 +139,7 @@
             "description": "",
             "title": "Cron expression for scheduling image processing job execution (requires restart)"
         },
-        "ImageTools.Thumbnails.ProcessBacthSize": {
+        "ImageTools.Thumbnails.ProcessBatchSize": {
             "title": "Partition size",
             "description": ""
         },
