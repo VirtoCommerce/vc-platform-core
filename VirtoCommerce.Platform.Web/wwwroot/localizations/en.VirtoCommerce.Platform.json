@@ -569,6 +569,14 @@
                     "Quarters": "Quarters",
                     "Years": "Years"
                 }
+            },
+            "change-password": {
+                "title": "Please enter a new password for the '{{userName}}' user",
+                "password": "New password:",
+                "confirm": "Repeat new password:",
+                "save": "Change password",
+                "postpone": "Postpone",
+                "force-change-info": "You must change the password to continue using the manager."
             }
         },
         "templates": {
@@ -789,5 +797,4 @@
             "title": "The global lifetime of objects in the cache"
         }
     }
-
 }

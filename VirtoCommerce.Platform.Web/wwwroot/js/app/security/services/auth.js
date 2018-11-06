@@ -72,13 +72,11 @@ angular.module('platformWebApp')
     };
 
     function changeAuth(user) {
-        authContext.userId = user.id;
-        authContext.permissions = user.permissions;
+        angular.extend(authContext, user);
         authContext.userLogin = user.userName;
         authContext.fullName = user.userLogin;
         authContext.isAuthenticated = user.userName != null;
-        authContext.userType = user.userType;
-        authContext.isAdministrator = user.isAdministrator;
+
         //Interpolate permissions to replace some template to real value
         if (authContext.permissions) {
             authContext.permissions = _.map(authContext.permissions, function (x) {
