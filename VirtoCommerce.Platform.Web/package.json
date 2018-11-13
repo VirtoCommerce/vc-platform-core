@@ -3,20 +3,24 @@
     "version": "1.0.0",
     "private": true,
     "devDependencies": {
+        "aspnet-webpack": "^3.0.0",
+        "del": "3.0.0",
         "gulp": "^3.9.1",
+        "gulp-autoprefixer": "^3.1.0",
         "gulp-concat": "^2.6.1",
         "gulp-cssmin": "^0.2.0",
-        "gulp-htmlmin": "^3.0.0",
-        "gulp-uglify": "^3.0.0",
-        "merge-stream": "^1.0.1",
-        "gulp-util": "^3.0.8",
         "gulp-filter": "^5.0.0",
-        "gulp-autoprefixer": "^3.1.0",
+        "gulp-htmlmin": "^3.0.0",
         "gulp-sass": "^3.1.0",
         "gulp-sourcemaps": "^2.4.1",
+        "gulp-sync": "0.1.4",
+        "gulp-uglify": "^3.0.0",
+        "gulp-util": "^3.0.8",
         "main-bower-files": "2.9.0",
+        "merge-stream": "^1.0.1",
         "node-bourbon": "^4.2.3",
-        "del": "3.0.0",
-        "gulp-sync": "0.1.4"
+        "webpack": "^4.25.1",
+        "webpack-dev-middleware": "^3.4.0",
+        "webpack-hot-middleware": "^2.24.3"
     }
 }
