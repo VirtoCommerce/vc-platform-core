@@ -428,6 +428,21 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             return Ok(result);
         }
 
+        /// <summary>
+        /// Validate password reset token
+        /// </summary>
+        [HttpPost]
+        [Route("users/{userId}/validatepasswordresettoken")]
+        [AllowAnonymous]
+        public async Task<ActionResult<bool>> ValidatePasswordResetToken(string userId, [FromBody] ValidatePasswordResetTokenRequest resetPasswordToken)
+        {
+            var applicationUser = await _userManager.FindByIdAsync(userId);
+            var tokenProvider = _userManager.Options.Tokens.PasswordResetTokenProvider;
+            var result = await _userManager.VerifyUserTokenAsync(applicationUser, tokenProvider, "ResetPassword",
+                resetPasswordToken.Token);
+            return Ok(result);
+        }
+
 
         /// <summary>
         /// Send email with instructions on how to reset user password.
@@ -564,7 +579,5 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         {
             return _securityOptions.NonEditableUsers?.FirstOrDefault(x => x.EqualsInvariant(userName)) == null;
         }
-
-
     }
 }

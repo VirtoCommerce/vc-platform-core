@@ -6,9 +6,9 @@ angular.module('platformWebApp')
                 templateUrl: '$(Platform)/Scripts/app/security/login/login.tpl.html',
                 controller: [
                     '$scope', 'platformWebApp.authService', 'platformWebApp.externalSignInService',
-                    function($scope, authService, externalSignInService) {
+                    function ($scope, authService, externalSignInService) {
                         externalSignInService.getProviders().then(
-                            function(response) {
+                            function (response) {
                                 $scope.externalLoginProviders = response.data;
                             });
 
@@ -16,19 +16,19 @@ angular.module('platformWebApp')
                         $scope.authError = null;
                         $scope.authReason = false;
                         $scope.loginProgress = false;
-                        $scope.ok = function() {
+                        $scope.ok = function () {
                             // Clear any previous security errors
                             $scope.authError = null;
                             $scope.loginProgress = true;
                             // Try to login
                             authService.login($scope.user.email, $scope.user.password, $scope.user.remember).then(
-                                function(loggedIn) {
+                                function (loggedIn) {
                                     $scope.loginProgress = false;
                                     if (!loggedIn) {
                                         $scope.authError = 'invalidCredentials';
                                     }
                                 },
-                                function(x) {
+                                function (x) {
                                     $scope.loginProgress = false;
                                     if (angular.isDefined(x.status)) {
                                         if (x.status == 401) {
@@ -50,68 +50,68 @@ angular.module('platformWebApp')
                 url: '/forgotpassword',
                 templateUrl: '$(Platform)/Scripts/app/security/dialogs/forgotPasswordDialog.tpl.html',
                 controller: [
-                    '$scope', 'platformWebApp.authService', '$state', function($scope, authService, $state) {
+                    '$scope', 'platformWebApp.authService', '$state', function ($scope, authService, $state) {
                         $scope.viewModel = {};
-                        $scope.ok = function() {
+                        $scope.ok = function () {
                             $scope.isLoading = true;
                             $scope.errorMessage = null;
-                            authService.requestpasswordreset($scope.viewModel).then(function(retVal) {
+                            authService.requestpasswordreset($scope.viewModel).then(function (retVal) {
                                 $scope.isLoading = false;
                                 angular.extend($scope, retVal);
                             });
                         };
-                        $scope.close = function() {
+                        $scope.close = function () {
                             $state.go('loginDialog');
                         };
                     }
                 ]
             });
 
-	    $stateProvider.state('resetpasswordDialog', {
-	        url: '/resetpassword/:userId/{code:.*}',
-	        templateUrl: '$(Platform)/Scripts/app/security/dialogs/resetPasswordDialog.tpl.html',
-	        controller: ['$rootScope', '$scope', '$stateParams', 'platformWebApp.authService', function ($rootScope, $scope, $stateParams, authService) {
-	            $scope.viewModel = $stateParams;
-	            $scope.isValidToken = true;
-	            $scope.isLoading = true;
-	            authService.validatepasswordresettoken($scope.viewModel).then(function (retVal) {
-	                $scope.isValidToken = retVal;
-	                $scope.isLoading = false;
-	            }, function (response) {
-	                $scope.isLoading = false;
-	                $scope.errors = response.data.errors;
-	            });
-	            $scope.ok = function () {
-	                $scope.errorMessage = null;
-	                $scope.isLoading = true;
-	                authService.resetpassword($scope.viewModel).then(function (retVal) {
-	                    $scope.isLoading = false;
-	                    $rootScope.preventLoginDialog = false;
-	                    angular.extend($scope, retVal);
-	                }, function (response) {
-	                    $scope.viewModel.newPassword = $scope.viewModel.newPassword2 = undefined;
-	                    $scope.errors = response.data.errors;
-	                    $scope.isLoading = false;
-	                });
-	            };
-	        }]
-	    })
+        $stateProvider.state('resetpasswordDialog', {
+            url: '/resetpassword/:userId/{code:.*}',
+            templateUrl: '$(Platform)/Scripts/app/security/dialogs/resetPasswordDialog.tpl.html',
+            controller: ['$rootScope', '$scope', '$stateParams', 'platformWebApp.authService', function ($rootScope, $scope, $stateParams, authService) {
+                $scope.viewModel = $stateParams;
+                $scope.isValidToken = true;
+                $scope.isLoading = true;
+                authService.validatepasswordresettoken($scope.viewModel).then(function (retVal) {
+                    $scope.isValidToken = retVal;
+                    $scope.isLoading = false;
+                }, function (response) {
+                    $scope.isLoading = false;
+                    $scope.errors = response.data.errors;
+                });
+                $scope.ok = function () {
+                    $scope.errorMessage = null;
+                    $scope.isLoading = true;
+                    authService.resetpassword($scope.viewModel).then(function (retVal) {
+                        $scope.isLoading = false;
+                        $rootScope.preventLoginDialog = false;
+                        angular.extend($scope, retVal);
+                    }, function (response) {
+                        $scope.viewModel.newPassword = $scope.viewModel.newPassword2 = undefined;
+                        $scope.errors = response.data.errors;
+                        $scope.isLoading = false;
+                    });
+                };
+            }]
+        })
 
-	    .state('workspace.securityModule', {
-	        url: '/security',
-	        templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-	        controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-				    var blade = {
-				        id: 'security',
-				        title: 'platform.blades.security-main.title',
-				        subtitle: 'platform.blades.security-main.subtitle',
-				        controller: 'platformWebApp.securityMainController',
-				        template: '$(Platform)/Scripts/app/security/blades/security-main.tpl.html',
-				        isClosingDisabled: true
-				    };
-				    bladeNavigationService.showBlade(blade);
-				}
-	        ]
+            .state('workspace.securityModule', {
+                url: '/security',
+                templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+                controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+                    var blade = {
+                        id: 'security',
+                        title: 'platform.blades.security-main.title',
+                        subtitle: 'platform.blades.security-main.subtitle',
+                        controller: 'platformWebApp.securityMainController',
+                        template: '$(Platform)/Scripts/app/security/blades/security-main.tpl.html',
+                        isClosingDisabled: true
+                    };
+                    bladeNavigationService.showBlade(blade);
+                }
+                ]
             });
 
         $stateProvider.state('changePasswordDialog',
@@ -150,7 +150,7 @@ angular.module('platformWebApp')
                     }
                 }]
             });
-	}])
+    }])
     .run(['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.metaFormsService', 'platformWebApp.widgetService', '$state', 'platformWebApp.authService',
         function ($rootScope, mainMenuService, metaFormsService, widgetService, $state, authService) {
 
