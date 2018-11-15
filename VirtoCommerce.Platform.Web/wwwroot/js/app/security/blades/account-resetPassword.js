@@ -1,4 +1,4 @@
-﻿angular.module('platformWebApp')
+angular.module('platformWebApp')
 .controller('platformWebApp.accountResetPasswordController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.accounts', function ($scope, bladeNavigationService, accounts) {
     var blade = $scope.blade;
 
@@ -27,7 +27,7 @@
         accounts.resetPassword({ id: blade.currentEntityId }, postData, function (data) {
             $scope.bladeClose();
         }, function (error) {
-            bladeNavigationService.setError('Error: ' + error.data.message, $scope.blade);
+            bladeNavigationService.setError(error, $scope.blade);
         });
     };
     

@@ -381,12 +381,12 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         {
             if (!IsUserEditable(userName))
             {
-                return BadRequest(new IdentityError() { Description = "It is forbidden to edit this user." });
+                return BadRequest(new IdentityError { Description = "It is forbidden to edit this user." });
             }
             var user = await _userManager.FindByNameAsync(userName);
             if (user == null)
             {
-                return BadRequest(IdentityResult.Failed(new IdentityError() { Description = "User not found" }));
+                return BadRequest(IdentityResult.Failed(new IdentityError { Description = "User not found" }));
             }
 
             var result = await _signInManager.UserManager.ChangePasswordAsync(user, changePassword.OldPassword, changePassword.NewPassword);
