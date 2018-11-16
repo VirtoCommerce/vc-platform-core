@@ -76,7 +76,7 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
 
             ValidatePath(filePath);
 
-            return File.Open(filePath, FileMode.Open);
+            return File.Open(filePath, FileMode.Open, FileAccess.Read);
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
                 Directory.CreateDirectory(folderPath);
             }
 
-            return File.Open(filePath, FileMode.Create);
+            return File.Open(filePath, FileMode.Create, FileAccess.Write);
         }
 
 
