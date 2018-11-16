@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
@@ -41,7 +40,9 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
         public virtual Task<BlobInfo> GetBlobInfoAsync(string url)
         {
             if (string.IsNullOrEmpty(url))
-                throw new ArgumentNullException("url");
+            {
+                throw new ArgumentNullException(nameof(url));
+            }
 
             BlobInfo retVal = null;
             var filePath = GetStoragePathFromUrl(url);
@@ -159,7 +160,7 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
         {
             if (folder == null)
             {
-                throw new ArgumentNullException("folder");
+                throw new ArgumentNullException(nameof(folder));
             }
             var path = _storagePath;
             if (folder.ParentUrl != null)
@@ -185,7 +186,9 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
         public virtual Task RemoveAsync(string[] urls)
         {
             if (urls == null)
-                throw new ArgumentNullException("urls");
+            {
+                throw new ArgumentNullException(nameof(urls));
+            }
 
             foreach (var url in urls)
             {
@@ -218,7 +221,7 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
         {
             if (relativeUrl == null)
             {
-                throw new ArgumentNullException("relativeUrl");
+                throw new ArgumentNullException(nameof(relativeUrl));
             }
             var retVal = relativeUrl;
             if (!relativeUrl.IsAbsoluteUrl())
