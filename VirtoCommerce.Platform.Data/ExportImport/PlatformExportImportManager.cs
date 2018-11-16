@@ -12,6 +12,7 @@ using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
+using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
@@ -115,6 +116,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
             progressCallback(progressInfo);
 
             using (var zipArchive = new ZipArchive(stream))
+            using (EventSuppressor.SupressEvents())
             {
                 //Import selected platform entries
                 await ImportPlatformEntriesInternalAsync(zipArchive, manifest, progressCallback, cancellationToken);
