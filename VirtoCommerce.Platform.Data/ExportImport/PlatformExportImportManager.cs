@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Security.Claims;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
@@ -22,8 +20,8 @@ namespace VirtoCommerce.Platform.Data.ExportImport
 {
     public class PlatformExportImportManager : IPlatformExportImportManager
     {
-        private const string _manifestZipEntryName = "Manifest.json";
-        private const string _platformZipEntryName = "PlatformEntries.json";
+        private const string ManifestZipEntryName = "Manifest.json";
+        private const string PlatformZipEntryName = "PlatformEntries.json";
 
         private readonly ILocalModuleCatalog _moduleCatalog;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -67,10 +65,10 @@ namespace VirtoCommerce.Platform.Data.ExportImport
 
         public PlatformExportManifest ReadExportManifest(Stream stream)
         {
-            PlatformExportManifest retVal = null;
+            PlatformExportManifest retVal;
             using (var package = new ZipArchive(stream))
             {
-                var manifestPart = package.GetEntry(_manifestZipEntryName.ToString());
+                var manifestPart = package.GetEntry(ManifestZipEntryName);
                 using (var manifestStream = manifestPart.Open())
                 {
                     retVal = manifestStream.DeserializeJson<PlatformExportManifest>(GetJsonSerializer());
@@ -94,7 +92,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                 await ExportModulesInternalAsync(zipArchive, manifest, progressCallback, cancellationToken);
 
                 //Write system information about exported modules
-                var manifestZipEntry = zipArchive.CreateEntry(_manifestZipEntryName, CompressionLevel.Optimal);
+                var manifestZipEntry = zipArchive.CreateEntry(ManifestZipEntryName, CompressionLevel.Optimal);
 
                 //After all modules exported need write export manifest part
                 using (var stream = manifestZipEntry.Open())
@@ -131,7 +129,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
         {
             var progressInfo = new ExportImportProgressInfo();
 
-            var platformZipEntries = zipArchive.GetEntry(_platformZipEntryName);
+            var platformZipEntries = zipArchive.GetEntry(PlatformZipEntryName);
             if (platformZipEntries != null)
             {
                 PlatformExportEntries platformEntries;
@@ -143,7 +141,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                 //Import security objects
                 if (manifest.HandleSecurity)
                 {
-                    progressInfo.Description = $"Import { platformEntries.Users.Count()} users with roles...";
+                    progressInfo.Description = $"Import { platformEntries.Users.Count} users with roles...";
                     progressCallback(progressInfo);
 
                     foreach (var role in platformEntries.Roles)
@@ -205,7 +203,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                 }
                 //users 
                 var usersResult = _userManager.Users.ToArray();
-                progressInfo.Description = $"Security: {usersResult.Count()} users exporting...";
+                progressInfo.Description = $"Security: {usersResult.Length} users exporting...";
                 progressCallback(progressInfo);
 
                 foreach (var user in usersResult)
@@ -239,7 +237,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
 
 
             //Create part for platform entries
-            var platformEntiriesPart = zipArchive.CreateEntry(_platformZipEntryName, CompressionLevel.Optimal);
+            var platformEntiriesPart = zipArchive.CreateEntry(PlatformZipEntryName, CompressionLevel.Optimal);
             using (var partStream = platformEntiriesPart.Open())
             {
                 platformExportObj.SerializeJson(partStream);
@@ -257,7 +255,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                     var modulePart = zipArchive.GetEntry(moduleInfo.PartUri.TrimStart('/'));
                     using (var modulePartStream = modulePart.Open())
                     {
-                        void modulePorgressCallback(ExportImportProgressInfo x)
+                        void ModuleProgressCallback(ExportImportProgressInfo x)
                         {
                             progressInfo.Description = $"{moduleInfo.Id}: {x.Description}";
                             progressCallback(progressInfo);
@@ -268,11 +266,11 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                             {
                                 //TODO: Add JsonConverter which will be materialized concrete ExportImport option type 
                                 var options = manifest.Options.FirstOrDefault(x => x.ModuleIdentity.Id == moduleDescriptor.Identity.Id);
-                                await importer.ImportAsync(modulePartStream, options, modulePorgressCallback, cancellationToken);
+                                await importer.ImportAsync(modulePartStream, options, ModuleProgressCallback, cancellationToken);
                             }
                             catch (Exception ex)
                             {
-                                progressInfo.Errors.Add($"{moduleInfo.Id}: {ex.ToString()}");
+                                progressInfo.Errors.Add($"{moduleInfo.Id}: {ex}");
                                 progressCallback(progressInfo);
                             }
                         }
@@ -294,7 +292,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                     var moduleZipEntryName = module.Id + ".json";
                     var zipEntry = zipArchive.CreateEntry(moduleZipEntryName, CompressionLevel.Optimal);
 
-                    void modulePorgressCallback(ExportImportProgressInfo x)
+                    void ModuleProgressCallback(ExportImportProgressInfo x)
                     {
                         progressInfo.Description = $"{ module.Id }: { x.Description }";
                         progressCallback(progressInfo);
@@ -308,15 +306,15 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                         {
                             //TODO: Add JsonConverter which will be materialized concrete ExportImport option type 
                             var options = manifest.Options.FirstOrDefault(x => x.ModuleIdentity.Id == moduleDescriptor.Identity.Id);
-                            await exporter.ExportAsync(zipEntry.Open(), options, modulePorgressCallback, cancellationToken);
+                            await exporter.ExportAsync(zipEntry.Open(), options, ModuleProgressCallback, cancellationToken);
                         }
                         catch (Exception ex)
                         {
-                            progressInfo.Errors.Add($"{ module.Id}: {ex.ToString()}");
+                            progressInfo.Errors.Add($"{ module.Id}: {ex}");
                             progressCallback(progressInfo);
                         }
                     }
-                    module.PartUri = moduleZipEntryName.ToString();
+                    module.PartUri = moduleZipEntryName;
                 }
             }
         }
