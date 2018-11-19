@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.Serialization;
@@ -27,7 +27,7 @@ namespace VirtoCommerce.Platform.Core.Common
 		public static string GetHash<T>(this object instance) where T : HashAlgorithm, new()
 		{
 			T cryptoServiceProvider = new T();
-			return computeHash(instance, cryptoServiceProvider);
+			return ComputeHash(instance, cryptoServiceProvider);
 		}
 
 		/// <summary>
@@ -48,7 +48,7 @@ namespace VirtoCommerce.Platform.Core.Common
 		public static string GetKeyedHash<T>(this object instance, byte[] key) where T : KeyedHashAlgorithm, new()
 		{
 			T cryptoServiceProvider = new T { Key = key };
-			return computeHash(instance, cryptoServiceProvider);
+			return ComputeHash(instance, cryptoServiceProvider);
 		}
 
 		/// <summary>
@@ -79,7 +79,7 @@ namespace VirtoCommerce.Platform.Core.Common
 			return instance.GetHash<SHA1CryptoServiceProvider>();
 		}
 
-		private static string computeHash<T>(object instance, T cryptoServiceProvider) where T : HashAlgorithm, new()
+		private static string ComputeHash<T>(object instance, T cryptoServiceProvider) where T : HashAlgorithm, new()
 		{
 			XmlSerializer xmlSerializer = new XmlSerializer(instance.GetType());
 
@@ -95,13 +95,14 @@ namespace VirtoCommerce.Platform.Core.Common
         {
             if (obj == null)
             {
-                return default(T);
+                return null;
             }
-            var objString = obj as string;
-            if (objString != null)
+
+            if (obj is string objString)
             {
                 return objString.ToNullable<T>();
             }
+
             var objType = typeof(T);
             if (objType.IsGenericType && objType.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
