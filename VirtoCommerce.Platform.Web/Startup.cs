@@ -42,7 +42,7 @@ using VirtoCommerce.Platform.Security.Repositories;
 using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Hangfire;
 using VirtoCommerce.Platform.Web.JsonConverters;
-using VirtoCommerce.Platform.Web.Middelware;
+using VirtoCommerce.Platform.Web.Middleware;
 using VirtoCommerce.Platform.Web.Swagger;
 
 namespace VirtoCommerce.Platform.Web
@@ -286,7 +286,7 @@ namespace VirtoCommerce.Platform.Web
                 app.UseDatabaseErrorPage();
                 app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
                 {
-                    HotModuleReplacement = true
+                    HotModuleReplacement = false
                 });
             }
             else

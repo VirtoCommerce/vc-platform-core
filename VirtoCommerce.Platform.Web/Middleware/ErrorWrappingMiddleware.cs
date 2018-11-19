@@ -1,4 +1,4 @@
-﻿namespace VirtoCommerce.Platform.Web.Middelware
+namespace VirtoCommerce.Platform.Web.Middleware
 {
     internal class ErrorWrappingMiddleware
     {

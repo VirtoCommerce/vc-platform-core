@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace VirtoCommerce.Platform.Web.Middelware
+namespace VirtoCommerce.Platform.Web.Middleware
 {
     public class ApiErrorWrappingMiddleware
     {
