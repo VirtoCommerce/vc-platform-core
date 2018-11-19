@@ -33,16 +33,18 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         private readonly IPermissionsRegistrar _permissionsProvider;
         private readonly IUserSearchService _userSearchService;
         private readonly IRoleSearchService _roleSearchService;
+        private readonly IPasswordCheckService _passwordCheckService;
         private readonly IEmailSender _emailSender;
         private readonly IEventPublisher _eventPublisher;
 
         public SecurityController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager,
                 IPermissionsRegistrar permissionsProvider, IUserSearchService userSearchService, IRoleSearchService roleSearchService,
-                IOptions<SecurityOptions> securityOptions, IEmailSender emailSender, IEventPublisher eventPublisher)
+                IOptions<SecurityOptions> securityOptions, IPasswordCheckService passwordCheckService, IEmailSender emailSender, IEventPublisher eventPublisher)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _securityOptions = securityOptions.Value;
+            _passwordCheckService = passwordCheckService;
             _permissionsProvider = permissionsProvider;
             _roleManager = roleManager;
             _userSearchService = userSearchService;
@@ -117,7 +119,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 Id = user.Id,
                 isAdministrator = await _userManager.IsInRoleAsync(user, PlatformConstants.Security.Roles.Administrator),
                 UserName = user.UserName,
-
+                PasswordExpired = user.PasswordExpired
             };
             var roleNames = await _userManager.GetRolesAsync(user);
             foreach (var roleName in roleNames)
@@ -393,6 +395,94 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             if (result.Succeeded)
             {
                 await _eventPublisher.Publish(new UserPasswordChangedEvent(user.Id));
+
+                // If the password change was required for the user, now it is not needed anymore - the password is changed.
+                if (user.PasswordExpired)
+                {
+                    user.PasswordExpired = false;
+                    await _userManager.UpdateAsync(user);
+                }
+            }
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Resets password for current user.
+        /// </summary>
+        /// <param name="resetPassword">Password reset information containing new password.</param>
+        /// <returns>Result of password reset.</returns>
+        [HttpPost]
+        [Route("currentuser/resetpassword")]
+        [ProducesResponseType(typeof(IdentityResult), 200)]
+        [ProducesResponseType(typeof(IdentityResult), 400)]
+        public async Task<ActionResult> ResetCurrentUserPassword([FromBody] ResetPasswordConfirmRequest resetPassword)
+        {
+            var currentUserName = User.Identity.Name;
+
+            var user = await _userManager.FindByNameAsync(currentUserName);
+            if (user == null)
+            {
+                return BadRequest(IdentityResult.Failed(new IdentityError { Description = "User not found" }));
+            }
+            if (!IsUserEditable(user.UserName))
+            {
+                return BadRequest(new IdentityError { Description = "It is forbidden to edit this user." });
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _signInManager.UserManager.ResetPasswordAsync(user, token, resetPassword.NewPassword);
+            if (result.Succeeded)
+            {
+                await _eventPublisher.Publish(new UserResetPasswordEvent(user.Id));
+
+                if (user.PasswordExpired != resetPassword.ForcePasswordChangeOnNextSignIn)
+                {
+                    user.PasswordExpired = resetPassword.ForcePasswordChangeOnNextSignIn;
+
+                    // TODO: publish UserChangingEvent/UserChangedEvent?
+                    var userUpdateResult = await _userManager.UpdateAsync(user);
+                }
+            }
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Reset password confirmation
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <param name="resetPasswordConfirm">New password.</param>
+        [HttpPost]
+        [Route("users/{userName}/resetpassword")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(typeof(IdentityResult), 200)]
+        [Authorize(PlatformConstants.Security.Permissions.SecurityUpdate)]
+        public async Task<ActionResult> ResetPassword([FromRoute] string userName, [FromBody] ResetPasswordConfirmRequest resetPasswordConfirm)
+        {
+            var user = await _userManager.FindByNameAsync(userName);
+            if (user == null)
+            {
+                return BadRequest(IdentityResult.Failed(new IdentityError { Description = "User not found" }));
+            }
+            if (!IsUserEditable(user.UserName))
+            {
+                return BadRequest(new IdentityError { Description = "It is forbidden to edit this user." });
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _signInManager.UserManager.ResetPasswordAsync(user, token, resetPasswordConfirm.NewPassword);
+            if (result.Succeeded)
+            {
+                await _eventPublisher.Publish(new UserResetPasswordEvent(user.Id));
+
+                if (user.PasswordExpired != resetPasswordConfirm.ForcePasswordChangeOnNextSignIn)
+                {
+                    user.PasswordExpired = resetPasswordConfirm.ForcePasswordChangeOnNextSignIn;
+
+                    // TODO: publish UserChangingEvent/UserChangedEvent?
+                    var userUpdateResult = await _userManager.UpdateAsync(user);
+                }
             }
 
             return Ok(result);
@@ -407,22 +497,31 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Route("users/{userId}/resetpasswordconfirm")]
         [ProducesResponseType(400)]
         [ProducesResponseType(typeof(IdentityResult), 200)]
-        [Authorize(PlatformConstants.Security.Permissions.SecurityUpdate)]
-        public async Task<ActionResult> ResetPassword([FromRoute] string userId, [FromBody] ResetPasswordConfirmRequest resetPasswordConfirm)
+        [AllowAnonymous]
+        public async Task<ActionResult> ResetPasswordByToken([FromRoute] string userId, [FromBody] ResetPasswordConfirmRequest resetPasswordConfirm)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                return BadRequest(IdentityResult.Failed(new IdentityError() { Description = "User not found" }));
+                return BadRequest(IdentityResult.Failed(new IdentityError { Description = "User not found" }));
             }
             if (!IsUserEditable(user.UserName))
             {
-                return BadRequest(new IdentityError() { Description = "It is forbidden to edit this user." });
+                return BadRequest(new IdentityError { Description = "It is forbidden to edit this user." });
             }
             var result = await _signInManager.UserManager.ResetPasswordAsync(user, resetPasswordConfirm.Token, resetPasswordConfirm.NewPassword);
             if (result.Succeeded)
             {
                 await _eventPublisher.Publish(new UserResetPasswordEvent(user.Id));
+
+                // If the password reset was required for the user, now it is not needed anymore - the password is changed now.
+                if (user.PasswordExpired)
+                {
+                    user.PasswordExpired = false;
+
+                    // TODO: publish UserChangingEvent/UserChangedEvent?
+                    var userUpdateResult = await _userManager.UpdateAsync(user);
+                }
             }
 
             return Ok(result);
@@ -463,7 +562,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             }
 
             //Do not permit rejected users and customers
-            if (user != null && user.Email != null && IsUserEditable(user.UserName) && !(await _userManager.IsInRoleAsync(user, PlatformConstants.Security.Roles.Customer)))
+            if (user?.Email != null && IsUserEditable(user.UserName) && !(await _userManager.IsInRoleAsync(user, PlatformConstants.Security.Roles.Customer)))
             {
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var callbackUrl = $"{Request.Scheme}{Request.Host}/api/platform/security/#/resetpassword/{user.Id}/{token}";
@@ -474,6 +573,15 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             }
 
             return Ok();
+        }
+
+        [HttpPost]
+        [Route("validatepassword")]
+        [ProducesResponseType(typeof(PasswordValidationResult), 200)]
+        public async Task<ActionResult> ValidatePasswordAsync([FromBody] string password)
+        {
+            var result = await _passwordCheckService.ValidatePasswordAsync(password);
+            return Ok(result);
         }
 
         /// <summary>

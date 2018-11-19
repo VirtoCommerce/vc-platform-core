@@ -45,6 +45,7 @@ using VirtoCommerce.Platform.Web.JsonConverters;
 using VirtoCommerce.Platform.Web.Middelware;
 using VirtoCommerce.Platform.Web.Swagger;
 using VirtoCommerce.Platform.Core;
+using VirtoCommerce.Platform.Security.Services;
 
 namespace VirtoCommerce.Platform.Web
 {
@@ -209,6 +210,8 @@ namespace VirtoCommerce.Platform.Web
             services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
             //Platform authorization handler for policies based on permissions 
             services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+            // Default password validation service implementation
+            services.AddScoped<IPasswordCheckService, PasswordCheckService>();
 
             // Add memory cache services
             services.AddMemoryCache();
@@ -386,9 +389,6 @@ namespace VirtoCommerce.Platform.Web
 
             //Seed default users
             app.UseDefaultUsersAsync().GetAwaiter().GetResult();
-
-
-
         }
     }
 }
