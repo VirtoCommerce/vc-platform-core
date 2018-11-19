@@ -8,15 +8,25 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
     /// <summary>
     /// Base class for repository implementations that are based on the Entity Framework.
     /// </summary>
-    public abstract class DbContextRepositoryBase<TContext> : IRepository where TContext : DbContext
+    public abstract class DbContextRepositoryBase<TContext> : IDbContextProvider, IRepository where TContext : DbContext
     {
-        public DbContextRepositoryBase(TContext dbContext, IUnitOfWork unitOfWork = null)
+        protected DbContextRepositoryBase(TContext dbContext, IUnitOfWork unitOfWork = null)
         {
             DbContext = dbContext;
             UnitOfWork = unitOfWork ?? new DbContextUnitOfWork(dbContext);
+
+            var connectionTimeout = dbContext.Database.GetDbConnection().ConnectionTimeout;
+            dbContext.Database.SetCommandTimeout(connectionTimeout);
         }
 
-        public TContext DbContext { get; private set; }
+        public TContext DbContext { get; }
+
+        #region IDbContextProvider Members
+        public DbContext GetDbContext()
+        {
+            return DbContext;
+        }
+        #endregion
 
         #region IRepository Members
         /// <summary>
@@ -25,7 +35,7 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
         /// <value>
         /// The unit of work.
         /// </value>
-        public IUnitOfWork UnitOfWork { get; private set; }
+        public IUnitOfWork UnitOfWork { get; }
 
         /// <summary>
         /// Attaches the specified item.
