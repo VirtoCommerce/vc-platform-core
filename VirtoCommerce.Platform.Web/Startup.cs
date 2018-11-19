@@ -21,6 +21,7 @@ using Newtonsoft.Json.Converters;
 using Smidge;
 using Smidge.Nuglify;
 using Swashbuckle.AspNetCore.Swagger;
+using Swashbuckle.AspNetCore.SwaggerUI;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Jobs;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -246,6 +247,18 @@ namespace VirtoCommerce.Platform.Web
                 c.DocumentFilter<TagsFilter>();
                 c.MapType<object>(() => new Schema { Type = "object" });
                 c.AddModulesXmlComments(services);
+
+                // TECHDEBT: this is a workaround for the Swashbuckle issue: https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/752
+                // By default, Swashbuckle encodes generic types like this: System.Func[VirtoCommerce.Domain.Common.IEvaluationContext,System.Boolean]
+                // and uses that string to reference the type. It contains URL-incompatible characters like '[' or ']', and Swagger validation doesn't accept it.
+                // So, to overcome this, we replace these characters with URL compatible characters like '-' or '_', and the result will look like this:
+                // System.Func_2_VirtoCommerce.Domain.Common.IEvaluationContext-System.Boolean_
+                c.CustomSchemaIds(type => type.ToString()
+                    .Replace('[', '_')
+                    .Replace(']', '_')
+                    .Replace('`', '_')
+                    .Replace(',', '-')
+                );
             });
 
             //Add SignalR for push notifications
