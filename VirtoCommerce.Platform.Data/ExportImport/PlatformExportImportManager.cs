@@ -258,6 +258,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                         void ModuleProgressCallback(ExportImportProgressInfo x)
                         {
                             progressInfo.Description = $"{moduleInfo.Id}: {x.Description}";
+                            progressInfo.Errors = x.Errors;
                             progressCallback(progressInfo);
                         }
                         if (moduleDescriptor.ModuleInstance is IImportSupport importer)
@@ -295,6 +296,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                     void ModuleProgressCallback(ExportImportProgressInfo x)
                     {
                         progressInfo.Description = $"{ module.Id }: { x.Description }";
+                        progressInfo.Errors = x.Errors;
                         progressCallback(progressInfo);
                     }
 
