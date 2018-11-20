@@ -19069,6 +19069,112 @@ CodeMirror.registerHelper("fold", "markdown", function(cm, start) {
   };
 });
 
+angular.module('platformWebApp')
+.controller('platformWebApp.confirmDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
+    angular.extend($scope, dialog);
+
+    $scope.yes = function () {
+        $modalInstance.close(true);
+    };
+
+    $scope.no = function () {
+        $modalInstance.close(false);
+    };
+
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
+}])
+.factory('platformWebApp.dialogService', ['$rootScope', '$modal', function ($rootScope, $modal) {
+    var dialogService = {
+        dialogs: [],
+        currentDialog: undefined
+    };
+
+    function findDialog(id) {
+        var found;
+        angular.forEach(dialogService.dialogs, function (dialog) {
+            if (dialog.id == id) {
+                found = dialog;
+            }
+        });
+
+        return found;
+    }
+
+    dialogService.showDialog = function (dialog, templateUrl, controller, cssClass) {
+        var dlg = findDialog(dialog.id);
+
+        if (angular.isUndefined(dlg)) {
+            dlg = dialog;
+
+            dlg.instance = $modal.open({
+                templateUrl: templateUrl,
+                controller: controller,
+                windowClass: cssClass ? cssClass : null,
+                resolve: {
+                    dialog: function () {
+                        return dialog;
+                    }
+                }
+            });
+
+            dlg.instance.result.then(function (result) //success
+            {
+                var idx = dialogService.dialogs.indexOf(dlg);
+                dialogService.dialogs.splice(idx, 1);
+                if (dlg.callback)
+                    dlg.callback(result);
+            }, function (reason) //dismiss
+            {
+                var idx = dialogService.dialogs.indexOf(dlg);
+                dialogService.dialogs.splice(idx, 1);
+            });
+
+            dialogService.dialogs.push(dlg);
+        }
+    };
+
+    dialogService.showConfirmationDialog = function (dialog) {
+        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/confirmDialog.tpl.html', 'platformWebApp.confirmDialogController');
+    };
+
+    dialogService.showNotificationDialog = function (dialog) {
+        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/notifyDialog.tpl.html', 'platformWebApp.confirmDialogController');
+    };
+
+    dialogService.showGalleryDialog = function (dialog) {
+        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/galleryDialog.tpl.html', 'platformWebApp.galleryDialogController', '__gallery');
+    };
+
+    return dialogService;
+
+}])
+
+angular.module('platformWebApp')
+.controller('platformWebApp.galleryDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
+    angular.extend($scope, dialog);
+
+    var imgCount = dialog.images.length;
+
+    $scope.close = function () {
+        $modalInstance.close(false);
+    }
+
+    $scope.prevImage = function (index) {
+        var i = index == -1 ? imgCount - 1 : index;
+        $scope.currentImage = dialog.images[i];
+    }
+
+    $scope.nextImage = function (index) {
+        var i = index == imgCount ? 0 : index;
+        $scope.currentImage = dialog.images[i];
+    }
+
+    $scope.openImage = function (image) {
+        $scope.currentImage = image;
+    }
+}]);
 'use strict';
 
 angular.module('platformWebApp')
@@ -21183,112 +21289,6 @@ angular.module('platformWebApp').directive('vaTabs', function () {
         }
     }
 });
-angular.module('platformWebApp')
-.controller('platformWebApp.confirmDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
-    angular.extend($scope, dialog);
-
-    $scope.yes = function () {
-        $modalInstance.close(true);
-    };
-
-    $scope.no = function () {
-        $modalInstance.close(false);
-    };
-
-    $scope.cancel = function () {
-        $modalInstance.dismiss('cancel');
-    };
-}])
-.factory('platformWebApp.dialogService', ['$rootScope', '$modal', function ($rootScope, $modal) {
-    var dialogService = {
-        dialogs: [],
-        currentDialog: undefined
-    };
-
-    function findDialog(id) {
-        var found;
-        angular.forEach(dialogService.dialogs, function (dialog) {
-            if (dialog.id == id) {
-                found = dialog;
-            }
-        });
-
-        return found;
-    }
-
-    dialogService.showDialog = function (dialog, templateUrl, controller, cssClass) {
-        var dlg = findDialog(dialog.id);
-
-        if (angular.isUndefined(dlg)) {
-            dlg = dialog;
-
-            dlg.instance = $modal.open({
-                templateUrl: templateUrl,
-                controller: controller,
-                windowClass: cssClass ? cssClass : null,
-                resolve: {
-                    dialog: function () {
-                        return dialog;
-                    }
-                }
-            });
-
-            dlg.instance.result.then(function (result) //success
-            {
-                var idx = dialogService.dialogs.indexOf(dlg);
-                dialogService.dialogs.splice(idx, 1);
-                if (dlg.callback)
-                    dlg.callback(result);
-            }, function (reason) //dismiss
-            {
-                var idx = dialogService.dialogs.indexOf(dlg);
-                dialogService.dialogs.splice(idx, 1);
-            });
-
-            dialogService.dialogs.push(dlg);
-        }
-    };
-
-    dialogService.showConfirmationDialog = function (dialog) {
-        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/confirmDialog.tpl.html', 'platformWebApp.confirmDialogController');
-    };
-
-    dialogService.showNotificationDialog = function (dialog) {
-        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/notifyDialog.tpl.html', 'platformWebApp.confirmDialogController');
-    };
-
-    dialogService.showGalleryDialog = function (dialog) {
-        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/galleryDialog.tpl.html', 'platformWebApp.galleryDialogController', '__gallery');
-    };
-
-    return dialogService;
-
-}])
-
-angular.module('platformWebApp')
-.controller('platformWebApp.galleryDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
-    angular.extend($scope, dialog);
-
-    var imgCount = dialog.images.length;
-
-    $scope.close = function () {
-        $modalInstance.close(false);
-    }
-
-    $scope.prevImage = function (index) {
-        var i = index == -1 ? imgCount - 1 : index;
-        $scope.currentImage = dialog.images[i];
-    }
-
-    $scope.nextImage = function (index) {
-        var i = index == imgCount ? 0 : index;
-        $scope.currentImage = dialog.images[i];
-    }
-
-    $scope.openImage = function (image) {
-        $scope.currentImage = image;
-    }
-}]);
 // Full list of countries defined by ISO 3166-1 alpha-3
 // based on https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
 angular.module('platformWebApp')

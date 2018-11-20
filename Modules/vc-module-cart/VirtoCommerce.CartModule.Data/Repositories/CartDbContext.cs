@@ -99,6 +99,13 @@ namespace VirtoCommerce.CartModule.Data.Repositories
                         .HasForeignKey(x => x.PaymentId).OnDelete(DeleteBehavior.Restrict);
             #endregion
 
+            #region Coupons
+            modelBuilder.Entity<CouponEntity>().ToTable("CartCoupon").HasKey(x => x.Id);
+            modelBuilder.Entity<CouponEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<CouponEntity>().HasOne(x => x.ShoppingCart).WithMany(x => x.Coupons).IsRequired()
+                        .HasForeignKey(x => x.ShoppingCartId).OnDelete(DeleteBehavior.Cascade);
+            #endregion
+
             base.OnModelCreating(modelBuilder);
         }
     }

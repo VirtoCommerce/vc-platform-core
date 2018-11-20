@@ -56,6 +56,9 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     b.Property<string>("Line2")
                         .HasMaxLength(2048);
 
+                    b.Property<string>("Name")
+                        .HasMaxLength(2048);
+
                     b.Property<string>("Organization")
                         .HasMaxLength(64);
 
@@ -86,6 +89,25 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     b.HasIndex("ShoppingCartId");
 
                     b.ToTable("CartAddress");
+                });
+
+            modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.CouponEntity", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
+
+                    b.Property<string>("Code")
+                        .HasMaxLength(64);
+
+                    b.Property<string>("ShoppingCartId")
+                        .IsRequired();
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ShoppingCartId");
+
+                    b.ToTable("CartCoupon");
                 });
 
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.DiscountEntity", b =>
@@ -472,9 +494,6 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     b.Property<string>("Comment")
                         .HasMaxLength(2048);
 
-                    b.Property<string>("Coupon")
-                        .HasMaxLength(64);
-
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(64);
 
@@ -628,6 +647,14 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                         .WithMany("Addresses")
                         .HasForeignKey("ShoppingCartId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.CouponEntity", b =>
+                {
+                    b.HasOne("VirtoCommerce.CartModule.Data.Model.ShoppingCartEntity", "ShoppingCart")
+                        .WithMany("Coupons")
+                        .HasForeignKey("ShoppingCartId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.DiscountEntity", b =>
