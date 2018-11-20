@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Primitives;
 using Hangfire;
 using Hangfire.MemoryStorage;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -146,7 +147,27 @@ namespace VirtoCommerce.Platform.Web
 
 
             // Register the OAuth2 validation handler.
-            services.AddAuthentication().AddOAuthValidation();
+            var auth = services.AddAuthentication().AddOAuthValidation();
+
+            var azureAdSection = Configuration.GetSection("AzureAd");
+            if (azureAdSection.GetChildren().Any())
+            {
+                var options = new AzureAdOptions();
+                azureAdSection.Bind(options);
+
+                if (options.Enabled)
+                {
+                    auth.AddOpenIdConnect(options.AuthenticationType, options.AuthenticationCaption,
+                        openIdConnectOptions =>
+                        {
+                            openIdConnectOptions.ClientId = options.ApplicationId;
+                            openIdConnectOptions.Authority = $"{options.AzureAdInstance}{options.TenantId}";
+                            openIdConnectOptions.UseTokenLifetime = true;
+                            openIdConnectOptions.RequireHttpsMetadata = false;
+                            openIdConnectOptions.SignInScheme = IdentityConstants.ExternalScheme;
+                        });
+                }
+            }
 
             // Register the OpenIddict services.
             // Note: use the generic overload if you need

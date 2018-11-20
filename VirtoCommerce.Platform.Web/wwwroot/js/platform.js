@@ -27634,6 +27634,46 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
+.directive('vaLoginToolbar', ['$document', '$timeout', '$state', 'platformWebApp.authService', function ($document, $timeout, $state, authService) {
+    return {
+        templateUrl: '$(Platform)/Scripts/app/security/login/loginToolbar.tpl.html',
+        restrict: 'E',
+        replace: true,
+        scope: true,
+        link: function ($scope, $element, $attrs, $controller) {
+            $scope.openProfile = function () {
+                $state.go('workspace.userProfile');
+            };
+
+            //$scope.isAuthenticated = authService.isAuthenticated;
+            $scope.logout = authService.logout;
+            $scope.$watch(function () {
+                return authService.userLogin;
+            }, function (userLogin) {
+                $scope.userLogin = userLogin;
+                $scope.fullName = authService.fullName;
+            });
+
+            // menu stuff
+            var onDocumentClick = function (event) {
+                //$scope.isMenuVisible = false;
+                $scope.$apply("isMenuVisible = false");
+                $document.off("click", onDocumentClick);
+            };
+
+            $scope.showMenu = function () {
+                $document.off("click", onDocumentClick);
+                $scope.isMenuVisible = !$scope.isMenuVisible;
+                if ($scope.isMenuVisible) {
+                    $timeout(function () {
+                        $document.on("click", onDocumentClick);
+                    });
+                }
+            }
+        }
+    }
+}])
+angular.module('platformWebApp')
     .directive('vaPasswordInput', ['$q', function($q) {
         return {
             restrict: 'E',
@@ -27685,46 +27725,6 @@ angular.module('platformWebApp')
 		}
 	};
 }]);
-angular.module('platformWebApp')
-.directive('vaLoginToolbar', ['$document', '$timeout', '$state', 'platformWebApp.authService', function ($document, $timeout, $state, authService) {
-    return {
-        templateUrl: '$(Platform)/Scripts/app/security/login/loginToolbar.tpl.html',
-        restrict: 'E',
-        replace: true,
-        scope: true,
-        link: function ($scope, $element, $attrs, $controller) {
-            $scope.openProfile = function () {
-                $state.go('workspace.userProfile');
-            };
-
-            //$scope.isAuthenticated = authService.isAuthenticated;
-            $scope.logout = authService.logout;
-            $scope.$watch(function () {
-                return authService.userLogin;
-            }, function (userLogin) {
-                $scope.userLogin = userLogin;
-                $scope.fullName = authService.fullName;
-            });
-
-            // menu stuff
-            var onDocumentClick = function (event) {
-                //$scope.isMenuVisible = false;
-                $scope.$apply("isMenuVisible = false");
-                $document.off("click", onDocumentClick);
-            };
-
-            $scope.showMenu = function () {
-                $document.off("click", onDocumentClick);
-                $scope.isMenuVisible = !$scope.isMenuVisible;
-                if ($scope.isMenuVisible) {
-                    $timeout(function () {
-                        $document.on("click", onDocumentClick);
-                    });
-                }
-            }
-        }
-    }
-}])
 angular.module('platformWebApp')
 .factory('platformWebApp.accounts', ['$resource', function ($resource) {
     return $resource('api/platform/security/users/:id', { id: '@Id' }, {
@@ -27854,12 +27854,7 @@ angular.module('platformWebApp')
     .factory('platformWebApp.externalSignInService', ['$http', '$q', function ($http, $q) {
         return {
             getProviders: function () {
-                // TODO: uncomment this after implementing external sign-in
-                //return $http.get('externalsignin/providers');
-
-                return $q(function(resolve) {
-                    resolve([]);
-                });
+                return $http.get('externalsignin/providers');
             }
         }
     }]);
