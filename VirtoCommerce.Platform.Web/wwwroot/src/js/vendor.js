@@ -1,6 +1,7 @@
 import $ from 'jquery';
 window.$ = $; // Ugly hack
 
+import 'webpack-jquery-ui';
 import 'angular';
 import '@uirouter/angularjs';
 import 'angularjs-scroll-glue';
@@ -24,14 +25,23 @@ import 'angular-translate-storage-cookie';
 //import 'font-awesome';
 import 'moment';
 import 'moment-timezone';
-//import 'ng-context-menu';
+import 'Vendor/ng-context-menu/dist/ng-context-menu.js';
 import 'ng-tags-input';
 import 'ngstorage';
 import 'textangular';
 import 'textangular/dist/textangular-sanitize';
 import 'ng-focus-on';
-//import 'modernizr';
+import 'modernizr';
 import 'angular-filter';
 import 'uikit';
 import 'marked';
 import 'angular-ui-codemirror';
+
+import 'angular-ui-validate';
+import 'angular-ui-scroll';
+import 'angular-ui-scrollpoint';
+import 'angular-ui-event';
+import 'angular-ui-mask';
+import 'angular-ui-validate';
+import 'angular-ui-indeterminate';
+import 'angular-ui-uploader';
