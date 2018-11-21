@@ -4,7 +4,7 @@
     "private": true,
     "scripts": {
         "gulp-min": "gulp min",
-        "webpack": "webpack"
+        "webpack": "webpack --display-error-details"
     },
     "devDependencies": {
         "aspnet-webpack": "^3.0.0",
@@ -20,6 +20,7 @@
         "gulp-sync": "0.1.4",
         "gulp-uglify": "^3.0.0",
         "gulp-util": "^3.0.8",
+        "imports-loader": "^0.8.0",
         "main-bower-files": "2.9.0",
         "merge-stream": "^1.0.1",
         "node-bourbon": "^4.2.3",
@@ -47,16 +48,21 @@
         "angular-translate-storage-local": "^2.15.1",
         "angular-ui-bootstrap": "^0.13.1",
         "angular-ui-codemirror": "^0.3.0",
+        "angular-ui-event": "^1.0.0",
         "angular-ui-grid": "^4.6.4",
-        "angular-ui-sortable": "^0.19.0",
+        "angular-ui-indeterminate": "^1.0.0",
+        "angular-ui-mask": "^1.8.7",
+        "angular-ui-scroll": "^1.7.2",
+        "angular-ui-scrollpoint": "^2.1.1",
+        "angular-ui-sortable": "^0.13.4",
+        "angular-ui-uploader": "^1.4.1",
+        "angular-ui-validate": "^1.2.3",
         "angularjs-scroll-glue": "^2.2.0",
         "font-awesome": "^4.7.0",
         "jquery": "^2.1.4",
         "marked": "^0.5.1",
-        "modernizr": "^3.6.0",
         "moment": "^2.22.2",
         "moment-timezone": "^0.5.23",
-        "ng-context-menu": "^0.1.1",
         "ng-focus-on": "^0.2.2",
         "ng-tags-input": "^3.2.0",
         "ngstorage": "^0.3.11",
@@ -64,6 +70,8 @@
         "ui-grid-draggable-rows": "^0.3.3",
         "ui-select": "^0.19.8",
         "uikit": "^3.0.0-rc.22",
-        "underscore": "^1.9.1"
+        "underscore": "^1.9.1",
+        "webpack-jquery-ui": "^2.0.1",
+        "webpack-modernizr-loader": "^4.0.1"
     }
 }
