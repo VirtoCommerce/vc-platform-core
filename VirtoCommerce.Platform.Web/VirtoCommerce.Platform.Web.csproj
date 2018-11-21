@@ -24,6 +24,9 @@
     <None Remove="wwwroot\App_Data\**" />
     <None Remove="wwwroot\Scripts\**" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Remove="appDependencies.config.json" />
+  </ItemGroup>
   
   <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.Validation" Version="2.0.0-rc1-final" />
@@ -66,6 +69,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="wwwroot\swagger\index.html" />
+    <None Include="wwwroot\js\app\appDependencies.json" />
     <None Include="wwwroot\swagger\logo_small.png" />
     <None Include="wwwroot\swagger\vc.css" />
   </ItemGroup>
