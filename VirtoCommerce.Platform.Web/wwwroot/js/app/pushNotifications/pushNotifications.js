@@ -1,3 +1,5 @@
+import * as signalR from '@aspnet/signalr';
+
 angular.module('platformWebApp')
 .config(
   ['$stateProvider', function ($stateProvider) {
