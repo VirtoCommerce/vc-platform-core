@@ -13,7 +13,7 @@ module.exports = [
             filename: 'vendor.js',
             publicPath: 'dist/'
         },
-        mode: 'production',
+        mode: 'development',
         module: {
             rules: [
                 {
@@ -56,7 +56,7 @@ module.exports = [
             filename: 'app.js',
             publicPath: 'dist/'
         },
-        mode: 'production',
+        mode: 'development',
         plugins: [
             new webpack.ProvidePlugin({
                 _: 'underscore'
@@ -73,7 +73,7 @@ module.exports = [
             filename: 'modules.js',
             publicPath: 'dist/'
         },
-        mode: 'production',
+        mode: 'development',
         plugins: [
             new webpack.DefinePlugin({
                 'AppDependencies': JSON.stringify(appDependencies)
