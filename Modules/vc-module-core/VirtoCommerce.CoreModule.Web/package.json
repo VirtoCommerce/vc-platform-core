@@ -1,0 +1,14 @@
+{
+    "version": "1.0.0",
+    "name": "asp.net",
+    "private": true,
+    "scripts": {
+        "gulp": "gulp packJavaScript"
+    },
+    "devDependencies": {
+        "gulp": "3.9.1",
+        "gulp-concat": "2.6.0",
+        "gulp-uglify": "2.0.0",
+        "main-bower-files": "2.13.1"
+    }
+}
