@@ -45,3 +45,5 @@ import 'angular-ui-mask';
 import 'angular-ui-validate';
 import 'angular-ui-indeterminate';
 import 'angular-ui-uploader';
+
+import 'codemirror';

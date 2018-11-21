@@ -58,6 +58,7 @@
         "angular-ui-uploader": "^1.4.1",
         "angular-ui-validate": "^1.2.3",
         "angularjs-scroll-glue": "^2.2.0",
+        "codemirror": "^5.1.0",
         "font-awesome": "^4.7.0",
         "jquery": "^2.1.4",
         "marked": "^0.5.1",
