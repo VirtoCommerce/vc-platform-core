@@ -53,11 +53,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     @RenderBody()
 
     <environment include="Development">
-        <script src="~/js/allpackages.js" asp-append-version="true"></script>
-        <script src="~/dist/vendor.js" asp-append-version="true"></script>
-        <script src="~/js/platform.js" asp-append-version="true"></script>
+        <script src="~/dist/vendor.js" type ="text/javascript" asp-append-version="true"></script>
+        @*<script src="~/js/allpackages.js" asp-append-version="true"></script>*@
+        <script src="~/dist/app.js" type="text/javascript" asp-append-version="true"></script>
+        @*<script src="~/js/platform.js" asp-append-version="true"></script>*@
         @*<script asp-src-include="~/js/**/*" asp-append-version="true"></script>*@
-        <script src="vc-modules-scripts" type="text/javascript" debug="true"></script>
+        <script src="~/dist/modules.js" type="text/javascript" asp-append-version="true"></script>
+        @*<script src="vc-modules-scripts" type="text/javascript" debug="true"></script>*@
     </environment>
 
     @RenderSection("scripts", required: false)
