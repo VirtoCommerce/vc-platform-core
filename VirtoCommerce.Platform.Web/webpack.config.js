@@ -65,19 +65,5 @@ module.exports = [
                 'AppDependencies': JSON.stringify(appDependencies)
             })
         ]
-    },
-    {
-        entry: glob.sync('./Modules/**/*.Web/Scripts/**/*.js', { ignore: ['./Modules/Module1/**/*.*'], nosort: true }),
-        output: {
-            path: path.resolve(__dirname, 'wwwroot/dist'),
-            filename: 'modules.js',
-            publicPath: 'dist/'
-        },
-        mode: 'development',
-        plugins: [
-            new webpack.DefinePlugin({
-                'AppDependencies': JSON.stringify(appDependencies)
-            })
-        ]
     }
 ];
