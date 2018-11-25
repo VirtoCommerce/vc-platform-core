@@ -10,6 +10,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="bower_components\**" />
+    <Compile Remove="node_modules\**" />
+    <EmbeddedResource Remove="bower_components\**" />
+    <EmbeddedResource Remove="node_modules\**" />
+    <None Remove="bower_components\**" />
+    <None Remove="node_modules\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Controllers\" />
   </ItemGroup>
 
