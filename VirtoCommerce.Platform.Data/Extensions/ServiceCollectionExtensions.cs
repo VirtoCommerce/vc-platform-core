@@ -21,7 +21,7 @@ using VirtoCommerce.Platform.Data.Settings;
 
 namespace VirtoCommerce.Platform.Data.Extensions
 {
-    public static class ServiceCollectionExtenions
+    public static class ServiceCollectionExtensions
     {
 
         public static IServiceCollection AddPlatformServices(this IServiceCollection services, IConfiguration configuration)
