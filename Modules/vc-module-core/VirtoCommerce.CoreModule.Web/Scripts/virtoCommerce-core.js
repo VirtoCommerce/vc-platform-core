@@ -1,3 +1,6 @@
+import 'uikit';
+import 'marked';
+
 var moduleName = "virtoCommerce.coreModule";
 
 if (AppDependencies != undefined) {

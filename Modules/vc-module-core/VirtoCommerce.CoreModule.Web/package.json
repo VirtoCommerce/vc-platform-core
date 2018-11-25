@@ -1,14 +1,23 @@
 {
-    "version": "1.0.0",
-    "name": "asp.net",
-    "private": true,
-    "scripts": {
-        "gulp": "gulp packJavaScript"
-    },
-    "devDependencies": {
-        "gulp": "3.9.1",
-        "gulp-concat": "2.6.0",
-        "gulp-uglify": "2.0.0",
-        "main-bower-files": "2.13.1"
-    }
+  "version": "1.0.0",
+  "name": "asp.net",
+  "private": true,
+  "scripts": {
+    "gulp": "gulp packJavaScript",
+    "webpack": "webpack --display-error-details",
+    "webpack:watch": "webpack watch"
+  },
+  "devDependencies": {
+    "webpack": "^4.25.1",
+    "webpack-cli": "^3.1.2",
+    "gulp": "3.9.1",
+    "gulp-concat": "2.6.0",
+    "gulp-uglify": "2.0.0",
+    "main-bower-files": "2.13.1"
+  },
+  "dependencies": {
+    "jquery": "^2.1.4",
+    "marked": "^0.3.6",
+    "uikit": "^2.27.1"
+  }
 }
