@@ -38,7 +38,7 @@ namespace VirtoCommerce.OrdersModule.Data.ExportImport
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var progressInfo = new ExportImportProgressInfo { Description = "The orders are loading" };
+            var progressInfo = new ExportImportProgressInfo { Description = "Orders are loading" };
             progressCallback(progressInfo);
 
             using (var sw = new StreamWriter(outStream, Encoding.UTF8))

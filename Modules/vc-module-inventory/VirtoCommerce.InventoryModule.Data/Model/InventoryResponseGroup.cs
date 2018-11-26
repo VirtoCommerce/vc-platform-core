@@ -8,7 +8,7 @@ namespace VirtoCommerce.InventoryModule.Data.Model
     public enum InventoryResponseGroup
     {
         Default = 0,
-        WithFulfillmentCenter = 1,
-        Full = 2
+        WithFulfillmentCenter = 1 << 0,
+        Full = Default | WithFulfillmentCenter
     }
 }

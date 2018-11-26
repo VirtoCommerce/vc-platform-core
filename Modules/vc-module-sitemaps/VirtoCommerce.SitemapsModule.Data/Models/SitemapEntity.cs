@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SitemapsModule.Core.Models;
 
@@ -24,6 +25,9 @@ namespace VirtoCommerce.SitemapsModule.Data.Models
         [StringLength(256)]
         public string UrlTemplate { get; set; }
 
+        [NotMapped]
+        public int TotalItemsCount { get; set; }
+
         public virtual ObservableCollection<SitemapItemEntity> Items { get; set; }
 
         public virtual Sitemap ToModel(Sitemap sitemap)
@@ -41,6 +45,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Models
             sitemap.ModifiedDate = ModifiedDate;
             sitemap.StoreId = StoreId;
             sitemap.UrlTemplate = UrlTemplate;
+            sitemap.TotalItemsCount = TotalItemsCount;
 
             return sitemap;
         }
