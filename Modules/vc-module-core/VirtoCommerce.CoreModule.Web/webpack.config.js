@@ -9,7 +9,6 @@ module.exports = [
             path: path.resolve(__dirname, 'Scripts/dist'),
             filename: 'app.js'
         },
-        mode: 'development',
         plugins: [
             new webpack.ProvidePlugin({
                 $: 'jquery',

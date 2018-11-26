@@ -3,9 +3,9 @@
   "name": "asp.net",
   "private": true,
   "scripts": {
-    "gulp": "gulp packJavaScript",
-    "webpack": "webpack --display-error-details",
-    "webpack:watch": "webpack watch"
+    "webpack:dev": "webpack --display-error-details --mode=development",
+    "webpack:watch": "webpack watch --mode=development",
+    "webpack:build": "webpack --mode=production"
   },
   "devDependencies": {
     "webpack": "^4.25.1",
