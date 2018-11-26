@@ -47,3 +47,5 @@ import 'angular-ui-indeterminate';
 import 'angular-ui-uploader';
 
 import 'codemirror';
+import _ from 'underscore';
+window._ = _;
