@@ -1,9 +1,6 @@
 const path = require('path');
 const glob = require('glob');
 const webpack = require('webpack');
-const appDependencies = require('./wwwroot/js/app/appDependencies.json').appDependencies;
-
-//console.log(glob.sync('./Modules/**/*.Web/Scripts/**/*.js', { ignore: ['./Modules/Module1/**/*.*', './**/allPackages.js'], nosort: true } ));
 
 module.exports = [
     {
@@ -60,9 +57,6 @@ module.exports = [
         plugins: [
             new webpack.ProvidePlugin({
                 _: 'underscore'
-            }),
-            new webpack.DefinePlugin({
-                'AppDependencies': JSON.stringify(appDependencies)
             })
         ]
     }
