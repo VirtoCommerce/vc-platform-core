@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <Folder Include="Controllers\" />
+    <Folder Include="Scripts\dist\" />
   </ItemGroup>
 
   <ItemGroup>
