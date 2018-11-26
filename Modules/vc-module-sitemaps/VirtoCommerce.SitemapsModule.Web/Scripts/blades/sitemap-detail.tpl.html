@@ -1,0 +1,75 @@
+﻿<div class="blade-static __bottom" ng-include="'$(Platform)/Scripts/common/templates/create.tpl.html'" ng-if="blade.isNew"></div>
+<div class="blade-static __bottom" ng-if="pageSettings.itemsPerPageCount < pageSettings.totalItems" ng-include="'pagerTemplate.html'"></div>
+<div class="blade-content __medium-wide">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form class="list __info" name="formSitemap">
+                <div class="form-group" ng-init="setForm(formSitemap)">
+                    <label class="form-label" for="sitemapPath" translate="sitemapsModule.blades.sitemap.formSitemap.labelSitemapLocation"></label>
+                    <div class="form-input">
+                        <input id="sitemapPath" name="sitemapPath" required="required" type="text" ng-pattern="/^([\/{}a-z_\-\s0-9\.]+)+\.(xml)$/" ng-model="blade.currentEntity.location" />
+                        <div class="error" ng-if="errorMessage" >{{errorMessage | translate}}</div>
+                        <div class="list-descr">{{'sitemapsModule.blades.sitemap.formSitemap.descriptionSitemapLocation' | translate}}</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="urlTemplate" ng-bind="'sitemapsModule.blades.sitemap.formSitemap.labelSitemapItemsLocation' | translate"></label>
+                    <div class="form-input">
+                        <input id="urlTemplate" name="urlTemplate" required="required" type="text" ng-pattern="/^([\/{}a-z_\-\s0-9\.]+)$/" ng-model="blade.currentEntity.urlTemplate" />
+                        <div class="list-descr" ng-bind="'sitemapsModule.blades.sitemap.formSitemap.descriptionSitemapItemsLocation' | translate"></div>
+                    </div>
+                </div>
+            </form>
+            <div ng-if="!blade.isNew">
+                <div class="form-group">
+                    <label class="form-label" for="urlTemplate" ng-bind="'sitemapsModule.blades.sitemap.formSitemap.labelSitemapItems' | translate"></label>
+                </div>
+                <div class="note" ng-show="!blade.currentEntities.length" ng-bind="'sitemapsModule.blades.sitemap.noSitemapsIemsMessage' | translate"></div>
+                <div class="table-wrapper" ng-show="blade.currentEntities.length" ng-init="setGridOptions({
+                    data: 'blade.currentEntities',
+                    useExternalSorting: true,
+                    rowTemplate: 'sitemap-item-list-row.tpl.html',
+                    rowHeight: 48,
+                    columnDefs: [
+                     { name: 'actions',  displayName: '', cellTemplate: 'sitemap-item-list-actions-cell.tpl.html', enableColumnResizing: false, enableSorting: false, pinnedLeft: true, width: 30 },
+                     { name: 'imageUrl', displayName: 'sitemapsModule.blades.sitemap.gridHeaders.img', cellTemplate: 'sitemap-item-list-image-cell.tpl.html',   enableColumnResizing: false, enableSorting: false, width: 60 },
+                     { name: 'title', displayName: 'sitemapsModule.blades.sitemap.gridHeaders.title' },
+                     { name: 'objectType', displayName: 'sitemapsModule.blades.sitemap.gridHeaders.type', width: 65 }]})">
+                    <div ui-grid="gridOptions" ui-grid-pinning ui-grid-auto-resize ui-grid-save-state ui-grid-selection ui-grid-resize-columns ui-grid-move-columns></div>
+                    <ul class="menu __context" id="sitemap_item_menu">
+                        <li class="menu-item" ng-click="blade.removeItems([ contextMenuEntity ])">
+                            <i class="menu-ico fa fa-trash-o"></i> {{ 'sitemapsModule.contextMenu.remove' | translate }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="sitemap-item-list-row.tpl.html" type="text/ng-template">
+    <div ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid"
+         ui-grid-one-bind-id-grid="rowRenderIndex + '-' + col.uid + '-cell'"
+         class="ui-grid-cell"
+         ng-class="{
+             'ui-grid-row-header-cell': col.isRowHeader,
+             '__hovered': grid.appScope.contextMenuEntity === row.entity }"
+         role="{{ col.isRowHeader ? 'rowheader' : 'gridcell' }}"
+         ui-grid-cell
+         context-menu="grid.appScope.contextMenuEntity = row.entity"
+         data-target="sitemap_item_menu"></div>
+</script>
+
+<script id="sitemap-item-list-actions-cell.tpl.html" type="text/ng-template">
+    <div class="ui-grid-actions" left-click-menu="grid.appScope.contextMenuEntity = row.entity" data-target="sitemap_item_menu">
+        <i class="fa fa-ellipsis-v"></i>
+    </div>
+</script>
+
+<script id="sitemap-item-list-image-cell.tpl.html" type="text/ng-template">
+    <div class="ui-grid-cell-contents">
+        <div class="product-img">
+            <div class="image" style="background-image: url('{{COL_FIELD}}')" ng-if="COL_FIELD"></div>
+        </div>
+    </div>
+</script>
