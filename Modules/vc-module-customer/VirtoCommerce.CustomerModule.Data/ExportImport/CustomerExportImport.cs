@@ -52,7 +52,7 @@ namespace VirtoCommerce.CustomerModule.Data.ExportImport
                 writer.WriteValue(memberCount);
 
                 cancellationToken.ThrowIfCancellationRequested();
-
+              
                 writer.WritePropertyName("Members");
                 writer.WriteStartArray();
 
@@ -120,7 +120,7 @@ namespace VirtoCommerce.CustomerModule.Data.ExportImport
                                 var orgsTopologicalSortedList = TopologicalSort.Sort(nodes, edges);
                                 members = members.OrderByDescending(x => orgsTopologicalSortedList.IndexOf(x.Id)).ToList();
 
-                                for (int i = 0; i < membersCount; i += _batchSize)
+                                for (var i = 0; i < membersCount; i += _batchSize)
                                 {
                                     await _memberService.SaveChangesAsync(members.Skip(i).Take(_batchSize).ToArray());
 

@@ -91,36 +91,43 @@ namespace VirtoCommerce.StoreModule.Data.ExportImport
                         {
                             storeTotalCount = reader.ReadAsInt32() ?? 0;
                         }
-                        else if (reader.Value.ToString() == "Store")
+                        else if (reader.Value.ToString() == "Stores")
                         {
-                            var stores = new List<Store>();
-                            var storeCount = 0;
-                            while (reader.TokenType != JsonToken.EndArray)
+                            reader.Read();
+                            if (reader.TokenType == JsonToken.StartArray)
                             {
-                                var store = _serializer.Deserialize<Store>(reader);
-                                stores.Add(store);
-                                storeCount++;
-
                                 reader.Read();
-                            }
 
-                            for (int i = 0; i < storeCount; i += BatchSize)
-                            {
-                                var batchStores = stores.Skip(i).Take(BatchSize);
-                                foreach (var store in batchStores)
+                                var stores = new List<Store>();
+                                var storeCount = 0;
+                                while (reader.TokenType != JsonToken.EndArray)
                                 {
-                                    await _storeService.SaveChangesAsync(new[] { store });
+                                    var store = _serializer.Deserialize<Store>(reader);
+                                    stores.Add(store);
+                                    storeCount++;
+
+                                    reader.Read();
                                 }
 
-                                if (storeCount > 0)
+                                for (int i = 0; i < storeCount; i += BatchSize)
                                 {
-                                    progressInfo.Description = $"{i} of {storeCount} stores imported";
+                                    var batchStores = stores.Skip(i).Take(BatchSize);
+                                    foreach (var store in batchStores)
+                                    {
+                                        await _storeService.SaveChangesAsync(new[] {store});
+                                    }
+
+                                    if (storeCount > 0)
+                                    {
+                                        progressInfo.Description = $"{i} of {storeCount} stores imported";
+                                    }
+                                    else
+                                    {
+                                        progressInfo.Description = $"{i} stores imported";
+                                    }
+
+                                    progressCallback(progressInfo);
                                 }
-                                else
-                                {
-                                    progressInfo.Description = $"{i} stores imported";
-                                }
-                                progressCallback(progressInfo);
                             }
                         }
                     }
