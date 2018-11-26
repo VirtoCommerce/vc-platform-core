@@ -83,40 +83,14 @@ namespace VirtoCommerce.Platform.Web.TagHelpers
             }
         }
 
-        private void AddScriptFiles(string[] targetPathCollection)
-        {
-            foreach (var targetPath in targetPathCollection)
-            {
-                if (Directory.Exists(targetPath))
-                {
-                    var moduleScript = Path.Join(targetPath, "app.js");
-                    var moduleVendor = Path.Join(targetPath, "vendor.js");
-
-                    if (File.Exists(moduleScript))
-                    {
-                        _moduleScripts.Add(new Script
-                        {
-                            Path = moduleScript
-                        });
-                    }
-
-                    if (File.Exists(moduleVendor))
-                    {
-                        _moduleScripts.Add(new Script
-                        {
-                            Path = moduleVendor,
-                            IsVendor = true
-                        });
-                    }
-                }
-            }
-        }
-
         private void AddFileVersion()
         {
-            foreach (var moduleScript in _moduleScripts)
+            if (AppendVersion)
             {
-                moduleScript.Version = _fileVersionProvider.GetFileVersion(moduleScript.Path);
+                foreach (var moduleScript in _moduleScripts)
+                {
+                    moduleScript.Version = _fileVersionProvider.GetFileVersion(moduleScript.Path);
+                }
             }
         }
 
