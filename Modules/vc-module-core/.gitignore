@@ -158,3 +158,4 @@ $RECYCLE.BIN/
 .vs/
 /VirtoCommerce.CoreModule.Web/bower_components
 /VirtoCommerce.CoreModule.Web/node_modules
+/VirtoCommerce.CoreModule.Web/Scripts/dist
