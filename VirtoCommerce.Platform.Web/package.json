@@ -3,8 +3,8 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-        "gulp-min": "gulp min",
-        "webpack": "webpack --display-error-details"
+        "webpack:dev": "webpack --display-error-details --mode=development",
+        "webpack:build": "webpack --mode=production"
     },
     "devDependencies": {
         "aspnet-webpack": "^3.0.0",
