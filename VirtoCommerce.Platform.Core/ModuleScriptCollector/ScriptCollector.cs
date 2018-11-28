@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using VirtoCommerce.Platform.Core.FileVersionProvider;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.ModuleScriptCollector.Normalizer;
+using VirtoCommerce.Platform.Core.VersionProvider;
 
 namespace VirtoCommerce.Platform.Core.ModuleScriptCollector
 {

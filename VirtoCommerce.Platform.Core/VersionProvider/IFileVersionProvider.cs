@@ -1,4 +1,4 @@
-namespace VirtoCommerce.Platform.Core.FileVersionProvider
+namespace VirtoCommerce.Platform.Core.VersionProvider
 {
     public interface IFileVersionProvider
     {

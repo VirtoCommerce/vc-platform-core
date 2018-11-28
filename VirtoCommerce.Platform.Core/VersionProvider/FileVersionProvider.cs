@@ -2,7 +2,7 @@ using System.IO;
 using Microsoft.AspNetCore.Mvc.TagHelpers.Internal;
 using Microsoft.AspNetCore.WebUtilities;
 
-namespace VirtoCommerce.Platform.Core.FileVersionProvider
+namespace VirtoCommerce.Platform.Core.VersionProvider
 {
     public class FileVersionProvider : IFileVersionProvider
     {

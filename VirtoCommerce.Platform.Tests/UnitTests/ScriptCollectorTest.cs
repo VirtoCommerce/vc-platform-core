@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Moq;
-using VirtoCommerce.Platform.Core.FileVersionProvider;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.ModuleScriptCollector;
 using VirtoCommerce.Platform.Core.ModuleScriptCollector.Normalizer;
+using VirtoCommerce.Platform.Core.VersionProvider;
 using Xunit;
 
 namespace VirtoCommerce.Platform.Tests.UnitTests
