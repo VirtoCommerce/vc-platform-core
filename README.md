@@ -2,15 +2,15 @@
 **List of changes**
 
 **Tecnology stack**
-- ASP.NET Core 2.1.6 : base platform 
-- EF Core 2.1.4 : primary ORM
-- ASP.NET Core Identity 2.1.6 : authentification and authorization
-- OpenIddict 2.0.0 : OAuth authorization
-- WebPack : design and runtime bundler and minifier
-- Swashbuckle.AspNetCore.SwaggerGen : Swagger docs and UI
-- SignalR Core: push notifcations
-- AngularJS 1.4: primary framework for UI
-- HangFire 1.6.21: run background tasks
+- **ASP.NET Core 2.1.6** as base platform 
+- **EF Core 2.1.4** as primary ORM
+- **ASP.NET Core Identity 2.1.6** for authentification and authorization
+- **OpenIddict 2.0.0** for OAuth authorization
+- **WebPack** as primary design/runtime bundler and minifier
+- **Swashbuckle.AspNetCore.SwaggerGen** for Swagger docs and UI
+- **SignalR Core** for push notifcations
+- **AngularJS 1.4** as primary framework for SPA
+- **HangFire 1.6.21** for run background tasks
 
 **Platform**
   - Configuration
