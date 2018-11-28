@@ -2,13 +2,15 @@
 **List of changes**
 
 **Tecnology stack**
-- ASP.NET Core 2.1.6
-- EF Core 2.1.4
-- ASP.NET Core Identity 2.1.6
-- OpenIddict 2.0.0
-- WebPack
-- Swashbuckle.AspNetCore.SwaggerGen
-- SignalR Core
+- ASP.NET Core 2.1.6 : base platform 
+- EF Core 2.1.4 : primary ORM
+- ASP.NET Core Identity 2.1.6 : authentification and authorization
+- OpenIddict 2.0.0 : OAuth authorization
+- WebPack : design and runtime bundler and minifier
+- Swashbuckle.AspNetCore.SwaggerGen : Swagger docs and UI
+- SignalR Core: push notifcations
+- AngularJS 1.4: primary framework for UI
+- HangFire 1.6.21: run background tasks
 
 **Platform**
   - Configuration
