@@ -1,4 +1,4 @@
-namespace VirtoCommerce.Platform.Core.Normalizer
+namespace VirtoCommerce.Platform.Core.ModuleScriptCollector.Normalizer
 {
     public interface IModuleScriptPathNormalizerFactory
     {

@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Modularity;
 
-namespace VirtoCommerce.Platform.Core.Normalizer
+namespace VirtoCommerce.Platform.Core.ModuleScriptCollector.Normalizer
 {
     public class ModuleScriptPathNormalizerFactory : IModuleScriptPathNormalizerFactory
     {
