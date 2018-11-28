@@ -8,8 +8,9 @@ Tecnology stack
 - OpenIddict 2.0.0
 - WebPack
 - Swashbuckle.AspNetCore.SwaggerGen
+- SignalR Core
 
-Platform
+**Platform**
   - Configuration
     - Use NET Core configuration paradigm (configuration providers and strongly types IOptions)
   - Solution structure
@@ -42,13 +43,33 @@ Platform
     - Strongly typed cache regions and cache dependencies 
     - Allow to manage expiration time of cached objects and disable cache 
     - Removed special CacheModule, now caching is implemented in place where it is needed. 
+ - Dynamic properties
+    - Changed registration logic, now is using manual registration instead of using reflection as it was done in 2.x
+ - Logging
+    - Used build in .NET Core  ILog abstraction and logic instead of ICommonLogging and NLog
  - UI
     - Replaced Gulp + Bower to Webpack + npm 
      
-Modules
-- the new Notifications module
-- Removed VirtoCommerce.Domain project and nuget package (now each module defines self domain model in Core project)
+**Modules**
+- Changed module solution structure (Core project, Constants, Caching)
+- Switched all DAL into asynchronous operations
+- the new Notifications module (written from scratch)
+- Removed **VirtoCommerce.Domain** project and nuget package (now each module defines self domain model and abstractions in Core project)
+- Removed **CacheModule**
+- Export/Import now is streamed for all modules
+
 TODO check list:
+- Implement cache synchronization logic between multiple platform instances use Redis cache for this purposes 
+- Resource based authorization (scope bounded permissions)
+- Remaining modules
+    - Catalog (eliminated webmodel and improved extensibility model)
+    - Marketing (rework expressions serialization design)
+    - ElasticSearch
+    - Azure
+    - Personalization ???
+    - Publishing ??? need to improve design and extensibility
+    
+- Migration script from 2.x -> 3.x
 
 ![8ea72ae0c3d511e7a1325bdfb85b1215 map](https://user-images.githubusercontent.com/7566324/32503635-68fa4a8c-c3e6-11e7-910a-88af3fec87e1.png)
 
