@@ -1,7 +1,7 @@
 # VirtoCommerce Platform Core - COMING SOON!
-List of changes:
+**List of changes**
 
-Tecnology stack
+**Tecnology stack**
 - ASP.NET Core 2.1.6
 - EF Core 2.1.4
 - ASP.NET Core Identity 2.1.6
