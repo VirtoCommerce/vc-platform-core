@@ -20,8 +20,8 @@
     <ItemGroup>
         <PackageReference Include="AutoCompare.Core" Version="1.0.0" />
         <PackageReference Include="DinkToPdf" Version="1.0.8" />
-        <PackageReference Include="Microsoft.AspNetCore" Version="2.1.0" />
-        <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.0" />
+        <PackageReference Include="Microsoft.AspNetCore" Version="2.1.6" />
+        <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.6" />
     </ItemGroup>
 
   <ItemGroup>
