@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
+using OpenIddict.Abstractions;
 using OpenIddict.Core;
 using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Common;

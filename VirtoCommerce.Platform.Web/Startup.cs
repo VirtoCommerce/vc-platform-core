@@ -45,6 +45,7 @@ using VirtoCommerce.Platform.Web.JsonConverters;
 using VirtoCommerce.Platform.Web.Middelware;
 using VirtoCommerce.Platform.Web.Swagger;
 using VirtoCommerce.Platform.Core;
+using Swashbuckle.AspNetCore.SwaggerUI;
 
 namespace VirtoCommerce.Platform.Web
 {
@@ -165,16 +166,17 @@ namespace VirtoCommerce.Platform.Web
             // Register the OpenIddict services.
             // Note: use the generic overload if you need
             // to replace the default OpenIddict entities.
-            services.AddOpenIddict(options =>
+            services.AddOpenIddict()
+                .AddCore(options =>
             {
-                // Register the Entity Framework stores.
-                options.AddEntityFrameworkCoreStores<SecurityDbContext>();
-
-
+                options.UseEntityFrameworkCore()
+                       .UseDbContext<SecurityDbContext>();
+            }).AddServer(options =>
+            {
                 // Register the ASP.NET Core MVC binder used by OpenIddict.
                 // Note: if you don't call this method, you won't be able to
                 // bind OpenIdConnectRequest or OpenIdConnectResponse parameters.
-                options.AddMvcBinders();
+                options.UseMvc();
 
                 // Enable the authorization, logout, token and userinfo endpoints.
                 options.EnableTokenEndpoint("/connect/token")
