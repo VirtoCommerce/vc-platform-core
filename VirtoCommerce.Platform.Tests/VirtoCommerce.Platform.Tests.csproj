@@ -17,7 +17,6 @@
   <ItemGroup>
     <ProjectReference Include="..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
     <ProjectReference Include="..\VirtoCommerce.Platform.Data\VirtoCommerce.Platform.Data.csproj" />
-    <ProjectReference Include="..\VirtoCommerce.Platform.Web\VirtoCommerce.Platform.Web.csproj" />
   </ItemGroup>
 
 </Project>
