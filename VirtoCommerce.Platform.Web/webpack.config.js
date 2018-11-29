@@ -77,53 +77,6 @@ module.exports = env => {
                     _: 'underscore'
                 })
             ]
-        },
-        //{
-        //    entry: './wwwroot/src/css/vendor.css',
-        //    output: {
-        //        path: path.resolve(__dirname, 'wwwroot/dist')
-        //    },
-        //    plugins: [
-        //        new CleanWebpackPlugin(path.resolve(__dirname, 'wwwroot/dist'), { verbose: env.dev ? true : false }),
-        //        new MiniCssExtractPlugin({
-        //            filename: 'vendor.css'
-        //        })
-        //    ],
-        //    module: {
-        //        rules: [
-        //            {
-        //                test: /\.css$/,
-        //                use: [
-        //                    MiniCssExtractPlugin.loader,
-        //                    "css-loader"
-        //                ]
-        //            },
-        //            {
-        //                test: /\.(jpe?g|png|gif)$/i,
-        //                loader: "file-loader",
-        //                options: {
-        //                    name: '[name].[ext]',
-        //                    outputPath: 'assets/images/'
-        //                    //the images will be emited to dist/assets/images/ folder
-        //                }
-        //            },
-        //            {
-        //                test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
-        //                use: [
-        //                    {
-        //                        loader: 'file-loader',
-        //                        options: {
-        //                            name: '[name].[ext]',
-        //                            outputPath: 'fonts/'
-        //                        }
-        //                    }
-        //                ]
-        //            }
-        //        ]
-        //    },
-        //    resolve: {
-        //        modules: ['node_modules']
-        //    }
-        //}
+        }
     ];
 };
