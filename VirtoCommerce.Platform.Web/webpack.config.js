@@ -6,10 +6,17 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 const rootPath = path.resolve(__dirname, 'wwwroot/dist');
 
+function isProductionEnvironment(env) {
+    return env && env.prod === true;
+}
+
 module.exports = env => {
     return [
         {
-            entry: { 'main': './wwwroot/src/js/vendor.js' },
+            entry: {
+                main: ['./wwwroot/src/js/vendor.js', './wwwroot/css/themes/main/sass/main.sass']
+            },
+            mode: isProductionEnvironment(env) ? 'production' : 'development',
             output: {
                 path: rootPath,
                 filename: 'vendor.js',
@@ -17,6 +24,12 @@ module.exports = env => {
             },
             module: {
                 rules: [
+                    {
+                        test: /\.js$/,
+                        use: {
+                            loader: 'babel-loader'
+                        }
+                    },
                     {
                         test: /\.css$/,
                         loaders: [ MiniCssExtractPlugin.loader, "css-loader" ]
@@ -44,13 +57,21 @@ module.exports = env => {
                                 }
                             }
                         ]
+                    },
+                    {
+                        test: /\.(sass|scss)$/,
+                        use: [
+                            { loader: MiniCssExtractPlugin.loader },
+                            { loader: 'css-loader' },
+                            { loader: 'sass-loader', options: { includePaths: [require('node-bourbon').includePaths] } }
+                        ]
                     }
                 ]
             },
             plugins: [
-                new CleanWebpackPlugin(rootPath, { verbose: env.dev ? true : false }),
+                new CleanWebpackPlugin(rootPath, { verbose: isProductionEnvironment(env) ? false : true }),
                 new MiniCssExtractPlugin({
-                    filename: 'vendor.css'
+                    filename: 'style.css'
                 }),
                 new webpack.ProvidePlugin({
                     $: 'jquery',
@@ -67,6 +88,7 @@ module.exports = env => {
         },
         {
             entry: glob.sync('./wwwroot/js/**/*.js'),
+            mode: isProductionEnvironment(env) ? 'production' : 'development',
             output: {
                 path: rootPath,
                 filename: 'app.js',
