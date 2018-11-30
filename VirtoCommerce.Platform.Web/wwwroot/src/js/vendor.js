@@ -50,9 +50,11 @@ import 'codemirror';
 import _ from 'underscore';
 window._ = _;
 
-import '../../../node_modules/angular-ui-grid/ui-grid.css';
-import '../../../node_modules/angular-gridster/dist/angular-gridster.css';
-import '../../../node_modules/ui-select/dist/select.css';
-import '../../../node_modules/ng-tags-input/build/ng-tags-input.css';
-import '../../../node_modules/textAngular/dist/textAngular.css';
-import '../../../node_modules/uikit/dist/css/uikit.css';
+import 'angular-ui-grid/ui-grid.css';
+import 'angular-gridster/dist/angular-gridster.css';
+import 'ui-select/dist/select.css';
+import 'ng-tags-input/build/ng-tags-input.css';
+import 'textAngular/dist/textAngular.css';
+import 'uikit/dist/css/uikit.css';
+import 'select2/select2.css';
+import 'font-awesome/css/font-awesome.css';
