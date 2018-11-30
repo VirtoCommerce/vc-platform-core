@@ -92,7 +92,7 @@ module.exports = env => {
             output: {
                 path: rootPath,
                 filename: 'app.js',
-                publicPath: 'dist/'
+                publicPath: '/dist/'
             },
             plugins: [
                 new webpack.ProvidePlugin({
