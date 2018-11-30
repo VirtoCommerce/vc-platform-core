@@ -20,7 +20,7 @@ module.exports = env => {
             output: {
                 path: rootPath,
                 filename: 'vendor.js',
-                publicPath: 'dist/'
+                publicPath: '/dist/'
             },
             module: {
                 rules: [
