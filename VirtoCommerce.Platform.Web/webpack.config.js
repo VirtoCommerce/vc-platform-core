@@ -98,7 +98,17 @@ module.exports = env => {
                 new webpack.ProvidePlugin({
                     _: 'underscore'
                 })
-            ]
+            ],
+            module: {
+                rules: [
+                    {
+                        test: /\.js$/,
+                        use: {
+                            loader: 'babel-loader'
+                        }
+                    }
+                ]
+            }
         }
     ];
 };
