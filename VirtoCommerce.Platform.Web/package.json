@@ -3,8 +3,8 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-        "webpack:dev": "webpack --display-error-details --mode=development",
-        "webpack:build": "webpack --mode=production --env.prod"
+        "webpack:dev": "webpack --display-error-details",
+        "webpack:build": "webpack --env.prod"
     },
     "devDependencies": {
         "@babel/core": "^7.1.6",
