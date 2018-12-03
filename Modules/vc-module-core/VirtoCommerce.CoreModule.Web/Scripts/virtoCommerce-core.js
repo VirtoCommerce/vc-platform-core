@@ -1,5 +1,6 @@
 import 'uikit';
 import 'marked';
+import 'uikit/dist/css/components/htmleditor.css';
 
 var moduleName = "virtoCommerce.coreModule";
 
