@@ -8,7 +8,7 @@ const rootPath = path.resolve(__dirname, 'dist');
 
 function getEntrypoints() {
     const result = [
-        ...glob.sync('./Scripts/**/*.js', { ignore: ['./Scripts/dist/**/*.*'], nosort: true }),
+        ...glob.sync('./Scripts/**/*.js', { nosort: true }),
         ...glob.sync('./Content/**/*.css', { nosort: true })
     ];
 
