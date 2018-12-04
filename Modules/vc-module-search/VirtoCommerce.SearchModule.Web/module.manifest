@@ -21,10 +21,10 @@
     <moduleType>VirtoCommerce.SearchModule.Web.Module, VirtoCommerce.SearchModule.Web</moduleType>
 
     <styles>
-        <directory virtualPath="$/Content" searchPattern="*.css" searchSubdirectories="true" />
+        <directory virtualPath="$/dist" searchPattern="*.css" searchSubdirectories="true" />
     </styles>
     <scripts>
-        <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
+        <directory virtualPath="$/dist" searchPattern="*.js" searchSubdirectories="true" />
     </scripts>
     
     <incompatibilities>
