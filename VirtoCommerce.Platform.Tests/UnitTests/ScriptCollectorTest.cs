@@ -4,8 +4,8 @@ using System.IO;
 using System.Reflection;
 using Moq;
 using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.Platform.Core.ModuleScriptCollector;
-using VirtoCommerce.Platform.Core.ModuleScriptCollector.Normalizer;
+using VirtoCommerce.Platform.Core.ModuleFileCollector;
+using VirtoCommerce.Platform.Core.ModuleFileCollector.Normalizer;
 using VirtoCommerce.Platform.Core.VersionProvider;
 using Xunit;
 
@@ -30,7 +30,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
                 CreateModuleInfo(_destinationPath, new []{ CreateScriptBundleItem(_temporaryFolderName) })
             });
 
-            var pathNormalizer = CreateMockedModuleScriptPathNormalizer();
+            var pathNormalizer = CreateMockedModuleFilePathNormalizer();
 
             var collector = CreateScriptCollector(
                 fileVersionProvider.Object,
@@ -52,7 +52,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
             CreateTemporaryFiles(new []{ "app.js" });
 
             var fileVersionProvider = CreateMockedFileVersionProvider();
-            var pathNormalizer = CreateMockedModuleScriptPathNormalizer();
+            var pathNormalizer = CreateMockedModuleFilePathNormalizer();
             var localModuleCatalog = CreateMockedLocalModuleCatalog();
 
             localModuleCatalog.Setup(l => l.Modules).Returns(new List<ModuleInfo>
@@ -73,7 +73,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
         public void TestCollectorWithoutScripts()
         {
             var fileVersionProvider = CreateMockedFileVersionProvider();
-            var pathNormalizer = CreateMockedModuleScriptPathNormalizer();
+            var pathNormalizer = CreateMockedModuleFilePathNormalizer();
             var localModuleCatalog = CreateMockedLocalModuleCatalog();
 
             localModuleCatalog.Setup(l => l.Modules).Returns(new List<ModuleInfo>
@@ -95,7 +95,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
             CreateTemporaryFiles(new []{ "wrongApp.js", "wrongVendor.js" });
 
             var fileVersionProvider = CreateMockedFileVersionProvider();
-            var pathNormalizer = CreateMockedModuleScriptPathNormalizer();
+            var pathNormalizer = CreateMockedModuleFilePathNormalizer();
             var localModuleCatalog = CreateMockedLocalModuleCatalog();
 
             localModuleCatalog.Setup(l => l.Modules).Returns(new List<ModuleInfo>
@@ -118,7 +118,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
             CreateTemporaryFiles(new [] { "app.js", "vendor.js" });
 
             var fileVersionProvider = CreateMockedFileVersionProvider();
-            var pathNormalizer = CreateMockedModuleScriptPathNormalizer();
+            var pathNormalizer = CreateMockedModuleFilePathNormalizer();
             var localModuleCatalog = CreateMockedLocalModuleCatalog();
 
             localModuleCatalog.Setup(l => l.Modules).Returns(new List<ModuleInfo>
@@ -139,7 +139,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
             CreateTemporaryFiles(new[] { "app.js", "vendor.js" }, distFolderName: "wrongDist");
 
             var fileVersionProvider = CreateMockedFileVersionProvider();
-            var pathNormalizer = CreateMockedModuleScriptPathNormalizer();
+            var pathNormalizer = CreateMockedModuleFilePathNormalizer();
             var localModuleCatalog = CreateMockedLocalModuleCatalog();
 
             localModuleCatalog.Setup(l => l.Modules).Returns(new List<ModuleInfo>
@@ -156,7 +156,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
             Assert.Empty(result);
         }
 
-        private ScriptCollector CreateScriptCollector(IFileVersionProvider fileVersionProvider, ILocalModuleCatalog localModuleCatalog, IModuleScriptPathNormalizer pathNormalizer)
+        private ScriptCollector CreateScriptCollector(IFileVersionProvider fileVersionProvider, ILocalModuleCatalog localModuleCatalog, IModuleFilePathNormalizer pathNormalizer)
         {
             return new ScriptCollector(
                 fileVersionProvider,
@@ -175,14 +175,14 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
             return new Mock<ILocalModuleCatalog>();
         }
 
-        private Mock<IModuleScriptPathNormalizer> CreateMockedModuleScriptPathNormalizer()
+        private Mock<IModuleFilePathNormalizer> CreateMockedModuleFilePathNormalizer()
         {
-            return new Mock<IModuleScriptPathNormalizer>();
+            return new Mock<IModuleFilePathNormalizer>();
         }
 
-        private IModuleScriptPathNormalizerFactory CreateScriptPathNormalizerFactory(IModuleScriptPathNormalizer normalizer)
+        private IModuleFilePathNormalizerFactory CreateScriptPathNormalizerFactory(IModuleFilePathNormalizer normalizer)
         {
-            var factory = new Mock<IModuleScriptPathNormalizerFactory>();
+            var factory = new Mock<IModuleFilePathNormalizerFactory>();
 
             factory
                 .Setup(f => f.Create(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))

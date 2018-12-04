@@ -27,11 +27,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         @*<link rel="stylesheet" href="~/css/allPackages.css" />
         <link rel="stylesheet" href="~/css/platform.css" />*@
         <link rel="stylesheet" href="~/dist/style.css" asp-append-version="true"/>
-        <link rel="stylesheet" href="vc-modules-styles" />
+        @*<link rel="stylesheet" href="vc-modules-styles" />*@
+        <modules-styles-resolve asp-append-version="true"/>
     </environment>
     <environment exclude="Development">
         <link rel="stylesheet" href="~/css/allPackages.min.css" asp-append-version="true" />
-        <link rel="stylesheet" href="vc-modules-styles" />
+        @*<link rel="stylesheet" href="vc-modules-styles" />*@
     </environment>
 
     <meta name="viewport" content="width=device-width" />

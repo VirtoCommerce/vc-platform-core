@@ -1,5 +1,5 @@
 using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.Platform.Core.ModuleScriptCollector.Normalizer;
+using VirtoCommerce.Platform.Core.ModuleFileCollector.Normalizer;
 using Xunit;
 
 namespace VirtoCommerce.Platform.Tests.UnitTests
@@ -15,7 +15,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
             var moduleFolder = "SomeModuleFolder";
             var fullFilePath = @"bla\bla\path\bestModuleEver\SomeModuleFolder\Scripts\dist\app.js";
 
-            var normalizer = new ModuleScriptPathNormalizer(GetLocalStorageModuleCatalogOptions(rootPath), path, moduleName, moduleFolder);
+            var normalizer = new ModuleFilePathNormalizer(GetLocalStorageModuleCatalogOptions(rootPath), path, moduleName, moduleFolder);
 
             var result = normalizer.Normalize(fullFilePath);
 

@@ -2,16 +2,16 @@ using System;
 using System.IO;
 using VirtoCommerce.Platform.Core.Modularity;
 
-namespace VirtoCommerce.Platform.Core.ModuleScriptCollector.Normalizer
+namespace VirtoCommerce.Platform.Core.ModuleFileCollector.Normalizer
 {
-    public class ModuleScriptPathNormalizer : IModuleScriptPathNormalizer
+    public class ModuleFilePathNormalizer : IModuleFilePathNormalizer
     {
         private readonly string _rootPath;
         private readonly string _path;
         private readonly string _moduleName;
         private readonly string _moduleFolder;
 
-        public ModuleScriptPathNormalizer(LocalStorageModuleCatalogOptions localStorageModuleCatalogOptions, string path, string moduleName, string moduleFolder)
+        public ModuleFilePathNormalizer(LocalStorageModuleCatalogOptions localStorageModuleCatalogOptions, string path, string moduleName, string moduleFolder)
         {
             _rootPath = localStorageModuleCatalogOptions.DiscoveryPath;
             _path = path;

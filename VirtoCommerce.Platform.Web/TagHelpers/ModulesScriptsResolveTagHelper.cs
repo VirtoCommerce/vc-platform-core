@@ -1,14 +1,14 @@
 using System.Linq;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Razor.TagHelpers;
-using VirtoCommerce.Platform.Core.ModuleScriptCollector;
+using VirtoCommerce.Platform.Core.ModuleFileCollector;
 
 namespace VirtoCommerce.Platform.Web.TagHelpers
 {
     public class ModulesScriptsResolveTagHelper : TagHelper
     {
         private readonly IScriptCollector _scriptCollector;
-        private ModuleScript[] _moduleScripts;
+        private ModuleFile[] _moduleScripts;
 
         public ModulesScriptsResolveTagHelper(IScriptCollector scriptCollector)
         {

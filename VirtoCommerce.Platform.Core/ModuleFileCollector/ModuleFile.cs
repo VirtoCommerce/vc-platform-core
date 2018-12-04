@@ -1,6 +1,6 @@
-namespace VirtoCommerce.Platform.Core.ModuleScriptCollector
+namespace VirtoCommerce.Platform.Core.ModuleFileCollector
 {
-    public class ModuleScript
+    public class ModuleFile
     {
         public string WebPath { get; set; }
         public string Version { get; set; }
