@@ -197,7 +197,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
 
             _temporaryFolderName = Guid.NewGuid().ToString();
             _destinationPath = tempPath;
-            _fullPhysicalPathToDistFolder = Path.Join(tempPath, _temporaryFolderName, distFolderName ?? "dist");
+            _fullPhysicalPathToDistFolder = Path.Join(tempPath, _temporaryFolderName, distFolderName);
             
             Directory.CreateDirectory(_fullPhysicalPathToDistFolder);
 
@@ -222,7 +222,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
                 File.Delete(file);
             }
 
-            Directory.Delete(_fullPhysicalPathToDistFolder);
+            Directory.Delete(Path.Join(_destinationPath, _temporaryFolderName), true);
         }
 
         private static ModuleInfo CreateModuleInfo(string fullPhysicalPath, ManifestBundleItem[] scripts)

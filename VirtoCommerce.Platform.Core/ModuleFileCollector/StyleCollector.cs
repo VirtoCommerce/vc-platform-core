@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using VirtoCommerce.Platform.Core.Extensions;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.ModuleFileCollector.Normalizer;
 using VirtoCommerce.Platform.Core.VersionProvider;
@@ -34,9 +35,12 @@ namespace VirtoCommerce.Platform.Core.ModuleFileCollector
                     continue;
                 }
 
-                var stylesFolderName = stylesMetadata.VirtualPath.Split("/").Last();
+                var moduleRootFolderName = stylesMetadata.VirtualPath.Split("/").First();
+                var moduleFolderName = includedModule.Assembly.GetName().Name;
 
-                var targetPath = Path.Join(includedModule.FullPhysicalPath, stylesFolderName, "dist");
+                var stylesFolderName = stylesMetadata.VirtualPath.GetRelativeFilePath(moduleRootFolderName, moduleFolderName);
+
+                var targetPath = Path.Join(includedModule.FullPhysicalPath, stylesFolderName);
 
                 ModuleInfo = includedModule;
                 BundleItem = stylesMetadata;

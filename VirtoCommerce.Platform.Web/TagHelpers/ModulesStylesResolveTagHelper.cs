@@ -46,6 +46,7 @@ namespace VirtoCommerce.Platform.Web.TagHelpers
 
             tagBuilder.Attributes.Add("href", version != null ? $"{path}?v={version}" : path);
             tagBuilder.Attributes.Add("rel", "stylesheet");
+            tagBuilder.TagRenderMode = TagRenderMode.SelfClosing;
 
             output.Content.AppendHtml(tagBuilder);
         }
