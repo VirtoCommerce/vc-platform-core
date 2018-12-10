@@ -25,6 +25,6 @@
     <moduleType>VirtoCommerce.InventoryModule.Web.Module, VirtoCommerce.InventoryModule.Web</moduleType>
 
     <scripts>
-        <directory virtualPath="$/dist" searchPattern="*.js" searchSubdirectories="true" />
+        <directory virtualPath="dist" searchPattern="*.js" searchSubdirectories="true" />
     </scripts>
 </module>

@@ -21,6 +21,7 @@ using Newtonsoft.Json.Converters;
 using Smidge;
 using Smidge.Nuglify;
 using Swashbuckle.AspNetCore.Swagger;
+using Swashbuckle.AspNetCore.SwaggerUI;
 using VirtoCommerce.Platform.Assets.AzureBlobStorage;
 using VirtoCommerce.Platform.Assets.AzureBlobStorage.Extensions;
 using VirtoCommerce.Platform.Assets.FileSystem;
@@ -44,8 +45,6 @@ using VirtoCommerce.Platform.Web.Hangfire;
 using VirtoCommerce.Platform.Web.JsonConverters;
 using VirtoCommerce.Platform.Web.Middleware;
 using VirtoCommerce.Platform.Web.Swagger;
-using VirtoCommerce.Platform.Core;
-using Swashbuckle.AspNetCore.SwaggerUI;
 
 namespace VirtoCommerce.Platform.Web
 {
@@ -358,11 +357,11 @@ namespace VirtoCommerce.Platform.Web
             }
 
             //Using Smidge runtime bundling library for bundling modules js and css files
-            app.UseSmidge(bundles =>
-            {
-                app.UseModulesContent(bundles);
-            });
-            app.UseSmidgeNuglify();
+            //app.UseSmidge(bundles =>
+            //{
+            //    app.UseModulesContent(bundles);
+            //});
+            //app.UseSmidgeNuglify();
 
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.

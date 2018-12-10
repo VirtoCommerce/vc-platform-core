@@ -26,7 +26,7 @@
     <moduleType>VirtoCommerce.LicensingModule.Web.Module, VirtoCommerce.LicensingModule.Web</moduleType>
 
     <scripts>
-        <directory virtualPath="$/dist" searchPattern="*.js" searchSubdirectories="true" />
+        <directory virtualPath="dist" searchPattern="*.js" searchSubdirectories="true" />
     </scripts>
     
 </module>

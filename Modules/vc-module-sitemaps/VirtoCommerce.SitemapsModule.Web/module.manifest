@@ -28,6 +28,6 @@
     <moduleType>VirtoCommerce.SitemapsModule.Web.Module, VirtoCommerce.SitemapsModule.Web</moduleType>
 
     <scripts>
-        <directory virtualPath="$/dist" searchPattern="*.js" searchSubdirectories="true" />
+        <directory virtualPath="dist" searchPattern="*.js" searchSubdirectories="true" />
     </scripts>
 </module>

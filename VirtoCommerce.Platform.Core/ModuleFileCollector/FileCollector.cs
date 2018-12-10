@@ -1,27 +1,23 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.Platform.Core.ModuleFileCollector.Normalizer;
 using VirtoCommerce.Platform.Core.VersionProvider;
 
 namespace VirtoCommerce.Platform.Core.ModuleFileCollector
 {
     public abstract class FileCollector : ICollector
     {
-        private readonly IModuleFilePathNormalizerFactory _moduleFilePathNormalizerFactory;
         private readonly IFileVersionProvider _fileVersionProvider;
 
         private ICollection<InternalModuleFile> _moduleFiles;
 
-        protected FileCollector(IModuleFilePathNormalizerFactory moduleFilePathNormalizerFactory, IFileVersionProvider fileVersionProvider)
+        protected FileCollector(IFileVersionProvider fileVersionProvider)
         {
-            _moduleFilePathNormalizerFactory = moduleFilePathNormalizerFactory;
             _fileVersionProvider = fileVersionProvider;
         }
 
-        protected abstract ManifestModuleInfo ModuleInfo { get; set; }
-        protected abstract ManifestBundleItem BundleItem { get; set; }
+        protected abstract string ModuleName { get; set; }
+        protected abstract string VirtualPath { get; set; }
         internal abstract InternalModuleFile[] LoadModulesTargetPaths();
 
         public ModuleFile[] Collect(bool isNeedVersionAppend)
@@ -42,14 +38,12 @@ namespace VirtoCommerce.Platform.Core.ModuleFileCollector
                 var moduleFile = Path.Join(targetPath, applicationFilename);
                 var moduleVendor = Path.Join(targetPath, vendorFilename);
 
-                var normalizer = _moduleFilePathNormalizerFactory.Create(BundleItem.VirtualPath, ModuleInfo.ModuleName, ModuleInfo.Assembly.GetName().Name);
-
                 if (File.Exists(moduleFile))
                 {
                     result.Add(new InternalModuleFile
                     {
                         Path = moduleFile,
-                        WebPath = normalizer.Normalize(moduleFile)
+                        WebPath = GetWebPath(moduleFile)
                     });
                 }
 
@@ -58,7 +52,7 @@ namespace VirtoCommerce.Platform.Core.ModuleFileCollector
                     result.Add(new InternalModuleFile
                     {
                         Path = moduleVendor,
-                        WebPath = normalizer.Normalize(moduleFile),
+                        WebPath = GetWebPath(moduleVendor),
                         IsVendor = true
                     });
                 }
@@ -76,6 +70,11 @@ namespace VirtoCommerce.Platform.Core.ModuleFileCollector
                     moduleFile.Version = _fileVersionProvider.GetFileVersion(moduleFile.Path);
                 }
             }
+        }
+
+        private string GetWebPath(string filePath)
+        {
+            return $"/Modules/$({ModuleName})/{VirtualPath}/{Path.GetFileName(filePath)}";
         }
     }
 }

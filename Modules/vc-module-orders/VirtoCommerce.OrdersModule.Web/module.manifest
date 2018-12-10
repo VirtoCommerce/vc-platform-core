@@ -29,9 +29,9 @@
     <moduleType>VirtoCommerce.OrdersModule.Web.Module, VirtoCommerce.OrdersModule.Web</moduleType>
 
     <styles>
-        <directory virtualPath="$/dist" searchPattern="*.css" searchSubdirectories="true" />
+        <directory virtualPath="dist" searchPattern="*.css" searchSubdirectories="true" />
     </styles>
     <scripts>
-        <directory virtualPath="$/dist" searchPattern="*.js" searchSubdirectories="true" />
+        <directory virtualPath="dist" searchPattern="*.js" searchSubdirectories="true" />
     </scripts>
 </module>

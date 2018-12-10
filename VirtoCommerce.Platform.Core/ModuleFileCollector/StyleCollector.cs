@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using VirtoCommerce.Platform.Core.Extensions;
 using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.Platform.Core.ModuleFileCollector.Normalizer;
 using VirtoCommerce.Platform.Core.VersionProvider;
 
 namespace VirtoCommerce.Platform.Core.ModuleFileCollector
@@ -12,11 +11,11 @@ namespace VirtoCommerce.Platform.Core.ModuleFileCollector
     {
         private readonly ILocalModuleCatalog _localModuleCatalog;
 
-        protected override ManifestModuleInfo ModuleInfo { get; set; }
-        protected override ManifestBundleItem BundleItem { get; set; }
+        protected override string ModuleName { get; set; }
+        protected override string VirtualPath { get; set; }
 
-        public StyleCollector(IFileVersionProvider fileVersionProvider, ILocalModuleCatalog localModuleCatalog, IModuleFilePathNormalizerFactory moduleScriptPathNormalizerFactory)
-            : base(moduleScriptPathNormalizerFactory, fileVersionProvider)
+        public StyleCollector(IFileVersionProvider fileVersionProvider, ILocalModuleCatalog localModuleCatalog)
+            : base(fileVersionProvider)
         {
             _localModuleCatalog = localModuleCatalog;
         }
@@ -42,8 +41,8 @@ namespace VirtoCommerce.Platform.Core.ModuleFileCollector
 
                 var targetPath = Path.Join(includedModule.FullPhysicalPath, stylesFolderName);
 
-                ModuleInfo = includedModule;
-                BundleItem = stylesMetadata;
+                ModuleName = includedModule.ModuleName;
+                VirtualPath = stylesMetadata.VirtualPath;
 
                 result.AddRange(Handle(targetPath, "style.css", "vendor.css"));
             }
