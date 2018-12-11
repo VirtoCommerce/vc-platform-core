@@ -34,7 +34,7 @@ namespace VirtoCommerce.Platform.Core.ModuleFileCollector
                     continue;
                 }
 
-                var targetPath = Path.Join(includedModule.FullPhysicalPath, scriptsMetadata.VirtualPath.Replace("/", "\\"));
+                var targetPath = Path.Join(includedModule.FullPhysicalPath, scriptsMetadata.VirtualPath.Replace('/', Path.DirectorySeparatorChar));
 
                 ModuleName = includedModule.ModuleName;
                 VirtualPath = scriptsMetadata.VirtualPath;
