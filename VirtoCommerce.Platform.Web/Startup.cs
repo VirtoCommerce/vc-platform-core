@@ -188,6 +188,9 @@ namespace VirtoCommerce.Platform.Web
                        .AllowRefreshTokenFlow()
                        .AllowClientCredentialsFlow();
 
+                // Accept anonymous clients (i.e clients that don't send a client_id).
+                options.AcceptAnonymousClients();
+
                 // Make the "client_id" parameter mandatory when sending a token request.
                 //options.RequireClientIdentification();
 

@@ -7,25 +7,26 @@ using AspNet.Security.OpenIdConnect.Extensions;
 using AspNet.Security.OpenIdConnect.Primitives;
 using AspNet.Security.OpenIdConnect.Server;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using OpenIddict.Abstractions;
 using OpenIddict.Core;
-using OpenIddict.Models;
+using OpenIddict.EntityFrameworkCore.Models;
 using VirtoCommerce.Platform.Core.Security;
 
 namespace Mvc.Server
 {
     public class AuthorizationController : Controller
     {
-        private readonly OpenIddictApplicationManager<OpenIddictApplication> _applicationManager;
         private readonly IOptions<IdentityOptions> _identityOptions;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly OpenIddictApplicationManager<OpenIddictApplication> _applicationManager;
 
-        public AuthorizationController(OpenIddictApplicationManager<OpenIddictApplication> applicationManager,
+
+        public AuthorizationController(
+            OpenIddictApplicationManager<OpenIddictApplication> applicationManager,
             IOptions<IdentityOptions> identityOptions,
             SignInManager<ApplicationUser> signInManager,
             UserManager<ApplicationUser> userManager)
