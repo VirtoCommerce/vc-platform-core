@@ -25,7 +25,6 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="AspNet.Security.OAuth.Validation" Version="2.0.0" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.6.21" />
     <PackageReference Include="Hangfire.MemoryStorage" Version="1.5.3" />
     <PackageReference Include="HangFire.SqlServer" Version="1.6.21" />
@@ -45,8 +44,6 @@
     <PackageReference Include="OpenIddict" Version="2.0.0" />
     <PackageReference Include="OpenIddict.Core" Version="2.0.0" />
     <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="2.0.0" />
-    <PackageReference Include="OpenIddict.Models" Version="2.0.0-rc2-final" />
-    <PackageReference Include="OpenIddict.Mvc" Version="2.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
     <PackageReference Include="VirtoCommerce.Smidge" Version="3.0.0-beta002" />
