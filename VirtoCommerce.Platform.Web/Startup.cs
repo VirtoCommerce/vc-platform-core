@@ -1,4 +1,5 @@
 using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -16,19 +17,23 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using OpenIddict.Validation;
 using Smidge;
 using Smidge.Nuglify;
 using Swashbuckle.AspNetCore.Swagger;
-using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Jobs;
-using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.Platform.Core.Security;
+using Swashbuckle.AspNetCore.SwaggerUI;
 using VirtoCommerce.Platform.Assets.AzureBlobStorage;
 using VirtoCommerce.Platform.Assets.AzureBlobStorage.Extensions;
 using VirtoCommerce.Platform.Assets.FileSystem;
 using VirtoCommerce.Platform.Assets.FileSystem.Extensions;
+using VirtoCommerce.Platform.Core;
+using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Jobs;
+using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.Platform.Data.PushNotifications;
 using VirtoCommerce.Platform.Data.Repositories;
@@ -40,12 +45,9 @@ using VirtoCommerce.Platform.Security.Extensions;
 using VirtoCommerce.Platform.Security.Repositories;
 using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Hangfire;
-using VirtoCommerce.Platform.Web.Infrastructure;
 using VirtoCommerce.Platform.Web.JsonConverters;
 using VirtoCommerce.Platform.Web.Middelware;
 using VirtoCommerce.Platform.Web.Swagger;
-using VirtoCommerce.Platform.Core;
-using Swashbuckle.AspNetCore.SwaggerUI;
 
 namespace VirtoCommerce.Platform.Web
 {
@@ -161,53 +163,77 @@ namespace VirtoCommerce.Platform.Web
 
 
             // Register the OAuth2 validation handler.
-            services.AddAuthentication().AddOAuthValidation();
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+            JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
+            services
+                .AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = OpenIddictValidationDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(options =>
+                {
+                    options.Authority = "http://localhost:10645";
+                    options.Audience = "resource_server";
+                    options.RequireHttpsMetadata = false;
+                    options.IncludeErrorDetails = true;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        NameClaimType = OpenIdConnectConstants.Claims.Subject,
+                        RoleClaimType = OpenIdConnectConstants.Claims.Role
+                    };
+                });//.AddOAuthValidation();
 
             // Register the OpenIddict services.
             // Note: use the generic overload if you need
             // to replace the default OpenIddict entities.
             services.AddOpenIddict()
                 .AddCore(options =>
-            {
-                options.UseEntityFrameworkCore()
-                       .UseDbContext<SecurityDbContext>();
-            }).AddServer(options =>
-            {
-                // Register the ASP.NET Core MVC binder used by OpenIddict.
-                // Note: if you don't call this method, you won't be able to
-                // bind OpenIdConnectRequest or OpenIdConnectResponse parameters.
-                options.UseMvc();
+                {
+                    options.UseEntityFrameworkCore()
+                        .UseDbContext<SecurityDbContext>();
+                }).AddServer(options =>
+                {
+                    // Register the ASP.NET Core MVC binder used by OpenIddict.
+                    // Note: if you don't call this method, you won't be able to
+                    // bind OpenIdConnectRequest or OpenIdConnectResponse parameters.
+                    options.UseMvc();
 
-                // Enable the authorization, logout, token and userinfo endpoints.
-                options.EnableTokenEndpoint("/connect/token")
-                       .EnableUserinfoEndpoint("/api/security/userinfo");
+                    // Enable the authorization, logout, token and userinfo endpoints.
+                    options.EnableTokenEndpoint("/connect/token")
+                        .EnableUserinfoEndpoint("/api/security/userinfo");
 
-                // Note: the Mvc.Client sample only uses the code flow and the password flow, but you
-                // can enable the other flows if you need to support implicit or client credentials.
-                options.AllowPasswordFlow()
-                       .AllowRefreshTokenFlow()
-                       .AllowClientCredentialsFlow();
+                    // Note: the Mvc.Client sample only uses the code flow and the password flow, but you
+                    // can enable the other flows if you need to support implicit or client credentials.
+                    options.AllowPasswordFlow()
+                        .AllowRefreshTokenFlow()
+                        .AllowClientCredentialsFlow();
 
-                // Make the "client_id" parameter mandatory when sending a token request.
-                //options.RequireClientIdentification();
+                    options.SetRefreshTokenLifetime(TimeSpan.FromDays(30));
+                    options.SetAccessTokenLifetime(TimeSpan.FromHours(1));
 
-                // When request caching is enabled, authorization and logout requests
-                // are stored in the distributed cache by OpenIddict and the user agent
-                // is redirected to the same page with a single parameter (request_id).
-                // This allows flowing large OpenID Connect requests even when using
-                // an external authentication provider like Google, Facebook or Twitter.
-                options.EnableRequestCaching();
+                    options.AcceptAnonymousClients();
 
-                // During development, you can disable the HTTPS requirement.
-                options.DisableHttpsRequirement();
+                    // Make the "client_id" parameter mandatory when sending a token request.
+                    //options.RequireClientIdentification();
 
-                // Note: to use JWT access tokens instead of the default
-                // encrypted format, the following lines are required:
-                //
-                options.UseJsonWebTokens();
-                //TODO: Replace to X.509 certificate
-                options.AddEphemeralSigningKey();
-            });
+                    // When request caching is enabled, authorization and logout requests
+                    // are stored in the distributed cache by OpenIddict and the user agent
+                    // is redirected to the same page with a single parameter (request_id).
+                    // This allows flowing large OpenID Connect requests even when using
+                    // an external authentication provider like Google, Facebook or Twitter.
+                    options.EnableRequestCaching();
+
+                    // During development, you can disable the HTTPS requirement.
+                    options.DisableHttpsRequirement();
+
+                    // Note: to use JWT access tokens instead of the default
+                    // encrypted format, the following lines are required:
+                    //
+                    options.UseJsonWebTokens();
+                    //TODO: Replace to X.509 certificate
+                    options.AddEphemeralSigningKey();
+                });
+            //.AddValidation();
 
             services.Configure<IdentityOptions>(Configuration.GetSection("IdentityOptions"));
 
