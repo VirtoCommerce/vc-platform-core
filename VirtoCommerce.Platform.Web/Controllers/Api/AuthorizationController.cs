@@ -7,6 +7,7 @@ using AspNet.Security.OpenIdConnect.Extensions;
 using AspNet.Security.OpenIdConnect.Primitives;
 using AspNet.Security.OpenIdConnect.Server;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -14,6 +15,7 @@ using OpenIddict.Abstractions;
 using OpenIddict.Core;
 using OpenIddict.EntityFrameworkCore.Models;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Web.Infrastructure;
 
 namespace Mvc.Server
 {
@@ -23,18 +25,23 @@ namespace Mvc.Server
         private readonly IOptions<IdentityOptions> _identityOptions;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IUserClaimsPrincipalFactory<ApplicationUser> _userClaimsPrincipalFactory;
+        private readonly Authentication _authentication;
 
         public AuthorizationController(OpenIddictApplicationManager<OpenIddictApplication> applicationManager,
             IOptions<IdentityOptions> identityOptions,
             SignInManager<ApplicationUser> signInManager,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
+            IOptions<Authentication> authentication)
         {
             _applicationManager = applicationManager;
             _identityOptions = identityOptions;
             _signInManager = signInManager;
             _userManager = userManager;
+            _userClaimsPrincipalFactory = userClaimsPrincipalFactory;
+            _authentication = authentication.Value;
         }
-
 
         #region Password, authorization code and refresh token flows
         // Note: to support non-interactive flows like password,
@@ -50,6 +57,7 @@ namespace Mvc.Server
             if (request.IsPasswordGrantType())
             {
                 var user = await _userManager.FindByNameAsync(request.Username);
+
                 if (user == null)
                 {
                     return BadRequest(new OpenIdConnectResponse
@@ -72,6 +80,13 @@ namespace Mvc.Server
 
                 // Create a new authentication ticket.
                 var ticket = await CreateTicketAsync(request, user);
+
+                // Set limited permissions
+                var claims = await _userClaimsPrincipalFactory.CreateAsync(user);
+
+                ((ClaimsIdentity) claims.Identity).AddClaim(new Claim("LimitedPermissions", _authentication.LimitedCookiePermissions));
+
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claims);
 
                 return SignIn(ticket.Principal, ticket.Properties, ticket.AuthenticationScheme);
             }
@@ -164,8 +179,6 @@ namespace Mvc.Server
                 OpenIdConnectServerDefaults.AuthenticationScheme);
 
             ticket.SetResources("resource_server");
-
-
 
             return ticket;
         }

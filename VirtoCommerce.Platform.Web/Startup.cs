@@ -45,6 +45,7 @@ using VirtoCommerce.Platform.Security.Extensions;
 using VirtoCommerce.Platform.Security.Repositories;
 using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Hangfire;
+using VirtoCommerce.Platform.Web.Infrastructure;
 using VirtoCommerce.Platform.Web.JsonConverters;
 using VirtoCommerce.Platform.Web.Middelware;
 using VirtoCommerce.Platform.Web.Swagger;
@@ -156,8 +157,8 @@ namespace VirtoCommerce.Platform.Web
             // which saves you from doing the mapping in your authorization controller.
             services.Configure<IdentityOptions>(options =>
             {
-                options.ClaimsIdentity.UserNameClaimType = OpenIdConnectConstants.Claims.Name;
-                options.ClaimsIdentity.UserIdClaimType = OpenIdConnectConstants.Claims.Subject;
+                options.ClaimsIdentity.UserNameClaimType = OpenIdConnectConstants.Claims.Subject;
+                options.ClaimsIdentity.UserIdClaimType = OpenIdConnectConstants.Claims.Name;
                 options.ClaimsIdentity.RoleClaimType = OpenIdConnectConstants.Claims.Role;
             });
 
@@ -181,7 +182,10 @@ namespace VirtoCommerce.Platform.Web
                         NameClaimType = OpenIdConnectConstants.Claims.Subject,
                         RoleClaimType = OpenIdConnectConstants.Claims.Role
                     };
-                });//.AddOAuthValidation();
+                })
+                .AddCookie();//.AddOAuthValidation();
+
+            services.Configure<Authentication>(Configuration.GetSection("Authentication"));
 
             // Register the OpenIddict services.
             // Note: use the generic overload if you need
@@ -205,13 +209,15 @@ namespace VirtoCommerce.Platform.Web
                     // Note: the Mvc.Client sample only uses the code flow and the password flow, but you
                     // can enable the other flows if you need to support implicit or client credentials.
                     options.AllowPasswordFlow()
-                        .AllowRefreshTokenFlow()
-                        .AllowClientCredentialsFlow();
+                        .AllowRefreshTokenFlow();
 
-                    options.SetRefreshTokenLifetime(TimeSpan.FromDays(30));
-                    options.SetAccessTokenLifetime(TimeSpan.FromHours(1));
+                    options.SetRefreshTokenLifetime(TimeSpan.FromHours(Configuration.GetValue<int>("Authorization:RefreshTokenLifeTime")));
+                    options.SetAccessTokenLifetime(TimeSpan.FromHours(Configuration.GetValue<int>("Authorization:AccessTokenLifeTime")));
 
                     options.AcceptAnonymousClients();
+
+                    // Configure Openiddict to issues new refresh token for each token refresh request.
+                    options.UseRollingTokens();
 
                     // Make the "client_id" parameter mandatory when sending a token request.
                     //options.RequireClientIdentification();
@@ -224,7 +230,10 @@ namespace VirtoCommerce.Platform.Web
                     options.EnableRequestCaching();
 
                     // During development, you can disable the HTTPS requirement.
-                    options.DisableHttpsRequirement();
+                    if (HostingEnvironment.IsDevelopment())
+                    {
+                        options.DisableHttpsRequirement();
+                    }
 
                     // Note: to use JWT access tokens instead of the default
                     // encrypted format, the following lines are required:
