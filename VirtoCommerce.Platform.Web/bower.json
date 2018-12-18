@@ -38,7 +38,8 @@
         "underscore": "1.8.3",
         "angular-filter": "0.5.8",
         "uikit": "2.27.5",
-        "marked": "0.3.6"
+        "marked": "0.3.6",
+        "angular-local-storage": "^0.7.1"
     },
   "resolutions": {
     "angular": "1.4.4",

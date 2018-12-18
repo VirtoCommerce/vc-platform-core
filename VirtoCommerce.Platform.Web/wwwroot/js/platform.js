@@ -3438,398 +3438,6 @@ return browserIndex$1;
 })));
 //# sourceMappingURL=signalr.js.map
 
-var AppDependencies = [
-  'ui.router',
-  'luegg.directives',
-  'googlechart',
-  'gridster',
-  'ui.bootstrap',
-  'ui.utils',
-  'ui.sortable',
-  'ui.select',
-  'ngAnimate',
-  'ngStorage',
-  'ngResource',
-  'ngCookies',
-  'angularMoment',
-  'angularFileUpload',
-  'ngSanitize',
-  'ng-context-menu',
-  'ui.grid', 'ui.grid.autoResize', 'ui.grid.resizeColumns', 'ui.grid.moveColumns', 'ui.grid.saveState', 'ui.grid.selection', 'ui.grid.pagination', 'ui.grid.pinning', 'ui.grid.grouping',
-  'ui.grid.draggable-rows',
-  'ui.codemirror',
-  'focusOn',
-  'textAngular',
-  'ngTagsInput',
-  'tmh.dynamicLocale',
-  'pascalprecht.translate',
-  'angular.filter'
-];
-
-angular.module('platformWebApp', AppDependencies).
-controller('platformWebApp.appCtrl', ['$rootScope', '$scope', '$window', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationService',
-    'platformWebApp.i18n', '$timeout', 'platformWebApp.modules', '$state', 'platformWebApp.bladeNavigationService', 'platformWebApp.userProfile', 'platformWebApp.settings',
-    function ($rootScope, $scope, $window, mainMenuService, pushNotificationService,
-        i18n, $timeout, modules, $state, bladeNavigationService, userProfile, settings) {
-
-        pushNotificationService.run();
-
-        $scope.closeError = function () {
-            $scope.platformError = undefined;
-        };
-        modules.query().$promise.then(function (results) {
-            var modulesWithErrors = _.filter(results, function (x) { return _.any(x.validationErrors); });
-            if (_.any(modulesWithErrors)) {
-                $scope.platformError = {
-                    title: modulesWithErrors.length + " modules are loaded with errors and require your attention.",
-                    detail: ''
-                };
-                _.each(modulesWithErrors, function (x) {
-                    var moduleErrors = "<br/><br/><b>" + x.id + "</b> " + x.version + "<br/>" + x.validationErrors.join("<br/>");
-                    $scope.platformError.detail += moduleErrors;
-                });
-                $state.go('workspace.modularity');
-            }
-        });
-
-
-        $scope.$on('httpError', function (event, error) {
-            if (!event.defaultPrevented) {
-                if (bladeNavigationService.currentBlade) {
-                    bladeNavigationService.setError(error.status + ': ' + error.statusText, bladeNavigationService.currentBlade);
-                }
-            }
-        });
-
-        $scope.$on('httpRequestSuccess', function (event, data) {
-            // clear error on blade cap
-            if (bladeNavigationService.currentBlade) {
-                bladeNavigationService.currentBlade.error = undefined;
-            }
-        });
-
-        $scope.$on('loginStatusChanged', function (event, authContext) {
-            $scope.isAuthenticated = authContext.isAuthenticated;
-        });
-
-        $scope.$on('loginStatusChanged', function (event, authContext) {
-            //reset menu to default state
-            angular.forEach(mainMenuService.menuItems, function (menuItem) { mainMenuService.resetMenuItemDefaults(menuItem); });
-            if (authContext.isAuthenticated) {
-                userProfile.load().then(function () {
-                    i18n.changeLanguage(userProfile.language);
-                    i18n.changeRegionalFormat(userProfile.regionalFormat);
-                    i18n.changeTimeZone(userProfile.timeZone);
-                    i18n.changeTimeAgoSettings(userProfile.timeAgoSettings);
-                    initializeMainMenu(userProfile);
-                });
-            }
-        });
-
-        // TODO: Fix me! we need to detect scripts, not languages + we use to letter language codes only
-        $rootScope.$on('$translateChangeSuccess', function () {
-            var rtlLanguages = ['ar', 'arc', 'bcc', 'bqi', 'ckb', 'dv', 'fa', 'glk', 'he', 'lrc', 'mzn', 'pnb', 'ps', 'sd', 'ug', 'ur', 'yi'];
-            $rootScope.isRTL = rtlLanguages.indexOf(i18n.getLanguage()) >= 0;
-        });
-
-        $scope.mainMenu = {};
-        $scope.mainMenu.items = mainMenuService.menuItems;
-
-        $scope.onMainMenuChanged = function(mainMenu) {
-            if ($scope.isAuthenticated) {
-                saveMainMenuState(mainMenu, userProfile);
-            }
-        };
-
-        function initializeMainMenu(profile) {
-            if (profile.mainMenuState) {
-                $scope.mainMenu.isCollapsed = profile.mainMenuState.isCollapsed;
-                angular.forEach(profile.mainMenuState.items, function (x) {
-                    var existItem = mainMenuService.findByPath(x.path);
-                    if (existItem) {
-                        angular.extend(existItem, x);
-                    }
-                });
-            }
-        }
-
-        function saveMainMenuState(mainMenu, profile) {
-            if (mainMenu && profile.$resolved) {
-                profile.mainMenuState = {
-                    isCollapsed: mainMenu.isCollapsed,
-                    items: _.map(_.filter(mainMenu.items,
-                            function (x) { return !x.isAlwaysOnBar; }),
-                        function (x) { return { path: x.path, isCollapsed: x.isCollapsed, isFavorite: x.isFavorite, order: x.order }; })
-                };
-                profile.save();
-            }
-        }
-
-        settings.getUiCustomizationSetting(function (uiCustomizationSetting) {
-            if (uiCustomizationSetting.value) {
-                $rootScope.uiCustomization = angular.fromJson(uiCustomizationSetting.value);
-            }
-        });
-
-        // DO NOT CHANGE THE FUNCTION BELOW: COPYRIGHT VIOLATION
-        $scope.initExpiration = function (x) {
-            if (x && x.expirationDate) {
-                x.hasExpired = new Date(x.expirationDate) < new Date();
-            }
-            return x;
-        };
-
-        $scope.showLicense = function () {
-            $state.go('workspace.appLicense');
-        };
-
-    }])
-// Specify SignalR server URL (application URL)
-.factory('platformWebApp.signalRServerName', ['$location', function ($location) {
-    var retVal = $location.url() ? $location.absUrl().slice(0, -$location.url().length - 1) : $location.absUrl();
-    return retVal;
-}])
-.factory('platformWebApp.httpErrorInterceptor', ['$q', '$rootScope', function ($q, $rootScope) {
-    var httpErrorInterceptor = {};
-
-    httpErrorInterceptor.request = function (config) {
-        // do something on success
-        if (!config.cache) {
-            $rootScope.$broadcast('httpRequestSuccess', config);
-        }
-        return config;
-    };
-
-    httpErrorInterceptor.responseError = function (rejection) {
-        if (rejection.status === 401) {
-            $rootScope.$broadcast('unauthorized', rejection);
-        }
-        else {
-            $rootScope.$broadcast('httpError', rejection);
-        }
-        return $q.reject(rejection);
-    };
-    httpErrorInterceptor.requestError = function (rejection) {
-        $rootScope.$broadcast('httpError', rejection);
-        return $q.reject(rejection);
-    };
-
-    return httpErrorInterceptor;
-}])
-.factory('translateLoaderErrorHandler', function ($q, $log) {
-    return function (part, lang) {
-        $log.error('Localization "' + part + '" for "' + lang + '" was not loaded.');
-
-        //todo add notification.
-
-        //2) You have to either resolve the promise with a translation table for the given part and language or reject it 3) The partial loader will use the given translation table like it was successfully fetched from the server 4) If you reject the promise, then the loader will reject the whole loading process
-        return $q.when({});
-    };
-})
-.config(['$stateProvider', '$httpProvider', 'uiSelectConfig', 'datepickerConfig', 'datepickerPopupConfig', 'tagsInputConfigProvider', '$compileProvider',
-    function ($stateProvider, $httpProvider, uiSelectConfig, datepickerConfig, datepickerPopupConfig, tagsInputConfigProvider, $compileProvider) {
-
-        RegExp.escape = function (str) {
-            return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
-        };
-
-        $stateProvider.state('workspace', {
-            url: '/workspace',
-            templateUrl: '$(Platform)/Scripts/app/workspace.tpl.html'
-        });
-
-        //Add interceptor
-        $httpProvider.interceptors.push('platformWebApp.httpErrorInterceptor');
-        //ui-select set selectize as default theme
-        uiSelectConfig.theme = 'select2';
-
-        datepickerConfig.showWeeks = false;
-        datepickerPopupConfig.datepickerPopup = "mediumDate";
-
-        tagsInputConfigProvider.setDefaults('tagsInput', {
-            addOnEnter: true,
-            addOnSpace: false,
-            addOnComma: false,
-            addOnBlur: true,
-            addOnParse: true,
-            replaceSpacesWithDashes: false,
-            pasteSplitPattern: ";"
-        });
-
-        // Disable Debug Data in DOM ("significant performance boost").
-        // Comment the following line while debugging or execute this in browser console: angular.reloadWithDebugInfo();
-        $compileProvider.debugInfoEnabled(false);
-    }])
-.run(['$rootScope', '$state', '$stateParams', 'platformWebApp.authService', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationService', '$animate', '$templateCache', 'gridsterConfig', 'taOptions', '$timeout', '$templateRequest', '$compile',
-    function ($rootScope, $state, $stateParams, authService, mainMenuService, pushNotificationService, $animate, $templateCache, gridsterConfig, taOptions, $timeout, $templateRequest, $compile) {
-
-        //Disable animation
-        $animate.enabled(false);
-
-        $rootScope.$state = $state;
-        $rootScope.$stateParams = $stateParams;
-        $rootScope.$on('$stateChangeStart', function (event, toState) {
-            if (toState.name === 'resetpasswordDialog') {
-                $rootScope.preventLoginDialog = true;
-            } else if ($rootScope.preventLoginDialog && toState.name === 'loginDialog') {
-                event.preventDefault(); // Prevent state change
-            }
-        });
-
-        var homeMenuItem = {
-            path: 'home',
-            title: 'platform.menu.home',
-            icon: 'fa fa-home',
-            action: function () { $state.go('workspace'); },
-            // this item must always be at the top
-            priority: 0,
-            isAlwaysOnBar: true
-        };
-        mainMenuService.addMenuItem(homeMenuItem);
-
-        var browseMenuItem = {
-            path: 'browse',
-            icon: 'fa fa-search',
-            title: 'platform.menu.browse',
-            priority: 90
-        };
-        mainMenuService.addMenuItem(browseMenuItem);
-
-        var cfgMenuItem = {
-            path: 'configuration',
-            icon: 'fa fa-wrench',
-            title: 'platform.menu.configuration',
-            priority: 91
-        };
-        mainMenuService.addMenuItem(cfgMenuItem);
-
-        var moreMenuItem = {
-            path: 'more',
-            title: 'platform.menu.more',
-            headerTemplate: '$(Platform)/Scripts/app/navigation/menu/mainMenu-list-header.tpl.html',
-            contentTemplate: '$(Platform)/Scripts/app/navigation/menu/mainMenu-list-content.tpl.html',
-            // this item must always be at the bottom, so
-            // don't use just 99 number: we have INFINITE list
-            priority: Number.MAX_SAFE_INTEGER,
-            isAlwaysOnBar: true
-        };
-        mainMenuService.addMenuItem(moreMenuItem);
-
-        $rootScope.$on('unauthorized', function (event, rejection) {
-            if (!authService.isAuthenticated) {
-                $state.go('loginDialog');
-            }
-        });
-
-        //server error handling
-        //$rootScope.$on('httpError', function (event, rejection) {
-        //    if (!(rejection.config.url.indexOf('api/platform/notification') + 1)) {
-        //        pushNotificationService.error({ title: 'HTTP error', description: rejection.status + ' — ' + rejection.statusText, extendedData: rejection.data });
-        //    }
-        //});
-
-        $rootScope.$on('loginStatusChanged', function (event, authContext) {
-            //timeout need because $state not fully loading in run method and need to wait little time
-            $timeout(function () {
-                if (authContext.isAuthenticated) {
-                    if (!$state.current.name || $state.current.name === 'loginDialog') {
-                        $state.go('workspace');
-                    }
-                }
-                else {
-                    $state.go('loginDialog');
-                }
-            }, 500);
-
-        });
-
-        authService.fillAuthData();
-
-        // cache application level templates
-        $templateCache.put('pagerTemplate.html', '<div class="pagination"><pagination boundary-links="true" max-size="pageSettings.numPages" items-per-page="pageSettings.itemsPerPageCount" total-items="pageSettings.totalItems" ng-model="pageSettings.currentPage" class="pagination-sm" previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination></div>');
-
-        gridsterConfig.columns = 4;
-        gridsterConfig.colWidth = 130;
-        gridsterConfig.defaultSizeX = 1;
-        gridsterConfig.resizable = { enabled: false, handles: [] };
-        gridsterConfig.maxRows = 8;
-        gridsterConfig.mobileModeEnabled = false;
-        gridsterConfig.outerMargin = false;
-
-        String.prototype.hashCode = function () {
-            var hash = 0, i, chr, len;
-            if (this.length === 0) return hash;
-            for (i = 0, len = this.length; i < len; i++) {
-                chr = this.charCodeAt(i);
-                hash = (hash << 5) - hash + chr;
-                hash |= 0; // Convert to 32bit integer
-            }
-            return hash;
-        };
-
-        String.prototype.capitalize = function() {
-            return this.charAt(0).toUpperCase() + this.substr(1).toLowerCase();
-        };
-
-        if (!String.prototype.startsWith) {
-            String.prototype.startsWith = function(searchString, position) {
-                if (searchString && searchString.toString() === '[object RegExp]') {
-                    throw TypeError();
-                }
-                var length = this.length;
-                var startIndex = position ? Number(position) : 0;
-                if (isNaN(startIndex)) {
-                    startIndex = 0;
-                }
-                var fromIndex = Math.min(Math.max(startIndex, 0), length);
-                if (fromIndex + searchString.length > length) {
-                    return false;
-                }
-                return this.indexOf(searchString, startIndex) === fromIndex;
-            };
-        }
-
-        if (!String.prototype.endsWith) {
-            String.prototype.endsWith = function(searchString, position) {
-                if (searchString && searchString.toString() === '[object RegExp]') {
-                    throw TypeError();
-                }
-                var length = this.length;
-                var endIndex = length;
-                if (position !== undefined) {
-                    endIndex = position ? Number(position) : 0;
-                    if (isNaN(endIndex)) {
-                        endIndex = 0;
-                    }
-                }
-                var toIndex = Math.min(Math.max(endIndex, 0), length);
-                var fromIndex = toIndex - searchString.length;
-                if (fromIndex < 0) {
-                    return false;
-                }
-                return this.lastIndexOf(searchString, fromIndex) === fromIndex;
-            };
-        }
-
-        if (!angular.isDefined(Number.MIN_SAFE_INTEGER)) {
-            Number.MIN_SAFE_INTEGER = -9007199254740991;
-        }
-        if (!angular.isDefined(Number.MAX_SAFE_INTEGER)) {
-            Number.MAX_SAFE_INTEGER = 9007199254740991;
-        }
-
-        // textAngular
-        taOptions.toolbar = [
-        ['bold', 'italics', 'underline', 'strikeThrough', 'ul', 'ol', 'redo', 'undo', 'clear', 'quote'],
-        ['justifyLeft', 'justifyCenter', 'justifyRight', 'indent', 'outdent', 'html', 'insertImage', 'insertLink', 'insertVideo']];
-
-        //register metaproperties templates
-        $templateRequest('$(Platform)/Scripts/common/directives/genericValueInput.tpl.html').then(function (response) {
-            var template = angular.element(response);
-            $compile(template);
-        });
-    }]);
-
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -16097,6 +15705,436 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/html"))
 
 });
 
+var AppDependencies = [
+  'ui.router',
+  'luegg.directives',
+  'googlechart',
+  'gridster',
+  'ui.bootstrap',
+  'ui.utils',
+  'ui.sortable',
+  'ui.select',
+  'ngAnimate',
+  'ngStorage',
+  'ngResource',
+  'ngCookies',
+  'angularMoment',
+  'angularFileUpload',
+  'ngSanitize',
+  'ng-context-menu',
+  'ui.grid', 'ui.grid.autoResize', 'ui.grid.resizeColumns', 'ui.grid.moveColumns', 'ui.grid.saveState', 'ui.grid.selection', 'ui.grid.pagination', 'ui.grid.pinning', 'ui.grid.grouping',
+  'ui.grid.draggable-rows',
+  'ui.codemirror',
+  'focusOn',
+  'textAngular',
+  'ngTagsInput',
+  'tmh.dynamicLocale',
+  'pascalprecht.translate',
+  'angular.filter',
+  'LocalStorageModule'
+];
+
+angular.module('platformWebApp', AppDependencies).
+controller('platformWebApp.appCtrl', ['$rootScope', '$scope', '$window', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationService',
+    'platformWebApp.i18n', '$timeout', 'platformWebApp.modules', '$state', 'platformWebApp.bladeNavigationService', 'platformWebApp.userProfile', 'platformWebApp.settings',
+    function ($rootScope, $scope, $window, mainMenuService, pushNotificationService,
+        i18n, $timeout, modules, $state, bladeNavigationService, userProfile, settings) {
+
+        pushNotificationService.run();
+
+        $scope.closeError = function () {
+            $scope.platformError = undefined;
+        };
+        modules.query().$promise.then(function (results) {
+            var modulesWithErrors = _.filter(results, function (x) { return _.any(x.validationErrors); });
+            if (_.any(modulesWithErrors)) {
+                $scope.platformError = {
+                    title: modulesWithErrors.length + " modules are loaded with errors and require your attention.",
+                    detail: ''
+                };
+                _.each(modulesWithErrors, function (x) {
+                    var moduleErrors = "<br/><br/><b>" + x.id + "</b> " + x.version + "<br/>" + x.validationErrors.join("<br/>");
+                    $scope.platformError.detail += moduleErrors;
+                });
+                $state.go('workspace.modularity');
+            }
+        });
+
+
+        $scope.$on('httpError', function (event, error) {
+            if (!event.defaultPrevented) {
+                if (bladeNavigationService.currentBlade) {
+                    bladeNavigationService.setError(error.status + ': ' + error.statusText, bladeNavigationService.currentBlade);
+                }
+            }
+        });
+
+        $scope.$on('httpRequestSuccess', function (event, data) {
+            // clear error on blade cap
+            if (bladeNavigationService.currentBlade) {
+                bladeNavigationService.currentBlade.error = undefined;
+            }
+        });
+
+        $scope.$on('loginStatusChanged', function (event, authContext) {
+            $scope.isAuthenticated = authContext.isAuthenticated;
+        });
+
+        $scope.$on('loginStatusChanged', function (event, authContext) {
+            //reset menu to default state
+            angular.forEach(mainMenuService.menuItems, function (menuItem) { mainMenuService.resetMenuItemDefaults(menuItem); });
+            if (authContext.isAuthenticated) {
+                userProfile.load().then(function () {
+                    i18n.changeLanguage(userProfile.language);
+                    i18n.changeRegionalFormat(userProfile.regionalFormat);
+                    i18n.changeTimeZone(userProfile.timeZone);
+                    i18n.changeTimeAgoSettings(userProfile.timeAgoSettings);
+                    initializeMainMenu(userProfile);
+                });
+            }
+        });
+
+        // TODO: Fix me! we need to detect scripts, not languages + we use to letter language codes only
+        $rootScope.$on('$translateChangeSuccess', function () {
+            var rtlLanguages = ['ar', 'arc', 'bcc', 'bqi', 'ckb', 'dv', 'fa', 'glk', 'he', 'lrc', 'mzn', 'pnb', 'ps', 'sd', 'ug', 'ur', 'yi'];
+            $rootScope.isRTL = rtlLanguages.indexOf(i18n.getLanguage()) >= 0;
+        });
+
+        $scope.mainMenu = {};
+        $scope.mainMenu.items = mainMenuService.menuItems;
+
+        $scope.onMainMenuChanged = function(mainMenu) {
+            if ($scope.isAuthenticated) {
+                saveMainMenuState(mainMenu, userProfile);
+            }
+        };
+
+        function initializeMainMenu(profile) {
+            if (profile.mainMenuState) {
+                $scope.mainMenu.isCollapsed = profile.mainMenuState.isCollapsed;
+                angular.forEach(profile.mainMenuState.items, function (x) {
+                    var existItem = mainMenuService.findByPath(x.path);
+                    if (existItem) {
+                        angular.extend(existItem, x);
+                    }
+                });
+            }
+        }
+
+        function saveMainMenuState(mainMenu, profile) {
+            if (mainMenu && profile.$resolved) {
+                profile.mainMenuState = {
+                    isCollapsed: mainMenu.isCollapsed,
+                    items: _.map(_.filter(mainMenu.items,
+                            function (x) { return !x.isAlwaysOnBar; }),
+                        function (x) { return { path: x.path, isCollapsed: x.isCollapsed, isFavorite: x.isFavorite, order: x.order }; })
+                };
+                profile.save();
+            }
+        }
+
+        settings.getUiCustomizationSetting(function (uiCustomizationSetting) {
+            if (uiCustomizationSetting.value) {
+                $rootScope.uiCustomization = angular.fromJson(uiCustomizationSetting.value);
+            }
+        });
+
+        // DO NOT CHANGE THE FUNCTION BELOW: COPYRIGHT VIOLATION
+        $scope.initExpiration = function (x) {
+            if (x && x.expirationDate) {
+                x.hasExpired = new Date(x.expirationDate) < new Date();
+            }
+            return x;
+        };
+
+        $scope.showLicense = function () {
+            $state.go('workspace.appLicense');
+        };
+
+    }])
+// Specify SignalR server URL (application URL)
+.factory('platformWebApp.signalRServerName', ['$location', function ($location) {
+    var retVal = $location.url() ? $location.absUrl().slice(0, -$location.url().length - 1) : $location.absUrl();
+    return retVal;
+}])
+.factory('platformWebApp.httpErrorInterceptor', ['$q', '$rootScope', '$injector', 'platformWebApp.authDataStorage', function ($q, $rootScope, $injector, authDataStorage) {
+    var httpErrorInterceptor = {};
+
+    httpErrorInterceptor.request = function (config) {
+        config.headers = config.headers || {};
+        return extractAuthData()
+            .then(function (authData) {
+                if (authData) {
+                    config.headers.Authorization = 'Bearer ' + authData.token;
+                }
+                return config;
+            }).finally(function () {
+                // do something on success
+                if (!config.cache) {
+                    $rootScope.$broadcast('httpRequestSuccess', config);
+                }
+            });
+    };
+
+    function extractAuthData() {
+        var authData = authDataStorage.getStoredData();
+        if (!authData) {
+            return $q.resolve();
+        }
+        if (Date.now() < authData.expiresAt) {
+            return $q.resolve(authData);
+        }
+        var authService = $injector.get('platformWebApp.authService');
+        return authService.refreshToken();
+    }
+
+    httpErrorInterceptor.responseError = function (rejection) {
+        if (rejection.status === 401) {
+            $rootScope.$broadcast('unauthorized', rejection);
+        }
+        else {
+            $rootScope.$broadcast('httpError', rejection);
+        }
+        return $q.reject(rejection);
+    };
+    httpErrorInterceptor.requestError = function (rejection) {
+        $rootScope.$broadcast('httpError', rejection);
+        return $q.reject(rejection);
+    };
+
+    return httpErrorInterceptor;
+}])
+.factory('translateLoaderErrorHandler', function ($q, $log) {
+    return function (part, lang) {
+        $log.error('Localization "' + part + '" for "' + lang + '" was not loaded.');
+
+        //todo add notification.
+
+        //2) You have to either resolve the promise with a translation table for the given part and language or reject it 3) The partial loader will use the given translation table like it was successfully fetched from the server 4) If you reject the promise, then the loader will reject the whole loading process
+        return $q.when({});
+    };
+})
+.factory('fileUploaderOptions', ["platformWebApp.authDataStorage", function (authDataStorage) {
+    var authData = authDataStorage.getStoredData();
+    return {
+        url: '/',
+        alias: 'file',
+        queue: [],
+        progress: 0,
+        autoUpload: false,
+        removeAfterUpload: false,
+        method: 'POST',
+        filters: [],
+        formData: [],
+        queueLimit: Number.MAX_VALUE,
+        withCredentials: false,
+        headers: authData ? { Authorization: 'Bearer ' + authData.token } : {}
+    };
+}])
+.config(['$stateProvider', '$httpProvider', 'uiSelectConfig', 'datepickerConfig', 'datepickerPopupConfig', 'tagsInputConfigProvider', '$compileProvider',
+    function ($stateProvider, $httpProvider, uiSelectConfig, datepickerConfig, datepickerPopupConfig, tagsInputConfigProvider, $compileProvider) {
+
+        RegExp.escape = function (str) {
+            return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+        };
+
+        $stateProvider.state('workspace', {
+            url: '/workspace',
+            templateUrl: '$(Platform)/Scripts/app/workspace.tpl.html'
+        });
+
+        //Add interceptor
+        $httpProvider.interceptors.push('platformWebApp.httpErrorInterceptor');
+        //ui-select set selectize as default theme
+        uiSelectConfig.theme = 'select2';
+
+        datepickerConfig.showWeeks = false;
+        datepickerPopupConfig.datepickerPopup = "mediumDate";
+
+        tagsInputConfigProvider.setDefaults('tagsInput', {
+            addOnEnter: true,
+            addOnSpace: false,
+            addOnComma: false,
+            addOnBlur: true,
+            addOnParse: true,
+            replaceSpacesWithDashes: false,
+            pasteSplitPattern: ";"
+        });
+
+        // Disable Debug Data in DOM ("significant performance boost").
+        // Comment the following line while debugging or execute this in browser console: angular.reloadWithDebugInfo();
+        $compileProvider.debugInfoEnabled(false);
+    }])
+.run(['$rootScope', '$state', '$stateParams', 'platformWebApp.authService', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationService', '$animate', '$templateCache', 'gridsterConfig', 'taOptions', '$timeout', '$templateRequest', '$compile',
+    function ($rootScope, $state, $stateParams, authService, mainMenuService, pushNotificationService, $animate, $templateCache, gridsterConfig, taOptions, $timeout, $templateRequest, $compile) {
+
+        //Disable animation
+        $animate.enabled(false);
+
+        $rootScope.$state = $state;
+        $rootScope.$stateParams = $stateParams;
+        $rootScope.$on('$stateChangeStart', function (event, toState) {
+            if (toState.name === 'resetpasswordDialog') {
+                $rootScope.preventLoginDialog = true;
+            } else if ($rootScope.preventLoginDialog && toState.name === 'loginDialog') {
+                event.preventDefault(); // Prevent state change
+            }
+        });
+
+        var homeMenuItem = {
+            path: 'home',
+            title: 'platform.menu.home',
+            icon: 'fa fa-home',
+            action: function () { $state.go('workspace'); },
+            // this item must always be at the top
+            priority: 0,
+            isAlwaysOnBar: true
+        };
+        mainMenuService.addMenuItem(homeMenuItem);
+
+        var browseMenuItem = {
+            path: 'browse',
+            icon: 'fa fa-search',
+            title: 'platform.menu.browse',
+            priority: 90
+        };
+        mainMenuService.addMenuItem(browseMenuItem);
+
+        var cfgMenuItem = {
+            path: 'configuration',
+            icon: 'fa fa-wrench',
+            title: 'platform.menu.configuration',
+            priority: 91
+        };
+        mainMenuService.addMenuItem(cfgMenuItem);
+
+        var moreMenuItem = {
+            path: 'more',
+            title: 'platform.menu.more',
+            headerTemplate: '$(Platform)/Scripts/app/navigation/menu/mainMenu-list-header.tpl.html',
+            contentTemplate: '$(Platform)/Scripts/app/navigation/menu/mainMenu-list-content.tpl.html',
+            // this item must always be at the bottom, so
+            // don't use just 99 number: we have INFINITE list
+            priority: Number.MAX_SAFE_INTEGER,
+            isAlwaysOnBar: true
+        };
+        mainMenuService.addMenuItem(moreMenuItem);
+
+        $rootScope.$on('unauthorized', function (event, rejection) {
+            if (!authService.isAuthenticated) {
+                $state.go('loginDialog');
+            }
+        });
+
+        //server error handling
+        //$rootScope.$on('httpError', function (event, rejection) {
+        //    if (!(rejection.config.url.indexOf('api/platform/notification') + 1)) {
+        //        pushNotificationService.error({ title: 'HTTP error', description: rejection.status + ' — ' + rejection.statusText, extendedData: rejection.data });
+        //    }
+        //});
+
+        $rootScope.$on('loginStatusChanged', function (event, authContext) {
+            //timeout need because $state not fully loading in run method and need to wait little time
+            $timeout(function () {
+                if (authContext.isAuthenticated) {
+                    if (!$state.current.name || $state.current.name === 'loginDialog') {
+                        $state.go('workspace');
+                    }
+                }
+                else {
+                    $state.go('loginDialog');
+                }
+            }, 500);
+
+        });
+
+        authService.fillAuthData();
+
+        // cache application level templates
+        $templateCache.put('pagerTemplate.html', '<div class="pagination"><pagination boundary-links="true" max-size="pageSettings.numPages" items-per-page="pageSettings.itemsPerPageCount" total-items="pageSettings.totalItems" ng-model="pageSettings.currentPage" class="pagination-sm" previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination></div>');
+
+        gridsterConfig.columns = 4;
+        gridsterConfig.colWidth = 130;
+        gridsterConfig.defaultSizeX = 1;
+        gridsterConfig.resizable = { enabled: false, handles: [] };
+        gridsterConfig.maxRows = 8;
+        gridsterConfig.mobileModeEnabled = false;
+        gridsterConfig.outerMargin = false;
+
+        String.prototype.hashCode = function () {
+            var hash = 0, i, chr, len;
+            if (this.length === 0) return hash;
+            for (i = 0, len = this.length; i < len; i++) {
+                chr = this.charCodeAt(i);
+                hash = (hash << 5) - hash + chr;
+                hash |= 0; // Convert to 32bit integer
+            }
+            return hash;
+        };
+
+        String.prototype.capitalize = function() {
+            return this.charAt(0).toUpperCase() + this.substr(1).toLowerCase();
+        };
+
+        if (!String.prototype.startsWith) {
+            String.prototype.startsWith = function(searchString, position) {
+                if (searchString && searchString.toString() === '[object RegExp]') {
+                    throw TypeError();
+                }
+                var length = this.length;
+                var startIndex = position ? Number(position) : 0;
+                if (isNaN(startIndex)) {
+                    startIndex = 0;
+                }
+                var fromIndex = Math.min(Math.max(startIndex, 0), length);
+                if (fromIndex + searchString.length > length) {
+                    return false;
+                }
+                return this.indexOf(searchString, startIndex) === fromIndex;
+            };
+        }
+
+        if (!String.prototype.endsWith) {
+            String.prototype.endsWith = function(searchString, position) {
+                if (searchString && searchString.toString() === '[object RegExp]') {
+                    throw TypeError();
+                }
+                var length = this.length;
+                var endIndex = length;
+                if (position !== undefined) {
+                    endIndex = position ? Number(position) : 0;
+                    if (isNaN(endIndex)) {
+                        endIndex = 0;
+                    }
+                }
+                var toIndex = Math.min(Math.max(endIndex, 0), length);
+                var fromIndex = toIndex - searchString.length;
+                if (fromIndex < 0) {
+                    return false;
+                }
+                return this.lastIndexOf(searchString, fromIndex) === fromIndex;
+            };
+        }
+
+        if (!angular.isDefined(Number.MIN_SAFE_INTEGER)) {
+            Number.MIN_SAFE_INTEGER = -9007199254740991;
+        }
+        if (!angular.isDefined(Number.MAX_SAFE_INTEGER)) {
+            Number.MAX_SAFE_INTEGER = 9007199254740991;
+        }
+
+        // textAngular
+        taOptions.toolbar = [
+        ['bold', 'italics', 'underline', 'strikeThrough', 'ul', 'ol', 'redo', 'undo', 'clear', 'quote'],
+        ['justifyLeft', 'justifyCenter', 'justifyRight', 'indent', 'outdent', 'html', 'insertImage', 'insertLink', 'insertVideo']];
+
+        //register metaproperties templates
+        $templateRequest('$(Platform)/Scripts/common/directives/genericValueInput.tpl.html').then(function (response) {
+            var template = angular.element(response);
+            $compile(template);
+        });
+    }]);
+
 angular.module('platformWebApp')
  .factory('platformWebApp.bladeUtils', ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
      function initializePagination($scope, skipDefaultWatch) {
@@ -17186,1088 +17224,6 @@ angular.module('platformWebApp')
     i18n.changeTimeSettings();
 }]);
 
-angular.module('platformWebApp')
-.config(['$stateProvider', function ($stateProvider) {
-    $stateProvider
-        .state('workspace.assets', {
-            url: '/assets',
-            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-            controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-                var blade = {
-                    id: 'assetList',
-                    controller: 'platformWebApp.assets.assetListController',
-                    template: '$(Platform)/Scripts/app/assets/blades/asset-list.tpl.html',
-                    isClosingDisabled: true
-                };
-                bladeNavigationService.showBlade(blade);
-            }]
-        });
-}])
-.run(
-  ['platformWebApp.mainMenuService', '$state', function (mainMenuService, $state) {
-      var menuItem = {
-          path: 'browse/assets',
-          icon: 'fa fa-folder-o',
-          title: 'platform.menu.assets',
-          priority: 130,
-          action: function () { $state.go('workspace.assets'); },
-          permission: 'platform:asset:access'
-      };
-      mainMenuService.addMenuItem(menuItem);
-  }]);
-angular.module('platformWebApp')
-.config(['$stateProvider', function ($stateProvider) {
-    $stateProvider
-        .state('workspace.dynamicProperties', {
-            url: '/dynamicProperties',
-            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-            controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-                var blade = {
-                    id: 'dynamicPropertiesTypes',
-                    controller: 'platformWebApp.dynamicObjectListController',
-                    template: '$(Platform)/Scripts/app/dynamicProperties/blades/dynamicObject-list.tpl.html',
-                    isClosingDisabled: true
-                };
-                bladeNavigationService.showBlade(blade);
-            }
-            ]
-        });
-}]
-)
-.run(
-  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', function ($rootScope, mainMenuService, widgetService, $state) {
-      var menuItem = {
-          path: 'configuration/dynamicProperties',
-          icon: 'fa fa-pencil-square-o',
-          title: 'platform.menu.dynamic-properties',
-          priority: 2,
-          action: function () { $state.go('workspace.dynamicProperties'); },
-          permission: 'platform:dynamic_properties:access'
-      };
-      mainMenuService.addMenuItem(menuItem);
-  }])
-.filter('dynamicPropertyValueTypeToText', function () {
-    return function (input) {
-        var retVal;
-        switch (input) {
-            case 'ShortText': retVal = 'platform.properties.short-text.title'; break;
-            case 'LongText': retVal = 'platform.properties.long-text.title'; break;
-            case 'Integer': retVal = 'platform.properties.integer.title'; break;
-            case 'Decimal': retVal = 'platform.properties.decimal.title'; break;
-            case 'DateTime': retVal = 'platform.properties.date-time.title'; break;
-            case 'Boolean': retVal = 'platform.properties.boolean.title'; break;
-            case 'Html': retVal = 'platform.properties.html.title'; break;
-            default:
-                retVal = input ? input : 'platform.properties.undefined.title';
-        }
-        return retVal;
-    }
-})
-//Filter for showing localized display name in current user language
-.filter('localizeDynamicPropertyName', function () {
-    return function (input, lang) {
-        var retVal = input.name;
-        var displayName = _.find(input.displayNames, function (obj) { return obj && obj.locale.startsWith(lang); });
-        if (displayName && displayName.name)
-            retVal += ' (' + displayName.name + ')';
-
-        return retVal;
-    }
-});
-angular.module('platformWebApp')
-.config(['$stateProvider', function ($stateProvider) {
-	$stateProvider
-        .state('workspace.exportImport', {
-        	url: '/exportImport',
-        	templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-        	controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-        		var blade = {
-        			id: 'exportImport',
-        			title: 'platform.blades.exportImport-main.title',
-        			controller: 'platformWebApp.exportImport.mainController',
-        			template: '$(Platform)/Scripts/app/exportImport/blades/exportImport-main.tpl.html',
-        			isClosingDisabled: true
-        		};
-        		bladeNavigationService.showBlade(blade);
-        	}
-        	]
-        });
-	
-	$stateProvider
-        .state('setupWizard.sampleDataInstallation', {
-        	url: '/sampleDataInstallation',
-        	templateUrl: '$(Platform)/Scripts/app/exportImport/templates/sampleDataInstallation.tpl.html',
-        	controller: ['$scope', '$state', '$window', '$stateParams', 'platformWebApp.exportImport.resource', 'platformWebApp.setupWizard', function ($scope, $state, $window, $stateParams, exportImportResourse, setupWizard) {
-        		$scope.notification = {};
-        		if ($stateParams.notification) {
-        			$scope.notification = $stateParams.notification;
-        		}
-        		$scope.sampleDataInfos = {};
-        		//thats need when state direct open by url or push notification
-                var step = setupWizard.findStepByState($state.current.name);
-
-        		$scope.close = function () {
-        			setupWizard.showStep(step.nextStep);
-        			$window.location.reload();
-        		};
-
-				//copy notification to scope
-        		$scope.$on("new-notification-event", function (event, notification) {
-        			if (notification.notifyType == 'SampleDataImportPushNotification') {
-        				angular.copy(notification, $scope.notification);
-        				if (notification.finished && notification.errorCount == 0) {
-        					$scope.close();
-        				}
-        			}
-        		});
-
-        		$scope.importData = function (sampleData) {
-        			if (sampleData.url) {
-        				exportImportResourse.importSampleData({ url: sampleData.url }, function (data) {
-							//need check notification.created because not exist any way to check empty response 
-        					if (data && data.created) {
-        						angular.copy(data, $scope.notification);
-        					}
-        					else
-        					{
-        						setupWizard.showStep(step.nextStep);
-                            }
-                        }, function (error) { setupWizard.showStep(step.nextStep); });
-        			}
-        			else
-        			{
-        				setupWizard.showStep(step.nextStep);
-        			}
-        		}
-
-        		function discoverSampleData() {
-        			$scope.loading = true;
-        			exportImportResourse.sampleDataDiscover({}, function (sampleDataInfos) {
-        				$scope.loading = false;
-						//run obvious sample data installation 
-        				if (angular.isArray(sampleDataInfos) && sampleDataInfos.length > 0) {
-        					if (sampleDataInfos.length > 1) {
-        						$scope.sampleDataInfos = sampleDataInfos;
-        					}
-        					else {
-        						$scope.importData(sampleDataInfos[0]);
-        					}
-        				} 
-        				else {
-							//nothing to import - skip step
-        					setupWizard.showStep(step.nextStep);
-        				}
-        			});
-        		};
-        		discoverSampleData();
-        	}]
-        });
-}])
-.run(
-  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'platformWebApp.setupWizard', function ($rootScope, mainMenuService, widgetService, $state, pushNotificationTemplateResolver, bladeNavigationService, exportImportResourse, setupWizard) {
-  	var menuItem = {
-  		path: 'configuration/exportImport',
-  		icon: 'fa fa-database',
-  		title: 'platform.menu.export-import',
-  		priority: 10,
-  		action: function () { $state.go('workspace.exportImport'); },
-  		permission: 'platform:exportImport:access'
-  	};
-  	mainMenuService.addMenuItem(menuItem);
-
-  	//Push notifications
-  	var menuExportImportTemplate =
-	   {
-	   	priority: 900,
-	   	satisfy: function (notify, place) { return place == 'menu' && (notify.notifyType == 'PlatformExportPushNotification' || notify.notifyType == 'PlatformImportPushNotification'); },
-	   	template: '$(Platform)/Scripts/app/exportImport/notifications/menu.tpl.html',
-	   	action: function (notify) { $state.go('workspace.pushNotificationsHistory', notify) }
-	   };
-  	pushNotificationTemplateResolver.register(menuExportImportTemplate);
-
-  	var historyExportImportTemplate =
-	  {
-	  	priority: 900,
-	  	satisfy: function (notify, place) { return place == 'history' && (notify.notifyType == 'PlatformExportPushNotification' || notify.notifyType == 'PlatformImportPushNotification'); },
-	  	template: '$(Platform)/Scripts/app/exportImport/notifications/history.tpl.html',
-	  	action: function (notify) {
-	  		var isExport = notify.notifyType == 'PlatformExportPushNotification';
-	  		var blade = {
-	  			id: 'platformExportImport',
-	  			controller: isExport ? 'platformWebApp.exportImport.exportMainController' : 'platformWebApp.exportImport.importMainController',
-	  			template: isExport ? '$(Platform)/Scripts/app/exportImport/blades/export-main.tpl.html' : '$(Platform)/Scripts/app/exportImport/blades/import-main.tpl.html',
-	  			notification: notify
-	  		};
-	  		bladeNavigationService.showBlade(blade);
-	  	}
-	  };
-  	pushNotificationTemplateResolver.register(historyExportImportTemplate);
-
-  	$rootScope.$on("new-notification-event", function (event, notification) {
-  		if (notification.notifyType == 'SampleDataImportPushNotification' && $state.current && $state.current.name != 'setupWizard.sampleDataInstallation')
-  		{
-  			$state.go('setupWizard.sampleDataInstallation', { notification: notification });
-  		}
-  	});
-  	//register setup wizard step - sample data auto installation
-  	setupWizard.registerStep({
-  		state: "setupWizard.sampleDataInstallation",
-  		priority: 10
-  	});
-
-  }]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.licenseDetailController', ['$scope', '$window', 'FileUploader', '$http', 'platformWebApp.bladeNavigationService', function ($scope, $window, FileUploader, $http, bladeNavigationService) {
-    var blade = $scope.blade;
-    blade.isNew = blade.isNew || !$scope.license;
-
-    $scope.activate = function (activationCode) {
-        blade.isLoading = true;
-        $scope.activationError = null;
-        $scope.filename = null;
-
-        $http.post('api/platform/licensing/activateByCode', JSON.stringify(activationCode)).then(function (response) {
-            activationCallback(response.data, true);
-        }, function (error) {
-            $scope.activationError = error.data.message;
-        });
-    };
-
-    function activationCallback(license, isActivationByCode) {
-        blade.isLoading = false;
-        if (license) {
-            $scope.currentEntity = license;
-            if ($scope.currentEntity.expirationDate && new Date($scope.currentEntity.expirationDate) < new Date()) {
-                $scope.activationError = 'Activation failed. This license has expired.';
-            }
-        } else {
-            $scope.activationError = isActivationByCode ? 'Activation failed. Check the activation code.' : 'Activation failed. Check the license file.';
-        }
-    }
-
-    $scope.activateLicense = function () {
-        // confirmed. Activate the license
-        blade.isLoading = true;
-        $http.post('api/platform/licensing/activateLicense', $scope.currentEntity).then(function () {
-            $window.location.reload();
-        });
-    };
-
-    if (blade.isNew) {
-        // create the uploader
-        var uploader = $scope.uploader = new FileUploader({
-            scope: $scope,
-            headers: {
-                Accept: 'application/json'
-            },
-            url: 'api/platform/licensing/activateByFile',
-            method: 'POST',
-            autoUpload: true,
-            removeAfterUpload: true
-        });
-
-        // ADDING FILTERS
-        // lic only
-        uploader.filters.push({
-            name: 'licFilter',
-            fn: function (i /*{File|FileLikeObject}*/, options) {
-                return i.name.toLowerCase().endsWith('.lic');
-            }
-        });
-
-        uploader.onAfterAddingFile = function (fileItem) {
-            $scope.filename = fileItem.file.name;
-            $scope.activationError = null;
-        };
-
-        uploader.onSuccessItem = function (item, response) {
-            activationCallback(response, false);
-        };
-
-        uploader.onErrorItem = function (item, response, status) {
-            blade.isLoading = false;
-            $scope.activationError = response.message ? response.message : status;
-        };
-        blade.title = 'platform.blades.license.title-new';
-    } else {
-        $scope.currentEntity = $scope.license;
-
-        blade.toolbarCommands = [
-              {
-                  name: "platform.commands.new-license", icon: 'fa fa-check',
-                  executeMethod: function () {
-                      var newBlade = {
-                          id: 'license-activate',
-                          isNew: true,
-                          controller: blade.controller,
-                          template: blade.template
-                      };
-                      bladeNavigationService.showBlade(newBlade, blade);
-                  },
-                  canExecuteMethod: function () {
-                      return true;
-                  },
-                  permission: 'platform:module:manage'
-              }];
-
-        blade.title = 'platform.blades.license.title';
-    }
-
-    blade.headIcon = 'fa-id-card';
-    blade.isLoading = false;
-}])
-
-.config(['$stateProvider', function ($stateProvider) {
-    $stateProvider
-        .state('workspace.appLicense', {
-            url: '/appLicense',
-            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-            controller: ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
-                var blade = {
-                    id: 'appLicense',
-                    controller: 'platformWebApp.licenseDetailController',
-                    template: '$(Platform)/Scripts/app/licensing/license-detail.tpl.html',
-                    isClosingDisabled: true
-                };
-                bladeNavigationService.showBlade(blade);
-            }]
-        });
-}]);
-angular.module('platformWebApp')
-.config(['$stateProvider', function ($stateProvider) {
-	$stateProvider
-        .state('workspace.modularity', {
-        	url: '/modules',
-        	templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-        	controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-        		var blade = {
-        			id: 'modulesMain',
-        			title: 'platform.blades.modules-main.title',
-        			controller: 'platformWebApp.modulesMainController',
-        			template: '$(Platform)/Scripts/app/modularity/blades/modules-main.tpl.html',
-        			isClosingDisabled: true
-        		};
-        		bladeNavigationService.showBlade(blade);
-        	}]
-        });
-
-	$stateProvider
-	.state('setupWizard.modulesInstallation', {
-		url: '/modulesInstallation',
-		templateUrl: '$(Platform)/Scripts/app/modularity/templates/modulesInstallation.tpl.html',
-		controller: ['$scope', '$state', '$stateParams', '$window', 'platformWebApp.modules', 'platformWebApp.exportImport.resource', 'platformWebApp.setupWizard', function ($scope, $state, $stateParams, $window, modules, exportImportResourse, setupWizard) {
-			$scope.notification = {};
-			if ($stateParams.notification)
-			{
-				$scope.notification = $stateParams.notification;
-			}
-			//thats need when state direct open by url or push notification
-            var step = setupWizard.findStepByState($state.current.name);
-			if (!$scope.notification.created) {
-			modules.autoInstall({}, function (data) {
-				//if already installed need skip this step
-				if (data.finished) {					
-				    setupWizard.showStep(step.nextStep);
-                }
-            }, function (error) {
-                setupWizard.showStep(step.nextStep);
-            });
-			}
-
-			$scope.restart = function () {
-				$scope.restarted = true;
-				modules.restart({}, function () {
-					setupWizard.showStep(step.nextStep);
-					$window.location.reload();
-				});
-			};		
-
-			$scope.$on("new-notification-event", function (event, notification) {
-				if (notification.notifyType == 'ModuleAutoInstallPushNotification') {
-					angular.copy(notification, $scope.notification);
-					if (notification.finished && notification.errorCount == 0) {
-						$scope.close();
-					}
-				}
-			});
-		}]
-	});
-}])
-.run(
-  ['platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.bladeNavigationService', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', '$rootScope', 'platformWebApp.modules', 'platformWebApp.setupWizard', function (pushNotificationTemplateResolver, bladeNavigationService, mainMenuService, widgetService, $state, $rootScope, modules, setupWizard) {
-  	//Register module in main menu
-  	var menuItem = {
-  		path: 'configuration/modularity',
-  		icon: 'fa fa-cubes',
-  		title: 'platform.menu.modules',
-  		priority: 6,
-  		action: function () { $state.go('workspace.modularity'); },
-  		permission: 'platform:module:access'
-  	};
-  	mainMenuService.addMenuItem(menuItem);
-
-      // Register push notification template
-      pushNotificationTemplateResolver.register({
-	   	priority: 900,
-	   	satisfy: function (notify, place) { return place == 'menu' && notify.notifyType == 'ModulePushNotification'; },
-	   	template: '$(Platform)/Scripts/app/modularity/notifications/menu.tpl.html',
-	   	action: function (notify) { $state.go('workspace.pushNotificationsHistory', notify); }
-      });
-
-  	var historyExportImportTemplate =
-	{
-		priority: 900,
-		satisfy: function (notify, place) { return place == 'history' && notify.notifyType == 'ModulePushNotification'; },
-		template: '$(Platform)/Scripts/app/modularity/notifications/history.tpl.html',
-		action: function (notify) {
-			var blade = {
-				id: 'moduleInstallProgress',
-				title: notify.title,
-				currentEntity: notify,
-				controller: 'platformWebApp.moduleInstallProgressController',
-				template: '$(Platform)/Scripts/app/modularity/wizards/newModule/module-wizard-progress-step.tpl.html'
-			};
-			bladeNavigationService.showBlade(blade);
-		}
-	};
-  	pushNotificationTemplateResolver.register(historyExportImportTemplate);
-
-  	//Switch to  setupWizard.modulesInstallation state when receive ModuleAutoInstallPushNotification push notification
-  	$rootScope.$on("new-notification-event", function (event, notification) {
-  		if (notification.notifyType == 'ModuleAutoInstallPushNotification' && $state.current && $state.current.name != 'setupWizard.modulesInstallation') {
-  			$state.go('setupWizard.modulesInstallation', { notification: notification });
-  		}
-  	});
-	//register setup wizard step - modules auto installation
-  	setupWizard.registerStep({
-  		state: "setupWizard.modulesInstallation",
-  		priority: 1
-  	});
-  
-  }])
-.factory('platformWebApp.moduleHelper', function () {
-	// semver comparison: https://gist.github.com/TheDistantSea/8021359
-	return {};
-});
-
-angular.module('platformWebApp')
-.config(['$stateProvider', function ($stateProvider) {
-    $stateProvider
-		.state('workspace.notifications', {
-		    url: '/notifications?objectId&objectTypeId',
-		    templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-		    controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-		        var blade = {
-		            id: 'notifications',
-		            title: 'platform.menu.notifications',
-		            subtitle: 'platform.blades.notifications-menu.subtitle',
-		            controller: 'platformWebApp.notificationsMenuController',
-		            template: '$(Platform)/Scripts/app/notifications/blades/notifications-menu.tpl.html',
-		            isClosingDisabled: true
-		        };
-		        bladeNavigationService.showBlade(blade);
-		    }
-		    ]
-		});
-}])
-.run(
-  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', function ($rootScope, mainMenuService, widgetService, $state) {
-      //Register module in main menu
-      var menuItem = {
-          path: 'configuration/notifications',
-          icon: 'fa fa-envelope',
-          title: 'platform.menu.notifications',
-          priority: 7,
-          action: function () { $state.go('workspace.notifications'); },
-          permission: 'platform:notification:access'
-      };
-      mainMenuService.addMenuItem(menuItem);
-  }])
-;
-angular.module('platformWebApp')
-.config(
-  ['$stateProvider', function ($stateProvider) {
-      $stateProvider
-          .state('workspace.pushNotificationsHistory', {
-              url: '/events',
-              templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-              controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-                  var blade = {
-                      id: 'events',
-                      title: 'platform.blades.history.title',
-                      breadcrumbs: [],
-                      subtitle: 'platform.blades.history.subtitle',
-                      controller: 'platformWebApp.pushNotificationsHistoryController',
-                      template: '$(Platform)/Scripts/app/pushNotifications/blade/history.tpl.html',
-                      isClosingDisabled: true
-                  };
-                  bladeNavigationService.showBlade(blade);
-              }
-              ]
-          });
-  }])
-.factory('platformWebApp.pushNotificationTemplateResolver', ['platformWebApp.bladeNavigationService', '$state', function (bladeNavigationService, $state) {
-    var notificationTemplates = [];
-
-    function register(template) {
-        notificationTemplates.push(template);
-        notificationTemplates.sort(function (a, b) { return a.priority - b.priority; });
-    };
-    function resolve(notification, place) {
-        return _.find(notificationTemplates, function (x) { return x.satisfy(notification, place); });
-    };
-    var retVal = {
-        register: register,
-        resolve: resolve,
-    };
-
-    //Recent events notification template (error, info, debug) 
-    var menuDefaultTemplate =
-        {
-            priority: 1000,
-            satisfy: function (notification, place) { return place == 'menu'; },
-            //template for display that notification in menu and list
-            template: '$(Platform)/Scripts/app/pushNotifications/menuDefault.tpl.html',
-            //action executed when notification selected
-            action: function (notify) { $state.go('workspace.pushNotificationsHistory', notify) }
-        };
-
-    //In history list notification template (error, info, debug)
-    var historyDefaultTemplate =
-        {
-            priority: 1000,
-            satisfy: function (notification, place) { return place == 'history'; },
-            //template for display that notification in menu and list
-            template: '$(Platform)/Scripts/app/pushNotifications/blade/historyDefault.tpl.html',
-            //action executed in event detail
-            action: function (notify) {
-                var blade = {
-                    id: 'notifyDetail',
-                    title: 'platform.blades.historyDetailDefault.title',
-                    subtitle: 'platform.blades.historyDetailDefault.subtitle',
-                    template: '$(Platform)/Scripts/app/pushNotifications/blade/historyDetailDefault.tpl.html',
-                    isClosingDisabled: false,
-                    notify: notify
-                };
-                bladeNavigationService.showBlade(blade);
-            }
-        };
-
-    retVal.register(menuDefaultTemplate);
-    retVal.register(historyDefaultTemplate);
-
-    return retVal;
-}])
-.factory('platformWebApp.pushNotificationService', ['$rootScope', '$timeout', '$interval', '$state', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
-    function ($rootScope, $timeout, $interval, $state, mainMenuService, eventTemplateResolver, notifications) {
-
-        //SignalR setup connection
-        var connection = new signalR.HubConnectionBuilder()
-            .withUrl("/pushNotificationHub")
-            .build();     
-        connection.start();
-      
-        connection.on('Send', function (data) {
-            var notifyMenu = mainMenuService.findByPath('pushNotifications');
-            var notificationTemplate = eventTemplateResolver.resolve(data, 'menu');
-            //broadcast event
-            $rootScope.$broadcast("new-notification-event", data);
-
-            var menuItem = {
-                path: 'pushNotifications/notifications',
-                icon: 'fa fa-bell-o',
-                title: data.title,
-                priority: 2,
-                permission: '',
-                children: [],
-                action: notificationTemplate.action,
-                template: notificationTemplate.template,
-                notify: data
-            };
-
-            var alreadyExitstItem = _.find(notifyMenu.children, function (x) { return x.notify.id == menuItem.notify.id; });
-            if (alreadyExitstItem) {
-                angular.copy(menuItem, alreadyExitstItem);
-            }
-            else {
-                menuItem.parent = notifyMenu;
-                notifyMenu.children.push(menuItem);
-                notifyMenu.newCount++;
-
-                if (angular.isDefined(notifyMenu.intervalPromise)) {
-                    $interval.cancel(notifyMenu.intervalPromise);
-                }
-                animateNotify();
-                notifyMenu.intervalPromise = $interval(animateNotify, 30000);
-            }
-        });
-
-        function animateNotify() {
-            var notifyMenu = mainMenuService.findByPath('pushNotifications');
-            notifyMenu.isAnimated = true;
-
-            $timeout(function () {
-                notifyMenu.isAnimated = false;
-            }, 1500);
-        }
-
-        function markAllAsRead() {
-            var notifyMenu = mainMenuService.findByPath('pushNotifications');
-            if (angular.isDefined(notifyMenu.intervalPromise)) {
-                $interval.cancel(notifyMenu.intervalPromise);
-            }
-
-            notifications.markAllAsRead(null, function (data, status, headers, config) {
-                notifyMenu.isAnimated = false;
-                notifyMenu.newCount = 0;
-            }, function (error) {
-                //bladeNavigationService.setError('Error ' + error.status, blade);
-            });
-        }
-
-        var retVal = {
-            run: function () {
-                if (!this.running) {
-                    var notifyMenu = mainMenuService.findByPath('pushNotifications');
-                    if (!angular.isDefined(notifyMenu)) {
-                        notifyMenu = {
-                            path: 'pushNotifications',
-                            icon: 'fa fa-bell-o',
-                            title: 'platform.menu.notifications',
-                            priority: 2,
-                            isAlwaysOnBar: true,
-                            permission: '',
-                            headerTemplate: '$(Platform)/Scripts/app/pushNotifications/menuHeader.tpl.html',
-                            template: '$(Platform)/Scripts/app/pushNotifications/menu.tpl.html',
-                            action: function () { markAllAsRead(); if (this.children.length == 0) { this.showHistory(); } },
-                            showHistory: function () { $state.go('workspace.pushNotificationsHistory'); },
-                            clearRecent: function () { notifyMenu.children.splice(0, notifyMenu.children.length); },
-                            children: [],
-                            newCount: 0
-                        };
-                        mainMenuService.addMenuItem(notifyMenu);
-                    }
-                    this.running = true;
-                };
-            },
-            running: false
-        };
-        return retVal;
-
-    }]);
-
-angular.module('platformWebApp')
-    .config(['$stateProvider', '$httpProvider', function ($stateProvider, $httpProvider) {
-        $stateProvider.state('loginDialog', {
-	        url: '/login',
-	        templateUrl: '$(Platform)/Scripts/app/security/login/login.tpl.html',
-	        controller: ['$scope', 'platformWebApp.authService', function ($scope, authService) {
-	            $scope.user = {};
-	            $scope.authError = null;
-	            $scope.authReason = false;
-	            $scope.loginProgress = false;
-	            $scope.ok = function () {
-	                // Clear any previous security errors
-	                $scope.authError = null;
-	                $scope.loginProgress = true;
-	                // Try to login
-	                authService.login($scope.user.email, $scope.user.password, $scope.user.remember).then(function (loggedIn) {
-	                    $scope.loginProgress = false;
-	                    if (!loggedIn) {
-	                        $scope.authError = 'invalidCredentials';
-	                    }
-	                }, function (x) {
-	                    $scope.loginProgress = false;
-	                    if (angular.isDefined(x.status)) {
-	                        if (x.status == 401) {
-	                            $scope.authError = 'The login or password is incorrect.';
-	                        } else {
-	                            $scope.authError = 'Authentication error (code: ' + x.status + ').';
-	                        }
-	                    } else {
-	                        $scope.authError = 'Authentication error ' + x;
-	                    }
-	                });
-	            };
-
-	        }]
-	    })
-
-	    $stateProvider.state('forgotpasswordDialog', {
-	        url: '/forgotpassword',
-	        templateUrl: '$(Platform)/Scripts/app/security/login/forgotPassword.tpl.html',
-            controller: ['$scope', 'platformWebApp.authService', '$state', function ($scope, authService, $state) {
-	            $scope.viewModel = {};
-	            $scope.ok = function () {
-	                $scope.isLoading = true;
-	                $scope.errorMessage = null;
-	                authService.requestpasswordreset($scope.viewModel).then(function (retVal) {
-	                    $scope.isLoading = false;
-	                    angular.extend($scope, retVal);
-	                });
-                };
-                $scope.close = function () {
-                    $state.go('loginDialog');
-                };
-	        }]
-	    })
-
-	    $stateProvider.state('resetpasswordDialog', {
-	        url: '/resetpassword/:userId/{code:.*}',
-	        templateUrl: '$(Platform)/Scripts/app/security/login/resetPassword.tpl.html',
-	        controller: ['$rootScope', '$scope', '$stateParams', 'platformWebApp.authService', function ($rootScope, $scope, $stateParams, authService) {
-	            $scope.viewModel = $stateParams;
-	            $scope.ok = function () {
-	                $scope.errorMessage = null;
-	                $scope.isLoading = true;
-	                authService.resetpassword($scope.viewModel).then(function (retVal) {
-	                    $scope.isLoading = false;
-	                    $rootScope.preventLoginDialog = false;
-	                    angular.extend($scope, retVal);
-	                }, function (x) {
-	                    $scope.isLoading = false;
-	                    $scope.viewModel.newPassword = $scope.viewModel.newPassword2 = undefined;
-	                    if (x.status == 400 && x.data && x.data.message) {
-	                        $scope.errorMessage = x.data.message;
-	                    } else {
-	                        $scope.errorMessage = 'Error ' + x;
-	                    }
-	                });
-	            };
-	        }]
-	    })
-
-	    .state('workspace.securityModule', {
-	        url: '/security',
-	        templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-	        controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-				    var blade = {
-				        id: 'security',
-				        title: 'platform.blades.security-main.title',
-				        subtitle: 'platform.blades.security-main.subtitle',
-				        controller: 'platformWebApp.securityMainController',
-				        template: '$(Platform)/Scripts/app/security/blades/security-main.tpl.html',
-				        isClosingDisabled: true
-				    };
-				    bladeNavigationService.showBlade(blade);
-				}
-	        ]
-	    });
-	}])
-    .run(['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.metaFormsService', 'platformWebApp.widgetService', '$state', 'platformWebApp.authService',
-        function ($rootScope, mainMenuService, metaFormsService, widgetService, $state, authService) {
-
-        //Register module in main menu
-        var menuItem = {
-            path: 'configuration/security',
-            icon: 'fa fa-key',
-            title: 'platform.menu.security',
-            priority: 5,
-            action: function () { $state.go('workspace.securityModule'); },
-            permission: 'platform:security:access'
-        };
-        mainMenuService.addMenuItem(menuItem);
-
-        metaFormsService.registerMetaFields("accountDetails",
-        [
-            {
-                name: "isAdministrator",
-                title: "platform.blades.account-detail.labels.is-administrator",
-                valueType: "Boolean",
-                priority: 0
-            },
-            {
-                name: "userName",
-                templateUrl: "accountUserName.html",
-                priority: 1,
-                isRequired: true
-            },
-            {
-                name: "email",
-                templateUrl: "accountEmail.html",
-                priority: 2
-            },
-            {
-                name: "accountType",
-                templateUrl: "accountTypeSelector.html",
-                priority: 3
-            },
-            {
-                name: "accountInfo",
-                templateUrl: "accountInfo.html",
-                priority: 4
-            }
-        ]);
-
-        //Register widgets
-        widgetService.registerWidget({
-            controller: 'platformWebApp.accountRolesWidgetController',
-            template: '$(Platform)/Scripts/app/security/widgets/accountRolesWidget.tpl.html',
-        }, 'accountDetail');
-        widgetService.registerWidget({
-            controller: 'platformWebApp.accountApiWidgetController',
-            template: '$(Platform)/Scripts/app/security/widgets/accountApiWidget.tpl.html',
-        }, 'accountDetail');
-        widgetService.registerWidget({
-            controller: 'platformWebApp.changeLog.operationsWidgetController',
-            template: '$(Platform)/Scripts/app/changeLog/widgets/operations-widget.tpl.html'
-        }, 'accountDetail');
-    }]);
-
-angular.module("platformWebApp")
-.config(
-  ['$stateProvider', function ($stateProvider) {
-      $stateProvider
-          .state('workspace.modulesSettings', {
-              url: '/settings',
-              templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-              controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-                  var blade = {
-                      id: 'settings',
-                      title: 'platform.blades.settingGroup-list.title',
-                      //subtitle: 'Manage settings',
-                      controller: 'platformWebApp.settingGroupListController',
-                      template: '$(Platform)/Scripts/app/settings/blades/settingGroup-list.tpl.html',
-                      isClosingDisabled: true
-                  };
-                  bladeNavigationService.showBlade(blade);
-              }
-              ]
-          });
-  }]
-)
-.run(
-  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', function ($rootScope, mainMenuService, widgetService, $state) {
-      //Register module in main menu
-      var menuItem = {
-          path: 'configuration/settings',
-          icon: 'fa fa-gears',
-          title: 'platform.menu.settings',
-          priority: 1,
-          action: function () { $state.go('workspace.modulesSettings'); },
-          permission: 'platform:setting:access'
-      };
-      mainMenuService.addMenuItem(menuItem);
-  }])
-
-.factory('platformWebApp.settings.helper', [function () {
-    var retVal = {};
-
-    retVal.getSetting = function(settings, settingName) {
-        return _.findWhere(settings, { name: settingName });
-    };
-
-    retVal.fixValues = function (settings) {
-        // parse values as they all are strings
-        //var selectedSettings = _.where(settings, { valueType: 'Integer' });
-        //_.forEach(selectedSettings, function (setting) {
-        //    setting.value = parseInt(setting.value, 10);
-        //    if (setting.allowedValues) {
-        //        setting.allowedValues = _.map(setting.allowedValues, function (value) { return parseInt(value, 10); });
-        //    }
-        //});
-
-        //selectedSettings = _.where(settings, { valueType: 'Decimal' });
-        //_.forEach(selectedSettings, function (setting) {
-        //    setting.value = parseFloat(setting.value);
-        //    if (setting.allowedValues) {
-        //        setting.allowedValues = _.map(setting.allowedValues, function (value) { return parseFloat(value); });
-        //    }
-        //});
-
-        //selectedSettings = _.where(settings, { valueType: 'Boolean' });
-        //_.forEach(selectedSettings, function (setting) {
-        //    setting.value = setting.value && setting.value.toLowerCase() === 'true';
-        //    if (setting.allowedValues) {
-        //        setting.allowedValues = _.map(setting.allowedValues, function (value) { return value.toLowerCase() === 'true'; });
-        //    }
-        //});  
-    };
-
-    retVal.toApiFormat = function (settings) {
-        var selectedSettings = _.where(settings, { isDictionary: true });
-        _.forEach(selectedSettings, function (setting) {
-            if (setting.allowedValues) {
-                setting.allowedValues = _.pluck(setting.allowedValues, 'value');
-            }
-        });
-    };
-
-    return retVal;
-}]);
-
-// dictionary Setting values management helper
-function DictionarySettingDetailBlade(settingName) {
-    this.id = 'dictionarySettingDetails';
-    this.currentEntityId = settingName;
-    this.isApiSave = true;
-    this.controller = 'platformWebApp.settingDictionaryController';
-    this.template = '$(Platform)/Scripts/app/settings/blades/setting-dictionary.tpl.html';
-}
-
-angular.module('platformWebApp')
-.config(['$stateProvider', function ($stateProvider) {
-	$stateProvider
-        .state('setupWizard', {
-        	url: '/setupWizard',
-        	templateUrl: '$(Platform)/Scripts/app/setup/templates/setupWizard.tpl.html',
-            controller: ['$scope', '$state', '$stateParams', 'platformWebApp.setupWizard', function ($scope, $state, $stateParams, setupWizard) {}]
-        });
-}])
-.factory('platformWebApp.setupWizard', ['$state', 'platformWebApp.settings', function ($state, settings) {	
-	var wizardSteps = [];
-	var wizard =
-	{
-		//switches the current step in the wizard to passed or next on the current
-        showStep: function (step) {
-            var state = step ? step.state : "workspace";
-            if (wizard.currentStep != step) {
-                wizard.currentStep = step;
-                settings.update([{ name: 'VirtoCommerce.SetupStep', value: state }], function () {
-                    $state.go(state);
-                });
-            }
-            else {
-                $state.go(state);
-            }  
-		},
-
-		findStepByState : function (state) {
-			return _.find(wizardSteps, function (x) { return x.state == state; });
-		},
-
-		//registered step in the wizard
-		registerStep : function (wizardStep) {
-			wizardSteps.push(wizardStep);
-			wizardSteps = _.sortBy(wizardSteps, function (x) { return x.priority; });
-			var nextStep = undefined;
-			for (var i = wizardSteps.length; i-- > 0;) {
-				wizardSteps[i].nextStep = nextStep;
-				nextStep = wizardSteps[i];
-			}
-        },
-		load : function () {
-			//Initial step
-            wizard.currentStep = wizardSteps[0];
-            //load  saved setup step
-            return settings.getValues({ id: "VirtoCommerce.SetupStep" }).$promise.then(function (data) {
-				if (angular.isArray(data) && data.length > 0) {
-                    wizard.currentStep = wizard.findStepByState(data[0]);
-                    wizard.isCompleted = wizard.currentStep === undefined;
-                }
-                return wizard;
-			});
-        },
-        currentStep: undefined,
-        isCompleted: false
-	};
-	return wizard;
-}])
-.run(
-  ['$rootScope', '$state', 'platformWebApp.setupWizard', 'platformWebApp.settings', '$timeout', function ($rootScope, $state, setupWizard, settings, $timeout) {
-  	//Try to run setup wizard
-  	$rootScope.$on('loginStatusChanged', function (event, authContext) {
-  		if (authContext.isAuthenticated) {
-  			//timeout need because $state not fully loading in run method and need to wait little time
-                $timeout(function () {
-                    setupWizard.load().then(
-                        function (wizard) { if (!wizard.isCompleted) { wizard.showStep(wizard.currentStep); } });
-                }, 500);
-  		}
-  	});
-
-  }]);
-
-angular.module('platformWebApp')
-.config(['$stateProvider', function ($stateProvider) {
-    $stateProvider
-        .state('workspace.userProfile', {
-            url: '/userProfile',
-            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-            controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-                var blade = {
-                    id: 'userProfile',
-                    controller: 'platformWebApp.userProfile.userProfileController',
-                    template: '$(Platform)/Scripts/app/userProfile/blades/userProfile.tpl.html',
-                    isClosingDisabled: true
-                };
-                bladeNavigationService.showBlade(blade);
-            }]
-        });
-}])
-.factory('platformWebApp.userProfile', ['platformWebApp.userProfileApi', 'platformWebApp.settings.helper', 'platformWebApp.common.languages', 'platformWebApp.common.locales', function (userProfileApi, settingsHelper, languages, locales) {
-    var onChangeCallbacks = [];
-
-    var result = {
-        language: undefined,
-        regionalFormat: undefined,
-        timeZone: undefined,
-        timeAgoSettings: {
-            useTimeAgo: undefined,
-            threshold: undefined,
-            thresholdUnit: undefined,
-            thresholdUnits: undefined
-        },
-        timeSettings: {
-            showMeridian: undefined
-        },
-        mainMenuState: {},
-        load: function () {
-            return userProfileApi.get(function (profile) {
-                settingsHelper.fixValues(profile.settings);
-                profile.language = languages.normalize(settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.Language").value);
-                profile.regionalFormat = locales.normalize(settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.RegionalFormat").value);
-                profile.timeZone = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.TimeZone").value;
-                profile.timeSettings = {};
-                profile.timeSettings.showMeridian = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.ShowMeridian").value;
-                profile.timeAgoSettings = {};
-                profile.timeAgoSettings.useTimeAgo = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.UseTimeAgo").value;
-                profile.timeAgoSettings.threshold = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.FullDateThreshold").value;
-                var fullDateThresholdUnitSetting = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.FullDateThresholdUnit");
-                profile.timeAgoSettings.thresholdUnit = fullDateThresholdUnitSetting.value;
-                profile.timeAgoSettings.thresholdUnits = fullDateThresholdUnitSetting.allowedValues;
-                profile.mainMenuState = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.MainMenu.State").value;
-                if (profile.mainMenuState) {
-                    profile.mainMenuState = angular.fromJson(profile.mainMenuState);
-                }
-                angular.extend(result, profile);
-            }).$promise;
-        },
-        save: function() {
-            var oldState = angular.copy(this);
-            var mainMenuStateSetting = settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.MainMenu.State");
-            mainMenuStateSetting.value = angular.toJson(this.mainMenuState);
-            settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.Language").value = languages.normalize(result.language);
-            settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.RegionalFormat").value = locales.normalize(result.regionalFormat);
-            settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.TimeZone").value = result.timeZone;
-            settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.ShowMeridian").value = result.timeSettings.showMeridian;
-            settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.UseTimeAgo").value = result.timeAgoSettings.useTimeAgo;
-            settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.FullDateThreshold").value = result.timeAgoSettings.threshold;
-            settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.FullDateThresholdUnit").value = result.timeAgoSettings.thresholdUnit;
-            return userProfileApi.save(result).$promise.then(function() {
-                onChangeCallbacks.forEach(function(callback) {
-                    callback(this, oldState);
-                });
-            });
-        },
-        registerOnChangeCallback : function(callback) {
-            onChangeCallbacks.push(callback);
-        }
-    }
-    return result;
-}])
-.run(['platformWebApp.mainMenuService', '$state', function (mainMenuService, $state) {
-    var menuItem = {
-        path: 'configuration/userProfile',
-        icon: 'fa  fa-user',
-        title: 'platform.menu.user-profile',
-        priority: 99,
-        action: function () { $state.go('workspace.userProfile'); }
-    };
-    mainMenuService.addMenuItem(menuItem);
-}]);
-
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -19006,6 +17962,1086 @@ CodeMirror.registerHelper("fold", "markdown", function(cm, start) {
     return findMatchingClose(iter, name);
   };
 });
+
+angular.module('platformWebApp')
+.config(['$stateProvider', function ($stateProvider) {
+    $stateProvider
+        .state('workspace.assets', {
+            url: '/assets',
+            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+            controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+                var blade = {
+                    id: 'assetList',
+                    controller: 'platformWebApp.assets.assetListController',
+                    template: '$(Platform)/Scripts/app/assets/blades/asset-list.tpl.html',
+                    isClosingDisabled: true
+                };
+                bladeNavigationService.showBlade(blade);
+            }]
+        });
+}])
+.run(
+  ['platformWebApp.mainMenuService', '$state', function (mainMenuService, $state) {
+      var menuItem = {
+          path: 'browse/assets',
+          icon: 'fa fa-folder-o',
+          title: 'platform.menu.assets',
+          priority: 130,
+          action: function () { $state.go('workspace.assets'); },
+          permission: 'platform:asset:access'
+      };
+      mainMenuService.addMenuItem(menuItem);
+  }]);
+angular.module('platformWebApp')
+.config(['$stateProvider', function ($stateProvider) {
+    $stateProvider
+        .state('workspace.dynamicProperties', {
+            url: '/dynamicProperties',
+            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+            controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+                var blade = {
+                    id: 'dynamicPropertiesTypes',
+                    controller: 'platformWebApp.dynamicObjectListController',
+                    template: '$(Platform)/Scripts/app/dynamicProperties/blades/dynamicObject-list.tpl.html',
+                    isClosingDisabled: true
+                };
+                bladeNavigationService.showBlade(blade);
+            }
+            ]
+        });
+}]
+)
+.run(
+  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', function ($rootScope, mainMenuService, widgetService, $state) {
+      var menuItem = {
+          path: 'configuration/dynamicProperties',
+          icon: 'fa fa-pencil-square-o',
+          title: 'platform.menu.dynamic-properties',
+          priority: 2,
+          action: function () { $state.go('workspace.dynamicProperties'); },
+          permission: 'platform:dynamic_properties:access'
+      };
+      mainMenuService.addMenuItem(menuItem);
+  }])
+.filter('dynamicPropertyValueTypeToText', function () {
+    return function (input) {
+        var retVal;
+        switch (input) {
+            case 'ShortText': retVal = 'platform.properties.short-text.title'; break;
+            case 'LongText': retVal = 'platform.properties.long-text.title'; break;
+            case 'Integer': retVal = 'platform.properties.integer.title'; break;
+            case 'Decimal': retVal = 'platform.properties.decimal.title'; break;
+            case 'DateTime': retVal = 'platform.properties.date-time.title'; break;
+            case 'Boolean': retVal = 'platform.properties.boolean.title'; break;
+            case 'Html': retVal = 'platform.properties.html.title'; break;
+            default:
+                retVal = input ? input : 'platform.properties.undefined.title';
+        }
+        return retVal;
+    }
+})
+//Filter for showing localized display name in current user language
+.filter('localizeDynamicPropertyName', function () {
+    return function (input, lang) {
+        var retVal = input.name;
+        var displayName = _.find(input.displayNames, function (obj) { return obj && obj.locale.startsWith(lang); });
+        if (displayName && displayName.name)
+            retVal += ' (' + displayName.name + ')';
+
+        return retVal;
+    }
+});
+angular.module('platformWebApp')
+.config(['$stateProvider', function ($stateProvider) {
+	$stateProvider
+        .state('workspace.exportImport', {
+        	url: '/exportImport',
+        	templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+        	controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+        		var blade = {
+        			id: 'exportImport',
+        			title: 'platform.blades.exportImport-main.title',
+        			controller: 'platformWebApp.exportImport.mainController',
+        			template: '$(Platform)/Scripts/app/exportImport/blades/exportImport-main.tpl.html',
+        			isClosingDisabled: true
+        		};
+        		bladeNavigationService.showBlade(blade);
+        	}
+        	]
+        });
+	
+	$stateProvider
+        .state('setupWizard.sampleDataInstallation', {
+        	url: '/sampleDataInstallation',
+        	templateUrl: '$(Platform)/Scripts/app/exportImport/templates/sampleDataInstallation.tpl.html',
+        	controller: ['$scope', '$state', '$window', '$stateParams', 'platformWebApp.exportImport.resource', 'platformWebApp.setupWizard', function ($scope, $state, $window, $stateParams, exportImportResourse, setupWizard) {
+        		$scope.notification = {};
+        		if ($stateParams.notification) {
+        			$scope.notification = $stateParams.notification;
+        		}
+        		$scope.sampleDataInfos = {};
+        		//thats need when state direct open by url or push notification
+                var step = setupWizard.findStepByState($state.current.name);
+
+        		$scope.close = function () {
+        			setupWizard.showStep(step.nextStep);
+        			$window.location.reload();
+        		};
+
+				//copy notification to scope
+        		$scope.$on("new-notification-event", function (event, notification) {
+        			if (notification.notifyType == 'SampleDataImportPushNotification') {
+        				angular.copy(notification, $scope.notification);
+        				if (notification.finished && notification.errorCount == 0) {
+        					$scope.close();
+        				}
+        			}
+        		});
+
+        		$scope.importData = function (sampleData) {
+        			if (sampleData.url) {
+        				exportImportResourse.importSampleData({ url: sampleData.url }, function (data) {
+							//need check notification.created because not exist any way to check empty response 
+        					if (data && data.created) {
+        						angular.copy(data, $scope.notification);
+        					}
+        					else
+        					{
+        						setupWizard.showStep(step.nextStep);
+                            }
+                        }, function (error) { setupWizard.showStep(step.nextStep); });
+        			}
+        			else
+        			{
+        				setupWizard.showStep(step.nextStep);
+        			}
+        		}
+
+        		function discoverSampleData() {
+        			$scope.loading = true;
+        			exportImportResourse.sampleDataDiscover({}, function (sampleDataInfos) {
+        				$scope.loading = false;
+						//run obvious sample data installation 
+        				if (angular.isArray(sampleDataInfos) && sampleDataInfos.length > 0) {
+        					if (sampleDataInfos.length > 1) {
+        						$scope.sampleDataInfos = sampleDataInfos;
+        					}
+        					else {
+        						$scope.importData(sampleDataInfos[0]);
+        					}
+        				} 
+        				else {
+							//nothing to import - skip step
+        					setupWizard.showStep(step.nextStep);
+        				}
+        			});
+        		};
+        		discoverSampleData();
+        	}]
+        });
+}])
+.run(
+  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.bladeNavigationService', 'platformWebApp.exportImport.resource', 'platformWebApp.setupWizard', function ($rootScope, mainMenuService, widgetService, $state, pushNotificationTemplateResolver, bladeNavigationService, exportImportResourse, setupWizard) {
+  	var menuItem = {
+  		path: 'configuration/exportImport',
+  		icon: 'fa fa-database',
+  		title: 'platform.menu.export-import',
+  		priority: 10,
+  		action: function () { $state.go('workspace.exportImport'); },
+  		permission: 'platform:exportImport:access'
+  	};
+  	mainMenuService.addMenuItem(menuItem);
+
+  	//Push notifications
+  	var menuExportImportTemplate =
+	   {
+	   	priority: 900,
+	   	satisfy: function (notify, place) { return place == 'menu' && (notify.notifyType == 'PlatformExportPushNotification' || notify.notifyType == 'PlatformImportPushNotification'); },
+	   	template: '$(Platform)/Scripts/app/exportImport/notifications/menu.tpl.html',
+	   	action: function (notify) { $state.go('workspace.pushNotificationsHistory', notify) }
+	   };
+  	pushNotificationTemplateResolver.register(menuExportImportTemplate);
+
+  	var historyExportImportTemplate =
+	  {
+	  	priority: 900,
+	  	satisfy: function (notify, place) { return place == 'history' && (notify.notifyType == 'PlatformExportPushNotification' || notify.notifyType == 'PlatformImportPushNotification'); },
+	  	template: '$(Platform)/Scripts/app/exportImport/notifications/history.tpl.html',
+	  	action: function (notify) {
+	  		var isExport = notify.notifyType == 'PlatformExportPushNotification';
+	  		var blade = {
+	  			id: 'platformExportImport',
+	  			controller: isExport ? 'platformWebApp.exportImport.exportMainController' : 'platformWebApp.exportImport.importMainController',
+	  			template: isExport ? '$(Platform)/Scripts/app/exportImport/blades/export-main.tpl.html' : '$(Platform)/Scripts/app/exportImport/blades/import-main.tpl.html',
+	  			notification: notify
+	  		};
+	  		bladeNavigationService.showBlade(blade);
+	  	}
+	  };
+  	pushNotificationTemplateResolver.register(historyExportImportTemplate);
+
+  	$rootScope.$on("new-notification-event", function (event, notification) {
+  		if (notification.notifyType == 'SampleDataImportPushNotification' && $state.current && $state.current.name != 'setupWizard.sampleDataInstallation')
+  		{
+  			$state.go('setupWizard.sampleDataInstallation', { notification: notification });
+  		}
+  	});
+  	//register setup wizard step - sample data auto installation
+  	setupWizard.registerStep({
+  		state: "setupWizard.sampleDataInstallation",
+  		priority: 10
+  	});
+
+  }]);
+
+angular.module('platformWebApp')
+.controller('platformWebApp.licenseDetailController', ['$scope', '$window', 'FileUploader', '$http', 'platformWebApp.bladeNavigationService', function ($scope, $window, FileUploader, $http, bladeNavigationService) {
+    var blade = $scope.blade;
+    blade.isNew = blade.isNew || !$scope.license;
+
+    $scope.activate = function (activationCode) {
+        blade.isLoading = true;
+        $scope.activationError = null;
+        $scope.filename = null;
+
+        $http.post('api/platform/licensing/activateByCode', JSON.stringify(activationCode)).then(function (response) {
+            activationCallback(response.data, true);
+        }, function (error) {
+            $scope.activationError = error.data.message;
+        });
+    };
+
+    function activationCallback(license, isActivationByCode) {
+        blade.isLoading = false;
+        if (license) {
+            $scope.currentEntity = license;
+            if ($scope.currentEntity.expirationDate && new Date($scope.currentEntity.expirationDate) < new Date()) {
+                $scope.activationError = 'Activation failed. This license has expired.';
+            }
+        } else {
+            $scope.activationError = isActivationByCode ? 'Activation failed. Check the activation code.' : 'Activation failed. Check the license file.';
+        }
+    }
+
+    $scope.activateLicense = function () {
+        // confirmed. Activate the license
+        blade.isLoading = true;
+        $http.post('api/platform/licensing/activateLicense', $scope.currentEntity).then(function () {
+            $window.location.reload();
+        });
+    };
+
+    if (blade.isNew) {
+        // create the uploader
+        var uploader = $scope.uploader = new FileUploader({
+            scope: $scope,
+            url: 'api/platform/licensing/activateByFile',
+            method: 'POST',
+            autoUpload: true,
+            removeAfterUpload: true
+        });
+
+        // ADDING FILTERS
+        // lic only
+        uploader.filters.push({
+            name: 'licFilter',
+            fn: function (i /*{File|FileLikeObject}*/, options) {
+                return i.name.toLowerCase().endsWith('.lic');
+            }
+        });
+
+        uploader.onAfterAddingFile = function (fileItem) {
+            $scope.filename = fileItem.file.name;
+            $scope.activationError = null;
+        };
+
+        uploader.onSuccessItem = function (item, response) {
+            activationCallback(response, false);
+        };
+
+        uploader.onErrorItem = function (item, response, status) {
+            blade.isLoading = false;
+            $scope.activationError = response.message ? response.message : status;
+        };
+        blade.title = 'platform.blades.license.title-new';
+    } else {
+        $scope.currentEntity = $scope.license;
+
+        blade.toolbarCommands = [
+              {
+                  name: "platform.commands.new-license", icon: 'fa fa-check',
+                  executeMethod: function () {
+                      var newBlade = {
+                          id: 'license-activate',
+                          isNew: true,
+                          controller: blade.controller,
+                          template: blade.template
+                      };
+                      bladeNavigationService.showBlade(newBlade, blade);
+                  },
+                  canExecuteMethod: function () {
+                      return true;
+                  },
+                  permission: 'platform:module:manage'
+              }];
+
+        blade.title = 'platform.blades.license.title';
+    }
+
+    blade.headIcon = 'fa-id-card';
+    blade.isLoading = false;
+}])
+
+.config(['$stateProvider', function ($stateProvider) {
+    $stateProvider
+        .state('workspace.appLicense', {
+            url: '/appLicense',
+            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+            controller: ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
+                var blade = {
+                    id: 'appLicense',
+                    controller: 'platformWebApp.licenseDetailController',
+                    template: '$(Platform)/Scripts/app/licensing/license-detail.tpl.html',
+                    isClosingDisabled: true
+                };
+                bladeNavigationService.showBlade(blade);
+            }]
+        });
+}]);
+
+angular.module('platformWebApp')
+.config(['$stateProvider', function ($stateProvider) {
+	$stateProvider
+        .state('workspace.modularity', {
+        	url: '/modules',
+        	templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+        	controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+        		var blade = {
+        			id: 'modulesMain',
+        			title: 'platform.blades.modules-main.title',
+        			controller: 'platformWebApp.modulesMainController',
+        			template: '$(Platform)/Scripts/app/modularity/blades/modules-main.tpl.html',
+        			isClosingDisabled: true
+        		};
+        		bladeNavigationService.showBlade(blade);
+        	}]
+        });
+
+	$stateProvider
+	.state('setupWizard.modulesInstallation', {
+		url: '/modulesInstallation',
+		templateUrl: '$(Platform)/Scripts/app/modularity/templates/modulesInstallation.tpl.html',
+		controller: ['$scope', '$state', '$stateParams', '$window', 'platformWebApp.modules', 'platformWebApp.exportImport.resource', 'platformWebApp.setupWizard', function ($scope, $state, $stateParams, $window, modules, exportImportResourse, setupWizard) {
+			$scope.notification = {};
+			if ($stateParams.notification)
+			{
+				$scope.notification = $stateParams.notification;
+			}
+			//thats need when state direct open by url or push notification
+            var step = setupWizard.findStepByState($state.current.name);
+			if (!$scope.notification.created) {
+			modules.autoInstall({}, function (data) {
+				//if already installed need skip this step
+				if (data.finished) {					
+				    setupWizard.showStep(step.nextStep);
+                }
+            }, function (error) {
+                setupWizard.showStep(step.nextStep);
+            });
+			}
+
+			$scope.restart = function () {
+				$scope.restarted = true;
+				modules.restart({}, function () {
+					setupWizard.showStep(step.nextStep);
+					$window.location.reload();
+				});
+			};		
+
+			$scope.$on("new-notification-event", function (event, notification) {
+				if (notification.notifyType == 'ModuleAutoInstallPushNotification') {
+					angular.copy(notification, $scope.notification);
+					if (notification.finished && notification.errorCount == 0) {
+						$scope.close();
+					}
+				}
+			});
+		}]
+	});
+}])
+.run(
+  ['platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.bladeNavigationService', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', '$rootScope', 'platformWebApp.modules', 'platformWebApp.setupWizard', function (pushNotificationTemplateResolver, bladeNavigationService, mainMenuService, widgetService, $state, $rootScope, modules, setupWizard) {
+  	//Register module in main menu
+  	var menuItem = {
+  		path: 'configuration/modularity',
+  		icon: 'fa fa-cubes',
+  		title: 'platform.menu.modules',
+  		priority: 6,
+  		action: function () { $state.go('workspace.modularity'); },
+  		permission: 'platform:module:access'
+  	};
+  	mainMenuService.addMenuItem(menuItem);
+
+      // Register push notification template
+      pushNotificationTemplateResolver.register({
+	   	priority: 900,
+	   	satisfy: function (notify, place) { return place == 'menu' && notify.notifyType == 'ModulePushNotification'; },
+	   	template: '$(Platform)/Scripts/app/modularity/notifications/menu.tpl.html',
+	   	action: function (notify) { $state.go('workspace.pushNotificationsHistory', notify); }
+      });
+
+  	var historyExportImportTemplate =
+	{
+		priority: 900,
+		satisfy: function (notify, place) { return place == 'history' && notify.notifyType == 'ModulePushNotification'; },
+		template: '$(Platform)/Scripts/app/modularity/notifications/history.tpl.html',
+		action: function (notify) {
+			var blade = {
+				id: 'moduleInstallProgress',
+				title: notify.title,
+				currentEntity: notify,
+				controller: 'platformWebApp.moduleInstallProgressController',
+				template: '$(Platform)/Scripts/app/modularity/wizards/newModule/module-wizard-progress-step.tpl.html'
+			};
+			bladeNavigationService.showBlade(blade);
+		}
+	};
+  	pushNotificationTemplateResolver.register(historyExportImportTemplate);
+
+  	//Switch to  setupWizard.modulesInstallation state when receive ModuleAutoInstallPushNotification push notification
+  	$rootScope.$on("new-notification-event", function (event, notification) {
+  		if (notification.notifyType == 'ModuleAutoInstallPushNotification' && $state.current && $state.current.name != 'setupWizard.modulesInstallation') {
+  			$state.go('setupWizard.modulesInstallation', { notification: notification });
+  		}
+  	});
+	//register setup wizard step - modules auto installation
+  	setupWizard.registerStep({
+  		state: "setupWizard.modulesInstallation",
+  		priority: 1
+  	});
+  
+  }])
+.factory('platformWebApp.moduleHelper', function () {
+	// semver comparison: https://gist.github.com/TheDistantSea/8021359
+	return {};
+});
+
+angular.module('platformWebApp')
+.config(['$stateProvider', function ($stateProvider) {
+    $stateProvider
+		.state('workspace.notifications', {
+		    url: '/notifications?objectId&objectTypeId',
+		    templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+		    controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+		        var blade = {
+		            id: 'notifications',
+		            title: 'platform.menu.notifications',
+		            subtitle: 'platform.blades.notifications-menu.subtitle',
+		            controller: 'platformWebApp.notificationsMenuController',
+		            template: '$(Platform)/Scripts/app/notifications/blades/notifications-menu.tpl.html',
+		            isClosingDisabled: true
+		        };
+		        bladeNavigationService.showBlade(blade);
+		    }
+		    ]
+		});
+}])
+.run(
+  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', function ($rootScope, mainMenuService, widgetService, $state) {
+      //Register module in main menu
+      var menuItem = {
+          path: 'configuration/notifications',
+          icon: 'fa fa-envelope',
+          title: 'platform.menu.notifications',
+          priority: 7,
+          action: function () { $state.go('workspace.notifications'); },
+          permission: 'platform:notification:access'
+      };
+      mainMenuService.addMenuItem(menuItem);
+  }])
+;
+angular.module('platformWebApp')
+.config(
+  ['$stateProvider', function ($stateProvider) {
+      $stateProvider
+          .state('workspace.pushNotificationsHistory', {
+              url: '/events',
+              templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+              controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+                  var blade = {
+                      id: 'events',
+                      title: 'platform.blades.history.title',
+                      breadcrumbs: [],
+                      subtitle: 'platform.blades.history.subtitle',
+                      controller: 'platformWebApp.pushNotificationsHistoryController',
+                      template: '$(Platform)/Scripts/app/pushNotifications/blade/history.tpl.html',
+                      isClosingDisabled: true
+                  };
+                  bladeNavigationService.showBlade(blade);
+              }
+              ]
+          });
+  }])
+.factory('platformWebApp.pushNotificationTemplateResolver', ['platformWebApp.bladeNavigationService', '$state', function (bladeNavigationService, $state) {
+    var notificationTemplates = [];
+
+    function register(template) {
+        notificationTemplates.push(template);
+        notificationTemplates.sort(function (a, b) { return a.priority - b.priority; });
+    };
+    function resolve(notification, place) {
+        return _.find(notificationTemplates, function (x) { return x.satisfy(notification, place); });
+    };
+    var retVal = {
+        register: register,
+        resolve: resolve,
+    };
+
+    //Recent events notification template (error, info, debug) 
+    var menuDefaultTemplate =
+        {
+            priority: 1000,
+            satisfy: function (notification, place) { return place == 'menu'; },
+            //template for display that notification in menu and list
+            template: '$(Platform)/Scripts/app/pushNotifications/menuDefault.tpl.html',
+            //action executed when notification selected
+            action: function (notify) { $state.go('workspace.pushNotificationsHistory', notify) }
+        };
+
+    //In history list notification template (error, info, debug)
+    var historyDefaultTemplate =
+        {
+            priority: 1000,
+            satisfy: function (notification, place) { return place == 'history'; },
+            //template for display that notification in menu and list
+            template: '$(Platform)/Scripts/app/pushNotifications/blade/historyDefault.tpl.html',
+            //action executed in event detail
+            action: function (notify) {
+                var blade = {
+                    id: 'notifyDetail',
+                    title: 'platform.blades.historyDetailDefault.title',
+                    subtitle: 'platform.blades.historyDetailDefault.subtitle',
+                    template: '$(Platform)/Scripts/app/pushNotifications/blade/historyDetailDefault.tpl.html',
+                    isClosingDisabled: false,
+                    notify: notify
+                };
+                bladeNavigationService.showBlade(blade);
+            }
+        };
+
+    retVal.register(menuDefaultTemplate);
+    retVal.register(historyDefaultTemplate);
+
+    return retVal;
+}])
+.factory('platformWebApp.pushNotificationService', ['$rootScope', '$timeout', '$interval', '$state', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
+    function ($rootScope, $timeout, $interval, $state, mainMenuService, eventTemplateResolver, notifications) {
+
+        //SignalR setup connection
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl("/pushNotificationHub")
+            .build();     
+        connection.start();
+      
+        connection.on('Send', function (data) {
+            var notifyMenu = mainMenuService.findByPath('pushNotifications');
+            var notificationTemplate = eventTemplateResolver.resolve(data, 'menu');
+            //broadcast event
+            $rootScope.$broadcast("new-notification-event", data);
+
+            var menuItem = {
+                path: 'pushNotifications/notifications',
+                icon: 'fa fa-bell-o',
+                title: data.title,
+                priority: 2,
+                permission: '',
+                children: [],
+                action: notificationTemplate.action,
+                template: notificationTemplate.template,
+                notify: data
+            };
+
+            var alreadyExitstItem = _.find(notifyMenu.children, function (x) { return x.notify.id == menuItem.notify.id; });
+            if (alreadyExitstItem) {
+                angular.copy(menuItem, alreadyExitstItem);
+            }
+            else {
+                menuItem.parent = notifyMenu;
+                notifyMenu.children.push(menuItem);
+                notifyMenu.newCount++;
+
+                if (angular.isDefined(notifyMenu.intervalPromise)) {
+                    $interval.cancel(notifyMenu.intervalPromise);
+                }
+                animateNotify();
+                notifyMenu.intervalPromise = $interval(animateNotify, 30000);
+            }
+        });
+
+        function animateNotify() {
+            var notifyMenu = mainMenuService.findByPath('pushNotifications');
+            notifyMenu.isAnimated = true;
+
+            $timeout(function () {
+                notifyMenu.isAnimated = false;
+            }, 1500);
+        }
+
+        function markAllAsRead() {
+            var notifyMenu = mainMenuService.findByPath('pushNotifications');
+            if (angular.isDefined(notifyMenu.intervalPromise)) {
+                $interval.cancel(notifyMenu.intervalPromise);
+            }
+
+            notifications.markAllAsRead(null, function (data, status, headers, config) {
+                notifyMenu.isAnimated = false;
+                notifyMenu.newCount = 0;
+            }, function (error) {
+                //bladeNavigationService.setError('Error ' + error.status, blade);
+            });
+        }
+
+        var retVal = {
+            run: function () {
+                if (!this.running) {
+                    var notifyMenu = mainMenuService.findByPath('pushNotifications');
+                    if (!angular.isDefined(notifyMenu)) {
+                        notifyMenu = {
+                            path: 'pushNotifications',
+                            icon: 'fa fa-bell-o',
+                            title: 'platform.menu.notifications',
+                            priority: 2,
+                            isAlwaysOnBar: true,
+                            permission: '',
+                            headerTemplate: '$(Platform)/Scripts/app/pushNotifications/menuHeader.tpl.html',
+                            template: '$(Platform)/Scripts/app/pushNotifications/menu.tpl.html',
+                            action: function () { markAllAsRead(); if (this.children.length == 0) { this.showHistory(); } },
+                            showHistory: function () { $state.go('workspace.pushNotificationsHistory'); },
+                            clearRecent: function () { notifyMenu.children.splice(0, notifyMenu.children.length); },
+                            children: [],
+                            newCount: 0
+                        };
+                        mainMenuService.addMenuItem(notifyMenu);
+                    }
+                    this.running = true;
+                };
+            },
+            running: false
+        };
+        return retVal;
+
+    }]);
+
+angular.module('platformWebApp')
+    .config(['$stateProvider', '$httpProvider', function ($stateProvider, $httpProvider) {
+        $stateProvider.state('loginDialog', {
+	        url: '/login',
+	        templateUrl: '$(Platform)/Scripts/app/security/login/login.tpl.html',
+	        controller: ['$scope', 'platformWebApp.authService', function ($scope, authService) {
+	            $scope.user = {};
+	            $scope.authError = null;
+	            $scope.authReason = false;
+	            $scope.loginProgress = false;
+	            $scope.ok = function () {
+	                // Clear any previous security errors
+	                $scope.authError = null;
+	                $scope.loginProgress = true;
+	                // Try to login
+	                authService.login($scope.user.email, $scope.user.password, $scope.user.remember).then(function (loggedIn) {
+	                    $scope.loginProgress = false;
+	                    if (!loggedIn) {
+	                        $scope.authError = 'invalidCredentials';
+	                    }
+	                }, function (x) {
+	                    $scope.loginProgress = false;
+	                    if (angular.isDefined(x.status)) {
+	                        if (x.status == 401) {
+	                            $scope.authError = 'The login or password is incorrect.';
+	                        } else {
+	                            $scope.authError = 'Authentication error (code: ' + x.status + ').';
+	                        }
+	                    } else {
+	                        $scope.authError = 'Authentication error ' + x;
+	                    }
+	                });
+	            };
+
+	        }]
+	    })
+
+	    $stateProvider.state('forgotpasswordDialog', {
+	        url: '/forgotpassword',
+	        templateUrl: '$(Platform)/Scripts/app/security/login/forgotPassword.tpl.html',
+            controller: ['$scope', 'platformWebApp.authService', '$state', function ($scope, authService, $state) {
+	            $scope.viewModel = {};
+	            $scope.ok = function () {
+	                $scope.isLoading = true;
+	                $scope.errorMessage = null;
+	                authService.requestpasswordreset($scope.viewModel).then(function (retVal) {
+	                    $scope.isLoading = false;
+	                    angular.extend($scope, retVal);
+	                });
+                };
+                $scope.close = function () {
+                    $state.go('loginDialog');
+                };
+	        }]
+	    })
+
+	    $stateProvider.state('resetpasswordDialog', {
+	        url: '/resetpassword/:userId/{code:.*}',
+	        templateUrl: '$(Platform)/Scripts/app/security/login/resetPassword.tpl.html',
+	        controller: ['$rootScope', '$scope', '$stateParams', 'platformWebApp.authService', function ($rootScope, $scope, $stateParams, authService) {
+	            $scope.viewModel = $stateParams;
+	            $scope.ok = function () {
+	                $scope.errorMessage = null;
+	                $scope.isLoading = true;
+	                authService.resetpassword($scope.viewModel).then(function (retVal) {
+	                    $scope.isLoading = false;
+	                    $rootScope.preventLoginDialog = false;
+	                    angular.extend($scope, retVal);
+	                }, function (x) {
+	                    $scope.isLoading = false;
+	                    $scope.viewModel.newPassword = $scope.viewModel.newPassword2 = undefined;
+	                    if (x.status == 400 && x.data && x.data.message) {
+	                        $scope.errorMessage = x.data.message;
+	                    } else {
+	                        $scope.errorMessage = 'Error ' + x;
+	                    }
+	                });
+	            };
+	        }]
+	    })
+
+	    .state('workspace.securityModule', {
+	        url: '/security',
+	        templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+	        controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+				    var blade = {
+				        id: 'security',
+				        title: 'platform.blades.security-main.title',
+				        subtitle: 'platform.blades.security-main.subtitle',
+				        controller: 'platformWebApp.securityMainController',
+				        template: '$(Platform)/Scripts/app/security/blades/security-main.tpl.html',
+				        isClosingDisabled: true
+				    };
+				    bladeNavigationService.showBlade(blade);
+				}
+	        ]
+	    });
+	}])
+    .run(['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.metaFormsService', 'platformWebApp.widgetService', '$state', 'platformWebApp.authService',
+        function ($rootScope, mainMenuService, metaFormsService, widgetService, $state, authService) {
+
+        //Register module in main menu
+        var menuItem = {
+            path: 'configuration/security',
+            icon: 'fa fa-key',
+            title: 'platform.menu.security',
+            priority: 5,
+            action: function () { $state.go('workspace.securityModule'); },
+            permission: 'platform:security:access'
+        };
+        mainMenuService.addMenuItem(menuItem);
+
+        metaFormsService.registerMetaFields("accountDetails",
+        [
+            {
+                name: "isAdministrator",
+                title: "platform.blades.account-detail.labels.is-administrator",
+                valueType: "Boolean",
+                priority: 0
+            },
+            {
+                name: "userName",
+                templateUrl: "accountUserName.html",
+                priority: 1,
+                isRequired: true
+            },
+            {
+                name: "email",
+                templateUrl: "accountEmail.html",
+                priority: 2
+            },
+            {
+                name: "accountType",
+                templateUrl: "accountTypeSelector.html",
+                priority: 3
+            },
+            {
+                name: "accountInfo",
+                templateUrl: "accountInfo.html",
+                priority: 4
+            }
+        ]);
+
+        //Register widgets
+        widgetService.registerWidget({
+            controller: 'platformWebApp.accountRolesWidgetController',
+            template: '$(Platform)/Scripts/app/security/widgets/accountRolesWidget.tpl.html',
+        }, 'accountDetail');
+        widgetService.registerWidget({
+            controller: 'platformWebApp.accountApiWidgetController',
+            template: '$(Platform)/Scripts/app/security/widgets/accountApiWidget.tpl.html',
+        }, 'accountDetail');
+        widgetService.registerWidget({
+            controller: 'platformWebApp.changeLog.operationsWidgetController',
+            template: '$(Platform)/Scripts/app/changeLog/widgets/operations-widget.tpl.html'
+        }, 'accountDetail');
+    }]);
+
+angular.module("platformWebApp")
+.config(
+  ['$stateProvider', function ($stateProvider) {
+      $stateProvider
+          .state('workspace.modulesSettings', {
+              url: '/settings',
+              templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+              controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+                  var blade = {
+                      id: 'settings',
+                      title: 'platform.blades.settingGroup-list.title',
+                      //subtitle: 'Manage settings',
+                      controller: 'platformWebApp.settingGroupListController',
+                      template: '$(Platform)/Scripts/app/settings/blades/settingGroup-list.tpl.html',
+                      isClosingDisabled: true
+                  };
+                  bladeNavigationService.showBlade(blade);
+              }
+              ]
+          });
+  }]
+)
+.run(
+  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', function ($rootScope, mainMenuService, widgetService, $state) {
+      //Register module in main menu
+      var menuItem = {
+          path: 'configuration/settings',
+          icon: 'fa fa-gears',
+          title: 'platform.menu.settings',
+          priority: 1,
+          action: function () { $state.go('workspace.modulesSettings'); },
+          permission: 'platform:setting:access'
+      };
+      mainMenuService.addMenuItem(menuItem);
+  }])
+
+.factory('platformWebApp.settings.helper', [function () {
+    var retVal = {};
+
+    retVal.getSetting = function(settings, settingName) {
+        return _.findWhere(settings, { name: settingName });
+    };
+
+    retVal.fixValues = function (settings) {
+        // parse values as they all are strings
+        //var selectedSettings = _.where(settings, { valueType: 'Integer' });
+        //_.forEach(selectedSettings, function (setting) {
+        //    setting.value = parseInt(setting.value, 10);
+        //    if (setting.allowedValues) {
+        //        setting.allowedValues = _.map(setting.allowedValues, function (value) { return parseInt(value, 10); });
+        //    }
+        //});
+
+        //selectedSettings = _.where(settings, { valueType: 'Decimal' });
+        //_.forEach(selectedSettings, function (setting) {
+        //    setting.value = parseFloat(setting.value);
+        //    if (setting.allowedValues) {
+        //        setting.allowedValues = _.map(setting.allowedValues, function (value) { return parseFloat(value); });
+        //    }
+        //});
+
+        //selectedSettings = _.where(settings, { valueType: 'Boolean' });
+        //_.forEach(selectedSettings, function (setting) {
+        //    setting.value = setting.value && setting.value.toLowerCase() === 'true';
+        //    if (setting.allowedValues) {
+        //        setting.allowedValues = _.map(setting.allowedValues, function (value) { return value.toLowerCase() === 'true'; });
+        //    }
+        //});  
+    };
+
+    retVal.toApiFormat = function (settings) {
+        var selectedSettings = _.where(settings, { isDictionary: true });
+        _.forEach(selectedSettings, function (setting) {
+            if (setting.allowedValues) {
+                setting.allowedValues = _.pluck(setting.allowedValues, 'value');
+            }
+        });
+    };
+
+    return retVal;
+}]);
+
+// dictionary Setting values management helper
+function DictionarySettingDetailBlade(settingName) {
+    this.id = 'dictionarySettingDetails';
+    this.currentEntityId = settingName;
+    this.isApiSave = true;
+    this.controller = 'platformWebApp.settingDictionaryController';
+    this.template = '$(Platform)/Scripts/app/settings/blades/setting-dictionary.tpl.html';
+}
+
+angular.module('platformWebApp')
+.config(['$stateProvider', function ($stateProvider) {
+    $stateProvider
+        .state('workspace.userProfile', {
+            url: '/userProfile',
+            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+            controller: ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+                var blade = {
+                    id: 'userProfile',
+                    controller: 'platformWebApp.userProfile.userProfileController',
+                    template: '$(Platform)/Scripts/app/userProfile/blades/userProfile.tpl.html',
+                    isClosingDisabled: true
+                };
+                bladeNavigationService.showBlade(blade);
+            }]
+        });
+}])
+.factory('platformWebApp.userProfile', ['platformWebApp.userProfileApi', 'platformWebApp.settings.helper', 'platformWebApp.common.languages', 'platformWebApp.common.locales', function (userProfileApi, settingsHelper, languages, locales) {
+    var onChangeCallbacks = [];
+
+    var result = {
+        language: undefined,
+        regionalFormat: undefined,
+        timeZone: undefined,
+        timeAgoSettings: {
+            useTimeAgo: undefined,
+            threshold: undefined,
+            thresholdUnit: undefined,
+            thresholdUnits: undefined
+        },
+        timeSettings: {
+            showMeridian: undefined
+        },
+        mainMenuState: {},
+        load: function () {
+            return userProfileApi.get(function (profile) {
+                settingsHelper.fixValues(profile.settings);
+                profile.language = languages.normalize(settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.Language").value);
+                profile.regionalFormat = locales.normalize(settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.RegionalFormat").value);
+                profile.timeZone = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.TimeZone").value;
+                profile.timeSettings = {};
+                profile.timeSettings.showMeridian = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.ShowMeridian").value;
+                profile.timeAgoSettings = {};
+                profile.timeAgoSettings.useTimeAgo = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.UseTimeAgo").value;
+                profile.timeAgoSettings.threshold = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.FullDateThreshold").value;
+                var fullDateThresholdUnitSetting = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.FullDateThresholdUnit");
+                profile.timeAgoSettings.thresholdUnit = fullDateThresholdUnitSetting.value;
+                profile.timeAgoSettings.thresholdUnits = fullDateThresholdUnitSetting.allowedValues;
+                profile.mainMenuState = settingsHelper.getSetting(profile.settings, "VirtoCommerce.Platform.UI.MainMenu.State").value;
+                if (profile.mainMenuState) {
+                    profile.mainMenuState = angular.fromJson(profile.mainMenuState);
+                }
+                angular.extend(result, profile);
+            }).$promise;
+        },
+        save: function() {
+            var oldState = angular.copy(this);
+            var mainMenuStateSetting = settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.MainMenu.State");
+            mainMenuStateSetting.value = angular.toJson(this.mainMenuState);
+            settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.Language").value = languages.normalize(result.language);
+            settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.RegionalFormat").value = locales.normalize(result.regionalFormat);
+            settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.TimeZone").value = result.timeZone;
+            settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.ShowMeridian").value = result.timeSettings.showMeridian;
+            settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.UseTimeAgo").value = result.timeAgoSettings.useTimeAgo;
+            settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.FullDateThreshold").value = result.timeAgoSettings.threshold;
+            settingsHelper.getSetting(this.settings, "VirtoCommerce.Platform.UI.FullDateThresholdUnit").value = result.timeAgoSettings.thresholdUnit;
+            return userProfileApi.save(result).$promise.then(function() {
+                onChangeCallbacks.forEach(function(callback) {
+                    callback(this, oldState);
+                });
+            });
+        },
+        registerOnChangeCallback : function(callback) {
+            onChangeCallbacks.push(callback);
+        }
+    }
+    return result;
+}])
+.run(['platformWebApp.mainMenuService', '$state', function (mainMenuService, $state) {
+    var menuItem = {
+        path: 'configuration/userProfile',
+        icon: 'fa  fa-user',
+        title: 'platform.menu.user-profile',
+        priority: 99,
+        action: function () { $state.go('workspace.userProfile'); }
+    };
+    mainMenuService.addMenuItem(menuItem);
+}]);
+
+angular.module('platformWebApp')
+.config(['$stateProvider', function ($stateProvider) {
+	$stateProvider
+        .state('setupWizard', {
+        	url: '/setupWizard',
+        	templateUrl: '$(Platform)/Scripts/app/setup/templates/setupWizard.tpl.html',
+            controller: ['$scope', '$state', '$stateParams', 'platformWebApp.setupWizard', function ($scope, $state, $stateParams, setupWizard) {}]
+        });
+}])
+.factory('platformWebApp.setupWizard', ['$state', 'platformWebApp.settings', function ($state, settings) {	
+	var wizardSteps = [];
+	var wizard =
+	{
+		//switches the current step in the wizard to passed or next on the current
+        showStep: function (step) {
+            var state = step ? step.state : "workspace";
+            if (wizard.currentStep != step) {
+                wizard.currentStep = step;
+                settings.update([{ name: 'VirtoCommerce.SetupStep', value: state }], function () {
+                    $state.go(state);
+                });
+            }
+            else {
+                $state.go(state);
+            }  
+		},
+
+		findStepByState : function (state) {
+			return _.find(wizardSteps, function (x) { return x.state == state; });
+		},
+
+		//registered step in the wizard
+		registerStep : function (wizardStep) {
+			wizardSteps.push(wizardStep);
+			wizardSteps = _.sortBy(wizardSteps, function (x) { return x.priority; });
+			var nextStep = undefined;
+			for (var i = wizardSteps.length; i-- > 0;) {
+				wizardSteps[i].nextStep = nextStep;
+				nextStep = wizardSteps[i];
+			}
+        },
+		load : function () {
+			//Initial step
+            wizard.currentStep = wizardSteps[0];
+            //load  saved setup step
+            return settings.getValues({ id: "VirtoCommerce.SetupStep" }).$promise.then(function (data) {
+				if (angular.isArray(data) && data.length > 0) {
+                    wizard.currentStep = wizard.findStepByState(data[0]);
+                    wizard.isCompleted = wizard.currentStep === undefined;
+                }
+                return wizard;
+			});
+        },
+        currentStep: undefined,
+        isCompleted: false
+	};
+	return wizard;
+}])
+.run(
+  ['$rootScope', '$state', 'platformWebApp.setupWizard', 'platformWebApp.settings', '$timeout', function ($rootScope, $state, setupWizard, settings, $timeout) {
+  	//Try to run setup wizard
+  	$rootScope.$on('loginStatusChanged', function (event, authContext) {
+  		if (authContext.isAuthenticated) {
+  			//timeout need because $state not fully loading in run method and need to wait little time
+                $timeout(function () {
+                    setupWizard.load().then(
+                        function (wizard) { if (!wizard.isCompleted) { wizard.showStep(wizard.currentStep); } });
+                }, 500);
+  		}
+  	});
+
+  }]);
 
 angular.module('platformWebApp')
 .controller('platformWebApp.confirmDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
@@ -22639,6 +22675,103 @@ angular.module('platformWebApp')
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["公元前","公元"],ERAS:["公元前","公元"],FIRSTDAYOFWEEK:6,MONTH:["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"],SHORTDAY:["周日","周一","周二","周三","周四","周五","周六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"yy/M/d ah:mm",shortDate:"yy/M/d",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"¥",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤ ",negSuf:"",posPre:"¤ ",posSuf:""}]},id:"zh-cn",pluralCat:function(e,m){return E.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["公元前","公元"],ERAS:["BC","AD"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"d/M/yy ah:mm",shortDate:"d/M/yy",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-hk",pluralCat:function(e,m){return E.OTHER}})}]);
 "use strict";angular.module("ngLocale",[],["$provide",function(e){var E={ZERO:"zero",ONE:"one",TWO:"two",FEW:"few",MANY:"many",OTHER:"other"};e.value("$locale",{DATETIME_FORMATS:{AMPMS:["上午","下午"],DAY:["星期日","星期一","星期二","星期三","星期四","星期五","星期六"],ERANAMES:["西元前","西元"],ERAS:["西元前","西元"],FIRSTDAYOFWEEK:6,MONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],SHORTDAY:["週日","週一","週二","週三","週四","週五","週六"],SHORTMONTH:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],WEEKENDRANGE:[5,6],fullDate:"y年M月d日 EEEE",longDate:"y年M月d日",medium:"y年M月d日 ah:mm:ss",mediumDate:"y年M月d日",mediumTime:"ah:mm:ss",short:"y/M/d ah:mm",shortDate:"y/M/d",shortTime:"ah:mm"},NUMBER_FORMATS:{CURRENCY_SYM:"NT$",DECIMAL_SEP:".",GROUP_SEP:",",PATTERNS:[{gSize:3,lgSize:3,maxFrac:3,minFrac:0,minInt:1,negPre:"-",negSuf:"",posPre:"",posSuf:""},{gSize:3,lgSize:3,maxFrac:2,minFrac:2,minInt:1,negPre:"-¤",negSuf:"",posPre:"¤",posSuf:""}]},id:"zh-tw",pluralCat:function(e,m){return E.OTHER}})}]);
+// CodeMirror, copyright (c) by Marijn Haverbeke and others
+// Distributed under an MIT license: http://codemirror.net/LICENSE
+
+// Utility function that allows modes to be combined. The mode given
+// as the base argument takes care of most of the normal mode
+// functionality, but a second (typically simple) mode is used, which
+// can override the style of text. Both modes get to parse all of the
+// text, but when both assign a non-null style to a piece of code, the
+// overlay wins, unless the combine argument was true and not overridden,
+// or state.overlay.combineTokens was true, in which case the styles are
+// combined.
+
+(function(mod) {
+  if (typeof exports == "object" && typeof module == "object") // CommonJS
+    mod(require("../../lib/codemirror"));
+  else if (typeof define == "function" && define.amd) // AMD
+    define(["../../lib/codemirror"], mod);
+  else // Plain browser env
+    mod(CodeMirror);
+})(function(CodeMirror) {
+"use strict";
+
+CodeMirror.overlayMode = function(base, overlay, combine) {
+  return {
+    startState: function() {
+      return {
+        base: CodeMirror.startState(base),
+        overlay: CodeMirror.startState(overlay),
+        basePos: 0, baseCur: null,
+        overlayPos: 0, overlayCur: null,
+        streamSeen: null
+      };
+    },
+    copyState: function(state) {
+      return {
+        base: CodeMirror.copyState(base, state.base),
+        overlay: CodeMirror.copyState(overlay, state.overlay),
+        basePos: state.basePos, baseCur: null,
+        overlayPos: state.overlayPos, overlayCur: null
+      };
+    },
+
+    token: function(stream, state) {
+      if (stream != state.streamSeen ||
+          Math.min(state.basePos, state.overlayPos) < stream.start) {
+        state.streamSeen = stream;
+        state.basePos = state.overlayPos = stream.start;
+      }
+
+      if (stream.start == state.basePos) {
+        state.baseCur = base.token(stream, state.base);
+        state.basePos = stream.pos;
+      }
+      if (stream.start == state.overlayPos) {
+        stream.pos = stream.start;
+        state.overlayCur = overlay.token(stream, state.overlay);
+        state.overlayPos = stream.pos;
+      }
+      stream.pos = Math.min(state.basePos, state.overlayPos);
+
+      // state.overlay.combineTokens always takes precedence over combine,
+      // unless set to null
+      if (state.overlayCur == null) return state.baseCur;
+      else if (state.baseCur != null &&
+               state.overlay.combineTokens ||
+               combine && state.overlay.combineTokens == null)
+        return state.baseCur + " " + state.overlayCur;
+      else return state.overlayCur;
+    },
+
+    indent: base.indent && function(state, textAfter) {
+      return base.indent(state.base, textAfter);
+    },
+    electricChars: base.electricChars,
+
+    innerMode: function(state) { return {state: state.base, mode: base}; },
+
+    blankLine: function(state) {
+      if (base.blankLine) base.blankLine(state.base);
+      if (overlay.blankLine) overlay.blankLine(state.overlay);
+    }
+  };
+};
+
+});
+
+angular.module('platformWebApp')
+.factory('platformWebApp.assets.api', ['$resource', function ($resource) {
+    return $resource('api/platform/assets', {}, {
+        search: { method: 'GET', url: 'api/platform/assets', isArray: false },
+        createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
+        move: { method: 'POST', url: 'api/platform/assets/move' },
+        uploadFromUrl: { method: 'POST', params: { url: '@url', folderUrl: '@folderUrl', name: '@name' }, isArray: true }
+    });
+}]);
+
+
 angular.module('platformWebApp')
     .controller('platformWebApp.assets.assetListController', ['$scope', 'platformWebApp.assets.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', '$sessionStorage', 'platformWebApp.bladeUtils', 'platformWebApp.uiGridHelper',
         function ($scope, assets, bladeNavigationService, dialogService, $storage, bladeUtils, uiGridHelper) {
@@ -23015,7 +23148,6 @@ angular.module('platformWebApp')
                 // Create the uploader
                 var uploader = $scope.uploader = new FileUploader({
                     scope: $scope,
-                    headers: { Accept: 'application/json' },
                     url: 'api/platform/assets?folderUrl=' + folderUrl,
                     method: 'POST',
                     //autoUpload: true,
@@ -23111,17 +23243,6 @@ angular.module('platformWebApp')
     }]);
 
 angular.module('platformWebApp')
-.factory('platformWebApp.assets.api', ['$resource', function ($resource) {
-    return $resource('api/platform/assets', {}, {
-        search: { method: 'GET', url: 'api/platform/assets', isArray: false },
-        createFolder: { method: 'POST', url: 'api/platform/assets/folder' },
-        move: { method: 'POST', url: 'api/platform/assets/move' },
-        uploadFromUrl: { method: 'POST', params: { url: '@url', folderUrl: '@folderUrl', name: '@name' }, isArray: true }
-    });
-}]);
-
-
-angular.module('platformWebApp')
 .controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     
     $scope.blade.isLoading = false;
@@ -23130,88 +23251,6 @@ angular.module('platformWebApp')
         $scope.gridOptions = gridOptions;
     };
 }]);
-
-angular.module('platformWebApp')
-.controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    var blade = $scope.blade;
-
-    $scope.openBlade = function () {
-        var newBlade = {
-            id: "changesChildBlade",
-            currentEntities: blade.currentEntity.operationsLog,
-            headIcon: blade.headIcon,
-            title: blade.title,
-            subtitle: 'platform.widgets.operations.blade-subtitle',
-            isExpandable: true,
-            controller: 'platformWebApp.changeLog.operationListController',
-            template: '$(Platform)/Scripts/app/changeLog/blades/operation-list.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, blade);
-    };
-}]);
-angular.module('platformWebApp')
-.factory('platformWebApp.dynamicProperties.api', ['$resource', function ($resource) {
-    return $resource('api/platform/dynamic/properties', {}, {
-        queryTypes: { url: 'api/platform/dynamic/types', isArray: true },
-        getPropertiesForType: { url: 'api/platform/dynamic/types/:typeName/properties', method: 'POST', isArray: true },
-        update: { method: 'PUT' }
-    });
-}])
-.factory('platformWebApp.dynamicProperties.dictionaryItemsApi', ['$resource', function ($resource) {
-    return $resource('api/platform/dynamic/dictionaryitems', {}, {
-        getDictionaryItems: { url: 'api/platform/dynamic/dictionaryitems/search', method: 'POST', isArray: true },
-    });
-}])
-.factory('platformWebApp.dynamicProperties.valueTypesService', function () {
-    var propertyTypes = [
-        {
-            valueType: "ShortText",
-            title: "platform.properties.short-text.title",
-            description: "platform.properties.short-text.description"
-        },
-        {
-            valueType: "LongText",
-            title: "platform.properties.long-text.title",
-            description: "platform.properties.long-text.description"
-        },
-        {
-            valueType: "Integer",
-            title: "platform.properties.integer.title",
-            description: "platform.properties.integer.description"
-        },
-        {
-            valueType: "Decimal",
-            title: "platform.properties.decimal.title",
-            description: "platform.properties.decimal.description"
-        },
-        {
-            valueType: "DateTime",
-            title: "platform.properties.date-time.title",
-            description: "platform.properties.date-time.description"
-        },
-        {
-            valueType: "Boolean",
-            title: "platform.properties.boolean.title",
-            description: "platform.properties.boolean.description"
-        },
-        {
-            valueType: "Html",
-            title: "platform.properties.html.title",
-            description: "platform.properties.html.description"
-        },
-        {
-            valueType: "Image",
-            title: "platform.properties.image.title",
-            description: "platform.properties.image.description"
-        }
-    ];
-
-    return {
-        query: function() {
-            return propertyTypes;
-        }
-    };
-});
 
 angular.module('platformWebApp')
 .controller('platformWebApp.dynamicObjectListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dynamicProperties.api', function ($scope, bladeNavigationService, dynamicPropertiesApi) {
@@ -23828,6 +23867,70 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
+.factory('platformWebApp.dynamicProperties.api', ['$resource', function ($resource) {
+    return $resource('api/platform/dynamic/properties', {}, {
+        queryTypes: { url: 'api/platform/dynamic/types', isArray: true },
+        getPropertiesForType: { url: 'api/platform/dynamic/types/:typeName/properties', method: 'POST', isArray: true },
+        update: { method: 'PUT' }
+    });
+}])
+.factory('platformWebApp.dynamicProperties.dictionaryItemsApi', ['$resource', function ($resource) {
+    return $resource('api/platform/dynamic/dictionaryitems', {}, {
+        getDictionaryItems: { url: 'api/platform/dynamic/dictionaryitems/search', method: 'POST', isArray: true },
+    });
+}])
+.factory('platformWebApp.dynamicProperties.valueTypesService', function () {
+    var propertyTypes = [
+        {
+            valueType: "ShortText",
+            title: "platform.properties.short-text.title",
+            description: "platform.properties.short-text.description"
+        },
+        {
+            valueType: "LongText",
+            title: "platform.properties.long-text.title",
+            description: "platform.properties.long-text.description"
+        },
+        {
+            valueType: "Integer",
+            title: "platform.properties.integer.title",
+            description: "platform.properties.integer.description"
+        },
+        {
+            valueType: "Decimal",
+            title: "platform.properties.decimal.title",
+            description: "platform.properties.decimal.description"
+        },
+        {
+            valueType: "DateTime",
+            title: "platform.properties.date-time.title",
+            description: "platform.properties.date-time.description"
+        },
+        {
+            valueType: "Boolean",
+            title: "platform.properties.boolean.title",
+            description: "platform.properties.boolean.description"
+        },
+        {
+            valueType: "Html",
+            title: "platform.properties.html.title",
+            description: "platform.properties.html.description"
+        },
+        {
+            valueType: "Image",
+            title: "platform.properties.image.title",
+            description: "platform.properties.image.description"
+        }
+    ];
+
+    return {
+        query: function() {
+            return propertyTypes;
+        }
+    };
+});
+
+angular.module('platformWebApp')
 .controller('platformWebApp.dynamicPropertyWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
 	$scope.blade = $scope.widget.blade;
 	$scope.openBlade = function () {
@@ -24014,7 +24117,6 @@ angular.module('platformWebApp')
         // create the uploader
         var uploader = $scope.uploader = new FileUploader({
             scope: $scope,
-            headers: { Accept: 'application/json' },
             url: 'api/platform/assets/localstorage',
             method: 'POST',
             autoUpload: true,
@@ -24251,9 +24353,6 @@ angular.module('platformWebApp')
         // the uploader
         var uploader = $scope.uploader = new FileUploader({
             scope: $scope,
-            headers: {
-                Accept: 'application/json'
-            },
             url: 'api/platform/modules/localstorage',
             autoUpload: true,
             removeAfterUpload: true
@@ -24644,6 +24743,765 @@ angular.module('platformWebApp')
     });
 }]);
 
+angular.module('platformWebApp')
+.factory('platformWebApp.toolbarService', function () {
+    var toolbarCommandsMap = [];
+    return {
+        register: function (toolbarItem, toolbarController) {
+            var map = toolbarCommandsMap;
+            if (!map[toolbarController]) {
+                map[toolbarController] = [];
+            }
+
+            map[toolbarController].push(toolbarItem);
+            map[toolbarController].sort(function (a, b) {
+                return a.index - b.index;
+            });
+        },
+        resolve: function (bladeCommands, toolbarController) {
+            var externalCommands = toolbarCommandsMap[toolbarController];
+            if (externalCommands) {
+                bladeCommands = angular.copy(bladeCommands || []);
+
+                _.each(externalCommands, function (newCommand) {
+                    var overrideIndex = _.findIndex(bladeCommands, function (bladeCommand) {
+                        return bladeCommand.name === newCommand.name;
+                    });
+                    var deleteCount = overrideIndex >= 0 ? 1 : 0;
+                    overrideIndex = overrideIndex >= 0 ? overrideIndex : newCommand.index;
+
+                    bladeCommands.splice(overrideIndex, deleteCount, newCommand);
+                });
+            }
+
+            return bladeCommands;
+        }
+    };
+})
+.directive('vaBladeContainer', ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
+    return {
+        restrict: 'E',
+        replace: true,
+        templateUrl: '$(Platform)/Scripts/app/navigation/blade/bladeContainer.tpl.html',
+        link: function (scope) {
+            scope.blades = bladeNavigationService.stateBlades();
+        }
+    }
+}])
+.directive('vaBlade', ['$compile', 'platformWebApp.bladeNavigationService', 'platformWebApp.toolbarService', '$timeout', '$document', 'platformWebApp.dialogService', function ($compile, bladeNavigationService, toolbarService, $timeout, $document, dialogService) {
+    return {
+        terminal: true,
+        priority: 100,
+        link: function (scope, element) {
+            element.attr('ng-controller', scope.blade.controller);
+            element.attr('id', scope.blade.id);
+            element.attr('ng-model', "blade");
+            element.removeAttr("va-blade");
+            $compile(element)(scope);
+            scope.blade.$scope = scope;
+
+            var mainContent = $('.cnt');
+            var currentBlade = $(element).parent();
+            var parentBlade = currentBlade.prev();
+
+            if (!scope.blade.disableOpenAnimation) {
+                scope.blade.animated = true;
+                $timeout(function () {
+                    scope.blade.animated = false;
+                }, 250);
+            }
+
+            function scrollContent(scrollToBlade, scrollToElement) {
+                if (!scrollToBlade) {
+                    scrollToBlade = scope.blade;
+                }
+                if (!scrollToElement) {
+                    scrollToElement = currentBlade;
+                }
+
+                // we can't just get current blade position (because of animation) or calculate it
+                // via parent position + parent width (because we may open parent and child blade at the same time)
+                // instead, we need to use sum of width of all blades
+                var previousBlades = scrollToElement.prevAll();
+                var previousBladesWidthSum = 0;
+                previousBlades.each(function () {
+                    previousBladesWidthSum += $(this).outerWidth();
+                });
+                var scrollLeft = previousBladesWidthSum + scrollToElement.outerWidth(!(scrollToBlade.isExpanded || scrollToBlade.isMaximized)) - mainContent.width();
+                mainContent.animate({ scrollLeft: (scrollLeft > 0 ? scrollLeft : 0) }, 500);
+            }
+
+            var updateSize = function () {
+                var contentBlock = currentBlade.find(".blade-content");
+                var containerBlock = currentBlade.find(".blade-container");
+
+                var bladeWidth = "";
+                var bladeMinWidth = "";
+
+                if ((scope.blade.isExpandable && scope.blade.isExpanded) || (!scope.blade.isExpandable && scope.blade.isMaximized)) {
+                    // minimal required width + container padding
+                    bladeMinWidth = 'calc(' + contentBlock.css("min-width") + ' + ' + parseInt(containerBlock.outerWidth() - containerBlock.width()) + 'px)';
+                }
+
+                if (scope.blade.isExpandable && scope.blade.isExpanded) {
+                    var offset = parentBlade.length > 0 ? parentBlade.width() : 0;
+                    // free space of view - parent blade size (if exist)
+                    bladeWidth = 'calc(100% - ' + offset + 'px)';
+                } else if (!scope.blade.isExpandable && scope.blade.isMaximized) {
+                    currentBlade.attr('data-width', currentBlade.outerWidth());
+                    bladeWidth = '100%';
+                }
+
+                currentBlade.width(bladeWidth);
+                currentBlade.css('min-width', bladeMinWidth);
+
+                setVisibleToolsLimit();
+            }
+
+            scope.$watch('blade.isExpanded', function () {
+                // we must recalculate position only at next digest cycle,
+                // because at this time blade UI is not fully (re)initialized
+                // for example, ng-class set classes after this watch called
+                $timeout(updateSize, 0, false);
+            });
+
+            scope.$on('$includeContentLoaded', function (event, src) {
+                if (src === scope.blade.template) {
+                    // see above
+                    $timeout(function () {
+                        updateSize();
+                        scrollContent();
+                    }, 0, false);
+                }
+            });
+
+            scope.bladeMaximize = function () {
+                scope.blade.isMaximized = true;
+                updateSize();
+                scrollContent();
+            };
+
+            scope.bladeMinimize = function () {
+                scope.blade.isMaximized = false;
+                updateSize();
+            };
+
+            scope.bladeClose = function (onAfterClose) {
+                bladeNavigationService.closeBlade(scope.blade, onAfterClose, function (callback) {
+                    scope.blade.animated = true;
+                    scope.blade.closing = true;
+                    $timeout(function () {
+                        currentBlade.remove();
+                        scrollContent(scope.blade.parentBlade, parentBlade);
+                        callback();
+                    }, 125, false);
+                });
+            };
+
+            scope.$watch('blade.toolbarCommands', function (toolbarCommands) {
+                scope.resolvedToolbarCommands = toolbarService.resolve(toolbarCommands, scope.blade.controller);
+
+                setVisibleToolsLimit();
+            }, true);
+
+            var toolbar = currentBlade.find(".blade-toolbar .menu.__inline");
+
+            function setVisibleToolsLimit() {
+                scope.toolsPerLineCount = scope.resolvedToolbarCommands ? scope.resolvedToolbarCommands.length : 1;
+
+                $timeout(function () {
+                    if (toolbar.height() > 55 && scope.toolsPerLineCount > 1) {
+                        var maxToolbarWidth = toolbar.width() - 46; // the 'more' button is 46px wide
+                        //console.log(toolbar.width() + 'maxToolbarWidth: ' + maxToolbarWidth);
+                        var toolsWidth = 0;
+                        var lis = toolbar.find("li");
+                        var i = 0;
+                        while (maxToolbarWidth > toolsWidth && lis.length > i) {
+                            toolsWidth += lis[i].clientWidth;
+                            i++;
+                        }
+                        scope.toolsPerLineCount = i - 1;
+                    }
+                }, 220);
+            }
+
+            function handleClickEvent() {
+                setVisibleToolsLimit();
+                $document.unbind('click', handleClickEvent);
+            }
+
+            scope.showMoreTools = function (event) {
+                scope.toolsPerLineCount = scope.resolvedToolbarCommands.length;
+
+                event.stopPropagation();
+                $document.bind('click', handleClickEvent);
+            };
+
+            scope.showErrorDetails = function () {
+                var dialog = { id: "errorDetails" };
+                if (scope.blade.errorBody != undefined)
+                    dialog.message = scope.blade.errorBody;
+                dialogService.showDialog(dialog, '$(Platform)/Scripts/app/modularity/dialogs/errorDetails-dialog.tpl.html', 'platformWebApp.confirmDialogController');
+            };
+        }
+    }
+}])
+.factory('platformWebApp.bladeNavigationService', ['platformWebApp.authService', '$timeout', '$state', 'platformWebApp.dialogService', function (authService, $timeout, $state, dialogService) {
+
+    function showConfirmationIfNeeded(showConfirmation, canSave, blade, saveChangesCallback, closeCallback, saveTitle, saveMessage) {
+        if (showConfirmation) {
+            var dialog = { id: "confirmCurrentBladeClose" };
+
+            if (canSave) {
+                dialog.title = saveTitle;
+                dialog.message = saveMessage;
+            } else {
+                dialog.title = "Warning";
+                dialog.message = "Validation failed for this object. Will you continue editing and save later?";
+            }
+
+            dialog.callback = function (userChoseYes) {
+                if (canSave) {
+                    if (userChoseYes) {
+                        saveChangesCallback();
+                    }
+                    closeCallback();
+                } else if (!userChoseYes) {
+                    closeCallback();
+                }
+            };
+
+            dialogService.showConfirmationDialog(dialog);
+        }
+        else {
+            closeCallback();
+        }
+    }
+
+    var service = {
+        blades: [],
+        currentBlade: undefined,
+        showConfirmationIfNeeded: showConfirmationIfNeeded,
+        closeBlade: function (blade, callback, onBeforeClosing) {
+            //Need in case a copy was passed
+            blade = service.findBlade(blade.id) || blade;
+
+            // close all children
+            service.closeChildrenBlades(blade, function () {
+                var doCloseBlade = function () {
+                    if (angular.isFunction(onBeforeClosing)) {
+                        onBeforeClosing(doCloseBladeFinal);
+                    } else {
+                        doCloseBladeFinal();
+                    }
+                }
+
+                var doCloseBladeFinal = function () {
+                    var idx = service.stateBlades().indexOf(blade);
+                    if (idx >= 0) service.stateBlades().splice(idx, 1);
+
+                    //remove blade from children collection
+                    if (angular.isDefined(blade.parentBlade)) {
+                        var childIdx = blade.parentBlade.childrenBlades.indexOf(blade);
+                        if (childIdx >= 0) {
+                            blade.parentBlade.childrenBlades.splice(childIdx, 1);
+                        }
+                    }
+                    if (angular.isFunction(callback)) {
+                        callback();
+                    };
+                };
+
+                if (angular.isFunction(blade.onClose)) {
+                    blade.onClose(doCloseBlade);
+                }
+                else {
+                    doCloseBlade();
+                }
+            });
+
+            if (blade.parentBlade && blade.parentBlade.isExpandable) {
+                blade.parentBlade.isExpanded = true;
+                if (angular.isFunction(blade.parentBlade.onExpand)) {
+                    blade.parentBlade.onExpand();
+                }
+            }
+        },
+        closeChildrenBlades: function (blade, callback) {
+            if (blade && _.any(blade.childrenBlades)) {
+                angular.forEach(blade.childrenBlades.slice(), function (child) {
+                    service.closeBlade(child, function () {
+                        // show only when all children were closed
+                        if (blade.childrenBlades.length == 0 && angular.isFunction(callback)) {
+                            callback();
+                        }
+                    });
+                });
+            } else if (angular.isFunction(callback)) {
+                callback();
+            }
+        },
+        stateBlades: function (stateName) {
+            if (angular.isUndefined(stateName)) {
+                stateName = $state.current.name;
+            }
+
+            if (angular.isUndefined(service.blades[stateName])) {
+                service.blades[stateName] = [];
+            }
+
+            return service.blades[stateName];
+        },
+        findBlade: function (id) {
+            var found;
+            angular.forEach(service.stateBlades(), function (blade) {
+                if (blade.id == id) {
+                    found = blade;
+                }
+            });
+
+            return found;
+        },
+        showBlade: function (blade, parentBlade) {
+
+            //If it is first blade for state try to open saved blades
+            //var firstStateBlade = service.stateBlades($state.current.name)[0];
+            //if (angular.isDefined(firstStateBlade) && firstStateBlade.id == blade.id) {
+            //    service.currentBlade = firstStateBlade;
+            //    return;
+            //}
+            blade.errorBody = "";
+            blade.isLoading = true;
+            blade.parentBlade = parentBlade;
+            blade.childrenBlades = [];
+            if (parentBlade) {
+                blade.headIcon = parentBlade.headIcon;
+                blade.updatePermission = parentBlade.updatePermission;
+            }
+            //copy securityscopes from parent blade
+            if (parentBlade != null && parentBlade.securityScopes) {
+                //need merge scopes
+                if (angular.isArray(blade.securityScopes) && angular.isArray(parentBlade.securityScopes)) {
+                    blade.securityScopes = parentBlade.securityScopes.concat(blade.securityScopes);
+                }
+                else {
+                    blade.securityScopes = parentBlade.securityScopes;
+                }
+            }
+
+            var existingBlade = service.findBlade(blade.id);
+
+            //Show blade in previous location
+            if (existingBlade != undefined) {
+                //store prev blade x-index
+                blade.xindex = existingBlade.xindex;
+            } else if (!angular.isDefined(blade.xindex)) {
+                //Show blade as last one by default
+                blade.xindex = service.stateBlades().length;
+            }
+
+            var showBlade = function () {
+                if (angular.isDefined(parentBlade)) {
+                    blade.xindex = service.stateBlades().indexOf(parentBlade) + 1;
+                    parentBlade.childrenBlades.push(blade);
+                }
+                //show blade in same place where it was
+                service.stateBlades().splice(Math.min(blade.xindex, service.stateBlades().length), 0, blade);
+                service.currentBlade = blade;
+            };
+
+            if (angular.isDefined(parentBlade) && parentBlade.childrenBlades.length > 0) {
+                service.closeChildrenBlades(parentBlade, showBlade);
+            }
+            else if (angular.isDefined(existingBlade)) {
+                service.closeBlade(existingBlade, showBlade);
+            }
+            else {
+                $timeout(function() {
+                    showBlade();
+                });
+            }
+
+            if (parentBlade && parentBlade.isExpandable && parentBlade.isExpanded) {
+                parentBlade.isExpanded = false;
+                if (angular.isFunction(parentBlade.onCollapse)) {
+                    parentBlade.onCollapse();
+                }
+            }
+
+            if (blade.isExpandable) {
+                blade.isExpanded = true;
+                if (angular.isFunction(blade.onExpand)) {
+                    blade.onExpand();
+                }
+            }
+
+            blade.hasUpdatePermission = function () {
+                return authService.checkPermission(blade.updatePermission, blade.securityScopes);
+            };
+        },
+        checkPermission: authService.checkPermission,
+        setError: function (error, blade) {
+            if (blade && error) {
+                blade.isLoading = false;
+                blade.error = error.status && error.statusText ? error.status + ': ' + error.statusText : error;
+                blade.errorBody = error.data ? error.data.exceptionMessage : blade.errorBody;
+            }
+        }
+    };
+
+    return service;
+}]);
+
+angular.module('platformWebApp')
+    .directive('vaBreadcrumb', [
+        'platformWebApp.breadcrumbHistoryService', function (breadcrumbHistoryService) {
+            return {
+                restrict: 'E',
+                require: 'ngModel',
+                replace: true,
+                scope: {
+                    bladeId: '='
+                },
+        templateUrl: '$(Platform)/Scripts/app/navigation/breadcrumbs/breadcrumbs.tpl.html',
+                link: function (scope, element, attr, ngModelController) {
+                    scope.breadcrumbs = [];
+                    ngModelController.$render = function () {
+                        scope.breadcrumbs = ngModelController.$modelValue;
+                    };
+
+                    scope.innerNavigate = function (breadcrumb) {
+                        breadcrumb.navigate(breadcrumb);
+                    };
+
+                    scope.canNavigateBack = function () {
+                        return breadcrumbHistoryService.check(scope.bladeId);
+                    };
+
+                    scope.navigateBack = function () {
+                        if (scope.canNavigateBack()) {
+                            var breadcrumb = breadcrumbHistoryService.pop(scope.bladeId);
+                            breadcrumb.navigate(breadcrumb);
+                        }
+                    };
+                    scope.$watchCollection('breadcrumbs', function (newItems) {
+                        breadcrumbHistoryService.push(newItems, scope.bladeId);
+                    });
+                }
+            }
+        }
+    ])
+    .factory('platformWebApp.breadcrumbHistoryService', function () {
+        var map = {};
+
+        function breadcrumbsEqual(x,y) {
+            return x && y && x.id === y.id && x.name === y.name;
+        }
+
+        return {
+            push: function (breadcrumbs, id) {
+                var history = map[id];
+                if (!history) {
+                    map[id] = history = {
+                        ignoreNextAction: false,
+                        records: []
+                    };
+                }
+
+                var currentBreadcrumb = _.last(breadcrumbs);
+
+                if (history.ignoreNextAction) {
+                    history.ignoreNextAction = false;
+                } else if (history.currentBreadcrumb &&
+                            !breadcrumbsEqual(history.currentBreadcrumb, currentBreadcrumb) &&
+                            !breadcrumbsEqual(history.currentBreadcrumb, _.last(history.records))) {
+                    history.records.push(history.currentBreadcrumb);
+                }
+
+                if (currentBreadcrumb) {
+                    history.currentBreadcrumb = currentBreadcrumb;
+                }
+            },
+
+            check: function (id) {
+                return map[id] && _.any(map[id].records);
+            },
+
+            pop: function (id) {
+                var retVal = undefined;
+                var history = map[id];
+                if (_.any(history.records)) {
+                    retVal = history.records.pop();
+                    history.ignoreNextAction = true;
+                }
+
+                return retVal;
+            }
+        };
+    });
+angular.module('platformWebApp')
+.factory('platformWebApp.mainMenuService', [function () {
+
+    var menuItems = [];
+
+    function sortByGroupFirst(a, b) {
+        return a.path.split('/').length - b.path.split('/').length;
+    };
+
+    function sortByPriority(a, b) {
+        if (angular.isDefined(a.priority) && angular.isDefined(b.priority)) {
+            return a.priority < b.priority ? -1 : a.priority > b.priority ? 1 : 0;
+        }
+        return -1;
+    };
+
+    function constructList() {
+        angular.forEach(menuItems.sort(sortByGroupFirst), function (menuItem) {
+            if (!angular.isDefined(menuItem.group)) {
+                menuItem.group = null;
+            }
+            if (menuItem.group == null) {
+                var pathParts = menuItem.path.split('/');
+                var groupPath = null;
+                if (pathParts.length > 1) {
+                    pathParts.pop();
+                    groupPath = pathParts.join('/');
+                }
+                var group = _.find(menuItems, function (menuItem) { return menuItem.path === groupPath });
+                if (angular.isDefined(group)) {
+                    menuItem.group = group;
+                }
+            }
+        });
+        menuItems.sort(sortByPriority);
+    };
+
+    function addMenuItem(menuItem) {
+        resetMenuItemDefaults(menuItem);
+        menuItems.push(menuItem);
+        constructList();
+    }
+
+    function removeMenuItem(menuItem) {
+        var index = menuItems.indexOf(menuItem);
+        menuItems.splice(index, 1);
+        constructList();
+    }
+
+    function resetMenuItemDefaults(menuItem) {
+        // set defaults
+        if (!angular.isDefined(menuItem.priority)) {
+            menuItem.priority = Number.NaN;
+        }
+        if (!angular.isDefined(menuItem.children)) {
+            menuItem.children = [];
+        }
+        if (!angular.isDefined(menuItem.isAlwaysOnBar)) {
+            menuItem.isAlwaysOnBar = false;
+        }
+        menuItem.isCollapsed = false;
+        menuItem.isFavorite = false;
+            // place at the end
+        menuItem.order = Number.MAX_SAFE_INTEGER;
+    }
+
+    function findByPath(path) {
+        return _.find(menuItems, function (menuItem) { return menuItem.path === path });
+    };
+
+    var retVal = {
+        menuItems: menuItems,
+        addMenuItem: addMenuItem,
+        removeMenuItem: removeMenuItem,
+        resetMenuItemDefaults: resetMenuItemDefaults,
+        findByPath: findByPath
+    };
+    return retVal;
+}])
+.directive('vaMainMenu', ["$document",
+    function ($document) {
+
+    return {
+        restrict: 'E',
+        replace: true,
+        transclude: true,
+        require: 'ngModel',
+        scope: {
+            onMenuChanged: "&"
+        },
+        templateUrl: '$(Platform)/Scripts/app/navigation/menu/mainMenu.tpl.html',
+        link: function (scope, element, attr, ngModelController, linker) {
+            scope.menu = ngModelController.$modelValue;
+            ngModelController.$render = function () {
+                scope.menu = ngModelController.$modelValue;
+                updateFavorites();
+                scope.$watch(function () {
+                    return _.filter(scope.menu.items, function (x) { return x.isFavorite && !x.isAlwaysOnBar; });
+                }, function () { updateFavorites(); }, true);
+            };            
+
+            scope.selectItem = function (menuItem) {
+                if (scope.showSubMenu && scope.currentMenuItem === menuItem) {
+                    scope.showSubMenu = false;
+                } else {
+                    scope.currentMenuItem = menuItem;
+                    scope.showSubMenu = menuItem.children.length > 0 || menuItem.path === "more";
+                }
+                if (angular.isDefined(menuItem.action)) {
+                    menuItem.action();
+                }
+            };        
+         
+            function handleKeyUpEvent(event) {
+                if (scope.showSubMenu && event.keyCode === 27) {
+                    scope.$apply(function () {
+                        scope.showSubMenu = false;
+                    });
+                }
+            }
+
+            function handleClickEvent(event) {
+                var dropdownElement = $document.find('.nav-bar .dropdown');
+                var hadDropdownElement = $document.find('.__has-dropdown');
+                if (scope.showSubMenu && !(dropdownElement.is(event.target) || dropdownElement.has(event.target).length > 0 ||
+                                           hadDropdownElement.is(event.target) || hadDropdownElement.has(event.target).length > 0)) {
+                    scope.$apply(function () {
+                        scope.showSubMenu = false;
+                    });
+                }
+            }
+
+            $document.bind('keyup', handleKeyUpEvent);
+            $document.bind('click', handleClickEvent);
+
+            scope.$on('$destroy', function () {
+                $document.unbind('keyup', handleKeyUpEvent);
+                $document.unbind('click', handleClickEvent);
+            });
+
+            // required by ui-sortable: we can't use filters with it
+            // https://github.com/angular-ui/ui-sortable#usage
+            function updateFavorites() {
+                scope.dynamicMenuItems = _.sortBy(_.filter(scope.menu.items, function (x) { return x.isFavorite || x.path === "more"; }), function (x) { return x.order; });
+                raiseOnMenuChanged();
+            }
+
+            function raiseOnMenuChanged() {
+                _.throttle(scope.onMenuChanged({ menu: scope.menu }), 100);
+            };
+            scope.toggleCollapsed = function () {
+                scope.menu.isCollapsed = !scope.menu.isCollapsed;
+                raiseOnMenuChanged();
+            };
+
+            scope.toggleFavorite = function (menuItem) {
+                menuItem.isFavorite = !menuItem.isFavorite;
+                // clear order when removed from favorites
+                if (!menuItem.isFavorite) {
+                    menuItem.order = Number.MAX_SAFE_INTEGER;
+                }
+                var favorites = _.sortBy(_.filter(scope.menu.items, function (x) { return x.isFavorite }), function (x) { return x.order; });
+                // re-calculate order
+                for (var i = 0; i < favorites.length; i++) {
+                    favorites[i].order = i;
+                }
+                // Do not call the callback function to notify what favorites changed.
+                // We're already do that because we call updateFavorites (which call the calback) in ngModelController.$render
+            };
+
+            scope.sortableOptions = {
+                axis: "y",
+                cursor: "move",
+                // always use container with tolerance
+                // because otherwise draggable item can't replace top item:
+                // where is no space between top item and container top border
+                containment: ".outer-wrapper",
+                items: ".__draggable",
+                tolerance: "pointer",
+                stop: function (e, ui) {
+                    // re-calculate order for all favorites
+                    // we may use scope.favorites or source model of ui-sortable
+                    // I'm prefer last, to avoid dependence on directive's model
+                    var favorites = ui.item.sortable.sourceModel;
+                    for (var i = 0; i < favorites.length; i++) {
+                        favorites[i].order = i;
+                    }
+                }
+            };
+        }
+    }
+}]).directive('vaFavorites', function () {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attr) {
+            $(element).keydown(function (e) {
+                if (e.shiftKey && e.keyCode === 32) { // Shift + Space
+                    $(e.target).find(".list-fav").click();
+                }
+            });
+        }
+    }
+});
+
+angular.module('platformWebApp')
+.factory('platformWebApp.widgetService', function () {
+
+    var retVal = {
+        widgetsMap: [],
+        registerWidget: function (widget, containerName) {
+            if (!this.widgetsMap[containerName]) {
+                this.widgetsMap[containerName] = [];
+            }
+            this.widgetsMap[containerName].push(widget);
+        }
+
+    };
+    return retVal;
+})
+.directive('vaWidgetContainer', ['$compile', '$localStorage', 'platformWebApp.widgetService', function ($compile, $localStorage, widgetService) {
+    return {
+        restrict: 'E',
+        replace: true,
+        templateUrl: '$(Platform)/Scripts/app/navigation/widget/widgetContainer.tpl.html',
+        scope: {
+            data: '=?',
+            gridsterOpts: '=?',
+            group: '@',
+            blade: '='
+        },
+        link: function (scope, element, attr) {
+            if (!scope.gridsterOpts) { scope.gridsterOpts = {}; }
+            scope.$storage = $localStorage;
+
+            scope.$watch('gridsterOpts', function () {
+                var groupWidgets = _.filter(widgetService.widgetsMap[scope.group], function (w) { return !angular.isFunction(w.isVisible) || w.isVisible(scope.blade); });
+                scope.widgets = angular.copy(groupWidgets);
+                angular.forEach(scope.widgets, function (w) {
+                    w.blade = scope.blade;
+                    w.widgetsInContainer = scope.widgets;
+                });
+            }, true);
+
+            scope.getKey = function (prefix, widget) {
+                return (prefix + widget.controller + widget.template + scope.group).hashCode();
+            }
+        }
+    }
+}])
+.directive('vaWidget', ['$compile', 'platformWebApp.widgetService', 'platformWebApp.authService', function ($compile, widgetService, authService) {
+    return {
+        link: function (scope, element, attr) {
+
+            if (!scope.widget.permission || authService.checkPermission(scope.widget.permission)) {
+                element.attr('ng-controller', scope.widget.controller);
+                element.attr('ng-model', 'widget');
+                element.removeAttr("va-widget");
+                $compile(element)(scope);
+            }
+
+        }
+    }
+}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.notificationsJournalDetailtsController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.notifications', function ($scope, bladeNavigationService, notifications) {
 	var blade = $scope.blade;
@@ -25490,765 +26348,6 @@ angular.module('platformWebApp')
 	});
 }]);
 angular.module('platformWebApp')
-.factory('platformWebApp.toolbarService', function () {
-    var toolbarCommandsMap = [];
-    return {
-        register: function (toolbarItem, toolbarController) {
-            var map = toolbarCommandsMap;
-            if (!map[toolbarController]) {
-                map[toolbarController] = [];
-            }
-
-            map[toolbarController].push(toolbarItem);
-            map[toolbarController].sort(function (a, b) {
-                return a.index - b.index;
-            });
-        },
-        resolve: function (bladeCommands, toolbarController) {
-            var externalCommands = toolbarCommandsMap[toolbarController];
-            if (externalCommands) {
-                bladeCommands = angular.copy(bladeCommands || []);
-
-                _.each(externalCommands, function (newCommand) {
-                    var overrideIndex = _.findIndex(bladeCommands, function (bladeCommand) {
-                        return bladeCommand.name === newCommand.name;
-                    });
-                    var deleteCount = overrideIndex >= 0 ? 1 : 0;
-                    overrideIndex = overrideIndex >= 0 ? overrideIndex : newCommand.index;
-
-                    bladeCommands.splice(overrideIndex, deleteCount, newCommand);
-                });
-            }
-
-            return bladeCommands;
-        }
-    };
-})
-.directive('vaBladeContainer', ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
-    return {
-        restrict: 'E',
-        replace: true,
-        templateUrl: '$(Platform)/Scripts/app/navigation/blade/bladeContainer.tpl.html',
-        link: function (scope) {
-            scope.blades = bladeNavigationService.stateBlades();
-        }
-    }
-}])
-.directive('vaBlade', ['$compile', 'platformWebApp.bladeNavigationService', 'platformWebApp.toolbarService', '$timeout', '$document', 'platformWebApp.dialogService', function ($compile, bladeNavigationService, toolbarService, $timeout, $document, dialogService) {
-    return {
-        terminal: true,
-        priority: 100,
-        link: function (scope, element) {
-            element.attr('ng-controller', scope.blade.controller);
-            element.attr('id', scope.blade.id);
-            element.attr('ng-model', "blade");
-            element.removeAttr("va-blade");
-            $compile(element)(scope);
-            scope.blade.$scope = scope;
-
-            var mainContent = $('.cnt');
-            var currentBlade = $(element).parent();
-            var parentBlade = currentBlade.prev();
-
-            if (!scope.blade.disableOpenAnimation) {
-                scope.blade.animated = true;
-                $timeout(function () {
-                    scope.blade.animated = false;
-                }, 250);
-            }
-
-            function scrollContent(scrollToBlade, scrollToElement) {
-                if (!scrollToBlade) {
-                    scrollToBlade = scope.blade;
-                }
-                if (!scrollToElement) {
-                    scrollToElement = currentBlade;
-                }
-
-                // we can't just get current blade position (because of animation) or calculate it
-                // via parent position + parent width (because we may open parent and child blade at the same time)
-                // instead, we need to use sum of width of all blades
-                var previousBlades = scrollToElement.prevAll();
-                var previousBladesWidthSum = 0;
-                previousBlades.each(function () {
-                    previousBladesWidthSum += $(this).outerWidth();
-                });
-                var scrollLeft = previousBladesWidthSum + scrollToElement.outerWidth(!(scrollToBlade.isExpanded || scrollToBlade.isMaximized)) - mainContent.width();
-                mainContent.animate({ scrollLeft: (scrollLeft > 0 ? scrollLeft : 0) }, 500);
-            }
-
-            var updateSize = function () {
-                var contentBlock = currentBlade.find(".blade-content");
-                var containerBlock = currentBlade.find(".blade-container");
-
-                var bladeWidth = "";
-                var bladeMinWidth = "";
-
-                if ((scope.blade.isExpandable && scope.blade.isExpanded) || (!scope.blade.isExpandable && scope.blade.isMaximized)) {
-                    // minimal required width + container padding
-                    bladeMinWidth = 'calc(' + contentBlock.css("min-width") + ' + ' + parseInt(containerBlock.outerWidth() - containerBlock.width()) + 'px)';
-                }
-
-                if (scope.blade.isExpandable && scope.blade.isExpanded) {
-                    var offset = parentBlade.length > 0 ? parentBlade.width() : 0;
-                    // free space of view - parent blade size (if exist)
-                    bladeWidth = 'calc(100% - ' + offset + 'px)';
-                } else if (!scope.blade.isExpandable && scope.blade.isMaximized) {
-                    currentBlade.attr('data-width', currentBlade.outerWidth());
-                    bladeWidth = '100%';
-                }
-
-                currentBlade.width(bladeWidth);
-                currentBlade.css('min-width', bladeMinWidth);
-
-                setVisibleToolsLimit();
-            }
-
-            scope.$watch('blade.isExpanded', function () {
-                // we must recalculate position only at next digest cycle,
-                // because at this time blade UI is not fully (re)initialized
-                // for example, ng-class set classes after this watch called
-                $timeout(updateSize, 0, false);
-            });
-
-            scope.$on('$includeContentLoaded', function (event, src) {
-                if (src === scope.blade.template) {
-                    // see above
-                    $timeout(function () {
-                        updateSize();
-                        scrollContent();
-                    }, 0, false);
-                }
-            });
-
-            scope.bladeMaximize = function () {
-                scope.blade.isMaximized = true;
-                updateSize();
-                scrollContent();
-            };
-
-            scope.bladeMinimize = function () {
-                scope.blade.isMaximized = false;
-                updateSize();
-            };
-
-            scope.bladeClose = function (onAfterClose) {
-                bladeNavigationService.closeBlade(scope.blade, onAfterClose, function (callback) {
-                    scope.blade.animated = true;
-                    scope.blade.closing = true;
-                    $timeout(function () {
-                        currentBlade.remove();
-                        scrollContent(scope.blade.parentBlade, parentBlade);
-                        callback();
-                    }, 125, false);
-                });
-            };
-
-            scope.$watch('blade.toolbarCommands', function (toolbarCommands) {
-                scope.resolvedToolbarCommands = toolbarService.resolve(toolbarCommands, scope.blade.controller);
-
-                setVisibleToolsLimit();
-            }, true);
-
-            var toolbar = currentBlade.find(".blade-toolbar .menu.__inline");
-
-            function setVisibleToolsLimit() {
-                scope.toolsPerLineCount = scope.resolvedToolbarCommands ? scope.resolvedToolbarCommands.length : 1;
-
-                $timeout(function () {
-                    if (toolbar.height() > 55 && scope.toolsPerLineCount > 1) {
-                        var maxToolbarWidth = toolbar.width() - 46; // the 'more' button is 46px wide
-                        //console.log(toolbar.width() + 'maxToolbarWidth: ' + maxToolbarWidth);
-                        var toolsWidth = 0;
-                        var lis = toolbar.find("li");
-                        var i = 0;
-                        while (maxToolbarWidth > toolsWidth && lis.length > i) {
-                            toolsWidth += lis[i].clientWidth;
-                            i++;
-                        }
-                        scope.toolsPerLineCount = i - 1;
-                    }
-                }, 220);
-            }
-
-            function handleClickEvent() {
-                setVisibleToolsLimit();
-                $document.unbind('click', handleClickEvent);
-            }
-
-            scope.showMoreTools = function (event) {
-                scope.toolsPerLineCount = scope.resolvedToolbarCommands.length;
-
-                event.stopPropagation();
-                $document.bind('click', handleClickEvent);
-            };
-
-            scope.showErrorDetails = function () {
-                var dialog = { id: "errorDetails" };
-                if (scope.blade.errorBody != undefined)
-                    dialog.message = scope.blade.errorBody;
-                dialogService.showDialog(dialog, '$(Platform)/Scripts/app/modularity/dialogs/errorDetails-dialog.tpl.html', 'platformWebApp.confirmDialogController');
-            };
-        }
-    }
-}])
-.factory('platformWebApp.bladeNavigationService', ['platformWebApp.authService', '$timeout', '$state', 'platformWebApp.dialogService', function (authService, $timeout, $state, dialogService) {
-
-    function showConfirmationIfNeeded(showConfirmation, canSave, blade, saveChangesCallback, closeCallback, saveTitle, saveMessage) {
-        if (showConfirmation) {
-            var dialog = { id: "confirmCurrentBladeClose" };
-
-            if (canSave) {
-                dialog.title = saveTitle;
-                dialog.message = saveMessage;
-            } else {
-                dialog.title = "Warning";
-                dialog.message = "Validation failed for this object. Will you continue editing and save later?";
-            }
-
-            dialog.callback = function (userChoseYes) {
-                if (canSave) {
-                    if (userChoseYes) {
-                        saveChangesCallback();
-                    }
-                    closeCallback();
-                } else if (!userChoseYes) {
-                    closeCallback();
-                }
-            };
-
-            dialogService.showConfirmationDialog(dialog);
-        }
-        else {
-            closeCallback();
-        }
-    }
-
-    var service = {
-        blades: [],
-        currentBlade: undefined,
-        showConfirmationIfNeeded: showConfirmationIfNeeded,
-        closeBlade: function (blade, callback, onBeforeClosing) {
-            //Need in case a copy was passed
-            blade = service.findBlade(blade.id) || blade;
-
-            // close all children
-            service.closeChildrenBlades(blade, function () {
-                var doCloseBlade = function () {
-                    if (angular.isFunction(onBeforeClosing)) {
-                        onBeforeClosing(doCloseBladeFinal);
-                    } else {
-                        doCloseBladeFinal();
-                    }
-                }
-
-                var doCloseBladeFinal = function () {
-                    var idx = service.stateBlades().indexOf(blade);
-                    if (idx >= 0) service.stateBlades().splice(idx, 1);
-
-                    //remove blade from children collection
-                    if (angular.isDefined(blade.parentBlade)) {
-                        var childIdx = blade.parentBlade.childrenBlades.indexOf(blade);
-                        if (childIdx >= 0) {
-                            blade.parentBlade.childrenBlades.splice(childIdx, 1);
-                        }
-                    }
-                    if (angular.isFunction(callback)) {
-                        callback();
-                    };
-                };
-
-                if (angular.isFunction(blade.onClose)) {
-                    blade.onClose(doCloseBlade);
-                }
-                else {
-                    doCloseBlade();
-                }
-            });
-
-            if (blade.parentBlade && blade.parentBlade.isExpandable) {
-                blade.parentBlade.isExpanded = true;
-                if (angular.isFunction(blade.parentBlade.onExpand)) {
-                    blade.parentBlade.onExpand();
-                }
-            }
-        },
-        closeChildrenBlades: function (blade, callback) {
-            if (blade && _.any(blade.childrenBlades)) {
-                angular.forEach(blade.childrenBlades.slice(), function (child) {
-                    service.closeBlade(child, function () {
-                        // show only when all children were closed
-                        if (blade.childrenBlades.length == 0 && angular.isFunction(callback)) {
-                            callback();
-                        }
-                    });
-                });
-            } else if (angular.isFunction(callback)) {
-                callback();
-            }
-        },
-        stateBlades: function (stateName) {
-            if (angular.isUndefined(stateName)) {
-                stateName = $state.current.name;
-            }
-
-            if (angular.isUndefined(service.blades[stateName])) {
-                service.blades[stateName] = [];
-            }
-
-            return service.blades[stateName];
-        },
-        findBlade: function (id) {
-            var found;
-            angular.forEach(service.stateBlades(), function (blade) {
-                if (blade.id == id) {
-                    found = blade;
-                }
-            });
-
-            return found;
-        },
-        showBlade: function (blade, parentBlade) {
-
-            //If it is first blade for state try to open saved blades
-            //var firstStateBlade = service.stateBlades($state.current.name)[0];
-            //if (angular.isDefined(firstStateBlade) && firstStateBlade.id == blade.id) {
-            //    service.currentBlade = firstStateBlade;
-            //    return;
-            //}
-            blade.errorBody = "";
-            blade.isLoading = true;
-            blade.parentBlade = parentBlade;
-            blade.childrenBlades = [];
-            if (parentBlade) {
-                blade.headIcon = parentBlade.headIcon;
-                blade.updatePermission = parentBlade.updatePermission;
-            }
-            //copy securityscopes from parent blade
-            if (parentBlade != null && parentBlade.securityScopes) {
-                //need merge scopes
-                if (angular.isArray(blade.securityScopes) && angular.isArray(parentBlade.securityScopes)) {
-                    blade.securityScopes = parentBlade.securityScopes.concat(blade.securityScopes);
-                }
-                else {
-                    blade.securityScopes = parentBlade.securityScopes;
-                }
-            }
-
-            var existingBlade = service.findBlade(blade.id);
-
-            //Show blade in previous location
-            if (existingBlade != undefined) {
-                //store prev blade x-index
-                blade.xindex = existingBlade.xindex;
-            } else if (!angular.isDefined(blade.xindex)) {
-                //Show blade as last one by default
-                blade.xindex = service.stateBlades().length;
-            }
-
-            var showBlade = function () {
-                if (angular.isDefined(parentBlade)) {
-                    blade.xindex = service.stateBlades().indexOf(parentBlade) + 1;
-                    parentBlade.childrenBlades.push(blade);
-                }
-                //show blade in same place where it was
-                service.stateBlades().splice(Math.min(blade.xindex, service.stateBlades().length), 0, blade);
-                service.currentBlade = blade;
-            };
-
-            if (angular.isDefined(parentBlade) && parentBlade.childrenBlades.length > 0) {
-                service.closeChildrenBlades(parentBlade, showBlade);
-            }
-            else if (angular.isDefined(existingBlade)) {
-                service.closeBlade(existingBlade, showBlade);
-            }
-            else {
-                $timeout(function() {
-                    showBlade();
-                });
-            }
-
-            if (parentBlade && parentBlade.isExpandable && parentBlade.isExpanded) {
-                parentBlade.isExpanded = false;
-                if (angular.isFunction(parentBlade.onCollapse)) {
-                    parentBlade.onCollapse();
-                }
-            }
-
-            if (blade.isExpandable) {
-                blade.isExpanded = true;
-                if (angular.isFunction(blade.onExpand)) {
-                    blade.onExpand();
-                }
-            }
-
-            blade.hasUpdatePermission = function () {
-                return authService.checkPermission(blade.updatePermission, blade.securityScopes);
-            };
-        },
-        checkPermission: authService.checkPermission,
-        setError: function (error, blade) {
-            if (blade && error) {
-                blade.isLoading = false;
-                blade.error = error.status && error.statusText ? error.status + ': ' + error.statusText : error;
-                blade.errorBody = error.data ? error.data.exceptionMessage : blade.errorBody;
-            }
-        }
-    };
-
-    return service;
-}]);
-
-angular.module('platformWebApp')
-    .directive('vaBreadcrumb', [
-        'platformWebApp.breadcrumbHistoryService', function (breadcrumbHistoryService) {
-            return {
-                restrict: 'E',
-                require: 'ngModel',
-                replace: true,
-                scope: {
-                    bladeId: '='
-                },
-        templateUrl: '$(Platform)/Scripts/app/navigation/breadcrumbs/breadcrumbs.tpl.html',
-                link: function (scope, element, attr, ngModelController) {
-                    scope.breadcrumbs = [];
-                    ngModelController.$render = function () {
-                        scope.breadcrumbs = ngModelController.$modelValue;
-                    };
-
-                    scope.innerNavigate = function (breadcrumb) {
-                        breadcrumb.navigate(breadcrumb);
-                    };
-
-                    scope.canNavigateBack = function () {
-                        return breadcrumbHistoryService.check(scope.bladeId);
-                    };
-
-                    scope.navigateBack = function () {
-                        if (scope.canNavigateBack()) {
-                            var breadcrumb = breadcrumbHistoryService.pop(scope.bladeId);
-                            breadcrumb.navigate(breadcrumb);
-                        }
-                    };
-                    scope.$watchCollection('breadcrumbs', function (newItems) {
-                        breadcrumbHistoryService.push(newItems, scope.bladeId);
-                    });
-                }
-            }
-        }
-    ])
-    .factory('platformWebApp.breadcrumbHistoryService', function () {
-        var map = {};
-
-        function breadcrumbsEqual(x,y) {
-            return x && y && x.id === y.id && x.name === y.name;
-        }
-
-        return {
-            push: function (breadcrumbs, id) {
-                var history = map[id];
-                if (!history) {
-                    map[id] = history = {
-                        ignoreNextAction: false,
-                        records: []
-                    };
-                }
-
-                var currentBreadcrumb = _.last(breadcrumbs);
-
-                if (history.ignoreNextAction) {
-                    history.ignoreNextAction = false;
-                } else if (history.currentBreadcrumb &&
-                            !breadcrumbsEqual(history.currentBreadcrumb, currentBreadcrumb) &&
-                            !breadcrumbsEqual(history.currentBreadcrumb, _.last(history.records))) {
-                    history.records.push(history.currentBreadcrumb);
-                }
-
-                if (currentBreadcrumb) {
-                    history.currentBreadcrumb = currentBreadcrumb;
-                }
-            },
-
-            check: function (id) {
-                return map[id] && _.any(map[id].records);
-            },
-
-            pop: function (id) {
-                var retVal = undefined;
-                var history = map[id];
-                if (_.any(history.records)) {
-                    retVal = history.records.pop();
-                    history.ignoreNextAction = true;
-                }
-
-                return retVal;
-            }
-        };
-    });
-angular.module('platformWebApp')
-.factory('platformWebApp.mainMenuService', [function () {
-
-    var menuItems = [];
-
-    function sortByGroupFirst(a, b) {
-        return a.path.split('/').length - b.path.split('/').length;
-    };
-
-    function sortByPriority(a, b) {
-        if (angular.isDefined(a.priority) && angular.isDefined(b.priority)) {
-            return a.priority < b.priority ? -1 : a.priority > b.priority ? 1 : 0;
-        }
-        return -1;
-    };
-
-    function constructList() {
-        angular.forEach(menuItems.sort(sortByGroupFirst), function (menuItem) {
-            if (!angular.isDefined(menuItem.group)) {
-                menuItem.group = null;
-            }
-            if (menuItem.group == null) {
-                var pathParts = menuItem.path.split('/');
-                var groupPath = null;
-                if (pathParts.length > 1) {
-                    pathParts.pop();
-                    groupPath = pathParts.join('/');
-                }
-                var group = _.find(menuItems, function (menuItem) { return menuItem.path === groupPath });
-                if (angular.isDefined(group)) {
-                    menuItem.group = group;
-                }
-            }
-        });
-        menuItems.sort(sortByPriority);
-    };
-
-    function addMenuItem(menuItem) {
-        resetMenuItemDefaults(menuItem);
-        menuItems.push(menuItem);
-        constructList();
-    }
-
-    function removeMenuItem(menuItem) {
-        var index = menuItems.indexOf(menuItem);
-        menuItems.splice(index, 1);
-        constructList();
-    }
-
-    function resetMenuItemDefaults(menuItem) {
-        // set defaults
-        if (!angular.isDefined(menuItem.priority)) {
-            menuItem.priority = Number.NaN;
-        }
-        if (!angular.isDefined(menuItem.children)) {
-            menuItem.children = [];
-        }
-        if (!angular.isDefined(menuItem.isAlwaysOnBar)) {
-            menuItem.isAlwaysOnBar = false;
-        }
-        menuItem.isCollapsed = false;
-        menuItem.isFavorite = false;
-            // place at the end
-        menuItem.order = Number.MAX_SAFE_INTEGER;
-    }
-
-    function findByPath(path) {
-        return _.find(menuItems, function (menuItem) { return menuItem.path === path });
-    };
-
-    var retVal = {
-        menuItems: menuItems,
-        addMenuItem: addMenuItem,
-        removeMenuItem: removeMenuItem,
-        resetMenuItemDefaults: resetMenuItemDefaults,
-        findByPath: findByPath
-    };
-    return retVal;
-}])
-.directive('vaMainMenu', ["$document",
-    function ($document) {
-
-    return {
-        restrict: 'E',
-        replace: true,
-        transclude: true,
-        require: 'ngModel',
-        scope: {
-            onMenuChanged: "&"
-        },
-        templateUrl: '$(Platform)/Scripts/app/navigation/menu/mainMenu.tpl.html',
-        link: function (scope, element, attr, ngModelController, linker) {
-            scope.menu = ngModelController.$modelValue;
-            ngModelController.$render = function () {
-                scope.menu = ngModelController.$modelValue;
-                updateFavorites();
-                scope.$watch(function () {
-                    return _.filter(scope.menu.items, function (x) { return x.isFavorite && !x.isAlwaysOnBar; });
-                }, function () { updateFavorites(); }, true);
-            };            
-
-            scope.selectItem = function (menuItem) {
-                if (scope.showSubMenu && scope.currentMenuItem === menuItem) {
-                    scope.showSubMenu = false;
-                } else {
-                    scope.currentMenuItem = menuItem;
-                    scope.showSubMenu = menuItem.children.length > 0 || menuItem.path === "more";
-                }
-                if (angular.isDefined(menuItem.action)) {
-                    menuItem.action();
-                }
-            };        
-         
-            function handleKeyUpEvent(event) {
-                if (scope.showSubMenu && event.keyCode === 27) {
-                    scope.$apply(function () {
-                        scope.showSubMenu = false;
-                    });
-                }
-            }
-
-            function handleClickEvent(event) {
-                var dropdownElement = $document.find('.nav-bar .dropdown');
-                var hadDropdownElement = $document.find('.__has-dropdown');
-                if (scope.showSubMenu && !(dropdownElement.is(event.target) || dropdownElement.has(event.target).length > 0 ||
-                                           hadDropdownElement.is(event.target) || hadDropdownElement.has(event.target).length > 0)) {
-                    scope.$apply(function () {
-                        scope.showSubMenu = false;
-                    });
-                }
-            }
-
-            $document.bind('keyup', handleKeyUpEvent);
-            $document.bind('click', handleClickEvent);
-
-            scope.$on('$destroy', function () {
-                $document.unbind('keyup', handleKeyUpEvent);
-                $document.unbind('click', handleClickEvent);
-            });
-
-            // required by ui-sortable: we can't use filters with it
-            // https://github.com/angular-ui/ui-sortable#usage
-            function updateFavorites() {
-                scope.dynamicMenuItems = _.sortBy(_.filter(scope.menu.items, function (x) { return x.isFavorite || x.path === "more"; }), function (x) { return x.order; });
-                raiseOnMenuChanged();
-            }
-
-            function raiseOnMenuChanged() {
-                _.throttle(scope.onMenuChanged({ menu: scope.menu }), 100);
-            };
-            scope.toggleCollapsed = function () {
-                scope.menu.isCollapsed = !scope.menu.isCollapsed;
-                raiseOnMenuChanged();
-            };
-
-            scope.toggleFavorite = function (menuItem) {
-                menuItem.isFavorite = !menuItem.isFavorite;
-                // clear order when removed from favorites
-                if (!menuItem.isFavorite) {
-                    menuItem.order = Number.MAX_SAFE_INTEGER;
-                }
-                var favorites = _.sortBy(_.filter(scope.menu.items, function (x) { return x.isFavorite }), function (x) { return x.order; });
-                // re-calculate order
-                for (var i = 0; i < favorites.length; i++) {
-                    favorites[i].order = i;
-                }
-                // Do not call the callback function to notify what favorites changed.
-                // We're already do that because we call updateFavorites (which call the calback) in ngModelController.$render
-            };
-
-            scope.sortableOptions = {
-                axis: "y",
-                cursor: "move",
-                // always use container with tolerance
-                // because otherwise draggable item can't replace top item:
-                // where is no space between top item and container top border
-                containment: ".outer-wrapper",
-                items: ".__draggable",
-                tolerance: "pointer",
-                stop: function (e, ui) {
-                    // re-calculate order for all favorites
-                    // we may use scope.favorites or source model of ui-sortable
-                    // I'm prefer last, to avoid dependence on directive's model
-                    var favorites = ui.item.sortable.sourceModel;
-                    for (var i = 0; i < favorites.length; i++) {
-                        favorites[i].order = i;
-                    }
-                }
-            };
-        }
-    }
-}]).directive('vaFavorites', function () {
-    return {
-        restrict: 'A',
-        link: function (scope, element, attr) {
-            $(element).keydown(function (e) {
-                if (e.shiftKey && e.keyCode === 32) { // Shift + Space
-                    $(e.target).find(".list-fav").click();
-                }
-            });
-        }
-    }
-});
-
-angular.module('platformWebApp')
-.factory('platformWebApp.widgetService', function () {
-
-    var retVal = {
-        widgetsMap: [],
-        registerWidget: function (widget, containerName) {
-            if (!this.widgetsMap[containerName]) {
-                this.widgetsMap[containerName] = [];
-            }
-            this.widgetsMap[containerName].push(widget);
-        }
-
-    };
-    return retVal;
-})
-.directive('vaWidgetContainer', ['$compile', '$localStorage', 'platformWebApp.widgetService', function ($compile, $localStorage, widgetService) {
-    return {
-        restrict: 'E',
-        replace: true,
-        templateUrl: '$(Platform)/Scripts/app/navigation/widget/widgetContainer.tpl.html',
-        scope: {
-            data: '=?',
-            gridsterOpts: '=?',
-            group: '@',
-            blade: '='
-        },
-        link: function (scope, element, attr) {
-            if (!scope.gridsterOpts) { scope.gridsterOpts = {}; }
-            scope.$storage = $localStorage;
-
-            scope.$watch('gridsterOpts', function () {
-                var groupWidgets = _.filter(widgetService.widgetsMap[scope.group], function (w) { return !angular.isFunction(w.isVisible) || w.isVisible(scope.blade); });
-                scope.widgets = angular.copy(groupWidgets);
-                angular.forEach(scope.widgets, function (w) {
-                    w.blade = scope.blade;
-                    w.widgetsInContainer = scope.widgets;
-                });
-            }, true);
-
-            scope.getKey = function (prefix, widget) {
-                return (prefix + widget.controller + widget.template + scope.group).hashCode();
-            }
-        }
-    }
-}])
-.directive('vaWidget', ['$compile', 'platformWebApp.widgetService', 'platformWebApp.authService', function ($compile, widgetService, authService) {
-    return {
-        link: function (scope, element, attr) {
-
-            if (!scope.widget.permission || authService.checkPermission(scope.widget.permission)) {
-                element.attr('ng-controller', scope.widget.controller);
-                element.attr('ng-model', 'widget');
-                element.removeAttr("va-widget");
-                $compile(element)(scope);
-            }
-
-        }
-    }
-}]);
-angular.module('platformWebApp')
 .controller('platformWebApp.pushNotificationsHistoryController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
 function ($scope, bladeNavigationService, eventTemplateResolver, notifications) {
     var blade = $scope.blade;
@@ -26332,35 +26431,6 @@ angular.module('platformWebApp')
 	});
 }]);
 
-angular.module('platformWebApp')
-.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
-	return {
-		link: function (scope, element, attrs) {
-
-			if (attrs.vaPermission) {
-				var permissionValue = attrs.vaPermission.trim();
-			
-				//modelObject is a scope property of the parent/current scope
-				scope.$watch(attrs.securityScopes, function (value) {
-					if (value) {
-						toggleVisibilityBasedOnPermission(value);
-					}
-				});
-			
-				function toggleVisibilityBasedOnPermission(securityScopes) {
-					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
-					if (hasPermission)
-						element.show();
-					else
-						element.hide();
-				}
-
-				toggleVisibilityBasedOnPermission();
-				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
-			}
-		}
-	};
-}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.accountApiListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
@@ -27511,30 +27581,34 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
-.factory('platformWebApp.accounts', ['$resource', function ($resource) {
-    return $resource('api/platform/security/users/:id', { id: '@Id' }, {
-        search: { method: 'POST' },
-        generateNewApiAccount: { url: 'api/platform/security/apiaccounts/new' },
-        generateNewApiKey: { url: 'api/platform/security/apiaccounts/newKey', method: 'PUT' },
-        save: { url: 'api/platform/security/users/create', method: 'POST' },
-        changepassword: { url: 'api/platform/security/users/:id/changepassword', method: 'POST' },
-        resetPassword: { url: 'api/platform/security/users/:id/resetpassword', method: 'POST' },
-        update: { method: 'PUT' },
-        locked: { url: 'api/platform/security/users/:id/locked', method: 'GET' },
-        unlock: { url: 'api/platform/security/users/:id/unlock', method: 'POST' }
-    });
-}]);
-angular.module('platformWebApp')
-.factory('platformWebApp.roles', ['$resource', function ($resource) {
-    return $resource('api/platform/security/roles/:roleName', { roleName: '@roleName' }, {
-        search: { url: 'api/platform/security/roles/search', method: 'POST' },
-        queryPermissions: { url: 'api/platform/security/permissions', isArray: true },
-        update: { method: 'PUT' },
-        create: { method: 'POST' },
+.directive('vaPermission', ['platformWebApp.authService', '$compile', function (authService, $compile) {
+	return {
+		link: function (scope, element, attrs) {
 
-    });
-}]);
+			if (attrs.vaPermission) {
+				var permissionValue = attrs.vaPermission.trim();
+			
+				//modelObject is a scope property of the parent/current scope
+				scope.$watch(attrs.securityScopes, function (value) {
+					if (value) {
+						toggleVisibilityBasedOnPermission(value);
+					}
+				});
+			
+				function toggleVisibilityBasedOnPermission(securityScopes) {
+					var hasPermission = authService.checkPermission(permissionValue, securityScopes);
+					if (hasPermission)
+						element.show();
+					else
+						element.hide();
+				}
 
+				toggleVisibilityBasedOnPermission();
+				scope.$on('loginStatusChanged', toggleVisibilityBasedOnPermission);
+			}
+		}
+	};
+}]);
 angular.module('platformWebApp')
 .directive('vaLoginToolbar', ['$document', '$timeout', '$state', 'platformWebApp.authService', function ($document, $timeout, $state, authService) {
     return {
@@ -27576,7 +27650,32 @@ angular.module('platformWebApp')
     }
 }])
 angular.module('platformWebApp')
-    .factory('platformWebApp.authService', ['$http', '$rootScope', '$cookieStore', '$state', '$interpolate', function ($http, $rootScope, $cookieStore, $state, $interpolate) {
+.factory('platformWebApp.accounts', ['$resource', function ($resource) {
+    return $resource('api/platform/security/users/:id', { id: '@Id' }, {
+        search: { method: 'POST' },
+        generateNewApiAccount: { url: 'api/platform/security/apiaccounts/new' },
+        generateNewApiKey: { url: 'api/platform/security/apiaccounts/newKey', method: 'PUT' },
+        save: { url: 'api/platform/security/users/create', method: 'POST' },
+        changepassword: { url: 'api/platform/security/users/:id/changepassword', method: 'POST' },
+        resetPassword: { url: 'api/platform/security/users/:id/resetpassword', method: 'POST' },
+        update: { method: 'PUT' },
+        locked: { url: 'api/platform/security/users/:id/locked', method: 'GET' },
+        unlock: { url: 'api/platform/security/users/:id/unlock', method: 'POST' }
+    });
+}]);
+angular.module('platformWebApp')
+.factory('platformWebApp.roles', ['$resource', function ($resource) {
+    return $resource('api/platform/security/roles/:roleName', { roleName: '@roleName' }, {
+        search: { url: 'api/platform/security/roles/search', method: 'POST' },
+        queryPermissions: { url: 'api/platform/security/permissions', isArray: true },
+        update: { method: 'PUT' },
+        create: { method: 'POST' },
+
+    });
+}]);
+
+angular.module('platformWebApp')
+    .factory('platformWebApp.authService', ['$http', '$rootScope', '$cookieStore', '$state', '$interpolate', '$q', 'platformWebApp.authDataStorage', function ($http, $rootScope, $cookieStore, $state, $interpolate, $q, authDataStorage) {
     var serviceBase = 'api/platform/security/';
     var authContext = {
         userId: null,
@@ -27588,40 +27687,80 @@ angular.module('platformWebApp')
 
     authContext.fillAuthData = function () {
         return $http.get(serviceBase + 'currentuser').then(
-			function (results) {
-			    changeAuth(results.data);
-			});
+            function (results) {
+                changeAuth(results.data);
+            });
     };
 
     authContext.login = function (email, password, remember) {       
-        return $http.post(serviceBase + 'login/', { userName: email, password: password, rememberMe: remember }).then(
-            function (results) {
-                if (results.data.succeeded) {
-                    return authContext.fillAuthData().then(function () { return authContext.isAuthenticated; })
-                }
-                return false;
-			});
+        var requestData = 'grant_type=password&scope=offline_access&username=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password);
+        return $http.post('connect/token', requestData, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }).then(
+            function (response) {
+                var authData = {
+                    token: response.data.access_token,
+                    userName: email,
+                    expiresAt: getCurrentDateWithOffset(response.data.expires_in),
+                    refreshToken: response.data.refresh_token
+                };
+                authDataStorage.storeAuthData(authData);
+                return authContext.fillAuthData().then(function () {
+                    return response.data;
+                });
+            }, function (error) {
+                authContext.logout();
+                return $q.reject(error);
+            }
+        );
     };
+
+    authContext.refreshToken = function () {
+        var authData = authDataStorage.getStoredData();
+        if (authData) {
+            var data = 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(authData.refreshToken);
+            // NOTE: this method is called by the HTTP interceptor if the access token in the local storage expired.
+            //       So we clean the storage before sending the HTTP request - otherwise the HTTP interceptor will
+            //       detect expired token and will call this method again, causing the infinite loop.
+            authDataStorage.clearStoredData();
+            return $http.post('connect/token', data, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }).then(
+                function (response) {
+                    var newAuthData = {
+                        token: response.data.access_token,
+                        userName: response.data.userName,
+                        expiresAt: getCurrentDateWithOffset(response.data.expires_in),
+                        refreshToken: response.data.refresh_token
+                    };
+                    authDataStorage.storeAuthData(newAuthData);
+                    return newAuthData;
+                }, function (err) {
+                    authContext.logout();
+                    return $q.reject(err);
+                });
+        } else {
+            return $q.reject();
+        }
+    };
+
+    function getCurrentDateWithOffset(offsetInSeconds) {
+        return Date.now() + offsetInSeconds * 1000;
+    }
 
     authContext.requestpasswordreset = function (data) {
         return $http.post(serviceBase + 'users/' + data.userName + '/requestpasswordreset/').then(
-			function (results) {
-			    return results.data;
-			});
+            function (results) {
+                return results.data;
+            });
     };
 
     authContext.resetpassword = function (data) {
         return $http.post(serviceBase + 'users/' + data.userId + '/resetpasswordconfirm', { token: data.code, newPassword: data.newPassword }).then(
-			function (results) {
-			    return results.data;
-			});
+            function (results) {
+                return results.data;
+            });
     };
 
     authContext.logout = function () {
+        authDataStorage.clearStoredData();
         changeAuth({});
-
-        $http.get(serviceBase + 'logout/').then(function (result) {
-        });
     };
 
     authContext.checkPermission = function (permission, securityScopes) {
@@ -27666,6 +27805,22 @@ angular.module('platformWebApp')
     }
     return authContext;
 }]);
+
+angular.module('platformWebApp')
+    .factory('platformWebApp.authDataStorage', ['localStorageService', function(localStorageService) {
+        var service = {
+            storeAuthData: function(dataObject) {
+                localStorageService.set('authenticationData', dataObject);
+            },
+            getStoredData: function() {
+                return localStorageService.get('authenticationData');
+            },
+            clearStoredData: function() {
+                localStorageService.remove('authenticationData');
+            }
+        };
+        return service;
+    }]);
 
 angular.module('platformWebApp')
 .factory('platformWebApp.permissionScopeResolver', [ function () {
@@ -28387,92 +28542,24 @@ angular.module('platformWebApp')
         getRegionalFormats: { url: 'api/platform/localization/regionalformats', isArray: true }
     }); 
 }]);
-// CodeMirror, copyright (c) by Marijn Haverbeke and others
-// Distributed under an MIT license: http://codemirror.net/LICENSE
+angular.module('platformWebApp')
+.controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    var blade = $scope.blade;
 
-// Utility function that allows modes to be combined. The mode given
-// as the base argument takes care of most of the normal mode
-// functionality, but a second (typically simple) mode is used, which
-// can override the style of text. Both modes get to parse all of the
-// text, but when both assign a non-null style to a piece of code, the
-// overlay wins, unless the combine argument was true and not overridden,
-// or state.overlay.combineTokens was true, in which case the styles are
-// combined.
-
-(function(mod) {
-  if (typeof exports == "object" && typeof module == "object") // CommonJS
-    mod(require("../../lib/codemirror"));
-  else if (typeof define == "function" && define.amd) // AMD
-    define(["../../lib/codemirror"], mod);
-  else // Plain browser env
-    mod(CodeMirror);
-})(function(CodeMirror) {
-"use strict";
-
-CodeMirror.overlayMode = function(base, overlay, combine) {
-  return {
-    startState: function() {
-      return {
-        base: CodeMirror.startState(base),
-        overlay: CodeMirror.startState(overlay),
-        basePos: 0, baseCur: null,
-        overlayPos: 0, overlayCur: null,
-        streamSeen: null
-      };
-    },
-    copyState: function(state) {
-      return {
-        base: CodeMirror.copyState(base, state.base),
-        overlay: CodeMirror.copyState(overlay, state.overlay),
-        basePos: state.basePos, baseCur: null,
-        overlayPos: state.overlayPos, overlayCur: null
-      };
-    },
-
-    token: function(stream, state) {
-      if (stream != state.streamSeen ||
-          Math.min(state.basePos, state.overlayPos) < stream.start) {
-        state.streamSeen = stream;
-        state.basePos = state.overlayPos = stream.start;
-      }
-
-      if (stream.start == state.basePos) {
-        state.baseCur = base.token(stream, state.base);
-        state.basePos = stream.pos;
-      }
-      if (stream.start == state.overlayPos) {
-        stream.pos = stream.start;
-        state.overlayCur = overlay.token(stream, state.overlay);
-        state.overlayPos = stream.pos;
-      }
-      stream.pos = Math.min(state.basePos, state.overlayPos);
-
-      // state.overlay.combineTokens always takes precedence over combine,
-      // unless set to null
-      if (state.overlayCur == null) return state.baseCur;
-      else if (state.baseCur != null &&
-               state.overlay.combineTokens ||
-               combine && state.overlay.combineTokens == null)
-        return state.baseCur + " " + state.overlayCur;
-      else return state.overlayCur;
-    },
-
-    indent: base.indent && function(state, textAfter) {
-      return base.indent(state.base, textAfter);
-    },
-    electricChars: base.electricChars,
-
-    innerMode: function(state) { return {state: state.base, mode: base}; },
-
-    blankLine: function(state) {
-      if (base.blankLine) base.blankLine(state.base);
-      if (overlay.blankLine) overlay.blankLine(state.overlay);
-    }
-  };
-};
-
-});
-
+    $scope.openBlade = function () {
+        var newBlade = {
+            id: "changesChildBlade",
+            currentEntities: blade.currentEntity.operationsLog,
+            headIcon: blade.headIcon,
+            title: blade.title,
+            subtitle: 'platform.widgets.operations.blade-subtitle',
+            isExpandable: true,
+            controller: 'platformWebApp.changeLog.operationListController',
+            template: '$(Platform)/Scripts/app/changeLog/blades/operation-list.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, blade);
+    };
+}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.moduleInstallProgressController', ['$scope', '$window', 'platformWebApp.bladeNavigationService', 'platformWebApp.modules', function ($scope, $window, bladeNavigationService, modules) {
     var blade = $scope.blade;
