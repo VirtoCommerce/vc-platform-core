@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Primitives;
 using Hangfire;
 using Hangfire.MemoryStorage;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -20,7 +21,6 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using OpenIddict.Validation;
 using Smidge;
 using Smidge.Nuglify;
 using Swashbuckle.AspNetCore.Swagger;
@@ -43,6 +43,7 @@ using VirtoCommerce.Platform.Security;
 using VirtoCommerce.Platform.Security.Authorization;
 using VirtoCommerce.Platform.Security.Extensions;
 using VirtoCommerce.Platform.Security.Repositories;
+using VirtoCommerce.Platform.Security.Services;
 using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Hangfire;
 using VirtoCommerce.Platform.Web.Infrastructure;
@@ -67,6 +68,7 @@ namespace VirtoCommerce.Platform.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSingleton<IAuthenticationSchemeProvider, CustomAuthenticationSchemeProvider>();
 
             services.Configure<PlatformOptions>(Configuration.GetSection("VirtoCommerce"));
             services.Configure<HangfireOptions>(Configuration.GetSection("VirtoCommerce:Jobs"));
@@ -167,10 +169,7 @@ namespace VirtoCommerce.Platform.Web
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
             services
-                .AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = OpenIddictValidationDefaults.AuthenticationScheme;
-                })
+                .AddAuthentication()
                 .AddJwtBearer(options =>
                 {
                     options.Authority = "http://localhost:10645";
@@ -212,7 +211,7 @@ namespace VirtoCommerce.Platform.Web
                         .AllowRefreshTokenFlow();
 
                     options.SetRefreshTokenLifetime(TimeSpan.FromHours(Configuration.GetValue<int>("Authorization:RefreshTokenLifeTime")));
-                    options.SetAccessTokenLifetime(TimeSpan.FromHours(Configuration.GetValue<int>("Authorization:AccessTokenLifeTime")));
+                    options.SetAccessTokenLifetime(TimeSpan.FromMinutes(1));
 
                     options.AcceptAnonymousClients();
 
@@ -416,7 +415,7 @@ namespace VirtoCommerce.Platform.Web
                 c.DocExpansion(DocExpansion.None);
             });
 
-            app.UseHangfireDashboard("/hangfire", new DashboardOptions { Authorization = new[] { new HangfireAuthorizationHandler() } });
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions { Authorization = new[] { new HangfireAuthorizationHandler(app.ApplicationServices.GetRequiredService<LimitedPermissionsHandler>()) } });
             app.UseHangfireServer(new BackgroundJobServerOptions
             {
                 // Create some queues for job prioritization.

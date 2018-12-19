@@ -7,7 +7,6 @@ using AspNet.Security.OpenIdConnect.Extensions;
 using AspNet.Security.OpenIdConnect.Primitives;
 using AspNet.Security.OpenIdConnect.Server;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -15,6 +14,7 @@ using OpenIddict.Abstractions;
 using OpenIddict.Core;
 using OpenIddict.EntityFrameworkCore.Models;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Security.Services;
 using VirtoCommerce.Platform.Web.Infrastructure;
 
 namespace Mvc.Server
@@ -84,9 +84,9 @@ namespace Mvc.Server
                 // Set limited permissions
                 var claims = await _userClaimsPrincipalFactory.CreateAsync(user);
 
-                ((ClaimsIdentity) claims.Identity).AddClaim(new Claim("LimitedPermissions", _authentication.LimitedCookiePermissions));
+                ((ClaimsIdentity) claims.Identity).AddClaim(new Claim(LimitedPermissionsHandler.LimitedPermissionsClaimName, _authentication.LimitedCookiePermissions));
 
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claims);
+                await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, claims);
 
                 return SignIn(ticket.Principal, ticket.Properties, ticket.AuthenticationScheme);
             }
