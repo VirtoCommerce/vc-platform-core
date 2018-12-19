@@ -21,6 +21,7 @@ namespace Mvc.Server
 {
     public class AuthorizationController : Controller
     {
+        private readonly OpenIddictApplicationManager<OpenIddictApplication> _applicationManager;
         private readonly IOptions<IdentityOptions> _identityOptions;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
