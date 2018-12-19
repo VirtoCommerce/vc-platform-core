@@ -211,7 +211,7 @@ namespace VirtoCommerce.Platform.Web
                         .AllowRefreshTokenFlow();
 
                     options.SetRefreshTokenLifetime(TimeSpan.FromHours(Configuration.GetValue<int>("Authorization:RefreshTokenLifeTime")));
-                    options.SetAccessTokenLifetime(TimeSpan.FromMinutes(1));
+                    options.SetAccessTokenLifetime(TimeSpan.FromHours(Configuration.GetValue<int>("Authorization:AccessTokenLifeTime")));
 
                     options.AcceptAnonymousClients();
 
