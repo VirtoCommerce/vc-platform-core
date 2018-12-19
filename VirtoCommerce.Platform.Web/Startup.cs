@@ -172,7 +172,7 @@ namespace VirtoCommerce.Platform.Web
                 .AddAuthentication()
                 .AddJwtBearer(options =>
                 {
-                    options.Authority = "http://localhost:10645";
+                    options.Authority = Configuration.GetValue<string>("Authorization:Authority");
                     options.Audience = "resource_server";
                     options.RequireHttpsMetadata = false;
                     options.IncludeErrorDetails = true;
