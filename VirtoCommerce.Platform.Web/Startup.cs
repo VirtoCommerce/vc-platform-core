@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
@@ -295,6 +296,26 @@ namespace VirtoCommerce.Platform.Web
                 c.DocumentFilter<TagsFilter>();
                 c.MapType<object>(() => new Schema { Type = "object" });
                 c.AddModulesXmlComments(services);
+
+                c.CustomSchemaIds(type => type.ToString()
+                    .Replace('[', '_')
+                    .Replace(']', '_')
+                    .Replace('`', '_')
+                    .Replace(',', '-')
+                );
+
+                // https://github.com/domaindrivendev/Swashbuckle.AspNetCore#add-security-definitions-and-requirements
+                c.AddSecurityDefinition("oauth2", new OAuth2Scheme
+                {
+                    Type = "oauth2",
+                    Flow = "password",
+                    TokenUrl = "/connect/token",
+                });
+
+                c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>
+                {
+                    { "oauth2", new string[0] }
+                });
             });
 
             //Add SignalR for push notifications
@@ -413,6 +434,9 @@ namespace VirtoCommerce.Platform.Web
                 c.InjectStylesheet("/swagger/vc.css");
                 c.ShowExtensions();
                 c.DocExpansion(DocExpansion.None);
+
+                c.OAuthClientId(string.Empty);
+                c.OAuthClientSecret(string.Empty);
             });
 
             app.UseHangfireDashboard("/hangfire", new DashboardOptions { Authorization = new[] { new HangfireAuthorizationHandler(app.ApplicationServices.GetRequiredService<LimitedPermissionsHandler>()) } });
