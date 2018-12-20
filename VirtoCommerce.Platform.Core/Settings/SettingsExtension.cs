@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Exceptions;
 
 namespace VirtoCommerce.Platform.Core.Settings
 {
@@ -100,20 +99,11 @@ namespace VirtoCommerce.Platform.Core.Settings
         {
             var result = defaultValue;
 
-            try
+            var objectSetting = await manager.GetObjectSettingAsync(name);
+            if (objectSetting.Value != null)
             {
-                var objectSetting = await manager.GetObjectSettingAsync(name);
-                if (objectSetting.Value != null)
-                {
-                    result = (T) objectSetting.Value;
-                }
+                result = (T)objectSetting.Value;
             }
-            catch (PlatformException)
-            {
-                // This exception can be thrown when there is no setting registered with given name.
-                // VC Platform 2.x was returning the default value in this case, so the platform 3.x will do the same.
-            }
-
             return result;
         }
 

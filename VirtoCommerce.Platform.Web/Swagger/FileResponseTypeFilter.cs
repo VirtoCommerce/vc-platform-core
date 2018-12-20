@@ -14,13 +14,13 @@ namespace VirtoCommerce.Platform.Web.Swagger
         {
             if (IsFileResponse(context.ApiDescription))
             {
-                var responseSchema = new Schema { Format = "byte", Type = "file" };
+                Schema responseSchema = new Schema { Format = "byte", Type = "file" };
 
-                operation.Responses[((int)HttpStatusCode.OK).ToString()] = new Response
+                operation.Responses.Add(((int)HttpStatusCode.OK).ToString(), new Response
                 {
                     Description = "OK",
                     Schema = responseSchema
-                };
+                });
             }
         }
 

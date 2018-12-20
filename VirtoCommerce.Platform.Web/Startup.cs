@@ -297,13 +297,6 @@ namespace VirtoCommerce.Platform.Web
                 c.MapType<object>(() => new Schema { Type = "object" });
                 c.AddModulesXmlComments(services);
 
-                c.CustomSchemaIds(type => type.ToString()
-                    .Replace('[', '_')
-                    .Replace(']', '_')
-                    .Replace('`', '_')
-                    .Replace(',', '-')
-                );
-
                 // https://github.com/domaindrivendev/Swashbuckle.AspNetCore#add-security-definitions-and-requirements
                 c.AddSecurityDefinition("oauth2", new OAuth2Scheme
                 {
