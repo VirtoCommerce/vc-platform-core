@@ -12,9 +12,9 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
 {
     public class ScriptCollectorTest
     {
-        private string _destinationPath { get; set; }
-        private string _temporaryFolderName { get; set; }
-        private string _fullPhysicalPathToDistFolder { get; set; }
+        private string _destinationPath;
+        private string _temporaryFolderName;
+        private string _fullPhysicalPathToDistFolder;
 
         [Fact]
         public void TestCollectorWithOneModuleWithAppAndVendorNoVersionAppend()
@@ -26,7 +26,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
 
             localModuleCatalog.Setup(l => l.Modules).Returns(new List<ModuleInfo>
             {
-                CreateModuleInfo(_destinationPath, new []{ CreateScriptBundleItem(_temporaryFolderName) })
+                CreateModuleInfo(_destinationPath, CreateScriptBundleItem(_temporaryFolderName))
             });
 
             var collector = CreateScriptCollector(
@@ -52,7 +52,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
 
             localModuleCatalog.Setup(l => l.Modules).Returns(new List<ModuleInfo>
             {
-                CreateModuleInfo(_destinationPath, new []{ CreateScriptBundleItem(_temporaryFolderName) })
+                CreateModuleInfo(_destinationPath, CreateScriptBundleItem(_temporaryFolderName))
             });
 
             var collector = CreateScriptCollector(fileVersionProvider.Object, localModuleCatalog.Object);
@@ -72,7 +72,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
 
             localModuleCatalog.Setup(l => l.Modules).Returns(new List<ModuleInfo>
             {
-                CreateModuleInfo(_destinationPath, new ManifestBundleItem[]{})
+                CreateModuleInfo(_destinationPath, null)
             });
 
             var collector = CreateScriptCollector(fileVersionProvider.Object, localModuleCatalog.Object);
@@ -93,7 +93,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
 
             localModuleCatalog.Setup(l => l.Modules).Returns(new List<ModuleInfo>
             {
-                CreateModuleInfo(_destinationPath, new [] { CreateScriptBundleItem(_temporaryFolderName) })
+                CreateModuleInfo(_destinationPath, CreateScriptBundleItem(_temporaryFolderName))
             });
 
             var collector = CreateScriptCollector(fileVersionProvider.Object, localModuleCatalog.Object);
@@ -106,26 +106,6 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
         }
 
         [Fact]
-        public void TestMultipleScriptFolder()
-        {
-            CreateTemporaryFiles(new [] { "app.js", "vendor.js" });
-
-            var fileVersionProvider = CreateMockedFileVersionProvider();
-            var localModuleCatalog = CreateMockedLocalModuleCatalog();
-
-            localModuleCatalog.Setup(l => l.Modules).Returns(new List<ModuleInfo>
-            {
-                CreateModuleInfo(_destinationPath, new [] { CreateScriptBundleItem(_temporaryFolderName), CreateScriptBundleItem(_temporaryFolderName) })
-            });
-
-            var collector = CreateScriptCollector(fileVersionProvider.Object, localModuleCatalog.Object);
-
-            Assert.Throws<InvalidOperationException>(() => collector.Collect(default(bool)));
-
-            TryRemoveTemporaryFiles();
-        }
-
-        [Fact]
         public void TestDestinationFolderWithoutDist()
         {
             CreateTemporaryFiles(new[] { "app.js", "vendor.js" }, distFolderName: "wrongDist");
@@ -135,7 +115,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
 
             localModuleCatalog.Setup(l => l.Modules).Returns(new List<ModuleInfo>
             {
-                CreateModuleInfo(_destinationPath, new [] { CreateScriptBundleItem(_temporaryFolderName) })
+                CreateModuleInfo(_destinationPath, CreateScriptBundleItem(_temporaryFolderName))
             });
 
             var collector = CreateScriptCollector(fileVersionProvider.Object, localModuleCatalog.Object);
@@ -199,7 +179,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
             Directory.Delete(Path.Join(_destinationPath, _temporaryFolderName), true);
         }
 
-        private static ModuleInfo CreateModuleInfo(string fullPhysicalPath, ManifestBundleItem[] scripts)
+        private static ModuleInfo CreateModuleInfo(string fullPhysicalPath, ManifestBundleItem scripts)
         {
             return new ManifestModuleInfo(new ModuleManifest
             {

@@ -26,7 +26,7 @@ namespace VirtoCommerce.Platform.Core.ModuleFileCollector
 
             foreach (var includedModule in includedModules)
             {
-                var stylesMetadata = includedModule.Styles.SingleOrDefault();
+                var stylesMetadata = includedModule.Styles;
 
                 if (null == stylesMetadata)
                 {

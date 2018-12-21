@@ -21,12 +21,8 @@
     <assemblyFile>VirtoCommerce.CoreModule.Web.dll</assemblyFile>
     <moduleType>VirtoCommerce.CoreModule.Web.Module, VirtoCommerce.CoreModule.Web</moduleType>
 
-    <styles>
-        <directory virtualPath="dist" searchPattern="*.css" searchSubdirectories="true" />
-    </styles>
-    <scripts>
-        <directory virtualPath="dist" searchPattern="*.js" searchSubdirectories="true" />
-    </scripts>
+    <styles virtualPath="dist"/>
+    <scripts virtualPath="dist"/>
     
     <incompatibilities>
     </incompatibilities>

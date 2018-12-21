@@ -3,14 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Smidge;
-using Smidge.FileProcessors;
 using Smidge.Models;
-using Smidge.Nuglify;
-using Smidge.Options;
 using VirtoCommerce.Platform.Core.Modularity;
 
 namespace VirtoCommerce.Platform.Modules.Extensions
@@ -33,43 +28,43 @@ namespace VirtoCommerce.Platform.Modules.Extensions
 
         public static IApplicationBuilder UseModulesContent(this IApplicationBuilder appBuilder, IBundleManager bundles)
         {
-            var env = appBuilder.ApplicationServices.GetService<IHostingEnvironment>();
-            var modules = GetInstalledModules(appBuilder.ApplicationServices);
-            var modulesOptions = appBuilder.ApplicationServices.GetRequiredService<IOptions<LocalStorageModuleCatalogOptions>>().Value;
-            var cssBundleItems = modules.SelectMany(m => m.Styles).ToArray();
-            var cssFiles = cssBundleItems.OfType<ManifestBundleFile>().Select(x => new CssFile(x.VirtualPath));
+            //var env = appBuilder.ApplicationServices.GetService<IHostingEnvironment>();
+            //var modules = GetInstalledModules(appBuilder.ApplicationServices);
+            //var modulesOptions = appBuilder.ApplicationServices.GetRequiredService<IOptions<LocalStorageModuleCatalogOptions>>().Value;
+            //var cssBundleItems = modules.SelectMany(m => m.Styles).ToArray();
+            //var cssFiles = cssBundleItems.OfType<ManifestBundleFile>().Select(x => new CssFile(x.VirtualPath));
 
-            cssFiles = cssFiles.Concat(cssBundleItems.OfType<ManifestBundleDirectory>().SelectMany(x => new WebFileFolder(modulesOptions.DiscoveryPath, x.VirtualPath)
-                                                                                .AllWebFiles<CssFile>(x.SearchPattern, x.SearchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))).ToArray();
+            //cssFiles = cssFiles.Concat(cssBundleItems.OfType<ManifestBundleDirectory>().SelectMany(x => new WebFileFolder(modulesOptions.DiscoveryPath, x.VirtualPath)
+            //                                                                    .AllWebFiles<CssFile>(x.SearchPattern, x.SearchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))).ToArray();
 
-            var scriptBundleItems = modules.SelectMany(m => m.Scripts).ToArray();
-            var jsFiles = scriptBundleItems.OfType<ManifestBundleFile>().Select(x => new JavaScriptFile(x.VirtualPath));
+            //var scriptBundleItems = modules.SelectMany(m => m.Scripts).ToArray();
+            //var jsFiles = scriptBundleItems.OfType<ManifestBundleFile>().Select(x => new JavaScriptFile(x.VirtualPath));
 
-            jsFiles = modules.Aggregate(jsFiles, (current, module) =>
-            {
-                return current.Concat(module.Scripts
-                    .OfType<ManifestBundleDirectory>()
-                    .SelectMany(s =>
-                        env.IsDevelopment() ?
-                            new WebFileFolder(modulesOptions.DiscoveryPath, s.VirtualPath, module.ModuleName, module.Assembly.GetName().Name)
-                                .AllWebFilesForDevelopment<JavaScriptFile>(s.SearchPattern,
-                                    s.SearchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly) :
-                        new WebFileFolder(modulesOptions.DiscoveryPath, s.VirtualPath)
-                            .AllWebFilesWithRequestRoot<JavaScriptFile>(s.SearchPattern,
-                                s.SearchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)));
-            });
+            //jsFiles = modules.Aggregate(jsFiles, (current, module) =>
+            //{
+            //    return current.Concat(module.Scripts
+            //        .OfType<ManifestBundleDirectory>()
+            //        .SelectMany(s =>
+            //            env.IsDevelopment() ?
+            //                new WebFileFolder(modulesOptions.DiscoveryPath, s.VirtualPath, module.ModuleName, module.Assembly.GetName().Name)
+            //                    .AllWebFilesForDevelopment<JavaScriptFile>(s.SearchPattern,
+            //                        s.SearchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly) :
+            //            new WebFileFolder(modulesOptions.DiscoveryPath, s.VirtualPath)
+            //                .AllWebFilesWithRequestRoot<JavaScriptFile>(s.SearchPattern,
+            //                    s.SearchSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)));
+            //});
 
-            var options = bundles.DefaultBundleOptions;
-            options.DebugOptions.FileWatchOptions.Enabled = true;
-            options.DebugOptions.ProcessAsCompositeFile = false;
-            options.DebugOptions.CompressResult = false;
-            options.DebugOptions.CacheControlOptions = new CacheControlOptions() { EnableETag = false, CacheControlMaxAge = 0 };
+            //var options = bundles.DefaultBundleOptions;
+            //options.DebugOptions.FileWatchOptions.Enabled = true;
+            //options.DebugOptions.ProcessAsCompositeFile = false;
+            //options.DebugOptions.CompressResult = false;
+            //options.DebugOptions.CacheControlOptions = new CacheControlOptions() { EnableETag = false, CacheControlMaxAge = 0 };
 
-            bundles.Create("vc-modules-styles", cssFiles.ToArray())
-               .WithEnvironmentOptions(options);
+            //bundles.Create("vc-modules-styles", cssFiles.ToArray())
+            //   .WithEnvironmentOptions(options);
 
-            bundles.Create("vc-modules-scripts", bundles.PipelineFactory.Create<NuglifyJs>(), jsFiles.ToArray())
-                   .WithEnvironmentOptions(options);
+            //bundles.Create("vc-modules-scripts", bundles.PipelineFactory.Create<NuglifyJs>(), jsFiles.ToArray())
+            //       .WithEnvironmentOptions(options);
 
 
             return appBuilder;

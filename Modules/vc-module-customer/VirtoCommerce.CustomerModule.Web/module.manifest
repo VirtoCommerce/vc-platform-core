@@ -27,7 +27,6 @@
     <assemblyFile>VirtoCommerce.CustomerModule.Web.dll</assemblyFile>
     <moduleType>VirtoCommerce.CustomerModule.Web.Module, VirtoCommerce.CustomerModule.Web</moduleType>
 
-    <scripts>
-        <directory virtualPath="dist" searchPattern="*.js" searchSubdirectories="true" />
-    </scripts>
+    <scripts virtualPath="dist"/>
+    
 </module>

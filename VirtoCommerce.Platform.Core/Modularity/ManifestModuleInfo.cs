@@ -36,15 +36,15 @@ namespace VirtoCommerce.Platform.Core.Modularity
             {
                 Dependencies.AddRange(manifest.Dependencies.Select(x => new ModuleIdentity(x.Id, x.Version)));
             }
-            Styles = new List<ManifestBundleItem>();
+
             if (manifest.Styles != null)
             {
-                Styles.AddRange(manifest.Styles);
+                Styles = manifest.Styles;
             }
-            Scripts = new List<ManifestBundleItem>();
+
             if (manifest.Scripts != null)
             {
-                Scripts.AddRange(manifest.Scripts);
+                Scripts = manifest.Scripts;
             }
 
             Groups = new List<string>();
@@ -86,8 +86,8 @@ namespace VirtoCommerce.Platform.Core.Modularity
         public bool IsInstalled { get; set; }
         public ICollection<string> Groups { get; private set; }
         public string FullPhysicalPath { get; set; }
-        public ICollection<ManifestBundleItem> Styles { get; private set; }
-        public ICollection<ManifestBundleItem> Scripts { get; private set; }
+        public ManifestBundleItem Styles { get; private set; }
+        public ManifestBundleItem Scripts { get; private set; }
         public ICollection<string> Errors { get; set; }
         public bool UseFullTypeNameInSwagger { get; set; }
 

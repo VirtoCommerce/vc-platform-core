@@ -27,7 +27,7 @@ namespace VirtoCommerce.Platform.Core.ModuleFileCollector
 
             foreach (var includedModule in includedModules)
             {
-                var scriptsMetadata = includedModule.Scripts.SingleOrDefault();
+                var scriptsMetadata = includedModule.Scripts;
 
                 if (null == scriptsMetadata)
                 {

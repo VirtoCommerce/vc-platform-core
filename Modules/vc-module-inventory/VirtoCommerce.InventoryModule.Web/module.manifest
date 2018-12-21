@@ -24,7 +24,6 @@
     <assemblyFile>VirtoCommerce.InventoryModule.Web.dll</assemblyFile>
     <moduleType>VirtoCommerce.InventoryModule.Web.Module, VirtoCommerce.InventoryModule.Web</moduleType>
 
-    <scripts>
-        <directory virtualPath="dist" searchPattern="*.js" searchSubdirectories="true" />
-    </scripts>
+    <scripts virtualPath="dist"/>
+    
 </module>
