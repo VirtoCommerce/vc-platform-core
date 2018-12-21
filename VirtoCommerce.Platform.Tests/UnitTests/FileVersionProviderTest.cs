@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using Microsoft.AspNetCore.Mvc.TagHelpers.Internal;
 using Microsoft.AspNetCore.WebUtilities;
@@ -12,17 +11,15 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
         [Fact]
         public void TestVersionAppend()
         {
-            const string fileName = "test.txt";
-
-            var path = CreateTemporaryFile(fileName);
+            var filePath = CreateTemporaryFile();
 
             var versionProvider = new FileVersionProvider();
 
-            var actualHash = versionProvider.GetFileVersion(Path.Join(path, fileName));
+            var actualHash = versionProvider.GetFileVersion(filePath);
 
-            var expectedHash = GetFileHash(Path.Join(path, fileName));
+            var expectedHash = GetFileHash(filePath);
 
-            RemoveDirectoryAndFile(path, fileName);
+            RemoveDirectoryAndFile(filePath);
 
             Assert.Equal(expectedHash, actualHash);
         }
@@ -43,24 +40,16 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
 
         }
 
-        private string CreateTemporaryFile(string fileName)
+        private string CreateTemporaryFile()
         {
-            var tempPath = Path.GetTempPath();
-
-            var fullPhysicalPath = Path.Join(tempPath, Guid.NewGuid().ToString());
-
-            Directory.CreateDirectory(fullPhysicalPath);
-
-            File.Create(Path.Join(fullPhysicalPath, fileName)).Dispose();
+            var fullPhysicalPath = Path.GetTempFileName();
 
             return fullPhysicalPath;
         }
 
-        private void RemoveDirectoryAndFile(string dirFullPath, string fileName)
+        private void RemoveDirectoryAndFile(string filePath)
         {
-            File.Delete(Path.Join(dirFullPath, fileName));
-
-            Directory.Delete(dirFullPath);
+            File.Delete(filePath);
         }
 
         private string GetFileHash(string fullFilePath)

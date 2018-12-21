@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Modules.Bundling;
 using VirtoCommerce.Platform.Modules.External;
 
 namespace VirtoCommerce.Platform.Modules
@@ -51,6 +52,9 @@ namespace VirtoCommerce.Platform.Modules
             {
                 services.Configure(setupAction);
             }
+
+            services.AddSingleton<IScriptCollector, ScriptCollector>();
+            services.AddSingleton<IStyleCollector, StyleCollector>();
 
             return services;
         }

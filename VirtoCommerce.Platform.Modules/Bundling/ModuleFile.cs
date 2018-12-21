@@ -1,4 +1,4 @@
-namespace VirtoCommerce.Platform.Core.ModuleFileCollector
+namespace VirtoCommerce.Platform.Modules.Bundling
 {
     public class ModuleFile
     {

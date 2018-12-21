@@ -4,8 +4,8 @@ using System.IO;
 using System.Reflection;
 using Moq;
 using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.Platform.Core.ModuleFileCollector;
 using VirtoCommerce.Platform.Core.VersionProvider;
+using VirtoCommerce.Platform.Modules.Bundling;
 using Xunit;
 
 namespace VirtoCommerce.Platform.Tests.UnitTests
@@ -16,22 +16,28 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
         private string _temporaryFolderName;
         private string _fullPhysicalPathToDistFolder;
 
+        private readonly Mock<IFileVersionProvider> _fileVersionProvider;
+        private readonly Mock<ILocalModuleCatalog> _localModuleCatalog;
+
+        public ScriptCollectorTest()
+        {
+            _fileVersionProvider = CreateMockedFileVersionProvider();
+            _localModuleCatalog = CreateMockedLocalModuleCatalog();
+        }
+
         [Fact]
         public void TestCollectorWithOneModuleWithAppAndVendorNoVersionAppend()
         {
             CreateTemporaryFiles(new[] { "app.js", "vendor.js" });
 
-            var fileVersionProvider = CreateMockedFileVersionProvider();
-            var localModuleCatalog = CreateMockedLocalModuleCatalog();
-
-            localModuleCatalog.Setup(l => l.Modules).Returns(new List<ModuleInfo>
+            _localModuleCatalog.Setup(l => l.Modules).Returns(new List<ModuleInfo>
             {
                 CreateModuleInfo(_destinationPath, CreateScriptBundleItem(_temporaryFolderName))
             });
 
             var collector = CreateScriptCollector(
-                fileVersionProvider.Object,
-                localModuleCatalog.Object
+                _fileVersionProvider.Object,
+                _localModuleCatalog.Object
             );
 
             var result = collector.Collect(false);
@@ -39,7 +45,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
             TryRemoveTemporaryFiles();
 
             Assert.Equal(2, result.Length);
-            fileVersionProvider.Verify(f => f.GetFileVersion(It.IsAny<string>()), Times.Never);
+            _fileVersionProvider.Verify(f => f.GetFileVersion(It.IsAny<string>()), Times.Never);
         }
 
         [Fact]
@@ -47,40 +53,35 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
         {
             CreateTemporaryFiles(new []{ "app.js" });
 
-            var fileVersionProvider = CreateMockedFileVersionProvider();
-            var localModuleCatalog = CreateMockedLocalModuleCatalog();
-
-            localModuleCatalog.Setup(l => l.Modules).Returns(new List<ModuleInfo>
+            _localModuleCatalog.Setup(l => l.Modules).Returns(new List<ModuleInfo>
             {
                 CreateModuleInfo(_destinationPath, CreateScriptBundleItem(_temporaryFolderName))
             });
 
-            var collector = CreateScriptCollector(fileVersionProvider.Object, localModuleCatalog.Object);
+            var collector = CreateScriptCollector(_fileVersionProvider.Object, _localModuleCatalog.Object);
 
             collector.Collect(true);
 
             TryRemoveTemporaryFiles();
 
-            fileVersionProvider.Verify(f => f.GetFileVersion(It.IsAny<string>()), Times.Once);
+            _fileVersionProvider.Verify(f => f.GetFileVersion(It.IsAny<string>()), Times.Once);
         }
 
         [Fact]
         public void TestCollectorWithoutScripts()
         {
-            var fileVersionProvider = CreateMockedFileVersionProvider();
-            var localModuleCatalog = CreateMockedLocalModuleCatalog();
 
-            localModuleCatalog.Setup(l => l.Modules).Returns(new List<ModuleInfo>
+            _localModuleCatalog.Setup(l => l.Modules).Returns(new List<ModuleInfo>
             {
                 CreateModuleInfo(_destinationPath, null)
             });
 
-            var collector = CreateScriptCollector(fileVersionProvider.Object, localModuleCatalog.Object);
+            var collector = CreateScriptCollector(_fileVersionProvider.Object, _localModuleCatalog.Object);
 
             var scripts = collector.Collect(true);
 
             Assert.Empty(scripts);
-            fileVersionProvider.Verify(f => f.GetFileVersion(It.IsAny<string>()), Times.Never);
+            _fileVersionProvider.Verify(f => f.GetFileVersion(It.IsAny<string>()), Times.Never);
         }
 
         [Fact]
@@ -88,15 +89,12 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
         {
             CreateTemporaryFiles(new []{ "wrongApp.js", "wrongVendor.js" });
 
-            var fileVersionProvider = CreateMockedFileVersionProvider();
-            var localModuleCatalog = CreateMockedLocalModuleCatalog();
-
-            localModuleCatalog.Setup(l => l.Modules).Returns(new List<ModuleInfo>
+            _localModuleCatalog.Setup(l => l.Modules).Returns(new List<ModuleInfo>
             {
                 CreateModuleInfo(_destinationPath, CreateScriptBundleItem(_temporaryFolderName))
             });
 
-            var collector = CreateScriptCollector(fileVersionProvider.Object, localModuleCatalog.Object);
+            var collector = CreateScriptCollector(_fileVersionProvider.Object, _localModuleCatalog.Object);
 
             var result = collector.Collect(default(bool));
 
@@ -110,15 +108,12 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
         {
             CreateTemporaryFiles(new[] { "app.js", "vendor.js" }, distFolderName: "wrongDist");
 
-            var fileVersionProvider = CreateMockedFileVersionProvider();
-            var localModuleCatalog = CreateMockedLocalModuleCatalog();
-
-            localModuleCatalog.Setup(l => l.Modules).Returns(new List<ModuleInfo>
+            _localModuleCatalog.Setup(l => l.Modules).Returns(new List<ModuleInfo>
             {
                 CreateModuleInfo(_destinationPath, CreateScriptBundleItem(_temporaryFolderName))
             });
 
-            var collector = CreateScriptCollector(fileVersionProvider.Object, localModuleCatalog.Object);
+            var collector = CreateScriptCollector(_fileVersionProvider.Object, _localModuleCatalog.Object);
 
             var result = collector.Collect(default(bool));
 
@@ -159,12 +154,11 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
             {
                 File.Create(Path.Join(_fullPhysicalPathToDistFolder, fileName)).Dispose();
             }
-            
         }
 
         private void TryRemoveTemporaryFiles()
         {
-            if (null == _fullPhysicalPathToDistFolder)
+            if (_fullPhysicalPathToDistFolder == null)
             {
                 return;
             }

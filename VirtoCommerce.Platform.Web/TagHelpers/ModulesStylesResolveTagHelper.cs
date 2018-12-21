@@ -1,7 +1,7 @@
 using System.Linq;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Razor.TagHelpers;
-using VirtoCommerce.Platform.Core.ModuleFileCollector;
+using VirtoCommerce.Platform.Modules.Bundling;
 
 namespace VirtoCommerce.Platform.Web.TagHelpers
 {

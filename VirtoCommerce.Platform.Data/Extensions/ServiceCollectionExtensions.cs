@@ -7,7 +7,6 @@ using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.ExportImport;
-using VirtoCommerce.Platform.Core.ModuleFileCollector;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.TransactionFileManager;
 using VirtoCommerce.Platform.Core.VersionProvider;
@@ -45,8 +44,6 @@ namespace VirtoCommerce.Platform.Data.Extensions
             services.AddScoped<IPlatformExportImportManager, PlatformExportImportManager>();
             services.AddSingleton<ITransactionFileManager, TransactionFileManager.TransactionFileManager>();
             services.AddSingleton<IFileVersionProvider, FileVersionProvider>();
-            services.AddSingleton<IScriptCollector, ScriptCollector>();
-            services.AddSingleton<IStyleCollector, StyleCollector>();
             return services;
 
         }
