@@ -87,7 +87,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             criteria = FilterOrderSearchCriteria(User.Identity.Name, criteria);
 
             var result = await _searchService.SearchCustomerOrdersAsync(criteria);
-            
+
             return Ok(result);
         }
 
@@ -292,7 +292,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         [Route("{id}/shipments/new")]
         public async Task<ActionResult<Shipment>> GetNewShipment(string id)
         {
-            var order = await _customerOrderService.GetByIdAsync( id , CustomerOrderResponseGroup.Full.ToString());
+            var order = await _customerOrderService.GetByIdAsync(id, CustomerOrderResponseGroup.Full.ToString());
             if (order != null)
             {
                 var retVal = AbstractTypeFactory<Shipment>.TryCreateInstance();
@@ -331,7 +331,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         [Route("{id}/payments/new")]
         public async Task<ActionResult<PaymentIn>> GetNewPayment(string id)
         {
-            var order = await _customerOrderService.GetByIdAsync(id , CustomerOrderResponseGroup.Full.ToString());
+            var order = await _customerOrderService.GetByIdAsync(id, CustomerOrderResponseGroup.Full.ToString());
             if (order != null)
             {
                 var retVal = AbstractTypeFactory<PaymentIn>.TryCreateInstance();
@@ -499,7 +499,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
                 Objects = { new ObjectSettings { PagesCount = true, HtmlContent = emailNotificationMessage.Body } }
             };
             var converter = new SynchronizedConverter(new PdfTools());
-            byte[] byteArray = converter.Convert(pdf);
+            var byteArray = converter.Convert(pdf);
             Stream stream = new MemoryStream(byteArray);
 
             return new FileStreamResult(stream, "application/pdf");

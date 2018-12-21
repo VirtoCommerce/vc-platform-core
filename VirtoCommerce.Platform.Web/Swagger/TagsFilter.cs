@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Settings;
 
@@ -22,7 +23,7 @@ namespace VirtoCommerce.Platform.Web.Swagger
 
         public void Apply(SwaggerDocument swaggerDoc, DocumentFilterContext context)
         {
-            var defaultApiKey = _settingManager.GetValue("Swashbuckle.DefaultApiKey", string.Empty);
+            var defaultApiKey = _settingManager.GetValue(PlatformConstants.Settings.Swagger.DefaultApiKey.Name, string.Empty);
             swaggerDoc.Info.Description = string.Format(CultureInfo.InvariantCulture, "For this sample, you can use the `{0}` key to satisfy the authorization filters.", defaultApiKey);
             swaggerDoc.Info.TermsOfService = "";
 

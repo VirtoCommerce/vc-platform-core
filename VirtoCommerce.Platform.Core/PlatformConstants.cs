@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
@@ -264,14 +263,32 @@ namespace VirtoCommerce.Platform.Core
                     }
                 }
             }
-            public static IEnumerable<SettingDescriptor> AllSettings
+
+            public static class Swagger
             {
-                get
+                public static SettingDescriptor DefaultApiKey = new SettingDescriptor
                 {
-                    return Cache.AllSettings.Concat(Security.AllSettings).Concat(Setup.AllSettings)
-                                            .Concat(UserProfile.AllSettings).Concat(UserInterface.AllSettings);
+                    Name = "VirtoCommerce.Platform.Swagger.DefaultApiKey",
+                    GroupName = "Platform|Swagger",
+                    ValueType = SettingValueType.ShortText,
+                    DefaultValue = string.Empty
+                };
+
+                public static IEnumerable<SettingDescriptor> AllSettings
+                {
+                    get
+                    {
+                        yield return DefaultApiKey;
+                    }
                 }
             }
+
+            public static IEnumerable<SettingDescriptor> AllSettings => Cache.AllSettings
+                .Concat(Security.AllSettings)
+                .Concat(Setup.AllSettings)
+                .Concat(UserProfile.AllSettings)
+                .Concat(UserInterface.AllSettings)
+                .Concat(Swagger.AllSettings);
         }
     }
 }
