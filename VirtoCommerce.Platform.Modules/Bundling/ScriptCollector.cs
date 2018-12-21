@@ -16,7 +16,7 @@ namespace VirtoCommerce.Platform.Modules.Bundling
 
         protected override BundleMetadata GetMetadata()
         {
-            var includedModules = _localModuleCatalog.Modules.OfType<ManifestModuleInfo>().ToList();
+            var includedModules = _localModuleCatalog.Modules.OfType<ManifestModuleInfo>();
 
             return new BundleMetadata
             {
