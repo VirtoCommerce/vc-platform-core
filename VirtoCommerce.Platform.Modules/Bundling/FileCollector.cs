@@ -51,14 +51,14 @@ namespace VirtoCommerce.Platform.Modules.Bundling
             return result.ToArray();
         }
 
-        private ModuleFile[] Handle(string targetPath, string applicationFilename, string vendorFilename, string moduleName, string virtualPath, bool isNeedVersionAppend)
+        private ModuleFile[] Handle(string targetPath, string applicationFileName, string vendorFileName, string moduleName, string virtualPath, bool isNeedVersionAppend)
         {
             var result = new List<ModuleFile>();
 
             if (Directory.Exists(targetPath))
             {
-                var moduleFile = Path.Join(targetPath, applicationFilename);
-                var moduleVendor = Path.Join(targetPath, vendorFilename);
+                var moduleFile = Path.Join(targetPath, applicationFileName);
+                var moduleVendor = Path.Join(targetPath, vendorFileName);
 
                 if (File.Exists(moduleFile))
                 {
