@@ -65,7 +65,7 @@ namespace VirtoCommerce.Platform.Modules.Bundling
                     result.Add(new ModuleFile
                     {
                         WebPath = GetWebPath(moduleFile, moduleName, virtualPath),
-                        Version = isNeedVersionAppend ? _fileVersionProvider.GetFileVersion(moduleFile) : string.Empty
+                        Version = isNeedVersionAppend ? _fileVersionProvider.GetFileVersion(moduleFile) : null
                     });
                 }
 
@@ -74,7 +74,7 @@ namespace VirtoCommerce.Platform.Modules.Bundling
                     result.Add(new ModuleFile
                     {
                         WebPath = GetWebPath(moduleVendor, moduleName, virtualPath),
-                        Version = isNeedVersionAppend ? _fileVersionProvider.GetFileVersion(moduleFile) : string.Empty,
+                        Version = isNeedVersionAppend ? _fileVersionProvider.GetFileVersion(moduleFile) : null,
                         IsVendor = true
                     });
                 }
