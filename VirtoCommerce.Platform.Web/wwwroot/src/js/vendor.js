@@ -22,7 +22,7 @@ import 'angular-translate';
 import 'angular-translate-loader-url';
 import 'angular-translate-storage-local';
 import 'angular-translate-storage-cookie';
-//import 'font-awesome';
+import 'angular-local-storage';
 import 'moment';
 import 'moment-timezone';
 import 'Vendor/ng-context-menu/dist/ng-context-menu.js';
