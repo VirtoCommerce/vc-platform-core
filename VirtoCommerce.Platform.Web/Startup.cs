@@ -1,6 +1,5 @@
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Primitives;
 using Hangfire;
@@ -19,8 +18,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Smidge;
 using Smidge.Nuglify;
-using Swashbuckle.AspNetCore.Swagger;
-using Swashbuckle.AspNetCore.SwaggerUI;
 using VirtoCommerce.Platform.Assets.AzureBlobStorage;
 using VirtoCommerce.Platform.Assets.AzureBlobStorage.Extensions;
 using VirtoCommerce.Platform.Assets.FileSystem;
@@ -236,34 +233,7 @@ namespace VirtoCommerce.Platform.Web
             services.AddSmidgeNuglify();
 
             // Register the Swagger generator
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new Info
-                {
-                    Title = "VirtoCommerce Solution REST API documentation",
-                    Version = "v1",
-                    Description = "For this sample, you can use the"
-                    ,
-                    Contact = new Contact
-                    {
-                        Email = "support@virtocommerce.com",
-                        Name = "Virto Commerce",
-                        Url = "http://virtocommerce.com"
-                    }
-                });
-                c.TagActionsBy(api => api.GroupByModuleName(services));
-                c.DocInclusionPredicate((docName, api) => true);
-                c.DescribeAllEnumsAsStrings();
-                c.IgnoreObsoleteProperties();
-                c.IgnoreObsoleteActions();
-                c.OperationFilter<FileResponseTypeFilter>();
-                c.OperationFilter<OptionalParametersFilter>();
-                c.OperationFilter<TagsFilter>();
-                c.DocumentFilter<TagsFilter>();
-                c.MapType<object>(() => new Schema { Type = "object" });
-                c.AddModulesXmlComments(services);
-                c.CustomSchemaIds(x => x.FullName);
-            });
+            services.AddSwagger();
 
             //Add SignalR for push notifications
             services.AddSignalR();
@@ -364,24 +334,7 @@ namespace VirtoCommerce.Platform.Web
 
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
-            app.UseSwagger(c => c.RouteTemplate = "docs/{documentName}/docs.json");
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/docs/v1/docs.json", "Explore");
-                c.RoutePrefix = "docs";
-                c.EnableValidator();
-                c.IndexStream = () =>
-                {
-                    var type = GetType().GetTypeInfo().Assembly
-                        .GetManifestResourceStream("VirtoCommerce.Platform.Web.wwwroot.swagger.index.html");
-                    return type;
-                };
-                c.DocumentTitle = "VirtoCommerce Solution REST API documentation";
-                c.InjectStylesheet("/swagger/vc.css");
-                c.ShowExtensions();
-                c.DocExpansion(DocExpansion.None);
-            });
+            app.UseSwagger();
 
             app.UseHangfireDashboard("/hangfire", new DashboardOptions { Authorization = new[] { new HangfireAuthorizationHandler() } });
             app.UseHangfireServer(new BackgroundJobServerOptions
