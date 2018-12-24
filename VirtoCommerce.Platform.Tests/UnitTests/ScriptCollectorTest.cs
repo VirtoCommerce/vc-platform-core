@@ -10,7 +10,7 @@ using Xunit;
 
 namespace VirtoCommerce.Platform.Tests.UnitTests
 {
-    public class ScriptCollectorTest
+    public class ScriptCollectorTest : IDisposable
     {
         private string _destinationPath;
         private string _temporaryFolderName;
@@ -42,8 +42,6 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
 
             var result = collector.Collect(false);
 
-            TryRemoveTemporaryFiles();
-
             Assert.Equal(2, result.Length);
             _fileVersionProvider.Verify(f => f.GetFileVersion(It.IsAny<string>()), Times.Never);
         }
@@ -61,8 +59,6 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
             var collector = CreateScriptCollector(_fileVersionProvider.Object, _localModuleCatalog.Object);
 
             collector.Collect(true);
-
-            TryRemoveTemporaryFiles();
 
             _fileVersionProvider.Verify(f => f.GetFileVersion(It.IsAny<string>()), Times.Once);
         }
@@ -96,9 +92,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
 
             var collector = CreateScriptCollector(_fileVersionProvider.Object, _localModuleCatalog.Object);
 
-            var result = collector.Collect(default(bool));
-
-            TryRemoveTemporaryFiles();
+            var result = collector.Collect(false);
 
             Assert.Empty(result);
         }
@@ -115,9 +109,7 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
 
             var collector = CreateScriptCollector(_fileVersionProvider.Object, _localModuleCatalog.Object);
 
-            var result = collector.Collect(default(bool));
-
-            TryRemoveTemporaryFiles();
+            var result = collector.Collect(false);
 
             Assert.Empty(result);
         }
@@ -156,23 +148,6 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
             }
         }
 
-        private void TryRemoveTemporaryFiles()
-        {
-            if (_fullPhysicalPathToDistFolder == null)
-            {
-                return;
-            }
-
-            var files = Directory.GetFiles(_fullPhysicalPathToDistFolder);
-
-            foreach (var file in files)
-            {
-                File.Delete(file);
-            }
-
-            Directory.Delete(Path.Join(_destinationPath, _temporaryFolderName), true);
-        }
-
         private static ModuleInfo CreateModuleInfo(string fullPhysicalPath, ManifestBundleItem scripts)
         {
             return new ManifestModuleInfo(new ModuleManifest
@@ -194,6 +169,23 @@ namespace VirtoCommerce.Platform.Tests.UnitTests
             {
                 VirtualPath = virtualPath
             };
+        }
+
+        public void Dispose()
+        {
+            if (_fullPhysicalPathToDistFolder == null)
+            {
+                return;
+            }
+
+            var files = Directory.GetFiles(_fullPhysicalPathToDistFolder);
+
+            foreach (var file in files)
+            {
+                File.Delete(file);
+            }
+
+            Directory.Delete(Path.Join(_destinationPath, _temporaryFolderName), true);
         }
     }
 }
