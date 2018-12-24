@@ -14,7 +14,7 @@ using OpenIddict.Abstractions;
 using OpenIddict.Core;
 using OpenIddict.EntityFrameworkCore.Models;
 using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.Platform.Security.Services;
+using VirtoCommerce.Platform.Security.Authorization;
 using VirtoCommerce.Platform.Web.Infrastructure;
 
 namespace Mvc.Server
@@ -26,7 +26,7 @@ namespace Mvc.Server
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IUserClaimsPrincipalFactory<ApplicationUser> _userClaimsPrincipalFactory;
-        private readonly Authentication _authentication;
+        private readonly Authorization _authorization;
 
         public AuthorizationController(
             OpenIddictApplicationManager<OpenIddictApplication> applicationManager,
@@ -34,14 +34,14 @@ namespace Mvc.Server
             SignInManager<ApplicationUser> signInManager,
             UserManager<ApplicationUser> userManager,
             IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
-            IOptions<Authentication> authentication)
+            IOptions<Authorization> authorization)
         {
             _applicationManager = applicationManager;
             _identityOptions = identityOptions;
             _signInManager = signInManager;
             _userManager = userManager;
             _userClaimsPrincipalFactory = userClaimsPrincipalFactory;
-            _authentication = authentication.Value;
+            _authorization = authorization.Value;
         }
 
         #region Password, authorization code and refresh token flows
@@ -85,7 +85,7 @@ namespace Mvc.Server
                 // Set limited permissions
                 var claims = await _userClaimsPrincipalFactory.CreateAsync(user);
 
-                ((ClaimsIdentity) claims.Identity).AddClaim(new Claim(LimitedPermissionsHandler.LimitedPermissionsClaimName, _authentication.LimitedCookiePermissions));
+                ((ClaimsIdentity) claims.Identity).AddClaim(new Claim(PermissionAuthorizationHandler.LimitedPermissionsClaimName, _authorization.LimitedCookiePermissions));
 
                 await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, claims);
 

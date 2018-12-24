@@ -9,6 +9,7 @@ using AspNet.Security.OpenIdConnect.Primitives;
 using Hangfire;
 using Hangfire.MemoryStorage;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -19,6 +20,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -44,7 +46,6 @@ using VirtoCommerce.Platform.Security;
 using VirtoCommerce.Platform.Security.Authorization;
 using VirtoCommerce.Platform.Security.Extensions;
 using VirtoCommerce.Platform.Security.Repositories;
-using VirtoCommerce.Platform.Security.Services;
 using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Hangfire;
 using VirtoCommerce.Platform.Web.Infrastructure;
@@ -165,6 +166,8 @@ namespace VirtoCommerce.Platform.Web
                 options.ClaimsIdentity.RoleClaimType = OpenIdConnectConstants.Claims.Role;
             });
 
+            // Register custom configuration for JwtBearerOptions
+            services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>();
 
             // Register the OAuth2 validation handler.
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
@@ -172,20 +175,20 @@ namespace VirtoCommerce.Platform.Web
             services
                 .AddAuthentication()
                 .AddJwtBearer(options =>
-                {
-                    options.Authority = Configuration.GetValue<string>("Authorization:Authority");
-                    options.Audience = "resource_server";
-                    options.RequireHttpsMetadata = false;
-                    options.IncludeErrorDetails = true;
-                    options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        NameClaimType = OpenIdConnectConstants.Claims.Subject,
-                        RoleClaimType = OpenIdConnectConstants.Claims.Role
-                    };
-                })
+                        options.Audience = "resource_server";
+                        options.RequireHttpsMetadata = false;
+                        options.IncludeErrorDetails = true;
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            NameClaimType = OpenIdConnectConstants.Claims.Subject,
+                            RoleClaimType = OpenIdConnectConstants.Claims.Role
+                        };
+                    }
+                )
                 .AddCookie();//.AddOAuthValidation();
 
-            services.Configure<Authentication>(Configuration.GetSection("Authentication"));
+            services.Configure<Authorization>(Configuration.GetSection("Authorization"));
 
             // Register the OpenIddict services.
             // Note: use the generic overload if you need
@@ -432,7 +435,7 @@ namespace VirtoCommerce.Platform.Web
                 c.OAuthClientSecret(string.Empty);
             });
 
-            app.UseHangfireDashboard("/hangfire", new DashboardOptions { Authorization = new[] { new HangfireAuthorizationHandler(app.ApplicationServices.GetRequiredService<LimitedPermissionsHandler>()) } });
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions { Authorization = new[] { new HangfireAuthorizationHandler() } });
             app.UseHangfireServer(new BackgroundJobServerOptions
             {
                 // Create some queues for job prioritization.

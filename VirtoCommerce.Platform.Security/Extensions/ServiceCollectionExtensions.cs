@@ -26,8 +26,6 @@ namespace VirtoCommerce.Platform.Security.Extensions
             services.TryAddScoped<RoleManager<Role>, CustomRoleManager>();
             services.TryAddScoped<UserManager<ApplicationUser>, CustomUserManager>();
 
-            services.AddSingleton<LimitedPermissionsHandler>();
-
             if (setupAction != null)
             {
                 services.Configure(setupAction);

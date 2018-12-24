@@ -1,28 +1,28 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using VirtoCommerce.Platform.Core;
-using VirtoCommerce.Platform.Security.Services;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Security.Authorization
 {
     public class PermissionAuthorizationHandler : AuthorizationHandler<PermissionAuthorizationRequirement>
     {
-        private readonly LimitedPermissionsHandler _limitedPermissionsHandler;
+        public const string LimitedPermissionsClaimName = "LimitedPermissions";
 
-        public PermissionAuthorizationHandler(LimitedPermissionsHandler limitedPermissionsHandler)
-        {
-            _limitedPermissionsHandler = limitedPermissionsHandler;
-        }
-
-        protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionAuthorizationRequirement requirement)
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionAuthorizationRequirement requirement)
         {
             var claims = context.User.Claims.ToArray();
+            var limitedPermissionsClaim = claims.FirstOrDefault(c => c.Type.EqualsInvariant(LimitedPermissionsClaimName));
+
             if (context.User.Identity.AuthenticationType == IdentityConstants.ApplicationScheme
-                && _limitedPermissionsHandler.HasLimitedPermissionsClaim(claims))
+                && limitedPermissionsClaim != null)
             {
-                if (await _limitedPermissionsHandler.UserHasAnyPermissionAsync(claims, requirement.Permission.Name))
+                var limitedPermissions = limitedPermissionsClaim.Value?.Split(';', StringSplitOptions.RemoveEmptyEntries) ?? new string[0];
+
+                if (limitedPermissions.Contains(requirement.Permission.Name))
                 {
                     context.Succeed(requirement);
                 }
@@ -37,7 +37,7 @@ namespace VirtoCommerce.Platform.Security.Authorization
 
                 if (context.User.IsInRole(PlatformConstants.Security.Roles.Customer))
                 {
-                    return;
+                    return Task.CompletedTask;
                 }
 
                 if (context.User.HasClaim(PlatformConstants.Security.Claims.PermissionClaimType, requirement.Permission.Name)
@@ -46,6 +46,8 @@ namespace VirtoCommerce.Platform.Security.Authorization
                     context.Succeed(requirement);
                 }
             }
+
+            return Task.CompletedTask;
 
             //TODO: Check scoped permissions
             //if (result)
