@@ -264,31 +264,11 @@ namespace VirtoCommerce.Platform.Core
                 }
             }
 
-            public static class Swagger
-            {
-                public static SettingDescriptor DefaultApiKey = new SettingDescriptor
-                {
-                    Name = "VirtoCommerce.Platform.Swagger.DefaultApiKey",
-                    GroupName = "Platform|Swagger",
-                    ValueType = SettingValueType.ShortText,
-                    DefaultValue = string.Empty
-                };
-
-                public static IEnumerable<SettingDescriptor> AllSettings
-                {
-                    get
-                    {
-                        yield return DefaultApiKey;
-                    }
-                }
-            }
-
             public static IEnumerable<SettingDescriptor> AllSettings => Cache.AllSettings
                 .Concat(Security.AllSettings)
                 .Concat(Setup.AllSettings)
                 .Concat(UserProfile.AllSettings)
-                .Concat(UserInterface.AllSettings)
-                .Concat(Swagger.AllSettings);
+                .Concat(UserInterface.AllSettings);
         }
     }
 }
