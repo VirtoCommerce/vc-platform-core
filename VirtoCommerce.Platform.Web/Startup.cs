@@ -17,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using OpenIddict.Validation;
 using Smidge;
 using Smidge.Nuglify;
 using Swashbuckle.AspNetCore.Swagger;
@@ -158,8 +159,6 @@ namespace VirtoCommerce.Platform.Web
             });
 
 
-            // Register the OAuth2 validation handler.
-            services.AddAuthentication().AddOAuthValidation();
 
             // Register the OpenIddict services.
             // Note: use the generic overload if you need
@@ -171,6 +170,7 @@ namespace VirtoCommerce.Platform.Web
                        .UseDbContext<SecurityDbContext>();
             }).AddServer(options =>
             {
+
                 // Register the ASP.NET Core MVC binder used by OpenIddict.
                 // Note: if you don't call this method, you won't be able to
                 // bind OpenIdConnectRequest or OpenIdConnectResponse parameters.
@@ -189,6 +189,7 @@ namespace VirtoCommerce.Platform.Web
                 // Accept anonymous clients (i.e clients that don't send a client_id).
                 options.AcceptAnonymousClients();
 
+                options.DisableScopeValidation();
                 // Make the "client_id" parameter mandatory when sending a token request.
                 //options.RequireClientIdentification();
 
@@ -202,13 +203,16 @@ namespace VirtoCommerce.Platform.Web
                 // During development, you can disable the HTTPS requirement.
                 options.DisableHttpsRequirement();
 
+                options.UseReferenceTokens();
+                options.UseRollingTokens();
                 // Note: to use JWT access tokens instead of the default
                 // encrypted format, the following lines are required:
                 //
-                options.UseJsonWebTokens();
+                //options.UseJsonWebTokens();
                 //TODO: Replace to X.509 certificate
-                options.AddEphemeralSigningKey();
-            });
+                //options.AddEphemeralSigningKey();
+            }).AddValidation(options => options.UseReferenceTokens());
+
 
             services.Configure<IdentityOptions>(Configuration.GetSection("IdentityOptions"));
 
