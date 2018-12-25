@@ -70,6 +70,8 @@ namespace VirtoCommerce.Platform.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            /// This custom provider allows able to use just [Authorize] instead of having to define [Authorize(AuthenticationSchemes = "Bearer")] above every API controller
+            /// without this Bearer authorization will not work
             services.AddSingleton<IAuthenticationSchemeProvider, CustomAuthenticationSchemeProvider>();
 
             services.Configure<PlatformOptions>(Configuration.GetSection("VirtoCommerce"));
@@ -166,30 +168,8 @@ namespace VirtoCommerce.Platform.Web
                 options.ClaimsIdentity.RoleClaimType = OpenIdConnectConstants.Claims.Role;
             });
 
-            // Register custom configuration for JwtBearerOptions
-            services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>();
-
-            // Register the OAuth2 validation handler.
-            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-            JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
-            services
-                .AddAuthentication()
-                .AddJwtBearer(options =>
-                    {
-                        options.Audience = "resource_server";
-                        options.RequireHttpsMetadata = false;
-                        options.IncludeErrorDetails = true;
-                        options.TokenValidationParameters = new TokenValidationParameters
-                        {
-                            NameClaimType = OpenIdConnectConstants.Claims.Subject,
-                            RoleClaimType = OpenIdConnectConstants.Claims.Role
-                        };
-                    }
-                )
-                .AddCookie();//.AddOAuthValidation();
-
-            services.Configure<Authorization>(Configuration.GetSection("Authorization"));
-
+            services.Configure<Core.Security.AuthorizationOptions>(Configuration.GetSection("Authorization"));
+            var authorizationOptions = Configuration.GetSection("Authorization").Get<Core.Security.AuthorizationOptions>();
             // Register the OpenIddict services.
             // Note: use the generic overload if you need
             // to replace the default OpenIddict entities.
@@ -214,8 +194,8 @@ namespace VirtoCommerce.Platform.Web
                     options.AllowPasswordFlow()
                         .AllowRefreshTokenFlow();
 
-                    options.SetRefreshTokenLifetime(TimeSpan.FromHours(Configuration.GetValue<int>("Authorization:RefreshTokenLifeTime")));
-                    options.SetAccessTokenLifetime(TimeSpan.FromHours(Configuration.GetValue<int>("Authorization:AccessTokenLifeTime")));
+                    options.SetRefreshTokenLifetime(authorizationOptions.RefreshTokenLifeTime);
+                    options.SetAccessTokenLifetime(authorizationOptions.AccessTokenLifeTime);
 
                     options.AcceptAnonymousClients();
 
@@ -232,6 +212,9 @@ namespace VirtoCommerce.Platform.Web
                     // an external authentication provider like Google, Facebook or Twitter.
                     options.EnableRequestCaching();
 
+                    options.UseReferenceTokens();
+                    options.DisableScopeValidation();
+
                     // During development, you can disable the HTTPS requirement.
                     if (HostingEnvironment.IsDevelopment())
                     {
@@ -241,11 +224,10 @@ namespace VirtoCommerce.Platform.Web
                     // Note: to use JWT access tokens instead of the default
                     // encrypted format, the following lines are required:
                     //
-                    options.UseJsonWebTokens();
+                    //options.UseJsonWebTokens();
                     //TODO: Replace to X.509 certificate
-                    options.AddEphemeralSigningKey();
-                });
-            //.AddValidation();
+                    //options.AddEphemeralSigningKey();
+                }).AddValidation(options => options.UseReferenceTokens());
 
             services.Configure<IdentityOptions>(Configuration.GetSection("IdentityOptions"));
 

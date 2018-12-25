@@ -9,6 +9,8 @@ namespace VirtoCommerce.Platform.Web.Infrastructure
 {
     /// <summary>
     /// https://github.com/openiddict/openiddict-core/issues/594
+    /// This custom provider allows able to use just [Authorize] instead of having to define [Authorize(AuthenticationSchemes = "Bearer")] above every API controller
+    /// without this Bearer authorization will not work
     /// </summary>
     public class CustomAuthenticationSchemeProvider : AuthenticationSchemeProvider
     {
