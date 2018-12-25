@@ -1,15 +1,13 @@
-using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Primitives;
 using Hangfire;
 using Hangfire.MemoryStorage;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -20,8 +18,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Smidge;
@@ -70,8 +66,8 @@ namespace VirtoCommerce.Platform.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            /// This custom provider allows able to use just [Authorize] instead of having to define [Authorize(AuthenticationSchemes = "Bearer")] above every API controller
-            /// without this Bearer authorization will not work
+            // This custom provider allows able to use just [Authorize] instead of having to define [Authorize(AuthenticationSchemes = "Bearer")] above every API controller
+            // without this Bearer authorization will not work
             services.AddSingleton<IAuthenticationSchemeProvider, CustomAuthenticationSchemeProvider>();
 
             services.Configure<PlatformOptions>(Configuration.GetSection("VirtoCommerce"));
@@ -236,11 +232,15 @@ namespace VirtoCommerce.Platform.Web
             {
                 options.Events.OnRedirectToLogin = context =>
                 {
-                    context.Response.StatusCode = 401;
+                    context.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
+                    return Task.CompletedTask;
+                };
+                options.Events.OnRedirectToAccessDenied = context =>
+                {
+                    context.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
                     return Task.CompletedTask;
                 };
             });
-
 
             services.AddAuthorization();
             // register the AuthorizationPolicyProvider which dynamically registers authorization policies for each permission defined in module manifest
@@ -440,9 +440,6 @@ namespace VirtoCommerce.Platform.Web
 
             //Seed default users
             app.UseDefaultUsersAsync().GetAwaiter().GetResult();
-
-
-
         }
     }
 }
