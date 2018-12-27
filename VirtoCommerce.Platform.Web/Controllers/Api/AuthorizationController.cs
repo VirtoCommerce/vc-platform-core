@@ -84,14 +84,12 @@ namespace Mvc.Server
                 var claims = await _userClaimsPrincipalFactory.CreateAsync(user);
                 var limitedPermissions = _authorizationOptions.LimitedCookiePermissions?.Split(';', StringSplitOptions.RemoveEmptyEntries) ?? new string[0];
 
-                var userHasAnyPermissions = true;
-
                 if (!user.Roles.Select(r => r.Name).Contains(PlatformConstants.Security.Roles.Administrator))
                 {
-                    userHasAnyPermissions = claims.Claims.Where(c => c.Type == "permission").Select(c => c.Value).Intersect(limitedPermissions, StringComparer.OrdinalIgnoreCase).Any();
+                    limitedPermissions = claims.Claims.Where(c => c.Type == "permission").Select(c => c.Value).Intersect(limitedPermissions, StringComparer.OrdinalIgnoreCase).ToArray();
                 }
 
-                if (userHasAnyPermissions)
+                if (limitedPermissions.Any())
                 {
                     // Set limited permissions and authenticate user with combined mode Cookies + Bearer.
                     //
@@ -101,7 +99,7 @@ namespace Mvc.Server
                     // If the user identity has claim named "limited_permissions", this attribute should authorize only permissions listed in that claim. Any permissions that are required by this attribute but
                     // not listed in the claim should cause this method to return false. However, if permission limits of user identity are not defined ("limited_permissions" claim is missing),
                     // then no limitations should be applied to the permissions.
-                    ((ClaimsIdentity)claims.Identity).AddClaim(new Claim(PlatformConstants.Security.Claims.LimitedPermissionsClaimType, _authorizationOptions.LimitedCookiePermissions));
+                    ((ClaimsIdentity)claims.Identity).AddClaim(new Claim(PlatformConstants.Security.Claims.LimitedPermissionsClaimType, string.Join(';', limitedPermissions)));
                     await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, claims);
                 }
 
