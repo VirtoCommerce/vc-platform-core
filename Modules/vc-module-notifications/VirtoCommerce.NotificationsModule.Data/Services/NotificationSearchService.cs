@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.NotificationsModule.Core.Model;
@@ -18,13 +17,13 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             _repositoryFactory = repositoryFactory;
         }
 
-        public async  Task<GenericSearchResult<Notification>> SearchNotificationsAsync(NotificationSearchCriteria criteria)
+        public async Task<GenericSearchResult<Notification>> SearchNotificationsAsync(NotificationSearchCriteria criteria)
         {
             var query = AbstractTypeFactory<Notification>.AllTypeInfos
                 .Where(t => t.AllSubclasses.Any(s => s != t.Type && s.IsSubclassOf(typeof(Notification))))
                 .Select(n => n.Type)
                 .AsQueryable();
-            
+
             if (!string.IsNullOrEmpty(criteria.Keyword))
             {
                 query = query.Where(n => n.Name.Contains(criteria.Keyword));
@@ -44,19 +43,25 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
             using (var repository = _repositoryFactory())
             {
-                entities = await repository.GetByTypesAsync(collection.Select(c => c.Name).ToArray(), criteria.TenantId, criteria.TenantType, criteria.ResponseGroup);
+                entities = await repository.GetByTypesAsync(collection.Select(c => c.Name).ToArray(), criteria.TenantId,
+                    criteria.TenantType, criteria.ResponseGroup, criteria.IsActive);
             }
 
-            var list = collection.Select(t =>
+            var notifications = collection.Select(t =>
             {
                 var result = AbstractTypeFactory<Notification>.TryCreateInstance(t.Name);
                 var notificationEntity = entities.FirstOrDefault(e => e.Type.Equals(t.Name));
                 return notificationEntity != null ? notificationEntity.ToModel(result) : result;
-            }).ToList();
-            
+            });
+
+            if (criteria.IsActive)
+            {
+                notifications = notifications.Where(n => n.IsActive);
+            }
+
             return new GenericSearchResult<Notification>
             {
-                Results = list,
+                Results = notifications.ToList(),
                 TotalCount = totalCount
             };
         }

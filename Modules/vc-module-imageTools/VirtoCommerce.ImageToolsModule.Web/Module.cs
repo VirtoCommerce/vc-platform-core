@@ -82,14 +82,14 @@ namespace VirtoCommerce.ImageToolsModule.Web
         {
         }
 
-        public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
+        public Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
-            await _appBuilder.ApplicationServices.GetRequiredService<ThumbnailsExportImport>().ExportAsync(outStream, options, progressCallback, cancellationToken);
+            return _appBuilder.ApplicationServices.GetRequiredService<ThumbnailsExportImport>().DoExportAsync(outStream, progressCallback, cancellationToken);
         }
 
-        public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
+        public Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
-            await _appBuilder.ApplicationServices.GetRequiredService<ThumbnailsExportImport>().ImportAsync(inputStream, options, progressCallback, cancellationToken);
+            return _appBuilder.ApplicationServices.GetRequiredService<ThumbnailsExportImport>().DoImportAsync(inputStream, progressCallback, cancellationToken);
         }
     }
 }

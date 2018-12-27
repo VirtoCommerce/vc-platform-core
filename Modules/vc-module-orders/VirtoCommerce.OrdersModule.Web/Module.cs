@@ -101,13 +101,15 @@ namespace VirtoCommerce.OrdersModule.Web
         public Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
             ICancellationToken cancellationToken)
         {
-            return _appBuilder.ApplicationServices.GetRequiredService<OrderExportImport>().ExportAsync(outStream, options, progressCallback, cancellationToken);
+            return _appBuilder.ApplicationServices.GetRequiredService<OrderExportImport>().DoExportAsync(outStream,
+                progressCallback, cancellationToken);
         }
 
         public Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
             ICancellationToken cancellationToken)
         {
-            return _appBuilder.ApplicationServices.GetRequiredService<OrderExportImport>().ImportAsync(inputStream, options, progressCallback, cancellationToken);
+            return _appBuilder.ApplicationServices.GetRequiredService<OrderExportImport>().DoImportAsync(inputStream,
+                progressCallback, cancellationToken);
         }
     }
 }

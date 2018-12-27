@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.CoreModule.Core.Shipping;
 using VirtoCommerce.CoreModule.Core.Tax;
@@ -48,7 +47,6 @@ namespace VirtoCommerce.StoreModule.Web
             serviceCollection.AddSingleton<IStoreSearchService, StoreSearchService>();
             serviceCollection.AddSingleton<StoreExportImport>();
             serviceCollection.AddSingleton<StoreChangedEventHandler>();
-            serviceCollection.AddSingleton<JsonSerializer>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -93,14 +91,18 @@ namespace VirtoCommerce.StoreModule.Web
         {
         }
 
-        public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
+        public Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
+            ICancellationToken cancellationToken)
         {
-            await _appBuilder.ApplicationServices.GetRequiredService<StoreExportImport>().ExportAsync(outStream, options, progressCallback, cancellationToken);
+            return _appBuilder.ApplicationServices.GetRequiredService<StoreExportImport>().DoExportAsync(outStream,
+                progressCallback, cancellationToken);
         }
 
-        public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
+        public Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
+            ICancellationToken cancellationToken)
         {
-            await _appBuilder.ApplicationServices.GetRequiredService<StoreExportImport>().ImportAsync(inputStream, options, progressCallback, cancellationToken);
+            return _appBuilder.ApplicationServices.GetRequiredService<StoreExportImport>().DoImportAsync(inputStream,
+                progressCallback, cancellationToken);
         }
     }
 }

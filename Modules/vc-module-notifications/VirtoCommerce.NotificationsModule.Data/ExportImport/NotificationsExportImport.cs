@@ -3,34 +3,34 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using VirtoCommerce.NotificationsModule.Core.Model;
+using VirtoCommerce.NotificationsModule.Core.Services;
+using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Data.ExportImport;
-using VirtoCommerce.StoreModule.Core.Model;
-using VirtoCommerce.StoreModule.Core.Model.Search;
-using VirtoCommerce.StoreModule.Core.Services;
 
-namespace VirtoCommerce.StoreModule.Data.ExportImport
+namespace VirtoCommerce.NotificationsModule.Data.ExportImport
 {
-    public sealed class StoreExportImport
+    public sealed class NotificationsExportImport
     {
-        private readonly IStoreService _storeService;
-        private readonly IStoreSearchService _storeSearchService;
+        private readonly INotificationSearchService _notificationSearchService;
+        private readonly INotificationService _notificationService;
+        private const int _batchSize = 50;
         private readonly JsonSerializer _jsonSerializer;
-        private readonly int _batchSize = 50;
 
-        public StoreExportImport(IStoreService storeService, IStoreSearchService storeSearchService, JsonSerializer jsonSerializer)
+        public NotificationsExportImport(INotificationSearchService notificationSearchService, INotificationService notificationService, JsonSerializer jsonSerializer)
         {
-            _storeService = storeService;
+            _notificationSearchService = notificationSearchService;
+            _notificationService = notificationService;
             _jsonSerializer = jsonSerializer;
-            _storeSearchService = storeSearchService;
         }
 
         public async Task DoExportAsync(Stream outStream, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var progressInfo = new ExportImportProgressInfo { Description = "The store are loading" };
+            var progressInfo = new ExportImportProgressInfo { Description = "loading data..." };
             progressCallback(progressInfo);
 
             using (var sw = new StreamWriter(outStream))
@@ -38,19 +38,21 @@ namespace VirtoCommerce.StoreModule.Data.ExportImport
             {
                 await writer.WriteStartObjectAsync();
 
-                progressInfo.Description = "Stores are started to export";
+                progressInfo.Description = "Notifications are started to export";
                 progressCallback(progressInfo);
 
-                await writer.WritePropertyNameAsync("Stores");
+                await writer.WritePropertyNameAsync("Notifications");
                 await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) =>
                 {
-                    var searchCriteria = AbstractTypeFactory<StoreSearchCriteria>.TryCreateInstance();
+                    var searchCriteria = AbstractTypeFactory<NotificationSearchCriteria>.TryCreateInstance();
                     searchCriteria.Take = take;
                     searchCriteria.Skip = skip;
-                    return _storeSearchService.SearchStoresAsync(searchCriteria);
+                    searchCriteria.ResponseGroup = NotificationResponseGroup.Full.ToString();
+                    searchCriteria.IsActive = true;
+                    return _notificationSearchService.SearchNotificationsAsync(searchCriteria);
                 }, (processedCount, totalCount) =>
                 {
-                    progressInfo.Description = $"{processedCount} of {totalCount} stores have been exported";
+                    progressInfo.Description = $"{processedCount} of {totalCount} notifications have been exported";
                     progressCallback(progressInfo);
                 }, cancellationToken);
 
@@ -72,11 +74,11 @@ namespace VirtoCommerce.StoreModule.Data.ExportImport
                 {
                     if (reader.TokenType == JsonToken.PropertyName)
                     {
-                        if (reader.Value.ToString() == "Stores")
+                        if (reader.Value.ToString() == "Notifications")
                         {
-                            await reader.DeserializeJsonArrayWithPagingAsync<Store>(_jsonSerializer, _batchSize, items => _storeService.SaveChangesAsync(items.ToArray()), processedCount =>
+                            await reader.DeserializeJsonArrayWithPagingAsync<Notification>(_jsonSerializer, _batchSize, items => _notificationService.SaveChangesAsync(items.ToArray()), processedCount =>
                             {
-                                progressInfo.Description = $"{ processedCount } stores have been imported";
+                                progressInfo.Description = $"{ processedCount } notifications have been imported";
                                 progressCallback(progressInfo);
                             }, cancellationToken);
                         }

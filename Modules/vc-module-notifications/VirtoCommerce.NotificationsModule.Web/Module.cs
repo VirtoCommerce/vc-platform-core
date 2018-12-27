@@ -51,7 +51,7 @@ namespace VirtoCommerce.NotificationsModule.Web
             serviceCollection.AddTransient<INotificationMessageSender, SmtpEmailNotificationMessageSender>();
             serviceCollection.AddTransient<INotificationMessageSender, SendGridEmailNotificationMessageSender>();
             serviceCollection.AddTransient<IEmailSender, EmailNotificationMessageSender>();
-            serviceCollection.AddSingleton<NotificationsExportImportManager>();
+            serviceCollection.AddSingleton<NotificationsExportImport>();
             serviceCollection.Configure<EmailSendingOptions>(configuration.GetSection("Notifications"));
             serviceCollection.Configure<SmtpSenderOptions>(configuration.GetSection("Notifications:Smtp"));
             serviceCollection.Configure<SendGridSenderOptions>(configuration.GetSection("Notifications:SendGrid"));
@@ -113,14 +113,14 @@ namespace VirtoCommerce.NotificationsModule.Web
         {
         }
 
-        public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
+        public Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
-            await _appBuilder.ApplicationServices.GetRequiredService<NotificationsExportImportManager>().ExportAsync(outStream, options, progressCallback, cancellationToken);
+            return _appBuilder.ApplicationServices.GetRequiredService<NotificationsExportImport>().DoExportAsync(outStream, progressCallback, cancellationToken);
         }
 
-        public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
+        public Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
-            await _appBuilder.ApplicationServices.GetRequiredService<NotificationsExportImportManager>().ImportAsync(inputStream, options, progressCallback, cancellationToken);
+            return _appBuilder.ApplicationServices.GetRequiredService<NotificationsExportImport>().DoImportAsync(inputStream, progressCallback, cancellationToken);
         }
     }
 }
