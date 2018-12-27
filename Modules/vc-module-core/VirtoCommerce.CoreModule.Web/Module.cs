@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.CoreModule.Core;
+using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Currency;
 using VirtoCommerce.CoreModule.Core.Package;
 using VirtoCommerce.CoreModule.Core.Payment;
@@ -54,6 +55,7 @@ namespace VirtoCommerce.CoreModule.Web
             serviceCollection.AddSingleton<IPaymentMethodsRegistrar>(new PaymentMethodsRegistrar());
             serviceCollection.AddSingleton<ITaxProviderRegistrar>(new TaxProviderRegistrar());
             serviceCollection.AddSingleton<CoreExportImport>();
+            serviceCollection.AddSingleton<IUniqueNumberGenerator, SequenceUniqueNumberGeneratorService>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)

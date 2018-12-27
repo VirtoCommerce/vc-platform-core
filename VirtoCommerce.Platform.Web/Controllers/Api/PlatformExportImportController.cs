@@ -102,7 +102,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                         _settingsManager.SetValue(PlatformConstants.Settings.Setup.SampleDataState.Name, SampleDataState.Processing);
                         var pushNotification = new SampleDataImportPushNotification(User.Identity.Name);
                         _pushNotifier.Send(pushNotification);
-                        var jobId = BackgroundJob.Enqueue(() => SampleDataImportBackgroundAsync(new Uri(url), _hostEnv.MapPath(_platformOptions.LocalUploadFolderPath), pushNotification, JobCancellationToken.Null, null));
+                        var jobId = BackgroundJob.Enqueue(() => SampleDataImportBackgroundAsync(new Uri(url), Path.GetFullPath(_platformOptions.LocalUploadFolderPath), pushNotification, JobCancellationToken.Null, null));
                         pushNotification.JobId = jobId;
 
                         return Ok(pushNotification);
@@ -187,7 +187,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             };
             _pushNotifier.Send(notification);
 
-            var jobId = BackgroundJob.Enqueue(() => PlatformImportBackground(importRequest, notification, JobCancellationToken.Null, null));
+            var jobId = BackgroundJob.Enqueue(() => PlatformImportBackgroundAsync(importRequest, notification, JobCancellationToken.Null, null));
             notification.JobId = jobId;
 
             return Ok(notification);
@@ -302,28 +302,28 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             }
         }
 
-        public void PlatformImportBackground(PlatformImportExportRequest importRequest, PlatformImportPushNotification pushNotification, IJobCancellationToken cancellationToken, PerformContext context)
+        public async Task PlatformImportBackgroundAsync(PlatformImportExportRequest importRequest, PlatformImportPushNotification pushNotification, IJobCancellationToken cancellationToken, PerformContext context)
         {
-            Action<ExportImportProgressInfo> progressCallback = x =>
+            void progressCallback(ExportImportProgressInfo x)
             {
                 pushNotification.Path(x);
                 pushNotification.JobId = context.BackgroundJob.Id;
-                _pushNotifier.SendAsync(pushNotification);
-            };
+                _pushNotifier.Send(pushNotification);
+            }
 
             var now = DateTime.UtcNow;
             try
             {
                 var cancellationTokenWrapper = new JobCancellationTokenWrapper(cancellationToken);
 
-                var localPath = _hostEnv.MapPath(importRequest.FileUrl);
+                var localPath = Path.GetFullPath(Path.Combine(_platformOptions.LocalUploadFolderPath, importRequest.FileUrl));
 
                 //Load source data only from local file system 
                 using (var stream = new FileStream(localPath, FileMode.Open))
                 {
                     var manifest = importRequest.ToManifest();
                     manifest.Created = now;
-                    _platformExportManager.ImportAsync(stream, manifest, progressCallback, cancellationTokenWrapper);
+                    await _platformExportManager.ImportAsync(stream, manifest, progressCallback, cancellationTokenWrapper);
                 }
             }
             catch (JobAbortedException)
@@ -338,23 +338,23 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             {
                 pushNotification.Description = "Import finished";
                 pushNotification.Finished = DateTime.UtcNow;
-                _pushNotifier.Send(pushNotification);
+                await _pushNotifier.SendAsync(pushNotification);
             }
         }
 
         public async Task PlatformExportBackgroundAsync(PlatformImportExportRequest exportRequest, PlatformExportPushNotification pushNotification, IJobCancellationToken cancellationToken, PerformContext context)
         {
-            Action<ExportImportProgressInfo> progressCallback = x =>
+            void progressCallback(ExportImportProgressInfo x)
             {
                 pushNotification.Path(x);
                 pushNotification.JobId = context.BackgroundJob.Id;
-                _pushNotifier.SendAsync(pushNotification);
-            };
+                _pushNotifier.Send(pushNotification);
+            }
 
             try
             {
                 const string relativeUrl = "tmp/exported_data.zip";
-                var localTmpFolder = _hostEnv.MapPath(Path.Combine(_platformOptions.LocalUploadFolderPath, "tmp"));
+                var localTmpFolder = Path.GetFullPath(Path.Combine(_platformOptions.LocalUploadFolderPath, "tmp"));
                 var localTmpPath = Path.Combine(localTmpFolder, "exported_data.zip");
                 if (!Directory.Exists(localTmpFolder))
                 {

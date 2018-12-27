@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Moq;
 using VirtoCommerce.ImageToolsModule.Core.Models;
+using VirtoCommerce.ImageToolsModule.Core.Services;
 using VirtoCommerce.ImageToolsModule.Data.Models;
 using VirtoCommerce.ImageToolsModule.Data.Repositories;
 using VirtoCommerce.ImageToolsModule.Data.Services;
@@ -17,7 +18,7 @@ namespace VirtoCommerce.ImageToolsModule.Tests
         public void Search_ThumbnailOptionSearchCriteria_ReturnsGenericSearchResponseOfTasksInExpectedOrder()
         {
             var repoMock = GetTaskRepositoryMock();
-            var target = new ThumbnailTaskSearchService(() => repoMock.Object);
+            var target = new ThumbnailTaskSearchService(() => repoMock.Object, (new Mock<IThumbnailTaskService>()).Object);
             var criteria = new ThumbnailTaskSearchCriteria { Sort = "Name:desc;WorkPath:desc" };
             var resultTasks = target.SearchAsync(criteria);
 
@@ -30,7 +31,7 @@ namespace VirtoCommerce.ImageToolsModule.Tests
         {
             var keyword = "NameLong";
             var repoMock = GetTaskRepositoryMock();
-            var target = new ThumbnailTaskSearchService(() => repoMock.Object);
+            var target = new ThumbnailTaskSearchService(() => repoMock.Object, (new Mock<IThumbnailTaskService>()).Object);
 
             var resultTasks = target.SearchAsync(new ThumbnailTaskSearchCriteria { Keyword = keyword });
 

@@ -1,0 +1,6 @@
+﻿<ul class="list __prices">
+    <li class="list-item">{{'orders.widgets.shipment-totals.shipment-price' | translate}} <span class="list-price">{{shipment.price | currency:shipment.currency}}</span></li>
+    <li class="list-item">{{'orders.widgets.shipment-totals.discount-total' | translate}} <span class="list-price"><span ng-if="shipment.discountAmount > 0"></span>{{(shipment.discountAmount * -1) | currency:shipment.currency}}</span></li>
+    <li class="list-item">{{'orders.widgets.shipment-totals.tax-total' | translate}} <span class="list-price">{{shipment.taxTotal | currency:shipment.currency}}</span></li>
+    <li class="list-item __total">{{'orders.widgets.shipment-totals.total' | translate}} <span class="list-price">{{shipment.totalWithTax | currency:shipment.currency}}</span></li>
+</ul>

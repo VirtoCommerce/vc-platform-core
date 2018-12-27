@@ -14,14 +14,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.1.0" />
-    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.1.6" />
+    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.6" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.1.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
-    <ProjectReference Include="..\..\vc-module-store\VirtoCommerce.StoreModule.Core\VirtoCommerce.StoreModule.Core.csproj" />
     <ProjectReference Include="..\VirtoCommerce.CoreModule.Core\VirtoCommerce.CoreModule.Core.csproj" />
     <ProjectReference Include="..\VirtoCommerce.CoreModule.Data\VirtoCommerce.CoreModule.Data.csproj" />
   </ItemGroup>

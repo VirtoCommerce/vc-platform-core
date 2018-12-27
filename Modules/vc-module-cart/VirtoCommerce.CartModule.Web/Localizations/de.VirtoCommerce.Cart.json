@@ -1,0 +1,38 @@
+{
+  "cart": {
+    "blades": {
+      "carts-list": {
+        "title": "Warenkorb",
+        "labels": {
+          "customer": "Kunde",
+          "items-count": "Artikelanzahl",
+          "created": "Erstellt",
+          "modified": "Geändert",
+          "total": "Insgesamt"
+        }
+      },
+      "cart-detail": {
+        "title": "Warenkorb von {{name}}",
+        "labels": {
+          "name": "Name",
+          "price": "Preis",
+          "quantity": "Stückz.",
+          "total": "Insgesamt"
+        }
+      }
+    },
+    "dialogs": {
+      "carts-delete": {
+        "title": "löschen bestätigen",
+        "message": "Möchten Sie die ausgewählten Warenkörbe löschen?"
+      },
+      "cart-save": {
+        "title": "Änderungen speichern",
+        "message": "Der Warenkorb wurde geändert. Möchten Sie die Änderungen speichern?"
+      }
+    },
+    "commands": {
+      "open-in-store": "In Shop öffnen"
+    }
+  }
+}

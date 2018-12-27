@@ -1,0 +1,193 @@
+{
+  "customer": {
+	"main-menu-title": "Kontakte",
+    "blades": {
+      "contact-detail": {
+        "title-new": "Neuer Kunde",
+        "subtitle": "Kunden details",
+        "labels": {
+          "first-name": "Vorname",
+          "middle-name": "Zweiter Vorname",
+          "last-name": "Nachname",
+          "groups": "Benutzergruppen",
+          "full-name": "Name",
+          "birthday": "Geburtstag",
+          "salutation": "Anrede",
+          "defaultLanguage": "Standardsprache",
+          "organizations": "Organisation(en)",
+          "taxpayerId": "Steuerzahler ID",
+          "preferred-communication": "Bevorzugte Kommunikation",
+          "preferred-delivery": "Bevorzugte Lieferung",
+          "timezone": "Zeitzone"
+        },
+        "placeholders": {
+          "groups": "Benutzergruppen auswählen",
+          "first-name": "Wert eingeben",
+          "middle-name": "Wert eingeben",
+          "last-name": "Wert eingeben",
+          "full-name": "Wert eingeben",
+          "birthday": "Wert eingeben",
+          "salutation": "Wert eingeben",
+          "defaultLanguage": "Wert eingeben",
+          "preferred-communication": "Wert eingeben",
+          "preferred-delivery": "Wert eingeben",
+          "taxpayerId": "Wert eingeben",
+          "organizations": "Wählen Sie die Organisation",
+          "timezone": "Wert auswählen"
+        }
+      },
+      "employee-detail": {
+        "title-new": "Neuer Mitarbeiter",
+        "subtitle": "Mitarbeiter Details",
+        "labels": {
+          "is-active": "Ist aktiv",
+          "first-name": "Vorname",
+          "middle-name": "Zweiter Vorname",
+          "last-name": "Nachname",
+          "full-name": "Vollständiger Name",
+          "type": "Angestelltentyp",
+          "birthday": "Geburtstag",
+          "photo-url": "Foto URL",
+          "defaultLanguage": "Standardsprache",
+          "organizations": "Organisation(en)",
+          "timezone": "Zeitzone"
+        },
+        "placeholders": {
+          "first-name": "Wert eingeben",
+          "middle-name": "Wert eingeben",
+          "last-name": "Wert eingeben",
+          "full-name": "Wert eingeben",
+          "type": "Wert eingeben",
+          "birthday": "Wert eingeben",
+          "photo-url": "URL eingeben",
+          "defaultLanguage": "Wert eingeben",
+          "organizations": "Wählen Sie die Organisation",
+          "timezone": "Wert auswählen"
+        }
+      },
+      "pick-store-list": {
+        "title": "Neues Konto",
+        "subtitle": "Wählen Sie einen Speicher für das neue Konto",
+        "labels": {
+          "name": "Store Name"
+        }
+      },
+      "organization-detail": {
+        "title-new": "Neue Organisation",
+        "subtitle": "Details der Organisation",
+        "labels": {
+          "name": "Name",
+          "description": "Beschreibung",
+          "business-category": "Kategorie Business"
+        },
+        "placeholders": {
+          "name": "Namen eingeben",
+          "description": "Beschreibung eingeben"
+        }
+      },
+      "vendor-detail": {
+        "title-new": "Neue Hersteller",
+        "subtitle": "Details des Anbieter",
+        "labels": {
+          "name": "Name",
+          "site-url": "Website",
+          "logo-url": "Logo URL",
+          "group-name": "Gruppenname",
+          "description": "Beschreibung"
+        },
+        "placeholders": {
+          "name": "Namen eingeben",
+          "site-url": "URL eingeben",
+          "logo-url": "URL eingeben",
+          "group-name": "Wert eingeben",
+          "description": "Beschreibung eingeben"
+        }
+      },
+      "member-add": {
+        "title": "Neuer Kontakt",
+        "subtitle": "Wählen Sie den Kontakt-Typ",
+        "organization": {
+          "description": "Ein Container für Organisationen und Kunden."
+        },
+        "employee": {
+          "description": "Die Organisation der Mitarbeiter."
+        },
+        "contact": {
+          "description": "Shop Kunde. Kann zu Organisationen gehören oder einen einzelnen Käufer repräsentieren."
+        },
+        "vendor": {
+          "description": "Anbieter."
+        }
+      },
+      "member-emails-list": {
+        "labels": {
+          "no-emails": "Keine E-Mails",
+          "name": "Name",
+          "address": "Adresse",
+          "Email": "E-Mail"
+        },
+        "placeholders": {
+          "email": "Wert eingeben"
+        }
+      },
+      "member-list": {
+        "title": "Organisationen & Kontakte",
+        "subtitle": "Surfen nach '{{name}}'",
+        "labels": {
+          "type": "Typ",
+          "name": "Name",
+          "address": "Adresse",
+          "email": "E-Mail"
+        }
+      },
+      "member-phones-list": {
+        "labels": {
+          "no-phones": "Noch keine Telefonnummer"
+        },
+        "placeholders": {
+          "phone": "Telefonnummer eingeben"
+        }
+      }
+    },
+    "widgets": {
+      "address-list": {
+        "title": "Adressen",
+        "blade-subtitle": "Adressen verwalten"
+      },
+      "member-emails-list": {
+        "title": "E-Mails",
+        "blade-subtitle": "Verwalten von E-Mails"
+      },
+      "member-phones-list": {
+        "title": "Telefone",
+        "blade-subtitle": "Telefone verwalten"
+      },
+      "customer-accounts-list": {
+        "title": "Konten",
+        "blade-subtitle": "Kunden Konten verwalten"
+      }
+    },
+    "dialogs": {
+      "members-delete": {
+        "title": "Bestätigung löschen",
+        "message": "Sind Sie sicher, dass Sie ausgewählte Organisationen oder Kontakte löschen möchten?"
+      },
+      "unknown-member-type": {
+        "title": "Fehler",
+        "message": "Kann kein Mitglied des unbekannten Typs '{{memberType}}' bearbeiten."
+      },
+      "member-save": {
+        "title": "Änderungen speichern",
+        "message": "Dieser Kontakt wurde geändert. Möchten Sie die Änderungen speichern?"
+      },
+      "email-save": {
+        "title": "Änderungen speichern",
+        "message": "Die E-Mail wurde geändert. Möchten Sie die Änderungen speichern?"
+      },
+      "phone-number-save": {
+        "title": "Änderungen speichern",
+        "message": "Die Telefonnummer wurde geändert. Möchten Sie die Änderungen speichern?"
+      }
+    }
+  }
+}

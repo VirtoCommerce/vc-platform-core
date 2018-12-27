@@ -26,11 +26,14 @@ namespace VirtoCommerce.Platform.Core.Settings
             }
 
             //Deep load settings values for all object contains settings
-            var haveSettingsObjects = entity.GetFlatObjectsListWithInterface<IHasSettings>();
-
-            foreach (var haveSettingsObject in haveSettingsObjects.Where(x => x.Settings != null))
+            var hasSettingsObjects = entity.GetFlatObjectsListWithInterface<IHasSettings>();
+            foreach (var hasSettingsObject in hasSettingsObjects)
             {
-                haveSettingsObject.Settings = (await manager.GetObjectSettingsAsync(haveSettingsObject.Settings.Select(x => x.Name), haveSettingsObject.TypeName, haveSettingsObject.Id)).ToList();
+                var typeSettings = manager.GetSettingsForType(hasSettingsObject.TypeName);
+                if (!typeSettings.IsNullOrEmpty())
+                {
+                    hasSettingsObject.Settings = (await manager.GetObjectSettingsAsync(typeSettings.Select(x => x.Name), hasSettingsObject.TypeName, hasSettingsObject.Id)).ToList();
+                }
             }
         }
 

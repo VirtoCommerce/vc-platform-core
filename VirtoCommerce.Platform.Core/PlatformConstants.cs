@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
@@ -264,14 +263,12 @@ namespace VirtoCommerce.Platform.Core
                     }
                 }
             }
-            public static IEnumerable<SettingDescriptor> AllSettings
-            {
-                get
-                {
-                    return Cache.AllSettings.Concat(Security.AllSettings).Concat(Setup.AllSettings)
-                                            .Concat(UserProfile.AllSettings).Concat(UserInterface.AllSettings);
-                }
-            }
+
+            public static IEnumerable<SettingDescriptor> AllSettings => Cache.AllSettings
+                .Concat(Security.AllSettings)
+                .Concat(Setup.AllSettings)
+                .Concat(UserProfile.AllSettings)
+                .Concat(UserInterface.AllSettings);
         }
     }
 }

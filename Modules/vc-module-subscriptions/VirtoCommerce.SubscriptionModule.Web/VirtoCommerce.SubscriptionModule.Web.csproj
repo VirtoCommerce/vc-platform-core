@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.6.21" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
+    <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Data\VirtoCommerce.Platform.Data.csproj" />
+    <ProjectReference Include="..\..\vc-module-orders\VirtoCommerce.OrdersModule.Core\VirtoCommerce.OrdersModule.Core.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.SubscriptionModule.Core\VirtoCommerce.SubscriptionModule.Core.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.SubscriptionModule.Data\VirtoCommerce.SubscriptionModule.Data.csproj" />
+  </ItemGroup>
+
+</Project>

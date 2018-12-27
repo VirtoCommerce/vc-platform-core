@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.CoreModule.Core.Shipping;
 using VirtoCommerce.CoreModule.Core.Tax;
@@ -20,6 +21,7 @@ using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.StoreModule.Core;
 using VirtoCommerce.StoreModule.Core.Events;
+using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Notifications;
 using VirtoCommerce.StoreModule.Core.Services;
 using VirtoCommerce.StoreModule.Data.ExportImport;
@@ -46,6 +48,7 @@ namespace VirtoCommerce.StoreModule.Web
             serviceCollection.AddSingleton<IStoreSearchService, StoreSearchService>();
             serviceCollection.AddSingleton<StoreExportImport>();
             serviceCollection.AddSingleton<StoreChangedEventHandler>();
+            serviceCollection.AddSingleton<JsonSerializer>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -54,6 +57,8 @@ namespace VirtoCommerce.StoreModule.Web
 
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
+            //Register settings for type Store
+            settingsRegistrar.RegisterSettingsForType(ModuleConstants.Settings.AllSettings, typeof(Store).Name);
 
             var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>

@@ -252,7 +252,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                 var moduleDescriptor = InnerGetModulesWithInterface(typeof(IImportSupport)).FirstOrDefault(x => x.Id == moduleInfo.Id);
                 if (moduleDescriptor != null)
                 {
-                    var modulePart = zipArchive.GetEntry(moduleInfo.PartUri);
+                    var modulePart = zipArchive.GetEntry(moduleInfo.PartUri.TrimStart('/'));
                     using (var modulePartStream = modulePart.Open())
                     {
                         void modulePorgressCallback(ExportImportProgressInfo x)
