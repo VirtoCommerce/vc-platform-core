@@ -57,7 +57,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
             var contentStorageProvider = _contentStorageProviderFactory("");
 
             var cacheKey = CacheKey.With(GetType(), "pagesCount", $"content-{storeId}");
-            int pagesCount = _platformMemoryCache.GetOrCreateExclusive(cacheKey, cacheEntry =>
+            var pagesCount = _platformMemoryCache.GetOrCreateExclusive(cacheKey, cacheEntry =>
             {
                 cacheEntry.AddExpirationToken(ContentCacheRegion.CreateChangeToken($"content-{storeId}"));
                 var result = CountContentItemsRecursive(GetContentBasePath("pages", storeId), contentStorageProvider, GetContentBasePath("blogs", storeId));
@@ -78,7 +78,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
             {
                 ActiveThemeName = store.GetDynamicPropertyValue("DefaultThemeName", "not set"),
                 ThemesCount = themes.Results.Count(x => x.Type.EqualsInvariant("folder")),
-                BlogsCount = themes.Results.Count(x => x.Type.EqualsInvariant("folder")),
+                BlogsCount = blogs.Results.Count(x => x.Type.EqualsInvariant("folder")),
                 PagesCount = pagesCount
             };
 
@@ -245,7 +245,7 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         [Route("folder")]
         [ProducesResponseType(200)]
         [Authorize(Permissions.Create)]
-        public async Task<IActionResult> CreateContentFolderAsync(string contentType, string storeId, ContentFolder folder)
+        public async Task<IActionResult> CreateContentFolderAsync(string contentType, string storeId, [FromBody] ContentFolder folder)
         {
             var storageProvider = _contentStorageProviderFactory(GetContentBasePath(contentType, storeId));
 

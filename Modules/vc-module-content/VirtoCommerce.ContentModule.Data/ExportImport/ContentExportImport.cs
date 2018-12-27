@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -12,13 +11,13 @@ using VirtoCommerce.Platform.Core.ExportImport;
 
 namespace VirtoCommerce.ContentModule.Data.ExportImport
 {
-    public sealed class ContentExportImport : IExportSupport, IImportSupport
+    public sealed class ContentExportImport
     {
         private static string[] _exportedFolders = { "Pages", "Themes" };
         private readonly IMenuService _menuService;
         private readonly IContentStorageProviderFactory _contentStorageProviderFactory;
-        private readonly JsonSerializer _serializer;
-        private readonly int BatchSize = 50;
+        private readonly JsonSerializer _jsonSerializer;
+        private readonly int _batchSize = 50;
 
         public ContentExportImport(IMenuService menuService, Func<string, IContentStorageProviderFactory> themesStorageProviderFactory, JsonSerializer jsonSerializer)
         {
@@ -26,53 +25,51 @@ namespace VirtoCommerce.ContentModule.Data.ExportImport
                 throw new ArgumentNullException(nameof(themesStorageProviderFactory));
 
             _menuService = menuService;
-            _serializer = jsonSerializer;
+            _jsonSerializer = jsonSerializer;
         }
 
-        public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
+        public async Task DoExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             var progressInfo = new ExportImportProgressInfo();
 
-            //ToDo make export import
             using (var sw = new StreamWriter(outStream, Encoding.UTF8))
             using (var writer = new JsonTextWriter(sw))
             {
-                var backupObject = await GetBackupObjectAsync(progressCallback, options.HandleBinaryData);
-
-                writer.WriteStartObject();
+                await writer.WriteStartObjectAsync();
 
                 //Export menu link list
-                var countLinkList = backupObject.MenuLinkLists.Count;
+                var menuLinkLists = await _menuService.GetAllLinkListsAsync();
+                var countLinkList = menuLinkLists.Count();
 
-                writer.WriteStartArray();
-                writer.WritePropertyName("MenuLinkLists");
+                await writer.WritePropertyNameAsync("MenuLinkLists");
+                await writer.WriteStartArrayAsync();
 
-                for (int i = BatchSize; i < countLinkList; i += BatchSize)
+                for (var skip = 0; skip < countLinkList; skip += _batchSize)
                 {
-                    progressInfo.Description = $"{i} of {countLinkList} menu link lists have been loaded";
+                    progressInfo.Description = $"{skip} of {countLinkList} menu link lists have been loaded";
                     progressCallback(progressInfo);
 
-                    foreach (var list in backupObject.MenuLinkLists)
+                    foreach (var list in menuLinkLists.Skip(skip).Take(_batchSize).ToList())
                     {
-                        _serializer.Serialize(writer, list);
+                        _jsonSerializer.Serialize(writer, list);
                     }
 
-                    writer.Flush();
-                    progressInfo.Description = $"{ Math.Min(countLinkList, i + BatchSize) } of { countLinkList } menu link lists exported";
+                    await writer.FlushAsync();
+                    progressInfo.Description = $"{ Math.Min(countLinkList, skip + _batchSize) } of { countLinkList } menu link lists exported";
                     progressCallback(progressInfo);
 
                 }
-                writer.WriteEndArray();
 
+                await writer.WriteEndArrayAsync();
 
-
-                writer.WriteEndObject();
-                writer.Flush();
+                await writer.WriteEndObjectAsync();
+                await writer.FlushAsync();
             }
         }
 
+        //TODO
         public Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
             throw new NotImplementedException();

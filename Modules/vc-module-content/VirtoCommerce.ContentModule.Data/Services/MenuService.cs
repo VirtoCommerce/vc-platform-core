@@ -25,20 +25,29 @@ namespace VirtoCommerce.ContentModule.Data.Services
 
         public async Task<IEnumerable<MenuLinkList>> GetAllLinkListsAsync()
         {
-            var entities = await _menuRepositoryFactory().GetAllLinkListsAsync();
-            return entities.Select(x => x.ToModel(AbstractTypeFactory<MenuLinkList>.TryCreateInstance()));
+            using (var repository = _menuRepositoryFactory())
+            {
+                var entities = await repository.GetAllLinkListsAsync();
+                return entities.Select(x => x.ToModel(AbstractTypeFactory<MenuLinkList>.TryCreateInstance()));
+            }
         }
 
         public async Task<IEnumerable<MenuLinkList>> GetListsByStoreIdAsync(string storeId)
         {
-            var entities = await _menuRepositoryFactory().GetListsByStoreIdAsync(storeId);
-            return entities.Select(x => x.ToModel(AbstractTypeFactory<MenuLinkList>.TryCreateInstance()));
+            using (var repository = _menuRepositoryFactory())
+            {
+                var entities = await repository.GetListsByStoreIdAsync(storeId);
+                return entities.Select(x => x.ToModel(AbstractTypeFactory<MenuLinkList>.TryCreateInstance()));
+            }
         }
 
         public async Task<MenuLinkList> GetListByIdAsync(string listId)
         {
-            var entities = await _menuRepositoryFactory().GetListByIdAsync(listId);
-            return entities.ToModel(AbstractTypeFactory<MenuLinkList>.TryCreateInstance());
+            using (var repository = _menuRepositoryFactory())
+            {
+                var entities = await repository.GetListByIdAsync(listId);
+                return entities.ToModel(AbstractTypeFactory<MenuLinkList>.TryCreateInstance());
+            }
         }
 
         public async Task AddOrUpdateAsync(MenuLinkList list)
@@ -92,8 +101,7 @@ namespace VirtoCommerce.ContentModule.Data.Services
                 await repository.UnitOfWork.CommitAsync();
             }
         }
-
-
+        
         public async Task<bool> CheckListAsync(string storeId, string name, string language, string id)
         {
             using (var repository = _menuRepositoryFactory())

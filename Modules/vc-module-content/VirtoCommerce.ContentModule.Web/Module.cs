@@ -57,7 +57,7 @@ namespace VirtoCommerce.ContentModule.Web
 
                 //avoid closure
                 var rootPath = $"{azureBlobContentOptions.RootPath}";
-                IOptions<AzureBlobContentOptions> options = Options.Create(azureBlobContentOptions);
+                var options = Options.Create(azureBlobContentOptions);
 
                 serviceCollection.AddTransient<AzureContentBlobStorageProvider>().Configure<AzureContentBlobStorageProvider>(configuration.GetSection("Content:AzureBlobStorage"));
 
@@ -77,13 +77,13 @@ namespace VirtoCommerce.ContentModule.Web
 
                 //avoid closure
                 var rootPath = $"{fileSystemContentBlobOptions.RootPath}";
-                IOptions<FileSystemBlobContentOptions> options = Options.Create(fileSystemContentBlobOptions);
+                var options = Options.Create(fileSystemContentBlobOptions);
 
                 serviceCollection.AddTransient<FileSystemContentBlobStorageProvider>().Configure<FileSystemBlobContentOptions>(configuration.GetSection("Content:LocalStorage"));
 
                 serviceCollection.AddTransient<Func<string, IContentStorageProviderFactory>>(provider => (path) =>
                 {
-                    var httpContextAccessor= provider.GetService<IHttpContextAccessor>();
+                    var httpContextAccessor = provider.GetService<IHttpContextAccessor>();
                     options.Value.RootPath = Path.Combine(rootPath, path.Replace("/", "\\"));
 
                     return new FileSystemContentBlobStorageProvider(options, httpContextAccessor);
@@ -104,7 +104,13 @@ namespace VirtoCommerce.ContentModule.Web
 
             //Register module permissions
             var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
-            permissionsProvider.RegisterPermissions(ContentConstants.Security.Permissions.AllPermissions.Select(x => new Permission() { GroupName = "Content", ModuleId = ModuleInfo.Id, Name = x }).ToArray());
+            permissionsProvider.RegisterPermissions(ContentConstants.Security.Permissions.AllPermissions.Select(x =>
+                new Permission()
+                {
+                    GroupName = "Content",
+                    ModuleId = ModuleInfo.Id,
+                    Name = x
+                }).ToArray());
 
 
             //Force migrations
@@ -122,14 +128,14 @@ namespace VirtoCommerce.ContentModule.Web
         {
         }
 
-        public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
+        public Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
-            await _appBuilder.ApplicationServices.GetRequiredService<ContentExportImport>().ExportAsync(outStream, options, progressCallback, cancellationToken);
+            return _appBuilder.ApplicationServices.GetRequiredService<ContentExportImport>().DoExportAsync(outStream, options, progressCallback, cancellationToken);
         }
 
-        public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
+        public Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
-            await _appBuilder.ApplicationServices.GetRequiredService<ContentExportImport>().ImportAsync(inputStream, options, progressCallback, cancellationToken);
+            return _appBuilder.ApplicationServices.GetRequiredService<ContentExportImport>().ImportAsync(inputStream, options, progressCallback, cancellationToken);
         }
 
     }
