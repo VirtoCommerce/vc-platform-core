@@ -5,7 +5,7 @@ using VirtoCommerce.ContentModule.Core.Model;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.ContentModule.Data.Extension
+namespace VirtoCommerce.ContentModule.Data.Extensions
 {
     public static class ContentItemConverter
     {

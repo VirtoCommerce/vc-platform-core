@@ -13,7 +13,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Net.Http.Headers;
 using VirtoCommerce.ContentModule.Core.Model;
 using VirtoCommerce.ContentModule.Core.Services;
-using VirtoCommerce.ContentModule.Data.Extension;
+using VirtoCommerce.ContentModule.Data.Extensions;
 using VirtoCommerce.ContentModule.Data.Model;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Caching;
@@ -300,8 +300,6 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
 
             else
             {
-                string targetFilePath = null;
-
                 var boundary = MultipartRequestHelper.GetBoundary(MediaTypeHeaderValue.Parse(Request.ContentType), _defaultFormOptions.MultipartBoundaryLengthLimit);
                 var reader = new MultipartReader(boundary, HttpContext.Request.Body);
 
@@ -312,22 +310,19 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
 
                     if (hasContentDispositionHeader)
                     {
-                        if (MultipartRequestHelper.HasFileContentDisposition(contentDisposition))
+                        var fileName = contentDisposition.FileName.Value ?? contentDisposition.Name.Value.Replace("\"", string.Empty);
+
+                        var targetFilePath = folderUrl + "/" + fileName;
+
+                        using (var targetStream = storageProvider.OpenWrite(targetFilePath))
                         {
-                            var fileName = contentDisposition.FileName.Value;
-
-                            targetFilePath = folderUrl + "/" + fileName;
-
-                            using (var targetStream = storageProvider.OpenWrite(targetFilePath))
-                            {
-                                await section.Body.CopyToAsync(targetStream);
-                            }
-
-                            var contentFile = AbstractTypeFactory<ContentFile>.TryCreateInstance();
-                            contentFile.Name = fileName;
-                            contentFile.Url = _urlResolver.GetAbsoluteUrl(targetFilePath);
-                            retVal.Add(contentFile);
+                            await section.Body.CopyToAsync(targetStream);
                         }
+
+                        var contentFile = AbstractTypeFactory<ContentFile>.TryCreateInstance();
+                        contentFile.Name = fileName;
+                        contentFile.Url = _urlResolver.GetAbsoluteUrl(targetFilePath);
+                        retVal.Add(contentFile);
                     }
                 }
             }
