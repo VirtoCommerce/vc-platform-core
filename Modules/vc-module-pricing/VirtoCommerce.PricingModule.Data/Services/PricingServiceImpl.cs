@@ -328,13 +328,13 @@ namespace VirtoCommerce.PricingModule.Data.Services
             using (var repository = _repositoryFactory())
             {
                 var pricesIds = prices.Select(x => x.Id).Where(x => x != null).Distinct().ToArray();
-                var alreadyExistPricesEntities = await repository.Prices.Where(x => pricesIds.Contains(x.Id)).ToArrayAsync();
+                var alreadyExistPricesEntities = await repository.GetPricesByIdsAsync(pricesIds);
 
                 //Create default priceLists for prices without pricelist 
                 foreach (var priceWithoutPricelistGroup in prices.Where(x => x.PricelistId == null).GroupBy(x => x.Currency))
                 {
                     var defaultPriceListId = GetDefaultPriceListName(priceWithoutPricelistGroup.Key);
-                    var pricelists = await GetPricelistsByIdAsync(new[] {defaultPriceListId});
+                    var pricelists = await GetPricelistsByIdAsync(new[] { defaultPriceListId });
                     if (pricelists.IsNullOrEmpty())
                     {
                         var defaultPriceList = AbstractTypeFactory<Pricelist>.TryCreateInstance();
@@ -381,12 +381,8 @@ namespace VirtoCommerce.PricingModule.Data.Services
             using (var repository = _repositoryFactory())
             {
                 var pricelistsIds = priceLists.Select(x => x.Id).Where(x => x != null).Distinct().ToArray();
+                var alreadyExistEntities = await repository.GetPricelistByIdsAsync(pricelistsIds);
 
-                var existingPricelistsTask = repository.Pricelists.Where(x => pricelistsIds.Contains(x.Id)).ToArrayAsync();
-                var pricelistAssignmentsTask = repository.PricelistAssignments.Where(x => pricelistsIds.Contains(x.PricelistId)).ToArrayAsync();
-                Task.WaitAll(existingPricelistsTask, pricelistAssignmentsTask);
-
-                var alreadyExistEntities = existingPricelistsTask.Result;
                 foreach (var pricelist in priceLists)
                 {
                     var sourceEntity = AbstractTypeFactory<PricelistEntity>.TryCreateInstance().FromModel(pricelist, pkMap);
@@ -418,7 +414,8 @@ namespace VirtoCommerce.PricingModule.Data.Services
             using (var repository = _repositoryFactory())
             {
                 var assignmentsIds = assignments.Select(x => x.Id).Where(x => x != null).Distinct().ToArray();
-                var alreadyExistEntities = await repository.PricelistAssignments.Where(x => assignmentsIds.Contains(x.Id)).ToArrayAsync();
+                var alreadyExistEntities = await repository.GetPricelistAssignmentsByIdAsync(assignmentsIds);
+
                 foreach (var assignment in assignments)
                 {
                     //Serialize condition expression 

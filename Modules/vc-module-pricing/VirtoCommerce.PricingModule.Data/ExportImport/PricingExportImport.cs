@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -10,6 +9,7 @@ using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Data.ExportImport;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
 using VirtoCommerce.PricingModule.Core.Services;
@@ -64,80 +64,45 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
                 progressCallback(progressInfo);
 
                 #region Export price lists
-                var totalCount = (await _pricingSearchService.SearchPricelistsAsync(new PricelistSearchCriteria { Take = 0 })).TotalCount;
-                writer.WritePropertyName("PricelistsTotalCount");
-                writer.WriteValue(totalCount);
 
                 writer.WritePropertyName("Pricelists");
-                writer.WriteStartArray();
 
-                for (var i = 0; i < totalCount; i += BatchSize)
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, BatchSize, (skip, take) =>
+                    _pricingSearchService.SearchPricelistsAsync(new PricelistSearchCriteria { Skip = skip, Take = take })
+                , (processedCount, totalCount) =>
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    var searchResponse = await _pricingSearchService.SearchPricelistsAsync(new PricelistSearchCriteria { Skip = i, Take = BatchSize });
-                    foreach (var priceList in searchResponse.Results)
-                    {
-                        priceList.Assignments = null;
-                        _jsonSerializer.Serialize(writer, priceList);
-                    }
-                    writer.Flush();
-                    progressInfo.Description = $"{ Math.Min(totalCount, i + BatchSize) } of { totalCount } price lists have been exported";
+                    progressInfo.Description = $"{ processedCount } of { totalCount } pricelits have been exported";
                     progressCallback(progressInfo);
-                }
-                writer.WriteEndArray();
+                }, cancellationToken);
+
                 #endregion
 
                 #region Export price list assignments
-                totalCount = (await _pricingSearchService.SearchPricelistAssignmentsAsync(new PricelistAssignmentsSearchCriteria { Take = 0 })).TotalCount;
-                writer.WritePropertyName("AssignmentsTotalCount");
-                writer.WriteValue(totalCount);
 
                 writer.WritePropertyName("Assignments");
-                writer.WriteStartArray();
 
-                for (var i = 0; i < totalCount; i += BatchSize)
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, BatchSize, (skip, take) =>
+                    _pricingSearchService.SearchPricelistAssignmentsAsync(new PricelistAssignmentsSearchCriteria { Skip = skip, Take = take })
+                , (processedCount, totalCount) =>
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    var searchResponse = await _pricingSearchService.SearchPricelistAssignmentsAsync(new PricelistAssignmentsSearchCriteria { Skip = i, Take = BatchSize });
-                    foreach (var assignment in searchResponse.Results)
-                    {
-                        assignment.Pricelist = null;
-                        assignment.DynamicExpression = null;
-
-                        _jsonSerializer.Serialize(writer, assignment);
-                    }
-                    writer.Flush();
-                    progressInfo.Description = $"{ Math.Min(totalCount, i + BatchSize) } of { totalCount } price lits assignments have been exported";
+                    progressInfo.Description = $"{ processedCount } of { totalCount } pricelits assignments have been exported";
                     progressCallback(progressInfo);
-                }
-                writer.WriteEndArray();
+                }, cancellationToken);
+
                 #endregion
 
                 #region Export prices
-                totalCount = (await _pricingSearchService.SearchPricesAsync(new PricesSearchCriteria { Take = 0 })).TotalCount;
-                writer.WritePropertyName("PricesTotalCount");
-                writer.WriteValue(totalCount);
 
                 writer.WritePropertyName("Prices");
-                writer.WriteStartArray();
 
-                for (var i = 0; i < totalCount; i += BatchSize)
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, BatchSize, (skip, take) =>
+                    _pricingSearchService.SearchPricesAsync(new PricesSearchCriteria { Skip = skip, Take = take })
+                , (processedCount, totalCount) =>
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    var searchResponse = await _pricingSearchService.SearchPricesAsync(new PricesSearchCriteria { Skip = i, Take = BatchSize });
-                    foreach (var price in searchResponse.Results)
-                    {
-                        price.Pricelist = null;
-                        _jsonSerializer.Serialize(writer, price);
-                    }
-                    writer.Flush();
-                    progressInfo.Description = $"{ Math.Min(totalCount, i + BatchSize) } of { totalCount } prices have been exported";
+                    progressInfo.Description = $"{ processedCount } of { totalCount } prices have been exported";
                     progressCallback(progressInfo);
-                }
-                writer.WriteEndArray();
+                }, cancellationToken);
+
                 #endregion
 
                 writer.WriteEndObject();
@@ -162,64 +127,27 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
                         if (readerValue == "Pricelists")
                         {
-                            reader.Read();
-
-                            cancellationToken.ThrowIfCancellationRequested();
-
-                            var pricelists = _jsonSerializer.Deserialize<Pricelist[]>(reader);
-
-                            progressInfo.Description = $"{pricelists.Length} price lists importing...";
-                            progressCallback(progressInfo);
-
-                            cancellationToken.ThrowIfCancellationRequested();
-
-                            await _pricingService.SavePricelistsAsync(pricelists);
+                            await reader.DeserializeJsonArrayWithPagingAsync<Pricelist>(_jsonSerializer, BatchSize, items => _pricingService.SavePricelistsAsync(items.ToArray()), processedCount =>
+                            {
+                                progressInfo.Description = $"{ processedCount } price lists have been imported";
+                                progressCallback(progressInfo);
+                            }, cancellationToken);
                         }
                         else if (readerValue == "Prices")
                         {
-                            reader.Read();
-
-                            if (reader.TokenType == JsonToken.StartArray)
+                            await reader.DeserializeJsonArrayWithPagingAsync<Price>(_jsonSerializer, BatchSize, items => _pricingService.SavePricesAsync(items.ToArray()), processedCount =>
                             {
-                                reader.Read();
-
-                                var pricesChunk = new List<Price>();
-
-                                while (reader.TokenType != JsonToken.EndArray)
-                                {
-                                    cancellationToken.ThrowIfCancellationRequested();
-
-                                    var price = _jsonSerializer.Deserialize<Price>(reader);
-                                    pricesChunk.Add(price);
-
-                                    reader.Read();
-
-                                    if (pricesChunk.Count >= BatchSize || reader.TokenType == JsonToken.EndArray)
-                                    {
-                                        await _pricingService.SavePricesAsync(pricesChunk.ToArray());
-                                        progressInfo.ProcessedCount += pricesChunk.Count;
-                                        progressInfo.Description = $"Prices: {progressInfo.ProcessedCount} have been imported";
-                                        progressCallback(progressInfo);
-
-                                        pricesChunk.Clear();
-                                    }
-                                }
-                            }
+                                progressInfo.Description = $"Prices: {progressInfo.ProcessedCount} have been imported";
+                                progressCallback(progressInfo);
+                            }, cancellationToken);
                         }
                         else if (readerValue == "Assignments")
                         {
-                            reader.Read();
-
-                            cancellationToken.ThrowIfCancellationRequested();
-
-                            var assignments = _jsonSerializer.Deserialize<PricelistAssignment[]>(reader);
-
-                            progressInfo.Description = $"{assignments.Length} assignments importing...";
-                            progressCallback(progressInfo);
-
-                            cancellationToken.ThrowIfCancellationRequested();
-
-                            await _pricingService.SavePricelistAssignmentsAsync(assignments);
+                            await reader.DeserializeJsonArrayWithPagingAsync<PricelistAssignment>(_jsonSerializer, BatchSize, items => _pricingService.SavePricelistAssignmentsAsync(items.ToArray()), processedCount =>
+                            {
+                                progressInfo.Description = $"{progressInfo.ProcessedCount} assignments have been imported";
+                                progressCallback(progressInfo);
+                            }, cancellationToken);
                         }
                     }
                 }
