@@ -4,17 +4,32 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
+using McMaster.NETCore.Plugins;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.DependencyModel.Resolution;
 using Microsoft.Extensions.Logging;
-using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Modularity;
 namespace VirtoCommerce.Platform.Modules
 {
 
     public class LoadContextAssemblyResolver : IAssemblyResolver
     {
         private readonly ILogger<LoadContextAssemblyResolver> _logger;
+        private readonly static string[] _possibleDependencyExtensions = new[]
+        {
+            //Windows
+            ".dll",
+            ".ni.dll",
+            ".exe",
+            ".ni.exe",
+            //Unix
+            ".so",
+            ".ni.so",
+            //MacOS
+            ".dylib",
+            ".ni.dylib",
+        };
         public LoadContextAssemblyResolver(ILogger<LoadContextAssemblyResolver> logger)
         {
             _logger = logger;
@@ -38,7 +53,10 @@ namespace VirtoCommerce.Platform.Modules
                 throw new FileNotFoundException(assemblyUri.LocalPath);
             }
 
-            var assembly = LoadWithAllReferencedAssebliesRecursive(assemblyUri.LocalPath);
+            var loader = PluginLoader.CreateFromAssemblyFile(assemblyUri.LocalPath, PluginLoaderOptions.None);
+            var assembly = loader.LoadDefaultAssembly();
+
+            //var assembly = LoadWithAllReferencedAssebliesRecursive(assemblyUri.LocalPath);
             return assembly;
         }
 
@@ -70,7 +88,8 @@ namespace VirtoCommerce.Platform.Modules
                 {
                     bool assemblyPredicate(RuntimeLibrary runtime)
                     {
-                        var result = runtime.Name.EqualsInvariant(assemblyName.Name);
+                        var possibleDendencencyNames = _possibleDependencyExtensions.Select(ext => $"{assemblyName.Name}{ext}");
+                        var result = runtime.Name.EqualsInvariant(assemblyName.Name) || runtime.RuntimeAssemblyGroups.Any(g => g.AssetPaths.Any(ap => possibleDendencencyNames.Any(n => ap.EndsWith(n, StringComparison.OrdinalIgnoreCase))));
                         if (result)
                         {
                             //Need to do an additional comparison by version because modules can use different versions
