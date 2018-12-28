@@ -1,0 +1,18 @@
+﻿<form id="formBaseUrl" name="formBaseUrl">
+    <div class="modal-header">
+        <h3 class="modal-title" ng-bind="'sitemapsModule.dialogs.confirmBaseUrl.title' | translate"></h3>
+    </div>
+    <div class="modal-body">
+        <p ng-if="!originalBaseUrl" ng-bind="'sitemapsModule.dialogs.confirmBaseUrl.messageNoBaseUrl' | translate"></p>
+        <p ng-if="originalBaseUrl" ng-bind="'sitemapsModule.dialogs.confirmBaseUrl.messageConfirmBaseUrl' | translate"></p>
+        <div class="form-group">
+            <div class="form-input">
+                <input id="baseUrl" name="baseUrl" required="required" type="url" ng-model="baseUrl" />
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" type="button" ng-click="confirm()" ng-class="'__disabled: formBaseUrl.$invalid'" ng-disabled="formBaseUrl.$invalid" ng-bind="'platform.commands.confirm' | translate"></button>
+        <button class="btn __cancel" type="button" ng-click="cancel()" ng-bind="'platform.commands.cancel' | translate"></button>
+    </div>
+</form>

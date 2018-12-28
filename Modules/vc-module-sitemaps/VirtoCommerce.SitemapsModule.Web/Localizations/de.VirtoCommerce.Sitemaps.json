@@ -1,0 +1,156 @@
+{
+    "sitemapsModule": {
+        "blades": {
+            "sitemapList": {
+                "title": "Sitemaps",
+                "subtitle": "Verwalten von sitemaps, um sie in den Index sitemap.xml aufzunehmen",
+                "toolbar": {
+                    "download": "Sitemaps herunterladen"
+                },
+                "gridHeaders": {
+                    "location": "Lage",
+                    "itemsCount": "Artikelanzahl"
+                },
+                "noSitemapsMessage": "Es gibt keine Sitemaps noch"
+            },
+            "sitemap": {
+                "newSitemapTitle": "Neue sitemap",
+                "toolbar": {
+                    "addItems": "Einträge hinzufügen",
+                    "removeItems": "Artikel entfernen"
+                },
+                "formSitemap": {
+                    "labelSitemapLocation": "Sitemap Standort",
+                    "descriptionSitemapLocation": "Die Sitemap-Standort sollte eine relative Sitemap-URL sein, die im Kontext der Index-Sitemap eindeutig ist, d. H .: 'categories / electronics.xml', 'products.xml', etc. Bitte vermeiden Sie die Verwendung von 'sitemap.xml' im Sitemappfad.",
+                    "sitemapIndexErrorMessage": "Bitte vermeiden Sie die Verwendung von 'sitemap.xml' als Sitemap",
+                    "sitemapSitemapLocationExistErrorMessage": "Diese Sitemap Standort wird bereits verwendet",
+                    "labelSitemapItemsLocation": "Sitemap Artikellage",
+                    "descriptionSitemapItemsLocation": "Zur Erzeugung einer Sitemap-Item-URL können die nächsten Muster verwendet werden: {language} - wird durch Sprachcode ersetzt (d.h. en-US), {slug} - wird durch SEO semantischen URL-Teil ersetzt",
+                    "labelSitemapItems": "Sitemap Reihen"
+                },
+                "gridHeaders": {
+                    "img": "Bild",
+                    "title": "Titel",
+                    "type": "Typ"
+                },
+                "noSitemapsIemsMessage": "Es gibt noch keine Sitemap"
+            },
+            "addItems": {
+                "title": "Einträge hinzufügen",
+                "addCatalogItem": {
+                    "title": "Katalogartikel",
+                    "description": "Enthalten Produkt- und Kategorien"
+                },
+                "addVendorItem": {
+                    "title": "Anbieter Produkte",
+                    "description": "Anbieter gehören"
+                },
+                "addStaticContentItem": {
+                    "title": "Statische Inhalte",
+                    "description": "Fügen Sie die Seiten und Blogs"
+                },
+                "addCustomItem": {
+                    "title": "Benutzerdefinierte Position",
+                    "description": "Artikel mit benutzerdefinierte URL"
+                }
+            },
+            "addCatalogItems": {
+                "title": "Katalogartikel hinzufügen",
+                "toolbar": {
+                    "addSelected": "Ausgewählte hinzufügen"
+                }
+            },
+            "addCustomItem": {
+                "title": "Benutzerdefinierte Artikel hinzufügen",
+                "toolbar": {
+                    "save": "Speichern"
+                },
+                "formCustomSitemapItem": {
+                    "labelUrlTemplate": "URL Vorlage",
+                    "descriptionUrlTemplate": "Die konkrete relative URL für benutzerdefinierte Artikel, i.e .: / about-us, / my-folder / my-page"
+                }
+            },
+            "addVendorItems": {
+                "title": "Anbieter Artikel hinzufügen",
+                "toolbar": {
+                    "addSelected": "Ausgewählte hinzufügen"
+                }
+            },
+            "addStaticContentItems": {
+                "title": "Statischer Inhalt Artikel hinzufügen",
+                "toolbar": {
+                    "addSelected": "Ausgewählte hinzufügen"
+                }
+            }
+        },
+        "contextMenu": {
+            "manage": "Verwalten",
+            "remove": "Entfernen"
+        },
+        "dialogs": {
+            "sitemap-delete": {
+                "title": "Bestätigung löschen",
+                "message": "Möchten Sie die ausgewählten Sitemaps löschen?"
+            },
+            "sitemapItems-delete": {
+                "title": "Bestätigung entfernen",
+                "message": "Sind Sie sicher, dass Sie ausgewählte Artikel aus der Sitemap entfernen möchten?"
+            },
+            "confirmBaseUrl": {
+                "title": "Basis-URL",
+                "messageNoBaseUrl": "Geben Sie die Basis-URL für Sitemaps",
+                "messageConfirmBaseUrl": "Bitte bestätigen Sie Basis-URL für Sitemaps"
+            },
+            "discardChanges": {
+                "title": "Änderungen speichern",
+                "message": "Die Sitemap wurde geändert. Möchten Sie die Änderungen speichern?"
+            }
+        },
+        "errorMessages": {
+            "filenameNotUnique": "Sitemap Mit dieser Dateiname ist bereits vorhanden"
+        }
+    },
+
+    "permissions": {
+        "sitemaps:access": "Zugriff zum Öffnen eines Sitemaps-Blades",
+        "sitemaps:create": "Zugriff zum Erstellen einer Sitemap",
+        "sitemaps:read": "Zugriff, um eine Sitemap-Details anzuzeigen",
+        "sitemaps:update": "Zugriff auf eine Sitemap aktualisieren",
+        "sitemaps:delete": "Zugriff auf eine Sitemap löschen"
+    },
+
+    "settings": {
+        "Sitemap.RecordsLimitPerFile": {
+            "title": "Datensatzbegrenzung",
+            "description": "Aufzeichnungslimit für jede Sitemap-Datei Beachten Sie, dass Suchmaschinen-Crawler Sitepaketdateien akzeptieren, die weniger als 50000 URL-Datensätze enthalten und die Dateigröße weniger als 10 MB beträgt"
+        },
+        "Sitemap.FilenameSeparator": {
+            "title": "Dateinamens-Trennzeichen",
+            "description": "Das Trennzeichen für den Dateinamen der Sitemap und dessen Teil im Falle der Anzahl der Sitemap-Elemente ist größer als die Anzahl der Datensätze pro Datei"
+        },
+        "Sitemap.SearchBunchSize": {
+            "title": "Suche Gruppengröße",
+            "description": "Die Bündelgröße für Suchelemente (z. B. Katalogsuche)"
+        },
+        "Sitemap.AcceptedFilenameExtensions": {
+            "title": "Akzeptierte Dateierweiterungen für statische Inhalte",
+            "description": "Dieses Feld enthält die durch Kommas getrennte Liste der Dateinamenerweiterungen für statische Inhalte, die in der Sitemap enthalten sind. Zum Beispiel: .md,.html"
+        },
+        "Sitemap.ProductPageUpdateFrequency": {
+            "title": "Aktualisierungshäufigkeit der Produktseite",
+            "description": "Gibt an, wie häufig sich die Produktseite ändern wird. Dieser Wert stellt allgemeine Informationen für Suchmaschinen bereit und korreliert möglicherweise nicht genau mit der Häufigkeit, mit der die Seiten gecrawlt werden."
+        },
+        "Sitemap.ProductPagePriority": {
+            "title": "Priorität der Produktseite",
+            "description": "Die Priorität der URL relativ zu anderen URLs auf der Website. Gültige Werte liegen zwischen 0,0 und 1,0. Dieser Wert wirkt sich nicht darauf aus, wie Seiten mit Seiten auf anderen Websites verglichen werden. Dadurch können die Suchmaschinen nur erfahren, welche Seiten für die Crawler am wichtigsten sind."
+        },
+        "Sitemap.CategoryPageUpdateFrequency": {
+            "title": "Aktualisierungshäufigkeit der Kategorieseite",
+            "description": "Gibt an, wie häufig sich die Kategorieseite ändern wird. Dieser Wert stellt allgemeine Informationen für Suchmaschinen bereit und korreliert möglicherweise nicht genau mit der Häufigkeit, mit der die Seiten gecrawlt werden."
+        },
+        "Sitemap.CategoryPagePriority": {
+            "title": "Kategorieseitenpriorität",
+            "description": "Die Priorität der URL relativ zu anderen URLs auf der Website. Gültige Werte liegen zwischen 0,0 und 1,0. Dieser Wert wirkt sich nicht darauf aus, wie Seiten mit Seiten auf anderen Websites verglichen werden. Dadurch können die Suchmaschinen nur erfahren, welche Seiten für die Crawler am wichtigsten sind."
+        }
+    }
+}

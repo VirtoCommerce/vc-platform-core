@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -18,17 +17,20 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using OpenIddict.Validation;
 using Smidge;
 using Smidge.Nuglify;
 using Swashbuckle.AspNetCore.Swagger;
-using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Jobs;
-using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.Platform.Core.Security;
+using Swashbuckle.AspNetCore.SwaggerUI;
 using VirtoCommerce.Platform.Assets.AzureBlobStorage;
 using VirtoCommerce.Platform.Assets.AzureBlobStorage.Extensions;
 using VirtoCommerce.Platform.Assets.FileSystem;
 using VirtoCommerce.Platform.Assets.FileSystem.Extensions;
+using VirtoCommerce.Platform.Core;
+using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Jobs;
+using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.Platform.Data.PushNotifications;
 using VirtoCommerce.Platform.Data.Repositories;
@@ -40,11 +42,9 @@ using VirtoCommerce.Platform.Security.Extensions;
 using VirtoCommerce.Platform.Security.Repositories;
 using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Hangfire;
-using VirtoCommerce.Platform.Web.Infrastructure;
 using VirtoCommerce.Platform.Web.JsonConverters;
 using VirtoCommerce.Platform.Web.Middelware;
 using VirtoCommerce.Platform.Web.Swagger;
-using VirtoCommerce.Platform.Core;
 
 namespace VirtoCommerce.Platform.Web
 {
@@ -72,7 +72,23 @@ namespace VirtoCommerce.Platform.Web
             services.AddPlatformServices(Configuration);
             services.AddSecurityServices();
 
-            var mvcBuilder = services.AddMvc().AddJsonOptions(options =>
+            var mvcBuilder = services.AddMvc(mvcOptions =>
+                {
+                    // NOTE: combining multiple Authorize attributes when using a custom IAuthorizationPolicyProvider
+                    //       with ASP.NET Core MVC 2.1 causes an ArgumentNullException when calling an action.
+                    //       For more information, please see https://github.com/aspnet/Mvc/issues/7809
+                    //
+                    // Currently this issue affects following controllers:
+                    // - VirtoCommerce.Platform.Web.Controllers.Api.DynamicPropertiesController
+                    // - VirtoCommerce.SitemapsModule.Web.Controllers.Api.SitemapsModuleApiController
+                    // - probably some other controllers in modules not ported to VC Platform 3.x yet...
+                    //
+                    // This issue is fixed in ASP.NET Core MVC 2.2. The following line is a workaround for 2.1.
+                    // TODO: remove the following workaround after migrating to ASP.NET Core MVC 2.2
+                    mvcOptions.AllowCombiningAuthorizeFilters = false;
+                }
+            )
+            .AddJsonOptions(options =>
                 {
                     //Next line needs to represent custom derived types in the resulting swagger doc definitions. Because default SwaggerProvider used global JSON serialization settings
                     //we should register this converter globally.
@@ -143,22 +159,22 @@ namespace VirtoCommerce.Platform.Web
             });
 
 
-            // Register the OAuth2 validation handler.
-            services.AddAuthentication().AddOAuthValidation();
 
             // Register the OpenIddict services.
             // Note: use the generic overload if you need
             // to replace the default OpenIddict entities.
-            services.AddOpenIddict(options =>
+            services.AddOpenIddict()
+                .AddCore(options =>
             {
-                // Register the Entity Framework stores.
-                options.AddEntityFrameworkCoreStores<SecurityDbContext>();
-
+                options.UseEntityFrameworkCore()
+                       .UseDbContext<SecurityDbContext>();
+            }).AddServer(options =>
+            {
 
                 // Register the ASP.NET Core MVC binder used by OpenIddict.
                 // Note: if you don't call this method, you won't be able to
                 // bind OpenIdConnectRequest or OpenIdConnectResponse parameters.
-                options.AddMvcBinders();
+                options.UseMvc();
 
                 // Enable the authorization, logout, token and userinfo endpoints.
                 options.EnableTokenEndpoint("/connect/token")
@@ -170,6 +186,10 @@ namespace VirtoCommerce.Platform.Web
                        .AllowRefreshTokenFlow()
                        .AllowClientCredentialsFlow();
 
+                // Accept anonymous clients (i.e clients that don't send a client_id).
+                options.AcceptAnonymousClients();
+
+                options.DisableScopeValidation();
                 // Make the "client_id" parameter mandatory when sending a token request.
                 //options.RequireClientIdentification();
 
@@ -183,13 +203,16 @@ namespace VirtoCommerce.Platform.Web
                 // During development, you can disable the HTTPS requirement.
                 options.DisableHttpsRequirement();
 
+                options.UseReferenceTokens();
+                options.UseRollingTokens();
                 // Note: to use JWT access tokens instead of the default
                 // encrypted format, the following lines are required:
                 //
-                options.UseJsonWebTokens();
+                //options.UseJsonWebTokens();
                 //TODO: Replace to X.509 certificate
-                options.AddEphemeralSigningKey();
-            });
+                //options.AddEphemeralSigningKey();
+            }).AddValidation(options => options.UseReferenceTokens());
+
 
             services.Configure<IdentityOptions>(Configuration.GetSection("IdentityOptions"));
 
@@ -243,6 +266,7 @@ namespace VirtoCommerce.Platform.Web
                 c.DocumentFilter<TagsFilter>();
                 c.MapType<object>(() => new Schema { Type = "object" });
                 c.AddModulesXmlComments(services);
+                c.CustomSchemaIds(x => x.FullName);
             });
 
             //Add SignalR for push notifications
