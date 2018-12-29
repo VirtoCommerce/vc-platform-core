@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
@@ -28,8 +27,11 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
             }
             _storagePath = _options.RootPath.TrimEnd('\\');
 
-            var request = httpContext.HttpContext.Request;
-            _basePublicUrl = new Uri($"{ request.Scheme}://{ request.Host.Value }/{ _options.PublicPath}").ToString();
+            var request = httpContext.HttpContext?.Request;
+            if (request != null)
+            {
+                _basePublicUrl = new Uri($"{ request.Scheme}://{ request.Host.Value }/{ _options.PublicPath}").ToString();
+            }
         }
 
         #region IBlobStorageProvider members

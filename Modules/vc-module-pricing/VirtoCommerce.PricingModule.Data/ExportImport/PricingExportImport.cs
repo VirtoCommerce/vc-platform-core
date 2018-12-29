@@ -58,14 +58,14 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             using (var sw = new StreamWriter(backupStream, Encoding.UTF8))
             using (var writer = new JsonTextWriter(sw))
             {
-                writer.WriteStartObject();
+                await writer.WriteStartObjectAsync();
 
                 progressInfo.Description = "Price lists exporting...";
                 progressCallback(progressInfo);
 
                 #region Export price lists
 
-                writer.WritePropertyName("Pricelists");
+                await writer.WritePropertyNameAsync("Pricelists");
 
                 await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, BatchSize, (skip, take) =>
                     _pricingSearchService.SearchPricelistsAsync(new PricelistSearchCriteria { Skip = skip, Take = take })
@@ -79,7 +79,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
                 #region Export price list assignments
 
-                writer.WritePropertyName("Assignments");
+                await writer.WritePropertyNameAsync("Assignments");
 
                 await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, BatchSize, (skip, take) =>
                     _pricingSearchService.SearchPricelistAssignmentsAsync(new PricelistAssignmentsSearchCriteria { Skip = skip, Take = take })
@@ -93,7 +93,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
                 #region Export prices
 
-                writer.WritePropertyName("Prices");
+                await writer.WritePropertyNameAsync("Prices");
 
                 await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, BatchSize, (skip, take) =>
                     _pricingSearchService.SearchPricesAsync(new PricesSearchCriteria { Skip = skip, Take = take })
@@ -105,8 +105,8 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
                 #endregion
 
-                writer.WriteEndObject();
-                writer.Flush();
+                await writer.WriteEndObjectAsync();
+                await writer.FlushAsync();
             }
         }
 
