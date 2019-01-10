@@ -6,6 +6,7 @@ using Xunit;
 
 namespace Module1.Test
 {
+    [Trait("Category", "CI")]
     public class AssemblyLoadTest
     {
         [Fact]
@@ -15,12 +16,14 @@ namespace Module1.Test
             var resolver = new LoadContextAssemblyResolver(logger);
             var webRuntimeAssembly = resolver.LoadAssemblyFrom($"{AppContext.BaseDirectory}..\\..\\..\\Module1.Web\\bin\\netcoreapp2.1\\Module1.Web.dll");
 
-            // Uncommenting this line makes the trick - test passes (as we explicitly load dependency of referenced assembly Module1.Data,
-            // that is not loaded by LoadContextAssemblyResolver.LoadAssemblyFrom one level deps resolving now)
-            // System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromAssemblyPath(@"C:\Users\yecli\.nuget\packages\sharpziplib\1.1.0\lib\netstandard2.0\ICSharpCode.SharpZipLib.dll");
+            // Explicit loading of "ICSharpCode.SharpZipLib.dll" (dependency of referenced assembly Module1.Data) to default ALC would make test passing even without proper dependency loading:
+            // System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromAssemblyPath(Environment.ExpandEnvironmentVariables(@"%userprofile%\.nuget\packages\sharpziplib\1.1.0\lib\netstandard2.0\ICSharpCode.SharpZipLib.dll"));
             var controllerType = webRuntimeAssembly.GetType("Module1.Web.Controllers.ThirdPartyController");
+            Assert.NotNull(controllerType);
             var controllerInstance = Activator.CreateInstance(controllerType);
-            var stringResult = (string)controllerType.GetMethod("Execute3rdPartyCodeFromDifferentProject").Invoke(controllerInstance, new object[] { "Aloha!" });
+            var method = controllerType.GetMethod("Execute3rdPartyCodeFromDifferentProject");
+            Assert.NotNull(method);
+            var stringResult = (string)method.Invoke(controllerInstance, new object[] { "Aloha!" });
 
             Assert.NotNull(stringResult);
         }

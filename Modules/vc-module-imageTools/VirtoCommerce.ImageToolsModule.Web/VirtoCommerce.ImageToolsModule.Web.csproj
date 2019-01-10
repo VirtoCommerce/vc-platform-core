@@ -2,8 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-      <!--This line is necessary to copy all dependencies in the bin folder-->
-      <!--<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>-->
+    <!--This line is necessary to copy all dependencies in the bin folder-->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

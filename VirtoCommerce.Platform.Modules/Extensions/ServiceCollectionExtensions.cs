@@ -17,7 +17,6 @@ namespace VirtoCommerce.Platform.Modules
             services.AddSingleton<IModuleManager, ModuleManager>();
             services.AddSingleton<ILocalModuleCatalog, LocalStorageModuleCatalog>();
             services.AddSingleton<IModuleCatalog>(provider => provider.GetService<ILocalModuleCatalog>());
-            services.AddSingleton<IAssemblyResolver, LoadContextAssemblyResolver>();
 
             if (setupAction != null)
             {
