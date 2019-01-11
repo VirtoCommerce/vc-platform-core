@@ -7,12 +7,14 @@ using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Modularity.Exceptions;
+using VirtoCommerce.Platform.Modules.AssemblyLoading;
 
 namespace VirtoCommerce.Platform.Modules
 {
     public class LocalStorageModuleCatalog : ModuleCatalog, ILocalModuleCatalog
     {
         private readonly LocalStorageModuleCatalogOptions _options;
+
         public LocalStorageModuleCatalog(IOptions<LocalStorageModuleCatalogOptions> options)
         {
             _options = options.Value;
@@ -174,7 +176,8 @@ namespace VirtoCommerce.Platform.Modules
                 {
                     foreach (var sourceFilePath in Directory.EnumerateFiles(sourceDirectoryPath, "*.*", SearchOption.AllDirectories))
                     {
-                        if (IsAssemblyFile(sourceFilePath))
+                        // Copy all assembly related files except assemblies that are inlcuded in TPA list
+                        if (IsAssemblyRelatedFile(sourceFilePath) && !(IsAssemblyFile(sourceFilePath) && TPA.ContainsAssembly(Path.GetFileName(sourceFilePath))))
                         {
                             var targetFilePath = Path.Combine(targetDirectoryPath, Path.GetFileName(sourceFilePath));
                             CopyFile(sourceFilePath, targetFilePath);
@@ -205,6 +208,11 @@ namespace VirtoCommerce.Platform.Modules
                 Directory.CreateDirectory(targetDirectoryPath);
                 File.Copy(sourceFilePath, targetFilePath, true);
             }
+        }
+
+        private bool IsAssemblyRelatedFile(string path)
+        {
+            return _options.AssemblyFileExtensions.Union(_options.AssemblyServiceFileExtensions).Any(x => path.EndsWith(x, StringComparison.OrdinalIgnoreCase));
         }
 
         private bool IsAssemblyFile(string path)

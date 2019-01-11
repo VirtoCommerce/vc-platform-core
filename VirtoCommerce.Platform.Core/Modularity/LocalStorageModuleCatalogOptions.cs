@@ -4,6 +4,7 @@ namespace VirtoCommerce.Platform.Core.Modularity
     {
         public string DiscoveryPath { get; set; }
         public string ProbingPath { get; set; }
-        public string[] AssemblyFileExtensions { get; set; } = new[] { ".dll", ".pdb", ".exe", ".xml", ".deps.json" };
+        public string[] AssemblyFileExtensions { get; set; } = new[] { ".dll", ".exe", };
+        public string[] AssemblyServiceFileExtensions { get; set; } = new[] { ".pdb", ".xml", ".deps.json", };
     }
 }

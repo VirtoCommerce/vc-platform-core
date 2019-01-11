@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 using Microsoft.Extensions.Logging;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -19,7 +17,6 @@ namespace VirtoCommerce.Platform.Modules
         private readonly Dictionary<string, Assembly> _loadedAssemblies = new Dictionary<string, Assembly>();
         private string _basePath;
         private readonly HashSet<string> _additionalProbingPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        private readonly string[] _TPAPaths = GetTPAList();
 
         public LoadContextAssemblyResolver(ILogger<LoadContextAssemblyResolver> logger)
         {
@@ -91,20 +88,6 @@ namespace VirtoCommerce.Platform.Modules
             return mainAssembly;
         }
 
-        /// <summary>
-        /// Gets the list of Trusted Platform Assemblies (TPA).
-        /// <para>
-        /// https://github.com/dotnet/coreclr/issues/919#issuecomment-285928695
-        /// https://docs.microsoft.com/en-US/dotnet/core/tutorials/netcore-hosting#step-5---preparing-appdomain-settings
-        /// </para>
-        /// </summary>
-        /// <returns>Returns the list of TPA paths.</returns>
-        private static string[] GetTPAList()
-        {
-            var tpa = (string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES");
-            return tpa.Split(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ";" : ":");
-        }
-
         private ModuleInitializeException GenerateAssemblyLoadException(string assemblyPath, string modulePath, Exception innerException = null)
         {
             return new ModuleInitializeException($"Cannot load \"{assemblyPath}\" for module \"{modulePath}\".", innerException);
@@ -147,7 +130,7 @@ namespace VirtoCommerce.Platform.Modules
         {
             // To avoid FileNotFoundException for assemblies that are included in TPA - we load them using AssemblyLoadContext.Default.LoadFromAssemblyName.
             var assemblyFileName = Path.GetFileName(managedLibrary.AppLocalPath);
-            if (_TPAPaths.Any(x => x.EndsWith(Path.DirectorySeparatorChar + assemblyFileName, StringComparison.OrdinalIgnoreCase)))
+            if (TPA.ContainsAssembly(assemblyFileName))
             {
                 var defaultAssembly = AssemblyLoadContext.Default.LoadFromAssemblyName(managedLibrary.Name);
                 if (defaultAssembly != null)
