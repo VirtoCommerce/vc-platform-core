@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.ContentModule.Core.Services;
 using VirtoCommerce.Platform.Assets.FileSystem;
@@ -14,8 +11,8 @@ namespace VirtoCommerce.ContentModule.Data.Services
 {
     public class FileSystemContentBlobStorageProvider : FileSystemBlobProvider, IContentStorageProviderFactory
     {
-        public FileSystemContentBlobStorageProvider(IOptions<FileSystemBlobContentOptions> options, IHttpContextAccessor httpContext)
-            : base(options, httpContext)
+        public FileSystemContentBlobStorageProvider(IOptions<FileSystemBlobContentOptions> options, IUrlHelper urlHelper)
+            : base(options, urlHelper)
         {
         }
 

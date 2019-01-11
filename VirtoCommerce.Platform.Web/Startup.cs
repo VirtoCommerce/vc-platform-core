@@ -11,13 +11,14 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using OpenIddict.Validation;
 using Smidge;
 using Smidge.Nuglify;
 using Swashbuckle.AspNetCore.Swagger;
@@ -62,7 +63,16 @@ namespace VirtoCommerce.Platform.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddHttpContextAccessor();
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            services.AddSingleton(x =>
+            {
+                VirtoCommerce.Platform.Core.Extensions.UrlHelperExtensions.Configure(x.GetService<IHttpContextAccessor>());
+
+                var actionContext = x.GetRequiredService<IActionContextAccessor>().ActionContext;
+                var factory = x.GetRequiredService<IUrlHelperFactory>();
+                return factory.GetUrlHelper(actionContext);
+            });
 
             services.Configure<PlatformOptions>(Configuration.GetSection("VirtoCommerce"));
             services.Configure<HangfireOptions>(Configuration.GetSection("VirtoCommerce:Jobs"));
@@ -272,7 +282,6 @@ namespace VirtoCommerce.Platform.Web
             //Add SignalR for push notifications
             services.AddSignalR();
 
-
             var assetsProvider = Configuration.GetSection("Assets:Provider").Value;
             if (assetsProvider.EqualsInvariant(AzureBlobProvider.ProviderName))
             {
@@ -410,9 +419,6 @@ namespace VirtoCommerce.Platform.Web
 
             //Seed default users
             app.UseDefaultUsersAsync().GetAwaiter().GetResult();
-
-
-
         }
     }
 }

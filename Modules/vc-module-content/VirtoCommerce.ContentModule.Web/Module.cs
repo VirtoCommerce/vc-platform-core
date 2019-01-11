@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -79,14 +79,15 @@ namespace VirtoCommerce.ContentModule.Web
                 var rootPath = $"{fileSystemContentBlobOptions.RootPath}";
                 var options = Options.Create(fileSystemContentBlobOptions);
 
-                serviceCollection.AddTransient<FileSystemContentBlobStorageProvider>().Configure<FileSystemBlobContentOptions>(configuration.GetSection("Content:LocalStorage"));
 
-                serviceCollection.AddTransient<Func<string, IContentStorageProviderFactory>>(provider => (path) =>
+                serviceCollection.AddSingleton<FileSystemContentBlobStorageProvider>().Configure<FileSystemBlobContentOptions>(configuration.GetSection("Content:LocalStorage"));
+
+                serviceCollection.AddSingleton<Func<string, IContentStorageProviderFactory>>(provider => (path) =>
                 {
-                    var httpContextAccessor = provider.GetService<IHttpContextAccessor>();
+                    var urlHelper = provider.GetService<IUrlHelper>();
                     options.Value.RootPath = Path.Combine(rootPath, path.Replace("/", "\\"));
 
-                    return new FileSystemContentBlobStorageProvider(options, httpContextAccessor);
+                    return new FileSystemContentBlobStorageProvider(options, urlHelper);
                 });
             }
 
