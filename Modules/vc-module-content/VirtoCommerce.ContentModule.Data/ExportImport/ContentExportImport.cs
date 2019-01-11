@@ -10,6 +10,7 @@ using VirtoCommerce.ContentModule.Core.Services;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
+using VirtoCommerce.Platform.Data.ExportImport;
 
 namespace VirtoCommerce.ContentModule.Data.ExportImport
 {
@@ -97,96 +98,76 @@ namespace VirtoCommerce.ContentModule.Data.ExportImport
             }
         }
 
-        //TODO
-        public Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
+        public async Task DoImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
-        }
-        
-        //public void DoImport(Stream backupStream, PlatformExportManifest manifest, Action<ExportImportProgressInfo> progressCallback)
-        //{
-        //    if (manifest == null)
-        //        throw new ArgumentNullException(nameof(manifest));
+            cancellationToken.ThrowIfCancellationRequested();
 
-        //    var backupObject = backupStream.DeserializeJson<BackupObject>();
-        //    var originalObject = GetBackupObject(progressCallback, false);
+            var progressInfo = new ExportImportProgressInfo();
 
-        //    var progressInfo = new ExportImportProgressInfo
-        //    {
-        //        Description = String.Format("{0} menu link lists importing...", backupObject.MenuLinkLists.Count())
-        //    };
-        //    progressCallback(progressInfo);
-        //    UpdateMenuLinkLists(backupObject.MenuLinkLists);
-
-        //    if (manifest.HandleBinaryData)
-        //    {
-        //        progressInfo.Description = String.Format("importing binary data:  themes and pages importing...");
-        //        progressCallback(progressInfo);
-        //        foreach (var folder in backupObject.ContentFolders)
-        //        {
-        //            SaveContentFolderRecursive(folder, progressCallback);
-        //        }
-        //    }
-        //}
-
-        //private void UpdateMenuLinkLists(ICollection<webModels.MenuLinkList> linkLIsts)
-        //{
-        //    foreach (var item in linkLIsts.Select(x => x.ToCoreModel()))
-        //    {
-        //        _menuService.AddOrUpdate(item);
-        //    }
-        //}
-
-        private async Task<BackupObject> GetBackupObjectAsync(Action<ExportImportProgressInfo> progressCallback, bool handleBynaryData)
-        {
-            var retVal = new BackupObject();
-
-            var progressInfo = new ExportImportProgressInfo
+            using (var streamReader = new StreamReader(inputStream))
+            using (var reader = new JsonTextReader(streamReader))
             {
-                Description = "cms content loading..."
-            };
-            progressCallback(progressInfo);
+                while (reader.Read())
+                {
+                    if (reader.TokenType == JsonToken.PropertyName)
+                    {
+                        if (reader.Value.ToString() == "MenuLinkLists")
+                        {
+                            await reader.DeserializeJsonArrayWithPagingAsync<MenuLinkList>(_jsonSerializer, _batchSize,
+                            async items =>
+                            {
+                                foreach (var item in items)
+                                {
+                                    await _menuService.AddOrUpdateAsync(item);
+                                }
+                            }, processedCount =>
+                            {
+                                progressInfo.Description = $"{ processedCount } menu links have been imported";
+                                progressCallback(progressInfo);
+                            }, cancellationToken);
 
-            var menuLinkLists = await _menuService.GetAllLinkListsAsync();
-            retVal.MenuLinkLists = menuLinkLists.ToList();
+                        }
+                        else if (reader.Value.ToString() == "CmsContent")
+                        {
+                            if (options != null && options.HandleBinaryData)
+                            {
+                                progressInfo.Description = "importing binary data:  themes and pages importing...";
+                                progressCallback(progressInfo);
 
-            //if (handleBynaryData)
-            //{
-            //    var result = await _contentStorageProviderFactory.SearchAsync("", null);
-            //    foreach (var blobFolder in result.Results.OfType<BlobFolder>().Where(x => _exportedFolders.Contains(x.Name)))
-            //    {
-            //        var contentFolder = new ContentFolder
-            //        {
-            //            Url = blobFolder.RelativeUrl
-            //        };
-            //        ReadContentFoldersRecurive(contentFolder, progressCallback);
-            //        retVal.ContentFolders.Add(contentFolder);
-            //    }
-            //}
+                                var backupObject = _jsonSerializer.Deserialize<BackupObject>(reader);
 
-            return retVal;
+                                foreach (var folder in backupObject.ContentFolders)
+                                {
+                                    SaveContentFolderRecursive(folder, progressCallback);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
-        //private void SaveContentFolderRecursive(ContentFolder folder, Action<ExportImportProgressInfo> progressCallback)
-        //{
-        //    foreach (var childFolder in folder.Folders)
-        //    {
-        //        SaveContentFolderRecursive(childFolder, progressCallback);
-        //    }
-        //    foreach (var folderFile in folder.Files)
-        //    {
-        //        using (var stream = _contentStorageProvider.OpenWrite(folderFile.Url))
-        //        using (var memStream = new MemoryStream(folderFile.Data))
-        //        {
-        //            var progressInfo = new ExportImportProgressInfo
-        //            {
-        //                Description = String.Format("Saving {0}", folderFile.Url)
-        //            };
-        //            progressCallback(progressInfo);
-        //            memStream.CopyTo(stream);
-        //        }
-        //    }
-        //}
+        private void SaveContentFolderRecursive(ContentFolder folder, Action<ExportImportProgressInfo> progressCallback)
+        {
+            foreach (var childFolder in folder.Folders)
+            {
+                SaveContentFolderRecursive(childFolder, progressCallback);
+            }
+
+            foreach (var folderFile in folder.Files)
+            {
+                using (var stream = _contentStorageProvider.OpenWrite(folderFile.Url))
+                using (var memStream = new MemoryStream(folderFile.Data))
+                {
+                    var progressInfo = new ExportImportProgressInfo
+                    {
+                        Description = $"Saving {folderFile.Url}"
+                    };
+                    progressCallback(progressInfo);
+                    memStream.CopyTo(stream);
+                }
+            }
+        }
 
         private void ReadContentFoldersRecurive(ContentFolder folder, Action<ExportImportProgressInfo> progressCallback)
         {
@@ -203,7 +184,7 @@ namespace VirtoCommerce.ContentModule.Data.ExportImport
                 folder.Folders.Add(contentFolder);
             }
 
-            foreach (var blobItem in result.Results)
+            foreach (var blobItem in result.Results.OfType<BlobInfo>())
             {
                 var progressInfo = new ExportImportProgressInfo
                 {
