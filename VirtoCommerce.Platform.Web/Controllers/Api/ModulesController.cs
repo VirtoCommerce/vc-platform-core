@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
@@ -35,8 +36,9 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         private readonly ExternalModuleCatalogOptions _externalModuleCatalogOptions;
         private static readonly object _lockObject = new object();
         private static readonly FormOptions _defaultFormOptions = new FormOptions();
+        private readonly IApplicationLifetime _applicationLifetime;
 
-        public ModulesController(IExternalModuleCatalog externalModuleCatalog, IModuleInstaller moduleInstaller, IPushNotificationManager pushNotifier, IUserNameResolver userNameResolver, ISettingsManager settingsManager, IOptions<PlatformOptions> platformOptions, IOptions<ExternalModuleCatalogOptions> externalModuleCatalogOptions)
+        public ModulesController(IExternalModuleCatalog externalModuleCatalog, IModuleInstaller moduleInstaller, IPushNotificationManager pushNotifier, IUserNameResolver userNameResolver, ISettingsManager settingsManager, IOptions<PlatformOptions> platformOptions, IOptions<ExternalModuleCatalogOptions> externalModuleCatalogOptions, IApplicationLifetime applicationLifetime)
         {
             _externalModuleCatalog = externalModuleCatalog;
             _moduleInstaller = moduleInstaller;
@@ -45,6 +47,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             _settingsManager = settingsManager;
             _platformOptions = platformOptions.Value;
             _externalModuleCatalogOptions = externalModuleCatalogOptions.Value;
+            _applicationLifetime = applicationLifetime;
         }
 
         /// <summary>
@@ -252,8 +255,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Authorize(PlatformConstants.Security.Permissions.ModuleManage)]
         public ActionResult Restart()
         {
-            //TODO:
-            throw new NotImplementedException();
+            _applicationLifetime.StopApplication();
+            return NoContent();
         }
 
         /// <summary>
