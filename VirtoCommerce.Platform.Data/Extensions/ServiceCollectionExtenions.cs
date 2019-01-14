@@ -1,22 +1,21 @@
 using System;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.ChangeLog;
-using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.PushNotifications;
-using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Core.TransactionFileManager;
 using VirtoCommerce.Platform.Data.Caching;
 using VirtoCommerce.Platform.Data.ChangeLog;
 using VirtoCommerce.Platform.Data.DynamicProperties;
 using VirtoCommerce.Platform.Data.ExportImport;
 using VirtoCommerce.Platform.Data.PushNotifications;
+using VirtoCommerce.Platform.Data.Redis;
 using VirtoCommerce.Platform.Data.Repositories;
 using VirtoCommerce.Platform.Data.Settings;
 
@@ -41,6 +40,13 @@ namespace VirtoCommerce.Platform.Data.Extensions
             services.AddSingleton<IHandlerRegistrar>(inProcessBus);
             services.AddSingleton<IEventPublisher>(inProcessBus);
             services.AddSingleton<IChangeLogService, ChangeLogService>();
+
+            var redisConnection = ConnectionMultiplexer.Connect("localhost");
+            var configurationKey = "RedisConnection";
+            RedisConfigurations.AddConfiguration(new RedisConfiguration(configurationKey, redisConnection.Configuration));
+            services.AddSingleton<IConnectionMultiplexer>(redisConnection);
+            services.AddSingleton<ICacheBackplane, RedisCacheBackplane>();
+
             //Use MemoryCache decorator to use global platform cache settings
             services.AddSingleton<IPlatformMemoryCache, PlatformMemoryCache>();
             services.AddScoped<IPlatformExportImportManager, PlatformExportImportManager>();
