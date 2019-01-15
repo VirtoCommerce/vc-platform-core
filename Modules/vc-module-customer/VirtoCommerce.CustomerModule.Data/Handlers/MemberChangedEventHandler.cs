@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.CustomerModule.Core.Events;
@@ -9,7 +8,7 @@ using VirtoCommerce.Platform.Core.Events;
 
 namespace VirtoCommerce.CustomerModule.Data.Handlers
 {
-    public class MemberChangedEventHandler: IEventHandler<MemberChangedEvent>, IEventHandler<MemberChangingEvent>
+    public class MemberChangedEventHandler : IEventHandler<MemberChangedEvent>, IEventHandler<MemberChangingEvent>
     {
         private readonly IDynamicPropertyService _dynamicPropertyService;
         private readonly ISeoService _seoService;
@@ -28,7 +27,7 @@ namespace VirtoCommerce.CustomerModule.Data.Handlers
             {
                 if (changedEntry.EntryState == EntryState.Added)
                 {
-                    _cacheBackplane.NotifyChange(changedEntry.NewEntry.Id, CacheItemChangedEventAction.Add);
+                    await _cacheBackplane.NotifyChangeAsync(changedEntry.NewEntry.Id, CacheItemChangedEventAction.Add);
                     await _dynamicPropertyService.SaveDynamicPropertyValuesAsync(changedEntry.NewEntry);
                     if (changedEntry.NewEntry is ISeoSupport seoSupport)
                     {
@@ -37,7 +36,7 @@ namespace VirtoCommerce.CustomerModule.Data.Handlers
                 }
                 else if (changedEntry.EntryState == EntryState.Modified)
                 {
-                    _cacheBackplane.NotifyChange(changedEntry.NewEntry.Id, CacheItemChangedEventAction.Update);
+                    await _cacheBackplane.NotifyChangeAsync(changedEntry.NewEntry.Id, CacheItemChangedEventAction.Update);
                     await _dynamicPropertyService.SaveDynamicPropertyValuesAsync(changedEntry.NewEntry);
                     if (changedEntry.NewEntry is ISeoSupport seoSupport)
                     {
@@ -46,7 +45,7 @@ namespace VirtoCommerce.CustomerModule.Data.Handlers
                 }
                 else if (changedEntry.EntryState == EntryState.Deleted)
                 {
-                    _cacheBackplane.NotifyRemove(changedEntry.NewEntry.Id);
+                    await _cacheBackplane.NotifyRemoveAsync(changedEntry.NewEntry.Id);
                     await _dynamicPropertyService.DeleteDynamicPropertyValuesAsync(changedEntry.NewEntry);
                     if (changedEntry.NewEntry is ISeoSupport seoSupport)
                     {

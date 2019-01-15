@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using StackExchange.Redis.Extensions.Core;
 using VirtoCommerce.Platform.Core.Caching;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Data.Redis
 {
@@ -77,11 +78,11 @@ namespace VirtoCommerce.Platform.Data.Redis
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="action">The cache action.</param>
-        public void NotifyChange(string key, CacheItemChangedEventAction action)
+        public async Task NotifyChangeAsync(string key, CacheItemChangedEventAction action)
         {
             var message = new BackplaneMessage(_identifier, BackplaneAction.Changed, key, action);
 
-            PublishMessage(message);
+            await PublishMessageAsync(message);
         }
 
         /// <summary>
@@ -90,46 +91,46 @@ namespace VirtoCommerce.Platform.Data.Redis
         /// <param name="key">The key.</param>
         /// <param name="region">The region.</param>
         /// <param name="action">The cache action.</param>
-        public void NotifyChange(string key, string region, CacheItemChangedEventAction action)
+        public async Task NotifyChangeAsync(string key, string region, CacheItemChangedEventAction action)
         {
             var message = new BackplaneMessage(_identifier, BackplaneAction.Changed, key, region, action);
 
-            PublishMessage(message);
+            await PublishMessageAsync(message);
         }
 
         /// <summary>
         /// Notifies other cache clients about a cache clear.
         /// </summary>
-        public void NotifyClear()
+        public async Task NotifyClearAsync()
         {
             var message = new BackplaneMessage(_identifier, BackplaneAction.Clear);
 
-            PublishMessage(message);
+            await PublishMessageAsync(message);
         }
 
         /// <summary>
         /// Notifies other cache clients about a cache clear region call.
         /// </summary>
         /// <param name="region">The region.</param>
-        public void NotifyClearRegion(string region)
+        public async Task NotifyClearRegionAsync(string region)
         {
             var message = new BackplaneMessage(_identifier, BackplaneAction.Clear)
             {
                 Region = region
             };
 
-            PublishMessage(message);
+            await PublishMessageAsync(message);
         }
 
         /// <summary>
         /// Notifies other cache clients about a removed cache key.
         /// </summary>
         /// <param name="key">The key.</param>
-        public void NotifyRemove(string key)
+        public async Task NotifyRemoveAsync(string key)
         {
             var message = new BackplaneMessage(_identifier, BackplaneAction.Removed, key);
 
-            PublishMessage(message);
+            await PublishMessageAsync(message);
         }
 
         /// <summary>
@@ -137,23 +138,21 @@ namespace VirtoCommerce.Platform.Data.Redis
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="region">The region.</param>
-        public void NotifyRemove(string key, string region)
+        public async Task NotifyRemoveAsync(string key, string region)
         {
             var message = new BackplaneMessage(_identifier, BackplaneAction.Removed, key, region);
 
-            PublishMessage(message);
+            await PublishMessageAsync(message);
         }
 
 
 
-        private void Publish(byte[] message)
-        {
-            _connection.Subscriber.Publish(_channelName, message);
-        }
 
-        private void PublishMessage(BackplaneMessage message)
+
+        private async Task PublishMessageAsync(BackplaneMessage message)
         {
-            lock (_messageLock)
+            //lock (_messageLock)
+            using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(BackplaneMessage), message.Key)).LockAsync())
             {
                 if (message.Action == BackplaneAction.Clear)
                 {
@@ -178,80 +177,92 @@ namespace VirtoCommerce.Platform.Data.Redis
                     }
                 }
 
-                SendMessages(null);
+                await SendMessagesAsync(null);
             }
         }
 
-        private void SendMessages(object state)
+        private async Task SendMessagesAsync(object state)
         {
             if (_sending || _messages == null || _messages.Count == 0)
             {
                 return;
             }
 
-            Task.Factory.StartNew(
-                async (obj) =>
+            //Task.Factory.StartNew(
+            //    async (obj) =>
+            {
+                if (_sending || _messages == null || _messages.Count == 0)
                 {
-                    if (_sending || _messages == null || _messages.Count == 0)
-                    {
-                        return;
-                    }
+                    return;
+                }
 
-                    _sending = true;
-                    if (state != null && state is bool boolState && boolState == true)
-                    {
-                        _logger.LogInformation($"Backplane is sending {_messages.Count} messages triggered by timer.");
-                    }
+                _sending = true;
+                if (state != null && state is bool boolState && boolState == true)
+                {
+                    _logger.LogInformation($"Backplane is sending {_messages.Count} messages triggered by timer.");
+                }
 #if !NET40
-                    await Task.Delay(10).ConfigureAwait(false);
+                //await Task.Delay(10).ConfigureAwait(false);
 #endif
-                    byte[] msgs = null;
-                    lock (_messageLock)
+                byte[] msgs = null;
+                //lock (_messageLock)
+                {
+                    if (_messages != null && _messages.Count > 0)
                     {
-                        if (_messages != null && _messages.Count > 0)
+                        msgs = _serializer.Serialize(_messages.ToArray());
+
+                        if (_logger.IsEnabled(LogLevel.Debug))
                         {
-                            msgs = _serializer.Serialize(_messages.ToArray());
-
-                            if (_logger.IsEnabled(LogLevel.Debug))
-                            {
-                                _logger.LogDebug("Backplane is sending {0} messages ({1} skipped).", _messages.Count, _skippedMessages);
-                            }
-
-                            try
-                            {
-                                if (msgs != null)
-                                {
-                                    Publish(msgs);
-                                    //Interlocked.Increment(ref SentChunks);
-                                    //Interlocked.Add(ref MessagesSent, _messages.Count);
-                                    _skippedMessages = 0;
-
-                                    // clearing up only after successfully sending. Basically retrying...
-                                    _messages.Clear();
-
-                                    // reset log limmiter because we just send stuff
-                                    loggedLimitWarningOnce = false;
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.LogError(ex, "Error occurred sending backplane messages.");
-                            }
+                            _logger.LogDebug("Backplane is sending {0} messages ({1} skipped).", _messages.Count, _skippedMessages);
                         }
 
-                        _sending = false;
+                        try
+                        {
+                            if (msgs != null)
+                            {
+                                await PublishAsync(msgs);
+                                //Interlocked.Increment(ref SentChunks);
+                                //Interlocked.Add(ref MessagesSent, _messages.Count);
+                                _skippedMessages = 0;
+
+                                // clearing up only after successfully sending. Basically retrying...
+                                _messages.Clear();
+
+                                // reset log limmiter because we just send stuff
+                                loggedLimitWarningOnce = false;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Error occurred sending backplane messages.");
+                        }
                     }
-                },
-                this,
-                _source.Token,
-                TaskCreationOptions.DenyChildAttach,
-                TaskScheduler.Default)
-                .ConfigureAwait(false);
+
+                    _sending = false;
+                }
+            }
+                //,
+                //this,
+                //_source.Token,
+                //TaskCreationOptions.DenyChildAttach,
+                //TaskScheduler.Default)
+                //.ConfigureAwait(false)
+                ;
+        }
+
+        private void Publish(byte[] message)
+        {
+            _connection.Subscriber.PublishAsync(_channelName, message);
+        }
+
+        private Task PublishAsync(byte[] message)
+        {
+            return _connection.Subscriber.PublishAsync(_channelName, message);
         }
 
         private void Subscribe()
         {
-            _connection.Subscriber.Subscribe(
+            _connection.Subscriber.SubscribeAsync(
                 _channelName,
                 (channel, msg) =>
                 {
@@ -312,7 +323,8 @@ namespace VirtoCommerce.Platform.Data.Redis
                         _logger.LogWarning(ex, "Error reading backplane message(s)");
                     }
                 },
-                CommandFlags.FireAndForget);
+                CommandFlags.FireAndForget)
+                .GetAwaiter().GetResult();
         }
 
         private void TriggerCleared()

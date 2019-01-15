@@ -29,7 +29,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         private readonly ISeoService _seoService;
         private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        protected MemberServiceBase(Func<IMemberRepository> repositoryFactory,IEventPublisher eventPublisher, IDynamicPropertyService dynamicPropertyService, ISeoService seoService, IPlatformMemoryCache platformMemoryCache)
+        protected MemberServiceBase(Func<IMemberRepository> repositoryFactory, IEventPublisher eventPublisher, IDynamicPropertyService dynamicPropertyService, ISeoService seoService, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
@@ -37,7 +37,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
             _seoService = seoService;
             _platformMemoryCache = platformMemoryCache;
         }
-        
+
         #region IMemberService Members
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
 
         public virtual async Task<Member> GetByIdAsync(string memberId, string responseGroup = null, string memberType = null)
         {
-            var members = await GetByIdsAsync(new[] {memberId}, responseGroup, new[] {memberType});
+            var members = await GetByIdsAsync(new[] { memberId }, responseGroup, new[] { memberType });
             return members.FirstOrDefault();
         }
 
@@ -119,7 +119,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                             if (dataTargetMember != null)
                             {
                                 changedEntries.Add(new GenericChangedEntry<Member>(member, dataTargetMember.ToModel(AbstractTypeFactory<Member>.TryCreateInstance(member.MemberType)), EntryState.Modified));
-                                dataSourceMember.Patch(dataTargetMember);                               
+                                dataSourceMember.Patch(dataTargetMember);
                             }
                             else
                             {
@@ -140,7 +140,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         }
 
         public virtual async Task DeleteAsync(string[] ids, string[] memberTypes = null)
-        { 
+        {
             using (var repository = _repositoryFactory())
             {
                 var members = await GetByIdsAsync(ids, null, memberTypes);
