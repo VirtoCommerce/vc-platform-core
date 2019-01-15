@@ -43,15 +43,19 @@ namespace VirtoCommerce.Platform.Data.Extensions
             services.AddSingleton<IEventPublisher>(inProcessBus);
             services.AddSingleton<IChangeLogService, ChangeLogService>();
 
+            //Use MemoryCache decorator to use global platform cache settings
+            services.AddSingleton<IPlatformMemoryCache, PlatformMemoryCache>();
+
             var redisConnection = ConnectionMultiplexer.Connect("localhost");
             var configurationKey = "RedisConnection";
             RedisConfigurations.AddConfiguration(new RedisConfiguration(configurationKey, redisConnection.Configuration));
             services.AddSingleton<IConnectionMultiplexer>(redisConnection);
             services.AddSingleton<ICacheBackplane, RedisCacheBackplane>();
             services.AddSingleton<ISerializer, NewtonsoftSerializer>();
+            var snapshot = services.BuildServiceProvider();
+            var cacheBackplane = snapshot.GetService<ICacheBackplane>();
 
-            //Use MemoryCache decorator to use global platform cache settings
-            services.AddSingleton<IPlatformMemoryCache, PlatformMemoryCache>();
+            
             services.AddScoped<IPlatformExportImportManager, PlatformExportImportManager>();
             services.AddSingleton<ITransactionFileManager, TransactionFileManager.TransactionFileManager>();
             return services;

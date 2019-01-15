@@ -252,7 +252,7 @@ namespace VirtoCommerce.Platform.Data.Redis
 
         private void Publish(byte[] message)
         {
-            _connection.Subscriber.PublishAsync(_channelName, message);
+            _connection.Subscriber.Publish(_channelName, message);
         }
 
         private Task PublishAsync(byte[] message)
