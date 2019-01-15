@@ -14,13 +14,11 @@ namespace VirtoCommerce.Platform.Data.Caching
         private static bool? _cacheEnabled;
         private bool _disposed;
         private static object _lockObject = new object();
-        private readonly ICacheBackplane _cacheBackplane;
 
-        public PlatformMemoryCache(IMemoryCache memoryCache, ISettingsManager settingManager, ICacheBackplane cacheBackplane)
+        public PlatformMemoryCache(IMemoryCache memoryCache, ISettingsManager settingManager)
         {
             _memoryCache = memoryCache;
             _settingManager = settingManager;
-            _cacheBackplane = cacheBackplane;
         }
 
         public ICacheEntry CreateEntry(object key)
@@ -32,15 +30,12 @@ namespace VirtoCommerce.Platform.Data.Caching
                 result.SetAbsoluteExpiration(absoluteExpiration);
             }
 
-            _cacheBackplane.NotifyChange(key.ToString(), CacheItemChangedEventAction.Add);
-
             return result;
         }
 
         public void Remove(object key)
         {
             _memoryCache.Remove(key);
-            _cacheBackplane.NotifyRemove(key.ToString());
         }
 
         public bool TryGetValue(object key, out object value)

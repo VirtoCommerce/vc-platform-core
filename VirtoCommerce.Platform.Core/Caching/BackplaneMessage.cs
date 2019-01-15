@@ -60,6 +60,11 @@ namespace VirtoCommerce.Platform.Core.Caching
 
     public class BackplaneMessage
     {
+        public BackplaneMessage()
+        {
+
+        }
+
         public BackplaneMessage(byte[] owner, BackplaneAction action)
         {
             OwnerIdentity = owner;
@@ -94,19 +99,19 @@ namespace VirtoCommerce.Platform.Core.Caching
         /// Gets or sets the action.
         /// </summary>
         /// <value>The action.</value>
-        public BackplaneAction Action { get; }
+        public BackplaneAction Action { get; set; }
 
         /// <summary>
         /// Gets or sets the key.
         /// </summary>
         /// <value>The key.</value>
-        public string Key { get; }
+        public string Key { get; set; }
 
         /// <summary>
         /// Gets or sets the owner identity.
         /// </summary>
         /// <value>The owner identity.</value>
-        public byte[] OwnerIdentity { get; }
+        public byte[] OwnerIdentity { get; set; }
 
         /// <summary>
         /// Gets or sets the region.
@@ -117,6 +122,6 @@ namespace VirtoCommerce.Platform.Core.Caching
         /// <summary>
         /// Gets or sets the cache action.
         /// </summary>
-        public CacheItemChangedEventAction ChangeAction { get; }
+        public CacheItemChangedEventAction ChangeAction { get; set; }
     }
 }

@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
+using StackExchange.Redis.Extensions.Core;
+using StackExchange.Redis.Extensions.Newtonsoft;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.ChangeLog;
@@ -46,6 +48,7 @@ namespace VirtoCommerce.Platform.Data.Extensions
             RedisConfigurations.AddConfiguration(new RedisConfiguration(configurationKey, redisConnection.Configuration));
             services.AddSingleton<IConnectionMultiplexer>(redisConnection);
             services.AddSingleton<ICacheBackplane, RedisCacheBackplane>();
+            services.AddSingleton<ISerializer, NewtonsoftSerializer>();
 
             //Use MemoryCache decorator to use global platform cache settings
             services.AddSingleton<IPlatformMemoryCache, PlatformMemoryCache>();

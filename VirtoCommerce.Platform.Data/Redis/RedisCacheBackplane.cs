@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
+using StackExchange.Redis.Extensions.Core;
 using VirtoCommerce.Platform.Core.Caching;
 
 namespace VirtoCommerce.Platform.Data.Redis
@@ -25,6 +27,8 @@ namespace VirtoCommerce.Platform.Data.Redis
     /// </remarks>
     public sealed class RedisCacheBackplane : ICacheBackplane, IDisposable
     {
+        public static long MessagesReceived = 0;
+
         private const int HardLimit = 50000;
         private readonly string _channelName;
         private readonly byte[] _identifier;
@@ -37,15 +41,20 @@ namespace VirtoCommerce.Platform.Data.Redis
         private bool _sending = false;
         private CancellationTokenSource _source = new CancellationTokenSource();
         private bool loggedLimitWarningOnce = false;
+        private readonly ISerializer _serializer;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheBackplane"/> class.
         /// </summary>
         /// <param name="configuration">The cache manager configuration.</param>
         /// <param name="logger">The logger factory</param>
-        public RedisCacheBackplane(IConfiguration configuration, ILogger<RedisCacheBackplane> logger)
+        public RedisCacheBackplane(IConfiguration configuration, ILogger<RedisCacheBackplane> logger, ISerializer serializer, IPlatformMemoryCache platformMemoryCache)
         {
             _logger = logger;
+            _serializer = serializer;
+            _platformMemoryCache = platformMemoryCache;
+
             _channelName = "CacheManagerBackplane";
             _identifier = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString());
             ConfigurationKey = "RedisConnection";
@@ -57,7 +66,7 @@ namespace VirtoCommerce.Platform.Data.Redis
 
             // adding additional timer based send message invoke (shouldn't do anything if there are no messages,
             // but in really rare race conditions, it might happen messages do not get send if SendMEssages only get invoked through "NotifyXyz"
-            _timer = new Timer(SendMessages, true, 1000, 1000);
+            //_timer = new Timer(SendMessages, true, 1000, 1000);
         }
 
         public string ConfigurationKey { get; }
@@ -201,34 +210,33 @@ namespace VirtoCommerce.Platform.Data.Redis
                     {
                         if (_messages != null && _messages.Count > 0)
                         {
-                            //TODO
-                            //msgs = JsonConvert.SerializeObject(_messages.ToArray());
+                            msgs = _serializer.Serialize(_messages.ToArray());
 
-                            //if (_logger.IsEnabled(LogLevel.Debug))
-                            //{
-                            //    _logger.LogDebug("Backplane is sending {0} messages ({1} skipped).", _messages.Count, _skippedMessages);
-                            //}
+                            if (_logger.IsEnabled(LogLevel.Debug))
+                            {
+                                _logger.LogDebug("Backplane is sending {0} messages ({1} skipped).", _messages.Count, _skippedMessages);
+                            }
 
-                            //try
-                            //{
-                            //    if (msgs != null)
-                            //    {
-                            //        Publish(msgs);
-                            //        Interlocked.Increment(ref SentChunks);
-                            //        Interlocked.Add(ref MessagesSent, _messages.Count);
-                            //        _skippedMessages = 0;
+                            try
+                            {
+                                if (msgs != null)
+                                {
+                                    Publish(msgs);
+                                    //Interlocked.Increment(ref SentChunks);
+                                    //Interlocked.Add(ref MessagesSent, _messages.Count);
+                                    _skippedMessages = 0;
 
-                            //        // clearing up only after successfully sending. Basically retrying...
-                            //        _messages.Clear();
+                                    // clearing up only after successfully sending. Basically retrying...
+                                    _messages.Clear();
 
-                            //        // reset log limmiter because we just send stuff
-                            //        loggedLimitWarningOnce = false;
-                            //    }
-                            //}
-                            //catch (Exception ex)
-                            //{
-                            //    _logger.LogError(ex, "Error occurred sending backplane messages.");
-                            //}
+                                    // reset log limmiter because we just send stuff
+                                    loggedLimitWarningOnce = false;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Error occurred sending backplane messages.");
+                            }
                         }
 
                         _sending = false;
@@ -249,59 +257,55 @@ namespace VirtoCommerce.Platform.Data.Redis
                 {
                     try
                     {
-                        //TODO
-                        //var messages = BackplaneMessage.Deserialize(msg, _identifier);
+                        var messages = _serializer.Deserialize<BackplaneMessage[]>(msg);
 
-                        //if (!messages.Any())
-                        //{
-                        //    // no messages for this instance
-                        //    return;
-                        //}
+                        if (!messages.Any())
+                        {
+                            // no messages for this instance
+                            return;
+                        }
 
-                        //// now deserialize all of them (lazy enumerable)
-                        //var fullMessages = messages.ToArray();
-                        //Interlocked.Add(ref MessagesReceived, fullMessages.Length);
+                        Interlocked.Add(ref MessagesReceived, messages.Length);
+                        if (_logger.IsEnabled(LogLevel.Information))
+                        {
+                            _logger.LogInformation("Backplane got notified with {0} new messages.", messages.Length);
+                        }
 
-                        //if (_logger.IsEnabled(LogLevel.Information))
-                        //{
-                        //    _logger.LogInfo("Backplane got notified with {0} new messages.", fullMessages.Length);
-                        //}
+                        foreach (var message in messages)
+                        {
+                            switch (message.Action)
+                            {
+                                case BackplaneAction.Clear:
+                                    TriggerCleared();
+                                    break;
 
-                        //foreach (var message in fullMessages)
-                        //{
-                        //    switch (message.Action)
-                        //    {
-                        //        case BackplaneAction.Clear:
-                        //            TriggerCleared();
-                        //            break;
+                                case BackplaneAction.ClearRegion:
+                                    TriggerClearedRegion(message.Region);
+                                    break;
 
-                        //        case BackplaneAction.ClearRegion:
-                        //            TriggerClearedRegion(message.Region);
-                        //            break;
+                                case BackplaneAction.Changed:
+                                    if (string.IsNullOrWhiteSpace(message.Region))
+                                    {
+                                        TriggerChanged(message.Key, message.ChangeAction);
+                                    }
+                                    else
+                                    {
+                                        TriggerChanged(message.Key, message.Region, message.ChangeAction);
+                                    }
+                                    break;
 
-                        //        case BackplaneAction.Changed:
-                        //            if (string.IsNullOrWhiteSpace(message.Region))
-                        //            {
-                        //                TriggerChanged(message.Key, message.ChangeAction);
-                        //            }
-                        //            else
-                        //            {
-                        //                TriggerChanged(message.Key, message.Region, message.ChangeAction);
-                        //            }
-                        //            break;
-
-                        //        case BackplaneAction.Removed:
-                        //            if (string.IsNullOrWhiteSpace(message.Region))
-                        //            {
-                        //                TriggerRemoved(message.Key);
-                        //            }
-                        //            else
-                        //            {
-                        //                TriggerRemoved(message.Key, message.Region);
-                        //            }
-                        //            break;
-                        //    }
-                        //}
+                                case BackplaneAction.Removed:
+                                    if (string.IsNullOrWhiteSpace(message.Region))
+                                    {
+                                        TriggerRemoved(message.Key);
+                                    }
+                                    else
+                                    {
+                                        TriggerRemoved(message.Key, message.Region);
+                                    }
+                                    break;
+                            }
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -311,6 +315,35 @@ namespace VirtoCommerce.Platform.Data.Redis
                 CommandFlags.FireAndForget);
         }
 
+        private void TriggerCleared()
+        {
+
+        }
+
+        private void TriggerClearedRegion(string region)
+        {
+
+        }
+
+        private void TriggerChanged(string key, CacheItemChangedEventAction action)
+        {
+            _platformMemoryCache.Remove(key);
+        }
+
+        private void TriggerChanged(string key, string region, CacheItemChangedEventAction action)
+        {
+
+        }
+
+        private void TriggerRemoved(string key)
+        {
+
+        }
+
+        private void TriggerRemoved(string key, string region)
+        {
+
+        }
 
         /// <summary>
         /// Finalizes an instance of the <see cref="RedisCacheBackplane"/> class.

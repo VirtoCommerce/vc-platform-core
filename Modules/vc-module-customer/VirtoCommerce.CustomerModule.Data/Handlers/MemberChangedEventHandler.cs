@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.CustomerModule.Core.Events;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
@@ -12,10 +13,13 @@ namespace VirtoCommerce.CustomerModule.Data.Handlers
     {
         private readonly IDynamicPropertyService _dynamicPropertyService;
         private readonly ISeoService _seoService;
-        public MemberChangedEventHandler(IDynamicPropertyService dynamicPropertyService, ISeoService seoService)
+        private readonly ICacheBackplane _cacheBackplane;
+
+        public MemberChangedEventHandler(IDynamicPropertyService dynamicPropertyService, ISeoService seoService, ICacheBackplane cacheBackplane)
         {
             _dynamicPropertyService = dynamicPropertyService;
             _seoService = seoService;
+            _cacheBackplane = cacheBackplane;
         }
 
         public async Task Handle(MemberChangedEvent message)
@@ -24,6 +28,7 @@ namespace VirtoCommerce.CustomerModule.Data.Handlers
             {
                 if (changedEntry.EntryState == EntryState.Added)
                 {
+                    _cacheBackplane.NotifyChange(changedEntry.NewEntry.Id, CacheItemChangedEventAction.Add);
                     await _dynamicPropertyService.SaveDynamicPropertyValuesAsync(changedEntry.NewEntry);
                     if (changedEntry.NewEntry is ISeoSupport seoSupport)
                     {
@@ -32,6 +37,7 @@ namespace VirtoCommerce.CustomerModule.Data.Handlers
                 }
                 else if (changedEntry.EntryState == EntryState.Modified)
                 {
+                    _cacheBackplane.NotifyChange(changedEntry.NewEntry.Id, CacheItemChangedEventAction.Update);
                     await _dynamicPropertyService.SaveDynamicPropertyValuesAsync(changedEntry.NewEntry);
                     if (changedEntry.NewEntry is ISeoSupport seoSupport)
                     {
@@ -40,6 +46,7 @@ namespace VirtoCommerce.CustomerModule.Data.Handlers
                 }
                 else if (changedEntry.EntryState == EntryState.Deleted)
                 {
+                    _cacheBackplane.NotifyRemove(changedEntry.NewEntry.Id);
                     await _dynamicPropertyService.DeleteDynamicPropertyValuesAsync(changedEntry.NewEntry);
                     if (changedEntry.NewEntry is ISeoSupport seoSupport)
                     {
