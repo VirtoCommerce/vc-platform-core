@@ -24,8 +24,8 @@ namespace VirtoCommerce.CustomerModule.Data.Services
     {
         private readonly IUserSearchService _userSearchService;
         public CommerceMembersServiceImpl(Func<ICustomerRepository> repositoryFactory, IEventPublisher eventPublisher
-            , IDynamicPropertyService dynamicPropertyService, ISeoService seoService, IPlatformMemoryCache platformMemoryCache, IUserSearchService userSearchService)
-            : base(repositoryFactory, eventPublisher, dynamicPropertyService, seoService, platformMemoryCache)
+            , IDynamicPropertyService dynamicPropertyService, ISeoService seoService, ICacheManager cacheManager, IUserSearchService userSearchService)
+            : base(repositoryFactory, eventPublisher, dynamicPropertyService, seoService, cacheManager)
         {
             _userSearchService = userSearchService;
         }

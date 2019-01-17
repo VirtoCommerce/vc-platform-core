@@ -2,12 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.CustomerModule.Core.Events;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Services;
-using VirtoCommerce.CustomerModule.Data.Caching;
 using VirtoCommerce.CustomerModule.Data.Model;
 using VirtoCommerce.CustomerModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;
@@ -27,15 +25,15 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         private readonly IEventPublisher _eventPublisher;
         private readonly IDynamicPropertyService _dynamicPropertyService;
         private readonly ISeoService _seoService;
-        private readonly IPlatformMemoryCache _platformMemoryCache;
+        private readonly ICacheManager _cacheManager;
 
-        protected MemberServiceBase(Func<IMemberRepository> repositoryFactory, IEventPublisher eventPublisher, IDynamicPropertyService dynamicPropertyService, ISeoService seoService, IPlatformMemoryCache platformMemoryCache)
+        protected MemberServiceBase(Func<IMemberRepository> repositoryFactory, IEventPublisher eventPublisher, IDynamicPropertyService dynamicPropertyService, ISeoService seoService, ICacheManager cacheManager)
         {
             _repositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
             _dynamicPropertyService = dynamicPropertyService;
             _seoService = seoService;
-            _platformMemoryCache = platformMemoryCache;
+            _cacheManager = cacheManager;
         }
 
         #region IMemberService Members
@@ -49,8 +47,8 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         /// <returns></returns>
         public virtual async Task<Member[]> GetByIdsAsync(string[] memberIds, string responseGroup = null, string[] memberTypes = null)
         {
-            var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", memberIds), responseGroup, memberTypes == null ? null : string.Join("-", memberTypes));
-            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            var cacheKey = CacheKey.With(GetType(), string.Join("-", memberIds));
+            return await _cacheManager.GetAsync(cacheKey, async () =>
             {
                 var retVal = new List<Member>();
                 using (var repository = _repositoryFactory())
@@ -73,7 +71,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                         {
                             dataMember.ToModel(member);
                             retVal.Add(member);
-                            cacheEntry.AddExpirationToken(CustomerCacheRegion.CreateChangeToken(member));
+
                         }
                     }
                 }
@@ -161,12 +159,8 @@ namespace VirtoCommerce.CustomerModule.Data.Services
 
         private void ClearCache(IEnumerable<Member> entities)
         {
-            CustomerSearchCacheRegion.ExpireRegion();
-
-            foreach (var entity in entities)
-            {
-                CustomerCacheRegion.ExpireInventory(entity);
-            }
+            var cacheKey = CacheKey.With(GetType(), string.Join("-", entities.Select(ent => ent.Id)));
+            _cacheManager.Remove(cacheKey);
         }
         #endregion
 

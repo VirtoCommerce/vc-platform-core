@@ -2,6 +2,8 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using StackExchange.Redis.Extensions.Core;
 using StackExchange.Redis.Extensions.Newtonsoft;
@@ -46,16 +48,23 @@ namespace VirtoCommerce.Platform.Data.Extensions
             //Use MemoryCache decorator to use global platform cache settings
             services.AddSingleton<IPlatformMemoryCache, PlatformMemoryCache>();
 
-            var redisConnection = ConnectionMultiplexer.Connect("localhost");
-            var configurationKey = "RedisConnection";
-            RedisConfigurations.AddConfiguration(new RedisConfiguration(configurationKey, redisConnection.Configuration));
-            services.AddSingleton<IConnectionMultiplexer>(redisConnection);
-            services.AddSingleton<ICacheBackplane, RedisCacheBackplane>();
-            services.AddSingleton<ISerializer, NewtonsoftSerializer>();
-            var snapshot = services.BuildServiceProvider();
-            var cacheBackplane = snapshot.GetService<ICacheBackplane>();
+            services.Configure<RedisCachingOptions>(configuration.GetSection("RedisCaching"));
+            var redisServiceOptions = services.BuildServiceProvider().GetService<IOptions<RedisCachingOptions>>();
+            if (redisServiceOptions.Value.IsEnabled)
+            {
+                var redisConnection = ConnectionMultiplexer.Connect(redisServiceOptions.Value.ConnectionString);
+                RedisConfigurations.AddConfiguration(new RedisConfiguration(redisServiceOptions.Value.ConfigurationKey, redisConnection.Configuration));
+                services.AddSingleton<IConnectionMultiplexer>(redisConnection);
+                services.AddSingleton<ICacheBackplane, RedisCacheBackplane>();
+                services.AddSingleton<ISerializer, NewtonsoftSerializer>();
+                services.AddSingleton<IHostedService, RedisCacheHostedService>();
+                services.AddSingleton<ICacheManager, RedisCacheManager>();
+            }
+            else
+            {
+                services.AddSingleton<ICacheManager, DefaultCacheManager>();
+            }
 
-            
             services.AddScoped<IPlatformExportImportManager, PlatformExportImportManager>();
             services.AddSingleton<ITransactionFileManager, TransactionFileManager.TransactionFileManager>();
             return services;

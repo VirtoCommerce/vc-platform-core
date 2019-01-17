@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using StackExchange.Redis.Extensions.Core;
 using VirtoCommerce.Platform.Core.Caching;
@@ -44,13 +45,14 @@ namespace VirtoCommerce.Platform.Data.Redis
         private bool loggedLimitWarningOnce = false;
         private readonly ISerializer _serializer;
         private readonly IPlatformMemoryCache _platformMemoryCache;
+        private readonly RedisCachingOptions _redisCachingOptions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheBackplane"/> class.
         /// </summary>
         /// <param name="configuration">The cache manager configuration.</param>
         /// <param name="logger">The logger factory</param>
-        public RedisCacheBackplane(IConfiguration configuration, ILogger<RedisCacheBackplane> logger, ISerializer serializer, IPlatformMemoryCache platformMemoryCache)
+        public RedisCacheBackplane(IOptions<RedisCachingOptions> redisCachingOptions, IConfiguration configuration, ILogger<RedisCacheBackplane> logger, ISerializer serializer, IPlatformMemoryCache platformMemoryCache)
         {
             _logger = logger;
             _serializer = serializer;
@@ -58,20 +60,11 @@ namespace VirtoCommerce.Platform.Data.Redis
 
             _channelName = "CacheManagerBackplane";
             _identifier = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString());
-            ConfigurationKey = "RedisConnection";
+            _redisCachingOptions = redisCachingOptions.Value;
 
-            var cfg = RedisConfigurations.GetConfiguration(configuration, ConfigurationKey);
+            var cfg = RedisConfigurations.GetConfiguration(configuration, _redisCachingOptions.ConfigurationKey);
             _connection = new RedisConnectionManager(cfg, logger);
-
-            Subscribe();
-
-            // adding additional timer based send message invoke (shouldn't do anything if there are no messages,
-            // but in really rare race conditions, it might happen messages do not get send if SendMEssages only get invoked through "NotifyXyz"
-            //_timer = new Timer(SendMessages, true, 1000, 1000);
         }
-
-        public string ConfigurationKey { get; }
-
 
         /// <summary>
         /// Notifies other cache clients about a changed cache key.
@@ -145,8 +138,10 @@ namespace VirtoCommerce.Platform.Data.Redis
             await PublishMessageAsync(message);
         }
 
-
-
+        public Task SubscribeAsync()
+        {
+            return SubscribeRunAsync();
+        }
 
 
         private async Task PublishMessageAsync(BackplaneMessage message)
@@ -241,13 +236,6 @@ namespace VirtoCommerce.Platform.Data.Redis
                     _sending = false;
                 }
             }
-                //,
-                //this,
-                //_source.Token,
-                //TaskCreationOptions.DenyChildAttach,
-                //TaskScheduler.Default)
-                //.ConfigureAwait(false)
-                ;
         }
 
         private void Publish(byte[] message)
@@ -260,9 +248,9 @@ namespace VirtoCommerce.Platform.Data.Redis
             return _connection.Subscriber.PublishAsync(_channelName, message);
         }
 
-        private void Subscribe()
+        private Task SubscribeRunAsync()
         {
-            _connection.Subscriber.SubscribeAsync(
+            return _connection.Subscriber.SubscribeAsync(
                 _channelName,
                 (channel, msg) =>
                 {
@@ -323,8 +311,7 @@ namespace VirtoCommerce.Platform.Data.Redis
                         _logger.LogWarning(ex, "Error reading backplane message(s)");
                     }
                 },
-                CommandFlags.FireAndForget)
-                .GetAwaiter().GetResult();
+                CommandFlags.FireAndForget);
         }
 
         private void TriggerCleared()
@@ -339,7 +326,7 @@ namespace VirtoCommerce.Platform.Data.Redis
 
         private void TriggerChanged(string key, CacheItemChangedEventAction action)
         {
-            _platformMemoryCache.Remove(key);
+
         }
 
         private void TriggerChanged(string key, string region, CacheItemChangedEventAction action)
@@ -349,7 +336,7 @@ namespace VirtoCommerce.Platform.Data.Redis
 
         private void TriggerRemoved(string key)
         {
-
+            _platformMemoryCache.Remove(key);
         }
 
         private void TriggerRemoved(string key, string region)

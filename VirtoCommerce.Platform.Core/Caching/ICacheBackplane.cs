@@ -10,5 +10,6 @@ namespace VirtoCommerce.Platform.Core.Caching
         Task NotifyClearRegionAsync(string region);
         Task NotifyRemoveAsync(string key);
         Task NotifyRemoveAsync(string key, string region);
+        Task SubscribeAsync();
     }
 }

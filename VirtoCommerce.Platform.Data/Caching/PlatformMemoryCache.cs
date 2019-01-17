@@ -33,7 +33,7 @@ namespace VirtoCommerce.Platform.Data.Caching
             return result;
         }
 
-        public void Remove(object key)
+        public virtual void Remove(object key)
         {
             _memoryCache.Remove(key);
         }
@@ -41,6 +41,12 @@ namespace VirtoCommerce.Platform.Data.Caching
         public bool TryGetValue(object key, out object value)
         {
             return _memoryCache.TryGetValue(key, out value);
+        }
+
+        public void Set(string key, object data, int? cacheTime = null)
+        {
+            var absoluteExpiration = CacheEnabled ? AbsoluteExpiration : TimeSpan.FromTicks(1);
+            _memoryCache.Set(key, data, absoluteExpiration);
         }
 
         protected TimeSpan AbsoluteExpiration
