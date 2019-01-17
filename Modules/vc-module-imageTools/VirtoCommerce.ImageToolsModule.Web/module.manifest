@@ -24,7 +24,12 @@
     <assemblyFile>VirtoCommerce.ImageToolsModule.Web.dll</assemblyFile>
     <moduleType>VirtoCommerce.ImageToolsModule.Web.Module, VirtoCommerce.ImageToolsModule.Web</moduleType>
 
-    <styles virtualPath="dist"/>
-    <scripts virtualPath="dist"/>
+    <scripts virtualPath="dist">
+        <file>app.js</file>
+    </scripts>
+
+    <styles virtualPath="dist">
+        <file>style.css</file>
+    </styles>
 
 </module>

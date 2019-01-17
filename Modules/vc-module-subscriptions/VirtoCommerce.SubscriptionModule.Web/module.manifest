@@ -27,6 +27,8 @@
     <assemblyFile>VirtoCommerce.SubscriptionModule.Web.dll</assemblyFile>
     <moduleType>VirtoCommerce.SubscriptionModule.Web.Module, VirtoCommerce.SubscriptionModule.Web</moduleType>
 
-    <scripts virtualPath="dist"/>
+    <scripts virtualPath="dist">
+        <file>app.js</file>
+    </scripts>
     
 </module>

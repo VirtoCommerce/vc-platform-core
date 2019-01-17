@@ -25,6 +25,8 @@
     <assemblyFile>VirtoCommerce.StoreModule.Web.dll</assemblyFile>
     <moduleType>VirtoCommerce.StoreModule.Web.Module, VirtoCommerce.StoreModule.Web</moduleType>
 
-    <scripts virtualPath="dist"/>
+    <scripts virtualPath="dist">
+        <file>app.js</file>
+    </scripts>
 
 </module>

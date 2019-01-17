@@ -25,6 +25,8 @@
     <assemblyFile>VirtoCommerce.LicensingModule.Web.dll</assemblyFile>
     <moduleType>VirtoCommerce.LicensingModule.Web.Module, VirtoCommerce.LicensingModule.Web</moduleType>
 
-    <scripts virtualPath="dist"/>
+    <scripts virtualPath="dist">
+        <file>app.js</file>
+    </scripts>
     
 </module>

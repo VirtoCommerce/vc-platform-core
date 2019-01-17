@@ -28,7 +28,11 @@
     <assemblyFile>VirtoCommerce.OrdersModule.Web.dll</assemblyFile>
     <moduleType>VirtoCommerce.OrdersModule.Web.Module, VirtoCommerce.OrdersModule.Web</moduleType>
 
-    <styles virtualPath="dist"/>
-    
-    <scripts virtualPath="dist"/>
+    <styles virtualPath="dist">
+        <file>style.css</file>
+    </styles>
+
+    <scripts virtualPath="dist">
+        <file>app.js</file>
+    </scripts>
 </module>

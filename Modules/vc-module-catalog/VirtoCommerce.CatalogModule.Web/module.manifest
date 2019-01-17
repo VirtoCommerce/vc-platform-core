@@ -24,8 +24,12 @@
     <assemblyFile>VirtoCommerce.CatalogModule.Web.dll</assemblyFile>
     <moduleType>VirtoCommerce.CatalogModule.Web.Module, VirtoCommerce.CatalogModule.Web</moduleType>
 
-    <styles virtualPath="dist"/>
-    
-    <scripts virtualPath="dist"/>
+    <styles virtualPath="dist">
+        <file>style.css</file>
+    </styles>
+
+    <scripts virtualPath="dist">
+        <file>app.js</file>
+    </scripts>
 
 </module>

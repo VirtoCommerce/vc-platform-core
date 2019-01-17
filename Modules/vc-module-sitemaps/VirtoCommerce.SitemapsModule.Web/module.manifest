@@ -27,6 +27,8 @@
     <assemblyFile>VirtoCommerce.SitemapsModule.Web.dll</assemblyFile>
     <moduleType>VirtoCommerce.SitemapsModule.Web.Module, VirtoCommerce.SitemapsModule.Web</moduleType>
 
-    <scripts virtualPath="dist"/>
+    <scripts virtualPath="dist">
+        <file>app.js</file>
+    </scripts>
     
 </module>
