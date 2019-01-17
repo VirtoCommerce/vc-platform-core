@@ -4,6 +4,5 @@ namespace VirtoCommerce.Platform.Modules.Bundling
     {
         public string WebPath { get; set; }
         public string Version { get; set; }
-        public bool IsVendor { get; set; }
     }
 }

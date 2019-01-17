@@ -24,15 +24,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 
     <environment include="Development">
-        @*<link rel="stylesheet" href="~/css/allPackages.css" />
-        <link rel="stylesheet" href="~/css/platform.css" />*@
         <link rel="stylesheet" href="~/dist/style.css" asp-append-version="true"/>
-        @*<link rel="stylesheet" href="vc-modules-styles" />*@
-        <modules-styles-resolve asp-append-version="true"/>
+        <bundle-provider asp-append-version="true" bundle-type="styles"/>
     </environment>
     <environment exclude="Development">
         <link rel="stylesheet" href="~/css/allPackages.min.css" asp-append-version="true" />
-        @*<link rel="stylesheet" href="vc-modules-styles" />*@
     </environment>
 
     <meta name="viewport" content="width=device-width" />
@@ -54,60 +50,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     }
     @RenderBody()
 
-    <script type="text/javascript">
-        var AppDependencies = [
-            "ui.router",
-            "luegg.directives",
-            "googlechart",
-            "gridster",
-            "ui.bootstrap",
-            "ui.scroll",
-            "ui.scrollpoint",
-            "ui.event",
-            "ui.mask",
-            "ui.validate",
-            "ui.indeterminate",
-            "ui.uploader",
-            "ui.sortable",
-            "ui.select",
-            "ngAnimate",
-            "ngStorage",
-            "ngResource",
-            "ngCookies",
-            "angularMoment",
-            "angularFileUpload",
-            "ngSanitize",
-            "ng-context-menu",
-
-            "ui.grid",
-            "ui.grid.autoResize",
-            "ui.grid.resizeColumns",
-            "ui.grid.moveColumns",
-            "ui.grid.saveState",
-            "ui.grid.selection",
-            "ui.grid.pagination",
-            "ui.grid.pinning",
-            "ui.grid.grouping",
-
-            "ui.grid.draggable-rows",
-            "ui.codemirror",
-            "focusOn",
-            "textAngular",
-            "ngTagsInput",
-            "tmh.dynamicLocale",
-            "pascalprecht.translate",
-            "angular.filter"
-        ];
-    </script>
+    await @Html.RenderPartialAsync("_AppDependencies");
 
     <environment include="Development">
         <script src="~/dist/vendor.js" type ="text/javascript" asp-append-version="true"></script>
-        @*<script src="~/js/allpackages.js" asp-append-version="true"></script>*@
         <script src="~/dist/app.js" type="text/javascript" asp-append-version="true"></script>
-        @*<script src="~/js/platform.js" asp-append-version="true"></script>*@
-        @*<script asp-src-include="~/js/**/*" asp-append-version="true"></script>*@
-        @*<script src="vc-modules-scripts" type="text/javascript" debug="true"></script>*@
-        <modules-scripts-resolve asp-append-version="true"></modules-scripts-resolve>
+        <bundle-provider asp-append-version="true" bundle-type="scripts"></bundle-provider>
     </environment>
 
     @RenderSection("scripts", required: false)

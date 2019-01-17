@@ -53,8 +53,7 @@ namespace VirtoCommerce.Platform.Modules
                 services.Configure(setupAction);
             }
 
-            services.AddSingleton<IScriptCollector, ScriptCollector>();
-            services.AddSingleton<IStyleCollector, StyleCollector>();
+            services.AddSingleton<IBundleProvider, BundleProvider>();
 
             return services;
         }
