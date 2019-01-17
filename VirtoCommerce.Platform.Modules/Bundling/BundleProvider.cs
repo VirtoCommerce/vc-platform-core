@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.VersionProvider;
 
 namespace VirtoCommerce.Platform.Modules.Bundling
@@ -10,60 +8,25 @@ namespace VirtoCommerce.Platform.Modules.Bundling
     {
         private readonly IFileVersionProvider _fileVersionProvider;
 
-        protected BundleProvider(IFileVersionProvider fileVersionProvider)
+        public BundleProvider(IFileVersionProvider fileVersionProvider)
         {
             _fileVersionProvider = fileVersionProvider;
         }
 
-        public ModuleFile[] CollectScripts(IReadOnlyCollection<ManifestModuleInfo> modulesInfo, bool isNeedVersionAppend)
-        {
-            var modulesMetadata = modulesInfo.Select(m => new ModuleMetadata
-            {
-                FullPhysicalModulePath = m.FullPhysicalPath,
-                ModuleName = m.ModuleName,
-                VirtualPath = m.Scripts?.VirtualPath,
-                FileNames = m.Scripts?.FileName
-            }).ToArray();
-
-            return LoadModulesTargetPaths(modulesMetadata, isNeedVersionAppend);
-        }
-
-        public ModuleFile[] CollectStyles(IReadOnlyCollection<ManifestModuleInfo> modulesInfo, bool isNeedVersionAppend)
-        {
-            var modulesMetadata = modulesInfo.Select(m => new ModuleMetadata
-            {
-                FullPhysicalModulePath = m.FullPhysicalPath,
-                ModuleName = m.ModuleName,
-                VirtualPath = m.Styles?.VirtualPath,
-                FileNames = m.Styles?.FileName
-            }).ToArray();
-
-            return LoadModulesTargetPaths(modulesMetadata, isNeedVersionAppend);
-        }
-
-        protected virtual ModuleFile[] LoadModulesTargetPaths(ModuleMetadata[] modulesMetadata, bool isNeedVersionAppend)
+        public ModuleFile[] Collect(ModuleMetadata[] modulesMetadata, bool isNeedVersionAppend)
         {
             var result = new List<ModuleFile>();
 
             foreach (var moduleMetadata in modulesMetadata)
             {
-
-                if (moduleMetadata.VirtualPath == null)
+                if (string.IsNullOrEmpty(moduleMetadata.VirtualPath))
                 {
                     continue;
                 }
 
                 var targetPath = Path.Join(moduleMetadata.FullPhysicalModulePath, moduleMetadata.VirtualPath.Replace('/', Path.DirectorySeparatorChar));
 
-                result.AddRange(
-                    Handle(
-                        targetPath,
-                        moduleMetadata.FileNames,
-                        moduleMetadata.ModuleName,
-                        moduleMetadata.VirtualPath,
-                        isNeedVersionAppend
-                    )
-                );
+                result.AddRange(Handle(targetPath, moduleMetadata.FileNames, moduleMetadata.ModuleName, moduleMetadata.VirtualPath, isNeedVersionAppend));
             }
 
             return result.ToArray();

@@ -43,14 +43,30 @@ namespace VirtoCommerce.Platform.Web.TagHelpers
 
             if (BundleType == "styles")
             {
-                var moduleStyles = _bundleProvider.CollectStyles(IncludedModules, AppendVersion);
+                var modulesMetadata = IncludedModules.Select(m => new ModuleMetadata
+                {
+                    FullPhysicalModulePath = m.FullPhysicalPath,
+                    ModuleName = m.ModuleName,
+                    VirtualPath = m.Styles?.VirtualPath,
+                    FileNames = m.Styles?.FileName
+                }).ToArray();
+
+                var moduleStyles = _bundleProvider.Collect(modulesMetadata, AppendVersion);
 
                 BuildOutputStyles(moduleStyles);
             }
 
             if (BundleType == "scripts")
             {
-                var moduleScripts = _bundleProvider.CollectScripts(IncludedModules, AppendVersion);
+                var modulesMetadata = IncludedModules.Select(m => new ModuleMetadata
+                {
+                    FullPhysicalModulePath = m.FullPhysicalPath,
+                    ModuleName = m.ModuleName,
+                    VirtualPath = m.Scripts?.VirtualPath,
+                    FileNames = m.Scripts?.FileName
+                }).ToArray();
+
+                var moduleScripts = _bundleProvider.Collect(modulesMetadata, AppendVersion);
 
                 BuildOutputScripts(moduleScripts);
             }
@@ -76,10 +92,7 @@ namespace VirtoCommerce.Platform.Web.TagHelpers
             {
                 var tagBuilder = new TagBuilder("script");
 
-                tagBuilder.Attributes.Add("src",
-                    moduleScript.Version != null
-                        ? $"{moduleScript.WebPath}?v={moduleScript.Version}"
-                        : moduleScript.WebPath);
+                tagBuilder.Attributes.Add("src", moduleScript.Version != null ? $"{moduleScript.WebPath}?v={moduleScript.Version}" : moduleScript.WebPath);
                 tagBuilder.Attributes.Add("type", "text/javascript");
 
                 _output.Content.AppendHtml(tagBuilder);

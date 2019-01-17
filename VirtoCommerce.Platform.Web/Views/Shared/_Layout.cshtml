@@ -50,7 +50,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     }
     @RenderBody()
 
-    await @Html.RenderPartialAsync("_AppDependencies");
+    <partial name="_AppDependencies"/>
 
     <environment include="Development">
         <script src="~/dist/vendor.js" type ="text/javascript" asp-append-version="true"></script>
