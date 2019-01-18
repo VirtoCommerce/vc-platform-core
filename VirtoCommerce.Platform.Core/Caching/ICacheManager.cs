@@ -9,6 +9,7 @@ namespace VirtoCommerce.Platform.Core.Caching
         Task<T> GetAsync<T>(string key, Func<Task<T>> factory, int? cacheTime = null);
         void Set(string key, object data, int? cacheTime = null);
         void Remove(string key);
+        Task RemoveAsync(string key);
         void Clear();
     }
 }

@@ -134,7 +134,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                 await _eventPublisher.Publish(new MemberChangedEvent(changedEntries));
             }
 
-            ClearCache(members);
+            await ClearCacheAsync(members);
         }
 
         public virtual async Task DeleteAsync(string[] ids, string[] memberTypes = null)
@@ -153,14 +153,14 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                     await _eventPublisher.Publish(new MemberChangedEvent(changedEntries));
                 }
 
-                ClearCache(members);
+                await ClearCacheAsync(members);
             }
         }
 
-        private void ClearCache(IEnumerable<Member> entities)
+        private async Task ClearCacheAsync(IEnumerable<Member> entities)
         {
             var cacheKey = CacheKey.With(GetType(), string.Join("-", entities.Select(ent => ent.Id)));
-            _cacheManager.Remove(cacheKey);
+            await _cacheManager.RemoveAsync(cacheKey);
         }
         #endregion
 

@@ -30,6 +30,8 @@ namespace VirtoCommerce.Platform.Data.Redis
     public sealed class RedisCacheBackplane : ICacheBackplane, IDisposable
     {
         public static long MessagesReceived = 0;
+        public static long MessagesSent = 0;
+        public static long SentChunks = 0;
 
         private const int HardLimit = 50000;
         private readonly string _channelName;
@@ -38,14 +40,12 @@ namespace VirtoCommerce.Platform.Data.Redis
         private readonly RedisConnectionManager _connection;
         private readonly Timer _timer;
         private HashSet<BackplaneMessage> _messages = new HashSet<BackplaneMessage>();
-        private object _messageLock = new object();
         private int _skippedMessages = 0;
         private bool _sending = false;
         private CancellationTokenSource _source = new CancellationTokenSource();
         private bool loggedLimitWarningOnce = false;
         private readonly ISerializer _serializer;
         private readonly IPlatformMemoryCache _platformMemoryCache;
-        private readonly RedisCachingOptions _redisCachingOptions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheBackplane"/> class.
@@ -60,9 +60,8 @@ namespace VirtoCommerce.Platform.Data.Redis
 
             _channelName = "CacheManagerBackplane";
             _identifier = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString());
-            _redisCachingOptions = redisCachingOptions.Value;
 
-            var cfg = RedisConfigurations.GetConfiguration(configuration, _redisCachingOptions.ConfigurationKey);
+            var cfg = RedisConfigurations.GetConfiguration(configuration, redisCachingOptions.Value.ConfigurationKey);
             _connection = new RedisConnectionManager(cfg, logger);
         }
 
@@ -146,7 +145,6 @@ namespace VirtoCommerce.Platform.Data.Redis
 
         private async Task PublishMessageAsync(BackplaneMessage message)
         {
-            //lock (_messageLock)
             using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(BackplaneMessage), message.Key)).LockAsync())
             {
                 if (message.Action == BackplaneAction.Clear)
@@ -183,59 +181,49 @@ namespace VirtoCommerce.Platform.Data.Redis
                 return;
             }
 
-            //Task.Factory.StartNew(
-            //    async (obj) =>
+            if (_sending || _messages == null || _messages.Count == 0)
             {
-                if (_sending || _messages == null || _messages.Count == 0)
+                return;
+            }
+
+            _sending = true;
+            if (state != null && state is bool boolState && boolState == true)
+            {
+                _logger.LogInformation($"Backplane is sending {_messages.Count} messages triggered by timer.");
+            }
+            byte[] msgs = null;
+            if (_messages != null && _messages.Count > 0)
+            {
+                msgs = _serializer.Serialize(_messages.ToArray());
+
+                if (_logger.IsEnabled(LogLevel.Debug))
                 {
-                    return;
+                    _logger.LogDebug("Backplane is sending {0} messages ({1} skipped).", _messages.Count, _skippedMessages);
                 }
 
-                _sending = true;
-                if (state != null && state is bool boolState && boolState == true)
+                try
                 {
-                    _logger.LogInformation($"Backplane is sending {_messages.Count} messages triggered by timer.");
-                }
-#if !NET40
-                //await Task.Delay(10).ConfigureAwait(false);
-#endif
-                byte[] msgs = null;
-                //lock (_messageLock)
-                {
-                    if (_messages != null && _messages.Count > 0)
+                    if (msgs != null)
                     {
-                        msgs = _serializer.Serialize(_messages.ToArray());
+                        await PublishAsync(msgs);
+                        Interlocked.Increment(ref SentChunks);
+                        Interlocked.Add(ref MessagesSent, _messages.Count);
+                        _skippedMessages = 0;
 
-                        if (_logger.IsEnabled(LogLevel.Debug))
-                        {
-                            _logger.LogDebug("Backplane is sending {0} messages ({1} skipped).", _messages.Count, _skippedMessages);
-                        }
+                        // clearing up only after successfully sending. Basically retrying...
+                        _messages.Clear();
 
-                        try
-                        {
-                            if (msgs != null)
-                            {
-                                await PublishAsync(msgs);
-                                //Interlocked.Increment(ref SentChunks);
-                                //Interlocked.Add(ref MessagesSent, _messages.Count);
-                                _skippedMessages = 0;
-
-                                // clearing up only after successfully sending. Basically retrying...
-                                _messages.Clear();
-
-                                // reset log limmiter because we just send stuff
-                                loggedLimitWarningOnce = false;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Error occurred sending backplane messages.");
-                        }
+                        // reset log limmiter because we just send stuff
+                        loggedLimitWarningOnce = false;
                     }
-
-                    _sending = false;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error occurred sending backplane messages.");
                 }
             }
+
+            _sending = false;
         }
 
         private void Publish(byte[] message)

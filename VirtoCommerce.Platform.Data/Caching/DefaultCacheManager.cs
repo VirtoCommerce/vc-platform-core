@@ -47,6 +47,15 @@ namespace VirtoCommerce.Platform.Data.Caching
             _cache.Remove(key);
         }
 
+        public virtual Task RemoveAsync(string key)
+        {
+            Remove(key);
+
+            return Task.CompletedTask;
+        }
+
+
+
         public virtual void Clear()
         {
             _cancellationTokenSource.Cancel();
