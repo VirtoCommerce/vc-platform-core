@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ using VirtoCommerce.OrdersModule.Data.Handlers;
 using VirtoCommerce.OrdersModule.Data.Repositories;
 using VirtoCommerce.OrdersModule.Data.Services;
 using VirtoCommerce.OrdersModule.Web.JsonConverters;
+using VirtoCommerce.OrdersModule.Web.Security;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -50,6 +52,18 @@ namespace VirtoCommerce.OrdersModule.Web
             //Register as scoped because we use UserManager<> as dependency in this implementation
             serviceCollection.AddScoped<SendNotificationsOrderChangedEventHandler>();
             serviceCollection.AddSingleton<PolymorphicOperationJsonConverter>();
+
+            serviceCollection.AddAuthorization(options =>
+            {
+                options.AddPolicy(OrderStoreRequirement.PolicyName, policy => policy.Requirements.Add(new OrderStoreRequirement()));
+                options.AddPolicy(OrderResponsibleRequirement.PolicyName, policy => policy.Requirements.Add(new OrderResponsibleRequirement()));
+                options.AddPolicy(OrderSearchCriteriaRequirement.PolicyName, policy => policy.Requirements.Add(new OrderSearchCriteriaRequirement()));
+            });
+
+            //Register as scoped because we use UserManager<> added as Scoped as dependency in this implementation
+            serviceCollection.AddScoped<IAuthorizationHandler, OrderStoreAuthorizationHandler>();
+            serviceCollection.AddScoped<IAuthorizationHandler, OrderResponsibleAuthorizationHandler>();
+            serviceCollection.AddScoped<IAuthorizationHandler, OrderSearchCriteriaAutorizationHandler>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -67,6 +81,11 @@ namespace VirtoCommerce.OrdersModule.Web
                     ModuleId = ModuleInfo.Id,
                     Name = x
                 }).ToArray());
+
+            var securityScopeService = appBuilder.ApplicationServices.GetRequiredService<IPermissionScopeRequirementService>();
+            securityScopeService.RegisterScope(() => new OrderStoreRequirement());
+            securityScopeService.RegisterScope(() => new OrderResponsibleRequirement());
+            securityScopeService.RegisterScope(() => new OrderSearchCriteriaRequirement());
 
             var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
             inProcessBus.RegisterHandler<OrderChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<AdjustInventoryOrderChangedEventHandler>().Handle(message));

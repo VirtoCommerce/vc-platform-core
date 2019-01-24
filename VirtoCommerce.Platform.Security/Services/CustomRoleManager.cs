@@ -12,19 +12,21 @@ using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Security.Caching;
+using VirtoCommerce.Platform.Security.Converters;
 
 namespace VirtoCommerce.Platform.Security.Services
 {
     public class CustomRoleManager : AspNetRoleManager<Role>
     {
-        private readonly IPermissionsRegistrar _knownPermissions;
         private readonly IPlatformMemoryCache _memoryCache;
-        public CustomRoleManager(IPermissionsRegistrar knownPermissions, IPlatformMemoryCache memoryCache, IRoleStore<Role> store, IEnumerable<IRoleValidator<Role>> roleValidators,
-                                 ILookupNormalizer keyNormalizer, IdentityErrorDescriber errors, ILogger<RoleManager<Role>> logger, IHttpContextAccessor contextAccessor)
+        private readonly IPermissionScopeRequirementService _permissionScopeService;
+        public CustomRoleManager(IPlatformMemoryCache memoryCache, IRoleStore<Role> store, IEnumerable<IRoleValidator<Role>> roleValidators,
+                                 ILookupNormalizer keyNormalizer, IdentityErrorDescriber errors, ILogger<RoleManager<Role>> logger, IHttpContextAccessor contextAccessor,
+                                 IPermissionScopeRequirementService permissionScopeService)
             : base(store, roleValidators, keyNormalizer, errors, logger, contextAccessor)
         {
-            _knownPermissions = knownPermissions;
             _memoryCache = memoryCache;
+            _permissionScopeService = permissionScopeService;
         }
 
         public override async Task<Role> FindByNameAsync(string roleName)
@@ -64,7 +66,7 @@ namespace VirtoCommerce.Platform.Security.Services
             var result = await base.CreateAsync(role);
             if (result.Succeeded && !role.Permissions.IsNullOrEmpty())
             {
-                var permissionRoleClaims = role.Permissions.Select(x => new Claim(PlatformConstants.Security.Claims.PermissionClaimType, x.Name));
+                var permissionRoleClaims = role.Permissions.Select(x => x.ToClaim(_permissionScopeService));
                 foreach (var claim in permissionRoleClaims)
                 {
                     await base.AddClaimAsync(role, claim);
@@ -81,7 +83,7 @@ namespace VirtoCommerce.Platform.Security.Services
             var result = await base.UpdateAsync(role);
             if (result.Succeeded && role.Permissions != null)
             {
-                var sourcePermissionClaims = role.Permissions.Select(x => new Claim(PlatformConstants.Security.Claims.PermissionClaimType, x.Name)).ToList();
+                var sourcePermissionClaims = role.Permissions.Select(x => x.ToClaim(_permissionScopeService)).ToList();
                 var targetPermissionClaims = (await GetClaimsAsync(role)).Where(x => x.Type == PlatformConstants.Security.Claims.PermissionClaimType).ToList();
                 var comparer = AnonymousComparer.Create((Claim x) => x.Value);
                 //Add
@@ -120,8 +122,10 @@ namespace VirtoCommerce.Platform.Security.Services
             if (SupportsRoleClaims)
             {
                 //Load role claims and convert it to the permissions and assign to role
-                var rolePermissionClaims = (await GetClaimsAsync(role)).Where(x => x.Type == PlatformConstants.Security.Claims.PermissionClaimType);
-                role.Permissions = _knownPermissions.GetAllPermissions().Join(rolePermissionClaims, p => p.Name, c => c.Value, (p, c) => p).ToList();
+                role.Permissions = (await GetClaimsAsync(role))
+                    .Where(x => x.Type.EqualsInvariant(PlatformConstants.Security.Claims.PermissionClaimType))
+                    .Select(x => x.FromClaim(_permissionScopeService))
+                    .ToList();
             }
         }
     }

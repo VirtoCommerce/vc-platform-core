@@ -18,6 +18,7 @@ namespace VirtoCommerce.Platform.Security.Extensions
         {
             services.AddScoped<IUserNameResolver, HttpContextUserResolver>();
             services.AddSingleton<IPermissionsRegistrar, DefaultPermissionProvider>();
+            services.AddSingleton<IPermissionScopeRequirementService, PermissionScopeRequirementService>();
             services.AddScoped<IRoleSearchService, RoleSearchService>();
             //Register as singleton because this abstraction can be used as dependency in singleton services
             services.AddSingleton<IUserSearchService>(provider => new UserSearchService(provider.CreateScope().ServiceProvider.GetService<UserManager<ApplicationUser>>()));

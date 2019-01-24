@@ -7,8 +7,8 @@ using System.Runtime.Loader;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.DependencyModel.Resolution;
 using Microsoft.Extensions.Logging;
-using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Modularity;
 namespace VirtoCommerce.Platform.Modules
 {
 
@@ -71,7 +71,7 @@ namespace VirtoCommerce.Platform.Modules
                     bool assemblyPredicate(RuntimeLibrary runtime)
                     {
                         var result = runtime.Name.EqualsInvariant(assemblyName.Name);
-                        if (result)
+                        if (result && assemblyName.Version != null)
                         {
                             //Need to do an additional comparison by version because modules can use different versions
                             if (Version.TryParse(runtime.Version, out var version))

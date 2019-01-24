@@ -22,9 +22,11 @@ using VirtoCommerce.OrdersModule.Data.Repositories;
 using VirtoCommerce.OrdersModule.Data.Services;
 using VirtoCommerce.OrdersModule.Web.BackgroundJobs;
 using VirtoCommerce.OrdersModule.Web.Model;
+using VirtoCommerce.OrdersModule.Web.Security;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.StoreModule.Core.Services;
 
@@ -39,26 +41,25 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         private readonly IStoreService _storeService;
         private readonly IPlatformMemoryCache _platformMemoryCache;
         private readonly Func<IOrderRepository> _repositoryFactory;
-        //private readonly ISecurityService _securityService;
-        //private readonly IPermissionScopeService _permissionScopeService;
+        private readonly IPermissionScopeRequirementService _permissionScopeService;
         private readonly ICustomerOrderBuilder _customerOrderBuilder;
         private readonly IShoppingCartService _cartService;
         private readonly INotificationSender _notificationSender;
-
         private readonly INotificationTemplateRenderer _notificationTemplateRenderer;
         private readonly IChangeLogService _changeLogService;
-        private static readonly object _lockObject = new object();
+        private readonly IAuthorizationService _authorizationService;
 
         public OrderModuleController(ICustomerOrderService customerOrderService, ICustomerOrderSearchService searchService, IStoreService storeService
             , IUniqueNumberGenerator numberGenerator
             , IPlatformMemoryCache platformMemoryCache
             , Func<IOrderRepository> repositoryFactory
-            //, IPermissionScopeService permissionScopeService
-            //, ISecurityService securityService
+            , IPermissionScopeRequirementService permissionScopeService
             , ICustomerOrderBuilder customerOrderBuilder
             , IShoppingCartService cartService
             , INotificationSender notificationSender
-            , IChangeLogService changeLogService, INotificationTemplateRenderer notificationTemplateRenderer)
+            , IChangeLogService changeLogService
+            , INotificationTemplateRenderer notificationTemplateRenderer
+            , IAuthorizationService authorizationService)
         {
             _customerOrderService = customerOrderService;
             _searchService = searchService;
@@ -66,13 +67,13 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             _storeService = storeService;
             _platformMemoryCache = platformMemoryCache;
             _repositoryFactory = repositoryFactory;
-            //_securityService = securityService;
-            //_permissionScopeService = permissionScopeService;
+            _permissionScopeService = permissionScopeService;
             _customerOrderBuilder = customerOrderBuilder;
             _cartService = cartService;
             _notificationSender = notificationSender;
             _changeLogService = changeLogService;
             _notificationTemplateRenderer = notificationTemplateRenderer;
+            _authorizationService = authorizationService;
         }
 
         /// <summary>
@@ -83,11 +84,15 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         [Route("search")]
         public async Task<ActionResult<GenericSearchResult<CustomerOrder>>> Search([FromBody]CustomerOrderSearchCriteria criteria)
         {
-            //Scope bound ACL filtration
-            criteria = FilterOrderSearchCriteria(User.Identity.Name, criteria);
+            // Search criteria could be modified in authorization handler based on user permision scopes
+            var authorizationResult = await _authorizationService.AuthorizeAsync(User, criteria, new OrderSearchCriteriaRequirement() { DesiredPermission = ModuleConstants.Security.Permissions.Read });
+            if (!authorizationResult.Succeeded)
+            {
+                return Unauthorized();
+            }
 
             var result = await _searchService.SearchCustomerOrdersAsync(criteria);
-            
+
             return Ok(result);
         }
 
@@ -109,20 +114,20 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
 
             var retVal = result.Results.FirstOrDefault();
 
-            //TODO Resource based auth
-            //if (retVal != null)
-            //{
-            //    var scopes = _permissionScopeService.GetObjectPermissionScopeStrings(retVal).ToArray();
-            //    if (!_securityService.UserHasAnyPermission(User.Identity.Name, scopes, ModuleConstants.Security.Permissions.Read))
-            //    {
-            //        return Unauthorized();
-            //    }
-            //    //Set scopes for UI scope bounded ACL checking
-            //    retVal.Scopes = scopes;
-            //}
+            if (retVal != null)
+            {
+                if (!await CheckAuthorization(ModuleConstants.Security.Permissions.Read, retVal))
+                {
+                    return Unauthorized();
+                }
+
+                //Set scopes for UI scope bounded ACL checking
+                var scopes = _permissionScopeService.GetObjectPermissionScopeStrings(retVal).ToArray();
+                retVal.Scopes = scopes;
+            }
+
             return Ok(retVal);
         }
-
 
         /// <summary>
         /// Find customer order by id
@@ -140,16 +145,14 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
                 return NotFound();
             }
 
-            //TODO
-            ////Scope bound security check
-            //var scopes = _permissionScopeService.GetObjectPermissionScopeStrings(retVal).ToArray();
-            //if (!_securityService.UserHasAnyPermission(User.Identity.Name, scopes, OrderPredefinedPermissions.Read))
-            //{
-            //    throw new HttpResponseException(HttpStatusCode.Unauthorized);
-            //}
+            if (!await CheckAuthorization(ModuleConstants.Security.Permissions.Read, retVal))
+            {
+                return Unauthorized();
+            }
 
-            ////Set scopes for UI scope bounded ACL checking
-            //retVal.Scopes = scopes;
+            //Set scopes for UI scope bounded ACL checking
+            var scopes = _permissionScopeService.GetObjectPermissionScopeStrings(retVal).ToArray();
+            retVal.Scopes = scopes;
 
             return Ok(retVal);
         }
@@ -270,14 +273,10 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         [Route("")]
         public async Task<ActionResult> Update([FromBody]CustomerOrder customerOrder)
         {
-            //Check scope bound permission
-            //var scopes = _permissionScopeService.GetObjectPermissionScopeStrings(customerOrder).ToArray();
-
-            //TODO
-            //if (!_securityService.UserHasAnyPermission(User.Identity.Name, scopes, OrderPredefinedPermissions.Read))
-            //{
-            //    return Unauthorized();
-            //}
+            if (!await CheckAuthorization(ModuleConstants.Security.Permissions.Read, customerOrder))
+            {
+                return Unauthorized();
+            }
 
             await _customerOrderService.SaveChangesAsync(new[] { customerOrder });
             return Ok();
@@ -292,7 +291,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         [Route("{id}/shipments/new")]
         public async Task<ActionResult<Shipment>> GetNewShipment(string id)
         {
-            var order = await _customerOrderService.GetByIdAsync( id , CustomerOrderResponseGroup.Full.ToString());
+            var order = await _customerOrderService.GetByIdAsync(id, CustomerOrderResponseGroup.Full.ToString());
             if (order != null)
             {
                 var retVal = AbstractTypeFactory<Shipment>.TryCreateInstance();
@@ -331,7 +330,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         [Route("{id}/payments/new")]
         public async Task<ActionResult<PaymentIn>> GetNewPayment(string id)
         {
-            var order = await _customerOrderService.GetByIdAsync(id , CustomerOrderResponseGroup.Full.ToString());
+            var order = await _customerOrderService.GetByIdAsync(id, CustomerOrderResponseGroup.Full.ToString());
             if (order != null)
             {
                 var retVal = AbstractTypeFactory<PaymentIn>.TryCreateInstance();
@@ -524,32 +523,31 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             }
             return Ok(result);
         }
-        private CustomerOrderSearchCriteria FilterOrderSearchCriteria(string userName, CustomerOrderSearchCriteria criteria)
+
+        /// <summary>
+        /// Checks if current user has specific permission to specific order (regular and scoped permission are checked).
+        /// </summary>
+        /// <param name="permission">Required permission.</param>
+        /// <param name="order">Cutomer order to check permissions for.</param>
+        /// <returns>True if user has specified permission to specific order, otherwise false.</returns>
+        private async Task<bool> CheckAuthorization(string permission, CustomerOrder order)
         {
-            //TODO
-            //if (!_securityService.UserHasAnyPermission(userName, null, OrderPredefinedPermissions.Read))
-            //{
-            //    //Get defined user 'read' permission scopes
-            //    var readPermissionScopes = _securityService.GetUserPermissions(userName)
-            //        .Where(x => x.Id.StartsWith(OrderPredefinedPermissions.Read))
-            //        .SelectMany(x => x.AssignedScopes)
-            //        .ToList();
-
-            //    //Check user has a scopes
-            //    //Stores
-            //    criteria.StoreIds = readPermissionScopes.OfType<OrderStoreScope>()
-            //        .Select(x => x.Scope)
-            //        .Where(x => !string.IsNullOrEmpty(x))
-            //        .ToArray();
-
-            //    var responsibleScope = readPermissionScopes.OfType<OrderResponsibleScope>().FirstOrDefault();
-            //    //employee id
-            //    if (responsibleScope != null)
-            //    {
-            //        criteria.EmployeeId = userName;
-            //    }
-            //}
-            return criteria;
+            var result = false;
+            var requirementsToCheck = new PermissionScopeRequirement[]
+            {
+                new OrderStoreRequirement() { DesiredPermission = permission },
+                new OrderResponsibleRequirement() { DesiredPermission = permission },
+            };
+            foreach (var requirement in requirementsToCheck)
+            {
+                var authorizationResult = await _authorizationService.AuthorizeAsync(User, order, requirement);
+                if (authorizationResult.Succeeded)
+                {
+                    result = true;
+                    break;
+                }
+            }
+            return result;
         }
     }
 }

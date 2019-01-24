@@ -16,10 +16,17 @@ namespace VirtoCommerce.Platform.Core.Security
         /// </summary>
         public string GroupName { get; set; }
 
+        public ICollection<PermissionScopeRequirement> AssignedScopes { get; set; } = new List<PermissionScopeRequirement>();
+        public ICollection<PermissionScopeRequirement> AvailableScopes { get; set; } = new List<PermissionScopeRequirement>();
+
         protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Name;
             yield return ModuleId;
+            foreach (var scope in AssignedScopes)
+            {
+                yield return scope;
+            }
         }
     }
 }
