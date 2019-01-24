@@ -3463,7 +3463,8 @@ var AppDependencies = [
   'ngTagsInput',
   'tmh.dynamicLocale',
   'pascalprecht.translate',
-  'angular.filter'
+  'angular.filter',
+  'LocalStorageModule'
 ];
 
 angular.module('platformWebApp', AppDependencies).
@@ -3589,16 +3590,36 @@ controller('platformWebApp.appCtrl', ['$rootScope', '$scope', '$window', 'platfo
     var retVal = $location.url() ? $location.absUrl().slice(0, -$location.url().length - 1) : $location.absUrl();
     return retVal;
 }])
-.factory('platformWebApp.httpErrorInterceptor', ['$q', '$rootScope', function ($q, $rootScope) {
+.factory('platformWebApp.httpErrorInterceptor', ['$q', '$rootScope', '$injector', 'platformWebApp.authDataStorage', function ($q, $rootScope, $injector, authDataStorage) {
     var httpErrorInterceptor = {};
 
     httpErrorInterceptor.request = function (config) {
-        // do something on success
-        if (!config.cache) {
-            $rootScope.$broadcast('httpRequestSuccess', config);
-        }
-        return config;
+        config.headers = config.headers || {};
+        return extractAuthData()
+            .then(function (authData) {
+                if (authData) {
+                    config.headers.Authorization = 'Bearer ' + authData.token;
+                }
+                return config;
+            }).finally(function () {
+                // do something on success
+                if (!config.cache) {
+                    $rootScope.$broadcast('httpRequestSuccess', config);
+                }
+            });
     };
+
+    function extractAuthData() {
+        var authData = authDataStorage.getStoredData();
+        if (!authData) {
+            return $q.resolve();
+        }
+        if (Date.now() < authData.expiresAt) {
+            return $q.resolve(authData);
+        }
+        var authService = $injector.get('platformWebApp.authService');
+        return authService.refreshToken();
+    }
 
     httpErrorInterceptor.responseError = function (rejection) {
         if (rejection.status === 401) {
@@ -3626,6 +3647,23 @@ controller('platformWebApp.appCtrl', ['$rootScope', '$scope', '$window', 'platfo
         return $q.when({});
     };
 })
+.factory('fileUploaderOptions', ["platformWebApp.authDataStorage", function (authDataStorage) {
+    var authData = authDataStorage.getStoredData();
+    return {
+        url: '/',
+        alias: 'file',
+        queue: [],
+        progress: 0,
+        autoUpload: false,
+        removeAfterUpload: false,
+        method: 'POST',
+        filters: [],
+        formData: [],
+        queueLimit: Number.MAX_VALUE,
+        withCredentials: false,
+        headers: authData ? { Authorization: 'Bearer ' + authData.token } : {}
+    };
+}])
 .config(['$stateProvider', '$httpProvider', 'uiSelectConfig', 'datepickerConfig', 'datepickerPopupConfig', 'tagsInputConfigProvider', '$compileProvider',
     function ($stateProvider, $httpProvider, uiSelectConfig, datepickerConfig, datepickerPopupConfig, tagsInputConfigProvider, $compileProvider) {
 
@@ -17275,6 +17313,121 @@ angular.module('platformWebApp')
     }
 });
 angular.module('platformWebApp')
+.controller('platformWebApp.licenseDetailController', ['$scope', '$window', 'FileUploader', '$http', 'platformWebApp.bladeNavigationService', function ($scope, $window, FileUploader, $http, bladeNavigationService) {
+    var blade = $scope.blade;
+    blade.isNew = blade.isNew || !$scope.license;
+
+    $scope.activate = function (activationCode) {
+        blade.isLoading = true;
+        $scope.activationError = null;
+        $scope.filename = null;
+
+        $http.post('api/platform/licensing/activateByCode', JSON.stringify(activationCode)).then(function (response) {
+            activationCallback(response.data, true);
+        }, function (error) {
+            $scope.activationError = error.data.message;
+        });
+    };
+
+    function activationCallback(license, isActivationByCode) {
+        blade.isLoading = false;
+        if (license) {
+            $scope.currentEntity = license;
+            if ($scope.currentEntity.expirationDate && new Date($scope.currentEntity.expirationDate) < new Date()) {
+                $scope.activationError = 'Activation failed. This license has expired.';
+            }
+        } else {
+            $scope.activationError = isActivationByCode ? 'Activation failed. Check the activation code.' : 'Activation failed. Check the license file.';
+        }
+    }
+
+    $scope.activateLicense = function () {
+        // confirmed. Activate the license
+        blade.isLoading = true;
+        $http.post('api/platform/licensing/activateLicense', $scope.currentEntity).then(function () {
+            $window.location.reload();
+        });
+    };
+
+    if (blade.isNew) {
+        // create the uploader
+        var uploader = $scope.uploader = new FileUploader({
+            scope: $scope,
+            url: 'api/platform/licensing/activateByFile',
+            method: 'POST',
+            autoUpload: true,
+            removeAfterUpload: true
+        });
+
+        // ADDING FILTERS
+        // lic only
+        uploader.filters.push({
+            name: 'licFilter',
+            fn: function (i /*{File|FileLikeObject}*/, options) {
+                return i.name.toLowerCase().endsWith('.lic');
+            }
+        });
+
+        uploader.onAfterAddingFile = function (fileItem) {
+            $scope.filename = fileItem.file.name;
+            $scope.activationError = null;
+        };
+
+        uploader.onSuccessItem = function (item, response) {
+            activationCallback(response, false);
+        };
+
+        uploader.onErrorItem = function (item, response, status) {
+            blade.isLoading = false;
+            $scope.activationError = response.message ? response.message : status;
+        };
+        blade.title = 'platform.blades.license.title-new';
+    } else {
+        $scope.currentEntity = $scope.license;
+
+        blade.toolbarCommands = [
+              {
+                  name: "platform.commands.new-license", icon: 'fa fa-check',
+                  executeMethod: function () {
+                      var newBlade = {
+                          id: 'license-activate',
+                          isNew: true,
+                          controller: blade.controller,
+                          template: blade.template
+                      };
+                      bladeNavigationService.showBlade(newBlade, blade);
+                  },
+                  canExecuteMethod: function () {
+                      return true;
+                  },
+                  permission: 'platform:module:manage'
+              }];
+
+        blade.title = 'platform.blades.license.title';
+    }
+
+    blade.headIcon = 'fa-id-card';
+    blade.isLoading = false;
+}])
+
+.config(['$stateProvider', function ($stateProvider) {
+    $stateProvider
+        .state('workspace.appLicense', {
+            url: '/appLicense',
+            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
+            controller: ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
+                var blade = {
+                    id: 'appLicense',
+                    controller: 'platformWebApp.licenseDetailController',
+                    template: '$(Platform)/Scripts/app/licensing/license-detail.tpl.html',
+                    isClosingDisabled: true
+                };
+                bladeNavigationService.showBlade(blade);
+            }]
+        });
+}]);
+
+angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
 	$stateProvider
         .state('workspace.exportImport', {
@@ -17417,123 +17570,6 @@ angular.module('platformWebApp')
 
   }]);
 
-angular.module('platformWebApp')
-.controller('platformWebApp.licenseDetailController', ['$scope', '$window', 'FileUploader', '$http', 'platformWebApp.bladeNavigationService', function ($scope, $window, FileUploader, $http, bladeNavigationService) {
-    var blade = $scope.blade;
-    blade.isNew = blade.isNew || !$scope.license;
-
-    $scope.activate = function (activationCode) {
-        blade.isLoading = true;
-        $scope.activationError = null;
-        $scope.filename = null;
-
-        $http.post('api/platform/licensing/activateByCode', JSON.stringify(activationCode)).then(function (response) {
-            activationCallback(response.data, true);
-        }, function (error) {
-            $scope.activationError = error.data.message;
-        });
-    };
-
-    function activationCallback(license, isActivationByCode) {
-        blade.isLoading = false;
-        if (license) {
-            $scope.currentEntity = license;
-            if ($scope.currentEntity.expirationDate && new Date($scope.currentEntity.expirationDate) < new Date()) {
-                $scope.activationError = 'Activation failed. This license has expired.';
-            }
-        } else {
-            $scope.activationError = isActivationByCode ? 'Activation failed. Check the activation code.' : 'Activation failed. Check the license file.';
-        }
-    }
-
-    $scope.activateLicense = function () {
-        // confirmed. Activate the license
-        blade.isLoading = true;
-        $http.post('api/platform/licensing/activateLicense', $scope.currentEntity).then(function () {
-            $window.location.reload();
-        });
-    };
-
-    if (blade.isNew) {
-        // create the uploader
-        var uploader = $scope.uploader = new FileUploader({
-            scope: $scope,
-            headers: {
-                Accept: 'application/json'
-            },
-            url: 'api/platform/licensing/activateByFile',
-            method: 'POST',
-            autoUpload: true,
-            removeAfterUpload: true
-        });
-
-        // ADDING FILTERS
-        // lic only
-        uploader.filters.push({
-            name: 'licFilter',
-            fn: function (i /*{File|FileLikeObject}*/, options) {
-                return i.name.toLowerCase().endsWith('.lic');
-            }
-        });
-
-        uploader.onAfterAddingFile = function (fileItem) {
-            $scope.filename = fileItem.file.name;
-            $scope.activationError = null;
-        };
-
-        uploader.onSuccessItem = function (item, response) {
-            activationCallback(response, false);
-        };
-
-        uploader.onErrorItem = function (item, response, status) {
-            blade.isLoading = false;
-            $scope.activationError = response.message ? response.message : status;
-        };
-        blade.title = 'platform.blades.license.title-new';
-    } else {
-        $scope.currentEntity = $scope.license;
-
-        blade.toolbarCommands = [
-              {
-                  name: "platform.commands.new-license", icon: 'fa fa-check',
-                  executeMethod: function () {
-                      var newBlade = {
-                          id: 'license-activate',
-                          isNew: true,
-                          controller: blade.controller,
-                          template: blade.template
-                      };
-                      bladeNavigationService.showBlade(newBlade, blade);
-                  },
-                  canExecuteMethod: function () {
-                      return true;
-                  },
-                  permission: 'platform:module:manage'
-              }];
-
-        blade.title = 'platform.blades.license.title';
-    }
-
-    blade.headIcon = 'fa-id-card';
-    blade.isLoading = false;
-}])
-
-.config(['$stateProvider', function ($stateProvider) {
-    $stateProvider
-        .state('workspace.appLicense', {
-            url: '/appLicense',
-            templateUrl: '$(Platform)/Scripts/common/templates/home.tpl.html',
-            controller: ['platformWebApp.bladeNavigationService', function (bladeNavigationService) {
-                var blade = {
-                    id: 'appLicense',
-                    controller: 'platformWebApp.licenseDetailController',
-                    template: '$(Platform)/Scripts/app/licensing/license-detail.tpl.html',
-                    isClosingDisabled: true
-                };
-                bladeNavigationService.showBlade(blade);
-            }]
-        });
-}]);
 angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
 	$stateProvider
@@ -18108,6 +18144,79 @@ function DictionarySettingDetailBlade(settingName) {
 
 angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
+	$stateProvider
+        .state('setupWizard', {
+        	url: '/setupWizard',
+        	templateUrl: '$(Platform)/Scripts/app/setup/templates/setupWizard.tpl.html',
+            controller: ['$scope', '$state', '$stateParams', 'platformWebApp.setupWizard', function ($scope, $state, $stateParams, setupWizard) {}]
+        });
+}])
+.factory('platformWebApp.setupWizard', ['$state', 'platformWebApp.settings', function ($state, settings) {	
+	var wizardSteps = [];
+	var wizard =
+	{
+		//switches the current step in the wizard to passed or next on the current
+        showStep: function (step) {
+            var state = step ? step.state : "workspace";
+            if (wizard.currentStep != step) {
+                wizard.currentStep = step;
+                settings.update([{ name: 'VirtoCommerce.SetupStep', value: state }], function () {
+                    $state.go(state);
+                });
+            }
+            else {
+                $state.go(state);
+            }  
+		},
+
+		findStepByState : function (state) {
+			return _.find(wizardSteps, function (x) { return x.state == state; });
+		},
+
+		//registered step in the wizard
+		registerStep : function (wizardStep) {
+			wizardSteps.push(wizardStep);
+			wizardSteps = _.sortBy(wizardSteps, function (x) { return x.priority; });
+			var nextStep = undefined;
+			for (var i = wizardSteps.length; i-- > 0;) {
+				wizardSteps[i].nextStep = nextStep;
+				nextStep = wizardSteps[i];
+			}
+        },
+		load : function () {
+			//Initial step
+            wizard.currentStep = wizardSteps[0];
+            //load  saved setup step
+            return settings.getValues({ id: "VirtoCommerce.SetupStep" }).$promise.then(function (data) {
+				if (angular.isArray(data) && data.length > 0) {
+                    wizard.currentStep = wizard.findStepByState(data[0]);
+                    wizard.isCompleted = wizard.currentStep === undefined;
+                }
+                return wizard;
+			});
+        },
+        currentStep: undefined,
+        isCompleted: false
+	};
+	return wizard;
+}])
+.run(
+  ['$rootScope', '$state', 'platformWebApp.setupWizard', 'platformWebApp.settings', '$timeout', function ($rootScope, $state, setupWizard, settings, $timeout) {
+  	//Try to run setup wizard
+  	$rootScope.$on('loginStatusChanged', function (event, authContext) {
+  		if (authContext.isAuthenticated) {
+  			//timeout need because $state not fully loading in run method and need to wait little time
+                $timeout(function () {
+                    setupWizard.load().then(
+                        function (wizard) { if (!wizard.isCompleted) { wizard.showStep(wizard.currentStep); } });
+                }, 500);
+  		}
+  	});
+
+  }]);
+
+angular.module('platformWebApp')
+.config(['$stateProvider', function ($stateProvider) {
     $stateProvider
         .state('workspace.userProfile', {
             url: '/userProfile',
@@ -18194,79 +18303,6 @@ angular.module('platformWebApp')
     };
     mainMenuService.addMenuItem(menuItem);
 }]);
-
-angular.module('platformWebApp')
-.config(['$stateProvider', function ($stateProvider) {
-	$stateProvider
-        .state('setupWizard', {
-        	url: '/setupWizard',
-        	templateUrl: '$(Platform)/Scripts/app/setup/templates/setupWizard.tpl.html',
-            controller: ['$scope', '$state', '$stateParams', 'platformWebApp.setupWizard', function ($scope, $state, $stateParams, setupWizard) {}]
-        });
-}])
-.factory('platformWebApp.setupWizard', ['$state', 'platformWebApp.settings', function ($state, settings) {	
-	var wizardSteps = [];
-	var wizard =
-	{
-		//switches the current step in the wizard to passed or next on the current
-        showStep: function (step) {
-            var state = step ? step.state : "workspace";
-            if (wizard.currentStep != step) {
-                wizard.currentStep = step;
-                settings.update([{ name: 'VirtoCommerce.SetupStep', value: state }], function () {
-                    $state.go(state);
-                });
-            }
-            else {
-                $state.go(state);
-            }  
-		},
-
-		findStepByState : function (state) {
-			return _.find(wizardSteps, function (x) { return x.state == state; });
-		},
-
-		//registered step in the wizard
-		registerStep : function (wizardStep) {
-			wizardSteps.push(wizardStep);
-			wizardSteps = _.sortBy(wizardSteps, function (x) { return x.priority; });
-			var nextStep = undefined;
-			for (var i = wizardSteps.length; i-- > 0;) {
-				wizardSteps[i].nextStep = nextStep;
-				nextStep = wizardSteps[i];
-			}
-        },
-		load : function () {
-			//Initial step
-            wizard.currentStep = wizardSteps[0];
-            //load  saved setup step
-            return settings.getValues({ id: "VirtoCommerce.SetupStep" }).$promise.then(function (data) {
-				if (angular.isArray(data) && data.length > 0) {
-                    wizard.currentStep = wizard.findStepByState(data[0]);
-                    wizard.isCompleted = wizard.currentStep === undefined;
-                }
-                return wizard;
-			});
-        },
-        currentStep: undefined,
-        isCompleted: false
-	};
-	return wizard;
-}])
-.run(
-  ['$rootScope', '$state', 'platformWebApp.setupWizard', 'platformWebApp.settings', '$timeout', function ($rootScope, $state, setupWizard, settings, $timeout) {
-  	//Try to run setup wizard
-  	$rootScope.$on('loginStatusChanged', function (event, authContext) {
-  		if (authContext.isAuthenticated) {
-  			//timeout need because $state not fully loading in run method and need to wait little time
-                $timeout(function () {
-                    setupWizard.load().then(
-                        function (wizard) { if (!wizard.isCompleted) { wizard.showStep(wizard.currentStep); } });
-                }, 500);
-  		}
-  	});
-
-  }]);
 
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
@@ -19007,6 +19043,112 @@ CodeMirror.registerHelper("fold", "markdown", function(cm, start) {
   };
 });
 
+angular.module('platformWebApp')
+.controller('platformWebApp.confirmDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
+    angular.extend($scope, dialog);
+
+    $scope.yes = function () {
+        $modalInstance.close(true);
+    };
+
+    $scope.no = function () {
+        $modalInstance.close(false);
+    };
+
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
+}])
+.factory('platformWebApp.dialogService', ['$rootScope', '$modal', function ($rootScope, $modal) {
+    var dialogService = {
+        dialogs: [],
+        currentDialog: undefined
+    };
+
+    function findDialog(id) {
+        var found;
+        angular.forEach(dialogService.dialogs, function (dialog) {
+            if (dialog.id == id) {
+                found = dialog;
+            }
+        });
+
+        return found;
+    }
+
+    dialogService.showDialog = function (dialog, templateUrl, controller, cssClass) {
+        var dlg = findDialog(dialog.id);
+
+        if (angular.isUndefined(dlg)) {
+            dlg = dialog;
+
+            dlg.instance = $modal.open({
+                templateUrl: templateUrl,
+                controller: controller,
+                windowClass: cssClass ? cssClass : null,
+                resolve: {
+                    dialog: function () {
+                        return dialog;
+                    }
+                }
+            });
+
+            dlg.instance.result.then(function (result) //success
+            {
+                var idx = dialogService.dialogs.indexOf(dlg);
+                dialogService.dialogs.splice(idx, 1);
+                if (dlg.callback)
+                    dlg.callback(result);
+            }, function (reason) //dismiss
+            {
+                var idx = dialogService.dialogs.indexOf(dlg);
+                dialogService.dialogs.splice(idx, 1);
+            });
+
+            dialogService.dialogs.push(dlg);
+        }
+    };
+
+    dialogService.showConfirmationDialog = function (dialog) {
+        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/confirmDialog.tpl.html', 'platformWebApp.confirmDialogController');
+    };
+
+    dialogService.showNotificationDialog = function (dialog) {
+        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/notifyDialog.tpl.html', 'platformWebApp.confirmDialogController');
+    };
+
+    dialogService.showGalleryDialog = function (dialog) {
+        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/galleryDialog.tpl.html', 'platformWebApp.galleryDialogController', '__gallery');
+    };
+
+    return dialogService;
+
+}])
+
+angular.module('platformWebApp')
+.controller('platformWebApp.galleryDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
+    angular.extend($scope, dialog);
+
+    var imgCount = dialog.images.length;
+
+    $scope.close = function () {
+        $modalInstance.close(false);
+    }
+
+    $scope.prevImage = function (index) {
+        var i = index == -1 ? imgCount - 1 : index;
+        $scope.currentImage = dialog.images[i];
+    }
+
+    $scope.nextImage = function (index) {
+        var i = index == imgCount ? 0 : index;
+        $scope.currentImage = dialog.images[i];
+    }
+
+    $scope.openImage = function (image) {
+        $scope.currentImage = image;
+    }
+}]);
 'use strict';
 
 angular.module('platformWebApp')
@@ -21011,112 +21153,6 @@ angular.module('platformWebApp').directive('vaTabs', function () {
         }
     }
 });
-angular.module('platformWebApp')
-.controller('platformWebApp.confirmDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
-    angular.extend($scope, dialog);
-
-    $scope.yes = function () {
-        $modalInstance.close(true);
-    };
-
-    $scope.no = function () {
-        $modalInstance.close(false);
-    };
-
-    $scope.cancel = function () {
-        $modalInstance.dismiss('cancel');
-    };
-}])
-.factory('platformWebApp.dialogService', ['$rootScope', '$modal', function ($rootScope, $modal) {
-    var dialogService = {
-        dialogs: [],
-        currentDialog: undefined
-    };
-
-    function findDialog(id) {
-        var found;
-        angular.forEach(dialogService.dialogs, function (dialog) {
-            if (dialog.id == id) {
-                found = dialog;
-            }
-        });
-
-        return found;
-    }
-
-    dialogService.showDialog = function (dialog, templateUrl, controller, cssClass) {
-        var dlg = findDialog(dialog.id);
-
-        if (angular.isUndefined(dlg)) {
-            dlg = dialog;
-
-            dlg.instance = $modal.open({
-                templateUrl: templateUrl,
-                controller: controller,
-                windowClass: cssClass ? cssClass : null,
-                resolve: {
-                    dialog: function () {
-                        return dialog;
-                    }
-                }
-            });
-
-            dlg.instance.result.then(function (result) //success
-            {
-                var idx = dialogService.dialogs.indexOf(dlg);
-                dialogService.dialogs.splice(idx, 1);
-                if (dlg.callback)
-                    dlg.callback(result);
-            }, function (reason) //dismiss
-            {
-                var idx = dialogService.dialogs.indexOf(dlg);
-                dialogService.dialogs.splice(idx, 1);
-            });
-
-            dialogService.dialogs.push(dlg);
-        }
-    };
-
-    dialogService.showConfirmationDialog = function (dialog) {
-        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/confirmDialog.tpl.html', 'platformWebApp.confirmDialogController');
-    };
-
-    dialogService.showNotificationDialog = function (dialog) {
-        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/notifyDialog.tpl.html', 'platformWebApp.confirmDialogController');
-    };
-
-    dialogService.showGalleryDialog = function (dialog) {
-        dialogService.showDialog(dialog, '$(Platform)/Scripts/common/dialogs/galleryDialog.tpl.html', 'platformWebApp.galleryDialogController', '__gallery');
-    };
-
-    return dialogService;
-
-}])
-
-angular.module('platformWebApp')
-.controller('platformWebApp.galleryDialogController', ['$scope', '$modalInstance', 'dialog', function ($scope, $modalInstance, dialog) {
-    angular.extend($scope, dialog);
-
-    var imgCount = dialog.images.length;
-
-    $scope.close = function () {
-        $modalInstance.close(false);
-    }
-
-    $scope.prevImage = function (index) {
-        var i = index == -1 ? imgCount - 1 : index;
-        $scope.currentImage = dialog.images[i];
-    }
-
-    $scope.nextImage = function (index) {
-        var i = index == imgCount ? 0 : index;
-        $scope.currentImage = dialog.images[i];
-    }
-
-    $scope.openImage = function (image) {
-        $scope.currentImage = image;
-    }
-}]);
 // Full list of countries defined by ISO 3166-1 alpha-3
 // based on https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
 angular.module('platformWebApp')
@@ -23015,7 +23051,6 @@ angular.module('platformWebApp')
                 // Create the uploader
                 var uploader = $scope.uploader = new FileUploader({
                     scope: $scope,
-                    headers: { Accept: 'application/json' },
                     url: 'api/platform/assets?folderUrl=' + folderUrl,
                     method: 'POST',
                     //autoUpload: true,
@@ -23122,69 +23157,33 @@ angular.module('platformWebApp')
 
 
 angular.module('platformWebApp')
-.factory('platformWebApp.dynamicProperties.api', ['$resource', function ($resource) {
-    return $resource('api/platform/dynamic/properties', {}, {
-        queryTypes: { url: 'api/platform/dynamic/types', isArray: true },
-        getPropertiesForType: { url: 'api/platform/dynamic/types/:typeName/properties', method: 'POST', isArray: true },
-        update: { method: 'PUT' }
-    });
-}])
-.factory('platformWebApp.dynamicProperties.dictionaryItemsApi', ['$resource', function ($resource) {
-    return $resource('api/platform/dynamic/dictionaryitems', {}, {
-        getDictionaryItems: { url: 'api/platform/dynamic/dictionaryitems/search', method: 'POST', isArray: true },
-    });
-}])
-.factory('platformWebApp.dynamicProperties.valueTypesService', function () {
-    var propertyTypes = [
-        {
-            valueType: "ShortText",
-            title: "platform.properties.short-text.title",
-            description: "platform.properties.short-text.description"
-        },
-        {
-            valueType: "LongText",
-            title: "platform.properties.long-text.title",
-            description: "platform.properties.long-text.description"
-        },
-        {
-            valueType: "Integer",
-            title: "platform.properties.integer.title",
-            description: "platform.properties.integer.description"
-        },
-        {
-            valueType: "Decimal",
-            title: "platform.properties.decimal.title",
-            description: "platform.properties.decimal.description"
-        },
-        {
-            valueType: "DateTime",
-            title: "platform.properties.date-time.title",
-            description: "platform.properties.date-time.description"
-        },
-        {
-            valueType: "Boolean",
-            title: "platform.properties.boolean.title",
-            description: "platform.properties.boolean.description"
-        },
-        {
-            valueType: "Html",
-            title: "platform.properties.html.title",
-            description: "platform.properties.html.description"
-        },
-        {
-            valueType: "Image",
-            title: "platform.properties.image.title",
-            description: "platform.properties.image.description"
-        }
-    ];
-
-    return {
-        query: function() {
-            return propertyTypes;
-        }
+.controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    
+    $scope.blade.isLoading = false;
+    // ui-grid
+    $scope.setGridOptions = function (gridOptions) {
+        $scope.gridOptions = gridOptions;
     };
-});
+}]);
 
+angular.module('platformWebApp')
+.controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+    var blade = $scope.blade;
+
+    $scope.openBlade = function () {
+        var newBlade = {
+            id: "changesChildBlade",
+            currentEntities: blade.currentEntity.operationsLog,
+            headIcon: blade.headIcon,
+            title: blade.title,
+            subtitle: 'platform.widgets.operations.blade-subtitle',
+            isExpandable: true,
+            controller: 'platformWebApp.changeLog.operationListController',
+            template: '$(Platform)/Scripts/app/changeLog/blades/operation-list.tpl.html'
+        };
+        bladeNavigationService.showBlade(newBlade, blade);
+    };
+}]);
 angular.module('platformWebApp')
 .controller('platformWebApp.dynamicObjectListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dynamicProperties.api', function ($scope, bladeNavigationService, dynamicPropertiesApi) {
 	var blade = $scope.blade;
@@ -23800,6 +23799,70 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
+.factory('platformWebApp.dynamicProperties.api', ['$resource', function ($resource) {
+    return $resource('api/platform/dynamic/properties', {}, {
+        queryTypes: { url: 'api/platform/dynamic/types', isArray: true },
+        getPropertiesForType: { url: 'api/platform/dynamic/types/:typeName/properties', method: 'POST', isArray: true },
+        update: { method: 'PUT' }
+    });
+}])
+.factory('platformWebApp.dynamicProperties.dictionaryItemsApi', ['$resource', function ($resource) {
+    return $resource('api/platform/dynamic/dictionaryitems', {}, {
+        getDictionaryItems: { url: 'api/platform/dynamic/dictionaryitems/search', method: 'POST', isArray: true },
+    });
+}])
+.factory('platformWebApp.dynamicProperties.valueTypesService', function () {
+    var propertyTypes = [
+        {
+            valueType: "ShortText",
+            title: "platform.properties.short-text.title",
+            description: "platform.properties.short-text.description"
+        },
+        {
+            valueType: "LongText",
+            title: "platform.properties.long-text.title",
+            description: "platform.properties.long-text.description"
+        },
+        {
+            valueType: "Integer",
+            title: "platform.properties.integer.title",
+            description: "platform.properties.integer.description"
+        },
+        {
+            valueType: "Decimal",
+            title: "platform.properties.decimal.title",
+            description: "platform.properties.decimal.description"
+        },
+        {
+            valueType: "DateTime",
+            title: "platform.properties.date-time.title",
+            description: "platform.properties.date-time.description"
+        },
+        {
+            valueType: "Boolean",
+            title: "platform.properties.boolean.title",
+            description: "platform.properties.boolean.description"
+        },
+        {
+            valueType: "Html",
+            title: "platform.properties.html.title",
+            description: "platform.properties.html.description"
+        },
+        {
+            valueType: "Image",
+            title: "platform.properties.image.title",
+            description: "platform.properties.image.description"
+        }
+    ];
+
+    return {
+        query: function() {
+            return propertyTypes;
+        }
+    };
+});
+
+angular.module('platformWebApp')
 .controller('platformWebApp.dynamicPropertyWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
 	$scope.blade = $scope.widget.blade;
 	$scope.openBlade = function () {
@@ -23823,13 +23886,11 @@ angular.module('platformWebApp')
 
 }]);
 angular.module('platformWebApp')
-.controller('platformWebApp.changeLog.operationListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    
-    $scope.blade.isLoading = false;
-    // ui-grid
-    $scope.setGridOptions = function (gridOptions) {
-        $scope.gridOptions = gridOptions;
-    };
+.factory('platformWebApp.jobs', ['$resource', function ($resource) {
+
+    return $resource('api/platform/jobs', {}, {
+        getStatus: { url: 'api/platform/jobs/:id' }
+    });
 }]);
 
 angular.module('platformWebApp')
@@ -23996,7 +24057,6 @@ angular.module('platformWebApp')
         // create the uploader
         var uploader = $scope.uploader = new FileUploader({
             scope: $scope,
-            headers: { Accept: 'application/json' },
             url: 'api/platform/assets/localstorage',
             method: 'POST',
             autoUpload: true,
@@ -24071,24 +24131,6 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
-.controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
-    var blade = $scope.blade;
-
-    $scope.openBlade = function () {
-        var newBlade = {
-            id: "changesChildBlade",
-            currentEntities: blade.currentEntity.operationsLog,
-            headIcon: blade.headIcon,
-            title: blade.title,
-            subtitle: 'platform.widgets.operations.blade-subtitle',
-            isExpandable: true,
-            controller: 'platformWebApp.changeLog.operationListController',
-            template: '$(Platform)/Scripts/app/changeLog/blades/operation-list.tpl.html'
-        };
-        bladeNavigationService.showBlade(newBlade, blade);
-    };
-}]);
-angular.module('platformWebApp')
 .factory('platformWebApp.exportImport.resource', ['$resource', function ($resource) {
 
     return $resource(null, {},
@@ -24103,14 +24145,6 @@ angular.module('platformWebApp')
 
             taskCancel: { method: 'POST', url: 'api/platform/exortimport/tasks/:jobId/cancel'}
         });
-}]);
-
-angular.module('platformWebApp')
-.factory('platformWebApp.jobs', ['$resource', function ($resource) {
-
-    return $resource('api/platform/jobs', {}, {
-        getStatus: { url: 'api/platform/jobs/:id' }
-    });
 }]);
 
 angular.module('platformWebApp')
@@ -24251,9 +24285,6 @@ angular.module('platformWebApp')
         // the uploader
         var uploader = $scope.uploader = new FileUploader({
             scope: $scope,
-            headers: {
-                Accept: 'application/json'
-            },
             url: 'api/platform/modules/localstorage',
             autoUpload: true,
             removeAfterUpload: true
@@ -24629,6 +24660,20 @@ angular.module('platformWebApp')
 
         blade.refresh();
     }]);
+
+angular.module('platformWebApp')
+.factory('platformWebApp.modules', ['$resource', function ($resource) {
+
+    return $resource('api/platform/modules', null, {
+        getDependencies: { method: 'POST', url: 'api/platform/modules/getmissingdependencies', isArray: true },
+        getDependents: { method: 'POST', url: 'api/platform/modules/getdependents', isArray: true },
+        install: { method: 'POST', url: 'api/platform/modules/install' },
+        uninstall: { method: 'POST', url: 'api/platform/modules/uninstall' },
+        restart: { method: 'POST', url: 'api/platform/modules/restart' },
+        autoInstall: { method: 'POST', url: 'api/platform/modules/autoinstall' },
+        reload: { method: 'POST', url: 'api/platform/modules/reload', isArray: true },
+    });
+}]);
 
 angular.module('platformWebApp')
 .factory('platformWebApp.toolbarService', function () {
@@ -25038,20 +25083,6 @@ angular.module('platformWebApp')
     };
 
     return service;
-}]);
-
-angular.module('platformWebApp')
-.factory('platformWebApp.modules', ['$resource', function ($resource) {
-
-    return $resource('api/platform/modules', null, {
-        getDependencies: { method: 'POST', url: 'api/platform/modules/getmissingdependencies', isArray: true },
-        getDependents: { method: 'POST', url: 'api/platform/modules/getdependents', isArray: true },
-        install: { method: 'POST', url: 'api/platform/modules/install' },
-        uninstall: { method: 'POST', url: 'api/platform/modules/uninstall' },
-        restart: { method: 'POST', url: 'api/platform/modules/restart' },
-        autoInstall: { method: 'POST', url: 'api/platform/modules/autoinstall' },
-        reload: { method: 'POST', url: 'api/platform/modules/reload', isArray: true },
-    });
 }]);
 
 angular.module('platformWebApp')
@@ -27576,7 +27607,7 @@ angular.module('platformWebApp')
 }]);
 
 angular.module('platformWebApp')
-    .factory('platformWebApp.authService', ['$http', '$rootScope', '$cookieStore', '$state', '$interpolate', function ($http, $rootScope, $cookieStore, $state, $interpolate) {
+    .factory('platformWebApp.authService', ['$http', '$rootScope', '$cookieStore', '$state', '$interpolate', '$q', 'platformWebApp.authDataStorage', function ($http, $rootScope, $cookieStore, $state, $interpolate, $q, authDataStorage) {
     var serviceBase = 'api/platform/security/';
     var authContext = {
         userId: null,
@@ -27588,40 +27619,80 @@ angular.module('platformWebApp')
 
     authContext.fillAuthData = function () {
         return $http.get(serviceBase + 'currentuser').then(
-			function (results) {
-			    changeAuth(results.data);
-			});
+            function (results) {
+                changeAuth(results.data);
+            });
     };
 
     authContext.login = function (email, password, remember) {       
-        return $http.post(serviceBase + 'login/', { userName: email, password: password, rememberMe: remember }).then(
-            function (results) {
-                if (results.data.succeeded) {
-                    return authContext.fillAuthData().then(function () { return authContext.isAuthenticated; })
-                }
-                return false;
-			});
+        var requestData = 'grant_type=password&scope=offline_access&username=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password);
+        return $http.post('connect/token', requestData, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }).then(
+            function (response) {
+                var authData = {
+                    token: response.data.access_token,
+                    userName: email,
+                    expiresAt: getCurrentDateWithOffset(response.data.expires_in),
+                    refreshToken: response.data.refresh_token
+                };
+                authDataStorage.storeAuthData(authData);
+                return authContext.fillAuthData().then(function () {
+                    return response.data;
+                });
+            }, function (error) {
+                authContext.logout();
+                return $q.reject(error);
+            }
+        );
     };
+
+    authContext.refreshToken = function () {
+        var authData = authDataStorage.getStoredData();
+        if (authData) {
+            var data = 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(authData.refreshToken);
+            // NOTE: this method is called by the HTTP interceptor if the access token in the local storage expired.
+            //       So we clean the storage before sending the HTTP request - otherwise the HTTP interceptor will
+            //       detect expired token and will call this method again, causing the infinite loop.
+            authDataStorage.clearStoredData();
+            return $http.post('connect/token', data, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }).then(
+                function (response) {
+                    var newAuthData = {
+                        token: response.data.access_token,
+                        userName: response.data.userName,
+                        expiresAt: getCurrentDateWithOffset(response.data.expires_in),
+                        refreshToken: response.data.refresh_token
+                    };
+                    authDataStorage.storeAuthData(newAuthData);
+                    return newAuthData;
+                }, function (err) {
+                    authContext.logout();
+                    return $q.reject(err);
+                });
+        } else {
+            return $q.reject();
+        }
+    };
+
+    function getCurrentDateWithOffset(offsetInSeconds) {
+        return Date.now() + offsetInSeconds * 1000;
+    }
 
     authContext.requestpasswordreset = function (data) {
         return $http.post(serviceBase + 'users/' + data.userName + '/requestpasswordreset/').then(
-			function (results) {
-			    return results.data;
-			});
+            function (results) {
+                return results.data;
+            });
     };
 
     authContext.resetpassword = function (data) {
         return $http.post(serviceBase + 'users/' + data.userId + '/resetpasswordconfirm', { token: data.code, newPassword: data.newPassword }).then(
-			function (results) {
-			    return results.data;
-			});
+            function (results) {
+                return results.data;
+            });
     };
 
     authContext.logout = function () {
+        authDataStorage.clearStoredData();
         changeAuth({});
-
-        $http.get(serviceBase + 'logout/').then(function (result) {
-        });
     };
 
     authContext.checkPermission = function (permission, securityScopes) {
@@ -27666,6 +27737,22 @@ angular.module('platformWebApp')
     }
     return authContext;
 }]);
+
+angular.module('platformWebApp')
+    .factory('platformWebApp.authDataStorage', ['localStorageService', function(localStorageService) {
+        var service = {
+            storeAuthData: function(dataObject) {
+                localStorageService.set('authenticationData', dataObject);
+            },
+            getStoredData: function() {
+                return localStorageService.get('authenticationData');
+            },
+            clearStoredData: function() {
+                localStorageService.remove('authenticationData');
+            }
+        };
+        return service;
+    }]);
 
 angular.module('platformWebApp')
 .factory('platformWebApp.permissionScopeResolver', [ function () {

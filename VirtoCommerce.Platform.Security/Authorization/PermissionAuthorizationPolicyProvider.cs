@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -19,7 +17,7 @@ namespace VirtoCommerce.Platform.Security.Authorization
         private readonly IConfiguration _configuration;
         private readonly IPermissionsRegistrar _permissionsProvider;
         private readonly IPlatformMemoryCache _memoryCache;
-        public PermissionAuthorizationPolicyProvider(IOptions<AuthorizationOptions> options, IConfiguration configuration, IPermissionsRegistrar permissionsProvider, IPlatformMemoryCache memoryCache)
+        public PermissionAuthorizationPolicyProvider(IOptions<Microsoft.AspNetCore.Authorization.AuthorizationOptions> options, IConfiguration configuration, IPermissionsRegistrar permissionsProvider, IPlatformMemoryCache memoryCache)
             : base(options)
         {
             _configuration = configuration;
@@ -49,9 +47,7 @@ namespace VirtoCommerce.Platform.Security.Authorization
                 var resultLookup = new Dictionary<string, AuthorizationPolicy>();
                 foreach (var permission in _permissionsProvider.GetAllPermissions())
                 {
-                    //TODO: Load and use all registered auth schemes form   the system (instead of hardcoded list)
-                    //Use for authorization both auth schemes  (combined mode) cookies and bearer tokens
-                    resultLookup[permission.Name] = new AuthorizationPolicyBuilder(IdentityConstants.ApplicationScheme, "Bearer").AddRequirements(new PermissionAuthorizationRequirement { Permission = permission }).Build();
+                    resultLookup[permission.Name] = new AuthorizationPolicyBuilder().AddRequirements(new PermissionAuthorizationRequirement { Permission = permission }).Build();
                 }
                 return resultLookup;
             });
