@@ -232,12 +232,12 @@ namespace VirtoCommerce.Platform.Web
             {
                 options.Events.OnRedirectToLogin = context =>
                 {
-                    context.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
+                    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     return Task.CompletedTask;
                 };
                 options.Events.OnRedirectToAccessDenied = context =>
                 {
-                    context.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
+                    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     return Task.CompletedTask;
                 };
             });
@@ -289,7 +289,7 @@ namespace VirtoCommerce.Platform.Web
                     Flow = "password",
                     TokenUrl = "/connect/token",
                 });
-
+                c.CustomSchemaIds(x => x.FullName);
                 c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>
                 {
                     { "oauth2", new string[0] }

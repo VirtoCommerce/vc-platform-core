@@ -265,14 +265,12 @@ namespace VirtoCommerce.Platform.Core
                     }
                 }
             }
-            public static IEnumerable<SettingDescriptor> AllSettings
-            {
-                get
-                {
-                    return Cache.AllSettings.Concat(Security.AllSettings).Concat(Setup.AllSettings)
-                                            .Concat(UserProfile.AllSettings).Concat(UserInterface.AllSettings);
-                }
-            }
+
+            public static IEnumerable<SettingDescriptor> AllSettings => Cache.AllSettings
+                .Concat(Security.AllSettings)
+                .Concat(Setup.AllSettings)
+                .Concat(UserProfile.AllSettings)
+                .Concat(UserInterface.AllSettings);
         }
     }
 }
