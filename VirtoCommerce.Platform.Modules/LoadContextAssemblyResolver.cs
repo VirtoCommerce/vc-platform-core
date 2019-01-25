@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 using Microsoft.Extensions.Logging;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Modularity.Exceptions;
 using VirtoCommerce.Platform.Modules.AssemblyLoading;
@@ -15,12 +16,12 @@ namespace VirtoCommerce.Platform.Modules
     {
         private readonly ILogger<LoadContextAssemblyResolver> _logger;
         private readonly Dictionary<string, Assembly> _loadedAssemblies = new Dictionary<string, Assembly>();
-        private string _basePath;
-        private readonly HashSet<string> _additionalProbingPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private readonly bool _isDevelopmentEnvironment;
 
-        public LoadContextAssemblyResolver(ILogger<LoadContextAssemblyResolver> logger)
+        public LoadContextAssemblyResolver(ILogger<LoadContextAssemblyResolver> logger, bool isDevelopmentEnvironment)
         {
             _logger = logger;
+            _isDevelopmentEnvironment = isDevelopmentEnvironment;
         }
 
         /// <summary>
@@ -42,20 +43,23 @@ namespace VirtoCommerce.Platform.Modules
                 throw new FileNotFoundException(assemblyUri.LocalPath);
             }
 
-            // Fill _basePath and _additionalProbingPaths based on assemblyPath
-            // In fact we could add some _additionalProbingPaths to support assembly storages like NuGet package cache (), if we would need
-            var assemblyDirectory = Path.GetDirectoryName(assemblyUri.LocalPath);
-            _basePath = assemblyDirectory;
-            if (!_additionalProbingPaths.Contains(assemblyDirectory))
-            {
-                _additionalProbingPaths.Add(assemblyDirectory);
-            }
-
-            var assembly = LoadAssemblyWithReferences(assemblyUri.LocalPath);
+            var assembly = LoadAssemblyWithReferences(assemblyUri.LocalPath, BuildLoadContext(assemblyUri));
             return assembly;
         }
 
-        private Assembly LoadAssemblyWithReferences(string assemblyPath)
+        private ManagedAssemblyLoadContext BuildLoadContext(Uri assemblyUri)
+        {
+            var assemblyDirectory = Path.GetDirectoryName(assemblyUri.LocalPath);
+            var runtimeConfigFilePath = Path.ChangeExtension(assemblyUri.LocalPath, ".runtimeconfig.json");
+
+            return new ManagedAssemblyLoadContext()
+            {
+                BasePath = assemblyDirectory,
+                AdditionalProdingPath = runtimeConfigFilePath.TryGetAdditionalProbingPathFromRuntimeConfig(_isDevelopmentEnvironment, out _),
+            };
+        }
+
+        private Assembly LoadAssemblyWithReferences(string assemblyPath, ManagedAssemblyLoadContext loadContext)
         {
             var depsFilePath = Path.ChangeExtension(assemblyPath, ".deps.json");
 
@@ -68,12 +72,12 @@ namespace VirtoCommerce.Platform.Modules
             Assembly mainAssembly = null;
 
             // Load all assembly referencies which we could get through .deps.json file
-            foreach (var dependency in DependencyReader.ExtractDependencies(depsFilePath))
+            foreach (var dependency in depsFilePath.ExtractDependenciesFromPath())
             {
                 try
                 {
-                    var loadedAssembly = LoadAssemblyCached(dependency) ?? throw GenerateAssemblyLoadException(dependency.Name.Name, assemblyPath);
-                    if (mainAssemblyName.Equals(loadedAssembly.GetName().Name, StringComparison.OrdinalIgnoreCase))
+                    var loadedAssembly = LoadAssemblyCached(dependency, loadContext) ?? throw GenerateAssemblyLoadException(dependency.Name.Name, assemblyPath);
+                    if (mainAssemblyName.EqualsInvariant(loadedAssembly.GetName().Name))
                     {
                         mainAssembly = loadedAssembly;
                     }
@@ -82,7 +86,6 @@ namespace VirtoCommerce.Platform.Modules
                 {
                     throw GenerateAssemblyLoadException(dependency.Name.Name, assemblyPath, ex);
                 }
-
             }
 
             return mainAssembly;
@@ -100,8 +103,9 @@ namespace VirtoCommerce.Platform.Modules
         /// </para>
         /// </summary>
         /// <param name="managedLibrary">ManagedLibrary object containing library name and paths.</param>
+        /// <param name="loadContext">ManagedAssemblyLoadContext object.</param>
         /// <returns>Retures loaded assembly (could be cached).</returns>
-        private Assembly LoadAssemblyCached(ManagedLibrary managedLibrary)
+        private Assembly LoadAssemblyCached(ManagedLibrary managedLibrary, ManagedAssemblyLoadContext loadContext)
         {
             var assemblyName = managedLibrary.Name;
             if (_loadedAssemblies.ContainsKey(assemblyName.Name))
@@ -109,7 +113,7 @@ namespace VirtoCommerce.Platform.Modules
                 return _loadedAssemblies[assemblyName.Name];
             }
 
-            var loadedAssembly = LoadAssemblyInternal(managedLibrary);
+            var loadedAssembly = LoadAssemblyInternal(managedLibrary, loadContext);
             if (loadedAssembly != null)
             {
                 _loadedAssemblies.Add(assemblyName.Name, loadedAssembly);
@@ -125,8 +129,9 @@ namespace VirtoCommerce.Platform.Modules
         /// </para>
         /// </summary>
         /// <param name="managedLibrary">ManagedLibrary object containing assembly name and paths.</param>
+        /// <param name="loadContext">ManagedAssemblyLoadContext object.</param>
         /// <returns>Returns loaded assembly.</returns>
-        private Assembly LoadAssemblyInternal(ManagedLibrary managedLibrary)
+        private Assembly LoadAssemblyInternal(ManagedLibrary managedLibrary, ManagedAssemblyLoadContext loadContext)
         {
             // To avoid FileNotFoundException for assemblies that are included in TPA - we load them using AssemblyLoadContext.Default.LoadFromAssemblyName.
             var assemblyFileName = Path.GetFileName(managedLibrary.AppLocalPath);
@@ -139,7 +144,7 @@ namespace VirtoCommerce.Platform.Modules
                 }
             }
 
-            if (SearchForLibrary(managedLibrary, out var path))
+            if (SearchForLibrary(managedLibrary, loadContext, out var path))
             {
                 return AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
             }
@@ -147,10 +152,10 @@ namespace VirtoCommerce.Platform.Modules
             return null;
         }
 
-        private bool SearchForLibrary(ManagedLibrary library, out string path)
+        private bool SearchForLibrary(ManagedLibrary library, ManagedAssemblyLoadContext loadContext, out string path)
         {
             // 1. Check for in _basePath + app local path
-            var localFile = Path.Combine(_basePath, library.AppLocalPath);
+            var localFile = Path.Combine(loadContext.BasePath, library.AppLocalPath);
             if (File.Exists(localFile))
             {
                 path = localFile;
@@ -158,7 +163,7 @@ namespace VirtoCommerce.Platform.Modules
             }
 
             // 2. Search additional probing paths
-            foreach (var searchPath in _additionalProbingPaths)
+            foreach (var searchPath in loadContext.AdditionalProdingPath)
             {
                 var candidate = Path.Combine(searchPath, library.AdditionalProbingPath);
                 if (File.Exists(candidate))
@@ -171,7 +176,7 @@ namespace VirtoCommerce.Platform.Modules
             // 3. Search in base path
             foreach (var ext in PlatformInformation.ManagedAssemblyExtensions)
             {
-                var local = Path.Combine(_basePath, library.Name.Name + ext);
+                var local = Path.Combine(loadContext.BasePath, library.Name.Name + ext);
                 if (File.Exists(local))
                 {
                     path = local;

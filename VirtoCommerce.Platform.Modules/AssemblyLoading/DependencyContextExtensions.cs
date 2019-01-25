@@ -7,14 +7,14 @@ using Microsoft.Extensions.DependencyModel;
 namespace VirtoCommerce.Platform.Modules.AssemblyLoading
 {
     // Based on https://github.com/natemcmaster/DotNetCorePlugins/blob/ce1b5cc94e8e9ce018f9304368cc69897cc70cca/src/Plugins/Loader/DependencyContextExtensions.cs
-    public static class DependencyReader
+    public static class DependencyContextExtensions
     {
         /// <summary>
         /// Get dependency list from a .deps.json file.
         /// </summary>
         /// <param name="depsFilePath">The full path to the .deps.json file.</param>
         /// <returns>Returns all assembly dependencies.</returns>
-        public static IEnumerable<ManagedLibrary> ExtractDependencies(string depsFilePath)
+        public static IEnumerable<ManagedLibrary> ExtractDependenciesFromPath(this string depsFilePath)
         {
             var reader = new DependencyContextJsonReader();
             using (var file = File.OpenRead(depsFilePath))
@@ -29,7 +29,7 @@ namespace VirtoCommerce.Platform.Modules.AssemblyLoading
         /// </summary>
         /// <param name="dependencyContext">The dependency context.</param>
         /// <returns>Returns all assembly dependencies.</returns>
-        public static IEnumerable<ManagedLibrary> ExtractDependencies(DependencyContext dependencyContext)
+        public static IEnumerable<ManagedLibrary> ExtractDependencies(this DependencyContext dependencyContext)
         {
             var ridGraph = dependencyContext.RuntimeGraph.Any()
                ? dependencyContext.RuntimeGraph
@@ -86,9 +86,7 @@ namespace VirtoCommerce.Platform.Modules.AssemblyLoading
         private static IEnumerable<ManagedLibrary> ResolveRuntimeAssemblies(DependencyContext depContext, RuntimeFallbacks runtimeGraph)
         {
             var rids = GetRids(runtimeGraph);
-            return from library in depContext.RuntimeLibraries
-                   from assetPath in SelectAssets(rids, library.RuntimeAssemblyGroups)
-                   select ManagedLibrary.CreateFromPackage(library.Name, library.Version, assetPath);
+            return depContext.RuntimeLibraries.SelectMany(x => SelectAssets(rids, x.RuntimeAssemblyGroups).Select(assetPath => ManagedLibrary.CreateFromPackage(x.Name, x.Version, assetPath)));
         }
 
         private static IEnumerable<string> GetRids(RuntimeFallbacks runtimeGraph)

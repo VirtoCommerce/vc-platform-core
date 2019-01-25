@@ -13,8 +13,8 @@ namespace Module1.Data.Services
         {
             var bytes = Encoding.UTF8.GetBytes(message);
             using (var inStream = new MemoryStream(bytes))
+            using (var outStream = CreateToMemoryStream(inStream, "TestZipEntry"))
             {
-                var outStream = CreateToMemoryStream(inStream, "TestZipEntry");
                 return $"Zipped message UTF-8 decoded string is:{Encoding.UTF8.GetString(outStream.ToArray())}";
             }
         }
