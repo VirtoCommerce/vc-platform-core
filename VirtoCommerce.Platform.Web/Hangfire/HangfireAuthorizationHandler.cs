@@ -1,11 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Hangfire.Dashboard;
-using Microsoft.AspNetCore.Identity;
 using VirtoCommerce.Platform.Core;
-using VirtoCommerce.Platform.Core.Security;
 
 namespace VirtoCommerce.Platform.Web.Hangfire
 {

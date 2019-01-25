@@ -1,10 +1,13 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Primitives;
 using Hangfire;
 using Hangfire.MemoryStorage;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -61,6 +64,9 @@ namespace VirtoCommerce.Platform.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            // This custom provider allows able to use just [Authorize] instead of having to define [Authorize(AuthenticationSchemes = "Bearer")] above every API controller
+            // without this Bearer authorization will not work
+            services.AddSingleton<IAuthenticationSchemeProvider, CustomAuthenticationSchemeProvider>();
 
             services.Configure<PlatformOptions>(Configuration.GetSection("VirtoCommerce"));
             services.Configure<HangfireOptions>(Configuration.GetSection("VirtoCommerce:Jobs"));
@@ -151,60 +157,71 @@ namespace VirtoCommerce.Platform.Web
             // which saves you from doing the mapping in your authorization controller.
             services.Configure<IdentityOptions>(options =>
             {
-                options.ClaimsIdentity.UserNameClaimType = OpenIdConnectConstants.Claims.Name;
-                options.ClaimsIdentity.UserIdClaimType = OpenIdConnectConstants.Claims.Subject;
+                options.ClaimsIdentity.UserNameClaimType = OpenIdConnectConstants.Claims.Subject;
+                options.ClaimsIdentity.UserIdClaimType = OpenIdConnectConstants.Claims.Name;
                 options.ClaimsIdentity.RoleClaimType = OpenIdConnectConstants.Claims.Role;
             });
 
-
-            // Register the OAuth2 validation handler.
-            services.AddAuthentication().AddOAuthValidation();
-
+            services.Configure<Core.Security.AuthorizationOptions>(Configuration.GetSection("Authorization"));
+            var authorizationOptions = Configuration.GetSection("Authorization").Get<Core.Security.AuthorizationOptions>();
             // Register the OpenIddict services.
             // Note: use the generic overload if you need
             // to replace the default OpenIddict entities.
             services.AddOpenIddict()
                 .AddCore(options =>
-            {
-                options.UseEntityFrameworkCore()
-                       .UseDbContext<SecurityDbContext>();
-            }).AddServer(options =>
-            {
-                // Register the ASP.NET Core MVC binder used by OpenIddict.
-                // Note: if you don't call this method, you won't be able to
-                // bind OpenIdConnectRequest or OpenIdConnectResponse parameters.
-                options.UseMvc();
+                {
+                    options.UseEntityFrameworkCore()
+                        .UseDbContext<SecurityDbContext>();
+                }).AddServer(options =>
+                {
+                    // Register the ASP.NET Core MVC binder used by OpenIddict.
+                    // Note: if you don't call this method, you won't be able to
+                    // bind OpenIdConnectRequest or OpenIdConnectResponse parameters.
+                    options.UseMvc();
 
-                // Enable the authorization, logout, token and userinfo endpoints.
-                options.EnableTokenEndpoint("/connect/token")
-                       .EnableUserinfoEndpoint("/api/security/userinfo");
+                    // Enable the authorization, logout, token and userinfo endpoints.
+                    options.EnableTokenEndpoint("/connect/token")
+                        .EnableUserinfoEndpoint("/api/security/userinfo");
 
-                // Note: the Mvc.Client sample only uses the code flow and the password flow, but you
-                // can enable the other flows if you need to support implicit or client credentials.
-                options.AllowPasswordFlow()
-                       .AllowRefreshTokenFlow()
-                       .AllowClientCredentialsFlow();
+                    // Note: the Mvc.Client sample only uses the code flow and the password flow, but you
+                    // can enable the other flows if you need to support implicit or client credentials.
+                    options.AllowPasswordFlow()
+                        .AllowRefreshTokenFlow();
 
-                // Make the "client_id" parameter mandatory when sending a token request.
-                //options.RequireClientIdentification();
+                    options.SetRefreshTokenLifetime(authorizationOptions.RefreshTokenLifeTime);
+                    options.SetAccessTokenLifetime(authorizationOptions.AccessTokenLifeTime);
 
-                // When request caching is enabled, authorization and logout requests
-                // are stored in the distributed cache by OpenIddict and the user agent
-                // is redirected to the same page with a single parameter (request_id).
-                // This allows flowing large OpenID Connect requests even when using
-                // an external authentication provider like Google, Facebook or Twitter.
-                options.EnableRequestCaching();
+                    options.AcceptAnonymousClients();
 
-                // During development, you can disable the HTTPS requirement.
-                options.DisableHttpsRequirement();
+                    // Configure Openiddict to issues new refresh token for each token refresh request.
+                    options.UseRollingTokens();
 
-                // Note: to use JWT access tokens instead of the default
-                // encrypted format, the following lines are required:
-                //
-                options.UseJsonWebTokens();
-                //TODO: Replace to X.509 certificate
-                options.AddEphemeralSigningKey();
-            });
+                    // Make the "client_id" parameter mandatory when sending a token request.
+                    //options.RequireClientIdentification();
+
+                    // When request caching is enabled, authorization and logout requests
+                    // are stored in the distributed cache by OpenIddict and the user agent
+                    // is redirected to the same page with a single parameter (request_id).
+                    // This allows flowing large OpenID Connect requests even when using
+                    // an external authentication provider like Google, Facebook or Twitter.
+                    options.EnableRequestCaching();
+
+                    options.UseReferenceTokens();
+                    options.DisableScopeValidation();
+
+                    // During development, you can disable the HTTPS requirement.
+                    if (HostingEnvironment.IsDevelopment())
+                    {
+                        options.DisableHttpsRequirement();
+                    }
+
+                    // Note: to use JWT access tokens instead of the default
+                    // encrypted format, the following lines are required:
+                    //
+                    //options.UseJsonWebTokens();
+                    //TODO: Replace to X.509 certificate
+                    //options.AddEphemeralSigningKey();
+                }).AddValidation(options => options.UseReferenceTokens());
 
             services.Configure<IdentityOptions>(Configuration.GetSection("IdentityOptions"));
 
@@ -213,11 +230,15 @@ namespace VirtoCommerce.Platform.Web
             {
                 options.Events.OnRedirectToLogin = context =>
                 {
-                    context.Response.StatusCode = 401;
+                    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                    return Task.CompletedTask;
+                };
+                options.Events.OnRedirectToAccessDenied = context =>
+                {
+                    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     return Task.CompletedTask;
                 };
             });
-
 
             services.AddAuthorization();
             // register the AuthorizationPolicyProvider which dynamically registers authorization policies for each permission defined in module manifest
@@ -255,6 +276,19 @@ namespace VirtoCommerce.Platform.Web
                 c.DocumentFilter<TagsFilter>();
                 c.MapType<object>(() => new Schema { Type = "object" });
                 c.AddModulesXmlComments(services);
+
+                // https://github.com/domaindrivendev/Swashbuckle.AspNetCore#add-security-definitions-and-requirements
+                c.AddSecurityDefinition("oauth2", new OAuth2Scheme
+                {
+                    Type = "oauth2",
+                    Flow = "password",
+                    TokenUrl = "/connect/token",
+                });
+                c.CustomSchemaIds(x => x.FullName);
+                c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>
+                {
+                    { "oauth2", new string[0] }
+                });
             });
 
             //Add SignalR for push notifications
@@ -370,6 +404,9 @@ namespace VirtoCommerce.Platform.Web
                 c.InjectStylesheet("/swagger/vc.css");
                 c.ShowExtensions();
                 c.DocExpansion(DocExpansion.None);
+
+                c.OAuthClientId(string.Empty);
+                c.OAuthClientSecret(string.Empty);
             });
 
             app.UseHangfireDashboard("/hangfire", new DashboardOptions { Authorization = new[] { new HangfireAuthorizationHandler() } });
@@ -395,9 +432,6 @@ namespace VirtoCommerce.Platform.Web
 
             //Seed default users
             app.UseDefaultUsersAsync().GetAwaiter().GetResult();
-
-
-
         }
     }
 }
