@@ -18,18 +18,10 @@
     <projectUrl>https://virtocommerce.com/apps/extensions/image-tools-module</projectUrl>
     <iconUrl>Modules/$(VirtoCommerce.ImageTools)/Content/logo.png</iconUrl>
     <releaseNotes>First version.</releaseNotes>
-    <copyright>Copyright © 2011-2018 Virto Commerce. All rights reserved</copyright>
+    <copyright>Copyright © 2011-2019 Virto Commerce. All rights reserved</copyright>
     <tags>images</tags>
 
     <assemblyFile>VirtoCommerce.ImageToolsModule.Web.dll</assemblyFile>
     <moduleType>VirtoCommerce.ImageToolsModule.Web.Module, VirtoCommerce.ImageToolsModule.Web</moduleType>
-
-    <scripts virtualPath="dist">
-        <file>app.js</file>
-    </scripts>
-
-    <styles virtualPath="dist">
-        <file>style.css</file>
-    </styles>
 
 </module>

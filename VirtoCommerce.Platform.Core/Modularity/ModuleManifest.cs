@@ -68,12 +68,6 @@ namespace VirtoCommerce.Platform.Core.Modularity
 
         public string[] Groups { get; set; }
 
-        [XmlElement("styles")]
-        public ManifestBundleItem Styles { get; set; }
-
-        [XmlElement("scripts")]
-        public ManifestBundleItem Scripts { get; set; }
-
         [XmlElement("useFullTypeNameInSwagger")]
         public bool UseFullTypeNameInSwagger { get; set; }
     }

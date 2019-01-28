@@ -22,19 +22,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <!-- End Google Tag Manager -->
     }
 
-
     <environment include="Development">
-        <link rel="stylesheet" href="~/dist/style.css" asp-append-version="true"/>
-        <bundle-provider asp-append-version="true" bundle-type="styles"/>
-    </environment>
-    <environment exclude="Development">
-        <link rel="stylesheet" href="~/css/allPackages.min.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/dist/style.css" asp-append-version="true" />
+        <modules-style-bundle bundle-path="~/dist/style.css" asp-append-version="true"></modules-style-bundle>
     </environment>
 
     <meta name="viewport" content="width=device-width" />
     <base href="~/" />
 
-    <partial name="_FacebookTrackerPartial"/>
+    <partial name="_FacebookTrackerPartial" />
 
 </head>
 @*DO NOT CHANGE THE CODE BELOW: COPYRIGHT VIOLATION*@
@@ -50,12 +46,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     }
     @RenderBody()
 
-    <partial name="_AppDependencies"/>
+    <partial name="_AppDependencies" />
 
     <environment include="Development">
-        <script src="~/dist/vendor.js" type ="text/javascript" asp-append-version="true"></script>
+        <script src="~/dist/vendor.js" type="text/javascript" asp-append-version="true"></script>
         <script src="~/dist/app.js" type="text/javascript" asp-append-version="true"></script>
-        <bundle-provider asp-append-version="true" bundle-type="scripts"></bundle-provider>
+        <modules-script-bundle bundle-path="~/dist/app.js" asp-append-version="true"></modules-script-bundle>
     </environment>
 
     @RenderSection("scripts", required: false)

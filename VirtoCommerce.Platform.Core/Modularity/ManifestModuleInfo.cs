@@ -37,15 +37,6 @@ namespace VirtoCommerce.Platform.Core.Modularity
                 Dependencies.AddRange(manifest.Dependencies.Select(x => new ModuleIdentity(x.Id, x.Version)));
             }
 
-            if (manifest.Styles != null)
-            {
-                Styles = manifest.Styles;
-            }
-
-            if (manifest.Scripts != null)
-            {
-                Scripts = manifest.Scripts;
-            }
 
             Groups = new List<string>();
             if (manifest.Groups != null)
@@ -86,8 +77,6 @@ namespace VirtoCommerce.Platform.Core.Modularity
         public bool IsInstalled { get; set; }
         public ICollection<string> Groups { get; private set; }
         public string FullPhysicalPath { get; set; }
-        public ManifestBundleItem Styles { get; private set; }
-        public ManifestBundleItem Scripts { get; private set; }
         public ICollection<string> Errors { get; set; }
         public bool UseFullTypeNameInSwagger { get; set; }
 
@@ -105,7 +94,7 @@ namespace VirtoCommerce.Platform.Core.Modularity
             }
 
             // If parameter cannot be cast to ModuleIdentity return false.
-            ManifestModuleInfo other = obj as ManifestModuleInfo;
+            var other = obj as ManifestModuleInfo;
             if (other == null)
             {
                 return false;

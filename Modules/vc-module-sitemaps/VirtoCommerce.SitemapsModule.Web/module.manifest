@@ -22,13 +22,9 @@
     <projectUrl>https://virtocommerce.com/apps/extensions/automatic-sitemaps-module</projectUrl>
     <iconUrl>https://github.com/VirtoCommerce/vc-module-sitemaps/raw/master/VirtoCommerce.SitemapsModule.Web/Content/logo.png</iconUrl>
     <releaseNotes>First version.</releaseNotes>
-    <copyright>Copyright © 2011-2018 Virto Commerce. All rights reserved</copyright>
+    <copyright>Copyright © 2011-2019 Virto Commerce. All rights reserved</copyright>
     <tags>sitemaps</tags>
     <assemblyFile>VirtoCommerce.SitemapsModule.Web.dll</assemblyFile>
     <moduleType>VirtoCommerce.SitemapsModule.Web.Module, VirtoCommerce.SitemapsModule.Web</moduleType>
-
-    <scripts virtualPath="dist">
-        <file>app.js</file>
-    </scripts>
     
 </module>

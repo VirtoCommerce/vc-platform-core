@@ -21,14 +21,10 @@
     </owners>
     <projectUrl>https://virtocommerce.com/apps/extensions/subscriptions-module</projectUrl>
     <iconUrl>https://raw.githubusercontent.com/VirtoCommerce/vc-module-subscription/master/VirtoCommerce.SubscriptionModule.Web/Content/logo.png</iconUrl>
-    <copyright>Copyright © 2018 Virto Commerce. All rights reserved</copyright>
+    <copyright>Copyright © 2019 Virto Commerce. All rights reserved</copyright>
     <tags>subscriptions system</tags>
 
     <assemblyFile>VirtoCommerce.SubscriptionModule.Web.dll</assemblyFile>
     <moduleType>VirtoCommerce.SubscriptionModule.Web.Module, VirtoCommerce.SubscriptionModule.Web</moduleType>
-
-    <scripts virtualPath="dist">
-        <file>app.js</file>
-    </scripts>
     
 </module>

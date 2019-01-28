@@ -14,19 +14,11 @@
     <projectUrl>https://virtocommerce.com/apps/extensions/virto-core-module</projectUrl>
     <iconUrl>Modules/$(VirtoCommerce.Search)/Content/logoVC.png</iconUrl>
     <releaseNotes></releaseNotes>
-    <copyright>Copyright © 2011-2018 Virto Commerce. All rights reserved</copyright>
+    <copyright>Copyright © 2011-2019 Virto Commerce. All rights reserved</copyright>
     <tags>security core</tags>
 
     <assemblyFile>VirtoCommerce.SearchModule.Web.dll</assemblyFile>
     <moduleType>VirtoCommerce.SearchModule.Web.Module, VirtoCommerce.SearchModule.Web</moduleType>
-
-    <styles virtualPath="dist">
-        <file>style.css</file>
-    </styles>
-
-    <scripts virtualPath="dist">
-        <file>app.js</file>
-    </scripts>
     
     <incompatibilities>
     </incompatibilities>
