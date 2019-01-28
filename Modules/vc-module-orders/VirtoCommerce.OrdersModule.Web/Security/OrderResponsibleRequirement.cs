@@ -12,6 +12,11 @@ namespace VirtoCommerce.OrdersModule.Web.Security
     {
         public const string PolicyName = "OrderResponsible";
 
+        public OrderResponsibleRequirement() : base()
+        {
+            Scope = "{{userId}}";
+        }
+
         private static readonly string[] _availablePermissions = new string[]
         {
             ModuleConstants.Security.Permissions.Read,
