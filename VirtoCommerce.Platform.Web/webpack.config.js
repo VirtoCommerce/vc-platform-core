@@ -94,7 +94,11 @@ module.exports = env => {
                 filename: 'app.js',
                 publicPath: '/dist/'
             },
+            devtool: false,
             plugins: [
+                new webpack.SourceMapDevToolPlugin({
+                    namespace: 'VirtoCommerce.Platform'
+                }),
                 new webpack.ProvidePlugin({
                     _: 'underscore'
                 })

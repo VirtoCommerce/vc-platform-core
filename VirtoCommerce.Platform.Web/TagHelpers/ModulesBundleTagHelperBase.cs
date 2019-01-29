@@ -1,18 +1,13 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Razor.TagHelpers;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.FileProviders.Physical;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Web.TagHelpers.Internal;
 
 namespace VirtoCommerce.Platform.Web.TagHelpers
 {
@@ -20,16 +15,14 @@ namespace VirtoCommerce.Platform.Web.TagHelpers
     {
         private readonly ILocalModuleCatalog _localModuleCatalog;
         private readonly IPlatformMemoryCache _platformMemoryCache;
-        private readonly PhysicalFilesWatcher _fileSystemWatcher;
         private readonly LocalStorageModuleCatalogOptions _localStorageModuleCatalogOptions;
+        private FileVersionHashProvider _fileVersionProvider;
 
         public ModulesBundleTagHelperBase(ILocalModuleCatalog localModuleCatalog, IOptions<LocalStorageModuleCatalogOptions> options, IPlatformMemoryCache platformMemoryCache)
         {
             _localModuleCatalog = localModuleCatalog;
             _platformMemoryCache = platformMemoryCache;
             _localStorageModuleCatalogOptions = options.Value;
-            var rootPath = _localStorageModuleCatalogOptions.DiscoveryPath.TrimEnd('\\') + '\\';
-            _fileSystemWatcher = new PhysicalFilesWatcher(rootPath, new FileSystemWatcher(rootPath), false);
         }
 
         [HtmlAttributeName("asp-append-version")]
@@ -39,25 +32,6 @@ namespace VirtoCommerce.Platform.Web.TagHelpers
         public string BundlePath { get; set; }
 
         protected abstract TagBuilder GetTagBuilder(string bundleVirtualPath, string version);
-
-        protected string GetBundleVersion(string bundlePhysicalPath)
-        {
-            if (bundlePhysicalPath == null)
-            {
-                throw new ArgumentNullException(nameof(bundlePhysicalPath));
-            }
-
-            var cacheKey = CacheKey.With(GetType(), "GetBundleVersion", bundlePhysicalPath);
-            return _platformMemoryCache.GetOrCreateExclusive(cacheKey, cacheEntry =>
-            {
-                cacheEntry.AddExpirationToken(_fileSystemWatcher.CreateFileChangeToken(GetRelativePath(bundlePhysicalPath)));
-                using (var stream = File.OpenRead(bundlePhysicalPath))
-                {
-                    var hashAlgorithm = CryptoConfig.AllowOnlyFipsAlgorithms ? (SHA256)new SHA256CryptoServiceProvider() : new SHA256Managed();
-                    return $"{WebEncoders.Base64UrlEncode(hashAlgorithm.ComputeHash(stream))}";
-                }
-            });
-        }
 
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
@@ -73,7 +47,8 @@ namespace VirtoCommerce.Platform.Web.TagHelpers
                     string version = null;
                     if (AppendVersion)
                     {
-                        version = GetBundleVersion(bundlePhysicalPath);
+                        EnsureFileVersionProvider();
+                        version = _fileVersionProvider.GetFileVersionHash(bundlePhysicalPath);
                     }
                     var tagBuilder = GetTagBuilder(moduleBundleVirtualPath, version);
                     output.Content.AppendHtml(tagBuilder);
@@ -82,10 +57,12 @@ namespace VirtoCommerce.Platform.Web.TagHelpers
             }
         }
 
-        protected virtual string GetRelativePath(string path)
+        private void EnsureFileVersionProvider()
         {
-            return path.Replace(_localStorageModuleCatalogOptions.DiscoveryPath, string.Empty).Replace(Path.DirectorySeparatorChar, '/').TrimStart('/');
+            if (_fileVersionProvider == null)
+            {
+                _fileVersionProvider = new FileVersionHashProvider(_localStorageModuleCatalogOptions.DiscoveryPath, _platformMemoryCache);
+            }
         }
-
     }
 }

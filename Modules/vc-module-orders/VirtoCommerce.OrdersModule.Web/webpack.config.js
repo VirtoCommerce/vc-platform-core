@@ -1,7 +1,8 @@
 const glob = require("glob");
 const path = require("path");
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const webpack = require("webpack");
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const rootPath = path.resolve(__dirname, 'dist');
 
@@ -29,7 +30,11 @@ module.exports = [
                 }
             ]
         },
+        devtool: false,
         plugins: [
+            new webpack.SourceMapDevToolPlugin({
+                namespace: 'VirtoCommerce.Orders'
+            }),
             new CleanWebpackPlugin(rootPath, { verbose: true }),
             new MiniCssExtractPlugin({
                 filename: 'style.css'
