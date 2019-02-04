@@ -16,9 +16,9 @@ namespace VirtoCommerce.CustomerModule.Data.Services
     {
         private readonly Func<IMemberRepository> _repositoryFactory;
         private readonly IMemberService _memberService;
-        private readonly IPlatformMemoryCache _platformMemoryCache;
+        private readonly ICacheManager _cacheManager;
 
-        public CommerceMembersSearchServiceImpl(Func<IMemberRepository> repositoryFactory, IMemberService memberService, IPlatformMemoryCache platformMemoryCache) : base(repositoryFactory, memberService, platformMemoryCache)
+        public CommerceMembersSearchServiceImpl(Func<IMemberRepository> repositoryFactory, IMemberService memberService, ICacheManager cacheManager) : base(repositoryFactory, memberService, cacheManager)
         {
         }
 

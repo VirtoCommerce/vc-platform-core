@@ -3,11 +3,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Model.Search;
 using VirtoCommerce.CustomerModule.Core.Services;
-using VirtoCommerce.CustomerModule.Data.Caching;
 using VirtoCommerce.CustomerModule.Data.Model;
 using VirtoCommerce.CustomerModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;
@@ -20,13 +18,13 @@ namespace VirtoCommerce.CustomerModule.Data.Services
     {
         private readonly Func<IMemberRepository> _repositoryFactory;
         private readonly IMemberService _memberService;
-        private readonly IPlatformMemoryCache _platformMemoryCache;
+        private readonly ICacheManager _cacheManager;
 
-        public MemberSearchServiceBase(Func<IMemberRepository> repositoryFactory, IMemberService memberService, IPlatformMemoryCache platformMemoryCache)
+        public MemberSearchServiceBase(Func<IMemberRepository> repositoryFactory, IMemberService memberService, ICacheManager cacheManager)
         {
             _repositoryFactory = repositoryFactory;
             _memberService = memberService;
-            _platformMemoryCache = platformMemoryCache;
+            _cacheManager = cacheManager;
         }
 
         #region IMemberSearchService Members
@@ -38,9 +36,8 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         public virtual async Task<GenericSearchResult<Member>> SearchMembersAsync(MembersSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), "SearchMembersAsync", criteria.GetCacheKey());
-            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await _cacheManager.GetAsync(cacheKey, async () =>
             {
-                cacheEntry.AddExpirationToken(CustomerSearchCacheRegion.CreateChangeToken());
                 using (var repository = _repositoryFactory())
                 {
                     repository.DisableChangesTracking();
