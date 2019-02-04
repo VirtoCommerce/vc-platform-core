@@ -10,6 +10,8 @@ namespace VirtoCommerce.Platform.Core.Caching
         void Set(string key, object data, int? cacheTime = null);
         void Remove(string key);
         Task RemoveAsync(string key);
+        void RemoveByPattern(string pattern);
+        Task RemoveByPatternAsync(string pattern);
         void Clear();
     }
 }

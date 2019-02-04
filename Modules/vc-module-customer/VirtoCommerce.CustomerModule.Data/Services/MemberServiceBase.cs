@@ -6,6 +6,7 @@ using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.CustomerModule.Core.Events;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Services;
+using VirtoCommerce.CustomerModule.Data.Caching;
 using VirtoCommerce.CustomerModule.Data.Model;
 using VirtoCommerce.CustomerModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;
@@ -47,7 +48,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         /// <returns></returns>
         public virtual async Task<Member[]> GetByIdsAsync(string[] memberIds, string responseGroup = null, string[] memberTypes = null)
         {
-            var cacheKey = CacheKey.With(GetType(), string.Join("-", memberIds));
+            var cacheKey = CacheKey.With(GetType(), CustomerCacheRegion.CustomersPatternCacheKey, string.Join("-", memberIds));
             return await _cacheManager.GetAsync(cacheKey, async () =>
             {
                 var retVal = new List<Member>();
@@ -161,6 +162,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         {
             var cacheKey = CacheKey.With(GetType(), string.Join("-", entities.Select(ent => ent.Id)));
             await _cacheManager.RemoveAsync(cacheKey);
+            await _cacheManager.RemoveByPatternAsync(CustomerCacheRegion.CustomersPatternCacheKey);
         }
         #endregion
 

@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Model.Search;
 using VirtoCommerce.CustomerModule.Core.Services;
+using VirtoCommerce.CustomerModule.Data.Caching;
 using VirtoCommerce.CustomerModule.Data.Model;
 using VirtoCommerce.CustomerModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;
@@ -35,7 +36,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         /// <returns></returns>
         public virtual async Task<GenericSearchResult<Member>> SearchMembersAsync(MembersSearchCriteria criteria)
         {
-            var cacheKey = CacheKey.With(GetType(), "SearchMembersAsync", criteria.GetCacheKey());
+            var cacheKey = CacheKey.With(GetType(), CustomerCacheRegion.CustomersPatternCacheKey, "SearchMembersAsync", criteria.GetCacheKey());
             return await _cacheManager.GetAsync(cacheKey, async () =>
             {
                 using (var repository = _repositoryFactory())

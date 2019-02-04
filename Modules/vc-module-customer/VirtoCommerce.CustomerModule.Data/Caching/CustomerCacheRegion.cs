@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using Microsoft.Extensions.Primitives;
 using VirtoCommerce.CustomerModule.Core.Model;
@@ -25,10 +23,12 @@ namespace VirtoCommerce.CustomerModule.Data.Caching
 
         public static void ExpireInventory(Member member)
         {
-            if (_memberRegionTokenLookup.TryRemove(member.Id, out CancellationTokenSource token))
+            if (_memberRegionTokenLookup.TryRemove(member.Id, out var token))
             {
                 token.Cancel();
             }
         }
+
+        public static string CustomersPatternCacheKey => "VirtoCommerce.Platform.Customers.";
     }
 }

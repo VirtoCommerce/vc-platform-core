@@ -106,7 +106,7 @@ namespace VirtoCommerce.Platform.Data.Redis
         /// <param name="region">The region.</param>
         public async Task NotifyClearRegionAsync(string region)
         {
-            var message = new BackplaneMessage(_identifier, BackplaneAction.Clear)
+            var message = new BackplaneMessage(_identifier, BackplaneAction.ClearRegion)
             {
                 Region = region
             };
@@ -302,21 +302,25 @@ namespace VirtoCommerce.Platform.Data.Redis
                 CommandFlags.FireAndForget);
         }
 
+        //TODO
         private void TriggerCleared()
         {
 
         }
 
+        //TODO
         private void TriggerClearedRegion(string region)
         {
 
         }
 
+        //TODO
         private void TriggerChanged(string key, CacheItemChangedEventAction action)
         {
 
         }
 
+        //TODO
         private void TriggerChanged(string key, string region, CacheItemChangedEventAction action)
         {
 
