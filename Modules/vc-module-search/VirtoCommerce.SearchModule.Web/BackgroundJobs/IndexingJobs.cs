@@ -16,8 +16,8 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Jobs;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchModule.Core;
-using VirtoCommerce.SearchModule.Core.Services;
 using VirtoCommerce.SearchModule.Core.Model;
+using VirtoCommerce.SearchModule.Core.Services;
 using Job = Hangfire.Common.Job;
 
 namespace VirtoCommerce.SearchModule.Web.BackgroundJobs
@@ -310,23 +310,32 @@ namespace VirtoCommerce.SearchModule.Web.BackgroundJobs
         {
             try
             {
-                foreach (var interceptor in _interceptors)
+                if (!_interceptors.IsNullOrEmpty())
                 {
-                    interceptor.OnBegin(options.ToArray());    
+                    foreach (var interceptor in _interceptors)
+                    {
+                        interceptor.OnBegin(options.ToArray());
+                    }
                 }
-                
+
                 await action(options);
 
-                foreach (var interceptor in _interceptors)
+                if (!_interceptors.IsNullOrEmpty())
                 {
-                    interceptor.OnEnd(options.ToArray());
+                    foreach (var interceptor in _interceptors)
+                    {
+                        interceptor.OnEnd(options.ToArray());
+                    }
                 }
             }
             catch (Exception ex)
             {
-                foreach (var interceptor in _interceptors)
+                if (!_interceptors.IsNullOrEmpty())
                 {
-                    interceptor.OnEnd(options.ToArray(), ex);
+                    foreach (var interceptor in _interceptors)
+                    {
+                        interceptor.OnEnd(options.ToArray(), ex);
+                    }
                 }
             }
         }

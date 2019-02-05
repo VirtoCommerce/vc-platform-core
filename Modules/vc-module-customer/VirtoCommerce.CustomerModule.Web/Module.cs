@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.CustomerModule.Core;
 using VirtoCommerce.CustomerModule.Core.Events;
 using VirtoCommerce.CustomerModule.Core.Model;
@@ -27,7 +26,6 @@ using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
-using VirtoCommerce.Platform.Data.Repositories;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
 
@@ -54,6 +52,8 @@ namespace VirtoCommerce.CustomerModule.Web
             serviceCollection.AddSingleton<CommerceMembersSearchServiceImpl>();
             serviceCollection.AddSingleton<IMemberSearchService, MemberSearchServiceDecorator>();
             serviceCollection.AddSingleton<CustomerExportImport>();
+            serviceCollection.AddSingleton<IIndexDocumentChangesProvider, MemberDocumentChangesProvider>();
+            serviceCollection.AddSingleton<IIndexDocumentBuilder, MemberDocumentBuilder>();
 
             var snapshot = serviceCollection.BuildServiceProvider();
 
@@ -62,12 +62,12 @@ namespace VirtoCommerce.CustomerModule.Web
                 DocumentType = KnownDocumentTypes.Member,
                 DocumentSource = new IndexDocumentSource
                 {
-                    ChangesProvider = snapshot.GetService<MemberDocumentChangesProvider>(),
-                    DocumentBuilder = snapshot.GetService<MemberDocumentBuilder>(),
+                    ChangesProvider = snapshot.GetService<IIndexDocumentChangesProvider>(),
+                    DocumentBuilder = snapshot.GetService<IIndexDocumentBuilder>(),
                 },
             };
 
-            serviceCollection.AddSingleton(memberIndexingConfiguration);
+            serviceCollection.AddSingleton(new[] { memberIndexingConfiguration });
             serviceCollection.AddSingleton<MemberChangedEventHandler>();
         }
 
