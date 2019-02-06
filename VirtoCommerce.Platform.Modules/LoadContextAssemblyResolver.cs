@@ -1,36 +1,41 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
-using Microsoft.Extensions.DependencyModel;
-using Microsoft.Extensions.DependencyModel.Resolution;
 using Microsoft.Extensions.Logging;
-using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Modularity.Exceptions;
+using VirtoCommerce.Platform.Modules.AssemblyLoading;
+
 namespace VirtoCommerce.Platform.Modules
 {
 
     public class LoadContextAssemblyResolver : IAssemblyResolver
     {
         private readonly ILogger<LoadContextAssemblyResolver> _logger;
-        public LoadContextAssemblyResolver(ILogger<LoadContextAssemblyResolver> logger)
+        private readonly Dictionary<string, Assembly> _loadedAssemblies = new Dictionary<string, Assembly>();
+        private readonly bool _isDevelopmentEnvironment;
+
+        public LoadContextAssemblyResolver(ILogger<LoadContextAssemblyResolver> logger, bool isDevelopmentEnvironment)
         {
             _logger = logger;
+            _isDevelopmentEnvironment = isDevelopmentEnvironment;
         }
 
         /// <summary>
-        /// Registers the specified assembly and resolves the types in it when the AppDomain requests for it.
+        /// Loads specified assembly and all its nested dependencies to default AssemblyLoadContext (ALC).
         /// </summary>
-        /// <param name="assemblyFilePath">The path to the assembly to load in the LoadFrom context.</param>    
-        public Assembly LoadAssemblyFrom(string assemblyFilePath)
+        /// <param name="assemblyPath">The path to the assembly to load.</param>
+        /// <exception cref="ModuleInitializeException">If cannot load assembly or its dependencies.</exception>
+        public Assembly LoadAssemblyFrom(string assemblyPath)
         {
-            Uri assemblyUri = GetFileUri(assemblyFilePath);
+            var assemblyUri = GetFileUri(assemblyPath);
 
             if (assemblyUri == null)
             {
-                throw new ArgumentException("The argument must be a valid absolute Uri to an assembly file.", nameof(assemblyFilePath));
+                throw new ArgumentException("The argument must be a valid absolute Uri to an assembly file.", nameof(assemblyPath));
             }
 
             if (!File.Exists(assemblyUri.LocalPath))
@@ -38,85 +43,154 @@ namespace VirtoCommerce.Platform.Modules
                 throw new FileNotFoundException(assemblyUri.LocalPath);
             }
 
-            var assembly = LoadWithAllReferencedAssebliesRecursive(assemblyUri.LocalPath);
+            var assembly = LoadAssemblyWithReferences(assemblyUri.LocalPath, BuildLoadContext(assemblyUri));
             return assembly;
         }
 
-        private Assembly LoadWithAllReferencedAssebliesRecursive(string assemblyPath)
+        private ManagedAssemblyLoadContext BuildLoadContext(Uri assemblyUri)
         {
-            Assembly assembly = null;
+            var assemblyDirectory = Path.GetDirectoryName(assemblyUri.LocalPath);
+            var runtimeConfigFilePath = Path.ChangeExtension(assemblyUri.LocalPath, ".runtimeconfig.json");
 
-            if (File.Exists(assemblyPath))
+            return new ManagedAssemblyLoadContext()
             {
-                // assembly = new AssemblyResolver(assemblyPath, _logger).Assembly;
-                assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
-                var dependencyContext = DependencyContext.Load(assembly);
+                BasePath = assemblyDirectory,
+                AdditionalProdingPath = runtimeConfigFilePath.TryGetAdditionalProbingPathFromRuntimeConfig(_isDevelopmentEnvironment, out _),
+            };
+        }
 
-                var assemblyResolver = new CompositeCompilationAssemblyResolver
-                                        (new ICompilationAssemblyResolver[]
-                {
-                        new AppBaseCompilationAssemblyResolver(Path.GetDirectoryName(assemblyPath) + "\\"),
-                        new ReferenceAssemblyPathResolver(),
-                        new PackageCompilationAssemblyResolver()
-                });
-                var loadContext = AssemblyLoadContext.GetLoadContext(assembly);
+        private Assembly LoadAssemblyWithReferences(string assemblyPath, ManagedAssemblyLoadContext loadContext)
+        {
+            var depsFilePath = Path.ChangeExtension(assemblyPath, ".deps.json");
 
-                //These event handler required for load modules dependencies (packages and libraries). It is the best solution what I've found.
-                //https://www.codeproject.com/Articles/1194332/Resolving-Assemblies-in-NET-Core
-                //https://github.com/dotnet/corefx/issues/11639
-                //https://github.com/dotnet/coreclr/blob/master/Documentation/design-docs/assemblyloadcontext.md
-                //https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/corehost.md
-                loadContext.Resolving += (context, assemblyName) =>
-                {
-                    bool assemblyPredicate(RuntimeLibrary runtime)
-                    {
-                        var result = runtime.Name.EqualsInvariant(assemblyName.Name);
-                        if (result)
-                        {
-                            //Need to do an additional comparison by version because modules can use different versions
-                            if (Version.TryParse(runtime.Version, out var version))
-                            {
-                                result = new SemanticVersion(assemblyName.Version).IsCompatibleWith(new SemanticVersion(version));
-                            }
-                        }
-                        return result;
-                    }
-                    _logger.LogDebug($"Trying to resolve {assemblyName} in the {assembly.GetName().Name} dependencies");
-
-                    //TODO: The current dependency resolving approach tries find dependency only within the direct dependencies of the main modules libraries that usually have Web suffix in name, 
-                    // therefore  if any of these libraries doesn't have the searched  dependency then dependency won't be resolved.
-                    //E.g  Module.Data has the Dep1 nuget library as direct dependency but Module.Data.Web doesn't in result  the  Dep1 won't be resolved.
-                    var library = dependencyContext.RuntimeLibraries.FirstOrDefault(assemblyPredicate);
-
-                    if (library != null)
-                    {
-                        var wrapper = new CompilationLibrary(
-                            library.Type,
-                            library.Name,
-                            library.Version,
-                            library.Hash,
-                            library.RuntimeAssemblyGroups.SelectMany(g => g.AssetPaths),
-                            library.Dependencies,
-                            library.Serviceable);
-
-                        var assemblies = new List<string>();
-                        assemblyResolver.TryResolveAssemblyPaths(wrapper, assemblies);
-                        if (assemblies.Count > 0)
-                        {
-                            _logger.LogDebug($"Load assembly {assemblyName} from {assemblies[0]}");
-
-                            return context.LoadFromAssemblyPath(assemblies[0]);
-                        }
-                    }
-                    return null;
-                };
+            if (!File.Exists(depsFilePath))
+            {
+                throw new ModuleInitializeException($"Cannot find \".deps.json\" file for \"{assemblyPath}\".");
             }
-            return assembly;
+
+            var mainAssemblyName = Path.GetFileNameWithoutExtension(assemblyPath);
+            Assembly mainAssembly = null;
+
+            // Load all assembly referencies which we could get through .deps.json file
+            foreach (var dependency in depsFilePath.ExtractDependenciesFromPath())
+            {
+                try
+                {
+                    var loadedAssembly = LoadAssemblyCached(dependency, loadContext) ?? throw GenerateAssemblyLoadException(dependency.Name.Name, assemblyPath);
+                    if (mainAssemblyName.EqualsInvariant(loadedAssembly.GetName().Name))
+                    {
+                        mainAssembly = loadedAssembly;
+                    }
+                }
+                catch (Exception ex) when (!(ex is ModuleInitializeException))
+                {
+                    throw GenerateAssemblyLoadException(dependency.Name.Name, assemblyPath, ex);
+                }
+            }
+
+            return mainAssembly;
+        }
+
+        private ModuleInitializeException GenerateAssemblyLoadException(string assemblyPath, string modulePath, Exception innerException = null)
+        {
+            return new ModuleInitializeException($"Cannot load \"{assemblyPath}\" for module \"{modulePath}\".", innerException);
+        }
+
+        /// <summary>
+        /// Loads assembly to AssemblyLoadContext.Default or gets it from own assembly cache.
+        /// <para>
+        /// Note that only one version of assembly would be loaded and cached by AssemblyName.Name, for all other versions returns cached assembly.
+        /// </para>
+        /// </summary>
+        /// <param name="managedLibrary">ManagedLibrary object containing library name and paths.</param>
+        /// <param name="loadContext">ManagedAssemblyLoadContext object.</param>
+        /// <returns>Retures loaded assembly (could be cached).</returns>
+        private Assembly LoadAssemblyCached(ManagedLibrary managedLibrary, ManagedAssemblyLoadContext loadContext)
+        {
+            var assemblyName = managedLibrary.Name;
+            if (_loadedAssemblies.ContainsKey(assemblyName.Name))
+            {
+                return _loadedAssemblies[assemblyName.Name];
+            }
+
+            var loadedAssembly = LoadAssemblyInternal(managedLibrary, loadContext);
+            if (loadedAssembly != null)
+            {
+                _loadedAssemblies.Add(assemblyName.Name, loadedAssembly);
+            }
+            return loadedAssembly;
+        }
+
+        /// <summary>
+        /// Performs loading into AssemblyLoadContext.Default using LoadFromAssemblyName for TPA assemblies and LoadFromAssemblyPath for other dependecies.
+        /// <para>
+        /// Based on https://github.com/natemcmaster/DotNetCorePlugins/blob/8f5c28fa70f0869a1af2e2904536268f184e71de/src/Plugins/Loader/ManagedLoadContext.cs Load method,
+        /// but avoided FileNotFoundException from LoadFromAssemblyName trying only load TPA assemblies that way.
+        /// </para>
+        /// </summary>
+        /// <param name="managedLibrary">ManagedLibrary object containing assembly name and paths.</param>
+        /// <param name="loadContext">ManagedAssemblyLoadContext object.</param>
+        /// <returns>Returns loaded assembly.</returns>
+        private Assembly LoadAssemblyInternal(ManagedLibrary managedLibrary, ManagedAssemblyLoadContext loadContext)
+        {
+            // To avoid FileNotFoundException for assemblies that are included in TPA - we load them using AssemblyLoadContext.Default.LoadFromAssemblyName.
+            var assemblyFileName = Path.GetFileName(managedLibrary.AppLocalPath);
+            if (TPA.ContainsAssembly(assemblyFileName))
+            {
+                var defaultAssembly = AssemblyLoadContext.Default.LoadFromAssemblyName(managedLibrary.Name);
+                if (defaultAssembly != null)
+                {
+                    return defaultAssembly;
+                }
+            }
+
+            if (SearchForLibrary(managedLibrary, loadContext, out var path))
+            {
+                return AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
+            }
+
+            return null;
+        }
+
+        private bool SearchForLibrary(ManagedLibrary library, ManagedAssemblyLoadContext loadContext, out string path)
+        {
+            // 1. Check for in _basePath + app local path
+            var localFile = Path.Combine(loadContext.BasePath, library.AppLocalPath);
+            if (File.Exists(localFile))
+            {
+                path = localFile;
+                return true;
+            }
+
+            // 2. Search additional probing paths
+            foreach (var searchPath in loadContext.AdditionalProdingPath)
+            {
+                var candidate = Path.Combine(searchPath, library.AdditionalProbingPath);
+                if (File.Exists(candidate))
+                {
+                    path = candidate;
+                    return true;
+                }
+            }
+
+            // 3. Search in base path
+            foreach (var ext in PlatformInformation.ManagedAssemblyExtensions)
+            {
+                var local = Path.Combine(loadContext.BasePath, library.Name.Name + ext);
+                if (File.Exists(local))
+                {
+                    path = local;
+                    return true;
+                }
+            }
+
+            path = null;
+            return false;
         }
 
         private static Uri GetFileUri(string filePath)
         {
-            if (String.IsNullOrEmpty(filePath))
+            if (string.IsNullOrEmpty(filePath))
             {
                 return null;
             }
@@ -134,5 +208,4 @@ namespace VirtoCommerce.Platform.Modules
             return uri;
         }
     }
-
 }

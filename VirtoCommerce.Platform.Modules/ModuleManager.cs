@@ -144,7 +144,14 @@ namespace VirtoCommerce.Platform.Modules
         protected virtual bool ModuleNeedsRetrieval(ModuleInfo moduleInfo)
         {
             if (moduleInfo == null)
+            {
                 throw new ArgumentNullException("moduleInfo");
+            }
+
+            if (moduleInfo.Assembly == null)
+            {
+                return true;
+            }
 
             if (moduleInfo.State == ModuleState.NotStarted)
             {
