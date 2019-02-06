@@ -23,21 +23,21 @@ namespace VirtoCommerce.CustomerModule.Data.Services
     /// </summary>
     public abstract class MemberServiceBase : IMemberService
     {
-        private readonly Func<IMemberRepository> _repositoryFactory;
-        private readonly IEventPublisher _eventPublisher;
-        private readonly IDynamicPropertyService _dynamicPropertyService;
-        private readonly ISeoService _seoService;
-        private readonly IPlatformMemoryCache _platformMemoryCache;
-
         protected MemberServiceBase(Func<IMemberRepository> repositoryFactory,IEventPublisher eventPublisher, IDynamicPropertyService dynamicPropertyService, ISeoService seoService, IPlatformMemoryCache platformMemoryCache)
         {
-            _repositoryFactory = repositoryFactory;
-            _eventPublisher = eventPublisher;
-            _dynamicPropertyService = dynamicPropertyService;
-            _seoService = seoService;
-            _platformMemoryCache = platformMemoryCache;
+            RepositoryFactory = repositoryFactory;
+            EventPublisher = eventPublisher;
+            DynamicPropertyService = dynamicPropertyService;
+            SeoService = seoService;
+            PlatformMemoryCache = platformMemoryCache;
         }
-        
+
+        protected Func<IMemberRepository> RepositoryFactory { get; }
+        protected IEventPublisher EventPublisher { get; }
+        protected IDynamicPropertyService DynamicPropertyService { get; }
+        protected ISeoService SeoService { get; }
+        protected IPlatformMemoryCache PlatformMemoryCache { get; }
+
         #region IMemberService Members
 
         /// <summary>
@@ -50,10 +50,10 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         public virtual async Task<Member[]> GetByIdsAsync(string[] memberIds, string responseGroup = null, string[] memberTypes = null)
         {
             var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", memberIds), responseGroup, memberTypes == null ? null : string.Join("-", memberTypes));
-            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 var retVal = new List<Member>();
-                using (var repository = _repositoryFactory())
+                using (var repository = RepositoryFactory())
                 {
                     repository.DisableChangesTracking();
                     //There is loading for all corresponding members conceptual model entities types
@@ -78,8 +78,8 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                     }
                 }
 
-                var taskDynamicProperty = _dynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal.ToArray<IHasDynamicProperties>());
-                var taskSeo = _seoService.LoadSeoForObjectsAsync(retVal.OfType<ISeoSupport>().ToArray());
+                var taskDynamicProperty = DynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal.ToArray<IHasDynamicProperties>());
+                var taskSeo = SeoService.LoadSeoForObjectsAsync(retVal.OfType<ISeoSupport>().ToArray());
                 await Task.WhenAll(taskDynamicProperty, taskSeo);
 
                 return retVal.ToArray();
@@ -101,7 +101,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
             var pkMap = new PrimaryKeyResolvingMap();
             var changedEntries = new List<GenericChangedEntry<Member>>();
 
-            using (var repository = _repositoryFactory())
+            using (var repository = RepositoryFactory())
             {
                 var existingMemberEntities = await repository.GetMembersByIdsAsync(members.Where(m => !m.IsTransient()).Select(m => m.Id).ToArray());
 
@@ -130,10 +130,10 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                     }
                 }
                 //Raise domain events
-                await _eventPublisher.Publish(new MemberChangingEvent(changedEntries));
+                await EventPublisher.Publish(new MemberChangingEvent(changedEntries));
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
-                await _eventPublisher.Publish(new MemberChangedEvent(changedEntries));
+                await EventPublisher.Publish(new MemberChangedEvent(changedEntries));
             }
 
             ClearCache(members);
@@ -141,25 +141,25 @@ namespace VirtoCommerce.CustomerModule.Data.Services
 
         public virtual async Task DeleteAsync(string[] ids, string[] memberTypes = null)
         { 
-            using (var repository = _repositoryFactory())
+            using (var repository = RepositoryFactory())
             {
                 var members = await GetByIdsAsync(ids, null, memberTypes);
                 if (!members.IsNullOrEmpty())
                 {
                     var changedEntries = members.Select(x => new GenericChangedEntry<Member>(x, EntryState.Deleted));
-                    await _eventPublisher.Publish(new MemberChangingEvent(changedEntries));
+                    await EventPublisher.Publish(new MemberChangingEvent(changedEntries));
 
                     await repository.RemoveMembersByIdsAsync(members.Select(m => m.Id).ToArray());
                     await repository.UnitOfWork.CommitAsync();
 
-                    await _eventPublisher.Publish(new MemberChangedEvent(changedEntries));
+                    await EventPublisher.Publish(new MemberChangedEvent(changedEntries));
                 }
 
                 ClearCache(members);
             }
         }
 
-        private void ClearCache(IEnumerable<Member> entities)
+        protected virtual void ClearCache(IEnumerable<Member> entities)
         {
             CustomerSearchCacheRegion.ExpireRegion();
 
@@ -169,7 +169,5 @@ namespace VirtoCommerce.CustomerModule.Data.Services
             }
         }
         #endregion
-
-
     }
 }
