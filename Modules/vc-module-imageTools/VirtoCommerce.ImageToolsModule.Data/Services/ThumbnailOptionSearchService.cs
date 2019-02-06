@@ -11,16 +11,16 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
 {
     public class ThumbnailOptionSearchService : IThumbnailOptionSearchService
     {
-        private readonly Func<IThumbnailRepository> _thumbnailRepositoryFactory;
-
         public ThumbnailOptionSearchService(Func<IThumbnailRepository> thumbnailRepositoryFactory)
         {
-            _thumbnailRepositoryFactory = thumbnailRepositoryFactory;
+            ThumbnailRepositoryFactory = thumbnailRepositoryFactory;
         }
 
-        public async Task<GenericSearchResult<ThumbnailOption>> SearchAsync(ThumbnailOptionSearchCriteria criteria)
+        protected Func<IThumbnailRepository> ThumbnailRepositoryFactory { get; }
+
+        public virtual async Task<GenericSearchResult<ThumbnailOption>> SearchAsync(ThumbnailOptionSearchCriteria criteria)
         {
-            using (var repository = _thumbnailRepositoryFactory())
+            using (var repository = ThumbnailRepositoryFactory())
             {
                 var sortInfos = criteria.SortInfos;
                 if (sortInfos.IsNullOrEmpty())
@@ -35,9 +35,14 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
                 var query = repository.ThumbnailOptions.OrderBySortInfos(sortInfos);
                 var totalCount = await query.CountAsync();
 
-                var ids = await query.Skip(criteria.Skip).Take(criteria.Take).Select(x => x.Id).ToArrayAsync();
-                var thumbnailOptions = await repository.GetThumbnailOptionsByIdsAsync(ids);
-                var results = thumbnailOptions.Select(t => t.ToModel(AbstractTypeFactory<ThumbnailOption>.TryCreateInstance())).ToArray();
+                var results = new ThumbnailOption[0];
+
+                if (criteria.Take > 0)
+                {
+                    var ids = await query.Skip(criteria.Skip).Take(criteria.Take).Select(x => x.Id).ToArrayAsync();
+                    var thumbnailOptions = await repository.GetThumbnailOptionsByIdsAsync(ids);
+                    results = thumbnailOptions.Select(t => t.ToModel(AbstractTypeFactory<ThumbnailOption>.TryCreateInstance())).ToArray();
+                }
 
                 var retVal = new GenericSearchResult<ThumbnailOption>
                 {

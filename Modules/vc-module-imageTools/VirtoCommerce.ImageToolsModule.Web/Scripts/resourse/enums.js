@@ -1,4 +1,4 @@
-﻿angular.module('virtoCommerce.imageToolsModule')
+angular.module('virtoCommerce.imageToolsModule')
     .factory('virtoCommerce.imageToolsModule.resizeMethod', function () {
         return {
             get: function () {
@@ -65,11 +65,27 @@
                 ];
             }
         };
+    }).factory('virtoCommerce.imageToolsModule.jpegQuality', function () {
+        return {
+            get: function () {
+                return [
+                    {
+                        value: "Low",
+                        title: "imageTools.blades.setting-detail.jpeg-quality.low"
+                    },
+                    {
+                        value: "Medium",
+                        title: "imageTools.blades.setting-detail.jpeg-quality.medium"
+                    },
+                    {
+                        value: "High",
+                        title: "imageTools.blades.setting-detail.jpeg-quality.high"
+                    },
+                    {
+                        value: "VeryHigh",
+                        title: "imageTools.blades.setting-detail.jpeg-quality.very-high"
+                    }
+                ];
+            }
+        };
     });
-
-
-
-
-
-
-

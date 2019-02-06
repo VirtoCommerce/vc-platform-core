@@ -29,6 +29,7 @@ angular.module('virtoCommerce.imageToolsModule')
                 optionApi.search(optionSearchCriteria, function (options) {
                     updateEntityOptions(options.results);
                     blade.optionList = options.results;
+                    blade.currentEntity = {};
                     blade.isLoading = false;
                 });
             } else {

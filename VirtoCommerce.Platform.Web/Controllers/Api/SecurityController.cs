@@ -30,7 +30,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<Role> _roleManager;
-        private readonly SecurityOptions _securityOptions;
+        private readonly Core.Security.AuthorizationOptions _securityOptions;
         private readonly IPermissionsRegistrar _permissionsProvider;
         private readonly IUserSearchService _userSearchService;
         private readonly IRoleSearchService _roleSearchService;
@@ -39,7 +39,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
         public SecurityController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager,
                 IPermissionsRegistrar permissionsProvider, IUserSearchService userSearchService, IRoleSearchService roleSearchService,
-                IOptions<SecurityOptions> securityOptions, IEmailSender emailSender, IEventPublisher eventPublisher)
+                IOptions<Core.Security.AuthorizationOptions> securityOptions, IEmailSender emailSender, IEventPublisher eventPublisher)
         {
             _signInManager = signInManager;
             _userManager = userManager;

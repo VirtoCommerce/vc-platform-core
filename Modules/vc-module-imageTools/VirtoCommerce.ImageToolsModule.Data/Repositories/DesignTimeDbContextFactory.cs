@@ -9,7 +9,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Repositories
         {
             var builder = new DbContextOptionsBuilder<ThumbnailDbContext>();
 
-            builder.UseSqlServer("Data Source=localhost\\SQLEXPRESS;Initial Catalog=VirtoCommerce3;Persist Security Info=True;User ID=virto;Password=virto;MultipleActiveResultSets=True;Connect Timeout=30");
+            builder.UseSqlServer("Data Source=(local);Initial Catalog=VirtoCommerce3;Persist Security Info=True;User ID=virto;Password=virto;MultipleActiveResultSets=True;Connect Timeout=30");
 
             return new ThumbnailDbContext(builder.Options);
         }
