@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using MockQueryable.Moq;
 using Moq;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.ImageToolsModule.Data.Models;
@@ -18,7 +20,7 @@ namespace VirtoCommerce.ImageToolsModule.Tests
         {
             var repoMock = GetOptionsRepositoryMock();
             var target = new ThumbnailOptionSearchService(() => repoMock.Object);
-            var criteria = new ThumbnailOptionSearchCriteria() { Sort = "Name:desc;FileSuffix:desc" };
+            var criteria = new ThumbnailOptionSearchCriteria { Sort = "Name:desc;FileSuffix:desc" };
             var resultTasks = target.SearchAsync(criteria).GetAwaiter().GetResult();
 
             var expectedTasks = ThumbnailTaskEntitysDataSource.Select(x => x.ToModel(new ThumbnailOption())).OrderByDescending(t => t.Name).ThenByDescending(t => t.FileSuffix).ToArray();
@@ -27,16 +29,16 @@ namespace VirtoCommerce.ImageToolsModule.Tests
 
         public Mock<IThumbnailRepository> GetOptionsRepositoryMock()
         {
-            var entites = ThumbnailTaskEntitysDataSource.ToList();
-            var entitesQuerableMock = TestUtils.CreateQuerableMock(entites);
+            var entities = ThumbnailTaskEntitysDataSource.ToList();
+            var entitiesQueryableMock = entities.AsQueryable().BuildMock();
             var repoMock = new Mock<IThumbnailRepository>();
 
-            repoMock.Setup(x => x.ThumbnailOptions).Returns(entitesQuerableMock.Object);
+            repoMock.Setup(x => x.ThumbnailOptions).Returns(entitiesQueryableMock.Object);
 
-            repoMock.Setup(x => x.GetThumbnailOptionsByIdsAsync(It.IsAny<string[]>()).Result)
+            repoMock.Setup(x => x.GetThumbnailOptionsByIdsAsync(It.IsAny<string[]>()))
                 .Returns((string[] ids) =>
                 {
-                    return entitesQuerableMock.Object.Where(t => ids.Contains(t.Id)).ToArray();
+                    return Task.FromResult(entitiesQueryableMock.Object.Where(t => ids.Contains(t.Id)).ToArray());
                 });
 
             return repoMock;
@@ -46,10 +48,10 @@ namespace VirtoCommerce.ImageToolsModule.Tests
         {
             get
             {
-                yield return new ThumbnailOptionEntity() { Id = "Option1", Name = "Name 1", FileSuffix = "SuffixName4" };
-                yield return new ThumbnailOptionEntity() { Id = "Option2", Name = "NameLong 2", FileSuffix = "SuffixName3" };
-                yield return new ThumbnailOptionEntity() { Id = "Option3", Name = "Name 3", FileSuffix = "SuffixName2" };
-                yield return new ThumbnailOptionEntity() { Id = "Option4", Name = "NameLong 4", FileSuffix = "SuffixName1" };
+                yield return new ThumbnailOptionEntity { Id = "Option1", Name = "Name 1", FileSuffix = "SuffixName4" };
+                yield return new ThumbnailOptionEntity { Id = "Option2", Name = "NameLong 2", FileSuffix = "SuffixName3" };
+                yield return new ThumbnailOptionEntity { Id = "Option3", Name = "Name 3", FileSuffix = "SuffixName2" };
+                yield return new ThumbnailOptionEntity { Id = "Option4", Name = "NameLong 4", FileSuffix = "SuffixName1" };
             }
         }
     }

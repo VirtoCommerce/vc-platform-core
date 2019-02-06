@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,16 +16,18 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
     {
         public bool IsTotalCountSupported => true;
 
-        private readonly IBlobStorageProvider _storageProvider;
-        private readonly IThumbnailOptionSearchService _thumbnailOptionSearchService;
-
         private IList<ImageChange> _changeBlobs;
 
         public BlobImagesChangesProvider(IBlobStorageProvider storageProvider, IThumbnailOptionSearchService thumbnailOptionSearchService)
         {
-            _storageProvider = storageProvider;
-            _thumbnailOptionSearchService = thumbnailOptionSearchService;
+            StorageProvider = storageProvider;
+            ThumbnailOptionSearchService = thumbnailOptionSearchService;
         }
+
+        private static readonly string[] SupportedImageExtensions = { ".bmp", ".gif", ".jpg", ".jpeg", ".jpe", ".jif", ".jfif", ".jfi", ".png", ".tiff", ".tif" };
+
+        protected IBlobStorageProvider StorageProvider { get; }
+        protected IThumbnailOptionSearchService ThumbnailOptionSearchService { get; }
 
         protected virtual async Task<IList<ImageChange>> GetChangeFiles(ThumbnailTask task, DateTime? changedSince,
             ICancellationToken token)
@@ -88,9 +91,9 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
 
             var result = new List<BlobEntry>();
 
-            var searchResults = await _storageProvider.SearchAsync(folderPath, null);
+            var searchResults = await StorageProvider.SearchAsync(folderPath, null);
 
-            result.AddRange(searchResults.Results);
+            result.AddRange(searchResults.Results.Where(item => SupportedImageExtensions.Contains(Path.GetExtension(item.Name))));
             foreach (var blobFolder in searchResults.Results.Where( x => x.Type == "folder"))
             {
                 var folderResult = await ReadBlobFolderAsync(blobFolder.RelativeUrl, token);
@@ -110,7 +113,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
         /// </returns>
         protected virtual async Task<bool> ExistsAsync(string imageUrl)
         {
-            var blobInfo = await _storageProvider.GetBlobInfoAsync(imageUrl);
+            var blobInfo = await StorageProvider.GetBlobInfoAsync(imageUrl);
             return blobInfo != null;
         }
 
@@ -140,7 +143,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
         //get all options to create a map of all potential file names
         protected virtual async Task<ICollection<ThumbnailOption>> GetOptionsCollection()
         {
-            var options = await _thumbnailOptionSearchService.SearchAsync(new ThumbnailOptionSearchCriteria()
+            var options = await ThumbnailOptionSearchService.SearchAsync(new ThumbnailOptionSearchCriteria()
             {
                 Take = Int32.MaxValue
             });
@@ -160,10 +163,11 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
 
             foreach (var blobInfo in source)
             {
+                var name = blobInfo.Name;
+
                 var present = false;
                 foreach (var suffix in suffixCollection)
                 {
-                    var name = blobInfo.Name;
                     if (name.Contains("_" + suffix))
                     {
                         present = true;

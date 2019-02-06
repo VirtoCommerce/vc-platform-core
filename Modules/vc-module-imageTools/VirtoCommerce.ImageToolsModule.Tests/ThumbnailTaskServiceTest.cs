@@ -32,7 +32,8 @@ namespace VirtoCommerce.ImageToolsModule.Tests
                     {
                         taskEntities.Remove(entity);
                     }
-                });
+                })
+                .Returns(Task.CompletedTask);
 
             var sut = new ThumbnailTaskService(() => mock.Object);
             await sut.RemoveByIdsAsync(ids);
@@ -50,8 +51,8 @@ namespace VirtoCommerce.ImageToolsModule.Tests
 
             var mock = new Mock<IThumbnailRepository>();
             mock.SetupGet(x => x.UnitOfWork).Returns(new Mock<IUnitOfWork>().Object);
-            mock.Setup(r => r.GetThumbnailTasksByIdsAsync(It.IsIn<string[]>(ids)).Result)
-                .Returns(taskEntities.Where(t => ids.Contains(t.Id)).ToArray());
+            mock.Setup(r => r.GetThumbnailTasksByIdsAsync(It.IsIn<string[]>(ids)))
+                .ReturnsAsync(taskEntities.Where(t => ids.Contains(t.Id)).ToArray());
 
             var sut = new ThumbnailTaskService(() => mock.Object);
             var result = await sut.GetByIdsAsync(ids);
@@ -71,8 +72,8 @@ namespace VirtoCommerce.ImageToolsModule.Tests
                 {
                     taskEntities.Add(entity);
                 });
-            mock.Setup(r => r.GetThumbnailTasksByIdsAsync(It.IsAny<string[]>()).Result).Returns(
-                (string[] ids) => { return taskEntities.Where(t => ids.Contains(t.Id)).ToArray(); });
+            mock.Setup(r => r.GetThumbnailTasksByIdsAsync(It.IsAny<string[]>()))
+                .ReturnsAsync((string[] ids) => { return taskEntities.Where(t => ids.Contains(t.Id)).ToArray(); });
 
             var sut = new ThumbnailTaskService(() => mock.Object);
             await sut.SaveChangesAsync(new[]

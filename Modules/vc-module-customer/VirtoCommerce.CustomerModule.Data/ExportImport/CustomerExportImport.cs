@@ -68,7 +68,7 @@ namespace VirtoCommerce.CustomerModule.Data.ExportImport
                 writer.WriteValue(memberCount);
 
                 cancellationToken.ThrowIfCancellationRequested();
-
+              
                 writer.WritePropertyName("Members");
                 writer.WriteStartArray();
 

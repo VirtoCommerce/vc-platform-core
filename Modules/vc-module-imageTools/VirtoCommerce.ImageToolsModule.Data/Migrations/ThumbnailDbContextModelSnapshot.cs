@@ -41,6 +41,9 @@ namespace VirtoCommerce.ImageToolsModule.Data.Migrations
 
                     b.Property<int?>("Height");
 
+                    b.Property<string>("JpegQuality")
+                        .HasMaxLength(64);
+
                     b.Property<string>("ModifiedBy")
                         .HasMaxLength(64);
 
