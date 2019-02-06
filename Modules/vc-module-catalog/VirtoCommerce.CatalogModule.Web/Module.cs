@@ -14,6 +14,7 @@ using VirtoCommerce.CatalogModule.Data.Validation;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Web
 {
@@ -41,6 +42,24 @@ namespace VirtoCommerce.CatalogModule.Web
 
             serviceCollection.AddSingleton(propertyValueValidatorFactory);
             serviceCollection.AddSingleton<AbstractValidator<IHasProperties>, HasPropertiesValidator>();
+
+            serviceCollection.AddSingleton(new IndexDocumentConfiguration
+            {
+                DocumentType = KnownDocumentTypes.Category,
+                DocumentSource = new IndexDocumentSource
+                {
+                    //TODO
+                },
+            });
+
+            serviceCollection.AddSingleton(new IndexDocumentConfiguration
+            {
+                DocumentType = KnownDocumentTypes.Product,
+                DocumentSource = new IndexDocumentSource
+                {
+                    //TODO
+                },
+            });
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)

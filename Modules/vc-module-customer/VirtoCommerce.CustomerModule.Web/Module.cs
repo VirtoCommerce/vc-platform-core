@@ -52,22 +52,22 @@ namespace VirtoCommerce.CustomerModule.Web
             serviceCollection.AddSingleton<CommerceMembersSearchServiceImpl>();
             serviceCollection.AddSingleton<IMemberSearchService, MemberSearchServiceDecorator>();
             serviceCollection.AddSingleton<CustomerExportImport>();
-            serviceCollection.AddSingleton<IIndexDocumentChangesProvider, MemberDocumentChangesProvider>();
-            serviceCollection.AddSingleton<IIndexDocumentBuilder, MemberDocumentBuilder>();
+
+            serviceCollection.AddSingleton<MemberDocumentChangesProvider>();
+            serviceCollection.AddSingleton<MemberDocumentBuilder>();
 
             var snapshot = serviceCollection.BuildServiceProvider();
 
-            var memberIndexingConfiguration = new IndexDocumentConfiguration
+            serviceCollection.AddSingleton(new IndexDocumentConfiguration
             {
                 DocumentType = KnownDocumentTypes.Member,
                 DocumentSource = new IndexDocumentSource
                 {
-                    ChangesProvider = snapshot.GetService<IIndexDocumentChangesProvider>(),
-                    DocumentBuilder = snapshot.GetService<IIndexDocumentBuilder>(),
+                    ChangesProvider = snapshot.GetService<MemberDocumentChangesProvider>(),
+                    DocumentBuilder = snapshot.GetService<MemberDocumentBuilder>(),
                 },
-            };
+            });
 
-            serviceCollection.AddSingleton(new[] { memberIndexingConfiguration });
             serviceCollection.AddSingleton<MemberChangedEventHandler>();
         }
 

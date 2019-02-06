@@ -27,7 +27,7 @@ namespace VirtoCommerce.SearchModule.Web.BackgroundJobs
         private static readonly MethodInfo _indexChangesJobMethod;
         private static readonly MethodInfo _manualIndexAllJobMethod;
 
-        private readonly IndexDocumentConfiguration[] _documentsConfigs;
+        private readonly IEnumerable<IndexDocumentConfiguration> _documentsConfigs;
         private readonly IIndexingManager _indexingManager;
         private readonly ISettingsManager _settingsManager;
         private readonly IndexProgressHandler _progressHandler;
@@ -39,7 +39,7 @@ namespace VirtoCommerce.SearchModule.Web.BackgroundJobs
             _manualIndexAllJobMethod = typeof(IndexingJobs).GetMethod("IndexAllDocumentsJob");
         }
 
-        public IndexingJobs(IndexDocumentConfiguration[] documentsConfigs, IIndexingManager indexingManager, ISettingsManager settingsManager,
+        public IndexingJobs(IEnumerable<IndexDocumentConfiguration> documentsConfigs, IIndexingManager indexingManager, ISettingsManager settingsManager,
             IndexProgressHandler progressHandler, IIndexingInterceptor[] interceptors = null)
         {
             _documentsConfigs = documentsConfigs;

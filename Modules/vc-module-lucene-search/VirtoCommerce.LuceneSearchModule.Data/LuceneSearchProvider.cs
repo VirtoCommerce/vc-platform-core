@@ -162,9 +162,8 @@ namespace VirtoCommerce.LuceneSearchModule.Data
 
                 using (IndexReader reader = DirectoryReader.Open(FSDirectory.Open(directoryPath)))
                 {
-                    //TODO
-                    var field = "contents";
-                    var availableFields = new[] { field };
+                    //TODO how to get fields from documentType ?! 
+                    var availableFields = new[] { "content" };
                     var searcher = new IndexSearcher(reader);
                     var providerRequest = LuceneSearchRequestBuilder.BuildRequest(request, indexName, documentType, availableFields);
 
@@ -243,8 +242,9 @@ namespace VirtoCommerce.LuceneSearchModule.Data
 
                     foreach (var value in field.Values)
                     {
-                        var int64Field = new Int64Field(fieldName, ((DateTime)value).Ticks, Field.Store.NO);
-                        result.Add(int64Field);
+                        var dateTime = ((DateTime)value).ToString("O");
+                        var stringField = new StringField(fieldName, dateTime, store);
+                        result.Add(stringField);
                         result.Add(new StringField(dateTimeFieldName, value.ToStringInvariant(), Field.Store.NO));
                     }
                     break;

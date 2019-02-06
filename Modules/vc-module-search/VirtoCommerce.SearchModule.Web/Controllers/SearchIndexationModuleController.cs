@@ -1,7 +1,8 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.SearchModule.Core;
@@ -15,13 +16,13 @@ namespace VirtoCommerce.SearchModule.Web.Controllers
     [Produces("application/json")]
     public class SearchIndexationModuleController : Controller
     {
-        private readonly IndexDocumentConfiguration[] _documentConfigs;
+        private readonly IEnumerable<IndexDocumentConfiguration> _documentConfigs;
         private readonly ISearchProvider _searchProvider;
         private readonly IIndexingManager _indexingManager;
         private readonly IUserNameResolver _userNameResolver;
         private readonly IPushNotificationManager _pushNotifier;
 
-        public SearchIndexationModuleController(IndexDocumentConfiguration[] documentConfigs, ISearchProvider searchProvider, IIndexingManager indexingManager, IUserNameResolver userNameResolver, IPushNotificationManager pushNotifier)
+        public SearchIndexationModuleController(IEnumerable<IndexDocumentConfiguration> documentConfigs, ISearchProvider searchProvider, IIndexingManager indexingManager, IUserNameResolver userNameResolver, IPushNotificationManager pushNotifier)
         {
             _documentConfigs = documentConfigs;
             _searchProvider = searchProvider;
