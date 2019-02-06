@@ -61,6 +61,7 @@ namespace VirtoCommerce.Platform.Data.ChangeLog
             }
         }
 
+        ///TODO: Replace to paginate version that  receive SearchCriteria as parameter and return response GenericResult
         public IEnumerable<OperationLog> FindObjectChangeHistory(string objectId, string objectType)
         {
             if (objectId == null)
@@ -78,7 +79,7 @@ namespace VirtoCommerce.Platform.Data.ChangeLog
                 return retVal;
             }
         }
-
+        ///TODO: Replace to paginate version that  receive SearchCriteria as parameter and return response GenericResult
         public OperationLog GetObjectLastChange(string objectId, string objectType)
         {
             if (objectId == null)
@@ -100,7 +101,7 @@ namespace VirtoCommerce.Platform.Data.ChangeLog
             }
             return retVal;
         }
-
+        ///TODO: Replace to paginate version that  receive SearchCriteria as parameter and return response GenericResult
         public IEnumerable<OperationLog> FindChangeHistory(string objectType, DateTime? startDate, DateTime? endDate)
         {
             if (objectType == null)

@@ -17,7 +17,7 @@ namespace VirtoCommerce.Platform.Security.Authorization
         private readonly IConfiguration _configuration;
         private readonly IPermissionsRegistrar _permissionsProvider;
         private readonly IPlatformMemoryCache _memoryCache;
-        public PermissionAuthorizationPolicyProvider(IOptions<AuthorizationOptions> options, IConfiguration configuration, IPermissionsRegistrar permissionsProvider, IPlatformMemoryCache memoryCache)
+        public PermissionAuthorizationPolicyProvider(IOptions<Microsoft.AspNetCore.Authorization.AuthorizationOptions> options, IConfiguration configuration, IPermissionsRegistrar permissionsProvider, IPlatformMemoryCache memoryCache)
             : base(options)
         {
             _configuration = configuration;

@@ -1,0 +1,13 @@
+﻿<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <ul class="list __items">
+                <li class="list-item" ng-repeat="data in availableTypes" ng-click="addItem(data)">
+                    <i class="list-ico fa {{data.icon}}"></i>
+                    <span class="list-t">{{'sitemapsModule.blades.addItems.add' + data.type + '.title' | translate}}</span>
+                    <span class="list-descr">{{'sitemapsModule.blades.addItems.add' + data.type + '.description' | translate}}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
