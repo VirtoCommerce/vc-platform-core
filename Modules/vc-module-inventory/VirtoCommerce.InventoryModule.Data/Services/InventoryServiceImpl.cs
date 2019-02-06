@@ -39,14 +39,14 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                 using (var repository = RepositoryFactory())
                 {
                     repository.DisableChangesTracking();
-                    var entity = await repository.Inventories.ToArrayAsync();
-                    
-                    return entity.Select(e =>
+                    var entries = await repository.Inventories.ToArrayAsync();
+
+                    return entries.Select(e =>
                     {
                         var result = e.ToModel(AbstractTypeFactory<InventoryInfo>.TryCreateInstance());
                         cacheEntry.AddExpirationToken(InventoryCacheRegion.CreateChangeToken(result));
                         return result;
-                    });
+                    }).ToArray();
                 }
             });
         }
@@ -84,11 +84,11 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             var changedEntries = new List<GenericChangedEntry<InventoryInfo>>();
             using (var repository = RepositoryFactory())
             {
-                var dataExistInventories = await repository.GetProductsInventoriesAsync(inventoryInfos.Select(x=>x.ProductId));
+                var dataExistInventories = await repository.GetProductsInventoriesAsync(inventoryInfos.Select(x => x.ProductId));
                 foreach (var changedInventory in inventoryInfos)
-                {               
+                {
                     var originalEntity = dataExistInventories.FirstOrDefault(x => x.Sku == changedInventory.ProductId && x.FulfillmentCenterId == changedInventory.FulfillmentCenterId);
-            
+
                     var modifiedEntity = AbstractTypeFactory<InventoryEntity>.TryCreateInstance().FromModel(changedInventory);
                     if (originalEntity != null)
                     {
