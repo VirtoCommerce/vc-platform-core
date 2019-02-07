@@ -45,7 +45,6 @@ namespace VirtoCommerce.ImageToolsModule.Tests
 
             var image = new Bitmap(50, 50);
             var mockStorage = new Mock<IImageService>();
-            mockStorage.Setup(x => x.GetImageFormat(It.IsAny<Image>())).Returns(ImageFormat.Bmp);
             mockStorage.Setup(x => x.LoadImageAsync(It.IsAny<string>())).Returns(Task.FromResult<Image>(image));
 
             var mockResizer = new Mock<IImageResizer>();
@@ -71,7 +70,6 @@ namespace VirtoCommerce.ImageToolsModule.Tests
 
             var image = new Bitmap(50, 50);
             var mockStorage = new Mock<IImageService>();
-            mockStorage.Setup(x => x.GetImageFormat(It.IsAny<Image>())).Returns(ImageFormat.Bmp);
             mockStorage.Setup(x => x.LoadImageAsync(It.IsAny<string>())).Returns(Task.FromResult<Image>(image));
 
             var mockResizer = new Mock<IImageResizer>();
@@ -98,7 +96,6 @@ namespace VirtoCommerce.ImageToolsModule.Tests
             var image = new Bitmap(50, 50);
 
             var mockStorage = new Mock<IImageService>();
-            mockStorage.Setup(x => x.GetImageFormat(It.IsAny<Image>())).Returns(ImageFormat.Bmp);
             mockStorage.Setup(x => x.LoadImageAsync(It.IsAny<string>())).Returns(Task.FromResult<Image>(image));
 
             var mockResizer = new Mock<IImageResizer>();
@@ -125,7 +122,6 @@ namespace VirtoCommerce.ImageToolsModule.Tests
             var image = new Bitmap(50, 50);
 
             var mockStorage = new Mock<IImageService>();
-            mockStorage.Setup(x => x.GetImageFormat(It.IsAny<Image>())).Returns(ImageFormat.Bmp);
             mockStorage.Setup(x => x.LoadImageAsync(It.IsAny<string>())).Returns(Task.FromResult<Image>(image));
 
             var mockResizer = new Mock<IImageResizer>();

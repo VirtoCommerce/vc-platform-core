@@ -12,17 +12,17 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
 {
     public class ThumbnailTaskService : IThumbnailTaskService
     {
-        private readonly Func<IThumbnailRepository> _thumbnailRepositoryFactory;
-
         public ThumbnailTaskService(Func<IThumbnailRepository> thumbnailRepositoryFactory)
         {
-            _thumbnailRepositoryFactory = thumbnailRepositoryFactory;
+            ThumbnailRepositoryFactory = thumbnailRepositoryFactory;
         }
 
-        public async Task SaveChangesAsync(ICollection<ThumbnailTask> tasks)
+        protected Func<IThumbnailRepository> ThumbnailRepositoryFactory { get; }
+
+        public virtual async Task SaveChangesAsync(ICollection<ThumbnailTask> tasks)
         {
             var pkMap = new PrimaryKeyResolvingMap();
-            using (var repository = _thumbnailRepositoryFactory())
+            using (var repository = ThumbnailRepositoryFactory())
             {
                 var existPlanEntities = await repository.GetThumbnailTasksByIdsAsync(tasks.Select(t => t.Id).ToArray());
                 foreach (var task in tasks)
@@ -48,18 +48,18 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
             }
         }
 
-        public async Task RemoveByIdsAsync(string[] ids)
+        public virtual async Task RemoveByIdsAsync(string[] ids)
         {
-            using (var repository = _thumbnailRepositoryFactory())
+            using (var repository = ThumbnailRepositoryFactory())
             {
                 await repository.RemoveThumbnailTasksByIdsAsync(ids);
                 await repository.UnitOfWork.CommitAsync();
             }
         }
 
-        public async Task<ThumbnailTask[]> GetByIdsAsync(string[] ids)
+        public virtual async Task<ThumbnailTask[]> GetByIdsAsync(string[] ids)
         {
-            using (var repository = _thumbnailRepositoryFactory())
+            using (var repository = ThumbnailRepositoryFactory())
             {
                 var thumbnailTasks = await repository.GetThumbnailTasksByIdsAsync(ids);
                 return thumbnailTasks.Select(x => x.ToModel(AbstractTypeFactory<ThumbnailTask>.TryCreateInstance())).ToArray();
