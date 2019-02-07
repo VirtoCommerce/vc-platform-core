@@ -24,9 +24,8 @@ namespace VirtoCommerce.ImageToolsModule.Tests
             var tasks = optionEntites.Select(t => t.ToModel(new ThumbnailOption())).ToArray();
 
             var mock = new Mock<IThumbnailRepository>();
-            mock.Setup(r => r.GetThumbnailOptionsByIdsAsync(It.IsIn<string[]>(ids)).Result)
-                .Returns(optionEntites.Where(o => ids.Contains(o.Id))
-                .ToArray());
+            mock.Setup(r => r.GetThumbnailOptionsByIdsAsync(It.IsIn<string[]>(ids)))
+                .ReturnsAsync(optionEntites.Where(o => ids.Contains(o.Id)).ToArray());
 
             var sut = new ThumbnailOptionService(() => mock.Object);
             var result = sut.GetByIdsAsync(ids);
@@ -35,7 +34,7 @@ namespace VirtoCommerce.ImageToolsModule.Tests
         }
 
         [Fact]
-        public void Delete_ThumbnailOptionIds_DeletedThumbnailOptionWithPassedIds()
+        public async Task Delete_ThumbnailOptionIds_DeletedThumbnailOptionWithPassedIds()
         {
             var optionEntites = ThumbnailOptionEntitesDataSource.ToList();
 
@@ -51,10 +50,11 @@ namespace VirtoCommerce.ImageToolsModule.Tests
                     {
                         optionEntites.Remove(entity);
                     }
-                });
+                })
+                .Returns(Task.CompletedTask);
 
             var sut = new ThumbnailOptionService(() => mock.Object);
-            sut.RemoveByIdsAsync(ids);
+            await sut.RemoveByIdsAsync(ids);
 
             Assert.Empty(optionEntites);
         }
@@ -67,8 +67,8 @@ namespace VirtoCommerce.ImageToolsModule.Tests
 
             var mock = new Mock<IThumbnailRepository>();
             mock.SetupGet(x => x.UnitOfWork).Returns(new Mock<IUnitOfWork>().Object);
-            mock.Setup(r => r.GetThumbnailOptionsByIdsAsync(It.IsAny<string[]>()).Result)
-                .Returns((string[] ids) =>
+            mock.Setup(r => r.GetThumbnailOptionsByIdsAsync(It.IsAny<string[]>()))
+                .ReturnsAsync((string[] ids) =>
                 {
                     var result = optionEntities.Where(t => ids.Contains(t.Id)).ToArray();
                     return result;
@@ -92,8 +92,8 @@ namespace VirtoCommerce.ImageToolsModule.Tests
                 {
                     optionEntities.Add(entity);
                 });
-            mock.Setup(r => r.GetThumbnailOptionsByIdsAsync(It.IsAny<string[]>()).Result)
-                .Returns((string[] ids) =>
+            mock.Setup(r => r.GetThumbnailOptionsByIdsAsync(It.IsAny<string[]>()))
+                .ReturnsAsync((string[] ids) =>
                 {
                     return optionEntities.Where(t => ids.Contains(t.Id)).ToArray();
                 });
@@ -101,7 +101,7 @@ namespace VirtoCommerce.ImageToolsModule.Tests
             var sut = new ThumbnailOptionService(() => mock.Object);
             await sut.SaveOrUpdateAsync(new[]
             {
-                new ThumbnailOption()
+                new ThumbnailOption
                 {
                     Id = "NewOptionId", Name = "New Option name"
                 }
@@ -114,9 +114,9 @@ namespace VirtoCommerce.ImageToolsModule.Tests
         {
             get
             {
-                yield return new ThumbnailOptionEntity() { Id = "Option 1" };
-                yield return new ThumbnailOptionEntity() { Id = "Option 2" };
-                yield return new ThumbnailOptionEntity() { Id = "Option 3" };
+                yield return new ThumbnailOptionEntity { Id = "Option 1" };
+                yield return new ThumbnailOptionEntity { Id = "Option 2" };
+                yield return new ThumbnailOptionEntity { Id = "Option 3" };
             }
         }
 
@@ -124,9 +124,9 @@ namespace VirtoCommerce.ImageToolsModule.Tests
         {
             get
             {
-                yield return new ThumbnailOption() { Id = "Option 1", Name = "New Name" };
-                yield return new ThumbnailOption() { Id = "Option 2", Name = "New Name" };
-                yield return new ThumbnailOption() { Id = "Option 3", Name = "New Name" };
+                yield return new ThumbnailOption { Id = "Option 1", Name = "New Name" };
+                yield return new ThumbnailOption { Id = "Option 2", Name = "New Name" };
+                yield return new ThumbnailOption { Id = "Option 3", Name = "New Name" };
             }
         }
     }
