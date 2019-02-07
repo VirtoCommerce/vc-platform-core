@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +24,7 @@ namespace VirtoCommerce.Platform.Web.Swagger
         /// <param name="services"></param>
         public static void AddSwagger(this IServiceCollection services)
         {
+            var httpContextAccessor = services.BuildServiceProvider().GetService<IHttpContextAccessor>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info
@@ -59,6 +61,14 @@ namespace VirtoCommerce.Platform.Web.Swagger
                 });
                 c.AddModulesXmlComments(services);
                 c.CustomSchemaIds(x => x.FullName);
+                c.AddSecurityDefinition("oauth2", new OAuth2Scheme
+                {
+                    Type = "oauth2",
+                    Flow = "password",
+                    AuthorizationUrl = "connect/token",
+                    TokenUrl = $"{httpContextAccessor.HttpContext.Request?.Scheme}://{httpContextAccessor.HttpContext.Request?.Host}/connect/token"
+                });
+                c.OperationFilter<SecurityRequirementsOperationFilter>();
             });
         }
 
@@ -68,7 +78,10 @@ namespace VirtoCommerce.Platform.Web.Swagger
         /// <param name="applicationBuilder"></param>
         public static void UseSwagger(this IApplicationBuilder applicationBuilder)
         {
-            applicationBuilder.UseSwagger(c => c.RouteTemplate = "docs/{documentName}/docs.json");
+            applicationBuilder.UseSwagger(c =>
+            {
+                c.RouteTemplate = "docs/{documentName}/docs.json";
+            });
 
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
             applicationBuilder.UseSwaggerUI(c =>
@@ -87,6 +100,9 @@ namespace VirtoCommerce.Platform.Web.Swagger
                 c.ShowExtensions();
                 c.DocExpansion(DocExpansion.None);
                 c.DefaultModelsExpandDepth(-1);
+                c.OAuthClientId(string.Empty);
+                c.OAuthClientSecret(string.Empty);
+                c.OAuthUseBasicAuthenticationWithAccessCodeGrant();
             });
         }
 
