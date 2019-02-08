@@ -113,6 +113,23 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         }
 
         /// <summary>
+        /// Bulk create new members (can be any objects inherited from Member type)
+        /// </summary>
+        /// <param name="members">Array of concrete instances of abstract member type will be created by using PolymorphicMemberJsonConverter</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("members/bulk")]
+        [Authorize(ModuleConstants.Security.Permissions.Create)]
+        public async Task<ActionResult<Member[]>> BulkCreateMembers([FromBody] Member[] members)
+        {
+            await _memberService.SaveChangesAsync(members);
+            var retVal = await _memberService.GetByIdsAsync(members.Select(m => m.Id).ToArray(), null, members.Select(m => m.MemberType).ToArray());
+
+            // Casting to dynamic fixes a serialization error in XML formatter when the returned object type is derived from the Member class.
+            return Ok((dynamic)retVal);
+        }
+
+        /// <summary>
         /// Update member
         /// </summary>
         /// <param name="member">concrete instance of abstract member type will be created by using PolymorphicMemberJsonConverter</param>
@@ -123,6 +140,19 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         {
             await _memberService.SaveChangesAsync(new[] { member });
             return Ok();
+        }
+
+        /// <summary>
+        /// Bulk update members
+        /// </summary>
+        /// <param name="members">Array of concrete instances of abstract member type will be created by using PolymorphicMemberJsonConverter</param>
+        [HttpPut]
+        [Route("members/bulk")]
+        [Authorize(ModuleConstants.Security.Permissions.Update)]
+        public async Task<ActionResult> BulkUpdateMembers(Member[] members)
+        {
+            await _memberService.SaveChangesAsync(members);
+            return NoContent();
         }
 
         /// <summary>
@@ -190,6 +220,17 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         }
 
         /// <summary>
+        /// Bulk create contacts
+        /// </summary>
+        [HttpPost]
+        [Route("contacts/bulk")]
+        [Authorize(ModuleConstants.Security.Permissions.Create)]
+        public Task<ActionResult<Member[]>> BulkCreateContacts(Contact[] contacts)
+        {
+            return BulkCreateMembers(contacts.Cast<Member>().ToArray());
+        }
+
+        /// <summary>
         /// Update contact
         /// </summary>
         [HttpPut]
@@ -198,6 +239,17 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         public Task<ActionResult> UpdateContact([FromBody]Contact contact)
         {
             return UpdateMember(contact);
+        }
+
+        /// <summary>
+        /// Bulk update contact
+        /// </summary>
+        [HttpPut]
+        [Route("contacts/bulk")]
+        [Authorize(ModuleConstants.Security.Permissions.Update)]
+        public Task<ActionResult> BulkUpdateContacts(Contact[] contacts)
+        {
+            return BulkUpdateMembers(contacts.Cast<Member>().ToArray());
         }
 
         /// <summary>
@@ -212,6 +264,17 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         }
 
         /// <summary>
+        /// Bulk create organizations
+        /// </summary>
+        [HttpPost]
+        [Route("organizations/bulk")]
+        [Authorize(ModuleConstants.Security.Permissions.Create)]
+        public Task<ActionResult<Member[]>> BulkCreateOrganizations(Organization[] organizations)
+        {
+            return BulkCreateMembers(organizations.Cast<Member>().ToArray());
+        }
+
+        /// <summary>
         /// Update organization
         /// </summary>
         [HttpPut]
@@ -220,6 +283,17 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         public Task<ActionResult> UpdateOrganization([FromBody]Organization organization)
         {
             return UpdateMember(organization);
+        }
+
+        /// <summary>
+        /// Bulk update organization
+        /// </summary>
+        [HttpPut]
+        [Route("organizations/bulk")]
+        [Authorize(ModuleConstants.Security.Permissions.Update)]
+        public Task<ActionResult> BulkUpdateOrganizations(Organization[] organizations)
+        {
+            return BulkUpdateMembers(organizations.Cast<Member>().ToArray());
         }
 
         /// <summary>
@@ -273,6 +347,34 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         }
 
         /// <summary>
+        /// Search organizations
+        /// </summary>
+        /// <remarks>Get array of organizations satisfied search criteria.</remarks>
+        /// <param name="criteria">concrete instance of SearchCriteria type type will be created by using PolymorphicMemberSearchCriteriaJsonConverter</param>
+        [HttpPost]
+        [Route("organizations/search")]
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
+        public async Task<ActionResult<GenericSearchResult<Organization>>> SearchOrganizations(MembersSearchCriteria criteria)
+        {
+            if (criteria == null)
+            {
+                criteria = new MembersSearchCriteria();
+            }
+
+            criteria.MemberType = typeof(Organization).Name;
+            criteria.MemberTypes = new[] { criteria.MemberType };
+            var searchResult = await _memberSearchService.SearchMembersAsync(criteria);
+
+            var result = new GenericSearchResult<Organization>
+            {
+                TotalCount = searchResult.TotalCount,
+                Results = searchResult.Results.OfType<Organization>().ToList()
+            };
+
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Get contact
         /// </summary>
         /// <param name="id">Contact ID</param>
@@ -295,6 +397,34 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         public Task<ActionResult<Member[]>> GetContactsByIds([FromQuery]string[] ids)
         {          
             return GetMembersByIds(ids, null, new[] { typeof(Contact).Name });
+        }
+
+        /// <summary>
+        /// Search contacts
+        /// </summary>
+        /// <remarks>Get array of contacts satisfied search criteria.</remarks>
+        /// <param name="criteria">concrete instance of SearchCriteria type type will be created by using PolymorphicMemberSearchCriteriaJsonConverter</param>
+        [HttpPost]
+        [Route("contacts/search")]
+        [Authorize(ModuleConstants.Security.Permissions.Read)]
+        public async Task<ActionResult<GenericSearchResult<Contact>>> SearchContacts(MembersSearchCriteria criteria)
+        {
+            if (criteria == null)
+            {
+                criteria = new MembersSearchCriteria();
+            }
+
+            criteria.MemberType = typeof(Contact).Name;
+            criteria.MemberTypes = new[] { criteria.MemberType };
+            var searchResult = await _memberSearchService.SearchMembersAsync(criteria);
+
+            var result = new GenericSearchResult<Contact>
+            {
+                TotalCount = searchResult.TotalCount,
+                Results = searchResult.Results.OfType<Contact>().ToList()
+            };
+
+            return Ok(result);
         }
 
         /// <summary>
@@ -337,6 +467,7 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
             }
 
             criteria.MemberType = typeof(Vendor).Name;
+            criteria.MemberTypes = new[] { criteria.MemberType };
             var searchResult = await _memberSearchService.SearchMembersAsync(criteria);
 
             var result = new GenericSearchResult<Vendor>
@@ -371,6 +502,17 @@ namespace VirtoCommerce.CustomerModule.Web.Controllers.Api
         public Task<ActionResult<Member>> CreateEmployee([FromBody]Employee employee)
         {
             return CreateMember(employee);
+        }
+
+        /// <summary>
+        /// Create employee
+        /// </summary>
+        [HttpPost]
+        [Route("employees/bulk")]
+        [Authorize(ModuleConstants.Security.Permissions.Create)]
+        public Task<ActionResult<Member[]>> BulkCreateEmployees(Employee[] employees)
+        {
+            return BulkCreateMembers(employees.Cast<Member>().ToArray());
         }
 
         /// <summary>

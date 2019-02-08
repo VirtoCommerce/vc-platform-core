@@ -4,6 +4,7 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <!--This line is necessary to copy all dependencies in the bin folder-->
     <!--<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>-->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>  
   </PropertyGroup>
 
   <ItemGroup>
