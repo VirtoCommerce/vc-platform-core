@@ -1,4 +1,5 @@
-﻿using System.Linq;
+using System.Linq;
+using System.Threading.Tasks;
 using VirtoCommerce.MarketingModule.Data.Model;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -17,22 +18,22 @@ namespace VirtoCommerce.MarketingModule.Data.Repositories
         IQueryable<PublishingGroupContentPlaceEntity> PublishingGroupContentPlaces { get; }
         IQueryable<PromotionStoreEntity> PromotionStores { get; }
 
-        PromotionEntity[] GetPromotionsByIds(string[] ids);       
-        DynamicContentFolderEntity[] GetContentFoldersByIds(string[] ids);
-        DynamicContentItemEntity[] GetContentItemsByIds(string[] ids);
-        DynamicContentPlaceEntity[] GetContentPlacesByIds(string[] ids);
-        DynamicContentPublishingGroupEntity[] GetContentPublicationsByIds(string[] ids);
+        Task<PromotionEntity[]> GetPromotionsByIdsAsync(string[] ids);
+        Task<DynamicContentFolderEntity[]> GetContentFoldersByIdsAsync(string[] ids);
+        Task<DynamicContentItemEntity[]> GetContentItemsByIdsAsync(string[] ids);
+        Task<DynamicContentPlaceEntity[]> GetContentPlacesByIdsAsync(string[] ids);
+        Task<DynamicContentPublishingGroupEntity[]> GetContentPublicationsByIdsAsync(string[] ids);
 
-        void RemoveFolders(string[] ids);
-        void RemoveContentPublications(string[] ids);
-        void RemovePlaces(string[] ids);
-        void RemoveContentItems(string[] ids);
-        void RemovePromotions(string[] ids);
+        Task RemoveFoldersAsync(string[] ids);
+        Task RemoveContentPublicationsAsync(string[] ids);
+        Task RemovePlacesAsync(string[] ids);
+        Task RemoveContentItemsAsync(string[] ids);
+        Task RemovePromotionsAsync(string[] ids);
 
-        CouponEntity[] GetCouponsByIds(string[] ids);
-        void RemoveCoupons(string[] ids);
+        Task<CouponEntity[]> GetCouponsByIdsAsync(string[] ids);
+        Task RemoveCouponsAsync(string[] ids);
 
-        PromotionUsageEntity[] GetMarketingUsagesByIds(string[] ids);
-        void RemoveMarketingUsages(string[] ids);
+        Task<PromotionUsageEntity[]> GetMarketingUsagesByIdsAsync(string[] ids);
+        Task RemoveMarketingUsagesAsync(string[] ids);
     }
 }

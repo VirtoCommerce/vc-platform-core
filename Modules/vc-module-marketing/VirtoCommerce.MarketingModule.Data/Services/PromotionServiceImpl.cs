@@ -1,41 +1,51 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.Domain.Marketing.Model;
-using VirtoCommerce.Domain.Marketing.Services;
+using System.Threading.Tasks;
+using VirtoCommerce.MarketingModule.Core.Model.Promotions;
+using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Model;
 using VirtoCommerce.MarketingModule.Data.Promotions;
 using VirtoCommerce.MarketingModule.Data.Repositories;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.MarketingModule.Data.Services
 {
-    public class PromotionServiceImpl : ServiceBase, IPromotionService
+    public class PromotionServiceImpl : IPromotionService
     {
         private readonly Func<IMarketingRepository> _repositoryFactory;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public PromotionServiceImpl(Func<IMarketingRepository> repositoryFactory)
+        public PromotionServiceImpl(Func<IMarketingRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
+            _platformMemoryCache = platformMemoryCache;
         }
 
         #region IMarketingService Members       
 
-        public virtual Promotion[] GetPromotionsByIds(string[] ids)
+        public virtual async Task<Promotion[]> GetPromotionsByIdsAsync(string[] ids)
         {
-            using (var repository = _repositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), "GetPromotionsByIds", string.Join("-", ids));
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                return repository.GetPromotionsByIds(ids).Select(x => x.ToModel(AbstractTypeFactory<DynamicPromotion>.TryCreateInstance())).ToArray();
-            }
+                var result = new List<Promotion>();
+                using (var repository = _repositoryFactory())
+                {
+                    var promotionEntities = await repository.GetPromotionsByIdsAsync(ids);
+                    result = promotionEntities.Select(x => x.ToModel(AbstractTypeFactory<DynamicPromotion>.TryCreateInstance())).ToList();
+                }
+                return result.ToArray();
+            });
         }
 
-        public virtual void SavePromotions(Promotion[] promotions)
+        public virtual async Task SavePromotionsAsync(Promotion[] promotions)
         {
             var pkMap = new PrimaryKeyResolvingMap();
             using (var repository = _repositoryFactory())
-            using (var changeTracker = GetChangeTracker(repository))
             {
-                var existEntities = repository.GetPromotionsByIds(promotions.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
+                var existEntities = await repository.GetPromotionsByIdsAsync(promotions.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var promotion in promotions.OfType<DynamicPromotion>())
                 {
                     var sourceEntity = AbstractTypeFactory<PromotionEntity>.TryCreateInstance();
@@ -54,17 +64,17 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                         }
                     }
                 }
-                CommitChanges(repository);
+                await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
             }
         }
 
-        public virtual void DeletePromotions(string[] ids)
+        public virtual async Task DeletePromotionsAsync(string[] ids)
         {
             using (var repository = _repositoryFactory())
             {
-                repository.RemovePromotions(ids);
-                CommitChanges(repository);
+                await repository.RemovePromotionsAsync(ids);
+                await repository.UnitOfWork.CommitAsync();
             }
         }
 

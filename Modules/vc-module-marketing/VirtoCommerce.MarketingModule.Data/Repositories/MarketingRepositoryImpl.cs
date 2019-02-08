@@ -1,165 +1,65 @@
 using System;
+using System.Data.SqlClient;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.MarketingModule.Data.Model;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.MarketingModule.Data.Repositories
 {
-    public class MarketingRepositoryImpl : DbContextRepositoryBase, IMarketingRepository
+    public class MarketingRepositoryImpl : DbContextRepositoryBase<MarketingDbContext>, IMarketingRepository
     {
-        public MarketingRepositoryImpl()
+        private readonly MarketingDbContext _dbContext;
+        public MarketingRepositoryImpl(MarketingDbContext dbContext) : base(dbContext)
         {
-        }
-
-        public MarketingRepositoryImpl(string nameOrConnectionString, params IInterceptor[] interceptors)
-            : base(nameOrConnectionString, null, interceptors)
-        {
-            Configuration.LazyLoadingEnabled = false;
-
-        }
-
-        protected override void OnModelCreating(DbModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<CouponEntity>().ToTable("Coupon");
-            modelBuilder.Entity<CouponEntity>().HasKey(x => x.Id)
-                        .Property(x => x.Id);
-            modelBuilder.Entity<CouponEntity>().HasRequired(x => x.Promotion)
-                                .WithMany()
-                                .HasForeignKey(x => x.PromotionId).WillCascadeOnDelete(true);
-
-
-            modelBuilder.Entity<PromotionEntity>().ToTable("Promotion");
-            modelBuilder.Entity<PromotionEntity>().HasKey(x => x.Id)
-                        .Property(x => x.Id);
-
-            modelBuilder.Entity<PromotionUsageEntity>().ToTable("PromotionUsage");
-            modelBuilder.Entity<PromotionUsageEntity>().HasKey(x => x.Id)
-                        .Property(x => x.Id);
-            modelBuilder.Entity<PromotionUsageEntity>().HasRequired(x => x.Promotion)
-                                   .WithMany()
-                                   .HasForeignKey(x => x.PromotionId).WillCascadeOnDelete(true);
-
-            modelBuilder.Entity<DynamicContentItemEntity>().ToTable("DynamicContentItem");
-            modelBuilder.Entity<DynamicContentItemEntity>().HasKey(x => x.Id)
-                        .Property(x => x.Id);
-            modelBuilder.Entity<DynamicContentItemEntity>().HasOptional(x => x.Folder)
-                                   .WithMany(x => x.ContentItems)
-                                   .HasForeignKey(x => x.FolderId).WillCascadeOnDelete(true);
-
-            modelBuilder.Entity<DynamicContentPlaceEntity>().ToTable("DynamicContentPlace");
-            modelBuilder.Entity<DynamicContentPlaceEntity>().HasKey(x => x.Id)
-                    .Property(x => x.Id);
-            modelBuilder.Entity<DynamicContentPlaceEntity>().HasOptional(x => x.Folder)
-                               .WithMany(x => x.ContentPlaces)
-                               .HasForeignKey(x => x.FolderId).WillCascadeOnDelete(true);
-
-            modelBuilder.Entity<DynamicContentPublishingGroupEntity>().ToTable("DynamicContentPublishingGroup");
-            modelBuilder.Entity<DynamicContentPublishingGroupEntity>().HasKey(x => x.Id)
-                    .Property(x => x.Id);
-
-            modelBuilder.Entity<PublishingGroupContentItemEntity>().ToTable("PublishingGroupContentItem");
-            modelBuilder.Entity<PublishingGroupContentItemEntity>().HasKey(x => x.Id)
-                    .Property(x => x.Id);
-            modelBuilder.Entity<PublishingGroupContentItemEntity>().HasRequired(p => p.ContentItem)
-                    .WithMany().HasForeignKey(x => x.DynamicContentItemId)
-                    .WillCascadeOnDelete(true);
-            modelBuilder.Entity<PublishingGroupContentItemEntity>().HasRequired(p => p.PublishingGroup)
-                  .WithMany(x => x.ContentItems).HasForeignKey(x => x.DynamicContentPublishingGroupId)
-                  .WillCascadeOnDelete(true);
-
-            modelBuilder.Entity<PublishingGroupContentPlaceEntity>().ToTable("PublishingGroupContentPlace");
-            modelBuilder.Entity<PublishingGroupContentPlaceEntity>().HasKey(x => x.Id)
-                    .Property(x => x.Id);
-            modelBuilder.Entity<PublishingGroupContentPlaceEntity>().HasRequired(p => p.ContentPlace).WithMany()
-                .HasForeignKey(x => x.DynamicContentPlaceId)
-                .WillCascadeOnDelete(true);
-            modelBuilder.Entity<PublishingGroupContentPlaceEntity>().HasRequired(p => p.PublishingGroup)
-               .WithMany(x => x.ContentPlaces).HasForeignKey(x => x.DynamicContentPublishingGroupId)
-               .WillCascadeOnDelete(true);
-
-            modelBuilder.Entity<DynamicContentFolderEntity>().ToTable("DynamicContentFolder");
-            modelBuilder.Entity<DynamicContentFolderEntity>().HasKey(x => x.Id)
-                .Property(x => x.Id);
-
-            modelBuilder.Entity<PromotionStoreEntity>().ToTable("PromotionStore");
-            modelBuilder.Entity<PromotionStoreEntity>().HasKey(x => x.Id).Property(x => x.Id);
-            modelBuilder.Entity<PromotionStoreEntity>().HasRequired(x => x.Promotion)
-                .WithMany(x => x.Stores).HasForeignKey(x => x.PromotionId)
-                .WillCascadeOnDelete(true);
-
-
-            base.OnModelCreating(modelBuilder);
+            _dbContext = dbContext;
         }
 
         #region IMarketingRepository Members
 
-        public IQueryable<PromotionEntity> Promotions
-        {
-            get { return GetAsQueryable<PromotionEntity>(); }
-        }
-        public IQueryable<CouponEntity> Coupons
-        {
-            get { return GetAsQueryable<CouponEntity>(); }
-        }
-        public IQueryable<PromotionUsageEntity> PromotionUsages
-        {
-            get { return GetAsQueryable<PromotionUsageEntity>(); }
-        }
+        public IQueryable<PromotionEntity> Promotions => DbContext.Set<PromotionEntity>();
 
-        public IQueryable<DynamicContentFolderEntity> Folders
-        {
-            get { return GetAsQueryable<DynamicContentFolderEntity>(); }
+        public IQueryable<CouponEntity> Coupons => DbContext.Set<CouponEntity>();
 
-        }
-        public IQueryable<DynamicContentItemEntity> Items
-        {
-            get { return GetAsQueryable<DynamicContentItemEntity>(); }
-        }
+        public IQueryable<PromotionUsageEntity> PromotionUsages => DbContext.Set<PromotionUsageEntity>();
 
-        public IQueryable<DynamicContentPlaceEntity> Places
-        {
-            get { return GetAsQueryable<DynamicContentPlaceEntity>(); }
-        }
+        public IQueryable<DynamicContentFolderEntity> Folders => DbContext.Set<DynamicContentFolderEntity>();
 
-        public IQueryable<DynamicContentPublishingGroupEntity> PublishingGroups
-        {
-            get { return GetAsQueryable<DynamicContentPublishingGroupEntity>(); }
-        }
+        public IQueryable<DynamicContentItemEntity> Items => DbContext.Set<DynamicContentItemEntity>();
 
-        public IQueryable<PublishingGroupContentItemEntity> PublishingGroupContentItems
-        {
-            get { return GetAsQueryable<PublishingGroupContentItemEntity>(); }
-        }
+        public IQueryable<DynamicContentPlaceEntity> Places => DbContext.Set<DynamicContentPlaceEntity>();
 
-        public IQueryable<PublishingGroupContentPlaceEntity> PublishingGroupContentPlaces
-        {
-            get { return GetAsQueryable<PublishingGroupContentPlaceEntity>(); }
-        }
+        public IQueryable<DynamicContentPublishingGroupEntity> PublishingGroups => DbContext.Set<DynamicContentPublishingGroupEntity>();
 
-        public IQueryable<PromotionStoreEntity> PromotionStores
-        {
-            get { return GetAsQueryable<PromotionStoreEntity>(); }
-        }
+        public IQueryable<PublishingGroupContentItemEntity> PublishingGroupContentItems => DbContext.Set<PublishingGroupContentItemEntity>();
 
-        public virtual PromotionEntity[] GetPromotionsByIds(string[] ids)
+        public IQueryable<PublishingGroupContentPlaceEntity> PublishingGroupContentPlaces => DbContext.Set<PublishingGroupContentPlaceEntity>();
+
+        public IQueryable<PromotionStoreEntity> PromotionStores => DbContext.Set<PromotionStoreEntity>();
+
+        public virtual async Task<PromotionEntity[]> GetPromotionsByIdsAsync(string[] ids)
         {
-            var retVal = Promotions.Where(x => ids.Contains(x.Id)).ToArray();
-            var stores = PromotionStores.Where(x => ids.Contains(x.PromotionId)).ToArray();
-            var promotionsIdsWithCoupons = Coupons.Where(x => ids.Contains(x.PromotionId)).Select(x => x.PromotionId).Distinct().ToArray();
-            foreach (var promotion in retVal)
+            var propmotions = await Promotions.Where(x => ids.Contains(x.Id)).ToArrayAsync();
+            var storesTask = PromotionStores.Where(x => ids.Contains(x.PromotionId)).ToArrayAsync();
+            var promotionsIdsWithCouponsTask = Coupons.Where(x => ids.Contains(x.PromotionId)).Select(x => x.PromotionId).Distinct().ToArrayAsync();
+            await Task.WhenAll(storesTask, promotionsIdsWithCouponsTask);
+
+            foreach (var promotion in propmotions)
             {
-                promotion.HasCoupons = promotionsIdsWithCoupons.Contains(promotion.Id);
+                promotion.HasCoupons = promotionsIdsWithCouponsTask.Result.Contains(promotion.Id);
             }
-            return retVal;
+            return propmotions;
         }
 
-        public DynamicContentFolderEntity[] GetContentFoldersByIds(string[] ids)
+        public async Task<DynamicContentFolderEntity[]> GetContentFoldersByIdsAsync(string[] ids)
         {
-            var retVal = Folders.Where(x => ids.Contains(x.Id)).ToArray();
+            var retVal = await Folders.Where(x => ids.Contains(x.Id)).ToArrayAsync();
             if (retVal.Any())
             {
                 var allParentFoldersIds = retVal.Where(x => x.ParentFolderId != null).Select(x => x.ParentFolderId).ToArray();
-                var allParentFolders = GetContentFoldersByIds(allParentFoldersIds);
+                var allParentFolders = await GetContentFoldersByIdsAsync(allParentFoldersIds);
                 foreach (var folder in retVal.Where(x => x.ParentFolderId != null))
                 {
                     folder.ParentFolder = allParentFolders.FirstOrDefault(x => x.Id == folder.ParentFolderId);
@@ -168,13 +68,13 @@ namespace VirtoCommerce.MarketingModule.Data.Repositories
             return retVal;
         }
 
-        public DynamicContentItemEntity[] GetContentItemsByIds(string[] ids)
+        public async Task<DynamicContentItemEntity[]> GetContentItemsByIdsAsync(string[] ids)
         {
-            var retVal = Items.Where(x => ids.Contains(x.Id)).ToArray();
+            var retVal = await Items.Where(x => ids.Contains(x.Id)).ToArrayAsync();
             if (retVal != null)
             {
                 var allFoldersIds = retVal.Where(x => x.FolderId != null).Select(x => x.FolderId).Distinct().ToArray();
-                var allFolders = GetContentFoldersByIds(allFoldersIds);
+                var allFolders = await GetContentFoldersByIdsAsync(allFoldersIds);
                 foreach (var item in retVal.Where(x => x.FolderId != null))
                 {
                     item.Folder = allFolders.FirstOrDefault(x => x.Id == item.FolderId);
@@ -183,13 +83,13 @@ namespace VirtoCommerce.MarketingModule.Data.Repositories
             return retVal;
         }
 
-        public DynamicContentPlaceEntity[] GetContentPlacesByIds(string[] ids)
+        public async Task<DynamicContentPlaceEntity[]> GetContentPlacesByIdsAsync(string[] ids)
         {
-            var retVal = Places.Where(x => ids.Contains(x.Id)).ToArray();
+            var retVal = await Places.Where(x => ids.Contains(x.Id)).ToArrayAsync();
             if (retVal != null)
             {
                 var allFoldersIds = retVal.Where(x => x.FolderId != null).Select(x => x.FolderId).Distinct().ToArray();
-                var allFolders = GetContentFoldersByIds(allFoldersIds);
+                var allFolders = await GetContentFoldersByIdsAsync(allFoldersIds);
                 foreach (var place in retVal.Where(x => x.FolderId != null))
                 {
                     place.Folder = allFolders.FirstOrDefault(x => x.Id == place.FolderId);
@@ -198,55 +98,55 @@ namespace VirtoCommerce.MarketingModule.Data.Repositories
             return retVal;
         }
 
-        public DynamicContentPublishingGroupEntity[] GetContentPublicationsByIds(string[] ids)
+        public Task<DynamicContentPublishingGroupEntity[]> GetContentPublicationsByIdsAsync(string[] ids)
         {
             return PublishingGroups.Include(x => x.ContentItems.Select(y => y.ContentItem))
                                     .Include(x => x.ContentPlaces.Select(y => y.ContentPlace))
-                                    .Where(x => ids.Contains(x.Id)).ToArray();
+                                    .Where(x => ids.Contains(x.Id)).ToArrayAsync();
         }
 
-        public void RemoveFolders(string[] ids)
+        public Task RemoveFoldersAsync(string[] ids)
         {
-            const string queryPattern = @"DELETE FROM DynamicContentFolder WHERE Id IN ({0})";
-            var query = string.Format(queryPattern, string.Join(", ", ids.Select(x => string.Format("'{0}'", x))));
-            ObjectContext.ExecuteStoreCommand(query);
+            const string queryPattern = @"DELETE FROM DynamicContentFolder WHERE Id IN (@Ids)";
+            var name = new SqlParameter("@Ids", string.Join(", ", ids));
+            return _dbContext.Database.ExecuteSqlCommandAsync(queryPattern, name);
         }
 
 
-        public void RemoveContentPublications(string[] ids)
+        public Task RemoveContentPublicationsAsync(string[] ids)
         {
-            const string queryPattern = @"DELETE FROM DynamicContentPublishingGroup WHERE Id IN ({0})";
-            var query = string.Format(queryPattern, string.Join(", ", ids.Select(x => string.Format("'{0}'", x))));
-            ObjectContext.ExecuteStoreCommand(query);
+            const string queryPattern = @"DELETE FROM DynamicContentPublishingGroup WHERE Id IN (@Ids)";
+            var name = new SqlParameter("@Ids", string.Join(", ", ids));
+            return _dbContext.Database.ExecuteSqlCommandAsync(queryPattern, name);
         }
 
-        public void RemovePlaces(string[] ids)
+        public Task RemovePlacesAsync(string[] ids)
         {
-            const string queryPattern = @"DELETE FROM DynamicContentPlace WHERE Id IN ({0})";
-            var query = string.Format(queryPattern, string.Join(", ", ids.Select(x => string.Format("'{0}'", x))));
-            ObjectContext.ExecuteStoreCommand(query);
+            const string queryPattern = @"DELETE FROM DynamicContentPlace WHERE Id IN (@Ids)";
+            var name = new SqlParameter("@Ids", string.Join(", ", ids));
+            return _dbContext.Database.ExecuteSqlCommandAsync(queryPattern, name);
         }
 
-        public void RemoveContentItems(string[] ids)
+        public Task RemoveContentItemsAsync(string[] ids)
         {
-            const string queryPattern = @"DELETE FROM DynamicContentItem WHERE Id IN ({0})";
-            var query = string.Format(queryPattern, string.Join(", ", ids.Select(x => string.Format("'{0}'", x))));
-            ObjectContext.ExecuteStoreCommand(query);
+            const string queryPattern = @"DELETE FROM DynamicContentItem WHERE Id IN (@Ids)";
+            var name = new SqlParameter("@Ids", string.Join(", ", ids));
+            return _dbContext.Database.ExecuteSqlCommandAsync(queryPattern, name);
         }
 
-        public virtual void RemovePromotions(string[] ids)
+        public virtual Task RemovePromotionsAsync(string[] ids)
         {
-            const string queryPattern = @"DELETE FROM Promotion WHERE Id IN ({0})";
-            var query = string.Format(queryPattern, string.Join(", ", ids.Select(x => string.Format("'{0}'", x))));
-            ObjectContext.ExecuteStoreCommand(query);
+            const string queryPattern = @"DELETE FROM Promotion WHERE Id IN (@Ids)";
+            var name = new SqlParameter("@Ids", string.Join(", ", ids));
+            return _dbContext.Database.ExecuteSqlCommandAsync(queryPattern, name);
         }
 
-        public CouponEntity[] GetCouponsByIds(string[] ids)
+        public async Task<CouponEntity[]> GetCouponsByIdsAsync(string[] ids)
         {
-            var retVal = Coupons.Where(x => ids.Contains(x.Id)).ToArray();
+            var retVal = await Coupons.Where(x => ids.Contains(x.Id)).ToArrayAsync();
             var couponCodes = retVal.Select(x => x.Code).ToArray();
-            var couponUsagesTotals = PromotionUsages.Where(x => couponCodes.Contains(x.CouponCode)).GroupBy(x => x.CouponCode)
-                   .Select(x => new { CouponCode = x.Key, TotalUsesCount = x.Count() }).ToArray();
+            var couponUsagesTotals = await PromotionUsages.Where(x => couponCodes.Contains(x.CouponCode)).GroupBy(x => x.CouponCode)
+                   .Select(x => new { CouponCode = x.Key, TotalUsesCount = x.Count() }).ToArrayAsync();
             foreach (var totalsUses in couponUsagesTotals)
             {
                 var coupon = retVal.FirstOrDefault(x => x.Code.EqualsInvariant(totalsUses.CouponCode));
@@ -258,24 +158,23 @@ namespace VirtoCommerce.MarketingModule.Data.Repositories
             return retVal;
         }
 
-        public void RemoveCoupons(string[] ids)
+        public Task RemoveCouponsAsync(string[] ids)
         {
-            const string queryPattern = @"DELETE FROM Coupon WHERE Id IN ({0})";
-            var query = string.Format(queryPattern, string.Join(", ", ids.Select(x => string.Format("'{0}'", x))));
-            ObjectContext.ExecuteStoreCommand(query);
+            const string queryPattern = @"DELETE FROM Coupon WHERE Id IN (@Ids)";
+            var name = new SqlParameter("@Ids", string.Join(", ", ids));
+            return _dbContext.Database.ExecuteSqlCommandAsync(queryPattern, name);
         }
 
-        public PromotionUsageEntity[] GetMarketingUsagesByIds(string[] ids)
+        public Task<PromotionUsageEntity[]> GetMarketingUsagesByIdsAsync(string[] ids)
         {
-            var retVal = PromotionUsages.Where(x => ids.Contains(x.Id)).ToArray();
-            return retVal;
+            return PromotionUsages.Where(x => ids.Contains(x.Id)).ToArrayAsync();
         }
 
-        public void RemoveMarketingUsages(string[] ids)
+        public Task RemoveMarketingUsagesAsync(string[] ids)
         {
-            const string queryPattern = @"DELETE FROM PromotionUsage WHERE Id IN ({0})";
-            var query = string.Format(queryPattern, string.Join(", ", ids.Select(x => string.Format("'{0}'", x))));
-            ObjectContext.ExecuteStoreCommand(query);
+            const string queryPattern = @"DELETE FROM PromotionUsage WHERE Id IN (@Ids)";
+            var name = new SqlParameter("@Ids", string.Join(", ", ids));
+            return _dbContext.Database.ExecuteSqlCommandAsync(queryPattern, name);
         }
         #endregion
     }

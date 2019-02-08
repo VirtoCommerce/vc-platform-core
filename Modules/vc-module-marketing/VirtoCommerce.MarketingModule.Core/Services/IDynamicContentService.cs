@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
 
 namespace VirtoCommerce.MarketingModule.Core.Services
@@ -8,9 +9,9 @@ namespace VirtoCommerce.MarketingModule.Core.Services
         void SaveFolders(DynamicContentFolder[] folders);
         void DeleteFolders(string[] ids);
 
-        DynamicContentItem[] GetContentItemsByIds(string[] ids);
-        void SaveContentItems(DynamicContentItem[] items);
-        void DeleteContentItems(string[] ids);
+        Task<DynamicContentItem[]> GetContentItemsByIds(string[] ids);
+        Task SaveContentItems(DynamicContentItem[] items);
+        Task DeleteContentItems(string[] ids);
 
         DynamicContentPlace[] GetPlacesByIds(string[] ids);
         void SavePlaces(DynamicContentPlace[] places);

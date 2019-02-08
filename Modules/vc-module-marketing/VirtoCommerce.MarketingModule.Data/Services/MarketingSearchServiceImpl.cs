@@ -1,12 +1,14 @@
-﻿using System;
+using System;
 using System.Linq;
-using VirtoCommerce.Domain.Commerce.Model.Search;
-using VirtoCommerce.Domain.Marketing.Model.DynamicContent.Search;
-using VirtoCommerce.Domain.Marketing.Model.Promotions.Search;
-using VirtoCommerce.Domain.Marketing.Services;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
+using VirtoCommerce.MarketingModule.Core.Model.DynamicContent.Search;
+using VirtoCommerce.MarketingModule.Core.Model.Promotions;
+using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
+using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Common;
-using coreModel = VirtoCommerce.Domain.Marketing.Model;
 
 namespace VirtoCommerce.MarketingModule.Data.Services
 {
@@ -14,19 +16,19 @@ namespace VirtoCommerce.MarketingModule.Data.Services
     {
         private readonly Func<IMarketingRepository> _repositoryFactory;
         private readonly IDynamicContentService _dynamicContentService;
-        private readonly IPromotionService _promotionSrevice;
+        private readonly IPromotionService _promotionService;
 
-        public MarketingSearchServiceImpl(Func<IMarketingRepository> repositoryFactory, IDynamicContentService dynamicContentService, IPromotionService promotionSrevice)
+        public MarketingSearchServiceImpl(Func<IMarketingRepository> repositoryFactory, IDynamicContentService dynamicContentService, IPromotionService promotionService)
         {
             _repositoryFactory = repositoryFactory;
             _dynamicContentService = dynamicContentService;
-            _promotionSrevice = promotionSrevice;
+            _promotionService = promotionService;
         }
 
         #region IPromotionSearchService Members
-        public virtual GenericSearchResult<coreModel.Promotion> SearchPromotions(PromotionSearchCriteria criteria)
+        public virtual async Task<GenericSearchResult<Promotion>> SearchPromotionsAsync(PromotionSearchCriteria criteria)
         {
-            var retVal = new GenericSearchResult<coreModel.Promotion>();
+            var retVal = new GenericSearchResult<Promotion>();
             using (var repository = _repositoryFactory())
             {
                 var query = GetPromotionsQuery(repository, criteria);
@@ -34,16 +36,17 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 var sortInfos = criteria.SortInfos;
                 if (sortInfos.IsNullOrEmpty())
                 {
-                    sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<coreModel.Promotion>(x => x.Priority), SortDirection = SortDirection.Descending } };
+                    sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Promotion>(x => x.Priority), SortDirection = SortDirection.Descending } };
                 }
                 query = query.OrderBySortInfos(sortInfos);
 
                 retVal.TotalCount = query.Count();
 
-                var ids = query.Select(x => x.Id)
+                var ids = await query.Select(x => x.Id)
                                .Skip(criteria.Skip)
-                               .Take(criteria.Take).ToArray();
-                retVal.Results = _promotionSrevice.GetPromotionsByIds(ids).OrderBy(p => ids.ToList().IndexOf(p.Id)).ToList();
+                               .Take(criteria.Take).ToArrayAsync();
+                var promotions = await _promotionService.GetPromotionsByIdsAsync(ids);
+                retVal.Results = promotions.OrderBy(p => ids.ToList().IndexOf(p.Id)).ToList();
             }
             return retVal;
         }
@@ -78,9 +81,9 @@ namespace VirtoCommerce.MarketingModule.Data.Services
         #endregion
 
         #region IDynamicContentSearchService Members
-        public GenericSearchResult<coreModel.DynamicContentItem> SearchContentItems(DynamicContentItemSearchCriteria criteria)
+        public async Task<GenericSearchResult<DynamicContentItem>> SearchContentItemsAsync(DynamicContentItemSearchCriteria criteria)
         {
-            var retVal = new GenericSearchResult<coreModel.DynamicContentItem>();
+            var retVal = new GenericSearchResult<DynamicContentItem>();
             using (var repository = _repositoryFactory())
             {
                 var query = repository.Items;
@@ -96,23 +99,23 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 var sortInfos = criteria.SortInfos;
                 if (sortInfos.IsNullOrEmpty())
                 {
-                    sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<coreModel.DynamicContentItem>(x => x.Name), SortDirection = SortDirection.Ascending } };
+                    sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<DynamicContentItem>(x => x.Name), SortDirection = SortDirection.Ascending } };
                 }
                 query = query.OrderBySortInfos(sortInfos);
 
                 retVal.TotalCount = query.Count();
 
-                var ids = query.Select(x => x.Id)
+                var ids = await query.Select(x => x.Id)
                                .Skip(criteria.Skip)
-                               .Take(criteria.Take).ToArray();
-                retVal.Results = _dynamicContentService.GetContentItemsByIds(ids);
+                               .Take(criteria.Take).ToArrayAsync();
+                retVal.Results = await _dynamicContentService.GetContentItemsByIdsAsync(ids);
             }
             return retVal;
         }
 
-        public GenericSearchResult<coreModel.DynamicContentPlace> SearchContentPlaces(DynamicContentPlaceSearchCriteria criteria)
+        public async Task<GenericSearchResult<DynamicContentPlace>> SearchContentPlacesAsync(DynamicContentPlaceSearchCriteria criteria)
         {
-            var retVal = new GenericSearchResult<coreModel.DynamicContentPlace>();
+            var retVal = new GenericSearchResult<DynamicContentPlace>();
             using (var repository = _repositoryFactory())
             {
                 var query = repository.Places;
@@ -127,22 +130,22 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 var sortInfos = criteria.SortInfos;
                 if (sortInfos.IsNullOrEmpty())
                 {
-                    sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<coreModel.DynamicContentPlace>(x => x.Name), SortDirection = SortDirection.Ascending } };
+                    sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<DynamicContentPlace>(x => x.Name), SortDirection = SortDirection.Ascending } };
                 }
                 query = query.OrderBySortInfos(sortInfos);
 
                 retVal.TotalCount = query.Count();
-                var ids = query.Select(x => x.Id)
+                var ids = await query.Select(x => x.Id)
                                .Skip(criteria.Skip)
-                               .Take(criteria.Take).ToArray();
+                               .Take(criteria.Take).ToArrayAsync();
                 retVal.Results = _dynamicContentService.GetPlacesByIds(ids);
             }
             return retVal;
         }
 
-        public GenericSearchResult<coreModel.DynamicContentPublication> SearchContentPublications(DynamicContentPublicationSearchCriteria criteria)
+        public async Task<GenericSearchResult<DynamicContentPublication>> SearchContentPublicationsAsync(DynamicContentPublicationSearchCriteria criteria)
         {
-            var retVal = new GenericSearchResult<coreModel.DynamicContentPublication>();
+            var retVal = new GenericSearchResult<DynamicContentPublication>();
             using (var repository = _repositoryFactory())
             {
                 var query = repository.PublishingGroups;
@@ -161,23 +164,23 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 var sortInfos = criteria.SortInfos;
                 if (sortInfos.IsNullOrEmpty())
                 {
-                    sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<coreModel.DynamicContentPublication>(x => x.Name), SortDirection = SortDirection.Ascending } };
+                    sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<DynamicContentPublication>(x => x.Name), SortDirection = SortDirection.Ascending } };
                 }
                 query = query.OrderBySortInfos(sortInfos);
 
                 retVal.TotalCount = query.Count();
 
-                var ids = query.Select(x => x.Id)
+                var ids = await query.Select(x => x.Id)
                            .Skip(criteria.Skip)
-                           .Take(criteria.Take).ToArray();
+                           .Take(criteria.Take).ToArrayAsync();
                 retVal.Results = _dynamicContentService.GetPublicationsByIds(ids);
             }
             return retVal;
         }
 
-        public GenericSearchResult<coreModel.DynamicContentFolder> SearchFolders(DynamicContentFolderSearchCriteria criteria)
+        public async Task<GenericSearchResult<DynamicContentFolder>> SearchFoldersAsync(DynamicContentFolderSearchCriteria criteria)
         {
-            var retVal = new GenericSearchResult<coreModel.DynamicContentFolder>();
+            var retVal = new GenericSearchResult<DynamicContentFolder>();
             using (var repository = _repositoryFactory())
             {
                 var query = repository.Folders.Where(x => x.ParentFolderId == criteria.FolderId);
@@ -188,12 +191,12 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 var sortInfos = criteria.SortInfos;
                 if (sortInfos.IsNullOrEmpty())
                 {
-                    sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<coreModel.DynamicContentFolder>(x => x.Name), SortDirection = SortDirection.Ascending } };
+                    sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<DynamicContentFolder>(x => x.Name), SortDirection = SortDirection.Ascending } };
                 }
 
                 retVal.TotalCount = query.Count();
 
-                var folderIds = query.Select(x => x.Id).ToArray();
+                var folderIds = await query.Select(x => x.Id).ToArrayAsync();
                 retVal.Results = _dynamicContentService.GetFoldersByIds(folderIds);
             }
             return retVal;

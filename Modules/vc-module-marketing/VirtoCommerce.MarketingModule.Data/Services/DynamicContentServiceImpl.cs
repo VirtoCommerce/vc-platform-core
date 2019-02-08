@@ -1,16 +1,16 @@
-﻿using System;
+using System;
 using System.Linq;
-using VirtoCommerce.Domain.Marketing.Model;
-using VirtoCommerce.Domain.Marketing.Services;
+using System.Threading.Tasks;
+using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
+using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Model;
 using VirtoCommerce.MarketingModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
-using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.MarketingModule.Data.Services
 {
-    public class DynamicContentServiceImpl : ServiceBase, IDynamicContentService
+    public class DynamicContentServiceImpl : IDynamicContentService
     {
         private readonly Func<IMarketingRepository> _repositoryFactory;
         private readonly IDynamicPropertyService _dynamicPropertyService;
@@ -24,29 +24,28 @@ namespace VirtoCommerce.MarketingModule.Data.Services
         #region IDynamicContentService Members
 
         #region DynamicContentItem methods
-        public DynamicContentItem[] GetContentItemsByIds(string[] ids)
+        public async Task<DynamicContentItem[]> GetContentItemsByIdsAsync(string[] ids)
         {
             DynamicContentItem[] retVal = null;
             using (var repository = _repositoryFactory())
             {
-                retVal = repository.GetContentItemsByIds(ids).Select(x => x.ToModel(AbstractTypeFactory<DynamicContentItem>.TryCreateInstance())).ToArray();
+                retVal = (await repository.GetContentItemsByIdsAsync(ids)).Select(x => x.ToModel(AbstractTypeFactory<DynamicContentItem>.TryCreateInstance())).ToArray();
             }
 
             if (retVal != null)
             {
-                _dynamicPropertyService.LoadDynamicPropertyValues(retVal);
+                await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal);
             }
 
             return retVal;
         }
 
-        public void SaveContentItems(DynamicContentItem[] items)
+        public async Task SaveContentItemsAsync(DynamicContentItem[] items)
         {
             var pkMap = new PrimaryKeyResolvingMap();
             using (var repository = _repositoryFactory())
-            using (var changeTracker = GetChangeTracker(repository))
             {
-                var existEntities = repository.GetContentItemsByIds(items.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
+                var existEntities = await repository.GetContentItemsByIdsAsync(items.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var item in items)
                 {
                     var sourceEntity = AbstractTypeFactory<DynamicContentItemEntity>.TryCreateInstance();
@@ -56,7 +55,6 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                         var targetEntity = existEntities.FirstOrDefault(x => x.Id == item.Id);
                         if (targetEntity != null)
                         {
-                            changeTracker.Attach(targetEntity);
                             sourceEntity.Patch(targetEntity);
                         }
                         else
@@ -65,27 +63,29 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                         }
                     }
                 }
-                CommitChanges(repository);
+                await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
             }
 
-            foreach (var item in items)
-            {
-                _dynamicPropertyService.SaveDynamicPropertyValues(item);
-            }
+            //TODO move to handler
+            //foreach (var item in items)
+            //{
+            //    _dynamicPropertyService.SaveDynamicPropertyValues(item);
+            //}
         }
 
-        public void DeleteContentItems(string[] ids)
+        public async Task DeleteContentItems(string[] ids)
         {
-            var items = GetContentItemsByIds(ids);
-            foreach (var item in items)
-            {
-                _dynamicPropertyService.DeleteDynamicPropertyValues(item);
-            }
+            var items = await GetContentItemsByIdsAsync(ids);
+            //TODO move to handler
+            //foreach (var item in items)
+            //{
+            //    _dynamicPropertyService.DeleteDynamicPropertyValues(item);
+            //}
             using (var repository = _repositoryFactory())
             {
-                repository.RemoveContentItems(ids);
-                repository.UnitOfWork.Commit();
+                await repository.RemoveContentItemsAsync(ids);
+                await repository.UnitOfWork.CommitAsync();
             }
         }
         #endregion
@@ -103,7 +103,6 @@ namespace VirtoCommerce.MarketingModule.Data.Services
         {
             var pkMap = new PrimaryKeyResolvingMap();
             using (var repository = _repositoryFactory())
-            using (var changeTracker = GetChangeTracker(repository))
             {
                 var existEntities = repository.GetContentPlacesByIds(places.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var place in places)
@@ -235,7 +234,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 repository.RemoveFolders(ids);
                 CommitChanges(repository);
             }
-        } 
+        }
         #endregion
 
 
