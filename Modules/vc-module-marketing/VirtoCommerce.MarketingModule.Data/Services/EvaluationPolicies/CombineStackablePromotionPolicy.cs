@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.Domain.Common;
-using VirtoCommerce.Domain.Marketing.Model;
-using VirtoCommerce.Domain.Marketing.Model.Promotions.Search;
-using VirtoCommerce.Domain.Marketing.Services;
+using System.Threading.Tasks;
+using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.MarketingModule.Core.Model.Promotions;
+using VirtoCommerce.MarketingModule.Core.Model.Promotions.Rewards;
+using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
+using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Services
@@ -17,7 +19,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             _promotionSearchService = promotionSearchService;
         }
 
-        public PromotionResult EvaluatePromotion(IEvaluationContext context)
+        public async Task<PromotionResult> EvaluatePromotionAsync(IEvaluationContext context)
         {
             if (context == null)
             {
@@ -30,11 +32,11 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 throw new ArgumentException($"{nameof(context)} type {context.GetType()} must be derived from PromotionEvaluationContext");
             }
 
-            var promotions = _promotionSearchService.SearchPromotions(new PromotionSearchCriteria { OnlyActive = true, StoreIds = new[] { promoContext.StoreId }, Take = int.MaxValue }).Results;
+            var promotions = await _promotionSearchService.SearchPromotionsAsync(new PromotionSearchCriteria { OnlyActive = true, StoreIds = new[] { promoContext.StoreId }, Take = int.MaxValue });
 
             var result = new PromotionResult();
 
-            Func<PromotionEvaluationContext, IEnumerable<PromotionReward>> evalFunc = (evalContext) => promotions.SelectMany(x => x.EvaluatePromotion(evalContext))
+            Func<PromotionEvaluationContext, IEnumerable<PromotionReward>> evalFunc = (evalContext) => promotions.Results.SelectMany(x => x.EvaluatePromotion(evalContext))
                                     .OrderByDescending(x => x.Promotion.IsExclusive)
                                     .ThenByDescending(x => x.Promotion.Priority)
                                     .Where(x => x.IsValid)

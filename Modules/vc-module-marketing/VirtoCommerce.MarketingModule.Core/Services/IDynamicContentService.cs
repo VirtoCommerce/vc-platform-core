@@ -5,20 +5,20 @@ namespace VirtoCommerce.MarketingModule.Core.Services
 {
     public interface IDynamicContentService
     {
-        DynamicContentFolder[] GetFoldersByIds(string[] ids);
-        void SaveFolders(DynamicContentFolder[] folders);
-        void DeleteFolders(string[] ids);
+        Task<DynamicContentFolder[]> GetFoldersByIdsAsync(string[] ids);
+        Task SaveFoldersAsync(DynamicContentFolder[] folders);
+        Task DeleteFoldersAsync(string[] ids);
 
-        Task<DynamicContentItem[]> GetContentItemsByIds(string[] ids);
-        Task SaveContentItems(DynamicContentItem[] items);
-        Task DeleteContentItems(string[] ids);
+        Task<DynamicContentItem[]> GetContentItemsByIdsAsync(string[] ids);
+        Task SaveContentItemsAsync(DynamicContentItem[] items);
+        Task DeleteContentItemsAsync(string[] ids);
 
-        DynamicContentPlace[] GetPlacesByIds(string[] ids);
-        void SavePlaces(DynamicContentPlace[] places);
-        void DeletePlaces(string[] ids);
+        Task<DynamicContentPlace[]> GetPlacesByIdsAsync(string[] ids);
+        Task SavePlacesAsync(DynamicContentPlace[] places);
+        Task DeletePlacesAsync(string[] ids);
 
-        DynamicContentPublication[] GetPublicationsByIds(string[] ids);
-        void SavePublications(DynamicContentPublication[] publications);
-        void DeletePublications(string[] ids);
+        Task<DynamicContentPublication[]> GetPublicationsByIdsAsync(string[] ids);
+        Task SavePublicationsAsync(DynamicContentPublication[] publications);
+        Task DeletePublicationsAsync(string[] ids);
     }
 }

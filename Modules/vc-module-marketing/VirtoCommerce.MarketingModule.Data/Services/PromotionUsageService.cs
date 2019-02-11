@@ -1,28 +1,33 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.Domain.Commerce.Model.Search;
-using VirtoCommerce.Domain.Marketing.Model;
-using VirtoCommerce.Domain.Marketing.Model.Promotions.Search;
-using VirtoCommerce.Domain.Marketing.Services;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using VirtoCommerce.MarketingModule.Core.Events;
+using VirtoCommerce.MarketingModule.Core.Model.Promotions;
+using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
+using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Model;
 using VirtoCommerce.MarketingModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Data.Infrastructure;
+using VirtoCommerce.Platform.Core.Events;
 
 namespace VirtoCommerce.MarketingModule.Data.Services
 {
-    public class PromotionUsageService : ServiceBase, IPromotionUsageService
+    public class PromotionUsageService : IPromotionUsageService
     {
         private readonly Func<IMarketingRepository> _repositoryFactory;
+        private readonly IEventPublisher _eventPublisher;
 
-        public PromotionUsageService(Func<IMarketingRepository> repositoryFactory)
+        public PromotionUsageService(Func<IMarketingRepository> repositoryFactory, IEventPublisher eventPublisher)
         {
             _repositoryFactory = repositoryFactory;
+            _eventPublisher = eventPublisher;
         }
 
         #region IMarketingUsageService Members
 
-        public virtual GenericSearchResult<PromotionUsage> SearchUsages(PromotionUsageSearchCriteria criteria)
+        public virtual async Task<GenericSearchResult<PromotionUsage>> SearchUsagesAsync(PromotionUsageSearchCriteria criteria)
         {
             if (criteria == null)
             {
@@ -42,57 +47,60 @@ namespace VirtoCommerce.MarketingModule.Data.Services
 
                 var searchResult = new GenericSearchResult<PromotionUsage> { TotalCount = query.Count() };
 
-                var coupons = query.Skip(criteria.Skip).Take(criteria.Take).ToList();
+                var coupons = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
                 searchResult.Results = coupons.Select(x => x.ToModel(AbstractTypeFactory<PromotionUsage>.TryCreateInstance())).ToList();
 
                 return searchResult;
             }
         }
 
-        public virtual PromotionUsage[] GetByIds(string[] ids)
+        public virtual async Task<PromotionUsage[]> GetByIdsAsync(string[] ids)
         {
             using (var repository = _repositoryFactory())
             {
-                return repository.GetMarketingUsagesByIds(ids).Select(x => x.ToModel(AbstractTypeFactory<PromotionUsage>.TryCreateInstance())).ToArray();
+                var promotionUsage = await repository.GetMarketingUsagesByIdsAsync(ids);
+                return promotionUsage.Select(x => x.ToModel(AbstractTypeFactory<PromotionUsage>.TryCreateInstance())).ToArray();
             }
         }
 
-        public virtual void SaveUsages(PromotionUsage[] usages)
+        public virtual async Task SaveUsagesAsync(PromotionUsage[] usages)
         {
             var pkMap = new PrimaryKeyResolvingMap();
+            var changedEntries = new List<GenericChangedEntry<PromotionUsage>>();
             using (var repository = _repositoryFactory())
-            using (var changeTracker = GetChangeTracker(repository))
             {
-                var existUsageEntities = repository.GetMarketingUsagesByIds(usages.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
+                var existUsageEntities = await repository.GetMarketingUsagesByIdsAsync(usages.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var usage in usages)
                 {
-                    var sourceUsageEntity = AbstractTypeFactory<PromotionUsageEntity>.TryCreateInstance();
-                    if (sourceUsageEntity != null)
+                    var sourceEntity = AbstractTypeFactory<PromotionUsageEntity>.TryCreateInstance();
+                    if (sourceEntity != null)
                     {
-                        sourceUsageEntity = sourceUsageEntity.FromModel(usage, pkMap);
+                        sourceEntity = sourceEntity.FromModel(usage, pkMap);
                         var targetUsageEntity = existUsageEntities.FirstOrDefault(x => x.Id == usage.Id);
                         if (targetUsageEntity != null)
                         {
-                            changeTracker.Attach(targetUsageEntity);
-                            sourceUsageEntity.Patch(targetUsageEntity);
+                            changedEntries.Add(new GenericChangedEntry<PromotionUsage>(usage, sourceEntity.ToModel(AbstractTypeFactory<PromotionUsage>.TryCreateInstance()), EntryState.Modified));
+                            sourceEntity.Patch(targetUsageEntity);
                         }
                         else
                         {
-                            repository.Add(sourceUsageEntity);
+                            changedEntries.Add(new GenericChangedEntry<PromotionUsage>(usage, EntryState.Added));
+                            repository.Add(sourceEntity);
                         }
                     }
                 }
-                CommitChanges(repository);
+                await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
+                await _eventPublisher.Publish(new PromotionUsageChangedEvent(changedEntries));
             }
         }
 
-        public virtual void DeleteUsages(string[] ids)
+        public virtual async Task DeleteUsagesAsync(string[] ids)
         {
             using (var repository = _repositoryFactory())
             {
-                repository.RemoveMarketingUsages(ids);
-                CommitChanges(repository);
+                await repository.RemoveMarketingUsagesAsync(ids);
+                await repository.UnitOfWork.CommitAsync();
             }
         }
 

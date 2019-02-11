@@ -1,25 +1,31 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using VirtoCommerce.MarketingModule.Core.Events;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Model;
 using VirtoCommerce.MarketingModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Events;
 
 namespace VirtoCommerce.MarketingModule.Data.Services
 {
     public class CouponService : ICouponService
     {
         private readonly Func<IMarketingRepository> _repositoryFactory;
-        public CouponService(Func<IMarketingRepository> repositoryFactory)
+        private readonly IEventPublisher _eventPublisher;
+        public CouponService(Func<IMarketingRepository> repositoryFactory, IEventPublisher eventPublisher)
         {
             _repositoryFactory = repositoryFactory;
+            _eventPublisher = eventPublisher;
         }
 
         #region ICouponService members
 
-        public GenericSearchResult<Coupon> SearchCoupons(CouponSearchCriteria criteria)
+        public async Task<GenericSearchResult<Coupon>> SearchCouponsAsync(CouponSearchCriteria criteria)
         {
             if (criteria == null)
             {
@@ -57,55 +63,58 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                                .Skip(criteria.Skip)
                                .Take(criteria.Take).ToArray();
 
-                searchResult.Results = GetByIds(ids);
+                searchResult.Results = await GetByIdsAsync(ids);
                 return searchResult;
             }
         }
 
-        public Coupon[] GetByIds(string[] ids)
+        public async Task<Coupon[]> GetByIdsAsync(string[] ids)
         {
             using (var repository = _repositoryFactory())
             {
-                return repository.GetCouponsByIds(ids).Select(x => x.ToModel(AbstractTypeFactory<Coupon>.TryCreateInstance())).ToArray();
+                var coupons = await repository.GetCouponsByIdsAsync(ids);
+                return coupons.Select(x => x.ToModel(AbstractTypeFactory<Coupon>.TryCreateInstance())).ToArray();
             }
         }
 
-        public void SaveCoupons(Coupon[] coupons)
+        public async Task SaveCouponsAsync(Coupon[] coupons)
         {
             var pkMap = new PrimaryKeyResolvingMap();
+            var changedEntries = new List<GenericChangedEntry<Coupon>>();
             using (var repository = _repositoryFactory())
-            using (var changeTracker = GetChangeTracker(repository))
             {
-                var existCouponEntities = repository.GetCouponsByIds(coupons.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
+                var existCouponEntities = await repository.GetCouponsByIdsAsync(coupons.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var coupon in coupons)
                 {
-                    var sourceCouponEntity = AbstractTypeFactory<CouponEntity>.TryCreateInstance();
-                    if (sourceCouponEntity != null)
+                    var sourceEntity = AbstractTypeFactory<CouponEntity>.TryCreateInstance();
+                    if (sourceEntity != null)
                     {
-                        sourceCouponEntity = sourceCouponEntity.FromModel(coupon, pkMap);
+                        sourceEntity = sourceEntity.FromModel(coupon, pkMap);
                         var targetCouponEntity = existCouponEntities.FirstOrDefault(x => x.Id == coupon.Id);
                         if (targetCouponEntity != null)
                         {
-                            changeTracker.Attach(targetCouponEntity);
-                            sourceCouponEntity.Patch(targetCouponEntity);
+                            changedEntries.Add(new GenericChangedEntry<Coupon>(coupon, sourceEntity.ToModel(AbstractTypeFactory<Coupon>.TryCreateInstance()), EntryState.Modified));
+                            sourceEntity.Patch(targetCouponEntity);
                         }
                         else
                         {
-                            repository.Add(sourceCouponEntity);
+                            changedEntries.Add(new GenericChangedEntry<Coupon>(coupon, EntryState.Added));
+                            repository.Add(sourceEntity);
                         }
                     }
                 }
-                CommitChanges(repository);
+                await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
+                await _eventPublisher.Publish(new CouponChangedEvent(changedEntries));
             }
         }
 
-        public void DeleteCoupons(string[] ids)
+        public async Task DeleteCouponsAsync(string[] ids)
         {
             using (var repository = _repositoryFactory())
             {
-                repository.RemoveCoupons(ids);
-                CommitChanges(repository);
+                await repository.RemoveCouponsAsync(ids);
+                await repository.UnitOfWork.CommitAsync();
             }
         }
 

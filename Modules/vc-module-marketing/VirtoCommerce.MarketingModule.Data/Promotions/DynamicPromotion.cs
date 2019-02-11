@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
@@ -53,7 +54,7 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
             IEnumerable<Coupon> validCoupons = null;
             if (HasCoupons)
             {
-                validCoupons = FindValidCoupons(promoContext.Coupons, promoContext.CustomerId);
+                validCoupons = FindValidCouponsAsync(promoContext.Coupons, promoContext.CustomerId).GetAwaiter().GetResult();
             }
             //Check coupon
             var couponIsValid = !HasCoupons || validCoupons.Any();
@@ -89,6 +90,7 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
             return result.ToArray();
         }
 
+
         protected virtual void EvaluateReward(PromotionEvaluationContext promoContext, bool couponIsValid, PromotionReward reward)
         {
             reward.Promotion = this;
@@ -101,14 +103,7 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
             }
         }
 
-        //Leave this method for back compatibility
-        [Obsolete]
-        protected virtual bool CheckCouponIsValid(string couponCode)
-        {
-            return FindValidCoupons(new[] { couponCode }, null).Any();
-        }
-
-        protected virtual IEnumerable<Coupon> FindValidCoupons(ICollection<string> couponCodes, string userId)
+        protected virtual async Task<IEnumerable<Coupon>> FindValidCouponsAsync(ICollection<string> couponCodes, string userId)
         {
             var result = new List<Coupon>();
             if (!couponCodes.IsNullOrEmpty())
@@ -117,8 +112,8 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
                 couponCodes = couponCodes.Where(x => !string.IsNullOrEmpty(x)).ToList();
                 if (!couponCodes.IsNullOrEmpty())
                 {
-                    var coupons = _couponService.SearchCoupons(new CouponSearchCriteria { Codes = couponCodes, PromotionId = Id }).Results.OrderBy(x => x.TotalUsesCount);
-                    foreach (var coupon in coupons)
+                    var coupons = await _couponService.SearchCouponsAsync(new CouponSearchCriteria { Codes = couponCodes, PromotionId = Id });
+                    foreach (var coupon in coupons.Results.OrderBy(x => x.TotalUsesCount))
                     {
                         var couponIsValid = true;
                         if (coupon.ExpirationDate != null)
@@ -127,11 +122,13 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
                         }
                         if (couponIsValid && coupon.MaxUsesNumber > 0)
                         {
-                            couponIsValid = _usageService.SearchUsages(new PromotionUsageSearchCriteria { PromotionId = Id, CouponCode = coupon.Code, Take = 0 }).TotalCount <= coupon.MaxUsesNumber;
+                            var usage = await _usageService.SearchUsagesAsync(new PromotionUsageSearchCriteria { PromotionId = Id, CouponCode = coupon.Code, Take = 0 });
+                            couponIsValid = usage.TotalCount <= coupon.MaxUsesNumber;
                         }
                         if (couponIsValid && coupon.MaxUsesPerUser > 0 && !string.IsNullOrWhiteSpace(userId))
                         {
-                            couponIsValid = _usageService.SearchUsages(new PromotionUsageSearchCriteria { PromotionId = Id, CouponCode = coupon.Code, UserId = userId, Take = int.MaxValue }).TotalCount < coupon.MaxUsesPerUser;
+                            var usage = await _usageService.SearchUsagesAsync(new PromotionUsageSearchCriteria { PromotionId = Id, CouponCode = coupon.Code, UserId = userId, Take = int.MaxValue });
+                            couponIsValid = usage.TotalCount < coupon.MaxUsesPerUser;
                         }
                         if (couponIsValid)
                         {

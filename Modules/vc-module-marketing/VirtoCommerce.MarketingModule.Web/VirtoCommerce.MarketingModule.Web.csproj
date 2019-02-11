@@ -15,4 +15,9 @@
         <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.1.3" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\VirtoCommerce.MarketingModule.Core\VirtoCommerce.MarketingModule.Core.csproj" />
+      <ProjectReference Include="..\VirtoCommerce.MarketingModule.Data\VirtoCommerce.MarketingModule.Data.csproj" />
+    </ItemGroup>
+
 </Project>

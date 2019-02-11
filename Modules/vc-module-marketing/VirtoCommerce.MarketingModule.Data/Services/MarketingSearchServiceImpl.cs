@@ -138,7 +138,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 var ids = await query.Select(x => x.Id)
                                .Skip(criteria.Skip)
                                .Take(criteria.Take).ToArrayAsync();
-                retVal.Results = _dynamicContentService.GetPlacesByIds(ids);
+                retVal.Results = await _dynamicContentService.GetPlacesByIdsAsync(ids);
             }
             return retVal;
         }
@@ -173,7 +173,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 var ids = await query.Select(x => x.Id)
                            .Skip(criteria.Skip)
                            .Take(criteria.Take).ToArrayAsync();
-                retVal.Results = _dynamicContentService.GetPublicationsByIds(ids);
+                retVal.Results = await _dynamicContentService.GetPublicationsByIdsAsync(ids);
             }
             return retVal;
         }
@@ -194,10 +194,12 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                     sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<DynamicContentFolder>(x => x.Name), SortDirection = SortDirection.Ascending } };
                 }
 
+                query = query.OrderBySortInfos(sortInfos);
+
                 retVal.TotalCount = query.Count();
 
                 var folderIds = await query.Select(x => x.Id).ToArrayAsync();
-                retVal.Results = _dynamicContentService.GetFoldersByIds(folderIds);
+                retVal.Results = await _dynamicContentService.GetFoldersByIdsAsync(folderIds);
             }
             return retVal;
         }

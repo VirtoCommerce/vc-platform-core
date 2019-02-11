@@ -13,8 +13,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
         }
 
         [StringLength(64)]
-        //TODO
-        //[Index("IX_CodeAndPromotionId", IsUnique = true, Order = 1)]
         public string Code { get; set; }
 
         public int MaxUsesNumber { get; set; }
@@ -27,8 +25,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
         public long TotalUsesCount { get; set; }
 
         #region Navigation Properties
-        //TODO
-        //[Index("IX_CodeAndPromotionId", IsUnique = true, Order = 2)]
         public string PromotionId { get; set; }
         public virtual PromotionEntity Promotion { get; set; }
 

@@ -23,6 +23,7 @@ namespace VirtoCommerce.MarketingModule.Data.Repositories
             modelBuilder.Entity<CouponEntity>().Property(x => x.Id);
             modelBuilder.Entity<CouponEntity>().HasOne(x => x.Promotion).WithMany()
                 .HasForeignKey(x => x.PromotionId).OnDelete(DeleteBehavior.Cascade).IsRequired();
+            modelBuilder.Entity<CouponEntity>().HasIndex(i => new { i.Code, i.PromotionId }).IsUnique().HasName("IX_CodeAndPromotionId");
 
 
             modelBuilder.Entity<PromotionEntity>().ToTable("Promotion");
@@ -80,6 +81,7 @@ namespace VirtoCommerce.MarketingModule.Data.Repositories
             modelBuilder.Entity<PromotionStoreEntity>().HasOne(x => x.Promotion)
                 .WithMany(x => x.Stores).HasForeignKey(x => x.PromotionId)
                 .OnDelete(DeleteBehavior.Cascade).IsRequired();
+            modelBuilder.Entity<PromotionStoreEntity>().HasIndex(i => i.StoreId);
 
             base.OnModelCreating(modelBuilder);
         }

@@ -11,8 +11,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
 
         [StringLength(128)]
         [Required]
-        //TODO
-        //[Index]
         public string StoreId { get; set; }
     }
 }

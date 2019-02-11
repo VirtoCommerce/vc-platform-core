@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
 using VirtoCommerce.Platform.Core.Common;
@@ -6,9 +7,9 @@ namespace VirtoCommerce.MarketingModule.Core.Services
 {
     public interface ICouponService
     {
-        GenericSearchResult<Coupon> SearchCoupons(CouponSearchCriteria criteria);
-        Coupon[] GetByIds(string[] ids);
-        void SaveCoupons(Coupon[] coupons);
-        void DeleteCoupons(string[] ids);
+        Task<GenericSearchResult<Coupon>> SearchCouponsAsync(CouponSearchCriteria criteria);
+        Task<Coupon[]> GetByIdsAsync(string[] ids);
+        Task SaveCouponsAsync(Coupon[] coupons);
+        Task DeleteCouponsAsync(string[] ids);
     }
 }

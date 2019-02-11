@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 
@@ -10,6 +11,6 @@ namespace VirtoCommerce.MarketingModule.Core.Services
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        PromotionResult EvaluatePromotion(IEvaluationContext context);
+        Task<PromotionResult> EvaluatePromotionAsync(IEvaluationContext context);
     }
 }
