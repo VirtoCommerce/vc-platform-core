@@ -1,4 +1,4 @@
-namespace VirtoCommerce.MarketingModule.Core.Model.DynamicContent.Search
+namespace VirtoCommerce.MarketingModule.Core.Model
 {
     public class DynamicContentPublicationSearchCriteria : DynamicContentSearchCriteriaBase
     {

@@ -1,6 +1,6 @@
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.MarketingModule.Core.Model.DynamicContent.Search
+namespace VirtoCommerce.MarketingModule.Core.Model
 {
     public class DynamicContentSearchCriteriaBase : SearchCriteriaBase
     {

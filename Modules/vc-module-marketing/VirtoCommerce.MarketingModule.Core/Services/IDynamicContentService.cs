@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
+using VirtoCommerce.MarketingModule.Core.Model;
 
 namespace VirtoCommerce.MarketingModule.Core.Services
 {

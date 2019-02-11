@@ -1,7 +1,7 @@
 using System;
 using VirtoCommerce.CoreModule.Core.Common;
 
-namespace VirtoCommerce.MarketingModule.Core.Model.DynamicContent
+namespace VirtoCommerce.MarketingModule.Core.Model
 {
     public class DynamicContentEvaluationContext : IEvaluationContext
     {

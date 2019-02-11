@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 
-namespace VirtoCommerce.MarketingModule.Core.Model.DynamicContent
+namespace VirtoCommerce.MarketingModule.Core.Model
 {
     public class DynamicContentItem : AuditableEntity, IsHasFolder, IHasDynamicProperties
     {

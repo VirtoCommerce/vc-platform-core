@@ -1,4 +1,4 @@
-namespace VirtoCommerce.MarketingModule.Core.Model.DynamicContent
+namespace VirtoCommerce.MarketingModule.Core.Model
 {
     public interface IsHasFolder
     {

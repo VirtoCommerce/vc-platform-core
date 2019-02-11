@@ -1,6 +1,6 @@
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.MarketingModule.Core.Model.DynamicContent
+namespace VirtoCommerce.MarketingModule.Core.Model
 {
     public class DynamicContentFolder : AuditableEntity
     {

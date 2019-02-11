@@ -1,0 +1,27 @@
+﻿<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block clearfix">
+            <form class="form" name="formScope">
+                <div ng-init="setForm(formScope)">
+                    <label class="form-label">{{ 'marketing.blades.filter-detail.labels.name' | translate }}</label>
+                    <div class="form-input">
+                        <input ng-model="blade.currentEntity.name" required placeholder="{{ 'marketing.blades.filter-detail.labels.name_' | translate }}" />
+                    </div>
+                </div>
+
+                <va-metaform registered-inputs="blade.metaFields" blade="blade"></va-metaform>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="text/ng-template" id="storeSelector.html">
+    <div class="form-input">
+        <ui-select ng-model="blade.currentEntity.store">
+            <ui-select-match allow-clear="true" placeholder="{{ 'marketing.blades.filter-detail.placeholders.all' | translate }}">{{$select.selected.name}}</ui-select-match>
+            <ui-select-choices repeat="store.id as store in blade.stores | filter: { name: $select.search }">
+                <span ng-bind-html="store.name | highlight: $select.search"></span>
+            </ui-select-choices>
+        </ui-select>
+    </div>
+</script>

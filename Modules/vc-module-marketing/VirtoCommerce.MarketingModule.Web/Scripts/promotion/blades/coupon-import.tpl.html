@@ -1,0 +1,50 @@
+﻿<div class="blade-static __bottom">
+    <button class="btn" ng-click="startImport()" ng-disabled="!blade.canImport" ng-bind="'marketing.commands.start-import' | translate"></button>
+</div>
+<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form class="form" name="importForm">
+                <fieldset ng-init="setForm(importForm)">
+                    <label class="form-label" ng-bind="'marketing.blades.coupons-import.labels.delimiter' | translate"></label>
+                    <ui-select required ng-model="blade.columnDelimiter">
+                        <ui-select-match placeholder="{{ 'marketing.blades.coupons-import.placeholders.delimiter' | translate }}">{{ $select.selected.name | translate }}</ui-select-match>
+                        <ui-select-choices repeat="delimiter.value as delimiter in columnDelimiters | filter: { name: $select.search }">
+                            <span ng-bind-html="delimiter.name | translate | highlight: $select.search"></span>
+                        </ui-select-choices>
+                    </ui-select>
+                    <div class="list-descr" ng-bind="'marketing.blades.coupon-detail.labels.delimiter-description' | translate"></div>
+                </fieldset>
+                <fieldset ng-disabled="!blade.columnDelimiter">
+                    <div class="form-group">
+                        <label class="form-label" ng-bind="'marketing.blades.coupons-import.labels.upload' | translate"></label>
+                        <div class="form-input">
+                            <input uploader="uploader" style="z-index: 0;" tabindex="-1" type="file" nv-file-select />
+                            <input readonly="readonly" type="text" ng-model="blade.csvFileUrl" />
+                            <button class="btn __file" onclick="$('input[type=file]').trigger('click')" type="button">
+                                <i class="btn-ico fa fa-image"></i>
+                            </button>
+                            <div class="list-descr" ng-bind="'marketing.blades.coupon-detail.labels.upload-description' | translate"></div>
+                        </div>
+                    </div>
+                    <div ng-show="uploader.isUploading">
+                        <div class="sub-t" ng-bind="'marketing.blades.coupons-import.labels.upload-progress' | translate"></div>
+                        <div class="progress-bar __aqua" ng-style="{'width': uploader.progress + '%'}" style="width: 0%;"></div>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <div class="form-group">
+                        <label class="form-label">{{ 'marketing.blades.promotion-detail.labels.expiration-date' | translate }}</label>
+                        <div class="form-input __calendar">
+                            <input placeholder="{{ 'marketing.blades.promotion-detail.placeholders.expiration-date' | translate }}" ng-model="blade.currentEntity.expirationDate" datepicker-popup="" is-open="datepickers.expirationDate" />
+                            <button class="btn" type="button" ng-click="open($event,'expirationDate')">
+                                <i class="btn-ico fa fa-calendar"></i>
+                            </button>
+                            <div class="list-descr" ng-bind="'marketing.blades.coupon-detail.labels.reservation-expiration-date-description' | translate"></div>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>

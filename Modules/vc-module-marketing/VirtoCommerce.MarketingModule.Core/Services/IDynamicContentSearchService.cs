@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
-using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
-using VirtoCommerce.MarketingModule.Core.Model.DynamicContent.Search;
+using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Core.Services
