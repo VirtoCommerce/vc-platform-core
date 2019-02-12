@@ -12,6 +12,7 @@ using VirtoCommerce.MarketingModule.Core;
 using VirtoCommerce.MarketingModule.Core.Events;
 using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.MarketingModule.Core.Services;
+using VirtoCommerce.MarketingModule.Data.ExportImport;
 using VirtoCommerce.MarketingModule.Data.Handlers;
 using VirtoCommerce.MarketingModule.Data.Promotions;
 using VirtoCommerce.MarketingModule.Data.Repositories;
@@ -30,9 +31,9 @@ namespace VirtoCommerce.MarketingModule.Web
 {
     public class Module : IModule, IExportSupport, IImportSupport
     {
-
-
+        private IApplicationBuilder _appBuilder;
         public ManifestModuleInfo ModuleInfo { get; set; }
+
         public void Initialize(IServiceCollection serviceCollection)
         {
             var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
@@ -71,6 +72,8 @@ namespace VirtoCommerce.MarketingModule.Web
 
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
+            _appBuilder = appBuilder;
+
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.General.AllSettings, ModuleInfo.Id);
 
@@ -137,13 +140,13 @@ namespace VirtoCommerce.MarketingModule.Web
         public Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
             ICancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return _appBuilder.ApplicationServices.GetRequiredService<MarketingExportImport>().ExportAsync(outStream, options, progressCallback, cancellationToken);
         }
 
         public Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
             ICancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return _appBuilder.ApplicationServices.GetRequiredService<MarketingExportImport>().ImportAsync(inputStream, options, progressCallback, cancellationToken);
         }
     }
 }
