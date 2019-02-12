@@ -1,4 +1,3 @@
-using System;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Rewards
@@ -43,9 +42,6 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Rewards
 
         //Promotion 
         public Promotion Promotion { get; set; }
-
-        [Obsolete]
-        public bool IsExclusive { get; set; }
 
         public abstract PromotionReward Clone();
     }

@@ -7,9 +7,17 @@ namespace VirtoCommerce.MarketingModule.Web.Converters
     {
         public static webModel.PromotionReward ToWebModel(this coreModel.Promotions.Rewards.PromotionReward reward)
         {
-            var retVal = new webModel.PromotionReward();
-            //TODO
-            retVal.RewardType = reward.GetType().Name;
+            var retVal = new webModel.PromotionReward
+            {
+                RewardType = reward.GetType().Name,
+                IsValid = reward.IsValid,
+                Description = reward.Description,
+                CouponAmount = reward.CouponAmount,
+                Coupon = reward.Coupon,
+                CouponMinOrderAmount = reward.CouponMinOrderAmount,
+                Promotion = reward.Promotion,
+                PromotionId = reward.Promotion?.Id,
+            };
             return retVal;
         }
 

@@ -7,15 +7,35 @@ namespace VirtoCommerce.MarketingModule.Web.Converters
     {
         public static webModel.DynamicContentFolder ToWebModel(this coreModel.DynamicContentFolder folder)
         {
-            var retVal = new webModel.DynamicContentFolder();
-            //TODO
+            var retVal = new webModel.DynamicContentFolder
+            {
+                Id = folder.Id,
+                CreatedDate = folder.CreatedDate,
+                CreatedBy = folder.CreatedBy,
+                ModifiedDate = folder.ModifiedDate,
+                ModifiedBy = folder.ModifiedBy,
+                Description = folder.Description,
+                Path = folder.Path,
+                Name = folder.Name,
+                Outline = folder.Outline,
+            };
+
             return retVal;
         }
 
         public static coreModel.DynamicContentFolder ToCoreModel(this webModel.DynamicContentFolder folder)
         {
-            var retVal = new coreModel.DynamicContentFolder();
-            //TODO
+            var retVal = new coreModel.DynamicContentFolder
+            {
+                Id = folder.Id,
+                CreatedDate = folder.CreatedDate,
+                CreatedBy = folder.CreatedBy,
+                ModifiedDate = folder.ModifiedDate,
+                ModifiedBy = folder.ModifiedBy,
+                Description = folder.Description,
+                Name = folder.Name,
+            };
+
             return retVal;
         }
 
