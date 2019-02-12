@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.MarketingModule.Core.Events;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Services;
+using VirtoCommerce.MarketingModule.Data.Caching;
 using VirtoCommerce.MarketingModule.Data.Model;
 using VirtoCommerce.MarketingModule.Data.Promotions;
 using VirtoCommerce.MarketingModule.Data.Repositories;
@@ -34,6 +36,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             var cacheKey = CacheKey.With(GetType(), "GetPromotionsByIds", string.Join("-", ids));
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
+                cacheEntry.AddExpirationToken(PromotionCacheRegion.CreateChangeToken());
                 using (var repository = _repositoryFactory())
                 {
                     var promotionEntities = await repository.GetPromotionsByIdsAsync(ids);
@@ -72,6 +75,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 pkMap.ResolvePrimaryKeys();
                 await _eventPublisher.Publish(new PromotionChangedEvent(changedEntries));
             }
+
+            PromotionCacheRegion.ExpireRegion();
         }
 
         public virtual async Task DeletePromotionsAsync(string[] ids)
@@ -81,6 +86,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 await repository.RemovePromotionsAsync(ids);
                 await repository.UnitOfWork.CommitAsync();
             }
+
+            PromotionCacheRegion.ExpireRegion();
         }
 
         #endregion

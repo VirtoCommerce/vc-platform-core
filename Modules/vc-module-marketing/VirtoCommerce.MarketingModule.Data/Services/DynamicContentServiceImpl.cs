@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.MarketingModule.Core.Events;
 using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.MarketingModule.Core.Services;
+using VirtoCommerce.MarketingModule.Data.Caching;
 using VirtoCommerce.MarketingModule.Data.Model;
 using VirtoCommerce.MarketingModule.Data.Repositories;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
@@ -18,12 +21,14 @@ namespace VirtoCommerce.MarketingModule.Data.Services
         private readonly Func<IMarketingRepository> _repositoryFactory;
         private readonly IDynamicPropertyService _dynamicPropertyService;
         private readonly IEventPublisher _eventPublisher;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public DynamicContentServiceImpl(Func<IMarketingRepository> repositoryFactory, IDynamicPropertyService dynamicPropertyService, IEventPublisher eventPublisher)
+        public DynamicContentServiceImpl(Func<IMarketingRepository> repositoryFactory, IDynamicPropertyService dynamicPropertyService, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _dynamicPropertyService = dynamicPropertyService;
             _eventPublisher = eventPublisher;
+            _platformMemoryCache = platformMemoryCache;
         }
 
         #region IDynamicContentService Members
@@ -31,18 +36,24 @@ namespace VirtoCommerce.MarketingModule.Data.Services
         #region DynamicContentItem methods
         public async Task<DynamicContentItem[]> GetContentItemsByIdsAsync(string[] ids)
         {
-            DynamicContentItem[] retVal = null;
-            using (var repository = _repositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), "GetContentItemsByIdsAsync", string.Join("-", ids));
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                retVal = (await repository.GetContentItemsByIdsAsync(ids)).Select(x => x.ToModel(AbstractTypeFactory<DynamicContentItem>.TryCreateInstance())).ToArray();
-            }
+                cacheEntry.AddExpirationToken(DynamicContentItemCacheRegion.CreateChangeToken());
+                DynamicContentItem[] retVal = null;
+                using (var repository = _repositoryFactory())
+                {
+                    retVal = (await repository.GetContentItemsByIdsAsync(ids)).Select(x => x.ToModel(AbstractTypeFactory<DynamicContentItem>.TryCreateInstance())).ToArray();
+                }
 
-            if (retVal != null)
-            {
-                await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal);
-            }
+                if (retVal != null)
+                {
+                    await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal);
+                }
 
-            return retVal;
+                return retVal;
+            });
+
         }
 
         public async Task SaveContentItemsAsync(DynamicContentItem[] items)
@@ -76,6 +87,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 pkMap.ResolvePrimaryKeys();
                 await _eventPublisher.Publish(new DynamicContentItemChangedEvent(changedEntries));
             }
+
+            DynamicContentItemCacheRegion.ExpireRegion();
         }
 
         public async Task DeleteContentItemsAsync(string[] ids)
@@ -88,17 +101,25 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 await repository.UnitOfWork.CommitAsync();
             }
             await _eventPublisher.Publish(new DynamicContentItemChangedEvent(changedEntries));
+
+            DynamicContentItemCacheRegion.ExpireRegion();
         }
         #endregion
 
         #region DynamicContentPlace methods
         public async Task<DynamicContentPlace[]> GetPlacesByIdsAsync(string[] ids)
         {
-            using (var repository = _repositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), "GetPlacesByIdsAsync", string.Join("-", ids));
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                var contentPlaces = await repository.GetContentPlacesByIdsAsync(ids);
-                return contentPlaces.Select(x => x.ToModel(AbstractTypeFactory<DynamicContentPlace>.TryCreateInstance())).ToArray();
-            }
+                cacheEntry.AddExpirationToken(DynamicContentPlaceCacheRegion.CreateChangeToken());
+                using (var repository = _repositoryFactory())
+                {
+                    var contentPlaces = await repository.GetContentPlacesByIdsAsync(ids);
+                    return contentPlaces
+                        .Select(x => x.ToModel(AbstractTypeFactory<DynamicContentPlace>.TryCreateInstance())).ToArray();
+                }
+            });
         }
 
         public async Task SavePlacesAsync(DynamicContentPlace[] places)
@@ -132,6 +153,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 pkMap.ResolvePrimaryKeys();
                 await _eventPublisher.Publish(new DynamicContentPlaceChangedEvent(changedEntries));
             }
+
+            DynamicContentPlaceCacheRegion.ExpireRegion();
         }
 
         public async Task DeletePlacesAsync(string[] ids)
@@ -141,17 +164,24 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 await repository.RemovePlacesAsync(ids);
                 await repository.UnitOfWork.CommitAsync();
             }
+
+            DynamicContentPlaceCacheRegion.ExpireRegion();
         }
         #endregion
 
         #region DynamicContentPublication methods
         public async Task<DynamicContentPublication[]> GetPublicationsByIdsAsync(string[] ids)
         {
-            using (var repository = _repositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), "GetPublicationsByIdsAsync", string.Join("-", ids));
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                var publications = await repository.GetContentPublicationsByIdsAsync(ids);
-                return publications.Select(x => x.ToModel(AbstractTypeFactory<DynamicContentPublication>.TryCreateInstance())).ToArray();
-            }
+                cacheEntry.AddExpirationToken(DynamicContentPublicationCacheRegion.CreateChangeToken());
+                using (var repository = _repositoryFactory())
+                {
+                    var publications = await repository.GetContentPublicationsByIdsAsync(ids);
+                    return publications.Select(x => x.ToModel(AbstractTypeFactory<DynamicContentPublication>.TryCreateInstance())).ToArray();
+                }
+            });
         }
 
         public async Task SavePublicationsAsync(DynamicContentPublication[] publications)
@@ -184,6 +214,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 pkMap.ResolvePrimaryKeys();
                 await _eventPublisher.Publish(new DynamicContentPublicationChangedEvent(changedEntries));
             }
+
+            DynamicContentPublicationCacheRegion.ExpireRegion();
         }
 
         public async Task DeletePublicationsAsync(string[] ids)
@@ -193,6 +225,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 await repository.RemoveContentPublicationsAsync(ids);
                 await repository.UnitOfWork.CommitAsync();
             }
+
+            DynamicContentPublicationCacheRegion.ExpireRegion();
         }
         #endregion
 
@@ -200,11 +234,16 @@ namespace VirtoCommerce.MarketingModule.Data.Services
         #region DynamicContentFolder methods
         public async Task<DynamicContentFolder[]> GetFoldersByIdsAsync(string[] ids)
         {
-            using (var repository = _repositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), "GetFoldersByIdsAsync", string.Join("-", ids));
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                var folders = await repository.GetContentFoldersByIdsAsync(ids);
-                return folders.Select(x => x.ToModel(AbstractTypeFactory<DynamicContentFolder>.TryCreateInstance())).ToArray();
-            }
+                cacheEntry.AddExpirationToken(DynamicContentFolderCacheRegion.CreateChangeToken());
+                using (var repository = _repositoryFactory())
+                {
+                    var folders = await repository.GetContentFoldersByIdsAsync(ids);
+                    return folders.Select(x => x.ToModel(AbstractTypeFactory<DynamicContentFolder>.TryCreateInstance())).ToArray();
+                }
+            });
         }
 
         public async Task SaveFoldersAsync(DynamicContentFolder[] folders)
@@ -237,6 +276,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 pkMap.ResolvePrimaryKeys();
                 await _eventPublisher.Publish(new DynamicContentFolderChangedEvent(changedEntries));
             }
+
+            DynamicContentFolderCacheRegion.ExpireRegion();
         }
 
         public async Task DeleteFoldersAsync(string[] ids)
@@ -246,6 +287,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 await repository.RemoveFoldersAsync(ids);
                 await repository.UnitOfWork.CommitAsync();
             }
+
+            DynamicContentFolderCacheRegion.ExpireRegion();
         }
         #endregion
 

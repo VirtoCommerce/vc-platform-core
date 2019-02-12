@@ -2,12 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.MarketingModule.Core.Events;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
+using VirtoCommerce.MarketingModule.Data.Caching;
 using VirtoCommerce.MarketingModule.Data.Model;
 using VirtoCommerce.MarketingModule.Data.Repositories;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 
@@ -17,10 +20,13 @@ namespace VirtoCommerce.MarketingModule.Data.Services
     {
         private readonly Func<IMarketingRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
-        public CouponService(Func<IMarketingRepository> repositoryFactory, IEventPublisher eventPublisher)
+        private readonly IPlatformMemoryCache _platformMemoryCache;
+
+        public CouponService(Func<IMarketingRepository> repositoryFactory, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
+            _platformMemoryCache = platformMemoryCache;
         }
 
         #region ICouponService members
@@ -70,11 +76,16 @@ namespace VirtoCommerce.MarketingModule.Data.Services
 
         public async Task<Coupon[]> GetByIdsAsync(string[] ids)
         {
-            using (var repository = _repositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", ids));
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                var coupons = await repository.GetCouponsByIdsAsync(ids);
-                return coupons.Select(x => x.ToModel(AbstractTypeFactory<Coupon>.TryCreateInstance())).ToArray();
-            }
+                cacheEntry.AddExpirationToken(CouponCacheRegion.CreateChangeToken());
+                using (var repository = _repositoryFactory())
+                {
+                    var coupons = await repository.GetCouponsByIdsAsync(ids);
+                    return coupons.Select(x => x.ToModel(AbstractTypeFactory<Coupon>.TryCreateInstance())).ToArray();
+                }
+            });
         }
 
         public async Task SaveCouponsAsync(Coupon[] coupons)
@@ -107,6 +118,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 pkMap.ResolvePrimaryKeys();
                 await _eventPublisher.Publish(new CouponChangedEvent(changedEntries));
             }
+
+            CouponCacheRegion.ExpireRegion();
         }
 
         public async Task DeleteCouponsAsync(string[] ids)
@@ -116,6 +129,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 await repository.RemoveCouponsAsync(ids);
                 await repository.UnitOfWork.CommitAsync();
             }
+
+            CouponCacheRegion.ExpireRegion();
         }
 
         #endregion
