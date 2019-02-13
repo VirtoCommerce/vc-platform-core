@@ -17,6 +17,7 @@ using VirtoCommerce.MarketingModule.Data.Handlers;
 using VirtoCommerce.MarketingModule.Data.Promotions;
 using VirtoCommerce.MarketingModule.Data.Repositories;
 using VirtoCommerce.MarketingModule.Data.Services;
+using VirtoCommerce.MarketingModule.Web.ExportImport;
 using VirtoCommerce.MarketingModule.Web.JsonConverters;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
@@ -39,6 +40,7 @@ namespace VirtoCommerce.MarketingModule.Web
             var configuration = serviceCollection.BuildServiceProvider().GetRequiredService<IConfiguration>();
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Marketing") ?? configuration.GetConnectionString("VirtoCommerce");
 
+            serviceCollection.AddTransient<IMarketingRepository, MarketingRepositoryImpl>();
             serviceCollection.AddDbContext<MarketingDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddSingleton<Func<IMarketingRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IMarketingRepository>());
 
@@ -54,20 +56,26 @@ namespace VirtoCommerce.MarketingModule.Web
             serviceCollection.AddSingleton<IPromotionSearchService, MarketingSearchServiceImpl>();
             serviceCollection.AddSingleton<ICouponService, CouponService>();
             serviceCollection.AddSingleton<IDynamicContentSearchService, MarketingSearchServiceImpl>();
+            serviceCollection.AddSingleton<CsvCouponImporter>();
 
+            //var settingsManager = serviceCollection.BuildServiceProvider().GetRequiredService<ISettingsManager>();
+            //var promotionCombinePolicy = settingsManager.GetValue("Marketing.Promotion.CombinePolicy", "BestReward");
+            //if (promotionCombinePolicy.EqualsInvariant("CombineStackable"))
+            //{
+            //    serviceCollection.AddSingleton<IMarketingPromoEvaluator, CombineStackablePromotionPolicy>();
+            //}
+            //else
+            //{
+            serviceCollection.AddSingleton<IMarketingPromoEvaluator, BestRewardPromotionPolicy>();
+            //}
 
-            var settingsManager = serviceCollection.BuildServiceProvider().GetRequiredService<ISettingsManager>();
-            var promotionCombinePolicy = settingsManager.GetValue("Marketing.Promotion.CombinePolicy", "BestReward");
-            if (promotionCombinePolicy.EqualsInvariant("CombineStackable"))
+            AbstractTypeFactory<DynamicPromotion>.RegisterType<DynamicPromotion>().WithFactory(() =>
             {
-                serviceCollection.AddSingleton<IMarketingPromoEvaluator, CombineStackablePromotionPolicy>();
-            }
-            else
-            {
-                serviceCollection.AddSingleton<IMarketingPromoEvaluator, BestRewardPromotionPolicy>();
-            }
-
-            AbstractTypeFactory<DynamicPromotion>.RegisterType<DynamicPromotion>().WithFactory(() => serviceCollection.BuildServiceProvider().GetService<DynamicPromotion>());
+                var serializer = serviceCollection.BuildServiceProvider().GetService<IExpressionSerializer>();
+                var couponService = serviceCollection.BuildServiceProvider().GetService<ICouponService>();
+                var promotionUsageService = serviceCollection.BuildServiceProvider().GetService<IPromotionUsageService>();
+                return new DynamicPromotion(serializer, couponService, promotionUsageService);
+            });
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -76,6 +84,9 @@ namespace VirtoCommerce.MarketingModule.Web
 
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.General.AllSettings, ModuleInfo.Id);
+
+            var settingsManager = appBuilder.ApplicationServices.GetRequiredService<ISettingsManager>();
+            var promotionCombinePolicy = settingsManager.GetValue("Marketing.Promotion.CombinePolicy", "BestReward");
 
             var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>

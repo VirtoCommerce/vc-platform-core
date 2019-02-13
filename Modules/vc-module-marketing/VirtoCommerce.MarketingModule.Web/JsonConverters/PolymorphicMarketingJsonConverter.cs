@@ -44,11 +44,11 @@ namespace VirtoCommerce.MarketingModule.Web.JsonConverters
             var promotionType = value.GetType();
             if (typeof(Promotion).IsAssignableFrom(promotionType))
             {
-                //var dynamicPromotionType = typeof(DynamicPromotion);
-                //var typeName = dynamicPromotionType.IsAssignableFrom(promotionType)
-                //    ? dynamicPromotionType.Name
-                //    : promotionType.Name;
-                //jo.Add("type", typeName);
+                var dynamicPromotionType = typeof(DynamicPromotion);
+                var typeName = dynamicPromotionType.IsAssignableFrom(promotionType)
+                    ? dynamicPromotionType.Name
+                    : promotionType.Name;
+                jo.Add("type", typeName);
 
                 //PromoDynamicExpressionTree expressionTree = GetDynamicPromotion(value);
                 //if (expressionTree != null)
@@ -56,13 +56,13 @@ namespace VirtoCommerce.MarketingModule.Web.JsonConverters
                 //    jo.Add("dynamicExpression", JToken.FromObject(expressionTree, serializer));
                 //}
 
-                ////manually remove these props because using JsonIgnore breaks import/export
-                //var ignoredPropertysNames = new[] { "predicateSerialized", "predicateVisualTreeSerialized", "rewardsSerialized" };
-                //var ignoredProperties = jo.Children<JProperty>().Where(x => ignoredPropertysNames.Contains(x.Name)).ToList();
-                //foreach (var property in ignoredProperties)
-                //{
-                //    property.Remove();
-                //}
+                //manually remove these props because using JsonIgnore breaks import/export
+                var ignoredPropertysNames = new[] { "predicateSerialized", "predicateVisualTreeSerialized", "rewardsSerialized" };
+                var ignoredProperties = jo.Children<JProperty>().Where(x => ignoredPropertysNames.Contains(x.Name)).ToList();
+                foreach (var property in ignoredProperties)
+                {
+                    property.Remove();
+                }
             }
 
             jo.WriteTo(writer);
@@ -99,7 +99,7 @@ namespace VirtoCommerce.MarketingModule.Web.JsonConverters
 
         private void PopulateDynamicExpression(DynamicPromotion dynamicPromotion, JObject jObj)
         {
-            //var dynamicExpressionToken = jObj["dynamicExpression"];
+            var dynamicExpressionToken = jObj["dynamicExpression"];
             //var dynamicExpression = dynamicExpressionToken?.ToObject<PromoDynamicExpressionTree>();
             //if (dynamicExpression?.Children != null)
             //{

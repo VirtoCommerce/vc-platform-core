@@ -44,7 +44,7 @@ namespace VirtoCommerce.Platform.Data.Extensions
             services.AddSingleton<IPlatformMemoryCache, PlatformMemoryCache>();
             services.AddScoped<IPlatformExportImportManager, PlatformExportImportManager>();
             services.AddSingleton<ITransactionFileManager, TransactionFileManager.TransactionFileManager>();
-            services.AddScoped<IExpressionSerializer, XmlExpressionSerializer>();
+            services.AddSingleton<IExpressionSerializer, XmlExpressionSerializer>();
             return services;
 
         }

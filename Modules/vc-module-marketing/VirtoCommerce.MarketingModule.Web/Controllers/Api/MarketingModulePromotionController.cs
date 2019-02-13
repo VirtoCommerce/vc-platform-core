@@ -87,7 +87,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         /// <param name="context">Promotion evaluation context</param>
         [HttpPost]
         [Route("evaluate")]
-        public async Task<ActionResult<PromotionReward[]>> EvaluatePromotions(PromotionEvaluationContext context)
+        public async Task<ActionResult<PromotionReward[]>> EvaluatePromotions([FromBody]PromotionEvaluationContext context)
         {
             var retVal = await _promoEvaluator.EvaluatePromotionAsync(context);
             return Ok(retVal.Rewards.Select(x => x.ToWebModel()).ToArray());
@@ -139,7 +139,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [HttpPost]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
-        public async Task<ActionResult<Promotion>> CreatePromotion(Promotion promotion)
+        public async Task<ActionResult<Promotion>> CreatePromotion([FromBody]Promotion promotion)
         {
             //TODO
             //var scopes = _permissionScopeService.GetObjectPermissionScopeStrings(promotion).ToArray();
@@ -159,7 +159,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [HttpPut]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<IActionResult> UpdatePromotions(Promotion promotion)
+        public async Task<IActionResult> UpdatePromotions([FromBody]Promotion promotion)
         {
             //TODO
             //var scopes = _permissionScopeService.GetObjectPermissionScopeStrings(promotion).ToArray();
@@ -186,7 +186,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
 
         [HttpPost]
         [Route("coupons/search")]
-        public async Task<ActionResult<GenericSearchResult<Coupon>>> SearchCoupons(CouponSearchCriteria criteria)
+        public async Task<ActionResult<GenericSearchResult<Coupon>>> SearchCoupons([FromBody]CouponSearchCriteria criteria)
         {
             var searchResult = await _couponService.SearchCouponsAsync(criteria);
             // actualize coupon totalUsage field 
@@ -214,7 +214,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
 
         [HttpPost]
         [Route("coupons/add")]
-        public async Task<IActionResult> AddCoupons(Coupon[] coupons)
+        public async Task<IActionResult> AddCoupons([FromBody]Coupon[] coupons)
         {
             await _couponService.SaveCouponsAsync(coupons);
 
@@ -232,7 +232,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
 
         [HttpPost]
         [Route("coupons/import")]
-        public ActionResult<ImportNotification> ImportCoupons(ImportRequest request)
+        public ActionResult<ImportNotification> ImportCoupons([FromBody]ImportRequest request)
         {
             var notification = new ImportNotification(_userNameResolver.GetCurrentUserName())
             {

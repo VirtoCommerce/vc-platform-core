@@ -1,77 +1,77 @@
 {
     "marketing": {
-      "main-menu-title": "Marketing",
-      "widgets": {
-        "couponsWidget": {
-          "title": "Coupons",
-          "newPromotion": "You can add coupons after saving a promotion"
-        }
-      },
+        "main-menu-title": "Marketing",
+        "widgets": {
+            "couponsWidget": {
+                "title": "Coupons",
+                "newPromotion": "You can add coupons after saving a promotion"
+            }
+        },
         "blades": {
             "marketing-main": {
                 "title": "Marketing"
             },
-          "promotion-detail": {
-            "title-new": "New Promotion",
-            "labels": {
-              "is-active": "Is active",
-              "exclusivity": "Exclusivity",
-              "is-combine-with-self": "Combine with self",
-              "priority": "Priority",
-              "promotion-name": "Promotion name",
-              "description": "Description",
-              "store": "Stores",
-              "start-date": "Start date",
-              "usage-limit": "Usage limit",
-              "coupons": "Coupons",
-              "expiration-date": "Expiration date",
-              "per-customer-limit": "Per customer limit",
-              "promotion-conditions": "Promotion conditions",
-              "combined-with-others": "Can be combined with others",
-              "exclusive": "Globally exclusive"
-            },
-            "descr": {
-              "promotion-name": "Type a name that uniquely identifies the promotion. This name is displayed in the promotions list to identify the promotion.",
-              "store": "Stores in which this promotion will be active",
-              "is-active": "Flag controls Active/Inactive the promotion",
-              "start-date": "If you do not specify a start date, the promotion is will active immediately after saving.",
-              "expiration-date": "If you do not specify an end date, the promotion is in effect until you deactivate it.",
-              "priority": "The promotion with the highest priority is applied first.",
-              "exclusivity": "If a 'Globally exclusive' is selected, no other promotions with less priority can be applied to the order.",
-              "is-combine-with-self": "Specialty for the case when several coupons are defined for a promotion and their simultaneous action is required."
-            },
-            "placeholders": {
-              "promotion-name": "Please enter name...",
-              "description": "Enter description...",
-              "store": "Select...",
-              "start-date": "Please choose date...",
-              "coupons": "Enter coupon codes...",
-              "expiration-date": "Please choose date..."
+            "promotion-detail": {
+                "title-new": "New Promotion",
+                "labels": {
+                    "is-active": "Is active",
+                    "exclusivity": "Exclusivity",
+                    "is-combine-with-self": "Combine with self",
+                    "priority": "Priority",
+                    "promotion-name": "Promotion name",
+                    "description": "Description",
+                    "store": "Stores",
+                    "start-date": "Start date",
+                    "usage-limit": "Usage limit",
+                    "coupons": "Coupons",
+                    "expiration-date": "Expiration date",
+                    "per-customer-limit": "Per customer limit",
+                    "promotion-conditions": "Promotion conditions",
+                    "combined-with-others": "Can be combined with others",
+                    "exclusive": "Globally exclusive"
+                },
+                "descr": {
+                    "promotion-name": "Type a name that uniquely identifies the promotion. This name is displayed in the promotions list to identify the promotion.",
+                    "store": "Stores in which this promotion will be active",
+                    "is-active": "Flag controls Active/Inactive the promotion",
+                    "start-date": "If you do not specify a start date, the promotion is will active immediately after saving.",
+                    "expiration-date": "If you do not specify an end date, the promotion is in effect until you deactivate it.",
+                    "priority": "The promotion with the highest priority is applied first.",
+                    "exclusivity": "If a 'Globally exclusive' is selected, no other promotions with less priority can be applied to the order.",
+                    "is-combine-with-self": "Specialty for the case when several coupons are defined for a promotion and their simultaneous action is required."
+                },
+                "placeholders": {
+                    "promotion-name": "Please enter name...",
+                    "description": "Enter description...",
+                    "store": "Select...",
+                    "start-date": "Please choose date...",
+                    "coupons": "Enter coupon codes...",
+                    "expiration-date": "Please choose date..."
 
+                },
+                "toolbar": {
+                    "coupons": "Coupons"
+                }
             },
-            "toolbar": {
-              "coupons": "Coupons"
-            }
-          },
-          "coupon-detail": {
-            "new-title": "New coupon",
-            "title": "Coupon",
-            "labels": {
-              "coupon-code": "Code",
-              "code-description": "A correct coupon code can contain numbers and alphabetic symbols",
-              "max-uses-number": "Maximum uses number",
-              "max-uses-per-user": "Maximum uses per user",
-              "max-uses-number-description": "A coupon can be applied several times, 0 value means that a coupon can be applied an infinite number of times",
-              "max-uses-per-user-description": "A coupon can be applied several times by one user, 0 value means that a coupon can be applied an infinite number of times for one user",
-              "reservation-expiration-date": "A coupon expiration date",
-              "reservation-expiration-date-description": "The date, until the coupon is valid, leave blank for use value from promotion",
-              "delimiter-description": "CSV record delimiter",
-              "upload-description": "A CSV file with coupon records in next format: [coupon_code][delimiter][max_uses_number] (without square brackets). MaxUsesNumber 0 value means a coupon can be applied an infinite number of times",
-              "enter-value": "Enter a value",
-              "select-date": "Select a date"
+            "coupon-detail": {
+                "new-title": "New coupon",
+                "title": "Coupon",
+                "labels": {
+                    "coupon-code": "Code",
+                    "code-description": "A correct coupon code can contain numbers and alphabetic symbols",
+                    "max-uses-number": "Maximum uses number",
+                    "max-uses-per-user": "Maximum uses per user",
+                    "max-uses-number-description": "A coupon can be applied several times, 0 value means that a coupon can be applied an infinite number of times",
+                    "max-uses-per-user-description": "A coupon can be applied several times by one user, 0 value means that a coupon can be applied an infinite number of times for one user",
+                    "reservation-expiration-date": "A coupon expiration date",
+                    "reservation-expiration-date-description": "The date, until the coupon is valid, leave blank for use value from promotion",
+                    "delimiter-description": "CSV record delimiter",
+                    "upload-description": "A CSV file with coupon records in next format: [coupon_code][delimiter][max_uses_number] (without square brackets). MaxUsesNumber 0 value means a coupon can be applied an infinite number of times",
+                    "enter-value": "Enter a value",
+                    "select-date": "Select a date"
 
-            }
-          },
+                }
+            },
             "promotion-list": {
                 "labels": {
                     "name": "Name",
@@ -230,75 +230,75 @@
                     }
                 }
             },
-          "publishing": {
-            "add-content-items": {
-              "title": "Add content items elements",
-              "subtitle": "Add content items elements",
-              "labels": {
-                "chosen-content-items": "Chosen content items",
-                "content-items": "Content items",
-                "picture": "Pic",
-                "name": "Name",
-                "description": "Description",
-                "no-data": "No data"
-              }
-            },
-            "add-placeholders": {
-              "title": "Add placeholders elements",
-              "subtitle": "Add placeholders elements",
-              "labels": {
-                "chosen-placeholders": "Chosen placeholders",
-                "content-placeholders": "Content placeholders",
-                "picture": "Pic",
-                "name": "Name",
-                "description": "Description",
-                "no-data": "No data"
-              }
-            },
-            "publishing-main-step": {
-              "title": "Edit publishing element",
-              "subtitle": "Edit publishing element",
-              "title-new": "New publishing element",
-              "subtitle-new": "New publishing element",
-              "labels": {
-                "name": "Name",
-                "description": "Description",
-                "store": "Store",
-                "is-active": "Is active",
-                "start-date": "Start date",
-                "end-date": "End date",
-                "publishing-conditions": "Publishing conditions"
-              },
-              "placeholders": {
-                "name": "Enter publishing name",
-                "description": "Enter publishing description",
-                "store": "Select...",
-                "start-date": "Enter value",
-                "end-date": "Enter value"
-              },
-              "menu": {
-                "placeholders": {
-                  "title": "Placeholders",
-                  "description": "Chosen {{quantity}} placeholders"
+            "publishing": {
+                "add-content-items": {
+                    "title": "Add content items elements",
+                    "subtitle": "Add content items elements",
+                    "labels": {
+                        "chosen-content-items": "Chosen content items",
+                        "content-items": "Content items",
+                        "picture": "Pic",
+                        "name": "Name",
+                        "description": "Description",
+                        "no-data": "No data"
+                    }
                 },
-                "content-items": {
-                  "title": "Content items",
-                  "description": "Chosen {{quantity}} content items"
+                "add-placeholders": {
+                    "title": "Add placeholders elements",
+                    "subtitle": "Add placeholders elements",
+                    "labels": {
+                        "chosen-placeholders": "Chosen placeholders",
+                        "content-placeholders": "Content placeholders",
+                        "picture": "Pic",
+                        "name": "Name",
+                        "description": "Description",
+                        "no-data": "No data"
+                    }
+                },
+                "publishing-main-step": {
+                    "title": "Edit publishing element",
+                    "subtitle": "Edit publishing element",
+                    "title-new": "New publishing element",
+                    "subtitle-new": "New publishing element",
+                    "labels": {
+                        "name": "Name",
+                        "description": "Description",
+                        "store": "Store",
+                        "is-active": "Is active",
+                        "start-date": "Start date",
+                        "end-date": "End date",
+                        "publishing-conditions": "Publishing conditions"
+                    },
+                    "placeholders": {
+                        "name": "Enter publishing name",
+                        "description": "Enter publishing description",
+                        "store": "Select...",
+                        "start-date": "Enter value",
+                        "end-date": "Enter value"
+                    },
+                    "menu": {
+                        "placeholders": {
+                            "title": "Placeholders",
+                            "description": "Chosen {{quantity}} placeholders"
+                        },
+                        "content-items": {
+                            "title": "Content items",
+                            "description": "Chosen {{quantity}} content items"
+                        }
+                    }
+                },
+                "list": {
+                    "title": "Content publishing",
+                    "subtitle": "Content publishing list",
+                    "noItemsMessage": "There are no content publishings yet",
+                    "labels": {
+                        "picture": "Icon",
+                        "name": "Name",
+                        "description": "Description",
+                        "no-data": "No Publishings yet"
+                    }
                 }
-              }
             },
-            "list": {
-              "title": "Content publishing",
-              "subtitle": "Content publishing list",
-              "noItemsMessage": "There are no content publishings yet",
-              "labels": {
-                "picture": "Icon",
-                "name": "Name",
-                "description": "Description",
-                "no-data": "No Publishings yet"
-              }
-            }
-          },
             "coupons": {
                 "code": "Code",
                 "total-uses-count": "Total uses count",
@@ -313,30 +313,30 @@
                 },
                 "no-coupons-message": "There are no coupons yet"
             },
-          "coupons-import": {
-            "title": "Import coupons",
-            "labels": {
-              "delimiter": "CSV column delimiter",
-              "upload": "Upload CSV file",
-              "upload-progress": "Upload progress",
-              "space": "Space",
-              "comma": "Comma",
-              "semicolon": "Semicolon",
-              "start": "Start",
-              "end": "End",
-              "total": "Total count",
-              "processed": "Processed count",
-              "errors-count": "Errors count",
-              "errors": "Errors",
-              "tab": "Tab"
+            "coupons-import": {
+                "title": "Import coupons",
+                "labels": {
+                    "delimiter": "CSV column delimiter",
+                    "upload": "Upload CSV file",
+                    "upload-progress": "Upload progress",
+                    "space": "Space",
+                    "comma": "Comma",
+                    "semicolon": "Semicolon",
+                    "start": "Start",
+                    "end": "End",
+                    "total": "Total count",
+                    "processed": "Processed count",
+                    "errors-count": "Errors count",
+                    "errors": "Errors",
+                    "tab": "Tab"
+                },
+                "placeholders": {
+                    "delimiter": "Select..."
+                }
             },
-            "placeholders": {
-              "delimiter": "Select..."
+            "coupons-import-processing": {
+                "title": "Coupon import processing"
             }
-          },
-          "coupons-import-processing": {
-            "title": "Coupon import processing"
-          }
         },
         "dialogs": {
             "content-item-delete": {
@@ -367,20 +367,37 @@
                 "title": "Delete confirmation",
                 "message": "Are you sure you want to delete selected Promotions?"
             },
-          "promotion-save": {
-            "title": "Save changes",
-            "message": "The promotion has been modified. Do you want to save changes?"
-          },
-          "coupon-delete": {
-            "title": "Delete confirmation",
-            "message": "Are you sure you want to delete selected coupons?",
-            "message-all": "Are you sure you want to delete all of the coupons?"
-          }
+            "promotion-save": {
+                "title": "Save changes",
+                "message": "The promotion has been modified. Do you want to save changes?"
+            },
+            "coupon-delete": {
+                "title": "Delete confirmation",
+                "message": "Are you sure you want to delete selected coupons?",
+                "message-all": "Are you sure you want to delete all of the coupons?"
+            }
         },
         "commands": {
             "manage-type-properties": "Manage type properties",
-          "edit-folder": "Edit folder",
-          "start-import": "Start import"
+            "edit-folder": "Edit folder",
+            "start-import": "Start import"
+        }
+    },
+    "permissions": {
+        "marketing:read": "View marketing data",
+        "marketing:create": "Create marketing data",
+        "marketing:update": "Update marketing data",
+        "marketing:delete": "Delete marketing data",
+        "marketing:access": "Open marketing menu"
+    },
+    "settings": {
+        "Marketing.Promotion.CombinePolicy": {
+            "description": "BestReward - select the promotion rewards that benefits the shoppers the most. CombineStackable - If your store has multiple active promotions, shoppers can qualify for multiple promotions at a time. ",
+            "title": "Selected policy of combine active promotions (requires restart)"
+        },
+        "Marketing.ExportImport.Description": {
+            "description": "Export/Import promotions and dynamic contents (places, contents, publications)",
+            "title": "Export/Import description"
         }
     }
 }

@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <module>
   <id>VirtoCommerce.Marketing</id>
-  <version>2.17.4</version>
-  <platformVersion>2.13.30</platformVersion>
+  <version>3.0.0</version>
+  <platformVersion>3.0.0</platformVersion>
   <dependencies>
-    <dependency id="VirtoCommerce.Core" version="2.25.17" />
-    <dependency id="VirtoCommerce.Store" version="2.13.0" />
+    <dependency id="VirtoCommerce.Core" version="3.0.0" />
+    <dependency id="VirtoCommerce.Store" version="3.0.0" />
   </dependencies>
 
   <title>Marketing module</title>
   <description>Marketing system with dynamic contents and promotions management</description>
   <authors>
-    <author>Eugeney Tatarincev</author>
+    <author>Virto Commerce</author>
   </authors>
   <owners>
     <owner>Virto Commerce</owner>
   </owners>
   <projectUrl>https://virtocommerce.com/apps/extensions/virto-marketing-module</projectUrl>
   <iconUrl>https://raw.githubusercontent.com/VirtoCommerce/vc-module-marketing/master/VirtoCommerce.MarketingModule.Web/Content/logo.png</iconUrl>
-  <releaseNotes>First version.</releaseNotes>
+  <releaseNotes>Third version.</releaseNotes>
   <copyright>Copyright © 2011-2019 Virto Commerce. All rights reserved</copyright>
   <tags>marketing promotion</tags>
 
@@ -28,37 +28,4 @@
   <scripts>
     <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
   </scripts>
-
-  <settings>
-    <group name="Marketing|General">
-      <setting>
-        <name>Marketing.ExportImport.Description</name>
-        <valueType>string</valueType>
-        <defaultValue>Export/Import promotions and dynamic contents (places, contents, publications)</defaultValue>
-        <title>Export/Import description</title>
-        <description>Module description in platform export/import wizard</description>
-      </setting>     
-      <setting>
-        <name>Marketing.Promotion.CombinePolicy</name>
-        <valueType>string</valueType>
-        <defaultValue>BestReward</defaultValue>
-        <title>Selected policy of combine active promotions (requires restart)</title>
-        <description>BestReward - select the promotion rewards that benefits the shoppers the most. CombineStackable - If your store has multiple active promotions, shoppers can qualify for multiple promotions at a time. </description>
-        <allowedValues>
-          <value>BestReward</value>
-          <value>CombineStackable</value>
-        </allowedValues>
-      </setting>
-    </group>
-  </settings>
-
-  <permissions>
-    <group name="Marketing">
-      <permission id="marketing:access" name="Open marketing menu" description=""/>
-      <permission id="marketing:create" name="Create marketing data" description=""/>
-      <permission id="marketing:read" name="View marketing data" description=""/>
-      <permission id="marketing:update" name="Update marketing data" description=""/>
-      <permission id="marketing:delete" name="Delete marketing data" description=""/>
-    </group>
-  </permissions>
 </module>
