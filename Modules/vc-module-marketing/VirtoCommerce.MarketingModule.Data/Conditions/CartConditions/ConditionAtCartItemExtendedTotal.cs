@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
-using VirtoCommerce.Domain.Common;
-using VirtoCommerce.Domain.Marketing.Model;
-using VirtoCommerce.DynamicExpressionsModule.Data.Common;
-using VirtoCommerce.DynamicExpressionsModule.Data.Common.Extensions;
+using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using linq = System.Linq.Expressions;
 
-namespace VirtoCommerce.DynamicExpressionsModule.Data.Promotion
+namespace VirtoCommerce.MarketingModule.Data.Conditions.CartConditions
 {
     //Line item subtotal is []
     public class ConditionAtCartItemExtendedTotal : CompareConditionBase
