@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -6,7 +5,6 @@ using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Primitives;
 using Hangfire;
 using Hangfire.MemoryStorage;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -22,15 +20,15 @@ using Newtonsoft.Json.Converters;
 using Smidge;
 using Smidge.Nuglify;
 using Swashbuckle.AspNetCore.Swagger;
-using Swashbuckle.AspNetCore.SwaggerUI;
-using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Jobs;
-using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Assets.AzureBlobStorage;
 using VirtoCommerce.Platform.Assets.AzureBlobStorage.Extensions;
 using VirtoCommerce.Platform.Assets.FileSystem;
 using VirtoCommerce.Platform.Assets.FileSystem.Extensions;
+using VirtoCommerce.Platform.Core;
+using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Jobs;
+using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.Platform.Data.PushNotifications;
 using VirtoCommerce.Platform.Data.Repositories;
@@ -40,14 +38,12 @@ using VirtoCommerce.Platform.Security;
 using VirtoCommerce.Platform.Security.Authorization;
 using VirtoCommerce.Platform.Security.Extensions;
 using VirtoCommerce.Platform.Security.Repositories;
+using VirtoCommerce.Platform.Security.Services;
 using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Hangfire;
-using VirtoCommerce.Platform.Web.Infrastructure;
 using VirtoCommerce.Platform.Web.JsonConverters;
 using VirtoCommerce.Platform.Web.Middelware;
 using VirtoCommerce.Platform.Web.Swagger;
-using VirtoCommerce.Platform.Core;
-using VirtoCommerce.Platform.Security.Services;
 
 namespace VirtoCommerce.Platform.Web
 {
@@ -172,47 +168,50 @@ namespace VirtoCommerce.Platform.Web
             // Register the OpenIddict services.
             // Note: use the generic overload if you need
             // to replace the default OpenIddict entities.
-            services.AddOpenIddict(options =>
-            {
-                // Register the Entity Framework stores.
-                options.AddEntityFrameworkCoreStores<SecurityDbContext>();
+            services.AddOpenIddict()
+                .AddCore(options =>
+                {
+                    // Configure OpenIddict to use the Entity Framework Core stores and entities.
+                    options.UseEntityFrameworkCore()
+                        .UseDbContext<SecurityDbContext>();
+                })
+                .AddServer(options =>
+                {
+                    // Register the ASP.NET Core MVC binder used by OpenIddict.
+                    // Note: if you don't call this method, you won't be able to
+                    // bind OpenIdConnectRequest or OpenIdConnectResponse parameters.
+                    options.UseMvc();
 
+                    // Enable the authorization, logout, token and userinfo endpoints.
+                    options.EnableTokenEndpoint("/connect/token")
+                           .EnableUserinfoEndpoint("/api/security/userinfo");
 
-                // Register the ASP.NET Core MVC binder used by OpenIddict.
-                // Note: if you don't call this method, you won't be able to
-                // bind OpenIdConnectRequest or OpenIdConnectResponse parameters.
-                options.AddMvcBinders();
+                    // Note: the Mvc.Client sample only uses the code flow and the password flow, but you
+                    // can enable the other flows if you need to support implicit or client credentials.
+                    options.AllowPasswordFlow()
+                           .AllowRefreshTokenFlow()
+                           .AllowClientCredentialsFlow();
 
-                // Enable the authorization, logout, token and userinfo endpoints.
-                options.EnableTokenEndpoint("/connect/token")
-                       .EnableUserinfoEndpoint("/api/security/userinfo");
+                    // Make the "client_id" parameter mandatory when sending a token request.
+                    //options.RequireClientIdentification();
 
-                // Note: the Mvc.Client sample only uses the code flow and the password flow, but you
-                // can enable the other flows if you need to support implicit or client credentials.
-                options.AllowPasswordFlow()
-                       .AllowRefreshTokenFlow()
-                       .AllowClientCredentialsFlow();
+                    // When request caching is enabled, authorization and logout requests
+                    // are stored in the distributed cache by OpenIddict and the user agent
+                    // is redirected to the same page with a single parameter (request_id).
+                    // This allows flowing large OpenID Connect requests even when using
+                    // an external authentication provider like Google, Facebook or Twitter.
+                    options.EnableRequestCaching();
 
-                // Make the "client_id" parameter mandatory when sending a token request.
-                //options.RequireClientIdentification();
+                    // During development, you can disable the HTTPS requirement.
+                    options.DisableHttpsRequirement();
 
-                // When request caching is enabled, authorization and logout requests
-                // are stored in the distributed cache by OpenIddict and the user agent
-                // is redirected to the same page with a single parameter (request_id).
-                // This allows flowing large OpenID Connect requests even when using
-                // an external authentication provider like Google, Facebook or Twitter.
-                options.EnableRequestCaching();
-
-                // During development, you can disable the HTTPS requirement.
-                options.DisableHttpsRequirement();
-
-                // Note: to use JWT access tokens instead of the default
-                // encrypted format, the following lines are required:
-                //
-                options.UseJsonWebTokens();
-                //TODO: Replace to X.509 certificate
-                options.AddEphemeralSigningKey();
-            });
+                    // Note: to use JWT access tokens instead of the default
+                    // encrypted format, the following lines are required:
+                    //
+                    options.UseJsonWebTokens();
+                    //TODO: Replace to X.509 certificate
+                    options.AddEphemeralSigningKey();
+                });
 
             services.Configure<IdentityOptions>(Configuration.GetSection("IdentityOptions"));
 
