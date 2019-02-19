@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
-using VirtoCommerce.Platform.Data.Settings;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api
 {
@@ -94,7 +93,21 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<ActionResult<object[]>> GetArrayAsync(string name)
         {
-            var result = (await _settingsManager.GetObjectSettingAsync(name)).AllowedValues;
+            var settings = await _settingsManager.GetObjectSettingAsync(name);
+            object[] result;
+            if (settings.AllowedValues != null)
+            {
+                result = settings.AllowedValues;
+            }
+            else if (settings.Value != null)
+            {
+                result = new[] { settings.Value };
+            }
+            else
+            {
+                result = new[] { settings.DefaultValue };
+            }
+
             return Ok(result);
         }
 
