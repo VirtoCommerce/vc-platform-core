@@ -93,19 +93,20 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<ActionResult<object[]>> GetArrayAsync(string name)
         {
-            var settings = await _settingsManager.GetObjectSettingAsync(name);
             object[] result;
-            if (settings.AllowedValues != null)
+
+            var setting = await _settingsManager.GetObjectSettingAsync(name);
+            if (setting.AllowedValues != null)
             {
-                result = settings.AllowedValues;
+                result = setting.AllowedValues;
             }
-            else if (settings.Value != null)
+            else if (setting.Value != null)
             {
-                result = new[] { settings.Value };
+                result = new[] { setting.Value };
             }
             else
             {
-                result = new[] { settings.DefaultValue };
+                result = new[] { setting.DefaultValue };
             }
 
             return Ok(result);
