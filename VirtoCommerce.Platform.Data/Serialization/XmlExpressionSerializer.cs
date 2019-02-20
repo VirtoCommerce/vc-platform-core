@@ -21,7 +21,7 @@ namespace VirtoCommerce.Platform.Data.Serialization
 
         private ExpressionSerializer GetSerializer()
         {
-            return new ExpressionSerializer(new JsonSerializer());
+            return new ExpressionSerializer(new XmlSerializer());
         }
     }
 }

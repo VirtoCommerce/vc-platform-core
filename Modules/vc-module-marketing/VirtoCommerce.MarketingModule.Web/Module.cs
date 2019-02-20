@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,9 +9,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.MarketingModule.Core;
 using VirtoCommerce.MarketingModule.Core.Events;
 using VirtoCommerce.MarketingModule.Core.Model;
+using VirtoCommerce.MarketingModule.Core.Model.Promotions;
+using VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.ExportImport;
 using VirtoCommerce.MarketingModule.Data.Handlers;
@@ -131,6 +135,12 @@ namespace VirtoCommerce.MarketingModule.Web
 
             dynamicPropertyService.SaveDynamicPropertiesAsync(new[] { contentItemTypeProperty }).GetAwaiter().GetResult();
 
+            var promotionExtensionManager = appBuilder.ApplicationServices.GetService<IMarketingExtensionManager>();
+            promotionExtensionManager.PromotionCondition = new PromoDynamicCondition()
+            {
+                Children = GetConditionsAndRewards(),
+            };
+
             //Next lines allow to use polymorph types in API controller methods
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicMarketingJsonConverter(appBuilder.ApplicationServices.GetService<IMarketingExtensionManager>(),
@@ -158,6 +168,47 @@ namespace VirtoCommerce.MarketingModule.Web
             ICancellationToken cancellationToken)
         {
             return _appBuilder.ApplicationServices.GetRequiredService<MarketingExportImport>().ImportAsync(inputStream, options, progressCallback, cancellationToken);
+        }
+
+        private List<ICondition> GetConditionsAndRewards()
+        {
+            return new List<ICondition>
+            {
+                new BlockCustomerCondition
+                {
+                    AvailableChildren = new List<ICondition>
+                    {
+                        new ConditionIsRegisteredUser(), new ConditionIsEveryone(),
+                        new ConditionIsFirstTimeBuyer(), new UserGroupsContainsCondition()
+                    }
+                },
+                new BlockCartCondition
+                {
+                    AvailableChildren = new List<ICondition>
+                    {
+                        new ConditionAtCartItemExtendedTotal(), new ConditionAtNumItemsInCart(), new ConditionAtNumItemsInCategoryAreInCart(),
+                        new ConditionAtNumItemsOfEntryAreInCart(), new ConditionCartSubtotalLeast()
+                    }
+                },
+                new BlockCatalogCondition
+                {
+                    AvailableChildren = new List<ICondition>
+                    {
+                        new ConditionCategoryIs(), new ConditionCodeContains(), new ConditionCurrencyIs(),
+                        new ConditionEntryIs(), new ConditionInStockQuantity()
+                    }
+                },
+                new RewardBlock
+                {
+                    AvailableChildren = new List<ICondition>
+                    {
+                        new RewardCartGetOfAbsSubtotal(), new RewardCartGetOfRelSubtotal(), new RewardItemGetFreeNumItemOfProduct(), new RewardItemGetOfAbs(),
+                        new RewardItemGetOfAbsForNum(), new RewardItemGetOfRel(), new RewardItemGetOfRelForNum(),
+                        new RewardItemGiftNumItem(), new RewardShippingGetOfAbsShippingMethod(), new RewardShippingGetOfRelShippingMethod(), new RewardPaymentGetOfAbs(),
+                        new RewardPaymentGetOfRel(), new RewardItemForEveryNumInGetOfRel(), new RewardItemForEveryNumOtherItemInGetOfRel()
+                    }
+                }
+            };
         }
     }
 }

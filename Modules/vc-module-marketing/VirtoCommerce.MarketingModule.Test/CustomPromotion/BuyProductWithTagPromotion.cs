@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
-using VirtoCommerce.MarketingModule.Core.Model.Promotions.Rewards;
 
 namespace VirtoCommerce.MarketingModule.Test.CustomPromotion
 {
@@ -33,6 +32,7 @@ namespace VirtoCommerce.MarketingModule.Test.CustomPromotion
                         ProductId = entry.ProductId,
                         Promotion = this
                     };
+                    retVal.Add(reward);
                 }
             }
             return retVal.ToArray();

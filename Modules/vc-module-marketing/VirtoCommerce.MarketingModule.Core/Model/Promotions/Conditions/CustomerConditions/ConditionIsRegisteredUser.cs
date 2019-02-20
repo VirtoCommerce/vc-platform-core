@@ -1,12 +1,11 @@
 using VirtoCommerce.CoreModule.Core.Common;
-using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 
-namespace VirtoCommerce.MarketingModule.Data.Conditions.CustomerConditions
+namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
 {
     //Registered user
-    public class ConditionIsRegisteredUser : ICondition
+    public class ConditionIsRegisteredUser : BaseCondition
     {
-        public bool Evaluate(IEvaluationContext context)
+        public override bool Evaluate(IEvaluationContext context)
         {
             var result = false;
             if (context is PromotionEvaluationContext promotionEvaluationContext)

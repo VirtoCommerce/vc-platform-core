@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Services;
 
@@ -16,8 +17,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
         #region InMemoryExtensionManagerImpl Members
 
         //TODO
-        //public PromoDynamicExpressionTree PromotionDynamicExpressionTree { get; set; }
-        //public ConditionExpressionTree DynamicContentExpressionTree { get; set; }
+        public ICondition PromotionCondition { get; set; }
+        public ICondition ContentCondition { get; set; }
 
         public void RegisterPromotion(Promotion promotion)
         {

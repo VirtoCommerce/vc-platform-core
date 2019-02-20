@@ -1,20 +1,26 @@
-using VirtoCommerce.Platform.Core.Common;
+using System.Linq;
 
 namespace VirtoCommerce.CoreModule.Core.Common
 {
-    public abstract class BlockConditionAndOr : ICondition
+    public abstract class BlockConditionAndOr : BaseCondition
     {
         public bool All { get; set; }
 
         // Logical inverse of expression
         public bool Not { get; set; } = false;
 
-        public bool Evaluate(IEvaluationContext context)
+        public override bool Evaluate(IEvaluationContext context)
         {
             var result = false;
-            var expression = All ? PredicateBuilder.True<IEvaluationContext>() : PredicateBuilder.False<IEvaluationContext>();
-            var compile = expression.Compile();
-            //context.
+            if (Children != null && Children.Any())
+            {
+                result = All ? Children.All(ch => ch.Evaluate(context)) : Children.Any(ch => ch.Evaluate(context));
+            }
+
+            if (AvailableChildren != null && AvailableChildren.Any())
+            {
+                result = All ? AvailableChildren.All(ch => ch.Evaluate(context)) : AvailableChildren.Any(ch => ch.Evaluate(context));
+            }
 
             return result;
         }

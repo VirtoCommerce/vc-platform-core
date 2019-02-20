@@ -17,17 +17,15 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
     [Route("api/marketing")]
     public class MarketingModuleDynamicContentController : Controller
     {
-        private readonly IMarketingExtensionManager _marketingExtensionManager;
         private readonly IDynamicContentService _dynamicContentService;
         private readonly IMarketingDynamicContentEvaluator _dynamicContentEvaluator;
         private readonly IExpressionSerializer _expressionSerializer;
         private readonly IDynamicContentSearchService _dynamicConentSearchService;
 
-        public MarketingModuleDynamicContentController(IDynamicContentService dynamicContentService, IMarketingExtensionManager marketingExtensionManager,
+        public MarketingModuleDynamicContentController(IDynamicContentService dynamicContentService,
             IMarketingDynamicContentEvaluator dynamicContentEvaluator, IExpressionSerializer expressionSerializer, IDynamicContentSearchService dynamicConentSearchService)
         {
             _dynamicContentService = dynamicContentService;
-            _marketingExtensionManager = marketingExtensionManager;
             _dynamicContentEvaluator = dynamicContentEvaluator;
             _expressionSerializer = expressionSerializer;
             _dynamicConentSearchService = dynamicConentSearchService;

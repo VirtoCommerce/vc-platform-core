@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
@@ -50,11 +51,11 @@ namespace VirtoCommerce.MarketingModule.Web.JsonConverters
                     : promotionType.Name;
                 jo.Add("type", typeName);
 
-                //PromoDynamicExpressionTree expressionTree = GetDynamicPromotion(value);
-                //if (expressionTree != null)
-                //{
-                //    jo.Add("dynamicExpression", JToken.FromObject(expressionTree, serializer));
-                //}
+                var expressionTree = GetDynamicPromotion(value);
+                if (expressionTree != null)
+                {
+                    jo.Add("dynamicExpression", JToken.FromObject(expressionTree, serializer));
+                }
 
                 //manually remove these props because using JsonIgnore breaks import/export
                 var ignoredPropertysNames = new[] { "predicateSerialized", "predicateVisualTreeSerialized", "rewardsSerialized" };
@@ -100,64 +101,66 @@ namespace VirtoCommerce.MarketingModule.Web.JsonConverters
         private void PopulateDynamicExpression(DynamicPromotion dynamicPromotion, JObject jObj)
         {
             var dynamicExpressionToken = jObj["dynamicExpression"];
-            //var dynamicExpression = dynamicExpressionToken?.ToObject<PromoDynamicExpressionTree>();
-            //if (dynamicExpression?.Children != null)
-            //{
-            //    var conditionExpression = dynamicExpression.GetConditionExpression();
-            //    dynamicPromotion.PredicateSerialized = _expressionSerializer.SerializeExpression(conditionExpression);
+            var dynamicExpression = dynamicExpressionToken?.ToObject<PromoDynamicCondition>();
+            if (dynamicExpression?.Children != null)
+            {
+                //var conditionExpression = dynamicExpression.GetConditions();
+                //TODO
+                //dynamicPromotion.PredicateSerialized = _expressionSerializer.SerializeExpression(conditionExpression);
+                dynamicPromotion.PredicateSerialized = JsonConvert.SerializeObject(dynamicExpression);
 
-            //    var rewards = dynamicExpression.GetRewards();
-            //    dynamicPromotion.RewardsSerialized = JsonConvert.SerializeObject(rewards, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
+                var rewards = dynamicExpression.GetRewards();
+                dynamicPromotion.RewardsSerialized = JsonConvert.SerializeObject(rewards, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
 
-            //    // Clear availableElements in expression to decrease size
-            //    dynamicExpression.AvailableChildren = null;
-            //    var allBlocks = ((DynamicExpression)dynamicExpression).Traverse(x => x.Children);
-            //    foreach (var block in allBlocks)
-            //    {
-            //        block.AvailableChildren = null;
-            //    }
+                // Clear availableElements in expression to decrease size
+                dynamicExpression.AvailableChildren = null;
+                var allBlocks = ((ICondition)dynamicExpression).Traverse(x => x.Children);
+                foreach (var block in allBlocks)
+                {
+                    block.AvailableChildren = null;
+                }
 
-            //    dynamicPromotion.PredicateVisualTreeSerialized = JsonConvert.SerializeObject(dynamicExpression);
-            //}
+                dynamicPromotion.PredicateVisualTreeSerialized = JsonConvert.SerializeObject(dynamicExpression);
+            }
         }
 
-        //private PromoDynamicExpressionTree GetDynamicPromotion(object value)
-        //{
-        //    PromoDynamicExpressionTree result = null;
+        private ICondition GetDynamicPromotion(object value)
+        {
+            ICondition result = null;
 
-        //    var dynamicPromotion = value as DynamicPromotion;
-        //    if (dynamicPromotion?.IsTransient() == true ||
-        //        dynamicPromotion?.PredicateVisualTreeSerialized != null && dynamicPromotion?.PredicateSerialized != null && dynamicPromotion?.RewardsSerialized != null)
-        //    {
-        //        var etalonEpressionTree = _marketingExtensionManager.PromotionDynamicExpressionTree;
-        //        if (etalonEpressionTree != null)
-        //        {
-        //            result = etalonEpressionTree;
+            var dynamicPromotion = value as DynamicPromotion;
+            if (dynamicPromotion?.IsTransient() == true ||
+                dynamicPromotion?.PredicateVisualTreeSerialized != null && dynamicPromotion?.PredicateSerialized != null && dynamicPromotion?.RewardsSerialized != null)
+            {
+                var etalonEpressionTree = _marketingExtensionManager.PromotionCondition;
+                if (etalonEpressionTree != null)
+                {
+                    result = etalonEpressionTree;
 
-        //            if (!string.IsNullOrEmpty(dynamicPromotion?.PredicateVisualTreeSerialized))
-        //            {
-        //                result = JsonConvert.DeserializeObject<PromoDynamicExpressionTree>(dynamicPromotion.PredicateVisualTreeSerialized);
+                    if (!string.IsNullOrEmpty(dynamicPromotion?.PredicateVisualTreeSerialized))
+                    {
+                        result = JsonConvert.DeserializeObject<PromoDynamicCondition>(dynamicPromotion.PredicateVisualTreeSerialized);
 
-        //                // Copy available elements from etalon because they not persisted
-        //                var sourceBlocks = ((DynamicExpression)etalonEpressionTree).Traverse(x => x.Children);
-        //                var targetBlocks = ((DynamicExpression)result).Traverse(x => x.Children).ToList();
+                        //// Copy available elements from etalon because they not persisted
+                        var sourceBlocks = ((ICondition)etalonEpressionTree).Traverse(x => x.Children);
+                        var targetBlocks = ((ICondition)result).Traverse(x => x.Children).ToList();
 
-        //                foreach (var sourceBlock in sourceBlocks)
-        //                {
-        //                    foreach (var targetBlock in targetBlocks.Where(x => x.Id == sourceBlock.Id))
-        //                    {
-        //                        targetBlock.AvailableChildren = sourceBlock.AvailableChildren;
-        //                    }
-        //                }
+                        foreach (var sourceBlock in sourceBlocks)
+                        {
+                            foreach (var targetBlock in targetBlocks.Where(x => x.Id == sourceBlock.Id))
+                            {
+                                targetBlock.AvailableChildren = sourceBlock.AvailableChildren;
+                            }
+                        }
 
-        //                // Copy available elements from etalon
-        //                result.AvailableChildren = etalonEpressionTree.AvailableChildren;
-        //            }
-        //        }
-        //    }
+                        // Copy available elements from etalon
+                        result.AvailableChildren = etalonEpressionTree.AvailableChildren;
+                    }
+                }
+            }
 
-        //    return result;
-        //}
+            return result;
+        }
 
         private JsonSerializer CloneSerializerSettings(JsonSerializer jsonSettings)
         {

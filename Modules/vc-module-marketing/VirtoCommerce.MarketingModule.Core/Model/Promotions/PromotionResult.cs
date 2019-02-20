@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.MarketingModule.Core.Model.Promotions.Rewards;
 
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {

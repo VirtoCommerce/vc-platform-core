@@ -69,12 +69,12 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             criteria = FilterPromotionSearchCriteria(User.Identity.Name, criteria);
 
             var promoSearchResult = await _promoSearchService.SearchPromotionsAsync(criteria);
-            foreach (var promotion in promoSearchResult.Results.OfType<DynamicPromotion>())
-            {
-                promotion.PredicateVisualTreeSerialized = null;
-                promotion.PredicateSerialized = null;
-                promotion.RewardsSerialized = null;
-            }
+            //foreach (var promotion in promoSearchResult.Results.OfType<DynamicPromotion>())
+            //{
+            //    promotion.PredicateVisualTreeSerialized = null;
+            //    promotion.PredicateSerialized = null;
+            //    promotion.RewardsSerialized = null;
+            //}
 
             retVal.TotalCount = promoSearchResult.TotalCount;
             retVal.Results = promoSearchResult.Results.ToList();
@@ -87,7 +87,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         /// <param name="context">Promotion evaluation context</param>
         [HttpPost]
         [Route("evaluate")]
-        public async Task<ActionResult<PromotionReward[]>> EvaluatePromotions([FromBody]PromotionEvaluationContext context)
+        public async Task<ActionResult<Model.PromotionReward[]>> EvaluatePromotions([FromBody]PromotionEvaluationContext context)
         {
             var retVal = await _promoEvaluator.EvaluatePromotionAsync(context);
             return Ok(retVal.Rewards.Select(x => x.ToWebModel()).ToArray());

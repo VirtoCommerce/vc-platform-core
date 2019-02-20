@@ -31,8 +31,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
 
         public async Task<DynamicContentItem[]> EvaluateItemsAsync(IEvaluationContext context)
         {
-            var dynamicContext = context as DynamicContentEvaluationContext;
-            if (dynamicContext == null)
+            if (!(context is DynamicContentEvaluationContext dynamicContext))
             {
                 throw new ArgumentException("The context must be a DynamicContentEvaluationContext.");
             }
@@ -43,7 +42,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             var retVal = new List<DynamicContentItem>();
             using (var repository = _repositoryFactory())
             {
-                var publishings = await repository.PublishingGroups.Include(x => x.ContentItems)
+                var publishings = await repository.PublishingGroups
+                                                       .Include(x => x.ContentItems)
                                                        .Where(x => x.IsActive)
                                                        .Where(x => x.StoreId == dynamicContext.StoreId)
                                                        .Where(x => (x.StartDate == null || dynamicContext.ToDate >= x.StartDate) && (x.EndDate == null || x.EndDate >= dynamicContext.ToDate))

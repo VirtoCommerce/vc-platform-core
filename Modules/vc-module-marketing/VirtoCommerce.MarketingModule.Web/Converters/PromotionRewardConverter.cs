@@ -5,7 +5,7 @@ namespace VirtoCommerce.MarketingModule.Web.Converters
 {
     public static class PromotionRewardConverter
     {
-        public static webModel.PromotionReward ToWebModel(this coreModel.Promotions.Rewards.PromotionReward reward)
+        public static webModel.PromotionReward ToWebModel(this coreModel.Promotions.PromotionReward reward)
         {
             var retVal = new webModel.PromotionReward
             {

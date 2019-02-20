@@ -6,7 +6,7 @@ using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 namespace VirtoCommerce.MarketingModule.Test.CustomPromotionExpressions
 {
     //items with [] tag
-    public class ConditionItemWithTag : ICondition
+    public class ConditionItemWithTag : BaseCondition
     {
         public string[] Tags { get; set; }
 
@@ -14,7 +14,7 @@ namespace VirtoCommerce.MarketingModule.Test.CustomPromotionExpressions
         /// ((PromotionEvaluationContext)x).CheckItemTags() > NumItem
         /// </summary>
         /// <returns></returns>
-        public bool Evaluate(IEvaluationContext context)
+        public override bool Evaluate(IEvaluationContext context)
         {
             if (context is PromotionEvaluationContext promotionEvaluationContext)
             {

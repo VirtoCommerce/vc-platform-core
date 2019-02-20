@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using VirtoCommerce.CoreModule.Core.Common;
-using VirtoCommerce.MarketingModule.Core.Model.Promotions.Rewards;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions

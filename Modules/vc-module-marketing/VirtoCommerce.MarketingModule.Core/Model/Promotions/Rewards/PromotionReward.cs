@@ -1,6 +1,6 @@
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Rewards
+namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
     public abstract class PromotionReward : ValueObject
     {

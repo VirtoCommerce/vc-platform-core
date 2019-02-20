@@ -1,6 +1,6 @@
 using VirtoCommerce.CoreModule.Core.Common;
 
-namespace VirtoCommerce.MarketingModule.Data.Conditions
+namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
 {
     public class BlockCustomerCondition : BlockConditionAndOr
     {

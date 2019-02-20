@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
-using VirtoCommerce.MarketingModule.Core.Model.Promotions.Rewards;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
@@ -23,7 +22,7 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
             _couponService = couponService;
             _usageService = usageService;
         }
-        private Func<IEvaluationContext, bool> _condition;
+        private PromoDynamicCondition _condition;
         private PromotionReward[] _rewards;
 
         /// <summary>
@@ -38,7 +37,21 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
         public string PredicateVisualTreeSerialized { get; set; }
         public string RewardsSerialized { get; set; }
 
-        protected Func<IEvaluationContext, bool> Condition => _condition ?? (_condition = ExpressionSerializer.DeserializeExpression<Func<IEvaluationContext, bool>>(PredicateSerialized));
+        protected PromoDynamicCondition Condition
+        {
+            get
+            {
+                if (_condition == null)
+                {
+                    _condition = JsonConvert.DeserializeObject<PromoDynamicCondition>(PredicateSerialized);
+                }
+                return _condition
+                    //_condition = ExpressionSerializer.DeserializeExpression<Func<IEvaluationContext, bool>>(PredicateSerialized)
+
+                    ;
+            }
+        }
+
         protected PromotionReward[] Rewards => _rewards ?? (_rewards = JsonConvert.DeserializeObject<PromotionReward[]>(RewardsSerialized, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }));
 
         public override PromotionReward[] EvaluatePromotion(IEvaluationContext context)
@@ -94,7 +107,7 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
         protected virtual void EvaluateReward(PromotionEvaluationContext promoContext, bool couponIsValid, PromotionReward reward)
         {
             reward.Promotion = this;
-            reward.IsValid = couponIsValid && Condition(promoContext);
+            reward.IsValid = couponIsValid && Condition.Evaluate(promoContext);
 
             //Set productId for catalog item reward
             if (reward is CatalogItemAmountReward catalogItemReward && catalogItemReward.ProductId == null)

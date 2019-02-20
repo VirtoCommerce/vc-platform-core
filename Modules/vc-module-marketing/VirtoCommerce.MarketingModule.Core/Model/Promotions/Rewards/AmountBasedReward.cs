@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using VirtoCommerce.CoreModule.Core.Extensions;
 
-namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Rewards
+namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
     public abstract class AmountBasedReward : PromotionReward
     {

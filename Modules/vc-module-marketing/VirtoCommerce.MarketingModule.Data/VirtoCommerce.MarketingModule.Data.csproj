@@ -10,25 +10,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Remove="Conditions\CartConditions\BlockCartCondition.cs" />
-      <Compile Remove="Conditions\CartConditions\ConditionAtCartItemExtendedTotal.cs" />
-      <Compile Remove="Conditions\CartConditions\ConditionAtNumItemsInCart.cs" />
-      <Compile Remove="Conditions\CartConditions\ConditionAtNumItemsOfCategoryAreInCart.cs" />
-      <Compile Remove="Conditions\CartConditions\ConditionAtNumItemsOfEntryAreInCart.cs" />
-      <Compile Remove="Conditions\CartConditions\ConditionCartSubtotalLeast.cs" />
-      <Compile Remove="Conditions\CatalogConditions\BlockCatalogCondition.cs" />
-      <Compile Remove="Conditions\CatalogConditions\ConditionCategoryIs.cs" />
-      <Compile Remove="Conditions\CatalogConditions\ConditionCodeContains.cs" />
-      <Compile Remove="Conditions\CatalogConditions\ConditionCurrencyIs.cs" />
-      <Compile Remove="Conditions\CatalogConditions\ConditionEntryIs.cs" />
-      <Compile Remove="Conditions\CatalogConditions\ConditionInStockQuantity.cs" />
-      <Compile Remove="Conditions\CustomerConditions\ConditionIsEveryone.cs" />
-      <Compile Remove="Conditions\CustomerConditions\ConditionIsFirstTimeBuyer.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Conditions\CartConditions\" />
-      <Folder Include="Conditions\CatalogConditions\" />
       <Folder Include="Services\" />
     </ItemGroup>
 

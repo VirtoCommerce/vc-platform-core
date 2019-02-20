@@ -14,4 +14,9 @@
       <ProjectReference Include="..\..\vc-module-core\VirtoCommerce.CoreModule.Core\VirtoCommerce.CoreModule.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Model\Promotions\Conditions\CartConditions\" />
+      <Folder Include="Model\Promotions\Conditions\CatalogConditions\" />
+    </ItemGroup>
+
 </Project>
