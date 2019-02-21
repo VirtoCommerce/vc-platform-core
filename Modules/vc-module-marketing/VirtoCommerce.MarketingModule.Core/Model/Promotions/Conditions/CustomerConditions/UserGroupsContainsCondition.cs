@@ -5,7 +5,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
 {
     //User groups contains condition
-    public class UserGroupsContainsCondition : BaseCondition
+    public class UserGroupsContainsCondition : Condition
     {
         public string Group { get; set; }
 

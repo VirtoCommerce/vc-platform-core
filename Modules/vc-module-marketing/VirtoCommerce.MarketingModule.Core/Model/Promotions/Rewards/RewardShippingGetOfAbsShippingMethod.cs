@@ -3,7 +3,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
     //Get $[] off shipping []
-    public class RewardShippingGetOfAbsShippingMethod : BaseCondition, IRewardExpression
+    public class RewardShippingGetOfAbsShippingMethod : ConditionRewardTree, IReward
     {
         public decimal Amount { get; set; }
         public string ShippingMethod { get; set; }

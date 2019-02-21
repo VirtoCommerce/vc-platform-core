@@ -3,6 +3,7 @@ using System.Linq;
 using Moq;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
+using VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Promotions;
@@ -130,10 +131,32 @@ namespace VirtoCommerce.MarketingModule.Test
 
             var evalPolicy = GetPromotionEvaluationPolicy(new List<Promotion> { new DynamicPromotion(null, couponServiceMock.Object, promotionUsageMock.Object)
             {
-                RewardsSerialized = "{\"$type\":\"VirtoCommerce.MarketingModule.Core.Model.Promotions.PromotionReward[], VirtoCommerce.MarketingModule.Core\",\"$values\":[{\"$type\":\"VirtoCommerce.MarketingModule.Core.Model.Promotions.CartSubtotalReward, VirtoCommerce.MarketingModule.Core\",\"AmountType\":1,\"Amount\":15.0,\"MaxLimit\":20.0,\"Quantity\":0,\"ForNthQuantity\":0,\"InEveryNthQuantity\":0,\"IsValid\":false,\"Description\":null,\"CouponAmount\":0.0,\"Coupon\":null,\"CouponMinOrderAmount\":null,\"Promotion\":null},{\"$type\":\"VirtoCommerce.MarketingModule.Core.Model.Promotions.CatalogItemAmountReward, VirtoCommerce.MarketingModule.Core\",\"ProductId\":null,\"ConditionalProductId\":null,\"AmountType\":1,\"Amount\":25.0,\"MaxLimit\":30.0,\"Quantity\":0,\"ForNthQuantity\":0,\"InEveryNthQuantity\":0,\"IsValid\":false,\"Description\":null,\"CouponAmount\":0.0,\"Coupon\":null,\"CouponMinOrderAmount\":null,\"Promotion\":null}]}",
-                PredicateSerialized = "{\"AvailableChildren\":[],\"Children\":[{\"$type\":\"VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions.BlockCustomerCondition, VirtoCommerce.MarketingModule.Core\",\"All\":false,\"Not\":false,\"AvailableChildren\":[],\"Children\":[{\"$type\":\"VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions.ConditionIsEveryone, VirtoCommerce.MarketingModule.Core\",\"AvailableChildren\":[],\"Children\":[],\"Id\":\"ConditionIsEveryone\"},{\"$type\":\"VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions.ConditionIsRegisteredUser, VirtoCommerce.MarketingModule.Core\",\"AvailableChildren\":[],\"Children\":[],\"Id\":\"ConditionIsRegisteredUser\"}],\"Id\":\"BlockCustomerCondition\"},{\"$type\":\"VirtoCommerce.MarketingModule.Data.Conditions.BlockCartCondition, VirtoCommerce.MarketingModule.Core\",\"All\":false,\"Not\":false,\"AvailableChildren\":[],\"Children\":[{\"$type\":\"VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions.ConditionCartSubtotalLeast, VirtoCommerce.MarketingModule.Core\",\"SubTotal\":100.0,\"SubTotalSecond\":0.0,\"ExcludingCategoryIds\":[],\"ExcludingProductIds\":[],\"AvailableChildren\":[],\"Children\":[],\"Id\":\"ConditionCartSubtotalLeast\"}],\"Id\":\"BlockCartCondition\"},{\"$type\":\"VirtoCommerce.MarketingModule.Data.Conditions.BlockCatalogCondition, VirtoCommerce.MarketingModule.Core\",\"All\":false,\"Not\":false,\"AvailableChildren\":[],\"Children\":[{\"$type\":\"VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions.ConditionCurrencyIs, VirtoCommerce.MarketingModule.Core\",\"Currency\":\"usd\",\"AvailableChildren\":[],\"Children\":[],\"Id\":\"ConditionCurrencyIs\"},{\"$type\":\"VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions.ConditionInStockQuantity, VirtoCommerce.MarketingModule.Core\",\"Quantity\":6,\"QuantitySecond\":0,\"CompareCondition\":\"AtLeast\",\"Exactly\":false,\"AvailableChildren\":[],\"Children\":[],\"Id\":\"ConditionInStockQuantity\"}],\"Id\":\"BlockCatalogCondition\"},{\"$type\":\"VirtoCommerce.MarketingModule.Core.Model.Promotions.RewardBlock, VirtoCommerce.MarketingModule.Core\",\"AvailableChildren\":[],\"Children\":[{\"$type\":\"VirtoCommerce.MarketingModule.Core.Model.Promotions.RewardCartGetOfRelSubtotal, VirtoCommerce.MarketingModule.Core\",\"Amount\":15.0,\"MaxLimit\":20.0,\"AvailableChildren\":[],\"Children\":[],\"Id\":\"RewardCartGetOfRelSubtotal\"},{\"$type\":\"VirtoCommerce.MarketingModule.Core.Model.Promotions.RewardItemGetOfRel, VirtoCommerce.MarketingModule.Core\",\"Amount\":25.0,\"ProductId\":null,\"ProductName\":null,\"MaxLimit\":30.0,\"AvailableChildren\":[],\"Children\":[],\"Id\":\"RewardItemGetOfRel\"}],\"Id\":\"RewardBlock\"}],\"Id\":\"PromoDynamicCondition\"}"
+                PredicateSerialized = "[{\"All\":true,\"Not\":false,\"AvailableChildren\":[],\"Children\":[{\"$type\":\"VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions.ConditionIsRegisteredUser, VirtoCommerce.MarketingModule.Core\",\"AvailableChildren\":[],\"Children\":[],\"Id\":\"ConditionIsRegisteredUser\"},{\"$type\":\"VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions.ConditionIsEveryone, VirtoCommerce.MarketingModule.Core\",\"AvailableChildren\":[],\"Children\":[],\"Id\":\"ConditionIsEveryone\"}],\"Id\":\"BlockCustomerCondition\"},{\"All\":false,\"Not\":false,\"AvailableChildren\":[],\"Children\":[],\"Id\":\"BlockCartCondition\"},{\"All\":false,\"Not\":true,\"AvailableChildren\":[],\"Children\":[{\"$type\":\"VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions.ConditionCurrencyIs, VirtoCommerce.MarketingModule.Core\",\"Currency\":\"usd\",\"AvailableChildren\":[],\"Children\":[],\"Id\":\"ConditionCurrencyIs\"}],\"Id\":\"BlockCatalogCondition\"}]",
+                RewardsSerialized = "{\"$type\":\"VirtoCommerce.MarketingModule.Core.Model.Promotions.PromotionReward[], VirtoCommerce.MarketingModule.Core\",\"$values\":[{\"$type\":\"VirtoCommerce.MarketingModule.Core.Model.Promotions.CartSubtotalReward, VirtoCommerce.MarketingModule.Core\",\"AmountType\":0,\"Amount\":10.0,\"MaxLimit\":0.0,\"Quantity\":0,\"ForNthQuantity\":0,\"InEveryNthQuantity\":0,\"IsValid\":false,\"Description\":null,\"CouponAmount\":0.0,\"Coupon\":null,\"CouponMinOrderAmount\":null,\"Promotion\":null}]}",
+
             } });
-            var context = new PromotionEvaluationContext() { IsRegisteredUser = true, PromoEntries = new List<ProductPromoEntry> { new ProductPromoEntry() { ProductId = "1" } } };
+            var context = new PromotionEvaluationContext() { IsRegisteredUser = true, IsEveryone = true, Currency = "usd", PromoEntries = new List<ProductPromoEntry> { new ProductPromoEntry() { ProductId = "1" } } };
+            AbstractTypeFactory<Condition>.RegisterType<BlockConditionAndOr>();
+
+            AbstractTypeFactory<Condition>.RegisterType<BlockCustomerCondition>();
+            AbstractTypeFactory<Condition>.RegisterType<ConditionIsRegisteredUser>();
+            AbstractTypeFactory<Condition>.RegisterType<ConditionIsEveryone>();
+            AbstractTypeFactory<Condition>.RegisterType<ConditionIsFirstTimeBuyer>();
+            AbstractTypeFactory<Condition>.RegisterType<UserGroupsContainsCondition>();
+
+            AbstractTypeFactory<Condition>.RegisterType<BlockCatalogCondition>();
+            AbstractTypeFactory<Condition>.RegisterType<ConditionAtCartItemExtendedTotal>();
+            AbstractTypeFactory<Condition>.RegisterType<ConditionAtNumItemsInCart>();
+            AbstractTypeFactory<Condition>.RegisterType<ConditionAtNumItemsInCategoryAreInCart>();
+            AbstractTypeFactory<Condition>.RegisterType<ConditionAtNumItemsOfEntryAreInCart>();
+            AbstractTypeFactory<Condition>.RegisterType<ConditionCartSubtotalLeast>();
+
+            AbstractTypeFactory<Condition>.RegisterType<BlockCartCondition>();
+            AbstractTypeFactory<Condition>.RegisterType<ConditionCategoryIs>();
+            AbstractTypeFactory<Condition>.RegisterType<ConditionCodeContains>();
+            AbstractTypeFactory<Condition>.RegisterType<ConditionCurrencyIs>();
+            AbstractTypeFactory<Condition>.RegisterType<ConditionEntryIs>();
+            AbstractTypeFactory<Condition>.RegisterType<ConditionInStockQuantity>();
 
             //Act
             var rewards = evalPolicy.EvaluatePromotionAsync(context).GetAwaiter().GetResult().Rewards;

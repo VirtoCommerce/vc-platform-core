@@ -7,8 +7,8 @@ namespace VirtoCommerce.MarketingModule.Core.Services
     public interface IMarketingExtensionManager
     {
         //TODO
-        ICondition PromotionCondition { get; set; }
-        ICondition ContentCondition { get; set; }
+        IConditionRewardTree PromotionCondition { get; set; }
+        IConditionRewardTree ContentCondition { get; set; }
 
         void RegisterPromotion(Promotion promotion);
         IEnumerable<Promotion> Promotions { get; }

@@ -4,5 +4,6 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
 {
     public class BlockCartCondition : BlockConditionAndOr
     {
+
     }
 }

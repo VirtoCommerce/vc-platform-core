@@ -17,8 +17,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
         #region InMemoryExtensionManagerImpl Members
 
         //TODO
-        public ICondition PromotionCondition { get; set; }
-        public ICondition ContentCondition { get; set; }
+        public IConditionRewardTree PromotionCondition { get; set; }
+        public IConditionRewardTree ContentCondition { get; set; }
 
         public void RegisterPromotion(Promotion promotion)
         {

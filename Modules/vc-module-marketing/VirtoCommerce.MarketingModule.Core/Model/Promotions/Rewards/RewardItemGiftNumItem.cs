@@ -3,7 +3,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
     //Gift [] of Product []
-    public class RewardItemGiftNumItem : BaseCondition, IRewardExpression
+    public class RewardItemGiftNumItem : ConditionRewardTree, IReward
     {
         public string Name { get; set; }
         public string CategoryId { get; set; }

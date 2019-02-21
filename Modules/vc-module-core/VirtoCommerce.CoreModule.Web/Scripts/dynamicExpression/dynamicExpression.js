@@ -107,7 +107,7 @@ angular.module(moduleName, [])
                 displayName: '[] [] items of entry are in shopping cart'
             });
             dynamicExpressionService.registerExpression({
-                id: 'RewardBlock',
+                id: 'BlockReward',
                 newChildLabel: '+ add effect',
                 getValidationError: function () {
                     return (this.children && this.children.length) ? undefined : 'Promotion requires at least one reward';

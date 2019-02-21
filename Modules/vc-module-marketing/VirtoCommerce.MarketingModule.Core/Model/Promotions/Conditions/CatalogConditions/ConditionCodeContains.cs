@@ -3,7 +3,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
 {
     //Product code contains []
-    public class ConditionCodeContains : BaseCondition
+    public class ConditionCodeContains : Condition
     {
         public string Keyword { get; set; }
 

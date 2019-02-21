@@ -3,7 +3,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
     //Get [] % off cart subtotal not to exceed $ [ 500 ]
-    public class RewardCartGetOfRelSubtotal : BaseCondition, IRewardExpression
+    public class RewardCartGetOfRelSubtotal : ConditionRewardTree, IReward
     {
         public decimal Amount { get; set; }
         public decimal MaxLimit { get; set; }

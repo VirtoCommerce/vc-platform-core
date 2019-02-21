@@ -3,7 +3,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
 {
     //Everyone
-    public class ConditionIsEveryone : BaseCondition
+    public class ConditionIsEveryone : Condition
     {
         /// <summary>
         /// ((PromotionEvaluationContext)x).IsEveryone

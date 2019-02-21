@@ -3,7 +3,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
 {
     //Currency is []
-    public class ConditionCurrencyIs : BaseCondition
+    public class ConditionCurrencyIs : Condition
     {
         public string Currency { get; set; }
 

@@ -5,7 +5,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
 {
     //Category is []
-    public class ConditionCategoryIs : BaseCondition
+    public class ConditionCategoryIs : Condition
     {
         public ICollection<string> ExcludingCategoryIds { get; set; } = new List<string>();
         public ICollection<string> ExcludingProductIds { get; set; } = new List<string>();

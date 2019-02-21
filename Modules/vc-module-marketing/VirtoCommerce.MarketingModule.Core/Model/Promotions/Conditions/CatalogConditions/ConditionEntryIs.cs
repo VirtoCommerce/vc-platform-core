@@ -2,7 +2,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
 {
     //Product is []
-    public class ConditionEntryIs : BaseCondition
+    public class ConditionEntryIs : Condition
     {
 
         public string ProductId { get; set; }

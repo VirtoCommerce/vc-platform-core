@@ -3,7 +3,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
     //Get []% off [ select product ] not to exceed $ [ 500 ]
-    public class RewardItemGetOfRel : BaseCondition, IRewardExpression
+    public class RewardItemGetOfRel : ConditionRewardTree, IReward
     {
         public decimal Amount { get; set; }
         public string ProductId { get; set; }

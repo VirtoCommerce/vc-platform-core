@@ -3,7 +3,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
     //Get [] % off payment method [] not to exceed $ [ 500 ]
-    public class RewardPaymentGetOfRel : BaseCondition, IRewardExpression
+    public class RewardPaymentGetOfRel : ConditionRewardTree, IReward
     {
         public decimal Amount { get; set; }
         public string PaymentMethod { get; set; }

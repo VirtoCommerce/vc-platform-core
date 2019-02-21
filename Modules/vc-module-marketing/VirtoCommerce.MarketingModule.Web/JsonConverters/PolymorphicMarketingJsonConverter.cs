@@ -8,7 +8,6 @@ using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Promotions;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Serialization;
 
 namespace VirtoCommerce.MarketingModule.Web.JsonConverters
 {
@@ -18,12 +17,9 @@ namespace VirtoCommerce.MarketingModule.Web.JsonConverters
 
         private readonly IMarketingExtensionManager _marketingExtensionManager;
 
-        private readonly IExpressionSerializer _expressionSerializer;
-
-        public PolymorphicMarketingJsonConverter(IMarketingExtensionManager marketingExtensionManager, IExpressionSerializer expressionSerializer)
+        public PolymorphicMarketingJsonConverter(IMarketingExtensionManager marketingExtensionManager)
         {
             _marketingExtensionManager = marketingExtensionManager;
-            _expressionSerializer = expressionSerializer;
         }
 
         #region Overrides of JsonConverter
@@ -90,7 +86,7 @@ namespace VirtoCommerce.MarketingModule.Web.JsonConverters
             var dynamicPromotion = result as DynamicPromotion;
             if (dynamicPromotion != null)
             {
-                PopulateDynamicExpression(dynamicPromotion, jObj);
+                PopulateDynamicExpression(dynamicPromotion, jObj, serializer);
             }
 
             return result;
@@ -98,23 +94,21 @@ namespace VirtoCommerce.MarketingModule.Web.JsonConverters
 
         #endregion
 
-        private void PopulateDynamicExpression(DynamicPromotion dynamicPromotion, JObject jObj)
+        private void PopulateDynamicExpression(DynamicPromotion dynamicPromotion, JObject jObj, JsonSerializer serializer)
         {
             var dynamicExpressionToken = jObj["dynamicExpression"];
-            var dynamicExpression = dynamicExpressionToken?.ToObject<PromoDynamicCondition>();
+            var dynamicExpression = dynamicExpressionToken?.ToObject<PromotionConditionReward>(serializer);
             if (dynamicExpression?.Children != null)
             {
-                //var conditionExpression = dynamicExpression.GetConditions();
-                //TODO
-                //dynamicPromotion.PredicateSerialized = _expressionSerializer.SerializeExpression(conditionExpression);
-                dynamicPromotion.PredicateSerialized = JsonConvert.SerializeObject(dynamicExpression);
+                var conditionExpression = dynamicExpression.GetConditions();
+                dynamicPromotion.PredicateSerialized = JsonConvert.SerializeObject(conditionExpression);
 
                 var rewards = dynamicExpression.GetRewards();
-                dynamicPromotion.RewardsSerialized = JsonConvert.SerializeObject(rewards, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
+                dynamicPromotion.RewardsSerialized = JsonConvert.SerializeObject(rewards);
 
                 // Clear availableElements in expression to decrease size
                 dynamicExpression.AvailableChildren = null;
-                var allBlocks = ((ICondition)dynamicExpression).Traverse(x => x.Children);
+                var allBlocks = ((IConditionRewardTree)dynamicExpression).Traverse(x => x.Children);
                 foreach (var block in allBlocks)
                 {
                     block.AvailableChildren = null;
@@ -124,9 +118,9 @@ namespace VirtoCommerce.MarketingModule.Web.JsonConverters
             }
         }
 
-        private ICondition GetDynamicPromotion(object value)
+        private IConditionRewardTree GetDynamicPromotion(object value)
         {
-            ICondition result = null;
+            IConditionRewardTree result = null;
 
             var dynamicPromotion = value as DynamicPromotion;
             if (dynamicPromotion?.IsTransient() == true ||
@@ -139,11 +133,13 @@ namespace VirtoCommerce.MarketingModule.Web.JsonConverters
 
                     if (!string.IsNullOrEmpty(dynamicPromotion?.PredicateVisualTreeSerialized))
                     {
-                        result = JsonConvert.DeserializeObject<PromoDynamicCondition>(dynamicPromotion.PredicateVisualTreeSerialized);
+                        result = JsonConvert.DeserializeObject<PromotionConditionReward>(
+                            dynamicPromotion.PredicateVisualTreeSerialized,
+                            new PromotionConditionRewardJsonConverter());
 
                         //// Copy available elements from etalon because they not persisted
-                        var sourceBlocks = ((ICondition)etalonEpressionTree).Traverse(x => x.Children);
-                        var targetBlocks = ((ICondition)result).Traverse(x => x.Children).ToList();
+                        var sourceBlocks = etalonEpressionTree.Traverse(x => x.Children);
+                        var targetBlocks = result.Traverse(x => x.Children).ToList();
 
                         foreach (var sourceBlock in sourceBlocks)
                         {

@@ -3,7 +3,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
     //For [] in every [] items of entry [] get [] % off no more than [] not to exceed $ []
-    public class RewardItemForEveryNumInGetOfRel : BaseCondition, IRewardExpression
+    public class RewardItemForEveryNumInGetOfRel : ConditionRewardTree, IReward
     {
         public decimal Amount { get; set; }
         public ProductContainer Product { get; set; } = new ProductContainer();

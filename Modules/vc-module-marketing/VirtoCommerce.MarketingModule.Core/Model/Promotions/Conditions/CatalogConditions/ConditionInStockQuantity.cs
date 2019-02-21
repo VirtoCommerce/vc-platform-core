@@ -3,7 +3,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
 {
     //InStock quantity is []
-    public class ConditionInStockQuantity : BaseCondition
+    public class ConditionInStockQuantity : Condition
     {
         public int Quantity { get; set; }
 

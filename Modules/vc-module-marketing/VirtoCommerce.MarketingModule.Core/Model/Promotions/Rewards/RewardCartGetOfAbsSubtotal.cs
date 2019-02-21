@@ -3,7 +3,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
     //Get [] $ off cart subtotal
-    public class RewardCartGetOfAbsSubtotal : BaseCondition, IRewardExpression
+    public class RewardCartGetOfAbsSubtotal : ConditionRewardTree, IReward
     {
         public decimal Amount { get; set; }
 

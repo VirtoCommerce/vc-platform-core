@@ -3,7 +3,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
 {
     //First time buyers
-    public class ConditionIsFirstTimeBuyer : BaseCondition
+    public class ConditionIsFirstTimeBuyer : Condition
     {
         /// <summary>
         ///  ((PromotionEvaluationContext)x).IsFirstTimeBuyer

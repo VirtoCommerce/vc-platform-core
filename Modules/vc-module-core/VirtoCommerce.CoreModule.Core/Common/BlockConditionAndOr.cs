@@ -1,8 +1,9 @@
 using System.Linq;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CoreModule.Core.Common
 {
-    public abstract class BlockConditionAndOr : BaseCondition
+    public class BlockConditionAndOr : Condition
     {
         public bool All { get; set; }
 
@@ -12,17 +13,44 @@ namespace VirtoCommerce.CoreModule.Core.Common
         public override bool Evaluate(IEvaluationContext context)
         {
             var result = false;
+
+            if (Children.IsNullOrEmpty() && AvailableChildren.IsNullOrEmpty())
+            {
+                return true;
+            }
+
             if (Children != null && Children.Any())
             {
-                result = All ? Children.All(ch => ch.Evaluate(context)) : Children.Any(ch => ch.Evaluate(context));
+                if (!Not)
+                {
+                    result = All ? Children.All(ch => ch.Evaluate(context)) : Children.Any(ch => ch.Evaluate(context));
+                }
+                else
+                {
+                    result = All ? !Children.All(ch => ch.Evaluate(context)) : !Children.Any(ch => ch.Evaluate(context));
+                }
+
             }
 
             if (AvailableChildren != null && AvailableChildren.Any())
             {
-                result = All ? AvailableChildren.All(ch => ch.Evaluate(context)) : AvailableChildren.Any(ch => ch.Evaluate(context));
+                if (!Not)
+                {
+                    result = All ? AvailableChildren.All(ch => ch.Evaluate(context)) : AvailableChildren.Any(ch => ch.Evaluate(context));
+                }
+                else
+                {
+                    result = All ? !AvailableChildren.All(ch => ch.Evaluate(context)) : !AvailableChildren.Any(ch => ch.Evaluate(context));
+                }
+
             }
 
             return result;
+        }
+
+        public override Condition[] GetConditions()
+        {
+            return Children.OfType<Condition>().ToArray();
         }
     }
 }

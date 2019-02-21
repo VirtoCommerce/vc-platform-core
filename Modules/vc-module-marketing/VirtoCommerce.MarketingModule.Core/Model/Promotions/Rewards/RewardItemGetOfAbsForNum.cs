@@ -3,7 +3,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
     //Get $[] off [] items of entry []
-    public class RewardItemGetOfAbsForNum : BaseCondition, IRewardExpression
+    public class RewardItemGetOfAbsForNum : ConditionRewardTree, IReward
     {
         public decimal Amount { get; set; }
         public string ProductId { get; set; }

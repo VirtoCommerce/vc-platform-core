@@ -5,7 +5,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
 {
     //[] [] items are in shopping cart
-    public class ConditionAtNumItemsInCart : BaseCondition
+    public class ConditionAtNumItemsInCart : Condition
     {
 
         public ICollection<string> ExcludingCategoryIds { get; set; } = new List<string>();

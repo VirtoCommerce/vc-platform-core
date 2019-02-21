@@ -1,6 +1,6 @@
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
-    public interface IRewardExpression
+    public interface IReward
     {
         PromotionReward[] GetRewards();
     }

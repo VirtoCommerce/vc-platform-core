@@ -6,7 +6,7 @@ using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 namespace VirtoCommerce.MarketingModule.Test.CustomPromotionExpressions
 {
     //items with [] tag
-    public class ConditionItemWithTag : BaseCondition
+    public class ConditionItemWithTag : ConditionRewardTree
     {
         public string[] Tags { get; set; }
 

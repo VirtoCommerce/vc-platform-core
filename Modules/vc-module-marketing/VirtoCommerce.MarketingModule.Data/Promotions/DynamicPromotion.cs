@@ -8,7 +8,6 @@ using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Serialization;
 
 namespace VirtoCommerce.MarketingModule.Data.Promotions
 {
@@ -16,13 +15,12 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
     {
         private readonly ICouponService _couponService;
         private readonly IPromotionUsageService _usageService;
-        public DynamicPromotion(IExpressionSerializer expressionSerializer, ICouponService couponService, IPromotionUsageService usageService)
+        public DynamicPromotion(ICouponService couponService, IPromotionUsageService usageService)
         {
-            ExpressionSerializer = expressionSerializer;
             _couponService = couponService;
             _usageService = usageService;
         }
-        private PromoDynamicCondition _condition;
+        private Condition[] _conditions;
         private PromotionReward[] _rewards;
 
         /// <summary>
@@ -31,28 +29,13 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
         /// </summary>
         public bool IsAllowCombiningWithSelf { get; set; }
 
-        protected IExpressionSerializer ExpressionSerializer { get; set; }
-
         public string PredicateSerialized { get; set; }
         public string PredicateVisualTreeSerialized { get; set; }
         public string RewardsSerialized { get; set; }
 
-        protected PromoDynamicCondition Condition
-        {
-            get
-            {
-                if (_condition == null)
-                {
-                    _condition = JsonConvert.DeserializeObject<PromoDynamicCondition>(PredicateSerialized);
-                }
-                return _condition
-                    //_condition = ExpressionSerializer.DeserializeExpression<Func<IEvaluationContext, bool>>(PredicateSerialized)
+        protected Condition[] Conditions => _conditions ?? (_conditions = JsonConvert.DeserializeObject<Condition[]>(PredicateSerialized, new PromotionConditionRewardJsonConverter()));
 
-                    ;
-            }
-        }
-
-        protected PromotionReward[] Rewards => _rewards ?? (_rewards = JsonConvert.DeserializeObject<PromotionReward[]>(RewardsSerialized, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }));
+        protected PromotionReward[] Rewards => _rewards ?? (_rewards = JsonConvert.DeserializeObject<PromotionReward[]>(RewardsSerialized, new PromotionRewardJsonConverter()));
 
         public override PromotionReward[] EvaluatePromotion(IEvaluationContext context)
         {
@@ -107,7 +90,7 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
         protected virtual void EvaluateReward(PromotionEvaluationContext promoContext, bool couponIsValid, PromotionReward reward)
         {
             reward.Promotion = this;
-            reward.IsValid = couponIsValid && Condition.Evaluate(promoContext);
+            reward.IsValid = couponIsValid && Conditions.All(c => c.Evaluate(promoContext));
 
             //Set productId for catalog item reward
             if (reward is CatalogItemAmountReward catalogItemReward && catalogItemReward.ProductId == null)

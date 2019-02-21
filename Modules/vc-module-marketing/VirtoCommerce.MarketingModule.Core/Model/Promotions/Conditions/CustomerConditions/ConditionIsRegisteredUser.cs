@@ -3,7 +3,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
 {
     //Registered user
-    public class ConditionIsRegisteredUser : BaseCondition
+    public class ConditionIsRegisteredUser : Condition
     {
         public override bool Evaluate(IEvaluationContext context)
         {

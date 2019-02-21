@@ -5,7 +5,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
 {
     //Cart subtotal is []
-    public class ConditionCartSubtotalLeast : BaseCondition
+    public class ConditionCartSubtotalLeast : Condition
     {
         public decimal SubTotal { get; set; }
 

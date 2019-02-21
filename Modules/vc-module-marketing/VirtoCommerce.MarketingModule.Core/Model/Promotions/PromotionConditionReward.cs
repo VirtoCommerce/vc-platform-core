@@ -3,7 +3,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
-    public class PromoDynamicCondition : BaseCondition, IRewardExpression
+    public class PromotionConditionReward : ConditionRewardTree
     {
         public override bool Evaluate(IEvaluationContext context)
         {
@@ -15,11 +15,14 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
             return result;
         }
 
+        public Condition[] GetConditions()
+        {
+            return Children.OfType<Condition>().ToArray();
+        }
+
         public PromotionReward[] GetRewards()
         {
-            var retVal = Children.OfType<IRewardExpression>().SelectMany(x => x.GetRewards()).OfType<PromotionReward>().ToArray();
-
-            return retVal;
+            return Children.OfType<IReward>().SelectMany(x => x.GetRewards()).ToArray();
         }
     }
 }

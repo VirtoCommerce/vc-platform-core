@@ -3,7 +3,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
     //Get $[] off payment method []
-    public class RewardPaymentGetOfAbs : BaseCondition, IRewardExpression
+    public class RewardPaymentGetOfAbs : ConditionRewardTree, IReward
     {
         public decimal Amount { get; set; }
         public string PaymentMethod { get; set; }
