@@ -15,13 +15,15 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
     {
         private readonly ICouponService _couponService;
         private readonly IPromotionUsageService _usageService;
+
+        private Condition[] _conditions;
+        private PromotionReward[] _rewards;
+
         public DynamicPromotion(ICouponService couponService, IPromotionUsageService usageService)
         {
             _couponService = couponService;
             _usageService = usageService;
         }
-        private Condition[] _conditions;
-        private PromotionReward[] _rewards;
 
         /// <summary>
         /// If this flag is set to true, it allows this promotion to combine with itself.
@@ -35,7 +37,7 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
 
         protected Condition[] Conditions => _conditions ?? (_conditions = JsonConvert.DeserializeObject<Condition[]>(PredicateSerialized, new PromotionConditionRewardJsonConverter()));
 
-        protected PromotionReward[] Rewards => _rewards ?? (_rewards = JsonConvert.DeserializeObject<PromotionReward[]>(RewardsSerialized, new PromotionRewardJsonConverter()));
+        protected PromotionReward[] Rewards => _rewards ?? (_rewards = JsonConvert.DeserializeObject<PromotionReward[]>(RewardsSerialized, new PromotionConditionRewardJsonConverter()));
 
         public override PromotionReward[] EvaluatePromotion(IEvaluationContext context)
         {

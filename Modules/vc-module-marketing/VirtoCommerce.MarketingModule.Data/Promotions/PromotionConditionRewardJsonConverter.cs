@@ -2,6 +2,7 @@ using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Promotions
@@ -13,7 +14,7 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
 
         public override bool CanConvert(Type objectType)
         {
-            return typeof(IConditionRewardTree).IsAssignableFrom(objectType);
+            return typeof(IConditionRewardTree).IsAssignableFrom(objectType) || typeof(PromotionReward).IsAssignableFrom(objectType);
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
@@ -32,7 +33,14 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
                 type = pt.Value<string>();
             }
 
-            retVal = AbstractTypeFactory<IConditionRewardTree>.TryCreateInstance(type);
+            if (typeof(IConditionRewardTree).IsAssignableFrom(objectType))
+            {
+                retVal = AbstractTypeFactory<IConditionRewardTree>.TryCreateInstance(type);
+            }
+            else if (typeof(PromotionReward).IsAssignableFrom(objectType))
+            {
+                retVal = AbstractTypeFactory<PromotionReward>.TryCreateInstance(type);
+            }
 
             if (retVal == null)
             {

@@ -129,34 +129,15 @@ namespace VirtoCommerce.MarketingModule.Test
             var couponServiceMock = new Mock<ICouponService>();
             var promotionUsageMock = new Mock<IPromotionUsageService>();
 
-            var evalPolicy = GetPromotionEvaluationPolicy(new List<Promotion> { new DynamicPromotion(null, couponServiceMock.Object, promotionUsageMock.Object)
+            var evalPolicy = GetPromotionEvaluationPolicy(new List<Promotion> { new DynamicPromotion(couponServiceMock.Object, promotionUsageMock.Object)
             {
-                PredicateSerialized = "[{\"All\":true,\"Not\":false,\"AvailableChildren\":[],\"Children\":[{\"$type\":\"VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions.ConditionIsRegisteredUser, VirtoCommerce.MarketingModule.Core\",\"AvailableChildren\":[],\"Children\":[],\"Id\":\"ConditionIsRegisteredUser\"},{\"$type\":\"VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions.ConditionIsEveryone, VirtoCommerce.MarketingModule.Core\",\"AvailableChildren\":[],\"Children\":[],\"Id\":\"ConditionIsEveryone\"}],\"Id\":\"BlockCustomerCondition\"},{\"All\":false,\"Not\":false,\"AvailableChildren\":[],\"Children\":[],\"Id\":\"BlockCartCondition\"},{\"All\":false,\"Not\":true,\"AvailableChildren\":[],\"Children\":[{\"$type\":\"VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions.ConditionCurrencyIs, VirtoCommerce.MarketingModule.Core\",\"Currency\":\"usd\",\"AvailableChildren\":[],\"Children\":[],\"Id\":\"ConditionCurrencyIs\"}],\"Id\":\"BlockCatalogCondition\"}]",
-                RewardsSerialized = "{\"$type\":\"VirtoCommerce.MarketingModule.Core.Model.Promotions.PromotionReward[], VirtoCommerce.MarketingModule.Core\",\"$values\":[{\"$type\":\"VirtoCommerce.MarketingModule.Core.Model.Promotions.CartSubtotalReward, VirtoCommerce.MarketingModule.Core\",\"AmountType\":0,\"Amount\":10.0,\"MaxLimit\":0.0,\"Quantity\":0,\"ForNthQuantity\":0,\"InEveryNthQuantity\":0,\"IsValid\":false,\"Description\":null,\"CouponAmount\":0.0,\"Coupon\":null,\"CouponMinOrderAmount\":null,\"Promotion\":null}]}",
+                PredicateSerialized = "[{\"All\":false,\"Not\":false,\"AvailableChildren\":[],\"Children\":[{\"AvailableChildren\":[],\"Children\":[],\"Id\":\"ConditionIsRegisteredUser\"}],\"Id\":\"BlockCustomerCondition\"},{\"All\":false,\"Not\":false,\"AvailableChildren\":[],\"Children\":[],\"Id\":\"BlockCartCondition\"},{\"All\":false,\"Not\":false,\"AvailableChildren\":[],\"Children\":[],\"Id\":\"BlockCatalogCondition\"}]",
+                RewardsSerialized = "[{\"AmountType\":0,\"Amount\":2.0,\"MaxLimit\":0.0,\"Quantity\":0,\"ForNthQuantity\":0,\"InEveryNthQuantity\":0,\"Id\":\"CartSubtotalReward\",\"IsValid\":false,\"Description\":null,\"CouponAmount\":0.0,\"Coupon\":null,\"CouponMinOrderAmount\":null,\"Promotion\":null}]",
 
             } });
             var context = new PromotionEvaluationContext() { IsRegisteredUser = true, IsEveryone = true, Currency = "usd", PromoEntries = new List<ProductPromoEntry> { new ProductPromoEntry() { ProductId = "1" } } };
-            AbstractTypeFactory<Condition>.RegisterType<BlockConditionAndOr>();
 
-            AbstractTypeFactory<Condition>.RegisterType<BlockCustomerCondition>();
-            AbstractTypeFactory<Condition>.RegisterType<ConditionIsRegisteredUser>();
-            AbstractTypeFactory<Condition>.RegisterType<ConditionIsEveryone>();
-            AbstractTypeFactory<Condition>.RegisterType<ConditionIsFirstTimeBuyer>();
-            AbstractTypeFactory<Condition>.RegisterType<UserGroupsContainsCondition>();
-
-            AbstractTypeFactory<Condition>.RegisterType<BlockCatalogCondition>();
-            AbstractTypeFactory<Condition>.RegisterType<ConditionAtCartItemExtendedTotal>();
-            AbstractTypeFactory<Condition>.RegisterType<ConditionAtNumItemsInCart>();
-            AbstractTypeFactory<Condition>.RegisterType<ConditionAtNumItemsInCategoryAreInCart>();
-            AbstractTypeFactory<Condition>.RegisterType<ConditionAtNumItemsOfEntryAreInCart>();
-            AbstractTypeFactory<Condition>.RegisterType<ConditionCartSubtotalLeast>();
-
-            AbstractTypeFactory<Condition>.RegisterType<BlockCartCondition>();
-            AbstractTypeFactory<Condition>.RegisterType<ConditionCategoryIs>();
-            AbstractTypeFactory<Condition>.RegisterType<ConditionCodeContains>();
-            AbstractTypeFactory<Condition>.RegisterType<ConditionCurrencyIs>();
-            AbstractTypeFactory<Condition>.RegisterType<ConditionEntryIs>();
-            AbstractTypeFactory<Condition>.RegisterType<ConditionInStockQuantity>();
+            RegisterConditionRewards();
 
             //Act
             var rewards = evalPolicy.EvaluatePromotionAsync(context).GetAwaiter().GetResult().Rewards;
@@ -279,6 +260,56 @@ namespace VirtoCommerce.MarketingModule.Test
         private static IEnumerable<Promotion> GetPromotions(params string[] ids)
         {
             return TestPromotions.Where(x => ids.Contains(x.Id));
+        }
+
+
+        private static void RegisterConditionRewards()
+        {
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<PromotionConditionReward>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<BlockConditionAndOr>();
+
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<BlockCustomerCondition>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionIsRegisteredUser>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionIsEveryone>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionIsFirstTimeBuyer>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<UserGroupsContainsCondition>();
+
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<BlockCatalogCondition>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionAtCartItemExtendedTotal>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionAtNumItemsInCart>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionAtNumItemsInCategoryAreInCart>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionAtNumItemsOfEntryAreInCart>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionCartSubtotalLeast>();
+
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<BlockCartCondition>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionCategoryIs>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionCodeContains>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionCurrencyIs>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionEntryIs>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionInStockQuantity>();
+
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<BlockReward>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardCartGetOfAbsSubtotal>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardCartGetOfRelSubtotal>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardItemGetFreeNumItemOfProduct>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardItemGetOfAbs>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardItemGetOfAbsForNum>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardItemGetOfRel>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardItemGetOfRelForNum>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardItemGiftNumItem>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardShippingGetOfAbsShippingMethod>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardShippingGetOfRelShippingMethod>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardPaymentGetOfAbs>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardPaymentGetOfRel>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardItemForEveryNumInGetOfRel>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardItemForEveryNumOtherItemInGetOfRel>();
+
+            AbstractTypeFactory<PromotionReward>.RegisterType<GiftReward>();
+            AbstractTypeFactory<PromotionReward>.RegisterType<CartSubtotalReward>();
+            AbstractTypeFactory<PromotionReward>.RegisterType<CatalogItemAmountReward>();
+            AbstractTypeFactory<PromotionReward>.RegisterType<PaymentReward>();
+            AbstractTypeFactory<PromotionReward>.RegisterType<ShipmentReward>();
+            AbstractTypeFactory<PromotionReward>.RegisterType<SpecialOfferReward>();
         }
 
     }

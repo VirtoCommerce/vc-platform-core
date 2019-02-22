@@ -143,7 +143,6 @@ namespace VirtoCommerce.MarketingModule.Web
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicMarketingJsonConverter(appBuilder.ApplicationServices.GetService<IMarketingExtensionManager>()));
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PromotionConditionRewardJsonConverter());
-            mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PromotionRewardJsonConverter());
 
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
@@ -162,7 +161,6 @@ namespace VirtoCommerce.MarketingModule.Web
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<UserGroupsContainsCondition>();
 
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<BlockCatalogCondition>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionAtCartItemExtendedTotal>();
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionAtNumItemsInCart>();
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionAtNumItemsInCategoryAreInCart>();
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionAtNumItemsOfEntryAreInCart>();
@@ -191,7 +189,7 @@ namespace VirtoCommerce.MarketingModule.Web
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardItemForEveryNumInGetOfRel>();
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardItemForEveryNumOtherItemInGetOfRel>();
 
-            AbstractTypeFactory<PromotionReward>.RegisterType<AmountBasedReward>();
+            //AbstractTypeFactory<PromotionReward>.RegisterType<AmountBasedReward>();
             AbstractTypeFactory<PromotionReward>.RegisterType<GiftReward>();
             AbstractTypeFactory<PromotionReward>.RegisterType<CartSubtotalReward>();
             AbstractTypeFactory<PromotionReward>.RegisterType<CatalogItemAmountReward>();
@@ -228,20 +226,20 @@ namespace VirtoCommerce.MarketingModule.Web
                         new ConditionIsFirstTimeBuyer(), new UserGroupsContainsCondition()
                     }
                 },
-                new BlockCartCondition
-                {
-                    AvailableChildren = new List<IConditionRewardTree>
-                    {
-                        new ConditionAtCartItemExtendedTotal(), new ConditionAtNumItemsInCart(), new ConditionAtNumItemsInCategoryAreInCart(),
-                        new ConditionAtNumItemsOfEntryAreInCart(), new ConditionCartSubtotalLeast()
-                    }
-                },
                 new BlockCatalogCondition
                 {
                     AvailableChildren = new List<IConditionRewardTree>
                     {
                         new ConditionCategoryIs(), new ConditionCodeContains(), new ConditionCurrencyIs(),
                         new ConditionEntryIs(), new ConditionInStockQuantity()
+                    }
+                },
+                new BlockCartCondition
+                {
+                    AvailableChildren = new List<IConditionRewardTree>
+                    {
+                        new ConditionAtNumItemsInCart(), new ConditionAtNumItemsInCategoryAreInCart(),
+                        new ConditionAtNumItemsOfEntryAreInCart(), new ConditionCartSubtotalLeast()
                     }
                 },
                 new BlockReward

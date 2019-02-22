@@ -6,10 +6,12 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
     {
         public PromotionReward()
         {
+            Id = GetType().Name;
         }
         //Copy constructor
         protected PromotionReward(PromotionReward other)
         {
+            Id = GetType().Name;
             IsValid = other.IsValid;
             Description = other.Description;
             CouponAmount = other.CouponAmount;
@@ -18,6 +20,7 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
             Promotion = other.Promotion;
         }
 
+        public string Id { get; set; }
         /// <summary>
         /// Flag for applicability
         /// </summary>
