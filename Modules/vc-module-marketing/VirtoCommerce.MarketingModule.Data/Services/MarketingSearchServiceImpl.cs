@@ -39,13 +39,16 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 }
                 query = query.OrderBySortInfos(sortInfos);
 
-                retVal.TotalCount = query.Count();
+                retVal.TotalCount = await query.CountAsync();
 
-                var ids = await query.Select(x => x.Id)
-                               .Skip(criteria.Skip)
-                               .Take(criteria.Take).ToArrayAsync();
-                var promotions = await _promotionService.GetPromotionsByIdsAsync(ids);
-                retVal.Results = promotions.OrderBy(p => ids.ToList().IndexOf(p.Id)).ToList();
+                if (criteria.Take > 0)
+                {
+                    var ids = await query.Select(x => x.Id)
+                        .Skip(criteria.Skip)
+                        .Take(criteria.Take).ToArrayAsync();
+                    var promotions = await _promotionService.GetPromotionsByIdsAsync(ids);
+                    retVal.Results = promotions.OrderBy(p => ids.ToList().IndexOf(p.Id)).ToList();
+                }
             }
             return retVal;
         }
@@ -102,12 +105,14 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 }
                 query = query.OrderBySortInfos(sortInfos);
 
-                retVal.TotalCount = query.Count();
+                retVal.TotalCount = await query.CountAsync();
 
-                var ids = await query.Select(x => x.Id)
-                               .Skip(criteria.Skip)
-                               .Take(criteria.Take).ToArrayAsync();
-                retVal.Results = await _dynamicContentService.GetContentItemsByIdsAsync(ids);
+                if (criteria.Take > 0)
+                {
+                    var ids = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                    retVal.Results = await _dynamicContentService.GetContentItemsByIdsAsync(ids);
+                }
+
             }
             return retVal;
         }
@@ -132,12 +137,13 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                     sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<DynamicContentPlace>(x => x.Name), SortDirection = SortDirection.Ascending } };
                 }
                 query = query.OrderBySortInfos(sortInfos);
+                retVal.TotalCount = await query.CountAsync();
 
-                retVal.TotalCount = query.Count();
-                var ids = await query.Select(x => x.Id)
-                               .Skip(criteria.Skip)
-                               .Take(criteria.Take).ToArrayAsync();
-                retVal.Results = await _dynamicContentService.GetPlacesByIdsAsync(ids);
+                if (criteria.Take > 0)
+                {
+                    var ids = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                    retVal.Results = await _dynamicContentService.GetPlacesByIdsAsync(ids);
+                }
             }
             return retVal;
         }
@@ -167,12 +173,13 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 }
                 query = query.OrderBySortInfos(sortInfos);
 
-                retVal.TotalCount = query.Count();
+                retVal.TotalCount = await query.CountAsync();
 
-                var ids = await query.Select(x => x.Id)
-                           .Skip(criteria.Skip)
-                           .Take(criteria.Take).ToArrayAsync();
-                retVal.Results = await _dynamicContentService.GetPublicationsByIdsAsync(ids);
+                if (criteria.Take > 0)
+                {
+                    var ids = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                    retVal.Results = await _dynamicContentService.GetPublicationsByIdsAsync(ids);
+                }
             }
             return retVal;
         }
@@ -194,11 +201,13 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 }
 
                 query = query.OrderBySortInfos(sortInfos);
+                retVal.TotalCount = await query.CountAsync();
 
-                retVal.TotalCount = query.Count();
-
-                var folderIds = await query.Select(x => x.Id).ToArrayAsync();
-                retVal.Results = await _dynamicContentService.GetFoldersByIdsAsync(folderIds);
+                if (criteria.Take > 0)
+                {
+                    var folderIds = await query.Select(x => x.Id).ToArrayAsync();
+                    retVal.Results = await _dynamicContentService.GetFoldersByIdsAsync(folderIds);
+                }
             }
             return retVal;
         }

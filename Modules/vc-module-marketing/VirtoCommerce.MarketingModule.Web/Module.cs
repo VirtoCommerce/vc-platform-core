@@ -63,6 +63,8 @@ namespace VirtoCommerce.MarketingModule.Web
             serviceCollection.AddSingleton<IDynamicContentSearchService, MarketingSearchServiceImpl>();
             serviceCollection.AddSingleton<CsvCouponImporter>();
 
+
+            //TODO throw exception when CombinePolicy is null
             //var settingsManager = serviceCollection.BuildServiceProvider().GetRequiredService<ISettingsManager>();
             //var promotionCombinePolicy = settingsManager.GetValue("Marketing.Promotion.CombinePolicy", "BestReward");
             //if (promotionCombinePolicy.EqualsInvariant("CombineStackable"))
@@ -82,6 +84,7 @@ namespace VirtoCommerce.MarketingModule.Web
             });
 
             serviceCollection.AddSingleton<DynamicContentItemEventHandlers>();
+            serviceCollection.AddSingleton<MarketingExportImport>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -208,13 +211,13 @@ namespace VirtoCommerce.MarketingModule.Web
         public Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
             ICancellationToken cancellationToken)
         {
-            return _appBuilder.ApplicationServices.GetRequiredService<MarketingExportImport>().ExportAsync(outStream, options, progressCallback, cancellationToken);
+            return _appBuilder.ApplicationServices.GetRequiredService<MarketingExportImport>().DoExportAsync(outStream, progressCallback, cancellationToken);
         }
 
         public Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
             ICancellationToken cancellationToken)
         {
-            return _appBuilder.ApplicationServices.GetRequiredService<MarketingExportImport>().ImportAsync(inputStream, options, progressCallback, cancellationToken);
+            return _appBuilder.ApplicationServices.GetRequiredService<MarketingExportImport>().DoImportAsync(inputStream, progressCallback, cancellationToken);
         }
 
         private List<IConditionRewardTree> GetConditionsAndRewards()
