@@ -3,20 +3,11 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
 {
     //InStock quantity is []
-    public class ConditionInStockQuantity : Condition
+    public class ConditionInStockQuantity : CompareConditionBase
     {
         public int Quantity { get; set; }
 
         public int QuantitySecond { get; set; }
-
-        public string CompareCondition { get; set; }
-
-        public bool Exactly { get; set; }
-
-        public ConditionInStockQuantity()
-        {
-            CompareCondition = "AtLeast";
-        }
 
         /// <summary>
         /// ((PromotionEvaluationContext)x).IsItemsInStockQuantity(Exactly, Quantity, QuantitySecond)

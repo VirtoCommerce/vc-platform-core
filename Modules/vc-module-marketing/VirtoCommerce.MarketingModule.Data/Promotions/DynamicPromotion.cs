@@ -43,8 +43,7 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
         {
             var result = new List<PromotionReward>();
 
-            var promoContext = context as PromotionEvaluationContext;
-            if (promoContext == null)
+            if (!(context is PromotionEvaluationContext promoContext))
             {
                 throw new ArgumentException("context should be PromotionEvaluationContext");
             }

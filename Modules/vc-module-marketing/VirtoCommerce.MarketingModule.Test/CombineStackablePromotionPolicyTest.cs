@@ -131,11 +131,18 @@ namespace VirtoCommerce.MarketingModule.Test
 
             var evalPolicy = GetPromotionEvaluationPolicy(new List<Promotion> { new DynamicPromotion(couponServiceMock.Object, promotionUsageMock.Object)
             {
-                PredicateSerialized = "[{\"All\":false,\"Not\":false,\"AvailableChildren\":[],\"Children\":[{\"AvailableChildren\":[],\"Children\":[],\"Id\":\"ConditionIsRegisteredUser\"}],\"Id\":\"BlockCustomerCondition\"},{\"All\":false,\"Not\":false,\"AvailableChildren\":[],\"Children\":[],\"Id\":\"BlockCartCondition\"},{\"All\":false,\"Not\":false,\"AvailableChildren\":[],\"Children\":[],\"Id\":\"BlockCatalogCondition\"}]",
-                RewardsSerialized = "[{\"AmountType\":0,\"Amount\":2.0,\"MaxLimit\":0.0,\"Quantity\":0,\"ForNthQuantity\":0,\"InEveryNthQuantity\":0,\"Id\":\"CartSubtotalReward\",\"IsValid\":false,\"Description\":null,\"CouponAmount\":0.0,\"Coupon\":null,\"CouponMinOrderAmount\":null,\"Promotion\":null}]",
+                PredicateSerialized = "[{\"All\":false,\"Not\":false,\"AvailableChildren\":[],\"Children\":[{\"AvailableChildren\":[],\"Children\":[],\"Id\":\"ConditionIsRegisteredUser\"}],\"Id\":\"BlockCustomerCondition\"},{\"All\":false,\"Not\":false,\"AvailableChildren\":[],\"Children\":[],\"Id\":\"BlockCatalogCondition\"},{\"All\":true,\"Not\":false,\"AvailableChildren\":[],\"Children\":[{\"ExcludingCategoryIds\":[],\"ExcludingProductIds\":[],\"NumItem\":10,\"NumItemSecond\":13,\"CompareCondition\":\"Between\",\"AvailableChildren\":[],\"Children\":[],\"Id\":\"ConditionAtNumItemsInCart\"},{\"SubTotal\":0.0,\"SubTotalSecond\":100.0,\"ExcludingCategoryIds\":[],\"ExcludingProductIds\":[],\"CompareCondition\":\"Between\",\"AvailableChildren\":[],\"Children\":[],\"Id\":\"ConditionCartSubtotalLeast\"}],\"Id\":\"BlockCartCondition\"}]",
+                RewardsSerialized = "[{\"AmountType\":0,\"Amount\":15.0,\"MaxLimit\":0.0,\"Quantity\":0,\"ForNthQuantity\":0,\"InEveryNthQuantity\":0,\"Id\":\"CartSubtotalReward\",\"IsValid\":false,\"Description\":null,\"CouponAmount\":0.0,\"Coupon\":null,\"CouponMinOrderAmount\":null,\"Promotion\":null}]",
 
             } });
-            var context = new PromotionEvaluationContext() { IsRegisteredUser = true, IsEveryone = true, Currency = "usd", PromoEntries = new List<ProductPromoEntry> { new ProductPromoEntry() { ProductId = "1" } } };
+            var context = new PromotionEvaluationContext()
+            {
+                IsRegisteredUser = true,
+                IsEveryone = true,
+                Currency = "usd",
+                PromoEntries = new List<ProductPromoEntry> { new ProductPromoEntry() { ProductId = "1" } },
+                CartPromoEntries = new List<ProductPromoEntry> { new ProductPromoEntry { Quantity = 11, Price = 5} }
+            };
 
             RegisterConditionRewards();
 
@@ -275,7 +282,6 @@ namespace VirtoCommerce.MarketingModule.Test
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<UserGroupsContainsCondition>();
 
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<BlockCatalogCondition>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionAtCartItemExtendedTotal>();
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionAtNumItemsInCart>();
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionAtNumItemsInCategoryAreInCart>();
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionAtNumItemsOfEntryAreInCart>();

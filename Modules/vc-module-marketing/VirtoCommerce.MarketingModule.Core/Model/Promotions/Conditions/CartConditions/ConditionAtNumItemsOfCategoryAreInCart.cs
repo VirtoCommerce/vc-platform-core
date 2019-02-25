@@ -5,7 +5,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
 {
     //[] [] items of category are in shopping cart
-    public class ConditionAtNumItemsInCategoryAreInCart : Condition
+    public class ConditionAtNumItemsInCategoryAreInCart : CompareConditionBase
     {
         public int NumItem { get; set; }
         public int NumItemSecond { get; set; }
@@ -26,7 +26,7 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
             if (context is PromotionEvaluationContext promotionEvaluationContext)
             {
                 var quantity = promotionEvaluationContext.GetCartItemsOfCategoryQuantity(CategoryId, ExcludingCategoryIds.ToArray(), ExcludingProductIds.ToArray());
-                result = quantity > NumItem || quantity > NumItemSecond;
+                result = UseCompareCondition(quantity, NumItem, NumItemSecond);
             }
 
             return result;
