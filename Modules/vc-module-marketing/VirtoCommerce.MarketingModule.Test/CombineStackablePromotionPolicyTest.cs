@@ -141,7 +141,7 @@ namespace VirtoCommerce.MarketingModule.Test
                 IsEveryone = true,
                 Currency = "usd",
                 PromoEntries = new List<ProductPromoEntry> { new ProductPromoEntry() { ProductId = "1" } },
-                CartPromoEntries = new List<ProductPromoEntry> { new ProductPromoEntry { Quantity = 11, Price = 5} }
+                CartPromoEntries = new List<ProductPromoEntry> { new ProductPromoEntry { Quantity = 11, Price = 5 } }
             };
 
             RegisterConditionRewards();
@@ -272,7 +272,7 @@ namespace VirtoCommerce.MarketingModule.Test
 
         private static void RegisterConditionRewards()
         {
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<PromotionConditionReward>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<PromotionConditionRewardTree>();
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<BlockConditionAndOr>();
 
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<BlockCustomerCondition>();

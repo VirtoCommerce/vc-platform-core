@@ -6,7 +6,6 @@ namespace VirtoCommerce.MarketingModule.Core.Services
 {
     public interface IMarketingExtensionManager
     {
-        //TODO
         IConditionRewardTree PromotionCondition { get; set; }
         IConditionRewardTree ContentCondition { get; set; }
 

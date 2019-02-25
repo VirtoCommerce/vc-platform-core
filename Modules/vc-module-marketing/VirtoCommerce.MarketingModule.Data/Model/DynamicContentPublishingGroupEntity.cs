@@ -64,16 +64,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             publication.PredicateSerialized = ConditionExpression;
             publication.PredicateVisualTreeSerialized = PredicateVisualTreeSerialized;
 
-            if (!string.IsNullOrEmpty(publication.PredicateVisualTreeSerialized))
-            {
-                //Temporary back data compatibility fix for serialized expressions
-                publication.PredicateVisualTreeSerialized = publication.PredicateVisualTreeSerialized.Replace("VirtoCommerce.DynamicExpressionModule.", "VirtoCommerce.DynamicExpressionsModule.");
-            }
-            if (!string.IsNullOrEmpty(publication.PredicateSerialized))
-            {
-                //Temporary back data compatibility fix for serialized expressions
-                publication.PredicateSerialized = publication.PredicateSerialized.Replace("VirtoCommerce.DynamicExpressionModule.", "VirtoCommerce.DynamicExpressionsModule.");
-            }
             if (ContentItems != null)
             {
                 publication.ContentItems = ContentItems.Select(x => x.ContentItem.ToModel(AbstractTypeFactory<DynamicContentItem>.TryCreateInstance())).ToList();

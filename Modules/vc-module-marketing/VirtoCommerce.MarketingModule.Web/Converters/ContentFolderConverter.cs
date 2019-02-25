@@ -18,6 +18,7 @@ namespace VirtoCommerce.MarketingModule.Web.Converters
                 Path = folder.Path,
                 Name = folder.Name,
                 Outline = folder.Outline,
+                ParentFolderId = folder.ParentFolderId
             };
 
             return retVal;
@@ -34,6 +35,7 @@ namespace VirtoCommerce.MarketingModule.Web.Converters
                 ModifiedBy = folder.ModifiedBy,
                 Description = folder.Description,
                 Name = folder.Name,
+                ParentFolderId = folder.ParentFolderId
             };
 
             return retVal;

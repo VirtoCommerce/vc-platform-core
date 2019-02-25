@@ -1,8 +1,7 @@
 using System;
 using System.Linq;
-using VirtoCommerce.CoreModule.Core.Common;
 
-namespace VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions
+namespace VirtoCommerce.CoreModule.Core.Common.Conditions
 {
     //User groups contains condition
     public class UserGroupsContainsCondition : Condition

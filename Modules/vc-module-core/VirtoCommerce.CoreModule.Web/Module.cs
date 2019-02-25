@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.CoreModule.Core;
 using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Common.Conditions;
 using VirtoCommerce.CoreModule.Core.Currency;
 using VirtoCommerce.CoreModule.Core.Package;
 using VirtoCommerce.CoreModule.Core.Payment;
@@ -77,6 +77,19 @@ namespace VirtoCommerce.CoreModule.Web
                 dbContext.Database.EnsureCreated();
                 dbContext.Database.Migrate();
             }
+
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<BlockConditionAndOr>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionAgeIs>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionGenderIs>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionLanguageIs>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionStoreSearchedPhrase>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionUrlIs>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionGeoCity>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionGeoCountry>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionGeoState>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionGeoTimeZone>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionGeoZipCode>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<UserGroupsContainsCondition>();
 
         }
 

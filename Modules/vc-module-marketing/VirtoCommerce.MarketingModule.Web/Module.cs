@@ -10,9 +10,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Common.Conditions;
 using VirtoCommerce.MarketingModule.Core;
 using VirtoCommerce.MarketingModule.Core.Events;
 using VirtoCommerce.MarketingModule.Core.Model;
+using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions;
 using VirtoCommerce.MarketingModule.Core.Services;
@@ -78,6 +80,8 @@ namespace VirtoCommerce.MarketingModule.Web
                 var promotionUsageService = serviceCollection.BuildServiceProvider().GetService<IPromotionUsageService>();
                 return new DynamicPromotion(couponService, promotionUsageService);
             });
+
+            serviceCollection.AddSingleton<DynamicContentItemEventHandlers>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -133,16 +137,15 @@ namespace VirtoCommerce.MarketingModule.Web
 
             dynamicPropertyService.SaveDynamicPropertiesAsync(new[] { contentItemTypeProperty }).GetAwaiter().GetResult();
 
-            var promotionExtensionManager = appBuilder.ApplicationServices.GetService<IMarketingExtensionManager>();
-            promotionExtensionManager.PromotionCondition = new PromotionConditionReward()
-            {
-                Children = GetConditionsAndRewards(),
-            };
+            var extensionManager = appBuilder.ApplicationServices.GetService<IMarketingExtensionManager>();
+            extensionManager.PromotionCondition = new PromotionConditionRewardTree { Children = GetConditionsAndRewards() };
+            extensionManager.ContentCondition = new DynamicContentConditionTree() { Children = GetDynamicContentConditions() };
+
 
             //Next lines allow to use polymorph types in API controller methods
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicMarketingJsonConverter(appBuilder.ApplicationServices.GetService<IMarketingExtensionManager>()));
-            mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PromotionConditionRewardJsonConverter());
+            mvcJsonOptions.Value.SerializerSettings.Converters.Add(new ConditionRewardJsonConverter());
 
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
@@ -151,14 +154,15 @@ namespace VirtoCommerce.MarketingModule.Web
                 dbContext.Database.Migrate();
             }
 
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<PromotionConditionReward>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<BlockConditionAndOr>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<PromotionConditionRewardTree>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<DynamicContentConditionTree>();
+
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<BlockContentCondition>();
 
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<BlockCustomerCondition>();
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionIsRegisteredUser>();
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionIsEveryone>();
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionIsFirstTimeBuyer>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<UserGroupsContainsCondition>();
 
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<BlockCatalogCondition>();
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionAtNumItemsInCart>();
@@ -189,7 +193,6 @@ namespace VirtoCommerce.MarketingModule.Web
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardItemForEveryNumInGetOfRel>();
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardItemForEveryNumOtherItemInGetOfRel>();
 
-            //AbstractTypeFactory<PromotionReward>.RegisterType<AmountBasedReward>();
             AbstractTypeFactory<PromotionReward>.RegisterType<GiftReward>();
             AbstractTypeFactory<PromotionReward>.RegisterType<CartSubtotalReward>();
             AbstractTypeFactory<PromotionReward>.RegisterType<CatalogItemAmountReward>();
@@ -253,6 +256,20 @@ namespace VirtoCommerce.MarketingModule.Web
                     }
                 }
             };
+        }
+
+        private List<IConditionRewardTree> GetDynamicContentConditions()
+        {
+            var retVal = new List<IConditionRewardTree>
+            {
+                new BlockContentCondition { AvailableChildren = new List<IConditionRewardTree>
+                {
+                    new ConditionGeoTimeZone(), new ConditionGeoZipCode(), new ConditionStoreSearchedPhrase(), new ConditionAgeIs()
+                    , new ConditionGenderIs(), new ConditionGeoCity(), new ConditionGeoCountry(), new ConditionGeoState()
+                    , new ConditionLanguageIs(), new UserGroupsContainsCondition()
+                }}
+            };
+            return retVal;
         }
     }
 }

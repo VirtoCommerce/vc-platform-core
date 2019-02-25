@@ -8,7 +8,6 @@ using VirtoCommerce.MarketingModule.Core;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Web.Converters;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Serialization;
 using coreModel = VirtoCommerce.MarketingModule.Core.Model;
 using webModel = VirtoCommerce.MarketingModule.Web.Model;
 
@@ -19,16 +18,17 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
     {
         private readonly IDynamicContentService _dynamicContentService;
         private readonly IMarketingDynamicContentEvaluator _dynamicContentEvaluator;
-        private readonly IExpressionSerializer _expressionSerializer;
         private readonly IDynamicContentSearchService _dynamicConentSearchService;
+        private readonly IMarketingExtensionManager _marketingExtensionManager;
 
         public MarketingModuleDynamicContentController(IDynamicContentService dynamicContentService,
-            IMarketingDynamicContentEvaluator dynamicContentEvaluator, IExpressionSerializer expressionSerializer, IDynamicContentSearchService dynamicConentSearchService)
+            IMarketingDynamicContentEvaluator dynamicContentEvaluator, IDynamicContentSearchService dynamicConentSearchService
+            , IMarketingExtensionManager marketingExtensionManager)
         {
             _dynamicContentService = dynamicContentService;
             _dynamicContentEvaluator = dynamicContentEvaluator;
-            _expressionSerializer = expressionSerializer;
             _dynamicConentSearchService = dynamicConentSearchService;
+            _marketingExtensionManager = marketingExtensionManager;
         }
 
         /// <summary>
@@ -286,10 +286,10 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             {
                 ContentItems = new webModel.DynamicContentItem[] { },
                 ContentPlaces = new webModel.DynamicContentPlace[] { },
-                //TODO
-                //DynamicExpression = _marketingExtensionManager.DynamicContentExpressionTree,
+                DynamicExpression = _marketingExtensionManager.ContentCondition,
                 IsActive = true
             };
+
             return Ok(retVal);
         }
 
@@ -321,7 +321,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [Authorize(ModuleConstants.Security.Permissions.Create)]
         public async Task<ActionResult<webModel.DynamicContentPublication>> CreateDynamicContentPublication([FromBody]webModel.DynamicContentPublication publication)
         {
-            var corePublication = publication.ToCoreModel(_expressionSerializer);
+            var corePublication = publication.ToCoreModel();
             await _dynamicContentService.SavePublicationsAsync(new[] { corePublication });
             return await GetDynamicContentPublicationById(corePublication.Id);
         }
@@ -336,7 +336,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         [Authorize(ModuleConstants.Security.Permissions.Update)]
         public async Task<IActionResult> UpdateDynamicContentPublication([FromBody]webModel.DynamicContentPublication publication)
         {
-            var corePublication = publication.ToCoreModel(_expressionSerializer);
+            var corePublication = publication.ToCoreModel();
             await _dynamicContentService.SavePublicationsAsync(new[] { corePublication });
             return Ok();
         }

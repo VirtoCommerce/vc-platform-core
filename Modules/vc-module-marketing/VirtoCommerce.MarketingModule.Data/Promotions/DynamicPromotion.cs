@@ -35,9 +35,9 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
         public string PredicateVisualTreeSerialized { get; set; }
         public string RewardsSerialized { get; set; }
 
-        protected Condition[] Conditions => _conditions ?? (_conditions = JsonConvert.DeserializeObject<Condition[]>(PredicateSerialized, new PromotionConditionRewardJsonConverter()));
+        protected Condition[] Conditions => _conditions ?? (_conditions = JsonConvert.DeserializeObject<Condition[]>(PredicateSerialized, new ConditionRewardJsonConverter()));
 
-        protected PromotionReward[] Rewards => _rewards ?? (_rewards = JsonConvert.DeserializeObject<PromotionReward[]>(RewardsSerialized, new PromotionConditionRewardJsonConverter()));
+        protected PromotionReward[] Rewards => _rewards ?? (_rewards = JsonConvert.DeserializeObject<PromotionReward[]>(RewardsSerialized, new ConditionRewardJsonConverter()));
 
         public override PromotionReward[] EvaluatePromotion(IEvaluationContext context)
         {

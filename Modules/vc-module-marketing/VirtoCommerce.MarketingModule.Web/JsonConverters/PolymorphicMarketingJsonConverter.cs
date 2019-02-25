@@ -97,7 +97,7 @@ namespace VirtoCommerce.MarketingModule.Web.JsonConverters
         private void PopulateDynamicExpression(DynamicPromotion dynamicPromotion, JObject jObj, JsonSerializer serializer)
         {
             var dynamicExpressionToken = jObj["dynamicExpression"];
-            var dynamicExpression = dynamicExpressionToken?.ToObject<PromotionConditionReward>(serializer);
+            var dynamicExpression = dynamicExpressionToken?.ToObject<PromotionConditionRewardTree>(serializer);
             if (dynamicExpression?.Children != null)
             {
                 var conditionExpression = dynamicExpression.GetConditions();
@@ -133,9 +133,9 @@ namespace VirtoCommerce.MarketingModule.Web.JsonConverters
 
                     if (!string.IsNullOrEmpty(dynamicPromotion?.PredicateVisualTreeSerialized))
                     {
-                        result = JsonConvert.DeserializeObject<PromotionConditionReward>(
+                        result = JsonConvert.DeserializeObject<PromotionConditionRewardTree>(
                             dynamicPromotion.PredicateVisualTreeSerialized,
-                            new PromotionConditionRewardJsonConverter());
+                            new ConditionRewardJsonConverter());
 
                         //// Copy available elements from etalon because they not persisted
                         var sourceBlocks = etalonEpressionTree.Traverse(x => x.Children);

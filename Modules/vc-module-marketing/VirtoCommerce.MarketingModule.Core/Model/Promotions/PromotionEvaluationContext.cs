@@ -3,7 +3,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
-    public class PromotionEvaluationContext : IEvaluationContext
+    public class PromotionEvaluationContext : EvaluationContextBase
     {
         public string[] RefusedGiftIds { get; set; }
 

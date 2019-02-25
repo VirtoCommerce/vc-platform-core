@@ -7,7 +7,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Promotions
 {
-    public class PromotionConditionRewardJsonConverter : JsonConverter
+    public class ConditionRewardJsonConverter : JsonConverter
     {
         public override bool CanWrite { get; } = false;
         public override bool CanRead { get; } = true;

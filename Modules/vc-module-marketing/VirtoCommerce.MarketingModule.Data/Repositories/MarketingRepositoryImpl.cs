@@ -100,9 +100,10 @@ namespace VirtoCommerce.MarketingModule.Data.Repositories
 
         public Task<DynamicContentPublishingGroupEntity[]> GetContentPublicationsByIdsAsync(string[] ids)
         {
-            return PublishingGroups.Include(x => x.ContentItems.Select(y => y.ContentItem))
-                                    .Include(x => x.ContentPlaces.Select(y => y.ContentPlace))
-                                    .Where(x => ids.Contains(x.Id)).ToArrayAsync();
+            return PublishingGroups.Where(i => ids.Contains(i.Id))
+                .Include(x => x.ContentItems).ThenInclude(y => y.ContentItem)
+                .Include(x => x.ContentPlaces).ThenInclude(y => y.ContentPlace)
+                                    .ToArrayAsync();
         }
 
         public Task RemoveFoldersAsync(string[] ids)
