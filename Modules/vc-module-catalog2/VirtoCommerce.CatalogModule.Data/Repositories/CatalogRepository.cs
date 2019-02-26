@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using VirtoCommerce.CatalogModule.Core.Model;
-using VirtoCommerce.CatalogModule.Data.Model;
+using VirtoCommerce.CatalogModule.Core2.Model;
+using VirtoCommerce.CatalogModule.Data2.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
 
-namespace VirtoCommerce.CatalogModule.Data.Repositories
+namespace VirtoCommerce.CatalogModule.Data2.Repositories
 {
     public class CatalogRepository : DbContextRepositoryBase<CatalogDbContext>, ICatalogRepository
     {

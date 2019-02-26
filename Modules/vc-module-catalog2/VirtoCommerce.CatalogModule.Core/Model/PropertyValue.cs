@@ -3,7 +3,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 
-namespace VirtoCommerce.CatalogModule.Core.Model
+namespace VirtoCommerce.CatalogModule.Core2.Model
 {
     public class PropertyValue : AuditableEntity, IHasLanguage, IInheritable, ICloneable
     {

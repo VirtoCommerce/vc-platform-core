@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.CatalogModule.Core.Model;
-using VirtoCommerce.CatalogModule.Core.Model.OutlinePart;
-using VirtoCommerce.CatalogModule.Core.Services;
+using VirtoCommerce.CatalogModule.Core2.Model;
+using VirtoCommerce.CatalogModule.Core2.Model.OutlinePart;
+using VirtoCommerce.CatalogModule.Core2.Services;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.CatalogModule.Data.Services
+namespace VirtoCommerce.CatalogModule.Data2.Services
 {
     public sealed class OutlineService : IOutlineService
     {

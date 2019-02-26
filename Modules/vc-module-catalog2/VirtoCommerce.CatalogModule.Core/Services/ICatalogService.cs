@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace VirtoCommerce.CatalogModule.Core.Services
+namespace VirtoCommerce.CatalogModule.Core2.Services
 {
     public interface ICatalogService
 	{

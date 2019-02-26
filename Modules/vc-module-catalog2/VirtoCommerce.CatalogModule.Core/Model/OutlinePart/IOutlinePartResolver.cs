@@ -1,6 +1,6 @@
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.CatalogModule.Core.Model.OutlinePart
+namespace VirtoCommerce.CatalogModule.Core2.Model.OutlinePart
 {
     /// <summary>
     /// Resolves an outline part for an entity.

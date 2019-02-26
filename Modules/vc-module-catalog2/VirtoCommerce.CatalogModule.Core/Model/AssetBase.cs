@@ -6,7 +6,7 @@ using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 
-namespace VirtoCommerce.CatalogModule.Core.Model
+namespace VirtoCommerce.CatalogModule.Core2.Model
 {
     /// <summary>
     /// Base class for assets.

@@ -1,10 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace VirtoCommerce.CatalogModule.Data.Repositories
+namespace VirtoCommerce.CatalogModule.Data2.Repositories
 {
     public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<CatalogDbContext>
     {

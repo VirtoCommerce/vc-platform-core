@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core2.Model;
 
-namespace VirtoCommerce.CatalogModule.Core.Services
+namespace VirtoCommerce.CatalogModule.Core2.Services
 {
     public interface IPropertyService
 	{

@@ -1,13 +1,13 @@
 using System;
 using System.Linq;
-using VirtoCommerce.CatalogModule.Core.Model;
-using VirtoCommerce.CatalogModule.Core.Model.Search;
-using VirtoCommerce.CatalogModule.Core.Services;
-using VirtoCommerce.CatalogModule.Data.Repositories;
+using VirtoCommerce.CatalogModule.Core2.Model;
+using VirtoCommerce.CatalogModule.Core2.Model.Search;
+using VirtoCommerce.CatalogModule.Core2.Services;
+using VirtoCommerce.CatalogModule.Data2.Repositories;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
 
-namespace VirtoCommerce.CatalogModule.Data.Services
+namespace VirtoCommerce.CatalogModule.Data2.Services
 {
     public class PropertySearchService : IPropertySearchService
     {

@@ -1,4 +1,4 @@
-namespace VirtoCommerce.CatalogModule.Core.Security
+namespace VirtoCommerce.CatalogModule.Core2.Security
 {
     public static class SecurityConstants
     {

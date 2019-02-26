@@ -1,7 +1,7 @@
 using System;
 using VirtoCommerce.Platform.Core.Exceptions;
 
-namespace VirtoCommerce.CatalogModule.Core.Exceptions
+namespace VirtoCommerce.CatalogModule.Core2.Exceptions
 {
     public class CatalogModuleException : PlatformException
     {

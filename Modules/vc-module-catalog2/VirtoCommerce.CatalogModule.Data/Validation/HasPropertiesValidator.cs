@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using FluentValidation;
 using FluentValidation.Results;
-using VirtoCommerce.CatalogModule.Core.Model;
-using PropertyValidationRule = VirtoCommerce.CatalogModule.Core.Model.PropertyValidationRule;
+using VirtoCommerce.CatalogModule.Core2.Model;
+using PropertyValidationRule = VirtoCommerce.CatalogModule.Core2.Model.PropertyValidationRule;
 
-namespace VirtoCommerce.CatalogModule.Data.Validation
+namespace VirtoCommerce.CatalogModule.Data2.Validation
 {
     /// <summary>
     /// Custom validator for IHasProperties object - validates property values by attached PropertyValidationRule

@@ -1,9 +1,7 @@
-using System;
 using System.Collections.Generic;
-using System.Text;
-using VirtoCommerce.CatalogModule.Core.Model.ListEntry;
+using VirtoCommerce.CatalogModule.Core2.Model.ListEntry;
 
-namespace VirtoCommerce.CatalogModule.Web.Model
+namespace VirtoCommerce.CatalogModule.Web2.Model
 {
     /// <summary>
     /// Represent move operation detail

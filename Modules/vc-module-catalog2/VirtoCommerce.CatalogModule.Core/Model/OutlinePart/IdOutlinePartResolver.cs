@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.CatalogModule.Core.Model.OutlinePart
+namespace VirtoCommerce.CatalogModule.Core2.Model.OutlinePart
 {
     /// <summary>
     /// Uses ids for oultines.

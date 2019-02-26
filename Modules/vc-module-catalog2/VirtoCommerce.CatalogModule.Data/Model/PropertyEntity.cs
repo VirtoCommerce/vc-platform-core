@@ -2,10 +2,10 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core2.Model;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.CatalogModule.Data.Model
+namespace VirtoCommerce.CatalogModule.Data2.Model
 {
     public class PropertyEntity : AuditableEntity
     {

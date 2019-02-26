@@ -1,7 +1,7 @@
 using FluentValidation;
-using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core2.Model;
 
-namespace VirtoCommerce.CatalogModule.Data.Validation
+namespace VirtoCommerce.CatalogModule.Data2.Validation
 {
     public class PropertyValidator : AbstractValidator<Property>
     {

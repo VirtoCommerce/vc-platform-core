@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.CatalogModule.Core.Model.ListEntry
+namespace VirtoCommerce.CatalogModule.Core2.Model.ListEntry
 {
     /// <summary>
     /// Base class for all entries used in catalog categories browsing.

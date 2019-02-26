@@ -6,7 +6,7 @@ using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 
-namespace VirtoCommerce.CatalogModule.Core.Model
+namespace VirtoCommerce.CatalogModule.Core2.Model
 {
     public class CatalogProduct : AuditableEntity, IAggregateRoot, IHasLinks, ISeoSupport, IHasOutlines, IHasDimension, IHasAssociations, IHasProperties, IHasImages, IHasAssets, IInheritable, IHasTaxType, ICloneable
     {

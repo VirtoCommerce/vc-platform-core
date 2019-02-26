@@ -1,6 +1,6 @@
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.CatalogModule.Core.Model
+namespace VirtoCommerce.CatalogModule.Core2.Model
 {
     public class Asset : AssetBase
     {     

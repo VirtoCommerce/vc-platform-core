@@ -1,11 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Settings;
 
-namespace VirtoCommerce.CatalogModule.Core
+namespace VirtoCommerce.CatalogModule.Core2
 {
     public static class ModuleConstants
     {

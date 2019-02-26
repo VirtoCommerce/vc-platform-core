@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 
-namespace VirtoCommerce.CatalogModule.Core.Services
+namespace VirtoCommerce.CatalogModule.Core2.Services
 {
     /// <summary>
     /// XXX(leter)-XXXXXXXX(number).

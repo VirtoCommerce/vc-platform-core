@@ -1,10 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.CatalogModule.Core.Model.ListEntry
+namespace VirtoCommerce.CatalogModule.Core2.Model.ListEntry
 {
     /// <summary>
     /// Category ListEntry record.

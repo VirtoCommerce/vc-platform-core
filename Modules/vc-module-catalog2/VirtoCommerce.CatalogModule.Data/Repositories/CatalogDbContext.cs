@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
-using VirtoCommerce.CatalogModule.Data.Model;
+using VirtoCommerce.CatalogModule.Data2.Model;
 
-namespace VirtoCommerce.CatalogModule.Data.Repositories
+namespace VirtoCommerce.CatalogModule.Data2.Repositories
 {
     public class CatalogDbContext : DbContextWithTriggers
     {

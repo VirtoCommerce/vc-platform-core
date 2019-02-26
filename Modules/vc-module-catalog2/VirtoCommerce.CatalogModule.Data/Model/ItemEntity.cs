@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core2.Model;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.CatalogModule.Data.Model
+namespace VirtoCommerce.CatalogModule.Data2.Model
 {
     public class ItemEntity : AuditableEntity
     {
@@ -251,7 +251,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
             //Constant fields
             //Only for main product
-            AvailabilityRule = (int)Core.Model.AvailabilityRule.Always;
+            AvailabilityRule = (int)Core2.Model.AvailabilityRule.Always;
 
             CatalogId = product.CatalogId;
             CategoryId = string.IsNullOrEmpty(product.CategoryId) ? null : product.CategoryId;

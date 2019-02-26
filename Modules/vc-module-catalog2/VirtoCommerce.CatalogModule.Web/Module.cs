@@ -5,17 +5,17 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using VirtoCommerce.CatalogModule.Core;
-using VirtoCommerce.CatalogModule.Core.Model;
-using VirtoCommerce.CatalogModule.Core.Services;
-using VirtoCommerce.CatalogModule.Data.Repositories;
-using VirtoCommerce.CatalogModule.Data.Services;
-using VirtoCommerce.CatalogModule.Data.Validation;
+using VirtoCommerce.CatalogModule.Core2;
+using VirtoCommerce.CatalogModule.Core2.Model;
+using VirtoCommerce.CatalogModule.Core2.Services;
+using VirtoCommerce.CatalogModule.Data2.Repositories;
+using VirtoCommerce.CatalogModule.Data2.Services;
+using VirtoCommerce.CatalogModule.Data2.Validation;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 
-namespace VirtoCommerce.CatalogModule.Web
+namespace VirtoCommerce.CatalogModule.Web2
 {
     public class Module : IModule
     {

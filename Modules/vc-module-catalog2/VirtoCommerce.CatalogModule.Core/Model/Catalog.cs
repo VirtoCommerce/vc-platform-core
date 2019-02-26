@@ -1,10 +1,10 @@
-using System.Collections.Generic;
-using VirtoCommerce.Platform.Core.Common;
-using System.Linq;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 
-namespace VirtoCommerce.CatalogModule.Core.Model
+namespace VirtoCommerce.CatalogModule.Core2.Model
 {
     public class Catalog : AuditableEntity, IAggregateRoot, IHasProperties, ICloneable
     {

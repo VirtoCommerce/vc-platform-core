@@ -1,15 +1,15 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using VirtoCommerce.CatalogModule.Core.Exceptions;
-using VirtoCommerce.CatalogModule.Core.Model;
-using VirtoCommerce.CatalogModule.Core.Model.ListEntry;
-using VirtoCommerce.CatalogModule.Core.Services;
-using VirtoCommerce.CatalogModule.Web.Model;
+using VirtoCommerce.CatalogModule.Core2.Exceptions;
+using VirtoCommerce.CatalogModule.Core2.Model;
+using VirtoCommerce.CatalogModule.Core2.Model.ListEntry;
+using VirtoCommerce.CatalogModule.Core2.Model.Search;
+using VirtoCommerce.CatalogModule.Core2.Services;
+using VirtoCommerce.CatalogModule.Web2.Model;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
+namespace VirtoCommerce.CatalogModule.Web2.Controllers.Api
 {
     [Produces("application/json")]
     [Route("api/catalog/listentries")]

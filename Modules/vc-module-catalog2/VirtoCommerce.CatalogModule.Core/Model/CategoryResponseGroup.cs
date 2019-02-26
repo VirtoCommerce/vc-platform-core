@@ -1,6 +1,6 @@
 using System;
 
-namespace VirtoCommerce.CatalogModule.Core.Model
+namespace VirtoCommerce.CatalogModule.Core2.Model
 {
     [Flags]
     public enum CategoryResponseGroup

@@ -4,7 +4,7 @@ using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Model;
 
-namespace VirtoCommerce.CatalogModule.Core.Model
+namespace VirtoCommerce.CatalogModule.Core2.Model.Search.Indexed
 {
     public class ProductIndexedSearchCriteria : IndexedSearchCriteriaBase
     {

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace VirtoCommerce.CatalogModule.Core.Model
+namespace VirtoCommerce.CatalogModule.Core2.Model
 {
     /// <summary>
     /// Represents the path from the catalog to one of the child objects (product or category):

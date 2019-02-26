@@ -1,9 +1,8 @@
-
 using System.Globalization;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 
-namespace VirtoCommerce.CatalogModule.Core.Model
+namespace VirtoCommerce.CatalogModule.Core2.Model
 {
     public class CatalogLanguage : Entity, IHasLanguage
     {

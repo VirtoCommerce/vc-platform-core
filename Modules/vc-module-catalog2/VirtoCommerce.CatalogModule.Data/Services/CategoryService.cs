@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using FluentValidation;
 using Microsoft.Extensions.Caching.Memory;
-using VirtoCommerce.CatalogModule.Core.Events;
-using VirtoCommerce.CatalogModule.Core.Model;
-using VirtoCommerce.CatalogModule.Core.Services;
-using VirtoCommerce.CatalogModule.Data.Caching;
-using VirtoCommerce.CatalogModule.Data.Model;
-using VirtoCommerce.CatalogModule.Data.Repositories;
-using VirtoCommerce.CatalogModule.Data.Validation;
+using VirtoCommerce.CatalogModule.Core2.Events;
+using VirtoCommerce.CatalogModule.Core2.Model;
+using VirtoCommerce.CatalogModule.Core2.Services;
+using VirtoCommerce.CatalogModule.Data2.Caching;
+using VirtoCommerce.CatalogModule.Data2.Model;
+using VirtoCommerce.CatalogModule.Data2.Repositories;
+using VirtoCommerce.CatalogModule.Data2.Validation;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Caching;
@@ -17,7 +17,7 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Data.Infrastructure;
 
-namespace VirtoCommerce.CatalogModule.Data.Services
+namespace VirtoCommerce.CatalogModule.Data2.Services
 {
     public class CategoryService : ICategoryService
     {
