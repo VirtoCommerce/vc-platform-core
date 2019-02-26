@@ -183,6 +183,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Module1.Test", "Modules\Mod
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vc-module-catalog", "vc-module-catalog", "{4253302F-1A61-4288-A999-9A1B2737327A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.CatalogModule.Core", "Modules\vc-module-catalog\VirtoCommerce.CatalogModule.Core\VirtoCommerce.CatalogModule.Core.csproj", "{164F976E-63F7-41A8-A489-B49A098DCE3E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.CatalogModule.Data", "Modules\vc-module-catalog\VirtoCommerce.CatalogModule.Data\VirtoCommerce.CatalogModule.Data.csproj", "{02C6EF42-890A-48B4-938A-D6AFB74F7B09}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.CatalogModule.Web", "Modules\vc-module-catalog\VirtoCommerce.CatalogModule.Web\VirtoCommerce.CatalogModule.Web.csproj", "{2AD7E879-2ADD-4D0A-ABEA-C4B64409E8DD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -473,6 +479,18 @@ Global
 		{21C3CD47-5E04-4E1A-9483-87B8B3683CF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21C3CD47-5E04-4E1A-9483-87B8B3683CF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21C3CD47-5E04-4E1A-9483-87B8B3683CF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{164F976E-63F7-41A8-A489-B49A098DCE3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{164F976E-63F7-41A8-A489-B49A098DCE3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{164F976E-63F7-41A8-A489-B49A098DCE3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{164F976E-63F7-41A8-A489-B49A098DCE3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02C6EF42-890A-48B4-938A-D6AFB74F7B09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02C6EF42-890A-48B4-938A-D6AFB74F7B09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02C6EF42-890A-48B4-938A-D6AFB74F7B09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02C6EF42-890A-48B4-938A-D6AFB74F7B09}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2AD7E879-2ADD-4D0A-ABEA-C4B64409E8DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AD7E879-2ADD-4D0A-ABEA-C4B64409E8DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AD7E879-2ADD-4D0A-ABEA-C4B64409E8DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AD7E879-2ADD-4D0A-ABEA-C4B64409E8DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -559,6 +577,9 @@ Global
 		{DE1FC248-1465-417D-BF9A-83382C89D712} = {CB3E4574-7FA0-4040-B29F-B2347A1D2A9C}
 		{21C3CD47-5E04-4E1A-9483-87B8B3683CF8} = {1B8260F3-4F5D-4046-9AE0-34F2F9320409}
 		{4253302F-1A61-4288-A999-9A1B2737327A} = {7052A390-9A84-46DA-BD3B-556FD74DEC97}
+		{164F976E-63F7-41A8-A489-B49A098DCE3E} = {4253302F-1A61-4288-A999-9A1B2737327A}
+		{02C6EF42-890A-48B4-938A-D6AFB74F7B09} = {4253302F-1A61-4288-A999-9A1B2737327A}
+		{2AD7E879-2ADD-4D0A-ABEA-C4B64409E8DD} = {4253302F-1A61-4288-A999-9A1B2737327A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {80F99D88-A3B2-4ED2-9148-43D43EBFFFC3}
