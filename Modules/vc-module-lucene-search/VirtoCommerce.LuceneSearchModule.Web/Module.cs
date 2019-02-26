@@ -20,7 +20,7 @@ namespace VirtoCommerce.LuceneSearchModule.Web
             var snapshot = serviceCollection.BuildServiceProvider();
             var configuration = snapshot.GetService<IConfiguration>();
             var searchProvider = configuration.GetValue<string>("Search:Provider");
-            
+
             if (searchProvider.EqualsInvariant("Lucene"))
             {
                 var searchConnectionString = configuration.GetValue<string>("Search:Lucene:SearchConnectionString");

@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore" Version="2.1.6"/>
+        <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.6"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
+      <ProjectReference Include="..\..\vc-module-search\VirtoCommerce.SearchModule.Core\VirtoCommerce.SearchModule.Core.csproj" />
+      <ProjectReference Include="..\VirtoCommerce.ElasticSearchModule.Data\VirtoCommerce.ElasticSearchModule.Data.csproj" />
+    </ItemGroup>
+
+</Project>
