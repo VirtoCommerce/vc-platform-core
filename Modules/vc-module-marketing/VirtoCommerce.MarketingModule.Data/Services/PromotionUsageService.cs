@@ -50,10 +50,14 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 }
                 query = query.OrderBySortInfos(sortInfos);
 
-                var searchResult = new GenericSearchResult<PromotionUsage> { TotalCount = query.Count() };
+                var totalCount = await query.CountAsync();
+                var searchResult = new GenericSearchResult<PromotionUsage> { TotalCount = totalCount };
 
-                var coupons = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                searchResult.Results = coupons.Select(x => x.ToModel(AbstractTypeFactory<PromotionUsage>.TryCreateInstance())).ToList();
+                if (criteria.Take > 0)
+                {
+                    var coupons = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                    searchResult.Results = coupons.Select(x => x.ToModel(AbstractTypeFactory<PromotionUsage>.TryCreateInstance())).ToList();
+                }
 
                 return searchResult;
             }

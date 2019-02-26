@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.MarketingModule.Core.Events;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
@@ -63,13 +64,15 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 }
                 query = query.OrderBySortInfos(sortInfos);
 
-                var searchResult = new GenericSearchResult<Coupon> { TotalCount = query.Count() };
+                var totalCount = await query.CountAsync();
+                var searchResult = new GenericSearchResult<Coupon> { TotalCount = totalCount };
 
-                var ids = query.Select(x => x.Id)
-                               .Skip(criteria.Skip)
-                               .Take(criteria.Take).ToArray();
+                if (criteria.Take > 0)
+                {
+                    var ids = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                    searchResult.Results = await GetByIdsAsync(ids);
+                }
 
-                searchResult.Results = await GetByIdsAsync(ids);
                 return searchResult;
             }
         }
