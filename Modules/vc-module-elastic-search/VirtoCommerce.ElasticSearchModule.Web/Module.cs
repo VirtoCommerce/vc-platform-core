@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.ElasticSearchModule.Data;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
+using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
 
@@ -29,25 +30,12 @@ namespace VirtoCommerce.ElasticSearchModule.Web
                 serviceCollection.AddSingleton(luceneSettings);
                 serviceCollection.AddSingleton<ISearchProvider, ElasticSearchProvider>();
             }
-
-
-            //var searchConnection = snapshot.GetService<ISearchConnection>();
-
-            //if (searchConnection?.Provider?.EqualsInvariant("ElasticSearch") == true)
-            //{
-            //    serviceCollection.RegisterType<ISearchProvider>(
-            //        new ContainerControlledLifetimeManager(),
-            //        new InjectionFactory(c => new ElasticSearchProvider(
-            //            c.Resolve<ISearchConnection>(),
-            //            c.Resolve<ISettingsManager>()))
-            //    );
-            //}
-
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
-            // not needed
+            var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
+            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
         }
 
         public void Uninstall()
