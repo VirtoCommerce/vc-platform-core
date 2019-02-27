@@ -1,4 +1,4 @@
-﻿using VirtoCommerce.CatalogModule.Web.Model;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
 
 namespace VirtoCommerce.CatalogModule.Data.Search
 {

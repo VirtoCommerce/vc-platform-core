@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
-using VirtoCommerce.Domain.Catalog.Model.Search;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
 
 namespace VirtoCommerce.CatalogModule.Data.Search.BrowseFilters
 {
@@ -10,20 +11,20 @@ namespace VirtoCommerce.CatalogModule.Data.Search.BrowseFilters
         /// </summary>
         /// <param name="criteria"></param>
         /// <returns></returns>
-        IList<IBrowseFilter> GetBrowseFilters(ProductSearchCriteria criteria);
+        Task<IList<IBrowseFilter>> GetBrowseFilters(ProductSearchCriteria criteria);
 
         /// <summary>
         /// Returns all aggregations configured for a store
         /// </summary>
         /// <param name="storeId"></param>
         /// <returns></returns>
-        IList<IBrowseFilter> GetStoreAggregations(string storeId);
+        Task<IList<IBrowseFilter>> GetStoreAggregations(string storeId);
 
         /// <summary>
         /// Binds aggregations to a store
         /// </summary>
         /// <param name="storeId"></param>
         /// <param name="filters"></param>
-        void SaveStoreAggregations(string storeId, IList<IBrowseFilter> filters);
+        Task SaveStoreAggregations(string storeId, IList<IBrowseFilter> filters);
     }
 }

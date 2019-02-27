@@ -1,147 +1,117 @@
-using CacheManager.Core;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
-using VirtoCommerce.CatalogModule.Data.Extensions;
+using System.Threading.Tasks;
+using VirtoCommerce.CatalogModule.Core.Events;
+using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.Model;
 using VirtoCommerce.CatalogModule.Data.Repositories;
-using VirtoCommerce.Domain.Catalog.Events;
-using VirtoCommerce.Domain.Catalog.Model;
-using VirtoCommerce.Domain.Catalog.Services;
-using VirtoCommerce.Domain.Common.Events;
-using VirtoCommerce.Domain.Search;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
-using VirtoCommerce.Platform.Data.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
+using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Data.Services
 {
-    public class PropertyServiceImpl : ServiceBase, IPropertyService
+    public class PropertyServiceImpl : IPropertyService
     {
         private readonly Func<ICatalogRepository> _repositoryFactory;
-        private readonly ICacheManager<object> _cacheManager;
-        private readonly ICatalogService _catalogService;
         private readonly IEventPublisher _eventPublisher;
 
-        public PropertyServiceImpl(Func<ICatalogRepository> repositoryFactory, ICacheManager<object> cacheManager, ICatalogService catalogService, IEventPublisher eventPublisher)
+        public PropertyServiceImpl(Func<ICatalogRepository> repositoryFactory, IEventPublisher eventPublisher)
         {
             _repositoryFactory = repositoryFactory;
-            _cacheManager = cacheManager;
-            _catalogService = catalogService;
             _eventPublisher = eventPublisher;
         }
 
         #region IPropertyService Members
 
-        public Property GetById(string propertyId)
+
+        public virtual async Task<Property[]> GetByIdsAsync(string[] ids)
         {
-            return GetByIds(new[] { propertyId }).FirstOrDefault();
-        }
-
-        public Property[] GetByIds(string[] propertyIds)
-        {
-            var preloadedProperties = PreloadAllProperties();
-
-            var result = propertyIds
-                .Where(propertyId => preloadedProperties.ContainsKey(propertyId))
-                .Select(propertyId => preloadedProperties[propertyId])
-                .Select(x => x.Clone() as Property)
-                .ToArray();
-
-            return result;
-        }
-
-        public Property[] GetAllCatalogProperties(string catalogId)
-        {
-            var preloadedProperties = PreloadAllCatalogProperties(catalogId);
-            var result = preloadedProperties.Select(x => x.Clone() as Property).ToArray();
-            return result;
-        }
-
-
-        public Property[] GetAllProperties()
-        {
-            var preloadedProperties = PreloadAllProperties();
-            var result = preloadedProperties.Values.Select(x => x.Clone() as Property).ToArray();
-            return result;
-        }
-
-
-        public Property Create(Property property)
-        {
-            if (property.CatalogId == null)
+            using (var repository = _repositoryFactory())
             {
-                throw new NullReferenceException("property.CatalogId");
+                repository.DisableChangesTracking();
+
+                var entities = await repository.GetPropertiesByIdsAsync(ids);
+                var properties = entities.Select(p => p.ToModel(AbstractTypeFactory<Property>.TryCreateInstance())).ToArray();
+
+                ApplyInheritanceRules(properties);
+
+                return properties;
             }
-
-            SaveChanges(new[] { property });
-
-            var result = GetById(property.Id);
-            return result;
         }
 
-        public void Update(Property[] properties)
+        public virtual async Task SaveChangesAsync(Property[] properties)
         {
-            SaveChanges(properties);
+            var pkMap = new PrimaryKeyResolvingMap();
+            var changedEntries = new List<GenericChangedEntry<Property>>();
+
+            using (var repository = _repositoryFactory())
+            {
+                TryAddPredefinedValidationRules(properties);
+
+                var dbExistEntities = await repository.GetPropertiesByIdsAsync(properties.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray(), loadDictValues: true);
+                foreach (var property in properties)
+                {
+                    var originalEntity = dbExistEntities.FirstOrDefault(x => x.Id == property.Id);
+                    var modifiedEntity = AbstractTypeFactory<PropertyEntity>.TryCreateInstance().FromModel(property, pkMap);
+                    if (originalEntity != null)
+                    {
+                        changedEntries.Add(new GenericChangedEntry<Property>(property, originalEntity.ToModel(AbstractTypeFactory<Property>.TryCreateInstance()), EntryState.Modified));
+                        modifiedEntity.Patch(originalEntity);
+                        //Force set ModifiedDate property to mark a property changed. Special for  partial update cases when property table not have changes
+                        originalEntity.ModifiedDate = DateTime.UtcNow;
+                    }
+                    else
+                    {
+                        repository.Add(modifiedEntity);
+                        changedEntries.Add(new GenericChangedEntry<Property>(property, EntryState.Added));
+                    }
+                }
+
+                await _eventPublisher.Publish(new PropertyChangingEvent(changedEntries));
+
+                await repository.UnitOfWork.CommitAsync();
+                pkMap.ResolvePrimaryKeys();
+
+                //TODO
+                //Reset cached categories and catalogs
+                //ResetCache();
+
+                await _eventPublisher.Publish(new PropertyChangedEvent(changedEntries));
+            }
         }
 
-
-        public void Delete(string[] propertyIds)
+        public async Task DeleteAsync(string[] propertyIds)
         {
-            var changedEntries = GetByIds(propertyIds)
+            var changedEntries = (await GetByIdsAsync(propertyIds))
                 .Select(p => new GenericChangedEntry<Property>(p, EntryState.Deleted))
                 .ToList();
 
             using (var repository = _repositoryFactory())
             {
-                var entities = repository.GetPropertiesByIdsAsync(propertyIds);
+                var entities = await repository.GetPropertiesByIdsAsync(propertyIds);
 
-                _eventPublisher.Publish(new PropertyChangingEvent(changedEntries));
+                await _eventPublisher.Publish(new PropertyChangingEvent(changedEntries));
 
                 foreach (var entity in entities)
                 {
                     repository.Remove(entity);
                 }
 
-                CommitChanges(repository);
+                await repository.UnitOfWork.CommitAsync();
+
+                //TODO
                 //Reset cached categories and catalogs
-                ResetCache();
+                //ResetCache();
 
-                _eventPublisher.Publish(new PropertyChangedEvent(changedEntries));
+                await _eventPublisher.Publish(new PropertyChangedEvent(changedEntries));
             }
         }
-        [Obsolete("Use IProperyDictionaryItemService instead")]
-        public PropertyDictionaryValue[] SearchDictionaryValues(string propertyId, string keyword)
-        {
-            if (propertyId == null)
-            {
-                throw new ArgumentNullException(nameof(propertyId));
-            }
 
-            using (var repository = _repositoryFactory())
-            {
-                var query = repository.PropertyDictionaryValues.Include(x => x.DictionaryItem)
-                                      .Where(x => x.DictionaryItem.PropertyId == propertyId);
-                if (!string.IsNullOrEmpty(keyword))
-                {
-                    query = query.Where(x => x.Value.Contains(keyword));
-                }
-                var result = query.OrderBy(x => x.Id).ToArray();
-                return result.Select(x => x.ToModel(AbstractTypeFactory<PropertyDictionaryValue>.TryCreateInstance())).ToArray();
-            }
-        }
         #endregion
-
-        protected virtual void LoadDependencies(Property[] properties)
-        {
-            var catalogsMap = _catalogService.GetCatalogsList().ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
-            foreach (var property in properties)
-            {
-                property.Catalog = catalogsMap.GetValueOrThrow(property.CatalogId, $"property catalog with key {property.CatalogId} not exist");
-            }
-        }
 
         protected virtual void ApplyInheritanceRules(Property[] properties)
         {
@@ -176,95 +146,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     }
                 }
             }
-        }
-
-        protected virtual void SaveChanges(Property[] properties)
-        {
-            var pkMap = new PrimaryKeyResolvingMap();
-            var changedEntries = new List<GenericChangedEntry<Property>>();
-
-            using (var repository = _repositoryFactory())
-            using (var changeTracker = GetChangeTracker(repository))
-            {
-                TryAddPredefinedValidationRules(properties);
-
-                var dbExistEntities = repository.GetPropertiesByIds(properties.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray(), loadDictValues: true);
-                foreach (var property in properties)
-                {
-                    var originalEntity = dbExistEntities.FirstOrDefault(x => x.Id == property.Id);
-                    var modifiedEntity = AbstractTypeFactory<PropertyEntity>.TryCreateInstance().FromModel(property, pkMap);
-                    if (originalEntity != null)
-                    {
-                        changeTracker.Attach(originalEntity);
-                        changedEntries.Add(new GenericChangedEntry<Property>(property, originalEntity.ToModel(AbstractTypeFactory<Property>.TryCreateInstance()), EntryState.Modified));
-                        modifiedEntity.Patch(originalEntity);
-                        //Force set ModifiedDate property to mark a property changed. Special for  partial update cases when property table not have changes
-                        originalEntity.ModifiedDate = DateTime.UtcNow;
-                    }
-                    else
-                    {
-                        repository.Add(modifiedEntity);
-                        changedEntries.Add(new GenericChangedEntry<Property>(property, EntryState.Added));
-                    }
-                }
-
-                _eventPublisher.Publish(new PropertyChangingEvent(changedEntries));
-
-                CommitChanges(repository);
-                pkMap.ResolvePrimaryKeys();
-                //Reset cached categories and catalogs
-                ResetCache();
-
-                _eventPublisher.Publish(new PropertyChangedEvent(changedEntries));
-            }
-        }
-
-        protected virtual void ResetCache()
-        {
-            _cacheManager.ClearRegion(CatalogConstants.CacheRegion);
-            _cacheManager.ClearRegion(CatalogConstants.DictionaryItemsCacheRegion);
-        }
-
-        protected virtual IDictionary<string, Property> PreloadAllProperties()
-        {
-            return _cacheManager.Get("AllProperties", CatalogConstants.CacheRegion, () =>
-            {
-                using (var repository = _repositoryFactory())
-                {
-                    repository.DisableChangesTracking();
-
-                    var propertyIds = repository.Properties.Select(p => p.Id).ToArray();
-                    var entities = repository.GetPropertiesByIdsAsync(propertyIds);
-                    var properties = entities.Select(p => p.ToModel(AbstractTypeFactory<Property>.TryCreateInstance())).ToArray();
-
-                    LoadDependencies(properties);
-                    ApplyInheritanceRules(properties);
-
-                    var result = properties.ToDictionary(p => p.Id, StringComparer.OrdinalIgnoreCase);
-
-                    return result;
-                }
-            });
-        }
-
-        protected virtual IList<Property> PreloadAllCatalogProperties(string catalogId)
-        {
-            return _cacheManager.Get($"AllCatalogProperties-{catalogId}", CatalogConstants.CacheRegion, () =>
-            {
-                using (var repository = _repositoryFactory())
-                {
-                    repository.DisableChangesTracking();
-
-                    var result = repository.GetAllCatalogPropertiesAsync(catalogId)
-                        .GroupBy(p => p.Id, StringComparer.OrdinalIgnoreCase) // Remove duplicates
-                        .Select(g => g.First())
-                        .OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
-                        .Select(p => p.ToModel(AbstractTypeFactory<Property>.TryCreateInstance()))
-                        .ToArray();
-
-                    return result;
-                }
-            });
         }
     }
 }

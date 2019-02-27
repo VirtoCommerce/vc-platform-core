@@ -1,8 +1,8 @@
-﻿using VirtoCommerce.CatalogModule.Web.Model;
+using VirtoCommerce.CatalogModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Data.Search
 {
-    public class ProductSearchResult : CatalogSearchResult<Product>
+    public class ProductSearchResult : CatalogSearchResult<CatalogProduct>
     {
     }
 }

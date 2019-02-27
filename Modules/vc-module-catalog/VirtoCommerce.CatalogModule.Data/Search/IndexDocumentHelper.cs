@@ -1,8 +1,8 @@
-﻿using System.IO;
+using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using VirtoCommerce.Domain.Search;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Data.Search
 {

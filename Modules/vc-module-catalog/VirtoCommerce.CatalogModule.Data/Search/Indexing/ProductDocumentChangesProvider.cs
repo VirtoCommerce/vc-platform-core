@@ -1,12 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.CatalogModule.Data.Model;
 using VirtoCommerce.CatalogModule.Data.Repositories;
-using VirtoCommerce.Domain.Search;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.SearchModule.Core.Model;
+using VirtoCommerce.SearchModule.Core.Services;
 
 namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
 {
@@ -23,7 +25,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
             _changeLogService = changeLogService;
         }
 
-        public virtual Task<long> GetTotalChangesCountAsync(DateTime? startDate, DateTime? endDate)
+        public virtual async Task<long> GetTotalChangesCountAsync(DateTime? startDate, DateTime? endDate)
         {
             long result;
 
@@ -32,7 +34,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
                 // Get total products count
                 using (var repository = _catalogRepositoryFactory())
                 {
-                    result = repository.Items.Count(i => i.ParentId == null);
+                    result = await repository.Items.CountAsync(i => i.ParentId == null);
                 }
             }
             else
@@ -41,10 +43,10 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
                 result = _changeLogService.FindChangeHistory(ChangeLogObjectType, startDate, endDate).Count();
             }
 
-            return Task.FromResult(result);
+            return result;
         }
 
-        public virtual Task<IList<IndexDocumentChange>> GetChangesAsync(DateTime? startDate, DateTime? endDate, long skip, long take)
+        public virtual async Task<IList<IndexDocumentChange>> GetChangesAsync(DateTime? startDate, DateTime? endDate, long skip, long take)
         {
             IList<IndexDocumentChange> result;
 
@@ -53,13 +55,13 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
                 // Get documents from repository and return them as changes
                 using (var repository = _catalogRepositoryFactory())
                 {
-                    var productIds = repository.Items
+                    var productIds = await repository.Items
                         .Where(i => i.ParentId == null)
                         .OrderBy(i => i.CreatedDate)
                         .Select(i => i.Id)
                         .Skip((int)skip)
                         .Take((int)take)
-                        .ToArray();
+                        .ToArrayAsync();
 
                     result = productIds.Select(id =>
                         new IndexDocumentChange
@@ -89,7 +91,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
                 ).ToArray();
             }
 
-            return Task.FromResult(result);
+            return result;
         }
     }
 }

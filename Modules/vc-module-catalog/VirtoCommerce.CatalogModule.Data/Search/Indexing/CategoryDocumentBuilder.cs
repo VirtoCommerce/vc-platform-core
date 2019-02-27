@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using VirtoCommerce.CatalogModule.Web.Converters;
-using VirtoCommerce.Domain.Catalog.Model;
-using VirtoCommerce.Domain.Catalog.Services;
-using VirtoCommerce.Domain.Search;
+using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.SearchModule.Core.Model;
+using VirtoCommerce.SearchModule.Core.Services;
 
 namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
 {
@@ -23,22 +23,22 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
             _blobUrlResolver = blobUrlResolver;
         }
 
-        public virtual Task<IList<IndexDocument>> GetDocumentsAsync(IList<string> documentIds)
+        public virtual async Task<IList<IndexDocument>> GetDocumentsAsync(IList<string> documentIds)
         {
-            var categories = GetCategories(documentIds);
+            var categories = await GetCategories(documentIds);
 
             IList<IndexDocument> result = categories
                 .Select(CreateDocument)
                 .Where(doc => doc != null)
                 .ToArray();
 
-            return Task.FromResult(result);
+            return result;
         }
 
 
-        protected virtual IList<Category> GetCategories(IList<string> categoryIds)
+        protected virtual Task<Category[]> GetCategories(IList<string> categoryIds)
         {
-            return _categoryService.GetByIds(categoryIds.ToArray(), CategoryResponseGroup.WithProperties | CategoryResponseGroup.WithOutlines | CategoryResponseGroup.WithImages | CategoryResponseGroup.WithSeo | CategoryResponseGroup.WithLinks);
+            return _categoryService.GetByIdsAsync(categoryIds.ToArray(), CategoryResponseGroup.WithProperties | CategoryResponseGroup.WithOutlines | CategoryResponseGroup.WithImages | CategoryResponseGroup.WithSeo | CategoryResponseGroup.WithLinks);
         }
 
         protected virtual IndexDocument CreateDocument(Category category)
@@ -98,8 +98,9 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
             if (StoreObjectsInIndex)
             {
                 // Index serialized category
-                var itemDto = category.ToWebModel(_blobUrlResolver);
-                document.AddObjectFieldValue(itemDto);
+                //TODO
+                //var itemDto = category.ToWebModel(_blobUrlResolver);
+                document.AddObjectFieldValue(category);
             }
 
             return document;

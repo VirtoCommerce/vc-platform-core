@@ -1,12 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Data.Search.BrowseFilters;
-using VirtoCommerce.Domain.Catalog.Model.Search;
-using VirtoCommerce.Domain.Search;
 using VirtoCommerce.Platform.Core.Common;
-using RangeFilter = VirtoCommerce.Domain.Search.RangeFilter;
-using RangeFilterValue = VirtoCommerce.Domain.Search.RangeFilterValue;
+using VirtoCommerce.SearchModule.Core.Extenstions;
+using VirtoCommerce.SearchModule.Core.Model;
+using RangeFilter = VirtoCommerce.SearchModule.Core.Model.RangeFilter;
+using RangeFilterValue = VirtoCommerce.SearchModule.Core.Model.RangeFilterValue;
 
 namespace VirtoCommerce.CatalogModule.Data.Search
 {

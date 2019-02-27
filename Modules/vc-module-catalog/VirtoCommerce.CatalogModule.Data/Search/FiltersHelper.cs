@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using VirtoCommerce.Domain.Catalog.Model.Search;
-using VirtoCommerce.Domain.Search;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.SearchModule.Core.Extenstions;
+using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Data.Search
 {
@@ -109,6 +110,6 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             }
 
             return result;
-        }      
+        }
     }
 }

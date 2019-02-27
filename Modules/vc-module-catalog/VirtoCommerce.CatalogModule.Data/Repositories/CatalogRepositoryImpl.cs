@@ -20,6 +20,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
         {
             _dbContext = dbContext;
         }
+
         #region ICatalogRepository Members
 
         public IQueryable<CategoryEntity> Categories => DbContext.Set<CategoryEntity>();
@@ -391,22 +392,23 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
             if (catalogProperty != null)
             {
                 commandText = $"DELETE PV FROM PropertyValue PV INNER JOIN Catalog C ON C.Id = PV.CatalogId AND C.Id = '@CatalogId' WHERE PV.Name = '@Name'";
-                DbContext.Database.ExecuteSqlCommand(commandText, new SqlParameter("@CatalogId", catalogProperty.CatalogId), new SqlParameter("@Name", catalogProperty.Name));
+                await DbContext.Database.ExecuteSqlCommandAsync(commandText, new SqlParameter("@CatalogId", catalogProperty.CatalogId), new SqlParameter("@Name", catalogProperty.Name));
             }
             if (categoryProperty != null)
             {
                 commandText = $"DELETE PV FROM PropertyValue PV INNER JOIN Category C ON C.Id = PV.CategoryId AND C.CatalogId = '@CatalogId' WHERE PV.Name = '@Name'";
-                DbContext.Database.ExecuteSqlCommand(commandText, new SqlParameter("@CatalogId", categoryProperty.CatalogId), new SqlParameter("@Name", categoryProperty.Name));
+                await DbContext.Database.ExecuteSqlCommandAsync(commandText, new SqlParameter("@CatalogId", categoryProperty.CatalogId), new SqlParameter("@Name", categoryProperty.Name));
             }
             if (itemProperty != null)
             {
                 commandText = $"DELETE PV FROM PropertyValue PV INNER JOIN Item I ON I.Id = PV.ItemId AND I.CatalogId = '@CatalogId' WHERE PV.Name = '@Name'";
-                DbContext.Database.ExecuteSqlCommand(commandText, new SqlParameter("@CatalogId", itemProperty.CatalogId), new SqlParameter("@Name", itemProperty.Name));
+                await DbContext.Database.ExecuteSqlCommandAsync(commandText, new SqlParameter("@CatalogId", itemProperty.CatalogId), new SqlParameter("@Name", itemProperty.Name));
             }
         }
 
         public GenericSearchResult<AssociationEntity> SearchAssociations(ProductAssociationSearchCriteria criteria)
         {
+            //TODO
             throw new NotImplementedException();
         }
 

@@ -1,5 +1,4 @@
-﻿using FluentValidation;
-using VirtoCommerce.Domain.Catalog.Model;
+using VirtoCommerce.CatalogModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Data.Services.Validation
 {

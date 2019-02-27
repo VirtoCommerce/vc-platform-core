@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.Domain.Catalog.Model.Search;
-using VirtoCommerce.Domain.Commerce.Model.Search;
-using VirtoCommerce.Domain.Search;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.SearchModule.Core.Extenstions;
+using VirtoCommerce.SearchModule.Core.Model;
+using VirtoCommerce.SearchModule.Core.Services;
 
 namespace VirtoCommerce.CatalogModule.Data.Search
 {
@@ -34,7 +35,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
 
                 request = new SearchRequest
                 {
-                    SearchKeywords = productSearchCriteria.SearchPhrase,
+                    SearchKeywords = productSearchCriteria.Keyword,
                     SearchFields = new[] { "__content" },
                     Filter = GetFilters(allFilters).And(),
                     Sorting = GetSorting(productSearchCriteria),
@@ -42,8 +43,8 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                     Take = criteria.Take,
                     Aggregations = _aggregationConverter?.GetAggregationRequests(productSearchCriteria, allFilters),
                     IsFuzzySearch = productSearchCriteria.IsFuzzySearch,
-                    RawQuery = productSearchCriteria.RawQuery
-            };
+                    //RawQuery = productSearchCriteria.RawQuery
+                };
             }
 
             return request;
@@ -56,7 +57,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
 
             var priorityFields = criteria.GetPriorityFields();
 
-            foreach (SortInfo sortInfo in criteria.SortInfos)
+            foreach (var sortInfo in criteria.SortInfos)
             {
                 var sortingField = new SortingField();
                 if (sortInfo is GeoSortInfo geoSortInfo)
@@ -123,10 +124,10 @@ namespace VirtoCommerce.CatalogModule.Data.Search
         {
             var result = new List<IFilter>();
 
-            if (!string.IsNullOrEmpty(criteria.SearchPhrase))
+            if (!string.IsNullOrEmpty(criteria.Keyword))
             {
-                var parseResult = _searchPhraseParser.Parse(criteria.SearchPhrase);
-                criteria.SearchPhrase = parseResult.SearchPhrase;
+                var parseResult = _searchPhraseParser.Parse(criteria.Keyword);
+                criteria.Keyword = parseResult.Keyword;
                 result.AddRange(parseResult.Filters);
             }
 

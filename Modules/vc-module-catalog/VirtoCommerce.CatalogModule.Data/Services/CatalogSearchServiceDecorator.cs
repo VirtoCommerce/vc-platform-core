@@ -1,13 +1,13 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Internal;
+using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
+using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.Search;
-using VirtoCommerce.Domain.Catalog.Model;
-using VirtoCommerce.Domain.Catalog.Model.Search;
-using VirtoCommerce.Domain.Catalog.Services;
-using VirtoCommerce.Domain.Search;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
-using SearchCriteria = VirtoCommerce.Domain.Catalog.Model.SearchCriteria;
+using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Data.Services
 {
@@ -33,7 +33,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             _settingsManager = settingsManager;
         }
 
-        public virtual SearchResult Search(SearchCriteria criteria)
+        public virtual async Task<SearchResult> SearchAsync(SearchCriteria criteria)
         {
             SearchResult result;
 
@@ -52,7 +52,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 var serviceCriteria = AbstractTypeFactory<ProductSearchCriteria>.TryCreateInstance();
 
                 serviceCriteria.ObjectType = KnownDocumentTypes.Product;
-                serviceCriteria.SearchPhrase = criteria.Keyword;
+                serviceCriteria.Keyword = criteria.Keyword;
                 serviceCriteria.CatalogId = criteria.CatalogId;
                 serviceCriteria.Outline = criteria.CategoryId;
                 serviceCriteria.WithHidden = criteria.WithHidden;
@@ -61,21 +61,15 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 serviceCriteria.ResponseGroup = responseGroup.ToString();
                 serviceCriteria.Sort = criteria.Sort;
 
-                SearchItems(result, serviceCriteria, responseGroup);
+                await SearchItemsAsync(result, serviceCriteria, responseGroup);
             }
             else
             {
                 // use original implementation from catalog module
-                result = _catalogSearchService.Search(criteria);
+                result = await _catalogSearchService.SearchAsync(criteria);
             }
 
             return result;
-        }
-
-
-        protected virtual void SearchItems(SearchResult result, ProductSearchCriteria criteria, ItemResponseGroup responseGroup)
-        {
-            Task.Run(() => SearchItemsAsync(result, criteria, responseGroup)).GetAwaiter().GetResult();
         }
 
         protected virtual async Task SearchItemsAsync(SearchResult result, ProductSearchCriteria criteria, ItemResponseGroup responseGroup)
@@ -88,8 +82,8 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             if (!searchResults.Items.IsNullOrEmpty())
             {
                 // Now load items from repository preserving original order
-                var itemIds = searchResults.Items.Select(x => x.Id.ToString()).ToList();
-                result.Products = _itemService.GetByIds(itemIds.ToArray(), responseGroup, criteria.CatalogId)
+                var itemIds = searchResults.Items.Select(i => i.Id).ToArray();
+                result.Products = (await _itemService.GetByIdsAsync(itemIds, responseGroup, criteria.CatalogId))
                     .OrderBy(i => itemIds.IndexOf(i.Id)).ToArray();
             }
         }

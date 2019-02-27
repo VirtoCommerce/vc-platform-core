@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.Domain.Catalog.Model;
-using VirtoCommerce.Domain.Catalog.Services;
-using VirtoCommerce.Domain.Commerce.Model;
-using VirtoCommerce.Domain.Commerce.Services;
-using VirtoCommerce.Domain.Store.Model;
-using VirtoCommerce.Domain.Store.Services;
+using System.Threading.Tasks;
+using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Services;
+using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.StoreModule.Core.Model;
+using VirtoCommerce.StoreModule.Core.Services;
 
 namespace VirtoCommerce.CatalogModule.Data.Services
 {
@@ -27,13 +27,13 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         }
 
         #region ISeoConflictDetector Members
-        public IEnumerable<SeoInfo> DetectSeoDuplicates(string objectType, string objectId, IEnumerable<SeoInfo> allSeoDuplicates)
+        public async Task<IEnumerable<SeoInfo>> DetectSeoDuplicatesAsync(string objectType, string objectId, IEnumerable<SeoInfo> allSeoDuplicates)
         {
             var retVal = new List<SeoInfo>();
             string catalogId = null;
             if (objectType.EqualsInvariant(typeof(Store).Name))
             {
-                var store = _storeService.GetById(objectId);
+                var store = await _storeService.GetByIdAsync(objectId);
                 if (store != null)
                 {
                     catalogId = store.Catalog;
@@ -41,7 +41,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
             else if (objectType.EqualsInvariant(typeof(Category).Name))
             {
-                var category = _categoryService.GetById(objectId, CategoryResponseGroup.Info);
+                var category = await _categoryService.GetByIdAsync(objectId, CategoryResponseGroup.Info);
                 if (category != null)
                 {
                     catalogId = category.CatalogId;
@@ -49,7 +49,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
             else if (objectType.EqualsInvariant(typeof(CatalogProduct).Name))
             {
-                var product = _productService.GetById(objectId, ItemResponseGroup.ItemInfo);
+                var product = await _productService.GetByIdAsync(objectId, ItemResponseGroup.ItemInfo);
                 if (product != null)
                 {
                     catalogId = product.CatalogId;
@@ -59,7 +59,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             if (!string.IsNullOrEmpty(catalogId))
             {
                 //Get all SEO owners witch related to requested catalog and contains Seo duplicates
-                var objectsWithSeoDuplicates = GetSeoOwnersContainsDuplicates(catalogId, allSeoDuplicates);
+                var objectsWithSeoDuplicates = await GetSeoOwnersContainsDuplicatesAsync(catalogId, allSeoDuplicates);
                 //Need select for each seo owner one seo defined for requested container or without it if not exist
                 var seoInfos = objectsWithSeoDuplicates.Select(x => x.SeoInfos.Where(s => s.StoreId == objectId || string.IsNullOrEmpty(s.StoreId)).OrderByDescending(s => s.StoreId).FirstOrDefault())
                                                        .Where(x => x != null);
@@ -75,13 +75,13 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         /// <param name="catalogId"></param>
         /// <param name="allDublicatedSeos"></param>
         /// <returns></returns>
-        private IEnumerable<ISeoSupport> GetSeoOwnersContainsDuplicates(string catalogId, IEnumerable<SeoInfo> allDublicatedSeos)
+        private async Task<IEnumerable<ISeoSupport>> GetSeoOwnersContainsDuplicatesAsync(string catalogId, IEnumerable<SeoInfo> allDublicatedSeos)
         {
             var productsSeo = allDublicatedSeos.Where(x => x.ObjectType.EqualsInvariant(typeof(CatalogProduct).Name));
             var categoriesSeo = allDublicatedSeos.Where(x => x.ObjectType.EqualsInvariant(typeof(Category).Name));
 
-            var products = _productService.GetByIds(productsSeo.Select(x => x.ObjectId).Distinct().ToArray(), ItemResponseGroup.Outlines | ItemResponseGroup.Seo, catalogId);
-            var categories = _categoryService.GetByIds(categoriesSeo.Select(x => x.ObjectId).Distinct().ToArray(), CategoryResponseGroup.WithOutlines | CategoryResponseGroup.WithSeo, catalogId);
+            var products = await _productService.GetByIdsAsync(productsSeo.Select(x => x.ObjectId).Distinct().ToArray(), ItemResponseGroup.Outlines | ItemResponseGroup.Seo, catalogId);
+            var categories = await _categoryService.GetByIdsAsync(categoriesSeo.Select(x => x.ObjectId).Distinct().ToArray(), CategoryResponseGroup.WithOutlines | CategoryResponseGroup.WithSeo, catalogId);
 
             var retVal = new List<ISeoSupport>();
             //Here we try to find between SEO duplicates records for products with directly or indirectly (virtual) related to requested catalog

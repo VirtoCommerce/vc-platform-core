@@ -1,46 +1,51 @@
 using System;
 using System.Linq;
-using CacheManager.Core;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
+using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Services;
+using VirtoCommerce.CatalogModule.Data.Caching;
 using VirtoCommerce.CatalogModule.Data.Model;
 using VirtoCommerce.CatalogModule.Data.Repositories;
-using VirtoCommerce.Domain.Catalog.Model;
-using VirtoCommerce.Domain.Catalog.Model.Search;
-using VirtoCommerce.Domain.Catalog.Services;
-using VirtoCommerce.Domain.Commerce.Model.Search;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Data.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CatalogModule.Data.Services
 {
-    public class PropertyDictionaryItemService : ServiceBase, IProperyDictionaryItemService, IProperyDictionaryItemSearchService
+    public class PropertyDictionaryItemService : IProperyDictionaryItemService
     {
         private readonly Func<ICatalogRepository> _repositoryFactory;
-        private readonly ICacheManager<object> _cacheManager;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public PropertyDictionaryItemService(Func<ICatalogRepository> repositoryFactory, ICacheManager<object> cacheManager)
+        public PropertyDictionaryItemService(Func<ICatalogRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
-            _cacheManager = cacheManager;
+            _platformMemoryCache = platformMemoryCache;
         }
 
-        public PropertyDictionaryItem[] GetByIds(string[] ids)
+        public Task<PropertyDictionaryItem[]> GetByIdsAsync(string[] ids)
         {
-            PropertyDictionaryItem[] result;
-
-            using (var repository = _repositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join(",", ids));
+            return _platformMemoryCache.GetOrCreateExclusive(cacheKey, async (cacheEntry) =>
             {
-                //Optimize performance and CPU usage
-                repository.DisableChangesTracking();
+                cacheEntry.AddExpirationToken(CatalogCacheRegion.CreateChangeToken());
+                PropertyDictionaryItem[] result;
 
-                result = repository.GetPropertyDictionaryItemsByIdsAsync(ids)
-                                   .Select(x => x.ToModel(AbstractTypeFactory<PropertyDictionaryItem>.TryCreateInstance()))
-                                   .ToArray();
-            }
-            return result;
+                using (var repository = _repositoryFactory())
+                {
+                    //Optimize performance and CPU usage
+                    repository.DisableChangesTracking();
+
+                    result = (await repository.GetPropertyDictionaryItemsByIdsAsync(ids))
+                        .Select(x => x.ToModel(AbstractTypeFactory<PropertyDictionaryItem>.TryCreateInstance()))
+                        .ToArray();
+                }
+                return result;
+            });
         }
 
-        public void SaveChanges(PropertyDictionaryItem[] dictItems)
+        public async Task SaveChangesAsync(PropertyDictionaryItem[] dictItems)
         {
             if (dictItems == null)
             {
@@ -49,16 +54,14 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
             var pkMap = new PrimaryKeyResolvingMap();
             using (var repository = _repositoryFactory())
-            using (var changeTracker = GetChangeTracker(repository))
             {
-                var dbExistEntities = repository.GetPropertyDictionaryItemsByIds(dictItems.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
+                var dbExistEntities = await repository.GetPropertyDictionaryItemsByIdsAsync(dictItems.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var dictItem in dictItems)
                 {
                     var originalEntity = dbExistEntities.FirstOrDefault(x => x.Id == dictItem.Id);
                     var modifiedEntity = AbstractTypeFactory<PropertyDictionaryItemEntity>.TryCreateInstance().FromModel(dictItem, pkMap);
                     if (originalEntity != null)
                     {
-                        changeTracker.Attach(originalEntity);
                         modifiedEntity.Patch(originalEntity);
                     }
                     else
@@ -66,75 +69,28 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                         repository.Add(modifiedEntity);
                     }
                 }
-                CommitChanges(repository);
+
+                await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
             }
-            ResetCache();
+
+            DictionaryItemsCacheRegion.ExpireRegion();
         }
 
-        public void Delete(string[] ids)
+        public async Task DeleteAsync(string[] ids)
         {
             using (var repository = _repositoryFactory())
             {
-                var dbEntities = repository.GetPropertyDictionaryItemsByIdsAsync(ids);
+                var dbEntities = await repository.GetPropertyDictionaryItemsByIdsAsync(ids);
 
                 foreach (var dbEntity in dbEntities)
                 {
                     repository.Remove(dbEntity);
                 }
-                CommitChanges(repository);
-            }
-            ResetCache();
-        }
-
-        protected virtual void ResetCache()
-        {
-            _cacheManager.ClearRegion(CatalogConstants.DictionaryItemsCacheRegion);
-        }
-
-        public GenericSearchResult<PropertyDictionaryItem> Search(PropertyDictionaryItemSearchCriteria criteria)
-        {
-            if (criteria == null)
-            {
-                throw new ArgumentNullException(nameof(criteria));
+                await repository.UnitOfWork.CommitAsync();
             }
 
-            return _cacheManager.Get($"PropertyDictionaryItemService.Search-{criteria.GetCacheKey()}", CatalogConstants.DictionaryItemsCacheRegion, () =>
-            {
-                using (var repository = _repositoryFactory())
-                {
-                    //Optimize performance and CPU usage
-                    repository.DisableChangesTracking();
-
-                    var result = new GenericSearchResult<PropertyDictionaryItem>();
-
-                    var query = repository.PropertyDictionaryItems;
-                    if (!criteria.PropertyIds.IsNullOrEmpty())
-                    {
-                        query = query.Where(x => criteria.PropertyIds.Contains(x.PropertyId));
-                    }
-                    if (!string.IsNullOrEmpty(criteria.SearchPhrase))
-                    {
-                        query = query.Where(x => x.Alias.Contains(criteria.SearchPhrase));
-                    }
-
-                    var sortInfos = criteria.SortInfos;
-                    if (sortInfos.IsNullOrEmpty())
-                    {
-                        sortInfos = new[] {
-                            new SortInfo { SortColumn = "SortOrder", SortDirection = SortDirection.Ascending },
-                            new SortInfo { SortColumn = "Alias", SortDirection = SortDirection.Ascending }
-                        };
-                    }
-
-                    query = query.OrderBySortInfos(sortInfos);
-
-                    result.TotalCount = query.Count();
-                    var ids = query.Skip(criteria.Skip).Take(criteria.Take).Select(x => x.Id).ToArray();
-                    result.Results = GetByIds(ids).AsQueryable().OrderBySortInfos(sortInfos).ToList();
-                    return result;
-                }
-            });
+            DictionaryItemsCacheRegion.ExpireRegion();
         }
     }
 }

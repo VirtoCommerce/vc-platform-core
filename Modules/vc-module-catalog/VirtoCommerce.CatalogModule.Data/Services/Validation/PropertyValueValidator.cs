@@ -1,6 +1,4 @@
-using FluentValidation;
-using System;
-using VirtoCommerce.Domain.Catalog.Model;
+using VirtoCommerce.CatalogModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Data.Services.Validation
 {
@@ -38,6 +36,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services.Validation
                   .Matches(rule.RegExp).WithName(rule.Property.Name)
                   .When(notNullOrEmptyPredicate);
             }
-        }    
+        }
     }
 }

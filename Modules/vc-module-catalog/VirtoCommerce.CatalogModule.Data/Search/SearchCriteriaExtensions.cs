@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.Domain.Catalog.Model.Search;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
 
 namespace VirtoCommerce.CatalogModule.Data.Search
 {

@@ -1,19 +1,18 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.CatalogModule.Web.Converters;
-using VirtoCommerce.CatalogModule.Web.Model;
-using VirtoCommerce.Domain.Catalog.Model;
-using VirtoCommerce.Domain.Catalog.Model.Search;
-using VirtoCommerce.Domain.Catalog.Services;
-using VirtoCommerce.Domain.Search;
+using System.Threading.Tasks;
+using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
+using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
-using Aggregation = VirtoCommerce.CatalogModule.Web.Model.Aggregation;
+using VirtoCommerce.SearchModule.Core.Model;
+using VirtoCommerce.SearchModule.Core.Services;
 
 namespace VirtoCommerce.CatalogModule.Data.Search
 {
-    public class ProductSearchService : CatalogSearchService<Product, ProductSearchCriteria, ProductSearchResult>, IProductSearchService
+    public class ProductSearchService : CatalogSearchService<CatalogProduct, ProductSearchCriteria, ProductSearchResult>, IProductSearchService
     {
         private readonly IItemService _itemService;
         private readonly IBlobUrlResolver _blobUrlResolver;
@@ -28,13 +27,13 @@ namespace VirtoCommerce.CatalogModule.Data.Search
         }
 
 
-        protected override IList<Product> LoadMissingItems(string[] missingItemIds, ProductSearchCriteria criteria)
+        protected override async Task<IList<CatalogProduct>> LoadMissingItems(string[] missingItemIds, ProductSearchCriteria criteria)
         {
             var catalog = criteria.CatalogId;
-            var responseGroup = GetResponseGroup(criteria);           
-            var products = _itemService.GetByIds(missingItemIds, responseGroup, catalog);         
-            var result = products.Select(p => p.ToWebModel(_blobUrlResolver)).ToArray();         
-            return result;
+            var responseGroup = GetResponseGroup(criteria);
+            var products = await _itemService.GetByIdsAsync(missingItemIds, responseGroup, catalog);
+            //var result = products.Select(p => p.ToWebModel(_blobUrlResolver)).ToArray();
+            return products;
         }
 
         protected virtual ItemResponseGroup GetResponseGroup(ProductSearchCriteria criteria)
@@ -43,7 +42,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             return result;
         }
 
-        protected override void ReduceSearchResults(IEnumerable<Product> products, ProductSearchCriteria criteria)
+        protected override void ReduceSearchResults(IEnumerable<CatalogProduct> products, ProductSearchCriteria criteria)
         {
             var responseGroup = GetResponseGroup(criteria);
 
@@ -58,21 +57,21 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                 {
                     product.Properties = null;
                 }
-                else if(!string.IsNullOrEmpty(criteria.LanguageCode))
+                else if (!string.IsNullOrEmpty(criteria.LanguageCode))
                 {
-                    if(!product.Properties.IsNullOrEmpty())
+                    if (!product.Properties.IsNullOrEmpty())
                     {
                         //Return only display names for requested language
                         foreach (var property in product.Properties)
                         {
                             property.DisplayNames = property.DisplayNames?.Where(x => string.IsNullOrEmpty(x.LanguageCode) || x.LanguageCode.EqualsInvariant(criteria.LanguageCode)).ToList();
-                            if(!property.Values.IsNullOrEmpty())
-                            {
-                                property.Values = property.Values.Where(x => string.IsNullOrEmpty(x.LanguageCode) || x.LanguageCode.EqualsInvariant(criteria.LanguageCode)).ToList();
-                            }
+                            //if (!property.Values.IsNullOrEmpty())
+                            //{
+                            //    property.Values = property.Values.Where(x => string.IsNullOrEmpty(x.LanguageCode) || x.LanguageCode.EqualsInvariant(criteria.LanguageCode)).ToList();
+                            //}
                         }
-                    }                    
-                }              
+                    }
+                }
                 if (!responseGroup.HasFlag(ItemResponseGroup.ItemAssociations))
                 {
                     product.Associations = null;
@@ -85,7 +84,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                 else if (!string.IsNullOrEmpty(criteria.LanguageCode))
                 {
                     //Return  only reviews for requested language
-                    if(!product.Reviews.IsNullOrEmpty())
+                    if (!product.Reviews.IsNullOrEmpty())
                     {
                         product.Reviews = product.Reviews.Where(x => string.IsNullOrEmpty(x.LanguageCode) || x.LanguageCode.EqualsInvariant(criteria.LanguageCode)).ToList();
                     }

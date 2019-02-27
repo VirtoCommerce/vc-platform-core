@@ -1,33 +1,35 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using VirtoCommerce.CatalogModule.Data.Extensions;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.Model;
 using VirtoCommerce.CatalogModule.Data.Repositories;
-using VirtoCommerce.Domain.Catalog.Model;
-using VirtoCommerce.Domain.Catalog.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CatalogModule.Data.Services
 {
-    public class AssociationServiceImpl : ServiceBase, IAssociationService
+    public class AssociationServiceImpl : IAssociationService
     {
         private readonly Func<ICatalogRepository> _repositoryFactory;
         public AssociationServiceImpl(Func<ICatalogRepository> repositoryFactory)
         {
             _repositoryFactory = repositoryFactory;
         }
+
         #region IAssociationService members
-        public void LoadAssociations(IHasAssociations[] owners)
+        public async Task LoadAssociationsAsync(IHasAssociations[] owners)
         {
             using (var repository = _repositoryFactory())
             {
                 //Optimize performance and CPU usage
                 repository.DisableChangesTracking();
 
-                var productEntities = repository.GetItemByIds(owners.Select(x => x.Id).ToArray(), ItemResponseGroup.ItemAssociations);
+                var productEntities = await repository.GetItemByIdsAsync(owners.Select(x => x.Id).ToArray(), ItemResponseGroup.ItemAssociations);
                 foreach (var productEntity in productEntities)
                 {
                     var owner = owners.FirstOrDefault(x => x.Id == productEntity.Id);
@@ -44,7 +46,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
         }
 
-        public void SaveChanges(IHasAssociations[] owners)
+        public async Task SaveChangesAsync(IHasAssociations[] owners)
         {
             var changedEntities = new List<AssociationEntity>();
             foreach (var owner in owners)
@@ -61,23 +63,23 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
 
             using (var repository = _repositoryFactory())
-            using (var changeTracker = GetChangeTracker(repository))
+            //TODO
+            //using (var changeTracker = GetChangeTracker(repository))
             {
                 //Optimize performance and CPU usage
                 repository.DisableChangesTracking();
 
                 var itemIds = owners.Where(x => x.Id != null).Select(x => x.Id).ToArray();
-                var existEntities = repository.Associations.Where(x => itemIds.Contains(x.ItemId)).ToArray();
+                var existEntities = await repository.Associations.Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
 
                 var target = new { Associations = new ObservableCollection<AssociationEntity>(existEntities) };
                 var source = new { Associations = new ObservableCollection<AssociationEntity>(changedEntities) };
 
-                changeTracker.Attach(target);
+                //changeTracker.Attach(target);
                 var associationComparer = AnonymousComparer.Create((AssociationEntity x) => x.ItemId + ":" + x.AssociationType + ":" + x.AssociatedItemId + ":" + x.AssociatedCategoryId);
                 source.Associations.Patch(target.Associations, associationComparer, (sourceAssociation, targetAssociation) => sourceAssociation.Patch(targetAssociation));
 
-                ((System.Data.Entity.DbContext)repository).ChangeTracker.DetectChanges();
-                CommitChanges(repository);
+                await repository.UnitOfWork.CommitAsync();
             }
 
         }

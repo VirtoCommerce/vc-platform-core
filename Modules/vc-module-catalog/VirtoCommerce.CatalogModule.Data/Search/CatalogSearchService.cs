@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using VirtoCommerce.CatalogModule.Web.Model;
-using VirtoCommerce.Domain.Commerce.Model.Search;
-using VirtoCommerce.Domain.Search;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.SearchModule.Core.Model;
+using VirtoCommerce.SearchModule.Core.Services;
 
 namespace VirtoCommerce.CatalogModule.Data.Search
 {
@@ -38,7 +38,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             if (response != null)
             {
                 result.TotalCount = response.TotalCount;
-                result.Items = ConvertDocuments(response.Documents, criteria);
+                result.Items = await ConvertDocuments(response.Documents, criteria);
                 result.Aggregations = ConvertAggregations(response.Aggregations, criteria);
             }
 
@@ -46,7 +46,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
         }
 
 
-        protected abstract IList<TItem> LoadMissingItems(string[] missingItemIds, TCriteria criteria);
+        protected abstract Task<IList<TItem>> LoadMissingItems(string[] missingItemIds, TCriteria criteria);
         protected abstract void ReduceSearchResults(IEnumerable<TItem> items, TCriteria criteria);
         protected abstract Aggregation[] ConvertAggregations(IList<AggregationResponse> aggregationResponses, TCriteria criteria);
 
@@ -62,7 +62,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             return queryBuilder;
         }
 
-        protected virtual TItem[] ConvertDocuments(IList<SearchDocument> documents, TCriteria criteria)
+        protected virtual async Task<TItem[]> ConvertDocuments(IList<SearchDocument> documents, TCriteria criteria)
         {
             TItem[] result = null;
 
@@ -78,7 +78,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
 
                 if (missingObjectIds.Any())
                 {
-                    var missingItems = LoadMissingItems(missingObjectIds, criteria);
+                    var missingItems = await LoadMissingItems(missingObjectIds, criteria);
 
                     foreach (var item in missingItems)
                     {

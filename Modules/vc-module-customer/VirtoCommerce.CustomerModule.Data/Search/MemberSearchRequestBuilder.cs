@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.CustomerModule.Core.Model.Search;
-using VirtoCommerce.CustomerModule.Data.Search.Indexing;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Extenstions;
 using VirtoCommerce.SearchModule.Core.Model;
@@ -53,7 +52,7 @@ namespace VirtoCommerce.CustomerModule.Data.Search
             if (!string.IsNullOrEmpty(criteria.Keyword))
             {
                 var parseResult = _searchPhraseParser.Parse(criteria.Keyword);
-                criteria.Keyword = parseResult.SearchPhrase;
+                criteria.Keyword = parseResult.Keyword;
                 result.AddRange(parseResult.Filters);
             }
 

@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using VirtoCommerce.CatalogModule.Web.Model;
-using VirtoCommerce.Domain.Catalog.Model.Search;
-using VirtoCommerce.Domain.Search;
+using System.Collections.Generic;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
+using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Data.Search
 {

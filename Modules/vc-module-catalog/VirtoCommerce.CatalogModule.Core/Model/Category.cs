@@ -11,7 +11,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
             IsActive = true;
         }
         public string CatalogId { get; set; }
-        public CatalogModule.Core.Model.Catalog Catalog { get; set; }
+        public Catalog Catalog { get; set; }
 
         public string ParentId { get; set; }
         public string Code { get; set; }

@@ -1,13 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Newtonsoft.Json;
-using VirtoCommerce.Domain.Catalog.Model.Search;
-using VirtoCommerce.Domain.Store.Services;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
+using VirtoCommerce.StoreModule.Core.Services;
 
 namespace VirtoCommerce.CatalogModule.Data.Search.BrowseFilters
 {
@@ -32,12 +33,12 @@ namespace VirtoCommerce.CatalogModule.Data.Search.BrowseFilters
             TypeNameHandling = TypeNameHandling.None,
         };
 
-        public IList<IBrowseFilter> GetBrowseFilters(ProductSearchCriteria criteria)
+        public async Task<IList<IBrowseFilter>> GetBrowseFilters(ProductSearchCriteria criteria)
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
 
-            var aggregations = GetAllAggregations(criteria)?.AsQueryable();
+            var aggregations = (await GetAllAggregations(criteria))?.AsQueryable();
 
             // Check allowed aggregations
             if (criteria.IncludeAggregations != null)
@@ -58,21 +59,21 @@ namespace VirtoCommerce.CatalogModule.Data.Search.BrowseFilters
             return result;
         }
 
-        public virtual IList<IBrowseFilter> GetStoreAggregations(string storeId)
+        public virtual async Task<IList<IBrowseFilter>> GetStoreAggregations(string storeId)
         {
-            var serializedValue = GetSerializedValue(storeId);
+            var serializedValue = await GetSerializedValue(storeId);
             var result = Deserialize(serializedValue);
             return result;
         }
 
-        public virtual void SaveStoreAggregations(string storeId, IList<IBrowseFilter> filters)
+        public virtual async Task SaveStoreAggregations(string storeId, IList<IBrowseFilter> filters)
         {
             var serializedValue = Serialize(filters);
-            SaveSerializedValue(storeId, serializedValue);
+            await SaveSerializedValue(storeId, serializedValue);
         }
 
 
-        protected virtual IList<IBrowseFilter> GetAllAggregations(ProductSearchCriteria criteria)
+        protected virtual Task<IList<IBrowseFilter>> GetAllAggregations(ProductSearchCriteria criteria)
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
@@ -80,16 +81,16 @@ namespace VirtoCommerce.CatalogModule.Data.Search.BrowseFilters
             return GetStoreAggregations(criteria.StoreId);
         }
 
-        protected virtual string GetSerializedValue(string storeId)
+        protected virtual async Task<string> GetSerializedValue(string storeId)
         {
-            var store = _storeService.GetById(storeId);
+            var store = await _storeService.GetByIdAsync(storeId);
             var result = store?.GetDynamicPropertyValue(FilteredBrowsingPropertyName, string.Empty);
             return result;
         }
 
-        protected virtual void SaveSerializedValue(string storeId, string serializedValue)
+        protected virtual async Task SaveSerializedValue(string storeId, string serializedValue)
         {
-            var store = _storeService.GetById(storeId);
+            var store = await _storeService.GetByIdAsync(storeId);
             if (store != null)
             {
                 var property = store.DynamicProperties.FirstOrDefault(p => p.Name == FilteredBrowsingPropertyName);
@@ -101,7 +102,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search.BrowseFilters
 
                 property.Values = new List<DynamicPropertyObjectValue>(new[] { new DynamicPropertyObjectValue { Value = serializedValue } });
 
-                _storeService.Update(new[] { store });
+                await _storeService.SaveChangesAsync(new[] { store });
             }
         }
 

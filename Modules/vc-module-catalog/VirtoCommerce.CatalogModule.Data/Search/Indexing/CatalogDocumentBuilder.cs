@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.Domain.Catalog.Model;
-using VirtoCommerce.Domain.Catalog.Services;
-using VirtoCommerce.Domain.Search;
+using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
 {
@@ -19,12 +18,6 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
         }
 
         protected virtual bool StoreObjectsInIndex => _settingsManager.GetValue("Catalog.Search.UseFullObjectIndexStoring", true);
-
-        [Obsolete("Use overload with contentPropertyTypes")]
-        protected virtual void IndexCustomProperties(IndexDocument document, ICollection<Property> properties, ICollection<PropertyValue> propertyValues)
-        {
-            IndexCustomProperties(document, properties, propertyValues, null);
-        }
 
         protected virtual void IndexCustomProperties(IndexDocument document, ICollection<Property> properties, ICollection<PropertyValue> propertyValues, ICollection<PropertyType> contentPropertyTypes)
         {

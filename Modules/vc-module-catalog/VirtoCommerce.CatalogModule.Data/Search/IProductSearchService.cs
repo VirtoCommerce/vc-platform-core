@@ -1,5 +1,5 @@
-﻿using System.Threading.Tasks;
-using VirtoCommerce.Domain.Catalog.Model.Search;
+using System.Threading.Tasks;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
 
 namespace VirtoCommerce.CatalogModule.Data.Search
 {

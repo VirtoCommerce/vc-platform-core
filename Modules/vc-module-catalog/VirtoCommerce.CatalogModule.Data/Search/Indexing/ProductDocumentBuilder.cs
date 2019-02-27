@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using VirtoCommerce.CatalogModule.Web.Converters;
-using VirtoCommerce.Domain.Catalog.Model;
-using VirtoCommerce.Domain.Catalog.Services;
-using VirtoCommerce.Domain.Search;
+using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.SearchModule.Core.Model;
+using VirtoCommerce.SearchModule.Core.Services;
 
 namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
 {
@@ -22,22 +22,22 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
             _blobUrlResolver = blobUrlResolver;
         }
 
-        public virtual Task<IList<IndexDocument>> GetDocumentsAsync(IList<string> documentIds)
+        public virtual async Task<IList<IndexDocument>> GetDocumentsAsync(IList<string> documentIds)
         {
-            var products = GetProducts(documentIds);
+            var products = await GetProducts(documentIds);
 
             IList<IndexDocument> result = products
                 .Select(CreateDocument)
                 .Where(doc => doc != null)
                 .ToArray();
 
-            return Task.FromResult(result);
+            return result;
         }
 
 
-        protected virtual IList<CatalogProduct> GetProducts(IList<string> productIds)
+        protected virtual Task<CatalogProduct[]> GetProducts(IList<string> productIds)
         {
-            return _itemService.GetByIds(productIds.ToArray(), ItemResponseGroup.ItemLarge);
+            return _itemService.GetByIdsAsync(productIds.ToArray(), ItemResponseGroup.ItemLarge);
         }
 
         protected virtual IndexDocument CreateDocument(CatalogProduct product)
@@ -139,8 +139,9 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
             if (StoreObjectsInIndex)
             {
                 // Index serialized product
-                var itemDto = product.ToWebModel(_blobUrlResolver);
-                document.AddObjectFieldValue(itemDto);
+                //TODO
+                //var itemDto = product.ToWebModel(_blobUrlResolver);
+                document.AddObjectFieldValue(product);
             }
 
             return document;

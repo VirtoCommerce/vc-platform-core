@@ -1,15 +1,14 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.CatalogModule.Web.Converters;
-using VirtoCommerce.Domain.Catalog.Model;
-using VirtoCommerce.Domain.Catalog.Model.Search;
-using VirtoCommerce.Domain.Catalog.Services;
-using VirtoCommerce.Domain.Search;
+using System.Threading.Tasks;
+using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
+using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
-using Aggregation = VirtoCommerce.CatalogModule.Web.Model.Aggregation;
-using Category = VirtoCommerce.CatalogModule.Web.Model.Category;
+using VirtoCommerce.SearchModule.Core.Model;
+using VirtoCommerce.SearchModule.Core.Services;
 
 namespace VirtoCommerce.CatalogModule.Data.Search
 {
@@ -25,12 +24,12 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             _blobUrlResolver = blobUrlResolver;
         }
 
-        protected override IList<Category> LoadMissingItems(string[] missingItemIds, CategorySearchCriteria criteria)
+        protected override async Task<IList<Category>> LoadMissingItems(string[] missingItemIds, CategorySearchCriteria criteria)
         {
             var catalog = criteria?.CatalogId;
             var responseGroup = GetResponseGroup(criteria);
 
-            var categories = _categoryService.GetByIds(missingItemIds, responseGroup, catalog);
+            var categories = await _categoryService.GetByIdsAsync(missingItemIds, responseGroup, catalog);
 
             var result = categories.Select(p => p.ToWebModel(_blobUrlResolver)).ToArray();
             return result;

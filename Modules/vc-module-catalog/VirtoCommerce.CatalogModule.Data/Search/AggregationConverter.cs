@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
+using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.Search.BrowseFilters;
-using VirtoCommerce.CatalogModule.Web.Model;
-using VirtoCommerce.Domain.Catalog.Model.Search;
-using VirtoCommerce.Domain.Catalog.Services;
-using VirtoCommerce.Domain.Search;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.SearchModule.Core.Extenstions;
+using VirtoCommerce.SearchModule.Core.Model;
 using RangeFilter = VirtoCommerce.CatalogModule.Data.Search.BrowseFilters.RangeFilter;
 using RangeFilterValue = VirtoCommerce.CatalogModule.Data.Search.BrowseFilters.RangeFilterValue;
 
@@ -203,7 +203,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                     {
                         AggregationType = "attr",
                         Field = fieldName,
-                        Items = GetAttributeAggregationItems(aggregationResponseValues),
+                        Items = GetAttributeAggregationItems(aggregationResponseValues).ToArray(),
                     };
                 }
             }
@@ -217,7 +217,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             {
                 AggregationType = "range",
                 Field = rangeFilter.Key,
-                Items = GetRangeAggregationItems(rangeFilter.Key, rangeFilter.Values, aggregationResponses),
+                Items = GetRangeAggregationItems(rangeFilter.Key, rangeFilter.Values, aggregationResponses).ToArray(),
             };
 
             return result;
@@ -229,7 +229,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             {
                 AggregationType = "pricerange",
                 Field = priceRangeFilter.Key,
-                Items = GetRangeAggregationItems(priceRangeFilter.Key, priceRangeFilter.Values, aggregationResponses),
+                Items = GetRangeAggregationItems(priceRangeFilter.Key, priceRangeFilter.Values, aggregationResponses).ToArray(),
             };
 
 
