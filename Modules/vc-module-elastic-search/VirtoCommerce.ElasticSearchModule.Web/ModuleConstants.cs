@@ -3,13 +3,13 @@ using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.ElasticSearchModule.Web
 {
-    public class ModuleConstants
+    public static class ModuleConstants
     {
         public static class Settings
         {
             public static class Indexing
             {
-                public static SettingDescriptor IndexTotalFieldsLimit = new SettingDescriptor
+                private static readonly SettingDescriptor IndexTotalFieldsLimit = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Search.Elasticsearch.IndexTotalFieldsLimit",
                     GroupName = "Platform|General",
@@ -17,7 +17,7 @@ namespace VirtoCommerce.ElasticSearchModule.Web
                     DefaultValue = 1000
                 };
 
-                public static SettingDescriptor TokenFilter = new SettingDescriptor
+                private static readonly SettingDescriptor TokenFilter = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Search.Elasticsearch.TokenFilter",
                     GroupName = "Platform|General",
@@ -25,7 +25,7 @@ namespace VirtoCommerce.ElasticSearchModule.Web
                     DefaultValue = "custom_edge_ngram"
                 };
 
-                public static SettingDescriptor MinGram = new SettingDescriptor
+                private static readonly SettingDescriptor MinGram = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Search.Elasticsearch.NGramTokenFilter.MinGram",
                     GroupName = "Platform|General",
@@ -33,7 +33,7 @@ namespace VirtoCommerce.ElasticSearchModule.Web
                     DefaultValue = 1
                 };
 
-                public static SettingDescriptor MaxGram = new SettingDescriptor
+                private static readonly SettingDescriptor MaxGram = new SettingDescriptor
                 {
                     Name = "VirtoCommerce.Search.Elasticsearch.NGramTokenFilter.MaxGram",
                     GroupName = "Platform|General",

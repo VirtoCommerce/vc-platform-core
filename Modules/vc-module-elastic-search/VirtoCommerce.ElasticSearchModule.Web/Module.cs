@@ -24,10 +24,6 @@ namespace VirtoCommerce.ElasticSearchModule.Web
                 var searchConnectionString = configuration.GetValue<string>("Search:Elasticsearch:SearchConnectionString");
                 var searchConnection = new SearchConnection(searchConnectionString, searchProvider);
                 serviceCollection.AddSingleton<ISearchConnection>(searchConnection);
-
-                var luceneSettings = new ElasticSearchProviderSettings();
-
-                serviceCollection.AddSingleton(luceneSettings);
                 serviceCollection.AddSingleton<ISearchProvider, ElasticSearchProvider>();
             }
         }

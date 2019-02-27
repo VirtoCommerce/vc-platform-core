@@ -45,7 +45,6 @@ namespace VirtoCommerce.ElasticSearchModule.Data
         protected string Scope { get; }
         protected Uri ServerUrl { get; }
 
-
         public virtual async Task DeleteIndexAsync(string documentType)
         {
             if (string.IsNullOrEmpty(documentType))
@@ -72,12 +71,9 @@ namespace VirtoCommerce.ElasticSearchModule.Data
         public virtual async Task<IndexingResult> IndexAsync(string documentType, IList<IndexDocument> documents)
         {
             var indexName = GetIndexName(documentType);
-
             var providerFields = await GetMappingAsync(indexName, documentType);
             var oldFieldsCount = providerFields.Count();
-
             var providerDocuments = documents.Select(document => ConvertToProviderDocument(document, providerFields, documentType)).ToList();
-
             var updateMapping = providerFields.Count() != oldFieldsCount;
             var indexExits = await IndexExistsAsync(indexName);
 
@@ -103,8 +99,8 @@ namespace VirtoCommerce.ElasticSearchModule.Data
                 {
                     Id = i.Id,
                     Succeeded = i.IsValid,
-                    ErrorMessage = i.Error?.Reason,
-                }).ToArray(),
+                    ErrorMessage = i.Error?.Reason
+                }).ToArray()
             };
 
             return result;
@@ -159,7 +155,6 @@ namespace VirtoCommerce.ElasticSearchModule.Data
             var result = providerResponse.ToSearchResponse(request, documentType);
             return result;
         }
-
 
         protected virtual SearchDocument ConvertToProviderDocument(IndexDocument document, Properties<IProperties> properties, string documentType)
         {
@@ -304,16 +299,13 @@ namespace VirtoCommerce.ElasticSearchModule.Data
         protected virtual async Task<Properties<IProperties>> GetMappingAsync(string indexName, string documentType)
         {
             var properties = GetMappingFromCache(indexName);
-            if (properties == null)
+            if (properties == null && await IndexExistsAsync(indexName))
             {
-                if (await IndexExistsAsync(indexName))
+                var providerMapping = await Client.GetMappingAsync(new GetMappingRequest(indexName, documentType));
+                var mapping = providerMapping.Mapping;
+                if (mapping != null)
                 {
-                    var providerMapping = await Client.GetMappingAsync(new GetMappingRequest(indexName, documentType));
-                    var mapping = providerMapping.Mapping;
-                    if (mapping != null)
-                    {
-                        properties = new Properties<IProperties>(mapping.Properties);
-                    }
+                    properties = new Properties<IProperties>(mapping.Properties);
                 }
             }
 
@@ -362,7 +354,6 @@ namespace VirtoCommerce.ElasticSearchModule.Data
         {
             return key.Split('/');
         }
-
 
         protected virtual void ThrowException(string message, Exception innerException)
         {
@@ -419,8 +410,7 @@ namespace VirtoCommerce.ElasticSearchModule.Data
         {
             return tokenFilters
                 .NGram(NGramFilterName, descriptor => ConfigureNGramFilter(descriptor, documentType))
-                .EdgeNGram(EdgeNGramFilterName, descriptor => ConfigureEdgeNGramFilter(descriptor, documentType))
-                ;
+                .EdgeNGram(EdgeNGramFilterName, descriptor => ConfigureEdgeNGramFilter(descriptor, documentType));
         }
 
         protected virtual NGramTokenFilterDescriptor ConfigureNGramFilter(NGramTokenFilterDescriptor nGram, string documentType)
@@ -456,13 +446,11 @@ namespace VirtoCommerce.ElasticSearchModule.Data
 
         #endregion
 
-
         protected static IConnectionSettingsValues GetConnectionSettings(ISearchConnection connection)
         {
             var serverUrl = GetServerUrl(connection);
             var accessUser = GetAccessUser(connection);
             var accessKey = GetAccessKey(connection);
-
             var connectionSettings = new ConnectionSettings(serverUrl);
 
             if (!string.IsNullOrEmpty(accessUser) && !string.IsNullOrEmpty(accessKey))

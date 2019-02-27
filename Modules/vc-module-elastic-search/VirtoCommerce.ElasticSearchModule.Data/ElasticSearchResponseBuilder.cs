@@ -57,7 +57,7 @@ namespace VirtoCommerce.ElasticSearchModule.Data
                     var aggregation = new AggregationResponse
                     {
                         Id = aggregationRequest.Id ?? aggregationRequest.FieldName,
-                        Values = new List<AggregationResponseValue>(),
+                        Values = new List<AggregationResponseValue>()
                     };
 
                     var termAggregationRequest = aggregationRequest as TermAggregationRequest;
