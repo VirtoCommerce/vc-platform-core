@@ -48,7 +48,9 @@ namespace VirtoCommerce.ElasticSearchModule.Data
         public virtual async Task DeleteIndexAsync(string documentType)
         {
             if (string.IsNullOrEmpty(documentType))
+            {
                 throw new ArgumentNullException(nameof(documentType));
+            }
 
             try
             {
@@ -109,7 +111,6 @@ namespace VirtoCommerce.ElasticSearchModule.Data
         public virtual async Task<IndexingResult> RemoveAsync(string documentType, IList<IndexDocument> documents)
         {
             var providerDocuments = documents.Select(d => new SearchDocument { Id = d.Id }).ToArray();
-
             var indexName = GetIndexName(documentType);
             var bulkDefinition = new BulkDescriptor();
             bulkDefinition.DeleteMany(providerDocuments).Index(indexName).Type(documentType);
@@ -123,8 +124,8 @@ namespace VirtoCommerce.ElasticSearchModule.Data
                 {
                     Id = i.Id,
                     Succeeded = i.IsValid,
-                    ErrorMessage = i.Error?.Reason,
-                }).ToArray(),
+                    ErrorMessage = i.Error?.Reason
+                }).ToArray()
             };
 
             return result;
@@ -133,7 +134,6 @@ namespace VirtoCommerce.ElasticSearchModule.Data
         public virtual async Task<SearchResponse> SearchAsync(string documentType, SearchRequest request)
         {
             var indexName = GetIndexName(documentType);
-
             ISearchResponse<SearchDocument> providerResponse;
 
             try
@@ -167,11 +167,9 @@ namespace VirtoCommerce.ElasticSearchModule.Data
                 if (result.ContainsKey(fieldName))
                 {
                     var newValues = new List<object>();
-
                     var currentValue = result[fieldName];
-                    var currentValues = currentValue as object[];
 
-                    if (currentValues != null)
+                    if (currentValue is object[] currentValues)
                     {
                         newValues.AddRange(currentValues);
                     }
@@ -259,22 +257,19 @@ namespace VirtoCommerce.ElasticSearchModule.Data
         {
             if (property != null)
             {
-                var baseProperty = property as CorePropertyBase;
-                if (baseProperty != null)
+                if (property is CorePropertyBase baseProperty)
                 {
                     baseProperty.Store = field.IsRetrievable;
                 }
 
-                var textProperty = property as TextProperty;
-                if (textProperty != null)
+                switch (property)
                 {
-                    ConfigureTextProperty(textProperty, field, documentType);
-                }
-
-                var keywordProperty = property as KeywordProperty;
-                if (keywordProperty != null)
-                {
-                    ConfigureKeywordProperty(keywordProperty, field, documentType);
+                    case TextProperty textProperty:
+                        ConfigureTextProperty(textProperty, field, documentType);
+                        break;
+                    case KeywordProperty keywordProperty:
+                        ConfigureKeywordProperty(keywordProperty, field, documentType);
+                        break;
                 }
             }
         }
@@ -311,7 +306,6 @@ namespace VirtoCommerce.ElasticSearchModule.Data
 
             properties = properties ?? new Properties<IProperties>();
             AddMappingToCache(indexName, properties);
-
             return properties;
         }
 
@@ -326,7 +320,6 @@ namespace VirtoCommerce.ElasticSearchModule.Data
             }
 
             AddMappingToCache(indexName, properties);
-
             await Client.RefreshAsync(indexName);
         }
 
