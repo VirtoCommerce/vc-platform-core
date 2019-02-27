@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Core.Model.Search
 {
@@ -66,6 +68,6 @@ namespace VirtoCommerce.CatalogModule.Core.Model.Search
         /// <summary>
         /// Override base SortInfo property to support GeoSortInfo sorting types
         /// </summary>
-        public override SortInfo[] SortInfos => GeoSortInfo.TryParse(Sort).ToArray();
+        public override IList<SortInfo> SortInfos => GeoSortInfo.TryParse(Sort).ToList();
     }
 }

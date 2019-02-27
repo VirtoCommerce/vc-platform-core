@@ -104,7 +104,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             {
                 _eventPublisher.Publish(new CategoryChangingEvent(changedEntries));
 
-                repository.RemoveCategories(categoryIds);
+                repository.RemoveCategoriesAsync(categoryIds);
                 CommitChanges(repository);
                 //Reset cached categories and catalogs
                 ResetCache();

@@ -67,7 +67,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             {
                 _eventPublisher.Publish(new CatalogChangingEvent(changedEntries));
 
-                repository.RemoveCatalogs(catalogIds);
+                repository.RemoveCatalogsAsync(catalogIds);
                 CommitChanges(repository);
                 //Reset cached catalogs and catalogs
                 ResetCache();
@@ -166,7 +166,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     //Optimize performance and CPU usage
                     repository.DisableChangesTracking();
 
-                    entities = repository.GetCatalogsByIds(repository.Catalogs.Select(x => x.Id).ToArray());
+                    entities = repository.GetCatalogsByIdsAsync(repository.Catalogs.Select(x => x.Id).ToArray());
                 }
 
                 var result = entities.Select(x => x.ToModel(AbstractTypeFactory<Catalog>.TryCreateInstance())).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);

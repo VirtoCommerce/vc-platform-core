@@ -33,7 +33,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 //Optimize performance and CPU usage
                 repository.DisableChangesTracking();
 
-                result = repository.GetPropertyDictionaryItemsByIds(ids)
+                result = repository.GetPropertyDictionaryItemsByIdsAsync(ids)
                                    .Select(x => x.ToModel(AbstractTypeFactory<PropertyDictionaryItem>.TryCreateInstance()))
                                    .ToArray();
             }
@@ -76,7 +76,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         {
             using (var repository = _repositoryFactory())
             {
-                var dbEntities = repository.GetPropertyDictionaryItemsByIds(ids);
+                var dbEntities = repository.GetPropertyDictionaryItemsByIdsAsync(ids);
 
                 foreach (var dbEntity in dbEntities)
                 {

@@ -96,7 +96,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
             using (var repository = _repositoryFactory())
             {
-                var entities = repository.GetPropertiesByIds(propertyIds);
+                var entities = repository.GetPropertiesByIdsAsync(propertyIds);
 
                 _eventPublisher.Publish(new PropertyChangingEvent(changedEntries));
 
@@ -234,7 +234,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     repository.DisableChangesTracking();
 
                     var propertyIds = repository.Properties.Select(p => p.Id).ToArray();
-                    var entities = repository.GetPropertiesByIds(propertyIds);
+                    var entities = repository.GetPropertiesByIdsAsync(propertyIds);
                     var properties = entities.Select(p => p.ToModel(AbstractTypeFactory<Property>.TryCreateInstance())).ToArray();
 
                     LoadDependencies(properties);
@@ -255,7 +255,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 {
                     repository.DisableChangesTracking();
 
-                    var result = repository.GetAllCatalogProperties(catalogId)
+                    var result = repository.GetAllCatalogPropertiesAsync(catalogId)
                         .GroupBy(p => p.Id, StringComparer.OrdinalIgnoreCase) // Remove duplicates
                         .Select(g => g.First())
                         .OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase)

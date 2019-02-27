@@ -120,7 +120,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             {
                 _eventPublisher.Publish(new ProductChangingEvent(changedEntries));
 
-                repository.RemoveItems(itemIds);
+                repository.RemoveItemsAsync(itemIds);
                 CommitChanges(repository);
 
                 _eventPublisher.Publish(new ProductChangedEvent(changedEntries));
