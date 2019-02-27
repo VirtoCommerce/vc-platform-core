@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using VirtoCommerce.CatalogModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Core.Services
@@ -5,12 +6,12 @@ namespace VirtoCommerce.CatalogModule.Core.Services
     public interface IPropertyService
     {
 
-        Property GetById(string propertyId);
-        Property[] GetByIds(string[] propertyIds);
-        Property Create(Property property);
-        void Update(Property[] properties);
-        void Delete(string[] propertyIds);
-        Property[] GetAllCatalogProperties(string catalogId);
-        Property[] GetAllProperties();
+        Task<Property> GetByIdAsync(string propertyId);
+        Task<Property[]> GetByIdsAsync(string[] propertyIds);
+        Task<Property> CreateAsync(Property property);
+        Task UpdateAsync(Property[] properties);
+        Task DeleteAsync(string[] propertyIds);
+        Task<Property[]> GetAllCatalogPropertiesAsync(string catalogId);
+        Task<Property[]> GetAllPropertiesAsync();
     }
 }

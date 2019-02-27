@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using VirtoCommerce.CatalogModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Core.Services
@@ -7,8 +8,8 @@ namespace VirtoCommerce.CatalogModule.Core.Services
     /// </summary>
     public interface IProperyDictionaryItemService
     {
-        PropertyDictionaryItem[] GetByIds(string[] ids);
-        void SaveChanges(PropertyDictionaryItem[] dictItems);
-        void Delete(string[] ids);
+        Task<PropertyDictionaryItem[]> GetByIdsAsync(string[] ids);
+        Task SaveChangesAsync(PropertyDictionaryItem[] dictItems);
+        Task DeleteAsync(string[] ids);
     }
 }

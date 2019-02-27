@@ -8,7 +8,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
     public class Property : AuditableEntity, IInheritable, ICloneable
     {
         public string CatalogId { get; set; }
-        public CatalogModule.Core.Model.Catalog Catalog { get; set; }
+        public Catalog Catalog { get; set; }
         public string CategoryId { get; set; }
         public Category Category { get; set; }
         public string Name { get; set; }

@@ -4,4 +4,15 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.1.4" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.1.4" />
+    </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
+    <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Data\VirtoCommerce.Platform.Data.csproj" />
+    <ProjectReference Include="..\VirtoCommerce.CatalogModule.Core\VirtoCommerce.CatalogModule.Core.csproj" />
+  </ItemGroup>
+
 </Project>

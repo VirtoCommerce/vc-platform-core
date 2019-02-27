@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.Platform.Core.Common;
@@ -9,6 +10,6 @@ namespace VirtoCommerce.CatalogModule.Core.Services
     /// </summary>
     public interface IProperyDictionaryItemSearchService
     {
-        GenericSearchResult<PropertyDictionaryItem> Search(PropertyDictionaryItemSearchCriteria searchCriteria);
+        Task<GenericSearchResult<PropertyDictionaryItem>> SearchAsync(PropertyDictionaryItemSearchCriteria searchCriteria);
     }
 }
