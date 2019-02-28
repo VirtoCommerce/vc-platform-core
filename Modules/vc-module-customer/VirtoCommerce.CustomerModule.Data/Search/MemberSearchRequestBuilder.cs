@@ -42,7 +42,7 @@ namespace VirtoCommerce.CustomerModule.Data.Search
                 };
             }
 
-            return request;
+            return Task.FromResult(request);
         }
 
 

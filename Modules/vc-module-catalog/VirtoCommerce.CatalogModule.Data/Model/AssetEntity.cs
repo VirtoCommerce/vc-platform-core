@@ -37,16 +37,16 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             if (asset == null)
                 throw new ArgumentNullException(nameof(asset));
 
-            asset.Id = this.Id;
-            asset.CreatedBy = this.CreatedBy;
-            asset.CreatedDate = this.CreatedDate;
-            asset.ModifiedBy = this.ModifiedBy;
-            asset.ModifiedDate = this.ModifiedDate;
-            asset.LanguageCode = this.LanguageCode;
-            asset.Name = this.Name;
-            asset.MimeType = this.MimeType;
-            asset.Url = this.Url;
-            asset.Size = this.Size;
+            asset.Id = Id;
+            asset.CreatedBy = CreatedBy;
+            asset.CreatedDate = CreatedDate;
+            asset.ModifiedBy = ModifiedBy;
+            asset.ModifiedDate = ModifiedDate;
+            asset.LanguageCode = LanguageCode;
+            asset.Name = Name;
+            asset.MimeType = MimeType;
+            asset.Url = Url;
+            asset.Size = Size;
 
             return asset;
 
@@ -59,27 +59,27 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
             pkMap.AddPair(asset, this);
 
-            this.Id = asset.Id;
-            this.CreatedBy = asset.CreatedBy;
-            this.CreatedDate = asset.CreatedDate;
-            this.ModifiedBy = asset.ModifiedBy;
-            this.ModifiedDate = asset.ModifiedDate;
-            this.LanguageCode = asset.LanguageCode;
-            this.Name = asset.Name;
-            this.MimeType = asset.MimeType;
-            this.Url = asset.Url;
-            this.Size = asset.Size;
+            Id = asset.Id;
+            CreatedBy = asset.CreatedBy;
+            CreatedDate = asset.CreatedDate;
+            ModifiedBy = asset.ModifiedBy;
+            ModifiedDate = asset.ModifiedDate;
+            LanguageCode = asset.LanguageCode;
+            Name = asset.Name;
+            MimeType = asset.MimeType;
+            Url = asset.Url;
+            Size = asset.Size;
 
             return this;
         }
 
         public virtual void Patch(AssetEntity target)
         {
-            target.LanguageCode = this.LanguageCode;
-            target.Name = this.Name;
-            target.MimeType = this.MimeType;
-            target.Url = this.Url;
-            target.Size = this.Size;            
+            target.LanguageCode = LanguageCode;
+            target.Name = Name;
+            target.MimeType = MimeType;
+            target.Url = Url;
+            target.Size = Size;
         }
     }
 }
