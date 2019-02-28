@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
@@ -31,15 +30,16 @@ namespace VirtoCommerce.CatalogModule.Data.Search
 
             var categories = await _categoryService.GetByIdsAsync(missingItemIds, responseGroup, catalog);
 
-            var result = categories.Select(p => p.ToWebModel(_blobUrlResolver)).ToArray();
-            return result;
+            //TODO
+            //var result = categories.Select(p => p.ToWebModel(_blobUrlResolver)).ToArray();
+            return categories;
         }
 
         protected override void ReduceSearchResults(IEnumerable<Category> items, CategorySearchCriteria criteria)
         {
         }
 
-        protected override Aggregation[] ConvertAggregations(IList<AggregationResponse> aggregationResponses, CategorySearchCriteria criteria)
+        protected override Task<Aggregation[]> ConvertAggregationsAsync(IList<AggregationResponse> aggregationResponses, CategorySearchCriteria criteria)
         {
             return null;
         }

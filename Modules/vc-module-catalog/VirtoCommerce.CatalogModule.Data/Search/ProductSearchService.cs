@@ -112,9 +112,11 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             }
         }
 
-        protected override Aggregation[] ConvertAggregations(IList<AggregationResponse> aggregationResponses, ProductSearchCriteria criteria)
+        protected override async Task<Aggregation[]> ConvertAggregationsAsync(IList<AggregationResponse> aggregationResponses, ProductSearchCriteria criteria)
         {
-            return _aggregationConverter?.ConvertAggregations(aggregationResponses, criteria);
+            var aggregationsTasks = _aggregationConverter?.ConvertAggregationsAsync(aggregationResponses, criteria);
+            if (aggregationsTasks != null) await Task.WhenAny(aggregationsTasks);
+            return aggregationsTasks?.Result;
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Extenstions;
@@ -23,7 +24,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
 
         public virtual string DocumentType { get; } = KnownDocumentTypes.Product;
 
-        public virtual SearchRequest BuildRequest(SearchCriteriaBase criteria)
+        public virtual async Task<SearchRequest> BuildRequestAsync(SearchCriteriaBase criteria)
         {
             SearchRequest request = null;
 
@@ -31,7 +32,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             if (productSearchCriteria != null)
             {
                 // Getting filters modifies search phrase
-                var allFilters = GetAllFilters(productSearchCriteria);
+                var allFilters = await GetAllFiltersAsync(productSearchCriteria);
 
                 request = new SearchRequest
                 {
@@ -41,7 +42,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                     Sorting = GetSorting(productSearchCriteria),
                     Skip = criteria.Skip,
                     Take = criteria.Take,
-                    Aggregations = _aggregationConverter?.GetAggregationRequests(productSearchCriteria, allFilters),
+                    Aggregations = await _aggregationConverter?.GetAggregationRequestsAsync(productSearchCriteria, allFilters),
                     IsFuzzySearch = productSearchCriteria.IsFuzzySearch,
                     //RawQuery = productSearchCriteria.RawQuery
                 };
@@ -106,10 +107,10 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             return allFilters.GetFiltersExceptSpecified(null);
         }
 
-        protected virtual FiltersContainer GetAllFilters(ProductSearchCriteria criteria)
+        protected virtual async Task<FiltersContainer> GetAllFiltersAsync(ProductSearchCriteria criteria)
         {
             var permanentFilters = GetPermanentFilters(criteria);
-            var termFilters = _termFilterBuilder.GetTermFilters(criteria);
+            var termFilters = await _termFilterBuilder.GetTermFiltersAsync(criteria);
 
             var result = new FiltersContainer
             {

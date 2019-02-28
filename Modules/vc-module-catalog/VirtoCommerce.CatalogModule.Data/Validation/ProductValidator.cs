@@ -1,7 +1,7 @@
 using FluentValidation;
-using VirtoCommerce.Domain.Catalog.Model;
+using VirtoCommerce.CatalogModule.Core.Model;
 
-namespace VirtoCommerce.CatalogModule.Data.Services.Validation
+namespace VirtoCommerce.CatalogModule.Data.Validation
 {
     public class ProductValidator : AbstractValidator<CatalogProduct>
     {

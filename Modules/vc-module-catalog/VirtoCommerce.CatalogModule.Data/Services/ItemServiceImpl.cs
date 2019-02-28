@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentValidation;
 using VirtoCommerce.CatalogModule.Core.Events;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.Model;
 using VirtoCommerce.CatalogModule.Data.Repositories;
+using VirtoCommerce.CatalogModule.Data.Validation;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Data.Infrastructure;
@@ -15,20 +17,16 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 {
     public class ItemServiceImpl : IItemService
     {
-        private readonly ICategoryService _categoryService;
-        private readonly ICatalogService _catalogService;
-        private readonly IOutlineService _outlineService;
         private readonly Func<ICatalogRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
+        private readonly AbstractValidator<IHasProperties> _hasPropertyValidator;
 
-        public ItemServiceImpl(Func<ICatalogRepository> catalogRepositoryFactory, IOutlineService outlineService, ICatalogService catalogService, ICategoryService categoryService,
-                               IEventPublisher eventPublisher)
+        public ItemServiceImpl(Func<ICatalogRepository> catalogRepositoryFactory,
+                               IEventPublisher eventPublisher, AbstractValidator<IHasProperties> hasPropertyValidator)
         {
-            _catalogService = catalogService;
-            _categoryService = categoryService;
-            _outlineService = outlineService;
             _repositoryFactory = catalogRepositoryFactory;
             _eventPublisher = eventPublisher;
+            _hasPropertyValidator = hasPropertyValidator;
         }
 
         #region IItemService Members
@@ -83,7 +81,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             var pkMap = new PrimaryKeyResolvingMap();
             var changedEntries = new List<GenericChangedEntry<CatalogProduct>>();
 
-            ValidateProducts(products);
+            await ValidateProductsAsync(products);
 
             using (var repository = _repositoryFactory())
             {
@@ -352,7 +350,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
         }
 
-        protected virtual void ValidateProducts(CatalogProduct[] products)
+        protected virtual async Task ValidateProductsAsync(CatalogProduct[] products)
         {
             if (products == null)
             {
@@ -361,25 +359,25 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
 
             //TODO
-            ////Validate products
-            //var validator = new ProductValidator();
-            //foreach (var product in products)
-            //{
-            //    validator.ValidateAndThrow(product);
-            //}
+            //Validate products
+            var validator = new ProductValidator();
+            foreach (var product in products)
+            {
+                validator.ValidateAndThrow(product);
+            }
 
-            //LoadDependencies(products, false);
-            //ApplyInheritanceRules(products, false);
+            LoadDependencies(products, false);
+            ApplyInheritanceRules(products, false);
 
-            //var targets = products.OfType<IHasProperties>();
-            //foreach (var item in targets)
-            //{
-            //    var validatioResult = _hasPropertyValidator.Validate(item);
-            //    if (!validatioResult.IsValid)
-            //    {
-            //        throw new ValidationException($"Product properties has validation error: {string.Join(Environment.NewLine, validatioResult.Errors.Select(x => x.ToString()))}");
-            //    }
-            //}
+            var targets = products.OfType<IHasProperties>();
+            foreach (var item in targets)
+            {
+                var validatioResult = await _hasPropertyValidator.ValidateAsync(item);
+                if (!validatioResult.IsValid)
+                {
+                    throw new ValidationException($"Product properties has validation error: {string.Join(Environment.NewLine, validatioResult.Errors.Select(x => x.ToString()))}");
+                }
+            }
         }
     }
 }

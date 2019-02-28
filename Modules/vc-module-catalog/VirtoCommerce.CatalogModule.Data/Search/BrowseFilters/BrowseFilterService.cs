@@ -33,7 +33,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search.BrowseFilters
             TypeNameHandling = TypeNameHandling.None,
         };
 
-        public async Task<IList<IBrowseFilter>> GetBrowseFilters(ProductSearchCriteria criteria)
+        public async Task<IList<IBrowseFilter>> GetBrowseFiltersAsync(ProductSearchCriteria criteria)
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));

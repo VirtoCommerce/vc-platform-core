@@ -41,7 +41,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
             else if (objectType.EqualsInvariant(typeof(Category).Name))
             {
-                var category = await _categoryService.GetByIdAsync(objectId, CategoryResponseGroup.Info);
+                var category = (await _categoryService.GetByIdsAsync(new[] { objectId }, CategoryResponseGroup.Info)).FirstOrDefault();
                 if (category != null)
                 {
                     catalogId = category.CatalogId;
@@ -49,7 +49,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
             else if (objectType.EqualsInvariant(typeof(CatalogProduct).Name))
             {
-                var product = await _productService.GetByIdAsync(objectId, ItemResponseGroup.ItemInfo);
+                var product = (await _productService.GetByIdsAsync(new[] { objectId }, ItemResponseGroup.ItemInfo)).FirstOrDefault();
                 if (product != null)
                 {
                     catalogId = product.CatalogId;

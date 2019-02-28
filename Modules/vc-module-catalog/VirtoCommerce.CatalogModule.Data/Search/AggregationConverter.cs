@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.Search.BrowseFilters;
@@ -27,11 +28,11 @@ namespace VirtoCommerce.CatalogModule.Data.Search
 
         #region Request converter
 
-        public IList<AggregationRequest> GetAggregationRequests(ProductSearchCriteria criteria, FiltersContainer allFilters)
+        public async Task<IList<AggregationRequest>> GetAggregationRequestsAsync(ProductSearchCriteria criteria, FiltersContainer allFilters)
         {
             var result = new List<AggregationRequest>();
 
-            var browseFilters = _browseFilterService.GetBrowseFilters(criteria);
+            var browseFilters = await _browseFilterService.GetBrowseFiltersAsync(criteria);
             if (browseFilters != null)
             {
                 foreach (var filter in browseFilters)
@@ -127,11 +128,11 @@ namespace VirtoCommerce.CatalogModule.Data.Search
 
         #region Response converter
 
-        public virtual Aggregation[] ConvertAggregations(IList<AggregationResponse> aggregationResponses, ProductSearchCriteria criteria)
+        public virtual async Task<Aggregation[]> ConvertAggregationsAsync(IList<AggregationResponse> aggregationResponses, ProductSearchCriteria criteria)
         {
             var result = new List<Aggregation>();
 
-            var browseFilters = _browseFilterService.GetBrowseFilters(criteria);
+            var browseFilters = await _browseFilterService.GetBrowseFiltersAsync(criteria);
             if (browseFilters != null && aggregationResponses?.Any() == true)
             {
                 foreach (var filter in browseFilters)
@@ -165,7 +166,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             // Add localized labels for names and values
             if (result.Any())
             {
-                AddLabels(result, criteria.CatalogId);
+                await AddLabelsAsync(result, criteria.CatalogId);
             }
 
             return result.ToArray();
@@ -283,9 +284,9 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             return result;
         }
 
-        protected virtual void AddLabels(IList<Aggregation> aggregations, string catalogId)
+        protected virtual async Task AddLabelsAsync(IList<Aggregation> aggregations, string catalogId)
         {
-            var allProperties = _propertyService.GetAllCatalogProperties(catalogId);
+            var allProperties = await _propertyService.GetAllCatalogPropertiesAsync(catalogId);
 
             foreach (var aggregation in aggregations)
             {
@@ -300,8 +301,8 @@ namespace VirtoCommerce.CatalogModule.Data.Search
 
                     aggregation.Labels = GetFirstLabelForEachLanguage(allPropertyLabels);
 
-                    var allDictItemsMap = _propDictItemsSearchService.Search(new PropertyDictionaryItemSearchCriteria { PropertyIds = properties.Select(x => x.Id).ToArray(), Take = int.MaxValue })
-                                                                     .Results.GroupBy(x => x.Alias)
+                    var dictionaryItemsSearchResult = await _propDictItemsSearchService.SearchAsync(new PropertyDictionaryItemSearchCriteria { PropertyIds = properties.Select(x => x.Id).ToArray(), Take = int.MaxValue });
+                    var allDictItemsMap = dictionaryItemsSearchResult.Results.GroupBy(x => x.Alias)
                                                                      .ToDictionary(x => x.Key, x => x.SelectMany(dictItem => dictItem.LocalizedValues)
                                                                                                      .Select(localizedValue => new AggregationLabel { Language = localizedValue.LanguageCode, Label = localizedValue.Value }));
 
@@ -312,7 +313,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
                         {
                             if (allDictItemsMap.TryGetValue(alias, out var labels))
                             {
-                                aggregationItem.Labels = GetFirstLabelForEachLanguage(labels);
+                                aggregationItem.Labels = GetFirstLabelForEachLanguage(labels.ToArray());
                             }
                         }
                     }
@@ -320,14 +321,14 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             }
         }
 
-        private static IList<AggregationLabel> GetFirstLabelForEachLanguage(IEnumerable<AggregationLabel> labels)
+        private static AggregationLabel[] GetFirstLabelForEachLanguage(AggregationLabel[] labels)
         {
             var result = labels
                 .Where(x => !string.IsNullOrEmpty(x.Language) && !string.IsNullOrEmpty(x.Label))
                 .GroupBy(x => x.Language, StringComparer.OrdinalIgnoreCase)
                 .Select(g => g.FirstOrDefault())
                 .OrderBy(x => x?.Language)
-                .ThenBy(x => x.Label)
+                .ThenBy(x => x?.Label)
                 .ToArray();
 
             return result.Any() ? result : null;

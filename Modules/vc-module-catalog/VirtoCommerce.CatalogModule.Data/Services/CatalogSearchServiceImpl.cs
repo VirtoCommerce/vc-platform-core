@@ -182,7 +182,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
                 foreach (var catalogId in catalogIds)
                 {
-                    var catalog = await _catalogService.GetByIdAsync(catalogId);
+                    var catalog = (await _catalogService.GetByIdsAsync(new[] { catalogId })).FirstOrDefault();
 
                     if (catalog != null)
                     {

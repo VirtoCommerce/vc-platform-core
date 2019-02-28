@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentValidation;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CatalogModule.Core.Events;
 using VirtoCommerce.CatalogModule.Core.Model;
@@ -21,13 +22,15 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         private readonly IPlatformMemoryCache _platformMemoryCache;
         private readonly Func<ICatalogRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
+        private readonly AbstractValidator<IHasProperties> _hasPropertyValidator;
 
         public CatalogServiceImpl(Func<ICatalogRepository> catalogRepositoryFactory,
-                                  IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
+                                  IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache, AbstractValidator<IHasProperties> hasPropertyValidator)
         {
             _repositoryFactory = catalogRepositoryFactory;
             _eventPublisher = eventPublisher;
             _platformMemoryCache = platformMemoryCache;
+            _hasPropertyValidator = hasPropertyValidator;
         }
 
         #region ICatalogService Members
@@ -62,7 +65,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
             using (var repository = _repositoryFactory())
             {
-                ValidateCatalogProperties(catalogs);
+                await ValidateCatalogPropertiesAsync(catalogs);
                 var dbExistEntities = await repository.GetCatalogsByIdsAsync(catalogs.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var catalog in catalogs)
                 {
@@ -143,17 +146,16 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
         }
 
-        private void ValidateCatalogProperties(Catalog[] catalogs)
+        private async Task ValidateCatalogPropertiesAsync(Catalog[] catalogs)
         {
             //TODO
             //LoadDependencies(catalogs, PreloadCatalogs());
-            //foreach (var catalog in catalogs)
-            //{
-
-            //    var validatioResult = _hasPropertyValidator.Validate(catalog);
-            //    if (!validatioResult.IsValid)
-            //        throw new Exception($"Catalog properties has validation error: {string.Join(Environment.NewLine, validatioResult.Errors.Select(x => x.ToString()))}");
-            //}
+            foreach (var catalog in catalogs)
+            {
+                var validatioResult = await _hasPropertyValidator.ValidateAsync(catalog);
+                if (!validatioResult.IsValid)
+                    throw new Exception($"Catalog properties has validation error: {string.Join(Environment.NewLine, validatioResult.Errors.Select(x => x.ToString()))}");
+            }
         }
     }
 }

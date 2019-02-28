@@ -1,6 +1,6 @@
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 
-namespace VirtoCommerce.CatalogModule.Data.Search
+namespace VirtoCommerce.CatalogModule.Core.Model
 {
     public abstract class CatalogSearchResult<TItem>
     {

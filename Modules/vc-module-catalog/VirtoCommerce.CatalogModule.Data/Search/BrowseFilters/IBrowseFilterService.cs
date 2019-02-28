@@ -11,7 +11,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search.BrowseFilters
         /// </summary>
         /// <param name="criteria"></param>
         /// <returns></returns>
-        Task<IList<IBrowseFilter>> GetBrowseFilters(ProductSearchCriteria criteria);
+        Task<IList<IBrowseFilter>> GetBrowseFiltersAsync(ProductSearchCriteria criteria);
 
         /// <summary>
         /// Returns all aggregations configured for a store

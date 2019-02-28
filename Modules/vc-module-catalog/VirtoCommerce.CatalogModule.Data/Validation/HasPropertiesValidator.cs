@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using FluentValidation;
+using FluentValidation.Results;
 using VirtoCommerce.CatalogModule.Core.Model;
-using PropertyValidationRule = VirtoCommerce.Domain.Catalog.Model.PropertyValidationRule;
 
-namespace VirtoCommerce.CatalogModule.Data.Services.Validation
+namespace VirtoCommerce.CatalogModule.Data.Validation
 {
     /// <summary>
     /// Custom validator for IHasProperties object - validates property values by attached PropertyValidationRule
@@ -19,7 +21,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services.Validation
             _propertyValidatorFactory = propertyValidatorFactory;
         }
 
-        public override ValidationResult Validate(ValidationContext<IHasProperties> context)
+        public override async Task<ValidationResult> ValidateAsync(ValidationContext<IHasProperties> context, CancellationToken cancellation = default(CancellationToken))
         {
             var validationResults = new List<ValidationResult>();
             var propertyValues = context.InstanceToValidate.PropertyValues;
@@ -33,7 +35,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services.Validation
                         foreach (var rule in rules)
                         {
                             var ruleValidator = _propertyValidatorFactory(rule);
-                            var validationResult = ruleValidator.Validate(propertyValue);
+                            var validationResult = await ruleValidator.ValidateAsync(propertyValue, cancellation);
                             validationResults.Add(validationResult);
                         }
                     }

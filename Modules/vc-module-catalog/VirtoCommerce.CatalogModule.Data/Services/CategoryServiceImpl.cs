@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentValidation;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CatalogModule.Core.Events;
 using VirtoCommerce.CatalogModule.Core.Model;
@@ -9,6 +10,7 @@ using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.Caching;
 using VirtoCommerce.CatalogModule.Data.Model;
 using VirtoCommerce.CatalogModule.Data.Repositories;
+using VirtoCommerce.CatalogModule.Data.Validation;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
@@ -21,13 +23,15 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         private readonly IPlatformMemoryCache _platformMemoryCache;
         private readonly Func<ICatalogRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
+        private readonly AbstractValidator<IHasProperties> _hasPropertyValidator;
 
         public CategoryServiceImpl(Func<ICatalogRepository> catalogRepositoryFactory,
-                                   IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
+                                   IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache, AbstractValidator<IHasProperties> hasPropertyValidator)
         {
             _repositoryFactory = catalogRepositoryFactory;
             _eventPublisher = eventPublisher;
             _platformMemoryCache = platformMemoryCache;
+            _hasPropertyValidator = hasPropertyValidator;
         }
 
         #region ICategoryService Members
@@ -53,7 +57,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             var pkMap = new PrimaryKeyResolvingMap();
             var changedEntries = new List<GenericChangedEntry<Category>>();
 
-            ValidateCategoryProperties(categories);
+            await ValidateCategoryPropertiesAsync(categories);
 
             using (var repository = _repositoryFactory())
             {
@@ -144,34 +148,34 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
 
         //TODO
-        private void ValidateCategoryProperties(Category[] categories)
+        private async Task ValidateCategoryPropertiesAsync(Category[] categories)
         {
-            //if (categories == null)
-            //{
-            //    throw new ArgumentNullException(nameof(categories));
-            //}
-            ////Validate categories 
-            //var validator = new CategoryValidator();
-            //foreach (var category in categories)
-            //{
-            //    validator.ValidateAndThrow(category);
-            //}
+            if (categories == null)
+            {
+                throw new ArgumentNullException(nameof(categories));
+            }
+            //Validate categories 
+            var validator = new CategoryValidator();
+            foreach (var category in categories)
+            {
+                validator.ValidateAndThrow(category);
+            }
 
-            //var groups = categories.GroupBy(x => x.CatalogId);
-            //foreach (var group in groups)
-            //{
-            //    LoadDependencies(group, PreloadCategories(group.Key));
-            //    ApplyInheritanceRules(group);
+            var groups = categories.GroupBy(x => x.CatalogId);
+            foreach (var group in groups)
+            {
+                //LoadDependencies(group, PreloadCategories(group.Key));
+                //ApplyInheritanceRules(group);
 
-            //    foreach (var category in group)
-            //    {
-            //        var validatioResult = _hasPropertyValidator.Validate(category);
-            //        if (!validatioResult.IsValid)
-            //        {
-            //            throw new Exception($"Category properties has validation error: {string.Join(Environment.NewLine, validatioResult.Errors.Select(x => x.ToString()))}");
-            //        }
-            //    }
-            //}
+                foreach (var category in group)
+                {
+                    var validatioResult = await _hasPropertyValidator.ValidateAsync(category);
+                    if (!validatioResult.IsValid)
+                    {
+                        throw new Exception($"Category properties has validation error: {string.Join(Environment.NewLine, validatioResult.Errors.Select(x => x.ToString()))}");
+                    }
+                }
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Data.Search.BrowseFilters;
 using VirtoCommerce.Platform.Core.Common;
@@ -20,14 +21,14 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             _browseFilterService = browseFilterService;
         }
 
-        public virtual FiltersContainer GetTermFilters(ProductSearchCriteria criteria)
+        public virtual async Task<FiltersContainer> GetTermFiltersAsync(ProductSearchCriteria criteria)
         {
             var result = new FiltersContainer();
 
             var terms = criteria.GetTerms();
             if (terms.Any())
             {
-                var browseFilters = _browseFilterService.GetBrowseFilters(criteria);
+                var browseFilters = await _browseFilterService.GetBrowseFiltersAsync(criteria);
 
                 var filtersAndValues = browseFilters
                     ?.Select(f => new { Filter = f, Values = f.GetValues() })

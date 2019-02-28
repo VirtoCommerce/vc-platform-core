@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using VirtoCommerce.CustomerModule.Core.Model.Search;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Extenstions;
@@ -19,7 +20,7 @@ namespace VirtoCommerce.CustomerModule.Data.Search
 
         public virtual string DocumentType { get; } = KnownDocumentTypes.Member;
 
-        public virtual SearchRequest BuildRequest(SearchCriteriaBase criteria)
+        public virtual Task<SearchRequest> BuildRequestAsync(SearchCriteriaBase criteria)
         {
             SearchRequest request = null;
 

@@ -1,6 +1,7 @@
+using FluentValidation;
 using VirtoCommerce.CatalogModule.Core.Model;
 
-namespace VirtoCommerce.CatalogModule.Data.Services.Validation
+namespace VirtoCommerce.CatalogModule.Data.Validation
 {
     /// <summary>
     /// Custom validator for PropertyValue object, dynamically creates validation rules by passed PropertyValidationRule

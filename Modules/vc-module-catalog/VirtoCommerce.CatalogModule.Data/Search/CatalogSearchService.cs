@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
@@ -31,7 +32,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             var result = AbstractTypeFactory<TResult>.TryCreateInstance();
 
             var requestBuilder = GetRequestBuilder(criteria);
-            var request = requestBuilder?.BuildRequest(criteria);
+            var request = await requestBuilder?.BuildRequestAsync(criteria);
 
             var response = await _searchProvider.SearchAsync(criteria.ObjectType, request);
 
@@ -39,7 +40,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             {
                 result.TotalCount = response.TotalCount;
                 result.Items = await ConvertDocuments(response.Documents, criteria);
-                result.Aggregations = ConvertAggregations(response.Aggregations, criteria);
+                result.Aggregations = await ConvertAggregationsAsync(response.Aggregations, criteria);
             }
 
             return result;
@@ -48,7 +49,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
 
         protected abstract Task<IList<TItem>> LoadMissingItems(string[] missingItemIds, TCriteria criteria);
         protected abstract void ReduceSearchResults(IEnumerable<TItem> items, TCriteria criteria);
-        protected abstract Aggregation[] ConvertAggregations(IList<AggregationResponse> aggregationResponses, TCriteria criteria);
+        protected abstract Task<Aggregation[]> ConvertAggregationsAsync(IList<AggregationResponse> aggregationResponses, TCriteria criteria);
 
 
         protected virtual ISearchRequestBuilder GetRequestBuilder(TCriteria criteria)

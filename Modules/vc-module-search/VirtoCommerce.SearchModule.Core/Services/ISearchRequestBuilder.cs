@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Model;
 
@@ -18,6 +19,6 @@ namespace VirtoCommerce.SearchModule.Core.Services
         /// </summary>
         /// <param name="criteria"></param>
         /// <returns></returns>
-        SearchRequest BuildRequest(SearchCriteriaBase criteria);
+        Task<SearchRequest> BuildRequestAsync(SearchCriteriaBase criteria);
     }
 }
