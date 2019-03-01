@@ -48,6 +48,7 @@ namespace VirtoCommerce.CatalogModule.Web
             serviceCollection.AddSingleton<ISkuGenerator, DefaultSkuGenerator>();
             serviceCollection.AddSingleton<IProperyDictionaryItemService, PropertyDictionaryItemService>();
             serviceCollection.AddSingleton<IProperyDictionaryItemSearchService, ProperyDictionaryItemSearchService>();
+            serviceCollection.AddSingleton<IProductAssociationSearchService, ProductAssociationSearchService>();
 
             PropertyValueValidator PropertyValueValidatorFactory(PropertyValidationRule rule) => new PropertyValueValidator(rule);
             serviceCollection.AddSingleton((Func<PropertyValidationRule, PropertyValueValidator>)PropertyValueValidatorFactory);

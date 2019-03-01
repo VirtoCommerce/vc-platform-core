@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CatalogModule.Core.Events;
 using VirtoCommerce.CatalogModule.Core.Model;
@@ -56,6 +57,13 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 //LoadDependencies(result, result);
                 return result;
             });
+        }
+
+        public async Task<IEnumerable<Catalog>> GetCatalogsListAsync()
+        {
+            //Clone required because client code may change resulting objects
+            var catalogs = await PreloadCatalogs();
+            return catalogs.Values.Select(MemberwiseCloneCatalog).OrderBy(x => x.Name);
         }
 
         public virtual async Task SaveChangesAsync(Catalog[] catalogs)
@@ -116,6 +124,28 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
         #endregion
 
+        protected virtual Task<Dictionary<string, Catalog>> PreloadCatalogs()
+        {
+            var cacheKey = CacheKey.With(GetType(), "AllCatalogs");
+            return _platformMemoryCache.GetOrCreateExclusive(cacheKey, async (cacheEntry) =>
+            {
+                cacheEntry.AddExpirationToken(CatalogCacheRegion.CreateChangeToken());
+                CatalogEntity[] entities;
+                using (var repository = _repositoryFactory())
+                {
+                    //Optimize performance and CPU usage
+                    repository.DisableChangesTracking();
+
+                    var ids = await repository.Catalogs.Select(x => x.Id).ToArrayAsync();
+                    entities = await repository.GetCatalogsByIdsAsync(ids);
+                }
+
+                var result = entities.Select(x => x.ToModel(AbstractTypeFactory<Catalog>.TryCreateInstance())).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+
+                LoadDependencies(result.Values, result);
+                return result;
+            });
+        }
 
         protected virtual void LoadDependencies(IEnumerable<Catalog> catalogs, Dictionary<string, Catalog> preloadedCatalogsMap)
         {
@@ -145,6 +175,23 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 }
             }
         }
+
+        protected virtual Catalog MemberwiseCloneCatalog(Catalog catalog)
+        {
+            var retVal = AbstractTypeFactory<Catalog>.TryCreateInstance();
+
+            retVal.Id = catalog.Id;
+            retVal.IsVirtual = catalog.IsVirtual;
+            retVal.Name = catalog.Name;
+
+            // TODO: clone reference objects
+            retVal.Languages = catalog.Languages;
+            retVal.Properties = catalog.Properties;
+            retVal.PropertyValues = catalog.PropertyValues;
+
+            return retVal;
+        }
+
 
         private async Task ValidateCatalogPropertiesAsync(Catalog[] catalogs)
         {

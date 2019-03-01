@@ -7,7 +7,6 @@
 
   <ItemGroup>
     <Compile Remove="Controllers\Api\CatalogBrowseFiltersController.cs" />
-    <Compile Remove="Controllers\Api\CatalogModuleProductsController.cs" />
     <Compile Remove="Controllers\Api\CatalogModulePropertiesController.cs" />
     <Compile Remove="Controllers\Api\CatalogModulePropertyDictionaryItemsController.cs" />
     <Compile Remove="Controllers\Api\CatalogModuleSearchController.cs" />

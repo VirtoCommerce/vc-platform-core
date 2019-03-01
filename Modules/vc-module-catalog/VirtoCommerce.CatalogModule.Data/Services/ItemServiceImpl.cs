@@ -20,13 +20,17 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         private readonly Func<ICatalogRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
         private readonly AbstractValidator<IHasProperties> _hasPropertyValidator;
+        private readonly ICatalogService _catalogService;
+        private readonly ICategoryService _categoryService;
 
         public ItemServiceImpl(Func<ICatalogRepository> catalogRepositoryFactory,
-                               IEventPublisher eventPublisher, AbstractValidator<IHasProperties> hasPropertyValidator)
+                               IEventPublisher eventPublisher, AbstractValidator<IHasProperties> hasPropertyValidator, ICatalogService catalogService, ICategoryService categoryService)
         {
             _repositoryFactory = catalogRepositoryFactory;
             _eventPublisher = eventPublisher;
             _hasPropertyValidator = hasPropertyValidator;
+            _catalogService = catalogService;
+            _categoryService = categoryService;
         }
 
         #region IItemService Members
@@ -45,7 +49,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                                    .ToArray();
             }
 
-            LoadDependencies(result);
+            await LoadDependenciesAsync(result);
             ApplyInheritanceRules(result);
 
             //TODO
@@ -74,6 +78,12 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             //}
 
             return result;
+        }
+
+        public virtual async Task<CatalogProduct> GetByIdAsync(string itemId, ItemResponseGroup responseGroup, string catalogId = null)
+        {
+            var items = await GetByIdsAsync(new[] { itemId }, responseGroup, catalogId);
+            return items.FirstOrDefault();
         }
 
         public virtual async Task SaveChangesAsync(CatalogProduct[] products)
@@ -196,43 +206,48 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
 
 
-        protected virtual void LoadDependencies(CatalogProduct[] products, bool processVariations = true)
+        protected virtual async Task LoadDependenciesAsync(CatalogProduct[] products, bool processVariations = true)
         {
             //TODO
-            //var catalogsMap = _catalogService.GetCatalogsList().ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
-            //var allCategoriesIds = products.Select(x => x.CategoryId).Where(x => x != null).Distinct().ToArray();
-            //var categoriesMap = _categoryService.GetByIds(allCategoriesIds, CategoryResponseGroup.Full).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+            var catalogsMap = (await _catalogService.GetCatalogsListAsync()).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+            var allCategoriesIds = products.Select(x => x.CategoryId).Where(x => x != null).Distinct().ToArray();
+            var categoriesMap = (await _categoryService.GetByIdsAsync(allCategoriesIds, CategoryResponseGroup.Full)).ToDictionary(
+                    x => x.Id, StringComparer.OrdinalIgnoreCase);
 
-            //foreach (var product in products)
-            //{
-            //    product.Catalog = catalogsMap.GetValueOrThrow(product.CatalogId, $"catalog with key {product.CatalogId} not exist");
-            //    if (product.CategoryId != null)
-            //    {
-            //        product.Category = categoriesMap.GetValueOrThrow(product.CategoryId, $"category with key {product.CategoryId} not exist");
-            //    }
+            var categoryIdsLinks = products.SelectMany(p => p.Links).Select(l => l.CategoryId).Distinct().ToArray();
+            var categoryLinks = await _categoryService.GetByIdsAsync(categoryIdsLinks, CategoryResponseGroup.WithProperties | CategoryResponseGroup.WithParents);
 
-            //    if (product.Links != null)
-            //    {
-            //        foreach (var link in product.Links)
-            //        {
-            //            link.Catalog = catalogsMap.GetValueOrThrow(link.CatalogId, $"link catalog with key {link.CatalogId} not exist");
-            //            link.Category = _categoryService.GetById(link.CategoryId, CategoryResponseGroup.WithProperties | CategoryResponseGroup.WithParents);
-            //        }
-            //    }
 
-            //    if (product.MainProduct != null)
-            //    {
-            //        if (product.MainProduct.MainProduct != null)
-            //        {
-            //            throw new OperationCanceledException($"The main product can't contains reference to another main product! It can lead to the infinite recursion.");
-            //        }
-            //        LoadDependencies(new[] { product.MainProduct }, false);
-            //    }
-            //    if (processVariations && !product.Variations.IsNullOrEmpty())
-            //    {
-            //        LoadDependencies(product.Variations.ToArray());
-            //    }
-            //}
+            foreach (var product in products)
+            {
+                product.Catalog = catalogsMap.GetValueOrThrow(product.CatalogId, $"catalog with key {product.CatalogId} not exist");
+                if (product.CategoryId != null)
+                {
+                    product.Category = categoriesMap.GetValueOrThrow(product.CategoryId, $"category with key {product.CategoryId} not exist");
+                }
+
+                if (product.Links != null)
+                {
+                    foreach (var link in product.Links)
+                    {
+                        link.Catalog = catalogsMap.GetValueOrThrow(link.CatalogId, $"link catalog with key {link.CatalogId} not exist");
+                        link.Category = categoryLinks.FirstOrDefault(cl => cl.Id.EqualsInvariant(link.CategoryId));
+                    }
+                }
+
+                if (product.MainProduct != null)
+                {
+                    if (product.MainProduct.MainProduct != null)
+                    {
+                        throw new OperationCanceledException($"The main product can't contains reference to another main product! It can lead to the infinite recursion.");
+                    }
+                    await LoadDependenciesAsync(new[] { product.MainProduct }, false);
+                }
+                if (processVariations && !product.Variations.IsNullOrEmpty())
+                {
+                    await LoadDependenciesAsync(product.Variations.ToArray());
+                }
+            }
         }
 
         protected virtual void ApplyInheritanceRules(CatalogProduct[] products, bool processVariations = true)
@@ -366,7 +381,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 validator.ValidateAndThrow(product);
             }
 
-            LoadDependencies(products, false);
+            LoadDependenciesAsync(products, false);
             ApplyInheritanceRules(products, false);
 
             var targets = products.OfType<IHasProperties>();
