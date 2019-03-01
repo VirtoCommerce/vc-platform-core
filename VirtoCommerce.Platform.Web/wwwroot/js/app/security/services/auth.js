@@ -1,5 +1,4 @@
-angular.module('platformWebApp')
-    .factory('platformWebApp.authService', ['$http', '$rootScope', '$cookieStore', '$state', '$interpolate', '$q', 'platformWebApp.authDataStorage', function ($http, $rootScope, $cookieStore, $state, $interpolate, $q, authDataStorage) {
+angular.module('platformWebApp').factory('platformWebApp.authService', ['$http', '$rootScope', '$cookieStore', '$cookies', '$state', '$interpolate', '$q', 'platformWebApp.authDataStorage', function ($http, $rootScope, $cookieStore, $cookies, $state, $interpolate, $q, authDataStorage) {
     var serviceBase = 'api/platform/security/';
     var authContext = {
         userId: null,
@@ -16,7 +15,7 @@ angular.module('platformWebApp')
             });
     };
 
-    authContext.login = function (email, password, remember) {       
+    authContext.login = function (email, password, remember) {
         var requestData = 'grant_type=password&scope=offline_access&username=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password);
         return $http.post('connect/token', requestData, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }).then(
             function (response) {
@@ -84,6 +83,7 @@ angular.module('platformWebApp')
 
     authContext.logout = function () {
         authDataStorage.clearStoredData();
+        $http.get(serviceBase + 'logout');
         changeAuth({});
     };
 
