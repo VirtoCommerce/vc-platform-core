@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Newtonsoft.Json;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
+using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.StoreModule.Core.Services;

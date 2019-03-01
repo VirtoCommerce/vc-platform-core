@@ -1,10 +1,11 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Internal;
+using VirtoCommerce.CatalogModule.Core;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
+using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
-using VirtoCommerce.CatalogModule.Data.Search;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchModule.Core.Model;
@@ -37,7 +38,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         {
             SearchResult result;
 
-            var useIndexedSearch = _settingsManager.GetValue("Catalog.Search.UseCatalogIndexedSearchInManager", true);
+            var useIndexedSearch = _settingsManager.GetValue(ModuleConstants.Settings.Search.UseCatalogIndexedSearchInManager.Name, true);
             var searchProducts = criteria.ResponseGroup.HasFlag(SearchResponseGroup.WithProducts);
 
             if (useIndexedSearch && searchProducts && !string.IsNullOrEmpty(criteria.Keyword))

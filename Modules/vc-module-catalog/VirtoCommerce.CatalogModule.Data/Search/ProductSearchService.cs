@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
+using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
@@ -18,7 +19,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
         private readonly IBlobUrlResolver _blobUrlResolver;
         private readonly IAggregationConverter _aggregationConverter;
 
-        public ProductSearchService(ISearchRequestBuilder[] searchRequestBuilders, ISearchProvider searchProvider, ISettingsManager settingsManager, IItemService itemService, IBlobUrlResolver blobUrlResolver, IAggregationConverter aggregationConverter)
+        public ProductSearchService(IEnumerable<ISearchRequestBuilder> searchRequestBuilders, ISearchProvider searchProvider, ISettingsManager settingsManager, IItemService itemService, IBlobUrlResolver blobUrlResolver, IAggregationConverter aggregationConverter)
             : base(searchRequestBuilders, searchProvider, settingsManager)
         {
             _itemService = itemService;

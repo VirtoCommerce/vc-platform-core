@@ -1,0 +1,76 @@
+<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form name="formScope">
+                <div class="form-group" ng-init="setForm(formScope)">
+                    <label class="form-label">{{ 'catalog.blades.filter-detail.labels.name' | translate }}</label>
+                    <div class="form-input">
+                        <input ng-model="blade.currentEntity.name" required placeholder="{{ 'catalog.blades.filter-detail.placeholders.name' | translate }}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ 'catalog.blades.filter-detail.labels.criteria' | translate }}</label>
+                    <div class="form-input">
+                        <input ng-model="blade.currentEntity.keyword" placeholder="{{ 'catalog.blades.filter-detail.placeholders.criteria' | translate }}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ 'catalog.blades.filter-detail.labels.searchInVariations' | translate }}</label>
+                    <div class="form-input">
+                        <label class="form-label __switch">
+                            <input type="checkbox" ng-model="blade.currentEntity.searchInVariations">
+                            <span class="switch"></span>
+                        </label>
+                    </div>
+                </div>
+            </form>
+            <div class="form-group">
+                <div class="list __info">
+                    <div class="list-t">samsung galaxy</div>
+                    <div class="list-descr">all products with words 'samsung' AND 'galaxy' in property values</div>
+                </div>
+                <div class="list __info">
+                    <div class="list-t">color:Black,White</div>
+                    <div class="list-descr">where the color is 'Black' OR 'White'</div>
+                </div>
+                <div class="list __info">
+                    <div class="list-t">color:Black color:White</div>
+                    <div class="list-descr">where the color is 'Black' AND 'White'</div>
+                </div>
+                <div class="list __info">
+                    <div class="list-t">price_usd:[100 TO 200]</div>
+                    <div class="list-descr">where the price is in USD and between values including bounds</div>
+                </div>
+                <div class="list __info">
+                    <div class="list-t">price:(100 TO 200)</div>
+                    <div class="list-descr">where the price is in any currency and between values excluding bounds</div>
+                </div>
+                <div class="list __info">
+                    <div class="list-t">price:(0 TO)</div>
+                    <div class="list-descr">where the price is greater than zero</div>
+                </div>
+                <div class="list __info">
+                    <div class="list-t">price:(TO 100]</div>
+                    <div class="list-descr">where the price is less than or equal to 100</div>
+                </div>
+                <div class="list __info">
+                    <div class="list-t">!color:White</div>
+                    <div class="list-descr">use ! as NOT operator on filters</div>
+                </div>
+                <div class="list __info">
+                    <div class="list-t">Da?? Red*</div>
+                    <div class="list-descr">use ? to replace a single character, and * to replace zero or more characters</div>
+                </div>
+                <div class="list __info">
+                    <div class="list-t">sony color:Black price:[100 TO 200)</div>
+                    <div class="list-descr">combine keywords and filters</div>
+                </div>
+                <div class="list __info">
+                    <div class="list-item">
+                        <a ng-href="https://github.com/VirtoCommerce/vc-module-search#search-phrase-syntax" target="_blank">Search phrase syntax reference</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

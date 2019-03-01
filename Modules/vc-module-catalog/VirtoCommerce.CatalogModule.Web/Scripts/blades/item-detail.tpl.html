@@ -1,0 +1,207 @@
+﻿<div class="blade-content __medium-wide">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form name="detailForm">
+                <fieldset ng-init="setForm(detailForm)">
+                    <va-metaform registered-inputs="blade.metaFields" blade="blade" column-count="2" ng-if="blade.currentEntity"></va-metaform>
+
+                    <div class="form-group clearfix">
+                        <div class="column">
+                            <div class="form-group">
+                                <label class="form-label">{{ 'catalog.blades.item-detail.labels.sku' | translate }}</label>
+                                <div class="form-input">
+                                    <input ng-class="{'error': detailForm.code.$invalid && !detailForm.code.$pristine}" required class="form-control" ng-model="blade.item.code" name="code" placeholder="{{ 'catalog.blades.item-detail.placeholders.sku' | translate }}" ui-validate=" 'blade.codeValidator($value)' " />
+                                </div>
+                                <div class="form-error" data-ng-show="blade.formScope.code.$dirty">
+                                    <span data-ng-show="blade.formScope.code.$error.validator">{{ 'catalog.blades.item-detail.validations.sku' | translate }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="form-group">
+                                <label class="form-label">{{ 'catalog.blades.item-detail.labels.priority' | translate }}</label>
+                                <div class="form-input __number">
+                                    <input smart-float num-type="integer" required ng-model="blade.item._priority" placeholder="{{ 'catalog.blades.item-detail.placeholders.priority' | translate }}" type="text" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="columns clearfix">
+                        <div class="column">
+                            <div class="form-group __info list">
+                                <label class="form-label">{{ 'catalog.blades.item-detail.labels.start-date' | translate }}</label>
+                                <div class="form-input __calendar">
+                                    <input placeholder="{{ 'catalog.blades.item-detail.placeholders.start-date' | translate }}" ng-model="blade.item.startDate" datepicker-popup="" is-open="datepickers.str" />
+                                    <button class="btn" type="button" ng-click="open($event,'str')">
+                                        <i class="btn-ico fa fa-calendar"></i>
+                                    </button>
+                                </div>
+                                <div class="list-descr">{{ 'catalog.blades.item-detail.descr.start-date' | translate }}</div>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="form-group __info list">
+                                <label class="form-label __info list">{{ 'catalog.blades.item-detail.labels.end-date' | translate }}</label>
+                                <div class="form-input __calendar">
+                                    <input placeholder="{{ 'catalog.blades.item-detail.placeholders.end-date' | translate }}" ng-model="blade.item.endDate" datepicker-popup="" is-open="datepickers.end" />
+                                    <button class="btn" type="button" ng-click="open($event,'end')">
+                                        <i class="btn-ico fa fa-calendar"></i>
+                                    </button>
+                                </div>
+                                <div class="list-descr">{{ 'catalog.blades.item-detail.descr.end-date' | translate }}</div>
+                            </div>
+                        </div>
+                    </div>  
+                    <div class="form-group">
+                        <label class="form-label">{{ 'catalog.blades.item-detail.labels.name' | translate }}</label>
+                        <div class="form-input">
+                            <textarea class="__small" ng-class="{'error': detailForm.itemName.$invalid && !detailForm.itemName.$pristine}" required cols="30" rows="2" ng-model="blade.item.name" name="itemName" placeholder="{{ 'catalog.blades.item-detail.placeholders.sku' | translate }}"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="columns clearfix">
+                        <div class="column">
+                            <div class="form-group">
+                                <label class="form-label">{{'catalog.blades.item-detail.labels.can-be-purchased' | translate}}</label>
+                                <div class="form-input">
+                                    <label class="form-label __switch">
+                                        <input type="checkbox" ng-model="blade.item.isBuyable">
+                                        <span class="switch"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="form-group">
+                                <label class="form-label">{{'catalog.blades.item-detail.labels.store-visible' | translate}}</label>
+                                <div class="form-input">
+                                    <label class="form-label __switch">
+                                        <input type="checkbox" ng-model="blade.item.isActive">
+                                        <span class="switch"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column" ng-if="blade.item.productType!=='Digital'">
+                            <div class="form-group">
+                                <label class="form-label">{{'catalog.blades.item-detail.labels.track-inventory' | translate}}</label>
+                                <div class="form-input">
+                                    <label class="form-label __switch">
+                                        <input type="checkbox" ng-model="blade.item.trackInventory">
+                                        <span class="switch"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column" ng-if="blade.item.productType=='Digital'">
+                            <div class="form-group __checkbox">
+                                <label class="form-label">{{'catalog.blades.item-detail.labels.has-user-agreement' | translate}}</label>
+                                <div class="form-input">
+                                    <label class="form-label __switch">
+                                        <input type="checkbox" ng-model="blade.item.hasUserAgreement">
+                                        <span class="switch"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">{{ 'catalog.blades.item-detail.labels.gtin' | translate }}</label>
+                        <div class="form-input">
+                            <input ng-class="{'error': detailForm.gtin.$invalid && !detailForm.gtin.$pristine}" placeholder="{{ 'catalog.blades.item-detail.placeholders.gtin' | translate }}" class="form-control" ng-model="blade.item.gtin" name="gtin" type="text" ng-maxlength="14" />
+                        </div>
+                    </div>
+                    <div ng-if="blade.item.productType!=='Digital'">
+                      <div class="columns">
+                        <div class="column">
+                          <div class="form-group">
+                            <label class="form-label">{{ 'catalog.blades.item-detail.labels.min-quantity' | translate }}</label>
+                            <div class="form-input __number">
+                              <input num-type="integer" min="0" smart-float ng-model="blade.item.minQuantity">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="column">
+                          <div class="form-group">
+                            <label class="form-label">{{ 'catalog.blades.item-detail.labels.max-quantity' | translate }}</label>
+                            <div class="form-input __number">
+                              <input num-type="integer" min="0" smart-float ng-model="blade.item.maxQuantity">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group" ng-if="blade.item.productType==='Digital'">
+                        <div class="columns">
+                            <div class="column">
+                                <div class="form-group">
+                                    <label class="form-label">{{ 'catalog.blades.item-detail.labels.download-type' | translate }}</label>
+                                    <div class="form-input">
+                                        <ui-select ng-model="blade.item.downloadType" ng-init="downloadTypes=['Standard Product', 'Software', 'Music']">
+                                            <ui-select-match placeholder="{{ 'catalog.blades.item-detail.placeholders.download-type' | translate }}">{{$select.selected}}</ui-select-match>
+                                            <ui-select-choices repeat="x in downloadTypes | filter: $select.search">
+                                                <span ng-bind-html="x | highlight: $select.search"></span>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="column">
+                                <div class="form-group">
+                                    <label class="form-label">{{ 'catalog.blades.item-detail.labels.max-downloads' | translate }}</label>
+                                    <div class="form-input __number">
+                                        <input smart-float num-type="integer" ng-model="blade.item.maxNumberOfDownload">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="column">
+                                <div class="form-group">
+                                    <label class="form-label">{{ 'catalog.blades.item-detail.labels.expiration-date' | translate }}</label>
+                                    <div class="form-input __calendar">
+                                        <input placeholder="{{ 'catalog.blades.item-detail.placeholders.expiration-date' | translate }}" ng-model="blade.item.downloadExpiration" datepicker-popup="" is-open="datepickers.str" />
+                                        <button class="btn" type="button" ng-click="open($event,'str')">
+                                            <i class="btn-ico fa fa-calendar"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="columns clearfix">
+                            <div class="column">
+                                <div class="form-group">
+                                    <label class="form-label">{{ 'catalog.blades.item-detail.labels.vendor' | translate }} <a href="" ng-click="blade.openVendorsManagement()" class="form-edit" va-permission="customer:read"><i class="form-ico fa fa-pencil"></i></a></label>
+                                    <div class="form-input">
+                                        <ui-select ng-model="blade.item.vendor">
+                                            <ui-select-match allow-clear placeholder="{{ 'catalog.blades.item-detail.placeholders.vendor' | translate }}">{{$select.selected.name}}</ui-select-match>
+                                            <ui-select-choices repeat="x.id as x in blade.vendors.results | filter: {name: $select.search}">
+                                                <span ng-bind-html="x.name | highlight: $select.search"></span>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="column">
+                                <div class="form-group">
+                                    <label class="form-label">{{ 'catalog.blades.item-detail.labels.tax-type' | translate }} <a href="" ng-click="blade.openDictionarySettingManagement('TaxTypes')" class="form-edit" va-permission="platform:setting:update"><i class="form-ico fa fa-pencil"></i></a></label>
+                                    <div class="form-input">
+                                        <ui-select ng-model="blade.item.taxType">
+                                            <ui-select-match allow-clear="true" placeholder="{{ 'catalog.blades.item-detail.placeholders.tax-type' | translate }}">{{$select.selected}}</ui-select-match>
+                                            <ui-select-choices repeat="x in blade.taxTypes | filter: $select.search">
+                                                <span ng-bind-html="x | highlight: $select.search"></span>
+                                            </ui-select-choices>
+                                        </ui-select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+            </form>
+            <va-widget-container group="itemDetail" blade="blade" data="blade.item" gridster-opts="{width: 526}"></va-widget-container>
+        </div>
+    </div>
+</div>

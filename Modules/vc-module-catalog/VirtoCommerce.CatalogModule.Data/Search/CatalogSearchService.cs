@@ -20,9 +20,9 @@ namespace VirtoCommerce.CatalogModule.Data.Search
         private readonly ISearchProvider _searchProvider;
         private readonly ISettingsManager _settingsManager;
 
-        protected CatalogSearchService(ISearchRequestBuilder[] searchRequestBuilders, ISearchProvider searchProvider, ISettingsManager settingsManager)
+        protected CatalogSearchService(IEnumerable<ISearchRequestBuilder> searchRequestBuilders, ISearchProvider searchProvider, ISettingsManager settingsManager)
         {
-            _searchRequestBuilders = searchRequestBuilders;
+            _searchRequestBuilders = searchRequestBuilders.ToArray();
             _searchProvider = searchProvider;
             _settingsManager = settingsManager;
         }

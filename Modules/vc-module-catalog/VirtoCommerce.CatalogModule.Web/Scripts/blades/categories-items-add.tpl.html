@@ -1,0 +1,23 @@
+<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <ul class="list __items">
+                <li class="list-item" ng-mouseup="addCategory()" va-permission="catalog:create">
+                    <i class="list-ico fa fa-folder"></i>
+                    <span class="list-t">{{'catalog.blades.categories-items-add.menu.category.title' | translate}}</span>
+                    <span class="list-descr">{{ 'catalog.blades.categories-items-add.menu.category.description' | translate }}</span>
+                </li>
+                <li class="list-item" ng-mouseup="addLinkedCategory()" ng-if="blade.parentBlade.catalog.isVirtual" va-permission="catalog:create">
+                    <i class="list-ico fa fa-link"></i>
+                    <span class="list-t">{{ 'catalog.blades.categories-items-add.menu.link.title' | translate }}</span>
+                    <span class="list-descr">{{ 'catalog.blades.categories-items-add.menu.link.description' | translate }}</span>
+                </li>
+                <li class="list-item" ng-mouseup="addProduct(data.productType)" ng-repeat="data in availableTypes" ng-if="!blade.parentBlade.catalog.isVirtual" va-permission="catalog:create">
+                    <i class="list-ico fa {{data.icon}}"></i>
+                    <span class="list-t">{{data.itemType | translate}}</span>
+                    <span class="list-descr">{{data.description | translate}}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

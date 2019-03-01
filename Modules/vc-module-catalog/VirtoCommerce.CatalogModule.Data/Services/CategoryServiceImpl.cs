@@ -35,21 +35,26 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         }
 
         #region ICategoryService Members
-        public virtual Task<Category[]> GetByIdsAsync(string[] categoryIds, CategoryResponseGroup responseGroup, string catalogId = null)
+        public virtual async Task<Category[]> GetByIdsAsync(string[] categoryIds, CategoryResponseGroup responseGroup, string catalogId = null)
         {
-            var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join(",", categoryIds));
-            return _platformMemoryCache.GetOrCreateExclusive(cacheKey, async (cacheEntry) =>
+            var result = new List<Category>();
+            var preloadedCategoriesMap = await PreloadCategories(catalogId);
+            foreach (var categoryId in categoryIds.Where(x => x != null))
             {
-                cacheEntry.AddExpirationToken(CategoryCacheRegion.CreateChangeToken());
-                CategoryEntity[] entities;
-                using (var repository = _repositoryFactory())
+                Category category;
+                if (preloadedCategoriesMap.TryGetValue(categoryId, out category))
                 {
-                    repository.DisableChangesTracking();
-
-                    entities = await repository.GetCategoriesByIdsAsync(repository.Categories.Select(x => x.Id).ToArray(), responseGroup);
+                    result.Add(MemberwiseCloneCategory(category));
                 }
-                return entities.Select(x => x.ToModel(AbstractTypeFactory<Category>.TryCreateInstance())).ToArray();
-            });
+            }
+
+            //Reduce details according to response group
+            foreach (var category in result)
+            {
+                ReduceDetails(category, responseGroup);
+            }
+
+            return result.ToArray();
         }
 
         public virtual async Task SaveChangesAsync(Category[] categories)
@@ -112,6 +117,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         }
 
         #endregion
+
         /// <summary>
         /// Reduce category details according to response group
         /// </summary>
@@ -146,6 +152,77 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
         }
 
+        protected virtual Task<Dictionary<string, Category>> PreloadCategories(string catalogId)
+        {
+            var cacheKey = CacheKey.With(GetType(), "PreloadCategories", catalogId);
+            return _platformMemoryCache.GetOrCreateExclusive(cacheKey, async (cacheEntry) =>
+            {
+                cacheEntry.AddExpirationToken(CategoryCacheRegion.CreateChangeToken());
+                CategoryEntity[] entities;
+                using (var repository = _repositoryFactory())
+                {
+                    repository.DisableChangesTracking();
+
+                    entities = await repository.GetCategoriesByIdsAsync(repository.Categories.Select(x => x.Id).ToArray(), CategoryResponseGroup.Full);
+                }
+                var result = entities.Select(x => x.ToModel(AbstractTypeFactory<Category>.TryCreateInstance())).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+
+                //LoadDependencies(result.Values, result);
+                //ApplyInheritanceRules(result.Values);
+
+                //TODO
+                // Fill outlines for categories            
+                //_outlineService.FillOutlinesForObjects(result.Values, catalogId);
+
+                //var objectsWithSeo = new List<ISeoSupport>(result.Values);
+                //var outlineItems = result.Values.Where(c => c.Outlines != null).SelectMany(c => c.Outlines.SelectMany(o => o.Items));
+                //objectsWithSeo.AddRange(outlineItems);
+                //_commerceService.LoadSeoForObjects(objectsWithSeo.ToArray());
+
+                return result;
+            });
+        }
+
+        // TODO: Move to domain
+        protected virtual Category MemberwiseCloneCategory(Category category)
+        {
+            var retVal = AbstractTypeFactory<Category>.TryCreateInstance();
+
+            // Entity
+            retVal.Id = category.Id;
+
+            // AuditableEntity
+            retVal.CreatedDate = category.CreatedDate;
+            retVal.ModifiedDate = category.ModifiedDate;
+            retVal.CreatedBy = category.CreatedBy;
+            retVal.ModifiedBy = category.ModifiedBy;
+
+            // Category
+            retVal.CatalogId = category.CatalogId;
+            retVal.Code = category.Code;
+            retVal.IsActive = category.IsActive;
+            retVal.IsVirtual = category.IsVirtual;
+            retVal.Level = category.Level;
+            retVal.Name = category.Name;
+            retVal.PackageType = category.PackageType;
+            retVal.ParentId = category.ParentId;
+            retVal.Path = category.Path;
+            retVal.Priority = category.Priority;
+            retVal.TaxType = category.TaxType;
+
+            // TODO: clone reference objects
+            retVal.Children = category.Children;
+            retVal.Outlines = category.Outlines;
+            retVal.PropertyValues = category.PropertyValues;
+            retVal.SeoInfos = category.SeoInfos;
+            retVal.Catalog = category.Catalog;
+            retVal.Properties = category.Properties;
+            retVal.Parents = category.Parents;
+            retVal.Links = category.Links;
+            retVal.Images = category.Images;
+
+            return retVal;
+        }
 
         //TODO
         private async Task ValidateCategoryPropertiesAsync(Category[] categories)

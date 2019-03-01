@@ -1,0 +1,84 @@
+﻿<div class="blade-static __bottom" ng-include="'Modules/$(VirtoCommerce.Catalog)/Scripts/blades/common/templates/ok-cancel.tpl.html'"></div>
+<div class="blade-content __medium-wide">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form name="dimensionsForm" class="form">
+                <div class="form-group"  ng-init="setForm(dimensionsForm)">
+                    <div class="columns">
+                        <div class="column">
+                            <div class="form-group">
+                                <label class="form-label">{{ 'catalog.blades.item-detail.labels.weight-unit' | translate }} <a href="" ng-click="openDictionarySettingManagement('WeightUnits')" class="form-edit" va-permission="platform:setting:update"><i class="form-ico fa fa-pencil"></i></a></label>
+                                <div class="form-input">
+                                    <ui-select ng-model="blade.currentEntity.weightUnit">
+                                        <ui-select-match allow-clear="true" placeholder="{{ 'catalog.blades.item-detail.placeholders.weight-unit' | translate }}">{{$select.selected}}</ui-select-match>
+                                        <ui-select-choices repeat="x in weightUnits | filter: $select.search">
+                                            <span ng-bind-html="x | highlight: $select.search"></span>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Package type <a href="" ng-click="packageTypeUtils.editPackageTypes(blade)" class="form-edit" va-permission="platform:setting:update"><i class="form-ico fa fa-pencil"></i></a></label>
+                                <div class="form-input">
+                                    <ui-select ng-model="blade.currentEntity.packageType">
+                                        <ui-select-match allow-clear="true" placeholder="N/A">{{$select.selected.name}}</ui-select-match>
+                                        <ui-select-choices repeat="x.id as x in packageTypes | filter: $select.search">
+                                            <span ng-bind-html="x.name | highlight: $select.search"></span>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="form-group">
+                                <label class="form-label">{{ 'catalog.blades.item-detail.labels.weight' | translate }}</label>
+                                <div class="form-input __number">
+                                    <input smart-float num-type="float" min="0.0" ng-model="blade.currentEntity.weight" placeholder="{{ 'catalog.blades.item-detail.placeholders.weight' | translate}}" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Measure unit<a href="" ng-click="openDictionarySettingManagement('MeasureUnits')" class="form-edit" va-permission="platform:setting:update"><i class="form-ico fa fa-pencil"></i></a></label>
+                                <div class="form-input">
+                                    <ui-select ng-model="blade.currentEntity.measureUnit">
+                                        <ui-select-match allow-clear="true" placeholder="N/A">{{$select.selected}}</ui-select-match>
+                                        <ui-select-choices repeat="x in measureUnits | filter: $select.search">
+                                            <span ng-bind-html="x | highlight: $select.search"></span>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="columns">
+                        <div class="column">
+                            <div class="form-group">
+                                <label class="form-label">{{'catalog.widgets.itemDimensions.height' | translate}}</label>
+                                <div class="form-input __number">
+                                  <input num-type="float" min="0.0" smart-float ng-model="blade.currentEntity.height" placeholder="N/A" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="form-group">
+                                <label class="form-label">{{'catalog.widgets.itemDimensions.width' | translate}}</label>
+                                <div class="form-input __number">
+                                    <input smart-float num-type="float" min="0.0" ng-model="blade.currentEntity.width" placeholder="N/A" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="form-group">
+                                <label class="form-label">{{'catalog.widgets.itemDimensions.length' | translate}}</label>
+                                <div class="form-input __number">
+                                    <input smart-float num-type="float" min="0.0" ng-model="blade.currentEntity.length" placeholder="N/A" />
+                                </div>
+                            </div>
+                        </div>                    
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

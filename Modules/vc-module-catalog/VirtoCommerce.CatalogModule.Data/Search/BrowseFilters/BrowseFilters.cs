@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
+using VirtoCommerce.CatalogModule.Core.Search;
 
 namespace VirtoCommerce.CatalogModule.Data.Search.BrowseFilters
 {

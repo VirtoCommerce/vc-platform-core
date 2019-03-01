@@ -175,20 +175,10 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
                 if (catalogIds.IsNullOrEmpty())
                 {
-                    catalogIds = repository.Catalogs.OrderBySortInfos(sortInfos).Select(x => x.Id).ToArray();
+                    catalogIds = await repository.Catalogs.OrderBySortInfos(sortInfos).Select(x => x.Id).ToArrayAsync();
                 }
 
-                result.Catalogs = new List<Catalog>();
-
-                foreach (var catalogId in catalogIds)
-                {
-                    var catalog = (await _catalogService.GetByIdsAsync(new[] { catalogId })).FirstOrDefault();
-
-                    if (catalog != null)
-                    {
-                        result.Catalogs.Add(catalog);
-                    }
-                }
+                result.Catalogs = await _catalogService.GetByIdsAsync(catalogIds);
             }
         }
 
