@@ -110,6 +110,11 @@ gulp.task('watch', function () {
     gulp.watch(watch_patch, ['min:js']);
 });
 
+gulp.task('watch_css', function () {
+    var watch_patch = ['wwwroot/css/themes/main/sass/**/*.sass'];
+    gulp.watch(watch_patch, ['min:css']);
+});
+
 gulp.task("clean", function () {
     var files = ['wwwroot/css/allPackages.css', 'wwwroot/css/platform.css', 'wwwroot/js/allPackages.min.js', 'wwwroot/js/allPackages.js', 'wwwroot/js/platform.min.js', 'wwwroot/js/platform.js'];
     return del(files);
