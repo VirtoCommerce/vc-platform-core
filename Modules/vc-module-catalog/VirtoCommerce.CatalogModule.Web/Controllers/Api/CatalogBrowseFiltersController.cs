@@ -2,22 +2,21 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Net;
-using System.Web.Http;
-using System.Web.Http.Description;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
+using VirtoCommerce.CatalogModule.Core.Search;
+using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.Search.BrowseFilters;
-using VirtoCommerce.CatalogModule.Web.Model;
-using VirtoCommerce.CatalogModule.Web.Security;
-using VirtoCommerce.Domain.Catalog.Services;
-using VirtoCommerce.Domain.Store.Services;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.StoreModule.Core.Services;
 
 namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
 {
-    [RoutePrefix("api/catalog/aggregationproperties")]
+    [Route("api/catalog/aggregationproperties")]
     [ApiExplorerSettings(IgnoreApi = true)]
-    public class CatalogBrowseFiltersController : CatalogBaseController
+    public class CatalogBrowseFiltersController : Controller
     {
         private const string _attributeType = "Attribute";
         private const string _rangeType = "Range";
@@ -29,8 +28,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         private readonly IProperyDictionaryItemSearchService _propDictItemsSearchService;
 
 
-        public CatalogBrowseFiltersController(ISecurityService securityService, IPermissionScopeService permissionScopeService, IStoreService storeService, IPropertyService propertyService, IBrowseFilterService browseFilterService, IProperyDictionaryItemSearchService propDictItemsSearchService)
-            : base(securityService, permissionScopeService)
+        public CatalogBrowseFiltersController(IStoreService storeService, IPropertyService propertyService, IBrowseFilterService browseFilterService, IProperyDictionaryItemSearchService propDictItemsSearchService)
         {
             _storeService = storeService;
             _propertyService = propertyService;
@@ -47,19 +45,18 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="storeId">Store ID</param>
         [HttpGet]
         [Route("{storeId}/properties")]
-        [ResponseType(typeof(AggregationProperty[]))]
-        public IHttpActionResult GetAggregationProperties(string storeId)
+        public async Task<ActionResult<AggregationProperty[]>> GetAggregationProperties(string storeId)
         {
-            var store = _storeService.GetById(storeId);
+            var store = await _storeService.GetByIdAsync(storeId);
             if (store == null)
             {
-                return StatusCode(HttpStatusCode.NoContent);
+                return NoContent();
             }
 
-            CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.ReadBrowseFilters, store);
+            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.ReadBrowseFilters, store);
 
-            var allProperties = GetAllProperties(store.Catalog, store.Currencies);
-            var selectedProperties = GetSelectedProperties(storeId);
+            var allProperties = await GetAllPropertiesAsync(store.Catalog, store.Currencies);
+            var selectedProperties = await GetSelectedPropertiesAsync(storeId);
 
             // Remove duplicates and keep selected properties order
             var result = selectedProperties.Concat(allProperties)
@@ -77,16 +74,15 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="browseFilterProperties"></param>
         [HttpPut]
         [Route("{storeId}/properties")]
-        [ResponseType(typeof(void))]
-        public IHttpActionResult SetAggregationProperties(string storeId, AggregationProperty[] browseFilterProperties)
+        public async Task<IActionResult> SetAggregationProperties(string storeId, [FromBody]AggregationProperty[] browseFilterProperties)
         {
-            var store = _storeService.GetById(storeId);
+            var store = await _storeService.GetByIdAsync(storeId);
             if (store == null)
             {
-                return StatusCode(HttpStatusCode.NoContent);
+                return NoContent();
             }
 
-            CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.UpdateBrowseFilters, store);
+            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.UpdateBrowseFilters, store);
 
             // Filter names must be unique
             // Keep the selected properties order.
@@ -97,37 +93,37 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                 .Where(f => f != null)
                 .ToArray();
 
-            _browseFilterService.SaveStoreAggregations(storeId, filters);
+            await _browseFilterService.SaveStoreAggregationsAsync(storeId, filters);
 
-            return StatusCode(HttpStatusCode.NoContent);
+            return NoContent();
         }
 
         [HttpGet]
         [Route("{storeId}/properties/{propertyName}/values")]
-        [ResponseType(typeof(string[]))]
-        public IHttpActionResult GetPropertyValues(string storeId, string propertyName)
+        public async Task<ActionResult<string[]>> GetPropertyValues(string storeId, string propertyName)
         {
             var result = Array.Empty<string>();
-            var store = _storeService.GetById(storeId);
+            var store = await _storeService.GetByIdAsync(storeId);
             if (store == null)
             {
-                return StatusCode(HttpStatusCode.NoContent);
+                return NoContent();
             }
 
-            CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.ReadBrowseFilters, store);
+            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.ReadBrowseFilters, store);
 
-            var property = _propertyService.GetAllCatalogProperties(store.Catalog).Where(p => p.Name.EqualsInvariant(propertyName) && p.Dictionary).FirstOrDefault();
+            var property = (await _propertyService.GetAllCatalogPropertiesAsync(store.Catalog)).FirstOrDefault(p => p.Name.EqualsInvariant(propertyName) && p.Dictionary);
             if (property != null)
             {
-                result = _propDictItemsSearchService.Search(new Domain.Catalog.Model.Search.PropertyDictionaryItemSearchCriteria { PropertyIds = new[] { property.Id }, Take = int.MaxValue }).Results.Select(x => x.Alias).Distinct().ToArray();
+                var searchResult = await _propDictItemsSearchService.SearchAsync(new PropertyDictionaryItemSearchCriteria { PropertyIds = new[] { property.Id }, Take = int.MaxValue });
+                result = searchResult.Results.Select(x => x.Alias).Distinct().ToArray();
             }
             return Ok(result);
         }
 
 
-        private IList<AggregationProperty> GetAllProperties(string catalogId, IEnumerable<string> currencies)
+        private async Task<IList<AggregationProperty>> GetAllPropertiesAsync(string catalogId, IEnumerable<string> currencies)
         {
-            var result = _propertyService.GetAllCatalogProperties(catalogId)
+            var result = (await _propertyService.GetAllCatalogPropertiesAsync(catalogId))
                 .Select(p => new AggregationProperty { Type = _attributeType, Name = p.Name })
                 .ToList();
 
@@ -136,11 +132,11 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             return result;
         }
 
-        private IList<AggregationProperty> GetSelectedProperties(string storeId)
+        private async Task<IList<AggregationProperty>> GetSelectedPropertiesAsync(string storeId)
         {
             var result = new List<AggregationProperty>();
 
-            var allFilters = _browseFilterService.GetStoreAggregations(storeId);
+            var allFilters = await _browseFilterService.GetStoreAggregationsAsync(storeId);
             if (allFilters != null)
             {
                 AggregationProperty property = null;

@@ -18,13 +18,13 @@ namespace VirtoCommerce.CatalogModule.Core.Search
         /// </summary>
         /// <param name="storeId"></param>
         /// <returns></returns>
-        Task<IList<IBrowseFilter>> GetStoreAggregations(string storeId);
+        Task<IList<IBrowseFilter>> GetStoreAggregationsAsync(string storeId);
 
         /// <summary>
         /// Binds aggregations to a store
         /// </summary>
         /// <param name="storeId"></param>
         /// <param name="filters"></param>
-        Task SaveStoreAggregations(string storeId, IList<IBrowseFilter> filters);
+        Task SaveStoreAggregationsAsync(string storeId, IList<IBrowseFilter> filters);
     }
 }

@@ -1,25 +1,21 @@
-using System.Linq;
-using System.Web.Http;
-using System.Web.Http.Description;
-using VirtoCommerce.CatalogModule.Web.Converters;
-using VirtoCommerce.CatalogModule.Web.Security;
-using VirtoCommerce.Domain.Catalog.Model.Search;
-using VirtoCommerce.Domain.Catalog.Services;
-using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.Platform.Core.Web.Security;
-using moduleModel = VirtoCommerce.Domain.Catalog.Model;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.CatalogModule.Core;
+using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
+using VirtoCommerce.CatalogModule.Core.Services;
 
 namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
 {
-    [RoutePrefix("api/catalog/dictionaryitems")]
-    public class CatalogModulePropertyDictionaryItemsController : CatalogBaseController
+    [Route("api/catalog/dictionaryitems")]
+    public class CatalogModulePropertyDictionaryItemsController : Controller
     {
         private readonly IProperyDictionaryItemSearchService _propertyDictionarySearchService;
         private readonly IProperyDictionaryItemService _propertyDictionaryService;
 
-        public CatalogModulePropertyDictionaryItemsController(ISecurityService securityService, IPermissionScopeService permissionScopeService, IProperyDictionaryItemSearchService propertyDictionarySearchService,
+        public CatalogModulePropertyDictionaryItemsController(IProperyDictionaryItemSearchService propertyDictionarySearchService,
                                                              IProperyDictionaryItemService propertyDictionaryService)
-            : base(securityService, permissionScopeService)
         {
             _propertyDictionarySearchService = propertyDictionarySearchService;
             _propertyDictionaryService = propertyDictionaryService;
@@ -32,11 +28,10 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("search")]
-        [ResponseType(typeof(moduleModel.PropertyDictionaryItem[]))]
-        [CheckPermission(Permission = CatalogPredefinedPermissions.Read)]
-        public IHttpActionResult SearchPropertyDictionaryItems(PropertyDictionaryItemSearchCriteria criteria)
+        [Authorize(ModuleConstants.Security.Permissions.CatalogRead)]
+        public async Task<ActionResult<PropertyDictionaryItem[]>> SearchPropertyDictionaryItems([FromBody]PropertyDictionaryItemSearchCriteria criteria)
         {
-            var result = _propertyDictionarySearchService.Search(criteria);
+            var result = await _propertyDictionarySearchService.SearchAsync(criteria);
             return Ok(result);
         }
 
@@ -45,11 +40,10 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// </summary>
         [HttpPost]
         [Route("")]
-        [ResponseType(typeof(void))]
-        [CheckPermission(Permission = CatalogPredefinedPermissions.Create)]
-        public IHttpActionResult SaveChanges(moduleModel.PropertyDictionaryItem[] propertyDictItems)
+        [Authorize(ModuleConstants.Security.Permissions.CatalogCreate)]
+        public async Task<IActionResult> SaveChanges([FromBody]PropertyDictionaryItem[] propertyDictItems)
         {
-            _propertyDictionaryService.SaveChanges(propertyDictItems);
+            await _propertyDictionaryService.SaveChangesAsync(propertyDictItems);
             return Ok();
         }
 
@@ -59,11 +53,10 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="ids">The identifiers of objects that needed to be deleted</param>
         [HttpDelete]
         [Route("")]
-        [ResponseType(typeof(void))]
-        [CheckPermission(Permission = CatalogPredefinedPermissions.Delete)]
-        public IHttpActionResult Delete([FromUri] string[] ids)
+        [Authorize(ModuleConstants.Security.Permissions.CatalogDelete)]
+        public async Task<IActionResult> Delete([FromQuery] string[] ids)
         {
-            _propertyDictionaryService.Delete(ids);
+            await _propertyDictionaryService.DeleteAsync(ids);
             return Ok();
         }
     }

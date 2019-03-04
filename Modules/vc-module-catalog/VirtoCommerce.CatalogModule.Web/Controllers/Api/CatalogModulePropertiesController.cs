@@ -1,21 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Web.Http;
-using System.Web.Http.Description;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
+using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.Repositories;
-using VirtoCommerce.CatalogModule.Web.Converters;
-using VirtoCommerce.CatalogModule.Web.Security;
-using VirtoCommerce.Domain.Catalog.Services;
-using VirtoCommerce.Platform.Core.Security;
-using moduleModel = VirtoCommerce.Domain.Catalog.Model;
-using webModel = VirtoCommerce.CatalogModule.Web.Model;
 
 namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
 {
-    [RoutePrefix("api/catalog/properties")]
-    public class CatalogModulePropertiesController : CatalogBaseController
+    [Route("api/catalog/properties")]
+    public class CatalogModulePropertiesController : Controller
     {
         private readonly IPropertyService _propertyService;
         private readonly ICategoryService _categoryService;
@@ -24,9 +20,8 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         //Workaround: Bad design to use repository in the controller layer, need to extend in the future IPropertyService.Delete with new parameter DeleteAllValues
         private readonly Func<ICatalogRepository> _repositoryFactory;
         public CatalogModulePropertiesController(IPropertyService propertyService, ICategoryService categoryService, ICatalogService catalogService,
-                                                 ISecurityService securityService, IPermissionScopeService permissionScopeService, Func<ICatalogRepository> repositoryFactory,
+                                                 Func<ICatalogRepository> repositoryFactory,
                                                  IProperyDictionaryItemSearchService propertyDictionarySearchService)
-            : base(securityService, permissionScopeService)
         {
             _propertyService = propertyService;
             _categoryService = categoryService;
@@ -44,13 +39,12 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpGet]
         [Route("{propertyId}/values")]
-        [ResponseType(typeof(webModel.PropertyDictionaryValue[]))]
         [Obsolete("Use POST api/catalog/properties/dictionaryitems/search instead")]
-        public IHttpActionResult GetPropertyValues(string propertyId, [FromUri]string keyword = null)
+        public async Task<ActionResult<PropertyDictionaryItem[]>> GetPropertyValues(string propertyId, [FromQuery]string keyword = null)
         {
-            var dictValues = _propertyDictionarySearchService.Search(new moduleModel.Search.PropertyDictionaryItemSearchCriteria { SearchPhrase = keyword, PropertyIds = new[] { propertyId }, Take = int.MaxValue }).Results;
+            var dictValues = await _propertyDictionarySearchService.SearchAsync(new PropertyDictionaryItemSearchCriteria { Keyword = keyword, PropertyIds = new[] { propertyId }, Take = int.MaxValue });
 
-            return Ok(dictValues.Select(x => new webModel.PropertyDictionaryValue { Id = x.Id, Alias = x.Alias, ValueId = x.PropertyId, Value = x.Alias }).ToArray());
+            return Ok(dictValues.Results);
         }
 
 
@@ -60,19 +54,16 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="propertyId">The property id.</param>
 		[HttpGet]
         [Route("{propertyId}")]
-        [ResponseType(typeof(webModel.Property))]
-        public IHttpActionResult Get(string propertyId)
+        public async Task<ActionResult<Property>> Get(string propertyId)
         {
-            var property = _propertyService.GetById(propertyId);
+            var property = (await _propertyService.GetByIdsAsync(new[] { propertyId })).FirstOrDefault();
             if (property == null)
             {
                 return NotFound();
             }
-            CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Read, property);
+            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Read, property);
 
-            var retVal = property.ToWebModel();
-            retVal.IsManageable = true;
-            return Ok(retVal);
+            return Ok(property);
         }
 
 
@@ -82,23 +73,22 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="catalogId">The catalog id.</param>
         [HttpGet]
         [Route("~/api/catalog/{catalogId}/properties/getnew")]
-        [ResponseType(typeof(webModel.Property))]
-        public IHttpActionResult GetNewCatalogProperty(string catalogId)
+        public async Task<ActionResult<Property>> GetNewCatalogProperty(string catalogId)
         {
-            var catalog = _catalogService.GetById(catalogId);
-            var retVal = new webModel.Property
+            var catalog = (await _catalogService.GetByIdsAsync(new[] { catalogId })).FirstOrDefault();
+            var retVal = new Property
             {
                 Id = Guid.NewGuid().ToString(),
-                IsNew = true,
-                CatalogId = catalog.Id,
+                //IsNew = true,
+                CatalogId = catalog?.Id,
                 Name = "new property",
-                Type = moduleModel.PropertyType.Catalog,
-                ValueType = moduleModel.PropertyValueType.ShortText,
-                Attributes = new List<webModel.PropertyAttribute>(),
-                DisplayNames = catalog.Languages.Select(x => new moduleModel.PropertyDisplayName { LanguageCode = x.LanguageCode }).ToList()
+                Type = PropertyType.Catalog,
+                ValueType = PropertyValueType.ShortText,
+                Attributes = new List<PropertyAttribute>(),
+                DisplayNames = catalog?.Languages.Select(x => new PropertyDisplayName { LanguageCode = x.LanguageCode }).ToList()
             };
 
-            CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, retVal.ToCoreModel());
+            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, retVal.ToCoreModel());
 
             return Ok(retVal);
         }
@@ -110,24 +100,23 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="categoryId">The category id.</param>
         [HttpGet]
         [Route("~/api/catalog/categories/{categoryId}/properties/getnew")]
-        [ResponseType(typeof(webModel.Property))]
-        public IHttpActionResult GetNewCategoryProperty(string categoryId)
+        public async Task<ActionResult<Property>> GetNewCategoryProperty(string categoryId)
         {
-            var category = _categoryService.GetById(categoryId, Domain.Catalog.Model.CategoryResponseGroup.Info);
-            var retVal = new webModel.Property
+            var category = (await _categoryService.GetByIdsAsync(new[] { categoryId }, CategoryResponseGroup.Info)).FirstOrDefault();
+            var retVal = new Property
             {
                 Id = Guid.NewGuid().ToString(),
-                IsNew = true,
+                //IsNew = true,
                 CategoryId = categoryId,
-                CatalogId = category.CatalogId,
+                CatalogId = category?.CatalogId,
                 Name = "new property",
-                Type = moduleModel.PropertyType.Category,
-                ValueType = moduleModel.PropertyValueType.ShortText,
-                Attributes = new List<webModel.PropertyAttribute>(),
-                DisplayNames = category.Catalog.Languages.Select(x => new moduleModel.PropertyDisplayName { LanguageCode = x.LanguageCode }).ToList()
+                Type = PropertyType.Category,
+                ValueType = PropertyValueType.ShortText,
+                Attributes = new List<PropertyAttribute>(),
+                DisplayNames = category?.Catalog.Languages.Select(x => new PropertyDisplayName { LanguageCode = x.LanguageCode }).ToList()
             };
 
-            CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, retVal.ToCoreModel());
+            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, retVal.ToCoreModel());
 
             return Ok(retVal);
         }
@@ -140,25 +129,11 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="property">The property.</param>
         [HttpPost]
         [Route("")]
-        [ResponseType(typeof(void))]
-        public IHttpActionResult CreateOrUpdateProperty(webModel.Property property)
+        public async Task<IActionResult> SaveProperty([FromBody]Property property)
         {
-            var moduleProperty = property.ToCoreModel();
+            await _propertyService.SaveChangesAsync(new[] { property });
 
-            if (property.IsNew)
-            {
-                CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, moduleProperty);
-
-                _propertyService.Create(moduleProperty);
-            }
-            else
-            {
-                CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Update, moduleProperty);
-
-                _propertyService.Update(new[] { moduleProperty });
-            }
-
-            return StatusCode(HttpStatusCode.NoContent);
+            return NoContent();
         }
 
 
@@ -170,25 +145,24 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpDelete]
         [Route("")]
-        [ResponseType(typeof(void))]
-        public IHttpActionResult Delete(string id, bool doDeleteValues = false)
+        public async Task<IActionResult> Delete(string id, bool doDeleteValues = false)
         {
-            var property = _propertyService.GetById(id);
+            //var property = _propertyService.GetById(id);
 
-            CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Delete, property);
+            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Delete, property);
 
             if (doDeleteValues)
             {
                 //TODO: Move this logic in the IPropertyService
                 using (var repository = _repositoryFactory())
                 {
-                    repository.RemoveAllPropertyValues(id);
-                    repository.UnitOfWork.Commit();
+                    await repository.RemoveAllPropertyValuesAsync(id);
+                    await repository.UnitOfWork.CommitAsync();
                 }
             }
 
-            _propertyService.Delete(new[] { id });
-            return StatusCode(HttpStatusCode.NoContent);
+            await _propertyService.DeleteAsync(new[] { id });
+            return NoContent();
         }
     }
 }

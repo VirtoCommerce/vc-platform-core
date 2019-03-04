@@ -60,14 +60,14 @@ namespace VirtoCommerce.CatalogModule.Data.Search.BrowseFilters
             return result;
         }
 
-        public virtual async Task<IList<IBrowseFilter>> GetStoreAggregations(string storeId)
+        public virtual async Task<IList<IBrowseFilter>> GetStoreAggregationsAsync(string storeId)
         {
             var serializedValue = await GetSerializedValue(storeId);
             var result = Deserialize(serializedValue);
             return result;
         }
 
-        public virtual async Task SaveStoreAggregations(string storeId, IList<IBrowseFilter> filters)
+        public virtual async Task SaveStoreAggregationsAsync(string storeId, IList<IBrowseFilter> filters)
         {
             var serializedValue = Serialize(filters);
             await SaveSerializedValue(storeId, serializedValue);
@@ -79,7 +79,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search.BrowseFilters
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
 
-            return GetStoreAggregations(criteria.StoreId);
+            return GetStoreAggregationsAsync(criteria.StoreId);
         }
 
         protected virtual async Task<string> GetSerializedValue(string storeId)

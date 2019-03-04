@@ -1,31 +1,22 @@
-﻿using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Description;
-using VirtoCommerce.CatalogModule.Data.Search;
-using VirtoCommerce.CatalogModule.Web.Converters;
-using VirtoCommerce.CatalogModule.Web.Model;
-using VirtoCommerce.Domain.Catalog.Model.Search;
-using VirtoCommerce.Domain.Catalog.Services;
-using VirtoCommerce.Domain.Search;
-using VirtoCommerce.Platform.Core.Assets;
-using VirtoCommerce.Platform.Core.Security;
-using SearchCriteria = VirtoCommerce.CatalogModule.Web.Model.SearchCriteria;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
+using VirtoCommerce.CatalogModule.Core.Search;
+using VirtoCommerce.CatalogModule.Core.Services;
+using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
 {
-    [RoutePrefix("api/catalog/search")]
-    public class CatalogModuleSearchController : CatalogBaseController
+    [Route("api/catalog/search")]
+    public class CatalogModuleSearchController : Controller
     {
         private readonly ICatalogSearchService _searchService;
-        private readonly IBlobUrlResolver _blobUrlResolver;
         private readonly IProductSearchService _productSearchService;
         private readonly ICategorySearchService _categorySearchService;
 
-        public CatalogModuleSearchController(ISecurityService securityService, IPermissionScopeService permissionScopeService, ICatalogSearchService searchService, IBlobUrlResolver blobUrlResolver, IProductSearchService productSearchService, ICategorySearchService categorySearchService)
-            : base(securityService, permissionScopeService)
+        public CatalogModuleSearchController(ICatalogSearchService searchService, IProductSearchService productSearchService, ICategorySearchService categorySearchService)
         {
             _searchService = searchService;
-            _blobUrlResolver = blobUrlResolver;
             _productSearchService = productSearchService;
             _categorySearchService = categorySearchService;
         }
@@ -38,20 +29,17 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("")]
-        [ResponseType(typeof(CatalogSearchResult))]
-        public IHttpActionResult Search(SearchCriteria criteria)
+        public async Task<ActionResult<SearchResult>> Search([FromBody]CatalogListEntrySearchCriteria criteria)
         {
-            var coreModelCriteria = criteria.ToCoreModel();
-            ApplyRestrictionsForCurrentUser(coreModelCriteria);
-            var serviceResult = _searchService.Search(coreModelCriteria);
+            //ApplyRestrictionsForCurrentUser(coreModelCriteria);
+            var serviceResult = await _searchService.SearchAsync(criteria);
 
-            return Ok(serviceResult.ToWebModel(_blobUrlResolver));
+            return Ok(serviceResult);
         }
 
         [HttpPost]
         [Route("products")]
-        [ResponseType(typeof(ProductSearchResult))]
-        public async Task<IHttpActionResult> SearchProducts(ProductSearchCriteria criteria)
+        public async Task<ActionResult<ProductSearchResult>> SearchProducts([FromBody]ProductSearchCriteria criteria)
         {
             criteria.ObjectType = KnownDocumentTypes.Product;
             var result = await _productSearchService.SearchAsync(criteria);
@@ -60,8 +48,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
 
         [HttpPost]
         [Route("categories")]
-        [ResponseType(typeof(CategorySearchResult))]
-        public async Task<IHttpActionResult> SearchCategories(CategorySearchCriteria criteria)
+        public async Task<ActionResult<CategorySearchResult>> SearchCategories([FromBody]CategorySearchCriteria criteria)
         {
             criteria.ObjectType = KnownDocumentTypes.Category;
             var result = await _categorySearchService.SearchAsync(criteria);
