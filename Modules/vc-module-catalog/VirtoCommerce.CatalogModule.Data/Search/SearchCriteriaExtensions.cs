@@ -7,7 +7,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
 {
     public static class SearchCriteriaExtensions
     {
-        public static IList<string> GetPriorityFields(this CatalogSearchCriteriaBase criteria)
+        public static IList<string> GetPriorityFields(this CatalogSearchCriteria criteria)
         {
             var allNames = criteria
                 .GetRawOutlines()
@@ -20,7 +20,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             return result;
         }
 
-        public static IList<string> GetOutlines(this CatalogSearchCriteriaBase criteria)
+        public static IList<string> GetOutlines(this CatalogSearchCriteria criteria)
         {
             var result = criteria
                 .GetRawOutlines()
@@ -31,7 +31,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             return result;
         }
 
-        public static IList<string> GetRawOutlines(this CatalogSearchCriteriaBase criteria)
+        public static IList<string> GetRawOutlines(this CatalogSearchCriteria criteria)
         {
             var outlines = new List<string>();
 
@@ -54,7 +54,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             return result;
         }
 
-        public static IList<StringKeyValues> GetTerms(this CatalogSearchCriteriaBase criteria)
+        public static IList<StringKeyValues> GetTerms(this CatalogSearchCriteria criteria)
         {
             var result = new List<StringKeyValues>();
 

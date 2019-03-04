@@ -14,11 +14,9 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
 {
     public class CatalogRepositoryImpl : DbContextRepositoryBase<CatalogDbContext>, ICatalogRepository
     {
-        private readonly CatalogDbContext _dbContext;
         public CatalogRepositoryImpl(CatalogDbContext dbContext)
             : base(dbContext)
         {
-            _dbContext = dbContext;
         }
 
         #region ICatalogRepository Members
@@ -51,7 +49,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
             var catalogPropertiesIds = await Properties.Where(x => catalogIds.Contains(x.CatalogId) && x.CategoryId == null)
                                                  .Select(x => x.Id)
                                                  .ToArrayAsync();
-            var catalogProperties = GetPropertiesByIdsAsync(catalogPropertiesIds);
+            var catalogProperties = await GetPropertiesByIdsAsync(catalogPropertiesIds);
 
             return retVal;
         }
@@ -94,7 +92,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
                 var propertyValues = await PropertyValues.Include(x => x.DictionaryItem.DictionaryValueEntities).Where(x => categoriesIds.Contains(x.CategoryId)).ToArrayAsync();
 
                 var categoryPropertiesIds = await Properties.Where(x => categoriesIds.Contains(x.CategoryId)).Select(x => x.Id).ToArrayAsync();
-                var categoryProperties = GetPropertiesByIdsAsync(categoryPropertiesIds);
+                var categoryProperties = await GetPropertiesByIdsAsync(categoryPropertiesIds);
             }
 
             return result;
@@ -263,16 +261,12 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
 
             if (!categoryIds.IsNullOrEmpty())
             {
-                const string commandText = @"
-                    WITH cte AS (
-                        SELECT a.Id FROM Category a  WHERE Id IN (@CategoryIds)
-                        UNION ALL
-                        SELECT a.Id FROM Category a JOIN cte c ON a.ParentCategoryId = c.Id
-                    )
-                    SELECT Id FROM cte WHERE Id NOT IN (@CategoryIds)
-                ";
-                var parameter = new SqlParameter("@CategoryIds", categoryIds);
-                result = await Categories.FromSql(commandText, parameter).Select(x => x.Id).ToArrayAsync();
+                var commandText = "WITH cte AS ( SELECT a.Id FROM Category a  WHERE Id IN (@categoryIds) " +
+                                           " UNION ALL SELECT a.Id FROM Category a JOIN cte c ON a.ParentCategoryId = c.Id )" +
+                                           "SELECT Id FROM cte WHERE Id NOT IN (@categoryIds) ";
+                //TODO The required column 'CatalogId' was not present in the results of a 'FromSql' operation. ????
+                var categories = await Categories.FromSql(commandText, new SqlParameter("@categoryIds", string.Join(",", categoryIds))).ToArrayAsync();
+                result = categories.Select(x => x.Id).ToArray();
             }
 
             return result ?? new string[0];
@@ -317,7 +311,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
                 do
                 {
                     var batchItemIds = itemIds.Skip(skip).Take(batchSize).ToArray();
-                    await DbContext.Database.ExecuteSqlCommandAsync(commandText, new SqlParameter("@BatchItemIds", batchItemIds));
+                    await DbContext.Database.ExecuteSqlCommandAsync(commandText, new SqlParameter("@BatchItemIds", string.Join(",", batchItemIds)));
 
                     skip += batchSize;
                 }
@@ -345,7 +339,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
                     DELETE P FROM Property P INNER JOIN Category C ON C.Id = P.CategoryId  WHERE C.Id IN (@CategoryIds)
                     DELETE FROM Category WHERE Id IN (@CategoryIds)";
 
-                await DbContext.Database.ExecuteSqlCommandAsync(commandText, new SqlParameter("@CategoryIds", categoryIds));
+                await DbContext.Database.ExecuteSqlCommandAsync(commandText, new SqlParameter("@CategoryIds", string.Join(",", categoryIds)));
 
                 //TODO: Notify about removed entities by event or trigger
             }
@@ -369,7 +363,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
                     DELETE FROM Catalog WHERE Id IN (@Ids)
                 ";
 
-                await DbContext.Database.ExecuteSqlCommandAsync(commandText, new SqlParameter("@Ids", ids));
+                await DbContext.Database.ExecuteSqlCommandAsync(commandText, new SqlParameter("@Ids", string.Join(",", ids)));
 
                 //TODO: Notify about removed entities by event or trigger
             }

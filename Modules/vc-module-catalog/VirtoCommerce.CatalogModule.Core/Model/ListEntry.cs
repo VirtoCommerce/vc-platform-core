@@ -1,6 +1,6 @@
-﻿using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.CatalogModule.Web.Model
+namespace VirtoCommerce.CatalogModule.Core.Model
 {
     /// <summary>
     /// Base class for all entries used in catalog categories browsing.

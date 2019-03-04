@@ -214,9 +214,8 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             var categoriesMap = (await _categoryService.GetByIdsAsync(allCategoriesIds, CategoryResponseGroup.Full)).ToDictionary(
                     x => x.Id, StringComparer.OrdinalIgnoreCase);
 
-            var categoryIdsLinks = products.SelectMany(p => p.Links).Select(l => l.CategoryId).Distinct().ToArray();
+            var categoryIdsLinks = products.Any(p => !p.Links.IsNullOrEmpty()) ? products.SelectMany(p => p.Links).Select(l => l.CategoryId).Distinct().ToArray() : new string[] { };
             var categoryLinks = await _categoryService.GetByIdsAsync(categoryIdsLinks, CategoryResponseGroup.WithProperties | CategoryResponseGroup.WithParents);
-
 
             foreach (var product in products)
             {
@@ -381,7 +380,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 validator.ValidateAndThrow(product);
             }
 
-            LoadDependenciesAsync(products, false);
+            await LoadDependenciesAsync(products, false);
             ApplyInheritanceRules(products, false);
 
             var targets = products.OfType<IHasProperties>();

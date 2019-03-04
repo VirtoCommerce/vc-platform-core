@@ -3,13 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Services;
-using VirtoCommerce.CatalogModule.Web.Converters;
 using VirtoCommerce.CoreModule.Core.Seo;
-using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
-using coreModel = VirtoCommerce.CatalogModule.Core.Model;
-using webModel = VirtoCommerce.CatalogModule.Web.Model;
 
 namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
 {
@@ -18,13 +15,11 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
     {
         private readonly ICategoryService _categoryService;
         private readonly ICatalogService _catalogService;
-        private readonly IBlobUrlResolver _blobUrlResolver;
 
-        public CatalogModuleCategoriesController(ICategoryService categoryService, ICatalogService catalogService, IBlobUrlResolver blobUrlResolver)
+        public CatalogModuleCategoriesController(ICategoryService categoryService, ICatalogService catalogService)
         {
             _categoryService = categoryService;
             _catalogService = catalogService;
-            _blobUrlResolver = blobUrlResolver;
         }
 
 
@@ -34,9 +29,9 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="id">Category id.</param>
         [HttpGet]
         [Route("{id}")]
-        public async Task<ActionResult<webModel.Category>> Get(string id)
+        public async Task<ActionResult<Category>> Get(string id)
         {
-            var category = (await _categoryService.GetByIdsAsync(new[] { id }, coreModel.CategoryResponseGroup.Full)).FirstOrDefault();
+            var category = (await _categoryService.GetByIdsAsync(new[] { id }, CategoryResponseGroup.Full)).FirstOrDefault();
 
             if (category == null)
             {
@@ -53,20 +48,19 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         ///<param name="respGroup">Response group.</param>
         [HttpGet]
         [Route("")]
-        public async Task<ActionResult<webModel.Category[]>> GetCategoriesByIdsAsync([FromQuery] string[] ids, [FromQuery] coreModel.CategoryResponseGroup respGroup = coreModel.CategoryResponseGroup.Full)
+        public async Task<ActionResult<Category[]>> GetCategoriesByIdsAsync([FromQuery] string[] ids, [FromQuery] CategoryResponseGroup respGroup = CategoryResponseGroup.Full)
         {
             var categories = await _categoryService.GetByIdsAsync(ids, respGroup);
 
             //TODO
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Read, categories);
 
-            var retVal = categories.Select(x => x.ToWebModel(_blobUrlResolver)).ToArray();
             //foreach (var category in retVal)
             //{
             //    category.SecurityScopes = GetObjectPermissionScopeStrings(category);
             //}
 
-            return Ok(retVal);
+            return Ok(categories);
         }
 
         /// <summary>
@@ -77,7 +71,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("plenty")]
-        public Task<ActionResult<webModel.Category[]>> GetCategoriesByPlentyIds([FromBody] string[] ids, [FromQuery] coreModel.CategoryResponseGroup respGroup = coreModel.CategoryResponseGroup.Full)
+        public Task<ActionResult<Category[]>> GetCategoriesByPlentyIds([FromBody] string[] ids, [FromQuery] CategoryResponseGroup respGroup = CategoryResponseGroup.Full)
         {
             return GetCategoriesByIdsAsync(ids, respGroup);
         }
@@ -89,9 +83,9 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="parentCategoryId">The parent category id. (Optional)</param>
         [HttpGet]
         [Route("~/api/catalog/{catalogId}/categories/newcategory")]
-        public ActionResult<webModel.Category> GetNewCategory(string catalogId, [FromQuery]string parentCategoryId = null)
+        public ActionResult<Category> GetNewCategory(string catalogId, [FromQuery]string parentCategoryId = null)
         {
-            var retVal = new webModel.Category
+            var retVal = new Category
             {
                 ParentId = parentCategoryId,
                 CatalogId = catalogId,
@@ -115,34 +109,32 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="category">The category.</param>
         [HttpPost]
         [Route("")]
-        public async Task<IActionResult> CreateOrUpdateCategory([FromBody]webModel.Category category)
+        public async Task<IActionResult> CreateOrUpdateCategory([FromBody]Category category)
         {
-            var coreCategory = category.ToModuleModel();
-            if (coreCategory.Id == null)
+            if (category.Id == null)
             {
-                if (coreCategory.SeoInfos == null || !coreCategory.SeoInfos.Any())
+                if (category.SeoInfos == null || !category.SeoInfos.Any())
                 {
                     var slugUrl = category.Name.GenerateSlug();
                     if (!string.IsNullOrEmpty(slugUrl))
                     {
                         var catalog = (await _catalogService.GetByIdsAsync(new[] { category.CatalogId })).FirstOrDefault();
-                        var defaultLanguage = catalog.Languages.First(x => x.IsDefault).LanguageCode;
-                        coreCategory.SeoInfos = new[] { new SeoInfo { LanguageCode = defaultLanguage, SemanticUrl = slugUrl } };
+                        var defaultLanguage = catalog?.Languages.First(x => x.IsDefault).LanguageCode;
+                        category.SeoInfos = new[] { new SeoInfo { LanguageCode = defaultLanguage, SemanticUrl = slugUrl } };
                     }
                 }
 
                 //TODO
                 //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, coreCategory);
 
-                await _categoryService.SaveChangesAsync(new[] { coreCategory });
-                var retVal = coreCategory.ToWebModel(_blobUrlResolver);
-                return Ok(retVal);
+                await _categoryService.SaveChangesAsync(new[] { category });
+                return Ok(category);
             }
             else
             {
                 //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Update, coreCategory);
 
-                await _categoryService.SaveChangesAsync(new[] { coreCategory });
+                await _categoryService.SaveChangesAsync(new[] { category });
                 return NoContent();
             }
         }

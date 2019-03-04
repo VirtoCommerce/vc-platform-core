@@ -35,7 +35,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
         }
 
-        public virtual async Task<SearchResult> SearchAsync(SearchCriteria criteria)
+        public virtual async Task<SearchResult> SearchAsync(CatalogListEntrySearchCriteria criteria)
         {
             var retVal = new SearchResult();
             var taskList = new List<Task>();
@@ -61,7 +61,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         }
 
 
-        protected virtual async Task SearchCategoriesAsync(SearchCriteria criteria, SearchResult result)
+        protected virtual async Task SearchCategoriesAsync(CatalogListEntrySearchCriteria criteria, SearchResult result)
         {
             using (var repository = _catalogRepositoryFactory())
             {
@@ -79,7 +79,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     {
                         searchCategoryIds = searchCategoryIds.Concat(await repository.GetAllChildrenCategoriesIdsAsync(searchCategoryIds)).ToArray();
                         //linked categories
-                        var allLinkedCategories = repository.CategoryLinks.Where(x => searchCategoryIds.Contains(x.TargetCategoryId)).Select(x => x.SourceCategoryId).ToArray();
+                        var allLinkedCategories = await repository.CategoryLinks.Where(x => searchCategoryIds.Contains(x.TargetCategoryId)).Select(x => x.SourceCategoryId).ToArrayAsync();
                         searchCategoryIds = searchCategoryIds.Concat(allLinkedCategories).Distinct().ToArray();
                     }
 
@@ -98,9 +98,9 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     {
                         //need search in all catalog linked and children categories 
                         //First need load all categories belong to searched catalogs
-                        searchCategoryIds = repository.Categories.Where(x => criteria.CatalogIds.Contains(x.CatalogId)).Select(x => x.Id).ToArray();
+                        searchCategoryIds = await repository.Categories.Where(x => criteria.CatalogIds.Contains(x.CatalogId)).Select(x => x.Id).ToArrayAsync();
                         //Then load all physical categories linked to catalog
-                        var allCatalogLinkedCategories = repository.CategoryLinks.Where(x => criteria.CatalogIds.Contains(x.TargetCatalogId)).Select(x => x.SourceCategoryId).ToArray();
+                        var allCatalogLinkedCategories = await repository.CategoryLinks.Where(x => criteria.CatalogIds.Contains(x.TargetCatalogId)).Select(x => x.SourceCategoryId).ToArrayAsync();
                         searchCategoryIds = searchCategoryIds.Concat(allCatalogLinkedCategories).Distinct().ToArray();
                         //Then expand all categories, get all children's
                         searchCategoryIds = searchCategoryIds.Concat(await repository.GetAllChildrenCategoriesIdsAsync(searchCategoryIds)).ToArray();
@@ -153,7 +153,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
         }
 
-        protected virtual async Task SearchCatalogsAsync(SearchCriteria criteria, SearchResult result)
+        protected virtual async Task SearchCatalogsAsync(CatalogListEntrySearchCriteria criteria, SearchResult result)
         {
             using (var repository = _catalogRepositoryFactory())
             {
@@ -182,7 +182,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
         }
 
-        protected virtual async Task SearchItemsAsync(SearchCriteria criteria, SearchResult result)
+        protected virtual async Task SearchItemsAsync(CatalogListEntrySearchCriteria criteria, SearchResult result)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -254,7 +254,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
         }
 
-        protected virtual IQueryable<ItemEntity> BuildSearchQuery(IQueryable<ItemEntity> query, SearchCriteria criteria, string[] searchCategoryIds)
+        protected virtual IQueryable<ItemEntity> BuildSearchQuery(IQueryable<ItemEntity> query, CatalogListEntrySearchCriteria criteria, string[] searchCategoryIds)
         {
             query = query.Where(x => criteria.WithHidden || x.IsActive);
 
@@ -312,7 +312,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             return query;
         }
 
-        protected virtual void TryTransformSortingInfoColumnNames(IDictionary<string, string> transformationMap, SortInfo[] sortingInfos)
+        protected virtual void TryTransformSortingInfoColumnNames(IDictionary<string, string> transformationMap, IList<SortInfo> sortingInfos)
         {
             //Try to replace sorting columns names
             foreach (var sortInfo in sortingInfos)

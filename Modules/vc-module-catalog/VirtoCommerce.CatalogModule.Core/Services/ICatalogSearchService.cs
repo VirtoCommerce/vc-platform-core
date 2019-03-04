@@ -5,6 +5,6 @@ namespace VirtoCommerce.CatalogModule.Core.Services
 {
     public interface ICatalogSearchService
     {
-        Task<SearchResult> SearchAsync(SearchCriteria criteria);
+        Task<SearchResult> SearchAsync(CatalogListEntrySearchCriteria criteria);
     }
 }

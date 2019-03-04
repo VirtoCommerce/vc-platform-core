@@ -3,7 +3,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model.Search
 {
-    public class CatalogSearchCriteriaBase : SearchCriteriaBase
+    public class CatalogSearchCriteria : SearchCriteriaBase
     {
         public string StoreId { get; set; }
 

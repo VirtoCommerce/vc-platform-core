@@ -1,4 +1,4 @@
-﻿namespace VirtoCommerce.CatalogModule.Web.Model
+namespace VirtoCommerce.CatalogModule.Core.Model
 {
     /// <summary>
     /// Search criteria for categories and/or items.
@@ -16,7 +16,7 @@
         /// <value>
         /// The response group.
         /// </value>
-		public ResponseGroup ResponseGroup { get; set; }
+		public ListEntryResponseGroup ResponseGroup { get; set; }
         /// <summary>
         /// Gets or sets the keyword to search for.
         /// </summary>

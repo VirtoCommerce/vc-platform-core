@@ -1,6 +1,7 @@
-﻿using System.Linq;
+using System.Linq;
+using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.CatalogModule.Web.Model
+namespace VirtoCommerce.CatalogModule.Core.Model
 {
     /// <summary>
     /// Category ListEntry record.
@@ -12,14 +13,14 @@ namespace VirtoCommerce.CatalogModule.Web.Model
         public ListEntryCategory(Category category)
             : base(TypeName, category)
         {
-            ImageUrl = category.ImgSrc;
+            ImageUrl = category.Images.FirstOrDefault()?.Url;
             Code = category.Code;
             Name = category.Name;
             IsActive = category.IsActive;
 
-            if (!string.IsNullOrEmpty(category.Outline))
+            if (!category.Outlines.IsNullOrEmpty())
             {
-                Outline = category.Outline.Split('/').Select(x => x).ToArray();
+                Outline = category.Outlines.Select(x => x.ToString()).ToArray();
             }
 
             if (!string.IsNullOrEmpty(category.Path))

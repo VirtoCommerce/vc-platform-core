@@ -11,7 +11,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
 {
     public static class FiltersHelper
     {
-        public static IFilter CreateOutlineFilter(CatalogSearchCriteriaBase criteria)
+        public static IFilter CreateOutlineFilter(CatalogSearchCriteria criteria)
         {
             IFilter result = null;
 

@@ -4,10 +4,9 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model.Search
 {
-    // Inheritance from SearchCriteriaBase is breaking changes here.
-    public class SearchCriteria : ValueObject
+    public class CatalogListEntrySearchCriteria : SearchCriteriaBase
     {
-        public SearchCriteria()
+        public CatalogListEntrySearchCriteria()
         {
             //ResponseGroup = ItemResponseGroup.ItemMedium;
             Outline = string.Empty;
@@ -17,8 +16,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model.Search
         }
 
         public string StoreId { get; set; }
-        public SearchResponseGroup ResponseGroup { get; set; }
-        public string Keyword { get; set; }
+        public new SearchResponseGroup ResponseGroup { get; set; }
 
         /// <summary>
         /// Search  in all children categories for specified catalog or categories
@@ -68,25 +66,10 @@ namespace VirtoCommerce.CatalogModule.Core.Model.Search
 
         }
 
-        public string LanguageCode { get; set; }
-
         /// <summary>
         /// Product or category code
         /// </summary>
         public string Code { get; set; }
-
-        /// <summary>
-        /// Sorting expression property1:asc;property2:desc
-        /// </summary>
-        public string Sort { get; set; }
-
-        public SortInfo[] SortInfos
-        {
-            get
-            {
-                return SortInfo.Parse(Sort).ToArray();
-            }
-        }
 
         //Hides direct linked categories in virtual category displayed only linked category content without itself
         public bool HideDirectLinkedCategories { get; set; }
@@ -98,11 +81,6 @@ namespace VirtoCommerce.CatalogModule.Core.Model.Search
         public string Currency { get; set; }
         public decimal? StartPrice { get; set; }
         public decimal? EndPrice { get; set; }
-
-
-        public int Skip { get; set; }
-
-        public int Take { get; set; }
 
         /// <summary>
         /// All products have index date less that specified

@@ -1,6 +1,7 @@
-﻿using System.Linq;
+using System.Linq;
+using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.CatalogModule.Web.Model
+namespace VirtoCommerce.CatalogModule.Core.Model
 {
     /// <summary>
     /// Product ListEntry record.
@@ -10,25 +11,26 @@ namespace VirtoCommerce.CatalogModule.Web.Model
         public const string TypeName = "product";
         public string ProductType { get; set; }
 
-        public ListEntryProduct(Product product)
+        public ListEntryProduct(CatalogProduct product)
             : base(TypeName, product)
         {
             ProductType = product.ProductType;
 
-            ImageUrl = product.ImgSrc;
+            ImageUrl = product.Images.FirstOrDefault()?.Url;
             Code = product.Code;
             Name = product.Name;
             IsActive = product.IsActive ?? true;
 
-            if (!string.IsNullOrEmpty(product.Outline))
+            if (!product.Outlines.IsNullOrEmpty())
             {
-                Outline = product.Outline.Split('/').Select(x => x).ToArray();
+                Outline = product.Outlines.Select(x => x.ToString()).ToArray();
             }
 
-            if (!string.IsNullOrEmpty(product.Path))
-            {
-                Path = product.Path.Split('/').Select(x => x).ToArray();
-            }
+            //TODO
+            //if (!string.IsNullOrEmpty(product))
+            //{
+            //    Path = product.Path.Split('/').Select(x => x).ToArray();
+            //}
 
             if (product.Links != null)
             {

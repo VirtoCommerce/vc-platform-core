@@ -1,4 +1,4 @@
-﻿namespace VirtoCommerce.CatalogModule.Web.Model
+namespace VirtoCommerce.CatalogModule.Core.Model
 {
     /// <summary>
     /// Information to define linking information from item or category to category.
@@ -13,7 +13,7 @@
         {
             CatalogId = link.CatalogId;
             CategoryId = link.CategoryId;
-            ListEntryId = link.SourceItemId;
+            ListEntryId = link.CategoryId;
         }
 
         /// <summary>

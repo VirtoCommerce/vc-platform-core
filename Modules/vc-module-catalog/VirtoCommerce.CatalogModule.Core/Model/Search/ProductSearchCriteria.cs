@@ -6,7 +6,7 @@ using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Core.Model.Search
 {
-    public class ProductSearchCriteria : CatalogSearchCriteriaBase
+    public class ProductSearchCriteria : CatalogSearchCriteria
     {
         public override string ObjectType { get; set; } = KnownDocumentTypes.Product;
 

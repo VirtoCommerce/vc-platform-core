@@ -256,7 +256,12 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             CategoryId = string.IsNullOrEmpty(product.CategoryId) ? null : product.CategoryId;
 
             #region ItemPropertyValues
-            ItemPropertyValues = new ObservableCollection<PropertyValueEntity>(new ObservableCollection<PropertyValueEntity>(AbstractTypeFactory<PropertyValueEntity>.TryCreateInstance().FromModels(product.PropertyValues, pkMap)));
+
+            if (!product.Properties.IsNullOrEmpty())
+            {
+                ItemPropertyValues = new ObservableCollection<PropertyValueEntity>(new ObservableCollection<PropertyValueEntity>(AbstractTypeFactory<PropertyValueEntity>.TryCreateInstance().FromModels(product.PropertyValues, pkMap)));
+            }
+            
             #endregion
 
             #region Assets

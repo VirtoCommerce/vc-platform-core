@@ -2,15 +2,15 @@ using System;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
-using VirtoCommerce.CatalogModule.Web.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Web.JsonConverters
 {
     public class SearchCriteriaJsonConverter : JsonConverter
     {
-        private readonly Type[] _knowTypes = new[] { typeof(Product), typeof(ProductSearchCriteria), typeof(CategorySearchCriteria) };
+        private readonly Type[] _knowTypes = new[] { typeof(CatalogProduct), typeof(ProductSearchCriteria), typeof(CategorySearchCriteria) };
 
         public override bool CanWrite => false;
         public override bool CanRead => true;

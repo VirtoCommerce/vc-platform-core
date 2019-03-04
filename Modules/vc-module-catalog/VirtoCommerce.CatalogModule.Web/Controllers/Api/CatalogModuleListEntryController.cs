@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
-using VirtoCommerce.CatalogModule.Web.Converters;
-using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
-using coreModel = VirtoCommerce.CatalogModule.Core.Model;
-using webModel = VirtoCommerce.CatalogModule.Web.Model;
 
 namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
 {
@@ -19,20 +17,17 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         private readonly ICategoryService _categoryService;
         private readonly ICatalogService _catalogService;
         private readonly IItemService _itemService;
-        private readonly IBlobUrlResolver _blobUrlResolver;
 
         public CatalogModuleListEntryController(
             ICatalogSearchService searchService,
             ICategoryService categoryService,
             IItemService itemService,
-            IBlobUrlResolver blobUrlResolver,
             ICatalogService catalogService
             )
         {
             _searchService = searchService;
             _categoryService = categoryService;
             _itemService = itemService;
-            _blobUrlResolver = blobUrlResolver;
             _catalogService = catalogService;
         }
 
@@ -43,50 +38,49 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("")]
-        public async Task<ActionResult<webModel.ListEntrySearchResult>> ListItemsSearchAsync([FromBody]webModel.SearchCriteria criteria)
+        public async Task<ActionResult<ListEntrySearchResult>> ListItemsSearchAsync([FromBody]CatalogListEntrySearchCriteria criteria)
         {
-            var coreModelCriteria = criteria.ToCoreModel();
             //ApplyRestrictionsForCurrentUser(coreModelCriteria);
 
-            coreModelCriteria.WithHidden = true;
+            criteria.WithHidden = true;
             //Need search in children categories if user specify keyword
-            if (!string.IsNullOrEmpty(coreModelCriteria.Keyword))
+            if (!string.IsNullOrEmpty(criteria.Keyword))
             {
-                coreModelCriteria.SearchInChildren = true;
-                coreModelCriteria.SearchInVariations = true;
+                criteria.SearchInChildren = true;
+                criteria.SearchInVariations = true;
             }
 
-            var retVal = new webModel.ListEntrySearchResult();
+            var retVal = new ListEntrySearchResult();
 
             var categorySkip = 0;
             var categoryTake = 0;
             //Because products and categories represent in search result as two separated collections for handle paging request 
             //we should join two resulting collection artificially
             //search categories
-            var copyRespGroup = coreModelCriteria.ResponseGroup;
-            if ((coreModelCriteria.ResponseGroup & coreModel.Search.SearchResponseGroup.WithCategories) == coreModel.Search.SearchResponseGroup.WithCategories)
+            var copyRespGroup = criteria.ResponseGroup;
+            if ((criteria.ResponseGroup & SearchResponseGroup.WithCategories) == SearchResponseGroup.WithCategories)
             {
-                coreModelCriteria.ResponseGroup = coreModelCriteria.ResponseGroup & ~coreModel.Search.SearchResponseGroup.WithProducts;
-                var categoriesSearchResult = await _searchService.SearchAsync(coreModelCriteria);
-                var categoriesTotalCount = categoriesSearchResult.Categories.Count();
+                criteria.ResponseGroup = criteria.ResponseGroup & ~SearchResponseGroup.WithProducts;
+                var categoriesSearchResult = await _searchService.SearchAsync(criteria);
+                var categoriesTotalCount = categoriesSearchResult.Categories.Count;
 
-                categorySkip = Math.Min(categoriesTotalCount, coreModelCriteria.Skip);
-                categoryTake = Math.Min(coreModelCriteria.Take, Math.Max(0, categoriesTotalCount - coreModelCriteria.Skip));
-                var categories = categoriesSearchResult.Categories.Skip(categorySkip).Take(categoryTake).Select(x => new webModel.ListEntryCategory(x.ToWebModel(_blobUrlResolver))).ToList();
+                categorySkip = Math.Min(categoriesTotalCount, criteria.Skip);
+                categoryTake = Math.Min(criteria.Take, Math.Max(0, categoriesTotalCount - criteria.Skip));
+                var categories = categoriesSearchResult.Categories.Skip(categorySkip).Take(categoryTake).Select(x => new ListEntryCategory(x)).ToList();
 
                 retVal.TotalCount = categoriesTotalCount;
                 retVal.ListEntries.AddRange(categories);
             }
-            coreModelCriteria.ResponseGroup = copyRespGroup;
+            criteria.ResponseGroup = copyRespGroup;
             //search products
-            if ((coreModelCriteria.ResponseGroup & coreModel.Search.SearchResponseGroup.WithProducts) == coreModel.Search.SearchResponseGroup.WithProducts)
+            if ((criteria.ResponseGroup & SearchResponseGroup.WithProducts) == SearchResponseGroup.WithProducts)
             {
-                coreModelCriteria.ResponseGroup = coreModelCriteria.ResponseGroup & ~coreModel.Search.SearchResponseGroup.WithCategories;
-                coreModelCriteria.Skip = coreModelCriteria.Skip - categorySkip;
-                coreModelCriteria.Take = coreModelCriteria.Take - categoryTake;
-                var productsSearchResult = await _searchService.SearchAsync(coreModelCriteria);
+                criteria.ResponseGroup = criteria.ResponseGroup & ~SearchResponseGroup.WithCategories;
+                criteria.Skip = criteria.Skip - categorySkip;
+                criteria.Take = criteria.Take - categoryTake;
+                var productsSearchResult = await _searchService.SearchAsync(criteria);
 
-                var products = productsSearchResult.Products.Select(x => new webModel.ListEntryProduct(x.ToWebModel(_blobUrlResolver)));
+                var products = productsSearchResult.Products.Select(x => new ListEntryProduct(x));
 
                 retVal.TotalCount += productsSearchResult.ProductsTotalCount;
                 retVal.ListEntries.AddRange(products);
@@ -102,7 +96,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="links">The links.</param>
         [HttpPost]
         [Route("~/api/catalog/listentrylinks")]
-        public async Task<ActionResult> CreateLinks([FromBody]webModel.ListEntryLink[] links)
+        public async Task<ActionResult> CreateLinks([FromBody]ListEntryLink[] links)
         {
             //Scope bound security check
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, links);
@@ -118,7 +112,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("~/api/catalog/listentrylinks/bulkcreate")]
-        public async Task<IActionResult> BulkCreateLinks(webModel.BulkLinkCreationRequest creationRequest)
+        public async Task<IActionResult> BulkCreateLinks([FromBody]BulkLinkCreationRequest creationRequest)
         {
 
             if (creationRequest.CatalogId.IsNullOrEmpty() || creationRequest.CategoryId.IsNullOrEmpty())
@@ -126,22 +120,22 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                 throw new ArgumentException("Target catalog and category identifiers should be specified.");
             }
 
-            var coreModelCriteria = creationRequest.SearchCriteria.ToCoreModel();
+            var coreModelCriteria = creationRequest.SearchCriteria;
 
             bool haveProducts;
 
             do
             {
-                var links = new List<webModel.ListEntryLink>();
+                var links = new List<ListEntryLink>();
 
                 var searchResult = await _searchService.SearchAsync(coreModelCriteria);
 
                 var productLinks = searchResult
                     .Products
-                    .Select(x => new webModel.ListEntryLink
+                    .Select(x => new ListEntryLink
                     {
                         CatalogId = creationRequest.CatalogId,
-                        ListEntryType = webModel.ListEntryProduct.TypeName,
+                        ListEntryType = ListEntryProduct.TypeName,
                         ListEntryId = x.Id,
                         CategoryId = creationRequest.CategoryId
                     })
@@ -149,16 +143,16 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
 
                 links.AddRange(productLinks);
 
-                if (coreModelCriteria.ResponseGroup.HasFlag(coreModel.Search.SearchResponseGroup.WithCategories))
+                if (coreModelCriteria.ResponseGroup.HasFlag(SearchResponseGroup.WithCategories))
                 {
-                    coreModelCriteria.ResponseGroup = coreModelCriteria.ResponseGroup & ~coreModel.Search.SearchResponseGroup.WithCategories;
+                    coreModelCriteria.ResponseGroup = coreModelCriteria.ResponseGroup & ~SearchResponseGroup.WithCategories;
 
                     var categoryLinks = searchResult
                         .Categories
-                        .Select(c => new webModel.ListEntryLink
+                        .Select(c => new ListEntryLink
                         {
                             CatalogId = creationRequest.CatalogId,
-                            ListEntryType = webModel.ListEntryCategory.TypeName,
+                            ListEntryType = ListEntryCategory.TypeName,
                             ListEntryId = c.Id,
                             CategoryId = creationRequest.CategoryId
                         })
@@ -198,7 +192,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="links">The links.</param>
         [HttpPost]
         [Route("~/api/catalog/listentrylinks/delete")]
-        public async Task<IActionResult> DeleteLinks(webModel.ListEntryLink[] links)
+        public async Task<IActionResult> DeleteLinks([FromBody]ListEntryLink[] links)
         {
             //Scope bound security check
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Delete, links);
@@ -213,36 +207,36 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="moveInfo">Move operation details</param>
         [HttpPost]
         [Route("move")]
-        public async Task<IActionResult> Move(webModel.MoveInfo moveInfo)
+        public async Task<IActionResult> Move([FromBody]MoveInfo moveInfo)
         {
-            var categories = new List<coreModel.Category>();
+            var categories = new List<Category>();
             var dstCatalog = (await _catalogService.GetByIdsAsync(new[] { moveInfo.Catalog })).FirstOrDefault();
-            if (dstCatalog.IsVirtual)
+            if (dstCatalog != null && dstCatalog.IsVirtual)
             {
                 throw new InvalidOperationException("Unable to move in virtual catalog");
             }
 
             //Move  categories
-            foreach (var listEntryCategory in moveInfo.ListEntries.Where(x => x.Type.EqualsInvariant(webModel.ListEntryCategory.TypeName)))
+            foreach (var listEntryCategory in moveInfo.ListEntries.Where(x => x.Type.EqualsInvariant(ListEntryCategory.TypeName)))
             {
-                var category = (await _categoryService.GetByIdsAsync(new[] { listEntryCategory.Id }, coreModel.CategoryResponseGroup.Info)).FirstOrDefault();
-                if (category.CatalogId != moveInfo.Catalog)
+                var category = (await _categoryService.GetByIdsAsync(new[] { listEntryCategory.Id }, CategoryResponseGroup.Info)).FirstOrDefault();
+                if (category != null && category.CatalogId != moveInfo.Catalog)
                 {
                     category.CatalogId = moveInfo.Catalog;
                 }
-                if (category.ParentId != moveInfo.Category)
+                if (category != null && category.ParentId != moveInfo.Category)
                 {
                     category.ParentId = moveInfo.Category;
                 }
                 categories.Add(category);
             }
 
-            var products = new List<coreModel.CatalogProduct>();
+            var products = new List<CatalogProduct>();
             //Move products
-            foreach (var listEntryProduct in moveInfo.ListEntries.Where(x => x.Type.EqualsInvariant(webModel.ListEntryProduct.TypeName)))
+            foreach (var listEntryProduct in moveInfo.ListEntries.Where(x => x.Type.EqualsInvariant(ListEntryProduct.TypeName)))
             {
-                var product = (await _itemService.GetByIdsAsync(new[] { listEntryProduct.Id }, coreModel.ItemResponseGroup.ItemLarge)).FirstOrDefault();
-                if (product.CatalogId != moveInfo.Catalog)
+                var product = (await _itemService.GetByIdsAsync(new[] { listEntryProduct.Id }, ItemResponseGroup.ItemLarge)).FirstOrDefault();
+                if (product != null && product.CatalogId != moveInfo.Catalog)
                 {
                     product.CatalogId = moveInfo.Catalog;
                     product.CategoryId = null;
@@ -253,7 +247,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                     }
 
                 }
-                if (product.CategoryId != moveInfo.Category)
+                if (product != null && product.CategoryId != moveInfo.Category)
                 {
                     product.CategoryId = moveInfo.Category;
                     foreach (var variation in product.Variations)
@@ -262,7 +256,11 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                     }
                 }
                 products.Add(product);
-                products.AddRange(product.Variations);
+
+                if (product != null)
+                {
+                    products.AddRange(product.Variations);
+                }
             }
 
             //Scope bound security check
@@ -280,32 +278,32 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             return Ok();
         }
 
-        private async Task InnerUpdateLinks(webModel.ListEntryLink[] links, Action<coreModel.ILinkSupport, coreModel.CategoryLink> action)
+        private async Task InnerUpdateLinks(ListEntryLink[] links, Action<ILinkSupport, CategoryLink> action)
         {
-            var changedObjects = new List<coreModel.ILinkSupport>();
+            var changedObjects = new List<ILinkSupport>();
             foreach (var link in links)
             {
-                coreModel.ILinkSupport changedObject;
-                var newlink = new coreModel.CategoryLink
+                ILinkSupport changedObject;
+                var newlink = new CategoryLink
                 {
                     CategoryId = link.CategoryId,
                     CatalogId = link.CatalogId
                 };
 
-                if (link.ListEntryType.EqualsInvariant(webModel.ListEntryCategory.TypeName))
+                if (link.ListEntryType.EqualsInvariant(ListEntryCategory.TypeName))
                 {
-                    changedObject = (await _categoryService.GetByIdsAsync(new[] { link.ListEntryId }, coreModel.CategoryResponseGroup.Full)).FirstOrDefault();
+                    changedObject = (await _categoryService.GetByIdsAsync(new[] { link.ListEntryId }, CategoryResponseGroup.Full)).FirstOrDefault();
                 }
                 else
                 {
-                    changedObject = (await _itemService.GetByIdsAsync(new[] { link.ListEntryId }, coreModel.ItemResponseGroup.ItemLarge)).FirstOrDefault();
+                    changedObject = (await _itemService.GetByIdsAsync(new[] { link.ListEntryId }, ItemResponseGroup.ItemLarge)).FirstOrDefault();
                 }
                 action(changedObject, newlink);
                 changedObjects.Add(changedObject);
             }
 
-            var categorySaveChangesTask = _categoryService.SaveChangesAsync(changedObjects.OfType<coreModel.Category>().ToArray());
-            var itemSaveChangesTask = _itemService.SaveChangesAsync(changedObjects.OfType<coreModel.CatalogProduct>().ToArray());
+            var categorySaveChangesTask = _categoryService.SaveChangesAsync(changedObjects.OfType<Category>().ToArray());
+            var itemSaveChangesTask = _itemService.SaveChangesAsync(changedObjects.OfType<CatalogProduct>().ToArray());
 
             await Task.WhenAll(categorySaveChangesTask, itemSaveChangesTask);
         }

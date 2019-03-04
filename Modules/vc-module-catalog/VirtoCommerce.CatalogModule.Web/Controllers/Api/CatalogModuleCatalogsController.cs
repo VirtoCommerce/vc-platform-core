@@ -4,10 +4,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.CatalogModule.Core;
+using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
-using VirtoCommerce.CatalogModule.Web.Converters;
-using webModel = VirtoCommerce.CatalogModule.Web.Model;
 
 namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
 {
@@ -29,9 +28,9 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <remarks>Get common and virtual Catalogs list with minimal information included. Returns array of Catalog</remarks>
 		[HttpGet]
         [Route("")]
-        public async Task<ActionResult<webModel.Catalog[]>> GetCatalogs(string sort = null, int skip = 0, int take = 20)
+        public async Task<ActionResult<Catalog[]>> GetCatalogs(string sort = null, int skip = 0, int take = 20)
         {
-            var criteria = new SearchCriteria
+            var criteria = new CatalogListEntrySearchCriteria()
             {
                 ResponseGroup = SearchResponseGroup.WithCatalogs,
                 Sort = sort,
@@ -43,9 +42,8 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             //ApplyRestrictionsForCurrentUser(criteria);
 
             var serviceResult = await _searchService.SearchAsync(criteria);
-            var retVal = serviceResult.Catalogs.Select(cat => cat.ToWebModel()).ToArray();
 
-            return Ok(retVal);
+            return Ok(serviceResult.Catalogs);
         }
 
         /// <summary>
@@ -55,7 +53,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="id">The Catalog id.</param>
 		[HttpGet]
         [Route("{id}")]
-        public async Task<ActionResult<webModel.Catalog>> Get(string id)
+        public async Task<ActionResult<Catalog>> Get(string id)
         {
             var catalog = (await _catalogService.GetByIdsAsync(new[] { id })).FirstOrDefault();
             if (catalog == null)
@@ -64,11 +62,11 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             }
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Read, catalog);
 
-            var retVal = catalog.ToWebModel();
+            //var retVal = catalog.ToWebModel();
 
             //retVal.SecurityScopes = GetObjectPermissionScopeStrings(catalog);
 
-            return Ok(retVal);
+            return Ok(catalog);
         }
 
         /// <summary>
@@ -78,14 +76,14 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [HttpGet]
         [Route("getnew")]
         [Authorize(ModuleConstants.Security.Permissions.CatalogCreate)]
-        public ActionResult<webModel.Catalog> GetNewCatalog()
+        public ActionResult<Catalog> GetNewCatalog()
         {
-            var retVal = new webModel.Catalog
+            var retVal = new Catalog
             {
                 Name = "New catalog",
-                Languages = new List<webModel.CatalogLanguage>
+                Languages = new List<CatalogLanguage>
                 {
-                    new webModel.CatalogLanguage
+                    new CatalogLanguage
                     {
                         IsDefault = true,
                         LanguageCode = "en-US"
@@ -104,15 +102,15 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [HttpGet]
         [Route("getnewvirtual")]
         [Authorize(ModuleConstants.Security.Permissions.CatalogCreate)]
-        public ActionResult<webModel.Catalog> GetNewVirtualCatalog()
+        public ActionResult<Catalog> GetNewVirtualCatalog()
         {
-            var retVal = new webModel.Catalog
+            var retVal = new Catalog
             {
                 Name = "New virtual catalog",
                 IsVirtual = true,
-                Languages = new List<webModel.CatalogLanguage>
+                Languages = new List<CatalogLanguage>
                 {
-                    new webModel.CatalogLanguage
+                    new CatalogLanguage
                     {
                         IsDefault = true,
                         LanguageCode = "en-US"
@@ -132,14 +130,12 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
 		[HttpPost]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.CatalogCreate)]
-        public async Task<ActionResult<webModel.Catalog>> Create([FromBody]webModel.Catalog catalog)
+        public async Task<ActionResult<Catalog>> Create([FromBody]Catalog catalog)
         {
-            var newCatalog = catalog.ToCoreModel();
-            await _catalogService.SaveChangesAsync(new[] { newCatalog });
-            var retVal = newCatalog.ToWebModel();
+            await _catalogService.SaveChangesAsync(new[] { catalog });
             //Need for UI permission checks
             //retVal.SecurityScopes = GetObjectPermissionScopeStrings(newCatalog);
-            return Ok(retVal);
+            return Ok(catalog);
         }
 
         /// <summary>
@@ -150,10 +146,9 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [HttpPut]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.CatalogUpdate)]
-        public async Task<IActionResult> Update(webModel.Catalog catalog)
+        public async Task<IActionResult> Update([FromBody]Catalog catalog)
         {
-            var moduleCatalog = catalog.ToCoreModel();
-            await _catalogService.SaveChangesAsync(new[] { moduleCatalog });
+            await _catalogService.SaveChangesAsync(new[] { catalog });
             return NoContent();
         }
 

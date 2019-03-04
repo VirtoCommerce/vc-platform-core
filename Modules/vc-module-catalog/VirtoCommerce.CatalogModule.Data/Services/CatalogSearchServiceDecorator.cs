@@ -34,7 +34,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             _settingsManager = settingsManager;
         }
 
-        public virtual async Task<SearchResult> SearchAsync(SearchCriteria criteria)
+        public virtual async Task<SearchResult> SearchAsync(CatalogListEntrySearchCriteria criteria)
         {
             SearchResult result;
 
