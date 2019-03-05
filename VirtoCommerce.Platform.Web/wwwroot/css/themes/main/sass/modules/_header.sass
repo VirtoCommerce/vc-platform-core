@@ -2,7 +2,12 @@
   background: $headerBg
   display: flex
   height: $headerHeight
-  margin-top: 28px
+  left: 0
+  min-width: 800px
+  position: absolute
+  right: 0
+  top: 28px
+  z-index: 100
   &__logo
     background: url('/images/logo.svg') no-repeat scroll 15px 15px
     background-size: 127px 30px
@@ -14,6 +19,37 @@
     border-right: 1px solid $headerBrd
     color: $whiteColor
     padding: 0 20px
+  &__nav
+    display: flex
+    margin-left: auto
+    &-item
+      align-items: center
+      border-left: 1px solid $headerBrd
+      cursor: pointer
+      display: flex
+      position: relative
+      &:hover,
+      &--opened
+        background-color: $headerBgOver
+      &--opened
+        .account-user__carret
+          transform: rotate(180deg)
+    &-ico
+      background-repeat: no-repeat
+      background-size: contain
+      height: 20px
+      margin: 20px
+      width: 20px
+      &--settings
+        background-image: url('/images/header/settings.svg')
+      &--help
+        background-image: url('/images/header/support.svg')
+      &--notice
+        background-image: url('/images/header/notify_empty.svg')
+        &-give
+          background-image: url('/images/header/notify.svg')
+
+  // License
   .license
     align-items: center
     display: flex
@@ -21,20 +57,66 @@
     &__text
       font-size: 12px
       margin-right: 20px
-  &__nav
+
+  // Account user
+  .account-user
+    align-items: center
+    box-sizing: border-box
     display: flex
-    margin-left: auto
+    padding: 0 15px
+    width: 300px
+    &__img
+      background-color: $whiteColor
+      border-radius: 34px
+      height: 34px
+      margin-right: 15px
+      width: 34px
+    &__name,
+    &__role
+      color: $whiteColor
+      display: block
+      font-size: 14px
+    &__role
+      color: #838d9a
+    &__carret
+      background: url('/images/chevron.svg') no-repeat
+      height: 7px
+      margin-left: auto
+      pointer-events: none
+      width: 13px
+
+  // Dropdowns
+  .dropdown-menu
+    background: $whiteColor
+    border-bottom-left-radius: 4px
+    border-bottom-right-radius: 4px
+    box-shadow: 0 2px 7px 0 rgba(63,63,68,.07)
+    display: none
+    padding: 20px 15px
+    position: absolute
+    right: 0
+    top: 100%
+
+  // Notice
+  .notice
+    text-align: center
+    &__bg
+      background: url('/images/notify_empty.png') no-repeat
+      background-size: contain
+      height: 214px
+      width: 285px
+    &__t
+      font-size: $fontSize
+      font-weight: bold
+      margin-bottom: 10px
+    &__descr
+      font-size: 14px
+    .btn
+      margin-top: 40px
+
+.header
+  &__nav
     &-item
-      align-items: center
-      border-left: 1px solid $headerBrd
-      display: flex
-      &:hover,
-      &--active
-        background-color: $headerBgOver
-    &-ico
-      background-repeat: no-repeat
-      height: 20px
-      margin: 20px
-      width: 20px
-      &--settings
-        background-image: url('/images/header/settings.svg')
+      &--opened
+        .dropdown-menu
+          display: block
