@@ -1,4 +1,4 @@
-﻿angular.module('platformWebApp').factory('platformWebApp.topMenuService', [function () {
+angular.module('platformWebApp').factory('platformWebApp.headerService', [function () {
 
     var menuItems = [];
 
@@ -76,7 +76,7 @@
     };
     return retVal;
 }])
-    .directive('vaTopMenu', ["$document",
+    .directive('vaHeader', ["$document",
         function ($document) {
 
             return {
@@ -87,7 +87,7 @@
                 scope: {
                     onMenuChanged: "&"
                 },
-                templateUrl: '$(Platform)/Scripts/app/navigation/topMenu/topMenu.tpl.html',
+                templateUrl: '$(Platform)/Scripts/app/navigation/header/header.tpl.html',
                 link: function (scope, element, attr, ngModelController, linker) {
                     scope.menu = ngModelController.$modelValue;
                     ngModelController.$render = function () {
