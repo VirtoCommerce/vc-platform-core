@@ -19,13 +19,10 @@
     <projectUrl>https://virtocommerce.com/apps/extensions/virto-store-module</projectUrl>
     <iconUrl>Modules/$(VirtoCommerce.Store)/Content/logoVC.png</iconUrl>
     <releaseNotes></releaseNotes>
-    <copyright>Copyright © 2011-2018 Virto Commerce. All rights reserved</copyright>
+    <copyright>Copyright © 2011-2019 Virto Commerce. All rights reserved</copyright>
     <tags>stores</tags>
 
     <assemblyFile>VirtoCommerce.StoreModule.Web.dll</assemblyFile>
     <moduleType>VirtoCommerce.StoreModule.Web.Module, VirtoCommerce.StoreModule.Web</moduleType>
 
-    <scripts>
-        <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
-    </scripts>
 </module>

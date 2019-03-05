@@ -392,7 +392,7 @@ h3
       margin: -8px 0 0 10px
 .table.__indexed
   @include column("th", 5, true)
-.table-info	
+.table-info
   display: inline-block
   height: 100%
   vertical-align: middle
@@ -1474,6 +1474,13 @@ $names: "", ".double", ".triple", ".quadro"
 .select2-container-multi .select2-search-choice-close:hover::after
   color: #a1c0d4
 
+.select2-container .select2-search
+  margin-top: 4px
+
+.select2-container .select2-search input,
+.select2-container .select2-choice .select2-arrow b
+  background-image: none !important
+
 /* Tags input */
 tags-input
   .host
@@ -1615,13 +1622,13 @@ tags-input
           left: 20px
           position: absolute
           top: 2px
-      .error-message 
+      .error-message
         flex-grow: 1
         overflow: hidden
         text-overflow: ellipsis
         white-space: nowrap
         padding-right: 15px
-      .link-error-details 
+      .link-error-details
         color: #999
         float: right
         margin-right: 80px
@@ -2068,7 +2075,7 @@ tags-input
   > ul
     height: 100%
   > .list.__editing
-    background: url(../images/grid.png) repeat scroll 0 0
+    background: url(/images/grid.png) repeat scroll 0 0
   gridster-item,
   .list-item
     background: $lightBg
@@ -2260,7 +2267,7 @@ tags-input
     .tooltip-arrow
       border-bottom-color: $baseColor
       border-width: 0 8px 8px 8px
-      top: 0        
+      top: 0
   .tooltip-inner
     background: $baseColor
     color: $whiteColor
