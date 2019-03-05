@@ -779,8 +779,6 @@ $names: "", ".double", ".triple", ".quadro"
   right: 55px
 .__items .list-item.__default:hover:after
   right: 0
-.__items .list-item:first-child
-  border-top: 1px solid $baseBrd
 .__items .list-link
     display: block
     white-space: nowrap
@@ -1526,7 +1524,8 @@ tags-input
 .has-demo-warning .cnt
   top: $demoWarningHeight !important
 
-@import "modules/_menu.sass"
+@import "_menu.sass"
+@import "_header.sass"
 
 /* Content - main content area */
 .cnt
@@ -2506,3 +2505,22 @@ tags-input
   max-height: 100%
   max-width: 100%
   vertical-align: middle
+
+// Buttons
+.btn
+  align-items: center
+  border-radius: 2px
+  display: flex
+  font-size: 11px
+  height: 28px
+  padding: 0 30px
+  &:hover
+    opacity: 1
+  &--orange
+    background-color: $orangeBg
+    &:hover
+      background-color: darken($orangeBg, 5%)
+  &--blue
+    background-color: $blueBg
+    &:hover
+      background-color: darken($blueBg, 5%)

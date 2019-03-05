@@ -1,0 +1,40 @@
+.header
+  background: $headerBg
+  display: flex
+  height: $headerHeight
+  margin-top: 28px
+  &__logo
+    background: url('/images/logo.svg') no-repeat scroll 15px 15px
+    background-size: 127px 30px
+    border-right: 1px solid $headerBrd
+    flex: 0 0 $mainMenuWidth
+    font-size: 0
+    width: $mainMenuWidth
+  &__info
+    border-right: 1px solid $headerBrd
+    color: $whiteColor
+    padding: 0 20px
+  .license
+    align-items: center
+    display: flex
+    height: 100%
+    &__text
+      font-size: 12px
+      margin-right: 20px
+  &__nav
+    display: flex
+    margin-left: auto
+    &-item
+      align-items: center
+      border-left: 1px solid $headerBrd
+      display: flex
+      &:hover,
+      &--active
+        background-color: $headerBgOver
+    &-ico
+      background-repeat: no-repeat
+      height: 20px
+      margin: 20px
+      width: 20px
+      &--settings
+        background-image: url('/images/header/settings.svg')
