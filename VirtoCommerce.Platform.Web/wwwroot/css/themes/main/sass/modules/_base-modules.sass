@@ -1461,6 +1461,13 @@ $names: "", ".double", ".triple", ".quadro"
 .select2-container-multi .select2-search-choice-close:hover::after
   color: #a1c0d4
 
+.select2-container .select2-search
+  margin-top: 4px
+
+.select2-container .select2-search input,
+.select2-container .select2-choice .select2-arrow b
+  background-image: none !important
+
 /* Tags input */
 tags-input
   .host
@@ -2056,7 +2063,7 @@ tags-input
   > ul
     height: 100%
   > .list.__editing
-    background: url(../images/grid.png) repeat scroll 0 0
+    background: url(/images/grid.png) repeat scroll 0 0
   gridster-item,
   .list-item
     background: $lightBg

@@ -1,32 +1,3 @@
-var AppDependencies = [
-  'ui.router',
-  'luegg.directives',
-  'googlechart',
-  'gridster',
-  'ui.bootstrap',
-  'ui.utils',
-  'ui.sortable',
-  'ui.select',
-  'ngAnimate',
-  'ngStorage',
-  'ngResource',
-  'ngCookies',
-  'angularMoment',
-  'angularFileUpload',
-  'ngSanitize',
-  'ng-context-menu',
-  'ui.grid', 'ui.grid.autoResize', 'ui.grid.resizeColumns', 'ui.grid.moveColumns', 'ui.grid.saveState', 'ui.grid.selection', 'ui.grid.pagination', 'ui.grid.pinning', 'ui.grid.grouping',
-  'ui.grid.draggable-rows',
-  'ui.codemirror',
-  'focusOn',
-  'textAngular',
-  'ngTagsInput',
-  'tmh.dynamicLocale',
-  'pascalprecht.translate',
-  'angular.filter',
-  'LocalStorageModule'
-];
-
 angular.module('platformWebApp', AppDependencies).
 controller('platformWebApp.appCtrl', ['$rootScope', '$scope', '$window', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationService',
     'platformWebApp.i18n', '$timeout', 'platformWebApp.modules', '$state', 'platformWebApp.bladeNavigationService', 'platformWebApp.userProfile', 'platformWebApp.settings',

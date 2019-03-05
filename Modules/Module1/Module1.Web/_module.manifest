@@ -20,12 +20,9 @@
     <assemblyFile>Module1.Web.dll</assemblyFile>
     <moduleType>Module1.Web.Module, Module1.Web</moduleType>
 
-    <styles>
-        <directory virtualPath="$/Content" searchPattern="*.css" searchSubdirectories="true" />
-    </styles>
-    <scripts>
-        <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
-    </scripts> 
+    <styles virtualPath="Content"/>
+    
+    <scripts virtualPath="Scripts"/>
   
     <settings>
         <group name="Commerce|General">
@@ -52,20 +49,20 @@
                     <value>pound</value>
                 </arrayValues>
             </setting>
-			<setting>
-				<name>VirtoCommerce.Core.General.MeasureUnits</name>
-				<valueType>string</valueType>
-				<defaultValue>mm</defaultValue>
-				<title>Units of length</title>
-				<description>Measure units available for measuring length</description>
-				<isArray>true</isArray>
-				<arrayValues>
-					<value>m</value>
-					<value>mm</value>
-					<value>ft</value>
-					<value>in</value>
-				</arrayValues>
-			</setting>
+            <setting>
+                <name>VirtoCommerce.Core.General.MeasureUnits</name>
+                <valueType>string</valueType>
+                <defaultValue>mm</defaultValue>
+                <title>Units of length</title>
+                <description>Measure units available for measuring length</description>
+                <isArray>true</isArray>
+                <arrayValues>
+                    <value>m</value>
+                    <value>mm</value>
+                    <value>ft</value>
+                    <value>in</value>
+                </arrayValues>
+            </setting>
             <setting>
                 <name>VirtoCommerce.Core.General.Languages</name>
                 <valueType>string</valueType>
@@ -87,13 +84,13 @@
                 <title>Ground shipping rate</title>
                 <description>Fixed Ground shipping rate</description>
             </setting>
-			<setting>
-				<name>VirtoCommerce.Core.FixedRateShippingMethod.Air.Rate</name>
-				<valueType>decimal</valueType>
-				<defaultValue>0.00</defaultValue>
-				<title>Air shipping rate</title>
-				<description>Fixed Air shipping rate</description>
-			</setting>
+            <setting>
+                <name>VirtoCommerce.Core.FixedRateShippingMethod.Air.Rate</name>
+                <valueType>decimal</valueType>
+                <defaultValue>0.00</defaultValue>
+                <title>Air shipping rate</title>
+                <description>Fixed Air shipping rate</description>
+            </setting>
             <setting>
                 <name>VirtoCommerce.Core.FixedTaxRateProvider.Rate</name>
                 <valueType>decimal</valueType>
@@ -162,10 +159,10 @@
 
     <permissions>
         <group name="Core">
-			<permission id="core:packageType:create" name="Create package type" />
-			<permission id="core:packageType:update" name="Update package type" />
-			<permission id="core:packageType:delete" name="Delete package type" />
-			
+            <permission id="core:packageType:create" name="Create package type" />
+            <permission id="core:packageType:update" name="Update package type" />
+            <permission id="core:packageType:delete" name="Delete package type" />
+            
             <permission id="core:currency:create" name="Create currency" />
             <permission id="core:currency:update" name="Update currency" />
             <permission id="core:currency:delete" name="Delete currency" />

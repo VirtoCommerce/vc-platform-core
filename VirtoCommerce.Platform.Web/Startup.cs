@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,7 +45,7 @@ using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Hangfire;
 using VirtoCommerce.Platform.Web.Infrastructure;
 using VirtoCommerce.Platform.Web.JsonConverters;
-using VirtoCommerce.Platform.Web.Middelware;
+using VirtoCommerce.Platform.Web.Middleware;
 using VirtoCommerce.Platform.Web.Swagger;
 
 namespace VirtoCommerce.Platform.Web
@@ -248,9 +249,6 @@ namespace VirtoCommerce.Platform.Web
 
             // Add memory cache services
             services.AddMemoryCache();
-            //Add Smidge runtime bundling library configuration
-            services.AddSmidge(Configuration.GetSection("smidge"), new PhysicalFileProvider(modulesDiscoveryPath));
-            services.AddSmidgeNuglify();
 
             // Register the Swagger generator
             services.AddSwagger();
@@ -295,6 +293,10 @@ namespace VirtoCommerce.Platform.Web
                 app.UseDeveloperExceptionPage();
                 app.UseBrowserLink();
                 app.UseDatabaseErrorPage();
+                app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
+                {
+                    HotModuleReplacement = false
+                });
             }
             else
             {
@@ -344,13 +346,6 @@ namespace VirtoCommerce.Platform.Web
                 platformDbContext.Database.Migrate();
                 securityDbContext.Database.Migrate();
             }
-
-            //Using Smidge runtime bundling library for bundling modules js and css files
-            app.UseSmidge(bundles =>
-            {
-                app.UseModulesContent(bundles);
-            });
-            app.UseSmidgeNuglify();
 
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
