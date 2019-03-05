@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
@@ -24,6 +25,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         /// <summary>
         /// Associated object
         /// </summary>
+        [JsonIgnore]
         public Entity AssociatedObject { get; set; }
 
         public string[] Tags { get; set; }
