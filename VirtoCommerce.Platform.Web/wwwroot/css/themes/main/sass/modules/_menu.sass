@@ -6,9 +6,10 @@
   z-index: 100
   &.__collapsed
     width: $mainMenuCollapsedWidth
-    & ~ .header,
     & ~ .cnt
       left: $mainMenuCollapsedWidth
+    & ~ .cnt .header
+      padding-left: $mainMenuCollapsedWidth
     .logo
       background-image: url('/images/logo-small.svg')
       background-size: auto
@@ -220,8 +221,10 @@
 
   /* Dropdown - dropdown menu navigation */
   .dropdown
+    background: $whiteColor
     bottom: 0
     box-shadow: 1px 0 0 0 $baseBrd
+    margin-top: $headerHeight
     position: fixed
     top: 0
     width: $mainMenuDropdownWidth
