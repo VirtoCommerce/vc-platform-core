@@ -1,13 +1,14 @@
 <div class="notification-widget">
-  <div class="header__nav-item" ng-click="toggleNotice()" ng-class="{'header__nav-item--opened': noticeOpened}">
+  <div class="header__nav-item" ng-click="toggleNotice()">
     <span class="header__nav-ico header__nav-ico--notice"></span>
-    <div class="dropdown-menu">
-      <div class="notice">
-        <div class="notice__bg"></div>
-        <div class="notice__t">Nothing to see here</div>
-        <div class="notice__descr">When an event happens, you will see it here</div>
-        <a href="#" class="btn btn--orange" ng-click="toggleNotice()">Close</a>
-      </div>
+  </div>
+
+  <div class="dropdown-menu" ng-class="{'header__nav-item--opened': noticeOpened}">
+    <div class="notice">
+      <div class="notice__bg"></div>
+      <div class="notice__t">Nothing to see here</div>
+      <div class="notice__descr">When an event happens, you will see it here</div>
+      <a href="#" class="btn btn--orange" ng-click="close()">Close</a>
     </div>
   </div>
 </div>

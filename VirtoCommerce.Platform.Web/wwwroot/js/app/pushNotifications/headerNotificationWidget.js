@@ -12,8 +12,8 @@ angular.module('platformWebApp')
           scope.noticeOpened = false;
 
           function handleClickEvent(event) {
-            var dropdownElement = $document.find('.notification-widget .header__nav-item');
-            var hadDropdownElement = $document.find('.notification-widget .header__nav-item .header__nav-item--opened');
+            var dropdownElement = $document.find('.notification-widget.header__nav-item');
+            var hadDropdownElement = $document.find('.notification-widget.header__nav-item .header__nav-item--opened');
             if (scope.noticeOpened && !(dropdownElement.is(event.target) || dropdownElement.has(event.target).length > 0 ||
               hadDropdownElement.is(event.target) || hadDropdownElement.has(event.target).length > 0)) {
               scope.$apply(function () {
@@ -30,7 +30,14 @@ angular.module('platformWebApp')
           });
 
           scope.toggleNotice = function () {
+            var widgetIcon = $document.find('.notification-widget.header__nav-item');
+
             scope.noticeOpened = !scope.noticeOpened;
+          };
+
+          scope.close = function () {
+            debugger;
+            scope.noticeOpened = false;
           };
 
         }
