@@ -1,4 +1,4 @@
-﻿<div class="dropdown-content">
+<div class="dropdown-content">
     <div class="list __items" ng-if="searchText.value==''" va-favorites>
         <div class="list-group" ng-class="{'__opened': !group.isCollapsed}" ng-init="group = (menu.items | filter: { path: groupPath }: true)[0]" ng-repeat-start="(groupPath, groupItems) in menu.items | filter: { isAlwaysOnBar: 'false' } | omit: 'group == null' | orderBy: 'group.priority' | groupBy: 'group.path'" ng-click="group.isCollapsed = !group.isCollapsed">
             {{group.title | translate}}
@@ -13,7 +13,7 @@
     </ul>
     <script type="text/ng-template" id="listItemTemplate.html">
         <div class="list-fav" ng-click="toggleFavorite(menuItem); $event.stopPropagation();">
-            <i class="list-ico {{menuItem.isFavorite ? 'fa fa-star' : 'fa fa-star-o'}}"></i>
+            <i class="list-ico fa fa-star"></i>
         </div>
         <ng-include src="itemTemplateUrl"></ng-include>
     </script>

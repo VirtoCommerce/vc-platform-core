@@ -1,4 +1,3 @@
-<va-header></va-header>
 <va-main-menu ng-model="mainMenu" on-menu-changed="onMainMenuChanged(mainMenu)">
     <div class="info">
         <a class="info-license" ng-if="!license" href=""
@@ -11,6 +10,7 @@
     </div>
 </va-main-menu>
 <article class="cnt" role="main">
+    <va-header></va-header>
     <div class="cnt-inner">
         <div class="dashboard" ng-if="$state.current.name === 'workspace'">
             <header class="dashboard-head">

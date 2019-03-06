@@ -6,8 +6,12 @@
   z-index: 100
   &.__collapsed
     width: $mainMenuCollapsedWidth
-    &+.cnt
+    & ~ .header,
+    & ~ .cnt
       left: $mainMenuCollapsedWidth
+    .logo
+      background-image: url('/images/logo-small.svg')
+      background-size: auto
     .bar
       .info-license
         font-size: 11px
@@ -25,6 +29,15 @@
           left: 44px
     .dropdown.__opened
       transform: translateX($mainMenuCollapsedWidth)
+  .logo
+    background: url('/images/logo.svg') no-repeat scroll 15px 15px $headerBg
+    background-size: 127px 30px
+    flex: 0 0 $mainMenuWidth
+    font-size: 0
+    height: $headerHeight
+    position: relative
+    width: 100%
+    z-index: 50
   .bar
     background: $navbarBg
     box-shadow: 1px 0 0 0 $baseBrd
@@ -300,7 +313,7 @@
     .list-item:after
       display: none
     .list-ico
-      color: $colorText
+      color: #dfe3e8
       font-size: 20px
       height: 20px
       line-height: 1
@@ -311,7 +324,6 @@
         height: 100%
         width: 100%
     .list-fav
-      color: #a6a6a6
       display: block
       font-size: $fontSize
       font-weight: 300
