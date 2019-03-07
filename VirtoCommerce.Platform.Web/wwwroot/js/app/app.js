@@ -1,10 +1,7 @@
-angular.module('platformWebApp', AppDependencies).
-controller('platformWebApp.appCtrl', ['$rootScope', '$scope', '$window', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationService',
+angular.module('platformWebApp', AppDependencies).controller('platformWebApp.appCtrl', ['$rootScope', '$scope', '$window', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationService',
     'platformWebApp.i18n', '$timeout', 'platformWebApp.modules', '$state', 'platformWebApp.bladeNavigationService', 'platformWebApp.userProfile', 'platformWebApp.settings',
     function ($rootScope, $scope, $window, mainMenuService, pushNotificationService,
         i18n, $timeout, modules, $state, bladeNavigationService, userProfile, settings) {
-
-        pushNotificationService.run();
 
         $scope.closeError = function () {
             $scope.platformError = undefined;
