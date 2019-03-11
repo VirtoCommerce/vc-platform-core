@@ -93,15 +93,17 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             }
         }
 
-        public virtual IEnumerable<PropertyValueEntity> FromModels(IEnumerable<PropertyValue> propValues, PrimaryKeyResolvingMap pkMap)
+        public virtual IEnumerable<PropertyValueEntity> FromModels(IEnumerable<PropertyValue> propValues, Property property, PrimaryKeyResolvingMap pkMap)
         {
             if (propValues == null)
             {
                 throw new ArgumentNullException(nameof(propValues));
             }
+
             var groupedValues = propValues.Where(x => !x.IsInherited && (!string.IsNullOrEmpty(x.ValueId) || !string.IsNullOrEmpty(x.Value?.ToString())))
-                                           .Select(x => AbstractTypeFactory<PropertyValueEntity>.TryCreateInstance().FromModel(x, pkMap))
+                                           .Select(x => AbstractTypeFactory<PropertyValueEntity>.TryCreateInstance().FromModel(x, property, pkMap))
                                            .GroupBy(x => x.DictionaryItemId);
+
             var result = new List<PropertyValueEntity>();
             foreach (var group in groupedValues)
             {
@@ -118,7 +120,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
         }
 
-        public virtual PropertyValueEntity FromModel(PropertyValue propValue, PrimaryKeyResolvingMap pkMap)
+        public virtual PropertyValueEntity FromModel(PropertyValue propValue, Property property, PrimaryKeyResolvingMap pkMap)
         {
             if (propValue == null)
                 throw new ArgumentNullException(nameof(propValue));
@@ -130,8 +132,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             CreatedDate = propValue.CreatedDate;
             ModifiedBy = propValue.ModifiedBy;
             ModifiedDate = propValue.ModifiedDate;
-            Name = propValue.PropertyName;
-            ValueType = (int)propValue.ValueType;
+            Name = !string.IsNullOrEmpty(propValue.PropertyName) ? propValue.PropertyName : property.Name; 
+            ValueType = (int)propValue.ValueType > 0 ? (int)propValue.ValueType : (int)property.ValueType;
             DictionaryItemId = propValue.ValueId;
             //Required for manual reference
             Alias = propValue.Alias;

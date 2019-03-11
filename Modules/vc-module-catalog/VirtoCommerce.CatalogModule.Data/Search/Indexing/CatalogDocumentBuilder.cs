@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.CatalogModule.Core.Model;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchModule.Core.Model;
 
@@ -19,60 +18,59 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
 
         protected virtual bool StoreObjectsInIndex => _settingsManager.GetValue("Catalog.Search.UseFullObjectIndexStoring", true);
 
-        protected virtual void IndexCustomProperties(IndexDocument document, ICollection<Property> properties, ICollection<PropertyValue> propertyValues, ICollection<PropertyType> contentPropertyTypes)
+        protected virtual void IndexCustomProperties(IndexDocument document, ICollection<Property> properties, ICollection<PropertyType> contentPropertyTypes)
         {
-            foreach (var propValue in propertyValues.Where(x => x.Value != null))
-            {
-                var property = properties.FirstOrDefault(p => p.Name.EqualsInvariant(propValue.PropertyName) && p.ValueType == propValue.ValueType);
-
-                var propertyName = propValue.PropertyName?.ToLowerInvariant();
-                if (!string.IsNullOrEmpty(propertyName))
+            foreach (var property in properties)
+                foreach (var propValue in property.Values.Where(x => x.Value != null))
                 {
-                    var isCollection = property?.Multivalue == true;
-
-                    switch (propValue.ValueType)
+                    var propertyName = propValue.PropertyName?.ToLowerInvariant();
+                    if (!string.IsNullOrEmpty(propertyName))
                     {
-                        case PropertyValueType.Boolean:
-                        case PropertyValueType.DateTime:
-                        case PropertyValueType.Integer:
-                        case PropertyValueType.Number:
-                            document.Add(new IndexDocumentField(propertyName, propValue.Value) { IsRetrievable = true, IsFilterable = true, IsCollection = isCollection });
-                            break;
-                        case PropertyValueType.LongText:
-                            document.Add(new IndexDocumentField(propertyName, propValue.Value.ToString().ToLowerInvariant()) { IsRetrievable = true, IsSearchable = true, IsCollection = isCollection });
-                            break;
-                        case PropertyValueType.ShortText:
-                            // Index alias when it is available instead of display value.
-                            // Do not tokenize small values as they will be used for lookups and filters.
-                            var shortTextValue = propValue.Alias ?? propValue.Value.ToString();
-                            document.Add(new IndexDocumentField(propertyName, shortTextValue) { IsRetrievable = true, IsFilterable = true, IsCollection = isCollection });
-                            break;
-                        case PropertyValueType.GeoPoint:
-                            document.Add(new IndexDocumentField(propertyName, GeoPoint.TryParse((string)propValue.Value)) { IsRetrievable = true, IsSearchable = true, IsCollection = true });
-                            break;
+                        var isCollection = property?.Multivalue == true;
+
+                        switch (propValue.ValueType)
+                        {
+                            case PropertyValueType.Boolean:
+                            case PropertyValueType.DateTime:
+                            case PropertyValueType.Integer:
+                            case PropertyValueType.Number:
+                                document.Add(new IndexDocumentField(propertyName, propValue.Value) { IsRetrievable = true, IsFilterable = true, IsCollection = isCollection });
+                                break;
+                            case PropertyValueType.LongText:
+                                document.Add(new IndexDocumentField(propertyName, propValue.Value.ToString().ToLowerInvariant()) { IsRetrievable = true, IsSearchable = true, IsCollection = isCollection });
+                                break;
+                            case PropertyValueType.ShortText:
+                                // Index alias when it is available instead of display value.
+                                // Do not tokenize small values as they will be used for lookups and filters.
+                                var shortTextValue = propValue.Alias ?? propValue.Value.ToString();
+                                document.Add(new IndexDocumentField(propertyName, shortTextValue) { IsRetrievable = true, IsFilterable = true, IsCollection = isCollection });
+                                break;
+                            case PropertyValueType.GeoPoint:
+                                document.Add(new IndexDocumentField(propertyName, GeoPoint.TryParse((string)propValue.Value)) { IsRetrievable = true, IsSearchable = true, IsCollection = true });
+                                break;
+                        }
+                    }
+
+                    // Add value to the searchable content field if property type is uknown or if it is present in the provided list
+                    if (property == null || contentPropertyTypes == null || contentPropertyTypes.Contains(property.Type))
+                    {
+                        var contentField = string.Concat("__content", property != null && property.Multilanguage && !string.IsNullOrWhiteSpace(propValue.LanguageCode) ? "_" + propValue.LanguageCode.ToLowerInvariant() : string.Empty);
+
+                        switch (propValue.ValueType)
+                        {
+                            case PropertyValueType.LongText:
+                            case PropertyValueType.ShortText:
+                                var stringValue = propValue.Value.ToString();
+
+                                if (!string.IsNullOrWhiteSpace(stringValue)) // don't index empty values
+                                {
+                                    document.Add(new IndexDocumentField(contentField, stringValue.ToLower()) { IsRetrievable = true, IsSearchable = true, IsCollection = true });
+                                }
+
+                                break;
+                        }
                     }
                 }
-
-                // Add value to the searchable content field if property type is uknown or if it is present in the provided list
-                if (property == null || contentPropertyTypes == null || contentPropertyTypes.Contains(property.Type))
-                {
-                    var contentField = string.Concat("__content", property != null && property.Multilanguage && !string.IsNullOrWhiteSpace(propValue.LanguageCode) ? "_" + propValue.LanguageCode.ToLowerInvariant() : string.Empty);
-
-                    switch (propValue.ValueType)
-                    {
-                        case PropertyValueType.LongText:
-                        case PropertyValueType.ShortText:
-                            var stringValue = propValue.Value.ToString();
-
-                            if (!string.IsNullOrWhiteSpace(stringValue)) // don't index empty values
-                            {
-                                document.Add(new IndexDocumentField(contentField, stringValue.ToLower()) { IsRetrievable = true, IsSearchable = true, IsCollection = true });
-                            }
-
-                            break;
-                    }
-                }
-            }
         }
 
         protected virtual string[] GetOutlineStrings(IEnumerable<Outline> outlines)

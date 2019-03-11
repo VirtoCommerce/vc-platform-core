@@ -63,8 +63,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
 
             using (var repository = _repositoryFactory())
-            //TODO
-            //using (var changeTracker = GetChangeTracker(repository))
             {
                 //Optimize performance and CPU usage
                 repository.DisableChangesTracking();

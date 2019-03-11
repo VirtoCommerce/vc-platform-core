@@ -60,7 +60,7 @@ angular.module('virtoCommerce.catalogModule')
 
             ngModelController.$render = function () {
                 scope.currentEntity = ngModelController.$modelValue;
-
+                
                 scope.context.currentPropValues = angular.copy(scope.currentEntity.values);
                 //For dictionary multilingual properties need to left only distinct dictionary items
                 if (scope.currentEntity.dictionary) {
@@ -73,7 +73,6 @@ angular.module('virtoCommerce.catalogModule')
                             selected: true
                         };
                     }), function (x) { return x.valueId; });
-                  
                 }
                 if (needAddEmptyValue(scope.currentEntity, scope.context.currentPropValues)) {
                     scope.context.currentPropValues.push({ value: null });
@@ -144,7 +143,6 @@ angular.module('virtoCommerce.catalogModule')
             scope.loadDictionaryValues = function ($select) {
                 $select.page = 0;
                 scope.context.allDictionaryValues = [];
-
                 return scope.loadNextDictionaryValues($select);
             };
 
@@ -153,9 +151,8 @@ angular.module('virtoCommerce.catalogModule')
                 var countToTake = scope.pageSize;
 
                 return scope.getPropValues()(scope.currentEntity.id, $select.search, countToSkip, countToTake).then(function (result) {
-                    populateDictionaryValues(result.results);
+                    populateDictionaryValues(result.results, scope.currentEntity.name);
                     $select.page++;
-
                     // If there are more items to display, let's prepare to handle these items.
                     if (scope.context.allDictionaryValues.length < result.totalCount) {
                         // Reset scrolling for the when-scrolled directive, so it could trigger this method for next page.
@@ -166,16 +163,20 @@ angular.module('virtoCommerce.catalogModule')
                 });
             }
 
-            function populateDictionaryValues(dictItems) {
+            function populateDictionaryValues(dictItems, propertyName) {
                 angular.forEach(dictItems, function (dictItem) {
                     var dictValue = _.find(scope.context.currentPropValues, function (x) {
                         return x.valueId == dictItem.id;
                     });
+                    console.log(dictItem);
+                    console.log(dictValue);
                     if (!dictValue) {
+                        console.log(dictItem);
                         dictValue = {
                             alias: dictItem.alias,
                             valueId: dictItem.id,
-                            value: dictItem.alias
+                            value: dictItem.alias,
+                            propertyName: propertyName
                         };
                     }
                     scope.context.allDictionaryValues.push(dictValue);

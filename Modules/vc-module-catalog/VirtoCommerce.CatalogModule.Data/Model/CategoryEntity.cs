@@ -104,10 +104,16 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             category.Properties = Properties.Select(x => x.ToModel(AbstractTypeFactory<Property>.TryCreateInstance())).ToList();
 
             //category property values
-            category.PropertyValues = CategoryPropertyValues
-                .OrderBy(x => x.DictionaryItem?.SortOrder)
-                .ThenBy(x => x.Name)
-                .SelectMany(x => x.ToModel(AbstractTypeFactory<PropertyValue>.TryCreateInstance())).ToList();
+            if (!category.Properties.IsNullOrEmpty())
+            {
+                foreach (var property in category.Properties)
+                {
+                    property.Values = CategoryPropertyValues.Where(pr => pr.Name.EqualsInvariant(property.Name)).OrderBy(x => x.DictionaryItem?.SortOrder)
+                        .ThenBy(x => x.Name)
+                        .SelectMany(x => x.ToModel(AbstractTypeFactory<PropertyValue>.TryCreateInstance())).ToList();
+                }
+            }
+
             return category;
         }
 
@@ -137,10 +143,16 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             StartDate = DateTime.UtcNow;
             IsActive = category.IsActive ?? true;
 
-            if (category.PropertyValues != null)
+            if (!category.Properties.IsNullOrEmpty())
             {
-                CategoryPropertyValues = new ObservableCollection<PropertyValueEntity>(AbstractTypeFactory<PropertyValueEntity>.TryCreateInstance().FromModels(category.PropertyValues, pkMap));
+                var propertyValues = category.Properties.SelectMany(pr => new ObservableCollection<PropertyValueEntity>(
+                    AbstractTypeFactory<PropertyValueEntity>
+                        .TryCreateInstance()
+                        .FromModels(pr.Values, pr, pkMap)));
+
+                CategoryPropertyValues = new ObservableCollection<PropertyValueEntity>(propertyValues);
             }
+
 
             if (category.Links != null)
             {

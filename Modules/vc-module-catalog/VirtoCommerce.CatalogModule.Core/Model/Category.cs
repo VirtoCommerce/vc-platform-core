@@ -33,7 +33,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
 
         #region IHasProperties members
         public ICollection<Property> Properties { get; set; }
-        public ICollection<PropertyValue> PropertyValues { get; set; }
+
         #endregion
 
         #region ILinkSupport members
@@ -50,5 +50,45 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         #region IHasOutlines members
         public ICollection<Outline> Outlines { get; set; }
         #endregion
+
+
+        public virtual Category MemberwiseCloneCategory()
+        {
+            var retVal = AbstractTypeFactory<Category>.TryCreateInstance();
+
+            // Entity
+            retVal.Id = Id;
+
+            // AuditableEntity
+            retVal.CreatedDate = CreatedDate;
+            retVal.ModifiedDate = ModifiedDate;
+            retVal.CreatedBy = CreatedBy;
+            retVal.ModifiedBy = ModifiedBy;
+
+            // Category
+            retVal.CatalogId = CatalogId;
+            retVal.Code = Code;
+            retVal.IsActive = IsActive;
+            retVal.IsVirtual = IsVirtual;
+            retVal.Level = Level;
+            retVal.Name = Name;
+            retVal.PackageType = PackageType;
+            retVal.ParentId = ParentId;
+            retVal.Path = Path;
+            retVal.Priority = Priority;
+            retVal.TaxType = TaxType;
+
+            // TODO: clone reference objects
+            retVal.Children = Children;
+            retVal.Outlines = Outlines;
+            retVal.SeoInfos = SeoInfos;
+            retVal.Catalog = Catalog;
+            retVal.Properties = Properties;
+            retVal.Parents = Parents;
+            retVal.Links = Links;
+            retVal.Images = Images;
+
+            return retVal;
+        }
     }
 }

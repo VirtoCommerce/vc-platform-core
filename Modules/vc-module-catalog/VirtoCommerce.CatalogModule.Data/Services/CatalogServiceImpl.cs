@@ -36,34 +36,20 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
         #region ICatalogService Members
 
-        public virtual Task<Catalog[]> GetByIdsAsync(string[] catalogIds)
+        public virtual async Task<Catalog[]> GetByIdsAsync(string[] catalogIds)
         {
-            var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join(",", catalogIds));
-            return _platformMemoryCache.GetOrCreateExclusive(cacheKey, async (cacheEntry) =>
-            {
-                cacheEntry.AddExpirationToken(CatalogCacheRegion.CreateChangeToken());
-                CatalogEntity[] entities;
-                using (var repository = _repositoryFactory())
-                {
-                    //Optimize performance and CPU usage
-                    repository.DisableChangesTracking();
-
-                    entities = await repository.GetCatalogsByIdsAsync(catalogIds);
-                }
-
-                var result = entities.Select(x => x.ToModel(AbstractTypeFactory<Catalog>.TryCreateInstance())).ToArray();
-
-                //TODO
-                //LoadDependencies(result, result);
-                return result;
-            });
+            return (await PreloadCatalogs())
+                .Values
+                .Where(c => catalogIds.Contains(c.Id))
+                .Select(c => c.MemberwiseCloneCatalog())
+                .ToArray();
         }
 
         public async Task<IEnumerable<Catalog>> GetCatalogsListAsync()
         {
             //Clone required because client code may change resulting objects
             var catalogs = await PreloadCatalogs();
-            return catalogs.Values.Select(MemberwiseCloneCatalog).OrderBy(x => x.Name);
+            return catalogs.Values.Select(c => c.MemberwiseCloneCatalog()).OrderBy(x => x.Name);
         }
 
         public virtual async Task SaveChangesAsync(Catalog[] catalogs)
@@ -162,41 +148,26 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     foreach (var property in catalog.Properties)
                     {
                         property.Catalog = preloadedCatalogsMap[property.CatalogId];
+                        property.Values = catalog.Properties.Where(pr => pr.Id.EqualsInvariant(property.Id))
+                            .SelectMany(p => p.Values).ToArray();
                     }
-                    if (!catalog.PropertyValues.IsNullOrEmpty())
-                    {
-                        //Next need set Property in PropertyValues objects
-                        foreach (var propValue in catalog.PropertyValues.ToArray())
-                        {
-                            propValue.Property = catalog.Properties.Where(x => x.Type == PropertyType.Catalog)
-                                                                   .FirstOrDefault(x => x.IsSuitableForValue(propValue));
-                        }
-                    }
+                    //if (!catalog.PropertyValues.IsNullOrEmpty())
+                    //{
+                    //    //Next need set Property in PropertyValues objects
+                    //    foreach (var propValue in catalog.PropertyValues.ToArray())
+                    //    {
+                    //        propValue.Property = catalog.Properties.Where(x => x.Type == PropertyType.Catalog)
+                    //                                               .FirstOrDefault(x => x.IsSuitableForValue(propValue));
+                    //    }
+                    //}
                 }
             }
-        }
-
-        protected virtual Catalog MemberwiseCloneCatalog(Catalog catalog)
-        {
-            var retVal = AbstractTypeFactory<Catalog>.TryCreateInstance();
-
-            retVal.Id = catalog.Id;
-            retVal.IsVirtual = catalog.IsVirtual;
-            retVal.Name = catalog.Name;
-
-            // TODO: clone reference objects
-            retVal.Languages = catalog.Languages;
-            retVal.Properties = catalog.Properties;
-            retVal.PropertyValues = catalog.PropertyValues;
-
-            return retVal;
         }
 
 
         private async Task ValidateCatalogPropertiesAsync(Catalog[] catalogs)
         {
-            //TODO
-            //LoadDependencies(catalogs, PreloadCatalogs());
+            LoadDependencies(catalogs, await PreloadCatalogs());
             foreach (var catalog in catalogs)
             {
                 var validatioResult = await _hasPropertyValidator.ValidateAsync(catalog);

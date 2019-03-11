@@ -21,6 +21,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         public ICollection<PropertyAttribute> Attributes { get; set; }
         public ICollection<PropertyDisplayName> DisplayNames { get; set; }
         public ICollection<PropertyValidationRule> ValidationRules { get; set; }
+        public ICollection<PropertyValue> Values { get; set; }
 
         /// <summary>
         /// Because we not have a direct link between prop values and properties we should
@@ -30,7 +31,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         /// <returns></returns>
         public bool IsSuitableForValue(PropertyValue propValue)
         {
-            return String.Equals(Name, propValue.PropertyName, StringComparison.InvariantCultureIgnoreCase) && ValueType == propValue.ValueType;
+            return string.Equals(Name, propValue.PropertyName, StringComparison.InvariantCultureIgnoreCase) && ValueType == propValue.ValueType;
         }
 
         #region IInheritable Members

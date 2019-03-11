@@ -178,18 +178,15 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             newVariation.MainProductId = product.MainProductId ?? productId;
             newVariation.Properties = product.Properties.Where(x => x.Type == PropertyType.Variation).ToList();
 
-            //TODO
-            //foreach (var property in newVariation.Properties)
-            //{
-            //    // Mark variation property as required
-            //    if (property.Type == PropertyType.Variation)
-            //    {
-            //        property.Required = true;
-            //        property.Values.Clear();
-            //    }
-
-            //    property.IsManageable = true;
-            //}
+            foreach (var property in newVariation.Properties)
+            {
+                // Mark variation property as required
+                if (property.Type == PropertyType.Variation)
+                {
+                    property.Required = true;
+                    property.Values.Clear();
+                }
+            }
 
 
             newVariation.Code = _skuGenerator.GenerateSku(newVariation);
@@ -283,9 +280,9 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("associations/search")]
-        public ActionResult<ProductAssociationSearchResult> SearchProductAssociations([FromBody] ProductAssociationSearchCriteria criteria)
+        public async Task<ActionResult<ProductAssociationSearchResult>> SearchProductAssociations([FromBody] ProductAssociationSearchCriteria criteria)
         {
-            var searchResult = _productAssociationSearchService.SearchProductAssociations(criteria);
+            var searchResult = await _productAssociationSearchService.SearchProductAssociationsAsync(criteria);
             var result = new ProductAssociationSearchResult
             {
                 Results = searchResult.Results,

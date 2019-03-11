@@ -9,6 +9,7 @@ using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.Model;
 using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.CatalogModule.Data.Validation;
+using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Data.Infrastructure;
@@ -22,15 +23,19 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         private readonly AbstractValidator<IHasProperties> _hasPropertyValidator;
         private readonly ICatalogService _catalogService;
         private readonly ICategoryService _categoryService;
+        private readonly IOutlineService _outlineService;
+        private readonly ISeoService _seoService;
 
         public ItemServiceImpl(Func<ICatalogRepository> catalogRepositoryFactory,
-                               IEventPublisher eventPublisher, AbstractValidator<IHasProperties> hasPropertyValidator, ICatalogService catalogService, ICategoryService categoryService)
+                               IEventPublisher eventPublisher, AbstractValidator<IHasProperties> hasPropertyValidator, ICatalogService catalogService, ICategoryService categoryService, IOutlineService outlineService, ISeoService seoService)
         {
             _repositoryFactory = catalogRepositoryFactory;
             _eventPublisher = eventPublisher;
             _hasPropertyValidator = hasPropertyValidator;
             _catalogService = catalogService;
             _categoryService = categoryService;
+            _outlineService = outlineService;
+            _seoService = seoService;
         }
 
         #region IItemService Members
@@ -52,30 +57,29 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             await LoadDependenciesAsync(result);
             ApplyInheritanceRules(result);
 
-            //TODO
-            //var productsWithVariationsList = result.Concat(result.Where(p => p.Variations != null)
-            //                           .SelectMany(p => p.Variations));
-            //// Fill outlines for products and variations
-            //if (respGroup.HasFlag(ItemResponseGroup.Outlines))
-            //{
-            //    _outlineService.FillOutlinesForObjects(productsWithVariationsList, catalogId);
-            //}
-            //// Fill SEO info for products, variations and outline items
-            //if ((respGroup & ItemResponseGroup.Seo) == ItemResponseGroup.Seo)
-            //{
-            //    var objectsWithSeo = productsWithVariationsList.OfType<ISeoSupport>().ToList();
-            //    //Load SEO information for all Outline.Items
-            //    var outlineItems = productsWithVariationsList.Where(p => p.Outlines != null)
-            //                             .SelectMany(p => p.Outlines.SelectMany(o => o.Items));
-            //    objectsWithSeo.AddRange(outlineItems);
-            //    _commerceService.LoadSeoForObjects(objectsWithSeo.ToArray());
-            //}
+            var productsWithVariationsList = result.Concat(result.Where(p => p.Variations != null)
+                                       .SelectMany(p => p.Variations)).ToArray();
+            // Fill outlines for products and variations
+            if (respGroup.HasFlag(ItemResponseGroup.Outlines))
+            {
+                _outlineService.FillOutlinesForObjects(productsWithVariationsList, catalogId);
+            }
+            // Fill SEO info for products, variations and outline items
+            if ((respGroup & ItemResponseGroup.Seo) == ItemResponseGroup.Seo)
+            {
+                var objectsWithSeo = productsWithVariationsList.OfType<ISeoSupport>().ToList();
+                //Load SEO information for all Outline.Items
+                var outlineItems = productsWithVariationsList.Where(p => p.Outlines != null)
+                                         .SelectMany(p => p.Outlines.SelectMany(o => o.Items));
+                objectsWithSeo.AddRange(outlineItems);
+                await _seoService.LoadSeoForObjectsAsync(objectsWithSeo.ToArray());
+            }
 
-            ////Reduce details according to response group
-            //foreach (var product in productsWithVariationsList)
-            //{
-            //    ReduceDetails(product, respGroup);
-            //}
+            //Reduce details according to response group
+            foreach (var product in productsWithVariationsList)
+            {
+                ReduceDetails(product, respGroup);
+            }
 
             return result;
         }
@@ -122,11 +126,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
                 await _eventPublisher.Publish(new ProductChangedEvent(changedEntries));
             }
-
-            //TODO move to eventhandler
-            //Update SEO 
-            //var productsWithVariations = products.Concat(products.Where(x => x.Variations != null).SelectMany(x => x.Variations)).OfType<ISeoSupport>().ToArray();
-            //_commerceService.UpsertSeoForObjects(productsWithVariations);
         }
 
         public virtual async Task DeleteAsync(string[] itemIds)
@@ -183,7 +182,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             if (!respGroup.HasFlag(ItemResponseGroup.ItemProperties))
             {
                 product.Properties = null;
-                product.PropertyValues = null;
             }
             if (!respGroup.HasFlag(ItemResponseGroup.Links))
             {
@@ -208,7 +206,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
         protected virtual async Task LoadDependenciesAsync(CatalogProduct[] products, bool processVariations = true)
         {
-            //TODO
             var catalogsMap = (await _catalogService.GetCatalogsListAsync()).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
             var allCategoriesIds = products.Select(x => x.CategoryId).Where(x => x != null).Distinct().ToArray();
             var categoriesMap = (await _categoryService.GetByIdsAsync(allCategoriesIds, CategoryResponseGroup.Full)).ToDictionary(
@@ -293,55 +290,67 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 }
 
                 //Properties inheritance
-                product.Properties = (product.Category != null ? product.Category.Properties : product.Catalog.Properties).Select(x => x.Clone())
-                                     .OfType<Property>()
-                                     .OrderBy(x => x.Name)
-                                     .ToList();
+                var catalogProperties = (product.Category != null ? product.Category.Properties : product.Catalog.Properties)
+                    .Select(x => { x.IsInherited = true; return x.Clone(); })
+                    .OfType<Property>()
+                    .OrderBy(x => x.Name).ToList();
 
-                if (!product.Properties.IsNullOrEmpty())
+                if (!catalogProperties.IsNullOrEmpty())
                 {
-                    foreach (var property in product.Properties)
+                    foreach (var property in catalogProperties)
                     {
                         property.IsInherited = true;
 
-                        if (property.ValidationRules == null) continue;
-                        foreach (var validationRule in property.ValidationRules)
+                        if (!property.ValidationRules.IsNullOrEmpty())
                         {
-                            if (validationRule.Property == null)
+                            foreach (var validationRule in property.ValidationRules)
                             {
-                                validationRule.Property = property;
+                                if (validationRule.Property == null)
+                                {
+                                    validationRule.Property = property;
+                                }
                             }
                         }
                     }
-                }
 
-                if (!product.PropertyValues.IsNullOrEmpty())
-                {
-                    //Self item property values
-                    foreach (var propertyValue in product.PropertyValues.ToArray())
+                    if (!product.Properties.IsNullOrEmpty())
                     {
-                        //Try to find property meta information
-                        propertyValue.Property = product.Properties.Where(x => x.Type == PropertyType.Product || x.Type == PropertyType.Variation)
-                                                                   .FirstOrDefault(x => x.IsSuitableForValue(propertyValue));
+                        var unionProperties = !product.Properties.IsNullOrEmpty()
+                            ? catalogProperties.Union(product.Properties.Where(prp => !catalogProperties.Select(cp => cp.Name).Contains(prp.Name))).ToList()
+                            : catalogProperties;
+
+                        //Fill values 
+                        product.Properties = unionProperties.Select(up =>
+                        {
+                            up.Values = product.Properties
+                                .Where(p => p.Name.EqualsInvariant(up.Name) && p.Values.All(up.IsSuitableForValue))
+                                .SelectMany(pv => pv.Values).ToList();
+                            return up;
+                        }).ToArray();
                     }
+
                 }
 
                 //inherit not overridden property values from main product
-                if (product.MainProduct != null && !product.MainProduct.PropertyValues.IsNullOrEmpty())
+                if (product.MainProduct != null && !product.MainProduct.Properties.IsNullOrEmpty())
                 {
-                    var mainProductPopValuesGroups = product.MainProduct.PropertyValues.GroupBy(x => x.PropertyName);
+                    var mainProductPopValuesGroups = product.MainProduct.Properties.GroupBy(x => x.Name);
                     foreach (var group in mainProductPopValuesGroups)
                     {
                         //Inherit all values if not overriden
-                        if (!product.PropertyValues.Any(x => x.PropertyName.EqualsInvariant(group.Key)))
+                        foreach (var property in product.Properties)
                         {
-                            foreach (var inheritedpropValue in group.Select(x => x.Clone()).OfType<PropertyValue>())
+                            if (!property.Values.Any(x => x.PropertyName.EqualsInvariant(group.Key)))
                             {
-                                inheritedpropValue.Id = null;
-                                inheritedpropValue.IsInherited = true;
-                                product.PropertyValues.Add(inheritedpropValue);
+                                foreach (var inheritedpropValue in group.Select(x => x.Clone()).OfType<PropertyValue>())
+                                {
+                                    inheritedpropValue.Id = null;
+                                    inheritedpropValue.IsInherited = true;
+                                    property.Values.Add(inheritedpropValue);
+                                }
                             }
                         }
+
                     }
                 }
 
@@ -371,8 +380,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 throw new ArgumentNullException(nameof(products));
             }
 
-
-            //TODO
             //Validate products
             var validator = new ProductValidator();
             foreach (var product in products)

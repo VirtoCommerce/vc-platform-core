@@ -95,18 +95,18 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
             var contentPropertyTypes = new[] { PropertyType.Product, PropertyType.Variation };
 
             // Index custom product properties
-            IndexCustomProperties(document, product.Properties, product.PropertyValues, contentPropertyTypes);
+            IndexCustomProperties(document, product.Properties, contentPropertyTypes);
 
             //Index product category properties
             if (product.Category != null)
             {
-                IndexCustomProperties(document, product.Category.Properties, product.Category.PropertyValues, contentPropertyTypes);
+                IndexCustomProperties(document, product.Category.Properties, contentPropertyTypes);
             }
 
             //Index catalog properties
             if (product.Catalog != null)
             {
-                IndexCustomProperties(document, product.Catalog.Properties, product.Catalog.PropertyValues, contentPropertyTypes);
+                IndexCustomProperties(document, product.Catalog.Properties, contentPropertyTypes);
             }
 
             if (product.Variations != null)
@@ -128,7 +128,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
                     document.Add(new IndexDocumentField("code", variation.Code) { IsRetrievable = true, IsFilterable = true, IsCollection = true });
                     // add the variation code to content
                     document.Add(new IndexDocumentField("__content", variation.Code) { IsRetrievable = true, IsSearchable = true, IsCollection = true });
-                    IndexCustomProperties(document, variation.Properties, variation.PropertyValues, contentPropertyTypes);
+                    IndexCustomProperties(document, variation.Properties, contentPropertyTypes);
                 }
             }
 
@@ -139,8 +139,6 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
             if (StoreObjectsInIndex)
             {
                 // Index serialized product
-                //TODO
-                //var itemDto = product.ToWebModel(_blobUrlResolver);
                 document.AddObjectFieldValue(product);
             }
 

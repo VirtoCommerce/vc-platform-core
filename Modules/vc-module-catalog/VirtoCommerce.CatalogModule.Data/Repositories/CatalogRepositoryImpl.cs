@@ -400,10 +400,107 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
             }
         }
 
-        public GenericSearchResult<AssociationEntity> SearchAssociations(ProductAssociationSearchCriteria criteria)
+        public async Task<GenericSearchResult<AssociationEntity>> SearchAssociations(ProductAssociationSearchCriteria criteria)
         {
-            //TODO
-            throw new NotImplementedException();
+            var result = new GenericSearchResult<AssociationEntity>();
+
+            var countSqlCommandText = @"
+                ;WITH Association_CTE AS
+                (
+	                SELECT *
+	                FROM Association
+	                WHERE ItemId IN ({0})
+                "
+                + (!string.IsNullOrEmpty(criteria.Group) ? $" AND AssociationType = @group" : string.Empty) +
+                @"), Category_CTE AS
+                (
+	                SELECT AssociatedCategoryId Id
+	                FROM Association_CTE
+	                WHERE AssociatedCategoryId IS NOT NULL
+	                UNION ALL
+	                SELECT c.Id
+	                FROM Category c
+	                INNER JOIN Category_CTE cte ON c.ParentCategoryId = cte.Id
+                ),
+                Item_CTE AS 
+                (
+	                SELECT  i.Id
+	                FROM (SELECT DISTINCT Id FROM Category_CTE) c
+	                LEFT JOIN Item i ON c.Id=i.CategoryId WHERE i.ParentId IS NULL
+	                UNION
+	                SELECT AssociatedItemId Id FROM Association_CTE
+                ) 
+                SELECT COUNT(Id) FROM Item_CTE";
+
+            var querySqlCommandText = @"
+                    ;WITH Association_CTE AS
+                    (
+	                    SELECT
+ 		                    Id	
+		                    ,AssociationType
+		                    ,Priority
+		                    ,ItemId
+		                    ,CreatedDate
+		                    ,ModifiedDate
+		                    ,CreatedBy
+		                    ,ModifiedBy
+		                    ,Discriminator
+		                    ,AssociatedItemId
+		                    ,AssociatedCategoryId
+		                    ,Tags
+		                    ,Quantity
+	                    FROM Association
+	                    WHERE ItemId IN({0})"
+                    + (!string.IsNullOrEmpty(criteria.Group) ? $" AND AssociationType = @group" : string.Empty) +
+                    @"), Category_CTE AS
+                    (
+	                    SELECT AssociatedCategoryId Id, AssociatedCategoryId
+	                    FROM Association_CTE
+	                    WHERE AssociatedCategoryId IS NOT NULL
+	                    UNION ALL
+	                    SELECT c.Id, cte.AssociatedCategoryId
+	                    FROM Category c
+	                    INNER JOIN Category_CTE cte ON c.ParentCategoryId = cte.Id
+                    ),
+                    Item_CTE AS 
+                    (
+	                    SELECT 
+		                    a.Id	
+		                    ,a.AssociationType
+		                    ,a.Priority
+		                    ,a.ItemId
+		                    ,a.CreatedDate
+		                    ,a.ModifiedDate
+		                    ,a.CreatedBy
+		                    ,a.ModifiedBy
+		                    ,a.Discriminator
+		                    ,i.Id AssociatedItemId
+		                    ,a.AssociatedCategoryId
+		                    ,a.Tags
+		                    ,a.Quantity
+	                    FROM Category_CTE cat
+	                    LEFT JOIN Item i ON cat.Id=i.CategoryId
+	                    LEFT JOIN Association a ON cat.AssociatedCategoryId=a.AssociatedCategoryId
+                        WHERE i.ParentId IS NULL
+	                    UNION
+	                    SELECT * FROM Association_CTE
+                    ) 
+                    SELECT  * FROM Item_CTE WHERE AssociatedItemId IS NOT NULL ORDER BY Priority " +
+                    $"OFFSET {criteria.Skip} ROWS FETCH NEXT {criteria.Take} ROWS ONLY";
+
+            var countSqlCommandParameters = new List<SqlParameter>();
+            var querySqlCommandParameters = new List<SqlParameter>();
+
+            if (!string.IsNullOrEmpty(criteria.Group))
+            {
+                countSqlCommandParameters.Add(new SqlParameter($"@group", criteria.Group));
+                querySqlCommandParameters.Add(new SqlParameter($"@group", criteria.Group));
+            }
+
+            result.TotalCount = await Associations.FromSql(countSqlCommandText, countSqlCommandParameters).CountAsync();
+            result.Results = await Associations.FromSql(querySqlCommandText, querySqlCommandParameters).ToListAsync();
+
+            return result;
         }
 
         #endregion

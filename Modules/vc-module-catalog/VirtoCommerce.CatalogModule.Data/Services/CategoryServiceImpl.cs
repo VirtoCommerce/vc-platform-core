@@ -11,6 +11,7 @@ using VirtoCommerce.CatalogModule.Data.Caching;
 using VirtoCommerce.CatalogModule.Data.Model;
 using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.CatalogModule.Data.Validation;
+using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
@@ -24,14 +25,20 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         private readonly Func<ICatalogRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
         private readonly AbstractValidator<IHasProperties> _hasPropertyValidator;
+        private readonly ICatalogService _catalogService;
+        private readonly IOutlineService _outlineService;
+        private readonly ISeoService _seoService;
 
         public CategoryServiceImpl(Func<ICatalogRepository> catalogRepositoryFactory,
-                                   IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache, AbstractValidator<IHasProperties> hasPropertyValidator)
+                                   IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache, AbstractValidator<IHasProperties> hasPropertyValidator, ICatalogService catalogService, IOutlineService outlineService, ISeoService seoService)
         {
             _repositoryFactory = catalogRepositoryFactory;
             _eventPublisher = eventPublisher;
             _platformMemoryCache = platformMemoryCache;
             _hasPropertyValidator = hasPropertyValidator;
+            _catalogService = catalogService;
+            _outlineService = outlineService;
+            _seoService = seoService;
         }
 
         #region ICategoryService Members
@@ -44,7 +51,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 Category category;
                 if (preloadedCategoriesMap.TryGetValue(categoryId, out category))
                 {
-                    result.Add(MemberwiseCloneCategory(category));
+                    result.Add(category.MemberwiseCloneCategory());
                 }
             }
 
@@ -85,7 +92,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     }
                 }
 
-                //TODO Outline to eventhandler
                 await _eventPublisher.Publish(new CategoryChangingEvent(changedEntries));
 
                 await repository.UnitOfWork.CommitAsync();
@@ -112,8 +118,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 CategoryCacheRegion.ExpireRegion();
                 await _eventPublisher.Publish(new CategoryChangedEvent(changedEntries));
             }
-
-
         }
 
         #endregion
@@ -140,7 +144,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             if (!responseGroup.HasFlag(CategoryResponseGroup.WithProperties))
             {
                 category.Properties = null;
-                category.PropertyValues = null;
             }
             if (!responseGroup.HasFlag(CategoryResponseGroup.WithOutlines))
             {
@@ -167,64 +170,115 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 }
                 var result = entities.Select(x => x.ToModel(AbstractTypeFactory<Category>.TryCreateInstance())).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
 
-                //LoadDependencies(result.Values, result);
-                //ApplyInheritanceRules(result.Values);
+                await LoadDependenciesAsync(result.Values, result);
+                ApplyInheritanceRules(result.Values);
 
-                //TODO
                 // Fill outlines for categories            
-                //_outlineService.FillOutlinesForObjects(result.Values, catalogId);
+                _outlineService.FillOutlinesForObjects(result.Values, catalogId);
 
-                //var objectsWithSeo = new List<ISeoSupport>(result.Values);
-                //var outlineItems = result.Values.Where(c => c.Outlines != null).SelectMany(c => c.Outlines.SelectMany(o => o.Items));
-                //objectsWithSeo.AddRange(outlineItems);
-                //_commerceService.LoadSeoForObjects(objectsWithSeo.ToArray());
+                var objectsWithSeo = new List<ISeoSupport>(result.Values);
+                var outlineItems = result.Values.Where(c => c.Outlines != null).SelectMany(c => c.Outlines.SelectMany(o => o.Items));
+                objectsWithSeo.AddRange(outlineItems);
+                await _seoService.LoadSeoForObjectsAsync(objectsWithSeo.ToArray());
 
                 return result;
             });
         }
 
-        // TODO: Move to domain
-        protected virtual Category MemberwiseCloneCategory(Category category)
+        protected virtual async Task LoadDependenciesAsync(IEnumerable<Category> categories, Dictionary<string, Category> preloadedCategoriesMap)
         {
-            var retVal = AbstractTypeFactory<Category>.TryCreateInstance();
+            var catalogsMap = (await _catalogService.GetCatalogsListAsync()).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+            foreach (var category in categories)
+            {
+                category.Catalog = catalogsMap.GetValueOrThrow(category.CatalogId, $"catalog with key {category.CatalogId} not exist");
+                category.IsVirtual = category.Catalog.IsVirtual;
+                category.Parents = Array.Empty<Category>();
+                //Load all parent categories
+                if (category.ParentId != null)
+                {
+                    category.Parents = TreeExtension.GetAncestors(category, x => x.ParentId != null && preloadedCategoriesMap.ContainsKey(x.ParentId) ? preloadedCategoriesMap[x.ParentId] : null)
+                                                    .Reverse()
+                                                    .ToArray();
+                }
+                category.Level = category.Parents.Length;
 
-            // Entity
-            retVal.Id = category.Id;
+                if (!category.Links.IsNullOrEmpty())
+                {
+                    foreach (var link in category.Links)
+                    {
+                        link.Catalog = catalogsMap.GetValueOrThrow(link.CatalogId, $"link catalog with key {link.CatalogId} not exist");
+                        if (link.CategoryId != null)
+                        {
+                            if (preloadedCategoriesMap.ContainsKey(link.CategoryId))
+                            {
+                                link.Category = preloadedCategoriesMap[link.CategoryId];
+                            }
+                        }
+                    }
+                }
 
-            // AuditableEntity
-            retVal.CreatedDate = category.CreatedDate;
-            retVal.ModifiedDate = category.ModifiedDate;
-            retVal.CreatedBy = category.CreatedBy;
-            retVal.ModifiedBy = category.ModifiedBy;
+                if (!category.Properties.IsNullOrEmpty())
+                {
+                    foreach (var property in category.Properties)
+                    {
+                        property.Catalog = catalogsMap.GetValueOrThrow(property.CatalogId, $"property catalog with key {property.CatalogId} not exist");
+                        if (property.CategoryId != null)
+                        {
+                            if (preloadedCategoriesMap.ContainsKey(property.CategoryId))
+                            {
+                                property.Category = preloadedCategoriesMap[property.CategoryId];
+                            }
+                        }
+                    }
+                }
+            }
 
-            // Category
-            retVal.CatalogId = category.CatalogId;
-            retVal.Code = category.Code;
-            retVal.IsActive = category.IsActive;
-            retVal.IsVirtual = category.IsVirtual;
-            retVal.Level = category.Level;
-            retVal.Name = category.Name;
-            retVal.PackageType = category.PackageType;
-            retVal.ParentId = category.ParentId;
-            retVal.Path = category.Path;
-            retVal.Priority = category.Priority;
-            retVal.TaxType = category.TaxType;
-
-            // TODO: clone reference objects
-            retVal.Children = category.Children;
-            retVal.Outlines = category.Outlines;
-            retVal.PropertyValues = category.PropertyValues;
-            retVal.SeoInfos = category.SeoInfos;
-            retVal.Catalog = category.Catalog;
-            retVal.Properties = category.Properties;
-            retVal.Parents = category.Parents;
-            retVal.Links = category.Links;
-            retVal.Images = category.Images;
-
-            return retVal;
         }
 
-        //TODO
+        protected virtual void ApplyInheritanceRules(IEnumerable<Category> categories)
+        {
+            foreach (var category in categories)
+            {
+                //Try to inherit taxType from parent category
+                if (category.TaxType == null && !category.Parents.IsNullOrEmpty())
+                {
+                    category.TaxType = category.Parents.Select(x => x.TaxType).FirstOrDefault(x => x != null);
+                }
+                //Inherit properties
+                var properties = category.Catalog.Properties.ToList();
+                //For parents categories                       
+                properties.AddRange(category.Parents.SelectMany(x => x.Properties));
+                if (category.Properties != null)
+                {
+                    // Self properties
+                    properties.AddRange(category.Properties);
+                }
+
+                //property override - need leave only property has a min distance to target category 
+                //Algorithm based on index property in resulting list (property with min index will more closed to category)
+                category.Properties = properties.Select((x, index) => new { Property = x, Index = index })
+                                           .GroupBy(x => $"{x.Property.Name.ToLowerInvariant()}:{x.Property.Type}")
+                                           .Select(x => x.OrderBy(y => y.Index).First().Property)
+                                           .OrderBy(x => x.Name)
+                                           .ToList();
+
+                if (!category.Properties.IsNullOrEmpty())
+                {
+                    foreach (var property in category.Properties)
+                    {
+                        //Next need set Property in PropertyValues objects
+                        foreach (var propValue in property.Values.ToArray())
+                        {
+                            propValue.Property = category.Properties.Where(x => x.Type == PropertyType.Category)
+                                .FirstOrDefault(x => x.IsSuitableForValue(propValue));
+                        }
+                    }
+
+                }
+            }
+        }
+
+
         private async Task ValidateCategoryPropertiesAsync(Category[] categories)
         {
             if (categories == null)
@@ -241,8 +295,8 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             var groups = categories.GroupBy(x => x.CatalogId);
             foreach (var group in groups)
             {
-                //LoadDependencies(group, PreloadCategories(group.Key));
-                //ApplyInheritanceRules(group);
+                await LoadDependenciesAsync(group, await PreloadCategories(group.Key));
+                ApplyInheritanceRules(group);
 
                 foreach (var category in group)
                 {

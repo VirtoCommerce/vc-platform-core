@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.Platform.Core.Common;
@@ -25,13 +25,28 @@ namespace VirtoCommerce.CatalogModule.Core.Model
 
         #region IHasProperties members
         public ICollection<Property> Properties { get; set; }
-        public ICollection<PropertyValue> PropertyValues { get; set; }
+
         #endregion
 
         #region ICloneable members
         public object Clone()
         {
             var retVal = base.MemberwiseClone() as Catalog;
+            return retVal;
+        }
+
+        public virtual Catalog MemberwiseCloneCatalog()
+        {
+            var retVal = AbstractTypeFactory<Catalog>.TryCreateInstance();
+
+            retVal.Id = Id;
+            retVal.IsVirtual = IsVirtual;
+            retVal.Name = Name;
+
+            // TODO: clone reference objects
+            retVal.Languages = Languages;
+            retVal.Properties = Properties;
+
             return retVal;
         }
         #endregion

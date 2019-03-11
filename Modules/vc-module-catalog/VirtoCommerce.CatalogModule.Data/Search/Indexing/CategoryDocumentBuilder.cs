@@ -89,7 +89,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
                 document.Add(new IndexDocumentField("__outline", outline.ToLowerInvariant()) { IsRetrievable = true, IsFilterable = true, IsCollection = true });
             }
 
-            IndexCustomProperties(document, category.Properties, category.PropertyValues, new[] { PropertyType.Category });
+            IndexCustomProperties(document, category.Properties, new[] { PropertyType.Category });
 
             // add to content
             document.Add(new IndexDocumentField("__content", category.Name) { IsRetrievable = true, IsSearchable = true, IsCollection = true });
@@ -98,8 +98,6 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
             if (StoreObjectsInIndex)
             {
                 // Index serialized category
-                //TODO
-                //var itemDto = category.ToWebModel(_blobUrlResolver);
                 document.AddObjectFieldValue(category);
             }
 

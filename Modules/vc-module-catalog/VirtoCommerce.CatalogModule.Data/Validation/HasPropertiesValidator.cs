@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using FluentValidation;
 using FluentValidation.Results;
 using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Validation
 {
@@ -24,19 +25,22 @@ namespace VirtoCommerce.CatalogModule.Data.Validation
         public override async Task<ValidationResult> ValidateAsync(ValidationContext<IHasProperties> context, CancellationToken cancellation = default(CancellationToken))
         {
             var validationResults = new List<ValidationResult>();
-            var propertyValues = context.InstanceToValidate.PropertyValues;
-            if (propertyValues != null)
+            if (!context.InstanceToValidate.Properties.IsNullOrEmpty())
             {
-                foreach (var propertyValue in propertyValues)
+                var propertyValues = context.InstanceToValidate.Properties.SelectMany(pv => pv.Values).ToArray();
+                if (!propertyValues.IsNullOrEmpty())
                 {
-                    var rules = propertyValue?.Property?.ValidationRules;
-                    if (rules != null)
+                    foreach (var propertyValue in propertyValues)
                     {
-                        foreach (var rule in rules)
+                        var rules = propertyValue?.Property?.ValidationRules;
+                        if (rules != null)
                         {
-                            var ruleValidator = _propertyValidatorFactory(rule);
-                            var validationResult = await ruleValidator.ValidateAsync(propertyValue, cancellation);
-                            validationResults.Add(validationResult);
+                            foreach (var rule in rules)
+                            {
+                                var ruleValidator = _propertyValidatorFactory(rule);
+                                var validationResult = await ruleValidator.ValidateAsync(propertyValue, cancellation);
+                                validationResults.Add(validationResult);
+                            }
                         }
                     }
                 }

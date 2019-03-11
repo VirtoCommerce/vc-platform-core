@@ -78,7 +78,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
 
         #region IHasProperties members
         public ICollection<Property> Properties { get; set; }
-        public ICollection<PropertyValue> PropertyValues { get; set; }
+
 
         #endregion
         #region IHasImages members

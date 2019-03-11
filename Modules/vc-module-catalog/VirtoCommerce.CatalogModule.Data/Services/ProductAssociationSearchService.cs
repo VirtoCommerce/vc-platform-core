@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
@@ -19,7 +20,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             _itemService = itemService;
         }
 
-        public GenericSearchResult<ProductAssociation> SearchProductAssociations(ProductAssociationSearchCriteria criteria)
+        public async Task<GenericSearchResult<ProductAssociation>> SearchProductAssociationsAsync(ProductAssociationSearchCriteria criteria)
         {
             if (criteria == null)
             {
@@ -36,7 +37,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
                 var result = new GenericSearchResult<ProductAssociation>();
 
-                var dbResult = repository.SearchAssociations(criteria);
+                var dbResult = await repository.SearchAssociations(criteria);
 
                 result.TotalCount = dbResult.TotalCount;
                 result.Results = dbResult.Results.Select(x => x.ToModel(AbstractTypeFactory<ProductAssociation>.TryCreateInstance())).ToList();

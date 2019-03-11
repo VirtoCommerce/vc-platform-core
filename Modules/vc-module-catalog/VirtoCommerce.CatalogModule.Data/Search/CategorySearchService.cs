@@ -17,7 +17,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
         private readonly ICategoryService _categoryService;
         private readonly IBlobUrlResolver _blobUrlResolver;
 
-        public CategorySearchService(ISearchRequestBuilder[] searchRequestBuilders, ISearchProvider searchProvider, ISettingsManager settingsManager, ICategoryService categoryService, IBlobUrlResolver blobUrlResolver)
+        public CategorySearchService(IEnumerable<ISearchRequestBuilder> searchRequestBuilders, ISearchProvider searchProvider, ISettingsManager settingsManager, ICategoryService categoryService, IBlobUrlResolver blobUrlResolver)
             : base(searchRequestBuilders, searchProvider, settingsManager)
         {
             _categoryService = categoryService;
@@ -31,8 +31,6 @@ namespace VirtoCommerce.CatalogModule.Data.Search
 
             var categories = await _categoryService.GetByIdsAsync(missingItemIds, responseGroup, catalog);
 
-            //TODO
-            //var result = categories.Select(p => p.ToWebModel(_blobUrlResolver)).ToArray();
             return categories;
         }
 

@@ -1,9 +1,9 @@
 using System.Linq;
+using System.Threading.Tasks;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.CatalogModule.Data.Model;
-using System.Threading.Tasks;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Repositories
 {
@@ -32,7 +32,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
         Task<PropertyDictionaryItemEntity[]> GetPropertyDictionaryItemsByIdsAsync(string[] dictItemIds);
 
 
-        GenericSearchResult<AssociationEntity> SearchAssociations(ProductAssociationSearchCriteria criteria);
+        Task<GenericSearchResult<AssociationEntity>> SearchAssociations(ProductAssociationSearchCriteria criteria);
 
         Task RemoveItemsAsync(string[] itemIds);
         Task RemoveCategoriesAsync(string[] ids);

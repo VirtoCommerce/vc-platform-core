@@ -175,10 +175,18 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             }
 
             //item property values
-            product.PropertyValues = ItemPropertyValues
-                .OrderBy(x => x.DictionaryItem?.SortOrder)
-                .ThenBy(x => x.Name)
-                .SelectMany(x => x.ToModel(AbstractTypeFactory<PropertyValue>.TryCreateInstance())).ToList();
+            if (!ItemPropertyValues.IsNullOrEmpty())
+            {
+                var propertyValues = ItemPropertyValues.SelectMany(pv => pv.ToModel(AbstractTypeFactory<PropertyValue>.TryCreateInstance()).ToList());
+                product.Properties = propertyValues.GroupBy(pv => pv.PropertyName).Select(values =>
+                {
+                    var property = AbstractTypeFactory<Property>.TryCreateInstance();
+                    property.Name = values.Key;
+                    property.ValueType = values.FirstOrDefault().ValueType;
+                    property.Values = values.ToList();
+                    return property;
+                }).ToList();
+            }
 
             if (Parent != null)
             {
@@ -259,9 +267,14 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
             if (!product.Properties.IsNullOrEmpty())
             {
-                ItemPropertyValues = new ObservableCollection<PropertyValueEntity>(new ObservableCollection<PropertyValueEntity>(AbstractTypeFactory<PropertyValueEntity>.TryCreateInstance().FromModels(product.PropertyValues, pkMap)));
+                var propertyValues = product.Properties.SelectMany(pr => new ObservableCollection<PropertyValueEntity>(
+                    AbstractTypeFactory<PropertyValueEntity>
+                        .TryCreateInstance()
+                        .FromModels(pr.Values, pr, pkMap)));
+
+                ItemPropertyValues = new ObservableCollection<PropertyValueEntity>(propertyValues);
             }
-            
+
             #endregion
 
             #region Assets
