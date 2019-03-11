@@ -36,12 +36,8 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
                 .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<ItemEntity>().HasOne(m => m.Parent).WithMany(x => x.Childrens).HasForeignKey(x => x.ParentId)
                 .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<ItemEntity>().HasIndex(x => new { x.Code })
-                .IsUnique();
-
-            modelBuilder.Entity<ItemEntity>().HasIndex(x => new { x.CatalogId, x.ParentId })
-                .IsUnique(false)
-                .HasName("IX_CatalogId_ParentId");
+            modelBuilder.Entity<ItemEntity>().HasIndex(x => new { x.Code }).IsUnique();
+            modelBuilder.Entity<ItemEntity>().HasIndex(x => new { x.CatalogId, x.ParentId }).IsUnique(false).HasName("IX_CatalogId_ParentId");
             #endregion
 
             #region Property
@@ -57,8 +53,8 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
             #region PropertyDictionaryItem
             modelBuilder.Entity<PropertyDictionaryItemEntity>().ToTable("PropertyDictionaryItem").HasKey(x => x.Id);
             modelBuilder.Entity<PropertyDictionaryItemEntity>().Property(x => x.Id).HasMaxLength(128);
-            modelBuilder.Entity<PropertyDictionaryItemEntity>().HasOne(m => m.Property).WithMany().HasForeignKey(x => x.PropertyId)
-                .IsRequired().OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<PropertyDictionaryItemEntity>().HasOne(m => m.Property).WithMany(p => p.DictionaryItems)
+                .HasForeignKey(x => x.PropertyId).IsRequired().OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<PropertyDictionaryItemEntity>().HasIndex(x => new { x.Alias, x.PropertyId })
                 .IsUnique()
                 .HasName("IX_AliasAndPropertyId");
@@ -67,7 +63,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
             #region PropertyDictionaryValue
             modelBuilder.Entity<PropertyDictionaryValueEntity>().ToTable("PropertyDictionaryValue").HasKey(x => x.Id);
             modelBuilder.Entity<PropertyDictionaryValueEntity>().Property(x => x.Id).HasMaxLength(128);
-            modelBuilder.Entity<PropertyDictionaryValueEntity>().HasOne(m => m.DictionaryItem).WithMany(x => x.DictionaryValueEntities)
+            modelBuilder.Entity<PropertyDictionaryValueEntity>().HasOne(m => m.DictionaryItem).WithMany(x => x.DictionaryItemValues)
                 .HasForeignKey(x => x.DictionaryItemId).IsRequired().OnDelete(DeleteBehavior.Cascade);
             #endregion
 
@@ -94,8 +90,8 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
             modelBuilder.Entity<PropertyValueEntity>().HasOne(m => m.Category).WithMany(x => x.CategoryPropertyValues)
                 .HasForeignKey(x => x.CategoryId).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<PropertyValueEntity>().HasOne(m => m.Catalog).WithMany(x => x.CatalogPropertyValues)
-                .HasForeignKey(x => x.CatalogId).OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<PropertyValueEntity>().HasOne(m => m.DictionaryItem).WithMany(x => x.PropertyValues)
+                .HasForeignKey(x => x.CatalogId).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<PropertyValueEntity>().HasOne(m => m.DictionaryItem).WithMany()
                 .HasForeignKey(x => x.DictionaryItemId).OnDelete(DeleteBehavior.Cascade);
             #endregion
 

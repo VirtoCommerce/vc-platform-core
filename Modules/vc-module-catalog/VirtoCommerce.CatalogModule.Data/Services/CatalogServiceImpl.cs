@@ -148,18 +148,10 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     foreach (var property in catalog.Properties)
                     {
                         property.Catalog = preloadedCatalogsMap[property.CatalogId];
+                        property.IsReadOnly = property.Type != PropertyType.Catalog;
                         property.Values = catalog.Properties.Where(pr => pr.Id.EqualsInvariant(property.Id))
                             .SelectMany(p => p.Values).ToArray();
                     }
-                    //if (!catalog.PropertyValues.IsNullOrEmpty())
-                    //{
-                    //    //Next need set Property in PropertyValues objects
-                    //    foreach (var propValue in catalog.PropertyValues.ToArray())
-                    //    {
-                    //        propValue.Property = catalog.Properties.Where(x => x.Type == PropertyType.Catalog)
-                    //                                               .FirstOrDefault(x => x.IsSuitableForValue(propValue));
-                    //    }
-                    //}
                 }
             }
         }

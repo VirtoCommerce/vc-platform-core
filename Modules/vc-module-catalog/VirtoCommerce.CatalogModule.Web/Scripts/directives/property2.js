@@ -172,8 +172,7 @@ angular.module('virtoCommerce.catalogModule')
                         dictValue = {
                             alias: dictItem.alias,
                             valueId: dictItem.id,
-                            value: dictItem.alias,
-                            propertyName: propertyName
+                            value: dictItem.alias
                         };
                     }
                     scope.context.allDictionaryValues.push(dictValue);

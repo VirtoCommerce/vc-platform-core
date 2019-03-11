@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
+using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CatalogModule.Core.Events;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Services;
+using VirtoCommerce.CatalogModule.Data.Caching;
 using VirtoCommerce.CatalogModule.Data.Model;
 using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.CatalogModule.Data.Validation;
 using VirtoCommerce.CoreModule.Core.Seo;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Data.Infrastructure;
@@ -25,9 +28,10 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         private readonly ICategoryService _categoryService;
         private readonly IOutlineService _outlineService;
         private readonly ISeoService _seoService;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
 
         public ItemServiceImpl(Func<ICatalogRepository> catalogRepositoryFactory,
-                               IEventPublisher eventPublisher, AbstractValidator<IHasProperties> hasPropertyValidator, ICatalogService catalogService, ICategoryService categoryService, IOutlineService outlineService, ISeoService seoService)
+                               IEventPublisher eventPublisher, AbstractValidator<IHasProperties> hasPropertyValidator, ICatalogService catalogService, ICategoryService categoryService, IOutlineService outlineService, ISeoService seoService, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = catalogRepositoryFactory;
             _eventPublisher = eventPublisher;
@@ -36,52 +40,60 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             _categoryService = categoryService;
             _outlineService = outlineService;
             _seoService = seoService;
+            _platformMemoryCache = platformMemoryCache;
         }
 
         #region IItemService Members
 
         public virtual async Task<CatalogProduct[]> GetByIdsAsync(string[] itemIds, ItemResponseGroup respGroup, string catalogId = null)
         {
-            CatalogProduct[] result;
-
-            using (var repository = _repositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", itemIds), respGroup.ToString(), catalogId);
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                //Optimize performance and CPU usage
-                repository.DisableChangesTracking();
+                CatalogProduct[] result;
 
-                result = (await repository.GetItemByIdsAsync(itemIds, respGroup))
-                                   .Select(x => x.ToModel(AbstractTypeFactory<CatalogProduct>.TryCreateInstance()))
-                                   .ToArray();
-            }
+                using (var repository = _repositoryFactory())
+                {
+                    //Optimize performance and CPU usage
+                    repository.DisableChangesTracking();
 
-            await LoadDependenciesAsync(result);
-            ApplyInheritanceRules(result);
+                    result = (await repository.GetItemByIdsAsync(itemIds, respGroup))
+                                       .Select(x => x.ToModel(AbstractTypeFactory<CatalogProduct>.TryCreateInstance()))
+                                       .ToArray();
+                }
 
-            var productsWithVariationsList = result.Concat(result.Where(p => p.Variations != null)
-                                       .SelectMany(p => p.Variations)).ToArray();
-            // Fill outlines for products and variations
-            if (respGroup.HasFlag(ItemResponseGroup.Outlines))
-            {
-                _outlineService.FillOutlinesForObjects(productsWithVariationsList, catalogId);
-            }
-            // Fill SEO info for products, variations and outline items
-            if ((respGroup & ItemResponseGroup.Seo) == ItemResponseGroup.Seo)
-            {
-                var objectsWithSeo = productsWithVariationsList.OfType<ISeoSupport>().ToList();
-                //Load SEO information for all Outline.Items
-                var outlineItems = productsWithVariationsList.Where(p => p.Outlines != null)
-                                         .SelectMany(p => p.Outlines.SelectMany(o => o.Items));
-                objectsWithSeo.AddRange(outlineItems);
-                await _seoService.LoadSeoForObjectsAsync(objectsWithSeo.ToArray());
-            }
+                await LoadDependenciesAsync(result);
+                ApplyInheritanceRules(result);
 
-            //Reduce details according to response group
-            foreach (var product in productsWithVariationsList)
-            {
-                ReduceDetails(product, respGroup);
-            }
+                var productsWithVariationsList = result.Concat(result.Where(p => p.Variations != null)
+                                           .SelectMany(p => p.Variations)).ToArray();
 
-            return result;
+                // Fill outlines for products and variations
+                if (respGroup.HasFlag(ItemResponseGroup.Outlines))
+                {
+                    _outlineService.FillOutlinesForObjects(productsWithVariationsList, catalogId);
+                }
+
+                // Fill SEO info for products, variations and outline items
+                if ((respGroup & ItemResponseGroup.Seo) == ItemResponseGroup.Seo)
+                {
+                    var objectsWithSeo = productsWithVariationsList.OfType<ISeoSupport>().ToList();
+                    //Load SEO information for all Outline.Items
+                    var outlineItems = productsWithVariationsList.Where(p => p.Outlines != null)
+                                             .SelectMany(p => p.Outlines.SelectMany(o => o.Items));
+                    objectsWithSeo.AddRange(outlineItems);
+                    await _seoService.LoadSeoForObjectsAsync(objectsWithSeo.ToArray());
+                }
+
+                //Reduce details according to response group
+                foreach (var product in productsWithVariationsList)
+                {
+                    ReduceDetails(product, respGroup);
+                    cacheEntry.AddExpirationToken(ItemCacheRegion.CreateChangeToken(product));
+                }
+
+                return result;
+            });
         }
 
         public virtual async Task<CatalogProduct> GetByIdAsync(string itemId, ItemResponseGroup responseGroup, string catalogId = null)
@@ -126,6 +138,8 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
                 await _eventPublisher.Publish(new ProductChangedEvent(changedEntries));
             }
+
+            ClearCache(products);
         }
 
         public virtual async Task DeleteAsync(string[] itemIds)
@@ -144,9 +158,22 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
                 await _eventPublisher.Publish(new ProductChangedEvent(changedEntries));
             }
+
+            ClearCache(items);
         }
 
         #endregion
+
+        protected virtual void ClearCache(IEnumerable<CatalogProduct> entities)
+        {
+            ItemSearchCacheRegion.ExpireRegion();
+
+            foreach (var entity in entities)
+            {
+                ItemCacheRegion.ExpireInventory(entity);
+            }
+        }
+
         /// <summary>
         /// Reduce product details according to response group
         /// </summary>
@@ -321,9 +348,14 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     {
                         if (!product.Properties.IsNullOrEmpty())
                         {
-                            up.Values = product.Properties
-                                .Where(p => p.Name.EqualsInvariant(up.Name) && p.Values.All(up.IsSuitableForValue))
-                                .SelectMany(pv => pv.Values).ToList();
+                            up.Values = product.Properties.Where(p => p.Name.EqualsInvariant(up.Name) && p.Values.All(v => v.ValueType == up.ValueType))
+                                .SelectMany(pv => pv.Values).Select(val =>
+                                {
+                                    val.Property = up;
+                                    val.PropertyId = up.Id;
+                                    val.PropertyName = up.Name;
+                                    return val;
+                                }).ToList();
                         }
                         return up;
                     }).ToArray();

@@ -412,18 +412,11 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
                     Id = table.Column<string>(maxLength: 128, nullable: false),
                     Alias = table.Column<string>(maxLength: 512, nullable: false),
                     SortOrder = table.Column<int>(nullable: false),
-                    PropertyId = table.Column<string>(nullable: false),
-                    PropertyEntityId = table.Column<string>(nullable: true)
+                    PropertyId = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PropertyDictionaryItem", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PropertyDictionaryItem_Property_PropertyEntityId",
-                        column: x => x.PropertyEntityId,
-                        principalTable: "Property",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_PropertyDictionaryItem_Property_PropertyId",
                         column: x => x.PropertyId,
@@ -525,7 +518,7 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
                         column: x => x.CatalogId,
                         principalTable: "Catalog",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_PropertyValue_Category_CategoryId",
                         column: x => x.CategoryId,
@@ -661,11 +654,6 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
                 name: "IX_PropertyAttribute_PropertyId",
                 table: "PropertyAttribute",
                 column: "PropertyId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PropertyDictionaryItem_PropertyEntityId",
-                table: "PropertyDictionaryItem",
-                column: "PropertyEntityId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PropertyDictionaryItem_PropertyId",

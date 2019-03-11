@@ -45,7 +45,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
                                  .Where(x => catalogIds.Contains(x.Id))
                                  .ToArrayAsync();
 
-            var propertyValues = await PropertyValues.Include(x => x.DictionaryItem.DictionaryValueEntities).Where(x => catalogIds.Contains(x.CatalogId) && x.CategoryId == null).ToArrayAsync();
+            var propertyValues = await PropertyValues.Include(x => x.DictionaryItem.DictionaryItemValues).Where(x => catalogIds.Contains(x.CatalogId) && x.CategoryId == null).ToArrayAsync();
             var catalogPropertiesIds = await Properties.Where(x => catalogIds.Contains(x.CatalogId) && x.CategoryId == null)
                                                  .Select(x => x.Id)
                                                  .ToArrayAsync();
@@ -89,7 +89,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
             if (respGroup.HasFlag(CategoryResponseGroup.WithProperties))
             {
                 //Load category property values by separate query
-                var propertyValues = await PropertyValues.Include(x => x.DictionaryItem.DictionaryValueEntities).Where(x => categoriesIds.Contains(x.CategoryId)).ToArrayAsync();
+                var propertyValues = await PropertyValues.Include(x => x.DictionaryItem.DictionaryItemValues).Where(x => categoriesIds.Contains(x.CategoryId)).ToArrayAsync();
 
                 var categoryPropertiesIds = await Properties.Where(x => categoriesIds.Contains(x.CategoryId)).Select(x => x.Id).ToArrayAsync();
                 var categoryProperties = await GetPropertiesByIdsAsync(categoryPropertiesIds);
@@ -120,7 +120,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
 
             if (respGroup.HasFlag(ItemResponseGroup.ItemProperties))
             {
-                var propertyValues = await PropertyValues.Include(x => x.DictionaryItem.DictionaryValueEntities).Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
+                var propertyValues = await PropertyValues.Include(x => x.DictionaryItem.DictionaryItemValues).Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
             }
 
             if (respGroup.HasFlag(ItemResponseGroup.Links))
@@ -198,7 +198,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
 
             if (loadDictValues)
             {
-                var propDictionaryItems = await PropertyDictionaryItems.Include(x => x.DictionaryValueEntities).Where(x => propIds.Contains(x.PropertyId)).ToArrayAsync();
+                var propDictionaryItems = await PropertyDictionaryItems.Include(x => x.DictionaryItemValues).Where(x => propIds.Contains(x.PropertyId)).ToArrayAsync();
             }
             return retVal;
         }
@@ -251,7 +251,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
             {
                 throw new ArgumentNullException(nameof(dictItemIds));
             }
-            var result = await PropertyDictionaryItems.Include(x => x.DictionaryValueEntities).Where(x => dictItemIds.Contains(x.Id)).ToArrayAsync();
+            var result = await PropertyDictionaryItems.Include(x => x.DictionaryItemValues).Where(x => dictItemIds.Contains(x.Id)).ToArrayAsync();
             return result;
         }
 

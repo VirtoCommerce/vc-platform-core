@@ -500,16 +500,12 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(512);
 
-                    b.Property<string>("PropertyEntityId");
-
                     b.Property<string>("PropertyId")
                         .IsRequired();
 
                     b.Property<int>("SortOrder");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PropertyEntityId");
 
                     b.HasIndex("PropertyId");
 
@@ -833,12 +829,8 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
 
             modelBuilder.Entity("VirtoCommerce.CatalogModule.Data.Model.PropertyDictionaryItemEntity", b =>
                 {
-                    b.HasOne("VirtoCommerce.CatalogModule.Data.Model.PropertyEntity")
-                        .WithMany("DictionaryItems")
-                        .HasForeignKey("PropertyEntityId");
-
                     b.HasOne("VirtoCommerce.CatalogModule.Data.Model.PropertyEntity", "Property")
-                        .WithMany()
+                        .WithMany("DictionaryItems")
                         .HasForeignKey("PropertyId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
@@ -846,7 +838,7 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.CatalogModule.Data.Model.PropertyDictionaryValueEntity", b =>
                 {
                     b.HasOne("VirtoCommerce.CatalogModule.Data.Model.PropertyDictionaryItemEntity", "DictionaryItem")
-                        .WithMany("DictionaryValueEntities")
+                        .WithMany("DictionaryItemValues")
                         .HasForeignKey("DictionaryItemId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
@@ -885,7 +877,7 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
                     b.HasOne("VirtoCommerce.CatalogModule.Data.Model.CatalogEntity", "Catalog")
                         .WithMany("CatalogPropertyValues")
                         .HasForeignKey("CatalogId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("VirtoCommerce.CatalogModule.Data.Model.CategoryEntity", "Category")
                         .WithMany("CategoryPropertyValues")
@@ -893,7 +885,7 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("VirtoCommerce.CatalogModule.Data.Model.PropertyDictionaryItemEntity", "DictionaryItem")
-                        .WithMany("PropertyValues")
+                        .WithMany()
                         .HasForeignKey("DictionaryItemId")
                         .OnDelete(DeleteBehavior.Cascade);
 

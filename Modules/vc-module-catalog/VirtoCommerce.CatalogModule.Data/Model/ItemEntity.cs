@@ -267,10 +267,10 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
             if (!product.Properties.IsNullOrEmpty())
             {
-                var propertyValues = product.Properties.SelectMany(pr => new ObservableCollection<PropertyValueEntity>(
+                var propertyValues = new ObservableCollection<PropertyValueEntity>(
                     AbstractTypeFactory<PropertyValueEntity>
                         .TryCreateInstance()
-                        .FromModels(pr.Values, pr, pkMap)));
+                        .FromModels(product.Properties.SelectMany(pr => pr.Values), pkMap));
 
                 ItemPropertyValues = new ObservableCollection<PropertyValueEntity>(propertyValues);
             }

@@ -1,13 +1,17 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CatalogModule.Core;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
+using VirtoCommerce.CatalogModule.Data.Caching;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Data.Caching;
 using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Data.Services
@@ -21,56 +25,65 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         private readonly IItemService _itemService;
         private readonly IProductSearchService _productSearchService;
         private readonly ISettingsManager _settingsManager;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
 
         public CatalogSearchServiceDecorator(
             CatalogSearchServiceImpl catalogSearchService,
             IItemService itemService,
             IProductSearchService productSearchService,
-            ISettingsManager settingsManager)
+            ISettingsManager settingsManager, IPlatformMemoryCache platformMemoryCache)
         {
             _catalogSearchService = catalogSearchService;
             _itemService = itemService;
             _productSearchService = productSearchService;
             _settingsManager = settingsManager;
+            _platformMemoryCache = platformMemoryCache;
         }
 
         public virtual async Task<SearchResult> SearchAsync(CatalogListEntrySearchCriteria criteria)
         {
-            SearchResult result;
-
-            var useIndexedSearch = _settingsManager.GetValue(ModuleConstants.Settings.Search.UseCatalogIndexedSearchInManager.Name, true);
-            var searchProducts = criteria.ResponseGroup.HasFlag(SearchResponseGroup.WithProducts);
-
-            if (useIndexedSearch && searchProducts && !string.IsNullOrEmpty(criteria.Keyword))
+            var cacheKey = CacheKey.With(GetType(), "SearchAsync", criteria.GetCacheKey());
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                result = new SearchResult();
+                cacheEntry.AddExpirationToken(ItemSearchCacheRegion.CreateChangeToken());
+                SearchResult result;
 
-                // TODO: create outline for category
-                // TODO: implement sorting
+                var useIndexedSearch =
+                    _settingsManager.GetValue(ModuleConstants.Settings.Search.UseCatalogIndexedSearchInManager.Name,
+                        true);
+                var searchProducts = criteria.ResponseGroup.HasFlag(SearchResponseGroup.WithProducts);
 
-                const ItemResponseGroup responseGroup = ItemResponseGroup.ItemInfo | ItemResponseGroup.Outlines;
+                if (useIndexedSearch && searchProducts && !string.IsNullOrEmpty(criteria.Keyword))
+                {
+                    result = new SearchResult();
 
-                var serviceCriteria = AbstractTypeFactory<ProductSearchCriteria>.TryCreateInstance();
+                    // TODO: create outline for category
+                    // TODO: implement sorting
 
-                serviceCriteria.ObjectType = KnownDocumentTypes.Product;
-                serviceCriteria.Keyword = criteria.Keyword;
-                serviceCriteria.CatalogId = criteria.CatalogId;
-                serviceCriteria.Outline = criteria.CategoryId;
-                serviceCriteria.WithHidden = criteria.WithHidden;
-                serviceCriteria.Skip = criteria.Skip;
-                serviceCriteria.Take = criteria.Take;
-                serviceCriteria.ResponseGroup = responseGroup.ToString();
-                serviceCriteria.Sort = criteria.Sort;
+                    const ItemResponseGroup responseGroup = ItemResponseGroup.ItemInfo | ItemResponseGroup.Outlines;
 
-                await SearchItemsAsync(result, serviceCriteria, responseGroup);
-            }
-            else
-            {
-                // use original implementation from catalog module
-                result = await _catalogSearchService.SearchAsync(criteria);
-            }
+                    var serviceCriteria = AbstractTypeFactory<ProductSearchCriteria>.TryCreateInstance();
 
-            return result;
+                    serviceCriteria.ObjectType = KnownDocumentTypes.Product;
+                    serviceCriteria.Keyword = criteria.Keyword;
+                    serviceCriteria.CatalogId = criteria.CatalogId;
+                    serviceCriteria.Outline = criteria.CategoryId;
+                    serviceCriteria.WithHidden = criteria.WithHidden;
+                    serviceCriteria.Skip = criteria.Skip;
+                    serviceCriteria.Take = criteria.Take;
+                    serviceCriteria.ResponseGroup = responseGroup.ToString();
+                    serviceCriteria.Sort = criteria.Sort;
+
+                    await SearchItemsAsync(result, serviceCriteria, responseGroup);
+                }
+                else
+                {
+                    // use original implementation from catalog module
+                    result = await _catalogSearchService.SearchAsync(criteria);
+                }
+
+                return result;
+            });
         }
 
         protected virtual async Task SearchItemsAsync(SearchResult result, ProductSearchCriteria criteria, ItemResponseGroup responseGroup)

@@ -32,15 +32,19 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             var result = AbstractTypeFactory<TResult>.TryCreateInstance();
 
             var requestBuilder = GetRequestBuilder(criteria);
-            var request = await requestBuilder?.BuildRequestAsync(criteria);
 
-            var response = await _searchProvider.SearchAsync(criteria.ObjectType, request);
-
-            if (response != null)
+            if (requestBuilder != null)
             {
-                result.TotalCount = response.TotalCount;
-                result.Items = await ConvertDocuments(response.Documents, criteria);
-                result.Aggregations = await ConvertAggregationsAsync(response.Aggregations, criteria);
+                var request = await requestBuilder.BuildRequestAsync(criteria);
+
+                var response = await _searchProvider.SearchAsync(criteria.ObjectType, request);
+
+                if (response != null)
+                {
+                    result.TotalCount = response.TotalCount;
+                    result.Items = await ConvertDocuments(response.Documents, criteria);
+                    result.Aggregations = await ConvertAggregationsAsync(response.Aggregations, criteria);
+                }
             }
 
             return result;

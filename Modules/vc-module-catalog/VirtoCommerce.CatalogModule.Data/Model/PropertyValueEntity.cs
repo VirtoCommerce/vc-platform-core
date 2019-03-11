@@ -74,9 +74,9 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             propValue.Value = DictionaryItem != null ? DictionaryItem.Alias : GetValue(propValue.ValueType);
             propValue.Alias = DictionaryItem?.Alias;
             //Need to expand all dictionary values
-            if (DictionaryItem != null && !DictionaryItem.DictionaryValueEntities.IsNullOrEmpty())
+            if (DictionaryItem != null && !DictionaryItem.DictionaryItemValues.IsNullOrEmpty())
             {
-                foreach (var dictItemValue in DictionaryItem.DictionaryValueEntities)
+                foreach (var dictItemValue in DictionaryItem.DictionaryItemValues)
                 {
                     var dictPropValue = propValue.Clone() as PropertyValue;
                     dictPropValue.Alias = DictionaryItem.Alias;
@@ -93,7 +93,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             }
         }
 
-        public virtual IEnumerable<PropertyValueEntity> FromModels(IEnumerable<PropertyValue> propValues, Property property, PrimaryKeyResolvingMap pkMap)
+        public virtual IEnumerable<PropertyValueEntity> FromModels(IEnumerable<PropertyValue> propValues, PrimaryKeyResolvingMap pkMap)
         {
             if (propValues == null)
             {
@@ -101,7 +101,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             }
 
             var groupedValues = propValues.Where(x => !x.IsInherited && (!string.IsNullOrEmpty(x.ValueId) || !string.IsNullOrEmpty(x.Value?.ToString())))
-                                           .Select(x => AbstractTypeFactory<PropertyValueEntity>.TryCreateInstance().FromModel(x, property, pkMap))
+                                           .Select(x => AbstractTypeFactory<PropertyValueEntity>.TryCreateInstance().FromModel(x, pkMap))
                                            .GroupBy(x => x.DictionaryItemId);
 
             var result = new List<PropertyValueEntity>();
@@ -120,7 +120,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
         }
 
-        public virtual PropertyValueEntity FromModel(PropertyValue propValue, Property property, PrimaryKeyResolvingMap pkMap)
+        public virtual PropertyValueEntity FromModel(PropertyValue propValue, PrimaryKeyResolvingMap pkMap)
         {
             if (propValue == null)
                 throw new ArgumentNullException(nameof(propValue));
@@ -132,8 +132,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             CreatedDate = propValue.CreatedDate;
             ModifiedBy = propValue.ModifiedBy;
             ModifiedDate = propValue.ModifiedDate;
-            Name = !string.IsNullOrEmpty(propValue.PropertyName) ? propValue.PropertyName : property.Name; 
-            ValueType = (int)propValue.ValueType > 0 ? (int)propValue.ValueType : (int)property.ValueType;
+            Name = propValue.PropertyName;
+            ValueType = (int)propValue.ValueType;
             DictionaryItemId = propValue.ValueId;
             //Required for manual reference
             Alias = propValue.Alias;

@@ -11,7 +11,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
     {
         public PropertyDictionaryItemEntity()
         {
-            DictionaryValueEntities = new NullCollection<PropertyDictionaryValueEntity>();
+            DictionaryItemValues = new NullCollection<PropertyDictionaryValueEntity>();
         }
 
         [StringLength(512)]
@@ -23,11 +23,9 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         #region Navigation Properties
         public string PropertyId { get; set; }
         public virtual PropertyEntity Property { get; set; }
-
-        public virtual ObservableCollection<PropertyValueEntity> PropertyValues { get; set; }
         #endregion
 
-        public ObservableCollection<PropertyDictionaryValueEntity> DictionaryValueEntities { get; set; }
+        public ObservableCollection<PropertyDictionaryValueEntity> DictionaryItemValues { get; set; }
 
         public virtual PropertyDictionaryItem ToModel(PropertyDictionaryItem propDictItem)
         {
@@ -39,7 +37,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             propDictItem.Alias = Alias;
             propDictItem.SortOrder = SortOrder;
             propDictItem.PropertyId = PropertyId;
-            propDictItem.LocalizedValues = DictionaryValueEntities.Select(x => x.ToModel(AbstractTypeFactory<PropertyDictionaryItemLocalizedValue>.TryCreateInstance())).ToList();
+            propDictItem.LocalizedValues = DictionaryItemValues.Select(x => x.ToModel(AbstractTypeFactory<PropertyDictionaryItemLocalizedValue>.TryCreateInstance())).ToList();
 
             return propDictItem;
         }
@@ -58,7 +56,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             PropertyId = propDictItem.PropertyId;
             if (propDictItem.LocalizedValues != null)
             {
-                DictionaryValueEntities = new ObservableCollection<PropertyDictionaryValueEntity>(propDictItem.LocalizedValues.Select(x => AbstractTypeFactory<PropertyDictionaryValueEntity>.TryCreateInstance().FromModel(x, pkMap)));
+                DictionaryItemValues = new ObservableCollection<PropertyDictionaryValueEntity>(propDictItem.LocalizedValues.Select(x => AbstractTypeFactory<PropertyDictionaryValueEntity>.TryCreateInstance().FromModel(x, pkMap)));
             }
             return this;
         }
@@ -67,10 +65,10 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         {
             target.Alias = Alias;
             target.SortOrder = SortOrder;
-            if (!DictionaryValueEntities.IsNullCollection())
+            if (!DictionaryItemValues.IsNullCollection())
             {
                 var comparer = AnonymousComparer.Create((PropertyDictionaryValueEntity x) => x.Value + '|' + x.Locale);
-                DictionaryValueEntities.Patch(target.DictionaryValueEntities, comparer, (sourceDictItem, targetDictItem) => sourceDictItem.Patch(targetDictItem));
+                DictionaryItemValues.Patch(target.DictionaryItemValues, comparer, (sourceDictItem, targetDictItem) => sourceDictItem.Patch(targetDictItem));
             }
         }
 
