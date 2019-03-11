@@ -168,10 +168,7 @@ angular.module('virtoCommerce.catalogModule')
                     var dictValue = _.find(scope.context.currentPropValues, function (x) {
                         return x.valueId == dictItem.id;
                     });
-                    console.log(dictItem);
-                    console.log(dictValue);
                     if (!dictValue) {
-                        console.log(dictItem);
                         dictValue = {
                             alias: dictItem.alias,
                             valueId: dictItem.id,

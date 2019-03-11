@@ -16,6 +16,8 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         public bool Dictionary { get; set; }
         public bool Multivalue { get; set; }
         public bool Multilanguage { get; set; }
+        public bool IsManageable { get; set; }
+        public bool IsReadOnly { get; set; }
         public PropertyValueType ValueType { get; set; }
         public PropertyType Type { get; set; }
         public ICollection<PropertyAttribute> Attributes { get; set; }

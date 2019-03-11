@@ -291,11 +291,15 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
                 //Properties inheritance
                 var catalogProperties = (product.Category != null ? product.Category.Properties : product.Catalog.Properties)
-                    .Select(x => { x.IsInherited = true; return x.Clone(); })
+                    .Select(x => { x.IsInherited = true; x.IsReadOnly = false; return x.Clone(); })
                     .OfType<Property>()
                     .OrderBy(x => x.Name).ToList();
 
-                if (!catalogProperties.IsNullOrEmpty())
+                var unionProperties = !product.Properties.IsNullOrEmpty()
+                    ? catalogProperties.Union(product.Properties.Where(prp => !catalogProperties.Select(cp => cp.Name).Contains(prp.Name))).ToList()
+                    : catalogProperties;
+
+                if (!unionProperties.IsNullOrEmpty())
                 {
                     foreach (var property in catalogProperties)
                     {
@@ -313,22 +317,16 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                         }
                     }
 
-                    if (!product.Properties.IsNullOrEmpty())
+                    product.Properties = unionProperties.Select(up =>
                     {
-                        var unionProperties = !product.Properties.IsNullOrEmpty()
-                            ? catalogProperties.Union(product.Properties.Where(prp => !catalogProperties.Select(cp => cp.Name).Contains(prp.Name))).ToList()
-                            : catalogProperties;
-
-                        //Fill values 
-                        product.Properties = unionProperties.Select(up =>
+                        if (!product.Properties.IsNullOrEmpty())
                         {
                             up.Values = product.Properties
                                 .Where(p => p.Name.EqualsInvariant(up.Name) && p.Values.All(up.IsSuitableForValue))
                                 .SelectMany(pv => pv.Values).ToList();
-                            return up;
-                        }).ToArray();
-                    }
-
+                        }
+                        return up;
+                    }).ToArray();
                 }
 
                 //inherit not overridden property values from main product

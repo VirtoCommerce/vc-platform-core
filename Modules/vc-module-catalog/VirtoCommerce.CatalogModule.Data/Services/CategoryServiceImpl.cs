@@ -272,6 +272,9 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                             propValue.Property = category.Properties.Where(x => x.Type == PropertyType.Category)
                                 .FirstOrDefault(x => x.IsSuitableForValue(propValue));
                         }
+
+                        property.IsManageable = true;
+                        property.IsReadOnly = property.Type != PropertyType.Category;
                     }
 
                 }
