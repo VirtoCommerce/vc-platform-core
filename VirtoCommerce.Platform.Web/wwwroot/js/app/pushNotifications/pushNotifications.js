@@ -91,9 +91,7 @@ angular.module('platformWebApp').config(
         headerNotifications.addNotification(data);
       });
 
-      var retVal = {
-
-      };
+      var retVal = {};
       return retVal;
 
     }]);
