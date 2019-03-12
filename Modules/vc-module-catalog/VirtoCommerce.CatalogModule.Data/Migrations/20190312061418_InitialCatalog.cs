@@ -536,7 +536,7 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
                         column: x => x.ItemId,
                         principalTable: "Item",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(

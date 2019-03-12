@@ -892,7 +892,7 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
                     b.HasOne("VirtoCommerce.CatalogModule.Data.Model.ItemEntity", "CatalogItem")
                         .WithMany("ItemPropertyValues")
                         .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

@@ -10,7 +10,7 @@ using VirtoCommerce.CatalogModule.Data.Repositories;
 namespace VirtoCommerce.CatalogModule.Data.Migrations
 {
     [DbContext(typeof(CatalogDbContext))]
-    [Migration("20190311150456_InitialCatalog")]
+    [Migration("20190312061418_InitialCatalog")]
     partial class InitialCatalog
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -894,7 +894,7 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
                     b.HasOne("VirtoCommerce.CatalogModule.Data.Model.ItemEntity", "CatalogItem")
                         .WithMany("ItemPropertyValues")
                         .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

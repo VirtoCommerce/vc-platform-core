@@ -348,12 +348,14 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     {
                         if (!product.Properties.IsNullOrEmpty())
                         {
-                            up.Values = product.Properties.Where(p => p.Name.EqualsInvariant(up.Name) && p.Values.All(v => v.ValueType == up.ValueType))
+                            //TODO 
+                            up.Values = product.Properties.Where(p => p.Name.EqualsInvariant(up.Name)/* && p.Values.All(v => v.ValueType == up.ValueType)*/)
                                 .SelectMany(pv => pv.Values).Select(val =>
                                 {
                                     val.Property = up;
                                     val.PropertyId = up.Id;
                                     val.PropertyName = up.Name;
+                                    val.ValueType = up.ValueType;
                                     return val;
                                 }).ToList();
                         }
