@@ -1,4 +1,4 @@
-﻿{
+{
   "platform": {
     "menu": {
 	   "home":"Start",
@@ -535,12 +535,13 @@
           "end": "Ende"
         }
       },
-      "licensing": {
-        "license-absent": "Common License",
-        "license-present": "{{type}} Lizenz",
-        "community": "Sie nutzen die Community Edition. klicken Sie hier um eine kommerzielle Lizenz zu beantragen.",
-        "expired": "Ihre Lizenz ist am {{expirationDate | amParse | date}} abgelaufen, bitte erneuern."
-      },
+        "licensing": {
+          "license-absent": "Common License",
+          "license-present": "{{type}} Lizenz",
+          "community": "Sie nutzen die Community Edition. klicken Sie hier um eine kommerzielle Lizenz zu beantragen.",
+          "expired": "Ihre Lizenz ist am {{expirationDate | amParse | date}} abgelaufen, bitte erneuern.",
+          "purchase": "Kauf"
+        },
       "modulesAutoInstallation": {
         "labels": {
           "module-auto-installation": "Module automatische Installation",

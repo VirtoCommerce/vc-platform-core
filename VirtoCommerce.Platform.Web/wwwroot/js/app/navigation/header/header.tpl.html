@@ -1,8 +1,8 @@
 <header class="header">
-    <div class="header__info">
+    <div class="header__info" ng-if="!license">
         <div class="license">
-            <div class="license__text">Running community edition, click to <br>request a commercial license.</div>
-            <a href="#" class="btn btn--orange">Purchase</a>
+            <div class="license__text">{{'platform.templates.licensing.community' | translate}}</div>
+            <a href="#" class="btn btn--orange">{{'platform.templates.licensing.purchase' | translate}}</a>
         </div>
     </div>
     <div class="header__nav">
