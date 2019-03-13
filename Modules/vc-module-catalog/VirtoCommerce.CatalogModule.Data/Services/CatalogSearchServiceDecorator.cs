@@ -11,7 +11,6 @@ using VirtoCommerce.CatalogModule.Data.Caching;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
-using VirtoCommerce.Platform.Data.Caching;
 using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Data.Services
@@ -45,7 +44,8 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             var cacheKey = CacheKey.With(GetType(), "SearchAsync", criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                cacheEntry.AddExpirationToken(ItemSearchCacheRegion.CreateChangeToken());
+                AddExpirationToken(cacheEntry, criteria.ResponseGroup);
+
                 SearchResult result;
 
                 var useIndexedSearch =
@@ -99,6 +99,24 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 var itemIds = searchResults.Items.Select(i => i.Id).ToArray();
                 result.Products = (await _itemService.GetByIdsAsync(itemIds, responseGroup, criteria.CatalogId))
                     .OrderBy(i => itemIds.IndexOf(i.Id)).ToArray();
+            }
+        }
+
+        private void AddExpirationToken(MemoryCacheEntryOptions cacheEntry, SearchResponseGroup searchResponseGroup)
+        {
+            if (searchResponseGroup.HasFlag(SearchResponseGroup.WithCatalogs))
+            {
+                cacheEntry.AddExpirationToken(CatalogCacheRegion.CreateChangeToken());
+            }
+
+            if (searchResponseGroup.HasFlag(SearchResponseGroup.WithCategories))
+            {
+                cacheEntry.AddExpirationToken(CategoryCacheRegion.CreateChangeToken());
+            }
+
+            if (searchResponseGroup.HasFlag(SearchResponseGroup.WithProducts))
+            {
+                cacheEntry.AddExpirationToken(ItemSearchCacheRegion.CreateChangeToken());
             }
         }
     }

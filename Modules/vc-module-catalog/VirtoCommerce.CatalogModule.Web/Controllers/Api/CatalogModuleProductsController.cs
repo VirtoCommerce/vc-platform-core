@@ -19,15 +19,17 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         private readonly ICategoryService _categoryService;
         private readonly ISkuGenerator _skuGenerator;
         private readonly IProductAssociationSearchService _productAssociationSearchService;
+        private readonly IPropertyService _propertyService;
 
         public CatalogModuleProductsController(IItemService itemsService, ICatalogService catalogService, ICategoryService categoryService,
-                                               ISkuGenerator skuGenerator, IProductAssociationSearchService productAssociationSearchService)
+                                               ISkuGenerator skuGenerator, IProductAssociationSearchService productAssociationSearchService, IPropertyService propertyService)
         {
             _itemsService = itemsService;
             _categoryService = categoryService;
             _catalogService = catalogService;
             _skuGenerator = skuGenerator;
             _productAssociationSearchService = productAssociationSearchService;
+            _propertyService = propertyService;
         }
 
 
@@ -325,6 +327,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             if (!toSaveList.IsNullOrEmpty())
             {
                 await _itemsService.SaveChangesAsync(toSaveList.ToArray());
+                await _propertyService.SaveChangesAsync(products.SelectMany(pr => pr.Properties).ToArray());
             }
 
             return toSaveList.ToArray();

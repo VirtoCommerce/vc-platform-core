@@ -184,6 +184,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
                     property.Name = values.Key;
                     property.ValueType = values.FirstOrDefault().ValueType;
                     property.Values = values.ToList();
+                    property.Catalog = product.Catalog;
                     return property;
                 }).ToList();
             }

@@ -261,12 +261,28 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
 
             if (!categoryIds.IsNullOrEmpty())
             {
-                var commandText = "WITH cte AS ( SELECT a.Id FROM Category a  WHERE Id IN (@categoryIds) " +
-                                           " UNION ALL SELECT a.Id FROM Category a JOIN cte c ON a.ParentCategoryId = c.Id )" +
-                                           "SELECT Id FROM cte WHERE Id NOT IN (@categoryIds) ";
-                //TODO The required column 'CatalogId' was not present in the results of a 'FromSql' operation. ????
-                var categories = await Categories.FromSql(commandText, new SqlParameter("@categoryIds", string.Join(",", categoryIds))).ToArrayAsync();
-                result = categories.Select(x => x.Id).ToArray();
+                var conn = DbContext.Database.GetDbConnection();
+                await conn.OpenAsync();
+                using (var command = conn.CreateCommand())
+                {
+                    var categoryIdsQuery = string.Join(",", categoryIds.Select(v => "'" + v + "'"));
+                    var query = string.Format(@"WITH cte AS ( SELECT a.Id FROM Category a  WHERE Id IN ({0}) 
+                                UNION ALL SELECT a.Id FROM Category a JOIN cte c ON a.ParentCategoryId = c.Id )
+                                SELECT Id FROM cte WHERE Id NOT IN ({0}) ", categoryIdsQuery);
+                    command.CommandText = query;
+
+                    var reader = await command.ExecuteReaderAsync();
+                    var childrenIds = new List<string>();
+                    while (await reader.ReadAsync())
+                    {
+                        childrenIds.Add(reader.GetString(0));
+                    }
+
+                    reader.Dispose();
+                    result = childrenIds.ToArray();
+                }
+
+                conn.Close();
             }
 
             return result ?? new string[0];
@@ -276,42 +292,34 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
         {
             if (!itemIds.IsNullOrEmpty())
             {
-                const string commandText = @"
-                    DELETE SEO FROM SeoUrlKeyword SEO INNER JOIN Item I ON I.Id = SEO.ObjectId AND SEO.ObjectType = 'CatalogProduct'
-                    WHERE I.Id IN (@BatchItemIds) OR I.ParentId IN (@BatchItemIds)
-
-                    DELETE CR FROM CategoryItemRelation  CR INNER JOIN Item I ON I.Id = CR.ItemId
-                    WHERE I.Id IN (@BatchItemIds) OR I.ParentId IN (@BatchItemIds)
-        
-                    DELETE CI FROM CatalogImage CI INNER JOIN Item I ON I.Id = CI.ItemId
-                    WHERE I.Id IN (@BatchItemIds)  OR I.ParentId IN (@BatchItemIds)
-
-                    DELETE CA FROM CatalogAsset CA INNER JOIN Item I ON I.Id = CA.ItemId
-                    WHERE I.Id IN (@BatchItemIds) OR I.ParentId IN (@BatchItemIds)
-
-                    DELETE PV FROM PropertyValue PV INNER JOIN Item I ON I.Id = PV.ItemId
-                    WHERE I.Id IN (@BatchItemIds) OR I.ParentId IN (@BatchItemIds)
-
-                    DELETE ER FROM EditorialReview ER INNER JOIN Item I ON I.Id = ER.ItemId
-                    WHERE I.Id IN (@BatchItemIds) OR I.ParentId IN (@BatchItemIds)
-
-                    DELETE A FROM Association A INNER JOIN Item I ON I.Id = A.ItemId
-                    WHERE I.Id IN (@BatchItemIds) OR I.ParentId IN (@BatchItemIds)
-
-                    DELETE A FROM Association A INNER JOIN Item I ON I.Id = A.AssociatedItemId
-                    WHERE I.Id IN (@BatchItemIds) OR I.ParentId IN (@BatchItemIds)
-
-                    DELETE  FROM Item  WHERE ParentId IN (@BatchItemIds)
-
-                    DELETE  FROM Item  WHERE Id IN (@BatchItemIds)
-                ";
-
                 const int batchSize = 500;
                 var skip = 0;
                 do
                 {
                     var batchItemIds = itemIds.Skip(skip).Take(batchSize).ToArray();
-                    await DbContext.Database.ExecuteSqlCommandAsync(commandText, new SqlParameter("@BatchItemIds", string.Join(",", batchItemIds)));
+                    var itemIdsQuery = string.Join(",", batchItemIds.Select(v => "'" + v + "'"));
+
+                    var commandText = string.Format(@"DELETE SEO FROM SeoUrlKeyword SEO INNER JOIN Item I ON I.Id = SEO.ObjectId AND SEO.ObjectType = 'CatalogProduct' 
+                                      WHERE I.Id IN ({0}) OR I.ParentId IN ({0})
+                                      DELETE CR FROM CategoryItemRelation  CR INNER JOIN Item I ON I.Id = CR.ItemId
+                                      WHERE I.Id IN ({0}) OR I.ParentId IN ({0}) 
+                                      DELETE CI FROM CatalogImage CI INNER JOIN Item I ON I.Id = CI.ItemId
+                                      WHERE I.Id IN ({0})  OR I.ParentId IN ({0}) 
+                                      DELETE CA FROM CatalogAsset CA INNER JOIN Item I ON I.Id = CA.ItemId
+                                      WHERE I.Id IN ({0}) OR I.ParentId IN ({0}) 
+                                      DELETE PV FROM PropertyValue PV INNER JOIN Item I ON I.Id = PV.ItemId 
+                                      WHERE I.Id IN ({0}) OR I.ParentId IN ({0}) 
+                                      DELETE ER FROM EditorialReview ER INNER JOIN Item I ON I.Id = ER.ItemId 
+                                      WHERE I.Id IN ({0}) OR I.ParentId IN ({0}) 
+                                      DELETE A FROM Association A INNER JOIN Item I ON I.Id = A.ItemId 
+                                      WHERE I.Id IN ({0}) OR I.ParentId IN ({0}) 
+                                      DELETE A FROM Association A INNER JOIN Item I ON I.Id = A.AssociatedItemId 
+                                      WHERE I.Id IN ({0}) OR I.ParentId IN ({0}) 
+                                      DELETE  FROM Item  WHERE ParentId IN ({0}) 
+                                      DELETE  FROM Item  WHERE Id IN ({0}) ", itemIdsQuery);
+
+
+                    await DbContext.Database.ExecuteSqlCommandAsync(commandText);
 
                     skip += batchSize;
                 }
@@ -326,20 +334,21 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
             {
                 var categoryIds = (await GetAllChildrenCategoriesIdsAsync(ids)).Concat(ids).ToArray();
 
-                var itemIds = Items.Where(i => categoryIds.Contains(i.CategoryId)).Select(i => i.Id).ToArray();
+                var itemIds = await Items.Where(i => categoryIds.Contains(i.CategoryId)).Select(i => i.Id).ToArrayAsync();
                 await RemoveItemsAsync(itemIds);
 
-                const string commandText = @"
-                    DELETE FROM SeoUrlKeyword WHERE ObjectType = 'Category' AND ObjectId IN (@CategoryIds)
-                    DELETE CI FROM CatalogImage CI INNER JOIN Category C ON C.Id = CI.CategoryId WHERE C.Id IN (@CategoryIds) 
-                    DELETE PV FROM PropertyValue PV INNER JOIN Category C ON C.Id = PV.CategoryId WHERE C.Id IN (@CategoryIds) 
-                    DELETE CR FROM CategoryRelation CR INNER JOIN Category C ON C.Id = CR.SourceCategoryId OR C.Id = CR.TargetCategoryId  WHERE C.Id IN (@CategoryIds) 
-                    DELETE CIR FROM CategoryItemRelation CIR INNER JOIN Category C ON C.Id = CIR.CategoryId WHERE C.Id IN (@CategoryIds) 
-                    DELETE A FROM Association A INNER JOIN Category C ON C.Id = A.AssociatedCategoryId WHERE C.Id IN (@CategoryIds)
-                    DELETE P FROM Property P INNER JOIN Category C ON C.Id = P.CategoryId  WHERE C.Id IN (@CategoryIds)
-                    DELETE FROM Category WHERE Id IN (@CategoryIds)";
+                var categoryIdsQuery = string.Join(",", categoryIds.Select(v => "'" + v + "'"));
 
-                await DbContext.Database.ExecuteSqlCommandAsync(commandText, new SqlParameter("@CategoryIds", string.Join(",", categoryIds)));
+                var commandText = string.Format(@" DELETE FROM SeoUrlKeyword WHERE ObjectType = 'Category' AND ObjectId IN ({0})
+                    DELETE CI FROM CatalogImage CI INNER JOIN Category C ON C.Id = CI.CategoryId WHERE C.Id IN ({0}) 
+                    DELETE PV FROM PropertyValue PV INNER JOIN Category C ON C.Id = PV.CategoryId WHERE C.Id IN ({0}) 
+                    DELETE CR FROM CategoryRelation CR INNER JOIN Category C ON C.Id = CR.SourceCategoryId OR C.Id = CR.TargetCategoryId  WHERE C.Id IN ({0}) 
+                    DELETE CIR FROM CategoryItemRelation CIR INNER JOIN Category C ON C.Id = CIR.CategoryId WHERE C.Id IN ({0}) 
+                    DELETE A FROM Association A INNER JOIN Category C ON C.Id = A.AssociatedCategoryId WHERE C.Id IN ({0})
+                    DELETE P FROM Property P INNER JOIN Category C ON C.Id = P.CategoryId  WHERE C.Id IN ({0})
+                    DELETE FROM Category WHERE Id IN ({0})", categoryIdsQuery);
+
+                await DbContext.Database.ExecuteSqlCommandAsync(commandText);
 
                 //TODO: Notify about removed entities by event or trigger
             }
@@ -349,21 +358,22 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
         {
             if (!ids.IsNullOrEmpty())
             {
-                var itemIds = await Items.Where(i => i.CategoryId == null && ids.Contains(i.CatalogId)).Select(i => i.Id).ToArrayAsync();
+                var itemIds = await Items.Where(i => ids.Contains(i.CatalogId)).Select(i => i.Id).ToArrayAsync();
                 await RemoveItemsAsync(itemIds);
 
                 var categoryIds = await Categories.Where(c => ids.Contains(c.CatalogId)).Select(c => c.Id).ToArrayAsync();
                 await RemoveCategoriesAsync(categoryIds);
 
-                const string commandText = @"
-                    DELETE CL FROM CatalogLanguage CL INNER JOIN Catalog C ON C.Id = CL.CatalogId WHERE C.Id IN (@Ids)
-                    DELETE CR FROM CategoryRelation CR INNER JOIN Catalog C ON C.Id = CR.TargetCatalogId WHERE C.Id IN (@Ids) 
-                    DELETE PV FROM PropertyValue PV INNER JOIN Catalog C ON C.Id = PV.CatalogId WHERE C.Id IN (@Ids) 
-                    DELETE P FROM Property P INNER JOIN Catalog C ON C.Id = P.CatalogId  WHERE C.Id IN (@Ids)
-                    DELETE FROM Catalog WHERE Id IN (@Ids)
-                ";
+                var catalogIdsQuery = string.Join(",", ids.Select(v => "'" + v + "'"));
 
-                await DbContext.Database.ExecuteSqlCommandAsync(commandText, new SqlParameter("@Ids", string.Join(",", ids)));
+                var commandText = string.Format(@"
+                    DELETE CL FROM CatalogLanguage CL INNER JOIN Catalog C ON C.Id = CL.CatalogId WHERE C.Id IN (@{0})
+                    DELETE CR FROM CategoryRelation CR INNER JOIN Catalog C ON C.Id = CR.TargetCatalogId WHERE C.Id IN (@{0}) 
+                    DELETE PV FROM PropertyValue PV INNER JOIN Catalog C ON C.Id = PV.CatalogId WHERE C.Id IN ({0}) 
+                    DELETE P FROM Property P INNER JOIN Catalog C ON C.Id = P.CatalogId  WHERE C.Id IN ({0})
+                    DELETE FROM Catalog WHERE Id IN ({0})", catalogIdsQuery);
+
+                await DbContext.Database.ExecuteSqlCommandAsync(commandText);
 
                 //TODO: Notify about removed entities by event or trigger
             }
