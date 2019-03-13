@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
-using VirtoCommerce.CatalogModule.Data.Repositories;
 
 namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
 {
@@ -18,15 +17,12 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         private readonly ICatalogService _catalogService;
         private readonly IProperyDictionaryItemSearchService _propertyDictionarySearchService;
         //Workaround: Bad design to use repository in the controller layer, need to extend in the future IPropertyService.Delete with new parameter DeleteAllValues
-        private readonly Func<ICatalogRepository> _repositoryFactory;
         public CatalogModulePropertiesController(IPropertyService propertyService, ICategoryService categoryService, ICatalogService catalogService,
-                                                 Func<ICatalogRepository> repositoryFactory,
                                                  IProperyDictionaryItemSearchService propertyDictionarySearchService)
         {
             _propertyService = propertyService;
             _categoryService = categoryService;
             _catalogService = catalogService;
-            _repositoryFactory = repositoryFactory;
             _propertyDictionarySearchService = propertyDictionarySearchService;
         }
 
@@ -153,12 +149,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
 
             if (doDeleteValues)
             {
-                //TODO: Move this logic in the IPropertyService
-                using (var repository = _repositoryFactory())
-                {
-                    await repository.RemoveAllPropertyValuesAsync(id);
-                    await repository.UnitOfWork.CommitAsync();
-                }
+                await _propertyService.DeletePropertyValuesByPropertyIdAsync(id);
             }
 
             await _propertyService.DeleteAsync(new[] { id });

@@ -36,6 +36,8 @@ namespace VirtoCommerce.CatalogModule.Core.Model
             return string.Equals(Name, propValue.PropertyName, StringComparison.InvariantCultureIgnoreCase) && ValueType == propValue.ValueType;
         }
 
+        public bool IsNew => IsTransient();
+
         #region IInheritable Members
         public bool IsInherited { get; set; }
 

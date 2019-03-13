@@ -395,18 +395,18 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
             string commandText;
             if (catalogProperty != null)
             {
-                commandText = $"DELETE PV FROM PropertyValue PV INNER JOIN Catalog C ON C.Id = PV.CatalogId AND C.Id = '@CatalogId' WHERE PV.Name = '@Name'";
-                await DbContext.Database.ExecuteSqlCommandAsync(commandText, new SqlParameter("@CatalogId", catalogProperty.CatalogId), new SqlParameter("@Name", catalogProperty.Name));
+                commandText = $"DELETE PV FROM PropertyValue PV INNER JOIN Catalog C ON C.Id = PV.CatalogId AND C.Id = '{catalogProperty.CatalogId}' WHERE PV.Name = '{catalogProperty.Name}'";
+                await DbContext.Database.ExecuteSqlCommandAsync(commandText);
             }
             if (categoryProperty != null)
             {
-                commandText = $"DELETE PV FROM PropertyValue PV INNER JOIN Category C ON C.Id = PV.CategoryId AND C.CatalogId = '@CatalogId' WHERE PV.Name = '@Name'";
-                await DbContext.Database.ExecuteSqlCommandAsync(commandText, new SqlParameter("@CatalogId", categoryProperty.CatalogId), new SqlParameter("@Name", categoryProperty.Name));
+                commandText = $"DELETE PV FROM PropertyValue PV INNER JOIN Category C ON C.Id = PV.CategoryId AND C.CatalogId = '{categoryProperty.CatalogId}' WHERE PV.Name = '{categoryProperty.Name}'";
+                await DbContext.Database.ExecuteSqlCommandAsync(commandText);
             }
             if (itemProperty != null)
             {
-                commandText = $"DELETE PV FROM PropertyValue PV INNER JOIN Item I ON I.Id = PV.ItemId AND I.CatalogId = '@CatalogId' WHERE PV.Name = '@Name'";
-                await DbContext.Database.ExecuteSqlCommandAsync(commandText, new SqlParameter("@CatalogId", itemProperty.CatalogId), new SqlParameter("@Name", itemProperty.Name));
+                commandText = $"DELETE PV FROM PropertyValue PV INNER JOIN Item I ON I.Id = PV.ItemId AND I.CatalogId = '{itemProperty.CatalogId}' WHERE PV.Name = '{itemProperty.Name}'";
+                await DbContext.Database.ExecuteSqlCommandAsync(commandText);
             }
         }
 

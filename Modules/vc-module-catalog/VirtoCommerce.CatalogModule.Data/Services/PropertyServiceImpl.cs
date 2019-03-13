@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CatalogModule.Core.Events;
 using VirtoCommerce.CatalogModule.Core.Model;
@@ -94,18 +95,16 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
-
-                ResetCache();
-
                 await _eventPublisher.Publish(new PropertyChangedEvent(changedEntries));
             }
+
+            ResetCache(properties);
         }
 
         public async Task DeleteAsync(string[] propertyIds)
         {
-            var changedEntries = (await GetByIdsAsync(propertyIds))
-                .Select(p => new GenericChangedEntry<Property>(p, EntryState.Deleted))
-                .ToList();
+            var propeties = await GetByIdsAsync(propertyIds);
+            var changedEntries = propeties.Select(p => new GenericChangedEntry<Property>(p, EntryState.Deleted)).ToList();
 
             using (var repository = _repositoryFactory())
             {
@@ -119,20 +118,34 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 }
 
                 await repository.UnitOfWork.CommitAsync();
-
-                //Reset cached categories and catalogs
-                ResetCache();
-
+                
                 await _eventPublisher.Publish(new PropertyChangedEvent(changedEntries));
+            }
+
+            ResetCache(propeties);
+        }
+
+        public async Task DeletePropertyValuesByPropertyIdAsync(string propertyId)
+        {
+            using (var repository = _repositoryFactory())
+            {
+                await repository.RemoveAllPropertyValuesAsync(propertyId);
+                await repository.UnitOfWork.CommitAsync();
             }
         }
 
         #endregion
 
-        protected virtual void ResetCache()
+        protected virtual void ResetCache(Property[] properties)
         {
             CatalogCacheRegion.ExpireRegion();
             CategoryCacheRegion.ExpireRegion();
+            
+            if (properties.Any(p => p.Type == PropertyType.Product))
+            {
+                ItemCacheRegion.ExpireRegion();
+                ItemSearchCacheRegion.ExpireRegion();
+            }
         }
 
 
@@ -146,7 +159,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 {
                     repository.DisableChangesTracking();
 
-                    var propertyIds = repository.Properties.Select(p => p.Id).ToArray();
+                    var propertyIds = await repository.Properties.Select(p => p.Id).ToArrayAsync();
                     var entities = await repository.GetPropertiesByIdsAsync(propertyIds);
                     var properties = entities.Select(p => p.ToModel(AbstractTypeFactory<Property>.TryCreateInstance())).ToArray();
 
@@ -204,6 +217,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
                 //Add missed
                 property.DisplayNames.AddRange(displayNamesForCatalogLanguages.Except(property.DisplayNames, displayNamesComparer));
+                property.IsManageable = true;
             }
         }
 

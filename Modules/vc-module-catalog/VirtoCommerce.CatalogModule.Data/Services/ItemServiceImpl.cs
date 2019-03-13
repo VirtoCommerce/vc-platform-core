@@ -170,7 +170,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
             foreach (var entity in entities)
             {
-                ItemCacheRegion.ExpireInventory(entity);
+                ItemCacheRegion.ExpireEntity(entity);
             }
         }
 
@@ -346,6 +346,12 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
                     product.Properties = unionProperties.Select(up =>
                     {
+                        if (up.Catalog == null)
+                        {
+                            up.Catalog = product.Catalog;
+                            up.CatalogId = product.CatalogId;
+                        }
+
                         if (!product.Properties.IsNullOrEmpty())
                         {
                             //TODO 

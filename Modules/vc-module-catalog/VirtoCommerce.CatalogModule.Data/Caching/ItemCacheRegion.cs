@@ -21,7 +21,7 @@ namespace VirtoCommerce.CatalogModule.Data.Caching
             return new CompositeChangeToken(new[] { CreateChangeToken(), new CancellationChangeToken(cancellationTokenSource.Token) });
         }
 
-        public static void ExpireInventory(CatalogProduct entity)
+        public static void ExpireEntity(CatalogProduct entity)
         {
             if (_entityRegionTokenLookup.TryRemove(entity.Id, out var token))
             {

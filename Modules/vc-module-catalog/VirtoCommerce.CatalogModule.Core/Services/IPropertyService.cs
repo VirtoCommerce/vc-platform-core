@@ -11,5 +11,6 @@ namespace VirtoCommerce.CatalogModule.Core.Services
         Task<Property[]> GetAllPropertiesAsync();
         Task SaveChangesAsync(Property[] properties);
         Task DeleteAsync(string[] propertyIds);
+        Task DeletePropertyValuesByPropertyIdAsync(string propertyId);
     }
 }
