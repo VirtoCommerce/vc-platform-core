@@ -1,7 +1,7 @@
 <div class="header__nav-item" ng-class="{'header__nav-item--opened': dropDownOpened}" notificationWidget>
     <span class="header__nav-ico"
         ng-class="{'header__nav-ico--notice-give' : newAviable(), 'header__nav-ico--notice' : !newAviable()}"
-        ng-click="toggleNotice()"></span>
+        ng-click="toggleDropDown()"></span>
     <div class="dropdown-menu">
         <div class="notice" ng-if="!getNotifications().length">
             <div class="notice__bg"></div>
@@ -11,14 +11,9 @@
             <a href="#" class="btn btn--orange" ng-click="close()">Close</a>
         </div>
         <div class="notice-list" ng-if="getNotifications().length">
-            <div class="notice-list__item" ng-repeat="notification in getNotifications() | orderBy: 'created'"
-                ng-click="notificationClick(notification)">
-                <div class="notice-list__date" am-time-ago="notification.created"></div>
-                <div class="notice-list__name" ng-bind="notification.title"></div>
-                <div class="notice-list__descr" ng-bind="notification.description"></div>
-                <div class="notice-list__errors">Errors {{notification.errorCount}}</div>
+            <div class="notice-list__item" ng-repeat="model in getNotifications() | orderBy: 'created'"
+                ng-click="notificationClick(model)" ng-include="model.template">
             </div>
-
             <a href="#" class="btn btn--orange" ng-click="viewHistory()">View all notifications</a>
             <a href="#" class="btn btn--orange" ng-click="clearRecent()">Clear recent</a>
         </div>

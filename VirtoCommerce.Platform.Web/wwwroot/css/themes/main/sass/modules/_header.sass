@@ -127,8 +127,25 @@
         padding: 10px 15px
         position: relative
         text-align: left
+        display: flex
+        flex-flow: row wrap
+        justify-content: left
+        align-items: center
         &:hover
           background-color: darken($whiteColor, 2%)
+      &__ico
+        background-color: $noticeIconBgColor;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        padding: 8px;
+        display: flex;
+        justify-content: center;
+        &.error
+          background-color: $noticeIconErrorBgColor;
+        i
+          font-size: 1.4rem
+          color: $noticeIconColor
       &__date
         color: $noticeDateColor
         position: absolute
@@ -136,12 +153,16 @@
         top: 10px
       &__name
         font-weight: bold
+        padding-left: 16px
         padding-right: 95px
       &__descr,
       &__errors
+        padding-left: 16px
         font-size: 12px
       .btn
         margin: 20px 0
+      &__bar
+        flex-basis: 100%
 
 .header
   &__nav

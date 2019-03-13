@@ -7,29 +7,12 @@
     </div>
     <div class="header__nav">
         <div class="header__nav-item">
-            <span class="header__nav-ico header__nav-ico--settings"></span>
+            <span class="header__nav-ico header__nav-ico--settings" ng-click="manageSettings()"></span>
         </div>
         <div class="header__nav-item">
-            <span class="header__nav-ico header__nav-ico--help"></span>
+            <a class="header__nav-ico header__nav-ico--help" href="https://virtocommerce.com/docs" target="_blank"></a>
         </div>
-
         <va-header-notification-widget></va-header-notification-widget>
-
-        <div class="header__nav-item">
-            <span class="account-user">
-                <span class="account-user__img">
-                    <img src="" alt="" class="account-user__pic">
-                </span>
-                <span class="account-user__info">
-                    <span class="account-user__name">Alexander Siniouguine</span>
-                    <span class="account-user__role">Administrator</span>
-                </span>
-                <span class="account-user__carret"></span>
-            </span>
-            <div class="dropdown-menu">
-                <a href="#" class="dropdown-menu__item">Manage profile</a>
-                <a href="#" class="dropdown-menu__item">Sign Out</a>
-            </div>
-        </div>
+        <va-header-user-profile-widget></va-header-user-profile-widget>
     </div>
 </header>

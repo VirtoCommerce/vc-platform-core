@@ -23,7 +23,7 @@
 /* Dashboard */
 $dashboardHorizontalPadding: 90px
 $dashboardVerticalPadding: 22px
-$dashboardHeadHeight: 144px
+$dashboardHeadHeight: 80px
 
 .dashboard
   background: $baseBg
@@ -49,11 +49,9 @@ $dashboardHeadHeight: 144px
     position: relative
     .gridster-loaded
       width: 770px
-  .dashboard-title,
-  .dashboard-account
+  .dashboard-title
     position: absolute
     top: 30px
-  .dashboard-title
     font-weight: 300
     left: $dashboardHorizontalPadding
     text-shadow: 1px 2px rgba(255,255,255,.5), 2px -2px rgba(255,255,255,.5), -2px 2px rgba(255,255,255,.5), -2px -2px rgba(255,255,255,.5)
@@ -63,50 +61,6 @@ $dashboardHeadHeight: 144px
     .__logo
       max-height: $h1FontSize
       vertical-align: top
-  .dashboard-account
-    background: $whiteColor
-    border: 2px solid transparent
-    cursor: pointer
-    padding: 10px
-    right: 93px
-    top: 40px
-    z-index: 50
-    &:hover
-      border-color: rgba(0,0,0,.25)
-    &::before
-      background: #bfbfbf
-      color: $whiteColor
-      content: ''
-      font-family: $fontAw
-      font-size: 24px
-      height: 40px
-      left: 10px
-      line-height: 40px
-      position: absolute
-      text-align: center
-      text-shadow: 0 0 1px rgba(0,0,0,.2)
-      width: 40px
-    .user-name
-      font-size: 18px
-      height: 40px
-      line-height: 1.2
-      padding: 0 0 0 50px
-    .last-name
-      font-size: 14px
-    .sign-out
-      color: rgba(0,0,0,.7)
-      display: none
-      font-size: 14px
-      margin: 10px -10px -10px
-      padding: 5px 10px
-      &:hover
-        background: #ececec
-    .sign-ico
-      font-size: 18px
-      margin: 0 5px 0 0
-      vertical-align: -1px
-  .dashboard-account.__opened .sign-out
-    display: block
 
 /* Log */
 .log
@@ -191,7 +145,7 @@ $dashboardHeadHeight: 144px
     &:before
       left: 0
     &:after
-      right: 0    
+      right: 0
 .list-ico.__customers,
 .menu-ico.__customers
   position: relative

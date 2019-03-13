@@ -37,12 +37,12 @@ angular.module('platformWebApp').config(
     };
 
     //Recent events notification template (error, info, debug)
-    var menuDefaultTemplate =
+    var headerNotificationDefaultTemplate =
     {
       priority: 1000,
-      satisfy: function (notification, place) { return place == 'menu'; },
+      satisfy: function (notification, place) { return place == 'header-notification'; },
       //template for display that notification in menu and list
-      template: '$(Platform)/Scripts/app/pushNotifications/menuDefault.tpl.html',
+      template: '$(Platform)/Scripts/app/pushNotifications/headerNotificationDefault.tpl.html',
       //action executed when notification selected
       action: function (notify) { $state.go('workspace.pushNotificationsHistory', notify) }
     };
@@ -68,13 +68,13 @@ angular.module('platformWebApp').config(
       }
     };
 
-    retVal.register(menuDefaultTemplate);
+    retVal.register(headerNotificationDefaultTemplate);
     retVal.register(historyDefaultTemplate);
 
     return retVal;
   }])
-  .factory('platformWebApp.pushNotificationService', ['$rootScope', '$timeout', '$interval', '$state', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications', 'platformWebApp.headerNotificationWidgetService',
-    function ($rootScope, $timeout, $interval, $state, mainMenuService, eventTemplateResolver, notifications, headerNotifications) {
+  .factory('platformWebApp.pushNotificationService', ['$rootScope', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.headerNotificationWidgetService',
+    function ($rootScope, eventTemplateResolver, headerNotifications) {
 
       //SignalR setup connection
       var connection = new signalR.HubConnectionBuilder()
@@ -83,10 +83,10 @@ angular.module('platformWebApp').config(
       connection.start();
 
       connection.on('Send', function (data) {
-        //broadcast event
         $rootScope.$broadcast("new-notification-event", data);
 
-        var notificationTemplate = eventTemplateResolver.resolve(data, 'menu');
+        var notificationTemplate = eventTemplateResolver.resolve(data, 'header-notification');
+        data.template = notificationTemplate.template;
         data.action = notificationTemplate.action;
         headerNotifications.addNotification(data);
       });

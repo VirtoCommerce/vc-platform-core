@@ -1,11 +1,14 @@
-angular.module('platformWebApp').directive('vaHeader', ["$document",
-  function ($document) {
+angular.module('platformWebApp').directive('vaHeader', ["$state",
+  function ($state) {
     return {
       restrict: 'E',
       replace: true,
       transclude: true,
       templateUrl: '$(Platform)/Scripts/app/navigation/header/header.tpl.html',
-      link: function (scope, element, attr, ngModelController, linker) {
+      link: function (scope) {
+        scope.manageSettings = function () {
+          $state.go('workspace.modulesSettings');
+        }
       }
     }
   }]);

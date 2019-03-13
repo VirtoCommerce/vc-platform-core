@@ -1,6 +1,6 @@
 angular.module('platformWebApp')
-  .factory('platformWebApp.headerNotificationWidgetService', ['$rootScope', '$timeout', '$interval', '$state', 'platformWebApp.mainMenuService', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.pushNotifications',
-    function ($rootScope, $timeout, $interval, $state, mainMenuService, eventTemplateResolver, notifications) {
+  .factory('platformWebApp.headerNotificationWidgetService', ['platformWebApp.pushNotifications',
+    function (notifications) {
 
       var notifications = [];
       var newCount = 0;
@@ -54,8 +54,9 @@ angular.module('platformWebApp')
         restrict: 'E',
         replace: true,
         transclude: true,
+        scope: {},
         templateUrl: '$(Platform)/Scripts/app/pushNotifications/headerNotificationWidget.tpl.html',
-        link: function (scope, element, attr, ngModelController, linker) {
+        link: function (scope) {
 
           scope.dropDownOpened = false;
           scope.getNotifications = headerNotifications.getNotifications;
@@ -79,7 +80,7 @@ angular.module('platformWebApp')
             $document.unbind('click', handleClickEvent);
           });
 
-          scope.toggleNotice = function () {
+          scope.toggleDropDown = function () {
             scope.dropDownOpened = !scope.dropDownOpened;
             if (scope.dropDownOpened) {
               headerNotifications.markAllAsReaded();
@@ -100,7 +101,6 @@ angular.module('platformWebApp')
           }
 
           scope.notificationClick = function (notification) {
-            debugger;
             scope.dropDownOpened = false;
             notification.action(notification);
           }
