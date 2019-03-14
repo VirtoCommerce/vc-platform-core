@@ -30,7 +30,8 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Hangfire.AspNetCore" Version="1.6.22" />
+    <PackageReference Include="AspNet.Security.OAuth.Validation" Version="2.0.0" />
+	<PackageReference Include="Hangfire.AspNetCore" Version="1.6.22" />
     <PackageReference Include="Hangfire.MemoryStorage" Version="1.6.0" />
     <PackageReference Include="HangFire.SqlServer" Version="1.6.22" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.5.1" />
