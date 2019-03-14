@@ -41,6 +41,8 @@ using VirtoCommerce.Platform.Security;
 using VirtoCommerce.Platform.Security.Authorization;
 using VirtoCommerce.Platform.Security.Extensions;
 using VirtoCommerce.Platform.Security.Repositories;
+using VirtoCommerce.Platform.Security.Services;
+using VirtoCommerce.Platform.Web.Azure;
 using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Hangfire;
 using VirtoCommerce.Platform.Web.Infrastructure;
@@ -162,7 +164,29 @@ namespace VirtoCommerce.Platform.Web
                 options.ClaimsIdentity.UserIdClaimType = OpenIdConnectConstants.Claims.Name;
                 options.ClaimsIdentity.RoleClaimType = OpenIdConnectConstants.Claims.Role;
             });
+            var azureAdSection = Configuration.GetSection("AzureAd");
 
+
+            if (azureAdSection.GetChildren().Any())
+            {
+                var options = new AzureAdOptions();
+                azureAdSection.Bind(options);
+
+                if (options.Enabled)
+                {
+                    //TODO: Need to check how this influence to OpennIddict Reference tokens activated by this line below  AddValidation(options => options.UseReferenceTokens());
+                    var auth = services.AddAuthentication().AddOAuthValidation();
+                    auth.AddOpenIdConnect(options.AuthenticationType, options.AuthenticationCaption,
+                        openIdConnectOptions =>
+                        {
+                            openIdConnectOptions.ClientId = options.ApplicationId;
+                            openIdConnectOptions.Authority = $"{options.AzureAdInstance}{options.TenantId}";
+                            openIdConnectOptions.UseTokenLifetime = true;
+                            openIdConnectOptions.RequireHttpsMetadata = false;
+                            openIdConnectOptions.SignInScheme = IdentityConstants.ExternalScheme;
+                        });
+                }
+            }
             services.Configure<Core.Security.AuthorizationOptions>(Configuration.GetSection("Authorization"));
             var authorizationOptions = Configuration.GetSection("Authorization").Get<Core.Security.AuthorizationOptions>();
             // Register the OpenIddict services.
@@ -246,6 +270,8 @@ namespace VirtoCommerce.Platform.Web
             services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
             //Platform authorization handler for policies based on permissions 
             services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+            // Default password validation service implementation
+            services.AddScoped<IPasswordCheckService, PasswordCheckService>();
 
             // Add memory cache services
             services.AddMemoryCache();

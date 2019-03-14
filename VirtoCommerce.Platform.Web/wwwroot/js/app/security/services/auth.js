@@ -1,5 +1,5 @@
 angular.module('platformWebApp')
-    .factory('platformWebApp.authService', ['$http', '$rootScope', '$cookieStore', '$state', '$interpolate', '$q', 'platformWebApp.authDataStorage', function ($http, $rootScope, $cookieStore, $state, $interpolate, $q, authDataStorage) {
+.factory('platformWebApp.authService', ['$http', '$rootScope', '$cookieStore', '$state', '$interpolate', '$q', 'platformWebApp.authDataStorage', function ($http, $rootScope, $cookieStore, $state, $interpolate, $q, authDataStorage) {
     var serviceBase = 'api/platform/security/';
     var authContext = {
         userId: null,
@@ -75,6 +75,13 @@ angular.module('platformWebApp')
             });
     };
 
+    authContext.validatepasswordresettoken = function (data) {
+        return $http.post(serviceBase + 'users/' + data.userId + '/validatepasswordresettoken', { token: data.code }).then(
+            function (results) {
+                return results.data;
+            });
+    };
+
     authContext.resetpassword = function (data) {
         return $http.post(serviceBase + 'users/' + data.userId + '/resetpasswordconfirm', { token: data.code, newPassword: data.newPassword }).then(
             function (results) {
@@ -112,13 +119,11 @@ angular.module('platformWebApp')
     };
 
     function changeAuth(user) {
-        authContext.userId = user.id;
-        authContext.permissions = user.permissions;
+        angular.extend(authContext, user);
         authContext.userLogin = user.userName;
         authContext.fullName = user.userLogin;
         authContext.isAuthenticated = user.userName != null;
-        authContext.userType = user.userType;
-        authContext.isAdministrator = user.isAdministrator;
+
         //Interpolate permissions to replace some template to real value
         if (authContext.permissions) {
             authContext.permissions = _.map(authContext.permissions, function (x) {
