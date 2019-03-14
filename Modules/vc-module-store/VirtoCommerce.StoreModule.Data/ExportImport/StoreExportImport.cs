@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -20,11 +22,11 @@ namespace VirtoCommerce.StoreModule.Data.ExportImport
         private readonly JsonSerializer _serializer;
         private readonly int BatchSize = 50;
 
-        public StoreExportImport(IStoreService storeService, IStoreSearchService storeSearchService, JsonSerializer jsonSerializer)
+        public StoreExportImport(IStoreService storeService, IStoreSearchService storeSearchService, IOptions<MvcJsonOptions> jsonOptions)
         {
             _storeService = storeService;
-            _serializer = jsonSerializer;
             _storeSearchService = storeSearchService;
+            _serializer = JsonSerializer.Create(jsonOptions.Value.SerializerSettings);
         }
 
         public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)

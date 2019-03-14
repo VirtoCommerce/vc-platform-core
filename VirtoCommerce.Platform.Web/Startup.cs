@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,8 +25,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Smidge;
 using Smidge.Nuglify;
-using Swashbuckle.AspNetCore.Swagger;
-using Swashbuckle.AspNetCore.SwaggerUI;
 using VirtoCommerce.Platform.Assets.AzureBlobStorage;
 using VirtoCommerce.Platform.Assets.AzureBlobStorage.Extensions;
 using VirtoCommerce.Platform.Assets.FileSystem;
@@ -44,11 +43,13 @@ using VirtoCommerce.Platform.Security;
 using VirtoCommerce.Platform.Security.Authorization;
 using VirtoCommerce.Platform.Security.Extensions;
 using VirtoCommerce.Platform.Security.Repositories;
+using VirtoCommerce.Platform.Security.Services;
+using VirtoCommerce.Platform.Web.Azure;
 using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Hangfire;
 using VirtoCommerce.Platform.Web.Infrastructure;
 using VirtoCommerce.Platform.Web.JsonConverters;
-using VirtoCommerce.Platform.Web.Middelware;
+using VirtoCommerce.Platform.Web.Middleware;
 using VirtoCommerce.Platform.Web.Swagger;
 
 namespace VirtoCommerce.Platform.Web
@@ -175,7 +176,29 @@ namespace VirtoCommerce.Platform.Web
                 options.ClaimsIdentity.UserIdClaimType = OpenIdConnectConstants.Claims.Name;
                 options.ClaimsIdentity.RoleClaimType = OpenIdConnectConstants.Claims.Role;
             });
+            var azureAdSection = Configuration.GetSection("AzureAd");
 
+
+            if (azureAdSection.GetChildren().Any())
+            {
+                var options = new AzureAdOptions();
+                azureAdSection.Bind(options);
+
+                if (options.Enabled)
+                {
+                    //TODO: Need to check how this influence to OpennIddict Reference tokens activated by this line below  AddValidation(options => options.UseReferenceTokens());
+                    var auth = services.AddAuthentication().AddOAuthValidation();
+                    auth.AddOpenIdConnect(options.AuthenticationType, options.AuthenticationCaption,
+                        openIdConnectOptions =>
+                        {
+                            openIdConnectOptions.ClientId = options.ApplicationId;
+                            openIdConnectOptions.Authority = $"{options.AzureAdInstance}{options.TenantId}";
+                            openIdConnectOptions.UseTokenLifetime = true;
+                            openIdConnectOptions.RequireHttpsMetadata = false;
+                            openIdConnectOptions.SignInScheme = IdentityConstants.ExternalScheme;
+                        });
+                }
+            }
             services.Configure<Core.Security.AuthorizationOptions>(Configuration.GetSection("Authorization"));
             var authorizationOptions = Configuration.GetSection("Authorization").Get<Core.Security.AuthorizationOptions>();
             // Register the OpenIddict services.
@@ -259,54 +282,14 @@ namespace VirtoCommerce.Platform.Web
             services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
             //Platform authorization handler for policies based on permissions 
             services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+            // Default password validation service implementation
+            services.AddScoped<IPasswordCheckService, PasswordCheckService>();
 
             // Add memory cache services
             services.AddMemoryCache();
-            //Add Smidge runtime bundling library configuration
-            services.AddSmidge(Configuration.GetSection("smidge"), new PhysicalFileProvider(modulesDiscoveryPath));
-            services.AddSmidgeNuglify();
 
             // Register the Swagger generator
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new Info
-                {
-                    Title = "VirtoCommerce Solution REST API documentation",
-                    Version = "v1",
-                    Description = "For this sample, you can use the"
-                    ,
-                    Contact = new Contact
-                    {
-                        Email = "support@virtocommerce.com",
-                        Name = "Virto Commerce",
-                        Url = "http://virtocommerce.com"
-                    }
-                });
-                c.TagActionsBy(api => api.GroupByModuleName(services));
-                c.DocInclusionPredicate((docName, api) => true);
-                c.DescribeAllEnumsAsStrings();
-                c.IgnoreObsoleteProperties();
-                c.IgnoreObsoleteActions();
-                c.OperationFilter<FileResponseTypeFilter>();
-                c.OperationFilter<OptionalParametersFilter>();
-                c.OperationFilter<TagsFilter>();
-                c.DocumentFilter<TagsFilter>();
-                c.MapType<object>(() => new Schema { Type = "object" });
-                c.AddModulesXmlComments(services);
-
-                // https://github.com/domaindrivendev/Swashbuckle.AspNetCore#add-security-definitions-and-requirements
-                c.AddSecurityDefinition("oauth2", new OAuth2Scheme
-                {
-                    Type = "oauth2",
-                    Flow = "password",
-                    TokenUrl = "/connect/token",
-                });
-                c.CustomSchemaIds(x => x.FullName);
-                c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>
-                {
-                    { "oauth2", new string[0] }
-                });
-            });
+            services.AddSwagger();
 
             //Add SignalR for push notifications
             services.AddSignalR();
@@ -347,6 +330,10 @@ namespace VirtoCommerce.Platform.Web
                 app.UseDeveloperExceptionPage();
                 app.UseBrowserLink();
                 app.UseDatabaseErrorPage();
+                app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
+                {
+                    HotModuleReplacement = false
+                });
             }
             else
             {
@@ -397,36 +384,9 @@ namespace VirtoCommerce.Platform.Web
                 securityDbContext.Database.Migrate();
             }
 
-            //Using Smidge runtime bundling library for bundling modules js and css files
-            app.UseSmidge(bundles =>
-            {
-                app.UseModulesContent(bundles);
-            });
-            app.UseSmidgeNuglify();
-
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
-            app.UseSwagger(c => c.RouteTemplate = "docs/{documentName}/docs.json");
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/docs/v1/docs.json", "Explore");
-                c.RoutePrefix = "docs";
-                c.EnableValidator();
-                c.IndexStream = () =>
-                {
-                    var type = GetType().GetTypeInfo().Assembly
-                        .GetManifestResourceStream("VirtoCommerce.Platform.Web.wwwroot.swagger.index.html");
-                    return type;
-                };
-                c.DocumentTitle = "VirtoCommerce Solution REST API documentation";
-                c.InjectStylesheet("/swagger/vc.css");
-                c.ShowExtensions();
-                c.DocExpansion(DocExpansion.None);
-
-                c.OAuthClientId(string.Empty);
-                c.OAuthClientSecret(string.Empty);
-            });
+            app.UseSwagger();
 
             app.UseHangfireDashboard("/hangfire", new DashboardOptions { Authorization = new[] { new HangfireAuthorizationHandler() } });
             app.UseHangfireServer(new BackgroundJobServerOptions

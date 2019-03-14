@@ -19,7 +19,7 @@
     <projectUrl>https://virtocommerce.com/apps/extensions/virto-shoppingcart-module</projectUrl>
     <iconUrl>https://raw.githubusercontent.com/VirtoCommerce/vc-module-cart/master/VirtoCommerce.CartModule.Web/Content/logo.png</iconUrl>
     <releaseNotes>First version.</releaseNotes>
-    <copyright>Copyright © 2011-2018 Virto Commerce. All rights reserved</copyright>
+    <copyright>Copyright © 2011-2019 Virto Commerce. All rights reserved</copyright>
     <tags>shopping cart</tags>
 
     <assemblyFile>VirtoCommerce.CartModule.Web.dll</assemblyFile>

@@ -1,4 +1,4 @@
-﻿angular.module('platformWebApp')
+angular.module('platformWebApp')
 .controller('platformWebApp.accountApiController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.accounts', function ($scope, bladeNavigationService, dialogService, accounts) {
     var blade = $scope.blade;
     blade.updatePermission = 'platform:security:update';
@@ -85,6 +85,7 @@
         }
     ];
 
+    // TODO: this method is probably obsolete on platform 3.x
     function generateNewApiAccount(isInitialRequest) {
         var parameters;
         if (isInitialRequest) {
@@ -109,6 +110,7 @@
         });
     };
 
+    // TODO: this method is probably obsolete on platform 3.x
     function generateNewApiKey() {
         blade.isLoading = true;
         accounts.generateNewApiKey({}, blade.currentEntity, function (apiAccount) {

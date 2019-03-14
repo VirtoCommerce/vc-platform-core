@@ -107,7 +107,7 @@ namespace VirtoCommerce.Platform.Modules.AssemblyLoading
 
         private static RuntimeConfig TryReadConfig(string path)
         {
-            try
+            if (File.Exists(path))
             {
                 using (var file = File.OpenText(path))
                 using (var json = new JsonTextReader(file))
@@ -122,10 +122,7 @@ namespace VirtoCommerce.Platform.Modules.AssemblyLoading
                     return serializer.Deserialize<RuntimeConfig>(json);
                 }
             }
-            catch
-            {
-                return null;
-            }
+            return null;
         }
     }
 }

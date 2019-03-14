@@ -22,14 +22,14 @@ namespace VirtoCommerce.CustomerModule.Data.Services
     /// </summary>
     public class CommerceMembersServiceImpl : MemberServiceBase
     {
-        private readonly IUserSearchService _userSearchService;
         public CommerceMembersServiceImpl(Func<ICustomerRepository> repositoryFactory, IEventPublisher eventPublisher
             , IDynamicPropertyService dynamicPropertyService, ISeoService seoService, IPlatformMemoryCache platformMemoryCache, IUserSearchService userSearchService)
             : base(repositoryFactory, eventPublisher, dynamicPropertyService, seoService, platformMemoryCache)
         {
-            _userSearchService = userSearchService;
+            UserSearchService = userSearchService;
         }
 
+        protected IUserSearchService UserSearchService { get; }
 
         #region IMemberService Members
 
@@ -43,7 +43,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                 var hasSecurityAccountMembers = result.OfType<IHasSecurityAccounts>();
                 if (hasSecurityAccountMembers.Any())
                 {
-                    var usersSearchResult = await _userSearchService.SearchUsersAsync(new UserSearchCriteria { MemberIds = hasSecurityAccountMembers.Select(x => x.Id).ToList(), Take = int.MaxValue });
+                    var usersSearchResult = await UserSearchService.SearchUsersAsync(new UserSearchCriteria { MemberIds = hasSecurityAccountMembers.Select(x => x.Id).ToList(), Take = int.MaxValue });
                     foreach (var hasAccountMember in hasSecurityAccountMembers)
                     {
                         hasAccountMember.SecurityAccounts = usersSearchResult.Results.Where(x => x.MemberId.EqualsInvariant(hasAccountMember.Id)).ToList();
