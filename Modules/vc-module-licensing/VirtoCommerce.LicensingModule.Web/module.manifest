@@ -19,14 +19,10 @@
     <projectUrl>https://virtocommerce.com/virto-licensing-module</projectUrl>
     <iconUrl>Modules/$(VirtoCommerce.Licensing)/Content/logoVC.png</iconUrl>
     <releaseNotes>Third version.</releaseNotes>
-    <copyright>Copyright © 2011-2018 Virto Commerce. All rights reserved</copyright>
+    <copyright>Copyright © 2011-2019 Virto Commerce. All rights reserved</copyright>
     <tags>licensing</tags>
 
     <assemblyFile>VirtoCommerce.LicensingModule.Web.dll</assemblyFile>
     <moduleType>VirtoCommerce.LicensingModule.Web.Module, VirtoCommerce.LicensingModule.Web</moduleType>
 
-    <scripts>
-        <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
-    </scripts>
-    
 </module>

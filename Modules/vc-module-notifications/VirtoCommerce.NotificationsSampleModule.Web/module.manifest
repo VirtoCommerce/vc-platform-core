@@ -24,11 +24,8 @@
     <assemblyFile>VirtoCommerce.NotificationsSampleModule.Web.dll</assemblyFile>
     <moduleType>VirtoCommerce.NotificationsSampleModule.Web.Module, VirtoCommerce.NotificationsSample.Web</moduleType>
 
-    <styles>
-        <directory virtualPath="$/Content" searchPattern="*.css" searchSubdirectories="true" />
-    </styles>
-    <scripts>
-        <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
-    </scripts> 
+    <styles virtualPath="Content"/>
+    
+    <scripts virtualPath="Scripts"/>
     
 </module>

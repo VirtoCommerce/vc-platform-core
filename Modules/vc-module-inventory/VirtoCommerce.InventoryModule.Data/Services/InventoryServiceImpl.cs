@@ -20,45 +20,46 @@ namespace VirtoCommerce.InventoryModule.Data.Services
 {
     public class InventoryServiceImpl : IInventoryService
     {
-        private readonly Func<IInventoryRepository> _repositoryFactory;
-        private readonly IEventPublisher _eventPublisher;
-        private readonly IPlatformMemoryCache _platformMemoryCache;
         public InventoryServiceImpl(Func<IInventoryRepository> repositoryFactory, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
         {
-            _repositoryFactory = repositoryFactory;
-            _eventPublisher = eventPublisher;
-            _platformMemoryCache = platformMemoryCache;
+            RepositoryFactory = repositoryFactory;
+            EventPublisher = eventPublisher;
+            PlatformMemoryCache = platformMemoryCache;
         }
 
-        public async Task<IEnumerable<InventoryInfo>> GetByIdsAsync(string[] itemIds, string responseGroup = null)
+        protected Func<IInventoryRepository> RepositoryFactory { get; }
+        protected IEventPublisher EventPublisher { get; }
+        protected IPlatformMemoryCache PlatformMemoryCache { get; }
+
+        public virtual async Task<IEnumerable<InventoryInfo>> GetByIdsAsync(string[] itemIds, string responseGroup = null)
         {
             var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", itemIds), responseGroup);
-            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                using (var repository = _repositoryFactory())
+                using (var repository = RepositoryFactory())
                 {
                     repository.DisableChangesTracking();
-                    var entity = await repository.Inventories.ToArrayAsync();
-                    
-                    return entity.Select(e =>
+                    var entries = await repository.Inventories.ToArrayAsync();
+
+                    return entries.Select(e =>
                     {
                         var result = e.ToModel(AbstractTypeFactory<InventoryInfo>.TryCreateInstance());
                         cacheEntry.AddExpirationToken(InventoryCacheRegion.CreateChangeToken(result));
                         return result;
-                    });
+                    }).ToArray();
                 }
             });
         }
 
         #region IInventoryService Members
         
-        public async Task<IEnumerable<InventoryInfo>> GetProductsInventoryInfosAsync(IEnumerable<string> productIds, string responseGroup = null)
+        public virtual async Task<IEnumerable<InventoryInfo>> GetProductsInventoryInfosAsync(IEnumerable<string> productIds, string responseGroup = null)
         {
             var cacheKey = CacheKey.With(GetType(), "GetProductsInventoryInfosAsync", string.Join("-", productIds), responseGroup);
-            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 var retVal = new List<InventoryInfo>();
-                using (var repository = _repositoryFactory())
+                using (var repository = RepositoryFactory())
                 {
                     repository.DisableChangesTracking();
                     var entities = await repository.GetProductsInventoriesAsync(productIds.ToArray(), responseGroup);
@@ -73,7 +74,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             });
         }
 
-        public async Task SaveChangesAsync(IEnumerable<InventoryInfo> inventoryInfos)
+        public virtual async Task SaveChangesAsync(IEnumerable<InventoryInfo> inventoryInfos)
         {
             if (inventoryInfos == null)
             {
@@ -81,13 +82,13 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             }
 
             var changedEntries = new List<GenericChangedEntry<InventoryInfo>>();
-            using (var repository = _repositoryFactory())
+            using (var repository = RepositoryFactory())
             {
-                var dataExistInventories = await repository.GetProductsInventoriesAsync(inventoryInfos.Select(x=>x.ProductId));
+                var dataExistInventories = await repository.GetProductsInventoriesAsync(inventoryInfos.Select(x => x.ProductId));
                 foreach (var changedInventory in inventoryInfos)
-                {               
+                {
                     var originalEntity = dataExistInventories.FirstOrDefault(x => x.Sku == changedInventory.ProductId && x.FulfillmentCenterId == changedInventory.FulfillmentCenterId);
-            
+
                     var modifiedEntity = AbstractTypeFactory<InventoryEntity>.TryCreateInstance().FromModel(changedInventory);
                     if (originalEntity != null)
                     {
@@ -102,15 +103,15 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                 }
 
                 //Raise domain events
-                await _eventPublisher.Publish(new InventoryChangingEvent(changedEntries));
+                await EventPublisher.Publish(new InventoryChangingEvent(changedEntries));
                 await repository.UnitOfWork.CommitAsync();
-                await _eventPublisher.Publish(new InventoryChangedEvent(changedEntries));
+                await EventPublisher.Publish(new InventoryChangedEvent(changedEntries));
 
                 ClearCache(inventoryInfos);
             }
         }
 
-        private void ClearCache(IEnumerable<InventoryInfo> inventories)
+        protected virtual void ClearCache(IEnumerable<InventoryInfo> inventories)
         {
             InventorySearchCacheRegion.ExpireRegion();
 

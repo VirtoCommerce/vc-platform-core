@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<module>
+    <id>VirtoCommerce.Sitemaps</id>
+    <version>3.0.0</version>
+    <platformVersion>3.0.0</platformVersion>
+    <dependencies>
+        <dependency id="VirtoCommerce.Core" version="3.0.0" />
+        <dependency id="VirtoCommerce.Catalog" version="3.0.0" />
+        <!--TODO: these modules are not ported to VC platform 3.x yet.-->
+        <!--<dependency id="VirtoCommerce.Content" version="3.0.0" />-->
+        <!--<dependency id="VirtoCommerce.Customer" version="3.0.0" />-->
+        <dependency id="VirtoCommerce.Store" version="3.0.0" />
+    </dependencies>
+    <title>Sitemaps module</title>
+    <description>Sitemaps generation management for stores</description>
+    <authors>
+        <author>Andrey Orlov</author>
+    </authors>
+    <owners>
+        <owner>Virto Commerce</owner>
+    </owners>
+    <projectUrl>https://virtocommerce.com/apps/extensions/automatic-sitemaps-module</projectUrl>
+    <iconUrl>https://github.com/VirtoCommerce/vc-module-sitemaps/raw/master/VirtoCommerce.SitemapsModule.Web/Content/logo.png</iconUrl>
+    <releaseNotes>First version.</releaseNotes>
+    <copyright>Copyright © 2011-2019 Virto Commerce. All rights reserved</copyright>
+    <tags>sitemaps</tags>
+    <assemblyFile>VirtoCommerce.SitemapsModule.Web.dll</assemblyFile>
+    <moduleType>VirtoCommerce.SitemapsModule.Web.Module, VirtoCommerce.SitemapsModule.Web</moduleType>
+    
+</module>

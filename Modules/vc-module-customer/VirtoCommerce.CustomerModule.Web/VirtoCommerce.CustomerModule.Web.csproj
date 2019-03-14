@@ -2,14 +2,21 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
       <!--This line is necessary to copy all dependencies in the bin folder-->
       <!--<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>-->
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="node_modules\**" />
+    <EmbeddedResource Remove="node_modules\**" />
+    <None Remove="node_modules\**" />
+  </ItemGroup>
+
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore" Version="2.1.0" />
-        <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.1.0" />
+        <PackageReference Include="Microsoft.AspNetCore" Version="2.1.6" />
+        <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.6" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.1.3" />
     </ItemGroup>
 
   <ItemGroup>

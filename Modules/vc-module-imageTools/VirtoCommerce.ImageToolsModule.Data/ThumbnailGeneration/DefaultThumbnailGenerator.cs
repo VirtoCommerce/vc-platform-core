@@ -14,16 +14,16 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
     /// </summary>
     public class DefaultThumbnailGenerator : IThumbnailGenerator
     {
-        private readonly object _progressLock = new object();
-
-        private readonly IImageService _imageService;
-        private readonly IImageResizer _imageResizer;
-
         public DefaultThumbnailGenerator(IImageService storageProvider, IImageResizer imageResizer)
         {
-            _imageService = storageProvider;
-            _imageResizer = imageResizer;
+            ImageService = storageProvider;
+            ImageResizer = imageResizer;
         }
+
+        protected object ProgressLock { get; } = new object();
+
+        protected IImageService ImageService { get; }
+        protected IImageResizer ImageResizer { get; }
 
         /// <summary>
         /// Generates thumbnails asynchronously
@@ -33,11 +33,11 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
         /// <param name="options">Represents generation options</param>
         /// <param name="token">Allows cancel operation</param>
         /// <returns></returns>
-        public async Task<ThumbnailGenerationResult> GenerateThumbnailsAsync(string sourcePath, string destPath, IList<ThumbnailOption> options, ICancellationToken token)
+        public virtual async Task<ThumbnailGenerationResult> GenerateThumbnailsAsync(string sourcePath, string destPath, IList<ThumbnailOption> options, ICancellationToken token)
         {
             token?.ThrowIfCancellationRequested();
 
-            var originalImage = await _imageService.LoadImageAsync(sourcePath);
+            var originalImage = await ImageService.LoadImageAsync(sourcePath);
             if (originalImage == null)
             {
                 return new ThumbnailGenerationResult
@@ -48,11 +48,9 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
 
             var result = new ThumbnailGenerationResult();
 
-            var format = _imageService.GetImageFormat(originalImage);
-
             //one process only can use an Image object at the same time.
             Image clone;
-            lock (_progressLock)
+            lock (ProgressLock)
             {
                 clone = (Image)originalImage.Clone();
             }
@@ -64,7 +62,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
 
                 if (thumbnail != null)
                 {
-                    await _imageService.SaveImageAsync(thumbnailUrl, thumbnail, format);
+                    await ImageService.SaveImageAsync(thumbnailUrl, thumbnail, clone.RawFormat, option.JpegQuality);
                 }
                 else
                 {
@@ -93,16 +91,16 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
             switch (option.ResizeMethod)
             {
                 case ResizeMethod.FixedSize:
-                    thumbnail = _imageResizer.FixedSize(image, width, height, color);
+                    thumbnail = ImageResizer.FixedSize(image, width, height, color);
                     break;
                 case ResizeMethod.FixedWidth:
-                    thumbnail = _imageResizer.FixedWidth(image, width, color);
+                    thumbnail = ImageResizer.FixedWidth(image, width, color);
                     break;
                 case ResizeMethod.FixedHeight:
-                    thumbnail = _imageResizer.FixedHeight(image, height, color);
+                    thumbnail = ImageResizer.FixedHeight(image, height, color);
                     break;
                 case ResizeMethod.Crop:
-                    thumbnail = _imageResizer.Crop(image, width, height, option.AnchorPosition);
+                    thumbnail = ImageResizer.Crop(image, width, height, option.AnchorPosition);
                     break;
             }
             return thumbnail;

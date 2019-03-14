@@ -7,12 +7,14 @@ using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Modularity.Exceptions;
+using VirtoCommerce.Platform.Modules.AssemblyLoading;
 
 namespace VirtoCommerce.Platform.Modules
 {
     public class LocalStorageModuleCatalog : ModuleCatalog, ILocalModuleCatalog
     {
         private readonly LocalStorageModuleCatalogOptions _options;
+
         public LocalStorageModuleCatalog(IOptions<LocalStorageModuleCatalogOptions> options)
         {
             _options = options.Value;
@@ -32,8 +34,8 @@ namespace VirtoCommerce.Platform.Modules
                 Directory.CreateDirectory(_options.ProbingPath);
             }
 
-            if (!discoveryPath.EndsWith("\\", StringComparison.OrdinalIgnoreCase))
-                discoveryPath += "\\";
+            if (!discoveryPath.EndsWith(Path.DirectorySeparatorChar))
+                discoveryPath += Path.DirectorySeparatorChar;
 
             var rootUri = new Uri(discoveryPath);
 
@@ -47,10 +49,6 @@ namespace VirtoCommerce.Platform.Modules
                 var modulePath = Path.GetDirectoryName(manifestPath);
 
                 CopyAssemblies(modulePath, _options.ProbingPath);
-
-                var moduleVirtualPath = GetModuleVirtualPath(rootUri, modulePath);
-                ConvertVirtualPath(manifest.Scripts, moduleVirtualPath);
-                ConvertVirtualPath(manifest.Styles, moduleVirtualPath);
 
                 var moduleInfo = new ManifestModuleInfo(manifest) { FullPhysicalPath = Path.GetDirectoryName(manifestPath) };
 
@@ -174,7 +172,8 @@ namespace VirtoCommerce.Platform.Modules
                 {
                     foreach (var sourceFilePath in Directory.EnumerateFiles(sourceDirectoryPath, "*.*", SearchOption.AllDirectories))
                     {
-                        if (IsAssemblyFile(sourceFilePath))
+                        // Copy all assembly related files except assemblies that are inlcuded in TPA list
+                        if (IsAssemblyRelatedFile(sourceFilePath) && !(IsAssemblyFile(sourceFilePath) && TPA.ContainsAssembly(Path.GetFileName(sourceFilePath))))
                         {
                             var targetFilePath = Path.Combine(targetDirectoryPath, Path.GetFileName(sourceFilePath));
                             CopyFile(sourceFilePath, targetFilePath);
@@ -207,35 +206,14 @@ namespace VirtoCommerce.Platform.Modules
             }
         }
 
+        private bool IsAssemblyRelatedFile(string path)
+        {
+            return _options.AssemblyFileExtensions.Union(_options.AssemblyServiceFileExtensions).Any(x => path.EndsWith(x, StringComparison.OrdinalIgnoreCase));
+        }
+
         private bool IsAssemblyFile(string path)
         {
             return _options.AssemblyFileExtensions.Any(x => path.EndsWith(x, StringComparison.OrdinalIgnoreCase));
-        }
-
-        private string GetModuleVirtualPath(Uri rootUri, string modulePath)
-        {
-            var moduleRelativePath = MakeRelativePath(rootUri, modulePath);
-            return moduleRelativePath;
-        }
-
-        private static string MakeRelativePath(Uri rootUri, string fullPath)
-        {
-            var fullUri = new Uri(fullPath);
-            var relativePath = rootUri.MakeRelativeUri(fullUri).ToString();
-            return relativePath;
-        }
-
-        private static void ConvertVirtualPath(IEnumerable<ManifestBundleItem> items, string moduleVirtualPath)
-        {
-            if (items != null)
-            {
-                foreach (var item in items)
-                {
-                    const string moduleRoot = "$/";
-                    if (item.VirtualPath.StartsWith(moduleRoot, StringComparison.OrdinalIgnoreCase))
-                        item.VirtualPath = string.Join("/", moduleVirtualPath, item.VirtualPath.Substring(moduleRoot.Length));
-                }
-            }
         }
 
         private static string GetFileAbsoluteUri(string rootPath, string relativePath)

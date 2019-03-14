@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Swashbuckle.AspNetCore.Swagger;
@@ -22,23 +21,6 @@ namespace VirtoCommerce.Platform.Web.Swagger
 
         public void Apply(SwaggerDocument swaggerDoc, DocumentFilterContext context)
         {
-            var defaultApiKey = _settingManager.GetValue("Swashbuckle.DefaultApiKey", string.Empty);
-            swaggerDoc.Info.Description = string.Format(CultureInfo.InvariantCulture, "For this sample, you can use the `{0}` key to satisfy the authorization filters.", defaultApiKey);
-            swaggerDoc.Info.TermsOfService = "";
-
-            swaggerDoc.Info.Contact = new Contact
-            {
-                Email = "support@virtocommerce.com",
-                Name = "Virto Commerce",
-                Url = "http://virtocommerce.com"
-            };
-
-            swaggerDoc.Info.License = new License
-            {
-                Name = "Virto Commerce Open Software License 3.0",
-                Url = "http://virtocommerce.com/opensourcelicense"
-            };
-
             var tags = _moduleCatalog.Modules
                 .OfType<ManifestModuleInfo>()
                 .Select(x => new Tag

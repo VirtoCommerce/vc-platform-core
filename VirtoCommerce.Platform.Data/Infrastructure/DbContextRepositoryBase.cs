@@ -8,7 +8,7 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
     /// <summary>
     /// Base class for repository implementations that are based on the Entity Framework.
     /// </summary>
-    public abstract class DbContextRepositoryBase<TContext> : IDbContextProvider, IRepository where TContext : DbContext
+    public abstract class DbContextRepositoryBase<TContext> : IRepository where TContext : DbContext
     {
         protected DbContextRepositoryBase(TContext dbContext, IUnitOfWork unitOfWork = null)
         {
@@ -20,13 +20,6 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
         }
 
         public TContext DbContext { get; }
-
-        #region IDbContextProvider Members
-        public DbContext GetDbContext()
-        {
-            return DbContext;
-        }
-        #endregion
 
         #region IRepository Members
         /// <summary>
@@ -45,8 +38,8 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
         public void Attach<T>(T item) where T : class
         {
             DbContext.Attach(item);
-        }  
-       
+        }
+
         /// <summary>
         /// Adds the specified item.
         /// </summary>
@@ -55,7 +48,7 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
         public void Add<T>(T item) where T : class
         {
             DbContext.Add(item);
-        }      
+        }
 
         /// <summary>
         /// Updates the specified item.
@@ -67,7 +60,7 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
             DbContext.Update(item);
             DbContext.Entry(item).State = EntityState.Modified;
         }
-       
+
         /// <summary>
         /// Removes the specified item.
         /// </summary>

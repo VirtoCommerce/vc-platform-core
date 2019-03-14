@@ -1,11 +1,8 @@
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
-using OpenIddict.Core;
-using OpenIddict.Models;
 using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Security;
 

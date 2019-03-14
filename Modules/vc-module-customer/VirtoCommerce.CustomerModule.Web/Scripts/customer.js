@@ -1,4 +1,4 @@
-﻿//Call this to register our module to main application
+//Call this to register our module to main application
 var moduleName = "virtoCommerce.customerModule";
 
 if (AppDependencies != undefined) {
@@ -119,7 +119,7 @@ angular.module(moduleName, [])
       memberTypesResolverService.registerType({
           memberType: 'Organization',
           description: 'customer.blades.member-add.organization.description',
-          fullTypeName: 'VirtoCommerce.Domain.Customer.Model.Organization',
+          fullTypeName: 'VirtoCommerce.CustomerModule.Core.Model.Organization',
           icon: 'fa-university',
           detailBlade: {
               template: 'Modules/$(VirtoCommerce.Customer)/Scripts/blades/organization-detail.tpl.html',
@@ -134,7 +134,7 @@ angular.module(moduleName, [])
       memberTypesResolverService.registerType({
           memberType: 'Employee',
           description: 'customer.blades.member-add.employee.description',
-          fullTypeName: 'VirtoCommerce.Domain.Customer.Model.Employee',
+          fullTypeName: 'VirtoCommerce.CustomerModule.Core.Model.Employee',
           icon: ' fa-user',
           detailBlade: {
               template: 'Modules/$(VirtoCommerce.Customer)/Scripts/blades/employee-detail.tpl.html',
@@ -153,7 +153,7 @@ angular.module(moduleName, [])
       memberTypesResolverService.registerType({
           memberType: 'Contact',
           description: 'customer.blades.member-add.contact.description',
-          fullTypeName: 'VirtoCommerce.Domain.Customer.Model.Contact',
+          fullTypeName: 'VirtoCommerce.CustomerModule.Core.Model.Contact',
           icon: 'fa-smile-o',
           detailBlade: {
               template: 'Modules/$(VirtoCommerce.Customer)/Scripts/blades/customer-detail.tpl.html',
@@ -172,7 +172,7 @@ angular.module(moduleName, [])
       memberTypesResolverService.registerType({
           memberType: 'Vendor',
           description: 'customer.blades.member-add.vendor.description',
-          fullTypeName: 'VirtoCommerce.Domain.Customer.Model.Vendor',
+          fullTypeName: 'VirtoCommerce.CustomerModule.Core.Model.Vendor',
           icon: 'fa-balance-scale',
           detailBlade: {
               template: 'Modules/$(VirtoCommerce.Customer)/Scripts/blades/vendor-detail.tpl.html',
