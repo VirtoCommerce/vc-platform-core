@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using VirtoCommerce.CatalogModule.Core.Serialization;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.InventoryModule.Core.Model;
@@ -79,6 +80,9 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         #region IHasProperties members
         public ICollection<Property> Properties { get; set; }
 
+        [JsonIgnoreSerialization]
+        [Obsolete("it's for importing data from v.2, need to use values in Properties")]
+        public ICollection<PropertyValue> PropertyValues { get; set; }
 
         #endregion
         #region IHasImages members

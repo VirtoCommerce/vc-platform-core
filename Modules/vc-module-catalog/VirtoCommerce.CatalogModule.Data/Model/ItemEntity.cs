@@ -266,12 +266,24 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
             #region ItemPropertyValues
 
+            PropertyValue[] values = null;
+
             if (!product.Properties.IsNullOrEmpty())
+            {
+                values = product.Properties.SelectMany(pr => pr.Values).ToArray();
+            }
+
+            if (!product.PropertyValues.IsNullOrEmpty())
+            {
+                values = values.IsNullOrEmpty() ? product.PropertyValues.ToArray() : values.Union(product.PropertyValues).ToArray();
+            }
+
+            if (!values.IsNullOrEmpty())
             {
                 var propertyValues = new ObservableCollection<PropertyValueEntity>(
                     AbstractTypeFactory<PropertyValueEntity>
                         .TryCreateInstance()
-                        .FromModels(product.Properties.SelectMany(pr => pr.Values), pkMap));
+                        .FromModels(values, pkMap));
 
                 ItemPropertyValues = new ObservableCollection<PropertyValueEntity>(propertyValues);
             }

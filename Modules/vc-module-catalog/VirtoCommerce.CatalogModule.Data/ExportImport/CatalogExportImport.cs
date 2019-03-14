@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
@@ -28,7 +30,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
 
         private int _batchSize = 50;
 
-        public CatalogExportImport(ICatalogService catalogService, ICatalogSearchService catalogSearchService, ICategoryService categoryService, IItemService itemService, IPropertyService propertyService, IProperyDictionaryItemSearchService propertyDictionarySearchService, IProperyDictionaryItemService propertyDictionaryService, IProductSearchService productSearchService, ICategorySearchService categorySearchService, JsonSerializer jsonSerializer)
+        public CatalogExportImport(ICatalogService catalogService, ICatalogSearchService catalogSearchService, ICategoryService categoryService, IItemService itemService, IPropertyService propertyService, IProperyDictionaryItemSearchService propertyDictionarySearchService, IProperyDictionaryItemService propertyDictionaryService, IProductSearchService productSearchService, ICategorySearchService categorySearchService, IOptions<MvcJsonOptions> jsonOptions)
         {
             _catalogService = catalogService;
             _catalogSearchService = catalogSearchService;
@@ -39,7 +41,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             _propertyDictionaryService = propertyDictionaryService;
             _productSearchService = productSearchService;
             _categorySearchService = categorySearchService;
-            _jsonSerializer = jsonSerializer;
+            _jsonSerializer = JsonSerializer.Create(jsonOptions.Value.SerializerSettings); ;
         }
 
         public async Task DoExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
@@ -52,6 +54,35 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             using (var writer = new JsonTextWriter(sw))
             {
                 await writer.WriteStartObjectAsync();
+
+                progressInfo.Description = "Catalogs exporting...";
+                progressCallback(progressInfo);
+
+                await writer.WritePropertyNameAsync("Catalogs");
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
+                {
+                    var searchResult = (await _catalogService.GetCatalogsListAsync()).ToArray();
+                    return new GenericSearchResult<Catalog> { Results = searchResult, TotalCount = searchResult.Length };
+                }, (processedCount, totalCount) =>
+                {
+                    progressInfo.Description = $"{ processedCount } of { totalCount } catalogs have been exported";
+                    progressCallback(progressInfo);
+                }, cancellationToken);
+
+                progressInfo.Description = "Categories exporting...";
+                progressCallback(progressInfo);
+
+                await writer.WritePropertyNameAsync("Categories");
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
+                {
+                    var searchResult = await _catalogSearchService.SearchAsync(new CatalogListEntrySearchCriteria { Skip = skip, Take = take, ResponseGroup = SearchResponseGroup.WithCategories });
+                    var categories = await _categoryService.GetByIdsAsync(searchResult.Categories.Select(x => x.Id).ToArray(), CategoryResponseGroup.Full);
+                    return new GenericSearchResult<Category> { Results = categories, TotalCount = searchResult.Categories.Count };
+                }, (processedCount, totalCount) =>
+                {
+                    progressInfo.Description = $"{ processedCount } of { totalCount } Categories have been exported";
+                    progressCallback(progressInfo);
+                }, cancellationToken);
 
                 progressInfo.Description = "Properties exporting...";
                 progressCallback(progressInfo);
@@ -85,42 +116,15 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                     progressCallback(progressInfo);
                 }, cancellationToken);
 
-                progressInfo.Description = "Catalogs exporting...";
-                progressCallback(progressInfo);
-
-                await writer.WritePropertyNameAsync("Catalogs");
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
-                {
-                    var searchResult = await _catalogSearchService.SearchAsync(new CatalogListEntrySearchCriteria { Skip = skip, Take = take });
-                    return new GenericSearchResult<Catalog> { Results = searchResult.Catalogs, TotalCount = searchResult.Catalogs.Count };
-                }, (processedCount, totalCount) =>
-                {
-                    progressInfo.Description = $"{ processedCount } of { totalCount } catalogs have been exported";
-                    progressCallback(progressInfo);
-                }, cancellationToken);
-
-                progressInfo.Description = "Categories exporting...";
-                progressCallback(progressInfo);
-
-                await writer.WritePropertyNameAsync("Categories");
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
-                {
-                    var searchResult = await _categorySearchService.SearchAsync(new CategorySearchCriteria { Skip = skip, Take = take });
-                    return new GenericSearchResult<Category> { Results = searchResult.Items, TotalCount = (int)searchResult.TotalCount };
-                }, (processedCount, totalCount) =>
-                {
-                    progressInfo.Description = $"{ processedCount } of { totalCount } Categories have been exported";
-                    progressCallback(progressInfo);
-                }, cancellationToken);
-
                 progressInfo.Description = "Products exporting...";
                 progressCallback(progressInfo);
 
                 await writer.WritePropertyNameAsync("Products");
                 await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
                 {
-                    var searchResult = await _productSearchService.SearchAsync(new ProductSearchCriteria { Skip = skip, Take = take });
-                    return new GenericSearchResult<CatalogProduct> { Results = searchResult.Items, TotalCount = (int)searchResult.TotalCount };
+                    var searchResult = await _catalogSearchService.SearchAsync(new CatalogListEntrySearchCriteria { Skip = skip, Take = take, ResponseGroup = SearchResponseGroup.WithProducts });
+                    var products = await _itemService.GetByIdsAsync(searchResult.Products.Select(x => x.Id).ToArray(), ItemResponseGroup.ItemLarge);
+                    return new GenericSearchResult<CatalogProduct> { Results = products, TotalCount = searchResult.ProductsTotalCount };
                 }, (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } Products have been exported";

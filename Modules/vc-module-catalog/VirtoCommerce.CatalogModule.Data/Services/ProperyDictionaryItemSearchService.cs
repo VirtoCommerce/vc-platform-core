@@ -59,8 +59,12 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
                 result.TotalCount = await query.CountAsync();
 
-                var ids = query.Skip(criteria.Skip).Take(criteria.Take).Select(x => x.Id).ToArray();
-                result.Results = (await _properyDictionaryItemService.GetByIdsAsync(ids)).AsQueryable().OrderBySortInfos(sortInfos).ToList();
+                if (criteria.Take > 0)
+                {
+                    var ids = query.Skip(criteria.Skip).Take(criteria.Take).Select(x => x.Id).ToArray();
+                    result.Results = (await _properyDictionaryItemService.GetByIdsAsync(ids)).AsQueryable().OrderBySortInfos(sortInfos).ToList();
+                }
+
                 return result;
             }
         }

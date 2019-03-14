@@ -222,34 +222,37 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 // Build the query based on the search criteria
                 var query = BuildSearchQuery(repository.Items, criteria, searchCategoryIds);
 
-                result.ProductsTotalCount = query.Count();
+                result.ProductsTotalCount = await query.CountAsync();
 
-                query = query.OrderBySortInfos(sortInfos);
-
-                var itemIds = await query.Skip(criteria.Skip)
-                                   .Take(criteria.Take)
-                                   .Select(x => x.Id)
-                                   .ToListAsync();
-
-                var productResponseGroup = ItemResponseGroup.ItemInfo | ItemResponseGroup.ItemAssets | ItemResponseGroup.Links | ItemResponseGroup.Seo;
-
-                if (criteria.ResponseGroup.HasFlag(SearchResponseGroup.WithProperties))
+                if (criteria.Take > 0)
                 {
-                    productResponseGroup |= ItemResponseGroup.ItemProperties;
-                }
+                    query = query.OrderBySortInfos(sortInfos);
 
-                if (criteria.ResponseGroup.HasFlag(SearchResponseGroup.WithVariations))
-                {
-                    productResponseGroup |= ItemResponseGroup.Variations;
-                }
+                    var itemIds = await query.Skip(criteria.Skip)
+                        .Take(criteria.Take)
+                        .Select(x => x.Id)
+                        .ToListAsync();
 
-                if (criteria.ResponseGroup.HasFlag(SearchResponseGroup.WithOutlines))
-                {
-                    productResponseGroup |= ItemResponseGroup.Outlines;
-                }
+                    var productResponseGroup = ItemResponseGroup.ItemInfo | ItemResponseGroup.ItemAssets | ItemResponseGroup.Links | ItemResponseGroup.Seo;
 
-                result.Products = (await _itemService.GetByIdsAsync(itemIds.ToArray(), productResponseGroup, criteria.CatalogId))
-                                          .OrderBy(x => itemIds.IndexOf(x.Id)).ToList();
+                    if (criteria.ResponseGroup.HasFlag(SearchResponseGroup.WithProperties))
+                    {
+                        productResponseGroup |= ItemResponseGroup.ItemProperties;
+                    }
+
+                    if (criteria.ResponseGroup.HasFlag(SearchResponseGroup.WithVariations))
+                    {
+                        productResponseGroup |= ItemResponseGroup.Variations;
+                    }
+
+                    if (criteria.ResponseGroup.HasFlag(SearchResponseGroup.WithOutlines))
+                    {
+                        productResponseGroup |= ItemResponseGroup.Outlines;
+                    }
+
+                    result.Products = (await _itemService.GetByIdsAsync(itemIds.ToArray(), productResponseGroup, criteria.CatalogId))
+                        .OrderBy(x => itemIds.IndexOf(x.Id)).ToList();
+                }
             }
 
         }
