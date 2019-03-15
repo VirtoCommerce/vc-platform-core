@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.MarketingModule.Core;
@@ -15,6 +16,7 @@ using VirtoCommerce.MarketingModule.Web.Model;
 using VirtoCommerce.MarketingModule.Web.Model.PushNotifications;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Security;
 
@@ -232,7 +234,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
 
         [HttpPost]
         [Route("coupons/import")]
-        public ActionResult<ImportNotification> ImportCoupons([FromBody]ImportRequest request)
+        public async Task<ActionResult<ImportNotification>> ImportCouponsAsync([FromBody]ImportRequest request)
         {
             var notification = new ImportNotification(_userNameResolver.GetCurrentUserName())
             {
@@ -240,43 +242,44 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
                 Description = "Starting import..."
             };
 
-            //TODO
-            //_notifier.Upsert(notification);
+            await _notifier.SendAsync(notification);
 
-            //BackgroundJob.Enqueue(() => BackgroundImport(request, notification));
+            BackgroundJob.Enqueue(() => BackgroundImportAsync(request, notification));
 
             return Ok(notification);
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
-        public void BackgroundImport(ImportRequest request, ImportNotification notification)
+        public async Task BackgroundImportAsync(ImportRequest request, ImportNotification notification)
         {
-            //TODO
-            //Action<ExportImportProgressInfo> progressCallback = c =>
-            //{
-            //    notification.InjectFrom(c);
-            //    _notifier.Upsert(notification);
-            //};
+            Action<ExportImportProgressInfo> progressCallback = c =>
+            {
+                notification.Description = c.Description;
+                notification.Errors = c.Errors;
+                notification.ErrorCount = c.ErrorCount;
 
-            //using (var stream = _blobStorageProvider.OpenRead(request.FileUrl))
-            //{
-            //    try
-            //    {
-            //        _csvCouponImporter.DoImport(stream, request.Delimiter, request.PromotionId, request.ExpirationDate, progressCallback);
-            //    }
-            //    catch (Exception exception)
-            //    {
-            //        notification.Description = "Import error";
-            //        notification.ErrorCount++;
-            //        notification.Errors.Add(exception.ToString());
-            //    }
-            //    finally
-            //    {
-            //        notification.Finished = DateTime.UtcNow;
-            //        notification.Description = "Import finished" + (notification.Errors.Any() ? " with errors" : " successfully");
-            //        _notifier.Upsert(notification);
-            //    }
-            //}
+                _notifier.Send(notification);
+            };
+
+            using (var stream = _blobStorageProvider.OpenRead(request.FileUrl))
+            {
+                try
+                {
+                    await _csvCouponImporter.DoImportAsync(stream, request.Delimiter, request.PromotionId, request.ExpirationDate, progressCallback);
+                }
+                catch (Exception exception)
+                {
+                    notification.Description = "Import error";
+                    notification.ErrorCount++;
+                    notification.Errors.Add(exception.ToString());
+                }
+                finally
+                {
+                    notification.Finished = DateTime.UtcNow;
+                    notification.Description = "Import finished" + (notification.Errors.Any() ? " with errors" : " successfully");
+                    await _notifier.SendAsync(notification);
+                }
+            }
         }
 
 

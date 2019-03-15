@@ -64,16 +64,20 @@ namespace VirtoCommerce.MarketingModule.Web
             serviceCollection.AddSingleton<CsvCouponImporter>();
 
 
-            //TODO throw exception when CombinePolicy is null
-            //var settingsManager = serviceCollection.BuildServiceProvider().GetRequiredService<ISettingsManager>();
-            //var promotionCombinePolicy = settingsManager.GetValue("Marketing.Promotion.CombinePolicy", "BestReward");
+            var snapshot = serviceCollection.BuildServiceProvider();
+            var settingsRegistrar = snapshot.GetRequiredService<ISettingsRegistrar>();
+            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.General.AllSettings, ModuleInfo.Id);
+
+            //var snapshotSettings = serviceCollection.BuildServiceProvider();
+            //var settingsManager = snapshotSettings.GetService<ISettingsManager>();
+            //var promotionCombinePolicy = settingsManager.GetValue(ModuleConstants.Settings.General.CombinePolicy, "BestReward");
             //if (promotionCombinePolicy.EqualsInvariant("CombineStackable"))
             //{
             //    serviceCollection.AddSingleton<IMarketingPromoEvaluator, CombineStackablePromotionPolicy>();
             //}
             //else
             //{
-            serviceCollection.AddSingleton<IMarketingPromoEvaluator, BestRewardPromotionPolicy>();
+                serviceCollection.AddSingleton<IMarketingPromoEvaluator, BestRewardPromotionPolicy>();
             //}
 
             AbstractTypeFactory<DynamicPromotion>.RegisterType<DynamicPromotion>().WithFactory(() =>
@@ -91,11 +95,7 @@ namespace VirtoCommerce.MarketingModule.Web
         {
             _appBuilder = appBuilder;
 
-            var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
-            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.General.AllSettings, ModuleInfo.Id);
-
-            var settingsManager = appBuilder.ApplicationServices.GetRequiredService<ISettingsManager>();
-            var promotionCombinePolicy = settingsManager.GetValue("Marketing.Promotion.CombinePolicy", "BestReward");
+            
 
             var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
@@ -109,6 +109,13 @@ namespace VirtoCommerce.MarketingModule.Web
             var eventHandlerRegistrar = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
             //Create order observer. record order coupon usage
             eventHandlerRegistrar.RegisterHandler<DynamicContentItemChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<DynamicContentItemEventHandlers>().Handle(message));
+
+            using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
+            {
+                var dbContext = serviceScope.ServiceProvider.GetRequiredService<MarketingDbContext>();
+                dbContext.Database.EnsureCreated();
+                dbContext.Database.Migrate();
+            }
 
             var dynamicContentService = appBuilder.ApplicationServices.GetService<IDynamicContentService>();
             foreach (var id in new[] { Model.MarketingConstants.ContentPlacesRootFolderId, Model.MarketingConstants.CotentItemRootFolderId })
@@ -143,20 +150,12 @@ namespace VirtoCommerce.MarketingModule.Web
             var extensionManager = appBuilder.ApplicationServices.GetService<IMarketingExtensionManager>();
             extensionManager.PromotionCondition = new PromotionConditionRewardTree { Children = GetConditionsAndRewards() };
             extensionManager.ContentCondition = new DynamicContentConditionTree() { Children = GetDynamicContentConditions() };
-
-
+            
             //Next lines allow to use polymorph types in API controller methods
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicMarketingJsonConverter(appBuilder.ApplicationServices.GetService<IMarketingExtensionManager>()));
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new ConditionRewardJsonConverter());
-
-            using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
-            {
-                var dbContext = serviceScope.ServiceProvider.GetRequiredService<MarketingDbContext>();
-                dbContext.Database.EnsureCreated();
-                dbContext.Database.Migrate();
-            }
-
+            
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<PromotionConditionRewardTree>();
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<DynamicContentConditionTree>();
 
