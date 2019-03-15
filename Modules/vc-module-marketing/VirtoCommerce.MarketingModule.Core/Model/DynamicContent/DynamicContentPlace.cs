@@ -1,13 +1,9 @@
-using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
 
 namespace VirtoCommerce.MarketingModule.Core.Model
 {
-    public class DynamicContentPlace : AuditableEntity, IsHasFolder
+    public class DynamicContentPlace : DynamicContentListEntry, IsHasFolder
     {
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string ImageUrl { get; set; }
-
         #region IHasFolder Members
         public string FolderId { get; set; }
         public DynamicContentFolder Folder { get; set; }

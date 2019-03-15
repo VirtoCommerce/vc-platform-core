@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using VirtoCommerce.CoreModule.Core.Common.Conditions;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Core.Model
@@ -19,5 +20,10 @@ namespace VirtoCommerce.MarketingModule.Core.Model
 
         public ICollection<DynamicContentItem> ContentItems { get; set; }
         public ICollection<DynamicContentPlace> ContentPlaces { get; set; }
+
+        /// <summary>
+        /// Dynamic conditions tree determine the applicability of this publication
+        /// </summary>
+        public IConditionTree DynamicExpression { get; set; }
     }
 }
