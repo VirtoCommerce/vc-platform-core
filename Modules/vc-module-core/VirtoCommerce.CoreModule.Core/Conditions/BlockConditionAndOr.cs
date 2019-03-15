@@ -1,7 +1,8 @@
 using System.Linq;
+using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.CoreModule.Core.Common.Conditions
+namespace VirtoCommerce.CoreModule.Core.Conditions
 {
     public class BlockConditionAndOr : Condition
     {

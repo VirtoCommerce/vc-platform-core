@@ -1,4 +1,6 @@
-namespace VirtoCommerce.CoreModule.Core.Common.Conditions
+using VirtoCommerce.CoreModule.Core.Common;
+
+namespace VirtoCommerce.CoreModule.Core.Conditions.Browse
 {
     //Age is []
     public class ConditionAgeIs : CompareConditionBase

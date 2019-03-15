@@ -1,4 +1,6 @@
-namespace VirtoCommerce.CoreModule.Core.Common.Conditions
+using VirtoCommerce.CoreModule.Core.Common;
+
+namespace VirtoCommerce.CoreModule.Core.Conditions.GeoConditions
 {
     //Browsing from zip/postal code []
     public class ConditionGeoZipCode : MatchedConditionBase

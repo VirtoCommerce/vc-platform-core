@@ -1,6 +1,6 @@
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.CoreModule.Core.Common.Conditions
+namespace VirtoCommerce.CoreModule.Core.Conditions
 {
     public abstract class MatchedConditionBase : Condition
     {

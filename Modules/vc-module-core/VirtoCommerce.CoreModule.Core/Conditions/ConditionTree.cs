@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Common.Conditions;
 
-namespace VirtoCommerce.CoreModule.Core.Common.Conditions
+namespace VirtoCommerce.CoreModule.Core.Conditions
 {
     public class ConditionTree : IConditionTree
     {

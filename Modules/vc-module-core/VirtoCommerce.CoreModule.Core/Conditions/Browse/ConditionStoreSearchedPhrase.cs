@@ -1,4 +1,6 @@
-namespace VirtoCommerce.CoreModule.Core.Common.Conditions
+using VirtoCommerce.CoreModule.Core.Common;
+
+namespace VirtoCommerce.CoreModule.Core.Conditions.Browse
 {
     //Shopper searched for phrase [] in store
     public class ConditionStoreSearchedPhrase : MatchedConditionBase

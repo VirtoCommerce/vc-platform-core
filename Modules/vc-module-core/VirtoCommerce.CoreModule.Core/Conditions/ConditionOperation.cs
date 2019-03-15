@@ -1,4 +1,4 @@
-namespace VirtoCommerce.CoreModule.Core.Common.Conditions
+namespace VirtoCommerce.CoreModule.Core.Conditions
 {
     public static class ConditionOperation
     {

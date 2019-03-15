@@ -1,4 +1,6 @@
-namespace VirtoCommerce.CoreModule.Core.Common.Conditions
+using VirtoCommerce.CoreModule.Core.Common;
+
+namespace VirtoCommerce.CoreModule.Core.Conditions.GeoConditions
 {
     //Browsing from a time zone -/+ offset from UTC 
     public class ConditionGeoTimeZone : CompareConditionBase

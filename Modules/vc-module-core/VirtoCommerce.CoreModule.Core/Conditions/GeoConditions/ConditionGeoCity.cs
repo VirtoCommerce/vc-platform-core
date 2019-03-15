@@ -1,14 +1,16 @@
-namespace VirtoCommerce.CoreModule.Core.Common.Conditions
+using VirtoCommerce.CoreModule.Core.Common;
+
+namespace VirtoCommerce.CoreModule.Core.Conditions.GeoConditions
 {
-    //CUrrent url is []
-    public class ConditionUrlIs : MatchedConditionBase
+    //City is []
+    public class ConditionGeoCity : MatchedConditionBase
     {
         public override bool Evaluate(IEvaluationContext context)
         {
             var result = false;
             if (context is EvaluationContextBase evaluationContext)
             {
-                result = UseMatchedCondition(evaluationContext.CurrentUrl);
+                result = UseMatchedCondition(evaluationContext.GeoCity);
             }
 
             return result;
