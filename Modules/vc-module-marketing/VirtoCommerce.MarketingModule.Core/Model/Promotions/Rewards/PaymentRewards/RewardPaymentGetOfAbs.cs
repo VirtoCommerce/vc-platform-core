@@ -1,22 +1,22 @@
-using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Conditions;
 
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
-    //Get $[] off shipping []
-    public class RewardShippingGetOfAbsShippingMethod : ConditionRewardTree, IReward
+    //Get $[] off payment method []
+    public class RewardPaymentGetOfAbs : ConditionTree, IReward
     {
         public decimal Amount { get; set; }
-        public string ShippingMethod { get; set; }
+        public string PaymentMethod { get; set; }
 
         #region IRewardExpression Members
 
         public PromotionReward[] GetRewards()
         {
-            var retVal = new ShipmentReward
+            var retVal = new PaymentReward
             {
                 Amount = Amount,
                 AmountType = RewardAmountType.Absolute,
-                ShippingMethod = ShippingMethod
+                PaymentMethod = PaymentMethod
             };
             return new PromotionReward[] { retVal };
         }

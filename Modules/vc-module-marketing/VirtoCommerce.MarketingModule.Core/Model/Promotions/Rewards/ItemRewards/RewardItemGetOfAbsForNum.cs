@@ -1,9 +1,9 @@
-using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Conditions;
 
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
     //Get $[] off [] items of entry []
-    public class RewardItemGetOfAbsForNum : ConditionRewardTree, IReward
+    public class RewardItemGetOfAbsForNum : ConditionTree, IReward
     {
         public decimal Amount { get; set; }
         public string ProductId { get; set; }

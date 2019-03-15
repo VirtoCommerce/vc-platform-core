@@ -1,6 +1,7 @@
 using System.Linq;
 using Newtonsoft.Json;
-using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Common.Conditions;
+using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Data.Promotions;
 using VirtoCommerce.Platform.Core.Common;
 using coreModel = VirtoCommerce.MarketingModule.Core.Model;
@@ -10,7 +11,7 @@ namespace VirtoCommerce.MarketingModule.Web.Converters
 {
     public static class DynamicContentPublicationConverter
     {
-        public static webModel.DynamicContentPublication ToWebModel(this coreModel.DynamicContentPublication publication, IConditionRewardTree etalonEpressionTree = null)
+        public static webModel.DynamicContentPublication ToWebModel(this coreModel.DynamicContentPublication publication, IConditionTree etalonEpressionTree = null)
         {
             var retVal = new webModel.DynamicContentPublication()
             {
@@ -40,7 +41,7 @@ namespace VirtoCommerce.MarketingModule.Web.Converters
             retVal.DynamicExpression = etalonEpressionTree;
             if (!string.IsNullOrEmpty(publication.PredicateVisualTreeSerialized))
             {
-                retVal.DynamicExpression = JsonConvert.DeserializeObject<IConditionRewardTree>(publication.PredicateVisualTreeSerialized, new ConditionRewardJsonConverter());
+                retVal.DynamicExpression = JsonConvert.DeserializeObject<IConditionTree>(publication.PredicateVisualTreeSerialized, new ConditionRewardJsonConverter());
                 if (etalonEpressionTree != null)
                 {
                     //Copy available elements from etalon because they not persisted

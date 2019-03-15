@@ -1,9 +1,9 @@
-using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Conditions;
 
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
     //Get []% off [] items of entry [] not to exceed $ [ 500 ]
-    public class RewardItemGetOfRelForNum : ConditionRewardTree, IReward
+    public class RewardItemGetOfRelForNum : ConditionTree, IReward
     {
         public decimal Amount { get; set; }
         public string ProductId { get; set; }

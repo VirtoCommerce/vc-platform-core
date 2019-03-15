@@ -1,9 +1,9 @@
 using System.Linq;
-using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Conditions;
 
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
-    public class BlockReward : ConditionRewardTree, IReward
+    public class BlockReward : ConditionTree, IReward
     {
         #region IRewardsExpression Members
 

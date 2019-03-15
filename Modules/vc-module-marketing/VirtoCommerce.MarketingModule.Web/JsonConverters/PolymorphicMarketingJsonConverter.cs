@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Common.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
@@ -108,7 +108,7 @@ namespace VirtoCommerce.MarketingModule.Web.JsonConverters
 
                 // Clear availableElements in expression to decrease size
                 dynamicExpression.AvailableChildren = null;
-                var allBlocks = ((IConditionRewardTree)dynamicExpression).Traverse(x => x.Children);
+                var allBlocks = ((IConditionTree)dynamicExpression).Traverse(x => x.Children);
                 foreach (var block in allBlocks)
                 {
                     block.AvailableChildren = null;
@@ -118,20 +118,20 @@ namespace VirtoCommerce.MarketingModule.Web.JsonConverters
             }
         }
 
-        private IConditionRewardTree GetDynamicPromotion(object value)
+        private IConditionTree GetDynamicPromotion(object value)
         {
-            IConditionRewardTree result = null;
+            IConditionTree result = null;
 
             var dynamicPromotion = value as DynamicPromotion;
             if (dynamicPromotion?.IsTransient() == true ||
-                dynamicPromotion?.PredicateVisualTreeSerialized != null && dynamicPromotion?.PredicateSerialized != null && dynamicPromotion?.RewardsSerialized != null)
+                dynamicPromotion?.PredicateVisualTreeSerialized != null && dynamicPromotion.PredicateSerialized != null && dynamicPromotion.RewardsSerialized != null)
             {
                 var etalonEpressionTree = _marketingExtensionManager.PromotionCondition;
                 if (etalonEpressionTree != null)
                 {
                     result = etalonEpressionTree;
 
-                    if (!string.IsNullOrEmpty(dynamicPromotion?.PredicateVisualTreeSerialized))
+                    if (!string.IsNullOrEmpty(dynamicPromotion.PredicateVisualTreeSerialized))
                     {
                         result = JsonConvert.DeserializeObject<PromotionConditionRewardTree>(
                             dynamicPromotion.PredicateVisualTreeSerialized,

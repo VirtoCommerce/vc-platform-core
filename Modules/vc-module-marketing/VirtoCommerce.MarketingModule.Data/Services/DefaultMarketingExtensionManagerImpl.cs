@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Common.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Services;
 
@@ -16,9 +16,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
 
         #region InMemoryExtensionManagerImpl Members
 
-        //TODO
-        public IConditionRewardTree PromotionCondition { get; set; }
-        public IConditionRewardTree ContentCondition { get; set; }
+        public IConditionTree PromotionCondition { get; set; }
+        public IConditionTree ContentCondition { get; set; }
 
         public void RegisterPromotion(Promotion promotion)
         {
@@ -33,10 +32,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             _promotions.Add(promotion);
         }
 
-        public IEnumerable<Promotion> Promotions
-        {
-            get { return _promotions.AsReadOnly(); }
-        }
+        public IEnumerable<Promotion> Promotions => _promotions.AsReadOnly();
 
         #endregion
     }

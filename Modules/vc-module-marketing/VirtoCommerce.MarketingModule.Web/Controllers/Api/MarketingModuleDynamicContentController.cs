@@ -306,7 +306,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             var retVal = publications.FirstOrDefault();
             if (retVal != null)
             {
-                return Ok(retVal.ToWebModel());
+                return Ok(retVal.ToWebModel(_marketingExtensionManager.ContentCondition));
             }
             return NotFound();
         }

@@ -1,9 +1,10 @@
 using System.Linq;
 using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Conditions;
 
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
-    public class PromotionConditionRewardTree : ConditionRewardTree
+    public class PromotionConditionRewardTree : ConditionTree
     {
         public override bool Evaluate(IEvaluationContext context)
         {

@@ -1,9 +1,9 @@
-using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Conditions;
 
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
     //Gift [] of Product []
-    public class RewardItemGiftNumItem : ConditionRewardTree, IReward
+    public class RewardItemGiftNumItem : ConditionTree, IReward
     {
         public string Name { get; set; }
         public string CategoryId { get; set; }
