@@ -327,7 +327,6 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             if (!toSaveList.IsNullOrEmpty())
             {
                 await _itemsService.SaveChangesAsync(toSaveList.ToArray());
-                await _propertyService.SaveChangesAsync(products.SelectMany(pr => pr.Properties).Where(p => p.IsTransient()).ToArray());
             }
 
             return toSaveList.ToArray();
