@@ -8,7 +8,7 @@ namespace VirtoCommerce.Platform.Core.Common
     /// </summary>
     public class PrimaryKeyResolvingMap 
     {
-        private Dictionary<IEntity, IEntity> _resolvingMap = new Dictionary<IEntity, IEntity>();
+        private readonly Dictionary<IEntity, IEntity> _resolvingMap = new Dictionary<IEntity, IEntity>();
    
         public void AddPair(IEntity transientEntity, IEntity persistentEntity)
         {
@@ -17,11 +17,19 @@ namespace VirtoCommerce.Platform.Core.Common
 
         public void ResolvePrimaryKeys()
         {
-            foreach(var pair in _resolvingMap)
+            foreach (var pair in _resolvingMap)
             {
-                if(string.IsNullOrEmpty(pair.Key.Id) && !string.IsNullOrEmpty(pair.Value.Id))
+                if (string.IsNullOrEmpty(pair.Key.Id) && !string.IsNullOrEmpty(pair.Value.Id))
                 {
                     pair.Key.Id = pair.Value.Id;
+
+                    if (pair.Key is IAuditable transientAuditable && pair.Value is IAuditable persistentAuditable)
+                    {
+                        transientAuditable.CreatedBy = persistentAuditable.CreatedBy;
+                        transientAuditable.CreatedDate = persistentAuditable.CreatedDate;
+                        transientAuditable.ModifiedBy = persistentAuditable.ModifiedBy;
+                        transientAuditable.ModifiedDate = persistentAuditable.ModifiedDate;
+                    }
                 }
             }
         }

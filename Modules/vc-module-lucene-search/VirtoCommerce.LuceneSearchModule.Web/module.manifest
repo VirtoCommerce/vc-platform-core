@@ -18,7 +18,7 @@
     <projectUrl>https://virtocommerce.com/apps/extensions/virto-lucene-search-module</projectUrl>
     <iconUrl>https://github.com/VirtoCommerce/vc-module-lucene-search/raw/dev/VirtoCommerce.LuceneSearchModule.Web/Content/logo.png</iconUrl>
     <releaseNotes>Third version.</releaseNotes>
-    <copyright>Copyright © 2018 Virto Commerce. All rights reserved</copyright>
+    <copyright>Copyright © 2019 Virto Commerce. All rights reserved</copyright>
     <tags>lucene search</tags>
 
     <assemblyFile>VirtoCommerce.LuceneSearchModule.Web.dll</assemblyFile>

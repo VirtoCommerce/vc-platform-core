@@ -332,13 +332,21 @@
                 }
             },
             "account-resetPassword": {
-                "subtitle": "Change your password",
+                "subtitle": "Change user password",
                 "labels": {
                     "new-password": "New password",
-                    "repeat-password": "Repeat password"
+                    "repeat-password": "Repeat password",
+                    "force-password-change": "Make this user change their password when they sign in next time"
                 },
                 "validations": {
-                    "repeat-password": "New passwords doesn't match!"
+                    "repeat-password": "New passwords do not match!",
+                    "invalid-token": "Reset password token is invalid or expired",
+                    "password-too-weak": "New password does not comply one or more password security policies:",
+                    "passwordViolatesMinLength": "Passwords must be {{minPasswordLength}} or more characters long",
+                    "passwordMustHaveLowerCaseLetters": "Passwords must have at least one lowercase ('a'-'z')",
+                    "passwordMustHaveUpperCaseLetters": "Passwords must have at least one uppercase ('A'-'Z')",
+                    "passwordMustHaveDigits": "Passwords must have at least one digit ('0'-'9')",
+                    "passwordMustHaveSpecialCharacters": "Passwords must have at least one non alphanumeric character"
                 },
                 "placeholders": {
                     "new-password": "Enter new password",
@@ -443,6 +451,7 @@
                     "login": "Login",
                     "password": "Password",
                     "remember-me": "Remember me",
+                    "external-sign-in": "Sign in with {{displayName}}",
                     "forgot-password": "Forgot your password?",
                     "log-in": "Log in"
                 }
@@ -510,6 +519,10 @@
                     "login": "Enter login",
                     "password": "Enter new password",
                     "repeat-password": "Repeat new password"
+                },
+                "validations": {
+                    "repeat-password": "Entered passwords do not match!",
+                    "password-too-weak": "Entered password does not comply one or more password security policies:"
                 }
             },
             "security-main": {
@@ -569,6 +582,14 @@
                     "Quarters": "Quarters",
                     "Years": "Years"
                 }
+            },
+            "change-password": {
+                "title": "Please enter a new password for the '{{userName}}' user",
+                "password": "New password:",
+                "confirm": "Repeat new password:",
+                "save": "Change password",
+                "postpone": "Postpone",
+                "force-change-info": "You must change the password to continue using the manager."
             }
         },
         "templates": {
@@ -789,5 +810,4 @@
             "title": "The global lifetime of objects in the cache"
         }
     }
-
 }

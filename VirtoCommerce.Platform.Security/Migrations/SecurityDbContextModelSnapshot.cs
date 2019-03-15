@@ -270,6 +270,8 @@ namespace VirtoCommerce.Platform.Security.Migrations
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256);
 
+                    b.Property<bool>("PasswordExpired");
+
                     b.Property<string>("PasswordHash");
 
                     b.Property<string>("PhoneNumber");

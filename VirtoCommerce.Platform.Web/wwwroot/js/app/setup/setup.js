@@ -1,4 +1,4 @@
-﻿angular.module('platformWebApp')
+angular.module('platformWebApp')
 .config(['$stateProvider', function ($stateProvider) {
 	$stateProvider
         .state('setupWizard', {
@@ -17,11 +17,11 @@
             if (wizard.currentStep != step) {
                 wizard.currentStep = step;
                 settings.update([{ name: 'VirtoCommerce.SetupStep', value: state }], function () {
-                    $state.go(state);
+                    $state.go(state, step);
                 });
             }
             else {
-                $state.go(state);
+                $state.go(state, step);
             }  
 		},
 
@@ -64,7 +64,11 @@
   			//timeout need because $state not fully loading in run method and need to wait little time
                 $timeout(function () {
                     setupWizard.load().then(
-                        function (wizard) { if (!wizard.isCompleted) { wizard.showStep(wizard.currentStep); } });
+                        function(wizard) {
+                             if (!wizard.isCompleted) {
+                                 wizard.showStep(wizard.currentStep);
+                             }
+                        });
                 }, 500);
   		}
   	});

@@ -10,6 +10,12 @@
     <ProjectReference Include="..\VirtoCommerce.CatalogModule.Data\VirtoCommerce.CatalogModule.Data.csproj" />
   </ItemGroup>
 
+
+    <ItemGroup>
+      <Compile Remove="node_modules\**" />
+      <EmbeddedResource Remove="node_modules\**" />
+      <None Remove="node_modules\**" />
+    </ItemGroup>
     <ItemGroup>
         <PackageReference Include="FluentValidation" Version="8.0.101" />
         <PackageReference Include="Microsoft.AspNetCore" Version="2.1.6" />

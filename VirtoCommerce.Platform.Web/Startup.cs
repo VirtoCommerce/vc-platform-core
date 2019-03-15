@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,11 +41,13 @@ using VirtoCommerce.Platform.Security;
 using VirtoCommerce.Platform.Security.Authorization;
 using VirtoCommerce.Platform.Security.Extensions;
 using VirtoCommerce.Platform.Security.Repositories;
+using VirtoCommerce.Platform.Security.Services;
+using VirtoCommerce.Platform.Web.Azure;
 using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Hangfire;
 using VirtoCommerce.Platform.Web.Infrastructure;
 using VirtoCommerce.Platform.Web.JsonConverters;
-using VirtoCommerce.Platform.Web.Middelware;
+using VirtoCommerce.Platform.Web.Middleware;
 using VirtoCommerce.Platform.Web.Swagger;
 
 namespace VirtoCommerce.Platform.Web
@@ -161,7 +164,29 @@ namespace VirtoCommerce.Platform.Web
                 options.ClaimsIdentity.UserIdClaimType = OpenIdConnectConstants.Claims.Name;
                 options.ClaimsIdentity.RoleClaimType = OpenIdConnectConstants.Claims.Role;
             });
+            var azureAdSection = Configuration.GetSection("AzureAd");
 
+
+            if (azureAdSection.GetChildren().Any())
+            {
+                var options = new AzureAdOptions();
+                azureAdSection.Bind(options);
+
+                if (options.Enabled)
+                {
+                    //TODO: Need to check how this influence to OpennIddict Reference tokens activated by this line below  AddValidation(options => options.UseReferenceTokens());
+                    var auth = services.AddAuthentication().AddOAuthValidation();
+                    auth.AddOpenIdConnect(options.AuthenticationType, options.AuthenticationCaption,
+                        openIdConnectOptions =>
+                        {
+                            openIdConnectOptions.ClientId = options.ApplicationId;
+                            openIdConnectOptions.Authority = $"{options.AzureAdInstance}{options.TenantId}";
+                            openIdConnectOptions.UseTokenLifetime = true;
+                            openIdConnectOptions.RequireHttpsMetadata = false;
+                            openIdConnectOptions.SignInScheme = IdentityConstants.ExternalScheme;
+                        });
+                }
+            }
             services.Configure<Core.Security.AuthorizationOptions>(Configuration.GetSection("Authorization"));
             var authorizationOptions = Configuration.GetSection("Authorization").Get<Core.Security.AuthorizationOptions>();
             // Register the OpenIddict services.
@@ -245,12 +270,11 @@ namespace VirtoCommerce.Platform.Web
             services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
             //Platform authorization handler for policies based on permissions 
             services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+            // Default password validation service implementation
+            services.AddScoped<IPasswordCheckService, PasswordCheckService>();
 
             // Add memory cache services
             services.AddMemoryCache();
-            //Add Smidge runtime bundling library configuration
-            services.AddSmidge(Configuration.GetSection("smidge"), new PhysicalFileProvider(modulesDiscoveryPath));
-            services.AddSmidgeNuglify();
 
             // Register the Swagger generator
             services.AddSwagger();
@@ -295,6 +319,10 @@ namespace VirtoCommerce.Platform.Web
                 app.UseDeveloperExceptionPage();
                 app.UseBrowserLink();
                 app.UseDatabaseErrorPage();
+                app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
+                {
+                    HotModuleReplacement = false
+                });
             }
             else
             {
@@ -344,13 +372,6 @@ namespace VirtoCommerce.Platform.Web
                 platformDbContext.Database.Migrate();
                 securityDbContext.Database.Migrate();
             }
-
-            //Using Smidge runtime bundling library for bundling modules js and css files
-            app.UseSmidge(bundles =>
-            {
-                app.UseModulesContent(bundles);
-            });
-            app.UseSmidgeNuglify();
 
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
