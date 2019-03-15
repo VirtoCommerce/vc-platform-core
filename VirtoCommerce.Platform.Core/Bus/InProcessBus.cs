@@ -24,7 +24,7 @@ namespace VirtoCommerce.Platform.Core.Bus
 
         public async Task Publish<T>(T @event, CancellationToken cancellationToken = default(CancellationToken)) where T : class, IEvent
         {
-            if (_routes.TryGetValue(@event.GetType(), out var handlers))
+            if (!EventSuppressor.EventsSuppressed && _routes.TryGetValue(@event.GetType(), out var handlers))
             {
                 await Task.WhenAll(handlers.Select(handler => handler(@event, cancellationToken)));
             }
