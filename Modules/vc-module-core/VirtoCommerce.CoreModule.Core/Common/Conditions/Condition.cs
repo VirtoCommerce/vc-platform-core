@@ -1,6 +1,6 @@
-namespace VirtoCommerce.CoreModule.Core.Common
+namespace VirtoCommerce.CoreModule.Core.Common.Conditions
 {
-    public class Condition : ConditionRewardTree, ICondition
+    public class Condition : ConditionTree, ICondition
     {
         public virtual Condition[] GetConditions()
         {

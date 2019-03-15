@@ -1,7 +1,7 @@
 using System;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.CoreModule.Core.Common
+namespace VirtoCommerce.CoreModule.Core.Common.Conditions
 {
     public abstract class CompareConditionBase : Condition
     {
