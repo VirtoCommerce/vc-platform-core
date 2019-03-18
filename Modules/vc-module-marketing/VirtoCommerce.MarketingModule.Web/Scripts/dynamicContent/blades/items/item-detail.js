@@ -3,11 +3,22 @@
     function ($scope, dynamicContentItemsApi, bladeNavigationService, dialogService, dictionaryItemsApi, settings) {
         var blade = $scope.blade;
         blade.updatePermission = 'marketing:update';
+
+        blade.refresh = function() {
+            dynamicContentItemsApi.get({id: blade.entity.id}, function (response) {
+                blade.entity = response;
+                blade.currentEntity = response;
+                blade.initialize();
+              });
+
+        };
        
         blade.initialize = function () {
             blade.toolbarCommands = [];
 
             if (!blade.isNew) {
+               
+
                 blade.toolbarCommands = [
                     {
                         name: "platform.commands.save", icon: 'fa fa-save',
@@ -112,7 +123,8 @@
         };
 
         $scope.getDictionaryValues = function (property, callback) {
-            dictionaryItemsApi.query({ id: property.objectType, propertyId: property.id }, callback);
+            //dictionaryItemsApi.query({ id: property.objectType, propertyId: property.id }, callback);
+            dictionaryItemsApi.getDictionaryItems({}, { id: property.objectType, dynamicPropertyId: property.id, take: 999 }, callback);
         };
 
         $scope.setForm = function (form) { $scope.formScope = form; };
@@ -123,5 +135,5 @@
             $scope.languages = data;
         });
 
-        blade.initialize();
+        blade.refresh();
     }]);

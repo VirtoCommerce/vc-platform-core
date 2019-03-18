@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.MarketingModule.Data.Model
 {
@@ -72,6 +73,11 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             FolderId = item.FolderId;
             ImageUrl = item.ImageUrl;
             ContentTypeId = item.ContentType;
+
+            if (item.DynamicProperties != null)
+            {
+                ContentTypeId = item.GetDynamicPropertyValue<string>("Content type", null);
+            }
 
             return this;
         }

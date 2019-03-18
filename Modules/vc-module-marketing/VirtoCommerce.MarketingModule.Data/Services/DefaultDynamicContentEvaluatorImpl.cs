@@ -4,11 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.MarketingModule.Core.Services;
+using VirtoCommerce.MarketingModule.Data.Promotions;
 using VirtoCommerce.MarketingModule.Data.Repositories;
-using VirtoCommerce.Platform.Core.Serialization;
 
 namespace VirtoCommerce.MarketingModule.Data.Services
 {
@@ -16,14 +18,12 @@ namespace VirtoCommerce.MarketingModule.Data.Services
     {
         private readonly Func<IMarketingRepository> _repositoryFactory;
         private readonly IDynamicContentService _dynamicContentService;
-        private readonly IExpressionSerializer _expressionSerializer;
         private readonly ILogger _logger;
 
-        public DefaultDynamicContentEvaluatorImpl(Func<IMarketingRepository> repositoryFactory, IDynamicContentService dynamicContentService, IExpressionSerializer expressionSerializer, ILogger<DefaultDynamicContentEvaluatorImpl> logger)
+        public DefaultDynamicContentEvaluatorImpl(Func<IMarketingRepository> repositoryFactory, IDynamicContentService dynamicContentService, ILogger<DefaultDynamicContentEvaluatorImpl> logger)
         {
             _repositoryFactory = repositoryFactory;
             _dynamicContentService = dynamicContentService;
-            _expressionSerializer = expressionSerializer;
             _logger = logger;
         }
 
@@ -61,8 +61,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                     try
                     {
                         //Next step need filter assignments contains dynamicexpression
-                        var condition = _expressionSerializer.DeserializeExpression<Func<IEvaluationContext, bool>>(publishing.ConditionExpression);
-                        if (condition(context))
+                        var conditions = JsonConvert.DeserializeObject<Condition[]>(publishing.ConditionExpression, new ConditionRewardJsonConverter());
+                        if (conditions.All(c => c.Evaluate(context)))
                         {
                             contentItemIds.AddRange(publishing.ContentItems.Select(x => x.DynamicContentItemId));
                         }

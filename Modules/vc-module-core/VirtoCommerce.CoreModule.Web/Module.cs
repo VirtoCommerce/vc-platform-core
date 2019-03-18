@@ -11,6 +11,9 @@ using Microsoft.Extensions.Options;
 using VirtoCommerce.CoreModule.Core;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Common.Conditions;
+using VirtoCommerce.CoreModule.Core.Conditions;
+using VirtoCommerce.CoreModule.Core.Conditions.Browse;
+using VirtoCommerce.CoreModule.Core.Conditions.GeoConditions;
 using VirtoCommerce.CoreModule.Core.Currency;
 using VirtoCommerce.CoreModule.Core.Package;
 using VirtoCommerce.CoreModule.Core.Payment;
@@ -78,18 +81,18 @@ namespace VirtoCommerce.CoreModule.Web
                 dbContext.Database.Migrate();
             }
 
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<BlockConditionAndOr>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionAgeIs>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionGenderIs>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionLanguageIs>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionStoreSearchedPhrase>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionUrlIs>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionGeoCity>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionGeoCountry>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionGeoState>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionGeoTimeZone>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionGeoZipCode>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<UserGroupsContainsCondition>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<BlockConditionAndOr>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionAgeIs>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGenderIs>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionLanguageIs>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionStoreSearchedPhrase>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionUrlIs>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoCity>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoCountry>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoState>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoTimeZone>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoZipCode>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<UserGroupsContainsCondition>();
 
         }
 
