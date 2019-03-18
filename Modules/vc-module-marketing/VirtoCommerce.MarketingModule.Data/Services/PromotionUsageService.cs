@@ -39,28 +39,34 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 throw new ArgumentNullException(nameof(criteria));
             }
 
-            using (var repository = _repositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), "SearchUsagesAsync", criteria.GetCacheKey());
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                var query = GetPromotionUsageQuery(repository, criteria);
+                cacheEntry.AddExpirationToken(PromotionUsageCacheRegion.CreateChangeToken());
 
-                var sortInfos = criteria.SortInfos;
-                if (sortInfos.IsNullOrEmpty())
+                using (var repository = _repositoryFactory())
                 {
-                    sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<PromotionUsage>(x => x.ModifiedDate), SortDirection = SortDirection.Descending } };
+                    var query = GetPromotionUsageQuery(repository, criteria);
+
+                    var sortInfos = criteria.SortInfos;
+                    if (sortInfos.IsNullOrEmpty())
+                    {
+                        sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<PromotionUsage>(x => x.ModifiedDate), SortDirection = SortDirection.Descending } };
+                    }
+                    query = query.OrderBySortInfos(sortInfos);
+
+                    var totalCount = await query.CountAsync();
+                    var searchResult = new GenericSearchResult<PromotionUsage> { TotalCount = totalCount };
+
+                    if (criteria.Take > 0)
+                    {
+                        var coupons = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
+                        searchResult.Results = coupons.Select(x => x.ToModel(AbstractTypeFactory<PromotionUsage>.TryCreateInstance())).ToList();
+                    }
+
+                    return searchResult;
                 }
-                query = query.OrderBySortInfos(sortInfos);
-
-                var totalCount = await query.CountAsync();
-                var searchResult = new GenericSearchResult<PromotionUsage> { TotalCount = totalCount };
-
-                if (criteria.Take > 0)
-                {
-                    var coupons = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                    searchResult.Results = coupons.Select(x => x.ToModel(AbstractTypeFactory<PromotionUsage>.TryCreateInstance())).ToList();
-                }
-
-                return searchResult;
-            }
+            });
         }
 
         public virtual async Task<PromotionUsage[]> GetByIdsAsync(string[] ids)
