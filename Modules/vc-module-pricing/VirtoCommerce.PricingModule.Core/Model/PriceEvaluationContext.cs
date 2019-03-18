@@ -1,4 +1,5 @@
 using System;
+using VirtoCommerce.CoreModule.Core.Common;
 
 namespace VirtoCommerce.PricingModule.Core.Model
 {

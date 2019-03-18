@@ -20,6 +20,7 @@ using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Serialization;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.PricingModule.Core;
+using VirtoCommerce.PricingModule.Core.Model.Conditions;
 using VirtoCommerce.PricingModule.Core.Services;
 using VirtoCommerce.PricingModule.Data.DynamicExpressions.Pricing;
 using VirtoCommerce.PricingModule.Data.ExportImport;
@@ -108,7 +109,10 @@ namespace VirtoCommerce.PricingModule.Web
 
             //Pricing expression
             var pricingExtensionManager = appBuilder.ApplicationServices.GetRequiredService<IPricingExtensionManager>();
-            pricingExtensionManager.PriceConditionTree = GetPricingDynamicExpression();
+            pricingExtensionManager.PriceConditionTree = new PriceConditionTree
+            {
+                Children = new List<IConditionTree>() { GetPricingDynamicExpression() }
+            };
         }
 
         public void Uninstall()
