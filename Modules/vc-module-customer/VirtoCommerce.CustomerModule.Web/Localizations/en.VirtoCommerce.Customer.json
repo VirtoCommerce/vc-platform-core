@@ -207,6 +207,10 @@
         "Customer.MemberGroups": {
             "description": "All available members groups values",
             "title": "Member groups dictionary"
-        }
+        },
+        "Customer.ExportImport.PageSize": {
+            "description": "Large values may decrease performance",
+            "title": "The page size being used for Export / Import"
+        } 
     }
 }

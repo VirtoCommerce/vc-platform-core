@@ -33,8 +33,23 @@ angular
                         left = left - (totalWidth - docWidth);
                     }
 
-                    if (totalHeight > docHeight) {
-                        top = top - (totalHeight - docHeight);
+                    var maxTopOffset = 0;
+                    // get max bottom position of children
+                    $.map(menuElement.children(), function (item) {
+                        var height = $(item).find('ul').height();
+                        var topPosition = $(item).position().top;
+                        var bottomPosition = height + topPosition;
+                        if (bottomPosition > maxTopOffset)
+                            maxTopOffset = bottomPosition;
+                    });
+
+                    // get max bottom position of all context menu
+                    if (elementHeight > maxTopOffset)
+                        maxTopOffset = elementHeight;
+
+                    var scrollbarHeight = 20;
+                    if (event.pageY + maxTopOffset > docHeight) {
+                        top = top - (event.pageY - docHeight + maxTopOffset + scrollbarHeight);
                     }
 
                     menuElement.css('top', top + 'px');
@@ -61,7 +76,6 @@ angular
                           document.getElementById($attrs.target)
                         );
                         ContextMenuService.element = event.target;
-                        //console.log('set', ContextMenuService.element);
 
                         event.preventDefault();
                         event.stopPropagation();
@@ -75,7 +89,6 @@ angular
                 });
 
                 function handleKeyUpEvent(event) {
-                    //console.log('keyup');
                     if (!$scope.disabled() && opened && event.keyCode === 27) {
                         $scope.$apply(function () {
                             close(ContextMenuService.menuElement);
@@ -101,7 +114,6 @@ angular
                 $document.bind('contextmenu', handleClickEvent);
 
                 $scope.$on('$destroy', function () {
-                    //console.log('destroy');
                     $document.unbind('keyup', handleKeyUpEvent);
                     $document.unbind('click', handleClickEvent);
                     $document.unbind('contextmenu', handleClickEvent);

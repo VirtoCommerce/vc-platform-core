@@ -10,13 +10,16 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
     /// </summary>
     public abstract class DbContextRepositoryBase<TContext> : IRepository where TContext : DbContext
     {
-        public DbContextRepositoryBase(TContext dbContext, IUnitOfWork unitOfWork = null)
+        protected DbContextRepositoryBase(TContext dbContext, IUnitOfWork unitOfWork = null)
         {
             DbContext = dbContext;
             UnitOfWork = unitOfWork ?? new DbContextUnitOfWork(dbContext);
+
+            var connectionTimeout = dbContext.Database.GetDbConnection().ConnectionTimeout;
+            dbContext.Database.SetCommandTimeout(connectionTimeout);
         }
 
-        public TContext DbContext { get; private set; }
+        public TContext DbContext { get; }
 
         #region IRepository Members
         /// <summary>
@@ -25,7 +28,7 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
         /// <value>
         /// The unit of work.
         /// </value>
-        public IUnitOfWork UnitOfWork { get; private set; }
+        public IUnitOfWork UnitOfWork { get; }
 
         /// <summary>
         /// Attaches the specified item.
@@ -35,8 +38,8 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
         public void Attach<T>(T item) where T : class
         {
             DbContext.Attach(item);
-        }  
-       
+        }
+
         /// <summary>
         /// Adds the specified item.
         /// </summary>
@@ -45,7 +48,7 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
         public void Add<T>(T item) where T : class
         {
             DbContext.Add(item);
-        }      
+        }
 
         /// <summary>
         /// Updates the specified item.
@@ -57,7 +60,7 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
             DbContext.Update(item);
             DbContext.Entry(item).State = EntityState.Modified;
         }
-       
+
         /// <summary>
         /// Removes the specified item.
         /// </summary>

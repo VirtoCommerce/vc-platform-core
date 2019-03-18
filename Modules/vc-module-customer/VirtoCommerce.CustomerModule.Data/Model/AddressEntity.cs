@@ -91,7 +91,6 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
         public virtual Address ToModel(Address address)
         {
-            address.City = City;
             address.CountryCode = CountryCode;
             address.CountryName = CountryName;
             address.PostalCode = PostalCode;
@@ -115,7 +114,6 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             if (address == null)
                 throw new ArgumentNullException("address");
 
-            City = address.City;
             CountryCode = address.CountryCode;
             CountryName = address.CountryName;
             PostalCode = address.PostalCode;
@@ -136,13 +134,15 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
         public virtual void Patch(AddressEntity target)
         {
-            target.City = City;
             target.CountryCode = CountryCode;
             target.CountryName = CountryName;
             target.DaytimePhoneNumber = DaytimePhoneNumber;
+            target.EveningPhoneNumber = EveningPhoneNumber;
+            target.FaxNumber = FaxNumber;
             target.PostalCode = PostalCode;
             target.RegionId = RegionId;
             target.RegionName = RegionName;
+            target.StateProvince = StateProvince;
             target.Type = Type;
             target.City = City;
             target.Name = Name;
@@ -151,6 +151,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             target.LastName = LastName;
             target.Line1 = Line1;
             target.Line2 = Line2;
+            target.Organization = Organization;
         }    
     }
 }

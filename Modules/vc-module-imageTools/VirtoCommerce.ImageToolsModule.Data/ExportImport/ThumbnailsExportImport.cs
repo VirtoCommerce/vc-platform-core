@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using VirtoCommerce.ImageToolsModule.Core.ExportImport;
 using VirtoCommerce.ImageToolsModule.Core.Models;
@@ -24,19 +26,14 @@ namespace VirtoCommerce.ImageToolsModule.Data.ExportImport
 
         public ThumbnailsExportImport(IThumbnailTaskSearchService taskSearchService,
             IThumbnailOptionSearchService optionSearchService, IThumbnailTaskService taskService,
-            IThumbnailOptionService optionService)
+            IThumbnailOptionService optionService, IOptions<MvcJsonOptions> jsonOptions)
         {
             _taskSearchService = taskSearchService;
             _optionSearchService = optionSearchService;
             _taskService = taskService;
             _optionService = optionService;
 
-            _serializer = new JsonSerializer
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Formatting = Formatting.Indented,
-                NullValueHandling = NullValueHandling.Ignore
-            };
+            _serializer = JsonSerializer.Create(jsonOptions.Value.SerializerSettings);
         }
 
         public async Task ExportAsync(Stream outStream, ExportImportOptions exportOptions, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)

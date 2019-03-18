@@ -18,16 +18,16 @@ namespace VirtoCommerce.CustomerModule.Data.Services
 {
     public class MemberSearchServiceBase
     {
-        private readonly Func<IMemberRepository> _repositoryFactory;
-        private readonly IMemberService _memberService;
-        private readonly IPlatformMemoryCache _platformMemoryCache;
-
         public MemberSearchServiceBase(Func<IMemberRepository> repositoryFactory, IMemberService memberService, IPlatformMemoryCache platformMemoryCache)
         {
-            _repositoryFactory = repositoryFactory;
-            _memberService = memberService;
-            _platformMemoryCache = platformMemoryCache;
+            RepositoryFactory = repositoryFactory;
+            MemberService = memberService;
+            PlatformMemoryCache = platformMemoryCache;
         }
+
+        protected Func<IMemberRepository> RepositoryFactory { get; }
+        protected IMemberService MemberService { get; }
+        protected IPlatformMemoryCache PlatformMemoryCache { get; }
 
         #region IMemberSearchService Members
         /// <summary>
@@ -38,10 +38,10 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         public virtual async Task<GenericSearchResult<Member>> SearchMembersAsync(MembersSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), "SearchMembersAsync", criteria.GetCacheKey());
-            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(CustomerSearchCacheRegion.CreateChangeToken());
-                using (var repository = _repositoryFactory())
+                using (var repository = RepositoryFactory())
                 {
                     repository.DisableChangesTracking();
                     var result = new GenericSearchResult<Member>();
@@ -87,14 +87,13 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                     if (criteria.Take > 0)
                     {
                         var memberIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                        result.Results = (await _memberService.GetByIdsAsync(memberIds, criteria.ResponseGroup)).AsQueryable().OrderBySortInfos(sortInfos).ToList();
+                        result.Results = (await MemberService.GetByIdsAsync(memberIds, criteria.ResponseGroup)).AsQueryable().OrderBySortInfos(sortInfos).ToList();
                     }
                     return result;
                 }
             });
         }
         #endregion
-
 
         /// <summary>
         /// Used to define extra where clause for members search
