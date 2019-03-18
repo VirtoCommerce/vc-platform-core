@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 
-namespace VirtoCommerce.MarketingModule.Web.Model
+namespace VirtoCommerce.MarketingModule.Core.Model
 {
     public class ImportRequest
     {

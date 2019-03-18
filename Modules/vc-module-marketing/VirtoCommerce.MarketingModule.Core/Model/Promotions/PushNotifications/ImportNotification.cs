@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.PushNotifications;
 
-namespace VirtoCommerce.MarketingModule.Web.Model.PushNotifications
+namespace VirtoCommerce.MarketingModule.Core.Model.PushNotifications
 {
     public class ImportNotification : PushNotification
     {

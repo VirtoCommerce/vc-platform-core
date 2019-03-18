@@ -5,15 +5,14 @@ using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.MarketingModule.Core;
+using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
+using VirtoCommerce.MarketingModule.Core.Model.PushNotifications;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Promotions;
 using VirtoCommerce.MarketingModule.Data.Repositories;
-using VirtoCommerce.MarketingModule.Web.Converters;
 using VirtoCommerce.MarketingModule.Web.ExportImport;
-using VirtoCommerce.MarketingModule.Web.Model;
-using VirtoCommerce.MarketingModule.Web.Model.PushNotifications;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -89,10 +88,10 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         /// <param name="context">Promotion evaluation context</param>
         [HttpPost]
         [Route("evaluate")]
-        public async Task<ActionResult<Model.PromotionReward[]>> EvaluatePromotions([FromBody]PromotionEvaluationContext context)
+        public async Task<ActionResult<PromotionReward[]>> EvaluatePromotions([FromBody]PromotionEvaluationContext context)
         {
             var retVal = await _promoEvaluator.EvaluatePromotionAsync(context);
-            return Ok(retVal.Rewards.Select(x => x.ToWebModel()).ToArray());
+            return Ok(retVal.Rewards);
         }
 
         /// <summary>

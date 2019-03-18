@@ -44,6 +44,8 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
         public decimal? CouponMinOrderAmount { get; set; }
 
         //Promotion 
+        public string PromotionId { get; set; }
+                
         public Promotion Promotion { get; set; }
 
         public abstract PromotionReward Clone();

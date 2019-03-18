@@ -50,5 +50,11 @@ namespace VirtoCommerce.MarketingModule.Core
                 }
             }
         }
+
+        public static class MarketingConstants
+        {
+            public const string ContentPlacesRootFolderId = "ContentPlace";
+            public const string CotentItemRootFolderId = "ContentItem";
+        }
     }
 }

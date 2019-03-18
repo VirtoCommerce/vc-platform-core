@@ -70,6 +70,7 @@ namespace VirtoCommerce.MarketingModule.Web
             var settingsRegistrar = snapshot.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.General.AllSettings, ModuleInfo.Id);
 
+            //TODO
             //var snapshotSettings = serviceCollection.BuildServiceProvider();
             //var settingsManager = snapshotSettings.GetService<ISettingsManager>();
             //var promotionCombinePolicy = settingsManager.GetValue(ModuleConstants.Settings.General.CombinePolicy, "BestReward");
@@ -120,7 +121,7 @@ namespace VirtoCommerce.MarketingModule.Web
             }
 
             var dynamicContentService = appBuilder.ApplicationServices.GetService<IDynamicContentService>();
-            foreach (var id in new[] { Model.MarketingConstants.ContentPlacesRootFolderId, Model.MarketingConstants.CotentItemRootFolderId })
+            foreach (var id in new[] { ModuleConstants.MarketingConstants.ContentPlacesRootFolderId, ModuleConstants.MarketingConstants.CotentItemRootFolderId })
             {
                 var folders = dynamicContentService.GetFoldersByIdsAsync(new[] { id }).GetAwaiter().GetResult();
                 var rootFolder = folders.FirstOrDefault();
