@@ -7,7 +7,6 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
-using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
@@ -21,10 +20,8 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
         private readonly ICatalogService _catalogService;
         private readonly ICatalogSearchService _catalogSearchService;
         private readonly ICategoryService _categoryService;
-        private readonly ICategorySearchService _categorySearchService;
         private readonly IItemService _itemService;
         private readonly IPropertyService _propertyService;
-        private readonly IProductSearchService _productSearchService;
         private readonly IProperyDictionaryItemSearchService _propertyDictionarySearchService;
         private readonly IProperyDictionaryItemService _propertyDictionaryService;
         private readonly JsonSerializer _jsonSerializer;
@@ -32,7 +29,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
 
         private int _batchSize = 50;
 
-        public CatalogExportImport(ICatalogService catalogService, ICatalogSearchService catalogSearchService, ICategoryService categoryService, IItemService itemService, IPropertyService propertyService, IProperyDictionaryItemSearchService propertyDictionarySearchService, IProperyDictionaryItemService propertyDictionaryService, IProductSearchService productSearchService, ICategorySearchService categorySearchService, IOptions<MvcJsonOptions> jsonOptions
+        public CatalogExportImport(ICatalogService catalogService, ICatalogSearchService catalogSearchService, ICategoryService categoryService, IItemService itemService, IPropertyService propertyService, IProperyDictionaryItemSearchService propertyDictionarySearchService, IProperyDictionaryItemService propertyDictionaryService, IOptions<MvcJsonOptions> jsonOptions
             , IBlobStorageProvider blobStorageProvider)
         {
             _catalogService = catalogService;
@@ -42,8 +39,6 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             _propertyService = propertyService;
             _propertyDictionarySearchService = propertyDictionarySearchService;
             _propertyDictionaryService = propertyDictionaryService;
-            _productSearchService = productSearchService;
-            _categorySearchService = categorySearchService;
             _jsonSerializer = JsonSerializer.Create(jsonOptions.Value.SerializerSettings);
             _blobStorageProvider = blobStorageProvider;
         }
@@ -83,7 +78,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                     var categories = await _categoryService.GetByIdsAsync(searchResult.Categories.Select(x => x.Id).ToArray(), CategoryResponseGroup.Full);
                     if (options.HandleBinaryData)
                     {
-                        LoadImages(categories, progressInfo);
+                        LoadImages(categories.OfType<IHasImages>().ToArray(), progressInfo);
                     }
 
                     return new GenericSearchResult<Category> { Results = categories, TotalCount = searchResult.Categories.Count };
@@ -135,7 +130,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                     var products = await _itemService.GetByIdsAsync(searchResult.Products.Select(x => x.Id).ToArray(), ItemResponseGroup.ItemLarge);
                     if (options.HandleBinaryData)
                     {
-                        LoadImages(products, progressInfo);
+                        LoadImages(products.OfType<IHasImages>().ToArray(), progressInfo);
                     }
 
                     return new GenericSearchResult<CatalogProduct> { Results = products, TotalCount = searchResult.ProductsTotalCount };
@@ -178,9 +173,9 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                             await reader.DeserializeJsonArrayWithPagingAsync<Category>(_jsonSerializer, _batchSize, async (items) => {
                                 var itemsArray = items.ToArray();
                                 await _categoryService.SaveChangesAsync(itemsArray);
-                                if (options.HandleBinaryData)
+                                //if (options.HandleBinaryData)
                                 {
-                                    ImportImages(itemsArray, progressInfo);
+                                    ImportImages(itemsArray.OfType<IHasImages>().ToArray(), progressInfo);
                                 }
 
                             }, processedCount =>
@@ -210,9 +205,9 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                             await reader.DeserializeJsonArrayWithPagingAsync<CatalogProduct>(_jsonSerializer, _batchSize, async (items) => {
                                 var itemsArray = items.ToArray();
                                 await _itemService.SaveChangesAsync(itemsArray);
-                                if (options.HandleBinaryData)
+                                //if (options.HandleBinaryData)
                                 {
-                                    ImportImages(itemsArray, progressInfo);
+                                    ImportImages(itemsArray.OfType<IHasImages>().ToArray(), progressInfo);
                                 }
                             }, processedCount =>
                             {
