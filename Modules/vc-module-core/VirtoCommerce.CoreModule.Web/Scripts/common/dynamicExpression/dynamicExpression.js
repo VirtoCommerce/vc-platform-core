@@ -1,11 +1,4 @@
-﻿//Call this to register our module to main application
-var moduleName = "virtoCommerce.coreModule";
-
-if (AppDependencies != undefined) {
-    AppDependencies.push(moduleName);
-}
-
-angular.module(moduleName, [])
+﻿angular.module('virtoCommerce.coreModule.common', [])
     .run(
         ['$http', '$compile', 'virtoCommerce.coreModule.common.dynamicExpressionService', function ($http, $compile, dynamicExpressionService) {
 
@@ -243,7 +236,7 @@ angular.module(moduleName, [])
                 displayName: 'User groups contains []'
             });
 
-            $http.get('Modules/$(VirtoCommerce.Core)/Scripts/dynamicExpression/all-templates.html').then(function (response) {
+            $http.get('Modules/$(VirtoCommerce.Core)/Scripts/common/dynamicExpression/all-templates.html').then(function (response) {
                 // compile the response, which will put stuff into the cache
                 $compile(response.data);
             });
