@@ -13,7 +13,10 @@
     border-left: 1px solid $headerBrd
     border-right: 1px solid $headerBrd
     color: $whiteColor
-    padding: 0 20px
+    @include blaseSizes()
+      $width: getBladeContentSize($bladeSizeName)
+      min-width: $width
+      width: $width
   &__nav
     display: flex
     margin-left: auto
@@ -50,8 +53,9 @@
     align-items: center
     display: flex
     height: 100%
+    padding: 0 20px
     &__text
-      width: 220px;
+      min-width: 220px;
       white-space: normal;
       font-size: 12px
       margin-right: 20px

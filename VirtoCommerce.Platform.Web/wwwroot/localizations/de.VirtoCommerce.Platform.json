@@ -13,7 +13,8 @@
       "export-import": "Export & Import",
       "user-profile": "Benutzerprofil",
       "assets": "Medien",
-      "toggle-favorites": "Umschalttaste+Leertaste zu Favoriten umschalten"
+      "toggle-favorites": "Umschalttaste+Leertaste zu Favoriten umschalten",
+      "help" : "hilfe"
     },
     "navigation": {
       "back": "Zurück",
@@ -547,13 +548,14 @@
           "end": "Ende"
         }
       },
-        "licensing": {
-          "license-absent": "Common License",
-          "license-present": "{{type}} Lizenz",
-          "community": "Sie nutzen die Community Edition. klicken Sie hier um eine kommerzielle Lizenz zu beantragen.",
-          "expired": "Ihre Lizenz ist am {{expirationDate | amParse | date}} abgelaufen, bitte erneuern.",
-          "purchase": "Kauf"
-        },
+      "licensing": {
+        "license-absent": "Common License",
+        "license-present": "{{type}} Lizenz ist bis zum {{expirationDate | amParse | date}}",
+        "community": "Sie nutzen die Community Edition. klicken Sie hier um eine kommerzielle Lizenz zu beantragen.",
+        "expired": "Ihre Lizenz ist am {{expirationDate | amParse | date}} abgelaufen, bitte erneuern.",
+        "purchase": "Kauf",
+        "renew": "Aktualisieren"
+      },
       "modulesAutoInstallation": {
         "labels": {
           "module-auto-installation": "Module automatische Installation",

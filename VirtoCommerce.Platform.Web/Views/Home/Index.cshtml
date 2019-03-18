@@ -37,9 +37,9 @@
     <b ng-bind-template="{{ demoResetTime | amDifference : moment.utc() : 'minutes' | amDurationFormat : 'minutes' }}"></b>.
 </div> -->
 @*DO NOT CHANGE THE CODE BELOW: COPYRIGHT VIOLATION*@
-<div ng-class="{'demo-warning': license.hasExpired}" ng-if="isAuthenticated && license.hasExpired">
+<!-- <div ng-class="{'demo-warning': license.hasExpired}" ng-if="isAuthenticated && license.hasExpired">
     <span ng-if="license.hasExpired" ng-bind="'platform.templates.licensing.expired' | translate: license"></span>
-</div>
+</div> -->
 <div class="platform-error-bar" ng-if="platformError.title.length" ng-cloak>
     <a class="close" ng-click="closeError()"><i class="fa fa-remove"></i> </a>
     <div class="error-title">

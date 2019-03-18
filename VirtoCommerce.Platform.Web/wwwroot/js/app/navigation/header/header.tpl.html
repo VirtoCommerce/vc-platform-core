@@ -1,15 +1,13 @@
 <header class="header">
-    <div class="header__info" ng-if="!license">
-        <div class="license">
-            <div class="license__text">{{'platform.templates.licensing.community' | translate}}</div>
-            <a href="#" class="btn btn--orange">{{'platform.templates.licensing.purchase' | translate}}</a>
-        </div>
-    </div>
+    <va-header-license-widget></va-header-license-widget>
+
     <div class="header__nav">
-        <div class="header__nav-item">
+        <div class="header__nav-item" va-tooltip tooltip="{{'platform.menu.settings' | translate}}"
+            tooltip-placement="bottom" tooltip-animation="false" tooltip-popup-delay="{{tooltipPopupDelay}}">
             <span class="header__nav-ico header__nav-ico--settings" ng-click="manageSettings()"></span>
         </div>
-        <div class="header__nav-item">
+        <div class="header__nav-item" va-tooltip tooltip="{{'platform.menu.help' | translate}}"
+            tooltip-placement="bottom" tooltip-animation="false" tooltip-popup-delay="{{tooltipPopupDelay}}">
             <a class="header__nav-ico header__nav-ico--help" href="https://virtocommerce.com/docs" target="_blank"></a>
         </div>
         <va-header-notification-widget></va-header-notification-widget>
