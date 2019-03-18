@@ -9,6 +9,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using VirtoCommerce.CoreModule.Core.Common.Conditions;
+using VirtoCommerce.CoreModule.Core.Conditions;
+using VirtoCommerce.CoreModule.Core.Conditions.Browse;
+using VirtoCommerce.CoreModule.Core.Conditions.GeoConditions;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -16,11 +20,7 @@ using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Serialization;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.PricingModule.Core;
-using VirtoCommerce.PricingModule.Core.Model.CommonExpressions;
 using VirtoCommerce.PricingModule.Core.Services;
-using VirtoCommerce.PricingModule.Data.DynamicExpressions.Common.Conditions;
-using VirtoCommerce.PricingModule.Data.DynamicExpressions.Common.Conditions.Browse;
-using VirtoCommerce.PricingModule.Data.DynamicExpressions.Common.Conditions.GeoConditions;
 using VirtoCommerce.PricingModule.Data.DynamicExpressions.Pricing;
 using VirtoCommerce.PricingModule.Data.ExportImport;
 using VirtoCommerce.PricingModule.Data.Repositories;
@@ -108,7 +108,7 @@ namespace VirtoCommerce.PricingModule.Web
 
             //Pricing expression
             var pricingExtensionManager = appBuilder.ApplicationServices.GetRequiredService<IPricingExtensionManager>();
-            pricingExtensionManager.ConditionExpressionTree = GetPricingDynamicExpression();
+            pricingExtensionManager.PriceConditionTree = GetPricingDynamicExpression();
         }
 
         public void Uninstall()
@@ -135,19 +135,16 @@ namespace VirtoCommerce.PricingModule.Web
 
         #endregion
 
-        private static ConditionExpressionTree GetPricingDynamicExpression()
+        private static IConditionTree GetPricingDynamicExpression()
         {
-            var conditions = new List<DynamicExpression>
+            var conditions = new List<IConditionTree>
             {
                 new ConditionGeoTimeZone(), new ConditionGeoZipCode(), new ConditionStoreSearchedPhrase(), new ConditionAgeIs(), new ConditionGenderIs(),
                 new ConditionGeoCity(), new ConditionGeoCountry(), new ConditionGeoState(), new ConditionLanguageIs(), new UserGroupsContainsCondition()
             };
             var rootBlock = new BlockPricingCondition { AvailableChildren = conditions };
-            var retVal = new ConditionExpressionTree()
-            {
-                Children = new DynamicExpression[] { rootBlock }
-            };
-            return retVal;
+
+            return rootBlock;
         }
     }
 }

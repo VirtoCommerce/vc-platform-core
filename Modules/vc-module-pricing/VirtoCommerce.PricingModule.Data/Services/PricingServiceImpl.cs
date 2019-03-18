@@ -10,11 +10,12 @@ using Newtonsoft.Json.Linq;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Common.Conditions;
+using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Serialization;
 using VirtoCommerce.PricingModule.Core.Model;
-using VirtoCommerce.PricingModule.Core.Model.CommonExpressions;
 using VirtoCommerce.PricingModule.Core.Services;
 using VirtoCommerce.PricingModule.Data.Caching;
 using VirtoCommerce.PricingModule.Data.Model;
@@ -263,30 +264,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
                     foreach (var assignment in result)
                     {
                         cacheEntry.AddExpirationToken(PricelistAssignmentsCacheRegion.CreateChangeToken(assignment.Id));
-
-                        var defaultExpressionTree = _extensionManager.ConditionExpressionTree;
-                        //Set default expression tree first
-                        assignment.DynamicExpression = defaultExpressionTree;
-                        if (!string.IsNullOrEmpty(assignment.PredicateVisualTreeSerialized))
-                        {
-                            assignment.DynamicExpression = JsonConvert.DeserializeObject<ConditionExpressionTree>(assignment.PredicateVisualTreeSerialized);
-                            if (defaultExpressionTree != null)
-                            {
-                                //Copy available elements from default tree because they not persisted
-                                var sourceBlocks = ((DynamicExpression)defaultExpressionTree).Traverse(x => x.Children);
-                                var targetBlocks = ((DynamicExpression)assignment.DynamicExpression).Traverse(x => x.Children).ToList();
-
-                                foreach (var sourceBlock in sourceBlocks)
-                                {
-                                    foreach (var targetBlock in targetBlocks.Where(x => x.Id == sourceBlock.Id))
-                                    {
-                                        targetBlock.AvailableChildren = sourceBlock.AvailableChildren;
-                                    }
-                                }
-                                //copy available elements from default expression tree
-                                assignment.DynamicExpression.AvailableChildren = defaultExpressionTree.AvailableChildren;
-                            }
-                        }
+                        FillPricelistAssignmentConditions(assignment);
                     }
                 }
                 return result;
@@ -418,22 +396,8 @@ namespace VirtoCommerce.PricingModule.Data.Services
 
                 foreach (var assignment in assignments)
                 {
-                    //Serialize condition expression 
-                    if (assignment.DynamicExpression?.Children != null)
-                    {
-                        var conditionExpression = assignment.DynamicExpression.GetConditionExpression();
-                        assignment.ConditionExpression = _expressionSerializer.SerializeExpression(conditionExpression);
-
-                        //Clear availableElements in expression (for decrease size)
-                        assignment.DynamicExpression.AvailableChildren = null;
-                        var allBlocks = ((DynamicExpression)assignment.DynamicExpression).Traverse(x => x.Children);
-                        foreach (var block in allBlocks)
-                        {
-                            block.AvailableChildren = null;
-                        }
-                        assignment.PredicateVisualTreeSerialized = JsonConvert.SerializeObject(assignment.DynamicExpression);
-                    }
-
+                    SerializePricelistAssigmentConditions(assignment);
+                    
                     var sourceEntity = AbstractTypeFactory<PricelistAssignmentEntity>.TryCreateInstance().FromModel(assignment, pkMap);
                     var targetEntity = alreadyExistEntities.FirstOrDefault(x => x.Id == assignment.Id);
                     if (targetEntity != null)
@@ -515,6 +479,52 @@ namespace VirtoCommerce.PricingModule.Data.Services
             //Clear cache (Smart cache implementation) 
             PricingCacheRegion.ExpireRegion();
             PricingSearchCacheRegion.ExpireRegion();
+        }
+
+        private void FillPricelistAssignmentConditions(PricelistAssignment assignment)
+        {
+            var defaultExpressionTree = _extensionManager.PriceConditionTree;
+            //Set default expression tree first
+            assignment.DynamicExpression = defaultExpressionTree;
+            if (!string.IsNullOrEmpty(assignment.PredicateVisualTreeSerialized))
+            {
+                assignment.DynamicExpression = JsonConvert.DeserializeObject<IConditionTree>(assignment.PredicateVisualTreeSerialized, new ConditionJsonConverter());
+                if (defaultExpressionTree != null)
+                {
+                    //Copy available elements from default tree because they not persisted
+                    var sourceBlocks = defaultExpressionTree.Traverse(x => x.Children);
+                    var targetBlocks = assignment.DynamicExpression.Traverse(x => x.Children).ToList();
+
+                    foreach (var sourceBlock in sourceBlocks)
+                    {
+                        foreach (var targetBlock in targetBlocks.Where(x => x.Id == sourceBlock.Id))
+                        {
+                            targetBlock.AvailableChildren = sourceBlock.AvailableChildren;
+                        }
+                    }
+                    //copy available elements from default expression tree
+                    assignment.DynamicExpression.AvailableChildren = defaultExpressionTree.AvailableChildren;
+                }
+            }
+        }
+
+        private void SerializePricelistAssigmentConditions(PricelistAssignment assignment)
+        {
+            //Serialize condition expression 
+            if (assignment.DynamicExpression?.Children != null)
+            {
+                var conditionExpression = ((Condition)assignment.DynamicExpression).GetConditions();
+                assignment.ConditionExpression = JsonConvert.SerializeObject(conditionExpression);
+
+                //Clear availableElements in expression (for decrease size)
+                assignment.DynamicExpression.AvailableChildren = null;
+                var allBlocks = assignment.DynamicExpression.Traverse(x => x.Children);
+                foreach (var block in allBlocks)
+                {
+                    block.AvailableChildren = null;
+                }
+                assignment.PredicateVisualTreeSerialized = JsonConvert.SerializeObject(assignment.DynamicExpression);
+            }
         }
     }
 }

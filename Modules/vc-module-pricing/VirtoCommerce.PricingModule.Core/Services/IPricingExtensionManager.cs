@@ -1,9 +1,9 @@
-using VirtoCommerce.PricingModule.Core.Model.CommonExpressions;
+using VirtoCommerce.CoreModule.Core.Common.Conditions;
 
 namespace VirtoCommerce.PricingModule.Core.Services
 {
-	public interface IPricingExtensionManager
-	{
-		ConditionExpressionTree ConditionExpressionTree { get; set; }
-	}
+    public interface IPricingExtensionManager
+    {
+        IConditionTree PriceConditionTree { get; set; }
+    }
 }
