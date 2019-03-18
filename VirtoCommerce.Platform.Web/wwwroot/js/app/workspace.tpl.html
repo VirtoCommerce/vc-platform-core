@@ -1,4 +1,9 @@
-<va-main-menu ng-model="mainMenu" on-menu-changed="onMainMenuChanged(mainMenu)"></va-main-menu>
+<va-main-menu ng-model="mainMenu" on-menu-changed="onMainMenuChanged(mainMenu)">
+    <div class="logo">
+        <div class="logo-img">Virtocommerce</div>
+        <div class="logo-version">{{platformVersion}}</div>
+    </div>
+</va-main-menu>
 <article class="cnt" role="main">
     <va-header></va-header>
     <div class="cnt-inner">

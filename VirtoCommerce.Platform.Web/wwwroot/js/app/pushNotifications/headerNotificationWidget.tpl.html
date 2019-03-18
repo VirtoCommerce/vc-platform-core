@@ -8,15 +8,15 @@
             <div class="notice__bg"></div>
             <div class="notice__t">Nothing to see here</div>
             <div class="notice__descr">When an event happens, you will see it here</div>
-            <a href="#" class="btn btn--orange" ng-click="viewHistory()">View all notifications</a>
-            <a href="#" class="btn btn--orange" ng-click="close()">Close</a>
+            <button class="btn btn--orange" ng-click="viewHistory()">View all notifications</button>
+            <button class="btn btn--orange" ng-click="close()">Close</button>
         </div>
         <div class="notice-list" ng-if="getNotifications().length">
             <div class="notice-list__item" ng-repeat="model in getNotifications() | orderBy: 'created'"
                 ng-click="notificationClick(model)" ng-include="model.template">
             </div>
-            <a href="#" class="btn btn--orange" ng-click="viewHistory()">View all notifications</a>
-            <a href="#" class="btn btn--orange" ng-click="clearRecent()">Clear recent</a>
+            <button class="btn btn--orange" ng-click="viewHistory()">View all notifications</button>
+            <button class="btn btn--orange" ng-click="clearRecent()">Clear recent</button>
         </div>
     </div>
 </div>

@@ -1,6 +1,8 @@
 <nav class="nav-bar" ng-class="{'__collapsed': menu.isCollapsed}"
     ng-init="itemTemplateUrl = '$(Platform)/Scripts/app/navigation/menu/mainMenu-item.tpl.html'">
-    <div class="logo">Virtocommerce</div>
+
+    <ng-transclude> </ng-transclude>
+
     <div class="bar">
         <div class="wrapper">
             <div class="list __items" va-tooltip-options tooltip-enable="menu.isCollapsed" tooltip-append-to-body="true"

@@ -29,14 +29,21 @@
     .dropdown.__opened
       transform: translateX($mainMenuCollapsedWidth)
   .logo
-    background: url('/images/logo.svg') no-repeat scroll 15px 15px $headerBg
-    background-size: 127px 30px
-    flex: 0 0 $mainMenuWidth
-    font-size: 0
     height: $headerHeight
-    position: relative
     width: 100%
     z-index: 50
+    align-items: center
+    display: flex
+    &-img
+      background: url('/images/logo.svg') no-repeat scroll 15px 15px $headerBg
+      background-size: 127px 30px
+      width: 100%
+      font-size: 0
+      height: $headerHeight
+    &-version
+      color: #838d9a;
+      font-size: 10px;
+      margin-right: 20px;
   .bar
     background: $navbarBg
     box-shadow: 1px 0 0 0 $baseBrd
