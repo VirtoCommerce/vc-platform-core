@@ -1,9 +1,14 @@
 angular.module('platformWebApp')
-    .factory('platformWebApp.headerNotificationWidgetService', ['platformWebApp.pushNotifications',
-        function (notifications) {
+    .factory('platformWebApp.headerNotificationWidgetService', ['platformWebApp.pushNotifications', '$timeout', '$interval',
+        function (notifications, $timeout, $interval) {
 
             var notifications = [];
             var newCount = 0;
+            var notifyIsAnimated = false;
+            var intervalPromise;
+
+            var animationTime = 1500;
+            var animationInterval = 30000;
 
             function addNotification(notification) {
                 var exitstItem = _.find(notifications, function (x) { return x.id == notification.id; });
@@ -12,12 +17,16 @@ angular.module('platformWebApp')
                 } else {
                     notifications.push(notification);
                     newCount = newCount + 1;
+                    animateNotify();
+                    riseAnimateInterval();
                 }
             }
 
             function clear() {
                 notifications = [];
                 newCount = 0;
+                notifyIsAnimated = false;
+                cancelAnimateInterval();
             }
 
             function getNotifications() {
@@ -29,11 +38,32 @@ angular.module('platformWebApp')
             }
 
             function markAllAsReaded() {
+                cancelAnimateInterval();
                 newCount = 0;
             }
 
             function newAviable() {
                 return newCount > 0;
+            }
+
+            function animateNotify() {
+                notifyIsAnimated = true;
+                $timeout(function () { notifyIsAnimated = false; }, animationTime);
+            }
+
+            function cancelAnimateInterval() {
+                if (angular.isDefined(intervalPromise)) {
+                    $interval.cancel(intervalPromise);
+                }
+            }
+
+            function riseAnimateInterval() {
+                cancelAnimateInterval();
+                intervalPromise = $interval(animateNotify, animationInterval);
+            }
+
+            function isAnimated() {
+                return notifyIsAnimated;
             }
 
             var retVal = {
@@ -42,7 +72,8 @@ angular.module('platformWebApp')
                 getNewCount: getNewCount,
                 newAviable: newAviable,
                 markAllAsReaded: markAllAsReaded,
-                clear: clear
+                clear: clear,
+                isAnimated: isAnimated
             };
 
             return retVal;
@@ -62,7 +93,7 @@ angular.module('platformWebApp')
                     scope.getNotifications = headerNotifications.getNotifications;
                     scope.getNewCount = headerNotifications.getNewCount;
                     scope.newAviable = headerNotifications.newAviable;
-                    console.log(scope);
+                    scope.isAnimated = headerNotifications.isAnimated;
 
                     function handleClickEvent(event) {
                         var dropdownElement = $document.find('[notificationWidget]');

@@ -1,6 +1,6 @@
 <div class="header__nav-item" ng-class="{'header__nav-item--opened': dropDownOpened}" notificationWidget>
     <span class="header__nav-ico"
-        ng-class="{'header__nav-ico--notice-give' : newAviable(), 'header__nav-ico--notice' : !newAviable()}"
+        ng-class="{'header__nav-ico--notice-give' : newAviable(), 'header__nav-ico--notice' : !newAviable(), '__animated': isAnimated()}"
         ng-click="toggleDropDown()" va-tooltip tooltip="{{'platform.menu.notifications' | translate}}"
         tooltip-placement="bottom" tooltip-animation="false" tooltip-popup-delay="{{$parent.tooltipPopupDelay}}"></span>
     <div class="dropdown-menu">
