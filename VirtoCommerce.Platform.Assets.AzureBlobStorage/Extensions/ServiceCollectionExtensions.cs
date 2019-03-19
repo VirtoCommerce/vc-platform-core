@@ -6,7 +6,7 @@ namespace VirtoCommerce.Platform.Assets.AzureBlobStorage.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static void AddAzureBlobProvider(this IServiceCollection services, Action<AzureBlobContentOptions> setupAction = null)
+        public static void AddAzureBlobProvider(this IServiceCollection services, Action<AzureBlobOptions> setupAction = null)
         {
             services.AddSingleton<IBlobStorageProvider, AzureBlobProvider>();
             services.AddSingleton<IBlobUrlResolver, AzureBlobProvider>();

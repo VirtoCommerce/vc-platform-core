@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using Hangfire.Server;
@@ -17,11 +16,9 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Exceptions;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.ExportImport.PushNotifications;
-using VirtoCommerce.Platform.Core.Extensions;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
-using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Hangfire;
 
 using Permissions = VirtoCommerce.Platform.Core.PlatformConstants.Security.Permissions;
@@ -353,7 +350,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
             try
             {
-                const string relativeUrl = "tmp/exported_data.zip";
+                const string relativeUrl = "/tmp/exported_data.zip";
                 var localTmpFolder = Path.GetFullPath(Path.Combine(_platformOptions.LocalUploadFolderPath, "tmp"));
                 var localTmpPath = Path.Combine(localTmpFolder, "exported_data.zip");
                 if (!Directory.Exists(localTmpFolder))
