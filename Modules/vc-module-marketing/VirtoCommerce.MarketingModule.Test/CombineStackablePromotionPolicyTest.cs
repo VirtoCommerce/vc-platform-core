@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Moq;
 using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
@@ -272,43 +273,43 @@ namespace VirtoCommerce.MarketingModule.Test
 
         private static void RegisterConditionRewards()
         {
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<PromotionConditionRewardTree>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<BlockConditionAndOr>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<PromotionConditionRewardTree>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<BlockConditionAndOr>();
 
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<BlockCustomerCondition>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionIsRegisteredUser>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionIsEveryone>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionIsFirstTimeBuyer>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<UserGroupsContainsCondition>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<BlockCustomerCondition>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionIsRegisteredUser>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionIsEveryone>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionIsFirstTimeBuyer>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<UserGroupsContainsCondition>();
 
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<BlockCatalogCondition>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionAtNumItemsInCart>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionAtNumItemsInCategoryAreInCart>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionAtNumItemsOfEntryAreInCart>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionCartSubtotalLeast>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<BlockCatalogCondition>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionAtNumItemsInCart>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionAtNumItemsInCategoryAreInCart>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionAtNumItemsOfEntryAreInCart>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionCartSubtotalLeast>();
 
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<BlockCartCondition>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionCategoryIs>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionCodeContains>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionCurrencyIs>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionEntryIs>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<ConditionInStockQuantity>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<BlockCartCondition>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionCategoryIs>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionCodeContains>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionCurrencyIs>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionEntryIs>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionInStockQuantity>();
 
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<BlockReward>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardCartGetOfAbsSubtotal>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardCartGetOfRelSubtotal>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardItemGetFreeNumItemOfProduct>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardItemGetOfAbs>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardItemGetOfAbsForNum>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardItemGetOfRel>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardItemGetOfRelForNum>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardItemGiftNumItem>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardShippingGetOfAbsShippingMethod>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardShippingGetOfRelShippingMethod>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardPaymentGetOfAbs>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardPaymentGetOfRel>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardItemForEveryNumInGetOfRel>();
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<RewardItemForEveryNumOtherItemInGetOfRel>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<BlockReward>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<RewardCartGetOfAbsSubtotal>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<RewardCartGetOfRelSubtotal>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<RewardItemGetFreeNumItemOfProduct>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<RewardItemGetOfAbs>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<RewardItemGetOfAbsForNum>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<RewardItemGetOfRel>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<RewardItemGetOfRelForNum>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<RewardItemGiftNumItem>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<RewardShippingGetOfAbsShippingMethod>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<RewardShippingGetOfRelShippingMethod>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<RewardPaymentGetOfAbs>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<RewardPaymentGetOfRel>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<RewardItemForEveryNumInGetOfRel>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<RewardItemForEveryNumOtherItemInGetOfRel>();
 
             AbstractTypeFactory<PromotionReward>.RegisterType<GiftReward>();
             AbstractTypeFactory<PromotionReward>.RegisterType<CartSubtotalReward>();

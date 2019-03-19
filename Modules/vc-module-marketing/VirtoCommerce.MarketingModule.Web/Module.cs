@@ -65,19 +65,20 @@ namespace VirtoCommerce.MarketingModule.Web
             serviceCollection.AddSingleton<CsvCouponImporter>();
 
 
-            var settingsRegistrar = serviceCollection.BuildServiceProvider().GetRequiredService<ISettingsRegistrar>();
-            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.General.AllSettings, ModuleInfo.Id);
-
-            var settingsManager = serviceCollection.BuildServiceProvider().GetService<ISettingsManager>();
-            var promotionCombinePolicy = settingsManager.GetValue(ModuleConstants.Settings.General.CombinePolicy.Name, "BestReward");
-            if (promotionCombinePolicy.EqualsInvariant("CombineStackable"))
+            serviceCollection.AddSingleton<IMarketingPromoEvaluator>(provider =>
             {
-                serviceCollection.AddSingleton<IMarketingPromoEvaluator, CombineStackablePromotionPolicy>();
-            }
-            else
-            {
-                serviceCollection.AddSingleton<IMarketingPromoEvaluator, BestRewardPromotionPolicy>();
-            }
+                var settingsManager = provider.GetService<ISettingsManager>();
+                var promotionService = provider.GetService<IPromotionSearchService>();
+                var promotionCombinePolicy = settingsManager.GetValue(ModuleConstants.Settings.General.CombinePolicy.Name, "BestReward");
+                if (promotionCombinePolicy.EqualsInvariant("CombineStackable"))
+                {
+                    return new CombineStackablePromotionPolicy(promotionService);
+                }
+                else
+                {
+                    return new BestRewardPromotionPolicy(promotionService);
+                }
+            });
 
             AbstractTypeFactory<DynamicPromotion>.RegisterType<DynamicPromotion>().WithFactory(() =>
             {
@@ -94,7 +95,8 @@ namespace VirtoCommerce.MarketingModule.Web
         {
             _appBuilder = appBuilder;
 
-
+            var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
+            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.General.AllSettings, ModuleInfo.Id);
 
             var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>
