@@ -68,11 +68,13 @@ namespace VirtoCommerce.Platform.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //Follow lines required to inject the IUrlHelper type
+            //https://benfoster.io/blog/injecting-urlhelper-in-aspnet-core-mvc
             services.AddHttpContextAccessor();
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton(x =>
             {
-                VirtoCommerce.Platform.Core.Extensions.UrlHelperExtensions.Configure(x.GetService<IHttpContextAccessor>());
+                Core.Extensions.UrlHelperExtensions.Configure(x.GetService<IHttpContextAccessor>());
 
                 var actionContext = x.GetRequiredService<IActionContextAccessor>().ActionContext;
                 var factory = x.GetRequiredService<IUrlHelperFactory>();
@@ -297,12 +299,12 @@ namespace VirtoCommerce.Platform.Web
             var assetsProvider = Configuration.GetSection("Assets:Provider").Value;
             if (assetsProvider.EqualsInvariant(AzureBlobProvider.ProviderName))
             {
-                services.Configure<AzureBlobContentOptions>(Configuration.GetSection("Assets:AzureBlobStorage"));
+                services.Configure<AzureBlobOptions>(Configuration.GetSection("Assets:AzureBlobStorage"));
                 services.AddAzureBlobProvider();
             }
             else
             {
-                services.Configure<FileSystemBlobContentOptions>(Configuration.GetSection("Assets:FileSystem"));
+                services.Configure<FileSystemBlobOptions>(Configuration.GetSection("Assets:FileSystem"));
                 services.AddFileSystemBlobProvider(options =>
                 {
                     options.RootPath = HostingEnvironment.MapPath(options.RootPath);

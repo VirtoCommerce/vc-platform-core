@@ -12,7 +12,7 @@ namespace VirtoCommerce.Platform.Tests.Assets
     public class BlobStorageProviderTests : IDisposable
     {
         private readonly string _tempDirectory;
-        private readonly IOptions<FileSystemBlobContentOptions> _options;
+        private readonly IOptions<FileSystemBlobOptions> _options;
         private readonly Mock<IHttpContextAccessor> _httpContextAccessor;
 
         public BlobStorageProviderTests()
@@ -25,14 +25,14 @@ namespace VirtoCommerce.Platform.Tests.Assets
             _httpContextAccessor = BuildHttpContextAccessor();
         }
 
-        private static IOptions<FileSystemBlobContentOptions> BuildOptions(string tempDirectory)
+        private static IOptions<FileSystemBlobOptions> BuildOptions(string tempDirectory)
         {
-            var blobContentOptions = new FileSystemBlobContentOptions
+            var blobContentOptions = new FileSystemBlobOptions
             {
                 PublicPath = "some-public-path",
                 RootPath = tempDirectory
             };
-            return new OptionsWrapper<FileSystemBlobContentOptions>(blobContentOptions);
+            return new OptionsWrapper<FileSystemBlobOptions>(blobContentOptions);
         }
 
         private static Mock<IHttpContextAccessor> BuildHttpContextAccessor()

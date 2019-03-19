@@ -1,45 +1,24 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Threading.Tasks;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using VirtoCommerce.ContentModule.Core.Services;
 using VirtoCommerce.Platform.Assets.AzureBlobStorage;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
-using Microsoft.Extensions.Options;
 
-namespace VirtoCommerce.ContentModule.Data.Services
+namespace VirtoCommerce.ContentModule.Azure
 {
-    public class AzureContentBlobStorageProvider : AzureBlobProvider, IContentStorageProviderFactory
+    public class AzureContentBlobStorageProvider : AzureBlobProvider, IBlobContentStorageProvider
     {
-        private readonly string _chrootPath;
-
-        public AzureContentBlobStorageProvider(IOptions<AzureBlobContentOptions> options)
+        private AzureContentBlobOptions _options;
+        public AzureContentBlobStorageProvider(IOptions<AzureContentBlobOptions> options)
             : base(options)
         {
-            var chrootPath = options.Value.RootPath;
-
-            if (chrootPath == null)
-                throw new ArgumentNullException(nameof(chrootPath));
-
-            chrootPath = chrootPath.Replace('/', '\\');
-            _chrootPath = "\\" + chrootPath.TrimStart('\\');
+            _options = options.Value;
         }
 
-        #region IContentStorageProvider Members
-
-        public void MoveContent(string oldUrl, string newUrl)
-        {
-            base.Move(oldUrl, newUrl);
-        }
-
-        public void CopyContent(string fromUrl, string toUrl)
-        {
-            base.Copy(fromUrl, toUrl);
-        }
-        #endregion
 
         public override Stream OpenRead(string url)
         {
@@ -69,11 +48,13 @@ namespace VirtoCommerce.ContentModule.Data.Services
 
             await base.RemoveAsync(urls);
         }
+
         public override async Task<GenericSearchResult<BlobEntry>> SearchAsync(string folderUrl, string keyword)
         {
             folderUrl = NormalizeUrl(folderUrl);
             return await base.SearchAsync(folderUrl, keyword);
         }
+
 
         /// <summary>
         /// Chroot url (artificial add parent 'chroot' folder)
@@ -82,7 +63,7 @@ namespace VirtoCommerce.ContentModule.Data.Services
         /// <returns></returns>
         private string NormalizeUrl(string url)
         {
-            var retVal = _chrootPath;
+            var retVal = _options.RootPath;
             if (!string.IsNullOrEmpty(url))
             {
                 if (url.IsAbsoluteUrl())
@@ -90,7 +71,7 @@ namespace VirtoCommerce.ContentModule.Data.Services
                     url = Uri.UnescapeDataString(new Uri(url).AbsolutePath);
                 }
                 retVal = "\\" + url.Replace('/', '\\').TrimStart('\\');
-                retVal = _chrootPath + "\\" + retVal.Replace(_chrootPath, string.Empty);
+                retVal = _options.RootPath + "\\" + retVal.Replace(_options.RootPath, string.Empty);
                 retVal = retVal.Replace("\\\\", "\\");
             }
             return retVal;

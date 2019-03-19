@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Assets;
@@ -16,16 +15,13 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
         public const string ProviderName = "LocalStorage";
 
         private readonly string _storagePath;
-        private readonly FileSystemBlobContentOptions _options;
+        private readonly FileSystemBlobOptions _options;
         private readonly IUrlHelper _urlHelper;
 
-        public FileSystemBlobProvider(IOptions<FileSystemBlobContentOptions> options, IUrlHelper urlHelper)
+        public FileSystemBlobProvider(IOptions<FileSystemBlobOptions> options, IUrlHelper urlHelper)
         {
             _options = options.Value;
-            if (_options.RootPath == null)
-            {
-                throw new PlatformException($"{ nameof(_options.RootPath) } must be set");
-            }
+
             _storagePath = _options.RootPath.TrimEnd('\\');
 
             _urlHelper = urlHelper;
@@ -213,6 +209,51 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
             return Task.CompletedTask;
         }
 
+        public virtual void Move(string srcUrl, string dstUrl)
+        {
+            var srcPath = GetStoragePathFromUrl(srcUrl);
+            var dstPath = GetStoragePathFromUrl(dstUrl);
+
+            if (srcPath != dstPath)
+            {
+                if (Directory.Exists(srcPath) && !Directory.Exists(dstPath))
+                {
+                    Directory.Move(srcPath, dstPath);
+                }
+                else if (File.Exists(srcPath) && !File.Exists(dstPath))
+                {
+                    File.Move(srcPath, dstPath);
+                }
+            }
+        }
+
+        public virtual void Copy(string srcUrl, string destUrl)
+        {
+            var srcPath = GetStoragePathFromUrl(srcUrl);
+            var destPath = GetStoragePathFromUrl(destUrl);
+
+            CopyDirectoryRecursive(srcPath, destPath);
+        }
+
+        private static void CopyDirectoryRecursive(string sourcePath, string destPath)
+        {
+            if (!Directory.Exists(destPath))
+            {
+                Directory.CreateDirectory(destPath);
+            }
+
+            foreach (var file in Directory.GetFiles(sourcePath))
+            {
+                var dest = Path.Combine(destPath, Path.GetFileName(file));
+                File.Copy(file, dest);
+            }
+
+            foreach (var folder in Directory.GetDirectories(sourcePath))
+            {
+                var dest = Path.Combine(destPath, Path.GetFileName(folder));
+                CopyDirectoryRecursive(folder, dest);
+            }
+        }
         #endregion
 
         #region IBlobUrlResolver Members

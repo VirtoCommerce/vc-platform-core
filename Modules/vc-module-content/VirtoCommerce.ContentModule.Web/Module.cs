@@ -4,26 +4,27 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
+using VirtoCommerce.ContentModule.Azure;
+using VirtoCommerce.ContentModule.Azure.Extensions;
 using VirtoCommerce.ContentModule.Core;
 using VirtoCommerce.ContentModule.Core.Services;
 using VirtoCommerce.ContentModule.Data.ExportImport;
 using VirtoCommerce.ContentModule.Data.Repositories;
 using VirtoCommerce.ContentModule.Data.Services;
+using VirtoCommerce.ContentModule.FileSystem;
+using VirtoCommerce.ContentModule.FileSystem.Extensions;
+using VirtoCommerce.ContentModule.Web.Extensions;
 using VirtoCommerce.ContentModule.Web.Infrastructure;
 using VirtoCommerce.ContentModule.Web.Model;
 using VirtoCommerce.Platform.Assets.AzureBlobStorage;
-using VirtoCommerce.Platform.Assets.FileSystem;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.Platform.Web.Extensions;
 
 namespace VirtoCommerce.ContentModule.Web
 {
@@ -48,49 +49,19 @@ namespace VirtoCommerce.ContentModule.Web
             serviceCollection.AddSingleton<ContentExportImport>();
 
             var contentProvider = configuration.GetSection("Content:Provider").Value;
-
-
             if (contentProvider.EqualsInvariant(AzureBlobProvider.ProviderName))
             {
-                var azureBlobContentOptions = new AzureBlobContentOptions();
-                configuration.GetSection("Content:AzureBlobStorage").Bind(azureBlobContentOptions);
-
-                //avoid closure
-                var rootPath = $"{azureBlobContentOptions.RootPath}";
-                var options = Options.Create(azureBlobContentOptions);
-
-                serviceCollection.AddTransient<AzureContentBlobStorageProvider>().Configure<AzureContentBlobStorageProvider>(configuration.GetSection("Content:AzureBlobStorage"));
-
-                serviceCollection.AddTransient<Func<string, IContentStorageProviderFactory>>(provider => (path) =>
-                {
-                    options.Value.RootPath = Path.Combine(rootPath, path);
-
-                    return new AzureContentBlobStorageProvider(options);
-                });
+                serviceCollection.Configure<AzureContentBlobOptions>(configuration.GetSection("Content:AzureBlobStorage"));
+                serviceCollection.AddAzureContentBlobProvider();
             }
             else
             {
-                var fileSystemContentBlobOptions = new FileSystemBlobContentOptions();
-                configuration.GetSection("Content:LocalStorage").Bind(fileSystemContentBlobOptions);
-
-                fileSystemContentBlobOptions.RootPath = hostingEnvironment.MapPath(fileSystemContentBlobOptions.RootPath);
-
-                //avoid closure
-                var rootPath = $"{fileSystemContentBlobOptions.RootPath}";
-                var options = Options.Create(fileSystemContentBlobOptions);
-
-
-                serviceCollection.AddSingleton<FileSystemContentBlobStorageProvider>().Configure<FileSystemBlobContentOptions>(configuration.GetSection("Content:LocalStorage"));
-
-                serviceCollection.AddSingleton<Func<string, IContentStorageProviderFactory>>(provider => (path) =>
+                serviceCollection.Configure<FileSystemContentBlobOptions>(configuration.GetSection("Content:FileSystem"));
+                serviceCollection.AddFileSystemContentBlobProvider(options =>
                 {
-                    var urlHelper = provider.GetService<IUrlHelper>();
-                    options.Value.RootPath = Path.Combine(rootPath, path.Replace("/", "\\"));
-
-                    return new FileSystemContentBlobStorageProvider(options, urlHelper);
+                    options.RootPath = hostingEnvironment.MapPath(options.RootPath);
                 });
             }
-
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)

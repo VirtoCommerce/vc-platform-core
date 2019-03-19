@@ -1,9 +1,6 @@
-using System;
 using System.Collections.Generic;
-using System.Text;
 using VirtoCommerce.ContentModule.Web.Model;
 using VirtoCommerce.Platform.Core.DynamicProperties;
-using VirtoCommerce.StoreModule.Core.Model;
 
 namespace VirtoCommerce.ContentModule.Web.Infrastructure
 {
@@ -141,17 +138,15 @@ namespace VirtoCommerce.ContentModule.Web.Infrastructure
             ValueType = DynamicPropertyValueType.DateTime,
             CreatedBy = "Auto"
         };
-
         //Create DefaultTheme dynamic property for  Store 
         public static DynamicProperty defaultThemeNameProperty = new DynamicProperty
         {
             Id = "Default_Theme_Name_Property",
             Name = "DefaultThemeName",
-            ObjectType = typeof(Store).FullName,
+            ObjectType = "VirtoCommerce.StoreModule.Core.Model.Store",
             ValueType = DynamicPropertyValueType.ShortText,
             CreatedBy = "Auto"
         };
-
         //Create Authorize dynamic property for  Store 
         public static DynamicProperty authorizeProperty = new DynamicProperty
         {

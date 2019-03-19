@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
-using VirtoCommerce.StoreModule.Core.Model;
 
 namespace VirtoCommerce.ContentModule.Web.Model
 {
@@ -10,7 +9,7 @@ namespace VirtoCommerce.ContentModule.Web.Model
         public string ObjectType => GetType().FullName;
         public ICollection<DynamicObjectProperty> DynamicProperties { get; set; }
 
-    # region DynamicProperty
+        #region DynamicProperty
 
         //https://jekyllrb.com/docs/frontmatter/
         //Register special ContentItem.FrontMatterHeaders type which will be used to define YAML headers for pages, blogs and posts
@@ -150,7 +149,7 @@ namespace VirtoCommerce.ContentModule.Web.Model
         {
             Id = "Default_Theme_Name_Property",
             Name = "DefaultThemeName",
-            ObjectType = typeof(Store).FullName,
+            ObjectType = "VirtoCommerce.StoreModule.Core.Model.Store",
             ValueType = DynamicPropertyValueType.ShortText,
             CreatedBy = "Auto"
         };

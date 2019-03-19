@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using Microsoft.Extensions.Primitives;
 using VirtoCommerce.Platform.Core.Caching;
-using VirtoCommerce.StoreModule.Core.Model;
 
 namespace VirtoCommerce.ContentModule.Data.Model
 {
@@ -25,7 +22,7 @@ namespace VirtoCommerce.ContentModule.Data.Model
 
         public static void ExpireContent(string contentStore)
         {
-            if (_dirRegionTokenLookup.TryRemove(contentStore, out CancellationTokenSource token))
+            if (_dirRegionTokenLookup.TryRemove(contentStore, out var token))
             {
                 token.Cancel();
             }

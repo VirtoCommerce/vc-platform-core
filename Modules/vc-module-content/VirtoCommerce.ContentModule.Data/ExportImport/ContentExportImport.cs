@@ -18,18 +18,15 @@ namespace VirtoCommerce.ContentModule.Data.ExportImport
     {
         private static string[] _exportedFolders = { "Pages", "Themes" };
         private readonly IMenuService _menuService;
-        private readonly IContentStorageProviderFactory _contentStorageProvider;
+        private readonly IBlobContentStorageProvider _blobContentStorageProvider;
         private readonly JsonSerializer _jsonSerializer;
         private readonly int _batchSize = 50;
 
-        public ContentExportImport(IMenuService menuService, Func<string, IContentStorageProviderFactory> contentStorageProviderFactory, JsonSerializer jsonSerializer)
+        public ContentExportImport(IMenuService menuService, IBlobContentStorageProvider blobContentStorageProvider, JsonSerializer jsonSerializer)
         {
-            if (contentStorageProviderFactory == null)
-                throw new ArgumentNullException(nameof(contentStorageProviderFactory));
-
             _menuService = menuService;
             _jsonSerializer = jsonSerializer;
-            _contentStorageProvider = contentStorageProviderFactory(string.Empty);
+            _blobContentStorageProvider = blobContentStorageProvider;
         }
 
         public async Task DoExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
@@ -73,14 +70,14 @@ namespace VirtoCommerce.ContentModule.Data.ExportImport
                     await writer.WriteStartArrayAsync();
 
                     var backupContentFolders = new List<ContentFolder>();
-                    var result = await _contentStorageProvider.SearchAsync(string.Empty, null);
+                    var result = await _blobContentStorageProvider.SearchAsync(string.Empty, null);
                     foreach (var blobFolder in result.Results.Where(x => _exportedFolders.Contains(x.Name)))
                     {
                         var contentFolder = new ContentFolder
                         {
                             Url = blobFolder.RelativeUrl
                         };
-                        ReadContentFoldersRecurive(contentFolder, progressCallback);
+                        await ReadContentFoldersRecuriveAsync(contentFolder, progressCallback);
                         backupContentFolders.Add(contentFolder);
                     }
 
@@ -156,7 +153,7 @@ namespace VirtoCommerce.ContentModule.Data.ExportImport
 
             foreach (var folderFile in folder.Files)
             {
-                using (var stream = _contentStorageProvider.OpenWrite(folderFile.Url))
+                using (var stream = _blobContentStorageProvider.OpenWrite(folderFile.Url))
                 using (var memStream = new MemoryStream(folderFile.Data))
                 {
                     var progressInfo = new ExportImportProgressInfo
@@ -169,9 +166,9 @@ namespace VirtoCommerce.ContentModule.Data.ExportImport
             }
         }
 
-        private void ReadContentFoldersRecurive(ContentFolder folder, Action<ExportImportProgressInfo> progressCallback)
+        private async Task ReadContentFoldersRecuriveAsync(ContentFolder folder, Action<ExportImportProgressInfo> progressCallback)
         {
-            var result = _contentStorageProvider.SearchAsync(folder.Url, null).GetAwaiter().GetResult();
+            var result = await _blobContentStorageProvider.SearchAsync(folder.Url, null);
 
             foreach (var blobFolder in result.Results.OfType<BlobFolder>())
             {
@@ -180,7 +177,7 @@ namespace VirtoCommerce.ContentModule.Data.ExportImport
                     Url = blobFolder.RelativeUrl
                 };
 
-                ReadContentFoldersRecurive(contentFolder, progressCallback);
+                await ReadContentFoldersRecuriveAsync(contentFolder, progressCallback);
                 folder.Folders.Add(contentFolder);
             }
 
@@ -196,7 +193,7 @@ namespace VirtoCommerce.ContentModule.Data.ExportImport
                 {
                     Url = blobItem.RelativeUrl
                 };
-                using (var stream = _contentStorageProvider.OpenRead(blobItem.Url))
+                using (var stream = _blobContentStorageProvider.OpenRead(blobItem.Url))
                 {
                     contentFile.Data = stream.ReadFully();
                 }
