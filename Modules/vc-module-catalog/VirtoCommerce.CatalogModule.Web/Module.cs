@@ -79,19 +79,26 @@ namespace VirtoCommerce.CatalogModule.Web
             serviceCollection.AddSingleton<CategoryChangedEventHandler>();
             serviceCollection.AddSingleton<ProductChangedEventHandler>();
 
-            var settingsRegistrar = serviceCollection.BuildServiceProvider().GetRequiredService<ISettingsRegistrar>();
-            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
-
-            var settingManager = serviceCollection.BuildServiceProvider().GetService<ISettingsManager>();
-            if (settingManager.GetValue(ModuleConstants.Settings.General.CodesInOutline.Name, false))
-                serviceCollection.AddSingleton<IOutlinePartResolver, CodeOutlinePartResolver>();
-            else
-                serviceCollection.AddSingleton<IOutlinePartResolver, IdOutlinePartResolver>();
+            serviceCollection.AddSingleton<IOutlinePartResolver>(provider =>
+            {
+                var settingsManager = provider.GetService<ISettingsManager>();
+                if (settingsManager.GetValue(ModuleConstants.Settings.General.CodesInOutline.Name, false))
+                {
+                    return new CodeOutlinePartResolver();
+                }
+                else
+                {
+                    return new IdOutlinePartResolver();
+                }
+            });
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
             _appBuilder = appBuilder;
+
+            var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
+            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
 
             //Register module permissions
             var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
