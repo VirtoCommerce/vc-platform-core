@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -66,6 +68,18 @@ namespace VirtoCommerce.Platform.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //Follow lines required to inject the IUrlHelper type
+            //https://benfoster.io/blog/injecting-urlhelper-in-aspnet-core-mvc
+            services.AddHttpContextAccessor();
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            services.AddSingleton(x =>
+            {
+                Core.Extensions.UrlHelperExtensions.Configure(x.GetService<IHttpContextAccessor>());
+
+                var actionContext = x.GetRequiredService<IActionContextAccessor>().ActionContext;
+                var factory = x.GetRequiredService<IUrlHelperFactory>();
+                return factory.GetUrlHelper(actionContext);
+            });
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             // This custom provider allows able to use just [Authorize] instead of having to define [Authorize(AuthenticationSchemes = "Bearer")] above every API controller
             // without this Bearer authorization will not work
@@ -282,16 +296,15 @@ namespace VirtoCommerce.Platform.Web
             //Add SignalR for push notifications
             services.AddSignalR();
 
-
             var assetsProvider = Configuration.GetSection("Assets:Provider").Value;
             if (assetsProvider.EqualsInvariant(AzureBlobProvider.ProviderName))
             {
-                services.Configure<AzureBlobContentOptions>(Configuration.GetSection("Assets:AzureBlobStorage"));
+                services.Configure<AzureBlobOptions>(Configuration.GetSection("Assets:AzureBlobStorage"));
                 services.AddAzureBlobProvider();
             }
             else
             {
-                services.Configure<FileSystemBlobContentOptions>(Configuration.GetSection("Assets:FileSystem"));
+                services.Configure<FileSystemBlobOptions>(Configuration.GetSection("Assets:FileSystem"));
                 services.AddFileSystemBlobProvider(options =>
                 {
                     options.RootPath = HostingEnvironment.MapPath(options.RootPath);
