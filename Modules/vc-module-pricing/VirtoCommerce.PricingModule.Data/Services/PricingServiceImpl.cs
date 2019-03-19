@@ -9,8 +9,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Services;
-using VirtoCommerce.CoreModule.Core.Common;
-using VirtoCommerce.CoreModule.Core.Common.Conditions;
 using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
