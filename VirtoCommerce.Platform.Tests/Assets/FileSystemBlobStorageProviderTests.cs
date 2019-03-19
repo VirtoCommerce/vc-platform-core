@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Moq;
 using VirtoCommerce.Platform.Assets.FileSystem;
@@ -13,7 +14,7 @@ namespace VirtoCommerce.Platform.Tests.Assets
     {
         private readonly string _tempDirectory;
         private readonly IOptions<FileSystemBlobOptions> _options;
-        private readonly Mock<IHttpContextAccessor> _httpContextAccessor;
+        private readonly Mock<IUrlHelper> _urlHelper;
 
         public BlobStorageProviderTests()
         {
@@ -22,7 +23,7 @@ namespace VirtoCommerce.Platform.Tests.Assets
             Directory.CreateDirectory(_tempDirectory);
 
             _options = BuildOptions(_tempDirectory);
-            _httpContextAccessor = BuildHttpContextAccessor();
+            _urlHelper = new Mock<IUrlHelper>();
         }
 
         private static IOptions<FileSystemBlobOptions> BuildOptions(string tempDirectory)
@@ -64,7 +65,7 @@ namespace VirtoCommerce.Platform.Tests.Assets
         [Fact]
         public void FileSystemBlobProviderStreamWritePermissionsTest()
         {
-            var fsbProvider = new FileSystemBlobProvider(_options, _httpContextAccessor.Object);
+            var fsbProvider = new FileSystemBlobProvider(_options, _urlHelper.Object);
 
             using (var actualStream = fsbProvider.OpenWrite("file-write.tmp"))
             {
@@ -79,7 +80,7 @@ namespace VirtoCommerce.Platform.Tests.Assets
         [Fact]
         public void FileSystemBlobProviderStreamReadPermissionsTest()
         {
-            var fsbProvider = new FileSystemBlobProvider(_options, _httpContextAccessor.Object);
+            var fsbProvider = new FileSystemBlobProvider(_options, _urlHelper.Object);
             const string fileForRead = "file-read.tmp";
 
             // Creating empty file.

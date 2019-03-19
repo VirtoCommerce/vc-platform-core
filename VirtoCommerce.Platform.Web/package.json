@@ -5,7 +5,7 @@
     "scripts": {
         "webpack:dev": "webpack --display-error-details",
         "webpack:build": "webpack --env.prod",
-        "webpack:watch": "webpack --watch --progress"
+        "webpack:watch": "webpack --watch --progress --display-error-details"
     },
     "devDependencies": {
         "@babel/core": "^7.1.6",

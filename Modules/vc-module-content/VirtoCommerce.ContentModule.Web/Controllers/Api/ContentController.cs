@@ -110,14 +110,16 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         [Route("")]
         [ProducesResponseType(typeof(byte[]), 200)]
         [Authorize(Permissions.Read)]
-        public ActionResult GetContentItemDataStream(string contentType, string storeId, [FromQuery] string relativeUrl)
+        public async Task<ActionResult> GetContentItemDataStream(string contentType, string storeId, [FromQuery] string relativeUrl)
         {
             var storageProvider = _blobContentStorageProviderFactory.CreateProvider(GetContentBasePath(contentType, storeId));
-            var fileStream = storageProvider.OpenRead(relativeUrl);
-
-            return File(fileStream, MimeTypeResolver.ResolveContentType(relativeUrl));
+            if ((await storageProvider.GetBlobInfoAsync(relativeUrl)) != null)
+            {
+                var fileStream = storageProvider.OpenRead(relativeUrl);
+                return File(fileStream, MimeTypeResolver.ResolveContentType(relativeUrl));
+            }
+            return NotFound();
         }
-
 
         /// <summary>
         /// Search content items in specified folder and using search keyword
