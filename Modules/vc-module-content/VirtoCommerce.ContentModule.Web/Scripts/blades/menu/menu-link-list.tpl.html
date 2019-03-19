@@ -1,0 +1,131 @@
+﻿<div class="blade-static __bottom" ng-include="'$(Platform)/Scripts/common/templates/create.tpl.html'" ng-if="blade.isNew"></div>
+<div class="blade-content __large-wide">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form name="formScope">
+                <div class="clearfix">
+                    <div class="column">
+                        <div class="form-group">
+                            <label class="form-label">{{ 'content.blades.menu-link-list.labels.name' | translate }}</label>
+                            <div class="form-input">
+                                <input focus-on="" required class="form-control" ng-model="blade.currentEntity.name" placeholder="{{ 'content.blades.menu-link-list.placeholders.name' | translate }}" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="form-group">
+                            <label class="form-label">{{ 'content.blades.menu-link-list.labels.language' | translate }}</label>
+                            <div class="form-input">
+                                <ui-select ng-model="blade.currentEntity.language">
+                                    <ui-select-match allow-clear placeholder="{{ 'content.blades.menu-link-list.placeholders.language' | translate }}">{{$select.selected}}</ui-select-match>
+                                    <ui-select-choices repeat="x in blade.languages">
+                                        <span class="flag flag-{{x.substr(3).toLowerCase()}}"></span>
+                                        <span ng-bind-html="x"></span>
+                                    </ui-select-choices>
+                                </ui-select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="note">{{'content.blades.menu-link-list.labels.list-note' | translate}}</p>
+
+                <div class="table-wrapper" ng-if="blade.currentEntity.menuLinks.length" ng-init="setGridOptions({
+                    data: 'blade.currentEntity.menuLinks',
+                    rowTemplate: 'list.row.html',
+                    rowHeight: 55,
+                    enableSorting: false,
+                    virtualizationThreshold: 1000,
+                    columnDefs: [
+                        { name: 'actions', displayName: '', enableColumnResizing: false, enableSorting: false, width: 30, cellTemplate: 'list-actions.cell.html', pinnedLeft:true },
+                        { name: 'title', displayName: 'content.blades.menu-link-list.labels.link-title', cellTemplate: 'title.cell.html'},
+                        { name: 'url', displayName: 'content.blades.menu-link-list.labels.link-url', cellTemplate: 'url.cell.html'},
+                        { name: 'associatedObjectType', displayName: 'content.blades.menu-link-list.labels.links-to', cellTemplate: 'associatedObjectType.cell.html'},
+                        { name: 'associatedObjectName', displayName: 'content.blades.menu-link-list.labels.linked-object', cellTemplate: 'associatedObjectName.cell.html'}
+                    ]})">
+                    <div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-save-state ui-grid-selection ui-grid-resize-columns ui-grid-move-columns ui-grid-pinning ui-grid-draggable-rows ui-grid-height></div>
+                    <ul class="menu __context" role="menu" id="mll_menu">
+                        <li class="menu-item" ng-click='deleteRows([contextMenuEntity])'>
+                            <i class="menu-ico fa fa-trash-o"></i> {{'platform.commands.delete' | translate}}
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .ui-grid-editable .ui-grid-cell-contents {
+        overflow: visible;
+        padding: 10px 0 0 10px;
+    }
+
+    .ui-grid-cell .ui-grid-editable input {
+        padding: 6px 10px;
+        box-sizing: border-box;
+    }
+
+    .ui-grid-cell .ui-grid-editable .btn {
+        width: 80px;
+        margin: 10px 0 0 10px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
+    .ui-grid-cell .ui-grid-editable input.ng-valid {
+        border: 1px solid #dee9f0;
+    }
+</style>
+
+<script type="text/ng-template" id="list.row.html">
+    <div grid="grid" class="ui-grid-draggable-row" draggable="true">
+        <div ng-click='grid.appScope.selectedNode = row.entity' ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" ui-grid-one-bind-id-grid="rowRenderIndex + '-' + col.uid + '-cell'" class="ui-grid-cell" ng-class="{'ui-grid-row-header-cell': col.isRowHeader, '__hovered': grid.appScope.contextMenuEntity === row.entity, '__selected': row.entity===grid.appScope.selectedNode}" role="{{col.isRowHeader ? 'rowheader' : 'gridcell' }}" ui-grid-cell style="{{'cursor: ' + (col.name==='actions' ? 'pointer' : 'move')}}" context-menu="grid.appScope.contextMenuEntity = row.entity" data-target="mll_menu"></div>
+    </div>
+</script>
+<script type="text/ng-template" id="list-actions.cell.html">
+    <div class="ui-grid-actions" left-click-menu="grid.appScope.contextMenuEntity = row.entity" data-target="mll_menu">
+        <i class="fa fa-ellipsis-v"></i>
+    </div>
+</script>
+<script type="text/ng-template" id="title.cell.html">
+    <div class="ui-grid-editable">
+        <div class="ui-grid-cell-contents">
+            <div class="form-input">
+                <input ng-model="row.entity.title" required>
+            </div>
+        </div>
+    </div>
+</script>
+<script type="text/ng-template" id="url.cell.html">
+    <div class="ui-grid-editable">
+        <div class="ui-grid-cell-contents">
+            <div class="form-input">
+                <input ng-model="row.entity.url" required>
+            </div>
+        </div>
+    </div>
+</script>
+<script type="text/ng-template" id="associatedObjectType.cell.html">
+    <div class="ui-grid-editable">
+        <div class="ui-grid-cell-contents">
+            <div class="form-input">
+                <ui-select ng-model="row.entity.associatedObjectType" ng-change="row.entity.associatedObject = $select.selected;row.entity.associatedObjectId=row.entity.associatedObjectName=undefined" style="width:122px">
+                    <ui-select-match allow-clear placeholder="{{'content.blades.menu-link-list.placeholders.associated-object-type' | translate}}">{{$select.selected.name}}</ui-select-match>
+                    <ui-select-choices repeat="x.id as x in grid.appScope.associatedObjectTypes | filter: $select.search">
+                        <span ng-bind-html="x.name | highlight: $select.search"></span>
+                    </ui-select-choices>
+                </ui-select>
+            </div>
+        </div>
+    </div>
+</script>
+<script type="text/ng-template" id="associatedObjectName.cell.html">
+    <div class="ui-grid-editable">
+        <ng-include src='row.entity.associatedObject.templateURL'></ng-include>
+    </div>
+</script>
+
+<script type="text/ng-template" id="linkListSelectObject.tpl">
+    <a class="btn" ng-click="row.entity.associatedObject.openSelectWizard(row.entity, grid.appScope.blade)" title="{{row.entity.associatedObjectName}}">{{row.entity.associatedObjectName ? row.entity.associatedObjectName: ('content.blades.menu-link-list.placeholders.select-linked-object' | translate)}}</a>
+</script>

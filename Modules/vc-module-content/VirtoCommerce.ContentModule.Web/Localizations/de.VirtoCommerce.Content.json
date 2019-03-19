@@ -1,0 +1,272 @@
+{
+  "content": {
+  "main-menu-title": "CMS",
+    "blades": {
+      "scope-value-pick-from-simple-list": {
+        "title": "Nur für ausgewählte Shops",
+        "subtitle": "Shops wählen"
+      },
+      "content-main": {
+        "title": "Inhalt",
+        "subtitle": "Inhalt Service",
+        "labels": {
+          "no-active-theme": "Kein Theme aktiv, klicken Sie um auszuwählen",
+          "active-theme": "Aktives Theme :",
+          "edit-css-html": "Bearbeiten von CSS/HTML",
+          "preview-theme": "Theme Vorschau",
+          "customize-theme": "Theme anpassen",
+          "themes": "Themes",
+          "pages": "Seiten",
+          "link-lists": "Link listen",
+          "blogs": "Blogs",
+          "stores": "Shops",
+          "no-stores": "Hier können Sie Shops-Inhalte konfigurieren, aber es wurden keine Shops gefunden. Öffnen Sie das SHOPS-Menü, um eine zu erstellen."
+        }
+      },
+      "themes-list": {
+        "title": "{{name}}",
+        "subtitle": "Themen Liste",
+        "labels": {
+          "name": "Name",
+          "activated": "In Shop aktiviert",
+          "no-data": "Keine Themen noch"
+        }
+      },
+      "edit-asset": {
+        "subtitle": "Dokument bearbeiten Inhalt",
+        "title-new": "Neues Dokument",
+        "subtitle-new": "Neues Dokument erstellen",
+        "labels": {
+          "liquid-documentation": "Flüssige Dokumentation",
+          "asset-name": "Asset Name",
+          "upload-new-file": "Neue Datei hochladen",
+          "progress": "Fortschritt"
+        },
+        "placeholders": {
+          "asset-name": "Asset Name eingeben"
+        },
+        "validations": {
+          "name-invalid": "Die name kann alphanumerisch, '_', '-' und '.' Zeichen nur enthalten"
+        }
+      },
+      "edit-image-asset": {
+        "subtitle": "{{name}} beartbeiten"
+      },
+      "pages-list": {
+        "title-pages": "{{name}} Seitenliste",
+        "subtitle-pages": "Seitenliste",
+        "title-blogs": "{{name}} Seitenliste",
+        "subtitle-blogs": "Blogs Liste",
+        "labels": {
+          "name": "Name",
+          "modified": "Geändert"
+        }
+      },
+      "link-lists": {
+        "title": "Link Listen",
+        "subtitle": "Link Listen in Shop' {{name}}'",
+        "labels": {
+          "name": "Name",
+          "language": "Sprache",
+          "no-data": "Keine Linklisten noch"
+        }
+      },
+      "theme-detail": {
+        "subtitle": "Das Theme verwalten",
+        "title-new": "Neues Theme",
+        "subtitle-new": "Neues Theme erstellen",
+        "labels": {
+          "theme-name": "Name des Designs"
+        },
+        "placeholders": {
+          "theme-name": "Theme Namen eingeben"
+        }
+      },
+      "theme-upload": {
+        "title": "Theme hochladen",
+        "labels": {
+          "select-files": "Wählen Sie die Theme-Datei",
+          "drag-note": "Theme (.zip) datei hier ablegen",
+          "progress": "Fortschritt",
+          "file-selected": "Theme Datei",
+          "asset-uploaded": "Theme Datei hochgeladen."
+        },
+        "placeholders": {
+          "image-url": "Theme Datei-URL hier einfügen"
+        }
+      },
+      "edit-page": {
+        "title": "{{name}}' bearbeiten",
+        "subtitle": "Seite bearbeiten",
+        "title-new": "Neue Seite",
+        "subtitle-new": "Neue Seite erstellen",
+        "subtitle-post": "Blogpost bearbeiten",
+        "title-new-post": "Neue Post",
+        "subtitle-new-post": "Neuen Blogpost erstellen",
+        "labels": {
+          "name": "Name",
+          "language": "Sprache",
+          "drag-note": "Die Datei hier ziehen und loslassen",
+          "progress": "Fortschritt",
+          "markdown": "Markdown",
+          "metadata": "Metadaten"
+        },
+        "placeholders": {
+          "name": "Namen eingeben",
+          "language": "Wählen Sie aus...",
+          "metadata": "Metadaten eingeben"
+        },
+        "validations": {
+          "pageName-invalid": "Die Seitenname kann alphanumerisch, '_', '-' und '.' Zeichen nur enthalten"
+        }
+      },
+      "menu-link-list": {
+        "title": "' {{name}}'-Liste",
+        "subtitle": "Link Liste bearbeiten",
+        "title-new": "Neue Liste",
+        "subtitle-new": "Neuen Link Liste erstellen.",
+        "labels": {
+          "name": "Name",
+          "language": "Sprache",
+          "list-note": "Legen Sie den Auftrag fest, wie die Links im Web Store sortiert werden. Ziehen und loslassen, um die Reihenfolge zu ändern.",
+          "link-title": "Link Titel",
+          "link-url": "URL",
+          "links-to": "Links zu",
+          "linked-object": "Verknüpftes Objekt"
+        },
+        "placeholders": {
+          "name": "Liste Namen eingeben",
+          "language": "Wählen Sie aus...",
+          "associated-object-type": "Typ auswählen",
+          "select-linked-object": "Wählen Sie"
+        }
+      },
+      "catalog-items-select": {
+        "title-product": "Produkt für Link auswählen",
+        "title-category": "Kategorie für Link auswählen"
+      },
+      "edit-blog": {
+        "subtitle": "Blog bearbeiten",
+        "title-new": "Neuer Blog",
+        "subtitle-new": "Neuen Blog erstellen",
+        "labels": {
+          "blog-name": "Blog Namen",
+          "metadata": "Metadaten"
+        },
+        "placeholders": {
+          "blog-name": "Blog Namen eingeben"
+        },
+        "validations": {
+          "name-invalid": "Namen können nur alphanumerische Zeichen, '_', '-' und '.' Zeichen enthalten."
+        }
+      },
+      "asset-list": {
+        "subtitle": "Theme Assets verwalten",
+        "labels": {
+          "add-new": "Neu hinzufügen",
+          "nodata": "Keine Vermögenswerte noch"
+        }
+      },
+      "theme-asset-list": {
+        "title": "{{path}} bearbeiten",
+        "subtitle": "Theme Objektliste",
+        "labels": {
+          "add-new": "Neu hinzufügen",
+          "nodata": "Keine Vermögenswerte noch"
+        }
+      }
+    },
+    "widgets": {
+      "menu": {
+        "title": "Link Listen",
+        "blade-subtitle": "Link Listen"
+      },
+      "pages": {
+        "title": "Seiten",
+        "blade-subtitle": "Seitenliste"
+      },
+      "store-cms": {
+        "themes": "Themen",
+        "pages": "Seiten",
+        "blogs": "Blogs",
+        "links": "Link Listen",
+        "active-theme": "Aktive Themen"
+      }
+    },
+    "dialogs": {
+      "theme-clone": {
+        "title": "Klon Bestätigung",
+        "message": "Sind Sie sicher, dass Sie das ausgewählte Theme klonen möchten?"
+      },
+      "link-list-delete": {
+        "title": "Bestätigung löschen",
+        "message": "Sind Sie sicher, dass Sie ausgewählte Linklisten löschen möchten?"
+      },
+      "links-delete": {
+        "title": "Bestätigung löschen",
+        "message": "Sind Sie sicher, dass Sie ausgewählte Links löschen möchten?"
+      },
+      "blog-delete": {
+        "title": "Bestätigung löschen",
+        "message": "Sind Sie sicher, dass Sie den ausgewählten Blog löschen möchten?"
+      },
+      "page-delete": {
+        "title": "Bestätigung löschen",
+        "message": "Möchten Sie diese Seite wirklich löschen?"
+      },
+      "blog-save": {
+        "title": "Änderungen speichern",
+        "message": "Der Blog wurde geändert. Möchten Sie die Änderungen speichern?"
+      },
+      "page-save": {
+        "title": "Änderungen speichern",
+        "message": "Die Seite wurde geändert. Möchten Sie die Änderungen speichern?"
+      },
+      "theme-save": {
+        "title": "Änderungen speichern",
+        "message": "Das Theme wurde geändert. Möchten Sie die Änderungen speichern?"
+      },
+      "theme-delete": {
+        "title": "Bestätigung löschen",
+        "message": "Sind Sie sicher, dass Sie die '{{name}}' löschen möchten?",
+        "message-last-one": "Dieses Theme ist das letzte. Wenn du es löschst, kannst du deine Schaufenster brechen. Bist du sicher, dass du '{{name}} löschen möchtest?"
+      },
+      "asset-delete": {
+        "title": "Bestätigung löschen",
+        "message": "Sind Sie sicher, dass Sie diese Anlagen löschen möchten?"
+      },
+      "asset-save": {
+        "title": "Änderungen speichern",
+        "message": "Das Asset wurde geändert. Möchten Sie die Änderungen speichern?"
+      },
+      "link-list-save": {
+        "title": "Änderungen speichern",
+        "message": "Das Menü Link Liste wurde geändert. Möchten Sie die Änderungen speichern?"
+      },
+      "set-store-url": {
+        "title": "URL ist nicht für den Shop eingestellt",
+        "message": "Bitte, stellen Sie Shop url vor der Vorschau!"
+      },
+      "name-must-unique": {
+        "title": "Name nicht eindeutig",
+        "message": "Name muss eindeutig für diese Sprache!"
+      }
+    },
+    "commands": {
+      "add-link": "Link hinzufügen",
+      "add-list": "Liste hinzufügen",
+      "add-blog": "Blog hinzufügen",
+      "add-post": "Post hinzufügen",
+      "add-page": "Hinzufügen",
+      "delete-links": "Löschen links",
+      "delete-theme": "Löschen",
+      "manage-metadata": "Metadaten berarbeiten",
+      "edit-as-markdown": "Als Markdown bearbeiten",
+      "edit-as-html": "Als HTML bearbeiten",
+      "preview-theme": "Vorschau",
+      "edit-css-html": "Bearbeiten von CSS/HTML",
+      "add-theme": "Neues Theme hinzufügen",
+      "set-active": "Aktiv setzen"
+    }
+  }
+}
