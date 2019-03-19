@@ -25,11 +25,6 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
             _storagePath = _options.RootPath.TrimEnd('\\');
 
             _urlHelper = urlHelper;
-            var request = httpContext.HttpContext?.Request;
-            if (request != null)
-            {
-                _basePublicUrl = new Uri($"{ request.Scheme}://{ request.Host.Value }/{ _options.PublicPath}").ToString();
-            }
         }
 
         #region IBlobStorageProvider members
