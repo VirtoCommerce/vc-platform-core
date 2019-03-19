@@ -97,7 +97,7 @@ namespace VirtoCommerce.MarketingModule.Web.JsonConverters
         private void PopulateDynamicExpression(DynamicPromotion dynamicPromotion, JObject jObj, JsonSerializer serializer)
         {
             var dynamicExpressionToken = jObj["dynamicExpression"];
-            var dynamicExpression = dynamicExpressionToken?.ToObject<PromotionConditionRewardTree>(serializer);
+            var dynamicExpression = dynamicExpressionToken?.ToObject<PromotionConditionAndRewardTree>(serializer);
             if (dynamicExpression?.Children != null)
             {
                 var conditionExpression = dynamicExpression.GetConditions();
@@ -133,7 +133,7 @@ namespace VirtoCommerce.MarketingModule.Web.JsonConverters
 
                     if (!string.IsNullOrEmpty(dynamicPromotion.PredicateVisualTreeSerialized))
                     {
-                        result = JsonConvert.DeserializeObject<PromotionConditionRewardTree>(
+                        result = JsonConvert.DeserializeObject<PromotionConditionAndRewardTree>(
                             dynamicPromotion.PredicateVisualTreeSerialized,
                             new ConditionJsonConverter(), new RewardJsonConverter());
 

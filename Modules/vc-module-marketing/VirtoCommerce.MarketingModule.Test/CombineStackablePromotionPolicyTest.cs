@@ -272,7 +272,7 @@ namespace VirtoCommerce.MarketingModule.Test
 
         private static void RegisterConditionRewards()
         {
-            AbstractTypeFactory<IConditionRewardTree>.RegisterType<PromotionConditionRewardTree>();
+            AbstractTypeFactory<IConditionRewardTree>.RegisterType<PromotionConditionAndRewardTree>();
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<BlockConditionAndOr>();
 
             AbstractTypeFactory<IConditionRewardTree>.RegisterType<BlockCustomerCondition>();

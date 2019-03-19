@@ -147,7 +147,7 @@ namespace VirtoCommerce.MarketingModule.Web
             dynamicPropertyService.SaveDynamicPropertiesAsync(new[] { contentItemTypeProperty }).GetAwaiter().GetResult();
 
             var extensionManager = appBuilder.ApplicationServices.GetService<IMarketingExtensionManager>();
-            extensionManager.PromotionCondition = new PromotionConditionRewardTree { Children = GetConditionsAndRewards() };
+            extensionManager.PromotionCondition = new PromotionConditionAndRewardTree { Children = GetConditionsAndRewards() };
             extensionManager.ContentCondition = new DynamicContentConditionTree() { Children = GetDynamicContentConditions() };
 
             //Next lines allow to use polymorph types in API controller methods
@@ -155,7 +155,7 @@ namespace VirtoCommerce.MarketingModule.Web
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicMarketingJsonConverter(appBuilder.ApplicationServices.GetService<IMarketingExtensionManager>()));
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new RewardJsonConverter());
 
-            AbstractTypeFactory<IConditionTree>.RegisterType<PromotionConditionRewardTree>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<PromotionConditionAndRewardTree>();
             AbstractTypeFactory<IConditionTree>.RegisterType<DynamicContentConditionTree>();
 
             AbstractTypeFactory<IConditionTree>.RegisterType<BlockContentCondition>();

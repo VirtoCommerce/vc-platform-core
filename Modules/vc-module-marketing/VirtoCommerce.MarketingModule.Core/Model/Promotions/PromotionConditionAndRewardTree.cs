@@ -4,7 +4,7 @@ using VirtoCommerce.CoreModule.Core.Conditions;
 
 namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 {
-    public class PromotionConditionRewardTree : ConditionTree
+    public class PromotionConditionAndRewardTree : ConditionTree
     {
         public override bool Evaluate(IEvaluationContext context)
         {
