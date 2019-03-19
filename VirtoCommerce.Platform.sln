@@ -21,17 +21,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Core
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Security", "VirtoCommerce.Platform.Security\VirtoCommerce.Platform.Security.csproj", "{761F9B26-F4F8-4FB5-8651-7E36F2E5569B}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vc-module-catalog2", "vc-module-catalog2", "{67F372C4-BCD0-4AF4-B3EC-474648700B15}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CatalogModule.Core2", "Modules\vc-module-catalog2\VirtoCommerce.CatalogModule.Core\VirtoCommerce.CatalogModule.Core2.csproj", "{3F41010B-5CF3-4020-BF64-8C6D672A30DD}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vc-module-core", "vc-module-core", "{CF81DDF0-221F-4CB7-9B89-5935C54B8D5B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CoreModule.Core", "Modules\vc-module-core\VirtoCommerce.CoreModule.Core\VirtoCommerce.CoreModule.Core.csproj", "{0AE44C97-C36D-48D6-AF5A-27B120005655}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CatalogModule.Data2", "Modules\vc-module-catalog2\VirtoCommerce.CatalogModule.Data\VirtoCommerce.CatalogModule.Data2.csproj", "{1E2E250F-FBD1-4516-8C55-D4E0E6BC9596}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CatalogModule.Web2", "Modules\vc-module-catalog2\VirtoCommerce.CatalogModule.Web\VirtoCommerce.CatalogModule.Web2.csproj", "{08075BC4-F864-4128-B4A1-939F58CE3AD8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CoreModule.Web", "Modules\vc-module-core\VirtoCommerce.CoreModule.Web\VirtoCommerce.CoreModule.Web.csproj", "{091EFD2C-37DD-4790-A5EE-B0B221862C50}"
 EndProject
@@ -183,11 +175,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Module1.Test", "Modules\Mod
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vc-module-catalog", "vc-module-catalog", "{4253302F-1A61-4288-A999-9A1B2737327A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.CatalogModule.Core", "Modules\vc-module-catalog\VirtoCommerce.CatalogModule.Core\VirtoCommerce.CatalogModule.Core.csproj", "{164F976E-63F7-41A8-A489-B49A098DCE3E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CatalogModule.Core", "Modules\vc-module-catalog\VirtoCommerce.CatalogModule.Core\VirtoCommerce.CatalogModule.Core.csproj", "{164F976E-63F7-41A8-A489-B49A098DCE3E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.CatalogModule.Data", "Modules\vc-module-catalog\VirtoCommerce.CatalogModule.Data\VirtoCommerce.CatalogModule.Data.csproj", "{02C6EF42-890A-48B4-938A-D6AFB74F7B09}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CatalogModule.Data", "Modules\vc-module-catalog\VirtoCommerce.CatalogModule.Data\VirtoCommerce.CatalogModule.Data.csproj", "{02C6EF42-890A-48B4-938A-D6AFB74F7B09}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.CatalogModule.Web", "Modules\vc-module-catalog\VirtoCommerce.CatalogModule.Web\VirtoCommerce.CatalogModule.Web.csproj", "{2AD7E879-2ADD-4D0A-ABEA-C4B64409E8DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CatalogModule.Web", "Modules\vc-module-catalog\VirtoCommerce.CatalogModule.Web\VirtoCommerce.CatalogModule.Web.csproj", "{2AD7E879-2ADD-4D0A-ABEA-C4B64409E8DD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -223,22 +215,10 @@ Global
 		{761F9B26-F4F8-4FB5-8651-7E36F2E5569B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{761F9B26-F4F8-4FB5-8651-7E36F2E5569B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{761F9B26-F4F8-4FB5-8651-7E36F2E5569B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3F41010B-5CF3-4020-BF64-8C6D672A30DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3F41010B-5CF3-4020-BF64-8C6D672A30DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3F41010B-5CF3-4020-BF64-8C6D672A30DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3F41010B-5CF3-4020-BF64-8C6D672A30DD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0AE44C97-C36D-48D6-AF5A-27B120005655}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0AE44C97-C36D-48D6-AF5A-27B120005655}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0AE44C97-C36D-48D6-AF5A-27B120005655}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0AE44C97-C36D-48D6-AF5A-27B120005655}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1E2E250F-FBD1-4516-8C55-D4E0E6BC9596}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1E2E250F-FBD1-4516-8C55-D4E0E6BC9596}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1E2E250F-FBD1-4516-8C55-D4E0E6BC9596}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1E2E250F-FBD1-4516-8C55-D4E0E6BC9596}.Release|Any CPU.Build.0 = Release|Any CPU
-		{08075BC4-F864-4128-B4A1-939F58CE3AD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{08075BC4-F864-4128-B4A1-939F58CE3AD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{08075BC4-F864-4128-B4A1-939F58CE3AD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{08075BC4-F864-4128-B4A1-939F58CE3AD8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{091EFD2C-37DD-4790-A5EE-B0B221862C50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{091EFD2C-37DD-4790-A5EE-B0B221862C50}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{091EFD2C-37DD-4790-A5EE-B0B221862C50}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -499,12 +479,8 @@ Global
 		{1B8260F3-4F5D-4046-9AE0-34F2F9320409} = {7052A390-9A84-46DA-BD3B-556FD74DEC97}
 		{5CA37FDD-2DEC-4299-89E8-2B58EE458ED9} = {1B8260F3-4F5D-4046-9AE0-34F2F9320409}
 		{DDE15E15-939A-43D6-8933-5E68717C902B} = {1B8260F3-4F5D-4046-9AE0-34F2F9320409}
-		{67F372C4-BCD0-4AF4-B3EC-474648700B15} = {7052A390-9A84-46DA-BD3B-556FD74DEC97}
-		{3F41010B-5CF3-4020-BF64-8C6D672A30DD} = {67F372C4-BCD0-4AF4-B3EC-474648700B15}
 		{CF81DDF0-221F-4CB7-9B89-5935C54B8D5B} = {7052A390-9A84-46DA-BD3B-556FD74DEC97}
 		{0AE44C97-C36D-48D6-AF5A-27B120005655} = {CF81DDF0-221F-4CB7-9B89-5935C54B8D5B}
-		{1E2E250F-FBD1-4516-8C55-D4E0E6BC9596} = {67F372C4-BCD0-4AF4-B3EC-474648700B15}
-		{08075BC4-F864-4128-B4A1-939F58CE3AD8} = {67F372C4-BCD0-4AF4-B3EC-474648700B15}
 		{091EFD2C-37DD-4790-A5EE-B0B221862C50} = {CF81DDF0-221F-4CB7-9B89-5935C54B8D5B}
 		{AFB12010-1866-4A31-865E-5D2DF65FB521} = {7052A390-9A84-46DA-BD3B-556FD74DEC97}
 		{22084C21-0A6A-4465-B975-9E9FFA78179B} = {AFB12010-1866-4A31-865E-5D2DF65FB521}
