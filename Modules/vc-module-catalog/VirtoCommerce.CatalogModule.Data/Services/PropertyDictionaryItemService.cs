@@ -29,7 +29,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join(",", ids));
             return _platformMemoryCache.GetOrCreateExclusive(cacheKey, async (cacheEntry) =>
             {
-                cacheEntry.AddExpirationToken(CatalogCacheRegion.CreateChangeToken());
+                cacheEntry.AddExpirationToken(DictionaryItemsCacheRegion.CreateChangeToken());
                 PropertyDictionaryItem[] result;
 
                 using (var repository = _repositoryFactory())
