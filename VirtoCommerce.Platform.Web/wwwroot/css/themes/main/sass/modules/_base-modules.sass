@@ -176,11 +176,6 @@ ol
     word-break: break-word
   .list-link
     font-size: 12px
-  .list-item
-    &:hover
-      .list-t,
-      .list-descr
-        text-shadow: 1px 1px #fff
 
 /* List tags */
 .list.__tags
@@ -368,9 +363,8 @@ h3
     border-style: solid
     border-width: 1px 0
     font-size: 14px
-    padding: 10px;
-    text-align: left;
-    text-shadow: 1px 1px $whiteColor
+    padding: 10px
+    text-align: left
   .table-col:first-child
     padding-left: 20px
   .table-col:last-child
@@ -439,7 +433,6 @@ h3
   color: $tableIcoColor
   font-size: 28px
   margin: 0 10px
-  text-shadow: 1px 1px $whiteColor
   vertical-align: middle
 .table-item
   &.__error .table-ico
@@ -479,7 +472,6 @@ h3
   color: $tableIcoColor
   font-size: 28px
   margin: 0 10px
-  text-shadow: 1px 1px $whiteColor
   vertical-align: middle
 
 /* UI Grid */
@@ -702,11 +694,11 @@ $names: "", ".double", ".triple", ".quadro"
 .list.__files
   margin: 15px -20px
 .__items .list-group
-  background: $lightBg
+  background: $listGroupBg
   border-bottom: 1px solid $baseBrd
   cursor: pointer
   font-size: 14px
-  padding: 10px ($listItemHorizontalPadding + $listItemArrowSpace) 10px $listItemHorizontalPadding
+  padding: 10px $listItemHorizontalPadding
   position: relative
   &::after
     color: #a6a6a6
@@ -725,7 +717,7 @@ $names: "", ".double", ".triple", ".quadro"
   border-bottom: 1px solid $baseBrd
   cursor: pointer
   display: block
-  padding: 10px ($listItemHorizontalPadding + $listItemArrowSpace) 10px $listItemHorizontalPadding
+  padding: 10px $listItemHorizontalPadding
   position: relative
 .__items .list-item.__hovered
   background: #ecf7fc
@@ -762,16 +754,16 @@ $names: "", ".double", ".triple", ".quadro"
     top: 9px
     z-index: 25
 .__items .list-item:after
-  color: #a6a6a6
-  content: ""
+  display: none
+.__items .list-item.__more:before
+  background: url('/images/navbar/more.svg') no-repeat
+  color: $colorText
+  float: left
   font-family: $fontAw
   font-size: 16px
-  position: absolute
-  right: 30px
-  top: 50%
-
-  transform: translateY(-50%)
-  transition: right .25s ease-in-out 0s
+  height: 20px
+  margin: 0 10px 0 0
+  width: 20px
 .__items.__reverse .list-item:after
   right: 60px
   content: "\f053"
@@ -787,8 +779,6 @@ $names: "", ".double", ".triple", ".quadro"
   right: 55px
 .__items .list-item.__default:hover:after
   right: 0
-.__items .list-item:first-child
-  border-top: 1px solid $baseBrd
 .__items .list-link
     display: block
     white-space: nowrap
@@ -799,7 +789,6 @@ $names: "", ".double", ".triple", ".quadro"
   height: 30px
   line-height: 30px
   margin: 0 5px 0 0
-  text-shadow: 1px 1px $whiteColor
   vertical-align: middle
   width: 40px
 .__files .list-ico
@@ -830,9 +819,6 @@ $names: "", ".double", ".triple", ".quadro"
   position: relative
   vertical-align: middle
   width: 30px
-.__items .list-item:hover .list-name,
-.__files .list-item:hover .list-name
-  text-shadow: 1px 1px $whiteColor
 .__files .list-name
   vertical-align: middle
 .__files .list-descr
@@ -876,7 +862,6 @@ $names: "", ".double", ".triple", ".quadro"
 .__items .list-t,
 .__items .list-descr
   position: relative
-  text-shadow: 1px 1px $whiteColor
   z-index: 50
 .__items .list-item input[type=checkbox],
 .__items .list-item input[type=radio]
@@ -1539,16 +1524,20 @@ tags-input
   top: 0
 .has-demo-warning .nav-bar,
 .has-demo-warning .nav-bar .dropdown,
-.has-demo-warning .cnt
+.has-demo-warning .header
   top: $demoWarningHeight !important
+.has-demo-warning .cnt
+  padding-top: $demoWarningHeight + $headerHeight
 
-@import "modules/_menu.sass"
+@import "_menu.sass"
+@import "_header.sass"
 
 /* Content - main content area */
 .cnt
   left: $mainMenuWidth
   overflow: hidden
   overflow-x: auto
+  padding-top: $headerHeight
   right: 0
   white-space: nowrap
   z-index: 50
@@ -1572,8 +1561,9 @@ tags-input
 /* Blades */
 .blade
   background: $whiteColor
-  box-shadow: -5px 0 5px -6px rgba(0, 0, 0, .1)
+  box-shadow: 1px 0 0 0 $baseBrd
   font-family: serif
+  margin-right: 1px
   overflow: hidden
   position: relative
   &.__animated
@@ -1587,12 +1577,12 @@ tags-input
       animation-duration: .125s
   .blade-head,
   .blade-container
-    box-shadow: -8px 0 0 0 rgba(0,0,0,.2) inset
+    box-shadow: none
     font-family: $font
   .blade-head
-    background: #333
+    background: $bladeHeadBg
     box-sizing: border-box
-    height: 132px
+    height: 122px
     padding: 25px 0 5px
     position: relative
 
@@ -1601,7 +1591,7 @@ tags-input
       height: 25px
       left: 0
       position: absolute
-      right: 8px
+      right: 0
       top: 0
       .status-message
         background: #7a1c13
@@ -1652,11 +1642,11 @@ tags-input
       height: 25px
       left: 0
       position: absolute
-      right: 8px
+      right: 0
       text-align: right
       top: 0
       .menu
-        background: #232323
+        background: rgba(0,0,0,.25)
         position: relative
       .menu-item
         background: none
@@ -1729,11 +1719,11 @@ tags-input
     .blade-t
       color: $whiteColor
       left: 0
-      margin: 10px 20px
+      margin: 8px 20px
       min-height: 34px
       padding: 0 0 0 60px
       position: absolute
-      right: 8px
+      right: 0
       .blade-t_head
         font-size: 18px
         margin: 6px 0 0
@@ -1759,14 +1749,14 @@ tags-input
         font-size: 14px
         margin: 0
     .blade-toolbar
-      background: #333
-      border-top: 1px solid #3d3d3d
-      box-shadow: 0 1px 0 #2b2b2b inset
+      background: transparent
+      border-top: 1px solid rgba(255,255,255,.2)
+      box-shadow: none
       left: 0
       overflow: hidden
       position: absolute
-      right: 8px
-      top: 79px
+      right: 0
+      top: 74px
       z-index: 50
 
       transition: height .3s ease
@@ -2225,7 +2215,7 @@ tags-input
 
 /* Tooltip */
 .tooltip
-  font-family: 'Exo 2'
+  font-family: $font
   font-size: 12px
   position: absolute
   z-index: 100
@@ -2521,3 +2511,22 @@ tags-input
   max-height: 100%
   max-width: 100%
   vertical-align: middle
+
+// Buttons
+.btn
+  align-items: center
+  border-radius: 2px
+  display: inline-flex
+  font-size: 11px
+  height: 28px
+  padding: 0 30px
+  &:hover
+    opacity: 1
+  &--orange
+    background-color: $orangeBg
+    &:hover
+      background-color: darken($orangeBg, 5%)
+  &--blue
+    background-color: $blueBg
+    &:hover
+      background-color: darken($blueBg, 5%)
