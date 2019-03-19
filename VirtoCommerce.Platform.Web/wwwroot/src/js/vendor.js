@@ -1,6 +1,9 @@
 import $ from 'jquery';
 window.$ = $; // Ugly hack
 
+import CodeMirror from 'codemirror';
+window.CodeMirror = CodeMirror;
+
 import 'webpack-jquery-ui';
 import 'angular';
 import '@uirouter/angularjs';
@@ -25,7 +28,6 @@ import 'angular-translate-storage-cookie';
 import 'angular-local-storage';
 import 'moment';
 import 'moment-timezone';
-import 'Vendor/ng-context-menu/dist/ng-context-menu.js';
 import 'ng-tags-input';
 import 'ngstorage';
 import 'textangular';
@@ -35,7 +37,9 @@ import 'modernizr';
 import 'angular-filter';
 import 'uikit';
 import 'marked';
-import 'angular-ui-codemirror';
+
+import 'Vendor/ng-context-menu/dist/ng-context-menu.js';
+import 'Vendor/angular-ui-codemirror/ui-codemirror.js';
 
 import 'angular-ui-validate';
 import 'angular-ui-scroll';
@@ -46,7 +50,6 @@ import 'angular-ui-validate';
 import 'angular-ui-indeterminate';
 import 'angular-ui-uploader';
 
-import 'codemirror';
 import _ from 'underscore';
 window._ = _;
 
@@ -58,3 +61,4 @@ import 'textAngular/dist/textAngular.css';
 import 'uikit/dist/css/uikit.css';
 import 'select2/select2.css';
 import 'font-awesome/css/font-awesome.css';
+import 'codemirror/lib/codemirror.css'
