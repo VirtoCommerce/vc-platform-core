@@ -1,10 +1,13 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
+using VirtoCommerce.CatalogModule.Data.Caching;
 using VirtoCommerce.CatalogModule.Data.Repositories;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Infrastructure;
 
@@ -14,10 +17,12 @@ namespace VirtoCommerce.CatalogModule.Data.Services
     {
         private readonly Func<ICatalogRepository> _catalogRepositoryFactory;
         private readonly IItemService _itemService;
-        public ProductAssociationSearchService(Func<ICatalogRepository> catalogRepositoryFactory, IItemService itemService)
+        private readonly IPlatformMemoryCache _platformMemoryCache;
+        public ProductAssociationSearchService(Func<ICatalogRepository> catalogRepositoryFactory, IItemService itemService, IPlatformMemoryCache platformMemoryCache)
         {
             _catalogRepositoryFactory = catalogRepositoryFactory;
             _itemService = itemService;
+            _platformMemoryCache = platformMemoryCache;
         }
 
         public async Task<GenericSearchResult<ProductAssociation>> SearchProductAssociationsAsync(ProductAssociationSearchCriteria criteria)
@@ -27,22 +32,28 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 throw new ArgumentNullException(nameof(criteria));
             }
 
-            if (criteria.ObjectIds.IsNullOrEmpty())
-                return new GenericSearchResult<ProductAssociation>();
-
-            using (var repository = _catalogRepositoryFactory())
+            var cacheKey = CacheKey.With(GetType(), "SearchProductAssociationsAsync", criteria.GetCacheKey());
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                //Optimize performance and CPU usage
-                repository.DisableChangesTracking();
+                cacheEntry.AddExpirationToken(ItemSearchCacheRegion.CreateChangeToken());
 
-                var result = new GenericSearchResult<ProductAssociation>();
+                if (criteria.ObjectIds.IsNullOrEmpty()) return new GenericSearchResult<ProductAssociation>();
 
-                var dbResult = await repository.SearchAssociations(criteria);
+                using (var repository = _catalogRepositoryFactory())
+                {
+                    //Optimize performance and CPU usage
+                    repository.DisableChangesTracking();
 
-                result.TotalCount = dbResult.TotalCount;
-                result.Results = dbResult.Results.Select(x => x.ToModel(AbstractTypeFactory<ProductAssociation>.TryCreateInstance())).ToList();
-                return result;
-            }
+                    var result = new GenericSearchResult<ProductAssociation>();
+
+                    var dbResult = await repository.SearchAssociations(criteria);
+
+                    result.TotalCount = dbResult.TotalCount;
+                    result.Results = dbResult.Results
+                        .Select(x => x.ToModel(AbstractTypeFactory<ProductAssociation>.TryCreateInstance())).ToList();
+                    return result;
+                }
+            });
         }
     }
 }
