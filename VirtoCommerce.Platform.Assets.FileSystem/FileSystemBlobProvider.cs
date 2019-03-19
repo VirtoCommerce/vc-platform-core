@@ -1,12 +1,12 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Exceptions;
+using VirtoCommerce.Platform.Core.Extensions;
 
 namespace VirtoCommerce.Platform.Assets.FileSystem
 {
@@ -15,20 +15,16 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
         public const string ProviderName = "LocalStorage";
 
         private readonly string _storagePath;
-        private readonly string _basePublicUrl;
-        private readonly FileSystemBlobContentOptions _options;
+        private readonly FileSystemBlobOptions _options;
+        private readonly IUrlHelper _urlHelper;
 
-        public FileSystemBlobProvider(IOptions<FileSystemBlobContentOptions> options, IHttpContextAccessor httpContext)
+        public FileSystemBlobProvider(IOptions<FileSystemBlobOptions> options, IUrlHelper urlHelper)
         {
             _options = options.Value;
-            if (_options.RootPath == null)
-            {
-                throw new PlatformException($"{ nameof(_options.RootPath) } must be set");
-            }
+
             _storagePath = _options.RootPath.TrimEnd('\\');
 
-            var request = httpContext.HttpContext.Request;
-            _basePublicUrl = new Uri($"{ request.Scheme}://{ request.Host.Value }/{ _options.PublicPath}").ToString();
+            _urlHelper = urlHelper;
         }
 
         #region IBlobStorageProvider members
@@ -110,7 +106,7 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
         public virtual Task<GenericSearchResult<BlobEntry>> SearchAsync(string folderUrl, string keyword)
         {
             var retVal = new GenericSearchResult<BlobEntry>();
-            folderUrl = folderUrl ?? _basePublicUrl;
+            folderUrl = folderUrl ?? _urlHelper.AbsoluteRouteUrl(_options.PublicPath);
 
             var storageFolderPath = GetStoragePathFromUrl(folderUrl);
 
@@ -120,7 +116,7 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
             {
                 return Task.FromResult(retVal);
             }
-            var directories = String.IsNullOrEmpty(keyword) ? Directory.GetDirectories(storageFolderPath) : Directory.GetDirectories(storageFolderPath, "*" + keyword + "*", SearchOption.AllDirectories);
+            var directories = string.IsNullOrEmpty(keyword) ? Directory.GetDirectories(storageFolderPath) : Directory.GetDirectories(storageFolderPath, "*" + keyword + "*", SearchOption.AllDirectories);
             foreach (var directory in directories)
             {
                 var directoryInfo = new DirectoryInfo(directory);
@@ -128,12 +124,12 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
                 var folder = AbstractTypeFactory<BlobFolder>.TryCreateInstance();
                 folder.Name = Path.GetFileName(directory);
                 folder.Url = GetAbsoluteUrlFromPath(directory);
-                folder.ParentUrl = GetAbsoluteUrlFromPath(directoryInfo.Parent.FullName);
+                folder.ParentUrl = GetAbsoluteUrlFromPath(directoryInfo.Parent?.FullName);
                 folder.RelativeUrl = GetRelativeUrl(folder.Url);
                 retVal.Results.Add(folder);
             }
 
-            var files = String.IsNullOrEmpty(keyword) ? Directory.GetFiles(storageFolderPath) : Directory.GetFiles(storageFolderPath, "*" + keyword + "*.*", SearchOption.AllDirectories);
+            var files = string.IsNullOrEmpty(keyword) ? Directory.GetFiles(storageFolderPath) : Directory.GetFiles(storageFolderPath, "*" + keyword + "*.*", SearchOption.AllDirectories);
             foreach (var file in files)
             {
                 var fileInfo = new FileInfo(file);
@@ -148,7 +144,7 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
                 retVal.Results.Add(blobInfo);
             }
 
-            retVal.TotalCount = retVal.Results.Count();
+            retVal.TotalCount = retVal.Results.Count;
             return Task.FromResult(retVal);
         }
 
@@ -213,6 +209,51 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
             return Task.CompletedTask;
         }
 
+        public virtual void Move(string srcUrl, string dstUrl)
+        {
+            var srcPath = GetStoragePathFromUrl(srcUrl);
+            var dstPath = GetStoragePathFromUrl(dstUrl);
+
+            if (srcPath != dstPath)
+            {
+                if (Directory.Exists(srcPath) && !Directory.Exists(dstPath))
+                {
+                    Directory.Move(srcPath, dstPath);
+                }
+                else if (File.Exists(srcPath) && !File.Exists(dstPath))
+                {
+                    File.Move(srcPath, dstPath);
+                }
+            }
+        }
+
+        public virtual void Copy(string srcUrl, string destUrl)
+        {
+            var srcPath = GetStoragePathFromUrl(srcUrl);
+            var destPath = GetStoragePathFromUrl(destUrl);
+
+            CopyDirectoryRecursive(srcPath, destPath);
+        }
+
+        private static void CopyDirectoryRecursive(string sourcePath, string destPath)
+        {
+            if (!Directory.Exists(destPath))
+            {
+                Directory.CreateDirectory(destPath);
+            }
+
+            foreach (var file in Directory.GetFiles(sourcePath))
+            {
+                var dest = Path.Combine(destPath, Path.GetFileName(file));
+                File.Copy(file, dest);
+            }
+
+            foreach (var folder in Directory.GetDirectories(sourcePath))
+            {
+                var dest = Path.Combine(destPath, Path.GetFileName(folder));
+                CopyDirectoryRecursive(folder, dest);
+            }
+        }
         #endregion
 
         #region IBlobUrlResolver Members
@@ -223,30 +264,20 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
             {
                 throw new ArgumentNullException(nameof(relativeUrl));
             }
-            var retVal = relativeUrl;
-            if (!relativeUrl.IsAbsoluteUrl())
-            {
-                retVal = _basePublicUrl + "/" + relativeUrl.TrimStart('/').TrimEnd('/');
-            }
-            return new Uri(retVal).ToString();
+
+            return _urlHelper.AbsoluteRouteUrl(_options.PublicPath, relativeUrl);
         }
 
         #endregion
 
         protected string GetRelativeUrl(string url)
         {
-            var retVal = url;
-            if (!string.IsNullOrEmpty(_basePublicUrl))
-            {
-                retVal = url.Replace(_basePublicUrl, string.Empty);
-            }
-            return retVal;
+            return _urlHelper.RelativeUrl(_options.PublicPath, url);
         }
 
         protected string GetAbsoluteUrlFromPath(string path)
         {
-            var retVal = _basePublicUrl + "/" + path.Replace(_storagePath, string.Empty).TrimStart('\\').Replace('\\', '/');
-            return Uri.EscapeUriString(retVal);
+            return _urlHelper.AbsoluteRouteUrl(_options.PublicPath, path.Replace(_storagePath, string.Empty));
         }
 
         protected string GetStoragePathFromUrl(string url)
@@ -255,11 +286,7 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
             if (url != null)
             {
                 retVal = _storagePath + "\\";
-                if (!String.IsNullOrEmpty(_basePublicUrl))
-                {
-                    url = url.Replace(_basePublicUrl, string.Empty);
-                }
-                retVal += url;
+                retVal += GetRelativeUrl(url);
                 retVal = retVal.Replace("/", "\\").Replace("\\\\", "\\");
             }
             return Uri.UnescapeDataString(retVal);
