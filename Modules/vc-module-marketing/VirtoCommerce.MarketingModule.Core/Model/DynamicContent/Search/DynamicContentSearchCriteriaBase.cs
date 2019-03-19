@@ -5,6 +5,5 @@ namespace VirtoCommerce.MarketingModule.Core.Model
     public class DynamicContentSearchCriteriaBase : SearchCriteriaBase
     {
         public string FolderId { get; set; }
-        public string Keyword { get; set; }
     }
 }

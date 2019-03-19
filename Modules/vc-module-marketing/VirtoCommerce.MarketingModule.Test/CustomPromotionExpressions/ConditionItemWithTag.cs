@@ -1,12 +1,13 @@
 using System;
 using System.Linq;
 using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 
 namespace VirtoCommerce.MarketingModule.Test.CustomPromotionExpressions
 {
     //items with [] tag
-    public class ConditionItemWithTag : ConditionRewardTree
+    public class ConditionItemWithTag : ConditionTree
     {
         public string[] Tags { get; set; }
 
