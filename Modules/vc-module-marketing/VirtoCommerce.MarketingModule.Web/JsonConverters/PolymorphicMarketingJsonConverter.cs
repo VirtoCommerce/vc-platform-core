@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using VirtoCommerce.CoreModule.Core.Common.Conditions;
+using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
@@ -135,7 +135,7 @@ namespace VirtoCommerce.MarketingModule.Web.JsonConverters
                     {
                         result = JsonConvert.DeserializeObject<PromotionConditionRewardTree>(
                             dynamicPromotion.PredicateVisualTreeSerialized,
-                            new ConditionRewardJsonConverter());
+                            new ConditionJsonConverter(), new RewardJsonConverter());
 
                         //// Copy available elements from etalon because they not persisted
                         var sourceBlocks = etalonEpressionTree.Traverse(x => x.Children);

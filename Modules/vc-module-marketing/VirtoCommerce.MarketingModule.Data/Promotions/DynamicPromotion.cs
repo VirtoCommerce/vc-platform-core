@@ -28,7 +28,7 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
 
         /// <summary>
         /// If this flag is set to true, it allows this promotion to combine with itself.
-        /// Special for case when need to return same promotion rewards for multiple coupons  
+        /// Special for case when need to return same promotion rewards for multiple coupons
         /// </summary>
         public bool IsAllowCombiningWithSelf { get; set; }
 
@@ -36,9 +36,9 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
         public string PredicateVisualTreeSerialized { get; set; }
         public string RewardsSerialized { get; set; }
 
-        protected Condition[] Conditions => _conditions ?? (_conditions = JsonConvert.DeserializeObject<Condition[]>(PredicateSerialized, new ConditionRewardJsonConverter()));
+        protected Condition[] Conditions => _conditions ?? (_conditions = JsonConvert.DeserializeObject<Condition[]>(PredicateSerialized, new ConditionJsonConverter()));
 
-        protected PromotionReward[] Rewards => _rewards ?? (_rewards = JsonConvert.DeserializeObject<PromotionReward[]>(RewardsSerialized, new ConditionRewardJsonConverter()));
+        protected PromotionReward[] Rewards => _rewards ?? (_rewards = JsonConvert.DeserializeObject<PromotionReward[]>(RewardsSerialized, new RewardJsonConverter()));
 
         public override PromotionReward[] EvaluatePromotion(IEvaluationContext context)
         {

@@ -1,20 +1,20 @@
 using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using VirtoCommerce.CoreModule.Core.Common.Conditions;
+using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.MarketingModule.Data.Promotions
 {
-    public class ConditionRewardJsonConverter : JsonConverter
+    public class RewardJsonConverter : JsonConverter
     {
         public override bool CanWrite { get; } = false;
         public override bool CanRead { get; } = true;
 
         public override bool CanConvert(Type objectType)
         {
-            return typeof(IConditionTree).IsAssignableFrom(objectType) || typeof(PromotionReward).IsAssignableFrom(objectType);
+            return typeof(PromotionReward).IsAssignableFrom(objectType);
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
@@ -33,14 +33,7 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
                 type = pt.Value<string>();
             }
 
-            if (typeof(IConditionTree).IsAssignableFrom(objectType))
-            {
-                retVal = AbstractTypeFactory<IConditionTree>.TryCreateInstance(type);
-            }
-            else if (typeof(PromotionReward).IsAssignableFrom(objectType))
-            {
-                retVal = AbstractTypeFactory<PromotionReward>.TryCreateInstance(type);
-            }
+            retVal = AbstractTypeFactory<PromotionReward>.TryCreateInstance(type);
 
             if (retVal == null)
             {

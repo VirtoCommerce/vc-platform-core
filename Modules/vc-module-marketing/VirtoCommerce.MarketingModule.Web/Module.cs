@@ -9,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using VirtoCommerce.CoreModule.Core.Common.Conditions;
 using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.CoreModule.Core.Conditions.Browse;
 using VirtoCommerce.CoreModule.Core.Conditions.GeoConditions;
@@ -157,7 +156,7 @@ namespace VirtoCommerce.MarketingModule.Web
             //Next lines allow to use polymorph types in API controller methods
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicMarketingJsonConverter(appBuilder.ApplicationServices.GetService<IMarketingExtensionManager>()));
-            mvcJsonOptions.Value.SerializerSettings.Converters.Add(new ConditionRewardJsonConverter());
+            mvcJsonOptions.Value.SerializerSettings.Converters.Add(new RewardJsonConverter());
 
             AbstractTypeFactory<IConditionTree>.RegisterType<PromotionConditionRewardTree>();
             AbstractTypeFactory<IConditionTree>.RegisterType<DynamicContentConditionTree>();

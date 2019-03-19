@@ -5,10 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using VirtoCommerce.CoreModule.Core.Common.Conditions;
+using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core;
 using VirtoCommerce.MarketingModule.Core.Services;
-using VirtoCommerce.MarketingModule.Data.Promotions;
 using VirtoCommerce.Platform.Core.Common;
 using coreModel = VirtoCommerce.MarketingModule.Core.Model;
 
@@ -260,7 +259,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         }
 
         /// <summary>
-        /// Get new dynamic content publication object 
+        /// Get new dynamic content publication object
         /// </summary>
         [HttpGet]
         [Route("contentpublications/new")]
@@ -401,7 +400,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             publication.DynamicExpression = _marketingExtensionManager.ContentCondition;
             if (!string.IsNullOrEmpty(publication.PredicateVisualTreeSerialized))
             {
-                publication.DynamicExpression = JsonConvert.DeserializeObject<IConditionTree>(publication.PredicateVisualTreeSerialized, new ConditionRewardJsonConverter());
+                publication.DynamicExpression = JsonConvert.DeserializeObject<IConditionTree>(publication.PredicateVisualTreeSerialized, new ConditionJsonConverter());
                 if (_marketingExtensionManager.ContentCondition != null)
                 {
                     //Copy available elements from etalon because they not persisted

@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using VirtoCommerce.CoreModule.Core.Common.Conditions;
+using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 
 namespace VirtoCommerce.MarketingModule.Core.Services

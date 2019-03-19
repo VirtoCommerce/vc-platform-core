@@ -61,7 +61,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                     try
                     {
                         //Next step need filter assignments contains dynamicexpression
-                        var conditions = JsonConvert.DeserializeObject<Condition[]>(publishing.ConditionExpression, new ConditionRewardJsonConverter());
+                        var conditions = JsonConvert.DeserializeObject<Condition[]>(publishing.ConditionExpression, new ConditionJsonConverter());
                         if (conditions.All(c => c.Evaluate(context)))
                         {
                             contentItemIds.AddRange(publishing.ContentItems.Select(x => x.DynamicContentItemId));
