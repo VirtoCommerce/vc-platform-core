@@ -15,7 +15,7 @@ namespace VirtoCommerce.Platform.Data.Serialization
         {
             var serializer = GetSerializer();
             var expression = serializer.DeserializeText(serializedExpression);
-            var node = serializer.Convert(expression).ToExpression<T>();
+            var node = (Expression<T>)expression;
             return node.Compile();
         }
 

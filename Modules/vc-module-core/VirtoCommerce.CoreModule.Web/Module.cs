@@ -93,20 +93,6 @@ namespace VirtoCommerce.CoreModule.Web
                 dbContext.Database.EnsureCreated();
                 dbContext.Database.Migrate();
             }
-
-            AbstractTypeFactory<IConditionTree>.RegisterType<BlockConditionAndOr>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionAgeIs>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGenderIs>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionLanguageIs>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionStoreSearchedPhrase>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionUrlIs>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoCity>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoCountry>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoState>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoTimeZone>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoZipCode>();
-            AbstractTypeFactory<IConditionTree>.RegisterType<UserGroupsContainsCondition>();
-
         }
 
         public void Uninstall()

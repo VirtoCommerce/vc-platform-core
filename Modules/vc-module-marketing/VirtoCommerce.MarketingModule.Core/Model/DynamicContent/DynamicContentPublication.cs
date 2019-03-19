@@ -12,6 +12,8 @@ namespace VirtoCommerce.MarketingModule.Core.Model
         public int Priority { get; set; }
         public bool IsActive { get; set; }
         public string StoreId { get; set; }
+
+        //TODO need to serialize
         public string PredicateSerialized { get; set; }
         public string PredicateVisualTreeSerialized { get; set; }
 

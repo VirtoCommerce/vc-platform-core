@@ -66,11 +66,13 @@ namespace VirtoCommerce.MarketingModule.Data.Model
 
             if (ContentItems != null)
             {
-                publication.ContentItems = ContentItems.Select(x => x.ContentItem.ToModel(AbstractTypeFactory<DynamicContentItem>.TryCreateInstance())).ToList();
+                //TODO
+                publication.ContentItems = ContentItems.Where(ci => ci.ContentItem != null).Select(x => x.ContentItem.ToModel(AbstractTypeFactory<DynamicContentItem>.TryCreateInstance())).ToList();
             }
             if (ContentPlaces != null)
             {
-                publication.ContentPlaces = ContentPlaces.Select(x => x.ContentPlace.ToModel(AbstractTypeFactory<DynamicContentPlace>.TryCreateInstance())).ToList();
+                //TODO
+                publication.ContentPlaces = ContentPlaces.Where(ci => ci.ContentPlace != null).Select(x => x.ContentPlace.ToModel(AbstractTypeFactory<DynamicContentPlace>.TryCreateInstance())).ToList();
             }
 
             return publication;
