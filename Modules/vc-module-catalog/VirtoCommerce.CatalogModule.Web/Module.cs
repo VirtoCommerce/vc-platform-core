@@ -20,6 +20,7 @@ using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.CatalogModule.Data.Search;
 using VirtoCommerce.CatalogModule.Data.Search.BrowseFilters;
 using VirtoCommerce.CatalogModule.Data.Services;
+using VirtoCommerce.CatalogModule.Data.Services.OutlineParts;
 using VirtoCommerce.CatalogModule.Data.Validation;
 using VirtoCommerce.CatalogModule.Web.JsonConverters;
 using VirtoCommerce.Platform.Core.Bus;
@@ -28,6 +29,7 @@ using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.SearchModule.Core.Services;
 
 namespace VirtoCommerce.CatalogModule.Web
 {
@@ -44,21 +46,30 @@ namespace VirtoCommerce.CatalogModule.Web
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Catalog") ?? configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<CatalogDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddSingleton<Func<ICatalogRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICatalogRepository>());
+
             serviceCollection.AddSingleton<ICatalogService, CatalogServiceImpl>();
             serviceCollection.AddSingleton<ICatalogSearchService, CatalogSearchServiceDecorator>();
-            serviceCollection.AddSingleton<IProductSearchService, ProductSearchService>();
             serviceCollection.AddSingleton<CatalogSearchServiceImpl>();
+
             serviceCollection.AddSingleton<ICategoryService, CategoryServiceImpl>();
             serviceCollection.AddSingleton<ICategorySearchService, CategorySearchService>();
-            serviceCollection.AddSingleton<IOutlineService, OutlineService>();
+
             serviceCollection.AddSingleton<IItemService, ItemServiceImpl>();
-            serviceCollection.AddSingleton<IPropertyService, PropertyServiceImpl>();
+            serviceCollection.AddSingleton<IProductSearchService, ProductSearchService>();
+
             serviceCollection.AddSingleton<IAggregationConverter, AggregationConverter>();
             serviceCollection.AddSingleton<IBrowseFilterService, BrowseFilterService>();
-            serviceCollection.AddSingleton<ISkuGenerator, DefaultSkuGenerator>();
+            serviceCollection.AddSingleton<ITermFilterBuilder, TermFilterBuilder>();
+
+            serviceCollection.AddSingleton<ISearchRequestBuilder, ProductSearchRequestBuilder>();
+            serviceCollection.AddSingleton<ISearchRequestBuilder, CategorySearchRequestBuilder>();
+
+            serviceCollection.AddSingleton<IPropertyService, PropertyServiceImpl>();
             serviceCollection.AddSingleton<IProperyDictionaryItemService, PropertyDictionaryItemService>();
             serviceCollection.AddSingleton<IProperyDictionaryItemSearchService, ProperyDictionaryItemSearchService>();
             serviceCollection.AddSingleton<IProductAssociationSearchService, ProductAssociationSearchService>();
+            serviceCollection.AddSingleton<IOutlineService, OutlineService>();
+            serviceCollection.AddSingleton<ISkuGenerator, DefaultSkuGenerator>();
 
             PropertyValueValidator PropertyValueValidatorFactory(PropertyValidationRule rule) => new PropertyValueValidator(rule);
             serviceCollection.AddSingleton((Func<PropertyValidationRule, PropertyValueValidator>)PropertyValueValidatorFactory);
@@ -67,14 +78,20 @@ namespace VirtoCommerce.CatalogModule.Web
             serviceCollection.AddSingleton<CatalogExportImport>();
             serviceCollection.AddSingleton<CategoryChangedEventHandler>();
             serviceCollection.AddSingleton<ProductChangedEventHandler>();
+
+            var settingsRegistrar = serviceCollection.BuildServiceProvider().GetRequiredService<ISettingsRegistrar>();
+            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
+
+            var settingManager = serviceCollection.BuildServiceProvider().GetService<ISettingsManager>();
+            if (settingManager.GetValue(ModuleConstants.Settings.General.CodesInOutline.Name, false))
+                serviceCollection.AddSingleton<IOutlinePartResolver, CodeOutlinePartResolver>();
+            else
+                serviceCollection.AddSingleton<IOutlinePartResolver, IdOutlinePartResolver>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
             _appBuilder = appBuilder;
-
-            var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
-            settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
 
             //Register module permissions
             var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();

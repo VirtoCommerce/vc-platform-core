@@ -16,7 +16,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
         where TCriteria : SearchCriteriaBase
         where TResult : CatalogSearchResult<TItem>
     {
-        private readonly ISearchRequestBuilder[] _searchRequestBuilders;
+        private readonly IEnumerable<ISearchRequestBuilder> _searchRequestBuilders;
         private readonly ISearchProvider _searchProvider;
         private readonly ISettingsManager _settingsManager;
 
