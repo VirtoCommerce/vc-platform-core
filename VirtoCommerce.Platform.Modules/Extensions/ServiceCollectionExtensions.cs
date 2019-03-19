@@ -36,8 +36,11 @@ namespace VirtoCommerce.Platform.Modules
             foreach (var module in moduleCatalog.Modules.OfType<ManifestModuleInfo>().Where(x => x.State == ModuleState.NotStarted).ToArray())
             {
                 manager.LoadModule(module.ModuleName);
-                // Register API controller from modules
-                mvcBuilder.AddApplicationPart(module.Assembly);
+                if (module.Assembly != null)
+                {
+                    // Register API controller from modules
+                    mvcBuilder.AddApplicationPart(module.Assembly);
+                }
             }
 
             services.AddSingleton(moduleCatalog);
