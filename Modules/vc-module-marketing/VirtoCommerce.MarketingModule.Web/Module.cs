@@ -65,22 +65,19 @@ namespace VirtoCommerce.MarketingModule.Web
             serviceCollection.AddSingleton<CsvCouponImporter>();
 
 
-            var snapshot = serviceCollection.BuildServiceProvider();
-            var settingsRegistrar = snapshot.GetRequiredService<ISettingsRegistrar>();
+            var settingsRegistrar = serviceCollection.BuildServiceProvider().GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.General.AllSettings, ModuleInfo.Id);
 
-            //TODO
-            //var snapshotSettings = serviceCollection.BuildServiceProvider();
-            //var settingsManager = snapshotSettings.GetService<ISettingsManager>();
-            //var promotionCombinePolicy = settingsManager.GetValue(ModuleConstants.Settings.General.CombinePolicy, "BestReward");
-            //if (promotionCombinePolicy.EqualsInvariant("CombineStackable"))
-            //{
-            //    serviceCollection.AddSingleton<IMarketingPromoEvaluator, CombineStackablePromotionPolicy>();
-            //}
-            //else
-            //{
-            serviceCollection.AddSingleton<IMarketingPromoEvaluator, BestRewardPromotionPolicy>();
-            //}
+            var settingsManager = serviceCollection.BuildServiceProvider().GetService<ISettingsManager>();
+            var promotionCombinePolicy = settingsManager.GetValue(ModuleConstants.Settings.General.CombinePolicy.Name, "BestReward");
+            if (promotionCombinePolicy.EqualsInvariant("CombineStackable"))
+            {
+                serviceCollection.AddSingleton<IMarketingPromoEvaluator, CombineStackablePromotionPolicy>();
+            }
+            else
+            {
+                serviceCollection.AddSingleton<IMarketingPromoEvaluator, BestRewardPromotionPolicy>();
+            }
 
             AbstractTypeFactory<DynamicPromotion>.RegisterType<DynamicPromotion>().WithFactory(() =>
             {
