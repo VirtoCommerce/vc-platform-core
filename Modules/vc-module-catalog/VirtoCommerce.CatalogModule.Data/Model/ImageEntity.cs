@@ -69,7 +69,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             LanguageCode = image.LanguageCode;
             Name = image.Name;
             SortOrder = image.SortOrder;
-            Url = image.RelativeUrl;
+            Url = !string.IsNullOrEmpty(image.RelativeUrl) ? image.RelativeUrl : image.Url;
 
             return this;
         }
