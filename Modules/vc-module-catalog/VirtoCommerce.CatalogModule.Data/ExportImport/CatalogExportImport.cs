@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -151,6 +152,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             cancellationToken.ThrowIfCancellationRequested();
 
             var progressInfo = new ExportImportProgressInfo();
+            var propertiesWithForeignKeys = new List<Property>();
 
             using (var streamReader = new StreamReader(inputStream))
             using (var reader = new JsonTextReader(streamReader))
@@ -186,7 +188,19 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                         }
                         else if (reader.Value.ToString() == "Properties")
                         {
-                            await reader.DeserializeJsonArrayWithPagingAsync<Property>(_jsonSerializer, _batchSize, items => _propertyService.SaveChangesAsync(items.ToArray()), processedCount =>
+                            await reader.DeserializeJsonArrayWithPagingAsync<Property>(_jsonSerializer, _batchSize, async (items) => {
+                                foreach (var property in items)
+                                {
+                                    if (property.CategoryId != null || property.CatalogId != null)
+                                    {
+                                        propertiesWithForeignKeys.Add(property.Clone() as Property);
+                                        //Need to reset property foreign keys to prevent FK violation during  inserting into database 
+                                        property.CategoryId = null;
+                                        property.CatalogId = null;
+                                    }
+                                }
+                                await _propertyService.SaveChangesAsync(items.ToArray());
+                                }, processedCount =>
                             {
                                 progressInfo.Description = $"{ processedCount } properties have been imported";
                                 progressCallback(progressInfo);
@@ -216,6 +230,21 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                             }, cancellationToken);
                         }
                     }
+                }
+            }
+
+            //Update property associations after all required data are saved (Catalogs and Categories)
+            if (propertiesWithForeignKeys.Count > 0)
+            {
+                progressInfo.Description = $"Updating {propertiesWithForeignKeys.Count} property associations…";
+                progressCallback(progressInfo);
+
+                var totalCount = propertiesWithForeignKeys.Count;
+                for (var i = 0; i < totalCount; i += _batchSize)
+                {
+                    await _propertyService.SaveChangesAsync(propertiesWithForeignKeys.Skip(i).Take(_batchSize).ToArray());
+                    progressInfo.Description = $"{ Math.Min(totalCount, i + _batchSize) } of { totalCount } property associations updated.";
+                    progressCallback(progressInfo);
                 }
             }
         }
@@ -249,8 +278,9 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             {
                 try
                 {
+                    string url = image.Url != null && !image.Url.IsAbsoluteUrl() ? image.Url : image.RelativeUrl;
                     //do not save images with external url
-                    if (image.Url != null && !image.Url.IsAbsoluteUrl())
+                    if (!string.IsNullOrEmpty(url))
                     {
                         using (var sourceStream = new MemoryStream(image.BinaryData))
                         using (var targetStream = _blobStorageProvider.OpenWrite(image.Url))

@@ -13,7 +13,8 @@
             "export-import": "Экспорт & Импорт",
             "user-profile": "Профиль пользователя",
             "assets": "Ресурсы",
-            "toggle-favorites": "Shift + Пробел для переключения избранного"
+            "toggle-favorites": "Shift + Пробел для переключения избранного",
+            "help": "Помощь"
         },
         "navigation": {
             "back": "Назад",
@@ -688,9 +689,11 @@
             },
             "licensing": {
                 "license-absent": "Лицензия сообщества",
-                "license-present": "Лицензия {{type}}",
+                "license-present": "Лицензия {{type}}, действительно до {{expirationDate | amParse | date}}",
                 "community": "Работа с общественной версией, нажмите, чтобы запросить коммерческую лицензию.",
-                "expired": "Срок действия лицензии истекает {{expirationDate | amParse | date}}, пожалуйста, обновите."
+                "expired": "Срок действия лицензии истёк {{expirationDate | amParse | date}}, пожалуйста, обновите.",
+                "purchase": "Купить",
+                "renew": "Обновить"
             },
             "modulesAutoInstallation": {
                 "labels": {

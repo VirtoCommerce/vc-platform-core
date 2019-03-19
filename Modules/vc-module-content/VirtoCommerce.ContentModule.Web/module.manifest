@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<module>
+    <id>VirtoCommerce.Content</id>
+    <version>3.0.0</version>
+    <platformVersion>3.0.0</platformVersion>
+    <dependencies>
+        <dependency id="VirtoCommerce.Core" version="3.0.0" />
+        <dependency id="VirtoCommerce.Store" version="3.0.0" />
+    </dependencies>
+
+    <title>CMS Content module</title>
+    <description>Front-end CMS functionality based on liquid technology</description>
+    <authors>
+        <author>Virto Commerce</author>
+    </authors>
+    <owners>
+        <owner>Virto Commerce</owner>
+    </owners>
+    <projectUrl>https://virtocommerce.com/apps/extensions/virto-cms-module</projectUrl>
+    <iconUrl>https://github.com/VirtoCommerce/vc-module-content/raw/master/VirtoCommerce.ContentModule.Web/Content/logo.png</iconUrl>
+    <releaseNotes>First version.</releaseNotes>
+    <copyright>Copyright © 2011-2018 Virto Commerce. All rights reserved</copyright>
+    <tags>cms menu</tags>
+
+    <assemblyFile>VirtoCommerce.ContentModule.Web.dll</assemblyFile>
+    <moduleType>VirtoCommerce.ContentModule.Web.Module, VirtoCommerce.ContentModule.Web</moduleType>
+
+    <styles>
+        <directory virtualPath="$/Content" searchPattern="*.css" searchSubdirectories="true" />
+    </styles>
+    <scripts>
+        <directory virtualPath="$/Scripts" searchPattern="*.js" searchSubdirectories="true" />
+    </scripts>
+
+</module>
