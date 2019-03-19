@@ -17,7 +17,6 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.Platform.Core.Serialization;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.PricingModule.Core;
 using VirtoCommerce.PricingModule.Core.Model.Conditions;
@@ -47,8 +46,6 @@ namespace VirtoCommerce.PricingModule.Web
             serviceCollection.AddDbContext<PricingDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddTransient<IPricingRepository, PricingRepositoryImpl>();
             serviceCollection.AddSingleton<Func<IPricingRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<IPricingRepository>());
-
-            serviceCollection.AddSingleton<IExpressionSerializer, XmlExpressionSerializer>();
 
             serviceCollection.AddTransient<IPricingService, PricingServiceImpl>();
             serviceCollection.AddTransient<IPricingSearchService, PricingSearchServiceImpl>();
@@ -108,6 +105,9 @@ namespace VirtoCommerce.PricingModule.Web
             }
 
             //Pricing expression
+            AbstractTypeFactory<IConditionTree>.RegisterType<PriceConditionTree>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<BlockPricingCondition>();
+
             var pricingExtensionManager = appBuilder.ApplicationServices.GetRequiredService<IPricingExtensionManager>();
             pricingExtensionManager.PriceConditionTree = new PriceConditionTree
             {

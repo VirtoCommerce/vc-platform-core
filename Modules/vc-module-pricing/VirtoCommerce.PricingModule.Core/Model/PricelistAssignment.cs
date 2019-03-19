@@ -1,6 +1,5 @@
 using System;
 using Newtonsoft.Json;
-using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Common.Conditions;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -42,7 +41,7 @@ namespace VirtoCommerce.PricingModule.Core.Model
         // TECHDEBT: [JsonIgnore] attribute here is a workaround to exclude this property from Swagger documentation.
         //           This property causes NSwag to include lots of types including MethodImplAttributes, which leads to the invalid Swagger JSON.
         [JsonIgnore]
-        public Func<IEvaluationContext, bool> Condition { get; set; }
+        public IConditionTree Condition { get; set; }
 
         /// <summary>
         /// List of conditions and rules to define Prices Assignment is valid

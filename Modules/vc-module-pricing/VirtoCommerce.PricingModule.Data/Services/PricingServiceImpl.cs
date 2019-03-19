@@ -14,8 +14,8 @@ using VirtoCommerce.CoreModule.Core.Common.Conditions;
 using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Serialization;
 using VirtoCommerce.PricingModule.Core.Model;
+using VirtoCommerce.PricingModule.Core.Model.Conditions;
 using VirtoCommerce.PricingModule.Core.Services;
 using VirtoCommerce.PricingModule.Data.Caching;
 using VirtoCommerce.PricingModule.Data.Model;
@@ -29,18 +29,16 @@ namespace VirtoCommerce.PricingModule.Data.Services
         private readonly IItemService _productService;
         private readonly ILogger<PricingServiceImpl> _logger;
         private readonly IPlatformMemoryCache _platformMemoryCache;
-        private readonly IExpressionSerializer _expressionSerializer;
         private readonly IPricingExtensionManager _extensionManager;
 
         public PricingServiceImpl(Func<IPricingRepository> repositoryFactory, IItemService productService,
-            ILogger<PricingServiceImpl> logger, IPlatformMemoryCache platformMemoryCache, IExpressionSerializer expressionSerializer,
+            ILogger<PricingServiceImpl> logger, IPlatformMemoryCache platformMemoryCache,
             IPricingExtensionManager extensionManager)
         {
             _repositoryFactory = repositoryFactory;
             _productService = productService;
             _logger = logger;
             _platformMemoryCache = platformMemoryCache;
-            _expressionSerializer = expressionSerializer;
             _extensionManager = extensionManager;
         }
 
@@ -65,7 +63,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
                         try
                         {
                             //Deserialize conditions
-                            assignment.Condition = _expressionSerializer.DeserializeExpression<Func<IEvaluationContext, bool>>(assignment.ConditionExpression);
+                            assignment.Condition = JsonConvert.DeserializeObject<IConditionTree>(assignment.ConditionExpression, new ConditionJsonConverter());
                         }
                         catch (Exception ex)
                         {
@@ -102,7 +100,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
             {
                 try
                 {
-                    if (assignment.Condition(evalContext))
+                    if (assignment.Condition.Evaluate(evalContext))
                     {
                         if (assignmentsToReturn.All(x => x.PricelistId != assignment.PricelistId))
                         {
@@ -397,7 +395,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
                 foreach (var assignment in assignments)
                 {
                     SerializePricelistAssigmentConditions(assignment);
-                    
+
                     var sourceEntity = AbstractTypeFactory<PricelistAssignmentEntity>.TryCreateInstance().FromModel(assignment, pkMap);
                     var targetEntity = alreadyExistEntities.FirstOrDefault(x => x.Id == assignment.Id);
                     if (targetEntity != null)
@@ -513,7 +511,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
             //Serialize condition expression 
             if (assignment.DynamicExpression?.Children != null)
             {
-                var conditionExpression = ((Condition)assignment.DynamicExpression).GetConditions();
+                var conditionExpression = ((PriceConditionTree)assignment.DynamicExpression).GetConditions();
                 assignment.ConditionExpression = JsonConvert.SerializeObject(conditionExpression);
 
                 //Clear availableElements in expression (for decrease size)
