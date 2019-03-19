@@ -1,0 +1,34 @@
+﻿<div class="blade-static __bottom" ng-include="'Modules/$(VirtoCommerce.Catalog)/Scripts/blades/common/templates/ok-cancel.tpl.html'"></div>
+<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form class="form" name="associationForm">
+                <div class="form-group" ng-init="setForm(associationForm)">
+                    <label class="form-label">{{ 'catalog.blades.item-association-detail.labels.group' | translate }} <a href="" ng-click="openDictionarySettingManagement()" class="form-edit" va-permission="platform:setting:update"><i class="form-ico fa fa-pencil"></i></a></label>
+                    <div class="form-input">
+                        <ui-select ng-model="blade.currentEntity.type" required>
+                            <ui-select-match placeholder="{{ 'catalog.blades.item-association-detail.placeholders.group' | translate }}">{{$select.selected}}</ui-select-match>
+                            <ui-select-choices repeat="x in associationGroups | filter: $select.search">
+                                <span ng-bind-html="x | highlight: $select.search"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ 'catalog.blades.item-association-detail.labels.tags' | translate }}</label>
+                    <tags-input ng-model="blade.currentEntity.tags"
+                                display-property="value"
+                                placeholder="{{ 'catalog.blades.item-association-detail.placeholders.tags' | translate }}">
+                    </tags-input>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ 'catalog.blades.item-association-detail.labels.quantity' | translate }}</label>
+                    <div class="form-input __number">
+                        <input smart-float num-type="integer" ng-model="blade.currentEntity.quantity"
+                               placeholder="{{ 'catalog.blades.item-association-detail.placeholders.quantity' | translate }}">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

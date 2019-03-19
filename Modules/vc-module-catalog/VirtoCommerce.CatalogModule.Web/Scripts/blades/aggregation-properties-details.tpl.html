@@ -1,0 +1,50 @@
+﻿<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form class="form" name="rules">
+
+                <div class="form-group">
+                    <label class="form-label">{{'catalog.blades.aggregation-properties-details.name.label' | translate}}</label>
+                    <div class="form-input">
+                        <input ng-model="blade.property.name" ng-disabled="true" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">{{'catalog.blades.aggregation-properties-details.type.label' | translate}}</label>
+                    <div class="form-input">
+                        <ui-select ng-model="blade.property.type" ng-disabled="!blade.canChangeType()">
+                            <ui-select-match>{{$select.selected}}</ui-select-match>
+                            <ui-select-choices repeat="selectedType in blade.propertyTypes | filter: $select.search">
+                                <span>{{selectedType}}</span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                </div>
+
+                <div class="form-group" ng-if="blade.canChangeSize()">
+                    <label class="form-label">{{'catalog.blades.aggregation-properties-details.size.label' | translate}}</label>
+                    <div class="form-input">
+                        <input ng-model="blade.property.size" placeholder="{{'catalog.blades.aggregation-properties-details.size.placeholder' | translate}}" />
+                    </div>
+                    <div class="table-descr">{{'catalog.blades.aggregation-properties-details.size.description' | translate}}</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">{{'catalog.blades.aggregation-properties-details.values-'+blade.property.type+'.label' | translate}}</label>
+                    <div class="form-input">
+                        <ui-select multiple ng-model="blade.property.values">
+                            <ui-select-match placeholder="{{'catalog.blades.aggregation-properties-details.values-'+blade.property.type+'.placeholder' | translate}}">{{$item}}</ui-select-match>
+                            <ui-select-choices repeat="x in blade.getValues($select.search) | filter: $select.search">
+                                <span ng-bind-html="x | highlight: $select.search"></span>
+                            </ui-select-choices>
+                        </ui-select>
+                    </div>
+                    <div class="table-descr">{{'catalog.blades.aggregation-properties-details.values-'+blade.property.type+'.description' | translate}}</div>
+                </div>
+
+                <div class="blade-static __bottom" ng-include="'Modules/$(VirtoCommerce.Catalog)/Scripts/blades/common/templates/ok-cancel.tpl.html'"></div>
+            </form>
+        </div>
+    </div>
+</div>

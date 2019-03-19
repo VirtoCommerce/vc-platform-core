@@ -1,0 +1,114 @@
+﻿<div class="blade-content">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form class="form" name="rules">
+                <div class="form-group" ng-init="setForm(rules)">
+                    <label class="form-label">{{ 'catalog.blades.property-detail.labels.required' | translate }}</label>
+                    <div class="form-input">
+                        <label class="form-label __switch">
+                            <input ng-model="blade.propertyValidationRule.required"
+                                   type="checkbox">
+                            <span class="switch"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="table-descr">
+                    {{'catalog.blades.property-validationRule.descriptions.require'|translate}}
+                </div>
+                <div ng-class="{'__disabled': blade.property.valueType!=='ShortText'&&blade.property.valueType!=='LongText'}">
+                    <div class="form-group">
+                        <label class="form-label">{{'catalog.blades.property-validationRule.character-count'|translate}}</label>
+                        <div class="form-input">
+                            <label class="form-label __switch">
+                                <input ng-model="blade.propertyValidationRule.isLimited"
+                                       type="checkbox">
+                                <span class="switch"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="columns clearfix">
+                        <div class="column">
+                            <div class="form-group">
+                                <div class="form-input">
+                                    <ui-select ng-disabled="!blade.propertyValidationRule.isLimited"
+                                               ng-model="blade.propertyValidationRule.selectedLimit">
+                                        <ui-select-match>{{'catalog.blades.property-validationRule.character-limit.'+$select.selected|translate}}</ui-select-match>
+                                        <ui-select-choices repeat="selectedLimit in blade.propertyValidationRule.characterLimit | filter: $select.search">
+                                            <span>{{'catalog.blades.property-validationRule.character-limit.' + selectedLimit|translate}}</span>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="form-group">
+                                <div class="form-input">
+                                    <input ng-disabled="
+                                          !blade.propertyValidationRule.isLimited||
+                                          !blade.propertyValidationRule.selectedLimit||
+                                          blade.propertyValidationRule.selectedLimit=='not-more-than'"
+                                           ng-model="blade.propertyValidationRule.charCountMin"
+                                           placeholder="Min" class="form-control" type="number" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="form-group">
+                                <div class="form-input">
+                                    <input ng-disabled="
+                                          !blade.propertyValidationRule.isLimited||
+                                          !blade.propertyValidationRule.selectedLimit||
+                                          blade.propertyValidationRule.selectedLimit=='at-least'"
+                                           ng-model="blade.propertyValidationRule.charCountMax"
+                                           placeholder="Max" class="form-control" type="number" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-descr">
+                        {{'catalog.blades.property-validationRule.descriptions.character-limit'|translate}}
+                    </div>
+                    <div class="form-group __checkbox">
+                        <label class="form-label">{{'catalog.blades.property-validationRule.match-validation-pattern'|translate}}</label>
+                        <div class="form-input">
+                            <label class="form-label __switch">
+                                <input type="checkbox"
+                                       ng-model="blade.propertyValidationRule.isSpecificPattern">
+                                <span class="switch"></span>
+                            </label>
+                        </div>
+
+                    </div>
+                    <div class="columns clearfix">
+                        <div class="column">
+                            <div class="form-group">
+                                <div class="form-input">
+                                    <ui-select ng-disabled="!blade.propertyValidationRule.isSpecificPattern"
+                                               ng-model="blade.propertyValidationRule.selectedPattern">
+                                        <ui-select-match>{{ $select.selected.name }}</ui-select-match>
+                                        <ui-select-choices repeat="selectedPattern in blade.propertyValidationRule.validationPatterns| filter: $select.search">
+                                            <div>{{'catalog.blades.property-validationRule.patterns.' + selectedPattern.name |translate}}</div>
+                                        </ui-select-choices>
+                                    </ui-select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="form-group">
+                                <span class="form-input">
+                                    <input ng-disabled="!blade.propertyValidationRule.isSpecificPattern"
+                                           ng-model="blade.propertyValidationRule.selectedPattern.pattern" />
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-descr">
+                        {{'catalog.blades.property-validationRule.descriptions.pattern'|translate}}
+                    </div>
+                </div>
+                <div class="blade-static __bottom" ng-include="'Modules/$(VirtoCommerce.Catalog)/Scripts/blades/common/templates/ok-cancel.tpl.html'">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
