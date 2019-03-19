@@ -278,8 +278,9 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             {
                 try
                 {
+                    string url = image.Url != null && !image.Url.IsAbsoluteUrl() ? image.Url : image.RelativeUrl;
                     //do not save images with external url
-                    if (image.Url != null && !image.Url.IsAbsoluteUrl())
+                    if (!string.IsNullOrEmpty(url))
                     {
                         using (var sourceStream = new MemoryStream(image.BinaryData))
                         using (var targetStream = _blobStorageProvider.OpenWrite(image.Url))

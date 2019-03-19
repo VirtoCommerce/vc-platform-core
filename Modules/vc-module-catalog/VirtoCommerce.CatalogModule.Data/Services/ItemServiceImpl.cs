@@ -279,6 +279,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 {
                     foreach (var image in product.Images)
                     {
+                        image.RelativeUrl = image.Url;
                         image.Url = _blobUrlResolver.GetAbsoluteUrl(image.Url);
                     }
                 }

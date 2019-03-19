@@ -87,7 +87,7 @@ namespace VirtoCommerce.Platform.Core.Extensions
 
             if (!string.IsNullOrEmpty(urlPath))
             {
-                uriBuilder.Path += urlPath.Replace(uriBuilder.Uri.ToString(), string.Empty);
+                uriBuilder.Path = Combine(uriBuilder.Path, urlPath.Replace(uriBuilder.Uri.ToString(), string.Empty));
             }
 
             return uriBuilder.Uri.ToString();
@@ -135,6 +135,17 @@ namespace VirtoCommerce.Platform.Core.Extensions
             }
 
             return uriBuilder;
+        }
+
+        public static string Combine(string baseUrl, string relativeUrl)
+        {
+            if (string.IsNullOrWhiteSpace(relativeUrl))
+                return baseUrl;
+
+            baseUrl = baseUrl.TrimEnd('/');
+            relativeUrl = relativeUrl.TrimStart('/');
+
+            return $"{baseUrl}/{relativeUrl}";
         }
     }
 }
