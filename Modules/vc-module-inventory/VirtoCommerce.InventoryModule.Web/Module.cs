@@ -66,7 +66,7 @@ namespace VirtoCommerce.InventoryModule.Web
             //Register product availability indexation 
             #region Search
 
-            var productIndexingConfigurations = appBuilder.ApplicationServices.GetService<IndexDocumentConfiguration[]>();
+            var productIndexingConfigurations = appBuilder.ApplicationServices.GetServices<IndexDocumentConfiguration>();
             if (productIndexingConfigurations != null)
             {
                 var productAvaibilitySource = new IndexDocumentSource

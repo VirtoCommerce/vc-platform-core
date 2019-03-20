@@ -17,12 +17,12 @@ namespace VirtoCommerce.SearchModule.Data.Services
     public class IndexingManager : IIndexingManager
     {
         private readonly ISearchProvider _searchProvider;
-        private readonly IndexDocumentConfiguration[] _configs;
+        private readonly IEnumerable<IndexDocumentConfiguration> _configs;
         private readonly ISearchConnection _connection;
         private readonly ISettingsManager _settingsManager;
         private readonly IIndexingWorker _backgroundWorker;
 
-        public IndexingManager(ISearchProvider searchProvider, IndexDocumentConfiguration[] configs, ISearchConnection connection,
+        public IndexingManager(ISearchProvider searchProvider, IEnumerable<IndexDocumentConfiguration> configs, ISearchConnection connection,
             ISettingsManager settingsManager = null, IIndexingWorker backgroundWorker = null)
         {
             if (searchProvider == null)

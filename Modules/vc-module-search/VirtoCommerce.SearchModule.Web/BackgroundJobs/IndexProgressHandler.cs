@@ -1,16 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.SearchModule.Core.Model;
-using Hangfire.Logging;
 
 namespace VirtoCommerce.SearchModule.Web.BackgroundJobs
 {
     public class IndexProgressHandler
     {
-        private readonly ILog _log;
+        private readonly ILogger _log;
         private readonly IPushNotificationManager _pushNotificationManager;
 
         private IDictionary<string, long> _totalCountMap;
@@ -19,7 +19,7 @@ namespace VirtoCommerce.SearchModule.Web.BackgroundJobs
         private bool _suppressInsignificantNotifications;
         private bool _isCanceled;
 
-        public IndexProgressHandler(ILog log, IPushNotificationManager pushNotificationManager)
+        public IndexProgressHandler(ILogger<IndexProgressHandler> log, IPushNotificationManager pushNotificationManager)
         {
             _log = log;
             _pushNotificationManager = pushNotificationManager;
@@ -48,7 +48,7 @@ namespace VirtoCommerce.SearchModule.Web.BackgroundJobs
 
         public void Progress(IndexingProgress progress)
         {
-            _log.Trace(progress.Description);
+            _log.LogTrace(progress.Description);
 
             _totalCountMap[progress.DocumentType] = progress.TotalCount ?? 0;
             _processedCountMap[progress.DocumentType] = progress.ProcessedCount ?? 0;
@@ -89,7 +89,7 @@ namespace VirtoCommerce.SearchModule.Web.BackgroundJobs
                     ? $"{_notification.DocumentType}: Indexation completed. Total: {_notification.TotalCount}, Processed: {_notification.ProcessedCount}, Errors: {_notification.ErrorCount}."
                     : "Indexation completed" + (_notification.Errors?.Any() == true ? " with errors" : " successfully");
 
-            _log.Trace(_notification.Description);
+            _log.LogTrace(_notification.Description);
 
             if (!_suppressInsignificantNotifications || _isCanceled || _notification.TotalCount > 0 || _notification.ProcessedCount > 0)
             {

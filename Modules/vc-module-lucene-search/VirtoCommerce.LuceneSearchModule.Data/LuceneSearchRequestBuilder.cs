@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lucene.Net.Analysis.Standard;
-using Lucene.Net.QueryParsers;
 using Lucene.Net.QueryParsers.Classic;
 using Lucene.Net.Search;
 using VirtoCommerce.SearchModule.Core.Model;
@@ -58,6 +57,13 @@ namespace VirtoCommerce.LuceneSearchModule.Data
             {
                 var searchKeywords = request.SearchKeywords;
 
+                //https://stackoverflow.com/questions/48891716/lucene-net-4-8-search-not-returning-results
+                //and also not allowed as first character in WildcardQuery
+                if (!searchKeywords.EndsWith(WildcardQuery.WILDCARD_STRING))
+                {
+                    searchKeywords = $"{searchKeywords}{WildcardQuery.WILDCARD_STRING}";
+                }
+
                 if (request.IsFuzzySearch)
                 {
                     const string fuzzyMinSimilarity = "0.7";
@@ -66,7 +72,7 @@ namespace VirtoCommerce.LuceneSearchModule.Data
                     searchKeywords = string.Empty;
                     searchKeywords = keywords.Aggregate(searchKeywords, (current, keyword) => current + $"{keyword}~{fuzzyMinSimilarity}");
                 }
-
+                
                 var fields = request.SearchFields?.Select(LuceneSearchHelper.ToLuceneFieldName).ToArray() ?? LuceneSearchHelper.SearchableFields;
                 var analyzer = new StandardAnalyzer(_matchVersion);
 
