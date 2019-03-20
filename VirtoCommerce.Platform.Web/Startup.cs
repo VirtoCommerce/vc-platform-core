@@ -133,17 +133,7 @@ namespace VirtoCommerce.Platform.Web
                 }
             )
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-
-            var modulesDiscoveryPath = Path.GetFullPath("Modules");
-            services.AddModules(mvcBuilder, options =>
-            {
-                options.DiscoveryPath = modulesDiscoveryPath;
-                options.ProbingPath = "App_Data/Modules";
-            });
-
-            services.Configure<ExternalModuleCatalogOptions>(Configuration.GetSection("ExternalModules"));
-            services.AddExternalModules();
-
+            
             services.AddDbContext<SecurityDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("VirtoCommerce"));
@@ -286,6 +276,16 @@ namespace VirtoCommerce.Platform.Web
             services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
             // Default password validation service implementation
             services.AddScoped<IPasswordCheckService, PasswordCheckService>();
+
+            var modulesDiscoveryPath = Path.GetFullPath("Modules");
+            services.AddModules(mvcBuilder, options =>
+            {
+                options.DiscoveryPath = modulesDiscoveryPath;
+                options.ProbingPath = "App_Data/Modules";
+            });
+
+            services.Configure<ExternalModuleCatalogOptions>(Configuration.GetSection("ExternalModules"));
+            services.AddExternalModules();
 
             // Add memory cache services
             services.AddMemoryCache();

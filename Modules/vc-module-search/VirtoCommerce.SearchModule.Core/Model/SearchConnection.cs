@@ -9,14 +9,14 @@ namespace VirtoCommerce.SearchModule.Core.Model
     {
         private readonly IReadOnlyDictionary<string, string> _parameters;
 
-        public SearchConnection(string connectionString)
+        public SearchConnection(string connectionString, string provider)
         {
             if (string.IsNullOrEmpty(connectionString))
                 throw new ArgumentNullException(nameof(connectionString));
 
             _parameters = ParseString(connectionString);
 
-            Provider = this["provider"];
+            Provider = provider;
             Scope = this["scope"];
         }
 

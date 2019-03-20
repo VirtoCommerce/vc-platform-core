@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Settings;
 
@@ -41,12 +42,21 @@ namespace VirtoCommerce.CustomerModule.Core
                     DefaultValue = 50
                 };
 
+                public static SettingDescriptor MemberIndexationDate = new SettingDescriptor
+                {
+                    Name = "VirtoCommerce.Search.IndexingJobs.IndexationDate.Member",
+                    GroupName = "Customer|General",
+                    ValueType = SettingValueType.DateTime,
+                    DefaultValue = default(DateTime),
+                };
+
                 public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {
                         yield return MemberGroups;
                         yield return ExportImportPageSize;
+                        yield return MemberIndexationDate;
                     }
                 }
             }
