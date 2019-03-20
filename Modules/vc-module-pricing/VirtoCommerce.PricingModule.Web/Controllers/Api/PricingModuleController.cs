@@ -148,7 +148,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
                 Results = new List<webModel.ProductPrice>()
             };
 
-            var products = _itemService.GetByIds(result.Results.Select(x => x.ProductId).Distinct().ToArray(), ItemResponseGroup.ItemInfo.ToString());
+            var products = await _itemService.GetByIdsAsync(result.Results.Select(x => x.ProductId).Distinct().ToArray(), ItemResponseGroup.ItemInfo);
             foreach (var productPricesGroup in result.Results.GroupBy(x => x.ProductId))
             {
                 var productPrice = new webModel.ProductPrice
@@ -181,7 +181,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
             var priceEvalContext = AbstractTypeFactory<PriceEvaluationContext>.TryCreateInstance();
             priceEvalContext.ProductIds = new[] { productId };
 
-            var product = _itemService.GetByIds(new[] { productId }, ItemResponseGroup.ItemInfo.ToString()).FirstOrDefault();
+            var product = (await _itemService.GetByIdsAsync(new[] { productId }, ItemResponseGroup.ItemInfo)).FirstOrDefault();
             if (product != null)
             {
                 priceEvalContext.CatalogId = product.CatalogId;

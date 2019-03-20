@@ -1,23 +1,19 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using VirtoCommerce.CoreModule.Core.Common;
-using VirtoCommerce.CoreModule.Core.Common.Conditions;
+using Newtonsoft.Json;
 using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.CoreModule.Core.Conditions.Browse;
+using VirtoCommerce.CoreModule.Core.Conditions.GeoConditions;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.PricingModule.Core.Model;
+using VirtoCommerce.PricingModule.Core.Model.Conditions;
 using Xunit;
 
 namespace VirtoCommerce.PricingModule.Test
 {
     public class ConditionJsonSerializerTests
     {
-
-        public ConditionJsonSerializerTests()
-        {
-        }
-
         private static async Task<string> ReadTextFromEmbeddedResourceAsync(string filePath)
         {
             var currentAssembly = typeof(ConditionJsonSerializerTests).Assembly;
@@ -57,32 +53,29 @@ namespace VirtoCommerce.PricingModule.Test
                 }
             };
 
-            var conditionTree = new ConditionTree
+            var conditionTree = new PriceConditionTree
             {
                 Children = new List<IConditionTree> { condition }
             };
 
-            //var sourceExpression = expressionTree.();
-
-            //// NOTE: Visual Studio automatically inserts line break to the end of the file, but actual expression doesn't have it.
-            ////       So the Trim() call here eliminates that line break.
-            //var expectedResult = (await ReadTextFromEmbeddedResourceAsync("Resources.TestSerializedExpression.xml"))?.Trim();
+            var serializedConditionTree = (await ReadTextFromEmbeddedResourceAsync("Resources.TestSerializedCondition.json"))?.Trim();
 
             //// Act
-            //var actualResult = _serializer.SerializeExpression(sourceExpression);
+            var actualResult = JsonConvert.SerializeObject(conditionTree);
 
             // Assert
-            //Assert.Equal(expectedResult, actualResult);
+            Assert.Equal(serializedConditionTree, actualResult);
         }
 
         [Fact]
         public async Task TestExpressionDeserialization()
         {
             // Arrange
-            var serializedExpression = (await ReadTextFromEmbeddedResourceAsync("Resources.TestSerializedExpression.xml"))?.Trim();
+            var serializedConditionTree = (await ReadTextFromEmbeddedResourceAsync("Resources.TestSerializedCondition.json"))?.Trim();
+            RegisterTypes();
 
             // Act
-            var result = _serializer.DeserializeExpression<Func<IEvaluationContext, bool>>(serializedExpression);
+            var result = JsonConvert.DeserializeObject<PriceConditionTree>(serializedConditionTree, new ConditionJsonConverter());
 
             // Assert
             // NOTE: Since we have no way to explore result function and assert that it does expected checks,
@@ -99,24 +92,42 @@ namespace VirtoCommerce.PricingModule.Test
                 ShopperGender = "female",
                 ShopperAge = 17
             };
-            Assert.False(result(context));
+            Assert.False(result.Evaluate(context));
 
             // 2. ShopperSearchedPhraseInStore contains "test", so the result must be true.
-            context.ShopperSearchedPhraseInStore = "some test query";
-            Assert.True(result(context));
+            context.ShopperSearchedPhraseInStore = "test";
+            Assert.True(result.Evaluate(context));
 
             // 3. ShopperGender is male, so the result must be true again.
             context.ShopperSearchedPhraseInStore = "some query";
             context.ShopperGender = "male";
-            Assert.True(result(context));
+            Assert.True(result.Evaluate(context));
 
             // 4. ShopperAge exceeds 18, so the result must be true again.
             context.ShopperGender = "female";
             context.ShopperAge = 18;
-            Assert.True(result(context));
+            Assert.True(result.Evaluate(context));
 
             context.ShopperAge = 21;
-            Assert.True(result(context));
+            Assert.True(result.Evaluate(context));
+        }
+
+
+        private void RegisterTypes()
+        {
+            AbstractTypeFactory<IConditionTree>.RegisterType<PriceConditionTree>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<BlockPricingCondition>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionAgeIs>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGenderIs>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionLanguageIs>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionStoreSearchedPhrase>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionUrlIs>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoCity>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoCountry>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoState>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoTimeZone>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoZipCode>();
+            AbstractTypeFactory<IConditionTree>.RegisterType<UserGroupsContainsCondition>();
         }
     }
 }

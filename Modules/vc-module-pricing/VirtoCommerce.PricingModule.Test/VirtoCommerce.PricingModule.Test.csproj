@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\TestSerializedExpression.xml" />
+    <None Remove="Resources\TestSerializedCondition.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\TestSerializedExpression.xml" />
+    <EmbeddedResource Include="Resources\TestSerializedCondition.json" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,4 @@
-using VirtoCommerce.CoreModule.Core.Common.Conditions;
+using VirtoCommerce.CoreModule.Core.Conditions;
 
 namespace VirtoCommerce.PricingModule.Core.Services
 {

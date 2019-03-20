@@ -47,7 +47,7 @@ namespace VirtoCommerce.PricingModule.Test
                 new PriceEntity { List = 6, MinQuantity = 2, PricelistId = "Pricelist 3" },
                 new PriceEntity { List = 5, MinQuantity = 3,  PricelistId = "Pricelist 3" }
             };
-            for (int i = 0; i < mockPrices.Length; i++)
+            for (var i = 0; i < mockPrices.Length; i++)
             {
                 mockPrices[i].Id = i.ToString();
                 mockPrices[i].ProductId = "ProductId";
@@ -77,7 +77,7 @@ namespace VirtoCommerce.PricingModule.Test
         private IPricingService GetPricingService(Func<IPricingRepository> repositoryFactory)
         {
             var logger = new Moq.Mock<ILogger<PricingServiceImpl>>();
-            return new PricingServiceImpl(repositoryFactory, null, logger.Object, null, null, null);
+            return new PricingServiceImpl(repositoryFactory, null, logger.Object, null, null);
         }
 
         private IPricingRepository GetPricingRepository()

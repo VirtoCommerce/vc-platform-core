@@ -1,6 +1,6 @@
 using System;
 using Newtonsoft.Json;
-using VirtoCommerce.CoreModule.Core.Common.Conditions;
+using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.PricingModule.Core.Model
