@@ -1,4 +1,4 @@
-namespace VirtoCommerce.CatalogModule.Core.Model
+﻿namespace VirtoCommerce.CatalogModule.Core.Model
 {
 	public enum PropertyType
 	{

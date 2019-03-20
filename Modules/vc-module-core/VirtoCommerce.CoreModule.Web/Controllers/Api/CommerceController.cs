@@ -46,7 +46,7 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         public async Task<IActionResult> GetSeoDuplicates(string objectId, string objectType)
         {
             var seoDuplicates = await _seoService.GetAllSeoDuplicatesAsync();
-            var retVal = _seoDuplicateDetector.DetectSeoDuplicates(objectType, objectId, seoDuplicates);
+            var retVal = await _seoDuplicateDetector.DetectSeoDuplicatesAsync(objectType, objectId, seoDuplicates);
             return Ok(retVal.ToArray());
         }
 

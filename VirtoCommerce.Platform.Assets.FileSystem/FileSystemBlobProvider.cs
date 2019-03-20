@@ -56,7 +56,6 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
                 retVal.Name = fileInfo.Name;
                 retVal.ModifiedDate = fileInfo.LastWriteTimeUtc;
                 retVal.RelativeUrl = GetRelativeUrl(retVal.Url);
-
             }
 
             return Task.FromResult(retVal);

@@ -43,9 +43,10 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             image.ModifiedDate = ModifiedDate;
 
             image.Group = Group;
-            image.LanguageCode = LanguageCode;         
+            image.LanguageCode = LanguageCode;
             image.Name = Name;
             image.SortOrder = SortOrder;
+            image.Url = Url;
             image.RelativeUrl = Url;
 
             return image;
@@ -68,7 +69,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             LanguageCode = image.LanguageCode;
             Name = image.Name;
             SortOrder = image.SortOrder;
-            Url = image.RelativeUrl;
+            Url = !string.IsNullOrEmpty(image.RelativeUrl) ? image.RelativeUrl : image.Url;
 
             return this;
         }

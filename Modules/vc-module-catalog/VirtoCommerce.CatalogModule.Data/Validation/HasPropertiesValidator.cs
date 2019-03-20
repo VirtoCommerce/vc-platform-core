@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using FluentValidation;
 using FluentValidation.Results;
 using VirtoCommerce.CatalogModule.Core.Model;
-using PropertyValidationRule = VirtoCommerce.CatalogModule.Core.Model.PropertyValidationRule;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Validation
 {
@@ -20,22 +22,30 @@ namespace VirtoCommerce.CatalogModule.Data.Validation
             _propertyValidatorFactory = propertyValidatorFactory;
         }
 
-        public override ValidationResult Validate(ValidationContext<IHasProperties> context)
+        public override async Task<ValidationResult> ValidateAsync(ValidationContext<IHasProperties> context, CancellationToken cancellation = default(CancellationToken))
         {
             var validationResults = new List<ValidationResult>();
-
-            foreach (var property in context.InstanceToValidate?.Properties ?? Enumerable.Empty<Property>())
+            if (!context.InstanceToValidate.Properties.IsNullOrEmpty())
             {
-                foreach (var rule in property?.ValidationRules ?? Enumerable.Empty<PropertyValidationRule>())
+                var propertyValues = context.InstanceToValidate.Properties.SelectMany(pv => pv.Values).ToArray();
+                if (!propertyValues.IsNullOrEmpty())
                 {
-                    var ruleValidator = _propertyValidatorFactory(rule);
-                    foreach (var value in property?.Values ?? Enumerable.Empty<PropertyValue>())
+                    foreach (var propertyValue in propertyValues)
                     {
-                        var validationResult = ruleValidator.Validate(value);
-                        validationResults.Add(validationResult);
+                        var rules = propertyValue?.Property?.ValidationRules;
+                        if (rules != null)
+                        {
+                            foreach (var rule in rules)
+                            {
+                                var ruleValidator = _propertyValidatorFactory(rule);
+                                var validationResult = await ruleValidator.ValidateAsync(propertyValue, cancellation);
+                                validationResults.Add(validationResult);
+                            }
+                        }
                     }
                 }
             }
+
             var errors = validationResults.SelectMany(x => x.Errors);
             return new ValidationResult(errors);
         }

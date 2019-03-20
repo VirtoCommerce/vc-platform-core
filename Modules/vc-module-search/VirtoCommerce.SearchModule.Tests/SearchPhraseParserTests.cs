@@ -1,7 +1,6 @@
 using System.Linq;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
-using VirtoCommerce.SearchModule.Data.Search.SearchPhraseParsing;
 using VirtoCommerce.SearchModule.Data.SearchPhraseParsing;
 using Xunit;
 
@@ -9,7 +8,7 @@ namespace VirtoCommerce.SearchModule.Tests
 {
     [Trait("Category", "Unit")]
     public class SearchPhraseParserTests
-    {    
+    {
         [Fact]
         public void TestKeywords()
         {
@@ -17,7 +16,7 @@ namespace VirtoCommerce.SearchModule.Tests
             var result = parser.Parse(" one two three ");
 
             Assert.NotNull(result);
-            Assert.Equal("one two three", result.SearchPhrase);
+            Assert.Equal("one two three", result.Keyword);
             Assert.Empty(result.Filters);
         }
 
@@ -28,7 +27,7 @@ namespace VirtoCommerce.SearchModule.Tests
             var result = parser.Parse("!size:medium");
 
             Assert.NotNull(result);
-            Assert.Equal(string.Empty, result.SearchPhrase);
+            Assert.Equal(string.Empty, result.Keyword);
             Assert.NotNull(result.Filters);
             Assert.Equal(1, result.Filters.Count);
 
@@ -44,7 +43,7 @@ namespace VirtoCommerce.SearchModule.Tests
             var result = parser.Parse("color:red,blue");
 
             Assert.NotNull(result);
-            Assert.Equal(string.Empty, result.SearchPhrase);
+            Assert.Equal(string.Empty, result.Keyword);
             Assert.NotNull(result.Filters);
             Assert.Equal(1, result.Filters.Count);
 
@@ -70,7 +69,7 @@ namespace VirtoCommerce.SearchModule.Tests
             var result = parser.Parse("size:(10 TO 20],[30 to 40)");
 
             Assert.NotNull(result);
-            Assert.Equal(string.Empty, result.SearchPhrase);
+            Assert.Equal(string.Empty, result.Keyword);
             Assert.NotNull(result.Filters);
             Assert.Equal(1, result.Filters.Count);
 
@@ -98,7 +97,7 @@ namespace VirtoCommerce.SearchModule.Tests
             result = parser.Parse("size:(TO 10]");
 
             Assert.NotNull(result);
-            Assert.Equal(string.Empty, result.SearchPhrase);
+            Assert.Equal(string.Empty, result.Keyword);
             Assert.NotNull(result.Filters);
             Assert.Equal(1, result.Filters.Count);
 
@@ -120,7 +119,7 @@ namespace VirtoCommerce.SearchModule.Tests
             result = parser.Parse("size:(10 TO]");
 
             Assert.NotNull(result);
-            Assert.Equal(string.Empty, result.SearchPhrase);
+            Assert.Equal(string.Empty, result.Keyword);
             Assert.NotNull(result.Filters);
             Assert.Equal(1, result.Filters.Count);
 
@@ -146,7 +145,7 @@ namespace VirtoCommerce.SearchModule.Tests
             var result = parser.Parse("one brand:apple two");
 
             Assert.NotNull(result);
-            Assert.Equal("one two", result.SearchPhrase);
+            Assert.Equal("one two", result.Keyword);
             Assert.NotNull(result.Filters);
             Assert.Equal(1, result.Filters.Count);
 
@@ -173,7 +172,7 @@ namespace VirtoCommerce.SearchModule.Tests
             var result = parser.Parse("one \"two \\r\\n\\t\\\\ three\" four");
 
             Assert.NotNull(result);
-            Assert.Equal("one two \r\n\t\\ three four", result.SearchPhrase);
+            Assert.Equal("one two \r\n\t\\ three four", result.Keyword);
             Assert.Empty(result.Filters);
 
 
@@ -181,7 +180,7 @@ namespace VirtoCommerce.SearchModule.Tests
             result = parser.Parse("\"color \\r\\n\\t\\\\ 2\":\"light \\r\\n\\t\\\\ blue\"");
 
             Assert.NotNull(result);
-            Assert.Equal(string.Empty, result.SearchPhrase);
+            Assert.Equal(string.Empty, result.Keyword);
             Assert.NotNull(result.Filters);
             Assert.Equal(1, result.Filters.Count);
 
@@ -200,7 +199,7 @@ namespace VirtoCommerce.SearchModule.Tests
             result = parser.Parse("date:[\"2017-04-23T15:24:31.180Z\" to \"2017-04-28T15:24:31.180Z\"]");
 
             Assert.NotNull(result);
-            Assert.Equal(string.Empty, result.SearchPhrase);
+            Assert.Equal(string.Empty, result.Keyword);
             Assert.NotNull(result.Filters);
             Assert.Equal(1, result.Filters.Count);
 
