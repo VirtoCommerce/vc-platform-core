@@ -230,6 +230,7 @@
                 id: 'BlockPricingCondition',
                 newChildLabel: '+ add condition'
             });
+            
             dynamicExpressionService.registerExpression({
                 groupName: groupNames[1],
                 id: 'UserGroupsContainsCondition',

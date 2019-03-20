@@ -31,7 +31,8 @@ angular.module(moduleName, ['ui.grid.cellNav', 'ui.grid.edit', 'ui.grid.validate
   }]
 )
 .run(
-  ['$rootScope', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', 'platformWebApp.authService', function ($rootScope, mainMenuService, widgetService, $state, authService) {
+  ['$http', '$compile', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', '$state', 'platformWebApp.authService'
+  , function ($http, $compile, mainMenuService, widgetService, $state, authService) {
       //Register module in main menu
       var menuItem = {
           path: 'browse/pricing',
@@ -62,4 +63,9 @@ angular.module(moduleName, ['ui.grid.cellNav', 'ui.grid.edit', 'ui.grid.validate
           controller: 'virtoCommerce.pricingModule.assignmentsWidgetController',
           template: 'Modules/$(VirtoCommerce.Pricing)/Scripts/widgets/assignmentsWidget.tpl.html',
       }, 'pricelistDetail');
+      
+      $http.get('Modules/$(VirtoCommerce.Pricing)/Scripts/dynamicExpression/templates.html').then(function (response) {
+            // compile the response, which will put stuff into the cache
+            $compile(response.data);
+        });
   }]);

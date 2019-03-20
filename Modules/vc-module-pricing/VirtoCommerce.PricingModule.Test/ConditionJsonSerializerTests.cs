@@ -5,25 +5,22 @@ using System.Threading.Tasks;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Common.Conditions;
 using VirtoCommerce.CoreModule.Core.Conditions;
+using VirtoCommerce.CoreModule.Core.Conditions.Browse;
 using VirtoCommerce.PricingModule.Core.Model;
-using VirtoCommerce.PricingModule.Data.DynamicExpressions.Pricing;
-using VirtoCommerce.PricingModule.Data.Services;
 using Xunit;
 
 namespace VirtoCommerce.PricingModule.Test
 {
-    public class XmlExpressionSerializerTests
+    public class ConditionJsonSerializerTests
     {
-        private readonly XmlExpressionSerializer _serializer;
 
-        public XmlExpressionSerializerTests()
+        public ConditionJsonSerializerTests()
         {
-            _serializer = new XmlExpressionSerializer();
         }
 
         private static async Task<string> ReadTextFromEmbeddedResourceAsync(string filePath)
         {
-            var currentAssembly = typeof(XmlExpressionSerializerTests).Assembly;
+            var currentAssembly = typeof(ConditionJsonSerializerTests).Assembly;
             var resourcePath = $"{currentAssembly.GetName().Name}.{filePath}";
 
             using (var resourceStream = currentAssembly.GetManifestResourceStream(resourcePath))
@@ -34,34 +31,33 @@ namespace VirtoCommerce.PricingModule.Test
         }
 
         [Fact]
-        public async Task TestExpressionSerialization()
+        public async Task TestConditionSerialization()
         {
-            //TODO
             // Arrange
             var condition = new BlockPricingCondition
             {
-                //All = false,
-                //Children = new List<DynamicExpression>
-                //{
-                //    new ConditionStoreSearchedPhrase
-                //    {
-                //        MatchCondition = ExpressionConstants.ConditionOperation.Contains,
-                //        Value = "test"
-                //    },
-                //    new ConditionGenderIs
-                //    {
-                //        MatchCondition = ExpressionConstants.ConditionOperation.Matching,
-                //        Value = "male"
-                //    },
-                //    new ConditionAgeIs
-                //    {
-                //        CompareCondition = ExpressionConstants.ConditionOperation.IsGreaterThanOrEqual,
-                //        Value = 18
-                //    }
-                //}
+                All = false,
+                Children = new List<IConditionTree>
+                {
+                    new ConditionStoreSearchedPhrase
+                    {
+                        MatchCondition = ConditionOperation.Contains,
+                        Value = "test"
+                    },
+                    new ConditionGenderIs
+                    {
+                        MatchCondition = ConditionOperation.Matching,
+                        Value = "male"
+                    },
+                    new ConditionAgeIs
+                    {
+                        CompareCondition = ConditionOperation.IsGreaterThanOrEqual,
+                        Value = 18
+                    }
+                }
             };
 
-            var expressionTree = new ConditionTree
+            var conditionTree = new ConditionTree
             {
                 Children = new List<IConditionTree> { condition }
             };
