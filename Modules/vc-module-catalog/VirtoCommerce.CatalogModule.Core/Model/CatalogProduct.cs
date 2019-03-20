@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using VirtoCommerce.CatalogModule.Core.Serialization;
 using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.CoreModule.Core.Outlines;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.InventoryModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
