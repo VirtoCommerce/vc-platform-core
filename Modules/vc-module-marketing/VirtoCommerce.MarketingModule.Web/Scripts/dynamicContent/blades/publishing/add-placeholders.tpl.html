@@ -1,0 +1,52 @@
+﻿<div class="blade-static __bottom" ng-if="pageSettings.itemsPerPageCount < pageSettings.totalItems" ng-include="'pagerTemplate.html'"></div>
+<div class="blade-content __medium-wide">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <fieldset>
+                <legend class="ng-binding">{{ 'marketing.blades.publishing.add-placeholders.labels.chosen-placeholders' | translate }}</legend>
+                <div class="form-group">
+                    <a class="clear text-mini __link" ng-click="blade.deleteAllPlaceholder()" ng-if="blade.publication.contentPlaces.length">{{ 'platform.commands.clear-all' | translate }}</a>
+                    <ul class="list __inline __chosen">
+                        <li class="list-item" ng-repeat="place in blade.publication.contentPlaces">
+                            <a class="list-remove" ng-click="blade.deletePlaceholder(place)">×</a>
+                            <span class="list-name">{{place.path}}\{{place.name}}</span>
+                        </li>
+                    </ul>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend class="ng-binding">{{ 'marketing.blades.publishing.add-placeholders.labels.content-placeholders' | translate }}</legend>
+                <va-breadcrumb ng-model="blade.breadcrumbs" blade-id="blade.id"></va-breadcrumb>
+
+                <div class="table-wrapper" ng-show="pageSettings.totalItems > 0" ng-init="setGridOptions({
+                    data: 'blade.currentEntity.listEntries',
+                    useExternalSorting: true,
+                    rowTemplate: 'add-placeholder.row.html',
+                    rowHeight: 50,
+                    columnDefs: [
+                     { name: 'imageUrl', displayName: 'marketing.blades.publishing.add-placeholders.labels.picture', cellTemplate: 'dynamic-content-icon.cell.html', enableColumnResizing: false, enableSorting: false, width: 60 },
+                     { name: 'name', displayName: 'marketing.blades.publishing.add-placeholders.labels.name' },
+                     { name: 'description', displayName: 'marketing.blades.publishing.add-placeholders.labels.description'}
+                     ]})">
+                    <div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-save-state ui-grid-resize-columns ui-grid-move-columns ui-grid-height></div>
+                </div>
+                <div class="note" ng-if="!pageSettings.totalItems">
+                    {{ 'marketing.blades.publishing.add-placeholders.labels.no-data' | translate }}
+                </div>
+            </fieldset>
+        </div>
+    </div>
+</div>
+
+<script id="add-placeholder.row.html" type="text/ng-template">
+    <div ng-click='grid.appScope.blade.selectNode(row.entity)' ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" ui-grid-one-bind-id-grid="rowRenderIndex + '-' + col.uid + '-cell'" class="ui-grid-cell" ng-class="{'ui-grid-row-header-cell': col.isRowHeader}" role="{{col.isRowHeader ? 'rowheader' : 'gridcell' }}" ui-grid-cell></div>
+</script>
+
+<script id="dynamic-content-icon.cell.html" type="text/ng-template">
+    <div class="ui-grid-cell-contents">
+        <div class="product-img">
+            <i class="table-ico fa fa-folder" ng-if="row.entity.isFolder"></i>
+            <div class="image" style="background-image: url('{{COL_FIELD}}');" va-showbigimage="COL_FIELD" ng-if="!row.entity.isFolder"></div>
+        </div>
+    </div>
+</script>

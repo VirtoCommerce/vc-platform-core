@@ -93,7 +93,6 @@ namespace VirtoCommerce.CoreModule.Web
                 dbContext.Database.EnsureCreated();
                 dbContext.Database.Migrate();
             }
-
         }
 
         public void Uninstall()

@@ -30,6 +30,7 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
             var cacheKey = CacheKey.With(GetType(), "SearchDictionaryItemsAsync", criteria.GetHashCode().ToString());
             return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
+                cacheEntry.AddExpirationToken(DynamicPropertiesCacheRegion.CreateChangeToken());
                 var result = new GenericSearchResult<DynamicPropertyDictionaryItem>();
                 using (var repository = _repositoryFactory())
                 {
@@ -72,6 +73,7 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
             var cacheKey = CacheKey.With(GetType(), "SearchDynamicPropertiesAsync", criteria.GetHashCode().ToString());
             return await _memoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
+                cacheEntry.AddExpirationToken(DynamicPropertiesCacheRegion.CreateChangeToken());
                 var result = new GenericSearchResult<DynamicProperty>();
                 using (var repository = _repositoryFactory())
                 {
