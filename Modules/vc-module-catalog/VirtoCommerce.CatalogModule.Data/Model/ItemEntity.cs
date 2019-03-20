@@ -115,7 +115,9 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public virtual CatalogProduct ToModel(CatalogProduct product, bool convertChildrens = true, bool convertAssociations = true)
         {
             if (product == null)
+            {
                 throw new ArgumentNullException(nameof(product));
+            }
 
 
             product.Id = Id;
@@ -172,17 +174,21 @@ namespace VirtoCommerce.CatalogModule.Data.Model
                 product.ReferencedAssociations = ReferencedAssociations.Select(x => x.ToReferencedAssociationModel(AbstractTypeFactory<ProductAssociation>.TryCreateInstance())).OrderBy(x => x.Priority).ToList();
             }
 
-            product.Properties = new List<Property>();
-            foreach (var propValues in ItemPropertyValues.GroupBy(x => x.Name))
-            {   
-                //Need add property (without meta information) for each values group with the same property name
-                var property = AbstractTypeFactory<Property>.TryCreateInstance();
-                property.Name = propValues.Key;
-                property.Type = PropertyType.Product;
-                property.Values = propValues.OrderBy(x => x.Id).Select(x => x.ToModel(AbstractTypeFactory<PropertyValue>.TryCreateInstance())).ToList();
-                product.Properties.Add(property);
+            //item property values
+            if (!ItemPropertyValues.IsNullOrEmpty())
+            {
+                var propertyValues = ItemPropertyValues.SelectMany(pv => pv.ToModel(AbstractTypeFactory<PropertyValue>.TryCreateInstance()).ToList());
+                product.Properties = propertyValues.GroupBy(pv => pv.PropertyName).Select(values =>
+                {
+                    var property = AbstractTypeFactory<Property>.TryCreateInstance();
+                    property.Name = values.Key;
+                    property.ValueType = values.FirstOrDefault().ValueType;
+                    property.Values = values.ToList();
+                    property.Catalog = product.Catalog;
+                    return property;
+                }).ToList();
             }
-          
+
             if (Parent != null)
             {
                 product.MainProduct = Parent.ToModel(AbstractTypeFactory<CatalogProduct>.TryCreateInstance(), false, convertAssociations);
@@ -191,10 +197,10 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             if (convertChildrens)
             {
                 // Variations
-                product.Variations = new List<Variation>();
+                product.Variations = new List<CatalogProduct>();
                 foreach (var variation in Childrens)
                 {
-                    var productVariation = variation.ToModel(AbstractTypeFactory<Variation>.TryCreateInstance()) as Variation;
+                    var productVariation = variation.ToModel(AbstractTypeFactory<CatalogProduct>.TryCreateInstance());
                     productVariation.MainProduct = product;
                     productVariation.MainProductId = product.Id;
                     product.Variations.Add(productVariation);
@@ -206,7 +212,9 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public virtual ItemEntity FromModel(CatalogProduct product, PrimaryKeyResolvingMap pkMap)
         {
             if (product == null)
+            {
                 throw new ArgumentNullException(nameof(product));
+            }
 
             pkMap.AddPair(product, this);
 
@@ -257,17 +265,29 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             CategoryId = string.IsNullOrEmpty(product.CategoryId) ? null : product.CategoryId;
 
             #region ItemPropertyValues
-            if (product.Properties != null)
+
+            PropertyValue[] values = null;
+
+            if (!product.Properties.IsNullOrEmpty())
             {
-                ItemPropertyValues = new ObservableCollection<PropertyValueEntity>();
-                foreach (var propertyValue in product.Properties.SelectMany(x => x.Values))
-                {
-                    if (!propertyValue.IsInherited && propertyValue.Value != null && !string.IsNullOrEmpty(propertyValue.Value.ToString()))
-                    {
-                        ItemPropertyValues.Add(AbstractTypeFactory<PropertyValueEntity>.TryCreateInstance().FromModel(propertyValue, pkMap));
-                    }
-                }
+                values = product.Properties.SelectMany(pr => pr.Values).ToArray();
             }
+
+            if (!product.PropertyValues.IsNullOrEmpty())
+            {
+                values = values.IsNullOrEmpty() ? product.PropertyValues.ToArray() : values.Union(product.PropertyValues).ToArray();
+            }
+
+            if (!values.IsNullOrEmpty())
+            {
+                var propertyValues = new ObservableCollection<PropertyValueEntity>(
+                    AbstractTypeFactory<PropertyValueEntity>
+                        .TryCreateInstance()
+                        .FromModels(values, pkMap));
+
+                ItemPropertyValues = new ObservableCollection<PropertyValueEntity>(propertyValues);
+            }
+
             #endregion
 
             #region Assets
@@ -375,7 +395,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             #region Links
             if (!CategoryLinks.IsNullCollection())
             {
-                CategoryLinks.Patch(target.CategoryLinks, (sourcePropValue, targetPropValue) => sourcePropValue.Patch(targetPropValue));
+                CategoryLinks.Patch(target.CategoryLinks, new CategoryItemRelationComparer(),
+                                         (sourcePropValue, targetPropValue) => sourcePropValue.Patch(targetPropValue));
             }
             #endregion
 

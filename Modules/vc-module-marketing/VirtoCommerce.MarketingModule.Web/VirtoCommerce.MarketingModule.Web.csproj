@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp2.1</TargetFramework>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <NoWarn>1701;1702;1705;1591</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Hangfire" Version="1.6.22" />
+        <PackageReference Include="Microsoft.AspNetCore" Version="2.1.6" />
+        <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.6" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.1.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\vc-module-core\VirtoCommerce.CoreModule.Core\VirtoCommerce.CoreModule.Core.csproj" />
+      <ProjectReference Include="..\VirtoCommerce.MarketingModule.Core\VirtoCommerce.MarketingModule.Core.csproj" />
+      <ProjectReference Include="..\VirtoCommerce.MarketingModule.Data\VirtoCommerce.MarketingModule.Data.csproj" />
+    </ItemGroup>
+
+</Project>

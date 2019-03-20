@@ -1,6 +1,6 @@
 angular.module('virtoCommerce.catalogModule')
     .controller('virtoCommerce.catalogModule.categoriesItemsListController', [
-        '$sessionStorage', '$localStorage', '$timeout', '$scope', 'virtoCommerce.catalogModule.categories', 'virtoCommerce.catalogModule.items', 'virtoCommerce.catalogModule.listEntries', 'platformWebApp.bladeUtils', 'platformWebApp.dialogService', 'platformWebApp.authService', 'platformWebApp.uiGridHelper', 'virtoCommerce.catalogModule.catalogs',
+        '$sessionStorage', '$localStorage', '$timeout', '$scope',  'virtoCommerce.catalogModule.categories', 'virtoCommerce.catalogModule.items', 'virtoCommerce.catalogModule.listEntries', 'platformWebApp.bladeUtils', 'platformWebApp.dialogService', 'platformWebApp.authService', 'platformWebApp.uiGridHelper', 'virtoCommerce.catalogModule.catalogs',
         function ($sessionStorage, $localStorage, $timeout, $scope, categories, items, listEntries, bladeUtils, dialogService, authService, uiGridHelper, catalogs) {
             $scope.uiGridConstants = uiGridHelper.uiGridConstants;
             $scope.hasMore = true;
@@ -8,7 +8,6 @@ angular.module('virtoCommerce.catalogModule')
 
             var blade = $scope.blade;
             var bladeNavigationService = bladeUtils.bladeNavigationService;
-            // blade.catalog = bladeNavigationService.catalogsSelectedCatalog;
             if (blade.catalogId)
                 blade.catalog = catalogs.get({ id: blade.catalogId });
 
@@ -27,8 +26,8 @@ angular.module('virtoCommerce.catalogModule')
                         transformByFilters(data.listEntries);
                         blade.isLoading = false;
                         $scope.pageSettings.totalItems = data.totalCount;
-                        $scope.items = data.results;
-                        $scope.hasMore = data.results.length === $scope.pageSettings.itemsPerPageCount;
+                        $scope.items = data.listEntries;
+                        $scope.hasMore = data.listEntries.length === $scope.pageSettings.itemsPerPageCount;
 
                         //Set navigation breadcrumbs
                         setBreadcrumbs();
@@ -54,8 +53,8 @@ angular.module('virtoCommerce.catalogModule')
                             transformByFilters(data.listEntries);
                             blade.isLoading = false;
                             $scope.pageSettings.totalItems = data.totalCount;
-                            $scope.items = $scope.items.concat(data.results);
-                            $scope.hasMore = data.results.length === $scope.pageSettings.itemsPerPageCount;
+                            $scope.items = $scope.items.concat(data.listEntries);
+                            $scope.hasMore = data.listEntries.length === $scope.pageSettings.itemsPerPageCount;
                             $scope.gridApi.infiniteScroll.dataLoaded();
 
                             $timeout(function () {
@@ -76,6 +75,7 @@ angular.module('virtoCommerce.catalogModule')
                     catalogId: blade.catalogId,
                     categoryId: blade.categoryId,
                     keyword: filter.keyword ? filter.keyword : undefined,
+                    searchInVariations: filter.searchInVariations ? filter.searchInVariations : false,
                     responseGroup: 'withCategories, withProducts',
                     sort: uiGridHelper.getSortExpression($scope),
                     skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
@@ -115,7 +115,7 @@ angular.module('virtoCommerce.catalogModule')
                         function () {
                             blade.disableOpenAnimation = true;
                             bladeNavigationService.showBlade(blade, blade.parentBlade);
-                            blade.refresh();
+                           // blade.refresh();
                         });
                 };
             }
@@ -240,23 +240,42 @@ angular.module('virtoCommerce.catalogModule')
 
             function mapChecked() {
                 bladeNavigationService.closeChildrenBlades(blade);
-                var selection = $scope.gridApi.selection.getSelectedRows();
-                var listEntryLinks = [];
-                angular.forEach(selection, function (listItem) {
-                    listEntryLinks.push({
-                        listEntryId: listItem.id,
-                        listEntryType: listItem.type,
-                        catalogId: blade.parentBlade.catalogId,
-                        categoryId: blade.parentBlade.categoryId,
-                    });
-                });
 
                 blade.isLoading = true;
-                listEntries.createlinks(listEntryLinks, function () {
-                    blade.refresh();
-                    blade.parentBlade.refresh();
-                },
-                    function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+
+                if ($scope.gridApi && $scope.gridApi.selection.getSelectAllState()) {
+                    listEntries.bulkcreatelinks(
+                        {
+                            SearchCriteria: getSearchCriteria(),
+                            CatalogId: blade.parentBlade.catalogId,
+                            CategoryId: blade.parentBlade.categoryId
+                        },
+                        function () {
+                            blade.refresh();
+                            blade.parentBlade.refresh();
+                        },
+                        function (error) {
+                            bladeNavigationService.setError('Error ' + error.status, blade);
+                        }
+                    );
+                } else {
+                    var selection = $scope.gridApi.selection.getSelectedRows();
+                    var listEntryLinks = [];
+                    angular.forEach(selection, function (listItem) {
+                        listEntryLinks.push({
+                            listEntryId: listItem.id,
+                            listEntryType: listItem.type,
+                            catalogId: blade.parentBlade.catalogId,
+                            categoryId: blade.parentBlade.categoryId,
+                        });
+                    });
+                    
+                    listEntries.createlinks(listEntryLinks, function () {
+                            blade.refresh();
+                            blade.parentBlade.refresh();
+                        },
+                        function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+                }
             }
 
             blade.setSelectedItem = function (listItem) {
@@ -438,23 +457,6 @@ angular.module('virtoCommerce.catalogModule')
                     },
                     permission: 'catalog:create'
                 }
-
-                //{
-                //    name: "Advanced search", icon: 'fa fa-search',
-                //    executeMethod: function () {
-                //        var newBlade = {
-                //            id: 'listItemChild',
-                //            title: 'Advanced search',
-                //            subtitle: 'Searching within...',
-                //            controller: 'virtoCommerce.catalogModule.advancedSearchController',
-                //            template: 'Modules/$(VirtoCommerce.Catalog)/Scripts/blades/advanced-search.tpl.html'
-                //        };
-                //        bladeNavigationService.showBlade(newBlade, blade.parentBlade);
-                //    },
-                //    canExecuteMethod: function () {
-                //        return true;
-                //    }
-                //}
             ];
 
             if (blade.isBrowsingLinkedCategory) {
@@ -545,8 +547,6 @@ angular.module('virtoCommerce.catalogModule')
                     uiGridHelper.bindRefreshOnSortChanged($scope);
                     $scope.gridApi.infiniteScroll.on.needLoadMoreData($scope, showMore);
                 });
-
-                blade.refresh();
             };
 
             //No need to call this because page 'pageSettings.currentPage' is watched!!! It would trigger subsequent duplicated req...

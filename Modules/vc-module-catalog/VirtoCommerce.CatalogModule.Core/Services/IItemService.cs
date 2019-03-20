@@ -1,12 +1,13 @@
-using System.Collections.Generic;
+using System.Threading.Tasks;
 using VirtoCommerce.CatalogModule.Core.Model;
+
 namespace VirtoCommerce.CatalogModule.Core.Services
 {
     public interface IItemService
     {
-        IEnumerable<CatalogProduct> GetByIds(IEnumerable<string> itemIds, string respGroup = null, string catalogId = null);
-        void SaveChanges(IEnumerable<CatalogProduct> products);       
-        void Delete(IEnumerable<string> itemIds);
-        void LoadDependencies(IEnumerable<CatalogProduct> products);
+        Task<CatalogProduct[]> GetByIdsAsync(string[] itemIds, ItemResponseGroup respGroup, string catalogId = null);
+        Task<CatalogProduct> GetByIdAsync(string itemId, ItemResponseGroup responseGroup, string catalogId = null);
+        Task SaveChangesAsync(CatalogProduct[] items);
+        Task DeleteAsync(string[] itemIds);
     }
 }

@@ -163,6 +163,7 @@
                     "applies-to": "Applies to",
                     "value-type": "Value Type",
                     "manage-dictionary": "Manage dictionary",
+                    "new-dictionary-property-caution": "You can manage dictionary items only after saving property",
                     "attributes": "Attributes",
                     "manage-attributes": "Manage property attributes"
                 },
@@ -253,8 +254,12 @@
                     "current-values": "Current values",
                     "value": "Value",
                     "alias": "Alias",
+                    "sort-order": "Sort order",
                     "language-edit": "Edit values",
-                    "language-add": "New values"
+                    "language-add": "New values",
+                    "dictionary-edit": "Dictionary value edit",
+                    "priority": "Priority",
+                    "priority-description": "The lowest value will be used first."
                 },
                 "validations": {
                     "required": "Required",
@@ -262,10 +267,10 @@
                 },
                 "placeholders": {
                     "value": "Enter value",
-                    "alias": "Enter an alias"
+                    "alias": "Enter an alias",
+                    "priority": "Enter priority"
                 }
             },
-
             "item-detail": {
                 "subtitle-variation": "Variation details",
                 "labels": {
@@ -286,8 +291,8 @@
                     "expiration-date": "Download expiration date",
                     "download-type": "Download type",
                     "gtin": "GTIN",
-                    "start-date": "Sale start date",
-                    "end-date": "Sale expiration date"
+                    "start-date": "First listed",
+                    "end-date": "Listing expires on"
                 },
                 "validations": {
                     "sku": "SKU can't contain $+;=%{}[]|/@ ~!^*&()?:'<>, characters"
@@ -331,7 +336,6 @@
                     "sku": "SKU"
                 }
             },
-
             "editorialReviews-list": {
                 "subtitle": "Item descriptions",
                 "labels": {
@@ -534,6 +538,10 @@
                 "shallow": "Metadata",
                 "full": "Completely"
             },
+            "property-dictionary-item-delete": {
+                "message": "Are you sure you want to delete selected dictionary items?",
+                "warning": "WARNING: this change is permanent and can't be undone afterwards. It can lead to data loss."
+            },
             "virtual-catalog-save": {
                 "title": "Save changes",
                 "message": "The virtual catalog has been modified. Do you want to save changes?"
@@ -599,7 +607,7 @@
                     "code": "Code"
                 },
                 "validations": {
-                    "code": "Code can't contain $+;=%{}[]|/@ ~!^*&()?:'<>, characters"
+                    "code": "Code can't contain $+;=%{}[]|\/@ ~!^*&()?:'<>, characters"
                 },
                 "placeholders": {
                     "name": "Enter category name",
@@ -623,7 +631,7 @@
                     "seo-information-summary-undefined": "Seo information undefined"
                 },
                 "validations": {
-                    "sku": "SKU can't contain $+;=%{}[]|/@ ~!^*&()?:'<>, characters",
+                    "sku": "SKU can't contain $+;=%{}[]|\/@ ~!^*&()?:'<>, characters",
                     "sku-required": "Required",
                     "name-required": "Required"
                 },
@@ -644,7 +652,7 @@
                     "upload-images-summary": "{{ count }} image(s) uploaded"
                 },
                 "validations": {
-                    "sku": "SKU can't contain $+;=%{}[]|/@ ~!^*&()?:'<>, characters",
+                    "sku": "SKU can't contain $+;=%{}[]|\/@ ~!^*&()?:'<>, characters",
                     "sku-required": "Required",
                     "name-required": "Required"
                 },
@@ -692,7 +700,6 @@
             }
         }
     },
-
     "permissions": {
         "catalog:access": "Open catalogs menu",
         "catalog:create": "Create catalog related data",

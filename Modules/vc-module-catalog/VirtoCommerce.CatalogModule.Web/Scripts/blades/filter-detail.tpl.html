@@ -1,4 +1,4 @@
-﻿<div class="blade-content">
+<div class="blade-content">
     <div class="blade-inner">
         <div class="inner-block">
             <form name="formScope">
@@ -11,7 +11,16 @@
                 <div class="form-group">
                     <label class="form-label">{{ 'catalog.blades.filter-detail.labels.criteria' | translate }}</label>
                     <div class="form-input">
-                        <input ng-model="blade.currentEntity.keyword" required placeholder="{{ 'catalog.blades.filter-detail.placeholders.criteria' | translate }}" />
+                        <input ng-model="blade.currentEntity.keyword" placeholder="{{ 'catalog.blades.filter-detail.placeholders.criteria' | translate }}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ 'catalog.blades.filter-detail.labels.searchInVariations' | translate }}</label>
+                    <div class="form-input">
+                        <label class="form-label __switch">
+                            <input type="checkbox" ng-model="blade.currentEntity.searchInVariations">
+                            <span class="switch"></span>
+                        </label>
                     </div>
                 </div>
             </form>
@@ -43,6 +52,10 @@
                 <div class="list __info">
                     <div class="list-t">price:(TO 100]</div>
                     <div class="list-descr">where the price is less than or equal to 100</div>
+                </div>
+                <div class="list __info">
+                    <div class="list-t">!color:White</div>
+                    <div class="list-descr">use ! as NOT operator on filters</div>
                 </div>
                 <div class="list __info">
                     <div class="list-t">Da?? Red*</div>

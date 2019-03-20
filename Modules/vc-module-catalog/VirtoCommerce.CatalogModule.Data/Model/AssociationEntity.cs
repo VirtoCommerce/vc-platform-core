@@ -67,7 +67,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
             association.Type = AssociationType;
             association.Priority = Priority;
-            association.AssociatedObjectId = AssociatedItemId ?? this.AssociatedCategoryId;
+            association.AssociatedObjectId = AssociatedItemId ?? AssociatedCategoryId;
             association.Quantity = Quantity;
 
             if (AssociatedCategory != null)

@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
+using System.Linq;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -9,14 +12,13 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
     public class PropertyValueEntity : AuditableEntity
     {
-        [StringLength(64)]
+
+        [NotMapped]
         public string Alias { get; set; }
+
 
         [StringLength(64)]
         public string Name { get; set; }
-
-        [StringLength(128)]
-        public string KeyValue { get; set; }
 
         [Required]
         public int ValueType { get; set; }
@@ -47,27 +49,75 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
         public string CategoryId { get; set; }
         public virtual CategoryEntity Category { get; set; }
+
+        public string DictionaryItemId { get; set; }
+        public virtual PropertyDictionaryItemEntity DictionaryItem { get; set; }
+
         #endregion
 
-        public virtual PropertyValue ToModel(PropertyValue propValue)
+        public virtual IEnumerable<PropertyValue> ToModel(PropertyValue propValue)
         {
             if (propValue == null)
+            {
                 throw new ArgumentNullException(nameof(propValue));
+            }
 
             propValue.Id = Id;
             propValue.CreatedBy = CreatedBy;
             propValue.CreatedDate = CreatedDate;
             propValue.ModifiedBy = ModifiedBy;
             propValue.ModifiedDate = ModifiedDate;
-
-            propValue.Alias = Alias;
             propValue.LanguageCode = Locale;
             propValue.PropertyName = Name;
-            propValue.ValueId = KeyValue;
+            propValue.ValueId = DictionaryItemId;
             propValue.ValueType = (PropertyValueType)ValueType;
-            propValue.Value = GetValue(propValue.ValueType);
+            propValue.Value = DictionaryItem != null ? DictionaryItem.Alias : GetValue(propValue.ValueType);
+            propValue.Alias = DictionaryItem?.Alias;
+            //Need to expand all dictionary values
+            if (DictionaryItem != null && !DictionaryItem.DictionaryItemValues.IsNullOrEmpty())
+            {
+                foreach (var dictItemValue in DictionaryItem.DictionaryItemValues)
+                {
+                    var dictPropValue = propValue.Clone() as PropertyValue;
+                    dictPropValue.Alias = DictionaryItem.Alias;
+                    dictPropValue.ValueId = DictionaryItem.Id;
+                    dictPropValue.LanguageCode = dictItemValue.Locale;
+                    dictPropValue.Value = dictItemValue.Value;
+                    yield return dictPropValue;
 
-            return propValue;
+                }
+            }
+            else
+            {
+                yield return propValue;
+            }
+        }
+
+        public virtual IEnumerable<PropertyValueEntity> FromModels(IEnumerable<PropertyValue> propValues, PrimaryKeyResolvingMap pkMap)
+        {
+            if (propValues == null)
+            {
+                throw new ArgumentNullException(nameof(propValues));
+            }
+
+            var groupedValues = propValues.Where(x => !x.IsInherited && (!string.IsNullOrEmpty(x.ValueId) || !string.IsNullOrEmpty(x.Value?.ToString())))
+                                           .Select(x => AbstractTypeFactory<PropertyValueEntity>.TryCreateInstance().FromModel(x, pkMap))
+                                           .GroupBy(x => x.DictionaryItemId);
+
+            var result = new List<PropertyValueEntity>();
+            foreach (var group in groupedValues)
+            {
+                if (group.Key == null)
+                {
+                    result.AddRange(group);
+                }
+                else
+                {
+                    result.Add(group.FirstOrDefault());
+                }
+            }
+            return result;
+
         }
 
         public virtual PropertyValueEntity FromModel(PropertyValue propValue, PrimaryKeyResolvingMap pkMap)
@@ -82,31 +132,31 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             CreatedDate = propValue.CreatedDate;
             ModifiedBy = propValue.ModifiedBy;
             ModifiedDate = propValue.ModifiedDate;
-
-            Alias = propValue.Alias;
-            Locale = propValue.LanguageCode;
             Name = propValue.PropertyName;
             ValueType = (int)propValue.ValueType;
-            KeyValue = propValue.ValueId;
-            SetValue(propValue.ValueType, propValue.Value);
+            DictionaryItemId = propValue.ValueId;
+            //Required for manual reference
+            Alias = propValue.Alias;
+            //Store alias as value for dictionary properties values
+            SetValue(propValue.ValueType, !string.IsNullOrEmpty(DictionaryItemId) ? propValue.Alias : propValue.Value);
+            Locale = !string.IsNullOrEmpty(DictionaryItemId) ? null : propValue.LanguageCode;
 
             return this;
         }
 
         public virtual void Patch(PropertyValueEntity target)
         {
-            target.Alias = Alias;
             target.BooleanValue = BooleanValue;
             target.DateTimeValue = DateTimeValue;
             target.DecimalValue = DecimalValue;
             target.IntegerValue = IntegerValue;
-            target.KeyValue = KeyValue;
+            target.DictionaryItemId = DictionaryItemId;
             target.Locale = Locale;
             target.LongTextValue = LongTextValue;
             target.Name = Name;
             target.ShortTextValue = ShortTextValue;
             target.ValueType = ValueType;
-        }     
+        }
 
 
         protected virtual object GetValue(PropertyValueType valueType)

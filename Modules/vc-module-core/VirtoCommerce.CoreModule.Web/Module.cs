@@ -10,7 +10,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.CoreModule.Core;
 using VirtoCommerce.CoreModule.Core.Common;
-using VirtoCommerce.CoreModule.Core.Common.Conditions;
 using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.CoreModule.Core.Conditions.Browse;
 using VirtoCommerce.CoreModule.Core.Conditions.GeoConditions;
@@ -94,7 +93,6 @@ namespace VirtoCommerce.CoreModule.Web
                 dbContext.Database.EnsureCreated();
                 dbContext.Database.Migrate();
             }
-
         }
 
         public void Uninstall()

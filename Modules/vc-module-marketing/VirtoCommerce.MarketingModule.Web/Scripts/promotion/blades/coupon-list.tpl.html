@@ -1,0 +1,45 @@
+﻿<div class="blade-static">
+    <div class="form-group">        
+        <div class="form-input __search">
+            <input placeholder="{{'platform.placeholders.search-keyword' | translate}}" ng-model="filter.keyword" ng-keyup="$event.which === 13 && filter.criteriaChanged()" style="width: 380px;">
+            <button class="btn __other" style="position: relative; right: 45px;">
+                <i class="btn-ico fa fa-remove" title="Clear" ng-click="filter.keyword = null; filter.criteriaChanged()"></i>
+            </button>
+        </div>
+        <p class="form-count">{{ 'platform.list.count' | translate }}: <span class="count" ng-bind="pageSettings.totalItems | number:0"></span></p>
+    </div>
+</div>
+<div class="blade-static __bottom" ng-if="pageSettings.itemsPerPageCount < pageSettings.totalItems" ng-include="'pagerTemplate.html'"></div>
+<div class="blade-content __medium-wide">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <div class="note" ng-show="pageSettings.totalItems === 0" ng-bind="'marketing.blades.coupons.no-coupons-message' | translate"></div>
+            <div class="table-wrapper" ng-show="pageSettings.totalItems > 0" ng-init="setGridOptions({
+                useExternalSorting: true,
+                rowTemplate: 'coupon-list.row.html',
+                columnDefs: [{
+                    name: 'code',
+                    displayName: 'marketing.blades.coupons.code'
+                }, {
+                    name: 'totalUsesCount',
+                    displayName: 'marketing.blades.coupons.total-uses-count'
+                }, {
+                    name: 'maxUsesNumber',
+                    displayName: 'marketing.blades.coupons.max-uses-number',
+                }]
+            })">
+                <div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-save-state ui-grid-selection ui-grid-resize-columns ui-grid-move-columns ui-grid-pinning ui-grid-height></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="coupon-list.row.html" type="text/ng-template">
+    <div class="ui-grid-cell"
+         ng-click="grid.appScope.selectNode(row.entity)"
+         ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid"
+         ui-grid-one-bind-id-grid="rowRenderIndex + '-' + col.uid + '-cell'"
+         ng-class="{'ui-grid-row-header-cell': col.isRowHeader, '__hovered': grid.appScope.contextMenuEntity === row.entity, '__selected': row.entity.id===grid.appScope.selectedNodeId }"
+         role="{{col.isRowHeader ? 'rowheader' : 'gridcell' }}"
+         ui-grid-cell></div>
+</script>

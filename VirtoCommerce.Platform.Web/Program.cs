@@ -19,6 +19,7 @@ namespace VirtoCommerce.Platform.Web
                   logging.AddConsole();
                   logging.AddDebug();
               })
+              .UseKestrel(options => options.Limits.MaxRequestBodySize = null)
               .UseStartup<Startup>();
 
     }

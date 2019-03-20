@@ -1,12 +1,12 @@
 using System.Collections.Generic;
-using VirtoCommerce.Platform.Core.Domain;
+using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.Platform.Core.Events;
 
 namespace VirtoCommerce.CatalogModule.Core.Events
 {
-    public class PropertyChangingEvent : GenericChangedEntryEvent<Model.Property>
+    public class PropertyChangingEvent : GenericChangedEntryEvent<Property>
     {
-        public PropertyChangingEvent(IEnumerable<GenericChangedEntry<Model.Property>> changedEntries)
+        public PropertyChangingEvent(IEnumerable<GenericChangedEntry<Property>> changedEntries)
             : base(changedEntries)
         {
         }
