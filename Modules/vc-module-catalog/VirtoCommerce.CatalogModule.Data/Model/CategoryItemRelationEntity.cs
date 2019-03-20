@@ -5,10 +5,8 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class CategoryItemRelationEntity : ValueObject
+    public class CategoryItemRelationEntity : Entity
     {
-        public string Id { get; set; }
-
         public int Priority { get; set; }
 
         #region Navigation Properties
@@ -28,7 +26,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             if (link == null)
                 throw new ArgumentNullException(nameof(link));
 
-            link.EntryId = ItemId;
             link.CategoryId = CategoryId;
             link.CatalogId = CatalogId;
             link.Priority = Priority;
@@ -40,7 +37,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         {
             if (link == null)
                 throw new ArgumentNullException(nameof(link));
-            
+
             CategoryId = link.CategoryId;
             CatalogId = link.CatalogId;
             Priority = link.Priority;
@@ -53,12 +50,29 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             //Nothing todo. Because we not support change  link
         }
 
-        protected override IEnumerable<object> GetEqualityComponents()
+    }
+
+    public class CategoryItemRelationComparer : IEqualityComparer<CategoryItemRelationEntity>
+    {
+        #region IEqualityComparer<CategoryItemRelation> Members
+
+        public bool Equals(CategoryItemRelationEntity x, CategoryItemRelationEntity y)
         {
-            yield return CategoryId;
-            yield return CatalogId;
+            return GetHashCode(x) == GetHashCode(y);
         }
 
-    } 
-    
+        public int GetHashCode(CategoryItemRelationEntity obj)
+        {
+            var hash = 17;
+            hash = hash * 23 + obj.CatalogId.GetHashCode();
+            hash = hash * 23 + obj.Priority.GetHashCode();
+            if (obj.CategoryId != null)
+            {
+                hash = hash * 23 + obj.CategoryId.GetHashCode();
+            }
+            return hash;
+        }
+
+        #endregion
+    }
 }

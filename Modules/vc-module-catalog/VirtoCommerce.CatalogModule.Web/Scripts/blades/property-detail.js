@@ -1,4 +1,4 @@
-﻿angular.module('virtoCommerce.catalogModule')
+angular.module('virtoCommerce.catalogModule')
     .controller('virtoCommerce.catalogModule.propertyDetailController', ['$scope', 'virtoCommerce.catalogModule.properties', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'virtoCommerce.catalogModule.valueTypes', function ($scope, properties, bladeNavigationService, dialogService, valueTypes) {
         var blade = $scope.blade;
         blade.updatePermission = 'catalog:update';
@@ -36,6 +36,8 @@
         $scope.openChild = function (childType) {
             var newBlade = { id: "propertyChild" };
             newBlade.property = blade.currentEntity;
+            newBlade.languages = blade.languages;
+            newBlade.defaultLanguage = blade.defaultLanguage;
             switch (childType) {
                 case 'attr':
                     newBlade.title = 'catalog.blades.property-attributes.title';
@@ -55,8 +57,8 @@
                     newBlade.title = 'catalog.blades.property-dictionary.title';
                     newBlade.titleValues = { name: blade.origEntity.name ? blade.origEntity.name : blade.currentEntity.name };
                     newBlade.subtitle = 'catalog.blades.property-dictionary.subtitle';
-                    newBlade.controller = 'virtoCommerce.catalogModule.propertyDictionaryController';
-                    newBlade.template = 'Modules/$(VirtoCommerce.Catalog)/Scripts/blades/property-dictionary.tpl.html';
+                    newBlade.controller = 'virtoCommerce.catalogModule.propertyDictionaryListController';
+                    newBlade.template = 'Modules/$(VirtoCommerce.Catalog)/Scripts/blades/property-dictionary-list.tpl.html';
                     break;
             }
             bladeNavigationService.showBlade(newBlade, blade);
@@ -64,15 +66,18 @@
         }
 
         function initializeBlade(data) {
-            if (data.valueType === 'Number' && data.dictionaryValues) {
-                _.forEach(data.dictionaryValues, function (entry) {
-                    entry.value = parseFloat(entry.value);
-                });
-            }
+            properties.values({ propertyId: data.id }, function (response) {
+                data.dictionaryValues = response;
+                if (data.valueType === 'Number' && data.dictionaryValues) {
+                    _.forEach(data.dictionaryValues, function (entry) {
+                        entry.value = parseFloat(entry.value);
+                    });
+                }
 
-            blade.currentEntity = angular.copy(data);
-            blade.origEntity = data;
-            blade.isLoading = false;
+                blade.currentEntity = angular.copy(data);
+                blade.origEntity = data;
+                blade.isLoading = false;
+            });
         };
 
         function isDirty() {
@@ -85,6 +90,7 @@
 
         function saveChanges() {
             blade.isLoading = true;
+            bladeNavigationService.closeChildrenBlades(blade);
 
             if (blade.currentEntity.valueType !== "ShortText" && blade.currentEntity.valueType !== "LongText") {
                 blade.currentEntity.validationRule = null;

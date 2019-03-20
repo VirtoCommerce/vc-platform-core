@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using VirtoCommerce.CustomerModule.Core.Model.Search;
-using VirtoCommerce.CustomerModule.Data.Search.Indexing;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Extenstions;
 using VirtoCommerce.SearchModule.Core.Model;
@@ -20,7 +20,7 @@ namespace VirtoCommerce.CustomerModule.Data.Search
 
         public virtual string DocumentType { get; } = KnownDocumentTypes.Member;
 
-        public virtual SearchRequest BuildRequest(SearchCriteriaBase criteria)
+        public virtual Task<SearchRequest> BuildRequestAsync(SearchCriteriaBase criteria)
         {
             SearchRequest request = null;
 
@@ -42,7 +42,7 @@ namespace VirtoCommerce.CustomerModule.Data.Search
                 };
             }
 
-            return request;
+            return Task.FromResult(request);
         }
 
 
@@ -53,7 +53,7 @@ namespace VirtoCommerce.CustomerModule.Data.Search
             if (!string.IsNullOrEmpty(criteria.Keyword))
             {
                 var parseResult = _searchPhraseParser.Parse(criteria.Keyword);
-                criteria.Keyword = parseResult.SearchPhrase;
+                criteria.Keyword = parseResult.Keyword;
                 result.AddRange(parseResult.Filters);
             }
 

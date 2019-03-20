@@ -17,6 +17,11 @@ namespace VirtoCommerce.Platform.Core.Security
         public virtual string Password { get; set; }
         public virtual IList<Role> Roles { get; set; }
 
+        /// <summary>
+        /// Indicates that the password for this user is expired and must be changed.
+        /// </summary>
+        public virtual bool PasswordExpired { get; set; }
+
         //This override methods required to correct working of the Identity DB context updates.
         //DbContext throws out an "object of an already tracked object" when attempting to update a user on an object that wasn't retrieved from the DbContext
         public override bool Equals(object obj)

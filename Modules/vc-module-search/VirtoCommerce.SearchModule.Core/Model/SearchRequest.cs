@@ -52,5 +52,10 @@ namespace VirtoCommerce.SearchModule.Core.Model
         /// Gets or sets the maximum number of documents to return in search results
         /// </summary>
         public int Take { get; set; } = 20;
+
+        /// <summary>
+        /// Gets or sets the search provider specific raw search query. If it has value, all other search criteria will be ignored.
+        /// </summary>
+        public string RawQuery { get; set; }
     }
 }

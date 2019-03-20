@@ -4,13 +4,18 @@
   left: 0
   width: $mainMenuWidth
   z-index: 100
-  &.__collapsed  
+  &.__collapsed
     width: $mainMenuCollapsedWidth
-    &+.cnt
+    & ~ .cnt
       left: $mainMenuCollapsedWidth
+    & ~ .cnt .header
+      padding-left: $mainMenuCollapsedWidth
+    .logo-img
+      background-image: url('/images/logo-small.svg')
+      background-size: auto
+    .logo-version
+        display: none
     .bar
-      .info-license
-        font-size: 11px
       .__items
         .list-item,
         .list-item.__more
@@ -25,9 +30,25 @@
           left: 44px
     .dropdown.__opened
       transform: translateX($mainMenuCollapsedWidth)
+  .logo
+    height: $headerHeight
+    width: 100%
+    z-index: 50
+    align-items: center
+    display: flex
+    &-img
+      background: url('/images/logo.svg') no-repeat scroll 15px 15px $headerBg
+      background-size: 127px 30px
+      width: 100%
+      font-size: 0
+      height: $headerHeight
+    &-version
+      color: #838d9a;
+      font-size: 10px;
+      margin-right: 20px;
   .bar
-    background: $mainMenuBg
-    box-shadow: -5px 0 5px -5px rgba(0, 0, 0, .2) inset
+    background: $navbarBg
+    box-shadow: 1px 0 0 0 $baseBrd
     box-sizing: border-box
     display: table
     width: 100%
@@ -47,7 +68,7 @@
         height: 100%
       .inner-wrapper
         position: relative
-        height: 100%
+        height: calc(100% - 120px)
         overflow-x: hidden
         overflow-y: hidden
         &:hover
@@ -64,19 +85,27 @@
         -ms-scrollbar-track-color: #545454
         .content
           position: absolute
+          left: 0
+          right: 0
           top: 0
           bottom: 0
     .__items
       .list-item
-        background: $mainMenuBg
-        border: none
-        width: $mainMenuWidth - $listItemHorizontalPadding * 2
+        background: $navbarItemBg
+        border-bottom: 1px solid $baseBrd
+        height: 20px
+        width: auto
+        &:hover
+          .list-t,
+          .list-name,
+          .list-ico
+            text-shadow: none
+          .list-ico
+            color: $colorText
         &:not(.__more)
           padding: 10px $listItemHorizontalPadding
-          &:after
-            display: none
         &.__hovered
-          background: $mainMenuBg
+          background: $navbarItemBg
         &.__animated
           animation: notify ease 1 1.5s
           .list-ico,
@@ -87,7 +116,7 @@
           &:hover .list-name,
           &:hover .list-t
             color: #fff
-            text-shadow: none            
+            text-shadow: none
         &.__draggable
           &:before
             color: #a6a6a6
@@ -109,24 +138,38 @@
             opacity: 1
             display: block
         &.__more
-          height: $mainMenuIcoSize
-          width: $mainMenuWidth - $listItemHorizontalPadding * 2 - $listItemArrowSpace
+          height: 20px
+          width: auto
           .list-ico
+            display: none
             margin: 0
+      .list-name
+        color: $colorText
       .list-ico
-        font-size: $mainMenuIcoFontSize
-        text-shadow: 1px 1px $mainMenuBg
-        width: $mainMenuIcoSize
-      .list-name,
-      .list-t
-        color: #c2c2c2
-      .list-item:hover .list-name,
-      .list-t,
-      .list-descr
-        text-shadow: 1px 1px $mainMenuBg
+        color: $colorText
+        font-size: 20px
+        height: 20px
+        line-height: 1
+        margin: 0 6px 0 0
+        text-shadow: none
+        width: 20px
+        &::before
+          display: block
+          height: 100%
+          width: 100%
+        // &::before
+        //   content: ' '
+        //   display: block
+        //   height: 100%
+        //   width: 100%
+        // &.fa-home::before
+        //   background: url('../images/navbar/home.svg') no-repeat scroll
+        // &.fa-bars::before
+        //   background: url('../images/navbar/minimize_menu.svg') no-repeat scroll
+        // &.fa-folder::before
+        //   background: url('../images/navbar/catalog.svg') no-repeat scroll
       .list-count
         background: $whiteColor
-        color: #333
         height: 14px
         font-size: 10px
         line-height: 14px
@@ -137,24 +180,19 @@
         top: 8px
         border-radius: 50%
     .divider
-      border-bottom: 1px solid #606060
+      border: none
       height: 0
-      margin: 0px $listItemHorizontalPadding
+      margin: 0
     .info
-      background: $mainMenuBg
+      background: $navbarBg
       font-size: 0
       text-align: center
       padding: 5px 0 0 0
-      z-index: 50    
+      z-index: 50
     .info-version
-      color: #c2c2c2
       display: block
       font-size: 12px
       padding: 0 0 5px 0
-    .info-license
-      color: $genericInfoColor
-      &.__valid
-        color: $genericSuccessColor
   .menu-item
     text-align: center
   .menu-link
@@ -186,9 +224,10 @@
 
   /* Dropdown - dropdown menu navigation */
   .dropdown
-    background: #383838
+    background: $whiteColor
     bottom: 0
-    box-shadow: 5px 0 0 rgba(0,0,0,.1)
+    box-shadow: 1px 0 0 0 $baseBrd
+    margin-top: $headerHeight
     position: fixed
     top: 0
     width: $mainMenuDropdownWidth
@@ -222,13 +261,13 @@
     padding: 85px 20px 14px
     text-align: right
   &.__more .dropdown-head
-    background: #fbfdfe
-    border-color: #dee9f0
+    background: $bladeHeadBg
+    border-color: $bladeHeadBrd
     border-style: solid
-    border-width: 0 0 2px
+    border-width: 0 0 1px
     text-align: left
     padding: 0
-    height: 100px
+    height: 124px
     box-sizing: border-box
     .form-group,
     .form
@@ -237,6 +276,8 @@
       position: relative
     .form-group .form-hint
       padding: 5px 0
+    .form-input.__search
+      top: 30px
   .menu-item
     margin: 0 0 0 20px
     text-align: left
@@ -269,18 +310,26 @@
     .list
       width: 360px
     .list-group
-      padding: 10px 60px 10px 20px
+      font-weight: bold
+      padding: 10px $listItemHorizontalPadding
     .list-group:after
-      right: 32px
+      right: $listItemHorizontalPadding
     .list-item
-      padding: 10px 20px
+      padding: 10px $listItemHorizontalPadding
     .list-item:after
       display: none
     .list-ico
-      font-size: $mainMenuIcoFontSize
-      width: $mainMenuIcoSize
+      color: #dfe3e8
+      font-size: 20px
+      height: 20px
+      line-height: 1
+      margin: 0 6px 0 0
+      width: 20px
+      &::before
+        display: block
+        height: 100%
+        width: 100%
     .list-fav
-      color: #a6a6a6
       display: block
       font-size: $fontSize
       font-weight: 300
@@ -288,13 +337,15 @@
       right: 0
       top: 50%
       transform: translateY(-50%)
-      padding: 10px 32px 10px 12px
+      padding: 10px $listItemHorizontalPadding
       .list-ico
         font-size: $fontSize
         text-align: center
         margin: 0
         top: 0
         width: $fontSize
+        &.favorite
+          color: $menuIconFavoriteColor
   &:not(.__more) .dropdown-content
     -ms-scrollbar-arrow-color: #545454
     -ms-scrollbar-face-color: #434343

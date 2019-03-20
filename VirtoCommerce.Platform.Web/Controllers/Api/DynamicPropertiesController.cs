@@ -42,8 +42,13 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("types/{typeName}/properties")]
         [ProducesResponseType(typeof(DynamicProperty[]), 200)]
-        public async Task<IActionResult> Search([FromBody] DynamicPropertySearchCriteria criteria)
+        public async Task<IActionResult> Search(string typeName, [FromBody] DynamicPropertySearchCriteria criteria)
         {
+            if (!string.IsNullOrEmpty(typeName))
+            {
+                criteria.ObjectType = typeName;
+            }
+
             var result = await _dynamicPropertySearchService.SearchDynamicPropertiesAsync(criteria);
             return Ok(result.Results);
         }

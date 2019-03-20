@@ -27,7 +27,7 @@ namespace VirtoCommerce.CustomerModule.Data.Search
         public virtual async Task<GenericSearchResult<Member>> SearchAsync(MembersSearchCriteria criteria)
         {
             var requestBuilder = GetRequestBuilder(criteria);
-            var request = requestBuilder?.BuildRequest(criteria);
+            var request = await requestBuilder?.BuildRequestAsync(criteria);
 
             var response = await _searchProvider.SearchAsync(criteria.ObjectType, request);
 

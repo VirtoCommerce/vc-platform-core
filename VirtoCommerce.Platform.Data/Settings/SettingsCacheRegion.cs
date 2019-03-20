@@ -23,7 +23,7 @@ namespace VirtoCommerce.Platform.Data.Settings
 
         public static void ExpireSetting(ObjectSettingEntry settingEntry)
         {
-            if (_settingsRegionTokenLookup.TryRemove(settingEntry, out CancellationTokenSource token))
+            if (_settingsRegionTokenLookup.TryRemove(settingEntry, out var token))
             {
                 token.Cancel();
             }

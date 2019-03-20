@@ -1,4 +1,4 @@
-﻿<div class="blade-content">
+<div class="blade-content">
     <div class="blade-inner">
         <div class="inner-block">
             <ul class="list __items">
@@ -12,15 +12,10 @@
                     <span class="list-t">{{ 'catalog.blades.categories-items-add.menu.link.title' | translate }}</span>
                     <span class="list-descr">{{ 'catalog.blades.categories-items-add.menu.link.description' | translate }}</span>
                 </li>
-                <li class="list-item" ng-mouseup="addProduct('Physical')" ng-if="!blade.parentBlade.catalog.isVirtual" va-permission="catalog:create">
-                    <i class="list-ico fa fa-truck"></i>
-                    <span class="list-t">{{ 'catalog.blades.categories-items-add.menu.physical-product.title' | translate }}</span>
-                    <span class="list-descr">{{ 'catalog.blades.categories-items-add.menu.physical-product.description' | translate }}</span>
-                </li>
-                <li class="list-item" ng-mouseup="addProduct('Digital')" ng-if="!blade.parentBlade.catalog.isVirtual" va-permission="catalog:create">
-                    <i class="list-ico fa fa-file-archive-o"></i>
-                    <span class="list-t">{{ 'catalog.blades.categories-items-add.menu.digital-product.title' | translate }}</span>
-                    <span class="list-descr">{{ 'catalog.blades.categories-items-add.menu.digital-product.description' | translate }}</span>
+                <li class="list-item" ng-mouseup="addProduct(data.productType)" ng-repeat="data in availableTypes" ng-if="!blade.parentBlade.catalog.isVirtual" va-permission="catalog:create">
+                    <i class="list-ico fa {{data.icon}}"></i>
+                    <span class="list-t">{{data.itemType | translate}}</span>
+                    <span class="list-descr">{{data.description | translate}}</span>
                 </li>
             </ul>
         </div>

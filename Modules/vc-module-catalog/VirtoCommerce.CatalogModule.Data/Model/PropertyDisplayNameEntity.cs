@@ -41,7 +41,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
         public virtual void Patch(PropertyDisplayNameEntity target)
         {
-           
+
         }
     }
 }

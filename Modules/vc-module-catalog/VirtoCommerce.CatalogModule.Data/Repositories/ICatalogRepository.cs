@@ -1,35 +1,42 @@
 using System.Linq;
+using System.Threading.Tasks;
+using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
+using VirtoCommerce.CatalogModule.Data.Model;
 using VirtoCommerce.Platform.Core.Common;
-using dataModel = VirtoCommerce.CatalogModule.Data.Model;
-using moduleModel = VirtoCommerce.CatalogModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Data.Repositories
 {
     public interface ICatalogRepository : IRepository
     {
-        IQueryable<dataModel.CategoryEntity> Categories { get; }
-        IQueryable<dataModel.CatalogEntity> Catalogs { get; }
-        IQueryable<dataModel.ItemEntity> Items { get; }
-        IQueryable<dataModel.PropertyEntity> Properties { get; }
-        IQueryable<dataModel.ImageEntity> Images { get; }
-        IQueryable<dataModel.AssetEntity> Assets { get; }
-        IQueryable<dataModel.EditorialReviewEntity> EditorialReviews { get; }
-        IQueryable<dataModel.PropertyValueEntity> PropertyValues { get; }
-        IQueryable<dataModel.PropertyDictionaryValueEntity> PropertyDictionaryValues { get; }      
-        IQueryable<dataModel.CategoryItemRelationEntity> CategoryItemRelations { get; }
-        IQueryable<dataModel.AssociationEntity> Associations { get; }
-        IQueryable<dataModel.CategoryRelationEntity> CategoryLinks { get; }
+        IQueryable<CategoryEntity> Categories { get; }
+        IQueryable<CatalogEntity> Catalogs { get; }
+        IQueryable<ItemEntity> Items { get; }
+        IQueryable<PropertyEntity> Properties { get; }
+        IQueryable<ImageEntity> Images { get; }
+        IQueryable<AssetEntity> Assets { get; }
+        IQueryable<EditorialReviewEntity> EditorialReviews { get; }
+        IQueryable<PropertyValueEntity> PropertyValues { get; }
+        IQueryable<PropertyDictionaryValueEntity> PropertyDictionaryValues { get; }
+        IQueryable<PropertyDictionaryItemEntity> PropertyDictionaryItems { get; }
+        IQueryable<CategoryItemRelationEntity> CategoryItemRelations { get; }
+        IQueryable<AssociationEntity> Associations { get; }
+        IQueryable<CategoryRelationEntity> CategoryLinks { get; }
 
-        string[] GetAllChildrenCategoriesIds(string[] categoryIds);
-        dataModel.CatalogEntity[] GetCatalogsByIds(string[] catalogIds);
-        dataModel.CategoryEntity[] GetCategoriesByIds(string[] categoryIds, string respGroup = null);
-        dataModel.ItemEntity[] GetItemByIds(string[] itemIds, moduleModel.ItemResponseGroup respGroup);
-        dataModel.PropertyEntity[] GetAllCatalogProperties(string catalogId);
-        dataModel.PropertyEntity[] GetPropertiesByIds(string[] propIds);
- 
-        void RemoveItems(string[] ids);
-        void RemoveCategories(string[] ids);
-        void RemoveCatalogs(string[] ids);
-        void RemoveAllPropertyValues(string propertyId);
+        Task<string[]> GetAllChildrenCategoriesIdsAsync(string[] categoryIds);
+        Task<CatalogEntity[]> GetCatalogsByIdsAsync(string[] catalogIds);
+        Task<CategoryEntity[]> GetCategoriesByIdsAsync(string[] categoriesIds, CategoryResponseGroup respGroup);
+        Task<ItemEntity[]> GetItemByIdsAsync(string[] itemIds, ItemResponseGroup respGroup = ItemResponseGroup.ItemLarge);
+        Task<PropertyEntity[]> GetAllCatalogPropertiesAsync(string catalogId);
+        Task<PropertyEntity[]> GetPropertiesByIdsAsync(string[] propIds, bool loadDictValues = false);
+        Task<PropertyDictionaryItemEntity[]> GetPropertyDictionaryItemsByIdsAsync(string[] dictItemIds);
+
+
+        Task<GenericSearchResult<AssociationEntity>> SearchAssociations(ProductAssociationSearchCriteria criteria);
+
+        Task RemoveItemsAsync(string[] itemIds);
+        Task RemoveCategoriesAsync(string[] ids);
+        Task RemoveCatalogsAsync(string[] ids);
+        Task RemoveAllPropertyValuesAsync(string propertyId);
     }
 }

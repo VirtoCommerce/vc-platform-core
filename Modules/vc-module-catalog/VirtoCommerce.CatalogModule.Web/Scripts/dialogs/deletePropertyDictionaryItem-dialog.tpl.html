@@ -1,0 +1,13 @@
+<div class="modal-header">
+    <h3 class="modal-title">{{ 'platform.dialogs.delete.title' | translate }}</h3>
+</div>
+<div class="modal-body">
+    <p>{{ 'catalog.dialogs.property-dictionary-item-delete.message'  | translate }}</p>
+    <div class="form-group">
+        <div class="form-error">{{ 'catalog.dialogs.property-dictionary-item-delete.warning' | translate }}</div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn __cancel" ng-click="yes()">{{ 'platform.commands.confirm' | translate}}</button>
+    <button class="btn" ng-click="cancel()">{{ 'platform.commands.cancel' | translate }}</button>
+</div>

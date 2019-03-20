@@ -4,6 +4,6 @@ namespace VirtoCommerce.CatalogModule.Core.Model
 {
     public interface IHasProperties
     {
-        IList<Property> Properties { get; set; }
+        ICollection<Property> Properties { get; set; }
     }
 }

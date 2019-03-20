@@ -1,4 +1,4 @@
-﻿<div class="blade-content __xxlarge-wide">
+<div class="blade-content __xxlarge-wide">
     <div class="blade-inner">
         <div class="inner-block">
             <form class="form" name="editorialReviewsForm">
@@ -17,7 +17,7 @@
                     <label class="form-label">{{ 'catalog.blades.editorialReview-detail.labels.language' | translate }}</label>
                     <div class="form-input">
                         <ui-select ng-model="blade.currentEntity.languageCode" ng-disabled="disabled">
-                            <ui-select-match placeholder="{{'catalog.blades.editorialReview-detail.placeholders.language' | translate}}">{{$select.selected.displayName}}</ui-select-match>
+                            <ui-select-match allow-clear="true" placeholder="{{'catalog.blades.editorialReview-detail.placeholders.language' | translate}}">{{$select.selected.displayName}}</ui-select-match>
                             <ui-select-choices repeat="lang.languageCode as lang in blade.languages | filter: {displayName: $select.search}">
                                 <span ng-bind-html="lang.displayName | highlight: $select.search"></span>
                             </ui-select-choices>

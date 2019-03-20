@@ -1,4 +1,4 @@
-﻿angular.module('platformWebApp')
+angular.module('platformWebApp')
 .controller('platformWebApp.changeLog.operationsWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
     var blade = $scope.blade;
 
@@ -6,6 +6,8 @@
         var newBlade = {
             id: "changesChildBlade",
             currentEntities: blade.currentEntity.operationsLog,
+            tenantId: blade.currentEntity.id,
+            tenantType: blade.currentEntity.objectType,
             headIcon: blade.headIcon,
             title: blade.title,
             subtitle: 'platform.widgets.operations.blade-subtitle',

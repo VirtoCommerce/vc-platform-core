@@ -28,7 +28,7 @@ namespace VirtoCommerce.Platform.Core.Assets
         /// Create blob folder in specified provider
         /// </summary>
         /// <param name="folder"></param>
-        Task CreateFolderAsync (BlobFolder folder);
+        Task CreateFolderAsync(BlobFolder folder);
 
         /// <summary>
         /// Open blob for reading
@@ -48,6 +48,18 @@ namespace VirtoCommerce.Platform.Core.Assets
         /// Remove secified blobs
         /// </summary>
         /// <param name="urls"></param>
-        Task RemoveAsync (string[] urls);
+        Task RemoveAsync(string[] urls);
+        /// <summary>
+        /// Move specified blob with srcUrl  to destUrl
+        /// </summary>
+        /// <param name="srcUrl"></param>
+        /// <param name="destUrl"></param>
+        void Move(string srcUrl, string destUrl);
+        /// <summary>
+        /// Copy specified blob with srcUrl to destUrl
+        /// </summary>
+        /// <param name="srcUrl"></param>
+        /// <param name="destUrl"></param>
+        void Copy(string srcUrl, string destUrl);
     }
 }

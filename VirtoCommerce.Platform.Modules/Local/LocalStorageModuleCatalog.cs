@@ -50,10 +50,6 @@ namespace VirtoCommerce.Platform.Modules
 
                 CopyAssemblies(modulePath, _options.ProbingPath);
 
-                var moduleVirtualPath = GetModuleVirtualPath(rootUri, modulePath);
-                ConvertVirtualPath(manifest.Scripts, moduleVirtualPath);
-                ConvertVirtualPath(manifest.Styles, moduleVirtualPath);
-
                 var moduleInfo = new ManifestModuleInfo(manifest) { FullPhysicalPath = Path.GetDirectoryName(manifestPath) };
 
                 // Modules without assembly file don't need initialization
@@ -218,32 +214,6 @@ namespace VirtoCommerce.Platform.Modules
         private bool IsAssemblyFile(string path)
         {
             return _options.AssemblyFileExtensions.Any(x => path.EndsWith(x, StringComparison.OrdinalIgnoreCase));
-        }
-
-        private string GetModuleVirtualPath(Uri rootUri, string modulePath)
-        {
-            var moduleRelativePath = MakeRelativePath(rootUri, modulePath);
-            return moduleRelativePath;
-        }
-
-        private static string MakeRelativePath(Uri rootUri, string fullPath)
-        {
-            var fullUri = new Uri(fullPath);
-            var relativePath = rootUri.MakeRelativeUri(fullUri).ToString();
-            return relativePath;
-        }
-
-        private static void ConvertVirtualPath(IEnumerable<ManifestBundleItem> items, string moduleVirtualPath)
-        {
-            if (items != null)
-            {
-                foreach (var item in items)
-                {
-                    const string moduleRoot = "$/";
-                    if (item.VirtualPath.StartsWith(moduleRoot, StringComparison.OrdinalIgnoreCase))
-                        item.VirtualPath = string.Join("/", moduleVirtualPath, item.VirtualPath.Substring(moduleRoot.Length));
-                }
-            }
         }
 
         private static string GetFileAbsoluteUri(string rootPath, string relativePath)

@@ -7,6 +7,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 {
     public class CatalogLanguageEntity : Entity
     {
+
         [StringLength(64)]
         public string Language { get; set; }
 
@@ -45,7 +46,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
         public virtual void Patch(CatalogLanguageEntity target)
         {
-            target.Language = Language;          
+            target.Language = Language;
         }
     }
 }
