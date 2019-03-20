@@ -16,7 +16,6 @@ using VirtoCommerce.Platform.Data.DynamicProperties;
 using VirtoCommerce.Platform.Data.ExportImport;
 using VirtoCommerce.Platform.Data.PushNotifications;
 using VirtoCommerce.Platform.Data.Repositories;
-using VirtoCommerce.Platform.Data.Serialization;
 using VirtoCommerce.Platform.Data.Settings;
 
 namespace VirtoCommerce.Platform.Data.Extensions
