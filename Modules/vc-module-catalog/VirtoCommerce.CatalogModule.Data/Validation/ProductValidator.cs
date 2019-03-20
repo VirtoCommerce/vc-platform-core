@@ -10,9 +10,9 @@ namespace VirtoCommerce.CatalogModule.Data.Validation
         {
 
             RuleFor(product => product.CatalogId).NotNull().NotEmpty();
-            RuleFor(product => product.Name).NotNull().NotEmpty().WithMessage(x => $"Name is null or empty.").MaximumLength(1024);
-            //TODO:
-            //RuleFor(product => product.Code).NotNull().NotEmpty().MaximumLength(64).DependentRules(d => d.RuleFor(product => product.Code).Must(x => x.IndexOfAny(_illegalCodeChars) < 0).WithMessage("product code contains illegal chars"));
+            RuleFor(product => product.Name).NotNull().WithMessage(x => $"Name is null. Code: {x.Code}").NotEmpty().WithMessage(x => $"Name is empty. Code: {x.Code}").MaximumLength(1024);
+            RuleFor(product => product.Code).NotNull().NotEmpty().MaximumLength(64).DependentRules(() => RuleFor(product => product.Code).Must(x => x.IndexOfAny(_illegalCodeChars) < 0).WithMessage("product code contains illegal chars"));
+
         }
     }
 }

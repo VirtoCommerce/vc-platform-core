@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model

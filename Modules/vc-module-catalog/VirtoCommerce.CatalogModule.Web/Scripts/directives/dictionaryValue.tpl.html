@@ -1,0 +1,19 @@
+<div class="form-input">
+    <input type="text"
+           name="{{name}}"
+           class="form-control"
+           placeholder="{{ 'catalog.blades.property-dictionary.placeholders.value' | translate }}"
+           ng-model="ngModel"
+           ng-maxlength="{{validationRules.charCountMax}}"
+           ng-minlength="{{validationRules.charCountMin}}"
+           ng-required="{{required}}"
+           ng-pattern="{{validationRules.regExp}}">
+
+    <div class="form-error" ng-if="form[name].$invalid">
+        <span ng-if="form[name].$error.required">{{ 'catalog.blades.property-list.validations.required' | translate }}</span>
+        <span ng-if="form[name].$error.maxlength">{{ 'catalog.blades.property-list.validations.maxLength' | translate: { max: validationRules.charCountMax } }}</span>
+        <span ng-if="form[name].$error.minlength">{{ 'catalog.blades.property-list.validations.minLenght' | translate: { min: validationRules.charCountMin } }}</span>
+        <span ng-if="form[name].$error.pattern">{{ 'catalog.blades.property-list.validations.pattern' | translate }}</span>
+        <span ng-if="form[name].$error.validator">{{ 'catalog.blades.property-dictionary.validations.duplicate' | translate }}</span>
+    </div>
+</div>

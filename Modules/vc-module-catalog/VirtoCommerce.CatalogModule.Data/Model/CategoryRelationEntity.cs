@@ -5,10 +5,8 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
 {
-    public class CategoryRelationEntity : ValueObject
+    public class CategoryRelationEntity : Entity
     {
-        public string Id { get; set; }
-
         #region Navigation Properties
         public string SourceCategoryId { get; set; }
         public virtual CategoryEntity SourceCategory { get; set; }
@@ -25,7 +23,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             if (link == null)
                 throw new ArgumentNullException(nameof(link));
 
-            link.EntryId = SourceCategoryId;
             link.CategoryId = TargetCategoryId;
             link.CatalogId = TargetCatalogId;
 
@@ -48,11 +45,31 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             //Nothing todo. Because we not support change  link
         }
 
-        protected override IEnumerable<object> GetEqualityComponents()
-        {
-            yield return TargetCatalogId;
-            yield return TargetCategoryId;
-        }
     }
-  
+
+    public class LinkedCategoryComparer : IEqualityComparer<CategoryRelationEntity>
+    {
+        #region IEqualityComparer<LinkedCategory> Members
+
+        public bool Equals(CategoryRelationEntity x, CategoryRelationEntity y)
+        {
+            return GetHashCode(x) == GetHashCode(y);
+        }
+
+        public int GetHashCode(CategoryRelationEntity obj)
+        {
+            var hash = 17 * 23;
+            if (obj.TargetCategoryId != null)
+            {
+                hash = hash * 23 + obj.TargetCategoryId.GetHashCode();
+            }
+            else if (obj.TargetCatalogId != null)
+            {
+                hash = hash * 23 + obj.TargetCatalogId.GetHashCode();
+            }
+            return hash;
+        }
+
+        #endregion
+    }
 }

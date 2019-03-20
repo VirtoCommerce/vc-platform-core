@@ -1,4 +1,4 @@
-﻿angular.module('virtoCommerce.catalogModule')
+angular.module('virtoCommerce.catalogModule')
 .controller('virtoCommerce.catalogModule.editorialReviewDetailController', ['$scope', 'platformWebApp.bladeNavigationService', 'FileUploader', 'platformWebApp.settings', '$timeout',
     function ($scope, bladeNavigationService, FileUploader, settings, $timeout) {
         var blade = $scope.blade;
@@ -6,16 +6,15 @@
         function initilize() {
             if (!blade.item.reviews) {
                 blade.item.reviews = [];
-            };
+            }
             if (!blade.currentEntity) {
-                blade.currentEntity = {};
-            };
+                blade.currentEntity = {
+                    languageCode: blade.catalog.defaultLanguage.languageCode
+                };
+            }
 
             blade.origEntity = blade.currentEntity;
             blade.currentEntity = angular.copy(blade.currentEntity);
-            if (!blade.currentEntity.languageCode) {
-                blade.currentEntity.languageCode = blade.catalog.defaultLanguage.languageCode;
-            }
 
             $timeout(function () {
                 $scope.$broadcast('resetContent', { body: blade.currentEntity.content });

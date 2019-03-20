@@ -1,16 +1,15 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
 using VirtoCommerce.CoreModule.Core.Seo;
 
 namespace VirtoCommerce.CoreModule.Data.Seo
 {
     public class NullSeoDuplicateDetector : ISeoDuplicatesDetector
     {
-        public IEnumerable<SeoInfo> DetectSeoDuplicates(string objectType, string objectId, IEnumerable<SeoInfo> allSeoDuplicates)
+        public Task<IEnumerable<SeoInfo>> DetectSeoDuplicatesAsync(string objectType, string objectId, IEnumerable<SeoInfo> allSeoDuplicates)
         {
-            return Enumerable.Empty<SeoInfo>();
+            return Task.FromResult(Enumerable.Empty<SeoInfo>());
         }
     }
 }

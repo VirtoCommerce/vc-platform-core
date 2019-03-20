@@ -1,9 +1,9 @@
-using System;
+using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class ProductAssociation : ValueObject, ICloneable
+    public class ProductAssociation : ValueObject
     {
         /// <summary>
         /// Association type (Accessories, Up-Sales, Cross-Sales, Related etc)
@@ -25,13 +25,9 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         /// <summary>
         /// Associated object
         /// </summary>
-        public IEntity AssociatedObject { get; set; }
+        [JsonIgnore]
+        public Entity AssociatedObject { get; set; }
 
         public string[] Tags { get; set; }
-
-        public virtual object Clone()
-        {
-            return MemberwiseClone();
-        }
     }
 }

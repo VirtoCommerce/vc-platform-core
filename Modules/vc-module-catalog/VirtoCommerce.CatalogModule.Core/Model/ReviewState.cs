@@ -1,6 +1,6 @@
-namespace VirtoCommerce.CatalogModule.Core.Model
+﻿namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public enum ReviewState
+	public enum ReviewState
 	{
 		Draft,
 		PendingApproval,

@@ -7,6 +7,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 {
     public class AssetEntity : AuditableEntity
     {
+
         [StringLength(2083)]
         [Required]
         public string Url { get; set; }
@@ -44,7 +45,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             asset.LanguageCode = LanguageCode;
             asset.Name = Name;
             asset.MimeType = MimeType;
-            asset.RelativeUrl = Url;
+            asset.Url = Url;
             asset.Size = Size;
 
             return asset;
@@ -66,7 +67,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             LanguageCode = asset.LanguageCode;
             Name = asset.Name;
             MimeType = asset.MimeType;
-            Url = asset.RelativeUrl;
+            Url = asset.Url;
             Size = asset.Size;
 
             return this;
@@ -78,7 +79,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             target.Name = Name;
             target.MimeType = MimeType;
             target.Url = Url;
-            target.Size = Size;            
+            target.Size = Size;
         }
     }
 }

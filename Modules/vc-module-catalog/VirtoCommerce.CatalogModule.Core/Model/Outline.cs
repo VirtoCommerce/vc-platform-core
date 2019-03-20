@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
@@ -11,7 +11,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         /// <summary>
         /// Outline parts
         /// </summary>
-        public IList<OutlineItem> Items { get; set; }
+        public ICollection<OutlineItem> Items { get; set; }
 
         public override string ToString()
         {

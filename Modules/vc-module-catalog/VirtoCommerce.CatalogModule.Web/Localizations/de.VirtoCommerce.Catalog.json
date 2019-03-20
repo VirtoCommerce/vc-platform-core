@@ -214,7 +214,8 @@
           "current-values": "Aktuelle Werte",
           "value": "Wert",
           "language-edit": "Bearbeiten von Werten",
-          "language-add": "Neue Werte"
+          "language-add": "Neue Werte",
+          "dictionary-edit": "Wörterbuch wert bearbeiten"
         },
         "validations": {
           "required": "Erforderlich",
@@ -244,8 +245,8 @@
           "expiration-date": "Ablaufdatum herunterladen",
           "download-type": "Typ herunterladen",
           "gtin": "GTIN",
-          "start-date": "Datum start umsatz",
-          "end-date": "Datum das Ende umsatz"
+          "start-date": "Zuerst aufgeführt",
+          "end-date": "Listing läuft ab am"
         },
         "validations": {
           "sku": "Art.-Nr. kann nicht enthalten $ +"
@@ -268,7 +269,6 @@
           "start-date": "Wenn Sie kein startdatum angeben, wird das Produkt sofort nach dem Speichern aktiviert.",
           "end-date": "Wenn Sie kein Enddatum angeben, ist das Produkt aktiv, bis Sie es deaktivieren."
         }
-
       },
       "catalog-items-select": {
         "title": "Kategorien auswählen",
@@ -634,3 +634,4 @@
       }
     }
   }
+}

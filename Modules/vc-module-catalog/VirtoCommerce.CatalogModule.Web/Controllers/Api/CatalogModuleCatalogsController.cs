@@ -1,23 +1,25 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.CatalogModule.Core;
 using VirtoCommerce.CatalogModule.Core.Model;
-using VirtoCommerce.CatalogModule.Core.Security;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
-using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
 {
-    [Produces("application/json")]
     [Route("api/catalog/catalogs")]
     public class CatalogModuleCatalogsController : Controller
     {
         private readonly ICatalogService _catalogService;
-       
-        public CatalogModuleCatalogsController(ICatalogService catalogService)            
+        private readonly ICatalogSearchService _searchService;
+
+        public CatalogModuleCatalogsController(ICatalogService catalogService, ICatalogSearchService itemSearchService)
         {
             _catalogService = catalogService;
+            _searchService = itemSearchService;
         }
 
         /// <summary>
@@ -26,18 +28,22 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <remarks>Get common and virtual Catalogs list with minimal information included. Returns array of Catalog</remarks>
 		[HttpGet]
         [Route("")]
-        [ProducesResponseType(typeof(GenericSearchResult<Catalog>), 200)]
-        public ActionResult GetCatalogs()
-        {           
-            //TODO:
-            //ApplyRestrictionsForCurrentUser(criteria);
-            var retVal = new List<Catalog>();
-            foreach (var catalog in _catalogService.GetAllCatalogs())
+        public async Task<ActionResult<Catalog[]>> GetCatalogs(string sort = null, int skip = 0, int take = 20)
+        {
+            var criteria = new CatalogListEntrySearchCriteria()
             {
-               //webCatalog.SecurityScopes = GetObjectPermissionScopeStrings(catalog);
-                retVal.Add(catalog);
-            }
-            return Ok(retVal.ToArray());
+                ResponseGroup = SearchResponseGroup.WithCatalogs,
+                Sort = sort,
+                Skip = skip,
+                Take = take,
+            };
+
+            //TODO
+            //ApplyRestrictionsForCurrentUser(criteria);
+
+            var serviceResult = await _searchService.SearchAsync(criteria);
+
+            return Ok(serviceResult.Catalogs);
         }
 
         /// <summary>
@@ -47,19 +53,19 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="id">The Catalog id.</param>
 		[HttpGet]
         [Route("{id}")]
-        [ProducesResponseType(typeof(Catalog), 200)]
-        public ActionResult Get(string id)
+        public async Task<ActionResult<Catalog>> Get(string id)
         {
-            var catalog = _catalogService.GetByIds(new[] { id }).FirstOrDefault();
+            var catalog = (await _catalogService.GetByIdsAsync(new[] { id })).FirstOrDefault();
             if (catalog == null)
             {
                 return NotFound();
             }
-            //TODO:
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Read, catalog);
 
-            //TODO:
+            //var retVal = catalog.ToWebModel();
+
             //retVal.SecurityScopes = GetObjectPermissionScopeStrings(catalog);
+
             return Ok(catalog);
         }
 
@@ -69,24 +75,24 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <remarks>Gets the template for a new common catalog</remarks>
         [HttpGet]
         [Route("getnew")]
-        [ProducesResponseType(typeof(Catalog), 200)]
-        [Authorize(SecurityConstants.Permissions.Create)]
-        public ActionResult GetNewCatalog()
+        [Authorize(ModuleConstants.Security.Permissions.CatalogCreate)]
+        public ActionResult<Catalog> GetNewCatalog()
         {
-            var retVal = AbstractTypeFactory<Catalog>.TryCreateInstance();
-
-            retVal.Name = "New catalog";
-            retVal.Languages = new List<CatalogLanguage>
+            var retVal = new Catalog
+            {
+                Name = "New catalog",
+                Languages = new List<CatalogLanguage>
                 {
                     new CatalogLanguage
                     {
                         IsDefault = true,
                         LanguageCode = "en-US"
                     }
-                };
+                }
+            };
 
-            //TODO:
             //retVal.SecurityScopes = GetObjectPermissionScopeStrings(retVal);
+
             return Ok(retVal);
         }
 
@@ -95,23 +101,23 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// </summary>
         [HttpGet]
         [Route("getnewvirtual")]
-        [ProducesResponseType(typeof(Catalog), 200)]
-        [Authorize(SecurityConstants.Permissions.Create)]
-        public ActionResult GetNewVirtualCatalog()
+        [Authorize(ModuleConstants.Security.Permissions.CatalogCreate)]
+        public ActionResult<Catalog> GetNewVirtualCatalog()
         {
-            var retVal = AbstractTypeFactory<Catalog>.TryCreateInstance();
-            retVal.IsVirtual = true;
-            retVal.Languages = new List<CatalogLanguage>
+            var retVal = new Catalog
+            {
+                Name = "New virtual catalog",
+                IsVirtual = true,
+                Languages = new List<CatalogLanguage>
                 {
                     new CatalogLanguage
                     {
                         IsDefault = true,
                         LanguageCode = "en-US"
                     }
-                };
-
-           //TODO:
-           // retVal.SecurityScopes = GetObjectPermissionScopeStrings(retVal);
+                }
+            };
+            //retVal.SecurityScopes = GetObjectPermissionScopeStrings(retVal);
             return Ok(retVal);
         }
 
@@ -123,12 +129,11 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <exception cref="System.UnauthorizedAccessException"></exception>
 		[HttpPost]
         [Route("")]
-        [ProducesResponseType(typeof(Catalog), 200)]
-        [Authorize(SecurityConstants.Permissions.Create)]
-        public ActionResult Create([FromBody] Catalog catalog)
+        [Authorize(ModuleConstants.Security.Permissions.CatalogCreate)]
+        public async Task<ActionResult<Catalog>> Create([FromBody]Catalog catalog)
         {
-            _catalogService.SaveChanges(new [] { catalog });
-            //TODO:
+            await _catalogService.SaveChangesAsync(new[] { catalog });
+            //Need for UI permission checks
             //retVal.SecurityScopes = GetObjectPermissionScopeStrings(newCatalog);
             return Ok(catalog);
         }
@@ -140,13 +145,11 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="catalog">The catalog.</param>
         [HttpPut]
         [Route("")]
-        [ProducesResponseType(typeof(void), 200)]
-        public ActionResult Update([FromBody] Catalog catalog)
+        [Authorize(ModuleConstants.Security.Permissions.CatalogUpdate)]
+        public async Task<IActionResult> Update([FromBody]Catalog catalog)
         {
-            _catalogService.SaveChanges(new[] { catalog });
-            //TODO:
-            //  CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Update, catalog);
-            return Ok();
+            await _catalogService.SaveChangesAsync(new[] { catalog });
+            return NoContent();
         }
 
         /// <summary>
@@ -157,16 +160,15 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpDelete]
         [Route("{id}")]
-        [ProducesResponseType(typeof(void), 200)]
-        public ActionResult Delete(string id)
+        [Authorize(ModuleConstants.Security.Permissions.CatalogDelete)]
+        public async Task<IActionResult> Delete(string id)
         {
-            var catalog = _catalogService.GetByIds(new[] { id });
-            //TODO:
+            //TODO
+            //var catalog = (await _catalogService.GetByIdsAsync(new [] { id})).FirstOrDefault();
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Delete, catalog);
 
-            _catalogService.Delete(new[] { id });
-            return Ok();
+            await _catalogService.DeleteAsync(new[] { id });
+            return NoContent();
         }
-
     }
 }

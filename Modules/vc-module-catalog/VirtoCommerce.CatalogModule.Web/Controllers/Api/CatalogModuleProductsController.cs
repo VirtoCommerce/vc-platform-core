@@ -1,23 +1,35 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
 {
-    [Produces("application/json")]
     [Route("api/catalog/products")]
     public class CatalogModuleProductsController : Controller
     {
         private readonly IItemService _itemsService;
+        private readonly ICatalogService _catalogService;
+        private readonly ICategoryService _categoryService;
+        private readonly ISkuGenerator _skuGenerator;
         private readonly IProductAssociationSearchService _productAssociationSearchService;
+        private readonly IPropertyService _propertyService;
 
-        public CatalogModuleProductsController(IItemService itemsService, IProductAssociationSearchService productAssociationSearchService)
+        public CatalogModuleProductsController(IItemService itemsService, ICatalogService catalogService, ICategoryService categoryService,
+                                               ISkuGenerator skuGenerator, IProductAssociationSearchService productAssociationSearchService, IPropertyService propertyService)
         {
             _itemsService = itemsService;
+            _categoryService = categoryService;
+            _catalogService = catalogService;
+            _skuGenerator = skuGenerator;
             _productAssociationSearchService = productAssociationSearchService;
+            _propertyService = propertyService;
         }
 
 
@@ -28,14 +40,20 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         ///<param name="respGroup">Response group.</param>
         [HttpGet]
         [Route("{id}")]
-        [ProducesResponseType(typeof(CatalogProduct), 200)]
-        public ActionResult GetProductById(string id, [FromQuery] string responseGroup = null)
+        public async Task<ActionResult<CatalogProduct>> GetProductById(string id, [FromQuery] ItemResponseGroup respGroup = ItemResponseGroup.ItemLarge)
         {
-            var result = _itemsService.GetByIds(new[] { id }, responseGroup);
-            //TODO:
+            var item = await _itemsService.GetByIdAsync(id, respGroup);
+            if (item == null)
+            {
+                return NotFound();
+            }
+
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Read, item);
+
+            //var retVal = item.ToWebModel(_blobUrlResolver);
+
             //retVal.SecurityScopes = GetObjectPermissionScopeStrings(item);
-            return Ok(result);
+            return Ok(item);
         }
 
         /// <summary>
@@ -45,12 +63,14 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         ///<param name="respGroup">Response group.</param>
         [HttpGet]
         [Route("")]
-        [ProducesResponseType(typeof(CatalogProduct[]), 200)]
-        public ActionResult GetProductByIds([FromQuery] string[] ids, [FromQuery] string responseGroup = null)
+        public async Task<ActionResult<CatalogProduct[]>> GetProductByIds([FromQuery] string[] ids, [FromQuery] ItemResponseGroup respGroup = ItemResponseGroup.ItemLarge)
         {
-            var result = _itemsService.GetByIds(ids, responseGroup);
+            var items = await _itemsService.GetByIdsAsync(ids, respGroup);
+            if (items == null)
+            {
+                return NotFound();
+            }
 
-            //TODO
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Read, items);
 
             //var retVal = items.Select(x => x.ToWebModel(_blobUrlResolver)).ToArray();
@@ -58,7 +78,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             //{
             //    product.SecurityScopes = GetObjectPermissionScopeStrings(product);
             //}
-            return Ok(result);
+            return Ok(items);
         }
 
         /// <summary>
@@ -69,10 +89,9 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("plenty")]
-        [ProducesResponseType(typeof(CatalogProduct[]), 200)]
-        public ActionResult GetProductByPlentyIds([FromBody] string[] ids, [FromQuery] string responseGroup = null)
+        public Task<ActionResult<CatalogProduct[]>> GetProductByPlentyIds([FromBody] string[] ids, [FromQuery] ItemResponseGroup respGroup = ItemResponseGroup.ItemLarge)
         {
-            return GetProductByIds(ids, responseGroup);
+            return GetProductByIds(ids, respGroup);
         }
 
 
@@ -83,11 +102,9 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="catalogId">The catalog id.</param>
         [HttpGet]
         [Route("~/api/catalog/{catalogId}/products/getnew")]
-        [ProducesResponseType(typeof(CatalogProduct), 200)]
-        public ActionResult GetNewProductByCatalog(string catalogId)
+        public Task<ActionResult<CatalogProduct>> GetNewProductByCatalog(string catalogId)
         {
-            //TODO:
-            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, new coreModel.Catalog { Id = catalogId });
+            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, new Catalog { Id = catalogId });
 
             return GetNewProductByCatalogAndCategory(catalogId, null);
         }
@@ -101,24 +118,40 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="categoryId">The category id.</param>
         [HttpGet]
         [Route("~/api/catalog/{catalogId}/categories/{categoryId}/products/getnew")]
-        [ProducesResponseType(typeof(CatalogProduct), 200)]
-        public ActionResult GetNewProductByCatalogAndCategory(string catalogId, string categoryId)
+        public async Task<ActionResult<CatalogProduct>> GetNewProductByCatalogAndCategory(string catalogId, string categoryId)
         {
-            var result = new CatalogProduct
-            {
-                CategoryId = categoryId,
-                CatalogId = catalogId,
-                IsActive = true,
-                SeoInfos = new SeoInfo[] { }
-            };
+            var retVal = AbstractTypeFactory<CatalogProduct>.TryCreateInstance();
+            retVal.CategoryId = categoryId;
+            retVal.CatalogId = catalogId;
+            retVal.IsActive = true;
+            retVal.SeoInfos = Array.Empty<SeoInfo>();
 
-            //TODO:
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, retVal.ToModuleModel(_blobUrlResolver));
-            //TODO:
-            //Propery.IsManageable and IsReadonly (tests)
 
-            _itemsService.LoadDependencies(new[] { result });
-            return Ok(result);
+            if (catalogId != null)
+            {
+                var catalog = (await _catalogService.GetByIdsAsync(new[] { catalogId })).FirstOrDefault();
+                retVal.Properties = catalog?.Properties.ToList();
+            }
+
+            if (categoryId != null)
+            {
+                var category = (await _categoryService.GetByIdsAsync(new[] { categoryId }, CategoryResponseGroup.WithProperties)).FirstOrDefault();
+                retVal.Properties = category?.Properties.ToList();
+            }
+
+
+            //foreach (var property in retVal.Properties)
+            //{
+            //    property.Values = new List<PropertyValue>();
+            //    property.IsManageable = true;
+            //    property.IsReadOnly = property.Type != PropertyType.Product && property.Type != PropertyType.Variation;
+            //}
+
+
+            retVal.Code = _skuGenerator.GenerateSku(retVal);
+
+            return Ok(retVal);
         }
 
 
@@ -128,38 +161,75 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="productId">The parent product id.</param>
         [HttpGet]
         [Route("{productId}/getnewvariation")]
-        [ProducesResponseType(typeof(Variation), 200)]
-        public ActionResult GetNewVariation(string productId)
+        public async Task<ActionResult<CatalogProduct>> GetNewVariation(string productId)
         {
-            var product = _itemsService.GetByIds(new[] { productId }).FirstOrDefault();
+            var product = await _itemsService.GetByIdAsync(productId, ItemResponseGroup.ItemLarge);
+            if (product == null)
+            {
+                return NotFound();
+            }
 
-            //TODO
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, product);
 
-            var result = AbstractTypeFactory<Variation>.TryCreateInstance();
 
-            result.Name = product.Name;
-            result.CategoryId = product.CategoryId;
-            result.CatalogId = product.CatalogId;
-            result.MainProductId = product.MainProductId ?? productId;
-            _itemsService.LoadDependencies(new[] { result });
-            return Ok(result);
+            var newVariation = AbstractTypeFactory<CatalogProduct>.TryCreateInstance();
+
+            newVariation.Name = product.Name;
+            newVariation.CategoryId = product.CategoryId;
+            newVariation.CatalogId = product.CatalogId;
+            newVariation.MainProductId = product.MainProductId ?? productId;
+            newVariation.Properties = product.Properties.Where(x => x.Type == PropertyType.Variation).ToList();
+
+            foreach (var property in newVariation.Properties)
+            {
+                // Mark variation property as required
+                if (property.Type == PropertyType.Variation)
+                {
+                    property.Required = true;
+                    property.Values.Clear();
+                }
+            }
+
+
+            newVariation.Code = _skuGenerator.GenerateSku(newVariation);
+            return Ok(newVariation);
         }
 
 
         [HttpGet]
         [Route("{productId}/clone")]
-        [ProducesResponseType(typeof(CatalogProduct), 200)]
-        public ActionResult CloneProduct(string productId)
+        public async Task<ActionResult<CatalogProduct>> CloneProduct(string productId)
         {
-            var product = _itemsService.GetByIds(new[] { productId }).FirstOrDefault();
-            CatalogProduct result = null;
-            if (product != null)
+            var product = await _itemsService.GetByIdAsync(productId, ItemResponseGroup.ItemLarge);
+            if (product == null)
             {
-                result = product.GetCopy();
-                _itemsService.LoadDependencies(new[] { result });
+                return NotFound();
             }
-            return Ok(result);
+
+            // Generate new SKUs and remove SEO records for product and its variations
+            product.Code = _skuGenerator.GenerateSku(product);
+            product.SeoInfos.Clear();
+
+            foreach (var variation in product.Variations)
+            {
+                variation.Code = _skuGenerator.GenerateSku(variation);
+                variation.SeoInfos.Clear();
+            }
+
+            //var result = product.ToWebModel(_blobUrlResolver);
+
+            // Clear ID for all related entities except properties
+            var allEntities = product.GetFlatObjectsListWithInterface<IEntity>();
+            foreach (var entity in allEntities)
+            {
+                var property = entity as Property;
+                if (property == null)
+                {
+                    entity.Id = null;
+                }
+            }
+
+            return Ok(product);
         }
 
         /// <summary>
@@ -168,11 +238,14 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="product">The product.</param>
         [HttpPost]
         [Route("")]
-        [ProducesResponseType(typeof(CatalogProduct), 200)]
-        public ActionResult SaveProduct(CatalogProduct product)
+        public async Task<ActionResult<CatalogProduct>> SaveProduct([FromBody] CatalogProduct product)
         {
-            _itemsService.SaveChanges(new[] { product });
-            return Ok(product);
+            var result = (await InnerSaveProducts(new[] { product })).FirstOrDefault();
+            if (result != null)
+            {
+                return Ok(result);
+            }
+            return NoContent();
         }
 
         /// <summary>
@@ -181,10 +254,9 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="products">The products.</param>
         [HttpPost]
         [Route("batch")]
-        [ProducesResponseType(200)]
-        public ActionResult SaveProducts(CatalogProduct[] products)
+        public async Task<IActionResult> SaveProducts([FromBody] CatalogProduct[] products)
         {
-            _itemsService.SaveChanges(products);
+            await InnerSaveProducts(products);
             return Ok();
         }
 
@@ -195,15 +267,13 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="ids">The items ids.</param>
         [HttpDelete]
         [Route("")]
-        [ProducesResponseType(200)]
-        public ActionResult Delete([FromQuery] string[] ids)
+        public async Task<IActionResult> Delete([FromQuery] string[] ids)
         {
-            var products = _itemsService.GetByIds(ids, ItemResponseGroup.ItemInfo.ToString());
-            //TODO:
+            //var products = await _itemsService.GetByIdsAsync(ids, ItemResponseGroup.ItemInfo);
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Delete, products);
 
-            _itemsService.Delete(ids);
-            return Ok();
+            await _itemsService.DeleteAsync(ids);
+            return NoContent();
         }
 
         /// <summary>
@@ -212,13 +282,70 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("associations/search")]
-        [ProducesResponseType(typeof(GenericSearchResult<ProductAssociation>), 200)]
-        public ActionResult SearchProductAssociations(ProductAssociationSearchCriteria criteria)
+        public async Task<ActionResult<ProductAssociationSearchResult>> SearchProductAssociations([FromBody] ProductAssociationSearchCriteria criteria)
         {
-            var result = _productAssociationSearchService.SearchProductAssociations(criteria);
+            var searchResult = await _productAssociationSearchService.SearchProductAssociationsAsync(criteria);
+            var result = new ProductAssociationSearchResult
+            {
+                Results = searchResult.Results,
+                TotalCount = searchResult.TotalCount
+            };
             return Ok(result);
         }
 
 
+        private async Task<CatalogProduct[]> InnerSaveProducts(CatalogProduct[] products)
+        {
+            var toSaveList = new List<CatalogProduct>();
+            var catalogs = await _catalogService.GetByIdsAsync(products.Select(pr => pr.CatalogId).Distinct().ToArray());
+            foreach (var product in products)
+            {
+                if (product.IsTransient())
+                {
+                    if (product.SeoInfos == null || !product.SeoInfos.Any())
+                    {
+                        var slugUrl = GenerateProductDefaultSlugUrl(product);
+                        if (!string.IsNullOrEmpty(slugUrl))
+                        {
+                            var catalog = catalogs.FirstOrDefault(c => c.Id.EqualsInvariant(product.CatalogId));
+                            var defaultLanguageCode = catalog?.Languages.First(x => x.IsDefault).LanguageCode;
+                            var seoInfo = new SeoInfo
+                            {
+                                LanguageCode = defaultLanguageCode,
+                                SemanticUrl = slugUrl
+                            };
+                            product.SeoInfos = new[] { seoInfo };
+                        }
+                    }
+
+                    //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, moduleProduct);
+                }
+
+                toSaveList.Add(product);
+            }
+
+            if (!toSaveList.IsNullOrEmpty())
+            {
+                await _itemsService.SaveChangesAsync(toSaveList.ToArray());
+            }
+
+            return toSaveList.ToArray();
+        }
+
+        private string GenerateProductDefaultSlugUrl(CatalogProduct product)
+        {
+            var retVal = new List<string>
+            {
+                product.Name
+            };
+            if (product.Properties != null)
+            {
+                //foreach (var property in product.Properties.Where(x => x.Type == PropertyType.Variation && x.Values != null))
+                //{
+                //    retVal.AddRange(property.Values.Select(x => x.PropertyName + "-" + x.Value));
+                //}
+            }
+            return string.Join(" ", retVal).GenerateSlug();
+        }
     }
 }

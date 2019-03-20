@@ -1,9 +1,9 @@
-﻿angular.module('virtoCommerce.catalogModule')
+angular.module('virtoCommerce.catalogModule')
 .controller('virtoCommerce.catalogModule.imagesAddController',
     ['$scope', '$filter', '$translate', 'FileUploader', 'platformWebApp.dialogService',
         'platformWebApp.bladeNavigationService', 'platformWebApp.authService',
-        'platformWebApp.assets.api', 'virtoCommerce.catalogModule.imageTools', 'platformWebApp.settings',
-        function ($scope, $filter, $translate, FileUploader, dialogService, bladeNavigationService, authService, assets, imageTools, settings) {
+        'platformWebApp.assets.api', 'platformWebApp.settings',
+        function ($scope, $filter, $translate, FileUploader, dialogService, bladeNavigationService, authService, assets, settings) {
             var blade = $scope.blade;
 
             blade.hasAssetCreatePermission = bladeNavigationService.checkPermission('platform:asset:create');
@@ -48,13 +48,6 @@
                             image.isImage = true;
                             image.group = blade.imageType;
                             blade.currentEntities.push(image);
-                            var request = { imageUrl: image.url, isRegenerateAll: true };
-
-                            imageTools.generateThumbnails(request, function (response) {
-                                if (!response || response.error) {
-                                    bladeNavigationService.setError(response.error, blade);
-                                }
-                            });
                         });
                     };
 

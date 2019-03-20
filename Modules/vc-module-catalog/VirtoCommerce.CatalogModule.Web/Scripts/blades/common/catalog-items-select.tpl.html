@@ -1,4 +1,4 @@
-﻿<div class="blade-static" ng-class="{'__expanded': !isCatalogSelectMode()}">
+<div class="blade-static" ng-class="{'__expanded': !isCatalogSelectMode()}">
     <style>
         .breadcrumbs .menu .menu-item .menu-link {
             max-width: 131px;
@@ -54,7 +54,7 @@
 <script type="text/ng-template" id="item-list-icon.cell.html">
     <div class="ui-grid-cell-contents">
         <div class="product-img">
-            <img class="image" ng-src="{{COL_FIELD}}" ng-if="row.entity.type!=='category' && COL_FIELD">
+            <img class="image" fallback-src="{{ COL_FIELD }}" ng-src="{{ COL_FIELD | thumbnail: '_64x64' }}" ng-if="row.entity.type !== 'category' && COL_FIELD">
             <i class="table-ico fa" ng-class="row.entity.type == 'category' ? 'fa-folder' : 'fa-image'" ng-if="row.entity.type ==='category' || !COL_FIELD"></i>
         </div>
     </div>

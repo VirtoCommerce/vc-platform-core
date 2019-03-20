@@ -1,12 +1,11 @@
-using System.Collections.Generic;
-using VirtoCommerce.Platform.Core.Common;
-using System.Linq;
 using System;
-using VirtoCommerce.Platform.Core.Domain;
+using System.Collections.Generic;
+using System.Linq;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class Catalog : AuditableEntity, IAggregateRoot, IHasProperties, ICloneable
+    public class Catalog : Entity, IHasProperties, ICloneable
     {
         public string Name { get; set; }
         public bool IsVirtual { get; set; }
@@ -22,16 +21,33 @@ namespace VirtoCommerce.CatalogModule.Core.Model
                 return retVal;
             }
         }
-        public IList<CatalogLanguage> Languages { get; set; }
+        public ICollection<CatalogLanguage> Languages { get; set; }
 
-        #region IHasProperties
-        public IList<Property> Properties { get; set; }
+        #region IHasProperties members
+        public ICollection<Property> Properties { get; set; }
+
         #endregion
 
         #region ICloneable members
         public object Clone()
         {
-            return MemberwiseClone();
+            var retVal = base.MemberwiseClone() as Catalog;
+            return retVal;
+        }
+
+        public virtual Catalog MemberwiseCloneCatalog()
+        {
+            var retVal = AbstractTypeFactory<Catalog>.TryCreateInstance();
+
+            retVal.Id = Id;
+            retVal.IsVirtual = IsVirtual;
+            retVal.Name = Name;
+
+            // TODO: clone reference objects
+            retVal.Languages = Languages;
+            retVal.Properties = Properties;
+
+            return retVal;
         }
         #endregion
     }
