@@ -56,15 +56,13 @@ namespace VirtoCommerce.CustomerModule.Web
             serviceCollection.AddSingleton<MemberDocumentChangesProvider>();
             serviceCollection.AddSingleton<MemberDocumentBuilder>();
 
-            var snapshot = serviceCollection.BuildServiceProvider();
-
-            serviceCollection.AddSingleton(new IndexDocumentConfiguration
+            serviceCollection.AddSingleton(provider => new IndexDocumentConfiguration
             {
                 DocumentType = KnownDocumentTypes.Member,
                 DocumentSource = new IndexDocumentSource
                 {
-                    ChangesProvider = snapshot.GetService<MemberDocumentChangesProvider>(),
-                    DocumentBuilder = snapshot.GetService<MemberDocumentBuilder>(),
+                    ChangesProvider = provider.GetService<MemberDocumentChangesProvider>(),
+                    DocumentBuilder = provider.GetService<MemberDocumentBuilder>(),
                 },
             });
 
