@@ -1,4 +1,4 @@
-﻿angular.module('platformWebApp')
+angular.module('platformWebApp')
 .config(['$provide', function ($provide) {
     // Provide default format
     $provide.decorator('currencyFilter', ['$delegate', function ($delegate) {
@@ -115,74 +115,73 @@
     }]);
 
     // Fix bugs & add features for datepicker popup
-    $provide.decorator('datepickerPopupDirective', ['$delegate', 'platformWebApp.angularToMomentFormatConverter', 'uiDatetimePickerConfig', 'timepickerConfig', '$filter', '$locale',
-        function ($delegate, formatConverter, datepickerPopupConfig, timepickerConfig, $filter, $locale) {
-        //delete bootstrap directive
-        $delegate.shift();
+    $provide.decorator('datepickerPopupDirective', ['$delegate', 'platformWebApp.angularToMomentFormatConverter', 'uiDatetimePickerConfig', 'timepickerConfig', '$filter', '$locale', 'moment',
+        function ($delegate, formatConverter, datepickerPopupConfig, timepickerConfig, $filter, $locale, moment) {
+            //delete bootstrap directive
+            $delegate.shift();
 
-         //use custom date time picker directive
-        var directive = $delegate[0];
+            //use custom date time picker directive
+            var directive = $delegate[0];
 
-        directive.compile = function (tElem, tAttrs) {
-            tElem.attr("datepicker-popup-original", tAttrs.datepickerPopup);
-            return function (scope, element, attrs, ctrls) {
-                var ngModelCtrl = ctrls[0];
-                // datepicker has some bugs and limitations to support date & time formats,
-                // also, it doesn't support localized input,
-                // so limit format number & convert to date via moment to prevent random occurence of errors
-                var applyFormat = function (newFormat, oldFormat) {
-                    if (newFormat !== oldFormat) {
+            directive.compile = function (tElem, tAttrs) {
+                tElem.attr("datepicker-popup-original", tAttrs.datepickerPopup);
+                return function (scope, element, attrs, ctrls) {
+                    var ngModelCtrl = ctrls[0];
+                    // datepicker has some bugs and limitations to support date & time formats,
+                    // also, it doesn't support localized input,
+                    // so limit format number & convert to date via moment to prevent random occurence of errors
+                    var applyFormat = function (newFormat, oldFormat) {
+                        if (newFormat !== oldFormat) {
 
-                        var format = newFormat || datepickerPopupConfig.dateFormat;;
-                        formatConverter.validate(format, formatConverter.isInvalidDate);
+                            var format = newFormat || datepickerPopupConfig.dateFormat;;
+                            formatConverter.validate(format, formatConverter.isInvalidDate);
 
-                        if (formatConverter.additionalFormats.includes(format)) {
-                            format = $locale.DATETIME_FORMATS[format];
+                            if (formatConverter.additionalFormats.includes(format)) {
+                                format = $locale.DATETIME_FORMATS[format];
+                            }
+                            attrs.datepickerPopup = format;
                         }
-                        attrs.datepickerPopup = format;
-                    }
-                };
-                attrs.$observe('datepickerPopupOriginal', function (value, oldValue) {
-                    applyFormat(value, oldValue);
-                });
-                applyFormat(attrs.datepickerPopup, undefined);
+                    };
+                    attrs.$observe('datepickerPopupOriginal', function (value, oldValue) {
+                        applyFormat(value, oldValue);
+                    });
+                    applyFormat(attrs.datepickerPopup, undefined);
 
-                directive.link.apply(this, arguments);
+                    directive.link.apply(this, arguments);
 
-                // convert localized date to javascript date object for correct validation
-                ngModelCtrl.$formatters.splice(1, 1, function (value) {
-                    var format = attrs.datepickerPopup;
-                    scope.date = value;
-                    return ngModelCtrl.$isEmpty(value) ? value : $filter('date')(moment(value), format);
-                });
+                    // convert localized date to javascript date object for correct validation
+                    ngModelCtrl.$formatters.splice(1, 1, function (value) {
+                        var format = attrs.datepickerPopup;
+                        scope.date = value;
+                        return ngModelCtrl.$isEmpty(value) ? value : $filter('date')(moment(value), format);
+                    });
 
-                ngModelCtrl.$parsers.unshift(function (value) {
-                    if (value) {
-                        var format = formatConverter.convert(attrs.datepickerPopup);
-                        var date = moment(value, format, moment.locale(), true);
-                        return date.isValid() ? date.toDate() : undefined;
-                    }
-                    else
-                    {
-                        //Allow to enter empty value
-                        return value;
-                    }
-                });
-            }
-        };
-        return $delegate;
+                    ngModelCtrl.$parsers.unshift(function (value) {
+                        if (value) {
+                            var format = formatConverter.convert(attrs.datepickerPopup);
+                            var date = moment(value, format, moment.locale(), true);
+                            return date.isValid() ? date.toDate() : undefined;
+                        }
+                        else {
+                            //Allow to enter empty value
+                            return value;
+                        }
+                    });
+                }
+            };
+            return $delegate;
         }]);
 
     $provide.decorator('timepickerDirective', ['$delegate', 'timepickerConfig', '$locale', 'platformWebApp.settings.helper', 'platformWebApp.i18n', 'platformWebApp.userProfile',
         function ($delegate, timepickerConfig, $locale, settings, i18n, userProfile) {
 
-        $delegate.shift();
-        var directive = $delegate[0];
+            $delegate.shift();
+            var directive = $delegate[0];
 
-        var timeSettings = userProfile.timeSettings;
-        timepickerConfig.showMeridian = timeSettings.showMeridian;
+            var timeSettings = userProfile.timeSettings;
+            timepickerConfig.showMeridian = timeSettings.showMeridian;
 
-        var compile = directive.compile;
+            var compile = directive.compile;
             directive.compile = function (tElem, tAttrs) {
                 var link = compile.apply(this, arguments);
                 return function (scope, element, attrs, ctrls) {
@@ -198,7 +197,7 @@
                     }
 
                     scope.$watch('showMeridian', function (showMeridian) {
-                            cnahgeTimeSettings(showMeridian);
+                        cnahgeTimeSettings(showMeridian);
                     });
 
                     link.apply(this, arguments);
