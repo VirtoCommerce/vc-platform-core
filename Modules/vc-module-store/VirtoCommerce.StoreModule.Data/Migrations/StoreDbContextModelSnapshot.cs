@@ -15,14 +15,15 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.0-rtm-30799")
+                .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreCurrencyEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("CurrencyCode")
                         .IsRequired()
@@ -112,7 +113,8 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreFulfillmentCenterEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("FulfillmentCenterId")
                         .IsRequired()
@@ -139,7 +141,8 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreLanguageEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("LanguageCode")
                         .IsRequired()
@@ -158,7 +161,8 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StorePaymentMethodEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -191,7 +195,8 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreShippingMethodEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -225,7 +230,8 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreTaxProviderEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -256,7 +262,8 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreTrustedGroupEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("GroupName")
                         .IsRequired()
