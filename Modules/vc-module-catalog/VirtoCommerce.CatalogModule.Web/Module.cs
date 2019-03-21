@@ -19,6 +19,7 @@ using VirtoCommerce.CatalogModule.Data.Handlers;
 using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.CatalogModule.Data.Search;
 using VirtoCommerce.CatalogModule.Data.Search.BrowseFilters;
+using VirtoCommerce.CatalogModule.Data.Search.Indexing;
 using VirtoCommerce.CatalogModule.Data.Services;
 using VirtoCommerce.CatalogModule.Data.Services.OutlineParts;
 using VirtoCommerce.CatalogModule.Data.Validation;
@@ -29,6 +30,7 @@ using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
 
 namespace VirtoCommerce.CatalogModule.Web
@@ -91,6 +93,33 @@ namespace VirtoCommerce.CatalogModule.Web
                     return new IdOutlinePartResolver();
                 }
             });
+
+            serviceCollection.AddSingleton<ProductDocumentChangesProvider>();
+            serviceCollection.AddSingleton<ProductDocumentBuilder>();
+            serviceCollection.AddSingleton<CategoryDocumentChangesProvider>();
+            serviceCollection.AddSingleton<CategoryDocumentBuilder>();
+
+            // Product indexing configuration
+            serviceCollection.AddSingleton(provider => new IndexDocumentConfiguration
+            {
+                DocumentType = KnownDocumentTypes.Product,
+                DocumentSource = new IndexDocumentSource
+                {
+                    ChangesProvider = provider.GetService<ProductDocumentChangesProvider>(),
+                    DocumentBuilder = provider.GetService<ProductDocumentBuilder>(),
+                },
+            });
+
+            // Category indexing configuration
+            serviceCollection.AddSingleton(provider => new IndexDocumentConfiguration
+            {
+                DocumentType = KnownDocumentTypes.Category,
+                DocumentSource = new IndexDocumentSource
+                {
+                    ChangesProvider = provider.GetService<CategoryDocumentChangesProvider>(),
+                    DocumentBuilder = provider.GetService<CategoryDocumentBuilder>(),
+                },
+            });
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -120,6 +149,9 @@ namespace VirtoCommerce.CatalogModule.Web
                 catalogDbContext.Database.EnsureCreated();
                 catalogDbContext.Database.Migrate();
             }
+
+
+
         }
 
         public void Uninstall()
