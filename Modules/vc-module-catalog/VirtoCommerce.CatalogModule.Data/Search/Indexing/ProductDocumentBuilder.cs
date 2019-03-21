@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Services;
-using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
@@ -14,12 +13,10 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
     public class ProductDocumentBuilder : CatalogDocumentBuilder, IIndexDocumentBuilder
     {
         private readonly IItemService _itemService;
-        private readonly IBlobUrlResolver _blobUrlResolver;
-        public ProductDocumentBuilder(ISettingsManager settingsManager, IItemService itemService, IBlobUrlResolver blobUrlResolver)
+        public ProductDocumentBuilder(ISettingsManager settingsManager, IItemService itemService)
             : base(settingsManager)
         {
             _itemService = itemService;
-            _blobUrlResolver = blobUrlResolver;
         }
 
         public virtual async Task<IList<IndexDocument>> GetDocumentsAsync(IList<string> documentIds)

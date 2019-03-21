@@ -11,7 +11,6 @@ using VirtoCommerce.PricingModule.Core;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
 using VirtoCommerce.PricingModule.Core.Services;
-using webModel = VirtoCommerce.PricingModule.Web.Model;
 
 namespace VirtoCommerce.PricingModule.Web.Controllers.Api
 {
@@ -133,7 +132,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         /// </summary>
         /// <remarks>Search product prices</remarks>
         [HttpGet]
-        [ProducesResponseType(typeof(GenericSearchResult<webModel.ProductPrice>), 200)]
+        [ProducesResponseType(typeof(GenericSearchResult<ProductPrice>), 200)]
         [Route("api/catalog/products/prices/search")]
         public async Task<IActionResult> SearchProductPrices(PricesSearchCriteria criteria)
         {
@@ -142,16 +141,16 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
                 criteria = new PricesSearchCriteria();
             }
             var result = await _pricingSearchService.SearchPricesAsync(criteria);
-            var retVal = new GenericSearchResult<webModel.ProductPrice>
+            var retVal = new GenericSearchResult<ProductPrice>
             {
                 TotalCount = result.TotalCount,
-                Results = new List<webModel.ProductPrice>()
+                Results = new List<ProductPrice>()
             };
 
             var products = await _itemService.GetByIdsAsync(result.Results.Select(x => x.ProductId).Distinct().ToArray(), ItemResponseGroup.ItemInfo);
             foreach (var productPricesGroup in result.Results.GroupBy(x => x.ProductId))
             {
-                var productPrice = new webModel.ProductPrice
+                var productPrice = new ProductPrice
                 {
                     ProductId = productPricesGroup.Key,
                     Prices = productPricesGroup.ToList()
@@ -159,8 +158,16 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
                 var product = products.FirstOrDefault(x => x.Id == productPricesGroup.Key);
                 if (product != null)
                 {
-                    // TODO: uncomment this line when Product will become available in VirtoCommerce.CatalogModule.Web.Model
-                    //productPrice.Product = product.ToWebModel(_blobUrlResolver);
+                    if (!product.Images.IsNullOrEmpty())
+                    {
+                        foreach (var image in product.Images)
+                        {
+                            image.RelativeUrl = image.Url;
+                            image.Url = _blobUrlResolver.GetAbsoluteUrl(image.Url);
+                        }
+                    }
+
+                    productPrice.Product = product;
                 }
                 retVal.Results.Add(productPrice);
             }
@@ -240,7 +247,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 204)]
         [Route("api/products/prices")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<IActionResult> UpdateProductsPrices([FromBody]webModel.ProductPrice[] productPrices)
+        public async Task<IActionResult> UpdateProductsPrices([FromBody]ProductPrice[] productPrices)
         {
             var result = await _pricingSearchService.SearchPricesAsync(new PricesSearchCriteria
             {
@@ -289,7 +296,7 @@ namespace VirtoCommerce.PricingModule.Web.Controllers.Api
         [ProducesResponseType(typeof(void), 204)]
         [Route("api/products/{productId}/prices")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<IActionResult> UpdateProductPrices([FromBody]webModel.ProductPrice productPrice)
+        public async Task<IActionResult> UpdateProductPrices([FromBody]ProductPrice productPrice)
         {
             return await UpdateProductsPrices(new[] { productPrice });
         }

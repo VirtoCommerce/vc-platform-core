@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
+using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
@@ -17,18 +18,19 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         private readonly ICategoryService _categoryService;
         private readonly ICatalogService _catalogService;
         private readonly IItemService _itemService;
+        private readonly IBlobUrlResolver _blobUrlResolver;
 
         public CatalogModuleListEntryController(
             ICatalogSearchService searchService,
             ICategoryService categoryService,
             IItemService itemService,
-            ICatalogService catalogService
-            )
+            ICatalogService catalogService, IBlobUrlResolver blobUrlResolver)
         {
             _searchService = searchService;
             _categoryService = categoryService;
             _itemService = itemService;
             _catalogService = catalogService;
+            _blobUrlResolver = blobUrlResolver;
         }
 
         /// <summary>
@@ -80,7 +82,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                 criteria.Take = criteria.Take - categoryTake;
                 var productsSearchResult = await _searchService.SearchAsync(criteria);
 
-                var products = productsSearchResult.Products.Select(x => new ListEntryProduct(x));
+                var products = productsSearchResult.Products.Select(x => new ListEntryProduct(x, _blobUrlResolver));
 
                 retVal.TotalCount += productsSearchResult.ProductsTotalCount;
                 retVal.ListEntries.AddRange(products);

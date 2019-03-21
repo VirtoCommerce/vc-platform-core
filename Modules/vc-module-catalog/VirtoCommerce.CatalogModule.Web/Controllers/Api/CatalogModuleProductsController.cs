@@ -7,6 +7,7 @@ using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CoreModule.Core.Seo;
+using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
@@ -20,9 +21,10 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         private readonly ISkuGenerator _skuGenerator;
         private readonly IProductAssociationSearchService _productAssociationSearchService;
         private readonly IPropertyService _propertyService;
+        private readonly IBlobUrlResolver _blobUrlResolver;
 
         public CatalogModuleProductsController(IItemService itemsService, ICatalogService catalogService, ICategoryService categoryService,
-                                               ISkuGenerator skuGenerator, IProductAssociationSearchService productAssociationSearchService, IPropertyService propertyService)
+                                               ISkuGenerator skuGenerator, IProductAssociationSearchService productAssociationSearchService, IPropertyService propertyService, IBlobUrlResolver blobUrlResolver)
         {
             _itemsService = itemsService;
             _categoryService = categoryService;
@@ -30,6 +32,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             _skuGenerator = skuGenerator;
             _productAssociationSearchService = productAssociationSearchService;
             _propertyService = propertyService;
+            _blobUrlResolver = blobUrlResolver;
         }
 
 
@@ -46,6 +49,15 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             if (item == null)
             {
                 return NotFound();
+            }
+
+            if (!item.Images.IsNullOrEmpty())
+            {
+                foreach (var image in item.Images)
+                {
+                    image.RelativeUrl = image.Url;
+                    image.Url = _blobUrlResolver.GetAbsoluteUrl(image.Url);
+                }
             }
 
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Read, item);
@@ -71,6 +83,17 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                 return NotFound();
             }
 
+            foreach (var item in items)
+            {
+                if (!item.Images.IsNullOrEmpty())
+                {
+                    foreach (var image in item.Images)
+                    {
+                        image.RelativeUrl = image.Url;
+                        image.Url = _blobUrlResolver.GetAbsoluteUrl(image.Url);
+                    }
+                }
+            }
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Read, items);
 
             //var retVal = items.Select(x => x.ToWebModel(_blobUrlResolver)).ToArray();

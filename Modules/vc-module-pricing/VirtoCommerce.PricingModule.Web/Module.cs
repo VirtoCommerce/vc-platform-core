@@ -26,6 +26,7 @@ using VirtoCommerce.PricingModule.Data.Repositories;
 using VirtoCommerce.PricingModule.Data.Search;
 using VirtoCommerce.PricingModule.Data.Services;
 using VirtoCommerce.PricingModule.Web.JsonConverters;
+using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Web
 {
@@ -81,27 +82,26 @@ namespace VirtoCommerce.PricingModule.Web
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(appBuilder.ApplicationServices.GetService<PolymorphicPricingJsonConverter>());
 
-            //TODO
             // Add price document source to the product indexing configuration
-            //var productIndexingConfigurations = appBuilder.ApplicationServices.GetService<IEnumerable<IndexDocumentConfiguration>>();
-            //if (productIndexingConfigurations != null)
-            //{
-            //    var productPriceDocumentSource = new IndexDocumentSource
-            //    {
-            //        ChangesProvider = appBuilder.ApplicationServices.GetService<ProductPriceDocumentChangesProvider>(),
-            //        DocumentBuilder = appBuilder.ApplicationServices.GetService<ProductPriceDocumentBuilder>()
-            //    };
+            var productIndexingConfigurations = appBuilder.ApplicationServices.GetServices<IndexDocumentConfiguration>();
+            if (productIndexingConfigurations != null)
+            {
+                var productPriceDocumentSource = new IndexDocumentSource
+                {
+                    ChangesProvider = appBuilder.ApplicationServices.GetService<ProductPriceDocumentChangesProvider>(),
+                    DocumentBuilder = appBuilder.ApplicationServices.GetService<ProductPriceDocumentBuilder>()
+                };
 
-            //    foreach (var configuration in productIndexingConfigurations.Where(c => c.DocumentType == KnownDocumentTypes.Product))
-            //    {
-            //        if (configuration.RelatedSources == null)
-            //        {
-            //            configuration.RelatedSources = new List<IndexDocumentSource>();
-            //        }
+                foreach (var configuration in productIndexingConfigurations.Where(c => c.DocumentType == KnownDocumentTypes.Product))
+                {
+                    if (configuration.RelatedSources == null)
+                    {
+                        configuration.RelatedSources = new List<IndexDocumentSource>();
+                    }
 
-            //        configuration.RelatedSources.Add(productPriceDocumentSource);
-            //    }
-            //}
+                    configuration.RelatedSources.Add(productPriceDocumentSource);
+                }
+            }
 
             //Pricing expression
             AbstractTypeFactory<IConditionTree>.RegisterType<PriceConditionTree>();

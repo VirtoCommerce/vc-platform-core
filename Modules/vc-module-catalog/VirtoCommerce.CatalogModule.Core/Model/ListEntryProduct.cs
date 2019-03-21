@@ -1,4 +1,5 @@
 using System.Linq;
+using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
@@ -11,12 +12,16 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         public const string TypeName = "product";
         public string ProductType { get; set; }
 
-        public ListEntryProduct(CatalogProduct product)
+        public ListEntryProduct(CatalogProduct product, IBlobUrlResolver blobUrlResolver)
             : base(TypeName, product)
         {
             ProductType = product.ProductType;
 
-            ImageUrl = product.Images.FirstOrDefault()?.Url;
+            if (!product.Images.IsNullOrEmpty())
+            {
+                ImageUrl = blobUrlResolver.GetAbsoluteUrl(product.Images.FirstOrDefault()?.Url);
+            }
+
             Code = product.Code;
             Name = product.Name;
             IsActive = product.IsActive ?? true;

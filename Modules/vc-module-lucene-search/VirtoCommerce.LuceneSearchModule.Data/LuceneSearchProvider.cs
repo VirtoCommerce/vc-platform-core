@@ -163,7 +163,7 @@ namespace VirtoCommerce.LuceneSearchModule.Data
                 using (IndexReader reader = DirectoryReader.Open(FSDirectory.Open(directoryPath)))
                 {
                     //TODO how to get fields from documentType ?! 
-                    var availableFields = new[] { "content" };
+                    var availableFields = new[] { "content", "name" };
                     var searcher = new IndexSearcher(reader);
                     var providerRequest = LuceneSearchRequestBuilder.BuildRequest(request, indexName, documentType, availableFields);
 
