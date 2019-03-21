@@ -57,6 +57,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                 {
                     Id = x.Id,
                     Version = x.Version.ToString(),
+                    Description = x.Description
                 }).ToArray()
             };
 
