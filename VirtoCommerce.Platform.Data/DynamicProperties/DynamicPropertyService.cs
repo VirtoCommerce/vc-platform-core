@@ -220,6 +220,7 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                                                                     .ToList();
                     foreach (var prop in propOwner.DynamicProperties)
                     {
+						prop.ObjectId = propOwner.Id;
                         //Leave only self object values 
                         if (prop.Values != null)
                         {
