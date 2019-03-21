@@ -29,7 +29,6 @@ namespace VirtoCommerce.MarketingModule.Test
 
             _dynamicContentServiceMock = new Mock<IDynamicContentService>();
             //_expressionSerializerMock = new Mock<IExpressionSerializer>();
-            // _expressionSerializerMock = new XmlExpressionSerializer();
             _loggerMock = new Mock<ILogger<DefaultDynamicContentEvaluatorImpl>>();
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _repositoryMock.Setup(ss => ss.UnitOfWork).Returns(_mockUnitOfWork.Object);

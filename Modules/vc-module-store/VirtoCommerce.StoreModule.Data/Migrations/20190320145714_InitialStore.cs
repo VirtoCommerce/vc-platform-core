@@ -43,7 +43,7 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                 name: "StoreCurrency",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     CurrencyCode = table.Column<string>(maxLength: 32, nullable: false),
                     StoreId = table.Column<string>(nullable: false)
                 },
@@ -62,7 +62,7 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                 name: "StoreFulfillmentCenter",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     Name = table.Column<string>(maxLength: 128, nullable: false),
                     Type = table.Column<string>(maxLength: 32, nullable: false),
                     FulfillmentCenterId = table.Column<string>(maxLength: 128, nullable: false),
@@ -83,7 +83,7 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                 name: "StoreLanguage",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     LanguageCode = table.Column<string>(maxLength: 32, nullable: false),
                     StoreId = table.Column<string>(nullable: false)
                 },
@@ -102,7 +102,7 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                 name: "StorePaymentMethod",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     Code = table.Column<string>(maxLength: 128, nullable: false),
                     Priority = table.Column<int>(nullable: false),
                     Name = table.Column<string>(maxLength: 128, nullable: true),
@@ -127,7 +127,7 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                 name: "StoreShippingMethod",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     Code = table.Column<string>(maxLength: 128, nullable: false),
                     Priority = table.Column<int>(nullable: false),
                     Name = table.Column<string>(maxLength: 128, nullable: true),
@@ -152,7 +152,7 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                 name: "StoreTaxProvider",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     Code = table.Column<string>(maxLength: 128, nullable: false),
                     Priority = table.Column<int>(nullable: false),
                     Name = table.Column<string>(maxLength: 128, nullable: true),
@@ -176,7 +176,7 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                 name: "StoreTrustedGroup",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     GroupName = table.Column<string>(maxLength: 128, nullable: false),
                     StoreId = table.Column<string>(nullable: false)
                 },

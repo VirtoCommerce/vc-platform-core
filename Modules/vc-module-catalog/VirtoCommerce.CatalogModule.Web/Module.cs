@@ -150,6 +150,9 @@ namespace VirtoCommerce.CatalogModule.Web
                 catalogDbContext.Database.EnsureCreated();
                 catalogDbContext.Database.Migrate();
             }
+
+
+
         }
 
         public void Uninstall()
