@@ -61,7 +61,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
                         try
                         {
                             //Deserialize conditions
-                            assignment.Condition = JsonConvert.DeserializeObject<IConditionTree>(assignment.ConditionExpression, new ConditionJsonConverter());
+                            assignment.Conditions = JsonConvert.DeserializeObject<IConditionTree[]>(assignment.ConditionExpression, new ConditionJsonConverter());
                         }
                         catch (Exception ex)
                         {
@@ -92,13 +92,13 @@ namespace VirtoCommerce.PricingModule.Data.Services
             }
 
             var assignments = query.ToArray();
-            var assignmentsToReturn = assignments.Where(x => x.Condition == null).ToList();
+            var assignmentsToReturn = assignments.Where(x => x.Conditions.IsNullOrEmpty()).ToList();
 
-            foreach (var assignment in assignments.Where(x => x.Condition != null))
+            foreach (var assignment in assignments.Where(x => !x.Conditions.IsNullOrEmpty()))
             {
                 try
                 {
-                    if (assignment.Condition.Evaluate(evalContext))
+                    if (assignment.Conditions.All(x => x.Evaluate(evalContext)))
                     {
                         if (assignmentsToReturn.All(x => x.PricelistId != assignment.PricelistId))
                         {

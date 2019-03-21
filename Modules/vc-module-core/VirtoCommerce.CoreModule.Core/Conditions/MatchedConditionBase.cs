@@ -11,6 +11,11 @@ namespace VirtoCommerce.CoreModule.Core.Conditions
         {
             var result = false;
 
+            if (string.IsNullOrEmpty(leftOperand))
+            {
+                return false;
+            }
+
             if (MatchCondition.EqualsInvariant(ConditionOperation.Contains))
             {
                 result = leftOperand.ToLowerInvariant().Contains(Value.ToLowerInvariant());

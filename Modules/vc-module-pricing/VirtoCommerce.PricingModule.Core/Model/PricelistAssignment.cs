@@ -41,7 +41,7 @@ namespace VirtoCommerce.PricingModule.Core.Model
         // TECHDEBT: [JsonIgnore] attribute here is a workaround to exclude this property from Swagger documentation.
         //           This property causes NSwag to include lots of types including MethodImplAttributes, which leads to the invalid Swagger JSON.
         [JsonIgnore]
-        public IConditionTree Condition { get; set; }
+        public IConditionTree[] Conditions { get; set; }
 
         /// <summary>
         /// List of conditions and rules to define Prices Assignment is valid
