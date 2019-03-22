@@ -163,7 +163,7 @@ namespace VirtoCommerce.LuceneSearchModule.Data
                 using (IndexReader reader = DirectoryReader.Open(FSDirectory.Open(directoryPath)))
                 {
                     //TODO how to get fields from documentType ?! 
-                    var availableFields = new[] { "content" };
+                    var availableFields = new[] { "" };
                     var searcher = new IndexSearcher(reader);
                     var providerRequest = LuceneSearchRequestBuilder.BuildRequest(request, indexName, documentType, availableFields);
 
@@ -325,7 +325,7 @@ namespace VirtoCommerce.LuceneSearchModule.Data
                         Analyzer analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
                         var config = new IndexWriterConfig(LuceneVersion.LUCENE_48, analyzer)
                         {
-                            OpenMode = createNew ? OpenMode.CREATE : OpenMode.APPEND
+                            OpenMode = createNew ? OpenMode.CREATE : OpenMode.CREATE_OR_APPEND
                         };
                         var writer = new IndexWriter(directory, config);
                         _indexWriters[indexName] = writer;
