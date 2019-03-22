@@ -1,5 +1,5 @@
 angular.module('virtoCommerce.searchModule')
-    .controller('virtoCommerce.searchModule.indexWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.searchModule.searchIndexation', function ($scope, bladeNavigationService, searchApi) {
+    .controller('virtoCommerce.searchModule.indexWidgetController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.searchModule.searchIndexation', 'moment', function ($scope, bladeNavigationService, searchApi, moment) {
         var blade = $scope.blade;
         var momentFormat = "YYYYMMDDHHmmss";
         $scope.loading = true;
