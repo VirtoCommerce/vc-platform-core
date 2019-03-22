@@ -7,6 +7,7 @@ using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchModule.Core;
+using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
 using VirtoCommerce.SearchModule.Data.SearchPhraseParsing;
 using VirtoCommerce.SearchModule.Data.Services;
@@ -39,6 +40,13 @@ namespace VirtoCommerce.SearchModule.Web
 
             serviceCollection.AddSingleton<IIndexingManager, IndexingManager>();
             serviceCollection.AddSingleton<IndexProgressHandler>();
+
+            var configuration = serviceCollection.BuildServiceProvider().GetService<IConfiguration>();
+            serviceCollection.AddOptions<SearchSettings>().Configure(o =>
+            {
+                o.Provider = configuration.GetValue<string>("Search:Provider");
+                o.ConnectionSettings = configuration.GetSection($"Search:{o.Provider}:SearchConnectionString").Get<SearchConnectionSettings>();
+            });
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)

@@ -12,6 +12,7 @@ using Lucene.Net.Search;
 using Lucene.Net.Spatial.Vector;
 using Lucene.Net.Store;
 using Lucene.Net.Util;
+using Microsoft.Extensions.Options;
 using Spatial4n.Core.Context;
 using VirtoCommerce.SearchModule.Core.Exceptions;
 using VirtoCommerce.SearchModule.Core.Model;
@@ -24,18 +25,14 @@ namespace VirtoCommerce.LuceneSearchModule.Data
         private static readonly object _providerlock = new object();
         private static readonly Dictionary<string, IndexWriter> _indexWriters = new Dictionary<string, IndexWriter>();
         private static readonly SpatialContext _spatialContext = SpatialContext.GEO;
+        private readonly SearchSettings _searchOptions;
 
-
-        public string DataDirectoryPath { get; }
-        public string Scope { get; }
-
-        public LuceneSearchProvider(LuceneSearchProviderSettings settings)
+        public LuceneSearchProvider(IOptions<SearchSettings> settings)
         {
             if (settings == null)
                 throw new ArgumentNullException(nameof(settings));
 
-            DataDirectoryPath = settings.DataDirectoryPath;
-            Scope = settings.Scope;
+            _searchOptions = settings.Value;
         }
 
         public virtual Task DeleteIndexAsync(string documentType)
@@ -288,7 +285,7 @@ namespace VirtoCommerce.LuceneSearchModule.Data
         protected virtual string GetIndexName(string documentType)
         {
             // Use different index for each document type
-            return string.Join("-", Scope, documentType);
+            return string.Join("-", _searchOptions.ConnectionSettings.Scope, documentType);
         }
 
         protected virtual void CloseWriter(string indexName, bool optimize)
@@ -344,7 +341,7 @@ namespace VirtoCommerce.LuceneSearchModule.Data
 
         protected virtual string GetDirectoryPath(string indexName)
         {
-            return Path.Combine(DataDirectoryPath, indexName);
+            return Path.Combine(_searchOptions.ConnectionSettings.Server, indexName);
         }
     }
 }
