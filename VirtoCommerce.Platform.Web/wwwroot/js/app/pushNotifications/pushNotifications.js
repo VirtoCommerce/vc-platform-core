@@ -89,6 +89,7 @@ angular.module('platformWebApp').config(
                 data.template = notificationTemplate.template;
                 data.action = notificationTemplate.action;
                 headerNotifications.addNotification(data);
+                $rootScope.$apply();
             });
 
             var retVal = {};
