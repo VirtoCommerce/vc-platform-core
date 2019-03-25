@@ -31,10 +31,12 @@ namespace VirtoCommerce.Platform.Core.Settings
             foreach (var hasSettingsObject in hasSettingsObjects)
             {
                 var typeSettings = manager.GetSettingsForType(hasSettingsObject.TypeName);
-                if (!typeSettings.IsNullOrEmpty())
+                if (typeSettings.IsNullOrEmpty())
                 {
-                    hasSettingsObject.Settings = (await manager.GetObjectSettingsAsync(typeSettings.Select(x => x.Name), hasSettingsObject.TypeName, hasSettingsObject.Id)).ToList();
+                    throw new SettingsTypeNotRegisteredException(hasSettingsObject.TypeName);
                 }
+                hasSettingsObject.Settings = (await manager.GetObjectSettingsAsync(typeSettings.Select(x => x.Name),
+                    hasSettingsObject.TypeName, hasSettingsObject.Id)).ToList();
             }
         }
 
@@ -76,7 +78,7 @@ namespace VirtoCommerce.Platform.Core.Settings
         /// Deep remove entity and all nested objects settings values
         /// </summary>
         /// <param name="entity"></param>
-		public static async Task DeepRemoveSettingsAsync(this ISettingsManager manager, IHasSettings entity)
+        public static async Task DeepRemoveSettingsAsync(this ISettingsManager manager, IHasSettings entity)
         {
             if (entity == null)
             {
