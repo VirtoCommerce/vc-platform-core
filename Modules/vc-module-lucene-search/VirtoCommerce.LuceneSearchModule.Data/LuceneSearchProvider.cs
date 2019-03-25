@@ -256,8 +256,7 @@ namespace VirtoCommerce.LuceneSearchModule.Data
                     result.AddRange(strategy.CreateIndexableFields(shape));
                     break;
                 default:
-                    double t;
-                    if (double.TryParse(field.Value.ToStringInvariant(), NumberStyles.Float, CultureInfo.InvariantCulture, out t))
+                    if (double.TryParse(field.Value.ToStringInvariant(), NumberStyles.Float, CultureInfo.InvariantCulture, out _))
                     {
                         var facetableFieldName = LuceneSearchHelper.GetFacetableFieldName(field.Name);
 
@@ -341,7 +340,7 @@ namespace VirtoCommerce.LuceneSearchModule.Data
 
         protected virtual string GetDirectoryPath(string indexName)
         {
-            return Path.Combine(_searchOptions.ConnectionSettings.Server, indexName);
+            return Path.Combine(((LuceneSearchConnectionSettings)_searchOptions.ConnectionSettings).Server, indexName);
         }
     }
 }
