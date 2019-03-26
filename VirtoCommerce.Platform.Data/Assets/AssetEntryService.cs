@@ -27,35 +27,9 @@ namespace VirtoCommerce.Platform.Data.Assets
 
             using (var repository = _platformRepository())
             {
-                var query = repository.AssetEntries;
+                var query = GetSearchAssetEntriesQuery(criteria, repository);
 
-                if (!string.IsNullOrEmpty(criteria.SearchPhrase))
-                {
-                    query = query.Where(x =>
-                        x.Name.Contains(criteria.SearchPhrase) || x.RelativeUrl.Contains(criteria.SearchPhrase));
-                }
-
-                if (!string.IsNullOrEmpty(criteria.LanguageCode))
-                {
-                    query = query.Where(x => x.LanguageCode == criteria.LanguageCode);
-                }
-
-                if (!string.IsNullOrEmpty(criteria.Group))
-                {
-                    query = query.Where(x => x.Group == criteria.Group);
-                }
-
-                if (!criteria.Tenants.IsNullOrEmpty())
-                {
-                    var tenants = criteria.Tenants.Where(x => x.IsValid).ToArray();
-                    if (tenants.Any())
-                    {
-                        var tenantsStrings = tenants.Select(x => x.ToString());
-                        query = query.Where(x => tenantsStrings.Contains(x.TenantId + "_" + x.TenantType));
-                    }
-                }
-
-                var result = new GenericSearchResult<AssetEntry>()
+                var result = new GenericSearchResult<AssetEntry>
                 {
                     TotalCount = await query.CountAsync()
                 };
@@ -148,6 +122,39 @@ namespace VirtoCommerce.Platform.Data.Assets
 
                 AssetCacheRegion.ExpireRegion();
             }
+        }
+
+        private IQueryable<AssetEntryEntity> GetSearchAssetEntriesQuery(AssetEntrySearchCriteria criteria, IPlatformRepository repository)
+        {
+            var query = repository.AssetEntries;
+
+            if (!string.IsNullOrEmpty(criteria.SearchPhrase))
+            {
+                query = query.Where(x =>
+                    x.Name.Contains(criteria.SearchPhrase) || x.RelativeUrl.Contains(criteria.SearchPhrase));
+            }
+
+            if (!string.IsNullOrEmpty(criteria.LanguageCode))
+            {
+                query = query.Where(x => x.LanguageCode == criteria.LanguageCode);
+            }
+
+            if (!string.IsNullOrEmpty(criteria.Group))
+            {
+                query = query.Where(x => x.Group == criteria.Group);
+            }
+
+            if (!criteria.Tenants.IsNullOrEmpty())
+            {
+                var tenants = criteria.Tenants.Where(x => x.IsValid).ToArray();
+                if (tenants.Any())
+                {
+                    var tenantsStrings = tenants.Select(x => x.ToString());
+                    query = query.Where(x => tenantsStrings.Contains(x.TenantId + "_" + x.TenantType));
+                }
+            }
+
+            return query;
         }
     }
 }

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using VirtoCommerce.Platform.Core.Common;
@@ -14,6 +13,7 @@ namespace VirtoCommerce.Platform.Data.PushNotifications
         private readonly List<PushNotification> _innerList = new List<PushNotification>();
         private object _lockObject = new object();
         private readonly IHubContext<PushNotificationHub> _hubContext;
+
         public PushNotificationManager(IHubContext<PushNotificationHub> hubContext)
         {
             _hubContext = hubContext;
@@ -21,27 +21,12 @@ namespace VirtoCommerce.Platform.Data.PushNotifications
 
         public PushNotificationSearchResult SearchNotifies(string userId, PushNotificationSearchCriteria criteria)
         {
-            var query = _innerList.OrderByDescending(x => x.Created).Where(x => x.Creator == userId).AsQueryable();
-            if (criteria.Ids != null && criteria.Ids.Any())
-            {
-                query = query.Where(x => criteria.Ids.Contains(x.Id));
-            }
-            if (criteria.OnlyNew)
-            {
-                query = query.Where(x => x.IsNew);
-            }
-            if (criteria.StartDate != null)
-            {
-                query = query.Where(x => x.Created >= criteria.StartDate);
-            }
-            if (criteria.EndDate != null)
-            {
-                query = query.Where(x => x.Created <= criteria.EndDate);
-            }
+            var query = GetSearchNotifiesQuery(userId, criteria);
 
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
             {
+                //todo: sorting forgotten
                 sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<PushNotification>(x => x.Created), SortDirection = SortDirection.Descending } };
             }
 
@@ -97,6 +82,30 @@ namespace VirtoCommerce.Platform.Data.PushNotifications
             }
         }
 
-    }
+        private IQueryable<PushNotification> GetSearchNotifiesQuery(string userId, PushNotificationSearchCriteria criteria)
+        {
+            var query = _innerList.OrderByDescending(x => x.Created)
+                .Where(x => x.Creator == userId)
+                .AsQueryable();
+            if (criteria.Ids != null && criteria.Ids.Any())
+            {
+                query = query.Where(x => criteria.Ids.Contains(x.Id));
+            }
+            if (criteria.OnlyNew)
+            {
+                query = query.Where(x => x.IsNew);
+            }
+            if (criteria.StartDate != null)
+            {
+                query = query.Where(x => x.Created >= criteria.StartDate);
+            }
+            if (criteria.EndDate != null)
+            {
+                query = query.Where(x => x.Created <= criteria.EndDate);
+            }
 
+            return query;
+        }
+
+    }
 }

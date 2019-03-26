@@ -23,7 +23,6 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
             _memoryCache = memoryCache;
         }
 
-
         #region IDynamicPropertySearchService members
         public virtual async Task<GenericSearchResult<DynamicPropertyDictionaryItem>> SearchDictionaryItemsAsync(DynamicPropertyDictionaryItemSearchCriteria criteria)
         {
@@ -37,16 +36,7 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                     //Optimize performance and CPU usage
                     repository.DisableChangesTracking();
 
-                    var query = repository.DynamicPropertyDictionaryItems;
-
-                    if (!string.IsNullOrEmpty(criteria.DynamicPropertyId))
-                    {
-                        query = query.Where(x => x.PropertyId == criteria.DynamicPropertyId);
-                    }
-                    if (!string.IsNullOrEmpty(criteria.Keyword))
-                    {
-                        query = query.Where(x => x.Name.Contains(criteria.Keyword));
-                    }
+                    var query = GetSearchDictionaryItemsQuery(criteria, repository);
 
                     var sortInfos = criteria.SortInfos;
                     if (sortInfos.IsNullOrEmpty())
@@ -79,17 +69,7 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                 {
                     //Optimize performance and CPU usage
                     repository.DisableChangesTracking();
-
-                    var query = repository.DynamicProperties;
-
-                    if (!string.IsNullOrEmpty(criteria.ObjectType))
-                    {
-                        query = query.Where(x => x.ObjectType == criteria.ObjectType);
-                    }
-                    if (!string.IsNullOrEmpty(criteria.Keyword))
-                    {
-                        query = query.Where(x => x.Name.Contains(criteria.Keyword));
-                    }
+                    var query = GetSearchDynamicPropertiesQuery(criteria, repository);
 
                     var sortInfos = criteria.SortInfos;
                     if (sortInfos.IsNullOrEmpty())
@@ -110,6 +90,39 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                 return result;
             });
         }
+
+        private IQueryable<Model.DynamicPropertyDictionaryItemEntity> GetSearchDictionaryItemsQuery(DynamicPropertyDictionaryItemSearchCriteria criteria, IPlatformRepository repository)
+        {
+            var query = repository.DynamicPropertyDictionaryItems;
+
+            if (!string.IsNullOrEmpty(criteria.DynamicPropertyId))
+            {
+                query = query.Where(x => x.PropertyId == criteria.DynamicPropertyId);
+            }
+            if (!string.IsNullOrEmpty(criteria.Keyword))
+            {
+                query = query.Where(x => x.Name.Contains(criteria.Keyword));
+            }
+
+            return query;
+        }
+
+        private IQueryable<Model.DynamicPropertyEntity> GetSearchDynamicPropertiesQuery(DynamicPropertySearchCriteria criteria, IPlatformRepository repository)
+        {
+            var query = repository.DynamicProperties;
+
+            if (!string.IsNullOrEmpty(criteria.ObjectType))
+            {
+                query = query.Where(x => x.ObjectType == criteria.ObjectType);
+            }
+            if (!string.IsNullOrEmpty(criteria.Keyword))
+            {
+                query = query.Where(x => x.Name.Contains(criteria.Keyword));
+            }
+
+            return query;
+        }
+
         #endregion
     }
 }

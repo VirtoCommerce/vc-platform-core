@@ -13,16 +13,12 @@ namespace VirtoCommerce.Platform.Data.Settings
         {
             _settingsManager = settingsManager;
         }
+
         public async Task<GenericSearchResult<ObjectSettingEntry>> SearchSettingsAsync(SettingsSearchCriteria criteria)
         {
             var result = new GenericSearchResult<ObjectSettingEntry>();
 
-            var query = _settingsManager.AllRegisteredSettings.AsQueryable();
-
-            if (!string.IsNullOrEmpty(criteria.ModuleId))
-            {
-                query = query.Where(x => x.ModuleId == criteria.ModuleId);
-            }
+            var query = GetSearchSettingsQuery(criteria);
 
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -35,8 +31,20 @@ namespace VirtoCommerce.Platform.Data.Settings
 
             var settings = await _settingsManager.GetObjectSettingsAsync(names.ToArray());
             result.Results = settings.OrderBy(x => names.IndexOf(x.Name))
-                                       .ToList();
+                                     .ToList();
             return result;
+        }
+
+        private IQueryable<SettingDescriptor> GetSearchSettingsQuery(SettingsSearchCriteria criteria)
+        {
+            var query = _settingsManager.AllRegisteredSettings.AsQueryable();
+
+            if (!string.IsNullOrEmpty(criteria.ModuleId))
+            {
+                query = query.Where(x => x.ModuleId == criteria.ModuleId);
+            }
+
+            return query;
         }
     }
 }
