@@ -1,5 +1,3 @@
-import * as signalR from '@aspnet/signalr';
-
 angular.module('platformWebApp').config(
     ['$stateProvider', function ($stateProvider) {
         $stateProvider
@@ -73,26 +71,18 @@ angular.module('platformWebApp').config(
 
         return retVal;
     }])
-    .factory('platformWebApp.pushNotificationService', ['$rootScope', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.headerNotificationWidgetService',
-        function ($rootScope, eventTemplateResolver, headerNotifications) {
+    .factory('platformWebApp.pushNotificationService', ['$rootScope', 'platformWebApp.pushNotificationTemplateResolver', 'platformWebApp.headerNotificationWidgetService', 'platformWebApp.signalRHubProxy',
+        function ($rootScope, eventTemplateResolver, headerNotifications, signalRHubProxy) {
+            var clientPushHubProxy = signalRHubProxy();
 
-            //SignalR setup connection
-            var connection = new signalR.HubConnectionBuilder()
-                .withUrl("/pushNotificationHub")
-                .build();
-            connection.start();
-
-            connection.on('Send', function (data) {
+            clientPushHubProxy.on('Send', function (data) {
                 $rootScope.$broadcast("new-notification-event", data);
-
                 var notificationTemplate = eventTemplateResolver.resolve(data, 'header-notification');
                 data.template = notificationTemplate.template;
                 data.action = notificationTemplate.action;
                 headerNotifications.addNotification(data);
-                $rootScope.$apply();
             });
 
-            var retVal = {};
-            return retVal;
+            return {};
 
         }]);
