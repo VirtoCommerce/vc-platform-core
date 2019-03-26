@@ -146,7 +146,9 @@ namespace VirtoCommerce.PricingModule.Data.Services
                     evalContext.PricelistIds = (await EvaluatePriceListsAsync(evalContext)).Select(x => x.Id).ToArray();
                 }
                 query = query.Where(x => evalContext.PricelistIds.Contains(x.PricelistId));
-                prices = (await query.ToArrayAsync()).Select(x => x.ToModel(AbstractTypeFactory<Price>.TryCreateInstance())).ToArray();
+
+                var queryResult = await query.ToArrayAsync();
+                prices = queryResult.Select(x => x.ToModel(AbstractTypeFactory<Price>.TryCreateInstance())).ToArray();
             }
 
             var priceListOrdererList = evalContext.PricelistIds?.ToList();

@@ -3,18 +3,15 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.Internal;
-using Moq;
-using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.MarketingModule.Test
+namespace VirtoCommerce.Platform.Tests.Common
 {
-    internal class TestAsyncQueryProvider<TEntity> : IAsyncQueryProvider
+    public class TestAsyncQueryProvider<TEntity> : IAsyncQueryProvider
     {
         private readonly IQueryProvider _inner;
 
-        internal TestAsyncQueryProvider(IQueryProvider inner)
+        public TestAsyncQueryProvider(IQueryProvider inner)
         {
             _inner = inner;
         }
@@ -50,7 +47,7 @@ namespace VirtoCommerce.MarketingModule.Test
         }
     }
 
-    internal class TestAsyncEnumerable<T> : EnumerableQuery<T>, IAsyncEnumerable<T>, IQueryable<T>
+    public class TestAsyncEnumerable<T> : EnumerableQuery<T>, IAsyncEnumerable<T>, IQueryable<T>
     {
         public TestAsyncEnumerable(IEnumerable<T> enumerable)
             : base(enumerable)
@@ -71,7 +68,7 @@ namespace VirtoCommerce.MarketingModule.Test
         }
     }
 
-    internal class TestAsyncEnumerator<T> : IAsyncEnumerator<T>
+    public class TestAsyncEnumerator<T> : IAsyncEnumerator<T>
     {
         private readonly IEnumerator<T> _inner;
 
@@ -96,26 +93,6 @@ namespace VirtoCommerce.MarketingModule.Test
         public Task<bool> MoveNext(CancellationToken cancellationToken)
         {
             return Task.FromResult(_inner.MoveNext());
-        }
-    }
-
-    internal class MockDbSet
-    {
-        internal static Mock<DbSet<T>> GetMockDbSet<T>(IQueryable<T> entities) where T : Entity
-        {
-            var mockSet = new Mock<DbSet<T>>();
-            mockSet.As<IAsyncEnumerable<T>>()
-                .Setup(m => m.GetEnumerator())
-                .Returns(new TestAsyncEnumerator<T>(entities.GetEnumerator()));
-            mockSet.As<IQueryable<T>>()
-                .Setup(m => m.Provider)
-                .Returns(new TestAsyncQueryProvider<T>(entities.Provider));
-
-            mockSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(entities.Expression);
-            mockSet.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(entities.ElementType);
-            mockSet.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(entities.GetEnumerator);
-
-            return mockSet;
         }
     }
 }

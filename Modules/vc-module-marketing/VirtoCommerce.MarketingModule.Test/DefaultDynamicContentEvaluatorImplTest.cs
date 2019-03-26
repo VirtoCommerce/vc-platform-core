@@ -10,6 +10,7 @@ using VirtoCommerce.MarketingModule.Data.Repositories;
 using VirtoCommerce.MarketingModule.Data.Services;
 using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.Serialization;
+using VirtoCommerce.Platform.Tests.Common;
 using Xunit;
 
 namespace VirtoCommerce.MarketingModule.Test
