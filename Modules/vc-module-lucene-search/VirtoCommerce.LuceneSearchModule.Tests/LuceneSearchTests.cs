@@ -1,5 +1,7 @@
 using System.IO;
+using Microsoft.Extensions.Options;
 using VirtoCommerce.LuceneSearchModule.Data;
+using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
 using VirtoCommerce.SearchModule.Tests;
 using Xunit;
@@ -13,7 +15,11 @@ namespace VirtoCommerce.LuceneSearchModule.Tests
 
         protected override ISearchProvider GetSearchProvider()
         {
-            return new LuceneSearchProvider(new LuceneSearchProviderSettings(_dataDirectoryPath, "test"));
+            var someOptions = Options.Create(new SearchSettings()
+            {
+                ConnectionSettings = new LuceneSearchConnectionSettings() { Server = _dataDirectoryPath, Scope = "test" }
+            });
+            return new LuceneSearchProvider(someOptions);
         }
     }
 }
