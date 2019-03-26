@@ -1,6 +1,6 @@
 ﻿angular.module('virtoCommerce.subscriptionModule')
-    .controller('virtoCommerce.subscriptionModule.subscriptionDetailController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.subscriptionModule.subscriptionAPI', 'platformWebApp.dialogService', 'virtoCommerce.orderModule.order_res_customerOrders', '$timeout', 'focus',
-        function ($scope, bladeNavigationService, subscriptionAPI, dialogService, customerOrders, $timeout, focus) {
+    .controller('virtoCommerce.subscriptionModule.subscriptionDetailController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.subscriptionModule.subscriptionAPI', 'platformWebApp.dialogService', 'virtoCommerce.orderModule.order_res_customerOrders', '$timeout', 'focus', 'moment',
+        function ($scope, bladeNavigationService, subscriptionAPI, dialogService, customerOrders, $timeout, focus, moment) {
             var blade = $scope.blade;
             blade.updatePermission = 'subscription:update';
             blade.customerOrder = {};
@@ -16,7 +16,7 @@
                     subscriptionAPI.get({ id: blade.entityNode.id }, function (result) {
                         blade.initialize(result);
                         blade.customerOrder = blade.currentEntity.customerOrderPrototype;
-                        //necessary for scope bounded ACL checks 
+                        //necessary for scope bounded ACL checks
                         blade.securityScopes = result.scopes;
                     });
                 }
@@ -218,7 +218,7 @@
                         permission: 'order:create'
                     }
                 ];
-            };          
+            };
 
             blade.onClose = function (closeCallback) {
                 bladeNavigationService.showConfirmationIfNeeded(isDirty(), canSave(), blade, $scope.saveChanges, closeCallback, "orders.dialogs.operation-save.title", "orders.dialogs.operation-save.message");
