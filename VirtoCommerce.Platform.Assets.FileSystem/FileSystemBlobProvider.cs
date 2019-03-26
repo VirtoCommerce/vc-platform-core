@@ -1,12 +1,10 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Exceptions;
-using VirtoCommerce.Platform.Core.Extensions;
 
 namespace VirtoCommerce.Platform.Assets.FileSystem
 {
@@ -15,16 +13,19 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
         public const string ProviderName = "LocalStorage";
 
         private readonly string _storagePath;
+        private readonly string _basePublicUrl;
         private readonly FileSystemBlobOptions _options;
-        private readonly IUrlHelper _urlHelper;
 
-        public FileSystemBlobProvider(IOptions<FileSystemBlobOptions> options, IUrlHelper urlHelper)
+        public FileSystemBlobProvider(IOptions<FileSystemBlobOptions> options)
         {
             _options = options.Value;
 
             _storagePath = _options.RootPath.TrimEnd('\\');
-
-            _urlHelper = urlHelper;
+            _basePublicUrl = _options.PublicUrl;
+            if (_basePublicUrl != null)
+            {
+                _basePublicUrl = _basePublicUrl.TrimEnd('/');
+            }
         }
 
         #region IBlobStorageProvider members
@@ -105,7 +106,7 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
         public virtual Task<GenericSearchResult<BlobEntry>> SearchAsync(string folderUrl, string keyword)
         {
             var retVal = new GenericSearchResult<BlobEntry>();
-            folderUrl = folderUrl ?? _urlHelper.AbsoluteRouteUrl(_options.PublicPath);
+            folderUrl = folderUrl ?? _basePublicUrl;
 
             var storageFolderPath = GetStoragePathFromUrl(folderUrl);
 
@@ -264,19 +265,34 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
                 throw new ArgumentNullException(nameof(relativeUrl));
             }
 
-            return _urlHelper.AbsoluteRouteUrl(_options.PublicPath, relativeUrl);
+            if (relativeUrl == null)
+            {
+                throw new ArgumentNullException("relativeUrl");
+            }
+            var retVal = relativeUrl;
+            if (!relativeUrl.IsAbsoluteUrl())
+            {
+                retVal = _basePublicUrl + "/" + relativeUrl.TrimStart('/').TrimEnd('/');
+            }
+            return new Uri(retVal).ToString();
         }
 
         #endregion
 
         protected string GetRelativeUrl(string url)
         {
-            return _urlHelper.RelativeUrl(_options.PublicPath, url);
+            var retVal = url;
+            if (!string.IsNullOrEmpty(_basePublicUrl))
+            {
+                retVal = url.Replace(_basePublicUrl, string.Empty);
+            }
+            return retVal;
         }
 
         protected string GetAbsoluteUrlFromPath(string path)
         {
-            return _urlHelper.AbsoluteRouteUrl(_options.PublicPath, path.Replace(_storagePath, string.Empty));
+            var retVal = _basePublicUrl + "/" + path.Replace(_storagePath, string.Empty).TrimStart('\\').Replace('\\', '/');
+            return Uri.EscapeUriString(retVal);
         }
 
         protected string GetStoragePathFromUrl(string url)
