@@ -91,6 +91,7 @@ angular.module('platformWebApp')
 
     authContext.logout = function () {
         authDataStorage.clearStoredData();
+        $http.get(serviceBase + 'logout');
         changeAuth({});
     };
 

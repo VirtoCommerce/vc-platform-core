@@ -1,5 +1,4 @@
-﻿angular.module('virtoCommerce.contentModule')
-.factory('virtoCommerce.contentModule.menus', ['$resource', function ($resource) {
+﻿angular.module('virtoCommerce.contentModule').factory('virtoCommerce.contentModule.menus', ['$resource', function ($resource) {
     return $resource('api/cms/:storeId/menu/', {}, {
         get: { url: 'api/cms/:storeId/menu/', method: 'GET', isArray: true },
         getList: { url: 'api/cms/:storeId/menu/:listId', method: 'GET' },
@@ -7,13 +6,11 @@
         update: { url: 'api/cms/:storeId/menu/', method: 'POST' },
         delete: { url: 'api/cms/:storeId/menu/', method: 'DELETE' }
     });
-}])
-.factory('virtoCommerce.contentModule.themes', ['$resource', function ($resource) {
+}]).factory('virtoCommerce.contentModule.themes', ['$resource', function ($resource) {
     return $resource(null, null, {
         cloneTheme: { url: 'api/content/themes/:storeId/cloneTheme', method: 'POST' }
     });
-}])
-.factory('virtoCommerce.contentModule.contentApi', ['$resource', function ($resource) {
+}]).factory('virtoCommerce.contentModule.contentApi', ['$resource', 'moment', function ($resource, moment) {
     return $resource('api/content/:contentType/:storeId', null, {
         getStatistics: { url: 'api/content/:storeId/stats' },
         query: { url: 'api/content/:contentType/:storeId/search', isArray: true },

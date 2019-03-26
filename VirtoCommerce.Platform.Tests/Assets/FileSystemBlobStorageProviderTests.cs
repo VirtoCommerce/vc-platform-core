@@ -30,7 +30,7 @@ namespace VirtoCommerce.Platform.Tests.Assets
         {
             var blobContentOptions = new FileSystemBlobOptions
             {
-                PublicPath = "some-public-path",
+                PublicUrl = "some-public-path",
                 RootPath = tempDirectory
             };
             return new OptionsWrapper<FileSystemBlobOptions>(blobContentOptions);
