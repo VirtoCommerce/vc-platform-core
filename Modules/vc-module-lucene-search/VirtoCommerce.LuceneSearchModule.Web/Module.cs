@@ -22,10 +22,7 @@ namespace VirtoCommerce.LuceneSearchModule.Web
 
             if (searchProvider.Value != null && searchProvider.Value.Provider.EqualsInvariant("Lucene"))
             {
-                serviceCollection.Configure<SearchSettings>(o =>
-                {
-                    o.ConnectionSettings = configuration.GetSection($"Search:{searchProvider.Value.Provider}:SearchConnectionString").Get<LuceneSearchConnectionSettings>();
-                });
+                serviceCollection.Configure<LuceneSearchSettings>(configuration.GetSection($"Search:{searchProvider.Value.Provider}"));
                 serviceCollection.AddSingleton<ISearchProvider, LuceneSearchProvider>();
             }
         }
