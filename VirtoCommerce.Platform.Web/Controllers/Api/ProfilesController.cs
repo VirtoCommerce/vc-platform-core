@@ -41,7 +41,6 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             {
                 var userProfile = AbstractTypeFactory<UserProfile>.TryCreateInstance();
                 userProfile.Id = currentUser.Id;
-                userProfile.Settings = _settingsManager.AllRegisteredSettings.Where(x => x.GroupName == "Platform|User Profile").Select(x => new ObjectSettingEntry(x)).ToList();
                 await _settingsManager.DeepLoadSettingsAsync(userProfile);
                 return Ok(userProfile);
             }
