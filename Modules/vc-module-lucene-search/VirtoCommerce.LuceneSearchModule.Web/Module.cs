@@ -1,11 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using VirtoCommerce.LuceneSearchModule.Data;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
 
 namespace VirtoCommerce.LuceneSearchModule.Web
@@ -16,13 +14,12 @@ namespace VirtoCommerce.LuceneSearchModule.Web
         public ManifestModuleInfo ModuleInfo { get; set; }
         public void Initialize(IServiceCollection serviceCollection)
         {
-            var snapshot = serviceCollection.BuildServiceProvider();
-            var searchProvider = snapshot.GetService<IOptions<SearchSettings>>();
-            var configuration = snapshot.GetService<IConfiguration>();
+            var configuration = serviceCollection.BuildServiceProvider().GetService<IConfiguration>();
+            var provider = configuration.GetValue<string>("Search:Provider");
 
-            if (searchProvider.Value != null && searchProvider.Value.Provider.EqualsInvariant("Lucene"))
+            if (provider.EqualsInvariant("Lucene"))
             {
-                serviceCollection.Configure<LuceneSearchSettings>(configuration.GetSection($"Search:{searchProvider.Value.Provider}"));
+                serviceCollection.Configure<LuceneSearchOptions>(configuration.GetSection("Search:Lucene"));
                 serviceCollection.AddSingleton<ISearchProvider, LuceneSearchProvider>();
             }
         }

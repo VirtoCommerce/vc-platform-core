@@ -21,9 +21,9 @@ namespace VirtoCommerce.SearchModule.Data.Services
         private readonly IEnumerable<IndexDocumentConfiguration> _configs;
         private readonly ISettingsManager _settingsManager;
         private readonly IIndexingWorker _backgroundWorker;
-        private readonly SearchSettings _searchSettings;
+        private readonly SearchOptions _searchOptions;
 
-        public IndexingManager(ISearchProvider searchProvider, IEnumerable<IndexDocumentConfiguration> configs, IOptions<SearchSettings> searchSettings,
+        public IndexingManager(ISearchProvider searchProvider, IEnumerable<IndexDocumentConfiguration> configs, IOptions<SearchOptions> searchOptions,
             ISettingsManager settingsManager = null, IIndexingWorker backgroundWorker = null)
         {
             if (searchProvider == null)
@@ -31,7 +31,7 @@ namespace VirtoCommerce.SearchModule.Data.Services
             if (configs == null)
                 throw new ArgumentNullException(nameof(configs));
 
-            _searchSettings = searchSettings.Value;
+            _searchOptions = searchOptions.Value;
             _searchProvider = searchProvider;
             _configs = configs;
             _settingsManager = settingsManager;
@@ -40,7 +40,7 @@ namespace VirtoCommerce.SearchModule.Data.Services
 
         public virtual async Task<IndexState> GetIndexStateAsync(string documentType)
         {
-            var result = new IndexState { DocumentType = documentType, Provider = _searchSettings.Provider, Scope = _searchSettings.Scope };
+            var result = new IndexState { DocumentType = documentType, Provider = _searchOptions.Provider, Scope = _searchOptions.Scope };
 
             var searchRequest = new SearchRequest
             {

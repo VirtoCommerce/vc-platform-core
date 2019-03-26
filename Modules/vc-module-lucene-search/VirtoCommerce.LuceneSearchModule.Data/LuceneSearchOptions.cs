@@ -1,6 +1,6 @@
 namespace VirtoCommerce.LuceneSearchModule.Data
 {
-    public class LuceneSearchSettings
+    public class LuceneSearchOptions
     {
         public string Path { get; set; }
     }

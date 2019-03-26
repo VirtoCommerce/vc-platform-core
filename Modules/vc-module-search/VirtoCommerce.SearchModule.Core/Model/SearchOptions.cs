@@ -1,6 +1,6 @@
 namespace VirtoCommerce.SearchModule.Core.Model
 {
-    public class SearchSettings
+    public class SearchOptions
     {
         public string Provider { get; set; }
         public string Scope { get; set; }
