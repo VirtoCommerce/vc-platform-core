@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -10,7 +9,6 @@ using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Serialization;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
 using VirtoCommerce.PricingModule.Core.Services;
@@ -46,6 +44,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
             return _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
                 {
                     cacheEntry.AddExpirationToken(PricesCacheRegion.CreateChangeToken());
+                    cacheEntry.AddExpirationToken(PricingSearchCacheRegion.CreateChangeToken());
 
                     var retVal = new GenericSearchResult<Price>();
                     ICollection<CatalogProduct> products = new List<CatalogProduct>();
@@ -164,6 +163,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
             {
                 cacheEntry.AddExpirationToken(PricingSearchCacheRegion.CreateChangeToken());
+                cacheEntry.AddExpirationToken(PricingCacheRegion.CreateChangeToken());
 
                 var retVal = new GenericSearchResult<PricelistAssignment>();
                 using (var repository = _repositoryFactory())

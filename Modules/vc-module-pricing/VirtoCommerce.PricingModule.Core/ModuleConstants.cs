@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Settings;
 
@@ -29,6 +30,14 @@ namespace VirtoCommerce.PricingModule.Core
                     GroupName = "Pricing|General",
                     ValueType = SettingValueType.Integer,
                     DefaultValue = 50
+                };
+
+                public static SettingDescriptor IndexationDatePricingCalendar = new SettingDescriptor
+                {
+                    Name = "VirtoCommerce.Search.IndexingJobs.IndexationDate.Pricing.Calendar",
+                    GroupName = "Pricing|Search",
+                    ValueType = SettingValueType.DateTime,
+                    DefaultValue = default(DateTime)
                 };
 
                 public static IEnumerable<SettingDescriptor> AllSettings

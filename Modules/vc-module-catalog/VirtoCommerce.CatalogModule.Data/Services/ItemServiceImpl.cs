@@ -29,11 +29,15 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         private readonly IOutlineService _outlineService;
         private readonly ISeoService _seoService;
         private readonly IPlatformMemoryCache _platformMemoryCache;
-        //private readonly IBlobUrlResolver _blobUrlResolver;
 
         public ItemServiceImpl(Func<ICatalogRepository> catalogRepositoryFactory,
-                               IEventPublisher eventPublisher, AbstractValidator<IHasProperties> hasPropertyValidator, ICatalogService catalogService, ICategoryService categoryService, IOutlineService outlineService, ISeoService seoService, IPlatformMemoryCache platformMemoryCache
-            /*, IBlobUrlResolver blobUrlResolver*/)
+                               IEventPublisher eventPublisher,
+                               AbstractValidator<IHasProperties> hasPropertyValidator,
+                               ICatalogService catalogService,
+                               ICategoryService categoryService,
+                               IOutlineService outlineService,
+                               ISeoService seoService,
+                               IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = catalogRepositoryFactory;
             _eventPublisher = eventPublisher;
@@ -43,7 +47,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             _outlineService = outlineService;
             _seoService = seoService;
             _platformMemoryCache = platformMemoryCache;
-            //_blobUrlResolver = blobUrlResolver;
         }
 
         #region IItemService Members
@@ -273,16 +276,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 {
                     await LoadDependenciesAsync(product.Variations.ToArray());
                 }
-
-                //if (!product.Images.IsNullOrEmpty())
-                //{
-                //    foreach (var image in product.Images)
-                //    {
-                //        image.RelativeUrl = image.Url;
-                //        image.Url = _blobUrlResolver.GetAbsoluteUrl(image.Url);
-                //    }
-                //}
-
             }
         }
 

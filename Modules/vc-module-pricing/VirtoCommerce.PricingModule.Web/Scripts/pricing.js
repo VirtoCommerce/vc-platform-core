@@ -64,7 +64,7 @@ angular.module(moduleName, ['ui.grid.cellNav', 'ui.grid.edit', 'ui.grid.validate
           template: 'Modules/$(VirtoCommerce.Pricing)/Scripts/widgets/assignmentsWidget.tpl.html',
       }, 'pricelistDetail');
       
-      $http.get('Modules/$(VirtoCommerce.Pricing)/Scripts/dynamicExpression/templates.html').then(function (response) {
+      $http.get('Modules/$(VirtoCommerce.Pricing)/Scripts/dynamicConditions/templates.html').then(function (response) {
             // compile the response, which will put stuff into the cache
             $compile(response.data);
         });

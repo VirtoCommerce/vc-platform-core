@@ -14,8 +14,8 @@ namespace VirtoCommerce.Platform.Core.Extensions
 
         public static void Configure(IHttpContextAccessor httpContextAccessor)
         {
-            _host = httpContextAccessor.HttpContext?.Request?.Host.ToUriComponent();
-            _scheme = httpContextAccessor.HttpContext?.Request?.Scheme;
+            _host = httpContextAccessor.HttpContext.Request.Host.ToUriComponent();
+            _scheme = httpContextAccessor.HttpContext.Request.Scheme;
         }
 
         /// <summary>
