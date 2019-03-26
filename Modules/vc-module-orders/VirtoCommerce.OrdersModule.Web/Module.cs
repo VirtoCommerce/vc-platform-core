@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.OrdersModule.Core;
 using VirtoCommerce.OrdersModule.Core.Events;
+using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Notifications;
 using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.OrdersModule.Data.ExportImport;
@@ -20,6 +21,7 @@ using VirtoCommerce.OrdersModule.Data.Services;
 using VirtoCommerce.OrdersModule.Web.JsonConverters;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
@@ -55,6 +57,10 @@ namespace VirtoCommerce.OrdersModule.Web
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
             _appBuilder = appBuilder;
+
+            var dynamicPropertyRegistrar = appBuilder.ApplicationServices.GetRequiredService<IDynamicPropertyRegistrar>();
+            dynamicPropertyRegistrar.RegisterType<CustomerOrder>();
+            dynamicPropertyRegistrar.RegisterType<LineItem>();
 
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.General.AllSettings, ModuleInfo.Id);

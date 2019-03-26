@@ -68,18 +68,6 @@ namespace VirtoCommerce.Platform.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //Follow lines required to inject the IUrlHelper type
-            //https://benfoster.io/blog/injecting-urlhelper-in-aspnet-core-mvc
-            services.AddHttpContextAccessor();
-            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-            services.AddSingleton(x =>
-            {
-                Core.Extensions.UrlHelperExtensions.Configure(x.GetService<IHttpContextAccessor>());
-
-                var actionContext = x.GetRequiredService<IActionContextAccessor>().ActionContext;
-                var factory = x.GetRequiredService<IUrlHelperFactory>();
-                return factory.GetUrlHelper(actionContext);
-            });
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             // This custom provider allows able to use just [Authorize] instead of having to define [Authorize(AuthenticationSchemes = "Bearer")] above every API controller
             // without this Bearer authorization will not work
@@ -133,7 +121,7 @@ namespace VirtoCommerce.Platform.Web
                 }
             )
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-            
+
             services.AddDbContext<SecurityDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("VirtoCommerce"));

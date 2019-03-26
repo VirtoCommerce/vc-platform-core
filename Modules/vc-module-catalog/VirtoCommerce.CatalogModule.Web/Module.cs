@@ -94,6 +94,7 @@ namespace VirtoCommerce.CatalogModule.Web
                 }
             });
 
+
             serviceCollection.AddSingleton<ProductDocumentChangesProvider>();
             serviceCollection.AddSingleton<ProductDocumentBuilder>();
             serviceCollection.AddSingleton<CategoryDocumentChangesProvider>();

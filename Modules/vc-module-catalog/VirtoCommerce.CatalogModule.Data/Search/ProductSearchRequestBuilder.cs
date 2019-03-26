@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.Platform.Core.Common;
@@ -146,9 +145,12 @@ namespace VirtoCommerce.CatalogModule.Data.Search
 
             result.Add(FiltersHelper.CreateOutlineFilter(criteria));
 
-            result.Add(FiltersHelper.CreateDateRangeFilter("startdate", criteria.StartDateFrom, criteria.StartDate, false, true));
+            if (criteria.StartDateFrom.HasValue)
+            {
+                result.Add(FiltersHelper.CreateDateRangeFilter("startdate", criteria.StartDateFrom, criteria.StartDate, false, true));
+            }
 
-            if (criteria.EndDate != null)
+            if (criteria.EndDate.HasValue)
             {
                 result.Add(FiltersHelper.CreateDateRangeFilter("enddate", criteria.EndDate, null, false, false));
             }

@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\vc-module-catalog\VirtoCommerce.CatalogModule.Core\VirtoCommerce.CatalogModule.Core.csproj" />
     <ProjectReference Include="..\VirtoCommerce.SearchModule.Core\VirtoCommerce.SearchModule.Core.csproj" />
     <ProjectReference Include="..\VirtoCommerce.SearchModule.Data\VirtoCommerce.SearchModule.Data.csproj" />
     <ProjectReference Include="..\VirtoCommerce.SearchModule.Web\VirtoCommerce.SearchModule.Web.csproj" />
