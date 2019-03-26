@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
@@ -29,6 +30,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
 
         public string PropertyId { get; set; }
 
+        [JsonIgnore]
         public Property Property { get; set; }
 
         public object Clone()

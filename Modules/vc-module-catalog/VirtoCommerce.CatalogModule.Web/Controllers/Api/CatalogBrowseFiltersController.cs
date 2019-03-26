@@ -4,11 +4,11 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.Search.BrowseFilters;
+using VirtoCommerce.CatalogModule.Web.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.StoreModule.Core.Services;
 
@@ -24,16 +24,19 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
 
         private readonly IStoreService _storeService;
         private readonly IPropertyService _propertyService;
+        private readonly IPropertySearchService _propertySearchService;
         private readonly IBrowseFilterService _browseFilterService;
         private readonly IProperyDictionaryItemSearchService _propDictItemsSearchService;
 
 
-        public CatalogBrowseFiltersController(IStoreService storeService, IPropertyService propertyService, IBrowseFilterService browseFilterService, IProperyDictionaryItemSearchService propDictItemsSearchService)
+        public CatalogBrowseFiltersController(IStoreService storeService, IPropertyService propertyService, IBrowseFilterService browseFilterService,
+                                              IProperyDictionaryItemSearchService propDictItemsSearchService, IPropertySearchService propertySearchService)
         {
             _storeService = storeService;
             _propertyService = propertyService;
             _browseFilterService = browseFilterService;
             _propDictItemsSearchService = propDictItemsSearchService;
+            _propertySearchService = propertySearchService;
         }
 
         /// <summary>
@@ -110,8 +113,8 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             }
 
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.ReadBrowseFilters, store);
-
-            var property = (await _propertyService.GetAllCatalogPropertiesAsync(store.Catalog)).FirstOrDefault(p => p.Name.EqualsInvariant(propertyName) && p.Dictionary);
+            var catalogPropertiesSearchResult = await _propertySearchService.SearchPropertiesAsync(new PropertySearchCriteria { PropertyNames = new[] { propertyName }, CatalogId = store.Catalog, Take = 1 });
+            var property = catalogPropertiesSearchResult.Results.FirstOrDefault(p => p.Name.EqualsInvariant(propertyName) && p.Dictionary);
             if (property != null)
             {
                 var searchResult = await _propDictItemsSearchService.SearchAsync(new PropertyDictionaryItemSearchCriteria { PropertyIds = new[] { property.Id }, Take = int.MaxValue });
@@ -123,9 +126,9 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
 
         private async Task<IList<AggregationProperty>> GetAllPropertiesAsync(string catalogId, IEnumerable<string> currencies)
         {
-            var result = (await _propertyService.GetAllCatalogPropertiesAsync(catalogId))
-                .Select(p => new AggregationProperty { Type = _attributeType, Name = p.Name })
-                .ToList();
+            var result = (await _propertySearchService.SearchPropertiesAsync(new PropertySearchCriteria { CatalogId = catalogId, Take = int.MaxValue })).Results
+                            .Select(p => new AggregationProperty { Type = _attributeType, Name = p.Name })
+                            .ToList();
 
             result.AddRange(currencies.Select(c => new AggregationProperty { Type = _priceRangeType, Name = $"Price {c}", Currency = c }));
 

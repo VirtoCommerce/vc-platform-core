@@ -60,7 +60,7 @@ namespace VirtoCommerce.CustomerModule.Data.Search
             return result;
         }
 
-        protected virtual async Task<ICollection<Member>> ConvertDocumentsAsync(IList<SearchDocument> documents, MembersSearchCriteria criteria)
+        protected virtual async Task<IList<Member>> ConvertDocumentsAsync(IList<SearchDocument> documents, MembersSearchCriteria criteria)
         {
             var result = new List<Member>();
 

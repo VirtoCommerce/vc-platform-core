@@ -177,14 +177,16 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             //item property values
             if (!ItemPropertyValues.IsNullOrEmpty())
             {
-                var propertyValues = ItemPropertyValues.SelectMany(pv => pv.ToModel(AbstractTypeFactory<PropertyValue>.TryCreateInstance()).ToList());
+                var propertyValues = ItemPropertyValues.OrderBy(x => x.DictionaryItem?.SortOrder)
+                                                       .ThenBy(x => x.Name)
+                                                       .SelectMany(pv => pv.ToModel(AbstractTypeFactory<PropertyValue>.TryCreateInstance()).ToList());
+
                 product.Properties = propertyValues.GroupBy(pv => pv.PropertyName).Select(values =>
                 {
                     var property = AbstractTypeFactory<Property>.TryCreateInstance();
                     property.Name = values.Key;
                     property.ValueType = values.FirstOrDefault().ValueType;
                     property.Values = values.ToList();
-                    property.Catalog = product.Catalog;
                     return property;
                 }).ToList();
             }
@@ -197,10 +199,10 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             if (convertChildrens)
             {
                 // Variations
-                product.Variations = new List<CatalogProduct>();
+                product.Variations = new List<Variation>();
                 foreach (var variation in Childrens)
                 {
-                    var productVariation = variation.ToModel(AbstractTypeFactory<CatalogProduct>.TryCreateInstance());
+                    var productVariation = variation.ToModel(AbstractTypeFactory<Variation>.TryCreateInstance()) as Variation;
                     productVariation.MainProduct = product;
                     productVariation.MainProductId = product.Id;
                     product.Variations.Add(productVariation);
@@ -265,29 +267,27 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             CategoryId = string.IsNullOrEmpty(product.CategoryId) ? null : product.CategoryId;
 
             #region ItemPropertyValues
-
-            PropertyValue[] values = null;
-
             if (!product.Properties.IsNullOrEmpty())
             {
-                values = product.Properties.SelectMany(pr => pr.Values).ToArray();
+                var propValues = new List<PropertyValue>();
+                foreach (var property in product.Properties)
+                {
+                    if (property.Values != null)
+                    {
+                        foreach (var propValue in property.Values)
+                        {
+                            //Need populate required fields
+                            propValue.PropertyName = property.Name;
+                            propValue.ValueType = property.ValueType;
+                            propValues.Add(propValue);
+                        }
+                    }
+                }
+                if (!propValues.IsNullOrEmpty())
+                {
+                    ItemPropertyValues = new ObservableCollection<PropertyValueEntity>(AbstractTypeFactory<PropertyValueEntity>.TryCreateInstance().FromModels(propValues, pkMap));
+                }
             }
-
-            if (!product.PropertyValues.IsNullOrEmpty())
-            {
-                values = values.IsNullOrEmpty() ? product.PropertyValues.ToArray() : values.Union(product.PropertyValues).ToArray();
-            }
-
-            if (!values.IsNullOrEmpty())
-            {
-                var propertyValues = new ObservableCollection<PropertyValueEntity>(
-                    AbstractTypeFactory<PropertyValueEntity>
-                        .TryCreateInstance()
-                        .FromModels(values, pkMap));
-
-                ItemPropertyValues = new ObservableCollection<PropertyValueEntity>(propertyValues);
-            }
-
             #endregion
 
             #region Assets

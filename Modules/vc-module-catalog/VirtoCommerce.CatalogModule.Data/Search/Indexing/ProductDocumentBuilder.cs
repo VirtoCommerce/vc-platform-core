@@ -35,7 +35,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
 
         protected virtual Task<CatalogProduct[]> GetProducts(IList<string> productIds)
         {
-            return _itemService.GetByIdsAsync(productIds.ToArray(), ItemResponseGroup.ItemLarge);
+            return _itemService.GetByIdsAsync(productIds.ToArray(), null);
         }
 
         protected virtual IndexDocument CreateDocument(CatalogProduct product)

@@ -1,6 +1,4 @@
-﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace VirtoCommerce.Platform.Core.Common
 {
@@ -11,6 +9,6 @@ namespace VirtoCommerce.Platform.Core.Common
             Results = new List<T>();
         }
         public int TotalCount { get; set; }
-        public ICollection<T> Results { get; set; }
+        public IList<T> Results { get; set; }
     }
 }

@@ -14,4 +14,8 @@
     <ProjectReference Include="..\..\vc-module-search\VirtoCommerce.SearchModule.Core\VirtoCommerce.SearchModule.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Model\ListEntry\" />
+  </ItemGroup>
+
 </Project>

@@ -101,19 +101,26 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
             if (!catalog.Properties.IsNullOrEmpty())
             {
-                CatalogPropertyValues = new ObservableCollection<PropertyValueEntity>(
-                    AbstractTypeFactory<PropertyValueEntity>.TryCreateInstance()
-                        .FromModels(catalog.Properties.SelectMany(pr => pr.Values), pkMap));
-                //var propertyValues = new ObservableCollection<PropertyValueEntity>();
-                //foreach (var property in catalog.Properties)
-                //{
-                //    propertyValues.AddRange(new ObservableCollection<PropertyValueEntity>(
-                //        AbstractTypeFactory<PropertyValueEntity>
-                //            .TryCreateInstance()
-                //            .FromModels(catalog.Properties.SelectMany(pv => pv.Values), property, pkMap)));
-                //}
-                //CatalogPropertyValues = propertyValues;
+                var propValues = new List<PropertyValue>();
+                foreach (var property in catalog.Properties)
+                {
+                    if (property.Values != null)
+                    {
+                        foreach (var propValue in property.Values)
+                        {
+                            //Need populate required fields
+                            propValue.PropertyName = property.Name;
+                            propValue.ValueType = property.ValueType;
+                            propValues.Add(propValue);
+                        }
+                    }
+                }
+                if (!propValues.IsNullOrEmpty())
+                {
+                    CatalogPropertyValues = new ObservableCollection<PropertyValueEntity>(AbstractTypeFactory<PropertyValueEntity>.TryCreateInstance().FromModels(propValues, pkMap));
+                }
             }
+
 
             if (catalog.Languages != null)
             {
