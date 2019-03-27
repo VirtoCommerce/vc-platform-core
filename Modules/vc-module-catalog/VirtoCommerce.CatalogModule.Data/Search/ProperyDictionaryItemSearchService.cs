@@ -1,8 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
@@ -37,26 +37,8 @@ namespace VirtoCommerce.CatalogModule.Data.Search
 
                 var result = AbstractTypeFactory<PropertyDictionaryItemSearchResult>.TryCreateInstance();
 
-                var query = repository.PropertyDictionaryItems;
-                if (!criteria.PropertyIds.IsNullOrEmpty())
-                {
-                    query = query.Where(x => criteria.PropertyIds.Contains(x.PropertyId));
-                }
-                if (!string.IsNullOrEmpty(criteria.Keyword))
-                {
-                    query = query.Where(x => x.Alias.Contains(criteria.Keyword));
-                }
-
-                var sortInfos = criteria.SortInfos;
-                if (sortInfos.IsNullOrEmpty())
-                {
-                    sortInfos = new[] {
-                        new SortInfo { SortColumn = "SortOrder", SortDirection = SortDirection.Ascending },
-                        new SortInfo { SortColumn = "Alias", SortDirection = SortDirection.Ascending }
-                    };
-                }
-
-                query = query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id);
+                var sortInfos = GetSearchSortInfo(criteria);
+                var query = GetSearchQuery(criteria, repository, sortInfos);
 
                 result.TotalCount = await query.CountAsync();
 
@@ -68,6 +50,38 @@ namespace VirtoCommerce.CatalogModule.Data.Search
 
                 return result;
             }
+        }
+
+        private IQueryable<Model.PropertyDictionaryItemEntity> GetSearchQuery(PropertyDictionaryItemSearchCriteria criteria, ICatalogRepository repository, IEnumerable<SortInfo> sortInfos)
+        {
+            var query = repository.PropertyDictionaryItems;
+
+            if (!criteria.PropertyIds.IsNullOrEmpty())
+            {
+                query = query.Where(x => criteria.PropertyIds.Contains(x.PropertyId));
+            }
+
+            if (!string.IsNullOrEmpty(criteria.Keyword))
+            {
+                query = query.Where(x => x.Alias.Contains(criteria.Keyword));
+            }
+
+            query = query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id);
+            return query;
+        }
+
+        private IList<SortInfo> GetSearchSortInfo(PropertyDictionaryItemSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[] {
+                        new SortInfo { SortColumn = "SortOrder", SortDirection = SortDirection.Ascending },
+                        new SortInfo { SortColumn = "Alias", SortDirection = SortDirection.Ascending }
+                    };
+            }
+
+            return sortInfos;
         }
     }
 }
