@@ -236,7 +236,7 @@
                 displayName: 'User groups contains []'
             });
 
-            $http.get('Modules/$(VirtoCommerce.Core)/Scripts/common/dynamicExpression/all-templates.html').then(function (response) {
+            $http.get('Modules/$(VirtoCommerce.Core)/Scripts/dynamicConditions/all-templates.html').then(function (response) {
                 // compile the response, which will put stuff into the cache
                 $compile(response.data);
             });

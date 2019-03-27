@@ -28,7 +28,8 @@ angular.module(moduleName, [])
   }]
 )
 .run(
-    ['platformWebApp.mainMenuService', 'platformWebApp.widgetService', 'platformWebApp.toolbarService', '$state', 'platformWebApp.authService', 'virtoCommerce.storeModule.stores', 'platformWebApp.permissionScopeResolver', 'platformWebApp.bladeNavigationService', function (mainMenuService, widgetService, toolbarService, $state, authService, stores, permissionScopeResolver, bladeNavigationService) {
+    ['$http', '$compile', 'platformWebApp.mainMenuService', 'platformWebApp.widgetService', 'platformWebApp.toolbarService', '$state', 'platformWebApp.authService', 'virtoCommerce.storeModule.stores', 'platformWebApp.permissionScopeResolver', 'platformWebApp.bladeNavigationService'
+    , function ($http, $compile, mainMenuService, widgetService, toolbarService, $state, authService, stores, permissionScopeResolver, bladeNavigationService) {
       // // test toolbar commands and content
       //toolbarService.register({
       //    name: "ADDITIONAL COMMAND", icon: 'fa fa-cloud',
@@ -89,4 +90,9 @@ angular.module(moduleName, [])
       //    controller: 'virtoCommerce.marketingModule.dashboard.promotionsWidgetController',
       //    template: 'tile-count.html'
       //}, 'mainDashboard');
+
+      $http.get('Modules/$(VirtoCommerce.Marketing)/Scripts/dynamicConditions/templates.html').then(function (response) {
+        // compile the response, which will put stuff into the cache
+        $compile(response.data);
+    });
   }]);
