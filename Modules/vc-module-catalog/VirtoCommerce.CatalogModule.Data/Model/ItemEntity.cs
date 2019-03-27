@@ -167,6 +167,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             // EditorialReviews
             product.Reviews = EditorialReviews.Select(x => x.ToModel(AbstractTypeFactory<EditorialReview>.TryCreateInstance())).ToList();
 
+            product.Properties = new List<Property>();
             if (convertAssociations)
             {
                 // Associations

@@ -83,7 +83,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 }
 
                 // Fill SEO info for products, variations and outline items
-                if ((itemResponseGroup & ItemResponseGroup.Seo) == ItemResponseGroup.Seo)
+                if (itemResponseGroup.HasFlag(ItemResponseGroup.Seo))
                 {
                     var objectsWithSeo = productsWithVariationsList.OfType<ISeoSupport>().ToList();
                     //Load SEO information for all Outline.Items
