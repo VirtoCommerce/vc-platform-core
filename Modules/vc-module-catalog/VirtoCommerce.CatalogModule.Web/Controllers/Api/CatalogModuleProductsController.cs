@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
+using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CoreModule.Core.Seo;
-using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
@@ -21,10 +21,9 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         private readonly ISkuGenerator _skuGenerator;
         private readonly IProductAssociationSearchService _productAssociationSearchService;
         private readonly IPropertyService _propertyService;
-        private readonly IBlobUrlResolver _blobUrlResolver;
 
         public CatalogModuleProductsController(IItemService itemsService, ICatalogService catalogService, ICategoryService categoryService,
-                                               ISkuGenerator skuGenerator, IProductAssociationSearchService productAssociationSearchService, IPropertyService propertyService, IBlobUrlResolver blobUrlResolver)
+                                               ISkuGenerator skuGenerator, IProductAssociationSearchService productAssociationSearchService, IPropertyService propertyService)
         {
             _itemsService = itemsService;
             _categoryService = categoryService;
@@ -32,7 +31,6 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             _skuGenerator = skuGenerator;
             _productAssociationSearchService = productAssociationSearchService;
             _propertyService = propertyService;
-            _blobUrlResolver = blobUrlResolver;
         }
 
 
@@ -43,27 +41,15 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         ///<param name="respGroup">Response group.</param>
         [HttpGet]
         [Route("{id}")]
-        public async Task<ActionResult<CatalogProduct>> GetProductById(string id, [FromQuery] ItemResponseGroup respGroup = ItemResponseGroup.ItemLarge)
+        public async Task<ActionResult<CatalogProduct>> GetProductById(string id, [FromQuery] string respGroup = null)
         {
+            //TODO:
+            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Read, item);
             var item = await _itemsService.GetByIdAsync(id, respGroup);
             if (item == null)
             {
                 return NotFound();
             }
-
-            if (!item.Images.IsNullOrEmpty())
-            {
-                foreach (var image in item.Images)
-                {
-                    image.RelativeUrl = image.Url;
-                    image.Url = _blobUrlResolver.GetAbsoluteUrl(image.Url);
-                }
-            }
-
-            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Read, item);
-
-            //var retVal = item.ToWebModel(_blobUrlResolver);
-
             //retVal.SecurityScopes = GetObjectPermissionScopeStrings(item);
             return Ok(item);
         }
@@ -75,7 +61,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         ///<param name="respGroup">Response group.</param>
         [HttpGet]
         [Route("")]
-        public async Task<ActionResult<CatalogProduct[]>> GetProductByIds([FromQuery] string[] ids, [FromQuery] ItemResponseGroup respGroup = ItemResponseGroup.ItemLarge)
+        public async Task<ActionResult<CatalogProduct[]>> GetProductByIds([FromQuery] string[] ids, [FromQuery] string respGroup = null)
         {
             var items = await _itemsService.GetByIdsAsync(ids, respGroup);
             if (items == null)
@@ -83,17 +69,6 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                 return NotFound();
             }
 
-            foreach (var item in items)
-            {
-                if (!item.Images.IsNullOrEmpty())
-                {
-                    foreach (var image in item.Images)
-                    {
-                        image.RelativeUrl = image.Url;
-                        image.Url = _blobUrlResolver.GetAbsoluteUrl(image.Url);
-                    }
-                }
-            }
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Read, items);
 
             //var retVal = items.Select(x => x.ToWebModel(_blobUrlResolver)).ToArray();
@@ -112,9 +87,9 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("plenty")]
-        public Task<ActionResult<CatalogProduct[]>> GetProductByPlentyIds([FromBody] string[] ids, [FromQuery] ItemResponseGroup respGroup = ItemResponseGroup.ItemLarge)
+        public async Task<ActionResult<CatalogProduct[]>> GetProductByPlentyIds([FromBody] string[] ids, [FromQuery] string respGroup = null)
         {
-            return GetProductByIds(ids, respGroup);
+            return await GetProductByIds(ids, respGroup);
         }
 
 
@@ -125,11 +100,10 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="catalogId">The catalog id.</param>
         [HttpGet]
         [Route("~/api/catalog/{catalogId}/products/getnew")]
-        public Task<ActionResult<CatalogProduct>> GetNewProductByCatalog(string catalogId)
+        public async Task<ActionResult<CatalogProduct>> GetNewProductByCatalog(string catalogId)
         {
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, new Catalog { Id = catalogId });
-
-            return GetNewProductByCatalogAndCategory(catalogId, null);
+            return await GetNewProductByCatalogAndCategory(catalogId, null);
         }
 
 
@@ -156,22 +130,17 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                 var catalog = (await _catalogService.GetByIdsAsync(new[] { catalogId })).FirstOrDefault();
                 retVal.Properties = catalog?.Properties.ToList();
             }
-
             if (categoryId != null)
             {
-                var category = (await _categoryService.GetByIdsAsync(new[] { categoryId }, CategoryResponseGroup.WithProperties)).FirstOrDefault();
+                var category = (await _categoryService.GetByIdsAsync(new[] { categoryId }, CategoryResponseGroup.WithProperties.ToString())).FirstOrDefault();
                 retVal.Properties = category?.Properties.ToList();
             }
-
-
             //foreach (var property in retVal.Properties)
             //{
             //    property.Values = new List<PropertyValue>();
             //    property.IsManageable = true;
             //    property.IsReadOnly = property.Type != PropertyType.Product && property.Type != PropertyType.Variation;
             //}
-
-
             retVal.Code = _skuGenerator.GenerateSku(retVal);
 
             return Ok(retVal);
@@ -186,15 +155,12 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("{productId}/getnewvariation")]
         public async Task<ActionResult<CatalogProduct>> GetNewVariation(string productId)
         {
-            var product = await _itemsService.GetByIdAsync(productId, ItemResponseGroup.ItemLarge);
+            var product = await _itemsService.GetByIdAsync(productId, null);
             if (product == null)
             {
                 return NotFound();
             }
-
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, product);
-
-
             var newVariation = AbstractTypeFactory<CatalogProduct>.TryCreateInstance();
 
             newVariation.Name = product.Name;
@@ -212,8 +178,6 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                     property.Values.Clear();
                 }
             }
-
-
             newVariation.Code = _skuGenerator.GenerateSku(newVariation);
             return Ok(newVariation);
         }
@@ -223,7 +187,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("{productId}/clone")]
         public async Task<ActionResult<CatalogProduct>> CloneProduct(string productId)
         {
-            var product = await _itemsService.GetByIdAsync(productId, ItemResponseGroup.ItemLarge);
+            var product = await _itemsService.GetByIdAsync(productId, null);
             if (product == null)
             {
                 return NotFound();

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
+using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
@@ -19,10 +20,12 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
     public class CatalogExportImport
     {
         private readonly ICatalogService _catalogService;
-        private readonly ICatalogSearchService _catalogSearchService;
+        private readonly IProductSearchService _productSearchService;
+        private readonly ICategorySearchService _categorySearchService;
         private readonly ICategoryService _categoryService;
         private readonly IItemService _itemService;
         private readonly IPropertyService _propertyService;
+        private readonly IPropertySearchService _propertySearchService;
         private readonly IProperyDictionaryItemSearchService _propertyDictionarySearchService;
         private readonly IProperyDictionaryItemService _propertyDictionaryService;
         private readonly JsonSerializer _jsonSerializer;
@@ -30,14 +33,17 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
 
         private int _batchSize = 50;
 
-        public CatalogExportImport(ICatalogService catalogService, ICatalogSearchService catalogSearchService, ICategoryService categoryService, IItemService itemService, IPropertyService propertyService, IProperyDictionaryItemSearchService propertyDictionarySearchService, IProperyDictionaryItemService propertyDictionaryService, IOptions<MvcJsonOptions> jsonOptions
+        public CatalogExportImport(ICatalogService catalogService, IProductSearchService productSearchService, ICategorySearchService categorySearchService, ICategoryService categoryService,
+                                  IItemService itemService, IPropertyService propertyService, IPropertySearchService propertySearchService, IProperyDictionaryItemSearchService propertyDictionarySearchService, IProperyDictionaryItemService propertyDictionaryService, IOptions<MvcJsonOptions> jsonOptions
             , IBlobStorageProvider blobStorageProvider)
         {
             _catalogService = catalogService;
-            _catalogSearchService = catalogSearchService;
+            _productSearchService = productSearchService;
+            _categorySearchService = categorySearchService;
             _categoryService = categoryService;
             _itemService = itemService;
             _propertyService = propertyService;
+            _propertySearchService = propertySearchService;
             _propertyDictionarySearchService = propertyDictionarySearchService;
             _propertyDictionaryService = propertyDictionaryService;
             _jsonSerializer = JsonSerializer.Create(jsonOptions.Value.SerializerSettings);
@@ -55,6 +61,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             {
                 await writer.WriteStartObjectAsync();
 
+                #region Export catalogs
                 progressInfo.Description = "Catalogs exporting...";
                 progressCallback(progressInfo);
 
@@ -68,78 +75,81 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                     progressInfo.Description = $"{ processedCount } of { totalCount } catalogs have been exported";
                     progressCallback(progressInfo);
                 }, cancellationToken);
+                #endregion
 
+                #region Export categories
                 progressInfo.Description = "Categories exporting...";
                 progressCallback(progressInfo);
 
                 await writer.WritePropertyNameAsync("Categories");
                 await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
                 {
-                    var searchResult = await _catalogSearchService.SearchAsync(new CatalogListEntrySearchCriteria { Skip = skip, Take = take, ResponseGroup = SearchResponseGroup.WithCategories });
-                    var categories = await _categoryService.GetByIdsAsync(searchResult.Categories.Select(x => x.Id).ToArray(), CategoryResponseGroup.Full);
+                    var searchResult = await _categorySearchService.SearchCategoriesAsync(new CategorySearchCriteria { Skip = skip, Take = take });
+                    var categories = searchResult.Results;
                     if (options.HandleBinaryData)
                     {
                         LoadImages(categories.OfType<IHasImages>().ToArray(), progressInfo);
                     }
 
-                    return new GenericSearchResult<Category> { Results = categories, TotalCount = searchResult.Categories.Count };
+                    return new GenericSearchResult<Category> { Results = categories, TotalCount = searchResult.TotalCount };
                 }, (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } Categories have been exported";
                     progressCallback(progressInfo);
                 }, cancellationToken);
+                #endregion
 
+                #region Export properties
                 progressInfo.Description = "Properties exporting...";
                 progressCallback(progressInfo);
 
                 await writer.WritePropertyNameAsync("Properties");
-                await writer.WriteStartArrayAsync();
-                var properties = await _propertyService.GetAllPropertiesAsync();
-
-                var propertiesCount = properties.Length;
-                for (var i = 0; i < propertiesCount; i += _batchSize)
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
                 {
-                    var propertyBatch = properties.Skip(i).Take(_batchSize);
-                    foreach (var data in propertyBatch)
-                    {
-                        cancellationToken.ThrowIfCancellationRequested();
-                        _jsonSerializer.Serialize(writer, data);
-                    }
-                    await writer.FlushAsync();
-                    progressInfo.Description = $"{ Math.Min(propertiesCount, i + _batchSize) } of { propertiesCount } properties have been exported";
+                    var searchResult = await _propertySearchService.SearchPropertiesAsync(new PropertySearchCriteria { Skip = skip, Take = take });
+                    return new GenericSearchResult<Property> { Results = searchResult.Results, TotalCount = searchResult.TotalCount };
+                }, (processedCount, totalCount) =>
+                {
+                    progressInfo.Description = $"{ processedCount } of { totalCount } properties have been exported";
                     progressCallback(progressInfo);
-                }
-                await writer.WriteEndArrayAsync();
+                }, cancellationToken);
+                #endregion
 
+                #region Export propertyDictionaryItems 
                 progressInfo.Description = "PropertyDictionaryItems exporting...";
                 progressCallback(progressInfo);
 
                 await writer.WritePropertyNameAsync("PropertyDictionaryItems");
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) => _propertyDictionarySearchService.SearchAsync(new PropertyDictionaryItemSearchCriteria { Skip = skip, Take = take }), (processedCount, totalCount) =>
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
+                {
+                    var searchResult = await _propertyDictionarySearchService.SearchAsync(new PropertyDictionaryItemSearchCriteria { Skip = skip, Take = take });
+                    return new GenericSearchResult<PropertyDictionaryItem> { Results = searchResult.Results, TotalCount = searchResult.TotalCount };
+                }, (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } property dictionary items have been exported";
                     progressCallback(progressInfo);
                 }, cancellationToken);
+                #endregion
 
+                #region Export products
                 progressInfo.Description = "Products exporting...";
                 progressCallback(progressInfo);
 
                 await writer.WritePropertyNameAsync("Products");
                 await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
                 {
-                    var searchResult = await _catalogSearchService.SearchAsync(new CatalogListEntrySearchCriteria { Skip = skip, Take = take, ResponseGroup = SearchResponseGroup.WithProducts });
-                    var products = await _itemService.GetByIdsAsync(searchResult.Products.Select(x => x.Id).ToArray(), ItemResponseGroup.ItemLarge);
+                    var searchResult = await _productSearchService.SearchProductsAsync(new ProductSearchCriteria { Skip = skip, Take = take });
                     if (options.HandleBinaryData)
                     {
-                        LoadImages(products.OfType<IHasImages>().ToArray(), progressInfo);
+                        LoadImages(searchResult.Results.OfType<IHasImages>().ToArray(), progressInfo);
                     }
-
-                    return new GenericSearchResult<CatalogProduct> { Results = products, TotalCount = searchResult.ProductsTotalCount };
+                    return new GenericSearchResult<CatalogProduct> { Results = searchResult.Results, TotalCount = searchResult.TotalCount };
                 }, (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } Products have been exported";
                     progressCallback(progressInfo);
                 }, cancellationToken);
+                #endregion
 
                 await writer.WriteEndObjectAsync();
                 await writer.FlushAsync();
@@ -172,7 +182,8 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                         }
                         else if (reader.Value.ToString() == "Categories")
                         {
-                            await reader.DeserializeJsonArrayWithPagingAsync<Category>(_jsonSerializer, _batchSize, async (items) => {
+                            await reader.DeserializeJsonArrayWithPagingAsync<Category>(_jsonSerializer, _batchSize, async (items) =>
+                            {
                                 var itemsArray = items.ToArray();
                                 await _categoryService.SaveChangesAsync(itemsArray);
                                 //if (options.HandleBinaryData)
@@ -188,7 +199,8 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                         }
                         else if (reader.Value.ToString() == "Properties")
                         {
-                            await reader.DeserializeJsonArrayWithPagingAsync<Property>(_jsonSerializer, _batchSize, async (items) => {
+                            await reader.DeserializeJsonArrayWithPagingAsync<Property>(_jsonSerializer, _batchSize, async (items) =>
+                            {
                                 foreach (var property in items)
                                 {
                                     if (property.CategoryId != null || property.CatalogId != null)
@@ -200,11 +212,11 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                                     }
                                 }
                                 await _propertyService.SaveChangesAsync(items.ToArray());
-                                }, processedCount =>
-                            {
-                                progressInfo.Description = $"{ processedCount } properties have been imported";
-                                progressCallback(progressInfo);
-                            }, cancellationToken);
+                            }, processedCount =>
+                        {
+                            progressInfo.Description = $"{ processedCount } properties have been imported";
+                            progressCallback(progressInfo);
+                        }, cancellationToken);
                         }
                         else if (reader.Value.ToString() == "PropertyDictionaryItems")
                         {
@@ -216,7 +228,8 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                         }
                         else if (reader.Value.ToString() == "Products")
                         {
-                            await reader.DeserializeJsonArrayWithPagingAsync<CatalogProduct>(_jsonSerializer, _batchSize, async (items) => {
+                            await reader.DeserializeJsonArrayWithPagingAsync<CatalogProduct>(_jsonSerializer, _batchSize, async (items) =>
+                            {
                                 var itemsArray = items.ToArray();
                                 await _itemService.SaveChangesAsync(itemsArray);
                                 //if (options.HandleBinaryData)

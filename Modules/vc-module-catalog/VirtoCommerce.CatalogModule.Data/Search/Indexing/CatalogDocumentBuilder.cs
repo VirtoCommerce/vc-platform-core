@@ -22,7 +22,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
         protected virtual void IndexCustomProperties(IndexDocument document, ICollection<Property> properties, ICollection<PropertyType> contentPropertyTypes)
         {
             foreach (var property in properties)
-                foreach (var propValue in property.Values.Where(x => x.Value != null))
+                foreach (var propValue in property.Values?.Where(x => x.Value != null) ?? Array.Empty<PropertyValue>())
                 {
                     var propertyName = propValue.PropertyName?.ToLowerInvariant();
                     if (!string.IsNullOrEmpty(propertyName))

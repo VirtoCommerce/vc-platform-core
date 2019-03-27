@@ -20,19 +20,16 @@ namespace VirtoCommerce.PricingModule.Data.Services
     public class PricingSearchServiceImpl : IPricingSearchService
     {
         private readonly Func<IPricingRepository> _repositoryFactory;
-        private readonly ICatalogSearchService _catalogSearchService;
         private readonly IPricingService _pricingService;
         private readonly Dictionary<string, string> _pricesSortingAliases = new Dictionary<string, string>();
         private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public PricingSearchServiceImpl(Func<IPricingRepository> repositoryFactory, IPricingService pricingService,
-            IPlatformMemoryCache platformMemoryCache, ICatalogSearchService catalogSearchService)
+        public PricingSearchServiceImpl(Func<IPricingRepository> repositoryFactory, IPricingService pricingService, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _pricesSortingAliases["prices"] = ReflectionUtility.GetPropertyName<Price>(x => x.List);
             _pricingService = pricingService;
             _platformMemoryCache = platformMemoryCache;
-            _catalogSearchService = catalogSearchService;
         }
 
 
@@ -47,7 +44,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
                     cacheEntry.AddExpirationToken(PricingSearchCacheRegion.CreateChangeToken());
 
                     var retVal = new GenericSearchResult<Price>();
-                    ICollection<CatalogProduct> products = new List<CatalogProduct>();
+
                     using (var repository = _repositoryFactory())
                     {
                         var query = repository.Prices;
@@ -60,15 +57,6 @@ namespace VirtoCommerce.PricingModule.Data.Services
                         if (!criteria.ProductIds.IsNullOrEmpty())
                         {
                             query = query.Where(x => criteria.ProductIds.Contains(x.ProductId));
-                        }
-
-                        if (!string.IsNullOrEmpty(criteria.Keyword))
-                        {
-                            var catalogSearchResult = await _catalogSearchService.SearchAsync(new CatalogListEntrySearchCriteria { Keyword = criteria.Keyword, Skip = criteria.Skip, Take = criteria.Take, Sort = criteria.Sort.Replace("product.", string.Empty), ResponseGroup = SearchResponseGroup.WithProducts });
-                            var productIds = catalogSearchResult.Products.Select(x => x.Id).ToArray();
-                            query = query.Where(x => productIds.Contains(x.ProductId));
-                            //preserve resulting products for future assignment to prices
-                            products = catalogSearchResult.Products;
                         }
 
                         if (criteria.ModifiedSince.HasValue)

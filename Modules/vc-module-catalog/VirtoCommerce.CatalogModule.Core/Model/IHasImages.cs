@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
     public interface IHasImages
     {
-        ICollection<Image> Images { get; set; }
+        string ImgSrc { get; }
+        IList<Image> Images { get; set; }
     }
 }

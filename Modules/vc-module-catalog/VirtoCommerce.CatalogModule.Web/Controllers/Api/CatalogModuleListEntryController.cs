@@ -3,34 +3,39 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using VirtoCommerce.CatalogModule.Core;
 using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Model.ListEntry;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
+using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
-using VirtoCommerce.Platform.Core.Assets;
+using VirtoCommerce.CatalogModule.Web.Model;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Exceptions;
+using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
 {
     [Route("api/catalog/listentries")]
     public class CatalogModuleListEntryController : Controller
     {
-        private readonly ICatalogSearchService _searchService;
+        private readonly IProductIndexedSearchService _productIndexedSearchService;
         private readonly ICategoryService _categoryService;
         private readonly ICatalogService _catalogService;
         private readonly IItemService _itemService;
-        private readonly IBlobUrlResolver _blobUrlResolver;
+        private readonly IListEntrySearchService _listEntrySearchService;
+        private readonly ISettingsManager _settingsManager;
 
-        public CatalogModuleListEntryController(
-            ICatalogSearchService searchService,
-            ICategoryService categoryService,
-            IItemService itemService,
-            ICatalogService catalogService, IBlobUrlResolver blobUrlResolver)
+        public CatalogModuleListEntryController(IProductIndexedSearchService productIndexedSearchService, IListEntrySearchService listEntrySearchService,
+            ICategoryService categoryService, IItemService itemService, ICatalogService catalogService, ISettingsManager settingsManager)
         {
-            _searchService = searchService;
+            _productIndexedSearchService = productIndexedSearchService;
             _categoryService = categoryService;
             _itemService = itemService;
             _catalogService = catalogService;
-            _blobUrlResolver = blobUrlResolver;
+            _listEntrySearchService = listEntrySearchService;
+            _settingsManager = settingsManager;
         }
 
         /// <summary>
@@ -42,55 +47,41 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("")]
         public async Task<ActionResult<ListEntrySearchResult>> ListItemsSearchAsync([FromBody]CatalogListEntrySearchCriteria criteria)
         {
+            //TODO:
             //ApplyRestrictionsForCurrentUser(coreModelCriteria);
+            var result = new ListEntrySearchResult();
+            var useIndexedSearch = _settingsManager.GetValue(ModuleConstants.Settings.Search.UseCatalogIndexedSearchInManager.Name, true);
 
-            criteria.WithHidden = true;
-            //Need search in children categories if user specify keyword
-            if (!string.IsNullOrEmpty(criteria.Keyword))
+            if (useIndexedSearch && !string.IsNullOrEmpty(criteria.Keyword))
             {
-                criteria.SearchInChildren = true;
-                criteria.SearchInVariations = true;
+                // TODO: create outline for category
+                // TODO: implement sorting
+
+                const ItemResponseGroup responseGroup = ItemResponseGroup.ItemInfo | ItemResponseGroup.Outlines;
+
+                var productIndexedSearchCriteria = AbstractTypeFactory<ProductIndexedSearchCriteria>.TryCreateInstance();
+
+                productIndexedSearchCriteria.ObjectType = KnownDocumentTypes.Product;
+                productIndexedSearchCriteria.Keyword = criteria.Keyword;
+                productIndexedSearchCriteria.CatalogId = criteria.CatalogId;
+                productIndexedSearchCriteria.Outline = criteria.CategoryId;
+                productIndexedSearchCriteria.WithHidden = !criteria.HideDirectLinkedCategories;
+                productIndexedSearchCriteria.Skip = criteria.Skip;
+                productIndexedSearchCriteria.Take = criteria.Take;
+                productIndexedSearchCriteria.ResponseGroup = responseGroup.ToString();
+                productIndexedSearchCriteria.Sort = criteria.Sort;
+
+                var indexedSearchResult = await _productIndexedSearchService.SearchAsync(productIndexedSearchCriteria);
+                result.TotalCount = (int)indexedSearchResult.TotalCount;
+                result.Results = indexedSearchResult.Items.Select(x => AbstractTypeFactory<ProductListEntry>.TryCreateInstance().FromModel(x)).ToList();
             }
-
-            var retVal = new ListEntrySearchResult();
-
-            var categorySkip = 0;
-            var categoryTake = 0;
-            //Because products and categories represent in search result as two separated collections for handle paging request 
-            //we should join two resulting collection artificially
-            //search categories
-            var copyRespGroup = criteria.ResponseGroup;
-            if ((criteria.ResponseGroup & SearchResponseGroup.WithCategories) == SearchResponseGroup.WithCategories)
+            else
             {
-                criteria.ResponseGroup = criteria.ResponseGroup & ~SearchResponseGroup.WithProducts;
-                var categoriesSearchResult = await _searchService.SearchAsync(criteria);
-                var categoriesTotalCount = categoriesSearchResult.Categories.Count;
-
-                categorySkip = Math.Min(categoriesTotalCount, criteria.Skip);
-                categoryTake = Math.Min(criteria.Take, Math.Max(0, categoriesTotalCount - criteria.Skip));
-                var categories = categoriesSearchResult.Categories.Skip(categorySkip).Take(categoryTake).Select(x => new ListEntryCategory(x)).ToList();
-
-                retVal.TotalCount = categoriesTotalCount;
-                retVal.ListEntries.AddRange(categories);
+                result = await _listEntrySearchService.SearchAsync(criteria);
             }
-            criteria.ResponseGroup = copyRespGroup;
-            //search products
-            if ((criteria.ResponseGroup & SearchResponseGroup.WithProducts) == SearchResponseGroup.WithProducts)
-            {
-                criteria.ResponseGroup = criteria.ResponseGroup & ~SearchResponseGroup.WithCategories;
-                criteria.Skip = criteria.Skip - categorySkip;
-                criteria.Take = criteria.Take - categoryTake;
-                var productsSearchResult = await _searchService.SearchAsync(criteria);
-
-                var products = productsSearchResult.Products.Select(x => new ListEntryProduct(x, _blobUrlResolver));
-
-                retVal.TotalCount += productsSearchResult.ProductsTotalCount;
-                retVal.ListEntries.AddRange(products);
-            }
-
-
-            return Ok(retVal);
+            return Ok(result);
         }
+
 
         /// <summary>
         /// Creates links for categories or items to parent categories and catalogs.
@@ -98,14 +89,30 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="links">The links.</param>
         [HttpPost]
         [Route("~/api/catalog/listentrylinks")]
-        public async Task<ActionResult> CreateLinks([FromBody]ListEntryLink[] links)
+        [ProducesResponseType(200)]
+        public async Task<ActionResult> CreateLinks([FromBody] CategoryLink[] links)
         {
+            //TODO:
             //Scope bound security check
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, links);
-
-            await InnerUpdateLinks(links, (x, y) => x.Links.Add(y));
-            return NoContent();
+            var entryIds = links.Select(x => x.EntryId).ToArray();
+            var hasLinkEntries = await LoadCatalogEntriesAsync<IHasLinks>(entryIds);
+            foreach (var link in links)
+            {
+                var hasLinkEntry = hasLinkEntries.FirstOrDefault(x => x.Id.Equals(link.EntryId));
+                if (hasLinkEntry != null && !hasLinkEntry.Links.Contains(link))
+                {
+                    hasLinkEntry.Links.Add(link);
+                }
+            }
+            if (!hasLinkEntries.IsNullOrEmpty())
+            {
+                await SaveListCatalogEntitiesAsync(hasLinkEntries.ToArray());
+            }
+            return Ok();
         }
+
+
 
         /// <summary>
         /// Bulk create links to categories and items
@@ -114,66 +121,36 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("~/api/catalog/listentrylinks/bulkcreate")]
-        public async Task<IActionResult> BulkCreateLinks([FromBody]BulkLinkCreationRequest creationRequest)
+        public async Task<ActionResult> BulkCreateLinks([FromBody]BulkLinkCreationRequest creationRequest)
         {
-
             if (creationRequest.CatalogId.IsNullOrEmpty() || creationRequest.CategoryId.IsNullOrEmpty())
             {
-                throw new ArgumentException("Target catalog and category identifiers should be specified.");
+                return BadRequest("Target catalog and category identifiers should be specified.");
             }
 
-            var coreModelCriteria = creationRequest.SearchCriteria;
+            var searchCriteria = creationRequest.SearchCriteria;
 
             bool haveProducts;
 
             do
             {
-                var links = new List<ListEntryLink>();
+                var links = new List<IHasLinks>();
 
-                var searchResult = await _searchService.SearchAsync(coreModelCriteria);
+                var searchResult = await _listEntrySearchService.SearchAsync(searchCriteria);
+                var hasLinksEntities = await LoadCatalogEntriesAsync<IHasLinks>(searchResult.ListEntries.Select(x => x.Id).ToArray());
+                haveProducts = hasLinksEntities.Any();
 
-                var productLinks = searchResult
-                    .Products
-                    .Select(x => new ListEntryLink
-                    {
-                        CatalogId = creationRequest.CatalogId,
-                        ListEntryType = ListEntryProduct.TypeName,
-                        ListEntryId = x.Id,
-                        CategoryId = creationRequest.CategoryId
-                    })
-                    .ToList();
-
-                links.AddRange(productLinks);
-
-                if (coreModelCriteria.ResponseGroup.HasFlag(SearchResponseGroup.WithCategories))
-                {
-                    coreModelCriteria.ResponseGroup = coreModelCriteria.ResponseGroup & ~SearchResponseGroup.WithCategories;
-
-                    var categoryLinks = searchResult
-                        .Categories
-                        .Select(c => new ListEntryLink
-                        {
-                            CatalogId = creationRequest.CatalogId,
-                            ListEntryType = ListEntryCategory.TypeName,
-                            ListEntryId = c.Id,
-                            CategoryId = creationRequest.CategoryId
-                        })
-                        .ToList();
-
-                    links.AddRange(categoryLinks);
-                }
-
-                haveProducts = productLinks.Any();
-
-                coreModelCriteria.Skip += coreModelCriteria.Take;
+                searchCriteria.Skip += searchCriteria.Take;
 
                 //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, links.ToArray());
-
-                await InnerUpdateLinks(links.ToArray(), (x, y) => x.Links.Add(y));
+                if (haveProducts)
+                {
+                    await SaveListCatalogEntitiesAsync(hasLinksEntities.ToArray());
+                }
 
             } while (haveProducts);
 
-            return NoContent();
+            return Ok();
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
@@ -194,13 +171,27 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="links">The links.</param>
         [HttpPost]
         [Route("~/api/catalog/listentrylinks/delete")]
-        public async Task<IActionResult> DeleteLinks([FromBody]ListEntryLink[] links)
+        public async Task<ActionResult> DeleteLinks([FromBody]CategoryLink[] links)
         {
             //Scope bound security check
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Delete, links);
 
-            await InnerUpdateLinks(links, (x, y) => x.Links = x.Links.Where(l => string.Join(":", l.CatalogId, l.CategoryId) != string.Join(":", y.CatalogId, y.CategoryId)).ToList());
-            return NoContent();
+            var entryIds = links.Select(x => x.EntryId).ToArray();
+            var hasLinkEntries = await LoadCatalogEntriesAsync<IHasLinks>(entryIds);
+            foreach (var link in links)
+            {
+                var hasLinkEntry = hasLinkEntries.FirstOrDefault(x => x.Id.Equals(link.EntryId));
+                if (hasLinkEntry != null)
+                {
+                    hasLinkEntry.Links.Remove(link);
+                }
+            }
+            if (!hasLinkEntries.IsNullOrEmpty())
+            {
+                await SaveListCatalogEntitiesAsync(hasLinkEntries.ToArray());
+            }
+
+            return Ok();
         }
 
         /// <summary>
@@ -211,103 +202,62 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("move")]
         public async Task<IActionResult> Move([FromBody]MoveInfo moveInfo)
         {
-            var categories = new List<Category>();
             var dstCatalog = (await _catalogService.GetByIdsAsync(new[] { moveInfo.Catalog })).FirstOrDefault();
-            if (dstCatalog != null && dstCatalog.IsVirtual)
+            if (dstCatalog.IsVirtual)
             {
-                throw new InvalidOperationException("Unable to move in virtual catalog");
+                return BadRequest("Unable to move to an virtual catalog");
             }
-
-            //Move  categories
-            foreach (var listEntryCategory in moveInfo.ListEntries.Where(x => x.Type.EqualsInvariant(ListEntryCategory.TypeName)))
+            var catalogEntries = (await LoadCatalogEntriesAsync<IEntity>(moveInfo.ListEntries.Select(x => x.Id).ToArray())).ToList();
+            foreach (var listEntry in moveInfo.ListEntries.ToList())
             {
-                var category = (await _categoryService.GetByIdsAsync(new[] { listEntryCategory.Id }, CategoryResponseGroup.Info)).FirstOrDefault();
-                if (category != null && category.CatalogId != moveInfo.Catalog)
+                var existEntry = catalogEntries.FirstOrDefault(x => x.Equals(listEntry));
+                if (existEntry != null)
                 {
-                    category.CatalogId = moveInfo.Catalog;
-                }
-                if (category != null && category.ParentId != moveInfo.Category)
-                {
-                    category.ParentId = moveInfo.Category;
-                }
-                categories.Add(category);
-            }
-
-            var products = new List<CatalogProduct>();
-            //Move products
-            foreach (var listEntryProduct in moveInfo.ListEntries.Where(x => x.Type.EqualsInvariant(ListEntryProduct.TypeName)))
-            {
-                var product = (await _itemService.GetByIdsAsync(new[] { listEntryProduct.Id }, ItemResponseGroup.ItemLarge)).FirstOrDefault();
-                if (product != null && product.CatalogId != moveInfo.Catalog)
-                {
-                    product.CatalogId = moveInfo.Catalog;
-                    product.CategoryId = null;
-                    foreach (var variation in product.Variations)
+                    if (existEntry is Category category)
                     {
-                        variation.CatalogId = moveInfo.Catalog;
-                        variation.CategoryId = null;
+                        category.Move(moveInfo.Catalog, moveInfo.Category);
                     }
-
-                }
-                if (product != null && product.CategoryId != moveInfo.Category)
-                {
-                    product.CategoryId = moveInfo.Category;
-                    foreach (var variation in product.Variations)
+                    if (existEntry is CatalogProduct product)
                     {
-                        variation.CategoryId = moveInfo.Category;
+                        product.Move(moveInfo.Catalog, moveInfo.Category);
+                        if (!product.Variations.IsNullOrEmpty())
+                        {
+                            catalogEntries.AddRange(product.Variations);
+                        }
                     }
                 }
-                products.Add(product);
-
-                if (product != null)
-                {
-                    products.AddRange(product.Variations);
-                }
             }
 
+            //TODO:
             //Scope bound security check
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, categories);
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, products);
-
-            if (categories.Any())
-            {
-                await _categoryService.SaveChangesAsync(categories.ToArray());
-            }
-            if (products.Any())
-            {
-                await _itemService.SaveChangesAsync(products.ToArray());
-            }
+            await SaveListCatalogEntitiesAsync(catalogEntries.ToArray());
             return Ok();
         }
 
-        private async Task InnerUpdateLinks(ListEntryLink[] links, Action<ILinkSupport, CategoryLink> action)
+        private async Task SaveListCatalogEntitiesAsync(IEntity[] entities)
         {
-            var changedObjects = new List<ILinkSupport>();
-            foreach (var link in links)
+            if (!entities.IsNullOrEmpty())
             {
-                ILinkSupport changedObject;
-                var newlink = new CategoryLink
+                var products = entities.OfType<CatalogProduct>().ToArray();
+                if (!products.IsNullOrEmpty())
                 {
-                    CategoryId = link.CategoryId,
-                    CatalogId = link.CatalogId
-                };
-
-                if (link.ListEntryType.EqualsInvariant(ListEntryCategory.TypeName))
-                {
-                    changedObject = (await _categoryService.GetByIdsAsync(new[] { link.ListEntryId }, CategoryResponseGroup.Full)).FirstOrDefault();
+                    await _itemService.SaveChangesAsync(products);
                 }
-                else
+                var categories = entities.OfType<Category>().ToArray();
+                if (!categories.IsNullOrEmpty())
                 {
-                    changedObject = (await _itemService.GetByIdsAsync(new[] { link.ListEntryId }, ItemResponseGroup.ItemLarge)).FirstOrDefault();
+                    await _categoryService.SaveChangesAsync(categories);
                 }
-                action(changedObject, newlink);
-                changedObjects.Add(changedObject);
             }
+        }
 
-            var categorySaveChangesTask = _categoryService.SaveChangesAsync(changedObjects.OfType<Category>().ToArray());
-            var itemSaveChangesTask = _itemService.SaveChangesAsync(changedObjects.OfType<CatalogProduct>().ToArray());
-
-            await Task.WhenAll(categorySaveChangesTask, itemSaveChangesTask);
+        private async Task<IList<T>> LoadCatalogEntriesAsync<T>(string[] ids)
+        {
+            var products = await _itemService.GetByIdsAsync(ids, (ItemResponseGroup.Links | ItemResponseGroup.Variations).ToString());
+            var categories = await _categoryService.GetByIdsAsync(ids.Except(products.Select(x => x.Id)).ToArray(), CategoryResponseGroup.WithLinks.ToString());
+            return products.OfType<T>().Concat(categories.OfType<T>()).ToList();
         }
     }
 }

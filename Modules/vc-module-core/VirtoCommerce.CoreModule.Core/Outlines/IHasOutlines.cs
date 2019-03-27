@@ -4,6 +4,6 @@ namespace VirtoCommerce.CoreModule.Core.Outlines
 {
     public interface IHasOutlines
     {
-        ICollection<Outline> Outlines { get; set; }
+        IList<Outline> Outlines { get; set; }
     }
 }

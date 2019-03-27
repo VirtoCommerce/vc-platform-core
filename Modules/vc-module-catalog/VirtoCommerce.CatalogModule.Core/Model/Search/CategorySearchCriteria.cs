@@ -1,9 +1,13 @@
-using VirtoCommerce.SearchModule.Core.Model;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model.Search
 {
-    public class CategorySearchCriteria : CatalogSearchCriteria
+    public class CategorySearchCriteria : SearchCriteriaBase
     {
-        public override string ObjectType { get; set; } = KnownDocumentTypes.Category;
+        public string CatalogId { get; set; }
+        /// <summary>
+        /// Parent category id
+        /// </summary>
+        public string CategoryId { get; set; }
     }
 }

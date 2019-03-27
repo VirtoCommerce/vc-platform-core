@@ -320,10 +320,6 @@ namespace VirtoCommerce.Platform.Web
                 app.UseDeveloperExceptionPage();
                 app.UseBrowserLink();
                 app.UseDatabaseErrorPage();
-                app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
-                {
-                    HotModuleReplacement = false
-                });
             }
             else
             {

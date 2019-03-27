@@ -199,7 +199,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
                 //Need find products without price it may be a variation without implicitly price defined and try to get price from main product
                 if (productIdsWithoutPrice.Any())
                 {
-                    var variations = (await _productService.GetByIdsAsync(productIdsWithoutPrice, ItemResponseGroup.ItemInfo)).Where(x => x.MainProductId != null).ToList();
+                    var variations = (await _productService.GetByIdsAsync(productIdsWithoutPrice, ItemResponseGroup.ItemInfo.ToString())).Where(x => x.MainProductId != null).ToList();
                     evalContext.ProductIds = variations.Select(x => x.MainProductId).Distinct().ToArray();
 
                     var inheritedPrices = await EvaluateProductPricesAsync(evalContext);
