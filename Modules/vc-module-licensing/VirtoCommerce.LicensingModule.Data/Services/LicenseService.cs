@@ -17,7 +17,6 @@ using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Exceptions;
-using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.LicensingModule.Data.Services
 {
@@ -26,15 +25,13 @@ namespace VirtoCommerce.LicensingModule.Data.Services
         private readonly Func<ILicenseRepository> _licenseRepositoryFactory;
         private readonly IChangeLogService _changeLogService;
         private readonly IEventPublisher _eventPublisher;
-        private readonly ISettingsManager _settingsManager;
         private readonly LicenseOptions _licenseOptions;
 
-        public LicenseService(Func<ILicenseRepository> licenseRepositoryFactory, IChangeLogService changeLogService, ISettingsManager settingsManager, IEventPublisher eventPublisher
+        public LicenseService(Func<ILicenseRepository> licenseRepositoryFactory, IChangeLogService changeLogService, IEventPublisher eventPublisher
             , IOptions<LicenseOptions> licenseOptions)
         {
             _licenseRepositoryFactory = licenseRepositoryFactory;
             _changeLogService = changeLogService;
-            _settingsManager = settingsManager;
             _eventPublisher = eventPublisher;
             _licenseOptions = licenseOptions.Value;
         }
@@ -43,19 +40,9 @@ namespace VirtoCommerce.LicensingModule.Data.Services
         {
             using (var repository = _licenseRepositoryFactory())
             {
-                var query = repository.Licenses;
+                var sortInfos = GetSearchSortInfo(criteria);
+                var query = GetSearchQuery(criteria, repository, sortInfos);
 
-                if (criteria.Keyword != null)
-                {
-                    query = query.Where(x => x.CustomerName.Contains(criteria.Keyword));
-                }
-
-                var sortInfos = criteria.SortInfos;
-                if (sortInfos.IsNullOrEmpty())
-                {
-                    sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<License>(x => x.CreatedDate), SortDirection = SortDirection.Descending } };
-                }
-                query = query.OrderBySortInfos(sortInfos);
                 var arrayLicense = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
 
                 var retVal = new GenericSearchResult<License>
@@ -123,7 +110,7 @@ namespace VirtoCommerce.LicensingModule.Data.Services
                         }
                     }
                 }
-                
+
                 await repository.UnitOfWork.CommitAsync();
                 await _eventPublisher.Publish(new LicenseChangedEvent(changedEntries));
                 pkMap.ResolvePrimaryKeys();
@@ -166,7 +153,6 @@ namespace VirtoCommerce.LicensingModule.Data.Services
 
             return result;
         }
-
 
         private async Task<LicenseEntity> GetByCodeAsync(string code)
         {
@@ -217,6 +203,34 @@ namespace VirtoCommerce.LicensingModule.Data.Services
             }
 
             return fileContent;
+        }
+
+        private IList<SortInfo> GetSearchSortInfo(LicenseSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[] { new SortInfo
+                    {
+                        SortColumn = ReflectionUtility.GetPropertyName<License>(x => x.CreatedDate),
+                        SortDirection = SortDirection.Descending }
+                };
+            }
+
+            return sortInfos;
+        }
+
+        private IQueryable<LicenseEntity> GetSearchQuery(LicenseSearchCriteria criteria, ILicenseRepository repository, IList<SortInfo> sortInfos)
+        {
+            var query = repository.Licenses;
+
+            if (criteria.Keyword != null)
+            {
+                query = query.Where(x => x.CustomerName.Contains(criteria.Keyword));
+            }
+
+            query = query.OrderBySortInfos(sortInfos);
+            return query;
         }
     }
 }

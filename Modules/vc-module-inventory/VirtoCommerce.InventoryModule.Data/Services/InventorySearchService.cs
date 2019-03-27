@@ -40,8 +40,8 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                 {
                     repository.DisableChangesTracking();
 
-                    var sortInfos = GetSortInfos(criteria);
-                    var query = GetQuery(repository, criteria, sortInfos);
+                    var sortInfos = GetSearchInventoriesSortInfos(criteria);
+                    var query = GetSearchInventoriesQuery(repository, criteria, sortInfos);
 
                     result.TotalCount = await query.CountAsync();
                     if (criteria.Take > 0)
@@ -54,23 +54,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             });
         }
 
-        protected virtual IQueryable<InventoryEntity> GetQuery(IInventoryRepository repository,
-            InventorySearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
-        {
-            var query = repository.Inventories;
-            if (!criteria.ProductIds.IsNullOrEmpty())
-            {
-                query = query.Where(x => criteria.ProductIds.Contains(x.Sku));
-            }
-            if (!criteria.FulfillmentCenterIds.IsNullOrEmpty())
-            {
-                query = query.Where(x => criteria.FulfillmentCenterIds.Contains(x.FulfillmentCenterId));
-            }
-            
-            return query.OrderBySortInfos(sortInfos);
-        }
-
-        protected virtual IList<SortInfo> GetSortInfos(InventorySearchCriteria criteria)
+        protected virtual IList<SortInfo> GetSearchInventoriesSortInfos(InventorySearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -82,6 +66,21 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             }
 
             return sortInfos;
+        }
+
+        protected virtual IQueryable<InventoryEntity> GetSearchInventoriesQuery(IInventoryRepository repository, InventorySearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
+        {
+            var query = repository.Inventories;
+            if (!criteria.ProductIds.IsNullOrEmpty())
+            {
+                query = query.Where(x => criteria.ProductIds.Contains(x.Sku));
+            }
+            if (!criteria.FulfillmentCenterIds.IsNullOrEmpty())
+            {
+                query = query.Where(x => criteria.FulfillmentCenterIds.Contains(x.FulfillmentCenterId));
+            }
+
+            return query.OrderBySortInfos(sortInfos);
         }
     }
 }

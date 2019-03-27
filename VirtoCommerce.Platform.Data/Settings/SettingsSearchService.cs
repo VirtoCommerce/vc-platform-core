@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.Platform.Core.Common;
@@ -18,14 +19,9 @@ namespace VirtoCommerce.Platform.Data.Settings
         {
             var result = new GenericSearchResult<ObjectSettingEntry>();
 
-            var query = GetSearchSettingsQuery(criteria);
+            var sortInfos = GetSearchSettingsSortInfo(criteria);
+            var query = GetSearchSettingsQuery(criteria, sortInfos);
 
-            var sortInfos = criteria.SortInfos;
-            if (sortInfos.IsNullOrEmpty())
-            {
-                sortInfos = new[] { new SortInfo { SortColumn = "Name" } };
-            }
-            query = query.OrderBySortInfos(sortInfos);
             result.TotalCount = query.Count();
             var names = query.Skip(criteria.Skip).Take(criteria.Take).Select(x => x.Name).ToList();
 
@@ -35,7 +31,21 @@ namespace VirtoCommerce.Platform.Data.Settings
             return result;
         }
 
-        private IQueryable<SettingDescriptor> GetSearchSettingsQuery(SettingsSearchCriteria criteria)
+        private IList<SortInfo> GetSearchSettingsSortInfo(SettingsSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo { SortColumn = "Name" }
+                };
+            }
+
+            return sortInfos;
+        }
+
+        private IQueryable<SettingDescriptor> GetSearchSettingsQuery(SettingsSearchCriteria criteria, IList<SortInfo> sortInfos)
         {
             var query = _settingsManager.AllRegisteredSettings.AsQueryable();
 
@@ -43,6 +53,8 @@ namespace VirtoCommerce.Platform.Data.Settings
             {
                 query = query.Where(x => x.ModuleId == criteria.ModuleId);
             }
+
+            query = query.OrderBySortInfos(sortInfos);
 
             return query;
         }

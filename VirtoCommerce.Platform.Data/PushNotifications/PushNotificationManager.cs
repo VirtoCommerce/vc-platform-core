@@ -21,14 +21,8 @@ namespace VirtoCommerce.Platform.Data.PushNotifications
 
         public PushNotificationSearchResult SearchNotifies(string userId, PushNotificationSearchCriteria criteria)
         {
-            var query = GetSearchNotifiesQuery(userId, criteria);
-
-            var sortInfos = criteria.SortInfos;
-            if (sortInfos.IsNullOrEmpty())
-            {
-                //todo: sorting forgotten
-                sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<PushNotification>(x => x.Created), SortDirection = SortDirection.Descending } };
-            }
+            var sortInfos = GetSearchNotifiesSortInfo(criteria);
+            var query = GetSearchNotifiesQuery(userId, criteria, sortInfos);
 
             var retVal = new PushNotificationSearchResult
             {
@@ -82,30 +76,52 @@ namespace VirtoCommerce.Platform.Data.PushNotifications
             }
         }
 
-        private IQueryable<PushNotification> GetSearchNotifiesQuery(string userId, PushNotificationSearchCriteria criteria)
+        private IList<SortInfo> GetSearchNotifiesSortInfo(PushNotificationSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo
+                    {
+                        SortColumn = ReflectionUtility.GetPropertyName<PushNotification>(x => x.Created),
+                        SortDirection = SortDirection.Descending
+                    }
+                };
+            }
+
+            return sortInfos;
+        }
+
+        private IQueryable<PushNotification> GetSearchNotifiesQuery(string userId, PushNotificationSearchCriteria criteria, IList<SortInfo> sortInfos)
         {
             var query = _innerList.OrderByDescending(x => x.Created)
                 .Where(x => x.Creator == userId)
                 .AsQueryable();
+
             if (criteria.Ids != null && criteria.Ids.Any())
             {
                 query = query.Where(x => criteria.Ids.Contains(x.Id));
             }
+
             if (criteria.OnlyNew)
             {
                 query = query.Where(x => x.IsNew);
             }
+
             if (criteria.StartDate != null)
             {
                 query = query.Where(x => x.Created >= criteria.StartDate);
             }
+
             if (criteria.EndDate != null)
             {
                 query = query.Where(x => x.Created <= criteria.EndDate);
             }
 
+            query = query.OrderBySortInfos(sortInfos);
             return query;
         }
-
     }
 }

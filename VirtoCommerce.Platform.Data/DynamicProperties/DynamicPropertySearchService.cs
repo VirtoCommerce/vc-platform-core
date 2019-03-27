@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,7 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
         }
 
         #region IDynamicPropertySearchService members
+
         public virtual async Task<GenericSearchResult<DynamicPropertyDictionaryItem>> SearchDictionaryItemsAsync(DynamicPropertyDictionaryItemSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), "SearchDictionaryItemsAsync", criteria.GetHashCode().ToString());
@@ -36,15 +38,11 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                     //Optimize performance and CPU usage
                     repository.DisableChangesTracking();
 
-                    var query = GetSearchDictionaryItemsQuery(criteria, repository);
+                    var sortInfos = GetSearchDictionaryItemsSortInfo(criteria);
+                    var query = GetSearchDictionaryItemsQuery(criteria, repository, sortInfos);
 
-                    var sortInfos = criteria.SortInfos;
-                    if (sortInfos.IsNullOrEmpty())
-                    {
-                        sortInfos = new[] { new SortInfo { SortColumn = "Name" } };
-                    }
-                    query = query.OrderBySortInfos(sortInfos);
                     result.TotalCount = await query.CountAsync();
+
                     var ids = await query.Skip(criteria.Skip)
                                          .Take(criteria.Take)
                                          .Select(x => x.Id)
@@ -69,14 +67,10 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                 {
                     //Optimize performance and CPU usage
                     repository.DisableChangesTracking();
-                    var query = GetSearchDynamicPropertiesQuery(criteria, repository);
 
-                    var sortInfos = criteria.SortInfos;
-                    if (sortInfos.IsNullOrEmpty())
-                    {
-                        sortInfos = new[] { new SortInfo { SortColumn = "Name" } };
-                    }
-                    query = query.OrderBySortInfos(sortInfos);
+                    var sortInfos = GetSearchDynamicPropertiesSortInfo(criteria);
+                    var query = GetSearchDynamicPropertiesQuery(criteria, repository, sortInfos);
+
                     result.TotalCount = await query.CountAsync();
                     var ids = await query.Skip(criteria.Skip)
                                          .Take(criteria.Take)
@@ -91,7 +85,21 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
             });
         }
 
-        private IQueryable<Model.DynamicPropertyDictionaryItemEntity> GetSearchDictionaryItemsQuery(DynamicPropertyDictionaryItemSearchCriteria criteria, IPlatformRepository repository)
+        protected virtual IList<SortInfo> GetSearchDictionaryItemsSortInfo(DynamicPropertyDictionaryItemSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo { SortColumn = "Name" }
+                };
+            }
+
+            return sortInfos;
+        }
+
+        protected virtual IQueryable<Model.DynamicPropertyDictionaryItemEntity> GetSearchDictionaryItemsQuery(DynamicPropertyDictionaryItemSearchCriteria criteria, IPlatformRepository repository, IList<SortInfo> sortInfos)
         {
             var query = repository.DynamicPropertyDictionaryItems;
 
@@ -104,10 +112,26 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                 query = query.Where(x => x.Name.Contains(criteria.Keyword));
             }
 
+            query = query.OrderBySortInfos(sortInfos);
+
             return query;
         }
 
-        private IQueryable<Model.DynamicPropertyEntity> GetSearchDynamicPropertiesQuery(DynamicPropertySearchCriteria criteria, IPlatformRepository repository)
+        protected virtual IList<SortInfo> GetSearchDynamicPropertiesSortInfo(DynamicPropertySearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo { SortColumn = "Name" }
+                };
+            }
+
+            return sortInfos;
+        }
+
+        protected virtual IQueryable<Model.DynamicPropertyEntity> GetSearchDynamicPropertiesQuery(DynamicPropertySearchCriteria criteria, IPlatformRepository repository, IList<SortInfo> sortInfos)
         {
             var query = repository.DynamicProperties;
 
@@ -119,6 +143,8 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
             {
                 query = query.Where(x => x.Name.Contains(criteria.Keyword));
             }
+
+            query = query.OrderBySortInfos(sortInfos);
 
             return query;
         }

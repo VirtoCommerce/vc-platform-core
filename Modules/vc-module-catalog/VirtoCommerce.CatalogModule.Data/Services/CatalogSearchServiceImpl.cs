@@ -60,7 +60,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             return retVal;
         }
 
-
         protected virtual async Task SearchCategoriesAsync(CatalogListEntrySearchCriteria criteria, SearchResult result)
         {
             using (var repository = _catalogRepositoryFactory())
@@ -68,72 +67,11 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 //Optimize performance and CPU usage
                 repository.DisableChangesTracking();
 
-                var query = repository.Categories.Where(x => criteria.WithHidden || x.IsActive);
-
-                //Get list of search in categories
-                var searchCategoryIds = criteria.CategoryIds;
-
-                if (!searchCategoryIds.IsNullOrEmpty())
-                {
-                    if (criteria.SearchInChildren)
-                    {
-                        searchCategoryIds = searchCategoryIds.Concat(await repository.GetAllChildrenCategoriesIdsAsync(searchCategoryIds)).ToArray();
-                        //linked categories
-                        var allLinkedCategories = await repository.CategoryLinks.Where(x => searchCategoryIds.Contains(x.TargetCategoryId)).Select(x => x.SourceCategoryId).ToArrayAsync();
-                        searchCategoryIds = searchCategoryIds.Concat(allLinkedCategories).Distinct().ToArray();
-                    }
-
-                    if (criteria.HideDirectLinkedCategories)
-                    {
-                        query = query.Where(x => searchCategoryIds.Contains(x.ParentCategoryId) || x.OutgoingLinks.Any(y => searchCategoryIds.Contains(y.TargetCategory.ParentCategoryId)));
-                    }
-                    else
-                    {
-                        query = query.Where(x => searchCategoryIds.Contains(x.ParentCategoryId) || x.OutgoingLinks.Any(y => searchCategoryIds.Contains(y.TargetCategoryId)));
-                    }
-                }
-                else if (!criteria.CatalogIds.IsNullOrEmpty())
-                {
-                    if (criteria.SearchInChildren)
-                    {
-                        //need search in all catalog linked and children categories 
-                        //First need load all categories belong to searched catalogs
-                        searchCategoryIds = await repository.Categories.Where(x => criteria.CatalogIds.Contains(x.CatalogId)).Select(x => x.Id).ToArrayAsync();
-                        //Then load all physical categories linked to catalog
-                        var allCatalogLinkedCategories = await repository.CategoryLinks.Where(x => criteria.CatalogIds.Contains(x.TargetCatalogId)).Select(x => x.SourceCategoryId).ToArrayAsync();
-                        searchCategoryIds = searchCategoryIds.Concat(allCatalogLinkedCategories).Distinct().ToArray();
-                        //Then expand all categories, get all children's
-                        searchCategoryIds = searchCategoryIds.Concat(await repository.GetAllChildrenCategoriesIdsAsync(searchCategoryIds)).ToArray();
-                        if (!searchCategoryIds.IsNullOrEmpty())
-                        {
-                            //find all categories belong searched catalogs and all categories direct or implicitly linked to catalogs
-                            query = query.Where(x => searchCategoryIds.Contains(x.Id));
-                        }
-                    }
-                    else
-                    {
-                        query = query.Where(x => (criteria.CatalogIds.Contains(x.CatalogId) && x.ParentCategoryId == null) || (x.OutgoingLinks.Any(y => y.TargetCategoryId == null && criteria.CatalogIds.Contains(y.TargetCatalogId))));
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(criteria.Keyword))
-                {
-                    query = query.Where(x => x.Name.Contains(criteria.Keyword) || x.Code.Contains(criteria.Keyword));
-                }
-                else if (!string.IsNullOrEmpty(criteria.Code))
-                {
-                    query = query.Where(x => x.Code == criteria.Code);
-                }
-
-                var sortInfos = criteria.SortInfos;
-                if (sortInfos.IsNullOrEmpty())
-                {
-                    sortInfos = new[] { new SortInfo { SortColumn = "Name" } };
-                }
+                var sortInfos = GetSearchCategoriesSortInfo(criteria);
                 //Try to replace sorting columns names
                 TryTransformSortingInfoColumnNames(_categorySortingAliases, sortInfos);
 
-                query = query.OrderBySortInfos(sortInfos);
+                var query = await GetSearchCategoriesQuery(criteria, repository, sortInfos);
 
                 var categoryIds = await query.Select(x => x.Id).ToListAsync();
                 var categoryResponseGroup = CategoryResponseGroup.Info | CategoryResponseGroup.WithImages | CategoryResponseGroup.WithSeo | CategoryResponseGroup.WithLinks | CategoryResponseGroup.WithParents;
@@ -184,14 +122,9 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
         protected virtual async Task SearchItemsAsync(CatalogListEntrySearchCriteria criteria, SearchResult result)
         {
-            var sortInfos = criteria.SortInfos;
-            if (sortInfos.IsNullOrEmpty())
-            {
-                sortInfos = new[] { new SortInfo { SortColumn = "Priority", SortDirection = SortDirection.Descending }, new SortInfo { SortColumn = "Name", SortDirection = SortDirection.Ascending } };
-            }
+            var sortInfos = GetSearchItemsSortInfo(criteria);
             //Try to replace sorting columns names
             TryTransformSortingInfoColumnNames(_productSortingAliases, sortInfos);
-
 
             using (var repository = _catalogRepositoryFactory())
             {
@@ -219,8 +152,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     }
                 }
 
-                // Build the query based on the search criteria
-                var query = BuildSearchQuery(repository.Items, criteria, searchCategoryIds);
+                var query = GetSearchItemsQuery(repository.Items, criteria, searchCategoryIds);
 
                 result.ProductsTotalCount = await query.CountAsync();
 
@@ -257,7 +189,18 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
         }
 
-        protected virtual IQueryable<ItemEntity> BuildSearchQuery(IQueryable<ItemEntity> query, CatalogListEntrySearchCriteria criteria, string[] searchCategoryIds)
+        protected virtual IList<SortInfo> GetSearchItemsSortInfo(CatalogListEntrySearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[] { new SortInfo { SortColumn = "Priority", SortDirection = SortDirection.Descending }, new SortInfo { SortColumn = "Name", SortDirection = SortDirection.Ascending } };
+            }
+
+            return sortInfos;
+        }
+
+        protected virtual IQueryable<ItemEntity> GetSearchItemsQuery(IQueryable<ItemEntity> query, CatalogListEntrySearchCriteria criteria, string[] searchCategoryIds)
         {
             query = query.Where(x => criteria.WithHidden || x.IsActive);
 
@@ -320,13 +263,85 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             //Try to replace sorting columns names
             foreach (var sortInfo in sortingInfos)
             {
-                string newColumnName;
-                if (transformationMap.TryGetValue(sortInfo.SortColumn.ToLowerInvariant(), out newColumnName))
+                if (transformationMap.TryGetValue(sortInfo.SortColumn.ToLowerInvariant(), out var newColumnName))
                 {
                     sortInfo.SortColumn = newColumnName;
                 }
             }
         }
 
+        protected virtual IList<SortInfo> GetSearchCategoriesSortInfo(CatalogListEntrySearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[] { new SortInfo { SortColumn = "Name" } };
+            }
+
+            return sortInfos;
+        }
+
+        protected virtual async Task<IQueryable<CategoryEntity>> GetSearchCategoriesQuery(CatalogListEntrySearchCriteria criteria, ICatalogRepository repository, IList<SortInfo> sortInfos)
+        {
+            var query = repository.Categories.Where(x => criteria.WithHidden || x.IsActive);
+
+            //Get list of search in categories
+            var searchCategoryIds = criteria.CategoryIds;
+
+            if (!searchCategoryIds.IsNullOrEmpty())
+            {
+                if (criteria.SearchInChildren)
+                {
+                    searchCategoryIds = searchCategoryIds.Concat(await repository.GetAllChildrenCategoriesIdsAsync(searchCategoryIds)).ToArray();
+                    //linked categories
+                    var allLinkedCategories = await repository.CategoryLinks.Where(x => searchCategoryIds.Contains(x.TargetCategoryId)).Select(x => x.SourceCategoryId).ToArrayAsync();
+                    searchCategoryIds = searchCategoryIds.Concat(allLinkedCategories).Distinct().ToArray();
+                }
+
+                if (criteria.HideDirectLinkedCategories)
+                {
+                    query = query.Where(x => searchCategoryIds.Contains(x.ParentCategoryId) || x.OutgoingLinks.Any(y => searchCategoryIds.Contains(y.TargetCategory.ParentCategoryId)));
+                }
+                else
+                {
+                    query = query.Where(x => searchCategoryIds.Contains(x.ParentCategoryId) || x.OutgoingLinks.Any(y => searchCategoryIds.Contains(y.TargetCategoryId)));
+                }
+            }
+            else if (!criteria.CatalogIds.IsNullOrEmpty())
+            {
+                if (criteria.SearchInChildren)
+                {
+                    //need search in all catalog linked and children categories 
+                    //First need load all categories belong to searched catalogs
+                    searchCategoryIds = await repository.Categories.Where(x => criteria.CatalogIds.Contains(x.CatalogId)).Select(x => x.Id).ToArrayAsync();
+                    //Then load all physical categories linked to catalog
+                    var allCatalogLinkedCategories = await repository.CategoryLinks.Where(x => criteria.CatalogIds.Contains(x.TargetCatalogId)).Select(x => x.SourceCategoryId).ToArrayAsync();
+                    searchCategoryIds = searchCategoryIds.Concat(allCatalogLinkedCategories).Distinct().ToArray();
+                    //Then expand all categories, get all children's
+                    searchCategoryIds = searchCategoryIds.Concat(await repository.GetAllChildrenCategoriesIdsAsync(searchCategoryIds)).ToArray();
+                    if (!searchCategoryIds.IsNullOrEmpty())
+                    {
+                        //find all categories belong searched catalogs and all categories direct or implicitly linked to catalogs
+                        query = query.Where(x => searchCategoryIds.Contains(x.Id));
+                    }
+                }
+                else
+                {
+                    query = query.Where(x => (criteria.CatalogIds.Contains(x.CatalogId) && x.ParentCategoryId == null) || (x.OutgoingLinks.Any(y => y.TargetCategoryId == null && criteria.CatalogIds.Contains(y.TargetCatalogId))));
+                }
+            }
+
+            if (!string.IsNullOrEmpty(criteria.Keyword))
+            {
+                query = query.Where(x => x.Name.Contains(criteria.Keyword) || x.Code.Contains(criteria.Keyword));
+            }
+            else if (!string.IsNullOrEmpty(criteria.Code))
+            {
+                query = query.Where(x => x.Code == criteria.Code);
+            }
+
+            query = query.OrderBySortInfos(sortInfos);
+            return query;
+        }
     }
 }

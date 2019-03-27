@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
         }
 
         #region IPromotionSearchService Members
+
         public virtual async Task<GenericSearchResult<Promotion>> SearchPromotionsAsync(PromotionSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), "SearchPromotionsAsync", criteria.GetCacheKey());
@@ -40,14 +42,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 var retVal = new GenericSearchResult<Promotion>();
                 using (var repository = _repositoryFactory())
                 {
-                    var query = GetPromotionsQuery(repository, criteria);
-
-                    var sortInfos = criteria.SortInfos;
-                    if (sortInfos.IsNullOrEmpty())
-                    {
-                        sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Promotion>(x => x.Priority), SortDirection = SortDirection.Descending } };
-                    }
-                    query = query.OrderBySortInfos(sortInfos);
+                    var sortInfos = GetSearchPromotionsSortInfo(criteria);
+                    var query = GetSearchPromotionsQuery(repository, criteria, sortInfos);
 
                     retVal.TotalCount = await query.CountAsync();
 
@@ -64,36 +60,10 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             });
         }
 
-        protected virtual IQueryable<Model.PromotionEntity> GetPromotionsQuery(IMarketingRepository repository, PromotionSearchCriteria criteria)
-        {
-            var query = repository.Promotions;
-
-            if (!string.IsNullOrEmpty(criteria.Store))
-            {
-                query = query.Where(x => !x.Stores.Any() || x.Stores.Any(s => s.StoreId == criteria.Store));
-            }
-
-            if (!criteria.StoreIds.IsNullOrEmpty())
-            {
-                query = query.Where(x => !x.Stores.Any() || x.Stores.Any(s => criteria.StoreIds.Contains(s.StoreId)));
-            }
-
-            if (criteria.OnlyActive)
-            {
-                var now = DateTime.UtcNow;
-                query = query.Where(x => x.IsActive && (x.StartDate == null || now >= x.StartDate) && (x.EndDate == null || x.EndDate >= now));
-            }
-            if (!string.IsNullOrEmpty(criteria.Keyword))
-            {
-                query = query.Where(x => x.Name.Contains(criteria.Keyword) || x.Description.Contains(criteria.Keyword));
-            }
-
-            return query;
-        }
-
         #endregion
 
         #region IDynamicContentSearchService Members
+
         public async Task<GenericSearchResult<DynamicContentItem>> SearchContentItemsAsync(DynamicContentItemSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), "SearchContentItemsAsync", criteria.GetCacheKey());
@@ -219,18 +189,9 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 var retVal = new GenericSearchResult<DynamicContentFolder>();
                 using (var repository = _repositoryFactory())
                 {
-                    var query = repository.Folders.Where(x => x.ParentFolderId == criteria.FolderId);
-                    if (!string.IsNullOrEmpty(criteria.Keyword))
-                    {
-                        query = query.Where(q => q.Name.Contains(criteria.Keyword));
-                    }
-                    var sortInfos = criteria.SortInfos;
-                    if (sortInfos.IsNullOrEmpty())
-                    {
-                        sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<DynamicContentFolder>(x => x.Name), SortDirection = SortDirection.Ascending } };
-                    }
+                    var sortInfos = GetSearchFoldersSortInfo(criteria);
+                    var query = GetSearchFoldersQuery(criteria, repository, sortInfos);
 
-                    query = query.OrderBySortInfos(sortInfos);
                     retVal.TotalCount = await query.CountAsync();
 
                     if (criteria.Take > 0)
@@ -242,7 +203,71 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 return retVal;
             });
         }
+
         #endregion
+
+        protected virtual IList<SortInfo> GetSearchPromotionsSortInfo(PromotionSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Promotion>(x => x.Priority), SortDirection = SortDirection.Descending } };
+            }
+
+            return sortInfos;
+        }
+
+        protected virtual IQueryable<Model.PromotionEntity> GetSearchPromotionsQuery(IMarketingRepository repository, PromotionSearchCriteria criteria, IList<SortInfo> sortInfos)
+        {
+            var query = repository.Promotions;
+
+            if (!string.IsNullOrEmpty(criteria.Store))
+            {
+                query = query.Where(x => !x.Stores.Any() || x.Stores.Any(s => s.StoreId == criteria.Store));
+            }
+
+            if (!criteria.StoreIds.IsNullOrEmpty())
+            {
+                query = query.Where(x => !x.Stores.Any() || x.Stores.Any(s => criteria.StoreIds.Contains(s.StoreId)));
+            }
+
+            if (criteria.OnlyActive)
+            {
+                var now = DateTime.UtcNow;
+                query = query.Where(x => x.IsActive && (x.StartDate == null || now >= x.StartDate) && (x.EndDate == null || x.EndDate >= now));
+            }
+
+            if (!string.IsNullOrEmpty(criteria.Keyword))
+            {
+                query = query.Where(x => x.Name.Contains(criteria.Keyword) || x.Description.Contains(criteria.Keyword));
+            }
+
+            query = query.OrderBySortInfos(sortInfos);
+            return query;
+        }
+
+        private IList<SortInfo> GetSearchFoldersSortInfo(DynamicContentFolderSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<DynamicContentFolder>(x => x.Name), SortDirection = SortDirection.Ascending } };
+            }
+
+            return sortInfos;
+        }
+
+        private IQueryable<Model.DynamicContentFolderEntity> GetSearchFoldersQuery(DynamicContentFolderSearchCriteria criteria, IMarketingRepository repository, IList<SortInfo> sortInfos)
+        {
+            var query = repository.Folders.Where(x => x.ParentFolderId == criteria.FolderId);
+            if (!string.IsNullOrEmpty(criteria.Keyword))
+            {
+                query = query.Where(q => q.Name.Contains(criteria.Keyword));
+            }
+
+            query = query.OrderBySortInfos(sortInfos);
+            return query;
+        }
 
     }
 }

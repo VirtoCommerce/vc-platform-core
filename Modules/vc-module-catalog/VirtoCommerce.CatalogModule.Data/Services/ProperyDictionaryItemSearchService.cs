@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -36,26 +37,8 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
                 var result = new GenericSearchResult<PropertyDictionaryItem>();
 
-                var query = repository.PropertyDictionaryItems;
-                if (!criteria.PropertyIds.IsNullOrEmpty())
-                {
-                    query = query.Where(x => criteria.PropertyIds.Contains(x.PropertyId));
-                }
-                if (!string.IsNullOrEmpty(criteria.Keyword))
-                {
-                    query = query.Where(x => x.Alias.Contains(criteria.Keyword));
-                }
-
-                var sortInfos = criteria.SortInfos;
-                if (sortInfos.IsNullOrEmpty())
-                {
-                    sortInfos = new[] {
-                        new SortInfo { SortColumn = "SortOrder", SortDirection = SortDirection.Ascending },
-                        new SortInfo { SortColumn = "Alias", SortDirection = SortDirection.Ascending }
-                    };
-                }
-
-                query = query.OrderBySortInfos(sortInfos);
+                var sortInfos = GetSearchSortInfo(criteria);
+                var query = GetSearchQuery(criteria, repository, sortInfos);
 
                 result.TotalCount = await query.CountAsync();
 
@@ -67,6 +50,36 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
                 return result;
             }
+        }
+
+        private IList<SortInfo> GetSearchSortInfo(PropertyDictionaryItemSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[] {
+                    new SortInfo { SortColumn = "SortOrder", SortDirection = SortDirection.Ascending },
+                    new SortInfo { SortColumn = "Alias", SortDirection = SortDirection.Ascending }
+                };
+            }
+
+            return sortInfos;
+        }
+
+        private IQueryable<Model.PropertyDictionaryItemEntity> GetSearchQuery(PropertyDictionaryItemSearchCriteria criteria, ICatalogRepository repository, IList<SortInfo> sortInfos)
+        {
+            var query = repository.PropertyDictionaryItems;
+            if (!criteria.PropertyIds.IsNullOrEmpty())
+            {
+                query = query.Where(x => criteria.PropertyIds.Contains(x.PropertyId));
+            }
+            if (!string.IsNullOrEmpty(criteria.Keyword))
+            {
+                query = query.Where(x => x.Alias.Contains(criteria.Keyword));
+            }
+
+            query = query.OrderBySortInfos(sortInfos);
+            return query;
         }
     }
 }

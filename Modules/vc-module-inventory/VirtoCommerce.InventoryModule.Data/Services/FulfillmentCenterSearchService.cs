@@ -38,8 +38,8 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                 {
                     repository.DisableChangesTracking();
 
-                    var sortInfos = GetSortInfos(criteria);
-                    var query = GetFulfillmentCenterQuery(repository, criteria, sortInfos);
+                    var sortInfos = GetSearchCentersSortInfos(criteria);
+                    var query = GetSearchCentersQuery(repository, criteria, sortInfos);
 
                     result.TotalCount = await query.CountAsync();
 
@@ -57,19 +57,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             });
         }
 
-        protected virtual IQueryable<FulfillmentCenterEntity> GetFulfillmentCenterQuery(IInventoryRepository repository,
-            FulfillmentCenterSearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
-        {
-            var query = repository.FulfillmentCenters;
-            if (!string.IsNullOrEmpty(criteria.Keyword))
-            {
-                query = query.Where(x => x.Name.Contains(criteria.Keyword));
-            }
-
-            return query.OrderBySortInfos(sortInfos);
-        }
-
-        protected virtual IList<SortInfo> GetSortInfos(FulfillmentCenterSearchCriteria criteria)
+        protected virtual IList<SortInfo> GetSearchCentersSortInfos(FulfillmentCenterSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -78,6 +66,17 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             }
 
             return sortInfos;
+        }
+
+        protected virtual IQueryable<FulfillmentCenterEntity> GetSearchCentersQuery(IInventoryRepository repository, FulfillmentCenterSearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
+        {
+            var query = repository.FulfillmentCenters;
+            if (!string.IsNullOrEmpty(criteria.Keyword))
+            {
+                query = query.Where(x => x.Name.Contains(criteria.Keyword));
+            }
+
+            return query.OrderBySortInfos(sortInfos);
         }
     }
 }

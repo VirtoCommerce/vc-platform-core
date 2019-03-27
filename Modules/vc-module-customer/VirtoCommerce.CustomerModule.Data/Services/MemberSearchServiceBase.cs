@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -30,6 +31,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         protected IPlatformMemoryCache PlatformMemoryCache { get; }
 
         #region IMemberSearchService Members
+
         /// <summary>
         /// Search members in database by given criteria
         /// </summary>
@@ -46,42 +48,8 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                     repository.DisableChangesTracking();
                     var result = new GenericSearchResult<Member>();
 
-                    var query = LinqKit.Extensions.AsExpandable(repository.Members);
-
-                    if (!criteria.MemberTypes.IsNullOrEmpty())
-                    {
-                        query = query.Where(m => criteria.MemberTypes.Contains(m.MemberType));
-                    }
-
-                    if (!criteria.Groups.IsNullOrEmpty())
-                    {
-                        query = query.Where(m => m.Groups.Any(g => criteria.Groups.Contains(g.Group)));
-                    }
-
-                    if (criteria.MemberId != null)
-                    {
-                        //TODO: DeepSearch in specified member
-                        query = query.Where(m => m.MemberRelations.Any(r => r.AncestorId == criteria.MemberId));
-                    }
-                    else if (!criteria.DeepSearch)
-                    {
-                        query = query.Where(m => !m.MemberRelations.Any());
-                    }
-
-                    //Get extra predicates (where clause)
-                    var predicate = GetQueryPredicate(criteria);
-                    query = query.Where(LinqKit.Extensions.Expand(predicate));
-
-                    var sortInfos = criteria.SortInfos;
-                    if (sortInfos.IsNullOrEmpty())
-                    {
-                        sortInfos = new[] {
-                            new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Member>(m => m.MemberType), SortDirection = SortDirection.Descending },
-                            new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Member>(m => m.Name), SortDirection = SortDirection.Ascending },
-                        };
-                    }
-
-                    query = query.OrderBySortInfos(sortInfos);
+                    var sortInfos = GetSearchMembersSortInfo(criteria);
+                    var query = GetSearchMembersQuery(criteria, repository, sortInfos);
 
                     result.TotalCount = await query.CountAsync();
                     if (criteria.Take > 0)
@@ -93,6 +61,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                 }
             });
         }
+
         #endregion
 
         /// <summary>
@@ -111,6 +80,53 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                 return LinqKit.Extensions.Expand(predicate);
             }
             return PredicateBuilder.True<MemberEntity>();
+        }
+
+        protected virtual IQueryable<MemberEntity> GetSearchMembersQuery(MembersSearchCriteria criteria, IMemberRepository repository, IList<SortInfo> sortInfos)
+        {
+            var query = LinqKit.Extensions.AsExpandable(repository.Members);
+
+            if (!criteria.MemberTypes.IsNullOrEmpty())
+            {
+                query = query.Where(m => criteria.MemberTypes.Contains(m.MemberType));
+            }
+
+            if (!criteria.Groups.IsNullOrEmpty())
+            {
+                query = query.Where(m => m.Groups.Any(g => criteria.Groups.Contains(g.Group)));
+            }
+
+            if (criteria.MemberId != null)
+            {
+                //TODO: DeepSearch in specified member
+                query = query.Where(m => m.MemberRelations.Any(r => r.AncestorId == criteria.MemberId));
+            }
+            else if (!criteria.DeepSearch)
+            {
+                query = query.Where(m => !m.MemberRelations.Any());
+            }
+
+            //Get extra predicates (where clause)
+            var predicate = GetQueryPredicate(criteria);
+            query = query.Where(LinqKit.Extensions.Expand(predicate));
+
+            query = query.OrderBySortInfos(sortInfos);
+            return query;
+        }
+
+        protected virtual IList<SortInfo> GetSearchMembersSortInfo(MembersSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Member>(m => m.MemberType), SortDirection = SortDirection.Descending },
+                    new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Member>(m => m.Name), SortDirection = SortDirection.Ascending }
+                };
+            }
+
+            return sortInfos;
         }
     }
 }

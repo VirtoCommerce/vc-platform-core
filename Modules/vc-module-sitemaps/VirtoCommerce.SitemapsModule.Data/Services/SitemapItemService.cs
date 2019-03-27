@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -39,37 +40,10 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                 using (var repository = RepositoryFactory())
                 {
                     var searchResponse = new GenericSearchResult<SitemapItem>();
-                    var query = repository.SitemapItems;
-                    if (!string.IsNullOrEmpty(criteria.SitemapId))
-                    {
-                        query = query.Where(x => x.SitemapId == criteria.SitemapId);
-                    }
 
-                    if (criteria.ObjectTypes != null)
-                    {
-                        query = query.Where(i =>
-                            criteria.ObjectTypes.Contains(i.ObjectType, StringComparer.OrdinalIgnoreCase));
-                    }
+                    var sortInfos = GetSearchSortInfo(criteria);
+                    var query = GetSearchQuery(criteria, repository, sortInfos);
 
-                    if (!string.IsNullOrEmpty(criteria.ObjectType))
-                    {
-                        query = query.Where(i => i.ObjectType.EqualsInvariant(criteria.ObjectType));
-                    }
-
-                    var sortInfos = criteria.SortInfos;
-                    if (sortInfos.IsNullOrEmpty())
-                    {
-                        sortInfos = new[]
-                        {
-                            new SortInfo
-                            {
-                                SortColumn = ReflectionUtility.GetPropertyName<SitemapItemEntity>(x => x.CreatedDate),
-                                SortDirection = SortDirection.Descending
-                            }
-                        };
-                    }
-
-                    query = query.OrderBySortInfos(sortInfos);
                     searchResponse.TotalCount = await query.CountAsync();
 
                     if (criteria.Take > 0)
@@ -144,6 +118,47 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
             }
 
             SitemapItemSearchCacheRegion.ExpireRegion();
+        }
+
+        protected virtual IList<SortInfo> GetSearchSortInfo(SitemapItemSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo
+                    {
+                        SortColumn = ReflectionUtility.GetPropertyName<SitemapItemEntity>(x => x.CreatedDate),
+                        SortDirection = SortDirection.Descending
+                    }
+                };
+            }
+
+            return sortInfos;
+        }
+
+        protected virtual IQueryable<SitemapItemEntity> GetSearchQuery(SitemapItemSearchCriteria criteria, ISitemapRepository repository, IList<SortInfo> sortInfos)
+        {
+            var query = repository.SitemapItems;
+            if (!string.IsNullOrEmpty(criteria.SitemapId))
+            {
+                query = query.Where(x => x.SitemapId == criteria.SitemapId);
+            }
+
+            if (criteria.ObjectTypes != null)
+            {
+                query = query.Where(i =>
+                    criteria.ObjectTypes.Contains(i.ObjectType, StringComparer.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrEmpty(criteria.ObjectType))
+            {
+                query = query.Where(i => i.ObjectType.EqualsInvariant(criteria.ObjectType));
+            }
+
+            query = query.OrderBySortInfos(sortInfos);
+            return query;
         }
     }
 }

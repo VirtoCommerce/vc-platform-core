@@ -31,6 +31,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
         {
             return (await GetByIdsAsync(new[] { sitemapId }, responseGroup)).FirstOrDefault();
         }
+
         public virtual async Task<IEnumerable<Sitemap>> GetByIdsAsync(string[] sitemapIds, string responseGroup = null)
         {
             if (sitemapIds == null)
@@ -70,32 +71,8 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                 {
                     var result = new GenericSearchResult<Sitemap>();
 
-                    var query = repository.Sitemaps;
-
-                    if (!string.IsNullOrEmpty(criteria.StoreId))
-                    {
-                        query = query.Where(s => s.StoreId == criteria.StoreId);
-                    }
-
-                    if (!string.IsNullOrEmpty(criteria.Location))
-                    {
-                        query = query.Where(s => s.Filename == criteria.Location);
-                    }
-
-                    var sortInfos = criteria.SortInfos;
-                    if (sortInfos.IsNullOrEmpty())
-                    {
-                        sortInfos = new[]
-                        {
-                             new SortInfo
-                            {
-                                SortColumn = ReflectionUtility.GetPropertyName<SitemapEntity>(x => x.CreatedDate),
-                                SortDirection = SortDirection.Descending
-                            }
-                        };
-                    }
-
-                    query = query.OrderBySortInfos(sortInfos);
+                    var sortInfos = GetSearchSortInfo(criteria);
+                    var query = GetSearchQuery(criteria, repository, sortInfos);
 
                     result.TotalCount = await query.CountAsync();
 
@@ -167,7 +144,6 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
             ClearCacheFor(ids);
         }
 
-
         protected virtual void ClearCacheFor(IEnumerable<string> sitemapIds)
         {
             foreach (var sitemapId in sitemapIds)
@@ -175,6 +151,42 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                 SitemapCacheRegion.ExpireSitemap(sitemapId);
             }
             SitemapSearchCacheRegion.ExpireRegion();
+        }
+
+        protected virtual IList<SortInfo> GetSearchSortInfo(SitemapSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo
+                    {
+                        SortColumn = ReflectionUtility.GetPropertyName<SitemapEntity>(x => x.CreatedDate),
+                        SortDirection = SortDirection.Descending
+                    }
+                };
+            }
+
+            return sortInfos;
+        }
+
+        protected virtual IQueryable<SitemapEntity> GetSearchQuery(SitemapSearchCriteria criteria, ISitemapRepository repository, IList<SortInfo> sortInfos)
+        {
+            var query = repository.Sitemaps;
+
+            if (!string.IsNullOrEmpty(criteria.StoreId))
+            {
+                query = query.Where(s => s.StoreId == criteria.StoreId);
+            }
+
+            if (!string.IsNullOrEmpty(criteria.Location))
+            {
+                query = query.Where(s => s.Filename == criteria.Location);
+            }
+
+            query = query.OrderBySortInfos(sortInfos);
+            return query;
         }
     }
 }

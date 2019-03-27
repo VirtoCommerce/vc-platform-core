@@ -46,28 +46,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
 
                 using (var repository = _repositoryFactory())
                 {
-                    var query = repository.Coupons;
-
-                    if (!string.IsNullOrEmpty(criteria.PromotionId))
-                    {
-                        query = query.Where(c => c.PromotionId == criteria.PromotionId);
-                    }
-                    if (!string.IsNullOrEmpty(criteria.Code))
-                    {
-                        query = query.Where(c => c.Code == criteria.Code);
-                    }
-                    if (!criteria.Codes.IsNullOrEmpty())
-                    {
-                        query = query.Where(c => criteria.Codes.Contains(c.Code));
-                    }
-
-                    var sortInfos = criteria.SortInfos;
-                    //TODO: Sort by TotalUsesCount 
-                    if (sortInfos.IsNullOrEmpty() || sortInfos.Any(x => x.SortColumn.EqualsInvariant(ReflectionUtility.GetPropertyName<Coupon>(p => p.TotalUsesCount))))
-                    {
-                        sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Coupon>(x => x.Code), SortDirection = SortDirection.Descending } };
-                    }
-                    query = query.OrderBySortInfos(sortInfos);
+                    var sortInfos = GetSearchCouponsSortInfo(criteria);
+                    var query = GetSearchCouponsQuery(criteria, repository, sortInfos);
 
                     var totalCount = await query.CountAsync();
                     var searchResult = new GenericSearchResult<Coupon> { TotalCount = totalCount };
@@ -144,5 +124,39 @@ namespace VirtoCommerce.MarketingModule.Data.Services
 
         #endregion
 
+        private IList<SortInfo> GetSearchCouponsSortInfo(CouponSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            //TODO: Sort by TotalUsesCount 
+            if (sortInfos.IsNullOrEmpty() || sortInfos.Any(x => x.SortColumn.EqualsInvariant(ReflectionUtility.GetPropertyName<Coupon>(p => p.TotalUsesCount))))
+            {
+                sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Coupon>(x => x.Code), SortDirection = SortDirection.Descending } };
+            }
+
+            return sortInfos;
+        }
+
+        private IQueryable<CouponEntity> GetSearchCouponsQuery(CouponSearchCriteria criteria, IMarketingRepository repository, IList<SortInfo> sortInfos)
+        {
+            var query = repository.Coupons;
+
+            if (!string.IsNullOrEmpty(criteria.PromotionId))
+            {
+                query = query.Where(c => c.PromotionId == criteria.PromotionId);
+            }
+
+            if (!string.IsNullOrEmpty(criteria.Code))
+            {
+                query = query.Where(c => c.Code == criteria.Code);
+            }
+
+            if (!criteria.Codes.IsNullOrEmpty())
+            {
+                query = query.Where(c => criteria.Codes.Contains(c.Code));
+            }
+
+            query = query.OrderBySortInfos(sortInfos);
+            return query;
+        }
     }
 }

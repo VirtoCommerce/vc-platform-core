@@ -37,8 +37,8 @@ namespace VirtoCommerce.CartModule.Data.Services
                 cacheEntry.AddExpirationToken(CartSearchCacheRegion.CreateChangeToken());
                 using (var repository = RepositoryFactory())
                 {
-                    var sortInfos = GetSortInfos(criteria);
-                    var query = GetQuery(repository, criteria, sortInfos);
+                    var sortInfos = GetSearchCartSortInfos(criteria);
+                    var query = GetSearchCartQuery(repository, criteria, sortInfos);
 
                     retVal.TotalCount = await query.CountAsync();
                     if (criteria.Take > 0)
@@ -52,7 +52,25 @@ namespace VirtoCommerce.CartModule.Data.Services
             });
         }
 
-        protected virtual IQueryable<ShoppingCartEntity> GetQuery(ICartRepository repository, ShoppingCartSearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
+        protected virtual IList<SortInfo> GetSearchCartSortInfos(ShoppingCartSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo
+                    {
+                        SortColumn = ReflectionUtility.GetPropertyName<ShoppingCartEntity>(x => x.CreatedDate),
+                        SortDirection = SortDirection.Descending
+                    }
+                };
+            }
+
+            return sortInfos;
+        }
+
+        protected virtual IQueryable<ShoppingCartEntity> GetSearchCartQuery(ICartRepository repository, ShoppingCartSearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
         {
             var query = GetQueryableShoppingCarts(repository);
 
@@ -104,24 +122,6 @@ namespace VirtoCommerce.CartModule.Data.Services
         protected virtual IQueryable<ShoppingCartEntity> GetQueryableShoppingCarts(ICartRepository repository)
         {
             return repository.ShoppingCarts;
-        }
-
-        protected virtual IList<SortInfo> GetSortInfos(ShoppingCartSearchCriteria criteria)
-        {
-            var sortInfos = criteria.SortInfos;
-            if (sortInfos.IsNullOrEmpty())
-            {
-                sortInfos = new[]
-                {
-                    new SortInfo
-                    {
-                        SortColumn = ReflectionUtility.GetPropertyName<ShoppingCartEntity>(x => x.CreatedDate),
-                        SortDirection = SortDirection.Descending
-                    }
-                };
-            }
-
-            return sortInfos;
         }
     }
 }

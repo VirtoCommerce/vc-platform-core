@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -53,21 +51,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
 
         public virtual async Task<NotificationEntity[]> GetByTypesAsync(string[] types, string tenantId, string tenantType, string responseGroup)
         {
-            var query = Notifications;
-
-            query = query.Where(x => types.Contains(x.Type));
-
-            if (!string.IsNullOrEmpty(tenantId))
-            {
-                query = query.Where(q => q.TenantId.Equals(tenantId));
-            }
-
-            if (!string.IsNullOrEmpty(tenantType))
-            {
-                query = query.Where(q => q.TenantType.Equals(tenantType));
-            }
-
-            query = query.Include(n => n.Templates);
+            var query = GetTypesQuery(types, tenantId, tenantType);
 
             var result = await query.ToArrayAsync();
 
@@ -99,17 +83,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
 
         public virtual async Task<NotificationEntity> GetByTypeAsync(string type, string tenantId, string tenantType, string responseGroup)
         {
-            var query = Notifications;
-
-            if (!string.IsNullOrEmpty(tenantId))
-            {
-                query = query.Where(q => q.TenantId.Equals(tenantId));
-            }
-
-            if (!string.IsNullOrEmpty(tenantType))
-            {
-                query = query.Where(q => q.TenantType.Equals(tenantType));
-            }
+            var query = GetTypeQuery(tenantId, tenantType);
 
             var result = await query.FirstOrDefaultAsync(n => n.Type.Equals(type));
 
@@ -139,6 +113,43 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
         public Task<NotificationMessageEntity[]> GetMessageByIdAsync(string[] ids)
         {
             return NotifcationMessages.Where(x => ids.Contains(x.Id)).ToArrayAsync();
+        }
+
+        protected virtual IQueryable<NotificationEntity> GetTypesQuery(string[] types, string tenantId, string tenantType)
+        {
+            var query = Notifications;
+
+            query = query.Where(x => types.Contains(x.Type));
+
+            if (!string.IsNullOrEmpty(tenantId))
+            {
+                query = query.Where(q => q.TenantId.Equals(tenantId));
+            }
+
+            if (!string.IsNullOrEmpty(tenantType))
+            {
+                query = query.Where(q => q.TenantType.Equals(tenantType));
+            }
+
+            query = query.Include(n => n.Templates);
+            return query;
+        }
+
+        protected virtual IQueryable<NotificationEntity> GetTypeQuery(string tenantId, string tenantType)
+        {
+            var query = Notifications;
+
+            if (!string.IsNullOrEmpty(tenantId))
+            {
+                query = query.Where(q => q.TenantId.Equals(tenantId));
+            }
+
+            if (!string.IsNullOrEmpty(tenantType))
+            {
+                query = query.Where(q => q.TenantType.Equals(tenantType));
+            }
+
+            return query;
         }
     }
 }

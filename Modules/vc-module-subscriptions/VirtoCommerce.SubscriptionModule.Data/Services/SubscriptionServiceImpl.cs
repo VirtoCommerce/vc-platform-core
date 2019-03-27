@@ -9,19 +9,19 @@ using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.Platform.Core.Caching;
+using VirtoCommerce.Platform.Core.ChangeLog;
+using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Events;
+using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Data.Infrastructure;
+using VirtoCommerce.StoreModule.Core.Services;
+using VirtoCommerce.SubscriptionModule.Core.Events;
 using VirtoCommerce.SubscriptionModule.Core.Model;
 using VirtoCommerce.SubscriptionModule.Core.Model.Search;
 using VirtoCommerce.SubscriptionModule.Core.Services;
+using VirtoCommerce.SubscriptionModule.Data.Caching;
 using VirtoCommerce.SubscriptionModule.Data.Model;
 using VirtoCommerce.SubscriptionModule.Data.Repositories;
-using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Settings;
-using VirtoCommerce.Platform.Data.Infrastructure;
-using VirtoCommerce.Platform.Core.ChangeLog;
-using VirtoCommerce.Platform.Core.Events;
-using VirtoCommerce.SubscriptionModule.Core.Events;
-using VirtoCommerce.StoreModule.Core.Services;
-using VirtoCommerce.SubscriptionModule.Data.Caching;
 
 namespace VirtoCommerce.SubscriptionModule.Data.Services
 {
@@ -192,9 +192,11 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                 }
             }
         }
+
         #endregion
 
         #region ISubscriptionSearchService members
+
         public virtual async Task<GenericSearchResult<Subscription>> SearchSubscriptionsAsync(SubscriptionSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), nameof(SearchSubscriptionsAsync), criteria.GetCacheKey());
@@ -207,7 +209,8 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                 {
                     repository.DisableChangesTracking();
 
-                    var query = await GetSubscriptionsQueryForCriteria(repository, criteria);
+                    var sortInfos = GetSearchSubscriptionsSortInfo(criteria);
+                    var query = await GetSearchSubscriptionsQuery(repository, criteria, sortInfos);
 
                     retVal.TotalCount = await query.CountAsync();
 
@@ -225,10 +228,32 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                 }
             });
         }
+
         #endregion
 
-        protected virtual async Task<IQueryable<SubscriptionEntity>> GetSubscriptionsQueryForCriteria(
-            ISubscriptionRepository repository, SubscriptionSearchCriteria criteria)
+        protected virtual void ClearCacheFor(Subscription[] subscriptions)
+        {
+            foreach (var subscription in subscriptions)
+            {
+                SubscriptionCacheRegion.ExpireSubscription(subscription);
+            }
+
+            SubscriptionSearchCacheRegion.ExpireRegion();
+        }
+
+        protected virtual IList<SortInfo> GetSearchSubscriptionsSortInfo(SubscriptionSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Subscription>(x => x.CreatedDate), SortDirection = SortDirection.Descending } };
+            }
+
+            return sortInfos;
+        }
+
+        protected virtual async Task<IQueryable<SubscriptionEntity>> GetSearchSubscriptionsQuery(
+            ISubscriptionRepository repository, SubscriptionSearchCriteria criteria, IList<SortInfo> sortInfos)
         {
             var query = repository.Subscriptions;
 
@@ -245,10 +270,12 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
             {
                 query = query.Where(x => x.CustomerId == criteria.CustomerId);
             }
+
             if (criteria.Statuses != null && criteria.Statuses.Any())
             {
                 query = query.Where(x => criteria.Statuses.Contains(x.Status));
             }
+
             if (criteria.StoreId != null)
             {
                 query = query.Where(x => criteria.StoreId == x.StoreId);
@@ -287,24 +314,9 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                 query = query.Where(x => x.OuterId == criteria.OuterId);
             }
 
-            var sortInfos = criteria.SortInfos;
-            if (sortInfos.IsNullOrEmpty())
-            {
-                sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Subscription>(x => x.CreatedDate), SortDirection = SortDirection.Descending } };
-            }
             query = query.OrderBySortInfos(sortInfos);
 
             return query;
-        }
-
-        protected virtual void ClearCacheFor(Subscription[] subscriptions)
-        {
-            foreach (var subscription in subscriptions)
-            {
-                SubscriptionCacheRegion.ExpireSubscription(subscription);
-            }
-
-            SubscriptionSearchCacheRegion.ExpireRegion();
         }
     }
 }

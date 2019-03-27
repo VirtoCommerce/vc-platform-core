@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -22,17 +23,9 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
         {
             using (var repository = ThumbnailRepositoryFactory())
             {
-                var sortInfos = criteria.SortInfos;
-                if (sortInfos.IsNullOrEmpty())
-                    sortInfos = new[]
-                    {
-                        new SortInfo
-                        {
-                            SortColumn = ReflectionUtility.GetPropertyName<ThumbnailTask>(t => t.CreatedDate), SortDirection = SortDirection.Descending
-                        }
-                    };
+                var sortInfos = GetSearchSortInfo(criteria);
+                var query = GetSearchQuery(repository, sortInfos);
 
-                var query = repository.ThumbnailOptions.OrderBySortInfos(sortInfos);
                 var totalCount = await query.CountAsync();
 
                 var results = new ThumbnailOption[0];
@@ -52,6 +45,30 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
 
                 return retVal;
             }
+        }
+
+        protected virtual IList<SortInfo> GetSearchSortInfo(ThumbnailOptionSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo
+                    {
+                        SortColumn = ReflectionUtility.GetPropertyName<ThumbnailTask>(t => t.CreatedDate),
+                        SortDirection = SortDirection.Descending
+                    }
+                };
+            }
+
+            return sortInfos;
+        }
+
+        protected virtual IOrderedQueryable<Models.ThumbnailOptionEntity> GetSearchQuery(IThumbnailRepository repository, IList<SortInfo> sortInfos)
+        {
+            var query = repository.ThumbnailOptions.OrderBySortInfos(sortInfos);
+            return query;
         }
     }
 }

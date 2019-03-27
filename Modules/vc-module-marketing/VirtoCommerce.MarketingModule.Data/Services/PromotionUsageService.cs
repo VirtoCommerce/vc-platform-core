@@ -46,14 +46,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
 
                 using (var repository = _repositoryFactory())
                 {
-                    var query = GetPromotionUsageQuery(repository, criteria);
-
-                    var sortInfos = criteria.SortInfos;
-                    if (sortInfos.IsNullOrEmpty())
-                    {
-                        sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<PromotionUsage>(x => x.ModifiedDate), SortDirection = SortDirection.Descending } };
-                    }
-                    query = query.OrderBySortInfos(sortInfos);
+                    var sortInfos = GetPromotionUsageSortInfo(criteria);
+                    var query = GetPromotionUsageQuery(repository, criteria, sortInfos);
 
                     var totalCount = await query.CountAsync();
                     var searchResult = new GenericSearchResult<PromotionUsage> { TotalCount = totalCount };
@@ -128,8 +122,20 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             PromotionUsageCacheRegion.ExpireRegion();
         }
 
+        #endregion
 
-        protected virtual IQueryable<PromotionUsageEntity> GetPromotionUsageQuery(IMarketingRepository repository, PromotionUsageSearchCriteria criteria)
+        protected virtual IList<SortInfo> GetPromotionUsageSortInfo(PromotionUsageSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<PromotionUsage>(x => x.ModifiedDate), SortDirection = SortDirection.Descending } };
+            }
+
+            return sortInfos;
+        }
+
+        protected virtual IQueryable<PromotionUsageEntity> GetPromotionUsageQuery(IMarketingRepository repository, PromotionUsageSearchCriteria criteria, IList<SortInfo> sortInfos)
         {
             var query = repository.PromotionUsages;
 
@@ -137,29 +143,34 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             {
                 query = query.Where(x => x.PromotionId == criteria.PromotionId);
             }
+
             if (!string.IsNullOrEmpty(criteria.CouponCode))
             {
                 query = query.Where(x => x.CouponCode == criteria.CouponCode);
             }
+
             if (!string.IsNullOrEmpty(criteria.ObjectId))
             {
                 query = query.Where(x => x.ObjectId == criteria.ObjectId);
             }
+
             if (!string.IsNullOrEmpty(criteria.ObjectType))
             {
                 query = query.Where(x => x.ObjectType == criteria.ObjectType);
             }
+
             if (!string.IsNullOrWhiteSpace(criteria.UserId))
             {
                 query = query.Where(x => x.UserId == criteria.UserId);
             }
+
             if (!string.IsNullOrWhiteSpace(criteria.UserName))
             {
                 query = query.Where(x => x.UserName == criteria.UserName);
             }
 
+            query = query.OrderBySortInfos(sortInfos);
             return query;
         }
-        #endregion
     }
 }

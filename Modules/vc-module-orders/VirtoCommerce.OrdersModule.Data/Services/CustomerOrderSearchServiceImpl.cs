@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -39,21 +40,8 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                     var retVal = new GenericSearchResult<CustomerOrder>();
                     var orderResponseGroup = EnumUtility.SafeParse(criteria.ResponseGroup, CustomerOrderResponseGroup.Full);
 
-                    var query = GetOrdersQuery(repository, criteria);
-
-                    var sortInfos = criteria.SortInfos;
-                    if (sortInfos.IsNullOrEmpty())
-                    {
-                        sortInfos = new[]
-                        {
-                            new SortInfo
-                            {
-                                SortColumn = ReflectionUtility.GetPropertyName<CustomerOrderEntity>(x => x.CreatedDate),
-                                SortDirection = SortDirection.Descending
-                            }
-                        };
-                    }
-                    query = query.OrderBySortInfos(sortInfos);
+                    var sortInfos = GetOrdersSortInfo(criteria);
+                    var query = GetOrdersQuery(repository, criteria, sortInfos);
 
                     retVal.TotalCount = await query.CountAsync();
                     var orderIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
@@ -68,7 +56,30 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             });
         }
 
-        protected virtual IQueryable<CustomerOrderEntity> GetOrdersQuery(IOrderRepository repository, CustomerOrderSearchCriteria criteria)
+        protected virtual Expression<Func<CustomerOrderEntity, bool>> GetKeywordPredicate(CustomerOrderSearchCriteria criteria)
+        {
+            return order => order.Number.Contains(criteria.Keyword) || order.CustomerName.Contains(criteria.Keyword);
+        }
+
+        protected virtual IList<SortInfo> GetOrdersSortInfo(CustomerOrderSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo
+                    {
+                        SortColumn = ReflectionUtility.GetPropertyName<CustomerOrderEntity>(x => x.CreatedDate),
+                        SortDirection = SortDirection.Descending
+                    }
+                };
+            }
+
+            return sortInfos;
+        }
+
+        protected virtual IQueryable<CustomerOrderEntity> GetOrdersQuery(IOrderRepository repository, CustomerOrderSearchCriteria criteria, IList<SortInfo> sortInfos)
         {
             var query = repository.CustomerOrders;
 
@@ -127,12 +138,9 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                 query = query.Where(GetKeywordPredicate(criteria));
             }
 
-            return query;
-        }
+            query = query.OrderBySortInfos(sortInfos);
 
-        protected virtual Expression<Func<CustomerOrderEntity, bool>> GetKeywordPredicate(CustomerOrderSearchCriteria criteria)
-        {
-            return order => order.Number.Contains(criteria.Keyword) || order.CustomerName.Contains(criteria.Keyword);
+            return query;
         }
     }
 }

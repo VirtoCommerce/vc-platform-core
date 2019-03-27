@@ -124,8 +124,8 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
 
         #endregion
 
-
         #region IPaymentPlanSearchService members
+
         public virtual async Task<GenericSearchResult<PaymentPlan>> SearchPlansAsync(PaymentPlanSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), nameof(SearchPlansAsync), criteria.GetCacheKey());
@@ -138,14 +138,8 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                 {
                     repository.DisableChangesTracking();
 
-                    var query = repository.PaymentPlans;
-
-                    var sortInfos = criteria.SortInfos;
-                    if (sortInfos.IsNullOrEmpty())
-                    {
-                        sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<PaymentPlan>(x => x.CreatedDate), SortDirection = SortDirection.Descending } };
-                    }
-                    query = query.OrderBySortInfos(sortInfos);
+                    var sortInfos = GetSearchPlansSortInfo(criteria);
+                    var query = GetSearchPlansSortQuery(repository, sortInfos);
 
                     retVal.TotalCount = await query.CountAsync();
 
@@ -163,6 +157,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                 }
             });
         }
+
         #endregion
 
         protected virtual void ClearCacheFor(PaymentPlan[] paymentPlans)
@@ -173,6 +168,25 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
             }
 
             PaymentPlanSearchCacheRegion.ExpireRegion();
+        }
+
+        protected virtual IList<SortInfo> GetSearchPlansSortInfo(PaymentPlanSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[] { new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<PaymentPlan>(x => x.CreatedDate), SortDirection = SortDirection.Descending } };
+            }
+
+            return sortInfos;
+        }
+
+        protected virtual IQueryable<PaymentPlanEntity> GetSearchPlansSortQuery(ISubscriptionRepository repository, IList<SortInfo> sortInfos)
+        {
+            var query = repository.PaymentPlans;
+
+            query = query.OrderBySortInfos(sortInfos);
+            return query;
         }
     }
 }

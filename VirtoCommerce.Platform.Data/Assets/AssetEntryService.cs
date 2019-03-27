@@ -27,27 +27,13 @@ namespace VirtoCommerce.Platform.Data.Assets
 
             using (var repository = _platformRepository())
             {
-                var query = GetSearchAssetEntriesQuery(criteria, repository);
+                var sortInfos = GetSearchAssetEntriesSortInfo(criteria);
+                var query = GetSearchAssetEntriesQuery(criteria, repository, sortInfos);
 
                 var result = new GenericSearchResult<AssetEntry>
                 {
                     TotalCount = await query.CountAsync()
                 };
-
-                var sortInfos = criteria.SortInfos;
-                if (sortInfos.IsNullOrEmpty())
-                {
-                    sortInfos = new[]
-                    {
-                        new SortInfo
-                        {
-                            SortColumn = "CreatedDate",
-                            SortDirection = SortDirection.Descending
-                        }
-                    };
-                }
-
-                query = query.OrderBySortInfos(sortInfos);
 
                 var ids = await query
                     .Skip(criteria.Skip)
@@ -124,7 +110,25 @@ namespace VirtoCommerce.Platform.Data.Assets
             }
         }
 
-        private IQueryable<AssetEntryEntity> GetSearchAssetEntriesQuery(AssetEntrySearchCriteria criteria, IPlatformRepository repository)
+        private IList<SortInfo> GetSearchAssetEntriesSortInfo(AssetEntrySearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo
+                    {
+                        SortColumn = "CreatedDate",
+                        SortDirection = SortDirection.Descending
+                    }
+                };
+            }
+
+            return sortInfos;
+        }
+
+        private IQueryable<AssetEntryEntity> GetSearchAssetEntriesQuery(AssetEntrySearchCriteria criteria, IPlatformRepository repository, IList<SortInfo> sortInfos)
         {
             var query = repository.AssetEntries;
 
@@ -154,6 +158,7 @@ namespace VirtoCommerce.Platform.Data.Assets
                 }
             }
 
+            query = query.OrderBySortInfos(sortInfos);
             return query;
         }
     }
