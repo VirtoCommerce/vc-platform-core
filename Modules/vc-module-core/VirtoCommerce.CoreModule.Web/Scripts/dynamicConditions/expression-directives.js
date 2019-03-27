@@ -34,7 +34,7 @@ angular.module('virtoCommerce.coreModule.common')
                     $scope.source = newVal;
                 });
 
-                $scope.templateUrl = 'Modules/$(VirtoCommerce.Core)/Scripts/common/dynamicExpression/expression-tree.tpl.html';
+                $scope.templateUrl = 'Modules/$(VirtoCommerce.Core)/Scripts/dynamicConditions/expression-tree.tpl.html';
                 $scope.$watch($attrs.templateUrl, function (value) {
                     if (value) {
                         $scope.templateUrl = value;
