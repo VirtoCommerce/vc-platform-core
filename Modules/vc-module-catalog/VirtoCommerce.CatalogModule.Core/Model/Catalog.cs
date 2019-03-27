@@ -5,7 +5,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class Catalog : Entity, IHasProperties, ICloneable
+    public class Catalog : AuditableEntity, IHasProperties, ICloneable
     {
         public string Name { get; set; }
         public bool IsVirtual { get; set; }
@@ -21,34 +21,22 @@ namespace VirtoCommerce.CatalogModule.Core.Model
                 return retVal;
             }
         }
-        public ICollection<CatalogLanguage> Languages { get; set; }
+        public IList<CatalogLanguage> Languages { get; set; }
 
         #region IHasProperties members
-        public ICollection<Property> Properties { get; set; }
+        public IList<Property> Properties { get; set; }
 
         #endregion
 
         #region ICloneable members
-        public object Clone()
+        public virtual object Clone()
         {
-            var retVal = base.MemberwiseClone() as Catalog;
-            return retVal;
+            var result = MemberwiseClone() as Catalog;
+            result.Languages = Languages?.Select(x => x.Clone()).OfType<CatalogLanguage>().ToList();
+            result.Properties = Properties?.Select(x => x.Clone()).OfType<Property>().ToList();
+            return result;
         }
 
-        public virtual Catalog MemberwiseCloneCatalog()
-        {
-            var retVal = AbstractTypeFactory<Catalog>.TryCreateInstance();
-
-            retVal.Id = Id;
-            retVal.IsVirtual = IsVirtual;
-            retVal.Name = Name;
-
-            // TODO: clone reference objects
-            retVal.Languages = Languages;
-            retVal.Properties = Properties;
-
-            return retVal;
-        }
         #endregion
     }
 }

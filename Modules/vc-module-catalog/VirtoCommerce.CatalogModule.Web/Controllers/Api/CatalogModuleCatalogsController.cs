@@ -7,6 +7,7 @@ using VirtoCommerce.CatalogModule.Core;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
 {
@@ -14,12 +15,10 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
     public class CatalogModuleCatalogsController : Controller
     {
         private readonly ICatalogService _catalogService;
-        private readonly ICatalogSearchService _searchService;
 
-        public CatalogModuleCatalogsController(ICatalogService catalogService, ICatalogSearchService itemSearchService)
+        public CatalogModuleCatalogsController(ICatalogService catalogService)
         {
             _catalogService = catalogService;
-            _searchService = itemSearchService;
         }
 
         /// <summary>
@@ -30,20 +29,15 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("")]
         public async Task<ActionResult<Catalog[]>> GetCatalogs(string sort = null, int skip = 0, int take = 20)
         {
-            var criteria = new CatalogListEntrySearchCriteria()
-            {
-                ResponseGroup = SearchResponseGroup.WithCatalogs,
-                Sort = sort,
-                Skip = skip,
-                Take = take,
-            };
 
             //TODO
             //ApplyRestrictionsForCurrentUser(criteria);
 
-            var serviceResult = await _searchService.SearchAsync(criteria);
+            var stores = await _catalogService.GetCatalogsListAsync();
+            var sortInfos = !string.IsNullOrEmpty(sort) ? SortInfo.Parse(sort) : new[] { new SortInfo { SortColumn = "Name" } };
+            var result = stores.Skip(skip).Take(take).AsQueryable().OrderBySortInfos(sortInfos);
 
-            return Ok(serviceResult.Catalogs);
+            return Ok(result);
         }
 
         /// <summary>

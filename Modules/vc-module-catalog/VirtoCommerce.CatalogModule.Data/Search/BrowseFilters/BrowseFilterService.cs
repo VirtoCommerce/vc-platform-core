@@ -34,7 +34,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search.BrowseFilters
             TypeNameHandling = TypeNameHandling.None,
         };
 
-        public async Task<IList<IBrowseFilter>> GetBrowseFiltersAsync(ProductSearchCriteria criteria)
+        public async Task<IList<IBrowseFilter>> GetBrowseFiltersAsync(ProductIndexedSearchCriteria criteria)
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
@@ -74,7 +74,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search.BrowseFilters
         }
 
 
-        protected virtual Task<IList<IBrowseFilter>> GetAllAggregations(ProductSearchCriteria criteria)
+        protected virtual Task<IList<IBrowseFilter>> GetAllAggregations(ProductIndexedSearchCriteria criteria)
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));

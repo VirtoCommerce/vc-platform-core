@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -29,5 +31,13 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         public Entity AssociatedObject { get; set; }
 
         public string[] Tags { get; set; }
+
+        protected override IEnumerable<object> GetEqualityComponents()
+        {
+            yield return AssociatedObjectId;
+            yield return AssociatedObjectType;
+            yield return Type;
+        }
+
     }
 }

@@ -30,20 +30,9 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         #endregion
 
         #region ICloneable members
-        public object Clone()
+        public virtual object Clone()
         {
-            var retVal = new EditorialReview();
-            retVal.Id = Id;
-            retVal.CreatedBy = CreatedBy;
-            retVal.CreatedDate = CreatedDate;
-            retVal.ModifiedBy = ModifiedBy;
-            retVal.ModifiedDate = ModifiedDate;
-
-            retVal.Content = Content;
-            retVal.ReviewType = ReviewType;
-            retVal.LanguageCode = LanguageCode;
-            retVal.IsInherited = IsInherited;
-            return retVal;
+            return MemberwiseClone();
         }
         #endregion
     }

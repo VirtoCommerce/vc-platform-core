@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -101,16 +102,41 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
             category.Links = OutgoingLinks.Select(x => x.ToModel(new CategoryLink())).ToList();
             category.Images = Images.OrderBy(x => x.SortOrder).Select(x => x.ToModel(AbstractTypeFactory<Image>.TryCreateInstance())).ToList();
-            category.Properties = Properties.Select(x => x.ToModel(AbstractTypeFactory<Property>.TryCreateInstance())).ToList();
 
-            //category property values
-            if (!category.Properties.IsNullOrEmpty())
+            //Load self properties
+            var selfProperties = Properties.Select(x => x.ToModel(AbstractTypeFactory<Property>.TryCreateInstance())).ToList();
+
+            //load self category property values and transform then to transient properties
+            if (!CategoryPropertyValues.IsNullOrEmpty())
             {
-                foreach (var property in category.Properties)
+                var propertyValues = CategoryPropertyValues.OrderBy(x => x.DictionaryItem?.SortOrder)
+                                                       .ThenBy(x => x.Name)
+                                                       .SelectMany(pv => pv.ToModel(AbstractTypeFactory<PropertyValue>.TryCreateInstance()).ToList());
+
+                category.Properties = propertyValues.GroupBy(pv => pv.PropertyName).Select(values =>
                 {
-                    property.Values = CategoryPropertyValues.Where(pr => pr.Name.EqualsInvariant(property.Name)).OrderBy(x => x.DictionaryItem?.SortOrder)
-                        .ThenBy(x => x.Name)
-                        .SelectMany(x => x.ToModel(AbstractTypeFactory<PropertyValue>.TryCreateInstance())).ToList();
+                    var property = AbstractTypeFactory<Property>.TryCreateInstance();
+                    property.Name = values.Key;
+                    property.ValueType = values.FirstOrDefault().ValueType;
+                    property.Values = values.ToList();
+                    return property;
+                }).ToList();
+            }
+            //Then try to inherit self transient properties without meta-informations from self properties   
+            foreach (var selfProperty in selfProperties)
+            {
+                if (category.Properties == null)
+                {
+                    category.Properties = new List<Property>();
+                }
+                var existTransientProperty = category.Properties.FirstOrDefault(x => x.IsSame(selfProperty, PropertyType.Product, PropertyType.Variation));
+                if (existTransientProperty != null)
+                {
+                    existTransientProperty.TryInheritFrom(selfProperty);
+                }
+                else
+                {
+                    category.Properties.Add(selfProperty);
                 }
             }
 
@@ -145,12 +171,24 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
             if (!category.Properties.IsNullOrEmpty())
             {
-                var propertyValues = new ObservableCollection<PropertyValueEntity>(
-                    AbstractTypeFactory<PropertyValueEntity>
-                        .TryCreateInstance()
-                        .FromModels(category.Properties.SelectMany(pr => pr.Values), pkMap));
-
-                CategoryPropertyValues = new ObservableCollection<PropertyValueEntity>(propertyValues);
+                var propValues = new List<PropertyValue>();
+                foreach (var property in category.Properties)
+                {
+                    if (property.Values != null)
+                    {
+                        foreach (var propValue in property.Values)
+                        {
+                            //Need populate required fields
+                            propValue.PropertyName = property.Name;
+                            propValue.ValueType = property.ValueType;
+                            propValues.Add(propValue);
+                        }
+                    }
+                }
+                if (!propValues.IsNullOrEmpty())
+                {
+                    CategoryPropertyValues = new ObservableCollection<PropertyValueEntity>(AbstractTypeFactory<PropertyValueEntity>.TryCreateInstance().FromModels(propValues, pkMap));
+                }
             }
 
 
