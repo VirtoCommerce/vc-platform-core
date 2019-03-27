@@ -108,11 +108,6 @@ angular.module('platformWebApp', AppDependencies).controller('platformWebApp.app
         };
 
     }])
-    // Specify SignalR server URL (application URL)
-    .factory('platformWebApp.signalRServerName', ['$location', function ($location) {
-        var retVal = $location.url() ? $location.absUrl().slice(0, -$location.url().length - 1) : $location.absUrl();
-        return retVal;
-    }])
     .factory('platformWebApp.httpErrorInterceptor', ['$q', '$rootScope', '$injector', 'platformWebApp.authDataStorage', function ($q, $rootScope, $injector, authDataStorage) {
         var httpErrorInterceptor = {};
 

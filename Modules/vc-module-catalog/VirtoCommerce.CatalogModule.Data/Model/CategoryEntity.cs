@@ -103,6 +103,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             category.Links = OutgoingLinks.Select(x => x.ToModel(new CategoryLink())).ToList();
             category.Images = Images.OrderBy(x => x.SortOrder).Select(x => x.ToModel(AbstractTypeFactory<Image>.TryCreateInstance())).ToList();
 
+            category.Properties = new List<Property>();
+
             //Load self properties
             var selfProperties = Properties.Select(x => x.ToModel(AbstractTypeFactory<Property>.TryCreateInstance())).ToList();
 
@@ -125,10 +127,6 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             //Then try to inherit self transient properties without meta-informations from self properties   
             foreach (var selfProperty in selfProperties)
             {
-                if (category.Properties == null)
-                {
-                    category.Properties = new List<Property>();
-                }
                 var existTransientProperty = category.Properties.FirstOrDefault(x => x.IsSame(selfProperty, PropertyType.Product, PropertyType.Variation));
                 if (existTransientProperty != null)
                 {

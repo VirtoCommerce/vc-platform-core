@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.Platform.Core.Settings;
@@ -90,12 +91,30 @@ namespace VirtoCommerce.CatalogModule.Core
                     DefaultValue = false
                 };
 
+                public static SettingDescriptor IndexationDateProduct = new SettingDescriptor
+                {
+                    Name = "VirtoCommerce.Search.IndexingJobs.IndexationDate.Product",
+                    GroupName = "Catalog|Search",
+                    ValueType = SettingValueType.DateTime,
+                    DefaultValue = default(DateTime)
+                };
+
+                public static SettingDescriptor IndexationDateCategory = new SettingDescriptor
+                {
+                    Name = "VirtoCommerce.Search.IndexingJobs.IndexationDate.Category",
+                    GroupName = "Catalog|Search",
+                    ValueType = SettingValueType.DateTime,
+                    DefaultValue = default(DateTime)
+                };
+
                 public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {
                         yield return UseCatalogIndexedSearchInManager;
                         yield return UseFullObjectIndexStoring;
+                        yield return IndexationDateProduct;
+                        yield return IndexationDateCategory;
                     }
                 }
             }

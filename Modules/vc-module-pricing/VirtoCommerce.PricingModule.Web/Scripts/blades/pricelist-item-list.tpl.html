@@ -1,0 +1,51 @@
+﻿<div class="blade-static">
+    <div class="form-group">
+        <div class="form-input __search">
+            <input placeholder="{{ 'platform.placeholders.search-keyword' | translate }}" ng-model="filter.keyword" ng-keyup="$event.which === 13 && filter.criteriaChanged()">
+            <button class="btn __other" style="position: relative;right: 45px;">
+                <em class="btn-ico fa fa-remove" title="Clear" ng-click="filter.keyword=null;filter.criteriaChanged()"></em>
+            </button>
+        </div>
+        <p class="form-count">{{ 'platform.list.count' | translate }}: <span class="count">{{pageSettings.totalItems | number:0}}</span></p>
+    </div>
+</div>
+<div class="blade-static __bottom" ng-if="pageSettings.itemsPerPageCount < pageSettings.totalItems" ng-include="'pagerTemplate.html'"></div>
+<div class="blade-content __large-wide">
+    <div class="blade-inner">
+        <div class="inner-block" ng-init="setGridOptions({
+                    data: 'blade.currentEntities',
+                    useExternalSorting: true,
+                    rowHeight: 60,
+                    rowTemplate: 'list.row.html',
+                    columnDefs: [
+                        {
+                            name: 'product.imgSrc', displayName: 'pricing.blades.pricelist-item-list.labels.picture',
+                            enableColumnResizing: false, enableSorting: false, width: 60, cellTemplate: 'icon.cell.html'
+                        },
+                        { name: 'product.name', displayName: 'pricing.blades.pricelist-item-list.labels.item-name', cellTooltip:true, sort: { direction: uiGridConstants.ASC }, width: '**'},
+                        { name: 'product.code', displayName: 'pricing.blades.pricelist-item-list.labels.item-code'},
+                        { name: 'pricesLength', displayName: '#', headerTooltip: 'pricing.blades.pricelist-item-list.labels.prices-count', field: 'prices.length', width: 30},
+                        { name: 'prices', displayName: 'pricing.blades.pricelist-item-list.labels.price-range', headerTooltip: true, width: 90, cellTemplate: 'pricelistItems-list-priceRange.cell.html'}
+                    ]})">
+            <div class="table-wrapper" ng-if="blade.currentEntities.length">
+                <div ui-grid="gridOptions" ui-grid-auto-resize ui-grid-save-state ui-grid-selection ui-grid-resize-columns ui-grid-move-columns ui-grid-height></div>
+            </div>
+            <div class="note" ng-if="!blade.currentEntities.length">{{ 'platform.list.no-data' | translate }}</div>
+        </div>
+    </div>
+</div>
+
+<script type="text/ng-template" id="list.row.html">
+    <div ng-click='grid.appScope.selectNode(row.entity)' ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" ui-grid-one-bind-id-grid="rowRenderIndex + '-' + col.uid + '-cell'" class="ui-grid-cell" ng-class="{'ui-grid-row-header-cell': col.isRowHeader, '__selected': row.entity.productId===grid.appScope.selectedNodeId }" role="{{col.isRowHeader ? 'rowheader' : 'gridcell' }}" ui-grid-cell></div>
+</script>
+<script type="text/ng-template" id="icon.cell.html">
+    <div class="ui-grid-cell-contents">
+        <div class="product-img">
+            <div class="image" style="background-image: url('{{COL_FIELD}}')" ng-if="COL_FIELD"></div>
+            <em class="table-ico fa fa-image" ng-if="!COL_FIELD"></em>
+        </div>
+    </div>
+</script>
+<script type="text/ng-template" id="pricelistItems-list-priceRange.cell.html">
+    <div class="ui-grid-cell-contents">{{grid.appScope.getPriceRange(row.entity)}}</div>
+</script>

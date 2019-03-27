@@ -10,7 +10,17 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         /// <summary>
         /// Entry identifier which this link belongs to
         /// </summary>
-        public string EntryId { get; set; }
+        public string EntryId => ListEntryId;
+        public string ListEntryId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the type of the list entry. E.g. "product", "category"
+        /// </summary>
+        /// <value>
+        /// The type of the list entry.
+        /// </value>
+        public string ListEntryType { get; set; }
+
         /// <summary>
         /// Product order position in virtual catalog
         /// </summary>
