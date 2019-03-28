@@ -138,9 +138,7 @@ namespace VirtoCommerce.LuceneSearchModule.Data
 
                 if (!string.IsNullOrEmpty(fieldName))
                 {
-                    //TODO
-                    //var values = termAggregationRequest.Values ?? searcher.IndexReader.GetAllFieldValues(fieldName);
-                    var values = termAggregationRequest.Values;
+                    var values = termAggregationRequest.Values ?? searcher.IndexReader.GetAllFieldValues(fieldName);
                     valueFilters = values.Distinct().ToDictionary(v => v, v => LuceneSearchFilterBuilder.CreateTermsFilter(fieldName, v));
                 }
                 else

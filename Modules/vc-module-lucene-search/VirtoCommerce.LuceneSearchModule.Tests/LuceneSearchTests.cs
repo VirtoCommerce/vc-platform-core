@@ -16,7 +16,7 @@ namespace VirtoCommerce.LuceneSearchModule.Tests
         protected override ISearchProvider GetSearchProvider()
         {
             var luceneOptions = Options.Create(new LuceneSearchOptions { Path = _dataDirectoryPath });
-            var searchOptions = Options.Create(new SearchOptions { Scope = "test", Provider = "Lucene" });
+            var searchOptions = Options.Create(new SearchOptions { Scope = "test-core", Provider = "Lucene" });
             return new LuceneSearchProvider(luceneOptions, searchOptions);
         }
     }
