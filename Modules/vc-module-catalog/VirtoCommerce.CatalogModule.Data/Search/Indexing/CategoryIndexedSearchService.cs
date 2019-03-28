@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using VirtoCommerce.CatalogModule.Core.Model;
@@ -40,7 +41,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
 
         protected override Task<Aggregation[]> ConvertAggregationsAsync(IList<AggregationResponse> aggregationResponses, CategoryIndexedSearchCriteria criteria)
         {
-            return null;
+            return Task.FromResult(Array.Empty<Aggregation>());
         }
 
 

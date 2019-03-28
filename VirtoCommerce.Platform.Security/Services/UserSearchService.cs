@@ -16,7 +16,7 @@ namespace VirtoCommerce.Platform.Security.Services
         {
             _userManager = userManager;
         }
-        public async Task<GenericSearchResult<ApplicationUser>> SearchUsersAsync(UserSearchCriteria criteria)
+        public async Task<UserSearchResult> SearchUsersAsync(UserSearchCriteria criteria)
         {
             if (criteria == null)
             {
@@ -27,7 +27,7 @@ namespace VirtoCommerce.Platform.Security.Services
                 throw new NotSupportedException();
             }
 
-            var result = new GenericSearchResult<ApplicationUser>();
+            var result = AbstractTypeFactory<UserSearchResult>.TryCreateInstance();
             var query = _userManager.Users;
             if (criteria.Keyword != null)
             {

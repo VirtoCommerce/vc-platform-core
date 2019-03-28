@@ -23,7 +23,6 @@ namespace VirtoCommerce.CartModule.Data.Services
 
         private Store _store;
 
-        [CLSCompliant(false)]
         public ShoppingCartBuilderImpl(IStoreService storeService, IShoppingCartService shoppingShoppingCartService, IShoppingCartSearchService shoppingCartSearchService
             //, IMemberService memberService
             )

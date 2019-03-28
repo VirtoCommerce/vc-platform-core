@@ -20,7 +20,6 @@ namespace VirtoCommerce.MarketingModule.Test
         private readonly Mock<IMarketingRepository> _repositoryMock;
         private Func<IMarketingRepository> _repositoryFactory;
         private readonly Mock<IDynamicContentService> _dynamicContentServiceMock;
-        private readonly IExpressionSerializer _expressionSerializerMock;
         private readonly Mock<ILogger<DefaultDynamicContentEvaluatorImpl>> _loggerMock;
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
 

@@ -20,7 +20,6 @@ namespace VirtoCommerce.Platform.Assets.AzureBlobStorage
 
         private readonly CloudBlobClient _cloudBlobClient;
         private readonly CloudStorageAccount _cloudStorageAccount;
-        private readonly CloudBlobContainer _container;
         private readonly string _cdnUrl;
 
         public AzureBlobProvider(IOptions<AzureBlobOptions> options)
