@@ -12,22 +12,27 @@ using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Swashbuckle.AspNetCore.SwaggerUI;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 
 namespace VirtoCommerce.Platform.Web.Swagger
 {
     public static class SwaggerExtensions
     {
+        private static string platformDocName = "v1";
         /// <summary>
         /// 
         /// </summary>
         /// <param name="services"></param>
         public static void AddSwagger(this IServiceCollection services)
         {
-            var httpContextAccessor = services.BuildServiceProvider().GetService<IHttpContextAccessor>();
+            var provider = services.BuildServiceProvider();
+            var httpContextAccessor = provider.GetService<IHttpContextAccessor>();
+			var modules = provider.GetService<IModuleCatalog>().Modules.OfType<ManifestModuleInfo>().Where(m => m.ModuleInstance != null).ToArray();
+			
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info
+                c.SwaggerDoc(platformDocName, new Info
                 {
                     Title = "VirtoCommerce Solution REST API documentation",
                     Version = "v1",
@@ -46,13 +51,20 @@ namespace VirtoCommerce.Platform.Web.Swagger
                     }
                 });
 
+                foreach (var module in modules)
+                {
+                    c.SwaggerDoc(module.ModuleName, new Info { Title = $"{module.Id}", Version = "v1" });
+                    c.OperationFilter<ModuleTagsFilter>(module.Id);
+                }
+
                 c.TagActionsBy(api => api.GroupByModuleName(services));
-                c.DocInclusionPredicate((docName, api) => true);
                 c.DescribeAllEnumsAsStrings();
                 c.IgnoreObsoleteProperties();
                 c.IgnoreObsoleteActions();
                 c.OperationFilter<FileResponseTypeFilter>();
                 c.OperationFilter<OptionalParametersFilter>();
+                c.OperationFilter<FileUploadOperationFilter>();
+                c.OperationFilter<AssignOAuth2SecurityOperationFilter>();
                 c.OperationFilter<TagsFilter>();
                 c.DocumentFilter<TagsFilter>();
                 c.MapType<object>(() => new Schema
@@ -60,15 +72,26 @@ namespace VirtoCommerce.Platform.Web.Swagger
                     Type = "object"
                 });
                 c.AddModulesXmlComments(services);
-                c.CustomSchemaIds(x => x.FullName);
-                c.AddSecurityDefinition("oauth2", new OAuth2Scheme
+                c.CustomSchemaIds(x => x.FriendlyId());
+                c.AddSecurityDefinition("OAuth2", new OAuth2Scheme
                 {
                     Type = "oauth2",
                     Flow = "password",
                     AuthorizationUrl = "connect/token",
-                    TokenUrl = $"{httpContextAccessor.HttpContext.Request?.Scheme}://{httpContextAccessor.HttpContext.Request?.Host}/connect/token"
+                    TokenUrl = $"{httpContextAccessor.HttpContext.Request?.Scheme}://{httpContextAccessor.HttpContext.Request?.Host}/connect/token",
+                    Scopes = new Dictionary<string, string>()
                 });
                 c.OperationFilter<SecurityRequirementsOperationFilter>();
+                c.DocInclusionPredicate((docName, apiDesc) =>
+                {
+                    if (docName.EqualsInvariant(platformDocName)) return true;
+
+                    var currentAssembly = ((ControllerActionDescriptor)apiDesc.ActionDescriptor).ControllerTypeInfo.Assembly;
+                    var module = modules.FirstOrDefault(m => m.ModuleName.EqualsInvariant(docName));
+                    return module != null && module.Assembly == currentAssembly;
+                });
+                c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+
             });
         }
 
