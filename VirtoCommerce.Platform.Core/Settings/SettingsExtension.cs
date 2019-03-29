@@ -21,10 +21,6 @@ namespace VirtoCommerce.Platform.Core.Settings
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            if (string.IsNullOrEmpty(entity.Id))
-            {
-                throw new ArgumentException("entity must have Id");
-            }
 
             //Deep load settings values for all object contains settings
             var hasSettingsObjects = entity.GetFlatObjectsListWithInterface<IHasSettings>();
@@ -35,38 +31,38 @@ namespace VirtoCommerce.Platform.Core.Settings
                 {
                     throw new SettingsTypeNotRegisteredException(hasSettingsObject.TypeName);
                 }
-                hasSettingsObject.Settings = (await manager.GetObjectSettingsAsync(typeSettings.Select(x => x.Name),
-                    hasSettingsObject.TypeName, hasSettingsObject.Id)).ToList();
+                hasSettingsObject.Settings = (await manager.GetObjectSettingsAsync(typeSettings.Select(x => x.Name), hasSettingsObject.TypeName, hasSettingsObject.Id)).ToList();
             }
         }
 
+        public static async Task DeepSaveSettingsAsync(this ISettingsManager manager, IHasSettings entry)
+        {
+            await manager.DeepSaveSettingsAsync(new[] { entry });
+        }
         /// <summary>
         /// Deep save entity and all nested objects settings values
         /// </summary>
-        /// <param name="entity"></param>
-        public static async Task DeepSaveSettingsAsync(this ISettingsManager manager, IHasSettings entity)
+        public static async Task DeepSaveSettingsAsync(this ISettingsManager manager, IEnumerable<IHasSettings> entries)
         {
-            if (entity == null)
+            if (entries == null)
             {
-                throw new ArgumentNullException(nameof(entity));
-            }
-
-            if (string.IsNullOrEmpty(entity.Id))
-            {
-                throw new ArgumentException("entity must have Id");
+                throw new ArgumentNullException(nameof(entries));
             }
 
             var forSaveSettings = new List<ObjectSettingEntry>();
-            var haveSettingsObjects = entity.GetFlatObjectsListWithInterface<IHasSettings>();
-
-            foreach (var haveSettingsObject in haveSettingsObjects.Where(x => x.Settings != null))
+            foreach (var entry in entries)
             {
-                //Save settings
-                foreach (var setting in haveSettingsObject.Settings)
+                var haveSettingsObjects = entry.GetFlatObjectsListWithInterface<IHasSettings>();
+
+                foreach (var haveSettingsObject in haveSettingsObjects.Where(x => x.Settings != null))
                 {
-                    setting.ObjectId = haveSettingsObject.Id;
-                    setting.ObjectType = haveSettingsObject.TypeName;
-                    forSaveSettings.Add(setting);
+                    //Save settings
+                    foreach (var setting in haveSettingsObject.Settings)
+                    {
+                        setting.ObjectId = haveSettingsObject.Id;
+                        setting.ObjectType = haveSettingsObject.TypeName;
+                        forSaveSettings.Add(setting);
+                    }
                 }
             }
             if (forSaveSettings.Any())
@@ -74,23 +70,30 @@ namespace VirtoCommerce.Platform.Core.Settings
                 await manager.SaveObjectSettingsAsync(forSaveSettings);
             }
         }
+
         /// <summary>
         /// Deep remove entity and all nested objects settings values
         /// </summary>
-        /// <param name="entity"></param>
-        public static async Task DeepRemoveSettingsAsync(this ISettingsManager manager, IHasSettings entity)
+        public static async Task DeepRemoveSettingsAsync(this ISettingsManager manager, IHasSettings entry)
         {
-            if (entity == null)
+            await manager.DeepRemoveSettingsAsync(new[] { entry });
+        }
+        /// <summary>
+        /// Deep remove entity and all nested objects settings values
+        /// </summary>
+        public static async Task DeepRemoveSettingsAsync(this ISettingsManager manager, IEnumerable<IHasSettings> entries)
+        {
+            if (entries == null)
             {
-                throw new ArgumentNullException(nameof(entity));
+                throw new ArgumentNullException(nameof(entries));
             }
-
-            if (string.IsNullOrEmpty(entity.Id))
+            var foDeleteSettings = new List<ObjectSettingEntry>();
+            foreach (var entry in entries)
             {
-                throw new ArgumentException("entity must have Id");
+                var haveSettingsObjects = entry.GetFlatObjectsListWithInterface<IHasSettings>();
+                foDeleteSettings.AddRange(haveSettingsObjects.SelectMany(x => x.Settings).Distinct());
             }
-            var haveSettingsObjects = entity.GetFlatObjectsListWithInterface<IHasSettings>();
-            await manager.RemoveObjectSettingsAsync(haveSettingsObjects.SelectMany(x => x.Settings).Distinct());
+            await manager.RemoveObjectSettingsAsync(foDeleteSettings);
         }
 
         public static T GetValue<T>(this ISettingsManager manager, string name, T defaultValue)

@@ -227,38 +227,6 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                     b.ToTable("StoreShippingMethod");
                 });
 
-            modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreTaxProviderEntity", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(128);
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(128);
-
-                    b.Property<string>("Description");
-
-                    b.Property<bool>("IsActive");
-
-                    b.Property<string>("LogoUrl")
-                        .HasMaxLength(2048);
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(128);
-
-                    b.Property<int>("Priority");
-
-                    b.Property<string>("StoreId")
-                        .IsRequired();
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StoreId");
-
-                    b.ToTable("StoreTaxProvider");
-                });
-
             modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreTrustedGroupEntity", b =>
                 {
                     b.Property<string>("Id")
@@ -315,14 +283,6 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                 {
                     b.HasOne("VirtoCommerce.StoreModule.Data.Model.StoreEntity", "Store")
                         .WithMany("ShippingMethods")
-                        .HasForeignKey("StoreId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreTaxProviderEntity", b =>
-                {
-                    b.HasOne("VirtoCommerce.StoreModule.Data.Model.StoreEntity", "Store")
-                        .WithMany("TaxProviders")
                         .HasForeignKey("StoreId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });

@@ -55,7 +55,6 @@ namespace VirtoCommerce.CoreModule.Web
             serviceCollection.AddSingleton<ISeoDuplicatesDetector, NullSeoDuplicateDetector>();
             serviceCollection.AddSingleton<IShippingMethodsRegistrar>(new ShippingMethodRegistrar());
             serviceCollection.AddSingleton<IPaymentMethodsRegistrar>(new PaymentMethodsRegistrar());
-            serviceCollection.AddSingleton<ITaxProviderRegistrar>(new TaxProviderRegistrar());
             serviceCollection.AddSingleton<CoreExportImport>();
             serviceCollection.AddSingleton<IUniqueNumberGenerator, SequenceUniqueNumberGeneratorService>();
         }

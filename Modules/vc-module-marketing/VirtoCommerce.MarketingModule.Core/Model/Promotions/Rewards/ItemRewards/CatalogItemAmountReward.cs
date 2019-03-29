@@ -23,9 +23,6 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
         /// </summary>
         public string ConditionalProductId { get; set; }
 
-        public override PromotionReward Clone()
-        {
-            return new CatalogItemAmountReward(this);
-        }
+
     }
 }

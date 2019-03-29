@@ -16,9 +16,6 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
         }
         public string PaymentMethod { get; set; }
 
-        public override PromotionReward Clone()
-        {
-            return new PaymentReward(this);
-        }
+
     }
 }
