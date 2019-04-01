@@ -17,7 +17,7 @@ using VirtoCommerce.Platform.Core.Modularity;
 
 namespace VirtoCommerce.Platform.Web.Swagger
 {
-    public static class SwaggerExtensions
+    public static class SwaggerServiceCollectionExtensions
     {
         private static string platformDocName = "v1";
         /// <summary>
@@ -28,8 +28,8 @@ namespace VirtoCommerce.Platform.Web.Swagger
         {
             var provider = services.BuildServiceProvider();
             var httpContextAccessor = provider.GetService<IHttpContextAccessor>();
-			var modules = provider.GetService<IModuleCatalog>().Modules.OfType<ManifestModuleInfo>().Where(m => m.ModuleInstance != null).ToArray();
-			
+            var modules = provider.GetService<IModuleCatalog>().Modules.OfType<ManifestModuleInfo>().Where(m => m.ModuleInstance != null).ToArray();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc(platformDocName, new Info
@@ -64,24 +64,20 @@ namespace VirtoCommerce.Platform.Web.Swagger
                 c.OperationFilter<FileResponseTypeFilter>();
                 c.OperationFilter<OptionalParametersFilter>();
                 c.OperationFilter<FileUploadOperationFilter>();
-                c.OperationFilter<AssignOAuth2SecurityOperationFilter>();
+                c.OperationFilter<SecurityRequirementsOperationFilter>();
                 c.OperationFilter<TagsFilter>();
                 c.DocumentFilter<TagsFilter>();
-                c.MapType<object>(() => new Schema
-                {
-                    Type = "object"
-                });
+                c.MapType<object>(() => new Schema { Type = "object" });
                 c.AddModulesXmlComments(services);
                 c.CustomSchemaIds(x => x.FriendlyId());
                 c.AddSecurityDefinition("OAuth2", new OAuth2Scheme
                 {
                     Type = "oauth2",
+                    Description = "OAuth2 Resource Owner Password Grant flow",
                     Flow = "password",
-                    AuthorizationUrl = "connect/token",
-                    TokenUrl = $"{httpContextAccessor.HttpContext.Request?.Scheme}://{httpContextAccessor.HttpContext.Request?.Host}/connect/token",
-                    Scopes = new Dictionary<string, string>()
+                    TokenUrl = $"{httpContextAccessor.HttpContext.Request?.Scheme}://{httpContextAccessor.HttpContext.Request?.Host}/connect/token"
                 });
-                c.OperationFilter<SecurityRequirementsOperationFilter>();
+
                 c.DocInclusionPredicate((docName, apiDesc) =>
                 {
                     if (docName.EqualsInvariant(platformDocName)) return true;
@@ -103,13 +99,13 @@ namespace VirtoCommerce.Platform.Web.Swagger
         {
             applicationBuilder.UseSwagger(c =>
             {
-                c.RouteTemplate = "docs/{documentName}/docs.json";
+                c.RouteTemplate = "docs/{documentName}/swagger.json";
             });
 
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
             applicationBuilder.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/docs/v1/docs.json", "Explore");
+                c.SwaggerEndpoint("v1/swagger.json", "v1");
                 c.RoutePrefix = "docs";
                 c.EnableValidator();
                 c.IndexStream = () =>
