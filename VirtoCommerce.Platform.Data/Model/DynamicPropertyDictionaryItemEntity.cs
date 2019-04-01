@@ -27,7 +27,9 @@ namespace VirtoCommerce.Platform.Data.Model
         public virtual DynamicPropertyDictionaryItem ToModel(DynamicPropertyDictionaryItem dictItem)
         {
             if (dictItem == null)
+            {
                 throw new ArgumentNullException(nameof(dictItem));
+            }
 
             dictItem.Id = Id;
             dictItem.PropertyId = PropertyId;
@@ -39,8 +41,10 @@ namespace VirtoCommerce.Platform.Data.Model
         public virtual DynamicPropertyDictionaryItemEntity FromModel(DynamicPropertyDictionaryItem dictItem)
         {
             if (dictItem == null)
+            {
                 throw new ArgumentNullException(nameof(dictItem));
-
+            }
+            Id = dictItem.Id;
             PropertyId = dictItem.PropertyId;
             Name = dictItem.Name;
             if (dictItem.DisplayNames != null)

@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
@@ -9,6 +10,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
     {
         public string PropertyId { get; set; }
         public string PropertyName { get; set; }
+        [JsonIgnore]
         public Property Property { get; set; }
         public string Alias { get; set; }
         public string ValueId { get; set; }

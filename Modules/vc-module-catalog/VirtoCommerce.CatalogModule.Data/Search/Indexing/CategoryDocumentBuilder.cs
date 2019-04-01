@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Services;
-using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
@@ -14,13 +13,11 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
     public class CategoryDocumentBuilder : CatalogDocumentBuilder, IIndexDocumentBuilder
     {
         private readonly ICategoryService _categoryService;
-        private readonly IBlobUrlResolver _blobUrlResolver;
 
-        public CategoryDocumentBuilder(ISettingsManager settingsManager, ICategoryService categoryService, IBlobUrlResolver blobUrlResolver)
+        public CategoryDocumentBuilder(ISettingsManager settingsManager, ICategoryService categoryService)
             : base(settingsManager)
         {
             _categoryService = categoryService;
-            _blobUrlResolver = blobUrlResolver;
         }
 
         public virtual async Task<IList<IndexDocument>> GetDocumentsAsync(IList<string> documentIds)
@@ -38,7 +35,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
 
         protected virtual Task<Category[]> GetCategories(IList<string> categoryIds)
         {
-            return _categoryService.GetByIdsAsync(categoryIds.ToArray(), CategoryResponseGroup.WithProperties | CategoryResponseGroup.WithOutlines | CategoryResponseGroup.WithImages | CategoryResponseGroup.WithSeo | CategoryResponseGroup.WithLinks);
+            return _categoryService.GetByIdsAsync(categoryIds.ToArray(), (CategoryResponseGroup.WithProperties | CategoryResponseGroup.WithOutlines | CategoryResponseGroup.WithImages | CategoryResponseGroup.WithSeo | CategoryResponseGroup.WithLinks).ToString());
         }
 
         protected virtual IndexDocument CreateDocument(Category category)

@@ -1,8 +1,8 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
+using VirtoCommerce.Platform.Core.Exceptions;
 
 namespace VirtoCommerce.Platform.Data.Infrastructure
 {
@@ -24,7 +24,7 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
         {
             DbContext = context;
         }
-              
+
         public int Commit()
         {
             var result = DbContext.SaveChanges();
@@ -33,8 +33,15 @@ namespace VirtoCommerce.Platform.Data.Infrastructure
 
         public async Task<int> CommitAsync()
         {
-            var result = await DbContext.SaveChangesAsync();
-            return result;
+            try
+            {
+                var result = await DbContext.SaveChangesAsync();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new PlatformException(ex.ExpandExceptionMessage());
+            }
         }
     }
 }

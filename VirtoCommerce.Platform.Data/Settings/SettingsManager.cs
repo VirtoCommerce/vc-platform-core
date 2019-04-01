@@ -43,6 +43,11 @@ namespace VirtoCommerce.Platform.Data.Settings
             {
                 throw new ArgumentNullException(nameof(settings));
             }
+            var existTypeSettings = _registeredTypeSettingsByNameDict[typeName];
+            if (existTypeSettings != null)
+            {
+                settings = existTypeSettings.Concat(settings).Distinct().ToList();
+            }
             _registeredTypeSettingsByNameDict[typeName] = settings;
 
         }

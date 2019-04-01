@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
@@ -247,7 +248,7 @@ namespace VirtoCommerce.SearchModule.Tests
                 RelatedSources = documentSources?.Skip(1).Select(CreateIndexDocumentSource).ToArray(),
             };
 
-            return new IndexingManager(searchProvider, new[] { configuration }, new Moq.Mock<ISearchConnection>().Object);
+            return new IndexingManager(searchProvider, new[] { configuration }, new Moq.Mock<IOptions<SearchOptions>>().Object);
         }
 
         private static IndexDocumentSource CreateIndexDocumentSource(DocumentSource documentSource)

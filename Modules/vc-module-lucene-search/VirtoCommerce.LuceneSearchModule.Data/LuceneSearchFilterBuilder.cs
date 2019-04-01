@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Queries;
 using Lucene.Net.Search;
@@ -261,13 +260,16 @@ namespace VirtoCommerce.LuceneSearchModule.Data
             var dateValue = ConvertToDateTimeTicks(value);
             if (dateValue != null)
             {
-                //TODO
-                //return NumericUtils.LongToPrefixCoded(dateValue.Value);
+                return ConvertLongToString(dateValue.Value);
             }
 
-            //TODO
-            //var dobuleValue = ConvertToDouble(value);
-            //return dobuleValue != null ? NumericUtils.DoubleToPrefixCoded(dobuleValue.Value) : value;
+            var dobuleValue = ConvertToDouble(value);
+            if (dobuleValue.HasValue)
+            {
+                var longValue = NumericUtils.DoubleToSortableInt64(dobuleValue.Value);
+                return ConvertLongToString(longValue);
+
+            }
             return value;
         }
 
@@ -295,6 +297,13 @@ namespace VirtoCommerce.LuceneSearchModule.Data
             }
 
             return result;
+        }
+
+        private static string ConvertLongToString(long longValue)
+        {
+            var act = new BytesRef();
+            NumericUtils.Int64ToPrefixCoded(longValue, 0, act);
+            return act.Utf8ToString();
         }
     }
 }

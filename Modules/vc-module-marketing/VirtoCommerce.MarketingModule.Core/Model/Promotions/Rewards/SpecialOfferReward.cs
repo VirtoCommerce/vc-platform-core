@@ -13,9 +13,6 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
             : base(other)
         {
         }
-        public override PromotionReward Clone()
-        {
-            return new SpecialOfferReward(this);
-        }
+
     }
 }

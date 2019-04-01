@@ -27,7 +27,7 @@ namespace VirtoCommerce.CatalogModule.Data.Validation
             var validationResults = new List<ValidationResult>();
             if (!context.InstanceToValidate.Properties.IsNullOrEmpty())
             {
-                var propertyValues = context.InstanceToValidate.Properties.SelectMany(pv => pv.Values).ToArray();
+                var propertyValues = context.InstanceToValidate.Properties.Where(x => x.Values != null).SelectMany(pv => pv.Values).ToArray();
                 if (!propertyValues.IsNullOrEmpty())
                 {
                     foreach (var propertyValue in propertyValues)

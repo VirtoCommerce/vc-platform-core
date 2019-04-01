@@ -30,7 +30,7 @@ namespace VirtoCommerce.Platform.Tests.Assets
         {
             var blobContentOptions = new FileSystemBlobOptions
             {
-                PublicPath = "some-public-path",
+                PublicUrl = "some-public-path",
                 RootPath = tempDirectory
             };
             return new OptionsWrapper<FileSystemBlobOptions>(blobContentOptions);
@@ -65,7 +65,7 @@ namespace VirtoCommerce.Platform.Tests.Assets
         [Fact]
         public void FileSystemBlobProviderStreamWritePermissionsTest()
         {
-            var fsbProvider = new FileSystemBlobProvider(_options, _urlHelper.Object);
+            var fsbProvider = new FileSystemBlobProvider(_options);
 
             using (var actualStream = fsbProvider.OpenWrite("file-write.tmp"))
             {
@@ -80,7 +80,7 @@ namespace VirtoCommerce.Platform.Tests.Assets
         [Fact]
         public void FileSystemBlobProviderStreamReadPermissionsTest()
         {
-            var fsbProvider = new FileSystemBlobProvider(_options, _urlHelper.Object);
+            var fsbProvider = new FileSystemBlobProvider(_options);
             const string fileForRead = "file-read.tmp";
 
             // Creating empty file.

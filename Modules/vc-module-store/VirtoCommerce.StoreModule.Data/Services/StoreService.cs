@@ -14,6 +14,7 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.StoreModule.Core.Events;
 using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Services;
@@ -28,7 +29,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
     {
         public StoreService(Func<IStoreRepository> repositoryFactory, ISeoService seoService, ISettingsManager settingManager,
                             IDynamicPropertyService dynamicPropertyService, IShippingMethodsRegistrar shippingService, IPaymentMethodsRegistrar paymentService,
-                            ITaxProviderRegistrar taxService, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
+                            IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
         {
             RepositoryFactory = repositoryFactory;
             SeoService = seoService;
@@ -36,7 +37,6 @@ namespace VirtoCommerce.StoreModule.Data.Services
             DynamicPropertyService = dynamicPropertyService;
             ShippingMethodRegistrar = shippingService;
             PaymentMethodRegistrar = paymentService;
-            TaxProviderRegistrar = taxService;
             EventPublisher = eventPublisher;
             PlatformMemoryCache = platformMemoryCache;
         }
@@ -47,7 +47,6 @@ namespace VirtoCommerce.StoreModule.Data.Services
         protected IDynamicPropertyService DynamicPropertyService { get; }
         protected IShippingMethodsRegistrar ShippingMethodRegistrar { get; }
         protected IPaymentMethodsRegistrar PaymentMethodRegistrar { get; }
-        protected ITaxProviderRegistrar TaxProviderRegistrar { get; }
         protected IEventPublisher EventPublisher { get; }
         protected IPlatformMemoryCache PlatformMemoryCache { get; }
 
@@ -62,6 +61,8 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
                 using (var repository = RepositoryFactory())
                 {
+                    repository.DisableChangesTracking();
+
                     var dbStores = await repository.GetStoresByIdsAsync(ids);
                     foreach (var dbStore in dbStores)
                     {
@@ -223,15 +224,6 @@ namespace VirtoCommerce.StoreModule.Data.Services
                 if (dbStoredShippingMethod != null)
                 {
                     dbStoredShippingMethod.ToModel(shippingMethod);
-                }
-            }
-            store.TaxProviders = TaxProviderRegistrar.GetAllTaxProviders();
-            foreach (var taxProvider in store.TaxProviders)
-            {
-                var dbStoredTaxProvider = dbStore.TaxProviders.FirstOrDefault(x => x.Code.EqualsInvariant(taxProvider.Code));
-                if (dbStoredTaxProvider != null)
-                {
-                    dbStoredTaxProvider.ToModel(taxProvider);
                 }
             }
         }

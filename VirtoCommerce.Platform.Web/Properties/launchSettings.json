@@ -25,7 +25,7 @@
         "ASPNETCORE_preventHostingStartup": "True",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://localhost:10647/"
+      "applicationUrl": "http://localhost:10645/"
     }
   }
 }

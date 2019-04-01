@@ -1,0 +1,65 @@
+﻿<div class="blade-content __medium-wide">
+    <div class="blade-inner">
+        <div class="inner-block">
+            <form name="formScope" ng-init="setGridOptions('pricelist-grid', {
+                    data: 'blade.currentEntities',
+                    rowHeight: 60,
+                    rowTemplate: 'list.row.html',
+                    enableCellEdit: false,
+                    enableCellEditOnFocus: true,
+                    editableCellTemplate: 'default-cellTextEditor',
+                    columnDefs: [
+                        { name: 'currency', displayName: 'pricing.blades.prices-list.labels.currency' },
+                        { name: 'list', displayName: 'pricing.blades.prices-list.labels.list-price', editableCellTemplate: 'list-cellTextEditor', validators: {required: true, listValidator: true}, cellTemplate: 'priceCellTitleValidator', enableCellEdit: true },
+                        { name: 'sale', displayName: 'pricing.blades.prices-list.labels.sale-price', editableCellTemplate: 'sale-cellTextEditor', validators: {saleValidator: true}, cellTemplate: 'priceCellTitleValidator', enableCellEdit: true },
+                        { name: 'minQuantity', displayName: 'pricing.blades.prices-list.labels.min-quantity', editableCellTemplate: 'minQuantity-cellTextEditor', validators: {required: true, minQuantityValidator: true}, cellTemplate: 'ui-grid/cellTitleValidator', enableCellEdit: true, sort: { direction: uiGridConstants.ASC } },
+                        { name: 'modifiedDate', displayName: 'pricing.blades.prices-list.labels.last-modified' },
+                        { name: 'effectiveValue', type: 'currency', visible: false }
+                    ]})">
+                <div class="table-wrapper" ng-if="blade.currentEntities.length" ng-init="setForm(formScope);">
+                    <div ui-grid="gridOptions" ui-grid-cellNav ui-grid-edit ui-grid-validate ui-grid-auto-resize ui-grid-save-state ui-grid-selection ui-grid-resize-columns ui-grid-move-columns ui-grid-height></div>
+                </div>
+            </form>
+            <div class="note" ng-if="!blade.currentEntities.length">{{ 'platform.list.no-data' | translate }}</div>
+        </div>
+    </div>
+</div>
+
+<script type="text/ng-template" id="ui-grid/cellTitleValidator">
+    <div class="ui-grid-cell-contents" title="{{grid.validate.getTitleFormattedErrors(row.entity,col.colDef)}}">
+        <div class="form-editor form-input">
+            <input class="ng-valid form-input" ng-class="{'ng-invalid' : grid.validate.isInvalid(row.entity,col.colDef)}" value="{{COL_FIELD CUSTOM_FILTERS}}" placeholder="{{'platform.placeholders.n-a' | translate}}" readonly="readonly" />
+        </div>
+    </div>
+</script>
+<script type="text/ng-template" id="priceCellTitleValidator">
+    <div class="ui-grid-cell-contents" title="{{grid.validate.getTitleFormattedErrors(row.entity,col.colDef)}}">
+        <div class="form-editor form-input">
+            <input class="ng-valid form-input" money ng-model="MODEL_COL_FIELD" ng-class="{'ng-invalid' : grid.validate.isInvalid(row.entity,col.colDef)}" placeholder="{{'platform.placeholders.n-a' | translate}}" readonly="readonly" />
+        </div>
+    </div>
+</script>
+
+<script type="text/ng-template" id="default-cellTextEditor">
+    <div class="form-editor form-input">
+        <input class="form-input" ng-model="MODEL_COL_FIELD" ui-grid-editor placeholder="{{'platform.placeholders.n-a' | translate}}" />
+    </div>
+</script>
+<script type="text/ng-template" id="list-cellTextEditor">
+    <div class="form-editor form-input">
+        <input class="form-input" money required ng-model="MODEL_COL_FIELD" ui-grid-editor ng-class="{'ng-invalid': !grid.appScope.isListPriceValid(row.entity)}" />
+    </div>
+</script>
+<script type="text/ng-template" id="sale-cellTextEditor">
+    <div class="form-editor form-input">
+        <input class="form-input" money ng-model="MODEL_COL_FIELD" ui-grid-editor ng-class="{'ng-invalid': !grid.appScope.isSalePriceValid(row.entity)}" placeholder="{{'platform.placeholders.n-a' | translate}}">
+    </div>
+</script>
+<script type="text/ng-template" id="minQuantity-cellTextEditor">
+    <div class="form-editor form-input">
+        <input class="form-input" smart-float num-type="integer" required ng-model="MODEL_COL_FIELD" ui-grid-editor ng-class="{'ng-invalid': !grid.appScope.isUniqueQty(row.entity)}">
+    </div>
+</script>
+<script type="text/ng-template" id="list.row.html">
+    <div ng-repeat="(colRenderIndex, col) in colContainer.renderedColumns track by col.uid" ui-grid-one-bind-id-grid="rowRenderIndex + '-' + col.uid + '-cell'" class="ui-grid-cell" ng-class="{'ui-grid-row-header-cell': col.isRowHeader }" role="{{col.isRowHeader ? 'rowheader' : 'gridcell' }}" ui-grid-cell></div>
+</script>

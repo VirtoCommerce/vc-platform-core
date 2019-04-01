@@ -64,7 +64,7 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
                 promoContext.PromoEntry = promoEntry;
                 foreach (var reward in Rewards)
                 {
-                    var clonedReward = reward.Clone();
+                    var clonedReward = reward.Clone() as PromotionReward;
                     EvaluateReward(promoContext, couponIsValid, clonedReward);
                     //Add coupon to reward only for case when promotion contains associated coupons
                     if (!validCoupons.IsNullOrEmpty())
@@ -76,7 +76,7 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
                             clonedReward.Coupon = validCoupon.Code;
                             result.Add(clonedReward);
                             //Clone reward for next iteration
-                            clonedReward = clonedReward.Clone();
+                            clonedReward = clonedReward.Clone() as PromotionReward;
                         }
                     }
                     else

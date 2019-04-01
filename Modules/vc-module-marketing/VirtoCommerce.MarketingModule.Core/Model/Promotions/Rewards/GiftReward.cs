@@ -33,9 +33,6 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 
         public string ImageUrl { get; set; }
 
-        public override PromotionReward Clone()
-        {
-            return new GiftReward(this);
-        }
+
     }
 }

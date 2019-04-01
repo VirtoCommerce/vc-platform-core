@@ -41,7 +41,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
             else if (objectType.EqualsInvariant(typeof(Category).Name))
             {
-                var category = (await _categoryService.GetByIdsAsync(new[] { objectId }, CategoryResponseGroup.Info)).FirstOrDefault();
+                var category = (await _categoryService.GetByIdsAsync(new[] { objectId }, CategoryResponseGroup.Info.ToString())).FirstOrDefault();
                 if (category != null)
                 {
                     catalogId = category.CatalogId;
@@ -49,7 +49,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
             else if (objectType.EqualsInvariant(typeof(CatalogProduct).Name))
             {
-                var product = (await _productService.GetByIdsAsync(new[] { objectId }, ItemResponseGroup.ItemInfo)).FirstOrDefault();
+                var product = (await _productService.GetByIdsAsync(new[] { objectId }, ItemResponseGroup.ItemInfo.ToString())).FirstOrDefault();
                 if (product != null)
                 {
                     catalogId = product.CatalogId;
@@ -80,8 +80,8 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             var productsSeo = allDublicatedSeos.Where(x => x.ObjectType.EqualsInvariant(typeof(CatalogProduct).Name));
             var categoriesSeo = allDublicatedSeos.Where(x => x.ObjectType.EqualsInvariant(typeof(Category).Name));
 
-            var products = await _productService.GetByIdsAsync(productsSeo.Select(x => x.ObjectId).Distinct().ToArray(), ItemResponseGroup.Outlines | ItemResponseGroup.Seo, catalogId);
-            var categories = await _categoryService.GetByIdsAsync(categoriesSeo.Select(x => x.ObjectId).Distinct().ToArray(), CategoryResponseGroup.WithOutlines | CategoryResponseGroup.WithSeo, catalogId);
+            var products = await _productService.GetByIdsAsync(productsSeo.Select(x => x.ObjectId).Distinct().ToArray(), (ItemResponseGroup.Outlines | ItemResponseGroup.Seo).ToString(), catalogId);
+            var categories = await _categoryService.GetByIdsAsync(categoriesSeo.Select(x => x.ObjectId).Distinct().ToArray(), (CategoryResponseGroup.WithOutlines | CategoryResponseGroup.WithSeo).ToString(), catalogId);
 
             var retVal = new List<ISeoSupport>();
             //Here we try to find between SEO duplicates records for products with directly or indirectly (virtual) related to requested catalog

@@ -59,6 +59,16 @@ namespace VirtoCommerce.Platform.Data.Repositories
             return retVal;
         }
 
+        public virtual async Task<DynamicPropertyEntity[]> GetDynamicPropertiesForTypesAsync(string[] objectTypes)
+        {
+            var retVal = await DynamicProperties.Include(p => p.DisplayNames)
+                                          .Where(p => objectTypes.Contains(p.ObjectType))
+                                          .OrderBy(p => p.Name)
+                                          .ToArrayAsync();
+            return retVal;
+        }
+
+
         public virtual async Task<SettingEntity[]> GetObjectSettingsAsync(string objectType, string objectId)
         {
             var result = await Settings.Include(x => x.SettingValues)

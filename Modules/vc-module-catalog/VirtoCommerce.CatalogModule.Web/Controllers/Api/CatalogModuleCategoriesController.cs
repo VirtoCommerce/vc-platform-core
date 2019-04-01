@@ -31,7 +31,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("{id}")]
         public async Task<ActionResult<Category>> Get(string id)
         {
-            var category = (await _categoryService.GetByIdsAsync(new[] { id }, CategoryResponseGroup.Full)).FirstOrDefault();
+            var category = (await _categoryService.GetByIdsAsync(new[] { id }, null)).FirstOrDefault();
 
             if (category == null)
             {
@@ -48,7 +48,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         ///<param name="respGroup">Response group.</param>
         [HttpGet]
         [Route("")]
-        public async Task<ActionResult<Category[]>> GetCategoriesByIdsAsync([FromQuery] string[] ids, [FromQuery] CategoryResponseGroup respGroup = CategoryResponseGroup.Full)
+        public async Task<ActionResult<Category[]>> GetCategoriesByIdsAsync([FromQuery] string[] ids, [FromQuery] string respGroup = null)
         {
             var categories = await _categoryService.GetByIdsAsync(ids, respGroup);
 
@@ -71,7 +71,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("plenty")]
-        public Task<ActionResult<Category[]>> GetCategoriesByPlentyIds([FromBody] string[] ids, [FromQuery] CategoryResponseGroup respGroup = CategoryResponseGroup.Full)
+        public Task<ActionResult<Category[]>> GetCategoriesByPlentyIds([FromBody] string[] ids, [FromQuery] string respGroup = null)
         {
             return GetCategoriesByIdsAsync(ids, respGroup);
         }

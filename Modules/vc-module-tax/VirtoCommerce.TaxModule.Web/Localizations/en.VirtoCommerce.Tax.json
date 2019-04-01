@@ -1,0 +1,58 @@
+{
+    "tax": {
+        "blades": {
+
+            "tax-provider-detail": {
+                "subtitle": "Edit tax provider",
+                "labels": {
+                    "name": "Name",
+                    "code": "Code",
+                    "is-active": "Is active",
+                    "is-active-description": "Set to activate this tax provider for store",
+                    "settings": "Settings"
+                },
+                "placeholders": {
+                    "description": "Enter description"
+                }
+            },
+            "tax-provider-list": {
+                "subtitle": "",
+                "labels": {
+                    "is-active": "Is active",
+                    "tax-provider": "Tax provider",
+                    "no-tax-providers": "No tax providers are registered"
+                }
+            }
+
+        },
+        "dialogs": {
+            "tax-provider-save": {
+                "title": "Save changes",
+                "message": "The Tax provider has been modified. Do you want to save changes?"
+            }
+        },
+        "widgets": {
+            "storeTaxingWidget": {
+                "title": "Tax providers",
+                "blade-subtitle": "Tax providers"
+            }
+        },
+        "labels": {
+            "FixedTaxRateProvider": {
+                "name": "Fixed percent tax rate",
+                "description": "Fixed percent tax rate"
+            }
+        }
+
+    },
+    "settings": {
+        "VirtoCommerce.Core.FixedTaxRateProvider.Rate": {
+            "title": "Fixed tax rate %",
+            "description": "Fixed tax rate"
+        },
+        "VirtoCommerce.Core.General.TaxTypes": {
+            "title": "Tax types",
+            "description": "Tax types available in system"
+        }
+    }
+}

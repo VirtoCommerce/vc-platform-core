@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using VirtoCommerce.CatalogModule.Core;
 using VirtoCommerce.CatalogModule.Core.Events;
 using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Model.OutlinePart;
 using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.ExportImport;
@@ -21,7 +22,6 @@ using VirtoCommerce.CatalogModule.Data.Search;
 using VirtoCommerce.CatalogModule.Data.Search.BrowseFilters;
 using VirtoCommerce.CatalogModule.Data.Search.Indexing;
 using VirtoCommerce.CatalogModule.Data.Services;
-using VirtoCommerce.CatalogModule.Data.Services.OutlineParts;
 using VirtoCommerce.CatalogModule.Data.Validation;
 using VirtoCommerce.CatalogModule.Web.JsonConverters;
 using VirtoCommerce.Platform.Core.Bus;
@@ -49,15 +49,17 @@ namespace VirtoCommerce.CatalogModule.Web
             serviceCollection.AddDbContext<CatalogDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddSingleton<Func<ICatalogRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICatalogRepository>());
 
-            serviceCollection.AddSingleton<ICatalogService, CatalogServiceImpl>();
-            serviceCollection.AddSingleton<ICatalogSearchService, CatalogSearchServiceDecorator>();
-            serviceCollection.AddSingleton<CatalogSearchServiceImpl>();
-
-            serviceCollection.AddSingleton<ICategoryService, CategoryServiceImpl>();
+            serviceCollection.AddSingleton<IProductSearchService, ProductSearchService>();
             serviceCollection.AddSingleton<ICategorySearchService, CategorySearchService>();
 
-            serviceCollection.AddSingleton<IItemService, ItemServiceImpl>();
-            serviceCollection.AddSingleton<IProductSearchService, ProductSearchService>();
+            serviceCollection.AddSingleton<ICatalogService, CatalogService>();
+            serviceCollection.AddSingleton<IListEntrySearchService, ListEntrySearchService>();
+
+            serviceCollection.AddSingleton<ICategoryService, CategoryService>();
+            serviceCollection.AddSingleton<ICategoryIndexedSearchService, CategoryIndexedSearchService>();
+
+            serviceCollection.AddSingleton<IItemService, ItemService>();
+            serviceCollection.AddSingleton<IProductIndexedSearchService, ProductIndexedSearchService>();
 
             serviceCollection.AddSingleton<IAggregationConverter, AggregationConverter>();
             serviceCollection.AddSingleton<IBrowseFilterService, BrowseFilterService>();
@@ -66,7 +68,8 @@ namespace VirtoCommerce.CatalogModule.Web
             serviceCollection.AddSingleton<ISearchRequestBuilder, ProductSearchRequestBuilder>();
             serviceCollection.AddSingleton<ISearchRequestBuilder, CategorySearchRequestBuilder>();
 
-            serviceCollection.AddSingleton<IPropertyService, PropertyServiceImpl>();
+            serviceCollection.AddSingleton<IPropertyService, PropertyService>();
+            serviceCollection.AddSingleton<IPropertySearchService, PropertySearchService>();
             serviceCollection.AddSingleton<IProperyDictionaryItemService, PropertyDictionaryItemService>();
             serviceCollection.AddSingleton<IProperyDictionaryItemSearchService, ProperyDictionaryItemSearchService>();
             serviceCollection.AddSingleton<IProductAssociationSearchService, ProductAssociationSearchService>();
@@ -93,6 +96,7 @@ namespace VirtoCommerce.CatalogModule.Web
                     return new IdOutlinePartResolver();
                 }
             });
+
 
             serviceCollection.AddSingleton<ProductDocumentChangesProvider>();
             serviceCollection.AddSingleton<ProductDocumentBuilder>();

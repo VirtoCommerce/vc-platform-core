@@ -19,10 +19,11 @@ namespace VirtoCommerce.StoreModule.Web.ExportImport
         private readonly JsonSerializer _serializer;
         private readonly int BatchSize = 50;
 
-        public StoreExportImport(IStoreService storeService, JsonSerializer jsonSerializer)
+        public StoreExportImport(IStoreService storeService, IStoreSearchService storeSearchService, JsonSerializer jsonSerializer)
         {
             _storeService = storeService;
             _serializer = jsonSerializer;
+            _storeSearchService = storeSearchService;
         }
 
         public async Task DoExport(Stream backupStream, Action<ExportImportProgressInfo> progressCallback)
@@ -103,7 +104,7 @@ namespace VirtoCommerce.StoreModule.Web.ExportImport
                                 var batchStores = stores.Skip(i).Take(BatchSize);
                                 foreach (var store in batchStores)
                                 {
-                                    await _storeService.SaveChangesAsync(new [] { store });
+                                    await _storeService.SaveChangesAsync(new[] { store });
                                 }
 
                                 if (storeCount > 0)

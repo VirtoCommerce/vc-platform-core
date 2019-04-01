@@ -4,6 +4,6 @@ namespace VirtoCommerce.CatalogModule.Core.Model
 {
     public interface IHasAssets
     {
-        ICollection<Asset> Assets { get; set; }
+        IList<Asset> Assets { get; set; }
     }
 }

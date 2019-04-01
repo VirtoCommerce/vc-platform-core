@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
+using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
 
 namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
@@ -98,7 +99,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("~/api/catalog/categories/{categoryId}/properties/getnew")]
         public async Task<ActionResult<Property>> GetNewCategoryProperty(string categoryId)
         {
-            var category = (await _categoryService.GetByIdsAsync(new[] { categoryId }, CategoryResponseGroup.Info)).FirstOrDefault();
+            var category = (await _categoryService.GetByIdsAsync(new[] { categoryId }, CategoryResponseGroup.Info.ToString())).FirstOrDefault();
             var retVal = new Property
             {
                 Id = Guid.NewGuid().ToString(),
@@ -146,13 +147,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             //var property = _propertyService.GetById(id);
 
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Delete, property);
-
-            if (doDeleteValues)
-            {
-                await _propertyService.DeletePropertyValuesByPropertyIdAsync(id);
-            }
-
-            await _propertyService.DeleteAsync(new[] { id });
+            await _propertyService.DeleteAsync(new[] { id }, doDeleteValues);
             return NoContent();
         }
     }

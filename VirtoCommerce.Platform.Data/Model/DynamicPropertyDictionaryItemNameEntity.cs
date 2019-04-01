@@ -19,7 +19,9 @@ namespace VirtoCommerce.Platform.Data.Model
         public virtual DynamicPropertyDictionaryItemName ToModel(DynamicPropertyDictionaryItemName itemName)
         {
             if (itemName == null)
+            {
                 throw new ArgumentNullException(nameof(itemName));
+            }
 
             itemName.Locale = Locale;
             itemName.Name = Name;
@@ -30,7 +32,9 @@ namespace VirtoCommerce.Platform.Data.Model
         public virtual DynamicPropertyDictionaryItemNameEntity FromModel(DynamicPropertyDictionaryItemName itemName)
         {
             if (itemName == null)
+            {
                 throw new ArgumentNullException(nameof(itemName));
+            }
 
             Locale = itemName.Locale;
             Name = itemName.Name;

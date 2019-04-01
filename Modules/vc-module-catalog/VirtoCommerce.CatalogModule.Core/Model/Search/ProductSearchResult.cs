@@ -1,6 +1,8 @@
+using VirtoCommerce.Platform.Core.Common;
+
 namespace VirtoCommerce.CatalogModule.Core.Model.Search
 {
-    public class ProductSearchResult : CatalogSearchResult<CatalogProduct>
+    public class ProductSearchResult : GenericSearchResult<CatalogProduct>
     {
     }
 }
