@@ -32,5 +32,9 @@
     <ProjectReference Include="..\VirtoCommerce.NotificationsModule.SendGrid\VirtoCommerce.NotificationsModule.SendGrid.csproj" />
     <ProjectReference Include="..\VirtoCommerce.NotificationsModule.Smtp\VirtoCommerce.NotificationsModule.Smtp.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Infrastructure\" />
+  </ItemGroup>
   
 </Project>

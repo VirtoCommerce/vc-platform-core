@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
+using VirtoCommerce.NotificationsModule.Data.JsonConverters;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -48,7 +49,9 @@ namespace VirtoCommerce.NotificationsModule.Data.ExportImport
             {
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                 Formatting = Formatting.Indented,
-                NullValueHandling = NullValueHandling.Ignore
+                NullValueHandling = NullValueHandling.Ignore,
+                Converters = { new PolymorphicJsonConverter() },
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
             };
         }
 
@@ -92,7 +95,7 @@ namespace VirtoCommerce.NotificationsModule.Data.ExportImport
             }
         }
 
-        public Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
+        public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -132,7 +135,7 @@ namespace VirtoCommerce.NotificationsModule.Data.ExportImport
 
                                 if (notificationsCount % _batchSize == 0 || reader.TokenType == JsonToken.EndArray)
                                 {
-                                    _notificationService.SaveChangesAsync(notifications.ToArray()).GetAwaiter().GetResult();
+                                    await _notificationService.SaveChangesAsync(notifications.ToArray());
                                     notifications.Clear();
 
                                     if (notificationsTotalCount > 0)
@@ -151,7 +154,6 @@ namespace VirtoCommerce.NotificationsModule.Data.ExportImport
                     }
                 }
             }
-            return Task.CompletedTask;
         }
     }
 }

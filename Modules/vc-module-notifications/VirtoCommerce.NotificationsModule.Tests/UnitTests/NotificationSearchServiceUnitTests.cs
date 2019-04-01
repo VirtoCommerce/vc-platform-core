@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Moq;
 using VirtoCommerce.NotificationsModule.Core.Model;
@@ -8,7 +7,6 @@ using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Services;
 using VirtoCommerce.NotificationsModule.Tests.NotificationTypes;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using Xunit;
 
@@ -76,16 +74,23 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
             _notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
             _notificationRegistrar.RegisterNotification<InvoiceEmailNotification>();
             _notificationRegistrar.RegisterNotification<OrderSentEmailNotification>();
+
             var responseGroup = NotificationResponseGroup.Default.ToString();
             var searchCriteria = new NotificationSearchCriteria() { ResponseGroup = responseGroup };
-            _repositoryMock.Setup(n => n.GetByTypeAsync(nameof(OrderSentEmailNotification), null, null, responseGroup))
-                .ReturnsAsync(new EmailNotificationEntity { IsActive = true });
+            _repositoryMock.Setup(n => n.GetByTypesAsync(
+                new[]
+                {
+                    nameof(RegistrationEmailNotification),
+                    nameof(InvoiceEmailNotification),
+                    nameof(OrderSentEmailNotification)
+                }, null, null, responseGroup))
+                .ReturnsAsync(new NotificationEntity[] { new EmailNotificationEntity { IsActive = true, Type = nameof(OrderSentEmailNotification) } });
 
             //Act
             var result = await _notificationSearchService.SearchNotificationsAsync(searchCriteria);
 
             //Assert
-            Assert.Contains(result.Results, n => n.IsActive);
+            Assert.Contains(result.Results, x => x.IsActive);
         }
     }
 }
