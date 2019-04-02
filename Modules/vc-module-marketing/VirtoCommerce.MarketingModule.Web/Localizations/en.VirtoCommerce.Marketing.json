@@ -47,7 +47,6 @@
                     "start-date": "Please choose date...",
                     "coupons": "Enter coupon codes...",
                     "expiration-date": "Please choose date..."
-
                 },
                 "toolbar": {
                     "coupons": "Coupons"
@@ -69,7 +68,6 @@
                     "upload-description": "A CSV file with coupon records in next format: [coupon_code][delimiter][max_uses_number] (without square brackets). MaxUsesNumber 0 value means a coupon can be applied an infinite number of times",
                     "enter-value": "Enter a value",
                     "select-date": "Select a date"
-
                 }
             },
             "promotion-list": {
@@ -398,6 +396,11 @@
         "Marketing.ExportImport.Description": {
             "description": "Export/Import promotions and dynamic contents (places, contents, publications)",
             "title": "Export/Import description"
+        }
+    },
+    "module": {
+        "VirtoCommerce.Marketing": {
+            "description": "Export/Import promotions and dynamic contents (places, contents, publications)"
         }
     }
 }

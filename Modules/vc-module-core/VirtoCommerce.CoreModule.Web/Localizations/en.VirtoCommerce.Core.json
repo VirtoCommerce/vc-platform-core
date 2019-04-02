@@ -306,5 +306,10 @@
             "description": "Fixed tax rate",
             "title": "Fixed tax rate %"
         }
+    },
+    "module": {
+        "VirtoCommerce.Core": {
+            "description": "Export/Import fulfillment centers"
+        }
     }
 }

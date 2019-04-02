@@ -36,7 +36,6 @@
                     "name": "fulfillment center name",
                     "description": "fulfillment center description"
                 }
-
             }
         },
         "dialogs": {
@@ -93,6 +92,11 @@
         "Inventory.ExportImport.PageSize": {
             "description": "High value may will cause slow performance",
             "title": "The page size being used for Export / Import"
+        }
+    },
+    "module": {
+        "VirtoCommerce.Inventory": {
+            "description": "Export/Import inventory information"
         }
     }
 }

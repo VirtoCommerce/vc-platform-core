@@ -1,4 +1,4 @@
-﻿<div class="blade-static __bottom">
+<div class="blade-static __bottom">
     <button class="btn" ng-click="startExport()" ng-disabled="!canStartProcess() || blade.notification">
         <span>{{ 'platform.blades.export-main.labels.start-export' | translate }}</span>
     </button>
@@ -37,7 +37,7 @@
                             <input type="checkbox" ng-model="data.isChecked" ng-change="updateModuleSelection()">
                             <span class="switch"></span>
                             <span class="list-name">{{data.id}}</span>
-                            <span class="list-descr">{{data.description}}</span>
+                            <span class="list-descr">{{'module.' + data.moduleName + '.description' | translate}}</span>
                         </label>
                     </div>
                 </fieldset>
