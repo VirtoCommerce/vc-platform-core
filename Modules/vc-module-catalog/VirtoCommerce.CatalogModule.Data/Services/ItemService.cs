@@ -233,7 +233,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 //Resolve relative urls for all product images
                 if (!product.Images.IsNullOrEmpty())
                 {
-                    foreach (var image in product.Images)
+                    foreach (var image in product.Images.Where(x => !string.IsNullOrEmpty(x.Url)))
                     {
                         image.RelativeUrl = image.Url;
                         image.Url = _blobUrlResolver.GetAbsoluteUrl(image.Url);

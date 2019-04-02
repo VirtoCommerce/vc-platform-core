@@ -149,7 +149,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
             modelBuilder.Entity<CategoryItemRelationEntity>().HasOne(p => p.Category).WithMany()
                 .HasForeignKey(x => x.CategoryId).OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<CategoryItemRelationEntity>().HasOne(p => p.CatalogItem).WithMany(x => x.CategoryLinks).HasForeignKey(x => x.ItemId)
-                .IsRequired().OnDelete(DeleteBehavior.Restrict);
+                .IsRequired().OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<CategoryItemRelationEntity>().HasOne(p => p.Catalog).WithMany().HasForeignKey(x => x.CatalogId)
                 .IsRequired().OnDelete(DeleteBehavior.Restrict);
             #endregion
@@ -162,7 +162,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
                 .HasForeignKey(x => x.TargetCategoryId).OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<CategoryRelationEntity>().HasOne(x => x.SourceCategory).WithMany(x => x.OutgoingLinks)
-                .HasForeignKey(x => x.SourceCategoryId).IsRequired().OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(x => x.SourceCategoryId).IsRequired().OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<CategoryRelationEntity>().HasOne(x => x.TargetCatalog)
                 .WithMany(x => x.IncommingLinks)

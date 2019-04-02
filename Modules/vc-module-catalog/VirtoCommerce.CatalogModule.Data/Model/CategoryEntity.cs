@@ -223,7 +223,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
             if (!OutgoingLinks.IsNullCollection())
             {
-                OutgoingLinks.Patch(target.OutgoingLinks, new LinkedCategoryComparer(), (sourceLink, targetLink) => sourceLink.Patch(targetLink));
+                var categoryRelationComparer = AnonymousComparer.Create((CategoryRelationEntity x) => string.Join(":", x.TargetCatalogId, x.TargetCategoryId));
+                OutgoingLinks.Patch(target.OutgoingLinks, categoryRelationComparer, (sourceLink, targetLink) => sourceLink.Patch(targetLink));
             }
 
             if (!Images.IsNullCollection())

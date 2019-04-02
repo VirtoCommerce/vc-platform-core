@@ -88,6 +88,10 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         public IList<Property> Properties { get; set; }
 
         #endregion
+        [JsonIgnoreSerialization]
+        [Obsolete("it's for importing data from v.2, need to use values in Properties")]
+        public ICollection<PropertyValue> PropertyValues { get; set; }
+
         #region IHasImages members
         /// <summary>
         /// Gets the default image for the product.

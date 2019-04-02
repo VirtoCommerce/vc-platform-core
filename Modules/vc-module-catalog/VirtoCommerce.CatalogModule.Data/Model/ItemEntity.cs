@@ -289,6 +289,12 @@ namespace VirtoCommerce.CatalogModule.Data.Model
                     ItemPropertyValues = new ObservableCollection<PropertyValueEntity>(AbstractTypeFactory<PropertyValueEntity>.TryCreateInstance().FromModels(propValues, pkMap));
                 }
             }
+            else if (!product.PropertyValues.IsNullOrEmpty())
+            {
+                //Backward compatibility
+                //TODO: Remove later
+                ItemPropertyValues = new ObservableCollection<PropertyValueEntity>(AbstractTypeFactory<PropertyValueEntity>.TryCreateInstance().FromModels(product.PropertyValues, pkMap));
+            }
             #endregion
 
             #region Assets
@@ -396,7 +402,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             #region Links
             if (!CategoryLinks.IsNullCollection())
             {
-                CategoryLinks.Patch(target.CategoryLinks, new CategoryItemRelationComparer(),
+                var categoryItemRelationComparer = AnonymousComparer.Create((CategoryItemRelationEntity x) => string.Join(":", x.CatalogId, x.CategoryId));
+                CategoryLinks.Patch(target.CategoryLinks, categoryItemRelationComparer,
                                          (sourcePropValue, targetPropValue) => sourcePropValue.Patch(targetPropValue));
             }
             #endregion
