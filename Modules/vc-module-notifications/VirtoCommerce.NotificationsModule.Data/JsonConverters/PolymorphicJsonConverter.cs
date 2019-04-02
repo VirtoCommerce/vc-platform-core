@@ -5,7 +5,7 @@ using Newtonsoft.Json.Linq;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.NotificationsModule.Web.Infrastructure
+namespace VirtoCommerce.NotificationsModule.Data.JsonConverters
 {
     public class PolymorphicJsonConverter : JsonConverter
     {

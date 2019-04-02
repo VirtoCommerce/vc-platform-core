@@ -47,32 +47,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
         public virtual void Patch(CategoryItemRelationEntity target)
         {
-            //Nothing todo. Because we not support change  link
+            target.Priority = Priority;
         }
 
-    }
-
-    public class CategoryItemRelationComparer : IEqualityComparer<CategoryItemRelationEntity>
-    {
-        #region IEqualityComparer<CategoryItemRelation> Members
-
-        public bool Equals(CategoryItemRelationEntity x, CategoryItemRelationEntity y)
-        {
-            return GetHashCode(x) == GetHashCode(y);
-        }
-
-        public int GetHashCode(CategoryItemRelationEntity obj)
-        {
-            var hash = 17;
-            hash = hash * 23 + obj.CatalogId.GetHashCode();
-            hash = hash * 23 + obj.Priority.GetHashCode();
-            if (obj.CategoryId != null)
-            {
-                hash = hash * 23 + obj.CategoryId.GetHashCode();
-            }
-            return hash;
-        }
-
-        #endregion
     }
 }

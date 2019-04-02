@@ -173,7 +173,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     category.Parents = TreeExtension.GetAncestors(category, x => x.ParentId != null ? preloadedCategoriesMap[x.ParentId] : null)
                                                     .Reverse()
                                                     .ToArray();
-                    category.Parent = category.Parents.Last();
+                    category.Parent = category.Parents.LastOrDefault();
                 }
                 category.Level = category.Parents?.Count() ?? 0;
 
@@ -209,9 +209,10 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 //Resolve relative urls for category assets
                 if (category.Images != null)
                 {
-                    foreach (var asset in category.Images)
+                    foreach (var image in category.Images.Where(x => !string.IsNullOrEmpty(x.Url)))
                     {
-                        asset.Url = _blobUrlResolver.GetAbsoluteUrl(asset.RelativeUrl);
+                        image.RelativeUrl = image.Url;
+                        image.Url = _blobUrlResolver.GetAbsoluteUrl(image.Url);
                     }
                 }
             }
