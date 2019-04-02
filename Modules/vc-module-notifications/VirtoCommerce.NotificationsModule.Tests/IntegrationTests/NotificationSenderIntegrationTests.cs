@@ -43,7 +43,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
                 SmtpServer = "smtp.gmail.com",
                 Port = 587,
                 Login = "tasker.for.test@gmail.com",
-                Password = "gBcS6wY1"
+                Password = ""
             };
             _templateRender = new LiquidTemplateRenderer();
             _messageServiceMock = new Mock<INotificationMessageService>();
