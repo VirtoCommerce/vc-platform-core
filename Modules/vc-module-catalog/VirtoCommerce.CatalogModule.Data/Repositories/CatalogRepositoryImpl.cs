@@ -8,6 +8,7 @@ using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
 using VirtoCommerce.CatalogModule.Data.Model;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.CatalogModule.Data.Repositories
@@ -261,28 +262,17 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
 
             if (!categoryIds.IsNullOrEmpty())
             {
-                var conn = DbContext.Database.GetDbConnection();
-                await conn.OpenAsync();
-                using (var command = conn.CreateCommand())
-                {
-                    var categoryIdsQuery = string.Join(",", categoryIds.Select(v => "'" + v + "'"));
-                    var query = string.Format(@"WITH cte AS ( SELECT a.Id FROM Category a  WHERE Id IN ({0}) 
-                                UNION ALL SELECT a.Id FROM Category a JOIN cte c ON a.ParentCategoryId = c.Id )
-                                SELECT Id FROM cte WHERE Id NOT IN ({0}) ", categoryIdsQuery);
-                    command.CommandText = query;
+                const string commandTemplate = @"
+                    WITH cte AS (
+                        SELECT a.Id FROM Category a  WHERE Id IN ({0})
+                        UNION ALL
+                        SELECT a.Id FROM Category a JOIN cte c ON a.ParentCategoryId = c.Id
+                    )
+                    SELECT Id FROM cte WHERE Id NOT IN ({0})
+                ";
 
-                    var reader = await command.ExecuteReaderAsync();
-                    var childrenIds = new List<string>();
-                    while (await reader.ReadAsync())
-                    {
-                        childrenIds.Add(reader.GetString(0));
-                    }
-
-                    reader.Dispose();
-                    result = childrenIds.ToArray();
-                }
-
-                conn.Close();
+                var getAllChildrenCategoriesCommand = CreateCommand(commandTemplate, categoryIds);
+                result = await DbContext.ExecuteArrayAsync<string>(getAllChildrenCategoriesCommand.Text, getAllChildrenCategoriesCommand.Parameters);
             }
 
             return result ?? new string[0];
@@ -421,6 +411,34 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
         {
             var result = new GenericSearchResult<AssociationEntity>();
 
+            var countSqlCommandText = @"
+                ;WITH Association_CTE AS
+                (
+	                SELECT *
+	                FROM Association
+	                WHERE ItemId IN ({0})
+                "
+                                      + (!string.IsNullOrEmpty(criteria.Group) ? $" AND AssociationType = @group" : string.Empty) +
+                                      @"), Category_CTE AS
+                (
+	                SELECT AssociatedCategoryId Id
+	                FROM Association_CTE
+	                WHERE AssociatedCategoryId IS NOT NULL
+	                UNION ALL
+	                SELECT c.Id
+	                FROM Category c
+	                INNER JOIN Category_CTE cte ON c.ParentCategoryId = cte.Id
+                ),
+                Item_CTE AS 
+                (
+	                SELECT  i.Id
+	                FROM (SELECT DISTINCT Id FROM Category_CTE) c
+	                LEFT JOIN Item i ON c.Id=i.CategoryId WHERE i.ParentId IS NULL
+	                UNION
+	                SELECT AssociatedItemId Id FROM Association_CTE
+                ) 
+                SELECT COUNT(Id) FROM Item_CTE";
+
             var querySqlCommandText = @"
                     ;WITH Association_CTE AS
                     (
@@ -475,14 +493,16 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
                     SELECT  * FROM Item_CTE WHERE AssociatedItemId IS NOT NULL ORDER BY Priority " +
                     $"OFFSET {criteria.Skip} ROWS FETCH NEXT {criteria.Take} ROWS ONLY";
 
+            var countSqlCommand = CreateCommand(countSqlCommandText, criteria.ObjectIds);
             var querySqlCommand = CreateCommand(querySqlCommandText, criteria.ObjectIds);
             if (!string.IsNullOrEmpty(criteria.Group))
             {
+                countSqlCommand.Parameters = countSqlCommand.Parameters.Concat(new[] { new SqlParameter($"@group", criteria.Group) }).ToArray();
                 querySqlCommand.Parameters = querySqlCommand.Parameters.Concat(new[] { new SqlParameter($"@group", criteria.Group) }).ToArray();
             }
 
+            result.TotalCount = await DbContext.ExecuteScalarAsync<int>(countSqlCommand.Text, countSqlCommand.Parameters);
             result.Results = await Associations.FromSql(querySqlCommand.Text, querySqlCommand.Parameters).ToListAsync();
-            result.TotalCount = result.Results.Count;
 
             return result;
         }

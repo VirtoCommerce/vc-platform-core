@@ -69,7 +69,7 @@ namespace VirtoCommerce.Platform.Web.Swagger
                 c.DocumentFilter<TagsFilter>();
                 c.MapType<object>(() => new Schema { Type = "object" });
                 c.AddModulesXmlComments(services);
-                c.CustomSchemaIds(x => x.FriendlyId());
+                c.CustomSchemaIds(x => x.FriendlyId(true));
                 c.AddSecurityDefinition("OAuth2", new OAuth2Scheme
                 {
                     Type = "oauth2",
