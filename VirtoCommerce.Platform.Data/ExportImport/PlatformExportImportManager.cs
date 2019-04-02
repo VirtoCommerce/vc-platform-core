@@ -56,8 +56,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                 Modules = InnerGetModulesWithInterface(typeof(IImportSupport)).Select(x => new ExportModuleInfo
                 {
                     Id = x.Id,
-                    Version = x.Version.ToString(),
-                    ModuleName = x.ModuleName
+                    Version = x.Version.ToString()
                 }).ToArray()
             };
 
