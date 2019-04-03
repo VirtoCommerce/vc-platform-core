@@ -1,0 +1,84 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.489
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.Core", "VirtoCommerce.NotificationsModule.Core\VirtoCommerce.NotificationsModule.Core.csproj", "{561ABDC5-1F3F-4184-963A-EF9F83D986BB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.Data", "VirtoCommerce.NotificationsModule.Data\VirtoCommerce.NotificationsModule.Data.csproj", "{CDAC1E73-C543-48E8-819F-C324560901B7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.LiquidRenderer", "VirtoCommerce.NotificationsModule.LiquidRenderer\VirtoCommerce.NotificationsModule.LiquidRenderer.csproj", "{0C3EEF2E-C2F8-4575-A58D-17D67F30DF4F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.Notifications", "VirtoCommerce.NotificationsModule.Notifications\VirtoCommerce.NotificationsModule.Notifications.csproj", "{630AF9A7-C8BB-4EF7-A5FC-3C6921CFB825}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.SendGrid", "VirtoCommerce.NotificationsModule.SendGrid\VirtoCommerce.NotificationsModule.SendGrid.csproj", "{1C19C3F2-DD93-4CD0-8DA0-AC33E50ECA71}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.Smtp", "VirtoCommerce.NotificationsModule.Smtp\VirtoCommerce.NotificationsModule.Smtp.csproj", "{9C13D7A7-2266-49CC-9B53-606F58F768B6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.Tests", "VirtoCommerce.NotificationsModule.Tests\VirtoCommerce.NotificationsModule.Tests.csproj", "{4F1A2B62-281A-441C-AD3E-98226F03FEDB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.Web", "VirtoCommerce.NotificationsModule.Web\VirtoCommerce.NotificationsModule.Web.csproj", "{CD5F4C09-D5ED-42B1-8867-83605D1B8FD0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsSampleModule.Web", "VirtoCommerce.NotificationsSampleModule.Web\VirtoCommerce.NotificationsSampleModule.Web.csproj", "{77DA65B1-8ABD-43B8-B79C-D6365B16B25C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Core", "..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj", "{946ABAA7-D9E7-455F-A10F-7BE772B28300}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Data", "..\..\VirtoCommerce.Platform.Data\VirtoCommerce.Platform.Data.csproj", "{084AFF6E-567D-4CBA-AD3E-4EC5CA2367EA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{561ABDC5-1F3F-4184-963A-EF9F83D986BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{561ABDC5-1F3F-4184-963A-EF9F83D986BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{561ABDC5-1F3F-4184-963A-EF9F83D986BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{561ABDC5-1F3F-4184-963A-EF9F83D986BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CDAC1E73-C543-48E8-819F-C324560901B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDAC1E73-C543-48E8-819F-C324560901B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDAC1E73-C543-48E8-819F-C324560901B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDAC1E73-C543-48E8-819F-C324560901B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C3EEF2E-C2F8-4575-A58D-17D67F30DF4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C3EEF2E-C2F8-4575-A58D-17D67F30DF4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C3EEF2E-C2F8-4575-A58D-17D67F30DF4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C3EEF2E-C2F8-4575-A58D-17D67F30DF4F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{630AF9A7-C8BB-4EF7-A5FC-3C6921CFB825}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{630AF9A7-C8BB-4EF7-A5FC-3C6921CFB825}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{630AF9A7-C8BB-4EF7-A5FC-3C6921CFB825}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{630AF9A7-C8BB-4EF7-A5FC-3C6921CFB825}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C19C3F2-DD93-4CD0-8DA0-AC33E50ECA71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C19C3F2-DD93-4CD0-8DA0-AC33E50ECA71}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C19C3F2-DD93-4CD0-8DA0-AC33E50ECA71}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C19C3F2-DD93-4CD0-8DA0-AC33E50ECA71}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C13D7A7-2266-49CC-9B53-606F58F768B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C13D7A7-2266-49CC-9B53-606F58F768B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C13D7A7-2266-49CC-9B53-606F58F768B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C13D7A7-2266-49CC-9B53-606F58F768B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F1A2B62-281A-441C-AD3E-98226F03FEDB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F1A2B62-281A-441C-AD3E-98226F03FEDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F1A2B62-281A-441C-AD3E-98226F03FEDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F1A2B62-281A-441C-AD3E-98226F03FEDB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD5F4C09-D5ED-42B1-8867-83605D1B8FD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD5F4C09-D5ED-42B1-8867-83605D1B8FD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD5F4C09-D5ED-42B1-8867-83605D1B8FD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD5F4C09-D5ED-42B1-8867-83605D1B8FD0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77DA65B1-8ABD-43B8-B79C-D6365B16B25C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77DA65B1-8ABD-43B8-B79C-D6365B16B25C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77DA65B1-8ABD-43B8-B79C-D6365B16B25C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77DA65B1-8ABD-43B8-B79C-D6365B16B25C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{946ABAA7-D9E7-455F-A10F-7BE772B28300}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{946ABAA7-D9E7-455F-A10F-7BE772B28300}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{946ABAA7-D9E7-455F-A10F-7BE772B28300}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{946ABAA7-D9E7-455F-A10F-7BE772B28300}.Release|Any CPU.Build.0 = Release|Any CPU
+		{084AFF6E-567D-4CBA-AD3E-4EC5CA2367EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{084AFF6E-567D-4CBA-AD3E-4EC5CA2367EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{084AFF6E-567D-4CBA-AD3E-4EC5CA2367EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{084AFF6E-567D-4CBA-AD3E-4EC5CA2367EA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EF86C9C2-2D08-4D54-BDB2-9529400059E6}
+	EndGlobalSection
+EndGlobal

@@ -22,7 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Tests\VirtoCommerce.Platform.Tests.csproj" />
     <ProjectReference Include="..\VirtoCommerce.PricingModule.Core\VirtoCommerce.PricingModule.Core.csproj" />
     <ProjectReference Include="..\VirtoCommerce.PricingModule.Data\VirtoCommerce.PricingModule.Data.csproj" />
     <ProjectReference Include="..\VirtoCommerce.PricingModule.Web\VirtoCommerce.PricingModule.Web.csproj" />

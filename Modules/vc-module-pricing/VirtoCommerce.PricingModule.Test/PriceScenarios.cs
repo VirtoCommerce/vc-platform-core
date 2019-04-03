@@ -48,7 +48,7 @@ namespace VirtoCommerce.PricingModule.Test
                 PricelistIds = new[] { "Pricelist 1", "Pricelist 2", "Pricelist 3" }
             };
 
-            var mockPrices = new TestAsyncEnumerable<PriceEntity>(new List<PriceEntity> {
+            var mockPrices = new Common.TestAsyncEnumerable<PriceEntity>(new List<PriceEntity> {
                 new PriceEntity { List = 10, MinQuantity = 2, PricelistId = "Pricelist 1", Id = "1", ProductId = "ProductId" },
 
                 new PriceEntity { List = 9, MinQuantity = 1, PricelistId = "Pricelist 2", Id = "2", ProductId = "ProductId" },

@@ -8,9 +8,8 @@ using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Model;
 using VirtoCommerce.MarketingModule.Data.Repositories;
 using VirtoCommerce.MarketingModule.Data.Services;
+using VirtoCommerce.MarketingModule.Test.Common;
 using VirtoCommerce.Platform.Core.Domain;
-using VirtoCommerce.Platform.Core.Serialization;
-using VirtoCommerce.Platform.Tests.Common;
 using Xunit;
 
 namespace VirtoCommerce.MarketingModule.Test
