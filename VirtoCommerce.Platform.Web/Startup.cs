@@ -138,6 +138,7 @@ namespace VirtoCommerce.Platform.Web
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            services.AddAuthentication().AddCookie();
             services.AddSecurityServices(options =>
             {
                 options.NonEditableUsers = new[] { "admin" };

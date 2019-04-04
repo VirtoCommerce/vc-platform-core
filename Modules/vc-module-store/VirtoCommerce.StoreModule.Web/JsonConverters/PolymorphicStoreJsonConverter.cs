@@ -4,11 +4,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.CoreModule.Core.Shipping;
-using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Model.Search;
-using VirtoCommerce.TaxModule.Core.Model;
 
 namespace VirtoCommerce.StoreModule.Web.JsonConverters
 {
@@ -18,7 +16,6 @@ namespace VirtoCommerce.StoreModule.Web.JsonConverters
 
         private readonly IPaymentMethodsRegistrar _paymentMethodsService;
         private readonly IShippingMethodsRegistrar _shippingMethodsService;
-        private readonly ITaxProviderRegistrar _taxService;
         public PolymorphicStoreJsonConverter(IPaymentMethodsRegistrar paymentMethodsService, IShippingMethodsRegistrar shippingMethodsService)
         {
             _paymentMethodsService = paymentMethodsService;
