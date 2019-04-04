@@ -8,8 +8,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Notifications
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.LiquidRenderer", "VirtoCommerce.NotificationsModule.LiquidRenderer\VirtoCommerce.NotificationsModule.LiquidRenderer.csproj", "{0C3EEF2E-C2F8-4575-A58D-17D67F30DF4F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.Notifications", "VirtoCommerce.NotificationsModule.Notifications\VirtoCommerce.NotificationsModule.Notifications.csproj", "{630AF9A7-C8BB-4EF7-A5FC-3C6921CFB825}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.SendGrid", "VirtoCommerce.NotificationsModule.SendGrid\VirtoCommerce.NotificationsModule.SendGrid.csproj", "{1C19C3F2-DD93-4CD0-8DA0-AC33E50ECA71}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.NotificationsModule.Smtp", "VirtoCommerce.NotificationsModule.Smtp\VirtoCommerce.NotificationsModule.Smtp.csproj", "{9C13D7A7-2266-49CC-9B53-606F58F768B6}"
@@ -42,10 +40,6 @@ Global
 		{0C3EEF2E-C2F8-4575-A58D-17D67F30DF4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C3EEF2E-C2F8-4575-A58D-17D67F30DF4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C3EEF2E-C2F8-4575-A58D-17D67F30DF4F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{630AF9A7-C8BB-4EF7-A5FC-3C6921CFB825}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{630AF9A7-C8BB-4EF7-A5FC-3C6921CFB825}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{630AF9A7-C8BB-4EF7-A5FC-3C6921CFB825}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{630AF9A7-C8BB-4EF7-A5FC-3C6921CFB825}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1C19C3F2-DD93-4CD0-8DA0-AC33E50ECA71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1C19C3F2-DD93-4CD0-8DA0-AC33E50ECA71}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C19C3F2-DD93-4CD0-8DA0-AC33E50ECA71}.Release|Any CPU.ActiveCfg = Release|Any CPU
