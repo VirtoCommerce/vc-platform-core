@@ -78,6 +78,7 @@ namespace VirtoCommerce.Platform.Web
 
             PlatformVersion.CurrentVersion = SemanticVersion.Parse(Microsoft.Extensions.PlatformAbstractions.PlatformServices.Default.Application.ApplicationVersion);
 
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddPlatformServices(Configuration);
             services.AddSecurityServices();
 

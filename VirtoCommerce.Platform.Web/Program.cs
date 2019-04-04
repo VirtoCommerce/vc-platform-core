@@ -22,8 +22,8 @@ namespace VirtoCommerce.Platform.Web
                   //https://docs.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-2.2#logging-in-azure
                   logging.AddAzureWebAppDiagnostics();
               })
-              .UseKestrel(options => options.Limits.MaxRequestBodySize = null)
-              .UseStartup<Startup>();
+              .UseStartup<Startup>()
+              .ConfigureKestrel((context, options) => { options.Limits.MaxRequestBodySize = null; });
 
     }
 }
