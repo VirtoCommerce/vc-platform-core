@@ -20,7 +20,7 @@ namespace VirtoCommerce.Platform.Security.Authorization
             // If the user identity has claim named "limited_permissions", this attribute should authorize only permissions listed in that claim. Any permissions that are required by this attribute but
             // not listed in the claim should cause this method to return false. However, if permission limits of user identity are not defined ("limited_permissions" claim is missing),
             // then no limitations should be applied to the permissions.
-            if (context.User.Identity.AuthenticationType == IdentityConstants.ApplicationScheme && limitedPermissionsClaim != null)
+            if (limitedPermissionsClaim != null)
             {
                 var limitedPermissions = limitedPermissionsClaim.Split(PlatformConstants.Security.Claims.PermissionClaimTypeDelimiter, StringSplitOptions.RemoveEmptyEntries) ?? new string[0];
 
