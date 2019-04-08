@@ -129,7 +129,6 @@
                 "virtual-catalog-item-name": "Virtual catalog",
                 "virtual-catalog-item-description": "A subset of products and categories found in master catalogs."
             },
-
             "catalog-property-list": {
                 "subtitle": "Catalog properties",
                 "labels": {
@@ -218,7 +217,6 @@
                 "title": "Select Catalog",
                 "subtitle": "Creating a Link inside virtual catalog"
             },
-
             "property-valueType": {
                 "title": "{{name}} value type",
                 "subtitle": "Change value type"
@@ -733,6 +731,11 @@
         "Catalog.Search.UseFullObjectIndexStoring": {
             "description": "Store serialized catalog objects in the index and return them in search results",
             "title": "Store serialized catalog objects in the index"
+        }
+    },
+    "module": {
+        "VirtoCommerce.Catalog": {
+            "description": "Export/Import catalogs, categories, products, properties with images binary if you check binary flag"
         }
     }
 }

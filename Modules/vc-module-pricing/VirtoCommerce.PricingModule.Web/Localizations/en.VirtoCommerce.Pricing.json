@@ -110,8 +110,7 @@
                     "priority": "Priority",
                     "prices-count": "Prices count"
                 },
-                "no-assignments":
-                    "Catalog does not have assigned price lists. Please assign a price list by following this link ",
+                "no-assignments": "Catalog does not have assigned price lists. Please assign a price list by following this link ",
                 "manage-pricelists": "Manage pricing"
             },
             "item-prices": {
@@ -175,7 +174,6 @@
             "add-selected": "Add selected"
         }
     },
-
     "permissions": {
         "pricing:access": "Open pricing menu",
         "pricing:create": "Create pricing data",
@@ -183,11 +181,15 @@
         "pricing:update": "Update pricing data",
         "pricing:delete": "Delete pricing data"
     },
-
     "settings": {
         "Pricing.ExportImport.PageSize": {
             "title": "The page size being used for Export / Import",
             "description": "High value may cause slow performance"
-        } 
+        }
+    },
+    "module": {
+        "VirtoCommerce.Pricing": {
+            "description": "Export/Import price lists, assignments and prices"
+        }
     }
 }

@@ -154,5 +154,10 @@
             "title": "Enable image processing job",
             "description": "Flag for activating background image processing job (requires restart)"
         }
+    },
+    "module": {
+        "VirtoCommerce.ImageTools": {
+            "description": "Export/Import saved tasks and options"
+        }
     }
 }

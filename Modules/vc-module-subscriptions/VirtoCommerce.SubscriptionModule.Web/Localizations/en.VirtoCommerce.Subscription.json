@@ -121,7 +121,6 @@
             "new-order": "Create Order"
         }
     },
-
     "permissions": {
         "subscription:access": "Open subscriptions menu",
         "subscription:create": "Create subscription data",
@@ -130,7 +129,6 @@
         "subscription:delete": "Delete subscription",
         "paymentplan:manage": "Payment plan manage"
     },
-
     "settings": {
         "Subscription.EnableSubscriptions": {
             "title": "Enable subscriptions",
@@ -167,6 +165,11 @@
         "Subscription.ExportImport.Description": {
             "title": "Export/Import description",
             "description": "Module description in platform export/import wizard"
+        }
+    },
+    "module": {
+        "VirtoCommerce.Subscription": {
+            "description": "Export/Import of subscriptions"
         }
     }
 }
