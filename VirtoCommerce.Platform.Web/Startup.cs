@@ -121,7 +121,7 @@ namespace VirtoCommerce.Platform.Web
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                 }
             )
-            .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddDbContext<SecurityDbContext>(options =>
             {
