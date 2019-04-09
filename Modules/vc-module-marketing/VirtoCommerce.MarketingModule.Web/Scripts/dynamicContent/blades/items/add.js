@@ -1,4 +1,4 @@
-﻿angular.module('virtoCommerce.marketingModule')
+angular.module('virtoCommerce.marketingModule')
 .controller('virtoCommerce.marketingModule.addContentItemsElementController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.catalogModule.categories', 'virtoCommerce.catalogModule.items', 'platformWebApp.dynamicProperties.api', function ($scope, bladeNavigationService, categories, items, dynamicProperties) {
 	var blade = $scope.blade;
 	$scope.pageSettings = {};
@@ -14,7 +14,7 @@
 
 	blade.addContentItem = function () {
 		var start = $scope.pageSettings.currentPage * $scope.pageSettings.itemsPerPageCount - $scope.pageSettings.itemsPerPageCount;
-	    dynamicProperties.getPropertiesForType({ typeName: 'VirtoCommerce.MarketingModule.Core.Model.DynamicContentItem' }, { skip: start, take: $scope.pageSettings.itemsPerPageCount }, function (data) {
+		dynamicProperties.query({ id: 'VirtoCommerce.MarketingModule.Core.Model.DynamicContentItem' }, function (data) {
 	        angular.forEach(data, function (item){
 	        	item.values = [];
 	        	item.displayNames = [];

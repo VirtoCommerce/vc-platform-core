@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -93,7 +94,12 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<ActionResult<object[]>> GetArrayAsync(string name)
         {
-            var result = (await _settingsManager.GetObjectSettingAsync(name)).AllowedValues;
+            var setting = await _settingsManager.GetObjectSettingAsync(name);
+            object[] result = null;
+            if (setting != null)
+            {
+                result = setting.AllowedValues ?? new[] { setting.Value };
+            }
             return Ok(result);
         }
 

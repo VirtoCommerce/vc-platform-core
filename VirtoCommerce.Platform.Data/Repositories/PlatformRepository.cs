@@ -30,9 +30,9 @@ namespace VirtoCommerce.Platform.Data.Repositories
 
         public virtual async Task<DynamicPropertyEntity[]> GetObjectDynamicPropertiesAsync(string[] objectTypeNames, string[] objectIds)
         {
-            var properties = DynamicProperties.Include(x => x.DisplayNames)
+            var properties = await DynamicProperties.Include(x => x.DisplayNames)
                                               .OrderBy(x => x.Name)
-                                              .Where(x => objectTypeNames.Contains(x.ObjectType)).ToArray();
+                                              .Where(x => objectTypeNames.Contains(x.ObjectType)).ToArrayAsync();
 
             var propertyIds = properties.Select(x => x.Id).ToArray();
             var proprValues = await DynamicPropertyObjectValues.Include(x => x.DictionaryItem.DisplayNames)

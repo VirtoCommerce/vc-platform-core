@@ -21,7 +21,7 @@ namespace VirtoCommerce.Platform.Core.DynamicProperties
         #region ICloneable members
         public override object Clone()
         {
-            var result = Clone() as DynamicPropertyObjectValue;
+            var result = base.Clone() as DynamicPropertyObjectValue;
             if (Value is ICloneable cloneableValue)
             {
                 result.Value = cloneableValue.Clone();
