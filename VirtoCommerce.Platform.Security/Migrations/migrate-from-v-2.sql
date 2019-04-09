@@ -16,10 +16,10 @@ ALTER TABLE [AspNetUsers] ADD [ConcurrencyStamp] nvarchar(max);
 ALTER TABLE [AspNetUsers] ADD [LockoutEnd] datetimeoffset;
 ALTER TABLE [AspNetUsers] ADD [StoreId] nvarchar(128);
 ALTER TABLE [AspNetUsers] ADD [MemberId] nvarchar(128);
-ALTER TABLE [AspNetUsers] ADD [IsAdministrator] BIT NOT NULL;
+ALTER TABLE [AspNetUsers] ADD [IsAdministrator] BIT NOT NULL Default(0);
 ALTER TABLE [AspNetUsers] ADD [PhotoUrl] nvarchar(2048);
 ALTER TABLE [AspNetUsers] ADD [UserType] nvarchar(64);
-ALTER TABLE [AspNetUsers] ADD [PasswordExpired] bit NOT NULL;
+ALTER TABLE [AspNetUsers] ADD [PasswordExpired] bit NOT NULL Default(0);
 GO
 
 CREATE TABLE [dbo].[AspNetRoleClaims](
@@ -152,10 +152,9 @@ INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUE
 INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20180709123002_SettingsCleanup', '2.1.8-servicing-32085')
 GO
 
-UPDATE [AspNetUsers] SET SecurityStamp = 'E5STZEUPBSKSY35N74WEILHM7U56RM5T' where Id = '1eb2fa8ac6574541afdb525833dadb46'
-UPDATE [AspNetUsers] SET ConcurrencyStamp = 'b9523e0f-830b-4f8f-95a0-5e12e7262f88' where Id = '1eb2fa8ac6574541afdb525833dadb46'
-UPDATE [AspNetUsers] SET NormalizedUserName = 'ADMIN' where Id = '1eb2fa8ac6574541afdb525833dadb46'
-INSERT INTO [dbo].[AspNetUserRoles] ([UserId],[RoleId]) VALUES ('1eb2fa8ac6574541afdb525833dadb46','894f3c74-cadb-47c0-8cdd-c738526aab47')
+UPDATE [AspNetUsers] SET SecurityStamp = 'E5STZEUPBSKSY35N74WEILHM7U56RM5T', ConcurrencyStamp = 'b9523e0f-830b-4f8f-95a0-5e12e7262f88', NormalizedUserName = 'ADMIN' where Id = '1eb2fa8ac6574541afdb525833dadb46'
+INSERT INTO [dbo].[AspNetRoles] ([Id],[Name],[NormalizedName],[ConcurrencyStamp]) VALUES ('f7b50ba1-8e90-4c2b-a947-874229ca917b','Administrator','ADMINISTRATOR','f07f36b3-93b9-48fc-824e-293cf2b7ee46')
+INSERT INTO [dbo].[AspNetUserRoles] ([UserId],[RoleId]) VALUES ('1eb2fa8ac6574541afdb525833dadb46','f7b50ba1-8e90-4c2b-a947-874229ca917b')
 GO
 
 

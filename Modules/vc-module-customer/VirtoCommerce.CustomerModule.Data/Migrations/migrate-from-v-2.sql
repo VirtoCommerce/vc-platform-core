@@ -1,6 +1,6 @@
-INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId][ProductVersion]) VALUES ('20180718074308_InitialCustomer' '2.2.3-servicing-35854')
+INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20180718074308_InitialCustomer', '2.2.3-servicing-35854')
 
-ALTER TABLE [Member] ADD [Discriminator] nvarchar(max) NOT NULL
+ALTER TABLE [Member] ADD [Discriminator] nvarchar(max) NOT NULL DEFAULT ('Member')
 ALTER TABLE [Member] ADD [FirstName] nvarchar(128) NULL
 ALTER TABLE [Member] ADD [MiddleName] nvarchar(128) NULL
 ALTER TABLE [Member] ADD [LastName] nvarchar(128) NULL
@@ -21,4 +21,18 @@ ALTER TABLE [Member] ADD [OwnerId] nvarchar(128) NULL
 ALTER TABLE [Member] ADD [SiteUrl] nvarchar(2048) NULL
 ALTER TABLE [Member] ADD [LogoUrl] nvarchar(2048) NULL
 ALTER TABLE [Member] ADD [GroupName] nvarchar(64) NULL
+
+UPDATE Member SET Discriminator = CONCAT(MemberType, 'Entity') , FirstName = c.FirstName, MiddleName = c.MiddleName, LastName = c.LastName, FullName = c.FullName, TimeZone = c.TimeZone,
+	DefaultLanguage = c.DefaultLanguage, BirthDate = c.BirthDate, TaxpayerId = c.TaxpayerId, PreferredDelivery = c.PreferredDelivery, PreferredCommunication = c.PreferredCommunication, 
+	PhotoUrl = c.PhotoUrl, Salutation = c.Salutation
+FROM Member m INNER JOIN Contact c ON c.Id = m.Id
+
+UPDATE Member SET Discriminator = CONCAT(MemberType, 'Entity') , [Type] = o.OrgType, [Description] = o.Description, BusinessCategory = o.BusinessCategory, OwnerId = o.OwnerId
+FROM Member m INNER JOIN Organization o ON o.Id = m.Id
+
+UPDATE Member SET Discriminator = CONCAT(MemberType, 'Entity') , [Description] = v.Description, SiteUrl = v.SiteUrl, LogoUrl = v.LogoUrl, GroupName = v.GroupName
+FROM Member m INNER JOIN Vendor v ON v.Id = m.Id
+
+
+
 
