@@ -9,6 +9,10 @@ namespace VirtoCommerce.CoreModule.Data.Shipping
 {
     public class FixedRateShippingMethod : ShippingMethod
     {
+        public FixedRateShippingMethod() : base("FixedRate")
+        {
+        }
+
         private decimal GroundOptionRate
         {
             get

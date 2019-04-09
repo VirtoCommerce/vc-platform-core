@@ -18,9 +18,9 @@ using VirtoCommerce.CoreModule.Core.Package;
 using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.CoreModule.Core.Shipping;
-using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.CoreModule.Data.Currency;
 using VirtoCommerce.CoreModule.Data.Package;
+using VirtoCommerce.CoreModule.Data.Payment;
 using VirtoCommerce.CoreModule.Data.Registrars;
 using VirtoCommerce.CoreModule.Data.Repositories;
 using VirtoCommerce.CoreModule.Data.Seo;
@@ -85,6 +85,12 @@ namespace VirtoCommerce.CoreModule.Web
             AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoTimeZone>();
             AbstractTypeFactory<IConditionTree>.RegisterType<ConditionGeoZipCode>();
             AbstractTypeFactory<IConditionTree>.RegisterType<UserGroupsContainsCondition>();
+
+            var paymentMethodsRegistrar = appBuilder.ApplicationServices.GetRequiredService<IPaymentMethodsRegistrar>();
+            paymentMethodsRegistrar.RegisterPaymentMethod(() => new DefaultManualPaymentMethod());
+
+            var shippingMethodsRegistrar = appBuilder.ApplicationServices.GetRequiredService<IShippingMethodsRegistrar>();
+            shippingMethodsRegistrar.RegisterShippingMethod(() => new FixedRateShippingMethod());
 
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {

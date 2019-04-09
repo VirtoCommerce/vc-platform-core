@@ -7,6 +7,16 @@ namespace VirtoCommerce.CoreModule.Core.Shipping
 {
     public abstract class ShippingMethod : Entity, IHasSettings
     {
+        public ShippingMethod()
+        {
+
+        }
+
+        public ShippingMethod(string code) : this()
+        {
+            Code = code;
+        }
+
         /// <summary>
         /// Method identity property (System name)
         /// </summary>

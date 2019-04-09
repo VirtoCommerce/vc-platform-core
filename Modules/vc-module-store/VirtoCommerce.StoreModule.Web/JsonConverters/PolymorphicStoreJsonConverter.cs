@@ -45,12 +45,12 @@ namespace VirtoCommerce.StoreModule.Web.JsonConverters
             }
             else if (objectType == typeof(PaymentMethod))
             {
-                var paymentGatewayCode = obj["code"].Value<string>();
+                var paymentGatewayCode = obj.GetValue("code", StringComparison.InvariantCultureIgnoreCase).Value<string>();
                 retVal = _paymentMethodsService.GetAllPaymentMethods().FirstOrDefault(x => x.Code.EqualsInvariant(paymentGatewayCode));
             }
             else if (objectType == typeof(ShippingMethod))
             {
-                var shippingGatewayCode = obj["code"].Value<string>();
+                var shippingGatewayCode = obj.GetValue("code", StringComparison.InvariantCultureIgnoreCase).Value<string>();
                 retVal = _shippingMethodsService.GetAllShippingMethods().FirstOrDefault(x => x.Code.EqualsInvariant(shippingGatewayCode));
             }
 
