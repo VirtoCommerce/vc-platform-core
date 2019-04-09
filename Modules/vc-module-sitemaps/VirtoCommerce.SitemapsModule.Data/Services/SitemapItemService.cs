@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -120,7 +121,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                 pkMap.ResolvePrimaryKeys();
             }
 
-            SitemapItemSearchCacheRegion.ExpireRegion();
+            ClearCacheFor(sitemapItems.Select(x => x.SitemapId).Distinct());
         }
 
         public virtual async Task RemoveAsync(string[] itemIds)
@@ -140,9 +141,18 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                         repository.Remove(sitemapItemEntity);
                     }
                     await repository.UnitOfWork.CommitAsync();
+                    ClearCacheFor(sitemapItemEntities.Select(x => x.SitemapId).Distinct());
                 }
             }
+        }
 
+        protected virtual void ClearCacheFor(IEnumerable<string> sitemapIds)
+        {
+            foreach (var sitemapId in sitemapIds)
+            {
+                SitemapCacheRegion.ExpireSitemap(sitemapId);
+            }
+            SitemapSearchCacheRegion.ExpireRegion();
             SitemapItemSearchCacheRegion.ExpireRegion();
         }
     }

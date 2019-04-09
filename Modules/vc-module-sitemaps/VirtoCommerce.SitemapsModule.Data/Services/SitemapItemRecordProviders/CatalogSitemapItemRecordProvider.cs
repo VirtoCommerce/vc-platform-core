@@ -1,7 +1,16 @@
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CatalogModule.Core.Model.Search;
+using VirtoCommerce.CatalogModule.Core.Search;
+using VirtoCommerce.CatalogModule.Core.Services;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SitemapsModule.Core.Models;
 using VirtoCommerce.SitemapsModule.Core.Services;
 using VirtoCommerce.StoreModule.Core.Model;
@@ -15,128 +24,186 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
         {
         }
 
-        public Task LoadSitemapItemRecordsAsync(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
+        public CatalogSitemapItemRecordProvider(
+            ICategoryService categoryService,
+            IItemService itemService,
+            IListEntrySearchService listEntrySearchService,
+            ISitemapUrlBuilder urlBuilder,
+            ISettingsManager settingsManager)
+            : base(settingsManager, urlBuilder)
         {
-            // TODO: this implementation uses ICatalogSearchService which is not included to the CatalogModule yet, so this method does nothing.
-            return Task.CompletedTask;
+            CategoryService = categoryService;
+            ItemService = itemService;
+            ListEntrySearchService = listEntrySearchService;
         }
 
-        // TODO: uncomment the proper implementation after adding ICatalogSearchService to the CatalogModule
+        protected ICategoryService CategoryService { get; }
+        protected IItemService ItemService { get; }
+        protected IListEntrySearchService ListEntrySearchService { get; }
 
-        //public CatalogSitemapItemRecordProvider(
-        //    ICategoryService categoryService,
-        //    IItemService itemService,
-        //    ICatalogSearchService catalogSearchService,
-        //    ISitemapUrlBuilder urlBuilder,
-        //    ISettingsManager settingsManager)
-        //    : base(settingsManager, urlBuilder)
-        //{
-        //    CategoryService = categoryService;
-        //    ItemService = itemService;
-        //    CatalogSearchService = catalogSearchService;
-        //}
+        public virtual async Task LoadSitemapItemRecordsAsync(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
+        {
+            await ProcesseCategorySitemapItems(store, sitemap, baseUrl, progressCallback);
 
-        //protected ICategoryService CategoryService { get; }
-        //protected IItemService ItemService { get; }
-        //protected ICatalogSearchService CatalogSearchService { get; }
+            await ProcesseProductSitemapItem(store, sitemap, baseUrl);
+        }
 
-        //public virtual Task LoadSitemapItemRecordsAsync(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
-        //{
-        //    var progressInfo = new ExportImportProgressInfo();
+        private SitemapItemOptions GetProductOptions()
+        {
+            return new SitemapItemOptions
+            {
+                Priority = SettingsManager.GetValue("Sitemap.ProductPagePriority", 1.0M),
+                UpdateFrequency = SettingsManager.GetValue("Sitemap.ProductPageUpdateFrequency", UpdateFrequency.Daily)
+            };
+        }
 
-        //    var categoryOptions = new SitemapItemOptions
-        //    {
-        //        Priority = SettingsManager.GetValue("Sitemap.CategoryPagePriority", .7M),
-        //        UpdateFrequency = SettingsManager.GetValue("Sitemap.CategoryPageUpdateFrequency", UpdateFrequency.Weekly)
-        //    };
-        //    var productOptions = new SitemapItemOptions
-        //    {
-        //        Priority = SettingsManager.GetValue("Sitemap.ProductPagePriority", 1.0M),
-        //        UpdateFrequency = SettingsManager.GetValue("Sitemap.ProductPageUpdateFrequency", UpdateFrequency.Daily)
-        //    };
-        //    var searchBunchSize = SettingsManager.GetValue("Sitemap.SearchBunchSize", 500);
+        private async Task ProcesseProductSitemapItem(Store store, Sitemap sitemap, string baseUrl)
+        {
+            var productOptions = GetProductOptions();
+            var productSitemapItems = sitemap.Items.Where(si => si.ObjectType.EqualsInvariant(SitemapItemTypes.Product));
+            var productIds = productSitemapItems.Select(si => si.ObjectId).ToArray();
+            var itemResponceGroup = (ItemResponseGroup.Seo | ItemResponseGroup.Outlines).ToString();
 
-        //    var categorySitemapItems = sitemap.Items.Where(x => x.ObjectType.EqualsInvariant(SitemapItemTypes.Category));
-        //    var categoryIds = categorySitemapItems.Select(x => x.ObjectId).ToArray();
-        //    var categories = CategoryService.GetByIds(categoryIds, CategoryResponseGroup.WithSeo | CategoryResponseGroup.WithOutlines).Where(c => !c.IsActive.HasValue || c.IsActive.Value);
+            var products = (await ItemService.GetByIdsAsync(productIds, ItemResponseGroup.Full.ToString())).Where(p => !p.IsActive.HasValue || p.IsActive.Value);
 
-        //    var processedCount = 0;
-        //    var totalCount = categories.Count();
-        //    progressInfo.Description = $"Catalog: start generating records for {totalCount} categories";
-        //    progressCallback?.Invoke(progressInfo);
+            foreach (var sitemapItem in productSitemapItems)
+            {
+                var product = products.FirstOrDefault(x => x.Id == sitemapItem.ObjectId);
+                var itemRecords = GetSitemapItemRecords(store, productOptions, sitemap.UrlTemplate, baseUrl, product);
+                sitemapItem.ItemsRecords.AddRange(itemRecords);
+            }
+        }
 
-        //    foreach (var sitemapItem in categorySitemapItems)
-        //    {       
-        //        var category = categories.FirstOrDefault(x => x.Id == sitemapItem.ObjectId);
-        //        if (category != null)
-        //        {
-        //            sitemapItem.ItemsRecords = GetSitemapItemRecords(store, categoryOptions, sitemap.UrlTemplate, baseUrl, category);
-        //            if (category != null)
-        //            {
-        //                var catalogSearchCriteria = new Domain.Catalog.Model.SearchCriteria
-        //                {
-        //                    CategoryId = category.Id,
-        //                    ResponseGroup = SearchResponseGroup.WithCategories | SearchResponseGroup.WithOutlines,
-        //                    Skip = 0,                           
-        //                    Take = searchBunchSize,
-        //                    HideDirectLinkedCategories = true,
-        //                    SearchInChildren = true
-        //                };
-        //                var catalogSearchResult = CatalogSearchService.Search(catalogSearchCriteria);                    
+        private async Task ProcesseCategorySitemapItems(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback)
+        {
+            var productOptions = GetProductOptions();
+            var searchBunchSize = SettingsManager.GetValue("Sitemap.SearchBunchSize", 500);
 
-        //                foreach (var seoObj in catalogSearchResult.Categories.Where(c => !c.IsActive.HasValue || c.IsActive.Value))
-        //                {
-        //                    sitemapItem.ItemsRecords.AddRange(GetSitemapItemRecords(store, categoryOptions, sitemap.UrlTemplate, baseUrl, seoObj));
-        //                }
+            var categorySitemapItems = sitemap.Items.Where(x => x.ObjectType.EqualsInvariant(SitemapItemTypes.Category));
+            var categoryIds = categorySitemapItems.Select(x => x.ObjectId).ToArray();
+            var categoryResponceGroup = (CategoryResponseGroup.WithSeo | CategoryResponseGroup.WithOutlines).ToString();
+            var categories = (await CategoryService.GetByIdsAsync(categoryIds, CategoryResponseGroup.Full.ToString()))
+                                                   .Where(c => !c.IsActive.HasValue || c.IsActive.Value);
 
-        //                //Load all category products
-        //                catalogSearchCriteria.Take = 1;
-        //                catalogSearchCriteria.ResponseGroup = SearchResponseGroup.WithProducts | SearchResponseGroup.WithOutlines;
-        //                var productTotalCount = CatalogSearchService.Search(catalogSearchCriteria).ProductsTotalCount;
-        //                var itemRecords = new ConcurrentBag<SitemapItemRecord>();
-        //                Parallel.For(0, (int)Math.Ceiling(productTotalCount / (double)searchBunchSize), new ParallelOptions { MaxDegreeOfParallelism = 5 }, (i) =>
-        //                {
-        //                    var productSearchCriteria = new Domain.Catalog.Model.SearchCriteria
-        //                    {
-        //                        CategoryId = category.Id,
-        //                        ResponseGroup = SearchResponseGroup.WithProducts | SearchResponseGroup.WithOutlines,
-        //                        Skip = i * searchBunchSize,
-        //                        Take = searchBunchSize,
-        //                        HideDirectLinkedCategories = true,
-        //                        SearchInChildren = true,
-        //                        OnlyBuyable = true
-        //                    };
-        //                    var productSearchResult = CatalogSearchService.Search(productSearchCriteria);                  
+            var progressInfo = GetCategoryProgressInfo(progressCallback, categories.Count());
+            progressInfo.ProgressStarted();
 
-        //                    foreach (var product in productSearchResult.Products.Where(p => !p.IsActive.HasValue || p.IsActive.Value))
-        //                    {
-        //                        foreach (var record in GetSitemapItemRecords(store, productOptions, sitemap.UrlTemplate, baseUrl, product))
-        //                        {
-        //                            itemRecords.Add(record);
-        //                        }
-        //                    }
-        //                });
+            foreach (var sitemapItem in categorySitemapItems)
+            {
+                var category = categories.FirstOrDefault(x => x.Id == sitemapItem.ObjectId);
+                if (category == null) continue;
 
-        //                processedCount++;
-        //                progressInfo.Description = $"Catalog: generated records for {processedCount} of {totalCount} categories";
-        //                progressCallback?.Invoke(progressInfo);
+                var categoryItemRecords = await GetCategorySitemapItems(store, sitemap, baseUrl, searchBunchSize, category);
+                var productsItemRecords = await GetProductItemRecordsForCategory(store, sitemap, baseUrl, productOptions, searchBunchSize, category);
 
-        //                sitemapItem.ItemsRecords.AddRange(itemRecords);
-        //            }
-        //        }
-        //    }
+                sitemapItem.ItemsRecords.AddRange(categoryItemRecords);
+                sitemapItem.ItemsRecords.AddRange(productsItemRecords);
 
-        //    var productSitemapItems = sitemap.Items.Where(si => si.ObjectType.EqualsInvariant(SitemapItemTypes.Product));
-        //    var productIds = productSitemapItems.Select(si => si.ObjectId).ToArray();
-        //    var products = ItemService.GetByIds(productIds, ItemResponseGroup.Seo | ItemResponseGroup.Outlines).Where(p => !p.IsActive.HasValue || p.IsActive.Value);
-        //    foreach (var sitemapItem in productSitemapItems)
-        //    {
-        //        var product = products.FirstOrDefault(x => x.Id == sitemapItem.ObjectId);
-        //        var itemRecords = GetSitemapItemRecords(store, productOptions, sitemap.UrlTemplate, baseUrl, product);
-        //        sitemapItem.ItemsRecords.AddRange(itemRecords);
-        //    }
-        //
-        //    return Task.CompletedTask;
-        //}
+                progressInfo.NextProgress();
+            }
+        }
+
+        private async Task<ConcurrentBag<SitemapItemRecord>> GetProductItemRecordsForCategory(Store store, Sitemap sitemap, string baseUrl, SitemapItemOptions productOptions, int searchBunchSize, Category category)
+        {
+            //Load all category products
+            var productTotalCount = await GetTotalProductCount(category);
+
+            var itemRecords = new ConcurrentBag<SitemapItemRecord>();
+            Parallel.For(0, (int)Math.Ceiling(productTotalCount / (double)searchBunchSize), new ParallelOptions { MaxDegreeOfParallelism = 1 }, async (i) =>
+            {
+                var productSearchCriteria = new CatalogListEntrySearchCriteria
+                {
+                    CategoryId = category.Id,
+                    ResponseGroup = CategoryResponseGroup.Full.ToString(), // проверить с WithCategories - ответ должен быть тотже
+                    Skip = i * searchBunchSize,
+                    Take = searchBunchSize,
+                    HideDirectLinkedCategories = true,
+                    SearchInChildren = true,
+                    OnlyBuyable = true,
+                    ObjectType = KnownDocumentTypes.Product
+                };
+
+                var productSearchResult = await ListEntrySearchService.SearchAsync(productSearchCriteria);
+                var productIds = productSearchResult.ListEntries.Select(si => si.Id).ToArray();
+                var products = (await ItemService.GetByIdsAsync(productIds, ItemResponseGroup.Full.ToString())).Where(p => !p.IsActive.HasValue || p.IsActive.Value);
+
+                foreach (var product in products.Where(p => !p.IsActive.HasValue || p.IsActive.Value))
+                {
+                    foreach (var record in GetSitemapItemRecords(store, productOptions, sitemap.UrlTemplate, baseUrl, product))
+                    {
+                        itemRecords.Add(record);
+                    }
+                }
+            });
+            return itemRecords;
+        }
+
+        private async Task<int> GetTotalProductCount(Category category)
+        {
+            var catalogSearchCriteria = new CatalogListEntrySearchCriteria
+            {
+                CategoryId = category.Id,
+                ResponseGroup = CategoryResponseGroup.WithOutlines.ToString(), // SearchResponseGroup.WithProducts | SearchResponseGroup.WithOutlines;
+                Skip = 0,
+                Take = 1,
+                HideDirectLinkedCategories = true,
+                SearchInChildren = true,
+                ObjectType = KnownDocumentTypes.Product
+            };
+
+            var productTotalCount = (await ListEntrySearchService.SearchAsync(catalogSearchCriteria)).TotalCount;
+            return productTotalCount;
+        }
+
+        private async Task<ICollection<SitemapItemRecord>> GetCategorySitemapItems(Store store, Sitemap sitemap, string baseUrl, int searchBunchSize, Category category)
+        {
+            var categoryOptions = GetCategoryOptions();
+            var result = GetSitemapItemRecords(store, categoryOptions, sitemap.UrlTemplate, baseUrl, category);
+
+            var catalogSearchCriteria = new CatalogListEntrySearchCriteria
+            {
+                CategoryId = category.Id,
+                ResponseGroup = CategoryResponseGroup.Full.ToString(), // проверить с WithCategories - ответ должен быть тотже
+                Skip = 0,
+                Take = searchBunchSize,
+                HideDirectLinkedCategories = true,
+                SearchInChildren = true,
+                ObjectType = KnownDocumentTypes.Category
+            };
+
+            var catalogSearchResult = await ListEntrySearchService.SearchAsync(catalogSearchCriteria);
+
+            var categoryIds = catalogSearchResult.ListEntries.Select(x => x.Id).ToArray();
+            var categories = (await CategoryService.GetByIdsAsync(categoryIds, CategoryResponseGroup.Full.ToString()))
+                .Where(c => !c.IsActive.HasValue || c.IsActive.Value);
+
+            foreach (var seoObj in categories)
+            {
+                result.AddRange(GetSitemapItemRecords(store, categoryOptions, sitemap.UrlTemplate, baseUrl, seoObj));
+            }
+
+            return result;
+        }
+
+        private SitemapItemOptions GetCategoryOptions()
+        {
+            return new SitemapItemOptions
+            {
+                Priority = SettingsManager.GetValue("Sitemap.CategoryPagePriority", .7M),
+                UpdateFrequency = SettingsManager.GetValue("Sitemap.CategoryPageUpdateFrequency", UpdateFrequency.Weekly)
+            };
+        }
+
+        private SitemapProgressInfo GetCategoryProgressInfo(Action<ExportImportProgressInfo> progressCallback, long totalCount)
+        {
+            return new SitemapProgressInfo
+            {
+                StartDescriptionTemplate = "Catalog: start generating records for {0} categories",
+                EndDescriptionTemplate = "Catalog:  {0} categories generated",
+                ProgressDescriptionTemplate = "Catalog: generated records for {0} of {1} categories",
+                ProgressCallback = progressCallback,
+                TotalCount = totalCount
+            };
+        }
     }
 }
