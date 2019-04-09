@@ -211,6 +211,11 @@
         "Customer.ExportImport.PageSize": {
             "description": "Large values may decrease performance",
             "title": "The page size being used for Export / Import"
-        } 
+        }
+    },
+    "module": {
+        "VirtoCommerce.Customer": {
+            "description": "Export/Import contacts and organizations"
+        }
     }
 }
