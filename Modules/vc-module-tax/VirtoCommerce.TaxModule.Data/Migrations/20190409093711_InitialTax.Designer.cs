@@ -9,14 +9,14 @@ using VirtoCommerce.TaxModule.Data.Repositories;
 namespace VirtoCommerce.TaxModule.Data.Migrations
 {
     [DbContext(typeof(TaxDbContext))]
-    [Migration("20190329124545_Initial")]
-    partial class Initial
+    [Migration("20190409093711_InitialTax")]
+    partial class InitialTax
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
+                .HasAnnotation("ProductVersion", "2.2.3-servicing-35854")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -37,7 +37,8 @@ namespace VirtoCommerce.TaxModule.Data.Migrations
 
                     b.Property<int>("Priority");
 
-                    b.Property<string>("StoreId");
+                    b.Property<string>("StoreId")
+                        .HasMaxLength(128);
 
                     b.Property<string>("TypeName")
                         .IsRequired()

@@ -10,14 +10,14 @@ using VirtoCommerce.StoreModule.Data.Repositories;
 namespace VirtoCommerce.StoreModule.Data.Migrations
 {
     [DbContext(typeof(StoreDbContext))]
-    [Migration("20190329055738_RemoveTaxProvider")]
-    partial class RemoveTaxProvider
+    [Migration("20190409085836_InitialStore")]
+    partial class InitialStore
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
+                .HasAnnotation("ProductVersion", "2.2.3-servicing-35854")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 

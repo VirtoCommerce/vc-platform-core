@@ -2,7 +2,7 @@
 
 namespace VirtoCommerce.TaxModule.Data.Migrations
 {
-    public partial class Initial : Migration
+    public partial class InitialTax : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -16,7 +16,7 @@ namespace VirtoCommerce.TaxModule.Data.Migrations
                     TypeName = table.Column<string>(maxLength: 128, nullable: false),
                     LogoUrl = table.Column<string>(maxLength: 2048, nullable: true),
                     IsActive = table.Column<bool>(nullable: false),
-                    StoreId = table.Column<string>(nullable: true)
+                    StoreId = table.Column<string>(maxLength: 128, nullable: true)
                 },
                 constraints: table =>
                 {

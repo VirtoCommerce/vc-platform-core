@@ -149,30 +149,6 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "StoreTaxProvider",
-                columns: table => new
-                {
-                    Id = table.Column<string>(maxLength: 128, nullable: false),
-                    Code = table.Column<string>(maxLength: 128, nullable: false),
-                    Priority = table.Column<int>(nullable: false),
-                    Name = table.Column<string>(maxLength: 128, nullable: true),
-                    Description = table.Column<string>(nullable: true),
-                    LogoUrl = table.Column<string>(maxLength: 2048, nullable: true),
-                    IsActive = table.Column<bool>(nullable: false),
-                    StoreId = table.Column<string>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_StoreTaxProvider", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_StoreTaxProvider_Store_StoreId",
-                        column: x => x.StoreId,
-                        principalTable: "Store",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "StoreTrustedGroup",
                 columns: table => new
                 {
@@ -217,11 +193,6 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                 column: "StoreId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_StoreTaxProvider_StoreId",
-                table: "StoreTaxProvider",
-                column: "StoreId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_StoreTrustedGroup_StoreId",
                 table: "StoreTrustedGroup",
                 column: "StoreId");
@@ -243,9 +214,6 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "StoreShippingMethod");
-
-            migrationBuilder.DropTable(
-                name: "StoreTaxProvider");
 
             migrationBuilder.DropTable(
                 name: "StoreTrustedGroup");

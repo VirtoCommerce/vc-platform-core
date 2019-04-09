@@ -57,7 +57,7 @@ namespace VirtoCommerce.InventoryModule.Data.Migrations
                     PreorderAvailabilityDate = table.Column<DateTime>(nullable: true),
                     BackorderAvailabilityDate = table.Column<DateTime>(nullable: true),
                     Sku = table.Column<string>(maxLength: 128, nullable: false),
-                    FulfillmentCenterId = table.Column<string>(nullable: true)
+                    FulfillmentCenterId = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -67,7 +67,7 @@ namespace VirtoCommerce.InventoryModule.Data.Migrations
                         column: x => x.FulfillmentCenterId,
                         principalTable: "FulfillmentCenter",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(

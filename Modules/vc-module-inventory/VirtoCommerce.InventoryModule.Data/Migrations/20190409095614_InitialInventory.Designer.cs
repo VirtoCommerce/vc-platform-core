@@ -10,14 +10,14 @@ using VirtoCommerce.InventoryModule.Data.Repositories;
 namespace VirtoCommerce.InventoryModule.Data.Migrations
 {
     [DbContext(typeof(InventoryDbContext))]
-    [Migration("20180614075145_InitialInventory")]
+    [Migration("20190409095614_InitialInventory")]
     partial class InitialInventory
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.0-rtm-30799")
+                .HasAnnotation("ProductVersion", "2.2.3-servicing-35854")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -106,7 +106,8 @@ namespace VirtoCommerce.InventoryModule.Data.Migrations
 
                     b.Property<DateTime>("CreatedDate");
 
-                    b.Property<string>("FulfillmentCenterId");
+                    b.Property<string>("FulfillmentCenterId")
+                        .IsRequired();
 
                     b.Property<decimal>("InStockQuantity");
 
@@ -143,7 +144,7 @@ namespace VirtoCommerce.InventoryModule.Data.Migrations
                     b.HasOne("VirtoCommerce.InventoryModule.Data.Model.FulfillmentCenterEntity", "FulfillmentCenter")
                         .WithMany()
                         .HasForeignKey("FulfillmentCenterId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }
