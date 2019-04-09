@@ -52,9 +52,16 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
             }
 
             var sitemapUrls = new List<string>();
-
             var store = await StoreService.GetByIdAsync(storeId);
-            var sitemaps = await LoadAllStoreSitemaps(store, "");
+
+            var sitemapSearchCriteria = new SitemapSearchCriteria
+            {
+                StoreId = store.Id,
+                Skip = 0,
+                Take = int.MaxValue
+            };
+            var sitemaps = (await SitemapService.SearchAsync(sitemapSearchCriteria)).Results;
+
             foreach (var sitemap in sitemaps)
             {
                 sitemapUrls.AddRange(sitemap.PagedLocations);

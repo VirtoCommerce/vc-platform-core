@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.Platform.Core.Common;
@@ -22,25 +21,32 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
 
         public virtual Task LoadSitemapItemRecordsAsync(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
         {
-            var progressInfo = new ExportImportProgressInfo();
-
-            var sitemapItemRecords = new List<SitemapItemRecord>();
             var customOptions = new SitemapItemOptions();
             var customSitemapItems = sitemap.Items.Where(si => si.ObjectType.EqualsInvariant(SitemapItemTypes.Custom));
-            var processedCount = 0;
+
             var totalCount = customSitemapItems.Count();
-            progressInfo.Description = $"Custom: start generating {totalCount} custom records";
-            progressCallback?.Invoke(progressInfo);
+            var progressInfo = GetProgressInfo(progressCallback, totalCount);
 
             foreach (var customSitemapItem in customSitemapItems)
             {
                 customSitemapItem.ItemsRecords = GetSitemapItemRecords(store, customOptions, customSitemapItem.UrlTemplate, baseUrl);
-                processedCount++;
-                progressInfo.Description = $"Custom: generated {processedCount} of {totalCount} custom records";
-                progressCallback?.Invoke(progressInfo);
+                progressInfo.Next();
             }
 
+            progressInfo.End();
             return Task.CompletedTask;
+        }
+
+        private SitemapProgressInfo GetProgressInfo(Action<ExportImportProgressInfo> progressCallback, long totalCount)
+        {
+            return new SitemapProgressInfo
+            {
+                StartDescriptionTemplate = "Custom: start generating for {0} custom records",
+                EndDescriptionTemplate = "Custom: {0} custom records generated",
+                ProgressDescriptionTemplate = "Custom: generated {0} of {1} custom records",
+                ProgressCallback = progressCallback,
+                TotalCount = totalCount
+            };
         }
     }
 }

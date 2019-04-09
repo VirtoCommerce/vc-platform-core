@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.CustomerModule.Core.Model;
@@ -28,9 +27,6 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
 
         public virtual async Task LoadSitemapItemRecordsAsync(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
         {
-            var progressInfo = new ExportImportProgressInfo();
-
-            var sitemapItemRecords = new List<SitemapItemRecord>();
             var vendorOptions = new SitemapItemOptions();
 
             var vendorSitemapItems = sitemap.Items.Where(x => x.ObjectType.EqualsInvariant(SitemapItemTypes.Vendor));
@@ -38,9 +34,8 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
             var members = await MemberService.GetByIdsAsync(vendorIds);
 
             var totalCount = members.Length;
-            var processedCount = 0;
-            progressInfo.Description = $"Vendor: start generating {totalCount} records for vendors";
-            progressCallback?.Invoke(progressInfo);
+            var progressInfo = GetProgressInfo(progressCallback, totalCount);
+            progressInfo.Start();
 
             foreach (var sitemapItem in vendorSitemapItems)
             {
@@ -48,12 +43,23 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
                 if (vendor != null)
                 {
                     sitemapItem.ItemsRecords = GetSitemapItemRecords(store, vendorOptions, sitemap.UrlTemplate, baseUrl, vendor);
-
-                    processedCount++;
-                    progressInfo.Description = $"Vendor: generated  {processedCount} of {totalCount} records for vendors";
-                    progressCallback?.Invoke(progressInfo);
+                    progressInfo.Next();
                 }
             }
+
+            progressInfo.End();
+        }
+
+        private SitemapProgressInfo GetProgressInfo(Action<ExportImportProgressInfo> progressCallback, long totalCount)
+        {
+            return new SitemapProgressInfo
+            {
+                StartDescriptionTemplate = "Vendor: start generating records for {0} vendors",
+                EndDescriptionTemplate = "Vendor:  {0} vendors generated",
+                ProgressDescriptionTemplate = "Vendor: generated records for {0} of {1} vendors",
+                ProgressCallback = progressCallback,
+                TotalCount = totalCount
+            };
         }
     }
 }

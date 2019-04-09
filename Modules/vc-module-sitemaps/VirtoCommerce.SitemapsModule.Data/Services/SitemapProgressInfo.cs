@@ -11,21 +11,21 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
 
         public Action<ExportImportProgressInfo> ProgressCallback { get; set; }
 
-        public void ProgressStarted()
+        public void Start()
         {
             ProcessedCount = 0;
             Description = String.Format(StartDescriptionTemplate, TotalCount);
             ProgressCallback?.Invoke(this);
         }
 
-        public void NextProgress()
+        public void Next()
         {
             ProcessedCount++;
             Description = String.Format(ProgressDescriptionTemplate, ProcessedCount, TotalCount);
             ProgressCallback?.Invoke(this);
         }
 
-        public void ProgressEnded()
+        public void End()
         {
             Description = String.Format(EndDescriptionTemplate, TotalCount);
             ProgressCallback?.Invoke(this);
