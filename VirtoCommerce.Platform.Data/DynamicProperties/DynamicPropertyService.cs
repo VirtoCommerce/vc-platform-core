@@ -105,6 +105,8 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                 }
                 repository.UnitOfWork.Commit();
                 pkMap.ResolvePrimaryKeys();
+
+                DynamicPropertiesCacheRegion.ExpireRegion();
             }
             return properties;
         }
@@ -193,6 +195,7 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
             {
                 throw new ArgumentNullException(nameof(owners));
             }
+            //TODO: Add caching
 
             var propOwners = owners.SelectMany(x => x.GetFlatObjectsListWithInterface<IHasDynamicProperties>());
             using (var repository = _repositoryFactory())
@@ -200,16 +203,16 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                 //Optimize performance and CPU usage
                 repository.DisableChangesTracking();
 
-                var objectTypeNames = propOwners.Select(x => x.ObjectType).Distinct().ToArray();
+                var objectTypeNames = propOwners.Select(x => x.ObjectType ?? x.GetType().FullName).Distinct().ToArray();
                 var objectIds = propOwners.Select(x => x.Id).Distinct().ToArray();
 
                 //Load properties belongs to given objects types
                 var dynamicObjectProps = (await repository.GetObjectDynamicPropertiesAsync(objectTypeNames, objectIds))
                                                    .Select(x => x.ToModel(AbstractTypeFactory<DynamicObjectProperty>.TryCreateInstance()))
-                                                   .OfType<DynamicObjectProperty>();
+                                                   .OfType<DynamicObjectProperty>().ToArray();
                 foreach (var propOwner in propOwners)
                 {
-                    var objectType = propOwner.ObjectType;
+                    var objectType = propOwner.ObjectType ?? propOwner.GetType().FullName;
                     //Filter only properties with belongs to concrete type
                     propOwner.DynamicProperties = dynamicObjectProps.Where(x => x.ObjectType == objectType)
                                                                     .Select(x => x.Clone())
@@ -243,13 +246,13 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                 foreach (var prop in obj.DynamicProperties)
                 {
                     prop.ObjectId = obj.Id;
-                    prop.ObjectType = obj.ObjectType;
+                    prop.ObjectType = obj.ObjectType ?? obj.GetType().FullName;
                 }
             }
             var pkMap = new PrimaryKeyResolvingMap();
             using (var repository = _repositoryFactory())
             {
-                var objectTypes = objectsWithDynamicProperties.Select(x => x.ObjectType).Distinct().ToArray();
+                var objectTypes = objectsWithDynamicProperties.Select(x => x.ObjectType ?? x.GetType().FullName).Distinct().ToArray();
                 //Converting all incoming properties to db entity and group property values of all objects use for that   property.objectType and property.name as complex key 
                 var modifiedPropertyEntitiesGroup = objectsWithDynamicProperties.SelectMany(x => x.DynamicProperties.Select(dp => AbstractTypeFactory<DynamicPropertyEntity>.TryCreateInstance().FromModel(dp, pkMap)))
                                                                           .GroupBy(x => $"{x.Name}:{x.ObjectType}");
@@ -282,7 +285,8 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
             {
                 foreach (var objectHasDynamicProperties in objectsWithDynamicProperties.Where(x => x.Id != null))
                 {
-                    var values = await repository.DynamicPropertyObjectValues.Where(v => v.ObjectType == objectHasDynamicProperties.ObjectType && v.ObjectId == objectHasDynamicProperties.Id)
+                    var typeName = objectHasDynamicProperties.ObjectType ?? objectHasDynamicProperties.GetType().FullName;
+                    var values = await repository.DynamicPropertyObjectValues.Where(v => v.ObjectType == typeName && v.ObjectId == objectHasDynamicProperties.Id)
                                                 .ToListAsync();
 
                     foreach (var value in values)
@@ -295,33 +299,6 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
         }
 
         #endregion
-        protected virtual async Task TryToResolveTransientPropertiesAsync(IEnumerable<DynamicObjectProperty> properties, string objectType)
-        {
-            //When creating DynamicProperty manually, many properties remain unfilled (except Name, ValueType and ObjectValues).
-            //We have to set them with data from the repository.
-            var transistentProperties = properties.Where(x => x.Id == null);
-            if (transistentProperties.Any())
-            {
-                using (var repository = _repositoryFactory())
-                {
-                    var allPropertiesForType = (await repository.DynamicProperties.Where(x => x.ObjectType == objectType).ToArrayAsync())
-                                                    .Select(x => x.ToModel(AbstractTypeFactory<DynamicProperty>.TryCreateInstance()));
-                    foreach (var transistentPropery in transistentProperties)
-                    {
-                        var property = allPropertiesForType.FirstOrDefault(x => x.Name.EqualsInvariant(transistentPropery.Name));
-                        if (property != null)
-                        {
-                            transistentPropery.Id = property.Id;
-                            transistentPropery.ObjectType = property.ObjectType;
-                            transistentPropery.IsArray = property.IsArray;
-                            transistentPropery.IsRequired = property.IsRequired;
-                            transistentPropery.ValueType = property.ValueType;
-                        }
-                    }
-                }
-            }
-        }
-
 
     }
 }

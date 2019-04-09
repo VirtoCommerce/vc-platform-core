@@ -18,7 +18,6 @@ using VirtoCommerce.ContentModule.FileSystem;
 using VirtoCommerce.ContentModule.FileSystem.Extensions;
 using VirtoCommerce.ContentModule.Web.Extensions;
 using VirtoCommerce.ContentModule.Web.Infrastructure;
-using VirtoCommerce.ContentModule.Web.Model;
 using VirtoCommerce.Platform.Assets.AzureBlobStorage;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
@@ -72,7 +71,7 @@ namespace VirtoCommerce.ContentModule.Web
             dynamicPropertyRegistrar.RegisterType<FrontMatterHeaders>();
 
             var dynamicPropertyService = appBuilder.ApplicationServices.GetRequiredService<IDynamicPropertyService>();
-            dynamicPropertyService.SaveDynamicPropertiesAsync(DynamicProperties.AllDynamicProperties.ToArray()).GetAwaiter();
+            dynamicPropertyService.SaveDynamicPropertiesAsync(DynamicProperties.AllDynamicProperties.ToArray()).GetAwaiter().GetResult();
 
             //Register module permissions
             var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
