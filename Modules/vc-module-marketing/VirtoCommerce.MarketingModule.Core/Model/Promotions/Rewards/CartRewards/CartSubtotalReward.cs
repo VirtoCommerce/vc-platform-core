@@ -12,9 +12,6 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
             Amount = other.Amount;
         }
 
-        public override PromotionReward Clone()
-        {
-            return new CartSubtotalReward(this);
-        }
+
     }
 }

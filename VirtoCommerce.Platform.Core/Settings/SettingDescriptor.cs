@@ -7,7 +7,7 @@ namespace VirtoCommerce.Platform.Core.Settings
     /// <summary>
     /// Represent setting meta description
     /// </summary>
-    public class SettingDescriptor : ValueObject, ICloneable
+    public class SettingDescriptor : ValueObject
     {
         /// <summary>
         /// The flag indicates that you need to restart the application to apply this setting changes.
@@ -34,10 +34,6 @@ namespace VirtoCommerce.Platform.Core.Settings
         /// </summary>
         public bool IsDictionary { get; set; }
 
-        public object Clone()
-        {
-            return MemberwiseClone() as SettingDescriptor;
-        }
 
         protected override IEnumerable<object> GetEqualityComponents()
         {

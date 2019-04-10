@@ -45,9 +45,8 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
 
         //Promotion 
         public string PromotionId { get; set; }
-                
+
         public Promotion Promotion { get; set; }
 
-        public abstract PromotionReward Clone();
     }
 }

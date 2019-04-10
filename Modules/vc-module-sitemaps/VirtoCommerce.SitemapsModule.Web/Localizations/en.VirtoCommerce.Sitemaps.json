@@ -126,7 +126,6 @@
             "filenameNotUnique": "Sitemap with this filename already exists"
         }
     },
-
     "permissions": {
         "sitemaps:access": "Access to open a sitemaps blade",
         "sitemaps:create": "Access to create a sitemap",
@@ -134,7 +133,6 @@
         "sitemaps:update": "Access to update a sitemap",
         "sitemaps:delete": "Access to delete a sitemap"
     },
-
     "settings": {
         "Sitemap.RecordsLimitPerFile": {
             "title": "Records limit",
@@ -167,6 +165,11 @@
         "Sitemap.CategoryPagePriority": {
             "title": "Category page priority",
             "description": "The priority of URL relative to other URLs on site. Valid values range from 0.0 to 1.0. This value does not affect how pages are compared to pages on other sites — it only lets the search engines know which pages deem most important for the crawlers."
+        }
+    },
+    "module": {
+        "VirtoCommerce.Sitemaps": {
+            "description": "Export/Import sitemaps with all sitemap items"
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿//Call this to register our module to main application
+//Call this to register our module to main application
 var moduleName = "virtoCommerce.storeModule";
 
 if (AppDependencies != undefined) {
@@ -87,10 +87,7 @@ angular.module(moduleName, [
 	        controller: 'virtoCommerce.storeModule.storeShippingWidgetController',
 	        template: 'Modules/$(VirtoCommerce.Store)/Scripts/widgets/storeShippingWidget.tpl.html'
 	    }, 'storeDetail');
-	    widgetService.registerWidget({
-	        controller: 'virtoCommerce.storeModule.storeTaxingWidgetController',
-	        template: 'Modules/$(VirtoCommerce.Store)/Scripts/widgets/storeTaxingWidget.tpl.html'
-	    }, 'storeDetail');
+	 
 	    widgetService.registerWidget({
 	        controller: 'virtoCommerce.storeModule.storeNotificationsWidgetController',
 	        template: 'Modules/$(VirtoCommerce.Store)/Scripts/widgets/storeNotificationsWidget.tpl.html'
@@ -114,7 +111,6 @@ angular.module(moduleName, [
 	    };
 	    toolbarService.register(resetCommand, 'virtoCommerce.storeModule.paymentMethodDetailController');
 	    toolbarService.register(resetCommand, 'virtoCommerce.storeModule.shippingMethodDetailController');
-	    toolbarService.register(resetCommand, 'virtoCommerce.storeModule.taxProviderDetailController');
 
 	    // register login-on-behalf command in platform account blade
 	    var loginOnBehalfCommand = {

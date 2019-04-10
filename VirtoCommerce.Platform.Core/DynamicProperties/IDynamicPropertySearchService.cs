@@ -5,7 +5,7 @@ namespace VirtoCommerce.Platform.Core.DynamicProperties
 {
     public interface IDynamicPropertySearchService
     {
-        Task<GenericSearchResult<DynamicProperty>> SearchDynamicPropertiesAsync(DynamicPropertySearchCriteria criteria);
-        Task<GenericSearchResult<DynamicPropertyDictionaryItem>> SearchDictionaryItemsAsync(DynamicPropertyDictionaryItemSearchCriteria criteria);
+        Task<DynamicPropertySearchResult> SearchDynamicPropertiesAsync(DynamicPropertySearchCriteria criteria);
+        Task<DynamicPropertyDictionaryItemSearchResult> SearchDictionaryItemsAsync(DynamicPropertyDictionaryItemSearchCriteria criteria);
     }
 }

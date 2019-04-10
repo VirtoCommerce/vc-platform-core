@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Core.DynamicProperties
 {
-    public class DynamicPropertyObjectValue : ValueObject, ICloneable
+    public class DynamicPropertyObjectValue : ValueObject
     {
         public string ObjectType { get; set; }
-        public string ObjectId { get; set;}
+        public string ObjectId { get; set; }
         public string Locale { get; set; }
         public object Value { get; set; }
 
@@ -19,15 +19,15 @@ namespace VirtoCommerce.Platform.Core.DynamicProperties
         }
 
         #region ICloneable members
-        public object Clone()
+        public override object Clone()
         {
-            var result = MemberwiseClone() as DynamicPropertyObjectValue;        
+            var result = base.Clone() as DynamicPropertyObjectValue;
             if (Value is ICloneable cloneableValue)
             {
                 result.Value = cloneableValue.Clone();
             }
             return result;
-        } 
+        }
         #endregion
     }
 }

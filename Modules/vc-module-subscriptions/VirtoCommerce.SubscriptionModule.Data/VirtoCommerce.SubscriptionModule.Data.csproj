@@ -1,29 +1,32 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>netcoreapp2.2</TargetFramework>
+    </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <NoWarn>1701;1702;1705;1591</NoWarn>
     </PropertyGroup>
-  <ItemGroup>
-    <Compile Remove="Migrations\20181009092311_Initial.cs" />
-    <Compile Remove="Migrations\20181009092510_InitialSubscription.cs" />
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Remove="Migrations\20181009092311_Initial.cs" />
+        <Compile Remove="Migrations\20181009092510_InitialSubscription.cs" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
-    <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Data\VirtoCommerce.Platform.Data.csproj" />
-    <ProjectReference Include="..\..\vc-module-customer\VirtoCommerce.CustomerModule.Core\VirtoCommerce.CustomerModule.Core.csproj" />
-    <ProjectReference Include="..\..\vc-module-notifications\VirtoCommerce.NotificationsModule.Core\VirtoCommerce.NotificationsModule.Core.csproj" />
-    <ProjectReference Include="..\..\vc-module-orders\VirtoCommerce.OrdersModule.Core\VirtoCommerce.OrdersModule.Core.csproj" />
-    <ProjectReference Include="..\..\vc-module-store\VirtoCommerce.StoreModule.Core\VirtoCommerce.StoreModule.Core.csproj" />
-    <ProjectReference Include="..\VirtoCommerce.SubscriptionModule.Core\VirtoCommerce.SubscriptionModule.Core.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
+        <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Data\VirtoCommerce.Platform.Data.csproj" />
+        <ProjectReference Include="..\..\vc-module-customer\VirtoCommerce.CustomerModule.Core\VirtoCommerce.CustomerModule.Core.csproj" />
+        <ProjectReference Include="..\..\vc-module-notifications\VirtoCommerce.NotificationsModule.Core\VirtoCommerce.NotificationsModule.Core.csproj" />
+        <ProjectReference Include="..\..\vc-module-orders\VirtoCommerce.OrdersModule.Core\VirtoCommerce.OrdersModule.Core.csproj" />
+        <ProjectReference Include="..\..\vc-module-store\VirtoCommerce.StoreModule.Core\VirtoCommerce.StoreModule.Core.csproj" />
+        <ProjectReference Include="..\VirtoCommerce.SubscriptionModule.Core\VirtoCommerce.SubscriptionModule.Core.csproj" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.1.4" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.1.4" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.3" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.3" />
+        <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
+        <PackageReference Include="Microsoft.AspNetCore.App"/>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.2.0" />
+    </ItemGroup>
 
 </Project>

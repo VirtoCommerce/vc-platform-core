@@ -172,6 +172,11 @@ namespace VirtoCommerce.CartModule.Data.Model
             lineItem.ProductType = ProductType;
             lineItem.FulfillmentLocationCode = FulfillmentLocationCode;
             lineItem.Note = Comment;
+            lineItem.CatalogId = CatalogId;
+            lineItem.CategoryId = CategoryId;
+            lineItem.Currency = Currency;
+            lineItem.Name = Name;
+            lineItem.Sku = Sku;
 
             if (!Discounts.IsNullOrEmpty())
             {
@@ -231,7 +236,11 @@ namespace VirtoCommerce.CartModule.Data.Model
             ProductType = lineItem.ProductType;
             FulfillmentLocationCode = FulfillmentLocationCode;
             Comment = lineItem.Note;
-
+            CatalogId = lineItem.CatalogId;
+            CategoryId = lineItem.CategoryId;
+            Currency = lineItem.Currency;
+            Name = lineItem.Name;
+            Sku = lineItem.Sku;
             //Preserve link of the  original model LineItem for future references binding LineItems with  ShipmentLineItems 
             ModelLineItem = lineItem;
 
@@ -253,6 +262,7 @@ namespace VirtoCommerce.CartModule.Data.Model
             if (target == null)
                 throw new ArgumentNullException(nameof(target));
 
+            target.Name = Name;
             target.ListPrice = ListPrice;
             target.ListPriceWithTax = ListPriceWithTax;
             target.SalePrice = SalePrice;
@@ -285,7 +295,7 @@ namespace VirtoCommerce.CartModule.Data.Model
             target.RequiredShipping = RequiredShipping;
             target.ProductType = ProductType;
             target.FulfillmentLocationCode = FulfillmentLocationCode;
-
+            target.Sku = Sku;
             if (!Discounts.IsNullCollection())
             {
                 var discountComparer = AbstractTypeFactory<DiscountEntityComparer>.TryCreateInstance();

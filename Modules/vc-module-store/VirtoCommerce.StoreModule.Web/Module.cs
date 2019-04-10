@@ -42,7 +42,7 @@ namespace VirtoCommerce.StoreModule.Web
             var configuration = snapshot.GetService<IConfiguration>();
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Store") ?? configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<StoreDbContext>(options => options.UseSqlServer(connectionString));
-            serviceCollection.AddTransient<IStoreRepository, StoreRepositoryImpl>();
+            serviceCollection.AddTransient<IStoreRepository, StoreRepository>();
             serviceCollection.AddSingleton<Func<IStoreRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IStoreRepository>());
             serviceCollection.AddSingleton<IStoreService, StoreService>();
             serviceCollection.AddSingleton<IStoreSearchService, StoreSearchService>();
@@ -79,8 +79,7 @@ namespace VirtoCommerce.StoreModule.Web
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             var paymentMethodsRegistrar = appBuilder.ApplicationServices.GetService<IPaymentMethodsRegistrar>();
             var shippingMethodsRegistrar = appBuilder.ApplicationServices.GetService<IShippingMethodsRegistrar>();
-            var taxRegistrar = appBuilder.ApplicationServices.GetService<ITaxProviderRegistrar>();
-            mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicStoreJsonConverter(paymentMethodsRegistrar, shippingMethodsRegistrar, taxRegistrar));
+            mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicStoreJsonConverter(paymentMethodsRegistrar, shippingMethodsRegistrar));
 
             var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
             inProcessBus.RegisterHandler<StoreChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<StoreChangedEventHandler>().Handle(message));

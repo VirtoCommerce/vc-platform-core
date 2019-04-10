@@ -50,7 +50,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         [Route("{cartId}/itemscount")]
         public async Task<ActionResult<int>> GetCartItemsCount(string cartId)
         {
-            var carts = await _shoppingCartService.GetByIdsAsync(new[] {cartId}, CartResponseGroup.Default.ToString());
+            var carts = await _shoppingCartService.GetByIdsAsync(new[] { cartId }, CartResponseGroup.Default.ToString());
             var cart = carts.FirstOrDefault();
             return Ok(cart?.Items?.Count ?? 0);
         }
@@ -216,7 +216,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         [HttpPost]
         [Route("search")]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
-        public async Task<ActionResult<GenericSearchResult<ShoppingCart>>> Search(ShoppingCartSearchCriteria criteria)
+        public async Task<ActionResult<GenericSearchResult<ShoppingCart>>> Search([FromBody] ShoppingCartSearchCriteria criteria)
         {
             var result = await _searchService.SearchCartAsync(criteria);
             return Ok(result);
@@ -229,7 +229,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         [HttpPost]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
-        public async Task<ActionResult<ShoppingCart>> Create(ShoppingCart cart)
+        public async Task<ActionResult<ShoppingCart>> Create([FromBody] ShoppingCart cart)
         {
             await _shoppingCartService.SaveChangesAsync(new[] { cart });
             return Ok(cart);
@@ -242,7 +242,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         [HttpPut]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<ActionResult<ShoppingCart>> Update(ShoppingCart cart)
+        public async Task<ActionResult<ShoppingCart>> Update([FromBody] ShoppingCart cart)
         {
             using (await AsyncLock.GetLockByKey(CacheKey.With(cart.GetType(), cart.Id)).LockAsync())
             {
@@ -271,7 +271,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         /// <param name="cart">Shopping cart model</param>
         [HttpPost]
         [Route("recalculate")]
-        public ActionResult<ShoppingCart> RecalculateTotals(ShoppingCart cart)
+        public ActionResult<ShoppingCart> RecalculateTotals([FromBody] ShoppingCart cart)
         {
             _cartTotalsCalculator.CalculateTotals(cart);
             return Ok(cart);

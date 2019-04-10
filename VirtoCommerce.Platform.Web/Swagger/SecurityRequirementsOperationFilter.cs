@@ -1,5 +1,5 @@
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -25,7 +25,7 @@ namespace VirtoCommerce.Platform.Web.Swagger
                 operation.Security = new List<IDictionary<string, IEnumerable<string>>>();
                 operation.Security.Add(new Dictionary<string, IEnumerable<string>>
                 {
-                    { "oauth2", requiredScopes }
+                    { "OAuth2", requiredScopes }
                 });
             }
         }

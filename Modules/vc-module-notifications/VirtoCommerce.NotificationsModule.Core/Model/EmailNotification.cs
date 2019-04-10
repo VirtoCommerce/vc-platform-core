@@ -14,6 +14,7 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         public EmailNotification()
         {
             Kind = nameof(EmailNotification);
+            Type = GetType().Name;
             Templates = new List<NotificationTemplate>();
             Attachments = new List<EmailAttachment>();
         }

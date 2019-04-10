@@ -83,7 +83,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 }
 
                 // Fill SEO info for products, variations and outline items
-                if ((itemResponseGroup & ItemResponseGroup.Seo) == ItemResponseGroup.Seo)
+                if (itemResponseGroup.HasFlag(ItemResponseGroup.Seo))
                 {
                     var objectsWithSeo = productsWithVariationsList.OfType<ISeoSupport>().ToList();
                     //Load SEO information for all Outline.Items
@@ -233,7 +233,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 //Resolve relative urls for all product images
                 if (!product.Images.IsNullOrEmpty())
                 {
-                    foreach (var image in product.Images)
+                    foreach (var image in product.Images.Where(x => !string.IsNullOrEmpty(x.Url)))
                     {
                         image.RelativeUrl = image.Url;
                         image.Url = _blobUrlResolver.GetAbsoluteUrl(image.Url);

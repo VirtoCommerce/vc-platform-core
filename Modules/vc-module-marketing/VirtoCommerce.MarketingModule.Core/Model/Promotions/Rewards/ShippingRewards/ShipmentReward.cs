@@ -19,9 +19,6 @@ namespace VirtoCommerce.MarketingModule.Core.Model.Promotions
         public string ShippingMethod { get; set; }
         public string ShippingMethodOption { get; set; }
 
-        public override PromotionReward Clone()
-        {
-            return new ShipmentReward(this);
-        }
+
     }
 }

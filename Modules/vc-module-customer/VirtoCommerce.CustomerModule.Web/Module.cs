@@ -22,6 +22,7 @@ using VirtoCommerce.CustomerModule.Data.Services;
 using VirtoCommerce.CustomerModule.Web.JsonConverters;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
@@ -84,6 +85,13 @@ namespace VirtoCommerce.CustomerModule.Web
 
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
+
+            var dynamicPropertyRegistrar = appBuilder.ApplicationServices.GetRequiredService<IDynamicPropertyRegistrar>();
+            dynamicPropertyRegistrar.RegisterType<Organization>();
+            dynamicPropertyRegistrar.RegisterType<Contact>();
+            dynamicPropertyRegistrar.RegisterType<Vendor>();
+            dynamicPropertyRegistrar.RegisterType<Employee>();
+
 
             var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>

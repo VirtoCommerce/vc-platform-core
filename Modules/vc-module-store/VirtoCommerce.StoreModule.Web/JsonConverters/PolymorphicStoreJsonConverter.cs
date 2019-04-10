@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.CoreModule.Core.Shipping;
-using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Model.Search;
@@ -13,16 +12,14 @@ namespace VirtoCommerce.StoreModule.Web.JsonConverters
 {
     public class PolymorphicStoreJsonConverter : JsonConverter
     {
-        private static Type[] _knowTypes = new[] { typeof(Store), typeof(StoreSearchCriteria), typeof(PaymentMethod), typeof(ShippingMethod), typeof(TaxProvider) };
+        private static Type[] _knowTypes = new[] { typeof(Store), typeof(StoreSearchCriteria), typeof(PaymentMethod), typeof(ShippingMethod) };
 
         private readonly IPaymentMethodsRegistrar _paymentMethodsService;
         private readonly IShippingMethodsRegistrar _shippingMethodsService;
-        private readonly ITaxProviderRegistrar _taxService;
-        public PolymorphicStoreJsonConverter(IPaymentMethodsRegistrar paymentMethodsService, IShippingMethodsRegistrar shippingMethodsService, ITaxProviderRegistrar taxService)
+        public PolymorphicStoreJsonConverter(IPaymentMethodsRegistrar paymentMethodsService, IShippingMethodsRegistrar shippingMethodsService)
         {
             _paymentMethodsService = paymentMethodsService;
             _shippingMethodsService = shippingMethodsService;
-            _taxService = taxService;
         }
 
         public override bool CanWrite { get { return false; } }
@@ -56,11 +53,7 @@ namespace VirtoCommerce.StoreModule.Web.JsonConverters
                 var shippingGatewayCode = obj["code"].Value<string>();
                 retVal = _shippingMethodsService.GetAllShippingMethods().FirstOrDefault(x => x.Code.EqualsInvariant(shippingGatewayCode));
             }
-            else if (objectType == typeof(TaxProvider))
-            {
-                var taxProviderCode = obj["code"].Value<string>();
-                retVal = _taxService.GetAllTaxProviders().FirstOrDefault(x => x.Code.EqualsInvariant(taxProviderCode));
-            }
+
             serializer.Populate(obj.CreateReader(), retVal);
             return retVal;
         }

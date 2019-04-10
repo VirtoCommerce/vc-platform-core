@@ -15,7 +15,6 @@ namespace VirtoCommerce.StoreModule.Data.Model
             Currencies = new NullCollection<StoreCurrencyEntity>();
             PaymentMethods = new NullCollection<StorePaymentMethodEntity>();
             ShippingMethods = new NullCollection<StoreShippingMethodEntity>();
-            TaxProviders = new NullCollection<StoreTaxProviderEntity>();
             TrustedGroups = new NullCollection<StoreTrustedGroupEntity>();
             FulfillmentCenters = new NullCollection<StoreFulfillmentCenterEntity>();
         }
@@ -78,7 +77,6 @@ namespace VirtoCommerce.StoreModule.Data.Model
 
         public virtual ObservableCollection<StorePaymentMethodEntity> PaymentMethods { get; set; }
         public virtual ObservableCollection<StoreShippingMethodEntity> ShippingMethods { get; set; }
-        public virtual ObservableCollection<StoreTaxProviderEntity> TaxProviders { get; set; }
 
         public virtual ObservableCollection<StoreFulfillmentCenterEntity> FulfillmentCenters { get; set; }
         #endregion
@@ -189,10 +187,6 @@ namespace VirtoCommerce.StoreModule.Data.Model
             {
                 PaymentMethods = new ObservableCollection<StorePaymentMethodEntity>(store.PaymentMethods.Select(x => AbstractTypeFactory<StorePaymentMethodEntity>.TryCreateInstance().FromModel(x, pkMap)));
             }
-            if (store.TaxProviders != null)
-            {
-                TaxProviders = new ObservableCollection<StoreTaxProviderEntity>(store.TaxProviders.Select(x => AbstractTypeFactory<StoreTaxProviderEntity>.TryCreateInstance().FromModel(x, pkMap)));
-            }
 
             FulfillmentCenters = new ObservableCollection<StoreFulfillmentCenterEntity>();
             if (store.AdditionalFulfillmentCenterIds != null)
@@ -274,12 +268,6 @@ namespace VirtoCommerce.StoreModule.Data.Model
                 var shippingComparer = AnonymousComparer.Create((StoreShippingMethodEntity x) => x.Code);
                 ShippingMethods.Patch(target.ShippingMethods, shippingComparer,
                                       (sourceMethod, targetMethod) => sourceMethod.Patch(targetMethod));
-            }
-            if (!TaxProviders.IsNullCollection())
-            {
-                var shippingComparer = AnonymousComparer.Create((StoreTaxProviderEntity x) => x.Code);
-                TaxProviders.Patch(target.TaxProviders, shippingComparer,
-                                      (sourceProvider, targetProvider) => sourceProvider.Patch(targetProvider));
             }
             if (!FulfillmentCenters.IsNullCollection())
             {

@@ -209,6 +209,7 @@ namespace VirtoCommerce.CartModule.Data.Model
             TaxPercentRate = cart.TaxPercentRate;
             Type = cart.Type;
             Name = cart.Name;
+            StoreId = cart.StoreId;
 
             if (cart.Addresses != null)
             {

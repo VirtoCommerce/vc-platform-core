@@ -3,13 +3,12 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VirtoCommerce.CoreModule.Core.Common;
-using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
 namespace VirtoCommerce.CoreModule.Web.JsonConverters
 {
     public class PolymorphicJsonConverter : JsonConverter
     {
-        private static Type[] _knowTypes = new[] { typeof(Address), typeof(TaxEvaluationContext), typeof(TaxLine) };
+        private static Type[] _knowTypes = new[] { typeof(Address) };
 
         public override bool CanWrite { get { return false; } }
         public override bool CanRead { get { return true; } }

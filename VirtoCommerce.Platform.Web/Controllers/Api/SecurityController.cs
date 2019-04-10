@@ -272,46 +272,6 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             return Ok(result);
         }
 
-        //TODO: Implement generation new OAuth clients 
-
-        ///// <summary>
-        ///// Generate new API account
-        ///// </summary>
-        ///// <remarks>
-        ///// Generates new account but does not save it.
-        ///// </remarks>
-        ///// <param name="type"></param>
-        //[HttpGet]
-        //[Route("apiaccounts/new")]
-        //[ResponseType(typeof(ApiAccount))]
-        //[CheckPermission(Permission = PredefinedPermissions.SecurityUpdate)]
-        //public IHttpActionResult GenerateNewApiAccount(AuthenticationLoginProviderType type)
-        //{
-        //    var result = _securityService.GenerateNewApiAccount(type);
-        //    result.IsActive = null;
-        //    return Ok(result);
-        //}
-
-        ///// <summary>
-        ///// Generate new API key for specified account
-        ///// </summary>
-        ///// <remarks>
-        ///// Generates new key for specified account but does not save it.
-        ///// </remarks>
-        //[HttpPut]
-        //[Route("apiaccounts/newKey")]
-        //[ResponseType(typeof(void))]
-        //[CheckPermission(Permission = PredefinedPermissions.SecurityUpdate)]
-        //public IHttpActionResult GenerateNewApiKey(ApiAccount account)
-        //{
-        //    if (account.ApiAccountType != AuthenticationLoginProviderType.Hmac)
-        //    {
-        //        return BadRequest(SecurityResources.NonHmacKeyGenerationException);
-        //    }
-        //    var retVal = _securityService.GenerateNewApiKey(account);
-        //    return Ok(retVal);
-        //}
-
         /// <summary>
         /// SearchAsync users by keyword
         /// </summary>

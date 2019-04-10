@@ -14,14 +14,17 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         /// With images and assets
         /// </summary>
 		ItemAssets = 1 << 1,
+        WithImages = ItemAssets,
         /// <summary>
         /// With properties meta information
         /// </summary>
 		ItemProperties = 1 << 2,
+        WithProperties = ItemProperties,
+        Properties = ItemProperties,
         /// <summary>
         /// With product associations
         /// </summary>
-		ItemAssociations = 1 << 3,
+        ItemAssociations = 1 << 3,
         /// <summary>
         /// With descriptions
         /// </summary>
@@ -30,14 +33,17 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         /// With all product variations
         /// </summary>
 		Variations = 1 << 5,
+        WithVariations = Variations,
         /// <summary>
         /// With product SEO information
         /// </summary>
-		Seo = 1 << 6,
+        Seo = 1 << 6,
+        WithSeo = Seo,
         /// <summary>
         /// With outgoing product links to virtual catalog or categories
         /// </summary>
         Links = 1 << 7,
+        WithLinks = Links,
         /// <summary>
         /// With product inventory information
         /// </summary>
@@ -46,6 +52,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         /// With category outlines
         /// </summary>
         Outlines = 1 << 9,
+        WithOutlines = Outlines,
         /// <summary>
         /// With product referenced associations
         /// </summary>
@@ -53,6 +60,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
 
         ItemSmall = ItemInfo | ItemAssets | ItemEditorialReviews | Seo,
         ItemMedium = ItemSmall | ItemAssociations | ReferencedAssociations | ItemProperties,
-        ItemLarge = ItemMedium | Variations | Links | Inventory | Outlines
+        ItemLarge = ItemMedium | Variations | Links | Inventory | Outlines,
+        Full = ItemLarge
     }
 }

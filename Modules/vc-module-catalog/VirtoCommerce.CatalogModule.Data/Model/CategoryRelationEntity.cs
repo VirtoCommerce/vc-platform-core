@@ -47,29 +47,4 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
     }
 
-    public class LinkedCategoryComparer : IEqualityComparer<CategoryRelationEntity>
-    {
-        #region IEqualityComparer<LinkedCategory> Members
-
-        public bool Equals(CategoryRelationEntity x, CategoryRelationEntity y)
-        {
-            return GetHashCode(x) == GetHashCode(y);
-        }
-
-        public int GetHashCode(CategoryRelationEntity obj)
-        {
-            var hash = 17 * 23;
-            if (obj.TargetCategoryId != null)
-            {
-                hash = hash * 23 + obj.TargetCategoryId.GetHashCode();
-            }
-            else if (obj.TargetCatalogId != null)
-            {
-                hash = hash * 23 + obj.TargetCatalogId.GetHashCode();
-            }
-            return hash;
-        }
-
-        #endregion
-    }
 }

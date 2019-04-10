@@ -8,8 +8,8 @@ using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Model;
 using VirtoCommerce.MarketingModule.Data.Repositories;
 using VirtoCommerce.MarketingModule.Data.Services;
+using VirtoCommerce.MarketingModule.Test.Common;
 using VirtoCommerce.Platform.Core.Domain;
-using VirtoCommerce.Platform.Core.Serialization;
 using Xunit;
 
 namespace VirtoCommerce.MarketingModule.Test
@@ -19,7 +19,6 @@ namespace VirtoCommerce.MarketingModule.Test
         private readonly Mock<IMarketingRepository> _repositoryMock;
         private Func<IMarketingRepository> _repositoryFactory;
         private readonly Mock<IDynamicContentService> _dynamicContentServiceMock;
-        private readonly IExpressionSerializer _expressionSerializerMock;
         private readonly Mock<ILogger<DefaultDynamicContentEvaluatorImpl>> _loggerMock;
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
 

@@ -175,7 +175,6 @@
                 "message": "The notification template has been modified. Do you want to save changes?"
             }
         }
-
     },
     "notificationTypes": {
         "RegistrationEmailNotification": {
@@ -250,6 +249,11 @@
         "VirtoCommerce.Notifications.General.Languages": {
             "description": "Languages available in the Notifications",
             "title": "Languages"
+        }
+    },
+    "module": {
+        "VirtoCommerce.Notifications": {
+            "description": "Export/Import notifications"
         }
     }
 }

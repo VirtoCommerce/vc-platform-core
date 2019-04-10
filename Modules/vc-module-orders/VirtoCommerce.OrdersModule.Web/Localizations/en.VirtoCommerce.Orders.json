@@ -314,5 +314,10 @@
             "description": "Adjust inventory when order state changed.",
             "title": "Adjust inventory for orders"
         }
+    },
+    "module": {
+        "VirtoCommerce.Orders": {
+            "description": "Export/Import customer orders with all related objects (line items, shipments, payments etc)"
+        }
     }
 }
