@@ -6,10 +6,6 @@
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <NoWarn>1701;1702;1705;1591</NoWarn>
     </PropertyGroup>
-    <ItemGroup>
-        <Compile Remove="Migrations\20181009092311_Initial.cs" />
-        <Compile Remove="Migrations\20181009092510_InitialSubscription.cs" />
-    </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj" />
@@ -25,7 +21,7 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.3" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.3" />
         <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
-        <PackageReference Include="Microsoft.AspNetCore.App"/>
+        <PackageReference Include="Microsoft.AspNetCore.App" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.2.0" />
     </ItemGroup>
 

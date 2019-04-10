@@ -24,7 +24,6 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     CustomerName = table.Column<string>(maxLength: 128, nullable: true),
                     OrganizationId = table.Column<string>(maxLength: 64, nullable: true),
                     Currency = table.Column<string>(maxLength: 3, nullable: false),
-                    Coupon = table.Column<string>(maxLength: 64, nullable: true),
                     LanguageCode = table.Column<string>(maxLength: 16, nullable: true),
                     TaxIncluded = table.Column<bool>(nullable: false),
                     IsRecuring = table.Column<bool>(nullable: false),
@@ -52,6 +51,25 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Cart", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CartCoupon",
+                columns: table => new
+                {
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
+                    Code = table.Column<string>(maxLength: 64, nullable: true),
+                    ShoppingCartId = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CartCoupon", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CartCoupon_Cart_ShoppingCartId",
+                        column: x => x.ShoppingCartId,
+                        principalTable: "Cart",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -101,7 +119,7 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     TaxTotal = table.Column<decimal>(type: "Money", nullable: false),
                     TaxPercentRate = table.Column<decimal>(type: "decimal(18,4)", nullable: false),
                     TaxType = table.Column<string>(maxLength: 64, nullable: true),
-                    ShoppingCartId = table.Column<string>(nullable: true)
+                    ShoppingCartId = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -137,7 +155,7 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     TotalWithTax = table.Column<decimal>(type: "Money", nullable: false),
                     TaxTotal = table.Column<decimal>(type: "Money", nullable: false),
                     TaxPercentRate = table.Column<decimal>(type: "decimal(18,4)", nullable: false),
-                    ShoppingCartId = table.Column<string>(nullable: true)
+                    ShoppingCartId = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -182,7 +200,7 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     Fee = table.Column<decimal>(type: "Money", nullable: false),
                     FeeWithTax = table.Column<decimal>(type: "Money", nullable: false),
                     TaxType = table.Column<string>(maxLength: 64, nullable: true),
-                    ShoppingCartId = table.Column<string>(nullable: true)
+                    ShoppingCartId = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -200,6 +218,7 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(maxLength: 128, nullable: false),
+                    Name = table.Column<string>(maxLength: 2048, nullable: true),
                     AddressType = table.Column<string>(maxLength: 32, nullable: true),
                     Organization = table.Column<string>(maxLength: 64, nullable: true),
                     CountryCode = table.Column<string>(maxLength: 3, nullable: true),
@@ -375,6 +394,11 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                 column: "ShoppingCartId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CartCoupon_ShoppingCartId",
+                table: "CartCoupon",
+                column: "ShoppingCartId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CartDiscount_LineItemId",
                 table: "CartDiscount",
                 column: "LineItemId");
@@ -444,6 +468,9 @@ namespace VirtoCommerce.CartModule.Data.Migrations
         {
             migrationBuilder.DropTable(
                 name: "CartAddress");
+
+            migrationBuilder.DropTable(
+                name: "CartCoupon");
 
             migrationBuilder.DropTable(
                 name: "CartDiscount");

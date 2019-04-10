@@ -11,7 +11,7 @@ namespace VirtoCommerce.PricingModule.Data.Migrations
                 name: "Pricelist",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
@@ -29,7 +29,7 @@ namespace VirtoCommerce.PricingModule.Data.Migrations
                 name: "Price",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
@@ -56,7 +56,7 @@ namespace VirtoCommerce.PricingModule.Data.Migrations
                 name: "PricelistAssignment",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
@@ -88,7 +88,7 @@ namespace VirtoCommerce.PricingModule.Data.Migrations
                 column: "PricelistId");
 
             migrationBuilder.CreateIndex(
-                name: "ProductIdAndPricelistId",
+                name: "IX_PriceId",
                 table: "Price",
                 columns: new[] { "ProductId", "PricelistId" });
 

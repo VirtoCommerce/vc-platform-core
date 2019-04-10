@@ -10,14 +10,14 @@ using VirtoCommerce.CartModule.Data.Repositories;
 namespace VirtoCommerce.CartModule.Data.Migrations
 {
     [DbContext(typeof(CartDbContext))]
-    [Migration("20181023131138_AddressName")]
-    partial class AddressName
+    [Migration("20190410111538_InitialCart")]
+    partial class InitialCart
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.0-rtm-30799")
+                .HasAnnotation("ProductVersion", "2.2.3-servicing-35854")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -91,6 +91,25 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     b.HasIndex("ShoppingCartId");
 
                     b.ToTable("CartAddress");
+                });
+
+            modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.CouponEntity", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
+
+                    b.Property<string>("Code")
+                        .HasMaxLength(64);
+
+                    b.Property<string>("ShoppingCartId")
+                        .IsRequired();
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ShoppingCartId");
+
+                    b.ToTable("CartCoupon");
                 });
 
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.DiscountEntity", b =>
@@ -236,7 +255,8 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     b.Property<string>("ShipmentMethodCode")
                         .HasMaxLength(64);
 
-                    b.Property<string>("ShoppingCartId");
+                    b.Property<string>("ShoppingCartId")
+                        .IsRequired();
 
                     b.Property<string>("Sku")
                         .IsRequired()
@@ -316,7 +336,8 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     b.Property<string>("Purpose")
                         .HasMaxLength(1024);
 
-                    b.Property<string>("ShoppingCartId");
+                    b.Property<string>("ShoppingCartId")
+                        .IsRequired();
 
                     b.Property<decimal>("TaxPercentRate")
                         .HasColumnType("decimal(18,4)");
@@ -396,7 +417,8 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     b.Property<string>("ShipmentMethodOption")
                         .HasMaxLength(64);
 
-                    b.Property<string>("ShoppingCartId");
+                    b.Property<string>("ShoppingCartId")
+                        .IsRequired();
 
                     b.Property<bool>("TaxIncluded");
 
@@ -476,9 +498,6 @@ namespace VirtoCommerce.CartModule.Data.Migrations
 
                     b.Property<string>("Comment")
                         .HasMaxLength(2048);
-
-                    b.Property<string>("Coupon")
-                        .HasMaxLength(64);
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(64);
@@ -633,6 +652,14 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                         .WithMany("Addresses")
                         .HasForeignKey("ShoppingCartId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.CouponEntity", b =>
+                {
+                    b.HasOne("VirtoCommerce.CartModule.Data.Model.ShoppingCartEntity", "ShoppingCart")
+                        .WithMany("Coupons")
+                        .HasForeignKey("ShoppingCartId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("VirtoCommerce.CartModule.Data.Model.DiscountEntity", b =>

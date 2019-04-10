@@ -1,0 +1,73 @@
+INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20180716094326_InitialOrders', '2.2.3-servicing-35854')
+GO
+
+ALTER TABLE [CustomerOrder] ADD [Status] nvarchar(64) NULL
+ALTER TABLE [CustomerOrder] ADD [CreatedDate] datetime2 NOT NULL DEFAULT('0001-01-01 00:00:00')
+ALTER TABLE [CustomerOrder] ADD [ModifiedDate] datetime2 NULL
+ALTER TABLE [CustomerOrder] ADD [CreatedBy] nvarchar(64) NULL
+ALTER TABLE [CustomerOrder] ADD [ModifiedBy] nvarchar(64) NULL
+ALTER TABLE [CustomerOrder] ADD [Number] nvarchar(64) NOT NULL DEFAULT('')
+ALTER TABLE [CustomerOrder] ADD [IsApproved] bit NOT NULL DEFAULT(0)
+ALTER TABLE [CustomerOrder] ADD [Comment] nvarchar(2048) NULL
+ALTER TABLE [CustomerOrder] ADD [Currency] nvarchar(3) NOT NULL DEFAULT('')
+ALTER TABLE [CustomerOrder] ADD [Sum] money NOT NULL DEFAULT(0)
+ALTER TABLE [CustomerOrder] ADD [IsCancelled] [bit] NOT NULL DEFAULT(0)
+ALTER TABLE [CustomerOrder] ADD [CancelledDate] datetime2 NULL
+ALTER TABLE [CustomerOrder] ADD [CancelReason] nvarchar(2048) NULL
+GO
+
+UPDATE [CustomerOrder] SET [Status] = oo.[Status], CreatedDate = oo.CreatedDate, ModifiedDate = oo.ModifiedDate, CreatedBy = oo.CreatedBy, ModifiedBy = oo.ModifiedBy,
+	Number = oo.Number, IsApproved = oo.IsApproved, Comment = oo.Comment, Currency = oo.Currency, [Sum] = oo.[Sum], IsCancelled = oo.IsCancelled, 
+	CancelledDate = oo.CancelledDate, CancelReason = oo.CancelReason
+FROM [CustomerOrder] co INNER JOIN OrderOperation oo ON co.Id = oo.Id
+GO
+
+EXEC sp_RENAME 'OrderLineItem.FulfilmentLocationCode' , 'FulfillmentLocationCode', 'COLUMN'
+
+ALTER TABLE [OrderPaymentIn] ADD [Status] nvarchar(64) NULL
+ALTER TABLE [OrderPaymentIn] ADD [CreatedDate] datetime2 NOT NULL DEFAULT('0001-01-01 00:00:00')
+ALTER TABLE [OrderPaymentIn] ADD [ModifiedDate] datetime2 NULL
+ALTER TABLE [OrderPaymentIn] ADD [CreatedBy] nvarchar(64) NULL
+ALTER TABLE [OrderPaymentIn] ADD [ModifiedBy] nvarchar(64) NULL
+ALTER TABLE [OrderPaymentIn] ADD [Number] nvarchar(64) NOT NULL DEFAULT('')
+ALTER TABLE [OrderPaymentIn] ADD [IsApproved] bit NOT NULL DEFAULT(0)
+ALTER TABLE [OrderPaymentIn] ADD [Comment] nvarchar(2048) NULL
+ALTER TABLE [OrderPaymentIn] ADD [Currency] nvarchar(3) NOT NULL DEFAULT('')
+ALTER TABLE [OrderPaymentIn] ADD [Sum] money NOT NULL DEFAULT(0)
+ALTER TABLE [OrderPaymentIn] ADD [IsCancelled] [bit] NOT NULL DEFAULT(0)
+ALTER TABLE [OrderPaymentIn] ADD [CancelledDate] datetime2 NULL
+ALTER TABLE [OrderPaymentIn] ADD [CancelReason] nvarchar(2048) NULL
+GO
+
+UPDATE [OrderPaymentIn] SET [Status] = oo.[Status], CreatedDate = oo.CreatedDate, ModifiedDate = oo.ModifiedDate, CreatedBy = oo.CreatedBy, ModifiedBy = oo.ModifiedBy,
+	Number = oo.Number, IsApproved = oo.IsApproved, Comment = oo.Comment, Currency = oo.Currency, [Sum] = oo.[Sum], IsCancelled = oo.IsCancelled, 
+	CancelledDate = oo.CancelledDate, CancelReason = oo.CancelReason
+FROM [OrderPaymentIn] co INNER JOIN OrderOperation oo ON co.Id = oo.Id
+GO
+
+ALTER TABLE [OrderShipment] ADD [Status] nvarchar(64) NULL
+ALTER TABLE [OrderShipment] ADD [CreatedDate] datetime2 NOT NULL DEFAULT('0001-01-01 00:00:00')
+ALTER TABLE [OrderShipment] ADD [ModifiedDate] datetime2 NULL
+ALTER TABLE [OrderShipment] ADD [CreatedBy] nvarchar(64) NULL
+ALTER TABLE [OrderShipment] ADD [ModifiedBy] nvarchar(64) NULL
+ALTER TABLE [OrderShipment] ADD [Number] nvarchar(64) NOT NULL DEFAULT('')
+ALTER TABLE [OrderShipment] ADD [IsApproved] bit NOT NULL DEFAULT(0)
+ALTER TABLE [OrderShipment] ADD [Comment] nvarchar(2048) NULL
+ALTER TABLE [OrderShipment] ADD [Currency] nvarchar(3) NOT NULL DEFAULT('')
+ALTER TABLE [OrderShipment] ADD [Sum] money NOT NULL DEFAULT(0)
+ALTER TABLE [OrderShipment] ADD [IsCancelled] [bit] NOT NULL DEFAULT(0)
+ALTER TABLE [OrderShipment] ADD [CancelledDate] datetime2 NULL
+ALTER TABLE [OrderShipment] ADD [CancelReason] nvarchar(2048) NULL
+GO
+
+UPDATE [OrderShipment] SET [Status] = oo.[Status], CreatedDate = oo.CreatedDate, ModifiedDate = oo.ModifiedDate, CreatedBy = oo.CreatedBy, ModifiedBy = oo.ModifiedBy,
+	Number = oo.Number, IsApproved = oo.IsApproved, Comment = oo.Comment, Currency = oo.Currency, [Sum] = oo.[Sum], IsCancelled = oo.IsCancelled, 
+	CancelledDate = oo.CancelledDate, CancelReason = oo.CancelReason
+FROM [OrderPaymentIn] co INNER JOIN OrderOperation oo ON co.Id = oo.Id
+GO
+
+select * from [OrderShipment]
+
+
+
+

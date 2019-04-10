@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.ImageToolsModule.Data.Migrations
 {
-    public partial class Thumbnail : Migration
+    public partial class InitialImageTools : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -22,7 +22,8 @@ namespace VirtoCommerce.ImageToolsModule.Data.Migrations
                     Width = table.Column<int>(nullable: true),
                     Height = table.Column<int>(nullable: true),
                     BackgroundColor = table.Column<string>(nullable: true),
-                    AnchorPosition = table.Column<string>(maxLength: 64, nullable: true)
+                    AnchorPosition = table.Column<string>(maxLength: 64, nullable: true),
+                    JpegQuality = table.Column<string>(maxLength: 64, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -51,7 +52,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Migrations
                 name: "ThumbnailTaskOption",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     ThumbnailTaskId = table.Column<string>(nullable: true),
                     ThumbnailOptionId = table.Column<string>(nullable: true)
                 },

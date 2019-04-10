@@ -10,21 +10,22 @@ using VirtoCommerce.MarketingModule.Data.Repositories;
 namespace VirtoCommerce.MarketingModule.Data.Migrations
 {
     [DbContext(typeof(MarketingDbContext))]
-    [Migration("20190211141414_InitialMarketing")]
+    [Migration("20190409185706_InitialMarketing")]
     partial class InitialMarketing
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
+                .HasAnnotation("ProductVersion", "2.2.3-servicing-35854")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("VirtoCommerce.MarketingModule.Data.Model.CouponEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("Code")
                         .HasMaxLength(64);
@@ -63,7 +64,8 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.MarketingModule.Data.Model.DynamicContentFolderEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(64);
@@ -97,7 +99,8 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.MarketingModule.Data.Model.DynamicContentItemEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("ContentTypeId")
                         .HasMaxLength(64);
@@ -136,7 +139,8 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.MarketingModule.Data.Model.DynamicContentPlaceEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(64);
@@ -170,7 +174,8 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.MarketingModule.Data.Model.DynamicContentPublishingGroupEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("ConditionExpression");
 
@@ -212,7 +217,8 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.MarketingModule.Data.Model.PromotionEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("CatalogId")
                         .HasMaxLength(128);
@@ -267,7 +273,8 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.MarketingModule.Data.Model.PromotionStoreEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("PromotionId")
                         .IsRequired();
@@ -288,7 +295,8 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.MarketingModule.Data.Model.PromotionUsageEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("CouponCode")
                         .HasMaxLength(64);
@@ -328,7 +336,8 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.MarketingModule.Data.Model.PublishingGroupContentItemEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(64);
@@ -357,7 +366,8 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.MarketingModule.Data.Model.PublishingGroupContentPlaceEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(64);

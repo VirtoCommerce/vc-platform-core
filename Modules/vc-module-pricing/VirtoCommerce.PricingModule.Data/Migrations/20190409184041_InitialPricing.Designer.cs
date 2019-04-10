@@ -10,21 +10,22 @@ using VirtoCommerce.PricingModule.Data.Repositories;
 namespace VirtoCommerce.PricingModule.Data.Migrations
 {
     [DbContext(typeof(PricingDbContext))]
-    [Migration("20181017104018_InitialPricing")]
+    [Migration("20190409184041_InitialPricing")]
     partial class InitialPricing
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.0-rtm-30799")
+                .HasAnnotation("ProductVersion", "2.2.3-servicing-35854")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("VirtoCommerce.PricingModule.Data.Model.PriceEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(64);
@@ -56,7 +57,7 @@ namespace VirtoCommerce.PricingModule.Data.Migrations
                     b.HasIndex("PricelistId");
 
                     b.HasIndex("ProductId", "PricelistId")
-                        .HasName("ProductIdAndPricelistId");
+                        .HasName("IX_PriceId");
 
                     b.ToTable("Price");
                 });
@@ -64,7 +65,8 @@ namespace VirtoCommerce.PricingModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.PricingModule.Data.Model.PricelistAssignmentEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("CatalogId")
                         .IsRequired()
@@ -110,7 +112,8 @@ namespace VirtoCommerce.PricingModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.PricingModule.Data.Model.PricelistEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(64);

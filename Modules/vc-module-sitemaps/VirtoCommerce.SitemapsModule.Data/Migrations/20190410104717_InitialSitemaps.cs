@@ -11,7 +11,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Migrations
                 name: "Sitemap",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
@@ -29,7 +29,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Migrations
                 name: "SitemapItem",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),

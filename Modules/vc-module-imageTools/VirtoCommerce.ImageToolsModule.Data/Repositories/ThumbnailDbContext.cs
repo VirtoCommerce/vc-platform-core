@@ -1,4 +1,3 @@
-using System.Security.Cryptography.X509Certificates;
 using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.ImageToolsModule.Data.Models;
@@ -35,6 +34,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Repositories
             #region ThumbnailTaskOption
 
             modelBuilder.Entity<ThumbnailTaskOptionEntity>().ToTable("ThumbnailTaskOption").HasKey(x => x.Id);
+            modelBuilder.Entity<ThumbnailTaskOptionEntity>().Property(x => x.Id).HasMaxLength(128);
 
             modelBuilder.Entity<ThumbnailTaskOptionEntity>()
                 .HasOne(x => x.ThumbnailTask)

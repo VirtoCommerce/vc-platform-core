@@ -11,7 +11,7 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                 name: "DynamicContentFolder",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
@@ -36,7 +36,7 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                 name: "DynamicContentPublishingGroup",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
@@ -60,7 +60,7 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                 name: "Promotion",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
@@ -90,7 +90,7 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                 name: "DynamicContentItem",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
@@ -117,7 +117,7 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                 name: "DynamicContentPlace",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
@@ -142,7 +142,7 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                 name: "Coupon",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
@@ -168,7 +168,7 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                 name: "PromotionStore",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     PromotionId = table.Column<string>(nullable: false),
                     StoreId = table.Column<string>(maxLength: 128, nullable: false)
                 },
@@ -187,7 +187,7 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                 name: "PromotionUsage",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
@@ -214,7 +214,7 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                 name: "PublishingGroupContentItem",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
@@ -243,7 +243,7 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                 name: "PublishingGroupContentPlace",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
                     CreatedDate = table.Column<DateTime>(nullable: false),
                     ModifiedDate = table.Column<DateTime>(nullable: true),
                     CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
