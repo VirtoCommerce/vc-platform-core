@@ -46,10 +46,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
 
         public virtual async Task<ICollection<string>> GetSitemapUrlsAsync(string storeId)
         {
-            if (string.IsNullOrEmpty(storeId))
-            {
-                throw new ArgumentException("storeId");
-            }
+            if (string.IsNullOrEmpty(storeId)) { throw new ArgumentException("storeId"); }
 
             var sitemapUrls = new List<string>();
             var store = await StoreService.GetByIdAsync(storeId);

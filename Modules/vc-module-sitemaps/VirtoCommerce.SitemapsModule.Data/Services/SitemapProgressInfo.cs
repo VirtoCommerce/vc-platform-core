@@ -14,20 +14,20 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
         public void Start()
         {
             ProcessedCount = 0;
-            Description = String.Format(StartDescriptionTemplate, TotalCount);
+            Description = string.Format(StartDescriptionTemplate, TotalCount);
             ProgressCallback?.Invoke(this);
         }
 
         public void Next()
         {
             ProcessedCount++;
-            Description = String.Format(ProgressDescriptionTemplate, ProcessedCount, TotalCount);
+            Description = string.Format(ProgressDescriptionTemplate, ProcessedCount, TotalCount);
             ProgressCallback?.Invoke(this);
         }
 
         public void End()
         {
-            Description = String.Format(EndDescriptionTemplate, TotalCount);
+            Description = string.Format(EndDescriptionTemplate, TotalCount);
             ProgressCallback?.Invoke(this);
         }
     }
