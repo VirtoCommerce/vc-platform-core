@@ -36,7 +36,8 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
             _contentStorageProviderFactory = contentStorageProviderFactory;
         }
 
-        public virtual async Task LoadSitemapItemRecordsAsync(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
+        public virtual async Task LoadSitemapItemRecordsAsync(Store store, Sitemap sitemap,
+            string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
         {
             var contentBasePath = $"Pages/{sitemap.StoreId}";
             var storageProvider = _contentStorageProviderFactory(contentBasePath);
@@ -74,7 +75,8 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
             progressInfo.End();
         }
 
-        private List<SitemapItemRecord> GetSitemapItemsRecords(Store store, string baseUrl, IBlobContentStorageProvider storageProvider, SitemapItemOptions options, List<string> urls)
+        private IEnumerable<SitemapItemRecord> GetSitemapItemsRecords(Store store, string baseUrl,
+            IBlobContentStorageProvider storageProvider, SitemapItemOptions options, IEnumerable<string> urls)
         {
             var result = new List<SitemapItemRecord>();
             foreach (var url in urls)
@@ -108,12 +110,13 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
         private List<SitemapItem> GetStaticContentSitemapItems(Sitemap sitemap)
         {
             return sitemap.Items.Where(si => !string.IsNullOrEmpty(si.ObjectType) &&
-                                                                      (si.ObjectType.EqualsInvariant(SitemapItemTypes.ContentItem) ||
-                                                                       si.ObjectType.EqualsInvariant(SitemapItemTypes.Folder)))
-                                                                       .ToList();
+                                            (si.ObjectType.EqualsInvariant(SitemapItemTypes.ContentItem) ||
+                                            si.ObjectType.EqualsInvariant(SitemapItemTypes.Folder)))
+                                 .ToList();
         }
 
-        private async Task<List<string>> GetSiteMapFolderUrls(IBlobContentStorageProvider storageProvider, List<string> acceptedFilenameExtensions, SitemapItem sitemapItem)
+        private async Task<IEnumerable<string>> GetSiteMapFolderUrls(IBlobContentStorageProvider storageProvider,
+            ICollection<string> acceptedFilenameExtensions, SitemapItem sitemapItem)
         {
             var result = new List<string>();
             var searchResult = await storageProvider.SearchAsync(sitemapItem.UrlTemplate, null);

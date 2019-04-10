@@ -22,10 +22,10 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
         public virtual Task LoadSitemapItemRecordsAsync(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
         {
             var customOptions = new SitemapItemOptions();
-            var customSitemapItems = sitemap.Items.Where(si => si.ObjectType.EqualsInvariant(SitemapItemTypes.Custom));
+            var customSitemapItems = sitemap.Items.Where(si => si.ObjectType.EqualsInvariant(SitemapItemTypes.Custom))
+                                                  .ToList();
 
-            var totalCount = customSitemapItems.Count();
-            var progressInfo = GetProgressInfo(progressCallback, totalCount);
+            var progressInfo = GetProgressInfo(progressCallback, customSitemapItems.Count);
 
             foreach (var customSitemapItem in customSitemapItems)
             {

@@ -50,20 +50,18 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
         private async Task ProcesseProductSitemapItem(Store store, Sitemap sitemap, string baseUrl)
         {
             var productOptions = GetProductOptions();
-            var productSitemapItems = sitemap.Items.Where(si => si.ObjectType.EqualsInvariant(SitemapItemTypes.Product));
+            var productSitemapItems = sitemap.Items.Where(si => si.ObjectType.EqualsInvariant(SitemapItemTypes.Product))
+                                                   .ToList();
+
             var productIds = productSitemapItems.Select(si => si.ObjectId).ToArray();
             var itemResponceGroup = (ItemResponseGroup.Seo | ItemResponseGroup.Outlines).ToString();
+            var products = (await ItemService.GetByIdsAsync(productIds, itemResponceGroup))
+                                             .Where(p => !p.IsActive.HasValue || p.IsActive.Value);
 
-            var products = (await ItemService.GetByIdsAsync(productIds, itemResponceGroup)).Where(p => !p.IsActive.HasValue || p.IsActive.Value);
-
-            foreach (var sitemapItem in productSitemapItems)
+            foreach (var product in products)
             {
-                var product = products.FirstOrDefault(x => x.Id == sitemapItem.ObjectId);
-                if (product == null)
-                {
-                    continue;
-                }
                 var itemRecords = GetSitemapItemRecords(store, productOptions, sitemap.UrlTemplate, baseUrl, product);
+                var sitemapItem = productSitemapItems.First(x => x.ObjectId == product.Id);
                 sitemapItem.ItemsRecords.AddRange(itemRecords);
             }
         }
@@ -72,20 +70,21 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
         {
             var productOptions = GetProductOptions();
             var searchBunchSize = SettingsManager.GetValue("Sitemap.SearchBunchSize", 500);
+            var categorySitemapItems = sitemap.Items.Where(x => x.ObjectType.EqualsInvariant(SitemapItemTypes.Category))
+                                                    .ToList();
 
-            var categorySitemapItems = sitemap.Items.Where(x => x.ObjectType.EqualsInvariant(SitemapItemTypes.Category));
             var categoryIds = categorySitemapItems.Select(x => x.ObjectId).ToArray();
             var categoryResponceGroup = (CategoryResponseGroup.WithSeo | CategoryResponseGroup.WithOutlines).ToString();
             var categories = (await CategoryService.GetByIdsAsync(categoryIds, categoryResponceGroup))
-                                                   .Where(c => !c.IsActive.HasValue || c.IsActive.Value);
+                                                   .Where(c => !c.IsActive.HasValue || c.IsActive.Value)
+                                                   .ToList();
 
-            var progressInfo = GetProgressInfo(progressCallback, categories.Count());
+            var progressInfo = GetProgressInfo(progressCallback, categories.Count);
             progressInfo.Start();
 
-            foreach (var sitemapItem in categorySitemapItems)
+            foreach (var category in categories)
             {
-                var category = categories.FirstOrDefault(x => x.Id == sitemapItem.ObjectId);
-                if (category == null) continue;
+                var sitemapItem = categorySitemapItems.First(x => x.ObjectId == category.Id);
 
                 var productsItemRecords = await GetProductItemRecordsForCategory(store, sitemap, baseUrl, productOptions, searchBunchSize, category);
                 var categoryItemRecords = await GetCategorySitemapItems(store, sitemap, baseUrl, searchBunchSize, category);
@@ -99,7 +98,6 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
 
         private async Task<ConcurrentBag<SitemapItemRecord>> GetProductItemRecordsForCategory(Store store, Sitemap sitemap, string baseUrl, SitemapItemOptions productOptions, int searchBunchSize, Category category)
         {
-            //Load all category products
             var productTotalCount = await GetTotalProductCount(category);
 
             var itemRecords = new ConcurrentBag<SitemapItemRecord>();
@@ -108,7 +106,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
                 var productSearchCriteria = new CatalogListEntrySearchCriteria
                 {
                     CategoryId = category.Id,
-                    ResponseGroup = (CategoryResponseGroup.WithSeo).ToString(), // проверить с WithCategories - ответ должен быть тотже
+                    ResponseGroup = CategoryResponseGroup.WithSeo.ToString(),
                     Skip = i * searchBunchSize,
                     Take = searchBunchSize,
                     HideDirectLinkedCategories = true,
@@ -129,6 +127,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
                     }
                 }
             });
+
             return itemRecords;
         }
 
@@ -141,7 +140,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
             var catalogSearchCriteria = new CatalogListEntrySearchCriteria
             {
                 CategoryId = category.Id,
-                ResponseGroup = responseGroup, // проверить с WithCategories - ответ должен быть тотже
+                ResponseGroup = responseGroup,
                 Skip = 0,
                 Take = searchBunchSize,
                 HideDirectLinkedCategories = true,

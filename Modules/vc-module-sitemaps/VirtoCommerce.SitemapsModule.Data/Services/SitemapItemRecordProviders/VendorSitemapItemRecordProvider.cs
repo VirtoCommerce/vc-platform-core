@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -28,23 +27,20 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
         public virtual async Task LoadSitemapItemRecordsAsync(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
         {
             var vendorOptions = new SitemapItemOptions();
+            var vendorSitemapItems = sitemap.Items.Where(x => x.ObjectType.EqualsInvariant(SitemapItemTypes.Vendor))
+                                                  .ToList();
 
-            var vendorSitemapItems = sitemap.Items.Where(x => x.ObjectType.EqualsInvariant(SitemapItemTypes.Vendor));
             var vendorIds = vendorSitemapItems.Select(x => x.ObjectId).ToArray();
             var members = await MemberService.GetByIdsAsync(vendorIds);
 
-            var totalCount = members.Length;
-            var progressInfo = GetProgressInfo(progressCallback, totalCount);
+            var progressInfo = GetProgressInfo(progressCallback, members.Length);
             progressInfo.Start();
 
-            foreach (var sitemapItem in vendorSitemapItems)
+            foreach (var member in members)
             {
-                var vendor = members.FirstOrDefault(x => x.Id == sitemapItem.ObjectId) as Vendor;
-                if (vendor != null)
-                {
-                    sitemapItem.ItemsRecords = GetSitemapItemRecords(store, vendorOptions, sitemap.UrlTemplate, baseUrl, vendor);
-                    progressInfo.Next();
-                }
+                var sitemapItem = vendorSitemapItems.First(x => x.ObjectId == member.Id);
+                sitemapItem.ItemsRecords = GetSitemapItemRecords(store, vendorOptions, sitemap.UrlTemplate, baseUrl, member);
+                progressInfo.Next();
             }
 
             progressInfo.End();
