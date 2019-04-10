@@ -127,8 +127,7 @@
         };
 
         $scope.getDictionaryValues = function (property, callback) {
-            //dictionaryItemsApi.query({ id: property.objectType, propertyId: property.id }, callback);
-            dictionaryItemsApi.getDictionaryItems({}, { id: property.objectType, dynamicPropertyId: property.id, take: 999 }, callback);
+            dictionaryItemsApi.query({ id: property.objectType, propertyId: property.id }, callback);
         };
 
         $scope.setForm = function (form) { $scope.formScope = form; };

@@ -2,8 +2,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Core.DynamicProperties
 {
-    public class DynamicPropertySearchCriteria : SearchCriteriaBase
+    public class DynamicPropertySearchResult : GenericSearchResult<DynamicProperty>
     {
-        public string TypeName { get; set; }
     }
 }

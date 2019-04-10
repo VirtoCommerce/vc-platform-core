@@ -2,7 +2,6 @@ angular.module('virtoCommerce.contentModule')
 .controller('virtoCommerce.contentModule.editBlogController', ['$rootScope', '$scope', 'platformWebApp.validators', 'virtoCommerce.contentModule.contentApi', 'platformWebApp.dynamicProperties.api', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'platformWebApp.dynamicProperties.dictionaryItemsApi', 'platformWebApp.settings', function ($rootScope, $scope, validators, contentApi, dynamicPropertiesApi, bladeNavigationService, dialogService, dictionaryItemsApi, settings) {
     var blade = $scope.blade;
     blade.updatePermission = 'content:update';
-    blade.frontMatterHeaders = 'VirtoCommerce.ContentModule.Web.Model.FrontMatterHeaders'
     $scope.validators = validators;
 
     blade.initialize = function () {
@@ -20,12 +19,13 @@ angular.module('virtoCommerce.contentModule')
     };
 
     function fillMetadata(data) {
-        dynamicPropertiesApi.getPropertiesForType({ typeName: blade.frontMatterHeaders }, { skip: 0, take: 999 }, function (results) {
-            fillDynamicProperties(data.metadata, results);
-            blade.origEntity = angular.copy(blade.currentEntity);
-            blade.isLoading = false;
-
-        }, function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+        dynamicPropertiesApi.query({ id: 'VirtoCommerce.ContentModule.Web.FrontMatterHeaders' },
+            function (results) {
+                fillDynamicProperties(data.metadata, results);
+                blade.origEntity = angular.copy(blade.currentEntity);
+                blade.isLoading = false;
+            },
+            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
     }
 
     function fillDynamicProperties(metadata, props) {
