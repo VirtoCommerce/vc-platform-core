@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -15,7 +13,6 @@ using VirtoCommerce.SitemapsModule.Core.Services;
 
 namespace VirtoCommerce.SitemapsModule.Data.ExportImport
 {
-
     public sealed class SitemapExportImport
     {
         private readonly ISitemapService _sitemapService;
@@ -67,7 +64,6 @@ namespace VirtoCommerce.SitemapsModule.Data.ExportImport
                 await writer.FlushAsync();
             }
         }
-
 
         public async Task DoImportAsync(Stream inputStream, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
