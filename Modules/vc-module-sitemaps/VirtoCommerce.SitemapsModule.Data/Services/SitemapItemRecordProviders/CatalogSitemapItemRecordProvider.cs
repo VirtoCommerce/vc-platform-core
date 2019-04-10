@@ -99,8 +99,8 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
         private async Task<ConcurrentBag<SitemapItemRecord>> GetProductItemRecordsForCategory(Store store, Sitemap sitemap, string baseUrl, SitemapItemOptions productOptions, int searchBunchSize, Category category)
         {
             var productTotalCount = await GetTotalProductCount(category);
-
             var itemRecords = new ConcurrentBag<SitemapItemRecord>();
+
             Parallel.For(0, (int)Math.Ceiling(productTotalCount / (double)searchBunchSize), new ParallelOptions { MaxDegreeOfParallelism = 5 }, (i) =>
             {
                 var productSearchCriteria = new CatalogListEntrySearchCriteria
@@ -117,11 +117,13 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
 
                 var productSearchResult = ListEntrySearchService.SearchAsync(productSearchCriteria).Result;
                 var productIds = productSearchResult.ListEntries.Select(si => si.Id).ToArray();
-                var products = (ItemService.GetByIdsAsync(productIds, ItemResponseGroup.WithSeo.ToString()).Result).Where(p => !p.IsActive.HasValue || p.IsActive.Value);
+                var products = (ItemService.GetByIdsAsync(productIds, ItemResponseGroup.WithSeo.ToString()).Result)
+                                           .Where(p => !p.IsActive.HasValue || p.IsActive.Value);
 
                 foreach (var product in products.Where(p => !p.IsActive.HasValue || p.IsActive.Value))
                 {
-                    foreach (var record in GetSitemapItemRecords(store, productOptions, sitemap.UrlTemplate, baseUrl, product))
+                    var sitemapRecords = GetSitemapItemRecords(store, productOptions, sitemap.UrlTemplate, baseUrl, product);
+                    foreach (var record in sitemapRecords)
                     {
                         itemRecords.Add(record);
                     }
