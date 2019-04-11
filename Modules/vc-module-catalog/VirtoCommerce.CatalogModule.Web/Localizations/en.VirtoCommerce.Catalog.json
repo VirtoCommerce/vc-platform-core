@@ -708,6 +708,10 @@
         "catalog:import": "Import catalog data"
     },
     "settings": {
+        "Catalog.ImageCategories": {
+            "description": "Dictionary of possible categories that item's Images can have",
+            "title": "Image categories"
+        },
         "Catalog.AssociationGroups": {
             "description": "Catalog product association groups",
             "title": "Association Group names"

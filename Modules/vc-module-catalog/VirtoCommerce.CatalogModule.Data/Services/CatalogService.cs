@@ -144,13 +144,13 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 var preloadedCatalog = preloadedCatalogsMap[catalog.Id];
                 if (preloadedCatalog != null)
                 {
-                    catalog.Properties = preloadedCatalog.Properties;
+                    if (catalog.Properties.IsNullOrEmpty())
+                    {
+                        catalog.Properties = preloadedCatalog.Properties;
+                    }
                     foreach (var property in catalog.Properties)
                     {
                         property.Catalog = preloadedCatalogsMap[property.CatalogId];
-                        property.IsReadOnly = property.Type != PropertyType.Catalog;
-                        property.Values = catalog.Properties.Where(pr => pr.Id.EqualsInvariant(property.Id))
-                                                            .SelectMany(p => p.Values).ToArray();
                     }
                 }
             }

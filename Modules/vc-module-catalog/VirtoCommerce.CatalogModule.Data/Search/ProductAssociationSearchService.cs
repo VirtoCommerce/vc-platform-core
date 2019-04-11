@@ -36,7 +36,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             var cacheKey = CacheKey.With(GetType(), "SearchProductAssociationsAsync", criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                cacheEntry.AddExpirationToken(ItemSearchCacheRegion.CreateChangeToken());
+                cacheEntry.AddExpirationToken(AssociationSearchCacheRegion.CreateChangeToken());
                 var result = AbstractTypeFactory<ProductAssociationSearchResult>.TryCreateInstance();
                 if (!criteria.ObjectIds.IsNullOrEmpty())
                 {
