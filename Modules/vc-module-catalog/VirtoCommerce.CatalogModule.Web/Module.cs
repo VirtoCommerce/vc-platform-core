@@ -82,8 +82,7 @@ namespace VirtoCommerce.CatalogModule.Web
             serviceCollection.AddSingleton<AbstractValidator<IHasProperties>, HasPropertiesValidator>();
 
             serviceCollection.AddSingleton<CatalogExportImport>();
-            serviceCollection.AddSingleton<CategoryChangedEventHandler>();
-            serviceCollection.AddSingleton<ProductChangedEventHandler>();
+            serviceCollection.AddSingleton<SaveSeoForCatalogEntitesEventHandler>();
 
             serviceCollection.AddSingleton<IOutlinePartResolver>(provider =>
             {
@@ -142,10 +141,8 @@ namespace VirtoCommerce.CatalogModule.Web
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new SearchCriteriaJsonConverter());
 
             var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
-            inProcessBus.RegisterHandler<CategoryChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<CategoryChangedEventHandler>().Handle(message));
-            inProcessBus.RegisterHandler<CategoryChangingEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<CategoryChangedEventHandler>().Handle(message));
-            inProcessBus.RegisterHandler<ProductChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<ProductChangedEventHandler>().Handle(message));
-            inProcessBus.RegisterHandler<ProductChangingEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<ProductChangedEventHandler>().Handle(message));
+            inProcessBus.RegisterHandler<CategoryChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<SaveSeoForCatalogEntitesEventHandler>().Handle(message));
+            inProcessBus.RegisterHandler<ProductChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<SaveSeoForCatalogEntitesEventHandler>().Handle(message));
 
             //Force migrations
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
@@ -155,9 +152,6 @@ namespace VirtoCommerce.CatalogModule.Web
                 catalogDbContext.Database.EnsureCreated();
                 catalogDbContext.Database.Migrate();
             }
-
-
-
         }
 
         public void Uninstall()

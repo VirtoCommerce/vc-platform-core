@@ -8,7 +8,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class Category : AuditableEntity, IHasLinks, ISeoSupport, IHasOutlines, IHasImages, IHasProperties, ICloneable, IHasTaxType
+    public class Category : AuditableEntity, IHasLinks, ISeoSupport, IHasOutlines, IHasImages, IHasProperties, ICloneable, IHasTaxType, IHasName
     {
         public Category()
         {
@@ -24,7 +24,16 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         public string Code { get; set; }
 
         public string Name { get; set; }
-        public string Path { get; set; }
+        /// <summary>
+        /// Category outline in physical catalog (all parent categories ids concatenated. E.g. (1/21/344))
+        /// </summary>
+        public string Outline => Parent != null ? $"{Parent.Outline}/{Id}" : Id;
+        /// <summary>
+        /// Category path in physical catalog (all parent categories names concatenated. E.g. (parent1/parent2))
+        /// </summary>
+        public string Path => Parent != null ? $"{Parent.Path}/{Name}" : Name;
+
+
         public bool IsVirtual { get; set; }
         public int Level { get; set; }
         [JsonIgnore]
@@ -97,15 +106,20 @@ namespace VirtoCommerce.CatalogModule.Core.Model
                     {
                         Properties = new List<Property>();
                     }
+                    //Try to find property by type and name
                     var existProperty = Properties.FirstOrDefault(x => x.IsSame(parentProperty, PropertyType.Product, PropertyType.Variation));
-                    if (existProperty != null)
+                    if (existProperty == null)
                     {
-                        existProperty.TryInheritFrom(parentProperty);
+                        existProperty = AbstractTypeFactory<Property>.TryCreateInstance();
+                        Properties.Add(existProperty);
                     }
-                    else
-                    {
-                        Properties.Add(parentProperty);
-                    }
+                    existProperty.TryInheritFrom(parentProperty);
+                    existProperty.IsReadOnly = existProperty.Type != PropertyType.Category;
+                }
+                //Restore order after changes
+                if (Properties != null)
+                {
+                    Properties = Properties.OrderBy(x => x.Name).ToList();
                 }
             }
 

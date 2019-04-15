@@ -8,16 +8,21 @@ namespace VirtoCommerce.CatalogModule.Core.Model
 {
     public class PropertyValue : AuditableEntity, IHasLanguage, IInheritable, ICloneable
     {
-        public string PropertyId { get; set; }
         public string PropertyName { get; set; }
+        public string PropertyId { get; set; }
+        #region IHasLanguage members
+        public string LanguageCode { get; set; }
+        #endregion
         [JsonIgnore]
         public Property Property { get; set; }
         public string Alias { get; set; }
+        public PropertyValueType ValueType { get; set; }
         public string ValueId { get; set; }
         public object Value { get; set; }
+        public bool PropertyMultivalue => Property?.Multivalue ?? false;
+        [JsonIgnore]
+        public virtual bool IsEmpty => string.IsNullOrEmpty(ValueId) && string.IsNullOrEmpty(Value?.ToString());
 
-        public PropertyValueType ValueType { get; set; }
-        public string LanguageCode { get; set; }
 
         public override string ToString()
         {
@@ -52,5 +57,10 @@ namespace VirtoCommerce.CatalogModule.Core.Model
             return base.MemberwiseClone();
         }
         #endregion
+
+        #region Conditional JSON serialization for properties declared in base type
+        public override bool ShouldSerializeAuditableProperties => false;
+        #endregion
+
     }
 }

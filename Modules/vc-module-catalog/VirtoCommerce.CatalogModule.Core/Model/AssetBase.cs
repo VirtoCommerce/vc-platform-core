@@ -93,5 +93,9 @@ namespace VirtoCommerce.CatalogModule.Core.Model
             return result;
         }
         #endregion
+
+        #region Conditional JSON serialization for properties declared in base type
+        public override bool ShouldSerializeAuditableProperties => false;
+        #endregion
     }
 }

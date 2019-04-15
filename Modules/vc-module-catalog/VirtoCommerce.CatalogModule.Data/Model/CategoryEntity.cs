@@ -103,41 +103,48 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             category.Links = OutgoingLinks.Select(x => x.ToModel(new CategoryLink())).ToList();
             category.Images = Images.OrderBy(x => x.SortOrder).Select(x => x.ToModel(AbstractTypeFactory<Image>.TryCreateInstance())).ToList();
 
-            category.Properties = new List<Property>();
-
-            //Load self properties
-            var selfProperties = Properties.Select(x => x.ToModel(AbstractTypeFactory<Property>.TryCreateInstance())).ToList();
-
-            //load self category property values and transform then to transient properties
+            category.Properties = Properties.Select(x => x.ToModel(AbstractTypeFactory<Property>.TryCreateInstance()))
+                                           .OrderBy(x => x.Name)
+                                           .ToList();
+            foreach (var property in category.Properties)
+            {
+                property.IsReadOnly = property.Type != PropertyType.Category;
+            }
+            //transform property value into transient properties
             if (!CategoryPropertyValues.IsNullOrEmpty())
             {
                 var propertyValues = CategoryPropertyValues.OrderBy(x => x.DictionaryItem?.SortOrder)
                                                        .ThenBy(x => x.Name)
                                                        .SelectMany(pv => pv.ToModel(AbstractTypeFactory<PropertyValue>.TryCreateInstance()).ToList());
 
-                category.Properties = propertyValues.GroupBy(pv => pv.PropertyName).Select(values =>
+                var transientInstanceProperties = propertyValues.GroupBy(pv => pv.PropertyName).Select(values =>
                 {
                     var property = AbstractTypeFactory<Property>.TryCreateInstance();
+                    property.Type = PropertyType.Category;
                     property.Name = values.Key;
                     property.ValueType = values.FirstOrDefault().ValueType;
                     property.Values = values.ToList();
+                    foreach (var propValue in property.Values)
+                    {
+                        propValue.Property = property;
+                    }
                     return property;
-                }).ToList();
-            }
-            //Then try to inherit self transient properties without meta-informations from self properties   
-            foreach (var selfProperty in selfProperties)
-            {
-                var existTransientProperty = category.Properties.FirstOrDefault(x => x.IsSame(selfProperty, PropertyType.Product, PropertyType.Variation));
-                if (existTransientProperty != null)
-                {
-                    existTransientProperty.TryInheritFrom(selfProperty);
-                }
-                else
-                {
-                    category.Properties.Add(selfProperty);
-                }
-            }
+                }).OrderBy(x => x.Name).ToList();
 
+                foreach (var transientInstanceProperty in transientInstanceProperties)
+                {
+                    var existSelfProperty = category.Properties.FirstOrDefault(x => x.IsSame(transientInstanceProperty, PropertyType.Category));
+                    if (existSelfProperty == null)
+                    {
+                        category.Properties.Add(transientInstanceProperty);
+                    }
+                    else
+                    {
+                        //Just only copy values for existing self property
+                        existSelfProperty.Values = transientInstanceProperty.Values;
+                    }
+                }
+            }
             return category;
         }
 
@@ -170,11 +177,12 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             if (!category.Properties.IsNullOrEmpty())
             {
                 var propValues = new List<PropertyValue>();
-                foreach (var property in category.Properties)
+                foreach (var property in category.Properties.Where(x => x.Type == PropertyType.Category))
                 {
                     if (property.Values != null)
                     {
-                        foreach (var propValue in property.Values)
+                        //Do not use values from inherited properties and skip empty values
+                        foreach (var propValue in property.Values.Where(x => !x.IsInherited && !x.IsEmpty))
                         {
                             //Need populate required fields
                             propValue.PropertyName = property.Name;

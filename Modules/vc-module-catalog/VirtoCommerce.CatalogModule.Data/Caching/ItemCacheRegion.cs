@@ -23,9 +23,21 @@ namespace VirtoCommerce.CatalogModule.Data.Caching
 
         public static void ExpireEntity(CatalogProduct entity)
         {
+            if (entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
             if (_entityRegionTokenLookup.TryRemove(entity.Id, out var token))
             {
                 token.Cancel();
+            }
+            //need to also evict from cache a main product if given product is variation
+            if (entity.MainProductId != null)
+            {
+                if (_entityRegionTokenLookup.TryRemove(entity.MainProductId, out var token2))
+                {
+                    token2.Cancel();
+                }
             }
         }
     }
