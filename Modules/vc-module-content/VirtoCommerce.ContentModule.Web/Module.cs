@@ -24,6 +24,7 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Data.Extensions;
 
 namespace VirtoCommerce.ContentModule.Web
 {
@@ -89,6 +90,7 @@ namespace VirtoCommerce.ContentModule.Web
             {
                 using (var menuDbContext = serviceScope.ServiceProvider.GetRequiredService<MenuDbContext>())
                 {
+                    menuDbContext.Database.MigrateIfNotApplied(MigrationName.GetUpdateV2MigrationName(ModuleInfo.Id));
                     menuDbContext.Database.EnsureCreated();
                     menuDbContext.Database.Migrate();
                 }

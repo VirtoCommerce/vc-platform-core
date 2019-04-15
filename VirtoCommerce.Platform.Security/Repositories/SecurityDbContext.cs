@@ -32,6 +32,8 @@ namespace VirtoCommerce.Platform.Security.Repositories
             builder.Entity<IdentityUserLogin<string>>().Property(x => x.ProviderKey).HasMaxLength(128);
             builder.Entity<IdentityUserRole<string>>().Property(x => x.UserId).HasMaxLength(128);
             builder.Entity<IdentityUserRole<string>>().Property(x => x.RoleId).HasMaxLength(128);
+            builder.Entity<IdentityRoleClaim<string>>().Property(x => x.RoleId).HasMaxLength(128);
+            builder.Entity<IdentityUserToken<string>>().Property(x => x.UserId).HasMaxLength(128);
         }
     }
 }
