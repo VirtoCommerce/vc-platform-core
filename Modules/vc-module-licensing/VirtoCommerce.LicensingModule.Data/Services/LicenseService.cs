@@ -153,7 +153,7 @@ namespace VirtoCommerce.LicensingModule.Data.Services
                 };
 
                 var licenseString = JsonConvert.SerializeObject(license);
-                var signature = CreateSignature(licenseString);
+                var signature = await CreateSignatureAsync(licenseString);
 
                 result = string.Join("\r\n", licenseString, signature);
 
@@ -174,7 +174,7 @@ namespace VirtoCommerce.LicensingModule.Data.Services
             }
         }
 
-        private async Task<string> CreateSignature(string data)
+        private async Task<string> CreateSignatureAsync(string data)
         {
             var hashAlgorithmName = HashAlgorithmName.SHA256.Name;
 
