@@ -1,4 +1,4 @@
-﻿angular.module('virtoCommerce.coreModule.common', [])
+﻿angular.module('virtoCommerce.coreModule.common')
     .run(
         ['$http', '$compile', 'virtoCommerce.coreModule.common.dynamicExpressionService', function ($http, $compile, dynamicExpressionService) {
 
@@ -230,7 +230,7 @@
                 id: 'BlockPricingCondition',
                 newChildLabel: '+ add condition'
             });
-            
+
             dynamicExpressionService.registerExpression({
                 groupName: groupNames[1],
                 id: 'UserGroupsContainsCondition',
