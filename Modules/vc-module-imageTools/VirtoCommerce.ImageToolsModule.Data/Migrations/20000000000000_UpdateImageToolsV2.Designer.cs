@@ -102,9 +102,9 @@ namespace VirtoCommerce.ImageToolsModule.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(128);
 
-                    b.Property<string>("ThumbnailOptionId");
+                    b.Property<string>("ThumbnailOptionId").IsRequired();
 
-                    b.Property<string>("ThumbnailTaskId");
+                    b.Property<string>("ThumbnailTaskId").IsRequired();
 
                     b.HasKey("Id");
 

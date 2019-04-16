@@ -11,6 +11,7 @@ namespace VirtoCommerce.PricingModule.Data.Migrations
                  WHERE TABLE_NAME = '__MigrationHistory'))
                     BEGIN
 	                    INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20190409184041_InitialPricing', '2.2.3-servicing-35854')
+                        UPDATE [PricelistAssignment] SET [PredicateVisualTreeSerialized] = REPLACE([PredicateVisualTreeSerialized], 'ConditionExpressionTree', 'PriceConditionTree')
                     END");
         }
 

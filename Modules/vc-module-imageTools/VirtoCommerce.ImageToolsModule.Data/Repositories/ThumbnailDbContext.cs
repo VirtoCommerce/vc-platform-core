@@ -40,12 +40,14 @@ namespace VirtoCommerce.ImageToolsModule.Data.Repositories
                 .HasOne(x => x.ThumbnailTask)
                 .WithMany(t => t.ThumbnailTaskOptions)
                 .HasForeignKey(x => x.ThumbnailTaskId)
+                .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ThumbnailTaskOptionEntity>()
                 .HasOne(x => x.ThumbnailOption)
                 .WithMany()
                 .HasForeignKey(x => x.ThumbnailOptionId)
+                .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
 
             #endregion

@@ -287,7 +287,7 @@ namespace VirtoCommerce.Platform.Security.Migrations
 
                     b.Property<DateTimeOffset?>("LockoutEnd");
 
-                    b.Property<string>("MemberId");
+                    b.Property<string>("MemberId").HasMaxLength(128);
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256);
@@ -308,7 +308,7 @@ namespace VirtoCommerce.Platform.Security.Migrations
 
                     b.Property<string>("SecurityStamp");
 
-                    b.Property<string>("StoreId");
+                    b.Property<string>("StoreId").HasMaxLength(128);
 
                     b.Property<bool>("TwoFactorEnabled");
 

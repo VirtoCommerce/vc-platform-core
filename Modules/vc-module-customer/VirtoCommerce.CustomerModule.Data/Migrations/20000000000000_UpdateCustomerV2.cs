@@ -58,6 +58,12 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                                     FROM Member m INNER JOIN Employee e ON e.Id = m.Id')
 	                    END
 
+                        BEGIN
+                            UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.CustomerModule.Core.Model.Contact' WHERE [Name] = 'Married' AND ObjectType = 'VirtoCommerce.Domain.Customer.Model.Contact'
+                            UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.CustomerModule.Core.Model.Contact' WHERE [Name] = 'occupation' AND ObjectType = 'VirtoCommerce.Domain.Customer.Model.Contact'
+                            UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.CustomerModule.Core.Model.Contact' WHERE [Name] = 'Sex' AND ObjectType = 'VirtoCommerce.Domain.Customer.Model.Contact'
+                        END
+
                     END");
         }
 

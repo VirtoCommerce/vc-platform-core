@@ -11,6 +11,11 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                  WHERE TABLE_NAME = '__MigrationHistory'))
                     BEGIN
 	                    INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20190409185706_InitialMarketing', '2.2.3-servicing-35854')
+
+                        UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.MarketingModule.Core.Model.DynamicContentItem' WHERE [Name] = 'Content type' AND ObjectType = 'VirtoCommerce.Domain.Marketing.Model.DynamicContentItem'
+                        UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.MarketingModule.Core.Model.DynamicContentItem' WHERE [Name] = 'Html' AND ObjectType = 'VirtoCommerce.Domain.Marketing.Model.DynamicContentItem'
+                        UPDATE [Promotion] SET [PredicateVisualTreeSerialized] = REPLACE([PredicateVisualTreeSerialized], 'PromoDynamicExpressionTree', 'PromotionConditionAndRewardTree')
+                        UPDATE [Promotion] SET [PredicateVisualTreeSerialized] = REPLACE([PredicateVisualTreeSerialized], 'RewardBlock', 'BlockReward')
                     END");
         }
 

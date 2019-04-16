@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.ImageToolsModule.Data.Migrations
@@ -53,8 +53,8 @@ namespace VirtoCommerce.ImageToolsModule.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(maxLength: 128, nullable: false),
-                    ThumbnailTaskId = table.Column<string>(nullable: true),
-                    ThumbnailOptionId = table.Column<string>(nullable: true)
+                    ThumbnailTaskId = table.Column<string>(nullable: false),
+                    ThumbnailOptionId = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {

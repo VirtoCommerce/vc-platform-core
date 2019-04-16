@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -42,8 +42,8 @@ namespace VirtoCommerce.Platform.Security.Migrations
                     LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
                     LockoutEnabled = table.Column<bool>(nullable: false),
                     AccessFailedCount = table.Column<int>(nullable: false),
-                    StoreId = table.Column<string>(nullable: true),
-                    MemberId = table.Column<string>(nullable: true),
+                    StoreId = table.Column<string>(maxLength: 128, nullable: true),
+                    MemberId = table.Column<string>(maxLength: 128, nullable: true),
                     IsAdministrator = table.Column<bool>(nullable: false),
                     PhotoUrl = table.Column<string>(maxLength: 2048, nullable: true),
                     UserType = table.Column<string>(maxLength: 64, nullable: true),
