@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 
-namespace VirtoCommerce.ContentModule.Web.Model
+namespace VirtoCommerce.ContentModule.Web
 {
     public class FrontMatterHeaders : Entity, IHasDynamicProperties
     {

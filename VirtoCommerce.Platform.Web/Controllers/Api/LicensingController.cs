@@ -36,7 +36,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
             using (var httpClient = new HttpClient())
             {
-                var activationUrl = new Uri(_platformOptions.ActivationUrl + activationCode);
+                var activationUrl = new Uri(_platformOptions.LicenseActivationUrl + activationCode);
                 var httpResponse = await httpClient.GetAsync(activationUrl);
                 if (httpResponse.IsSuccessStatusCode)
                 {

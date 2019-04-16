@@ -1,0 +1,48 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.489
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.LicensingModule.Core", "VirtoCommerce.LicensingModule.Core\VirtoCommerce.LicensingModule.Core.csproj", "{07C5AD24-D0F4-415D-BC0D-D5CD0F0E5E29}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.LicensingModule.Data", "VirtoCommerce.LicensingModule.Data\VirtoCommerce.LicensingModule.Data.csproj", "{B89AD034-431F-4C78-A36E-D5E409C3530A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.LicensingModule.Web", "VirtoCommerce.LicensingModule.Web\VirtoCommerce.LicensingModule.Web.csproj", "{150BDE02-132B-4EF2-9CFF-1A7AFD5E4E8B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Core", "..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj", "{1A7E7ACB-DD73-4F63-ABEA-E283BFAD4693}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Data", "..\..\VirtoCommerce.Platform.Data\VirtoCommerce.Platform.Data.csproj", "{5FB162EA-C878-4CF1-9187-FD9E3ADCC6BE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{07C5AD24-D0F4-415D-BC0D-D5CD0F0E5E29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07C5AD24-D0F4-415D-BC0D-D5CD0F0E5E29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07C5AD24-D0F4-415D-BC0D-D5CD0F0E5E29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07C5AD24-D0F4-415D-BC0D-D5CD0F0E5E29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B89AD034-431F-4C78-A36E-D5E409C3530A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B89AD034-431F-4C78-A36E-D5E409C3530A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B89AD034-431F-4C78-A36E-D5E409C3530A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B89AD034-431F-4C78-A36E-D5E409C3530A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{150BDE02-132B-4EF2-9CFF-1A7AFD5E4E8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{150BDE02-132B-4EF2-9CFF-1A7AFD5E4E8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{150BDE02-132B-4EF2-9CFF-1A7AFD5E4E8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{150BDE02-132B-4EF2-9CFF-1A7AFD5E4E8B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A7E7ACB-DD73-4F63-ABEA-E283BFAD4693}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A7E7ACB-DD73-4F63-ABEA-E283BFAD4693}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A7E7ACB-DD73-4F63-ABEA-E283BFAD4693}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A7E7ACB-DD73-4F63-ABEA-E283BFAD4693}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FB162EA-C878-4CF1-9187-FD9E3ADCC6BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FB162EA-C878-4CF1-9187-FD9E3ADCC6BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FB162EA-C878-4CF1-9187-FD9E3ADCC6BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FB162EA-C878-4CF1-9187-FD9E3ADCC6BE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E4081D91-5774-4545-909F-D533C494D688}
+	EndGlobalSection
+EndGlobal

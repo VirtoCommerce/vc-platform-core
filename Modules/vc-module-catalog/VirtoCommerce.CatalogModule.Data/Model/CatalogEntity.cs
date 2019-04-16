@@ -64,20 +64,14 @@ namespace VirtoCommerce.CatalogModule.Data.Model
                 .OrderBy(x => x.Name)
                 .Select(x => x.ToModel(AbstractTypeFactory<Property>.TryCreateInstance())).ToList();
 
+
             foreach (var property in catalog.Properties)
             {
+                property.IsReadOnly = property.Type != PropertyType.Catalog;
                 property.Values = CatalogPropertyValues.Where(pr => pr.Name.EqualsInvariant(property.Name)).OrderBy(x => x.DictionaryItem?.SortOrder)
                     .ThenBy(x => x.Name)
                     .SelectMany(x => x.ToModel(AbstractTypeFactory<PropertyValue>.TryCreateInstance())).ToList();
             }
-
-            ////item property values
-            //catalog.PropertyValues = CatalogPropertyValues
-            //    .OrderBy(x => x.DictionaryItem?.SortOrder)
-            //    .ThenBy(x => x.Name)
-            //    .SelectMany(x => x.ToModel(AbstractTypeFactory<PropertyValue>.TryCreateInstance())).ToList();
-
-
 
             return catalog;
         }

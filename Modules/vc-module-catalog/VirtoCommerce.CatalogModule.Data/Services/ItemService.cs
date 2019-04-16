@@ -71,10 +71,11 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 }
 
                 await LoadDependenciesAsync(result);
-                ApplyInheritanceRules(result);
 
                 var productsWithVariationsList = result.Concat(result.Where(p => p.Variations != null)
                                            .SelectMany(p => p.Variations)).ToArray();
+                ApplyInheritanceRules(productsWithVariationsList);
+
 
                 // Fill outlines for products and variations
                 if (itemResponseGroup.HasFlag(ItemResponseGroup.Outlines))
@@ -98,6 +99,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 {
                     product.ReduceDetails(itemResponseGroup.ToString());
                     cacheEntry.AddExpirationToken(ItemCacheRegion.CreateChangeToken(product));
+                    cacheEntry.AddExpirationToken(CatalogCacheRegion.CreateChangeToken());
                 }
 
                 return result;
@@ -174,7 +176,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
         protected virtual void ClearCache(IEnumerable<CatalogProduct> entities)
         {
-            ItemSearchCacheRegion.ExpireRegion();
+            AssociationSearchCacheRegion.ExpireRegion();
 
             foreach (var entity in entities)
             {
@@ -213,13 +215,10 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     product.Category = productCategoriesByIdDict.GetValueOrThrow(product.CategoryId, $"category with key {product.CategoryId} doesn't exist");
                 }
 
-                if (product.Links != null)
+                foreach (var link in product.Links ?? Array.Empty<CategoryLink>())
                 {
-                    foreach (var link in product.Links)
-                    {
-                        link.Catalog = catalogsByIdDict.GetValueOrThrow(link.CatalogId, $"link catalog with key {link.CatalogId} doesn't exist");
-                        link.Category = productLinksCategoriesByIdDict.GetValueOrThrow(link.CategoryId, $"link category with key {link.CategoryId} doesn't exist");
-                    }
+                    link.Catalog = catalogsByIdDict.GetValueOrThrow(link.CatalogId, $"link catalog with key {link.CatalogId} doesn't exist");
+                    link.Category = productLinksCategoriesByIdDict.GetValueOrThrow(link.CategoryId, $"link category with key {link.CategoryId} doesn't exist");
                 }
 
                 if (product.MainProduct != null)
@@ -231,16 +230,16 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     await InnerLoadDependenciesAsync(product.Variations.ToArray());
                 }
                 //Resolve relative urls for all product images
-                if (!product.Images.IsNullOrEmpty())
+                var allImages = product.GetFlatObjectsListWithInterface<IHasImages>().Where(x => x.Images != null).SelectMany(x => x.Images);
+                foreach (var image in allImages.Where(x => !string.IsNullOrEmpty(x.Url)))
                 {
-                    foreach (var image in product.Images)
-                    {
-                        image.RelativeUrl = image.Url;
-                        image.Url = _blobUrlResolver.GetAbsoluteUrl(image.Url);
-                    }
+                    image.RelativeUrl = image.Url;
+                    image.Url = _blobUrlResolver.GetAbsoluteUrl(image.Url);
+
                 }
             }
         }
+
 
         protected virtual void ApplyInheritanceRules(IEnumerable<CatalogProduct> products)
         {

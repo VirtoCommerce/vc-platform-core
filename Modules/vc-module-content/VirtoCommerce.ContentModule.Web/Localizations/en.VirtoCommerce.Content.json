@@ -287,5 +287,10 @@
             "content:update": "Update store content data",
             "content:delete": "Delete store content data"
         }
+    },
+    "module": {
+        "VirtoCommerce.Content": {
+            "description": "Export/Import pages, themes, links, menu items"
+        }
     }
 }

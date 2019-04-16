@@ -188,8 +188,12 @@ namespace VirtoCommerce.CatalogModule.Data.Model
                     property.Name = values.Key;
                     property.ValueType = values.FirstOrDefault().ValueType;
                     property.Values = values.ToList();
+                    foreach (var propValue in property.Values)
+                    {
+                        propValue.Property = property;
+                    }
                     return property;
-                }).ToList();
+                }).OrderBy(x => x.Name).ToList();
             }
 
             if (Parent != null)
@@ -271,7 +275,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             if (!product.Properties.IsNullOrEmpty())
             {
                 var propValues = new List<PropertyValue>();
-                foreach (var property in product.Properties)
+                foreach (var property in product.Properties.Where(x => x.Type == PropertyType.Product || x.Type == PropertyType.Variation))
                 {
                     if (property.Values != null)
                     {
@@ -288,6 +292,12 @@ namespace VirtoCommerce.CatalogModule.Data.Model
                 {
                     ItemPropertyValues = new ObservableCollection<PropertyValueEntity>(AbstractTypeFactory<PropertyValueEntity>.TryCreateInstance().FromModels(propValues, pkMap));
                 }
+            }
+            else if (!product.PropertyValues.IsNullOrEmpty())
+            {
+                //Backward compatibility
+                //TODO: Remove later
+                ItemPropertyValues = new ObservableCollection<PropertyValueEntity>(AbstractTypeFactory<PropertyValueEntity>.TryCreateInstance().FromModels(product.PropertyValues, pkMap));
             }
             #endregion
 
@@ -396,7 +406,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             #region Links
             if (!CategoryLinks.IsNullCollection())
             {
-                CategoryLinks.Patch(target.CategoryLinks, new CategoryItemRelationComparer(),
+                var categoryItemRelationComparer = AnonymousComparer.Create((CategoryItemRelationEntity x) => string.Join(":", x.CatalogId, x.CategoryId));
+                CategoryLinks.Patch(target.CategoryLinks, categoryItemRelationComparer,
                                          (sourcePropValue, targetPropValue) => sourcePropValue.Patch(targetPropValue));
             }
             #endregion

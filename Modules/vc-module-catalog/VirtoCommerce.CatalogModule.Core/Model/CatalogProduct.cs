@@ -11,7 +11,7 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class CatalogProduct : AuditableEntity, IHasLinks, ISeoSupport, IHasOutlines, IHasDimension, IHasAssociations, IHasProperties, IHasImages, IHasAssets, IInheritable, IHasTaxType, ICloneable
+    public class CatalogProduct : AuditableEntity, IHasLinks, ISeoSupport, IHasOutlines, IHasDimension, IHasAssociations, IHasProperties, IHasImages, IHasAssets, IInheritable, IHasTaxType, IHasName, ICloneable
     {
         /// <summary>
         /// SKU code
@@ -31,6 +31,14 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         public string CategoryId { get; set; }
         [JsonIgnore]
         public Category Category { get; set; }
+        /// <summary>
+        /// Product outline in physical catalog (all parent categories ids concatenated. E.g. (1/21/344))
+        /// </summary>
+        public string Outline => Category?.Outline;
+        /// <summary>
+        /// Product path in physical catalog (all parent categories names concatenated. E.g. (parent1/parent2))
+        /// </summary>
+        public string Path => Category?.Path;
 
         public string TitularItemId => MainProductId;
         public string MainProductId { get; set; }
@@ -47,6 +55,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         /// Can be Physical, Digital or Subscription.
         /// </summary>
         public string ProductType { get; set; }
+
         //Type of product package (set of package types with their specific dimensions)
         public string PackageType { get; set; }
 
@@ -62,10 +71,12 @@ namespace VirtoCommerce.CatalogModule.Core.Model
 
         public bool? EnableReview { get; set; }
 
+
+
         /// <summary>
         /// re-downloads limit
         /// </summary>
-		public int? MaxNumberOfDownload { get; set; }
+        public int? MaxNumberOfDownload { get; set; }
         public DateTime? DownloadExpiration { get; set; }
         /// <summary>
         /// DownloadType: {Standard Product, Software, Music}
@@ -84,10 +95,15 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         /// </summary>
         public int Priority { get; set; }
 
+
         #region IHasProperties members
         public IList<Property> Properties { get; set; }
 
         #endregion
+        [JsonIgnoreSerialization]
+        [Obsolete("it's for importing data from v.2, need to use values in Properties")]
+        public ICollection<PropertyValue> PropertyValues { get; set; }
+
         #region IHasImages members
         /// <summary>
         /// Gets the default image for the product.
@@ -123,7 +139,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         /// <summary>
         /// Each derivative type should override this property tp use other object type in seo records 
         /// </summary>
-        public virtual string SeoObjectType { get; } = typeof(CatalogProduct).Name;
+        public virtual string SeoObjectType { get; } = "Product";
         public IList<SeoInfo> SeoInfos { get; set; }
         public IList<EditorialReview> Reviews { get; set; }
 
@@ -157,14 +173,19 @@ namespace VirtoCommerce.CatalogModule.Core.Model
                         Properties = new List<Property>();
                     }
                     var existProperty = Properties.FirstOrDefault(x => x.IsSame(parentProperty, PropertyType.Product, PropertyType.Variation));
-                    if (existProperty != null)
+                    if (existProperty == null)
                     {
-                        existProperty.TryInheritFrom(parentProperty);
+                        existProperty = AbstractTypeFactory<Property>.TryCreateInstance();
+                        Properties.Add(existProperty);
                     }
-                    else
-                    {
-                        Properties.Add(parentProperty);
-                    }
+                    existProperty.TryInheritFrom(parentProperty);
+
+                    existProperty.IsReadOnly = existProperty.Type != PropertyType.Variation && existProperty.Type != PropertyType.Product;
+                }
+                //Restore sorting order after changes
+                if (Properties != null)
+                {
+                    Properties = Properties.OrderBy(x => x.Name).ToList();
                 }
             }
 
@@ -222,9 +243,25 @@ namespace VirtoCommerce.CatalogModule.Core.Model
                     var existProperty = Properties.FirstOrDefault(x => x.IsSame(parentProductProperty, PropertyType.Product, PropertyType.Variation));
                     if (existProperty == null)
                     {
-                        var property = AbstractTypeFactory<Property>.TryCreateInstance();
-                        property.TryInheritFrom(parentProductProperty);
-                        Properties.Add(parentProductProperty);
+                        existProperty = AbstractTypeFactory<Property>.TryCreateInstance();
+                        Properties.Add(existProperty);
+                    }
+                    existProperty.TryInheritFrom(parentProductProperty);
+                    existProperty.IsReadOnly = existProperty.Type != PropertyType.Variation && existProperty.Type != PropertyType.Product;
+
+                    //Inherit only parent Product properties  values if own values aren't set
+                    if (parentProductProperty.Type == PropertyType.Product)
+                    {
+                        if (existProperty.Values.IsNullOrEmpty() && !parentProductProperty.Values.IsNullOrEmpty())
+                        {
+                            existProperty.Values = new List<PropertyValue>();
+                            foreach (var parentPropValue in parentProductProperty.Values)
+                            {
+                                var propValue = AbstractTypeFactory<PropertyValue>.TryCreateInstance();
+                                propValue.TryInheritFrom(parentPropValue);
+                                existProperty.Values.Add(propValue);
+                            }
+                        }
                     }
                 }
                 //TODO: prevent saving the inherited simple values

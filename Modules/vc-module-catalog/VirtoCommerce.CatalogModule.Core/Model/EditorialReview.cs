@@ -35,5 +35,9 @@ namespace VirtoCommerce.CatalogModule.Core.Model
             return MemberwiseClone();
         }
         #endregion
+
+        #region Conditional JSON serialization for properties declared in base type
+        public override bool ShouldSerializeAuditableProperties => false;
+        #endregion
     }
 }

@@ -15,7 +15,7 @@ namespace VirtoCommerce.Platform.Core.Exceptions
         {
             var builder = new StringBuilder();
 
-            string separator = Environment.NewLine;
+            var separator = Environment.NewLine;
             var exception = ex;
 
             while (exception != null)
@@ -24,7 +24,7 @@ namespace VirtoCommerce.Platform.Core.Exceptions
                 {
                     builder.Append(separator);
                 }
-
+                builder.Append(exception.Message);
                 exception = exception.InnerException;
             }
 

@@ -1,0 +1,60 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.489
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.MarketingModule.Core", "VirtoCommerce.MarketingModule.Core\VirtoCommerce.MarketingModule.Core.csproj", "{C683C502-DB13-46F7-8767-1455FBECA9E1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.MarketingModule.Data", "VirtoCommerce.MarketingModule.Data\VirtoCommerce.MarketingModule.Data.csproj", "{ADB68EF2-B46F-4608-B494-69521B7201E4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.MarketingModule.Test", "VirtoCommerce.MarketingModule.Test\VirtoCommerce.MarketingModule.Test.csproj", "{7970ACB3-F165-4F13-A553-8E76B02B1A19}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.MarketingModule.Web", "VirtoCommerce.MarketingModule.Web\VirtoCommerce.MarketingModule.Web.csproj", "{E6D50AC6-BB1A-4425-A132-BB7B8765B459}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CoreModule.Core", "..\vc-module-core\VirtoCommerce.CoreModule.Core\VirtoCommerce.CoreModule.Core.csproj", "{AC27A413-7F95-4B84-BC51-A273ABB3B259}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Core", "..\..\VirtoCommerce.Platform.Core\VirtoCommerce.Platform.Core.csproj", "{A0E28E7D-B01B-47FB-B05D-3B70F02D739C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.Platform.Data", "..\..\VirtoCommerce.Platform.Data\VirtoCommerce.Platform.Data.csproj", "{5DE3A595-37BA-4119-B1F2-B736A10F0BC2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C683C502-DB13-46F7-8767-1455FBECA9E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C683C502-DB13-46F7-8767-1455FBECA9E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C683C502-DB13-46F7-8767-1455FBECA9E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C683C502-DB13-46F7-8767-1455FBECA9E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ADB68EF2-B46F-4608-B494-69521B7201E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADB68EF2-B46F-4608-B494-69521B7201E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADB68EF2-B46F-4608-B494-69521B7201E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADB68EF2-B46F-4608-B494-69521B7201E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7970ACB3-F165-4F13-A553-8E76B02B1A19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7970ACB3-F165-4F13-A553-8E76B02B1A19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7970ACB3-F165-4F13-A553-8E76B02B1A19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7970ACB3-F165-4F13-A553-8E76B02B1A19}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6D50AC6-BB1A-4425-A132-BB7B8765B459}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6D50AC6-BB1A-4425-A132-BB7B8765B459}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6D50AC6-BB1A-4425-A132-BB7B8765B459}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6D50AC6-BB1A-4425-A132-BB7B8765B459}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC27A413-7F95-4B84-BC51-A273ABB3B259}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC27A413-7F95-4B84-BC51-A273ABB3B259}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC27A413-7F95-4B84-BC51-A273ABB3B259}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC27A413-7F95-4B84-BC51-A273ABB3B259}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0E28E7D-B01B-47FB-B05D-3B70F02D739C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0E28E7D-B01B-47FB-B05D-3B70F02D739C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0E28E7D-B01B-47FB-B05D-3B70F02D739C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0E28E7D-B01B-47FB-B05D-3B70F02D739C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5DE3A595-37BA-4119-B1F2-B736A10F0BC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DE3A595-37BA-4119-B1F2-B736A10F0BC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5DE3A595-37BA-4119-B1F2-B736A10F0BC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5DE3A595-37BA-4119-B1F2-B736A10F0BC2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EE4DCB79-295A-4FFC-BCC2-A8CE510CAA2C}
+	EndGlobalSection
+EndGlobal

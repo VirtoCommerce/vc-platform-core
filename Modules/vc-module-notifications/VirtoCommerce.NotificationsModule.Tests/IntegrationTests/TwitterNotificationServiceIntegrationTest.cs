@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,7 +28,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
         public TwitterNotificationServiceIntegrationTest()
         {
             var container = new ServiceCollection();
-            container.AddDbContext<TwitterNotificationDbContext>(options => options.UseSqlServer("Data Source=(local);Initial Catalog=VirtoCommerce3.0;Persist Security Info=True;User ID=virto;Password=virto;MultipleActiveResultSets=True;Connect Timeout=30"));
+            container.AddDbContext<TwitterNotificationDbContext>(options => options.UseSqlServer("Data Source=(local);Initial Catalog=VirtoCommerce3;Persist Security Info=True;User ID=virto;Password=virto;MultipleActiveResultSets=True;Connect Timeout=30"));
             container.AddScoped<INotificationRepository, TwitterNotificationRepository>();
             container.AddScoped<INotificationService, NotificationService>();
             container.AddScoped<Func<INotificationRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<INotificationRepository>());
@@ -40,9 +39,15 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             var serviceProvider = container.BuildServiceProvider();
             _notificationService = serviceProvider.GetService<INotificationService>();
             _notificationSearchService = serviceProvider.GetService<INotificationSearchService>();
-            AbstractTypeFactory<NotificationEntity>.RegisterType<TwitterNotificationEntity>();
-            AbstractTypeFactory<Notification>.RegisterType<TwitterNotification>().MapToType<NotificationEntity>();
+
+            if (AbstractTypeFactory<NotificationEntity>.AllTypeInfos.All(t => t.Type != typeof(TwitterNotificationEntity)))
+            {
+                AbstractTypeFactory<NotificationEntity>.RegisterType<TwitterNotificationEntity>();
+            }
+
             var registrar = serviceProvider.GetService<INotificationRegistrar>();
+            registrar.RegisterNotification<TwitterNotification>();
+            registrar.RegisterNotification<TwitterNotification, NotificationEntity>();
             registrar.RegisterNotification<PostTwitterNotification>();
         }
 

@@ -5,7 +5,6 @@ angular.module('virtoCommerce.contentModule')
     blade.frontMatterHeaders = 'VirtoCommerce.ContentModule.Web.Model.FrontMatterHeaders'
     $scope.validators = validators;
     var contentType = blade.contentType.substr(0, 1).toUpperCase() + blade.contentType.substr(1, blade.contentType.length - 1);
-
     $scope.fileUploader = new FileUploader({
         url: 'api/platform/assets?folderUrl=cms-content/' + contentType + '/' + blade.storeId + '/assets',
         headers: { Accept: 'application/json' },
@@ -55,15 +54,15 @@ angular.module('virtoCommerce.contentModule')
 
         blade.currentEntity.content = data.content;
 
-        dynamicPropertiesApi.getPropertiesForType({ typeName: blade.frontMatterHeaders }, { skip: 0, take: 999 }, function (results) {
-            fillDynamicProperties(data.metadata, results);
-            $scope.$broadcast('resetContent', { body: blade.currentEntity.content });
-            $timeout(function () {
-                blade.origEntity = angular.copy(blade.currentEntity);
-            });
-            blade.isLoading = false;
-
-        }, function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+        dynamicPropertiesApi.query({ id: 'VirtoCommerce.ContentModule.Web.FrontMatterHeaders' },
+            function (results) {
+                fillDynamicProperties(data.metadata, results);
+                $scope.$broadcast('resetContent', { body: blade.currentEntity.content });
+                $timeout(function () {
+                    blade.origEntity = angular.copy(blade.currentEntity);
+                });
+                blade.isLoading = false;
+            }, function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
     }
 
     function fillDynamicProperties(metadata, props) {
