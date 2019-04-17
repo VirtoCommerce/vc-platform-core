@@ -23,11 +23,11 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             _properyDictionaryItemService = properyDictionaryItemService;
         }
 
-        public async Task<PropertyDictionaryItemSearchResult> SearchAsync(PropertyDictionaryItemSearchCriteria criteria)
+        public async Task<PropertyDictionaryItemSearchResult> SearchAsync(PropertyDictionaryItemSearchCriteria searchCriteria)
         {
-            if (criteria == null)
+            if (searchCriteria == null)
             {
-                throw new ArgumentNullException(nameof(criteria));
+                throw new ArgumentNullException(nameof(searchCriteria));
             }
 
             using (var repository = _repositoryFactory())
@@ -37,14 +37,14 @@ namespace VirtoCommerce.CatalogModule.Data.Search
 
                 var result = AbstractTypeFactory<PropertyDictionaryItemSearchResult>.TryCreateInstance();
 
-                var sortInfos = GetSearchSortInfo(criteria);
-                var query = GetSearchQuery(criteria, repository, sortInfos);
+                var sortInfos = GetSearchSortInfos(searchCriteria);
+                var query = GetSearchQuery(searchCriteria, repository, sortInfos);
 
                 result.TotalCount = await query.CountAsync();
 
-                if (criteria.Take > 0)
+                if (searchCriteria.Take > 0)
                 {
-                    var ids = await query.Skip(criteria.Skip).Take(criteria.Take).Select(x => x.Id).ToArrayAsync();
+                    var ids = await query.Skip(searchCriteria.Skip).Take(searchCriteria.Take).Select(x => x.Id).ToArrayAsync();
                     result.Results = (await _properyDictionaryItemService.GetByIdsAsync(ids)).AsQueryable().OrderBySortInfos(sortInfos).ToList();
                 }
 
@@ -52,7 +52,21 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             }
         }
 
-        private IQueryable<Model.PropertyDictionaryItemEntity> GetSearchQuery(PropertyDictionaryItemSearchCriteria criteria, ICatalogRepository repository, IEnumerable<SortInfo> sortInfos)
+        protected virtual IList<SortInfo> GetSearchSortInfos(PropertyDictionaryItemSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[] {
+                        new SortInfo { SortColumn = "SortOrder", SortDirection = SortDirection.Ascending },
+                        new SortInfo { SortColumn = "Alias", SortDirection = SortDirection.Ascending }
+                    };
+            }
+
+            return sortInfos;
+        }
+
+        protected virtual IQueryable<Model.PropertyDictionaryItemEntity> GetSearchQuery(PropertyDictionaryItemSearchCriteria criteria, ICatalogRepository repository, IEnumerable<SortInfo> sortInfos)
         {
             var query = repository.PropertyDictionaryItems;
 
@@ -68,20 +82,6 @@ namespace VirtoCommerce.CatalogModule.Data.Search
 
             query = query.OrderBySortInfos(sortInfos).ThenBy(x => x.Id);
             return query;
-        }
-
-        private IList<SortInfo> GetSearchSortInfo(PropertyDictionaryItemSearchCriteria criteria)
-        {
-            var sortInfos = criteria.SortInfos;
-            if (sortInfos.IsNullOrEmpty())
-            {
-                sortInfos = new[] {
-                        new SortInfo { SortColumn = "SortOrder", SortDirection = SortDirection.Ascending },
-                        new SortInfo { SortColumn = "Alias", SortDirection = SortDirection.Ascending }
-                    };
-            }
-
-            return sortInfos;
         }
     }
 }

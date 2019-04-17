@@ -40,7 +40,7 @@ namespace VirtoCommerce.LicensingModule.Data.Services
         {
             using (var repository = _licenseRepositoryFactory())
             {
-                var sortInfos = GetSearchSortInfo(criteria);
+                var sortInfos = GetSearchSortInfos(criteria);
                 var query = GetSearchQuery(criteria, repository, sortInfos);
 
                 var arrayLicense = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
@@ -205,7 +205,7 @@ namespace VirtoCommerce.LicensingModule.Data.Services
             return fileContent;
         }
 
-        private IList<SortInfo> GetSearchSortInfo(LicenseSearchCriteria criteria)
+        protected virtual IList<SortInfo> GetSearchSortInfos(LicenseSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -220,7 +220,7 @@ namespace VirtoCommerce.LicensingModule.Data.Services
             return sortInfos;
         }
 
-        private IQueryable<LicenseEntity> GetSearchQuery(LicenseSearchCriteria criteria, ILicenseRepository repository, IList<SortInfo> sortInfos)
+        protected virtual IQueryable<LicenseEntity> GetSearchQuery(LicenseSearchCriteria criteria, ILicenseRepository repository, IList<SortInfo> sortInfos)
         {
             var query = repository.Licenses;
 

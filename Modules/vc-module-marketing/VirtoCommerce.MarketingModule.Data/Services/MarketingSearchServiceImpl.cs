@@ -42,8 +42,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 var retVal = new GenericSearchResult<Promotion>();
                 using (var repository = _repositoryFactory())
                 {
-                    var sortInfos = GetSearchPromotionsSortInfo(criteria);
-                    var query = GetSearchPromotionsQuery(repository, criteria, sortInfos);
+                    var sortInfos = GetPromotionsSortInfo(criteria);
+                    var query = GetPromotionsSearchQuery(repository, criteria, sortInfos);
 
                     retVal.TotalCount = await query.CountAsync();
 
@@ -189,8 +189,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 var retVal = new GenericSearchResult<DynamicContentFolder>();
                 using (var repository = _repositoryFactory())
                 {
-                    var sortInfos = GetSearchFoldersSortInfo(criteria);
-                    var query = GetSearchFoldersQuery(criteria, repository, sortInfos);
+                    var sortInfos = GetFoldersSortInfo(criteria);
+                    var query = GetFoldersSearchQuery(criteria, repository, sortInfos);
 
                     retVal.TotalCount = await query.CountAsync();
 
@@ -206,7 +206,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
 
         #endregion
 
-        protected virtual IList<SortInfo> GetSearchPromotionsSortInfo(PromotionSearchCriteria criteria)
+        protected virtual IList<SortInfo> GetPromotionsSortInfo(PromotionSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -217,7 +217,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             return sortInfos;
         }
 
-        protected virtual IQueryable<Model.PromotionEntity> GetSearchPromotionsQuery(IMarketingRepository repository, PromotionSearchCriteria criteria, IList<SortInfo> sortInfos)
+        protected virtual IQueryable<Model.PromotionEntity> GetPromotionsSearchQuery(IMarketingRepository repository, PromotionSearchCriteria criteria, IList<SortInfo> sortInfos)
         {
             var query = repository.Promotions;
 
@@ -246,7 +246,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             return query;
         }
 
-        private IList<SortInfo> GetSearchFoldersSortInfo(DynamicContentFolderSearchCriteria criteria)
+        protected virtual IList<SortInfo> GetFoldersSortInfo(DynamicContentFolderSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -257,7 +257,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             return sortInfos;
         }
 
-        private IQueryable<Model.DynamicContentFolderEntity> GetSearchFoldersQuery(DynamicContentFolderSearchCriteria criteria, IMarketingRepository repository, IList<SortInfo> sortInfos)
+        protected virtual IQueryable<Model.DynamicContentFolderEntity> GetFoldersSearchQuery(DynamicContentFolderSearchCriteria criteria, IMarketingRepository repository, IList<SortInfo> sortInfos)
         {
             var query = repository.Folders.Where(x => x.ParentFolderId == criteria.FolderId);
             if (!string.IsNullOrEmpty(criteria.Keyword))
@@ -268,6 +268,5 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             query = query.OrderBySortInfos(sortInfos);
             return query;
         }
-
     }
 }

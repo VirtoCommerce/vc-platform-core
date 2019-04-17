@@ -46,8 +46,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
 
                 using (var repository = _repositoryFactory())
                 {
-                    var sortInfos = GetSearchCouponsSortInfo(criteria);
-                    var query = GetSearchCouponsQuery(criteria, repository, sortInfos);
+                    var sortInfos = GetSearchSortInfos(criteria);
+                    var query = GetSearchQuery(criteria, repository, sortInfos);
 
                     var totalCount = await query.CountAsync();
                     var searchResult = new GenericSearchResult<Coupon> { TotalCount = totalCount };
@@ -124,7 +124,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
 
         #endregion
 
-        private IList<SortInfo> GetSearchCouponsSortInfo(CouponSearchCriteria criteria)
+        protected virtual IList<SortInfo> GetSearchSortInfos(CouponSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             //TODO: Sort by TotalUsesCount 
@@ -136,7 +136,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             return sortInfos;
         }
 
-        private IQueryable<CouponEntity> GetSearchCouponsQuery(CouponSearchCriteria criteria, IMarketingRepository repository, IList<SortInfo> sortInfos)
+        protected virtual IQueryable<CouponEntity> GetSearchQuery(CouponSearchCriteria criteria, IMarketingRepository repository, IList<SortInfo> sortInfos)
         {
             var query = repository.Coupons;
 

@@ -41,7 +41,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                 {
                     var searchResponse = new GenericSearchResult<SitemapItem>();
 
-                    var sortInfos = GetSearchSortInfo(criteria);
+                    var sortInfos = GetSearchSortInfos(criteria);
                     var query = GetSearchQuery(criteria, repository, sortInfos);
 
                     searchResponse.TotalCount = await query.CountAsync();
@@ -120,7 +120,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
             SitemapItemSearchCacheRegion.ExpireRegion();
         }
 
-        protected virtual IList<SortInfo> GetSearchSortInfo(SitemapItemSearchCriteria criteria)
+        protected virtual IList<SortInfo> GetSearchSortInfos(SitemapItemSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())

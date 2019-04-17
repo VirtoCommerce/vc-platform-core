@@ -40,8 +40,8 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                     var retVal = new GenericSearchResult<CustomerOrder>();
                     var orderResponseGroup = EnumUtility.SafeParse(criteria.ResponseGroup, CustomerOrderResponseGroup.Full);
 
-                    var sortInfos = GetOrdersSortInfo(criteria);
-                    var query = GetOrdersQuery(repository, criteria, sortInfos);
+                    var sortInfos = GetSearchSortInfos(criteria);
+                    var query = GetSearchQuery(repository, criteria, sortInfos);
 
                     retVal.TotalCount = await query.CountAsync();
                     var orderIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
@@ -61,7 +61,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             return order => order.Number.Contains(criteria.Keyword) || order.CustomerName.Contains(criteria.Keyword);
         }
 
-        protected virtual IList<SortInfo> GetOrdersSortInfo(CustomerOrderSearchCriteria criteria)
+        protected virtual IList<SortInfo> GetSearchSortInfos(CustomerOrderSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -79,7 +79,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             return sortInfos;
         }
 
-        protected virtual IQueryable<CustomerOrderEntity> GetOrdersQuery(IOrderRepository repository, CustomerOrderSearchCriteria criteria, IList<SortInfo> sortInfos)
+        protected virtual IQueryable<CustomerOrderEntity> GetSearchQuery(IOrderRepository repository, CustomerOrderSearchCriteria criteria, IList<SortInfo> sortInfos)
         {
             var query = repository.CustomerOrders;
 

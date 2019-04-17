@@ -37,8 +37,8 @@ namespace VirtoCommerce.CartModule.Data.Services
                 cacheEntry.AddExpirationToken(CartSearchCacheRegion.CreateChangeToken());
                 using (var repository = RepositoryFactory())
                 {
-                    var sortInfos = GetSearchCartSortInfos(criteria);
-                    var query = GetSearchCartQuery(repository, criteria, sortInfos);
+                    var sortInfos = GetSearchSortInfos(criteria);
+                    var query = GetSearchQuery(repository, criteria, sortInfos);
 
                     retVal.TotalCount = await query.CountAsync();
                     if (criteria.Take > 0)
@@ -52,7 +52,12 @@ namespace VirtoCommerce.CartModule.Data.Services
             });
         }
 
-        protected virtual IList<SortInfo> GetSearchCartSortInfos(ShoppingCartSearchCriteria criteria)
+        protected virtual IQueryable<ShoppingCartEntity> GetQueryableShoppingCarts(ICartRepository repository)
+        {
+            return repository.ShoppingCarts;
+        }
+
+        protected virtual IList<SortInfo> GetSearchSortInfos(ShoppingCartSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -70,7 +75,7 @@ namespace VirtoCommerce.CartModule.Data.Services
             return sortInfos;
         }
 
-        protected virtual IQueryable<ShoppingCartEntity> GetSearchCartQuery(ICartRepository repository, ShoppingCartSearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
+        protected virtual IQueryable<ShoppingCartEntity> GetSearchQuery(ICartRepository repository, ShoppingCartSearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
         {
             var query = GetQueryableShoppingCarts(repository);
 
@@ -117,11 +122,6 @@ namespace VirtoCommerce.CartModule.Data.Services
             query.OrderBySortInfos(sortInfos);
 
             return query;
-        }
-
-        protected virtual IQueryable<ShoppingCartEntity> GetQueryableShoppingCarts(ICartRepository repository)
-        {
-            return repository.ShoppingCarts;
         }
     }
 }

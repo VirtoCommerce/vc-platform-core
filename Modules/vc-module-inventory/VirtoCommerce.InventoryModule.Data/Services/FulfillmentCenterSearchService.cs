@@ -38,8 +38,8 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                 {
                     repository.DisableChangesTracking();
 
-                    var sortInfos = GetSearchCentersSortInfos(criteria);
-                    var query = GetSearchCentersQuery(repository, criteria, sortInfos);
+                    var sortInfos = GetSearchSortInfos(criteria);
+                    var query = GetSearchQuery(repository, criteria, sortInfos);
 
                     result.TotalCount = await query.CountAsync();
 
@@ -57,7 +57,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             });
         }
 
-        protected virtual IList<SortInfo> GetSearchCentersSortInfos(FulfillmentCenterSearchCriteria criteria)
+        protected virtual IList<SortInfo> GetSearchSortInfos(FulfillmentCenterSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -68,7 +68,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             return sortInfos;
         }
 
-        protected virtual IQueryable<FulfillmentCenterEntity> GetSearchCentersQuery(IInventoryRepository repository, FulfillmentCenterSearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
+        protected virtual IQueryable<FulfillmentCenterEntity> GetSearchQuery(IInventoryRepository repository, FulfillmentCenterSearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
         {
             var query = repository.FulfillmentCenters;
             if (!string.IsNullOrEmpty(criteria.Keyword))

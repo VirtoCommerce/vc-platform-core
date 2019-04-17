@@ -138,8 +138,8 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                 {
                     repository.DisableChangesTracking();
 
-                    var sortInfos = GetSearchPlansSortInfo(criteria);
-                    var query = GetSearchPlansSortQuery(repository, sortInfos);
+                    var sortInfos = GetSearchSortInfos(criteria);
+                    var query = GetSearchQuery(repository, sortInfos);
 
                     retVal.TotalCount = await query.CountAsync();
 
@@ -170,7 +170,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
             PaymentPlanSearchCacheRegion.ExpireRegion();
         }
 
-        protected virtual IList<SortInfo> GetSearchPlansSortInfo(PaymentPlanSearchCriteria criteria)
+        protected virtual IList<SortInfo> GetSearchSortInfos(PaymentPlanSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -181,7 +181,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
             return sortInfos;
         }
 
-        protected virtual IQueryable<PaymentPlanEntity> GetSearchPlansSortQuery(ISubscriptionRepository repository, IList<SortInfo> sortInfos)
+        protected virtual IQueryable<PaymentPlanEntity> GetSearchQuery(ISubscriptionRepository repository, IList<SortInfo> sortInfos)
         {
             var query = repository.PaymentPlans;
 

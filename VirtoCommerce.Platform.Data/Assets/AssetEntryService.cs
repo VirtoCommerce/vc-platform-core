@@ -27,8 +27,8 @@ namespace VirtoCommerce.Platform.Data.Assets
 
             using (var repository = _platformRepository())
             {
-                var sortInfos = GetSearchAssetEntriesSortInfo(criteria);
-                var query = GetSearchAssetEntriesQuery(criteria, repository, sortInfos);
+                var sortInfos = GetSearchSortInfos(criteria);
+                var query = GetSearchQuery(criteria, repository, sortInfos);
 
                 var result = new GenericSearchResult<AssetEntry>
                 {
@@ -110,7 +110,7 @@ namespace VirtoCommerce.Platform.Data.Assets
             }
         }
 
-        private IList<SortInfo> GetSearchAssetEntriesSortInfo(AssetEntrySearchCriteria criteria)
+        protected virtual IList<SortInfo> GetSearchSortInfos(AssetEntrySearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -128,7 +128,7 @@ namespace VirtoCommerce.Platform.Data.Assets
             return sortInfos;
         }
 
-        private IQueryable<AssetEntryEntity> GetSearchAssetEntriesQuery(AssetEntrySearchCriteria criteria, IPlatformRepository repository, IList<SortInfo> sortInfos)
+        protected virtual IQueryable<AssetEntryEntity> GetSearchQuery(AssetEntrySearchCriteria criteria, IPlatformRepository repository, IList<SortInfo> sortInfos)
         {
             var query = repository.AssetEntries;
 

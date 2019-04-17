@@ -28,8 +28,8 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
 
             using (var repository = ThumbnailRepositoryFactory())
             {
-                var sortInfos = GetTaskSortInfo(criteria);
-                var query = GetTasksQuery(repository, criteria, sortInfos);
+                var sortInfos = GetSearchSortInfos(criteria);
+                var query = GetSearchQuery(repository, criteria, sortInfos);
 
                 result.TotalCount = await query.CountAsync();
 
@@ -42,7 +42,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
             return result;
         }
 
-        protected virtual IList<SortInfo> GetTaskSortInfo(ThumbnailTaskSearchCriteria criteria)
+        protected virtual IList<SortInfo> GetSearchSortInfos(ThumbnailTaskSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -59,7 +59,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
             return sortInfos;
         }
 
-        protected virtual IQueryable<ThumbnailTaskEntity> GetTasksQuery(IThumbnailRepository repository, ThumbnailTaskSearchCriteria criteria, IList<SortInfo> sortInfos)
+        protected virtual IQueryable<ThumbnailTaskEntity> GetSearchQuery(IThumbnailRepository repository, ThumbnailTaskSearchCriteria criteria, IList<SortInfo> sortInfos)
         {
             var query = repository.ThumbnailTasks;
 

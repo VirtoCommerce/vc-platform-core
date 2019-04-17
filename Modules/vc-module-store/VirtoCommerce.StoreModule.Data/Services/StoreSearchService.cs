@@ -37,8 +37,8 @@ namespace VirtoCommerce.StoreModule.Data.Services
                 var result = new GenericSearchResult<Store>();
                 using (var repository = RepositoryFactory())
                 {
-                    var sortInfos = GetStoresSortInfo(criteria);
-                    var query = GetStoresQuery(repository, criteria, sortInfos);
+                    var sortInfos = GetSearchSortInfos(criteria);
+                    var query = GetSearchQuery(repository, criteria, sortInfos);
 
                     result.TotalCount = await query.CountAsync();
                     if (criteria.Take > 0)
@@ -51,7 +51,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
             });
         }
 
-        protected virtual IList<SortInfo> GetStoresSortInfo(StoreSearchCriteria criteria)
+        protected virtual IList<SortInfo> GetSearchSortInfos(StoreSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -68,7 +68,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
             return sortInfos;
         }
 
-        protected virtual IQueryable<StoreEntity> GetStoresQuery(IStoreRepository repository, StoreSearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
+        protected virtual IQueryable<StoreEntity> GetSearchQuery(IStoreRepository repository, StoreSearchCriteria criteria, IEnumerable<SortInfo> sortInfos)
         {
             var query = repository.Stores;
             if (!string.IsNullOrEmpty(criteria.Keyword))

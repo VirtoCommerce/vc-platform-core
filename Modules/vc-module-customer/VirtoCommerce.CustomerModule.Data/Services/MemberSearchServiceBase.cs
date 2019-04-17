@@ -48,8 +48,8 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                     repository.DisableChangesTracking();
                     var result = new GenericSearchResult<Member>();
 
-                    var sortInfos = GetSearchMembersSortInfo(criteria);
-                    var query = GetSearchMembersQuery(criteria, repository, sortInfos);
+                    var sortInfos = GetSearchSortInfos(criteria);
+                    var query = GetSearchQuery(criteria, repository, sortInfos);
 
                     result.TotalCount = await query.CountAsync();
                     if (criteria.Take > 0)
@@ -82,7 +82,22 @@ namespace VirtoCommerce.CustomerModule.Data.Services
             return PredicateBuilder.True<MemberEntity>();
         }
 
-        protected virtual IQueryable<MemberEntity> GetSearchMembersQuery(MembersSearchCriteria criteria, IMemberRepository repository, IList<SortInfo> sortInfos)
+        protected virtual IList<SortInfo> GetSearchSortInfos(MembersSearchCriteria criteria)
+        {
+            var sortInfos = criteria.SortInfos;
+            if (sortInfos.IsNullOrEmpty())
+            {
+                sortInfos = new[]
+                {
+                    new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Member>(m => m.MemberType), SortDirection = SortDirection.Descending },
+                    new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Member>(m => m.Name), SortDirection = SortDirection.Ascending }
+                };
+            }
+
+            return sortInfos;
+        }
+
+        protected virtual IQueryable<MemberEntity> GetSearchQuery(MembersSearchCriteria criteria, IMemberRepository repository, IList<SortInfo> sortInfos)
         {
             var query = LinqKit.Extensions.AsExpandable(repository.Members);
 
@@ -112,21 +127,6 @@ namespace VirtoCommerce.CustomerModule.Data.Services
 
             query = query.OrderBySortInfos(sortInfos);
             return query;
-        }
-
-        protected virtual IList<SortInfo> GetSearchMembersSortInfo(MembersSearchCriteria criteria)
-        {
-            var sortInfos = criteria.SortInfos;
-            if (sortInfos.IsNullOrEmpty())
-            {
-                sortInfos = new[]
-                {
-                    new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Member>(m => m.MemberType), SortDirection = SortDirection.Descending },
-                    new SortInfo { SortColumn = ReflectionUtility.GetPropertyName<Member>(m => m.Name), SortDirection = SortDirection.Ascending }
-                };
-            }
-
-            return sortInfos;
         }
     }
 }

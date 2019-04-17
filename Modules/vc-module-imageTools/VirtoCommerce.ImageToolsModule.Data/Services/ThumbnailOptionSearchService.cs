@@ -23,7 +23,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
         {
             using (var repository = ThumbnailRepositoryFactory())
             {
-                var sortInfos = GetSearchSortInfo(criteria);
+                var sortInfos = GetSearchSortInfos(criteria);
                 var query = GetSearchQuery(repository, sortInfos);
 
                 var totalCount = await query.CountAsync();
@@ -47,7 +47,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
             }
         }
 
-        protected virtual IList<SortInfo> GetSearchSortInfo(ThumbnailOptionSearchCriteria criteria)
+        protected virtual IList<SortInfo> GetSearchSortInfos(ThumbnailOptionSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())

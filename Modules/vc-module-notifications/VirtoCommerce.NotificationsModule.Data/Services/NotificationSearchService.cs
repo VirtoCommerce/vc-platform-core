@@ -21,8 +21,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
         public async Task<GenericSearchResult<Notification>> SearchNotificationsAsync(NotificationSearchCriteria criteria)
         {
-            var sortInfos = GetSearchNotificationsSortInfo(criteria);
-            var query = GetSearchNotificationsQuery(criteria, sortInfos);
+            var sortInfos = GetSearchSortInfos(criteria);
+            var query = GetSearchQuery(criteria, sortInfos);
 
             var totalCount = query.Count();
 
@@ -49,7 +49,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             };
         }
 
-        private IList<SortInfo> GetSearchNotificationsSortInfo(NotificationSearchCriteria criteria)
+        protected virtual IList<SortInfo> GetSearchSortInfos(NotificationSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -60,7 +60,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             return sortInfos;
         }
 
-        private IQueryable<Type> GetSearchNotificationsQuery(NotificationSearchCriteria criteria, IList<SortInfo> sortInfos)
+        protected virtual IQueryable<Type> GetSearchQuery(NotificationSearchCriteria criteria, IList<SortInfo> sortInfos)
         {
             var query = AbstractTypeFactory<Notification>.AllTypeInfos
                 .Where(t => t.AllSubclasses.Any(s => s != t.Type && s.IsSubclassOf(typeof(Notification))))

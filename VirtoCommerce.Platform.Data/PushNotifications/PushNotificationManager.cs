@@ -21,8 +21,8 @@ namespace VirtoCommerce.Platform.Data.PushNotifications
 
         public PushNotificationSearchResult SearchNotifies(string userId, PushNotificationSearchCriteria criteria)
         {
-            var sortInfos = GetSearchNotifiesSortInfo(criteria);
-            var query = GetSearchNotifiesQuery(userId, criteria, sortInfos);
+            var sortInfos = GetSearchSortInfos(criteria);
+            var query = GetSearchQuery(userId, criteria, sortInfos);
 
             var retVal = new PushNotificationSearchResult
             {
@@ -76,7 +76,7 @@ namespace VirtoCommerce.Platform.Data.PushNotifications
             }
         }
 
-        private IList<SortInfo> GetSearchNotifiesSortInfo(PushNotificationSearchCriteria criteria)
+        protected virtual IList<SortInfo> GetSearchSortInfos(PushNotificationSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -94,7 +94,7 @@ namespace VirtoCommerce.Platform.Data.PushNotifications
             return sortInfos;
         }
 
-        private IQueryable<PushNotification> GetSearchNotifiesQuery(string userId, PushNotificationSearchCriteria criteria, IList<SortInfo> sortInfos)
+        protected virtual IQueryable<PushNotification> GetSearchQuery(string userId, PushNotificationSearchCriteria criteria, IList<SortInfo> sortInfos)
         {
             var query = _innerList.OrderByDescending(x => x.Created)
                 .Where(x => x.Creator == userId)

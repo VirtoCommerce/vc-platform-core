@@ -46,8 +46,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
 
                 using (var repository = _repositoryFactory())
                 {
-                    var sortInfos = GetPromotionUsageSortInfo(criteria);
-                    var query = GetPromotionUsageQuery(repository, criteria, sortInfos);
+                    var sortInfos = GetSearchSortInfos(criteria);
+                    var query = GetSearchQuery(repository, criteria, sortInfos);
 
                     var totalCount = await query.CountAsync();
                     var searchResult = new GenericSearchResult<PromotionUsage> { TotalCount = totalCount };
@@ -124,7 +124,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
 
         #endregion
 
-        protected virtual IList<SortInfo> GetPromotionUsageSortInfo(PromotionUsageSearchCriteria criteria)
+        protected virtual IList<SortInfo> GetSearchSortInfos(PromotionUsageSearchCriteria criteria)
         {
             var sortInfos = criteria.SortInfos;
             if (sortInfos.IsNullOrEmpty())
@@ -135,7 +135,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             return sortInfos;
         }
 
-        protected virtual IQueryable<PromotionUsageEntity> GetPromotionUsageQuery(IMarketingRepository repository, PromotionUsageSearchCriteria criteria, IList<SortInfo> sortInfos)
+        protected virtual IQueryable<PromotionUsageEntity> GetSearchQuery(IMarketingRepository repository, PromotionUsageSearchCriteria criteria, IList<SortInfo> sortInfos)
         {
             var query = repository.PromotionUsages;
 
