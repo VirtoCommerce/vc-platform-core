@@ -76,7 +76,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             var retVal = new Property
             {
                 Id = Guid.NewGuid().ToString(),
-                //IsNew = true,
+                IsNew = true,
                 CatalogId = catalog?.Id,
                 Name = "new property",
                 Type = PropertyType.Catalog,
@@ -103,7 +103,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             var retVal = new Property
             {
                 Id = Guid.NewGuid().ToString(),
-                //IsNew = true,
+                IsNew = true,
                 CategoryId = categoryId,
                 CatalogId = category?.CatalogId,
                 Name = "new property",
