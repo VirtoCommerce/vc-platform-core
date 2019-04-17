@@ -139,7 +139,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
                 result.TryInheritFrom(parent);
             }
 
-            if (result.Properties.Any())
+            if (result.Properties != null)
             {
                 foreach (var property in result.Properties)
                 {
