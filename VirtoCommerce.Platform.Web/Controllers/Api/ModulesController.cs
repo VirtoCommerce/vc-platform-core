@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using Hangfire;
+using Hangfire.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Features;
@@ -12,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
+using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -20,6 +22,7 @@ using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Helpers;
+using VirtoCommerce.Platform.Modules;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api
 {
@@ -113,7 +116,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("getmissingdependencies")]
         [Authorize(PlatformConstants.Security.Permissions.ModuleQuery)]
-        public ActionResult<ModuleDescriptor[]> GetMissingDependencies(ModuleDescriptor[] moduleDescriptors)
+        public ActionResult<ModuleDescriptor[]> GetMissingDependencies([FromBody] ModuleDescriptor[] moduleDescriptors)
         {
             EnsureModulesCatalogInitialized();
             var modules = _externalModuleCatalog.Modules
@@ -158,7 +161,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             var section = await reader.ReadNextSectionAsync();
             if (section != null)
             {
-                var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out ContentDispositionHeaderValue contentDisposition);
+                var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out var contentDisposition);
 
                 if (hasContentDispositionHeader)
                 {
@@ -212,7 +215,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("install")]
         [Authorize(PlatformConstants.Security.Permissions.ModuleManage)]
-        public ActionResult<ModulePushNotification> InstallModules(ModuleDescriptor[] modules)
+        public ActionResult<ModulePushNotification> InstallModules([FromBody] ModuleDescriptor[] modules)
         {
             EnsureModulesCatalogInitialized();
 
@@ -233,7 +236,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("uninstall")]
         [Authorize(PlatformConstants.Security.Permissions.ModuleManage)]
-        public ActionResult<ModulePushNotification> UninstallModule(ModuleDescriptor[] modules)
+        public ActionResult<ModulePushNotification> UninstallModule([FromBody] ModuleDescriptor[] modules)
         {
             EnsureModulesCatalogInitialized();
 
@@ -437,6 +440,10 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             }
 
             _pushNotifier.Send(notification);
+            JobHelper.SetSerializerSettings(new JsonSerializerSettings
+            {
+                Converters = new JsonConverter[] { new ModuleIdentityJsonConverter() }
+            });
 
             BackgroundJob.Enqueue(() => ModuleBackgroundJob(options, notification));
 

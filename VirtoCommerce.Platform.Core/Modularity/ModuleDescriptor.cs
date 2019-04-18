@@ -65,7 +65,7 @@ namespace VirtoCommerce.Platform.Core.Modularity
         public ICollection<string> ValidationErrors { get; set; }
         public bool IsRemovable { get; set; }
         public bool IsInstalled { get; set; }
-        public ModuleIdentity InstalledVersion { get; set; }
+        //public ModuleIdentity InstalledVersion { get; set; }
 
     }
 }

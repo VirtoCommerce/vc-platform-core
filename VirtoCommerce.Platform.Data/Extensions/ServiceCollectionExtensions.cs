@@ -8,6 +8,7 @@ using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.ExportImport;
+using VirtoCommerce.Platform.Core.Notifications;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.TransactionFileManager;
 using VirtoCommerce.Platform.Data.Caching;
@@ -44,6 +45,7 @@ namespace VirtoCommerce.Platform.Data.Extensions
             services.AddScoped<IPlatformExportImportManager, PlatformExportImportManager>();
             services.AddSingleton<ITransactionFileManager, TransactionFileManager.TransactionFileManager>();
             services.AddSingleton<JsonSerializer>();
+            services.AddTransient<IEmailSender, DefaultEmailSender>();
             return services;
 
         }
