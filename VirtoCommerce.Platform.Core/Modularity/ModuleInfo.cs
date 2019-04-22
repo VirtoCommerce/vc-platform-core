@@ -93,5 +93,7 @@ namespace VirtoCommerce.Platform.Core.Modularity
         public ModuleState State { get; set; }
 
         public IModule ModuleInstance { get; set; }
+
+        public ModuleState PostInitializeState { get; set; }
     }
 }
