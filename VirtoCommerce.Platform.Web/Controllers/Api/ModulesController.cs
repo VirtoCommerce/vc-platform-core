@@ -5,7 +5,6 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using Hangfire;
-using Hangfire.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Features;
@@ -13,7 +12,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
-using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -22,7 +20,6 @@ using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Helpers;
-using VirtoCommerce.Platform.Modules;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api
 {
@@ -440,10 +437,6 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             }
 
             _pushNotifier.Send(notification);
-            JobHelper.SetSerializerSettings(new JsonSerializerSettings
-            {
-                Converters = new JsonConverter[] { new ModuleIdentityJsonConverter() }
-            });
 
             BackgroundJob.Enqueue(() => ModuleBackgroundJob(options, notification));
 

@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Primitives;
 using Hangfire;
+using Hangfire.Common;
 using Hangfire.MemoryStorage;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -304,6 +305,12 @@ namespace VirtoCommerce.Platform.Web
             {
                 services.AddHangfire(config => config.UseMemoryStorage());
             }
+
+            JobHelper.SetSerializerSettings(new JsonSerializerSettings
+            {
+                Converters = new JsonConverter[] { new ModuleIdentityJsonConverter() },
+                NullValueHandling = NullValueHandling.Ignore
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
