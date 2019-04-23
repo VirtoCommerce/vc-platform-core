@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 
 namespace VirtoCommerce.Platform.Core.Notifications
@@ -7,7 +6,8 @@ namespace VirtoCommerce.Platform.Core.Notifications
     {
         public Task SendEmailAsync(string email, string subject, string message)
         {
-            throw new NotImplementedException();
+            //nothing to do
+            return Task.CompletedTask;
         }
     }
 }
