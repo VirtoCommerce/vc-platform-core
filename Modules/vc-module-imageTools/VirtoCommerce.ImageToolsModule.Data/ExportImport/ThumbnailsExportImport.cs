@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -75,7 +74,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.ExportImport
             writer.WritePropertyName("Options");
             writer.WriteStartArray();
 
-            for (int i = 0; i < totalCount; i += _batchSize)
+            for (var i = 0; i < totalCount; i += _batchSize)
             {
                 var options = await _optionSearchService.SearchAsync(new ThumbnailOptionSearchCriteria { Take = _batchSize, Skip = i });
 
@@ -108,7 +107,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.ExportImport
             writer.WritePropertyName("Tasks");
             writer.WriteStartArray();
 
-            for (int i = 0; i < totalCount; i += _batchSize)
+            for (var i = 0; i < totalCount; i += _batchSize)
             {
                 var tasks = await _taskSearchService.SearchAsync(new ThumbnailTaskSearchCriteria { Take = _batchSize, Skip = i });
 

@@ -1,6 +1,8 @@
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
+using System;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.Primitives;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.ImageToolsModule.Core.ThumbnailGeneration;
 
@@ -14,46 +16,58 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
         /// <summary>
         /// Scale image by given percent
         /// </summary>
-        public virtual Image ScaleByPercent(Image image, int percent)
+        public virtual Image<Rgba32> ScaleByPercent(Image<Rgba32> image, int percent)
         {
             var nPercent = (float)percent / 100;
+            var newWidth = (int)(image.Width * nPercent);
+            var newHeight = (int)(image.Height * nPercent);
 
-            var source = new ImageDimensions { Width = image.Width, Height = image.Height };
-            var destination = new ImageDimensions { Width = (int)(source.Width * nPercent), Height = (int)(source.Height * nPercent) };
+            var result = image.Clone(ctx =>
+             {
+                 ctx.Resize(newWidth, newHeight);
+             });
 
-            return Transform(image, source, destination, destination.Size, null);
+            return result;
         }
 
         /// <summary>
         /// Resize image vertically with keeping it aspect rate.
         /// </summary>
-        public virtual Image FixedHeight(Image image, int height, Color backgroung)
+        public virtual Image<Rgba32> FixedHeight(Image<Rgba32> image, int height, Rgba32 backgroung)
         {
-            var source = new ImageDimensions { Width = image.Width, Height = image.Height };
-            var destination = new ImageDimensions();
+            var options = new ResizeOptions
+            {
+                Mode = ResizeMode.Max,
+                Size = new Size { Height = height, Width = image.Width }
+            };
 
-            var nPercent = height / (float)source.Height;
+            var result = image.Clone(ctx =>
+            {
+                ctx.BackgroundColor(backgroung);
+                ctx.Resize(options);
+            });
 
-            destination.Width = (int)(source.Width * nPercent);
-            destination.Height = (int)(source.Height * nPercent);
-
-            return Transform(image, source, destination, destination.Size, backgroung);
+            return result;
         }
 
         /// <summary>
         /// Resize image horizontally with keeping it aspect rate
         /// </summary>
-        public virtual Image FixedWidth(Image image, int width, Color backgroung)
+        public virtual Image<Rgba32> FixedWidth(Image<Rgba32> image, int width, Rgba32 backgroung)
         {
-            var source = new ImageDimensions { Width = image.Width, Height = image.Height };
-            var destination = new ImageDimensions();
+            var options = new ResizeOptions
+            {
+                Mode = ResizeMode.Max,
+                Size = new Size { Height = image.Height, Width = width }
+            };
 
-            var nPercent = width / (float)source.Width;
+            var result = image.Clone(ctx =>
+            {
+                ctx.BackgroundColor(backgroung);
+                ctx.Resize(options);
+            });
 
-            destination.Width = (int)(source.Width * nPercent);
-            destination.Height = (int)(source.Height * nPercent);
-
-            return Transform(image, source, destination, destination.Size, backgroung);
+            return result;
         }
 
         /// <summary>
@@ -63,103 +77,94 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
         /// If the original image has an aspect ratio different from thumbnail then thumbnail will contain empty spaces (top and bottom or left and right). 
         /// The empty spaces will be filled with given color.
         /// </summary>
-        public virtual Image FixedSize(Image image, int width, int height, Color backgroung)
+        public virtual Image<Rgba32> FixedSize(Image<Rgba32> image, int width, int height, Rgba32 backgroung)
         {
-            var source = new ImageDimensions { Width = image.Width, Height = image.Height };
-            var destination = new ImageDimensions();
-
-            float nPercent;
-            var nPercentW = width / (float)source.Width;
-            var nPercentH = height / (float)source.Height;
-
-            //if we have to pad the height pad both the top and the bottom
-            //with the difference between the scaled height and the desired height
-            if (nPercentH < nPercentW)
+            var options = new ResizeOptions
             {
-                nPercent = nPercentH;
-                destination.X = (int)((width - source.Width * nPercent) / 2);
-            }
-            else
+                Mode = ResizeMode.Pad,
+                Size = new Size { Height = height, Width = width }
+            };
+
+            var result = image.Clone(ctx =>
             {
-                nPercent = nPercentW;
-                destination.Y = (int)((height - source.Height * nPercent) / 2);
-            }
+                ctx.BackgroundColor(backgroung);
+                ctx.Resize(options);
+            });
 
-            destination.Width = (int)(source.Width * nPercent);
-            destination.Height = (int)(source.Height * nPercent);
-
-            return Transform(image, source, destination, new Size { Height = height, Width = width }, backgroung);
+            return result;
         }
 
         /// <summary>
         /// Resize and trim excess.
         /// The image will have given size
         /// </summary>
-        public virtual Image Crop(Image image, int width, int height, AnchorPosition anchor)
+        public virtual Image<Rgba32> Crop(Image<Rgba32> image, int width, int height, AnchorPosition anchor)
         {
-            var source = new ImageDimensions { Width = image.Width, Height = image.Height };
-            var destination = new ImageDimensions();
-
-            float nPercent;
-            var nPercentW = width / (float)source.Width;
-            var nPercentH = height / (float)source.Height;
-
-            if (nPercentH < nPercentW)
+            var options = new ResizeOptions
             {
-                nPercent = nPercentW;
-                if (anchor == AnchorPosition.TopLeft || anchor == AnchorPosition.TopCenter || anchor == AnchorPosition.TopRight)
-                {
-                    destination.Y = 0;
-                }
-                else if (anchor == AnchorPosition.BottomLeft || anchor == AnchorPosition.BottomCenter || anchor == AnchorPosition.BottomRight)
-                {
-                    destination.Y = (int)(height - source.Height * nPercent);
-                }
-                else
-                {
-                    destination.Y = (int)((height - source.Height * nPercent) / 2);
-                }
-            }
-            else
+                Mode = ResizeMode.Crop,
+                Size = new Size { Height = height, Width = width },
+                Position = GetAnchorPositionMode(anchor)
+            };
+
+            var result = image.Clone(ctx =>
             {
-                nPercent = nPercentH;
-                if (anchor == AnchorPosition.TopLeft || anchor == AnchorPosition.CenterLeft || anchor == AnchorPosition.BottomLeft)
-                {
-                    destination.X = 0;
-                }
-                else if (anchor == AnchorPosition.TopRight || anchor == AnchorPosition.CenterRight || anchor == AnchorPosition.BottomRight)
-                {
-                    destination.X = (int)(width - source.Width * nPercent);
-                }
-                else
-                {
-                    destination.X = (int)((width - source.Width * nPercent) / 2);
-                }
-            }
+                ctx.Resize(options);
+            });
 
-            destination.Width = (int)(source.Width * nPercent);
-            destination.Height = (int)(source.Height * nPercent);
-
-            return Transform(image, source, destination, new Size { Height = height, Width = width }, null);
+            return result;
         }
 
-        protected virtual Image Transform(Image original, ImageDimensions source, ImageDimensions destination, Size canvasSize, Color? backgroundColor)
+        protected virtual Image<Rgba32> Transform(Image<Rgba32> original, Rectangle source, Rectangle destination, Size canvasSize, Rgba32? backgroundColor)
         {
-            var bitmap = new Bitmap(canvasSize.Width, canvasSize.Height, PixelFormat.Format32bppArgb);
-            bitmap.SetResolution(original.HorizontalResolution, original.VerticalResolution);
-
-            using (var graphics = Graphics.FromImage(bitmap))
+            if (!backgroundColor.HasValue)
             {
-                if (backgroundColor != null)
-                {
-                    graphics.Clear(backgroundColor.Value);
-                }
-                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                graphics.DrawImage(original, destination.Rectangle, source.Rectangle, GraphicsUnit.Pixel);
+                backgroundColor = Rgba32.Transparent;
             }
 
-            return bitmap;
+            var result = new Image<Rgba32>(new Configuration(), canvasSize.Width, canvasSize.Height, backgroundColor.Value);
+            result.MetaData.HorizontalResolution = original.MetaData.HorizontalResolution;
+            result.MetaData.VerticalResolution = original.MetaData.VerticalResolution;
+
+            var imgToDraw = original.Clone(ctx =>
+            {
+                ctx.Crop(source);
+                ctx.Resize(destination.Size);
+            });
+
+            result.Mutate(ctx =>
+            {
+                ctx.DrawImage(imgToDraw, destination.Location, new GraphicsOptions(true));
+            });
+
+            return result;
+        }
+
+        private AnchorPositionMode GetAnchorPositionMode(AnchorPosition anchorPosition)
+        {
+            switch (anchorPosition)
+            {
+                case AnchorPosition.TopLeft:
+                    return AnchorPositionMode.TopLeft;
+                case AnchorPosition.TopCenter:
+                    return AnchorPositionMode.Top;
+                case AnchorPosition.TopRight:
+                    return AnchorPositionMode.TopRight;
+                case AnchorPosition.CenterLeft:
+                    return AnchorPositionMode.Left;
+                case AnchorPosition.Center:
+                    return AnchorPositionMode.Center;
+                case AnchorPosition.CenterRight:
+                    return AnchorPositionMode.Right;
+                case AnchorPosition.BottomLeft:
+                    return AnchorPositionMode.BottomLeft;
+                case AnchorPosition.BottomCenter:
+                    return AnchorPositionMode.Bottom;
+                case AnchorPosition.BottomRight:
+                    return AnchorPositionMode.BottomRight;
+                default:
+                    throw new ArgumentOutOfRangeException($"AnchorPosition {anchorPosition.ToString()} not supported.");
+            }
         }
     }
 }

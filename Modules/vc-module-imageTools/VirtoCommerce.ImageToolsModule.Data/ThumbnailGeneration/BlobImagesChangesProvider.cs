@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.ImageToolsModule.Core.Services;
@@ -94,7 +93,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
             var searchResults = await StorageProvider.SearchAsync(folderPath, null);
 
             result.AddRange(searchResults.Results.Where(item => SupportedImageExtensions.Contains(Path.GetExtension(item.Name))));
-            foreach (var blobFolder in searchResults.Results.Where( x => x.Type == "folder"))
+            foreach (var blobFolder in searchResults.Results.Where(x => x.Type == "folder"))
             {
                 var folderResult = await ReadBlobFolderAsync(blobFolder.RelativeUrl, token);
                 result.AddRange(folderResult);
@@ -145,7 +144,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
         {
             var options = await ThumbnailOptionSearchService.SearchAsync(new ThumbnailOptionSearchCriteria()
             {
-                Take = Int32.MaxValue
+                Take = int.MaxValue
             });
 
             return options.Results.ToList();

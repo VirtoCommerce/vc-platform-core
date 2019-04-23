@@ -1,4 +1,3 @@
-using System.Security.Cryptography.X509Certificates;
 using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.ImageToolsModule.Data.Models;
