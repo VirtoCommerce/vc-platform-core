@@ -16,8 +16,8 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Jobs;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchModule.Core;
-using VirtoCommerce.SearchModule.Core.Services;
 using VirtoCommerce.SearchModule.Core.Model;
+using VirtoCommerce.SearchModule.Core.Services;
 using Job = Hangfire.Common.Job;
 
 namespace VirtoCommerce.SearchModule.Web.BackgroundJobs
@@ -27,7 +27,7 @@ namespace VirtoCommerce.SearchModule.Web.BackgroundJobs
         private static readonly MethodInfo _indexChangesJobMethod;
         private static readonly MethodInfo _manualIndexAllJobMethod;
 
-        private readonly IndexDocumentConfiguration[] _documentsConfigs;
+        private readonly IEnumerable<IndexDocumentConfiguration> _documentsConfigs;
         private readonly IIndexingManager _indexingManager;
         private readonly ISettingsManager _settingsManager;
         private readonly IndexProgressHandler _progressHandler;
@@ -39,7 +39,7 @@ namespace VirtoCommerce.SearchModule.Web.BackgroundJobs
             _manualIndexAllJobMethod = typeof(IndexingJobs).GetMethod("IndexAllDocumentsJob");
         }
 
-        public IndexingJobs(IndexDocumentConfiguration[] documentsConfigs, IIndexingManager indexingManager, ISettingsManager settingsManager,
+        public IndexingJobs(IEnumerable<IndexDocumentConfiguration> documentsConfigs, IIndexingManager indexingManager, ISettingsManager settingsManager,
             IndexProgressHandler progressHandler, IIndexingInterceptor[] interceptors = null)
         {
             _documentsConfigs = documentsConfigs;
@@ -310,23 +310,32 @@ namespace VirtoCommerce.SearchModule.Web.BackgroundJobs
         {
             try
             {
-                foreach (var interceptor in _interceptors)
+                if (!_interceptors.IsNullOrEmpty())
                 {
-                    interceptor.OnBegin(options.ToArray());    
+                    foreach (var interceptor in _interceptors)
+                    {
+                        interceptor.OnBegin(options.ToArray());
+                    }
                 }
-                
+
                 await action(options);
 
-                foreach (var interceptor in _interceptors)
+                if (!_interceptors.IsNullOrEmpty())
                 {
-                    interceptor.OnEnd(options.ToArray());
+                    foreach (var interceptor in _interceptors)
+                    {
+                        interceptor.OnEnd(options.ToArray());
+                    }
                 }
             }
             catch (Exception ex)
             {
-                foreach (var interceptor in _interceptors)
+                if (!_interceptors.IsNullOrEmpty())
                 {
-                    interceptor.OnEnd(options.ToArray(), ex);
+                    foreach (var interceptor in _interceptors)
+                    {
+                        interceptor.OnEnd(options.ToArray(), ex);
+                    }
                 }
             }
         }

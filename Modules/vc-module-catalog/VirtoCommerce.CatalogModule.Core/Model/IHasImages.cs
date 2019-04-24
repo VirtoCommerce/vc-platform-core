@@ -4,7 +4,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model
 {
     public interface IHasImages
     {
-        string ImgSrc { get;  }
-        IList<Image> Images { get; }
+        string ImgSrc { get; }
+        IList<Image> Images { get; set; }
     }
 }

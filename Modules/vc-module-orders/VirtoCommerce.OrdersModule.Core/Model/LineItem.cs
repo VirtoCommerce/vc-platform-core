@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
@@ -16,7 +15,7 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         public string PriceId { get; set; }
 
         public string Currency { get; set; }
-     
+
         /// <summary>
         ///  unit price without discount and tax
         /// </summary>
@@ -62,7 +61,7 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         public decimal TaxPercentRate { get; set; }
 
         #endregion
-        
+
         /// <summary>
         /// Reserve quantity
         /// </summary>
@@ -70,8 +69,6 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         public int Quantity { get; set; }
 
         public string ProductId { get; set; }
-
-        public CatalogProduct Product { get; set; }
         public string Sku { get; set; }
         public string ProductType { get; set; }
         public string CatalogId { get; set; }

@@ -39,14 +39,10 @@ namespace VirtoCommerce.SearchModule.Web
             });
 
             serviceCollection.AddSingleton<IIndexingManager, IndexingManager>();
+            serviceCollection.AddSingleton<IndexProgressHandler>();
 
-            //TODO delete it after implementation in the modules
-            var productIndexingConfiguration = new IndexDocumentConfiguration
-            {
-                DocumentType = KnownDocumentTypes.Product,
-                DocumentSource = new IndexDocumentSource()
-            };
-            serviceCollection.AddSingleton(new[] { productIndexingConfiguration });
+            var configuration = serviceCollection.BuildServiceProvider().GetService<IConfiguration>();
+            serviceCollection.Configure<SearchOptions>(configuration.GetSection("Search"));
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)

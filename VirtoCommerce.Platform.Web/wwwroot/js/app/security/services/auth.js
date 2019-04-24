@@ -1,5 +1,5 @@
 angular.module('platformWebApp')
-    .factory('platformWebApp.authService', ['$http', '$rootScope', '$cookieStore', '$state', '$interpolate', function ($http, $rootScope, $cookieStore, $state, $interpolate) {
+.factory('platformWebApp.authService', ['$http', '$rootScope', '$cookieStore', '$state', '$interpolate', '$q', 'platformWebApp.authDataStorage', function ($http, $rootScope, $cookieStore, $state, $interpolate, $q, authDataStorage) {
     var serviceBase = 'api/platform/security/';
     var authContext = {
         userId: null,
@@ -11,40 +11,88 @@ angular.module('platformWebApp')
 
     authContext.fillAuthData = function () {
         return $http.get(serviceBase + 'currentuser').then(
-			function (results) {
-			    changeAuth(results.data);
-			});
+            function (results) {
+                changeAuth(results.data);
+            });
     };
 
     authContext.login = function (email, password, remember) {       
-        return $http.post(serviceBase + 'login/', { userName: email, password: password, rememberMe: remember }).then(
-            function (results) {
-                if (results.data.succeeded) {
-                    return authContext.fillAuthData().then(function () { return authContext.isAuthenticated; })
-                }
-                return false;
-			});
+        var requestData = 'grant_type=password&scope=offline_access&username=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password);
+        return $http.post('connect/token', requestData, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }).then(
+            function (response) {
+                var authData = {
+                    token: response.data.access_token,
+                    userName: email,
+                    expiresAt: getCurrentDateWithOffset(response.data.expires_in),
+                    refreshToken: response.data.refresh_token
+                };
+                authDataStorage.storeAuthData(authData);
+                return authContext.fillAuthData().then(function () {
+                    return response.data;
+                });
+            }, function (error) {
+                authContext.logout();
+                return $q.reject(error);
+            }
+        );
     };
+
+    authContext.refreshToken = function () {
+        var authData = authDataStorage.getStoredData();
+        if (authData) {
+            var data = 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(authData.refreshToken);
+            // NOTE: this method is called by the HTTP interceptor if the access token in the local storage expired.
+            //       So we clean the storage before sending the HTTP request - otherwise the HTTP interceptor will
+            //       detect expired token and will call this method again, causing the infinite loop.
+            authDataStorage.clearStoredData();
+            return $http.post('connect/token', data, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }).then(
+                function (response) {
+                    var newAuthData = {
+                        token: response.data.access_token,
+                        userName: response.data.userName,
+                        expiresAt: getCurrentDateWithOffset(response.data.expires_in),
+                        refreshToken: response.data.refresh_token
+                    };
+                    authDataStorage.storeAuthData(newAuthData);
+                    return newAuthData;
+                }, function (err) {
+                    authContext.logout();
+                    return $q.reject(err);
+                });
+        } else {
+            return $q.reject();
+        }
+    };
+
+    function getCurrentDateWithOffset(offsetInSeconds) {
+        return Date.now() + offsetInSeconds * 1000;
+    }
 
     authContext.requestpasswordreset = function (data) {
         return $http.post(serviceBase + 'users/' + data.userName + '/requestpasswordreset/').then(
-			function (results) {
-			    return results.data;
-			});
+            function (results) {
+                return results.data;
+            });
+    };
+
+    authContext.validatepasswordresettoken = function (data) {
+        return $http.post(serviceBase + 'users/' + data.userId + '/validatepasswordresettoken', { token: data.code }).then(
+            function (results) {
+                return results.data;
+            });
     };
 
     authContext.resetpassword = function (data) {
         return $http.post(serviceBase + 'users/' + data.userId + '/resetpasswordconfirm', { token: data.code, newPassword: data.newPassword }).then(
-			function (results) {
-			    return results.data;
-			});
+            function (results) {
+                return results.data;
+            });
     };
 
     authContext.logout = function () {
+        authDataStorage.clearStoredData();
+        $http.get(serviceBase + 'logout');
         changeAuth({});
-
-        $http.get(serviceBase + 'logout/').then(function (result) {
-        });
     };
 
     authContext.checkPermission = function (permission, securityScopes) {
@@ -72,13 +120,11 @@ angular.module('platformWebApp')
     };
 
     function changeAuth(user) {
-        authContext.userId = user.id;
-        authContext.permissions = user.permissions;
+        angular.extend(authContext, user);
         authContext.userLogin = user.userName;
         authContext.fullName = user.userLogin;
         authContext.isAuthenticated = user.userName != null;
-        authContext.userType = user.userType;
-        authContext.isAdministrator = user.isAdministrator;
+
         //Interpolate permissions to replace some template to real value
         if (authContext.permissions) {
             authContext.permissions = _.map(authContext.permissions, function (x) {

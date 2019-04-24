@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -7,7 +6,6 @@ using VirtoCommerce.NotificationsModule.Core;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Data.Model;
-using VirtoCommerce.NotificationsModule.Web.Infrastructure;
 using VirtoCommerce.NotificationsModule.Web.Model;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -80,7 +78,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         [Authorize(ModuleConstants.Security.Permissions.Update)]
         public async Task<IActionResult> UpdateNotification([FromBody]Notification notification)
         {
-            await _notificationService.SaveChangesAsync(new [] {notification});
+            await _notificationService.SaveChangesAsync(new[] { notification });
 
             return StatusCode((int)HttpStatusCode.NoContent);
         }

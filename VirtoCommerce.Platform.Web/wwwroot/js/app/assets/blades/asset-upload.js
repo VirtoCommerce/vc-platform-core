@@ -12,7 +12,6 @@ angular.module('platformWebApp')
                 // Create the uploader
                 var uploader = $scope.uploader = new FileUploader({
                     scope: $scope,
-                    headers: { Accept: 'application/json' },
                     url: 'api/platform/assets?folderUrl=' + folderUrl,
                     method: 'POST',
                     //autoUpload: true,

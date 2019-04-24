@@ -1,9 +1,10 @@
-using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class ProductAssociation : ValueObject, ICloneable
+    public class ProductAssociation : ValueObject
     {
         /// <summary>
         /// Association type (Accessories, Up-Sales, Cross-Sales, Related etc)
@@ -25,13 +26,26 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         /// <summary>
         /// Associated object
         /// </summary>
-        public IEntity AssociatedObject { get; set; }
+        [JsonIgnore]
+        public Entity AssociatedObject { get; set; }
+
+        /// <summary>
+        /// Display name for associated object
+        /// </summary>
+        public virtual string AssociatedObjectName => (AssociatedObject is IHasName hasName) ? hasName.Name : null;
+        /// <summary>
+        /// Associated object image URL
+        /// </summary>
+        public virtual string AssociatedObjectImg => (AssociatedObject is IHasImages hasImages) ? hasImages.ImgSrc : null;
 
         public string[] Tags { get; set; }
 
-        public virtual object Clone()
+        protected override IEnumerable<object> GetEqualityComponents()
         {
-            return MemberwiseClone();
+            yield return AssociatedObjectId;
+            yield return AssociatedObjectType;
+            yield return Type;
         }
+
     }
 }

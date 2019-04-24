@@ -12,20 +12,20 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
 {
     public class ThumbnailTaskSearchService : IThumbnailTaskSearchService
     {
-        private readonly IThumbnailTaskService _thumbnailTaskService;
-        private readonly Func<IThumbnailRepository> _thumbnailRepositoryFactory;
-
         public ThumbnailTaskSearchService(Func<IThumbnailRepository> thumbnailThumbnailRepositoryFactoryFactory, IThumbnailTaskService thumbnailTaskService)
         {
-            _thumbnailRepositoryFactory = thumbnailThumbnailRepositoryFactoryFactory;
-            _thumbnailTaskService = thumbnailTaskService;
+            ThumbnailRepositoryFactory = thumbnailThumbnailRepositoryFactoryFactory;
+            ThumbnailTaskService = thumbnailTaskService;
         }
 
-        public async Task<GenericSearchResult<ThumbnailTask>> SearchAsync(ThumbnailTaskSearchCriteria criteria)
+        protected IThumbnailTaskService ThumbnailTaskService { get; }
+        protected Func<IThumbnailRepository> ThumbnailRepositoryFactory { get; }
+
+        public virtual async Task<GenericSearchResult<ThumbnailTask>> SearchAsync(ThumbnailTaskSearchCriteria criteria)
         {
             var result = new GenericSearchResult<ThumbnailTask>();
 
-            using (var repository = _thumbnailRepositoryFactory())
+            using (var repository = ThumbnailRepositoryFactory())
             {
                 var query = GetTasksQuery(repository, criteria);
 
@@ -45,7 +45,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
                 if (criteria.Take > 0)
                 {
                     var ids = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                    result.Results = (await _thumbnailTaskService.GetByIdsAsync(ids)).AsQueryable().OrderBySortInfos(sortInfos).ToArray();
+                    result.Results = (await ThumbnailTaskService.GetByIdsAsync(ids)).AsQueryable().OrderBySortInfos(sortInfos).ToArray();
                 }
             }
             return result;

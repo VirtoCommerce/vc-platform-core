@@ -6,15 +6,15 @@ namespace VirtoCommerce.CatalogModule.Core.Model.ListEntry
     /// <summary>
     /// Base class for all entries used in catalog categories browsing.
     /// </summary>
-	public abstract class ListEntryBase : AuditableEntity
-    {  
+	public class ListEntryBase : AuditableEntity
+    {
         /// <summary>
         /// Gets or sets the type. E.g. "product", "category"
         /// </summary>
         /// <value>
         /// The type.
         /// </value>
-		public string Type { get; set; }
+        public string Type { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this entry is active.

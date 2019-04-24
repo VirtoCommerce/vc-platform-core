@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CatalogModule.Core.Events;
 using VirtoCommerce.CatalogModule.Core.Model;
@@ -11,7 +13,6 @@ using VirtoCommerce.CatalogModule.Data.Model;
 using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Data.Infrastructure;
 
@@ -19,45 +20,46 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 {
     public class CatalogService : ICatalogService
     {
-        private readonly IPlatformMemoryCache _memoryCache;
-        private readonly AbstractValidator<IHasProperties> _hasPropertyValidator;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
         private readonly Func<ICatalogRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
+        private readonly AbstractValidator<IHasProperties> _hasPropertyValidator;
 
-        public CatalogService(Func<ICatalogRepository> catalogRepositoryFactory, IPlatformMemoryCache cacheManager, AbstractValidator<IHasProperties> hasPropertyValidator, IEventPublisher eventPublisher)
+        public CatalogService(Func<ICatalogRepository> catalogRepositoryFactory,
+                                  IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache, AbstractValidator<IHasProperties> hasPropertyValidator)
         {
             _repositoryFactory = catalogRepositoryFactory;
-            _memoryCache = cacheManager;
-            _hasPropertyValidator = hasPropertyValidator;
             _eventPublisher = eventPublisher;
+            _platformMemoryCache = platformMemoryCache;
+            _hasPropertyValidator = hasPropertyValidator;
         }
 
         #region ICatalogService Members
 
-        public virtual IEnumerable<Catalog> GetAllCatalogs()
+        public virtual async Task<Catalog[]> GetByIdsAsync(string[] catalogIds)
         {
-            return PreloadCatalogs().Select(x => x.Value.Clone() as Catalog)
-                                          .ToArray();
+            return (await PreloadCatalogs()).Values.Where(x => catalogIds.Contains(x.Id))
+                                            .Select(x => x.Clone())
+                                            .OfType<Catalog>()
+                                            .ToArray();
         }
 
-        public virtual IEnumerable<Catalog> GetByIds(IEnumerable<string> catalogIds)
+        public async Task<IEnumerable<Catalog>> GetCatalogsListAsync()
         {
             //Clone required because client code may change resulting objects
-            var result = PreloadCatalogs().Join(catalogIds, pair => pair.Key, id => id, (pair, id) => pair.Value)
-                                          .Select(x => x.Clone() as Catalog)
-                                          .ToArray();
-            return result;
+            var catalogs = await PreloadCatalogs();
+            return catalogs.Values.Select(c => c.Clone()).OfType<Catalog>().OrderBy(x => x.Name);
         }
 
-        public virtual void SaveChanges(IEnumerable<Catalog> catalogs)
+        public virtual async Task SaveChangesAsync(Catalog[] catalogs)
         {
             var pkMap = new PrimaryKeyResolvingMap();
             var changedEntries = new List<GenericChangedEntry<Catalog>>();
 
             using (var repository = _repositoryFactory())
             {
-                ValidateCatalogProperties(catalogs);
-                var dbExistEntities = repository.GetCatalogsByIds(catalogs.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
+                await ValidateCatalogPropertiesAsync(catalogs);
+                var dbExistEntities = await repository.GetCatalogsByIdsAsync(catalogs.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var catalog in catalogs)
                 {
                     var originalEntity = dbExistEntities.FirstOrDefault(x => x.Id == catalog.Id);
@@ -74,39 +76,42 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     }
                 }
                 //Raise domain events
-                _eventPublisher.Publish(new CatalogChangingEvent(changedEntries));
+                await _eventPublisher.Publish(new CatalogChangingEvent(changedEntries));
                 //Save changes in database
-                repository.UnitOfWork.Commit();
+                await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
-                _eventPublisher.Publish(new CatalogChangedEvent(changedEntries));
+                await _eventPublisher.Publish(new CatalogChangedEvent(changedEntries));
 
                 //Reset cached catalogs and catalogs
                 CatalogCacheRegion.ExpireRegion();
             }
         }
 
-        public void Delete(IEnumerable<string> catalogIds)
+        public virtual async Task DeleteAsync(string[] catalogIds)
         {
-            var catalogs = GetByIds(catalogIds);
-            //Raise domain events before deletion
-            var changedEntries = catalogs.Select(x => new GenericChangedEntry<Catalog>(x, EntryState.Deleted));
-            _eventPublisher.Publish(new CatalogChangingEvent(changedEntries));
             using (var repository = _repositoryFactory())
             {
-                //TODO:  raise events on catalog deletion
-                repository.RemoveCatalogs(catalogIds.ToArray());
-                repository.UnitOfWork.Commit();
-                //Reset cached catalogs and catalogs
-                CatalogCacheRegion.ExpireRegion();
+                var catalogs = await GetByIdsAsync(catalogIds);
+                if (!catalogs.IsNullOrEmpty())
+                {
+                    var changedEntries = catalogs.Select(x => new GenericChangedEntry<Catalog>(x, EntryState.Deleted));
+                    await _eventPublisher.Publish(new CatalogChangingEvent(changedEntries));
+
+                    await repository.RemoveCatalogsAsync(catalogs.Select(m => m.Id).ToArray());
+                    await repository.UnitOfWork.CommitAsync();
+
+                    await _eventPublisher.Publish(new CatalogChangedEvent(changedEntries));
+                }
             }
-            _eventPublisher.Publish(new CatalogChangedEvent(changedEntries));
+            CatalogCacheRegion.ExpireRegion();
         }
+
         #endregion
 
-        protected virtual Dictionary<string, Catalog> PreloadCatalogs()
+        protected virtual Task<IDictionary<string, Catalog>> PreloadCatalogs()
         {
-            var cacheKey = CacheKey.With(GetType(), "PreloadCatalogs");
-            return _memoryCache.GetOrCreateExclusive(cacheKey, (cacheEntry) =>
+            var cacheKey = CacheKey.With(GetType(), "AllCatalogs");
+            return _platformMemoryCache.GetOrCreateExclusive(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(CatalogCacheRegion.CreateChangeToken());
                 CatalogEntity[] entities;
@@ -114,18 +119,21 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 {
                     //Optimize performance and CPU usage
                     repository.DisableChangesTracking();
-                    entities = repository.GetCatalogsByIds(repository.Catalogs.Select(x => x.Id).ToArray());
+
+                    var ids = await repository.Catalogs.Select(x => x.Id).ToArrayAsync();
+                    entities = await repository.GetCatalogsByIdsAsync(ids);
                 }
 
                 var result = entities.Select(x => x.ToModel(AbstractTypeFactory<Catalog>.TryCreateInstance()))
-                                     .ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+                                     .ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase)
+                                     .WithDefaultValue(null);
 
                 LoadDependencies(result.Values, result);
                 return result;
             });
         }
 
-        protected virtual void LoadDependencies(IEnumerable<Catalog> catalogs, Dictionary<string, Catalog> preloadedCatalogsMap)
+        protected virtual void LoadDependencies(IEnumerable<Catalog> catalogs, IDictionary<string, Catalog> preloadedCatalogsMap)
         {
             if (catalogs == null)
             {
@@ -133,26 +141,31 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
             foreach (var catalog in catalogs.Where(x => !x.IsTransient()))
             {
-                if (preloadedCatalogsMap.TryGetValue(catalog.Id, out var preloadedCatalog))
+                var preloadedCatalog = preloadedCatalogsMap[catalog.Id];
+                if (preloadedCatalog != null)
                 {
-                    catalog.Properties = preloadedCatalog.Properties;
+                    if (catalog.Properties.IsNullOrEmpty())
+                    {
+                        catalog.Properties = preloadedCatalog.Properties;
+                    }
                     foreach (var property in catalog.Properties)
                     {
                         property.Catalog = preloadedCatalogsMap[property.CatalogId];
-                        property.ActualizeValues();
                     }
                 }
             }
         }
 
-        private void ValidateCatalogProperties(IEnumerable<Catalog> catalogs)
+        private async Task ValidateCatalogPropertiesAsync(Catalog[] catalogs)
         {
-            LoadDependencies(catalogs, PreloadCatalogs());
+            LoadDependencies(catalogs, await PreloadCatalogs());
             foreach (var catalog in catalogs)
             {
-                var validatioResult = _hasPropertyValidator.Validate(catalog);
+                var validatioResult = await _hasPropertyValidator.ValidateAsync(catalog);
                 if (!validatioResult.IsValid)
+                {
                     throw new Exception($"Catalog properties has validation error: {string.Join(Environment.NewLine, validatioResult.Errors.Select(x => x.ToString()))}");
+                }
             }
         }
     }

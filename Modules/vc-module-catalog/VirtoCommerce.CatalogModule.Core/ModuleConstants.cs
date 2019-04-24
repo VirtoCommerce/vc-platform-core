@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.CatalogModule.Core
@@ -29,6 +27,13 @@ namespace VirtoCommerce.CatalogModule.Core
         {
             public static class General
             {
+                public static SettingDescriptor ImageCategories = new SettingDescriptor
+                {
+                    Name = "Catalog.ImageCategories",
+                    GroupName = "Catalog|General",
+                    ValueType = SettingValueType.ShortText,
+                    IsDictionary = true
+                };
                 public static SettingDescriptor AssociationGroups = new SettingDescriptor
                 {
                     Name = "Catalog.AssociationGroups",
@@ -67,6 +72,7 @@ namespace VirtoCommerce.CatalogModule.Core
                 {
                     get
                     {
+                        yield return ImageCategories;
                         yield return AssociationGroups;
                         yield return EditorialReviewTypes;
                         yield return CodesInOutline;
@@ -93,15 +99,35 @@ namespace VirtoCommerce.CatalogModule.Core
                     DefaultValue = false
                 };
 
+                public static SettingDescriptor IndexationDateProduct = new SettingDescriptor
+                {
+                    Name = "VirtoCommerce.Search.IndexingJobs.IndexationDate.Product",
+                    GroupName = "Catalog|Search",
+                    ValueType = SettingValueType.DateTime,
+                    DefaultValue = default(DateTime)
+                };
+
+                public static SettingDescriptor IndexationDateCategory = new SettingDescriptor
+                {
+                    Name = "VirtoCommerce.Search.IndexingJobs.IndexationDate.Category",
+                    GroupName = "Catalog|Search",
+                    ValueType = SettingValueType.DateTime,
+                    DefaultValue = default(DateTime)
+                };
+
                 public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {
                         yield return UseCatalogIndexedSearchInManager;
                         yield return UseFullObjectIndexStoring;
+                        yield return IndexationDateProduct;
+                        yield return IndexationDateCategory;
                     }
                 }
             }
+
+
 
             public static IEnumerable<SettingDescriptor> AllSettings
             {

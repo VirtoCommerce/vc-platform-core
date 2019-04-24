@@ -20,5 +20,7 @@ namespace VirtoCommerce.ImageToolsModule.Core.Models
         public string BackgroundColor { get; set; }
 
         public AnchorPosition AnchorPosition { get; set; }
+
+        public JpegQuality JpegQuality { get; set; }
     }
 }

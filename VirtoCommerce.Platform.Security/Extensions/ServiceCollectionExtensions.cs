@@ -14,7 +14,7 @@ namespace VirtoCommerce.Platform.Security.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddSecurityServices(this IServiceCollection services, Action<SecurityOptions> setupAction = null)
+        public static IServiceCollection AddSecurityServices(this IServiceCollection services, Action<AuthorizationOptions> setupAction = null)
         {
             services.AddScoped<IUserNameResolver, HttpContextUserResolver>();
             services.AddSingleton<IPermissionsRegistrar, DefaultPermissionProvider>();

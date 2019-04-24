@@ -2,14 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using VirtoCommerce.Platform.Core.Assets;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Exceptions;
 
 namespace VirtoCommerce.Platform.Assets.AzureBlobStorage
 {
@@ -18,19 +16,15 @@ namespace VirtoCommerce.Platform.Assets.AzureBlobStorage
 
         public const string ProviderName = "AzureBlobStorage";
         public const string DefaultBlobContainerName = "default-container";
-        private readonly AzureBlobContentOptions _option;
+        private readonly AzureBlobOptions _option;
 
         private readonly CloudBlobClient _cloudBlobClient;
         private readonly CloudStorageAccount _cloudStorageAccount;
-        private readonly CloudBlobContainer _container;
         private readonly string _cdnUrl;
 
-        public AzureBlobProvider(IOptions<AzureBlobContentOptions> options)
+        public AzureBlobProvider(IOptions<AzureBlobOptions> options)
         {
             _option = options.Value;
-
-            if (_option.ConnectionString == null)
-                throw new PlatformException($"{nameof(_option.ConnectionString)} must be set");
 
             _cloudStorageAccount = ParseConnectionString(_option.ConnectionString);
             _cloudBlobClient = _cloudStorageAccount.CreateCloudBlobClient();
@@ -81,7 +75,9 @@ namespace VirtoCommerce.Platform.Assets.AzureBlobStorage
         public virtual Stream OpenRead(string url)
         {
             if (string.IsNullOrEmpty(url))
+            {
                 throw new ArgumentNullException(nameof(url));
+            }
 
             var uri = url.IsAbsoluteUrl() ? new Uri(url) : new Uri(_cloudBlobClient.BaseUri, url.TrimStart('/'));
             var cloudBlob = _cloudBlobClient

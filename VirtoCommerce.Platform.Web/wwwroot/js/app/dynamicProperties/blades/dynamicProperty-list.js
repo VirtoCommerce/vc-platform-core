@@ -1,18 +1,12 @@
-angular.module('platformWebApp')
+﻿angular.module('platformWebApp')
 .controller('platformWebApp.dynamicPropertyListController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dynamicProperties.api', function ($scope, bladeNavigationService, dynamicPropertiesApi) {
     var blade = $scope.blade;
     blade.headIcon = 'fa-plus-square-o';
     blade.title = blade.objectType;
     blade.subtitle = 'platform.blades.dynamicProperty-list.subtitle';
-    $scope.pageSettings = {};
-    $scope.pageSettings.totalItems = 0;
-    $scope.pageSettings.currentPage = 1;
-    $scope.pageSettings.numPages = 5;
-    $scope.pageSettings.itemsPerPageCount = 999;
 
     blade.refresh = function (parentRefresh) {
-        var start = $scope.pageSettings.currentPage * $scope.pageSettings.itemsPerPageCount - $scope.pageSettings.itemsPerPageCount;
-        dynamicPropertiesApi.getPropertiesForType({ typeName: blade.objectType }, { skip: start, take: $scope.pageSettings.itemsPerPageCount }, function (results) {
+        dynamicPropertiesApi.query({ id: blade.objectType }, function (results) {
             if (parentRefresh && blade.parentRefresh) {
                 blade.parentRefresh(results);
             }

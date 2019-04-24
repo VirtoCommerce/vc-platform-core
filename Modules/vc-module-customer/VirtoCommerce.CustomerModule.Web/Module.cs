@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.CustomerModule.Core;
 using VirtoCommerce.CustomerModule.Core.Events;
 using VirtoCommerce.CustomerModule.Core.Model;
@@ -23,11 +22,11 @@ using VirtoCommerce.CustomerModule.Data.Services;
 using VirtoCommerce.CustomerModule.Web.JsonConverters;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
-using VirtoCommerce.Platform.Data.Repositories;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
 
@@ -55,19 +54,19 @@ namespace VirtoCommerce.CustomerModule.Web
             serviceCollection.AddSingleton<IMemberSearchService, MemberSearchServiceDecorator>();
             serviceCollection.AddSingleton<CustomerExportImport>();
 
-            var snapshot = serviceCollection.BuildServiceProvider();
+            serviceCollection.AddSingleton<MemberDocumentChangesProvider>();
+            serviceCollection.AddSingleton<MemberDocumentBuilder>();
 
-            var memberIndexingConfiguration = new IndexDocumentConfiguration
+            serviceCollection.AddSingleton(provider => new IndexDocumentConfiguration
             {
                 DocumentType = KnownDocumentTypes.Member,
                 DocumentSource = new IndexDocumentSource
                 {
-                    ChangesProvider = snapshot.GetService<MemberDocumentChangesProvider>(),
-                    DocumentBuilder = snapshot.GetService<MemberDocumentBuilder>(),
+                    ChangesProvider = provider.GetService<MemberDocumentChangesProvider>(),
+                    DocumentBuilder = provider.GetService<MemberDocumentBuilder>(),
                 },
-            };
+            });
 
-            serviceCollection.AddSingleton(memberIndexingConfiguration);
             serviceCollection.AddSingleton<MemberChangedEventHandler>();
         }
 
@@ -86,6 +85,13 @@ namespace VirtoCommerce.CustomerModule.Web
 
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
+
+            var dynamicPropertyRegistrar = appBuilder.ApplicationServices.GetRequiredService<IDynamicPropertyRegistrar>();
+            dynamicPropertyRegistrar.RegisterType<Organization>();
+            dynamicPropertyRegistrar.RegisterType<Contact>();
+            dynamicPropertyRegistrar.RegisterType<Vendor>();
+            dynamicPropertyRegistrar.RegisterType<Employee>();
+
 
             var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
             permissionsProvider.RegisterPermissions(ModuleConstants.Security.Permissions.AllPermissions.Select(x =>

@@ -3,7 +3,7 @@ using VirtoCommerce.Platform.Core.Common;
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
     public class Asset : AssetBase
-    {     
+    {
         public string MimeType { get; set; }
         public long Size { get; set; }
         public string ReadableSize

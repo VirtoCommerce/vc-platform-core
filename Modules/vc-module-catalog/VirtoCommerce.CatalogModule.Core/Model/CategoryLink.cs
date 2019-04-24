@@ -1,35 +1,36 @@
-using System;
+
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
+
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-	public class CategoryLink : ValueObject, ICloneable
+    public class CategoryLink : ValueObject
     {
         /// <summary>
         /// Entry identifier which this link belongs to
         /// </summary>
-        public string EntryId { get; set; }
+        public string EntryId => ListEntryId;
+        public string ListEntryId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the type of the list entry. E.g. "product", "category"
+        /// </summary>
+        /// <value>
+        /// The type of the list entry.
+        /// </value>
+        public string ListEntryType { get; set; }
+
         /// <summary>
         /// Product order position in virtual catalog
         /// </summary>
         public int Priority { get; set; }
-        /// <summary>
-        /// The catalog identifier which link referenced to
-        /// </summary>
-		public string CatalogId { get; set; }
-		public Catalog Catalog { get; set; }
-        /// <summary>
-        /// The category identifier which link referenced to
-        /// </summary>
-        public string CategoryId { get; set; }
-		public Category Category { get; set; }
 
-        #region ICloneable members
-        public virtual object Clone()
-        {
-            return MemberwiseClone();
-        } 
-        #endregion
+        public string CatalogId { get; set; }
+        [JsonIgnore]
+        public Catalog Catalog { get; set; }
+        public string CategoryId { get; set; }
+        public Category Category { get; set; }
 
         protected override IEnumerable<object> GetEqualityComponents()
         {

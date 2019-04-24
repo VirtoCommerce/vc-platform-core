@@ -4,5 +4,6 @@ namespace VirtoCommerce.Platform.Core.DynamicProperties
 {
     public class DynamicPropertySearchCriteria : SearchCriteriaBase
     {
+        public string TypeName { get; set; }
     }
 }

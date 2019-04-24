@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CatalogModule.Core.Events;
 using VirtoCommerce.CatalogModule.Core.Model;
@@ -12,7 +14,6 @@ using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.CatalogModule.Data.Validation;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Data.Infrastructure;
 using VirtoCommerce.SearchModule.Core.Model;
@@ -22,32 +23,40 @@ namespace VirtoCommerce.CatalogModule.Data.Services
     public class PropertyService : IPropertyService
     {
         private readonly Func<ICatalogRepository> _repositoryFactory;
-        private readonly IPlatformMemoryCache _memoryCache;
-        private readonly ICatalogService _catalogService;
         private readonly IEventPublisher _eventPublisher;
-        public PropertyService(Func<ICatalogRepository> repositoryFactory, IPlatformMemoryCache memoryCache, ICatalogService catalogService, IEventPublisher eventPublisher)
+        private readonly IPlatformMemoryCache _platformMemoryCache;
+        private readonly ICatalogService _catalogService;
+
+        public PropertyService(Func<ICatalogRepository> repositoryFactory, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache, ICatalogService catalogService)
         {
             _repositoryFactory = repositoryFactory;
-            _memoryCache = memoryCache;
-            _catalogService = catalogService;
             _eventPublisher = eventPublisher;
+            _platformMemoryCache = platformMemoryCache;
+            _catalogService = catalogService;
         }
 
         #region IPropertyService members
-        public IEnumerable<Property> GetByIds(IEnumerable<string> ids)
+        public async Task<IEnumerable<Property>> GetByIdsAsync(IEnumerable<string> ids)
         {
-            var preloadedProperties = PreloadAllProperties();
+            var preloadedProperties = await PreloadAllPropertiesAsync();
 
             var result = ids
-                .Where(propertyId => preloadedProperties.ContainsKey(propertyId))
-                .Select(propertyId => preloadedProperties[propertyId])
+                .Select(x => preloadedProperties[x])
+                .Where(x => x != null)
                 .Select(x => x.Clone()).OfType<Property>()
                 .ToList();
 
             return result;
         }
 
-        public void SaveChanges(IEnumerable<Property> properties)
+        public async Task<IEnumerable<Property>> GetAllCatalogPropertiesAsync(string catalogId)
+        {
+            var preloadedProperties = await PreloadAllCatalogPropertiesAsync(catalogId);
+            var result = preloadedProperties.Select(x => x.Clone()).OfType<Property>().ToArray();
+            return result;
+        }
+
+        public async Task SaveChangesAsync(IEnumerable<Property> properties)
         {
             var pkMap = new PrimaryKeyResolvingMap();
             var changedEntries = new List<GenericChangedEntry<Property>>();
@@ -58,7 +67,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             {
                 TryAddPredefinedValidationRules(properties);
 
-                var dbExistProperties = repository.GetPropertiesByIds(properties.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
+                var dbExistProperties = await repository.GetPropertiesByIdsAsync(properties.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var property in properties)
                 {
                     var modifiedEntity = AbstractTypeFactory<PropertyEntity>.TryCreateInstance().FromModel(property, pkMap);
@@ -79,49 +88,95 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 }
 
                 //Raise domain events
-                _eventPublisher.Publish(new PropertyChangingEvent(changedEntries));
+                await _eventPublisher.Publish(new PropertyChangingEvent(changedEntries));
                 //Save changes in database
-                repository.UnitOfWork.Commit();
+                await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
-                _eventPublisher.Publish(new PropertyChangedEvent(changedEntries));
+                await _eventPublisher.Publish(new PropertyChangedEvent(changedEntries));
 
                 //Reset catalog cache
                 CatalogCacheRegion.ExpireRegion();
             }
         }
 
-        public void Delete(IEnumerable<string> ids, bool doDeleteValues = false)
+        public async Task DeleteAsync(IEnumerable<string> ids, bool doDeleteValues = false)
         {
             using (var repository = _repositoryFactory())
             {
-                var entities = repository.GetPropertiesByIds(ids.ToArray());
+                var entities = await repository.GetPropertiesByIdsAsync(ids.ToArray());
                 //Raise domain events before deletion
                 var changedEntries = entities.Select(x => new GenericChangedEntry<Property>(x.ToModel(AbstractTypeFactory<Property>.TryCreateInstance()), EntryState.Deleted));
 
-                _eventPublisher.Publish(new PropertyChangingEvent(changedEntries));
+                await _eventPublisher.Publish(new PropertyChangingEvent(changedEntries));
 
                 foreach (var entity in entities)
                 {
                     repository.Remove(entity);
                     if (doDeleteValues)
                     {
-                        repository.RemoveAllPropertyValues(entity.Id);
+                        await repository.RemoveAllPropertyValuesAsync(entity.Id);
                     }
                 }
-                repository.UnitOfWork.Commit();
-                _eventPublisher.Publish(new PropertyChangedEvent(changedEntries));
+                await repository.UnitOfWork.CommitAsync();
+                await _eventPublisher.Publish(new PropertyChangedEvent(changedEntries));
                 //Reset catalog cache
                 CatalogCacheRegion.ExpireRegion();
             }
         }
         #endregion
 
-
-        protected virtual void LoadDependencies(Property[] properties)
+        protected virtual async Task<IDictionary<string, Property>> PreloadAllPropertiesAsync()
         {
+            var cacheKey = CacheKey.With(GetType(), "PreloadAllProperties");
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            {
+                cacheEntry.AddExpirationToken(CatalogCacheRegion.CreateChangeToken());
+
+                using (var repository = _repositoryFactory())
+                {
+                    repository.DisableChangesTracking();
+
+                    var propertyIds = await repository.Properties.Select(p => p.Id).ToArrayAsync();
+                    var entities = await repository.GetPropertiesByIdsAsync(propertyIds);
+                    var properties = entities.Select(p => p.ToModel(AbstractTypeFactory<Property>.TryCreateInstance())).ToArray();
+
+                    await LoadDependenciesAsync(properties);
+                    ApplyInheritanceRules(properties);
+
+                    var result = properties.ToDictionary(p => p.Id, StringComparer.OrdinalIgnoreCase).WithDefaultValue(null);
+                    return result;
+                }
+            });
+        }
+
+        protected virtual async Task<Property[]> PreloadAllCatalogPropertiesAsync(string catalogId)
+        {
+            var cacheKey = CacheKey.With(GetType(), "PreloadAllCatalogProperties", catalogId);
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            {
+                cacheEntry.AddExpirationToken(CatalogCacheRegion.CreateChangeToken());
+                using (var repository = _repositoryFactory())
+                {
+                    repository.DisableChangesTracking();
+
+                    var result = (await repository.GetAllCatalogPropertiesAsync(catalogId))
+                        .GroupBy(p => p.Id, StringComparer.OrdinalIgnoreCase) // Remove duplicates
+                        .Select(g => g.First())
+                        .OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+                        .Select(p => p.ToModel(AbstractTypeFactory<Property>.TryCreateInstance()))
+                        .ToArray();
+
+                    return result;
+                }
+            });
+        }
+
+        protected virtual async Task LoadDependenciesAsync(Property[] properties)
+        {
+            var catalogsMap = (await _catalogService.GetCatalogsListAsync()).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
             foreach (var property in properties)
             {
-                property.Catalog = _catalogService.GetByIds(new[] { property.CatalogId }).First();
+                property.Catalog = catalogsMap.GetValueOrThrow(property.CatalogId, $"property catalog with key {property.CatalogId} not exist");
             }
         }
 
@@ -152,29 +207,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             }
         }
 
-
-        protected virtual IDictionary<string, Property> PreloadAllProperties()
-        {
-            var cacheKey = CacheKey.With(GetType(), "PreloadAllProperties");
-            return _memoryCache.GetOrCreateExclusive(cacheKey, (cacheEntry) =>
-            {
-                cacheEntry.AddExpirationToken(CatalogCacheRegion.CreateChangeToken());
-                using (var repository = _repositoryFactory())
-                {
-                    repository.DisableChangesTracking();
-
-                    var propertyIds = repository.Properties.Select(p => p.Id).ToArray();
-                    var entities = repository.GetPropertiesByIds(propertyIds);
-                    var properties = entities.Select(p => p.ToModel(AbstractTypeFactory<Property>.TryCreateInstance())).ToArray();
-
-                    LoadDependencies(properties);
-                    ApplyInheritanceRules(properties);
-                    var result = properties.ToDictionary(p => p.Id, StringComparer.OrdinalIgnoreCase);
-                    return result;
-                }
-            });
-        }
-
         protected virtual void ValidateProperties(IEnumerable<Property> properties)
         {
             if (properties == null)
@@ -188,6 +220,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 validator.ValidateAndThrow(property);
             }
         }
-
     }
 }
+

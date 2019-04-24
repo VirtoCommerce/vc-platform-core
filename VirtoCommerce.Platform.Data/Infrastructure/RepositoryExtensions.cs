@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+using System;
+using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.Platform.Data.Infrastructure

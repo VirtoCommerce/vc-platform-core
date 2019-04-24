@@ -10,7 +10,6 @@ using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
 using VirtoCommerce.NotificationsModule.Data.Validation;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Core.Events;
 
 namespace VirtoCommerce.NotificationsModule.Data.Services
@@ -100,6 +99,15 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             if (AbstractTypeFactory<Notification>.AllTypeInfos.All(t => t.Type != typeof(T)))
             {
                 AbstractTypeFactory<Notification>.RegisterType<T>();
+            }
+        }
+
+        public void RegisterNotification<T, TMap>() where T : Notification
+                                                    where TMap : AuditableEntity
+        {
+            if (AbstractTypeFactory<Notification>.AllTypeInfos.All(t => t.Type != typeof(T)))
+            {
+                AbstractTypeFactory<Notification>.RegisterType<T>().MapToType<TMap>();
             }
         }
 

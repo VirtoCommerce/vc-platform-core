@@ -8,11 +8,11 @@ using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
-using Lucene.Net.QueryParsers.Classic;
 using Lucene.Net.Search;
 using Lucene.Net.Spatial.Vector;
 using Lucene.Net.Store;
 using Lucene.Net.Util;
+using Microsoft.Extensions.Options;
 using Spatial4n.Core.Context;
 using VirtoCommerce.SearchModule.Core.Exceptions;
 using VirtoCommerce.SearchModule.Core.Model;
@@ -25,18 +25,18 @@ namespace VirtoCommerce.LuceneSearchModule.Data
         private static readonly object _providerlock = new object();
         private static readonly Dictionary<string, IndexWriter> _indexWriters = new Dictionary<string, IndexWriter>();
         private static readonly SpatialContext _spatialContext = SpatialContext.GEO;
+        private readonly LuceneSearchOptions _luceneSearchOptions;
+        private readonly SearchOptions _searchOptions;
 
-
-        public string DataDirectoryPath { get; }
-        public string Scope { get; }
-
-        public LuceneSearchProvider(LuceneSearchProviderSettings settings)
+        public LuceneSearchProvider(IOptions<LuceneSearchOptions> luceneSearchOptions, IOptions<SearchOptions> searchOptions)
         {
-            if (settings == null)
-                throw new ArgumentNullException(nameof(settings));
+            if (luceneSearchOptions == null)
+                throw new ArgumentNullException(nameof(luceneSearchOptions));
+            _luceneSearchOptions = luceneSearchOptions.Value;
 
-            DataDirectoryPath = settings.DataDirectoryPath;
-            Scope = settings.Scope;
+            if (searchOptions == null)
+                throw new ArgumentNullException(nameof(searchOptions));
+            _searchOptions = searchOptions.Value;
         }
 
         public virtual Task DeleteIndexAsync(string documentType)
@@ -116,7 +116,7 @@ namespace VirtoCommerce.LuceneSearchModule.Data
             CloseWriter(indexName, false);
 
             Analyzer analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
-            IndexWriterConfig config = new IndexWriterConfig(LuceneVersion.LUCENE_48, analyzer);
+            var config = new IndexWriterConfig(LuceneVersion.LUCENE_48, analyzer);
 
             using (var directory = FSDirectory.Open(directoryPath))
             using (var reader = new IndexWriter(directory, config))
@@ -161,13 +161,11 @@ namespace VirtoCommerce.LuceneSearchModule.Data
                     System.IO.Directory.CreateDirectory(directoryPath);
                 }
 
-                using (var directory = FSDirectory.Open(directoryPath))
-                using (IndexReader reader = DirectoryReader.Open(directory))
+                using (var directory = DirectoryReader.Open(FSDirectory.Open(directoryPath)))
                 {
-                    //TODO
-                    string field = "contents";
-                    var availableFields = new[] {field};
-                    IndexSearcher searcher = new IndexSearcher(reader);
+                    var searcher = new IndexSearcher(directory);
+
+                    var availableFields = directory.GetAllFacetableFields();
                     var providerRequest = LuceneSearchRequestBuilder.BuildRequest(request, indexName, documentType, availableFields);
 
                     var query = string.IsNullOrEmpty(providerRequest?.Query?.ToString()) ? new MatchAllDocsQuery() : providerRequest.Query;
@@ -212,87 +210,75 @@ namespace VirtoCommerce.LuceneSearchModule.Data
 
         protected virtual IList<IIndexableField> ConvertToProviderFields(IndexDocumentField field)
         {
-            // TODO: Introduce and use metadata describing value type
-
             var result = new List<IIndexableField>();
 
             var fieldName = LuceneSearchHelper.ToLuceneFieldName(field.Name);
             var store = field.IsRetrievable ? Field.Store.YES : Field.Store.NO;
-            //var index = field.IsSearchable ? Field.Index.ANALYZED : field.IsFilterable ? Field.Index.NOT_ANALYZED : Field.Index.NO;
 
-            if (field.Value is string)
+            switch (field.Value)
             {
-                foreach (var value in field.Values)
-                {
-                    result.Add(new StringField(fieldName, (string)value, store));
-
-                    if (field.IsSearchable)
+                case string _:
+                    foreach (var value in field.Values)
                     {
-                        result.Add(new StringField(LuceneSearchHelper.SearchableFieldName, (string)value, Field.Store.NO));
+                        result.Add(new StringField(fieldName, (string)value, store));
+
+                        if (field.IsSearchable)
+                        {
+                            result.Add(new StringField(LuceneSearchHelper.SearchableFieldName, (string)value, Field.Store.NO));
+                        }
                     }
-                }
-            }
-            else if (field.Value is bool)
-            {
-                var booleanFieldName = LuceneSearchHelper.GetBooleanFieldName(field.Name);
-
-                foreach (var value in field.Values)
-                {
-                    var stringValue = value.ToStringInvariant();
-                    result.Add(new StringField(fieldName, stringValue, store));
-                    result.Add(new StringField(booleanFieldName, stringValue, Field.Store.NO));
-                }
-            }
-            else if (field.Value is DateTime)
-            {
-                var dateTimeFieldName = LuceneSearchHelper.GetDateTimeFieldName(field.Name);
-
-                foreach (var value in field.Values)
-                {
-                    //TODO
-                    //var numericField = new NumericField(fieldName, store, index != Field.Index.NO);
-                    //numericField.SetLongValue(((DateTime)value).Ticks);
-                    //result.Add(numericField);
-                    result.Add(new StringField(dateTimeFieldName, value.ToStringInvariant(), Field.Store.NO));
-                }
-            }
-            else if (field.Value is GeoPoint)
-            {
-                var geoPoint = (GeoPoint)field.Value;
-
-                result.Add(new StringField(fieldName, geoPoint.ToString(), Field.Store.YES));
-
-                var shape = _spatialContext.MakePoint(geoPoint.Longitude, geoPoint.Latitude);
-                var strategy = new PointVectorStrategy(_spatialContext, fieldName);
-
-                foreach (var f in strategy.CreateIndexableFields(shape))
-                {
-                    result.Add(f);
-                }
-            }
-            else
-            {
-                double t;
-                if (double.TryParse(field.Value.ToStringInvariant(), NumberStyles.Float, CultureInfo.InvariantCulture, out t))
-                {
-                    var facetableFieldName = LuceneSearchHelper.GetFacetableFieldName(field.Name);
+                    break;
+                case bool _:
+                    var booleanFieldName = LuceneSearchHelper.GetBooleanFieldName(field.Name);
 
                     foreach (var value in field.Values)
                     {
                         var stringValue = value.ToStringInvariant();
-
-                        //TODO
-                        //var numericField = new NumericField(fieldName, store, index != Field.Index.NO);
-                        //numericField.SetDoubleValue(double.Parse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture));
-                        //result.Add(numericField);
-
-                        result.Add(new StringField(facetableFieldName, stringValue, Field.Store.NO));
+                        result.Add(new StringField(fieldName, stringValue, store));
+                        result.Add(new StringField(booleanFieldName, stringValue, Field.Store.NO));
                     }
-                }
-                else
-                {
-                    result.AddRange(field.Values.Select(value => new StringField(fieldName, value.ToStringInvariant(), store)));
-                }
+                    break;
+                case DateTime _:
+                    var dateTimeFieldName = LuceneSearchHelper.GetDateTimeFieldName(field.Name);
+
+                    foreach (var value in field.Values)
+                    {
+                        var numericField = new Int64Field(fieldName, ((DateTime)value).Ticks, store);
+                        result.Add(numericField);
+                        result.Add(new StringField(dateTimeFieldName, value.ToStringInvariant(), Field.Store.NO));
+                    }
+                    break;
+                case GeoPoint _:
+                    var geoPoint = (GeoPoint)field.Value;
+
+                    result.Add(new StringField(fieldName, geoPoint.ToString(), Field.Store.YES));
+
+                    var shape = _spatialContext.MakePoint(geoPoint.Longitude, geoPoint.Latitude);
+                    var strategy = new PointVectorStrategy(_spatialContext, fieldName);
+
+                    result.AddRange(strategy.CreateIndexableFields(shape));
+                    break;
+                default:
+                    if (double.TryParse(field.Value.ToStringInvariant(), NumberStyles.Float, CultureInfo.InvariantCulture, out _))
+                    {
+                        var facetableFieldName = LuceneSearchHelper.GetFacetableFieldName(field.Name);
+
+                        foreach (var value in field.Values)
+                        {
+                            var stringValue = value.ToStringInvariant();
+
+                            var doubleField = new DoubleField(fieldName, double.Parse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture), store);
+
+                            result.Add(doubleField);
+
+                            result.Add(new StringField(facetableFieldName, stringValue, Field.Store.NO));
+                        }
+                    }
+                    else
+                    {
+                        result.AddRange(field.Values.Select(value => new StringField(fieldName, value.ToStringInvariant(), store)));
+                    }
+                    break;
             }
 
             return result;
@@ -301,7 +287,7 @@ namespace VirtoCommerce.LuceneSearchModule.Data
         protected virtual string GetIndexName(string documentType)
         {
             // Use different index for each document type
-            return string.Join("-", Scope, documentType);
+            return string.Join("-", _searchOptions.Scope, documentType);
         }
 
         protected virtual void CloseWriter(string indexName, bool optimize)
@@ -311,11 +297,6 @@ namespace VirtoCommerce.LuceneSearchModule.Data
                 if (_indexWriters.ContainsKey(indexName) && _indexWriters[indexName] != null)
                 {
                     var writer = _indexWriters[indexName];
-                    //if (optimize)
-                    //{
-                    //    writer.Optimize();
-                    //}
-
                     writer.Dispose(true); // added waiting for all merges to complete
                     _indexWriters.Remove(indexName);
                 }
@@ -341,7 +322,10 @@ namespace VirtoCommerce.LuceneSearchModule.Data
                         }
 
                         Analyzer analyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
-                        IndexWriterConfig config = new IndexWriterConfig(LuceneVersion.LUCENE_48, analyzer);
+                        var config = new IndexWriterConfig(LuceneVersion.LUCENE_48, analyzer)
+                        {
+                            OpenMode = createNew ? OpenMode.CREATE : OpenMode.CREATE_OR_APPEND
+                        };
                         var writer = new IndexWriter(directory, config);
                         _indexWriters[indexName] = writer;
 
@@ -359,7 +343,7 @@ namespace VirtoCommerce.LuceneSearchModule.Data
 
         protected virtual string GetDirectoryPath(string indexName)
         {
-            return Path.Combine(DataDirectoryPath, indexName);
+            return Path.Combine(_luceneSearchOptions.Path, indexName);
         }
     }
 }

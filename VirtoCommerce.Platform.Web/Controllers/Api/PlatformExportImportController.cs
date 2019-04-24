@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using Hangfire.Server;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Assets;
@@ -17,11 +17,9 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Exceptions;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.ExportImport.PushNotifications;
-using VirtoCommerce.Platform.Core.Extensions;
 using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
-using VirtoCommerce.Platform.Web.Extensions;
 using VirtoCommerce.Platform.Web.Hangfire;
 
 using Permissions = VirtoCommerce.Platform.Core.PlatformConstants.Security.Permissions;
@@ -62,18 +60,16 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
         [HttpGet]
         [Route("sampledata/discover")]
-        [ProducesResponseType(typeof(SampleDataInfo[]), 200)]
         [AllowAnonymous]
-        public IActionResult DiscoverSampleData()
+        public ActionResult<SampleDataInfo[]> DiscoverSampleData()
         {
             return Ok(InnerDiscoverSampleData().ToArray());
         }
 
         [HttpPost]
         [Route("sampledata/autoinstall")]
-        [ProducesResponseType(typeof(SampleDataImportPushNotification), 200)]
         [Authorize(Permissions.PlatformImport)]
-        public IActionResult TryToAutoInstallSampleData()
+        public ActionResult<SampleDataImportPushNotification> TryToAutoInstallSampleData()
         {
             var sampleData = InnerDiscoverSampleData().FirstOrDefault(x => !x.Url.IsNullOrEmpty());
             if (sampleData != null)
@@ -81,15 +77,13 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 return ImportSampleData(sampleData.Url);
             }
 
-            return NoContent();
+            return Ok();
         }
 
         [HttpPost]
         [Route("sampledata/import")]
-        [ProducesResponseType(typeof(SampleDataImportPushNotification), 200)]
-        [ProducesResponseType(204)]
         [Authorize(Permissions.PlatformImport)]
-        public IActionResult ImportSampleData([FromQuery]string url = null)
+        public ActionResult<SampleDataImportPushNotification> ImportSampleData([FromQuery]string url = null)
         {
             lock (_lockObject)
             {
@@ -110,7 +104,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 }
             }
 
-            return NoContent();
+            return Ok();
         }
 
         /// <summary>
@@ -122,7 +116,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [ProducesResponseType(typeof(SampleDataState), 200)]
         [ApiExplorerSettings(IgnoreApi = true)]
         [AllowAnonymous]
-        public IActionResult GetSampleDataState()
+        public ActionResult<SampleDataState> GetSampleDataState()
         {
             var state = EnumUtility.SafeParse(_settingsManager.GetValue(PlatformConstants.Settings.Setup.SampleDataState.Name, string.Empty), SampleDataState.Undefined);
             return Ok(state);
@@ -130,16 +124,14 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
         [HttpGet]
         [Route("export/manifest/new")]
-        [ProducesResponseType(typeof(PlatformExportManifest), 200)]
-        public IActionResult GetNewExportManifest()
+        public ActionResult<PlatformExportManifest> GetNewExportManifest()
         {
             return Ok(_platformExportManager.GetNewExportManifest(_userNameResolver.GetCurrentUserName()));
         }
 
         [HttpGet]
         [Route("export/manifest/load")]
-        [ProducesResponseType(typeof(PlatformExportManifest), 200)]
-        public IActionResult LoadExportManifest([FromQuery]string fileUrl)
+        public ActionResult<PlatformExportManifest> LoadExportManifest([FromQuery]string fileUrl)
         {
             if (string.IsNullOrEmpty(fileUrl))
             {
@@ -158,9 +150,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
         [HttpPost]
         [Route("export")]
-        [ProducesResponseType(typeof(PlatformExportPushNotification), 200)]
         [Authorize(Permissions.PlatformImport)]
-        public IActionResult ProcessExport([FromBody]PlatformImportExportRequest exportRequest)
+        public ActionResult<PlatformExportPushNotification> ProcessExport([FromBody]PlatformImportExportRequest exportRequest)
         {
             var notification = new PlatformExportPushNotification(_userNameResolver.GetCurrentUserName())
             {
@@ -176,9 +167,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
         [HttpPost]
         [Route("import")]
-        [ProducesResponseType(typeof(PlatformImportPushNotification), 200)]
         [Authorize(Permissions.PlatformImport)]
-        public IActionResult ProcessImport([FromBody]PlatformImportExportRequest importRequest)
+        public ActionResult<PlatformImportPushNotification> ProcessImport([FromBody]PlatformImportExportRequest importRequest)
         {
             var notification = new PlatformImportPushNotification(_userNameResolver.GetCurrentUserName())
             {
@@ -195,10 +185,32 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
         [HttpPost]
         [Route("exortimport/tasks/{jobId}/cancel")]
-        public IActionResult Cancel([FromRoute]string jobId)
+        public ActionResult Cancel([FromRoute] string jobId)
         {
             BackgroundJob.Delete(jobId);
             return Ok();
+        }
+
+
+        [HttpGet]
+        [Route("export/download/{fileName}")]
+        [Authorize(Permissions.PlatformExport)]
+        public ActionResult DownloadExportFile([FromRoute] string fileName)
+        {
+            var localTmpFolder = Path.GetFullPath(Path.Combine(_platformOptions.DefaultExportFolder));
+            var localPath = Path.Combine(localTmpFolder, Path.GetFileName(_platformOptions.DefaultExportFileName));
+
+            //Load source data only from local file system 
+            using (var stream = System.IO.File.Open(localPath, FileMode.Open))
+            {
+                var provider = new FileExtensionContentTypeProvider();
+                string contentType;
+                if (!provider.TryGetContentType(localPath, out contentType))
+                {
+                    contentType = "application/octet-stream";
+                }
+                return PhysicalFile(localPath, contentType);
+            }
         }
 
         private static IEnumerable<SampleDataInfo> InnerDiscoverSampleData()
@@ -353,26 +365,19 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
             try
             {
-                const string relativeUrl = "tmp/exported_data.zip";
-                var localTmpFolder = Path.GetFullPath(Path.Combine(_platformOptions.LocalUploadFolderPath, "tmp"));
-                var localTmpPath = Path.Combine(localTmpFolder, "exported_data.zip");
+                var localTmpFolder = Path.GetFullPath(Path.Combine(_platformOptions.DefaultExportFolder));
+                var localTmpPath = Path.Combine(localTmpFolder, Path.GetFileName(_platformOptions.DefaultExportFileName));
+
                 if (!Directory.Exists(localTmpFolder))
                 {
                     Directory.CreateDirectory(localTmpFolder);
                 }
                 //Import first to local tmp folder because Azure blob storage doesn't support some special file access mode 
-                using (var stream = System.IO.File.Open(localTmpPath, FileMode.OpenOrCreate))
+                using (var stream = System.IO.File.OpenWrite(localTmpPath))
                 {
                     var manifest = exportRequest.ToManifest();
                     await _platformExportManager.ExportAsync(stream, manifest, progressCallback, new JobCancellationTokenWrapper(cancellationToken));
-                }
-                //Copy export data to blob provider for get public download url
-                using (var localStream = System.IO.File.Open(localTmpPath, FileMode.Open))
-                using (var blobStream = _blobStorageProvider.OpenWrite(relativeUrl))
-                {
-                    localStream.CopyTo(blobStream);
-                    //Get a download url
-                    pushNotification.DownloadUrl = _blobUrlResolver.GetAbsoluteUrl(relativeUrl);
+                    pushNotification.DownloadUrl = $"api/platform/export/download/{_platformOptions.DefaultExportFileName}";
                 }
             }
             catch (JobAbortedException)

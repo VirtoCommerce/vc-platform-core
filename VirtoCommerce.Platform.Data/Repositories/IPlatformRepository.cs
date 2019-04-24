@@ -18,6 +18,7 @@ namespace VirtoCommerce.Platform.Data.Repositories
         IQueryable<OperationLogEntity> OperationLogs { get; }
 
         Task<DynamicPropertyDictionaryItemEntity[]> GetDynamicPropertyDictionaryItemByIdsAsync(string[] ids);
+        Task<DynamicPropertyEntity[]> GetDynamicPropertiesForTypesAsync(string[] objectTypes);
         Task<DynamicPropertyEntity[]> GetDynamicPropertiesByIdsAsync(string[] ids);
         Task<DynamicPropertyEntity[]> GetObjectDynamicPropertiesAsync(string[] objectTypes, string[] objectIds);
 

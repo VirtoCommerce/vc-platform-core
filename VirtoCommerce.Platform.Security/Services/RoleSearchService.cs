@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
@@ -16,17 +16,17 @@ namespace VirtoCommerce.Platform.Security.Services
         {
             _roleManager = roleManager;
         }
-        public async Task<GenericSearchResult<Role>> SearchRolesAsync(RoleSearchCriteria criteria)
+        public async Task<RoleSearchResult> SearchRolesAsync(RoleSearchCriteria criteria)
         {
-            if(criteria == null)
+            if (criteria == null)
             {
                 throw new ArgumentNullException(nameof(criteria));
             }
-            if(!_roleManager.SupportsQueryableRoles)
+            if (!_roleManager.SupportsQueryableRoles)
             {
                 throw new NotSupportedException();
             }
-            var result = new GenericSearchResult<Role>();
+            var result = AbstractTypeFactory<RoleSearchResult>.TryCreateInstance();
             var query = _roleManager.Roles;
             if (criteria.Keyword != null)
             {

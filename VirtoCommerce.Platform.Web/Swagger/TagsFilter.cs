@@ -21,21 +21,6 @@ namespace VirtoCommerce.Platform.Web.Swagger
 
         public void Apply(SwaggerDocument swaggerDoc, DocumentFilterContext context)
         {
-            swaggerDoc.Info.TermsOfService = "";
-
-            swaggerDoc.Info.Contact = new Contact
-            {
-                Email = "support@virtocommerce.com",
-                Name = "Virto Commerce",
-                Url = "http://virtocommerce.com"
-            };
-
-            swaggerDoc.Info.License = new License
-            {
-                Name = "Virto Commerce Open Software License 3.0",
-                Url = "http://virtocommerce.com/opensourcelicense"
-            };
-
             var tags = _moduleCatalog.Modules
                 .OfType<ManifestModuleInfo>()
                 .Select(x => new Tag

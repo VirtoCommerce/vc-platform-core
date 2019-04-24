@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.SearchModule.Core;
@@ -17,12 +18,12 @@ namespace VirtoCommerce.SearchModule.Data.Services
     public class IndexingManager : IIndexingManager
     {
         private readonly ISearchProvider _searchProvider;
-        private readonly IndexDocumentConfiguration[] _configs;
-        private readonly ISearchConnection _connection;
+        private readonly IEnumerable<IndexDocumentConfiguration> _configs;
         private readonly ISettingsManager _settingsManager;
         private readonly IIndexingWorker _backgroundWorker;
+        private readonly SearchOptions _searchOptions;
 
-        public IndexingManager(ISearchProvider searchProvider, IndexDocumentConfiguration[] configs, ISearchConnection connection,
+        public IndexingManager(ISearchProvider searchProvider, IEnumerable<IndexDocumentConfiguration> configs, IOptions<SearchOptions> searchOptions,
             ISettingsManager settingsManager = null, IIndexingWorker backgroundWorker = null)
         {
             if (searchProvider == null)
@@ -30,7 +31,7 @@ namespace VirtoCommerce.SearchModule.Data.Services
             if (configs == null)
                 throw new ArgumentNullException(nameof(configs));
 
-            _connection = connection;
+            _searchOptions = searchOptions.Value;
             _searchProvider = searchProvider;
             _configs = configs;
             _settingsManager = settingsManager;
@@ -39,7 +40,7 @@ namespace VirtoCommerce.SearchModule.Data.Services
 
         public virtual async Task<IndexState> GetIndexStateAsync(string documentType)
         {
-            var result = new IndexState { DocumentType = documentType, Provider = _connection.Provider, Scope = _connection.Scope };
+            var result = new IndexState { DocumentType = documentType, Provider = _searchOptions.Provider, Scope = _searchOptions.Scope };
 
             var searchRequest = new SearchRequest
             {

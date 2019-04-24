@@ -50,7 +50,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             var notifications = collection.Select(t =>
             {
                 var result = AbstractTypeFactory<Notification>.TryCreateInstance(t.Name);
-                var notificationEntity = entities.FirstOrDefault(e => e.Type.Equals(t.Name));
+                var notificationEntity = entities.FirstOrDefault(e => e.Type.EqualsInvariant(t.Name));
                 return notificationEntity != null ? notificationEntity.ToModel(result) : result;
             });
 

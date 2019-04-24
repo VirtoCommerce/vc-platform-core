@@ -124,7 +124,7 @@ namespace VirtoCommerce.Platform.Modules
                 throw new ArgumentNullException("moduleInfo");
 
             IModule result = null;
-            var moduleInitializerType = moduleInfo.Assembly.GetTypes().Where(x => typeof(IModule).IsAssignableFrom(x)).FirstOrDefault();
+            var moduleInitializerType = moduleInfo.Assembly.GetTypes().FirstOrDefault(x => typeof(IModule).IsAssignableFrom(x));
             if (moduleInitializerType != null && moduleInitializerType != typeof(IModule))
             {
                 result = (IModule)Activator.CreateInstance(moduleInitializerType);

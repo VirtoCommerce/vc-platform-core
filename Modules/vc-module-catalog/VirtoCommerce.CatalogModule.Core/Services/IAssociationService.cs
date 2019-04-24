@@ -1,11 +1,12 @@
-using System.Collections.Generic;
+using System.Threading.Tasks;
 using VirtoCommerce.CatalogModule.Core.Model;
 
 namespace VirtoCommerce.CatalogModule.Core.Services
 {
     public interface IAssociationService
     {
-        void LoadAssociations(IEnumerable<IHasAssociations> owners);
-        void SaveChanges(IEnumerable<IHasAssociations> owners);
+        Task LoadAssociationsAsync(IHasAssociations[] owners);
+
+        Task SaveChangesAsync(IHasAssociations[] owners);
     }
 }

@@ -1,23 +1,32 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
+using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
-using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
 {
-    [Produces("application/json")]
     [Route("api/catalog/properties")]
     public class CatalogModulePropertiesController : Controller
     {
         private readonly IPropertyService _propertyService;
-        private readonly IPropertySearchService _propertySearchService;
-
-        public CatalogModulePropertiesController(IPropertyService propertyService, IPropertySearchService propertySearchService)
+        private readonly ICategoryService _categoryService;
+        private readonly ICatalogService _catalogService;
+        private readonly IProperyDictionaryItemSearchService _propertyDictionarySearchService;
+        //Workaround: Bad design to use repository in the controller layer, need to extend in the future IPropertyService.Delete with new parameter DeleteAllValues
+        public CatalogModulePropertiesController(IPropertyService propertyService, ICategoryService categoryService, ICatalogService catalogService,
+                                                 IProperyDictionaryItemSearchService propertyDictionarySearchService)
         {
             _propertyService = propertyService;
-            _propertySearchService = propertySearchService;
+            _categoryService = categoryService;
+            _catalogService = catalogService;
+            _propertyDictionarySearchService = propertyDictionarySearchService;
         }
+
 
         /// <summary>
         /// Gets all dictionary values that specified property can have.
@@ -25,14 +34,14 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="propertyId">The property id.</param>
         /// <param name="keyword">The keyword. (Optional)</param>
         /// <returns></returns>
-        [HttpPost]
-        [Route("{propertyId}/values/search")]
-        [ProducesResponseType(typeof(GenericSearchResult<PropertyValue>), 200)]
-        public ActionResult GetPropertyValues([FromBody] PropertyDictionaryValueSearchCriteria criteria)
+        [HttpGet]
+        [Route("{propertyId}/values")]
+        [Obsolete("Use POST api/catalog/properties/dictionaryitems/search instead")]
+        public async Task<ActionResult<PropertyDictionaryItem[]>> GetPropertyValues(string propertyId, [FromQuery]string keyword = null)
         {
-            //Need to return PropertyValue as it's more convenient in UI
-            var result = _propertySearchService.SearchPropertyDictionaryValues(criteria);     
-            return Ok(result);
+            var dictValues = await _propertyDictionarySearchService.SearchAsync(new PropertyDictionaryItemSearchCriteria { Keyword = keyword, PropertyIds = new[] { propertyId }, Take = int.MaxValue });
+
+            return Ok(dictValues.Results);
         }
 
 
@@ -42,16 +51,73 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="propertyId">The property id.</param>
 		[HttpGet]
         [Route("{propertyId}")]
-        [ProducesResponseType(typeof(Property), 200)]
-        public ActionResult GetById(string propertyId)
+        public async Task<ActionResult<Property>> Get(string propertyId)
         {
-            var result = _propertyService.GetByIds(new[] { propertyId });
-            //TODO:
+            var property = (await _propertyService.GetByIdsAsync(new[] { propertyId })).FirstOrDefault();
+            if (property == null)
+            {
+                return NotFound();
+            }
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Read, property);
-            //TODO:
-            // retVal.IsManageable = true;
-            return Ok(result);
+
+            return Ok(property);
         }
+
+
+        /// <summary>
+        /// Gets the template for a new catalog property.
+        /// </summary>
+        /// <param name="catalogId">The catalog id.</param>
+        [HttpGet]
+        [Route("~/api/catalog/{catalogId}/properties/getnew")]
+        public async Task<ActionResult<Property>> GetNewCatalogProperty(string catalogId)
+        {
+            var catalog = (await _catalogService.GetByIdsAsync(new[] { catalogId })).FirstOrDefault();
+            var retVal = new Property
+            {
+                Id = Guid.NewGuid().ToString(),
+                IsNew = true,
+                CatalogId = catalog?.Id,
+                Name = "new property",
+                Type = PropertyType.Catalog,
+                ValueType = PropertyValueType.ShortText,
+                Attributes = new List<PropertyAttribute>(),
+                DisplayNames = catalog?.Languages.Select(x => new PropertyDisplayName { LanguageCode = x.LanguageCode }).ToList()
+            };
+
+            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, retVal.ToCoreModel());
+
+            return Ok(retVal);
+        }
+
+
+        /// <summary>
+        /// Gets the template for a new category property.
+        /// </summary>
+        /// <param name="categoryId">The category id.</param>
+        [HttpGet]
+        [Route("~/api/catalog/categories/{categoryId}/properties/getnew")]
+        public async Task<ActionResult<Property>> GetNewCategoryProperty(string categoryId)
+        {
+            var category = (await _categoryService.GetByIdsAsync(new[] { categoryId }, CategoryResponseGroup.Info.ToString())).FirstOrDefault();
+            var retVal = new Property
+            {
+                Id = Guid.NewGuid().ToString(),
+                IsNew = true,
+                CategoryId = categoryId,
+                CatalogId = category?.CatalogId,
+                Name = "new property",
+                Type = PropertyType.Category,
+                ValueType = PropertyValueType.ShortText,
+                Attributes = new List<PropertyAttribute>(),
+                DisplayNames = category?.Catalog.Languages.Select(x => new PropertyDisplayName { LanguageCode = x.LanguageCode }).ToList()
+            };
+
+            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, retVal.ToCoreModel());
+
+            return Ok(retVal);
+        }
+
 
         /// <summary>
         /// Creates or updates the specified property.
@@ -60,13 +126,11 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="property">The property.</param>
         [HttpPost]
         [Route("")]
-        [ProducesResponseType(typeof(Property), 200)]
-        public ActionResult SaveProperty([FromBody] Property property)
+        public async Task<IActionResult> SaveProperty([FromBody]Property property)
         {
-            //TODO:
-            //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, moduleProperty);
-            _propertyService.SaveChanges(new[] { property });
-            return Ok(property);
+            await _propertyService.SaveChangesAsync(new[] { property });
+
+            return NoContent();
         }
 
 
@@ -78,18 +142,13 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpDelete]
         [Route("")]
-        [ProducesResponseType(200)]
-        public ActionResult Delete(string id, bool doDeleteValues = false)
+        public async Task<IActionResult> Delete(string id, bool doDeleteValues = false)
         {
-            var property = _propertyService.GetByIds(new[] { id });
+            //var property = _propertyService.GetById(id);
 
-            //TODO:
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Delete, property);
-
-            _propertyService.Delete(new[] { id } , doDeleteValues);
-            return Ok();
+            await _propertyService.DeleteAsync(new[] { id }, doDeleteValues);
+            return NoContent();
         }
-
-
     }
 }

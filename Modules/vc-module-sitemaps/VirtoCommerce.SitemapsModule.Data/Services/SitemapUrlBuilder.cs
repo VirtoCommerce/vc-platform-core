@@ -1,5 +1,5 @@
 using System.Linq;
-using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CoreModule.Core.Outlines;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SitemapsModule.Core.Models;
@@ -56,7 +56,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
             urlTemplate = urlTemplate.Replace(UrlTemplatePatterns.Slug, slug);
             var result = UrlBuilder.BuildStoreUrl(toolsContext, urlTemplate);
             return result;
-        } 
+        }
         #endregion
     }
 }
