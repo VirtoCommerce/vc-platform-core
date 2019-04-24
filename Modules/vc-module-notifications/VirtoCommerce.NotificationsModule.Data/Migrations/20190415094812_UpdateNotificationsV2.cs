@@ -24,8 +24,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
                                        ,[Kind]
                                        ,[Discriminator]
                                        ,[From]
-                                       ,[To]
-                                       ,[Post])
+                                       ,[To])
                             SELECT NEWID(), 
 	                            (SELECT TOP 1 pnt2.CreatedDate FROM [PlatformNotificationTemplate] pnt2 WHERE pnt2.NotificationTypeId = pnt.NotificationTypeId), 
 	                            (SELECT TOP 1 pnt2.ModifiedDate FROM [PlatformNotificationTemplate] pnt2 WHERE pnt2.NotificationTypeId = pnt.NotificationTypeId), 
@@ -36,7 +35,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Migrations
 	                            1, [NotificationTypeId], 
 	                            CASE WHEN [NotificationTypeId] LIKE '%EmailNotification%' THEN 'EmailNotification' ELSE 'SmsNotification' END,
 	                            CASE WHEN [NotificationTypeId] LIKE '%EmailNotification%' THEN 'EmailNotificationEntity' ELSE 'SmsNotificationEntity' END,
-	                            null, null, null
+	                            null, null
                             FROM [PlatformNotificationTemplate] pnt
                             GROUP BY [NotificationTypeId]
                         END
