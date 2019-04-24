@@ -16,7 +16,6 @@ namespace VirtoCommerce.ImageToolsModule.Tests
             }
         }
 
-
         [Fact]
         public void ScaleByPercent()
         {
