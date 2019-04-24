@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
+using Newtonsoft.Json;
+using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core.Events;
 using VirtoCommerce.MarketingModule.Core.Model;
+using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Caching;
 using VirtoCommerce.MarketingModule.Data.Model;
@@ -22,13 +25,15 @@ namespace VirtoCommerce.MarketingModule.Data.Services
         private readonly IDynamicPropertyService _dynamicPropertyService;
         private readonly IEventPublisher _eventPublisher;
         private readonly IPlatformMemoryCache _platformMemoryCache;
+        private readonly IMarketingExtensionManager _marketingExtensionManager;
 
-        public DynamicContentServiceImpl(Func<IMarketingRepository> repositoryFactory, IDynamicPropertyService dynamicPropertyService, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
+        public DynamicContentServiceImpl(Func<IMarketingRepository> repositoryFactory, IDynamicPropertyService dynamicPropertyService, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache, IMarketingExtensionManager marketingExtensionManager)
         {
             _repositoryFactory = repositoryFactory;
             _dynamicPropertyService = dynamicPropertyService;
             _eventPublisher = eventPublisher;
             _platformMemoryCache = platformMemoryCache;
+            _marketingExtensionManager = marketingExtensionManager;
         }
 
         #region IDynamicContentService Members
@@ -179,7 +184,12 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 using (var repository = _repositoryFactory())
                 {
                     var publications = await repository.GetContentPublicationsByIdsAsync(ids);
-                    return publications.Select(x => x.ToModel(AbstractTypeFactory<DynamicContentPublication>.TryCreateInstance())).ToArray();
+                    return publications.Select(x =>
+                    {
+                        var result = x.ToModel(AbstractTypeFactory<DynamicContentPublication>.TryCreateInstance());
+                        FillConditions(result);
+                        return result;
+                    }).ToArray();
                 }
             });
         }
@@ -193,6 +203,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 var existEntities = await repository.GetContentPublicationsByIdsAsync(publications.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var publication in publications)
                 {
+                    SerializeDynamicContentPublicationConditions(publication);
+
                     var sourceEntity = AbstractTypeFactory<DynamicContentPublishingGroupEntity>.TryCreateInstance();
                     if (sourceEntity != null)
                     {
@@ -227,6 +239,50 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             }
 
             DynamicContentPublicationCacheRegion.ExpireRegion();
+        }
+
+
+        private void FillConditions(DynamicContentPublication publication)
+        {
+            publication.DynamicExpression = _marketingExtensionManager.ContentCondition;
+            if (!string.IsNullOrEmpty(publication.PredicateVisualTreeSerialized))
+            {
+                publication.DynamicExpression = JsonConvert.DeserializeObject<IConditionTree>(publication.PredicateVisualTreeSerialized, new ConditionJsonConverter());
+                if (_marketingExtensionManager.ContentCondition != null)
+                {
+                    //Copy available elements from etalon because they not persisted
+                    var sourceBlocks = _marketingExtensionManager.ContentCondition.Traverse(x => x.Children);
+                    var targetBlocks = publication.DynamicExpression.Traverse(x => x.Children).ToList();
+                    foreach (var sourceBlock in sourceBlocks)
+                    {
+                        foreach (var targetBlock in targetBlocks.Where(x => x.Id == sourceBlock.Id))
+                        {
+                            targetBlock.AvailableChildren = sourceBlock.AvailableChildren;
+                        }
+                    }
+                    //copy available elements from etalon
+                    publication.DynamicExpression.AvailableChildren = _marketingExtensionManager.ContentCondition.AvailableChildren;
+                }
+            }
+        }
+
+        private void SerializeDynamicContentPublicationConditions(DynamicContentPublication publication)
+        {
+            //Serialize condition expression 
+            if (publication.DynamicExpression?.Children != null)
+            {
+                var conditionExpression = ((DynamicContentConditionTree)publication.DynamicExpression).GetConditions();
+                publication.PredicateSerialized = JsonConvert.SerializeObject(conditionExpression);
+
+                //Clear availableElements in expression (for decrease size)
+                publication.DynamicExpression.AvailableChildren = null;
+                var allBlocks = publication.DynamicExpression.Traverse(x => x.Children);
+                foreach (var block in allBlocks)
+                {
+                    block.AvailableChildren = null;
+                }
+                publication.PredicateVisualTreeSerialized = JsonConvert.SerializeObject(publication.DynamicExpression);
+            }
         }
         #endregion
 
