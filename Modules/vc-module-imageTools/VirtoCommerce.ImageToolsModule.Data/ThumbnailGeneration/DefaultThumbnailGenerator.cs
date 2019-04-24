@@ -20,8 +20,6 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
             ImageResizer = imageResizer;
         }
 
-        protected object ProgressLock { get; } = new object();
-
         protected IImageService ImageService { get; }
         protected IImageResizer ImageResizer { get; }
 
@@ -48,16 +46,9 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
 
             var result = new ThumbnailGenerationResult();
 
-            //one process only can use an Image object at the same time.
-            Image<Rgba32> clone;
-            lock (ProgressLock)
-            {
-                clone = originalImage.Clone();
-            }
-
             foreach (var option in options)
             {
-                var thumbnail = GenerateThumbnail(clone, option);
+                var thumbnail = GenerateThumbnail(originalImage, option);
                 var thumbnailUrl = sourcePath.GenerateThumbnailName(option.FileSuffix);
 
                 if (thumbnail != null)
@@ -87,10 +78,9 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
             var width = option.Width ?? image.Width;
 
             var color = Rgba32.Transparent;
-
             if (!string.IsNullOrWhiteSpace(option.BackgroundColor))
             {
-                Rgba32.FromHex(option.BackgroundColor);
+                color = Rgba32.FromHex(option.BackgroundColor);
             }
 
             Image<Rgba32> result;

@@ -43,8 +43,8 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
 
             var result = image.Clone(ctx =>
             {
-                ctx.BackgroundColor(backgroung);
                 ctx.Resize(options);
+                ctx.BackgroundColor(backgroung);
             });
 
             return result;
@@ -63,8 +63,8 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
 
             var result = image.Clone(ctx =>
             {
-                ctx.BackgroundColor(backgroung);
                 ctx.Resize(options);
+                ctx.BackgroundColor(backgroung);
             });
 
             return result;
@@ -87,8 +87,8 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
 
             var result = image.Clone(ctx =>
             {
-                ctx.BackgroundColor(backgroung);
                 ctx.Resize(options);
+                ctx.BackgroundColor(backgroung);
             });
 
             return result;
@@ -130,6 +130,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
             {
                 ctx.Crop(source);
                 ctx.Resize(destination.Size);
+                ctx.BackgroundColor(backgroundColor.Value);
             });
 
             result.Mutate(ctx =>

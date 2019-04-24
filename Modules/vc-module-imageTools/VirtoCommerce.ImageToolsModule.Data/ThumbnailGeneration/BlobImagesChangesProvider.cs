@@ -23,7 +23,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
             ThumbnailOptionSearchService = thumbnailOptionSearchService;
         }
 
-        private static readonly string[] SupportedImageExtensions = { ".bmp", ".gif", ".jpg", ".jpeg", ".jpe", ".jif", ".jfif", ".jfi", ".png", ".tiff", ".tif" };
+        private static readonly string[] SupportedImageExtensions = { ".bmp", ".gif", ".jpg", ".jpeg", ".png" };
 
         protected IBlobStorageProvider StorageProvider { get; }
         protected IThumbnailOptionSearchService ThumbnailOptionSearchService { get; }
