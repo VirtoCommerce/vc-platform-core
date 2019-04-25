@@ -27,7 +27,6 @@ namespace VirtoCommerce.ImageToolsModule.Data.ExportImport
         public ThumbnailsExportImport(IThumbnailTaskSearchService taskSearchService,
             IThumbnailOptionSearchService optionSearchService, IThumbnailTaskService taskService,
             IThumbnailOptionService optionService, JsonSerializer jsonSerializer)
-            IThumbnailOptionService optionService, IOptions<MvcJsonOptions> jsonOptions)
         {
             _taskSearchService = taskSearchService;
             _optionSearchService = optionSearchService;
