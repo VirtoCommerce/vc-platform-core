@@ -3,8 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using VirtoCommerce.Domain.Inventory.Model.Search;
 using VirtoCommerce.InventoryModule.Core;
@@ -44,14 +42,14 @@ namespace VirtoCommerce.InventoryModule.Data.ExportImport
 
         public InventoryExportImport(IInventoryService inventoryService, IFulfillmentCenterSearchService fulfillmentCenterSearchService,
             IInventorySearchService inventorySearchService, IFulfillmentCenterService fulfillmentCenterService,
-            ISettingsManager settingsManager, IOptions<MvcJsonOptions> jsonOptions)
+            ISettingsManager settingsManager, JsonSerializer jsonSerializer)
         {
             _inventoryService = inventoryService;
             _fulfillmentCenterSearchService = fulfillmentCenterSearchService;
             _fulfillmentCenterService = fulfillmentCenterService;
             _inventorySearchService = inventorySearchService;
             _settingsManager = settingsManager;
-            _jsonSerializer = serializer;
+            _jsonSerializer = jsonSerializer;
         }
 
         public async Task DoExportAsync(Stream outStream, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)

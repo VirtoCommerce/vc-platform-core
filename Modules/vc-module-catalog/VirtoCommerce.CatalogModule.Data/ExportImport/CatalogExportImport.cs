@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.Search;
@@ -37,7 +35,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
 
         public CatalogExportImport(ICatalogService catalogService, IProductSearchService productSearchService, ICategorySearchService categorySearchService, ICategoryService categoryService,
                                   IItemService itemService, IPropertyService propertyService, IPropertySearchService propertySearchService, IProperyDictionaryItemSearchService propertyDictionarySearchService,
-                                  IProperyDictionaryItemService propertyDictionaryService, IOptions<MvcJsonOptions> jsonOptions, IBlobStorageProvider blobStorageProvider, ISeoService seoService)
+                                  IProperyDictionaryItemService propertyDictionaryService, JsonSerializer jsonSerializer, IBlobStorageProvider blobStorageProvider, ISeoService seoService)
         {
             _catalogService = catalogService;
             _productSearchService = productSearchService;
@@ -48,7 +46,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             _propertySearchService = propertySearchService;
             _propertyDictionarySearchService = propertyDictionarySearchService;
             _propertyDictionaryService = propertyDictionaryService;
-            _jsonSerializer = JsonSerializer.Create(jsonOptions.Value.SerializerSettings);
+            _jsonSerializer = jsonSerializer;
             _blobStorageProvider = blobStorageProvider;
             _seoService = seoService;
         }
@@ -300,7 +298,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             {
                 try
                 {
-                    string url = image.Url != null && !image.Url.IsAbsoluteUrl() ? image.Url : image.RelativeUrl;
+                    var url = image.Url != null && !image.Url.IsAbsoluteUrl() ? image.Url : image.RelativeUrl;
                     //do not save images with external url
                     if (!string.IsNullOrEmpty(url))
                     {
