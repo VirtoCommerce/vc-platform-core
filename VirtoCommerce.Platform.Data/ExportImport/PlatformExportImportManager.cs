@@ -172,7 +172,8 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                                         {
                                             foreach (var user in items)
                                             {
-                                                if (_userManager.FindByIdAsync(user.Id).Result != null)
+                                                var userExist = await _userManager.FindByIdAsync(user.Id);
+                                                if (userExist != null)
                                                 {
                                                     await _userManager.UpdateAsync(user);
                                                 }
