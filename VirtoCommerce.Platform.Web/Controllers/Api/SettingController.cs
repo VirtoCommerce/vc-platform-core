@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
-using VirtoCommerce.Platform.Data.Settings;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api
 {
