@@ -17,6 +17,7 @@ using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.SubscriptionModule.Core;
 using VirtoCommerce.SubscriptionModule.Core.Events;
@@ -123,6 +124,7 @@ namespace VirtoCommerce.SubscriptionModule.Web
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
                 var subscriptionDbContext = serviceScope.ServiceProvider.GetRequiredService<SubscriptionDbContext>();
+                subscriptionDbContext.Database.MigrateIfNotApplied(MigrationName.GetUpdateV2MigrationName(ModuleInfo.Id));
                 subscriptionDbContext.Database.EnsureCreated();
                 subscriptionDbContext.Database.Migrate();
             }

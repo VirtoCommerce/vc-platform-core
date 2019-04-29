@@ -131,7 +131,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(CatalogCacheRegion.CreateChangeToken());
-                cacheEntry.AddExpirationToken(CategoryCacheRegion.CreateChangeToken());
 
                 using (var repository = _repositoryFactory())
                 {

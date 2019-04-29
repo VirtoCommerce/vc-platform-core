@@ -16,5 +16,10 @@ namespace VirtoCommerce.NotificationsModule.Core.Model
         /// Owner Type of Notification
         /// </summary>
         public string TenantType { get; set; }
+
+        /// <summary>
+        /// only active notification
+        /// </summary>
+        public bool IsActive { get; set; }
     }
 }

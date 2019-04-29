@@ -117,33 +117,39 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [Route("~/api/catalog/{catalogId}/categories/{categoryId}/products/getnew")]
         public async Task<ActionResult<CatalogProduct>> GetNewProductByCatalogAndCategory(string catalogId, string categoryId)
         {
-            var retVal = AbstractTypeFactory<CatalogProduct>.TryCreateInstance();
-            retVal.CategoryId = categoryId;
-            retVal.CatalogId = catalogId;
-            retVal.IsActive = true;
-            retVal.SeoInfos = Array.Empty<SeoInfo>();
+            var result = AbstractTypeFactory<CatalogProduct>.TryCreateInstance();
+            result.CategoryId = categoryId;
+            result.CatalogId = catalogId;
+            result.IsActive = true;
+            result.SeoInfos = Array.Empty<SeoInfo>();
 
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Create, retVal.ToModuleModel(_blobUrlResolver));
 
+            Entity parent = null;
             if (catalogId != null)
             {
-                var catalog = (await _catalogService.GetByIdsAsync(new[] { catalogId })).FirstOrDefault();
-                retVal.Properties = catalog?.Properties.ToList();
+                parent = (await _catalogService.GetByIdsAsync(new[] { catalogId })).FirstOrDefault();
             }
             if (categoryId != null)
             {
-                var category = (await _categoryService.GetByIdsAsync(new[] { categoryId }, CategoryResponseGroup.WithProperties.ToString())).FirstOrDefault();
-                retVal.Properties = category?.Properties.ToList();
+                parent = (await _categoryService.GetByIdsAsync(new[] { categoryId }, CategoryResponseGroup.WithProperties.ToString())).FirstOrDefault();
             }
-            //foreach (var property in retVal.Properties)
-            //{
-            //    property.Values = new List<PropertyValue>();
-            //    property.IsManageable = true;
-            //    property.IsReadOnly = property.Type != PropertyType.Product && property.Type != PropertyType.Variation;
-            //}
-            retVal.Code = _skuGenerator.GenerateSku(retVal);
+            if (parent != null)
+            {
+                result.TryInheritFrom(parent);
+            }
 
-            return Ok(retVal);
+            if (result.Properties != null)
+            {
+                foreach (var property in result.Properties)
+                {
+                    property.Values = new List<PropertyValue>();
+                    property.IsReadOnly = property.Type != PropertyType.Product && property.Type != PropertyType.Variation;
+                }
+            }
+            result.Code = _skuGenerator.GenerateSku(result);
+
+            return Ok(result);
         }
 
 

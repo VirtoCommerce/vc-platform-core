@@ -1,7 +1,9 @@
 using System;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Caching;
@@ -43,7 +45,13 @@ namespace VirtoCommerce.Platform.Data.Extensions
             services.AddSingleton<IPlatformMemoryCache, PlatformMemoryCache>();
             services.AddScoped<IPlatformExportImportManager, PlatformExportImportManager>();
             services.AddSingleton<ITransactionFileManager, TransactionFileManager.TransactionFileManager>();
-            services.AddSingleton<JsonSerializer>();
+
+            services.AddSingleton(js =>
+            {
+                var serv = js.GetService<IOptions<MvcJsonOptions>>();
+                return JsonSerializer.Create(serv.Value.SerializerSettings);
+            });
+
             return services;
 
         }

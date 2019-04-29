@@ -250,8 +250,7 @@ namespace VirtoCommerce.SitemapsModule.Test
                 }
             };
 
-            var jsonOptions = new OptionsWrapper<MvcJsonOptions>(mvcJsonOptions);
-            _sitemapExportImport = new SitemapExportImport(_sitemapService.Object, _sitemapItemService.Object, jsonOptions);
+            _sitemapExportImport = new SitemapExportImport(_sitemapService.Object, _sitemapItemService.Object, JsonSerializer.Create(mvcJsonOptions.SerializerSettings));
         }
 
         private static Stream ReadEmbeddedResource(string filePath)

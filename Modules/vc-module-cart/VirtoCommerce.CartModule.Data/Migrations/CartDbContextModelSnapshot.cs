@@ -15,7 +15,7 @@ namespace VirtoCommerce.CartModule.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.0-rtm-30799")
+                .HasAnnotation("ProductVersion", "2.2.3-servicing-35854")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -253,7 +253,8 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     b.Property<string>("ShipmentMethodCode")
                         .HasMaxLength(64);
 
-                    b.Property<string>("ShoppingCartId");
+                    b.Property<string>("ShoppingCartId")
+                        .IsRequired();
 
                     b.Property<string>("Sku")
                         .IsRequired()
@@ -333,7 +334,8 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     b.Property<string>("Purpose")
                         .HasMaxLength(1024);
 
-                    b.Property<string>("ShoppingCartId");
+                    b.Property<string>("ShoppingCartId")
+                        .IsRequired();
 
                     b.Property<decimal>("TaxPercentRate")
                         .HasColumnType("decimal(18,4)");
@@ -413,7 +415,8 @@ namespace VirtoCommerce.CartModule.Data.Migrations
                     b.Property<string>("ShipmentMethodOption")
                         .HasMaxLength(64);
 
-                    b.Property<string>("ShoppingCartId");
+                    b.Property<string>("ShoppingCartId")
+                        .IsRequired();
 
                     b.Property<bool>("TaxIncluded");
 

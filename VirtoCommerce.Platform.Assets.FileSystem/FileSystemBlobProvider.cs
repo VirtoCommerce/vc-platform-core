@@ -93,7 +93,7 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
                 Directory.CreateDirectory(folderPath);
             }
 
-            return File.Open(filePath, FileMode.Create, FileAccess.Write);
+            return File.OpenWrite(filePath);
         }
 
 

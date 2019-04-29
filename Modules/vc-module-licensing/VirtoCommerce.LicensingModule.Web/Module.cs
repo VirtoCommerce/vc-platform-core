@@ -13,10 +13,11 @@ using VirtoCommerce.LicensingModule.Data.Repositories;
 using VirtoCommerce.LicensingModule.Data.Services;
 using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.ChangeLog;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
-using VirtoCommerce.Platform.Core.Security.Events;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Data.Extensions;
 
 namespace VirtoCommerce.LicensingModule.Web
 {
@@ -57,6 +58,7 @@ namespace VirtoCommerce.LicensingModule.Web
             using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
             {
                 var licenseDbContext = serviceScope.ServiceProvider.GetRequiredService<LicenseDbContext>();
+                licenseDbContext.Database.MigrateIfNotApplied(MigrationName.GetUpdateV2MigrationName(ModuleInfo.Id));
                 licenseDbContext.Database.EnsureCreated();
                 licenseDbContext.Database.Migrate();
             }

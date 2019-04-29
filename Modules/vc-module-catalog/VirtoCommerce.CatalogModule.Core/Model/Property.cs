@@ -9,9 +9,31 @@ namespace VirtoCommerce.CatalogModule.Core.Model
 {
     public class Property : AuditableEntity, IInheritable, ICloneable
     {
+        // <summary>
+        /// Gets or sets a value indicating whether user can change property value.
+        /// </summary>     
+        public bool IsReadOnly { get; set; }
+        /// <summary>
+        /// Gets or sets a value indicating whether user can change property metadata or remove this property. 
+        /// </summary>
+        public bool IsManageable => !IsTransient();
+        /// <summary>
+        /// Gets or sets a value indicating whether this instance is new. A new property should be created on server site instead of trying to update it.
+        /// </summary>
+        public bool IsNew { get; set; }
+
+        /// <summary>
+        /// Gets or sets the catalog id that this product belongs to.
+        /// </summary>
         public string CatalogId { get; set; }
         [JsonIgnore]
         public Catalog Catalog { get; set; }
+        /// <summary>
+        /// Gets or sets the category id that this product belongs to.
+        /// </summary>
+        /// <value>
+        /// The category identifier.
+        /// </value>
         public string CategoryId { get; set; }
         [JsonIgnore]
         public Category Category { get; set; }
@@ -20,14 +42,14 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         public bool Dictionary { get; set; }
         public bool Multivalue { get; set; }
         public bool Multilanguage { get; set; }
-        public bool IsManageable { get; set; }
-        public bool IsReadOnly { get; set; }
+
         public PropertyValueType ValueType { get; set; }
         public PropertyType Type { get; set; }
+        public IList<PropertyValue> Values { get; set; } = new List<PropertyValue>();
         public IList<PropertyAttribute> Attributes { get; set; }
         public IList<PropertyDisplayName> DisplayNames { get; set; }
         public IList<PropertyValidationRule> ValidationRules { get; set; }
-        public IList<PropertyValue> Values { get; set; }
+        public PropertyValidationRule ValidationRule => ValidationRules?.FirstOrDefault();
 
         public virtual bool IsSame(Property other, params PropertyType[] additionalTypes)
         {
@@ -49,9 +71,6 @@ namespace VirtoCommerce.CatalogModule.Core.Model
             return string.Equals(Name, propValue.PropertyName, StringComparison.InvariantCultureIgnoreCase) && ValueType == propValue.ValueType;
         }
 
-
-        public bool IsNew => IsTransient();
-
         #region IInheritable Members
         public virtual bool IsInherited { get; set; }
 
@@ -60,11 +79,12 @@ namespace VirtoCommerce.CatalogModule.Core.Model
             if (parent is Property parentProperty)
             {
                 IsInherited = true;
-                Id = parentProperty.Id;
-                CreatedBy = parentProperty.CreatedBy;
-                ModifiedBy = parentProperty.ModifiedBy;
+                Id = parentProperty.Id ?? Id;
+                Name = parentProperty.Name ?? Name;
+                CreatedBy = parentProperty.CreatedBy ?? CreatedBy;
+                ModifiedBy = parentProperty.ModifiedBy ?? ModifiedBy;
                 CreatedDate = parentProperty.CreatedDate;
-                ModifiedDate = parentProperty.ModifiedDate;
+                ModifiedDate = parentProperty.ModifiedDate ?? ModifiedDate;
                 Required = parentProperty.Required;
                 Dictionary = parentProperty.Dictionary;
                 Multivalue = parentProperty.Multivalue;
@@ -74,17 +94,9 @@ namespace VirtoCommerce.CatalogModule.Core.Model
                 Attributes = parentProperty.Attributes;
                 DisplayNames = parentProperty.DisplayNames;
                 ValidationRules = parentProperty.ValidationRules;
+                CatalogId = parentProperty.CatalogId;
+                CategoryId = parentProperty.CategoryId;
 
-                if (Values.IsNullOrEmpty() && !parentProperty.Values.IsNullOrEmpty())
-                {
-                    Values = new List<PropertyValue>();
-                    foreach (var parentPropValue in parentProperty.Values)
-                    {
-                        var propValue = AbstractTypeFactory<PropertyValue>.TryCreateInstance();
-                        propValue.TryInheritFrom(parentPropValue);
-                        Values.Add(propValue);
-                    }
-                }
                 foreach (var propValue in Values ?? Array.Empty<PropertyValue>())
                 {
                     propValue.PropertyId = parentProperty.Id;
@@ -100,7 +112,6 @@ namespace VirtoCommerce.CatalogModule.Core.Model
                 DisplayNames = DisplayNames.Intersect(displayNamesForCatalogLanguages, displayNamesComparer).ToList();
                 //Add missed
                 DisplayNames.AddRange(displayNamesForCatalogLanguages.Except(DisplayNames, displayNamesComparer));
-                IsManageable = true;
             }
         }
         #endregion
@@ -108,8 +119,19 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         #region ICloneable members
         public virtual object Clone()
         {
-            return base.MemberwiseClone();
+            var result = MemberwiseClone() as Property;
+
+            result.Values = Values?.Select(x => x.Clone()).OfType<PropertyValue>().ToList();
+            result.Attributes = Attributes?.Select(x => x.Clone()).OfType<PropertyAttribute>().ToList();
+            result.DisplayNames = Values?.Select(x => x.Clone()).OfType<PropertyDisplayName>().ToList();
+            result.ValidationRules = Values?.Select(x => x.Clone()).OfType<PropertyValidationRule>().ToList();
+
+            return result;
         }
+        #endregion
+
+        #region Conditional JSON serialization for properties declared in base type
+        public override bool ShouldSerializeAuditableProperties => false;
         #endregion
     }
 }

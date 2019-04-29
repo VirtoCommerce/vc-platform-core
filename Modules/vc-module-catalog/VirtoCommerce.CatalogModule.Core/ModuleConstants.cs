@@ -27,6 +27,13 @@ namespace VirtoCommerce.CatalogModule.Core
         {
             public static class General
             {
+                public static SettingDescriptor ImageCategories = new SettingDescriptor
+                {
+                    Name = "Catalog.ImageCategories",
+                    GroupName = "Catalog|General",
+                    ValueType = SettingValueType.ShortText,
+                    IsDictionary = true
+                };
                 public static SettingDescriptor AssociationGroups = new SettingDescriptor
                 {
                     Name = "Catalog.AssociationGroups",
@@ -65,6 +72,7 @@ namespace VirtoCommerce.CatalogModule.Core
                 {
                     get
                     {
+                        yield return ImageCategories;
                         yield return AssociationGroups;
                         yield return EditorialReviewTypes;
                         yield return CodesInOutline;
@@ -118,6 +126,8 @@ namespace VirtoCommerce.CatalogModule.Core
                     }
                 }
             }
+
+
 
             public static IEnumerable<SettingDescriptor> AllSettings
             {

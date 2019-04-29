@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.PushNotifications;
 

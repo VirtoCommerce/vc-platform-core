@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
@@ -29,6 +28,15 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         /// </summary>
         [JsonIgnore]
         public Entity AssociatedObject { get; set; }
+
+        /// <summary>
+        /// Display name for associated object
+        /// </summary>
+        public virtual string AssociatedObjectName => (AssociatedObject is IHasName hasName) ? hasName.Name : null;
+        /// <summary>
+        /// Associated object image URL
+        /// </summary>
+        public virtual string AssociatedObjectImg => (AssociatedObject is IHasImages hasImages) ? hasImages.ImgSrc : null;
 
         public string[] Tags { get; set; }
 

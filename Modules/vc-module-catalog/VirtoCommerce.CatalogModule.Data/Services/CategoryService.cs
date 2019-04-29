@@ -98,7 +98,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
-                CategoryCacheRegion.ExpireRegion();
+                CatalogCacheRegion.ExpireRegion();
 
                 await _eventPublisher.Publish(new CategoryChangedEvent(changedEntries));
             }
@@ -117,7 +117,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 await repository.RemoveCategoriesAsync(categoryIds);
                 await repository.UnitOfWork.CommitAsync();
 
-                CategoryCacheRegion.ExpireRegion();
+                CatalogCacheRegion.ExpireRegion();
                 await _eventPublisher.Publish(new CategoryChangedEvent(changedEntries));
             }
         }
@@ -129,7 +129,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             var cacheKey = CacheKey.With(GetType(), "PreloadCategories", catalogId);
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
            {
-               cacheEntry.AddExpirationToken(CategoryCacheRegion.CreateChangeToken());
                cacheEntry.AddExpirationToken(CatalogCacheRegion.CreateChangeToken());
 
                CategoryEntity[] entities;
@@ -177,43 +176,31 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                 }
                 category.Level = category.Parents?.Count() ?? 0;
 
-                if (!category.Links.IsNullOrEmpty())
+                foreach (var link in category.Links ?? Array.Empty<CategoryLink>())
                 {
-                    foreach (var link in category.Links)
+                    link.Catalog = catalogsByIdDict.GetValueOrThrow(link.CatalogId, $"link catalog with key {link.CatalogId} doesn't exist");
+                    if (link.CategoryId != null)
                     {
-                        link.Catalog = catalogsByIdDict.GetValueOrThrow(link.CatalogId, $"link catalog with key {link.CatalogId} doesn't exist");
-                        if (link.CategoryId != null)
-                        {
-                            if (preloadedCategoriesMap.ContainsKey(link.CategoryId))
-                            {
-                                link.Category = preloadedCategoriesMap[link.CategoryId];
-                            }
-                        }
+                        link.Category = preloadedCategoriesMap[link.CategoryId];
                     }
                 }
 
-                if (!category.Properties.IsNullOrEmpty())
+                foreach (var property in category.Properties ?? Array.Empty<Property>())
                 {
-                    foreach (var property in category.Properties)
+                    property.Catalog = property.CatalogId != null ? catalogsByIdDict[property.CatalogId] : null;
+                    if (property.CategoryId != null)
                     {
-                        property.Catalog = catalogsByIdDict.GetValueOrThrow(property.CatalogId, $"property catalog with key {property.CatalogId} doesn't exist");
-                        if (property.CategoryId != null)
-                        {
-                            if (preloadedCategoriesMap.ContainsKey(property.CategoryId))
-                            {
-                                property.Category = preloadedCategoriesMap[property.CategoryId];
-                            }
-                        }
+                        property.Category = preloadedCategoriesMap[property.CategoryId];
                     }
                 }
-                //Resolve relative urls for category assets
-                if (category.Images != null)
+
+                //Resolve relative urls for all category assets
+                var allImages = category.GetFlatObjectsListWithInterface<IHasImages>().Where(x => x.Images != null).SelectMany(x => x.Images);
+                foreach (var image in allImages.Where(x => !string.IsNullOrEmpty(x.Url)))
                 {
-                    foreach (var image in category.Images.Where(x => !string.IsNullOrEmpty(x.Url)))
-                    {
-                        image.RelativeUrl = image.Url;
-                        image.Url = _blobUrlResolver.GetAbsoluteUrl(image.Url);
-                    }
+                    image.RelativeUrl = image.Url;
+                    image.Url = _blobUrlResolver.GetAbsoluteUrl(image.Url);
+
                 }
             }
         }

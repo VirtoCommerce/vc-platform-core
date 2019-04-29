@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -51,7 +49,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             return notifications;
         }
 
-        public virtual async Task<NotificationEntity[]> GetByTypesAsync(string[] types, string tenantId, string tenantType, string responseGroup)
+        public virtual async Task<NotificationEntity[]> GetByTypesAsync(string[] types, string tenantId, string tenantType, string responseGroup, bool isActive)
         {
             var query = Notifications;
 
@@ -65,6 +63,11 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             if (!string.IsNullOrEmpty(tenantType))
             {
                 query = query.Where(q => q.TenantType.Equals(tenantType));
+            }
+
+            if (isActive)
+            {
+                query = query.Where(q => q.IsActive);
             }
 
             query = query.Include(n => n.Templates);
