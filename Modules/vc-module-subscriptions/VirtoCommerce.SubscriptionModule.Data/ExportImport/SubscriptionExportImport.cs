@@ -4,8 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -26,14 +24,14 @@ namespace VirtoCommerce.SubscriptionModule.Data.ExportImport
         private readonly JsonSerializer _jsonSerializer;
 
         public SubscriptionExportImport(ISubscriptionService subscriptionService, ISubscriptionSearchService subscriptionSearchService,
-            IPaymentPlanSearchService planSearchService, IPaymentPlanService paymentPlanService, IOptions<MvcJsonOptions> jsonOptions)
+            IPaymentPlanSearchService planSearchService, IPaymentPlanService paymentPlanService, JsonSerializer jsonSerializer)
         {
             _subscriptionService = subscriptionService;
             _subscriptionSearchService = subscriptionSearchService;
             _paymentPlanSearchService = planSearchService;
             _paymentPlanService = paymentPlanService;
 
-            _jsonSerializer = JsonSerializer.Create(jsonOptions.Value.SerializerSettings);
+            _jsonSerializer = jsonSerializer;
         }
 
 
@@ -54,7 +52,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.ExportImport
 
                 await jsonTextWriter.WritePropertyNameAsync("PaymentPlans");
                 await jsonTextWriter.WriteStartArrayAsync();
-                for (int skip = 0; skip < paymentPlanSearchResponse.TotalCount; skip += BatchSize)
+                for (var skip = 0; skip < paymentPlanSearchResponse.TotalCount; skip += BatchSize)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
@@ -82,7 +80,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.ExportImport
 
                 await jsonTextWriter.WritePropertyNameAsync("Subscriptions");
                 await jsonTextWriter.WriteStartArrayAsync();
-                for (int skip = 0; skip < searchResponse.TotalCount; skip += BatchSize)
+                for (var skip = 0; skip < searchResponse.TotalCount; skip += BatchSize)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
@@ -127,7 +125,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.ExportImport
                             TryReadCollectionOf<PaymentPlan>(jsonReader, out var paymentPlans))
                         {
                             var totalCount = paymentPlans.Count;
-                            for (int skip = 0; skip < totalCount; skip += BatchSize)
+                            for (var skip = 0; skip < totalCount; skip += BatchSize)
                             {
                                 var currentPaymentPlans = paymentPlans.Skip(skip).Take(BatchSize).ToArray();
                                 await _paymentPlanService.SavePlansAsync(currentPaymentPlans);
@@ -140,7 +138,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.ExportImport
                                  TryReadCollectionOf<Subscription>(jsonReader, out var subscriptions))
                         {
                             var totalCount = subscriptions.Count;
-                            for (int skip = 0; skip < totalCount; skip += BatchSize)
+                            for (var skip = 0; skip < totalCount; skip += BatchSize)
                             {
                                 var currentSubscriptions = subscriptions.Skip(skip).Take(BatchSize).ToArray();
                                 await _subscriptionService.SaveSubscriptionsAsync(currentSubscriptions);

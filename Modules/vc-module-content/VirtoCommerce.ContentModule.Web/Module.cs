@@ -24,6 +24,7 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
+using VirtoCommerce.Platform.Data.Extensions;
 
 namespace VirtoCommerce.ContentModule.Web
 {
@@ -70,9 +71,6 @@ namespace VirtoCommerce.ContentModule.Web
             var dynamicPropertyRegistrar = appBuilder.ApplicationServices.GetRequiredService<IDynamicPropertyRegistrar>();
             dynamicPropertyRegistrar.RegisterType<FrontMatterHeaders>();
 
-            var dynamicPropertyService = appBuilder.ApplicationServices.GetRequiredService<IDynamicPropertyService>();
-            dynamicPropertyService.SaveDynamicPropertiesAsync(DynamicProperties.AllDynamicProperties.ToArray()).GetAwaiter().GetResult();
-
             //Register module permissions
             var permissionsProvider = appBuilder.ApplicationServices.GetRequiredService<IPermissionsRegistrar>();
             permissionsProvider.RegisterPermissions(ContentConstants.Security.Permissions.AllPermissions.Select(x =>
@@ -89,24 +87,28 @@ namespace VirtoCommerce.ContentModule.Web
             {
                 using (var menuDbContext = serviceScope.ServiceProvider.GetRequiredService<MenuDbContext>())
                 {
+                    menuDbContext.Database.MigrateIfNotApplied(MigrationName.GetUpdateV2MigrationName(ModuleInfo.Id));
                     menuDbContext.Database.EnsureCreated();
                     menuDbContext.Database.Migrate();
                 }
             }
+
+            var dynamicPropertyService = appBuilder.ApplicationServices.GetRequiredService<IDynamicPropertyService>();
+            dynamicPropertyService.SaveDynamicPropertiesAsync(DynamicProperties.AllDynamicProperties.ToArray()).GetAwaiter().GetResult();
         }
 
         public void Uninstall()
         {
         }
 
-        public Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
+        public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
-            return _appBuilder.ApplicationServices.GetRequiredService<ContentExportImport>().DoExportAsync(outStream, options, progressCallback, cancellationToken);
+            await _appBuilder.ApplicationServices.GetRequiredService<ContentExportImport>().DoExportAsync(outStream, options, progressCallback, cancellationToken);
         }
 
-        public Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
+        public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
-            return _appBuilder.ApplicationServices.GetRequiredService<ContentExportImport>().DoImportAsync(inputStream, options, progressCallback, cancellationToken);
+            await _appBuilder.ApplicationServices.GetRequiredService<ContentExportImport>().DoImportAsync(inputStream, options, progressCallback, cancellationToken);
         }
 
     }

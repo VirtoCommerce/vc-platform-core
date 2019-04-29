@@ -39,7 +39,7 @@ namespace VirtoCommerce.PricingModule.Test
 
         private PricingExportImport GetImportExportProcessor(IPricingService pricingService, ISettingsManager settingsManager)
         {
-            return new PricingExportImport(pricingService, GetPricingSearchService(), settingsManager, GetMvcJsonOptions());
+            return new PricingExportImport(pricingService, GetPricingSearchService(), settingsManager, JsonSerializer.Create(GetMvcJsonOptions().Value.SerializerSettings));
         }
 
         private Mock<IPricingService> GetPricingService()

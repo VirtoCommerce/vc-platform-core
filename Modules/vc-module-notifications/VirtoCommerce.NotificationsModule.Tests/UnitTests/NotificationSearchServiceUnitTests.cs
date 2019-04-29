@@ -83,7 +83,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                     nameof(RegistrationEmailNotification),
                     nameof(InvoiceEmailNotification),
                     nameof(OrderSentEmailNotification)
-                }, null, null, responseGroup))
+                }, null, null, responseGroup, true))
                 .ReturnsAsync(new NotificationEntity[] { new EmailNotificationEntity { IsActive = true, Type = nameof(OrderSentEmailNotification) } });
 
             //Act
