@@ -34,13 +34,28 @@ function Compress-Module
 	
 	Set-Location ($InputDir)
 	
+	$tmp = [Guid]::NewGuid()
+	
+	[xml]$xml = Get-Content $PSScriptRoot\module.manifest
+	$VCModuleId = (Select-Xml -Xml $xml -XPath "//module/id" | Select-Object -ExpandProperty Node).InnerText
+	$VCModuleVersion = (Select-Xml -Xml $xml -XPath "//module/version" | Select-Object -ExpandProperty Node).InnerText
+	$VCModuleZip = "$VCModuleId" + "_" + "$VCModuleVersion.zip"
+	
 	npm i
 	
 	npm run webpack:build
 	
-	Copy-Item "$InputDir\dist" -Destination "$OutputDir\dist" -Recurse
+	Copy-Item "$InputDir\dist" -Destination "$OutputDir\$tmp\dist" -Recurse
 	
-	dotnet publish -c Release -o "$OutputDir" -f netcoreapp2.2 --self-contained false
+	Copy-Item "$InputDir\Localizations" -Destination "$OutputDir\$tmp\Localizations" -Recurse
+	
+	Copy-Item "$InputDir\module.manifest" -Destination "$OutputDir\$tmp"
+	
+	dotnet publish -c Release -o "$OutputDir\$tmp\bin" -f netcoreapp2.2 --self-contained false
+	
+	Compress-Archive -Path "$OutputDir\$tmp\*" -DestinationPath "$OutputDir\$VCModuleZip"
+	
+	Remove-Item "$OutputDir\$tmp" -Recurse
 }
 
 Export-ModuleMember -Function Compress-Module
