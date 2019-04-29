@@ -1,11 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -23,17 +19,17 @@ namespace VirtoCommerce.SitemapsModule.Data.ExportImport
         private const int _batchSize = 50;
         private readonly JsonSerializer _jsonSerializer;
 
-        public SitemapExportImport(ISitemapService sitemapService, ISitemapItemService sitemapItemService,
-            IOptions<MvcJsonOptions> mvcJsonOptions)
+        public SitemapExportImport(ISitemapService sitemapService, ISitemapItemService sitemapItemService, JsonSerializer jsonSerializer)
         {
             _sitemapService = sitemapService;
             _sitemapItemService = sitemapItemService;
-            _jsonSerializer = JsonSerializer.Create(mvcJsonOptions.Value.SerializerSettings);
+            _jsonSerializer = jsonSerializer;
         }
 
         public async Task DoExportAsync(Stream outStream, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
+
             var progressInfo = new ExportImportProgressInfo { Description = "loading data..." };
             progressCallback(progressInfo);
 

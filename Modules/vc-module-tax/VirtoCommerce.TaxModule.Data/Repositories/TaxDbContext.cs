@@ -15,6 +15,7 @@ namespace VirtoCommerce.TaxModule.Data.Repositories
             #region StoreTaxProvider
             modelBuilder.Entity<StoreTaxProviderEntity>().ToTable("StoreTaxProvider").HasKey(x => x.Id);
             modelBuilder.Entity<StoreTaxProviderEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<StoreTaxProviderEntity>().Property(x => x.StoreId).HasMaxLength(128);
 
             modelBuilder.Entity<StoreTaxProviderEntity>().HasIndex(x => new { x.TypeName, x.StoreId })
                       .HasName("IX_StoreTaxProviderEntity_TypeName_StoreId")

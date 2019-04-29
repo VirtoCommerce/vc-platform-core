@@ -1,5 +1,4 @@
-angular.module('virtoCommerce.coreModule.common')
-.directive('vcUkHtmleditor', [function () {
+angular.module('virtoCommerce.coreModule.common').directive('vcUkHtmleditor', [function () {
     return {
         restrict: 'A',
         require: 'ngModel',
@@ -8,8 +7,12 @@ angular.module('virtoCommerce.coreModule.common')
             fileUploader: '='
         },
         link: function (scope, element, attributes) {
-			var htmlEditor = UIkit.htmleditor(element, { mode: 'split', maxsplitsize: 1000, markdown: true });
+            var htmlEditor = UIkit.htmleditor(element, { mode: 'split', maxsplitsize: 1000, markdown: true, enablescripts: false });
             var codeMirror = htmlEditor.editor;
+            //Besides inline scripts need to also eliminate inline event handlers on preview
+            htmlEditor.on('render', function () {
+                htmlEditor.replaceInPreview(/(?:<[^>]+\s)((on\S+)=["']?((?:.(?!["']?\s+(?:\S+)=|[>"']))+.)["']?)/ig, eventReplacer);
+            });
             htmlEditor.addButtons({
                 headerFirst: { label: 'H1', title: 'First level header' },
                 headerSecond: { label: 'H2', title: 'Second level header' }
@@ -81,6 +84,12 @@ angular.module('virtoCommerce.coreModule.common')
                 addActions(htmlEditor, codeMirror.getMode().name);
             });
 
+            function eventReplacer(match) {
+                if (match && match.matches && match.matches.length > 1) {
+                    return match.matches[0].replace(match.matches[1], '');
+                }
+            }
+
             function getCurrentEditorLine(editor, event) {
                 return editor.lineAtHeight(event.originalEvent.pageY);
             }
@@ -91,7 +100,7 @@ angular.module('virtoCommerce.coreModule.common')
             }
 
             function resetEditorLinesStyle(editor) {
-                for (var i = 0; i < editor.lineCount() ; i++) {
+                for (var i = 0; i < editor.lineCount(); i++) {
                     editor.removeLineClass(i, null, 'CodeMirror-activeline-background');
                 }
             }
@@ -106,9 +115,11 @@ angular.module('virtoCommerce.coreModule.common')
 
             function addActions(htmlEditor, editorMode) {
                 if (editorMode === 'gfm') {
+                    htmlEditor.enableMarkdown();
                     addAction(htmlEditor, 'headerFirst', '# $1');
                     addAction(htmlEditor, 'headerSecond', '## $1');
                 } else if (editorMode === 'htmlmixed') {
+                    htmlEditor.disableMarkdown();
                     addAction(htmlEditor, 'headerFirst', '<h1>$1</h1>');
                     addAction(htmlEditor, 'headerSecond', '<h2>$1</h2>');
                 }

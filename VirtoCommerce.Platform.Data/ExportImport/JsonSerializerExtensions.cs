@@ -11,7 +11,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
         public static async Task SerializeJsonArrayWithPagingAsync<T>(this JsonTextWriter writer, JsonSerializer serializer, int pageSize, Func<int, int, Task<GenericSearchResult<T>>> pagedDataLoader, Action<int, int> progressCallback, ICancellationToken cancellationToken)
         {
             //Evaluate total items counts
-            var result = await pagedDataLoader(0, 0);
+            var result = await pagedDataLoader(0, 1);
 
             var totalCount = result.TotalCount;
 

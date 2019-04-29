@@ -23,9 +23,4 @@
 
     <assemblyFile>VirtoCommerce.NotificationsSampleModule.Web.dll</assemblyFile>
     <moduleType>VirtoCommerce.NotificationsSampleModule.Web.Module, VirtoCommerce.NotificationsSample.Web</moduleType>
-
-    <styles virtualPath="Content"/>
-    
-    <scripts virtualPath="Scripts"/>
-    
 </module>

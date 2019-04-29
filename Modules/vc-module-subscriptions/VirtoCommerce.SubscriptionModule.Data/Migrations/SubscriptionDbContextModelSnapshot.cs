@@ -15,14 +15,15 @@ namespace VirtoCommerce.SubscriptionModule.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.0-rtm-30799")
+                .HasAnnotation("ProductVersion", "2.2.3-servicing-35854")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("VirtoCommerce.SubscriptionModule.Data.Model.PaymentPlanEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(64);
@@ -52,7 +53,8 @@ namespace VirtoCommerce.SubscriptionModule.Data.Migrations
             modelBuilder.Entity("VirtoCommerce.SubscriptionModule.Data.Model.SubscriptionEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
 
                     b.Property<decimal>("Balance")
                         .HasColumnType("Money");

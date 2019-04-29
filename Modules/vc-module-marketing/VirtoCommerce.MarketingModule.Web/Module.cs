@@ -33,6 +33,7 @@ using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Data.Extensions;
 
 namespace VirtoCommerce.MarketingModule.Web
 {
@@ -114,6 +115,7 @@ namespace VirtoCommerce.MarketingModule.Web
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
                 var dbContext = serviceScope.ServiceProvider.GetRequiredService<MarketingDbContext>();
+                dbContext.Database.MigrateIfNotApplied(MigrationName.GetUpdateV2MigrationName(ModuleInfo.Id));
                 dbContext.Database.EnsureCreated();
                 dbContext.Database.Migrate();
             }
@@ -208,17 +210,18 @@ namespace VirtoCommerce.MarketingModule.Web
         {
         }
 
-        public Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
+        public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
             ICancellationToken cancellationToken)
         {
-            return _appBuilder.ApplicationServices.GetRequiredService<MarketingExportImport>().DoExportAsync(outStream, progressCallback, cancellationToken);
+            await _appBuilder.ApplicationServices.GetRequiredService<MarketingExportImport>().DoExportAsync(outStream, progressCallback, cancellationToken);
         }
 
-        public Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
+        public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
             ICancellationToken cancellationToken)
         {
-            return _appBuilder.ApplicationServices.GetRequiredService<MarketingExportImport>().DoImportAsync(inputStream, progressCallback, cancellationToken);
+            await _appBuilder.ApplicationServices.GetRequiredService<MarketingExportImport>().DoImportAsync(inputStream, progressCallback, cancellationToken);
         }
+
 
         private List<IConditionTree> GetConditionsAndRewards()
         {

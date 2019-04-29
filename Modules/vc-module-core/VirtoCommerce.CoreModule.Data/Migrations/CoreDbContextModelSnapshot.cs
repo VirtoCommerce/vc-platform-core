@@ -15,11 +15,11 @@ namespace VirtoCommerce.CoreModule.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.0-rtm-30799")
+                .HasAnnotation("ProductVersion", "2.2.3-servicing-35854")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("VirtoCommerce.CoreModule.Data.Model.CurrencyEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.CoreModule.Data.Currency.CurrencyEntity", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
@@ -62,7 +62,22 @@ namespace VirtoCommerce.CoreModule.Data.Migrations
                     b.ToTable("Currency");
                 });
 
-            modelBuilder.Entity("VirtoCommerce.CoreModule.Data.Model.PackageTypeEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.CoreModule.Data.Model.SequenceEntity", b =>
+                {
+                    b.Property<string>("ObjectType")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(256);
+
+                    b.Property<DateTime?>("ModifiedDate");
+
+                    b.Property<int>("Value");
+
+                    b.HasKey("ObjectType");
+
+                    b.ToTable("Sequence");
+                });
+
+            modelBuilder.Entity("VirtoCommerce.CoreModule.Data.Package.PackageTypeEntity", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
@@ -86,7 +101,7 @@ namespace VirtoCommerce.CoreModule.Data.Migrations
                     b.ToTable("PackageType");
                 });
 
-            modelBuilder.Entity("VirtoCommerce.CoreModule.Data.Model.SeoUrlKeywordEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.CoreModule.Data.Seo.SeoUrlKeywordEntity", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
@@ -143,21 +158,6 @@ namespace VirtoCommerce.CoreModule.Data.Migrations
                         .HasName("IX_ObjectIdAndObjectType");
 
                     b.ToTable("SeoUrlKeyword");
-                });
-
-            modelBuilder.Entity("VirtoCommerce.CoreModule.Data.Model.SequenceEntity", b =>
-                {
-                    b.Property<string>("ObjectType")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(256);
-
-                    b.Property<DateTime?>("ModifiedDate");
-
-                    b.Property<int>("Value");
-
-                    b.HasKey("ObjectType");
-
-                    b.ToTable("Sequence");
                 });
 #pragma warning restore 612, 618
         }

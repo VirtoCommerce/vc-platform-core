@@ -32,9 +32,9 @@
         "node-bourbon": "^1.2.3",
         "node-sass": "^4.11.0",
         "sass-loader": "^7.1.0",
-        "webpack": "^4.29.6",
-        "webpack-cli": "^3.2.1",
-        "webpack-dev-middleware": "^3.4.0",
+        "webpack": "^4.30.0",
+        "webpack-cli": "^3.3.0",
+        "webpack-dev-middleware": "^3.6.2",
         "webpack-hot-middleware": "^2.24.3"
     },
     "dependencies": {
@@ -66,7 +66,7 @@
         "angular-ui-uploader": "^1.4.1",
         "angular-ui-validate": "^1.2.3",
         "angularjs-scroll-glue": "^2.2.0",
-        "codemirror": "4.13.0",
+        "codemirror": "^5.45.0",
         "font-awesome": "^4.7.0",
         "jquery": "^2.1.4",
         "marked": "0.3.6",
@@ -82,6 +82,7 @@
         "uikit": "2.27.4",
         "underscore": "^1.9.1",
         "webpack-jquery-ui": "^2.0.1",
-        "webpack-modernizr-loader": "^4.0.1"
+        "webpack-modernizr-loader": "^4.0.1",
+        "yamljs": "0.3.0"
     }
 }

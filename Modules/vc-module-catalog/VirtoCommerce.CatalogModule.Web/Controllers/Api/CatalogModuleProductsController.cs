@@ -138,10 +138,14 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
             {
                 result.TryInheritFrom(parent);
             }
-            foreach (var property in result.Properties)
+
+            if (result.Properties != null)
             {
-                property.Values = new List<PropertyValue>();
-                property.IsReadOnly = property.Type != PropertyType.Product && property.Type != PropertyType.Variation;
+                foreach (var property in result.Properties)
+                {
+                    property.Values = new List<PropertyValue>();
+                    property.IsReadOnly = property.Type != PropertyType.Product && property.Type != PropertyType.Variation;
+                }
             }
             result.Code = _skuGenerator.GenerateSku(result);
 
