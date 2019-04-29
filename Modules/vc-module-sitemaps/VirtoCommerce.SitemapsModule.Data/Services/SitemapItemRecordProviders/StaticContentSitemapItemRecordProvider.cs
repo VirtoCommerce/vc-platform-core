@@ -19,133 +19,102 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
 {
     public class StaticContentSitemapItemRecordProvider : SitemapItemRecordProviderBase, ISitemapItemRecordProvider
     {
-        public StaticContentSitemapItemRecordProvider(ISettingsManager settingsManager, ISitemapUrlBuilder urlBuilider)
-            : base(settingsManager, urlBuilider)
-        {
-        }
-
-        private readonly Func<string, IBlobContentStorageProvider> _contentStorageProviderFactory;
+        private readonly IBlobContentStorageProviderFactory _blobStorageProviderFactory;
         private static readonly Regex _headerRegExp = new Regex(@"(?s:^---(.*?)---)");
 
-        public StaticContentSitemapItemRecordProvider(
-            ISitemapUrlBuilder urlBuilder,
-            ISettingsManager settingsManager,
-            Func<string, IBlobContentStorageProvider> contentStorageProviderFactory)
-            : base(settingsManager, urlBuilder)
+        public StaticContentSitemapItemRecordProvider(ISettingsManager settingsManager, ISitemapUrlBuilder urlBuilider, IBlobContentStorageProviderFactory blobStorageProviderFactory)
+            : base(settingsManager, urlBuilider)
         {
-            _contentStorageProviderFactory = contentStorageProviderFactory;
+            _blobStorageProviderFactory = blobStorageProviderFactory;
         }
 
-        public virtual async Task LoadSitemapItemRecordsAsync(Store store, Sitemap sitemap,
-            string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
+        #region ISitemapItemRecordProvider members
+        public virtual async Task LoadSitemapItemRecordsAsync(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
         {
+            var progressInfo = new ExportImportProgressInfo();
+
             var contentBasePath = $"Pages/{sitemap.StoreId}";
-            var storageProvider = _contentStorageProviderFactory(contentBasePath);
+            var storageProvider = _blobStorageProviderFactory.CreateProvider(contentBasePath);
             var options = new SitemapItemOptions();
-            var staticContentSitemapItems = GetStaticContentSitemapItems(sitemap);
+            var staticContentSitemapItems = sitemap.Items.Where(si => !string.IsNullOrEmpty(si.ObjectType) &&
+                                                                      (si.ObjectType.EqualsInvariant(SitemapItemTypes.ContentItem) ||
+                                                                       si.ObjectType.EqualsInvariant(SitemapItemTypes.Folder)))
+                                                                       .ToList();
             var totalCount = staticContentSitemapItems.Count;
-            var progressInfo = GetProgressInfo(progressCallback, totalCount);
-            var acceptedFilenameExtensions = GetAcceptedFilenameExtensions();
-
-            progressInfo.Start();
-
-            foreach (var sitemapItem in staticContentSitemapItems)
+            if (totalCount > 0)
             {
-                var urls = new List<string>();
-                if (sitemapItem.ObjectType.EqualsInvariant(SitemapItemTypes.Folder))
+                var processedCount = 0;
+
+                var acceptedFilenameExtensions = SettingsManager.GetValue("Sitemap.AcceptedFilenameExtensions", ".md,.html")
+                    .Split(',')
+                    .Select(i => i.Trim())
+                    .Where(i => !string.IsNullOrEmpty(i))
+                    .ToList();
+
+                progressInfo.Description = $"Content: Starting records generation  for {totalCount} pages";
+                progressCallback?.Invoke(progressInfo);
+
+                foreach (var sitemapItem in staticContentSitemapItems)
                 {
-                    var folderUrls = await GetSiteMapFolderUrls(storageProvider, acceptedFilenameExtensions, sitemapItem);
-                    urls.AddRange(folderUrls);
-                }
-                else if (sitemapItem.ObjectType.EqualsInvariant(SitemapItemTypes.ContentItem))
-                {
-                    var item = await storageProvider.GetBlobInfoAsync(sitemapItem.UrlTemplate);
-                    if (item != null)
+                    var urls = new List<string>();
+                    if (sitemapItem.ObjectType.EqualsInvariant(SitemapItemTypes.Folder))
                     {
-                        urls.Add(item.RelativeUrl);
+                        var searchResult = await storageProvider.SearchAsync(sitemapItem.UrlTemplate, null);
+                        var itemUrls = await GetItemUrls(storageProvider, searchResult);
+                        foreach (var itemUrl in itemUrls)
+                        {
+                            var itemExtension = Path.GetExtension(itemUrl);
+                            if (!acceptedFilenameExtensions.Any() ||
+                                string.IsNullOrEmpty(itemExtension) ||
+                                acceptedFilenameExtensions.Contains(itemExtension, StringComparer.OrdinalIgnoreCase))
+                            {
+                                urls.Add(itemUrl);
+                            }
+                        }
+                    }
+                    else if (sitemapItem.ObjectType.EqualsInvariant(SitemapItemTypes.ContentItem))
+                    {
+                        var item = await storageProvider.GetBlobInfoAsync(sitemapItem.UrlTemplate);
+                        if (item != null)
+                        {
+                            urls.Add(item.RelativeUrl);
+                        }
+                    }
+                    totalCount = urls.Count;
+
+                    foreach (var url in urls)
+                    {
+                        using (var stream = storageProvider.OpenRead(url))
+                        {
+                            var content = stream.ReadToString();
+                            var yamlHeader = ReadYamlHeader(content);
+                            yamlHeader.TryGetValue("permalink", out var permalinks);
+                            var frontMatterPermalink = new FrontMatterPermalink(url.Replace(".md", ""));
+                            if (permalinks != null)
+                            {
+                                frontMatterPermalink = new FrontMatterPermalink(permalinks.FirstOrDefault());
+                            }
+                            sitemapItem.ItemsRecords.AddRange(GetSitemapItemRecords(store, options, frontMatterPermalink.ToUrl().TrimStart('/'), baseUrl));
+
+                            processedCount++;
+                            progressInfo.Description = $"Content: Have been generated records for {processedCount} of {totalCount} pages";
+                            progressCallback?.Invoke(progressInfo);
+                        }
                     }
                 }
-
-                var sitemapItemsRecords = GetSitemapItemsRecords(store, baseUrl, storageProvider, options, urls);
-                sitemapItem.ItemsRecords.AddRange(sitemapItemsRecords);
-
-                progressInfo.Next();
             }
-
-            progressInfo.End();
         }
+        #endregion
 
-        private IEnumerable<SitemapItemRecord> GetSitemapItemsRecords(Store store, string baseUrl,
-            IBlobContentStorageProvider storageProvider, SitemapItemOptions options, IEnumerable<string> urls)
-        {
-            var result = new List<SitemapItemRecord>();
-            foreach (var url in urls)
-            {
-                using (var stream = storageProvider.OpenRead(url))
-                {
-                    var content = stream.ReadToString();
-                    var yamlHeader = ReadYamlHeader(content);
-                    yamlHeader.TryGetValue("permalink", out var permalinks);
-                    var frontMatterPermalink = new FrontMatterPermalink(url.Replace(".md", ""));
-                    if (permalinks != null)
-                    {
-                        frontMatterPermalink = new FrontMatterPermalink(permalinks.FirstOrDefault());
-                    }
-                    result.AddRange(GetSitemapItemRecords(store, options, frontMatterPermalink.ToUrl().TrimStart('/'), baseUrl));
-                }
-            }
-
-            return result;
-        }
-
-        private List<string> GetAcceptedFilenameExtensions()
-        {
-            return SettingsManager.GetValue("Sitemap.AcceptedFilenameExtensions", ".md,.html")
-                .Split(',')
-                .Select(i => i.Trim())
-                .Where(i => !string.IsNullOrEmpty(i))
-                .ToList();
-        }
-
-        private List<SitemapItem> GetStaticContentSitemapItems(Sitemap sitemap)
-        {
-            return sitemap.Items.Where(si => !string.IsNullOrEmpty(si.ObjectType) &&
-                                            (si.ObjectType.EqualsInvariant(SitemapItemTypes.ContentItem) ||
-                                            si.ObjectType.EqualsInvariant(SitemapItemTypes.Folder)))
-                                 .ToList();
-        }
-
-        private async Task<IEnumerable<string>> GetSiteMapFolderUrls(IBlobContentStorageProvider storageProvider,
-            ICollection<string> acceptedFilenameExtensions, SitemapItem sitemapItem)
-        {
-            var result = new List<string>();
-            var searchResult = await storageProvider.SearchAsync(sitemapItem.UrlTemplate, null);
-            var itemUrls = await GetItemUrls(storageProvider, searchResult);
-
-            foreach (var itemUrl in itemUrls)
-            {
-                var itemExtension = Path.GetExtension(itemUrl);
-                if (!acceptedFilenameExtensions.Any() ||
-                    string.IsNullOrEmpty(itemExtension) ||
-                    acceptedFilenameExtensions.Contains(itemExtension, StringComparer.OrdinalIgnoreCase))
-                {
-                    result.Add(itemUrl);
-                }
-            }
-
-            return result;
-        }
-
-        private async Task<ICollection<string>> GetItemUrls(IBlobContentStorageProvider storageProvider, GenericSearchResult<BlobEntry> searchResult)
+        private async static Task<ICollection<string>> GetItemUrls(IBlobContentStorageProvider storageProvider, GenericSearchResult<BlobEntry> searchResult)
         {
             var urls = new List<string>();
 
-            foreach (var item in searchResult.Results.Where(x => x.Type.EqualsInvariant("blob")))
+            foreach (var item in searchResult.Results.OfType<BlobInfo>())
             {
                 urls.Add(item.RelativeUrl);
             }
-
-            foreach (var folder in searchResult.Results.Where(x => x.Type.EqualsInvariant("folder")))
+            foreach (var folder in searchResult.Results.OfType<BlobFolder>())
             {
                 var folderSearchResult = await storageProvider.SearchAsync(folder.RelativeUrl, null);
                 urls.AddRange(await GetItemUrls(storageProvider, folderSearchResult));
@@ -154,7 +123,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
             return urls;
         }
 
-        private IDictionary<string, IEnumerable<string>> ReadYamlHeader(string text)
+        private static IDictionary<string, IEnumerable<string>> ReadYamlHeader(string text)
         {
             var retVal = new Dictionary<string, IEnumerable<string>>();
             var headerMatches = _headerRegExp.Matches(text);
@@ -173,7 +142,8 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
                 {
                     foreach (var entry in collection.Children)
                     {
-                        if (entry.Key is YamlScalarNode node)
+                        var node = entry.Key as YamlScalarNode;
+                        if (node != null)
                         {
                             retVal.Add(node.Value, GetYamlNodeValues(entry.Value));
                         }
@@ -183,7 +153,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
             return retVal;
         }
 
-        private IEnumerable<string> GetYamlNodeValues(YamlNode value)
+        private static IEnumerable<string> GetYamlNodeValues(YamlNode value)
         {
             var retVal = new List<string>();
 
@@ -197,18 +167,6 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
             }
 
             return retVal;
-        }
-
-        private SitemapProgressInfo GetProgressInfo(Action<ExportImportProgressInfo> progressCallback, long totalCount)
-        {
-            return new SitemapProgressInfo
-            {
-                StartDescriptionTemplate = "Content: start generating records for {0} pages",
-                EndDescriptionTemplate = "Content: {0} pages records generated",
-                ProgressDescriptionTemplate = "Content: generated records for {0} of {1} pages",
-                ProgressCallback = progressCallback,
-                TotalCount = totalCount
-            };
         }
     }
 }

@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Moq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.SitemapsModule.Core.Models;
+using VirtoCommerce.SitemapsModule.Core.Models.Search;
 using VirtoCommerce.SitemapsModule.Core.Services;
 using VirtoCommerce.SitemapsModule.Data.ExportImport;
 using Xunit;
@@ -228,6 +228,8 @@ namespace VirtoCommerce.SitemapsModule.Test
 
         private readonly Mock<ISitemapService> _sitemapService;
         private readonly Mock<ISitemapItemService> _sitemapItemService;
+        private readonly Mock<ISitemapSearchService> _sitemapSearchService;
+        private readonly Mock<ISitemapItemSearchService> _sitemapItemSearchService;
         private readonly Mock<ICancellationToken> _cancellationToken;
         private readonly SitemapExportImport _sitemapExportImport;
 
@@ -235,6 +237,8 @@ namespace VirtoCommerce.SitemapsModule.Test
         {
             _sitemapService = new Mock<ISitemapService>();
             _sitemapItemService = new Mock<ISitemapItemService>();
+            _sitemapSearchService = new Mock<ISitemapSearchService>();
+            _sitemapItemSearchService = new Mock<ISitemapItemSearchService>();
             _cancellationToken = new Mock<ICancellationToken>();
 
             InitSitemapService();
@@ -250,7 +254,7 @@ namespace VirtoCommerce.SitemapsModule.Test
                 }
             };
 
-            _sitemapExportImport = new SitemapExportImport(_sitemapService.Object, _sitemapItemService.Object, JsonSerializer.Create(mvcJsonOptions.SerializerSettings));
+            _sitemapExportImport = new SitemapExportImport(_sitemapService.Object, _sitemapItemService.Object, _sitemapSearchService.Object, _sitemapItemSearchService.Object, JsonSerializer.Create(mvcJsonOptions.SerializerSettings));
         }
 
         private static Stream ReadEmbeddedResource(string filePath)
@@ -323,25 +327,25 @@ namespace VirtoCommerce.SitemapsModule.Test
 
         private void InitSitemapService()
         {
-            var sitemapSearchResult = new GenericSearchResult<Sitemap>
+            var sitemapSearchResult = new SitemapSearchResult
             {
                 TotalCount = TestSitemaps.Count,
                 Results = TestSitemaps
             };
 
-            _sitemapService.Setup(service => service.SearchAsync(It.IsAny<SitemapSearchCriteria>()))
+            _sitemapSearchService.Setup(service => service.SearchAsync(It.IsAny<SitemapSearchCriteria>()))
                 .ReturnsAsync(sitemapSearchResult);
         }
 
         private void InitSitemapItemService()
         {
-            var sitemapItemsSearchResult = new GenericSearchResult<SitemapItem>
+            var sitemapItemsSearchResult = new SitemapItemsSearchResult
             {
                 TotalCount = TestSitemapItems.Count,
                 Results = TestSitemapItems
             };
 
-            _sitemapItemService.Setup(service => service.SearchAsync(It.IsAny<SitemapItemSearchCriteria>()))
+            _sitemapItemSearchService.Setup(service => service.SearchAsync(It.IsAny<SitemapItemSearchCriteria>()))
                 .ReturnsAsync(sitemapItemsSearchResult);
         }
     }

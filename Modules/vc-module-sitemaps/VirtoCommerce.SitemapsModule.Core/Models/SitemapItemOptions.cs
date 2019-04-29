@@ -1,15 +1,8 @@
-﻿namespace VirtoCommerce.SitemapsModule.Core.Models
+namespace VirtoCommerce.SitemapsModule.Core.Models
 {
     public class SitemapItemOptions
     {
-        public SitemapItemOptions()
-        {
-            Priority = .5M;
-            UpdateFrequency = Models.UpdateFrequency.Weekly;
-        }
-
-        public string UpdateFrequency { get; set; }
-
-        public decimal Priority { get; set; }
+        public string UpdateFrequency { get; set; } = Models.UpdateFrequency.Weekly;
+        public decimal Priority { get; set; } = .5M;
     }
 }

@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SitemapsModule.Core.Models;
 using VirtoCommerce.SitemapsModule.Core.Services;
-using VirtoCommerce.SitemapsModule.Data.Caching;
 using VirtoCommerce.SitemapsModule.Data.Models;
 using VirtoCommerce.SitemapsModule.Data.Repositories;
 
@@ -16,79 +14,28 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
 {
     public class SitemapItemService : ISitemapItemService
     {
+        private readonly Func<ISitemapRepository> _repositoryFactory;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
+
         public SitemapItemService(Func<ISitemapRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache)
         {
-            RepositoryFactory = repositoryFactory;
-            PlatformMemoryCache = platformMemoryCache;
+            _repositoryFactory = repositoryFactory;
+            _platformMemoryCache = platformMemoryCache;
         }
 
-        protected Func<ISitemapRepository> RepositoryFactory { get; }
-        protected IPlatformMemoryCache PlatformMemoryCache { get; }
 
-        public virtual async Task<GenericSearchResult<SitemapItem>> SearchAsync(SitemapItemSearchCriteria criteria)
+        public async Task<IEnumerable<SitemapItem>> GetByIdsAsync(string[] itemIds, string responseGroup = null)
         {
-            if (criteria == null)
+            if (itemIds == null)
             {
-                throw new ArgumentNullException(nameof(criteria));
+                throw new ArgumentNullException(nameof(itemIds));
             }
 
-            var cacheKey = CacheKey.With(GetType(), nameof(SearchAsync), criteria.GetCacheKey());
-            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
+            using (var repository = _repositoryFactory())
             {
-                cacheEntry.AddExpirationToken(SitemapItemSearchCacheRegion.CreateChangeToken());
-
-                using (var repository = RepositoryFactory())
-                {
-                    var searchResponse = new GenericSearchResult<SitemapItem>();
-                    var query = repository.SitemapItems;
-                    if (!string.IsNullOrEmpty(criteria.SitemapId))
-                    {
-                        query = query.Where(x => x.SitemapId == criteria.SitemapId);
-                    }
-
-                    if (criteria.ObjectTypes != null)
-                    {
-                        query = query.Where(i =>
-                            criteria.ObjectTypes.Contains(i.ObjectType, StringComparer.OrdinalIgnoreCase));
-                    }
-
-                    if (!string.IsNullOrEmpty(criteria.ObjectType))
-                    {
-                        query = query.Where(i => i.ObjectType.EqualsInvariant(criteria.ObjectType));
-                    }
-
-                    var sortInfos = criteria.SortInfos;
-                    if (sortInfos.IsNullOrEmpty())
-                    {
-                        sortInfos = new[]
-                        {
-                            new SortInfo
-                            {
-                                SortColumn = ReflectionUtility.GetPropertyName<SitemapItemEntity>(x => x.CreatedDate),
-                                SortDirection = SortDirection.Descending
-                            }
-                        };
-                    }
-
-                    query = query.OrderBySortInfos(sortInfos);
-                    searchResponse.TotalCount = await query.CountAsync();
-
-                    if (criteria.Take > 0)
-                    {
-                        var matchingSitemapItems = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                        foreach (var sitemapItemEntity in matchingSitemapItems)
-                        {
-                            var sitemapItem = AbstractTypeFactory<SitemapItem>.TryCreateInstance();
-                            if (sitemapItem != null)
-                            {
-                                searchResponse.Results.Add(sitemapItemEntity.ToModel(sitemapItem));
-                            }
-                        }
-                    }
-
-                    return searchResponse;
-                }
-            });
+                var sitemapEntities = await repository.GetSitemapItemsAsync(itemIds);
+                return sitemapEntities.Select(x => x.ToModel(AbstractTypeFactory<SitemapItem>.TryCreateInstance())).ToArray();
+            }
         }
 
         public virtual async Task SaveChangesAsync(SitemapItem[] sitemapItems)
@@ -98,7 +45,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                 throw new ArgumentNullException(nameof(sitemapItems));
             }
 
-            using (var repository = RepositoryFactory())
+            using (var repository = _repositoryFactory())
             {
                 var pkMap = new PrimaryKeyResolvingMap();
                 var itemsIds = sitemapItems.Select(x => x.Id).Where(x => x != null).Distinct().ToArray();
@@ -120,8 +67,6 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
             }
-
-            ClearCacheFor(sitemapItems.Select(x => x.SitemapId).Distinct());
         }
 
         public virtual async Task RemoveAsync(string[] itemIds)
@@ -131,7 +76,7 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                 throw new ArgumentNullException(nameof(itemIds));
             }
 
-            using (var repository = RepositoryFactory())
+            using (var repository = _repositoryFactory())
             {
                 var sitemapItemEntities = await repository.SitemapItems.Where(i => itemIds.Contains(i.Id)).ToArrayAsync();
                 if (sitemapItemEntities.Any())
@@ -141,19 +86,9 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
                         repository.Remove(sitemapItemEntity);
                     }
                     await repository.UnitOfWork.CommitAsync();
-                    ClearCacheFor(sitemapItemEntities.Select(x => x.SitemapId).Distinct());
                 }
             }
         }
 
-        protected virtual void ClearCacheFor(IEnumerable<string> sitemapIds)
-        {
-            foreach (var sitemapId in sitemapIds)
-            {
-                SitemapCacheRegion.ExpireSitemap(sitemapId);
-            }
-            SitemapSearchCacheRegion.ExpireRegion();
-            SitemapItemSearchCacheRegion.ExpireRegion();
-        }
     }
 }

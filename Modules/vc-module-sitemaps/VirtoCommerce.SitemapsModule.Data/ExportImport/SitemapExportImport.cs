@@ -7,6 +7,7 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Data.ExportImport;
 using VirtoCommerce.SitemapsModule.Core.Models;
+using VirtoCommerce.SitemapsModule.Core.Models.Search;
 using VirtoCommerce.SitemapsModule.Core.Services;
 
 namespace VirtoCommerce.SitemapsModule.Data.ExportImport
@@ -15,13 +16,17 @@ namespace VirtoCommerce.SitemapsModule.Data.ExportImport
     {
         private readonly ISitemapService _sitemapService;
         private readonly ISitemapItemService _sitemapItemService;
+        private readonly ISitemapSearchService _sitemapSearchService;
+        private readonly ISitemapItemSearchService _sitemapItemSearchService;
         private const int _batchSize = 50;
         private readonly JsonSerializer _jsonSerializer;
 
-        public SitemapExportImport(ISitemapService sitemapService, ISitemapItemService sitemapItemService, JsonSerializer jsonSerializer)
+        public SitemapExportImport(ISitemapService sitemapService, ISitemapItemService sitemapItemService, ISitemapSearchService sitemapSearchService, ISitemapItemSearchService sitemapItemSearchService, JsonSerializer jsonSerializer)
         {
             _sitemapService = sitemapService;
             _sitemapItemService = sitemapItemService;
+            _sitemapSearchService = sitemapSearchService;
+            _sitemapItemSearchService = sitemapItemSearchService;
             _jsonSerializer = jsonSerializer;
         }
 
@@ -42,7 +47,7 @@ namespace VirtoCommerce.SitemapsModule.Data.ExportImport
 
                 await writer.WritePropertyNameAsync("Sitemaps");
 
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) => _sitemapService.SearchAsync(new SitemapSearchCriteria { Skip = skip, Take = take }), (processedCount, totalCount) =>
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) => (GenericSearchResult<Sitemap>)await _sitemapSearchService.SearchAsync(new SitemapSearchCriteria { Skip = skip, Take = take }), (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } site maps have been exported";
                     progressCallback(progressInfo);
@@ -52,7 +57,7 @@ namespace VirtoCommerce.SitemapsModule.Data.ExportImport
                 progressCallback(progressInfo);
 
                 await writer.WritePropertyNameAsync("SitemapItems");
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) => _sitemapItemService.SearchAsync(new SitemapItemSearchCriteria { Skip = skip, Take = take }), (processedCount, totalCount) =>
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) => (GenericSearchResult<SitemapItem>)await _sitemapItemSearchService.SearchAsync(new SitemapItemSearchCriteria { Skip = skip, Take = take }), (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } site maps items have been exported";
                     progressCallback(progressInfo);
