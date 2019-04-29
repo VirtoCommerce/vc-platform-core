@@ -21,17 +21,12 @@ namespace VirtoCommerce.CoreModule.Web.ExportImport
         private readonly IPackageTypesService _packageTypesService;
         private readonly ISeoService _seoService;
 
-        public CoreExportImport(ICurrencyService currencyService, IPackageTypesService packageTypesService, ISeoService seoService)
+        public CoreExportImport(ICurrencyService currencyService, IPackageTypesService packageTypesService, ISeoService seoService, JsonSerializer jsonSerializer)
         {
             _currencyService = currencyService;
             _packageTypesService = packageTypesService;
             _seoService = seoService;
-            _serializer = new JsonSerializer
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Formatting = Formatting.Indented,
-                NullValueHandling = NullValueHandling.Ignore
-            };
+            _serializer = jsonSerializer;
         }
 
         public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,

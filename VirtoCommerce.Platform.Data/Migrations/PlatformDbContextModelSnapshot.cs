@@ -15,7 +15,7 @@ namespace VirtoCommerce.Platform.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.0-rtm-30799")
+                .HasAnnotation("ProductVersion", "2.2.3-servicing-35854")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -287,7 +287,7 @@ namespace VirtoCommerce.Platform.Data.Migrations
                     b.Property<DateTime>("CreatedDate");
 
                     b.Property<string>("Detail")
-                        .HasMaxLength(1024);
+                        .HasMaxLength(2048);
 
                     b.Property<string>("ModifiedBy")
                         .HasMaxLength(64);
@@ -364,9 +364,6 @@ namespace VirtoCommerce.Platform.Data.Migrations
                         .HasColumnType("decimal(18,5)");
 
                     b.Property<int>("IntegerValue");
-
-                    b.Property<string>("Locale")
-                        .HasMaxLength(64);
 
                     b.Property<string>("LongTextValue");
 

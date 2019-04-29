@@ -136,17 +136,16 @@ namespace VirtoCommerce.SubscriptionModule.Test
 
             var mvcJsonOptions = new MvcJsonOptions
             {
-                SerializerSettings = 
+                SerializerSettings =
                 {
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                     NullValueHandling = NullValueHandling.Ignore,
                     Formatting = Formatting.Indented
                 }
             };
-            var options = new OptionsWrapper<MvcJsonOptions>(mvcJsonOptions);
 
             _subscriptionExportImport = new SubscriptionExportImport(_subscriptionService.Object, _subscriptionSearchService.Object,
-                _paymentPlanSearchService.Object, _paymentPlanService.Object, options);
+                _paymentPlanSearchService.Object, _paymentPlanService.Object, JsonSerializer.Create(mvcJsonOptions.SerializerSettings));
 
             _cancellationToken = new Mock<ICancellationToken>();
         }
