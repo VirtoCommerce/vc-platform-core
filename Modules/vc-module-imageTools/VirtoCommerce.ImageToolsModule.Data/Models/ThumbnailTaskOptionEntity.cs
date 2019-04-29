@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ImageToolsModule.Data.Models
@@ -18,9 +15,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Models
         public virtual void Patch(ThumbnailTaskOptionEntity target)
         {
             target.ThumbnailOptionId = ThumbnailOptionId;
-            target.ThumbnailOption = ThumbnailOption;
-            target.ThumbnailTaskId = ThumbnailOptionId;
-            target.ThumbnailTask = ThumbnailTask;
+            target.ThumbnailTaskId = ThumbnailTaskId;
         }
     }
 }
