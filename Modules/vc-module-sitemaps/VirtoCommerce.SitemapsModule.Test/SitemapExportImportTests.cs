@@ -242,7 +242,7 @@ namespace VirtoCommerce.SitemapsModule.Test
 
             InitSitemapService();
             InitSitemapItemService();
-            _sitemapExportImport = new SitemapExportImport(_sitemapService.Object, _sitemapItemService.Object, GetJsonSerializer());
+            _sitemapExportImport = new SitemapExportImport(_sitemapService.Object, _sitemapItemService.Object, _sitemapSearchService.Object, _sitemapItemSearchService.Object, GetJsonSerializer());
         }
 
         private static Stream ReadEmbeddedResource(string filePath)
