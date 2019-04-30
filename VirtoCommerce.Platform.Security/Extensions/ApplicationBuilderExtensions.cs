@@ -31,20 +31,25 @@ namespace VirtoCommerce.Platform.Security
                 {
                     await roleManager.CreateAsync(administratorRole);
                 }
-                var admin = new ApplicationUser
+
+                if (await userManager.FindByNameAsync("admin") == null)
                 {
-                    Id = "1eb2fa8ac6574541afdb525833dadb46",
-                    UserName = "admin",
-                    PasswordHash = "AHQSmKnSLYrzj9vtdDWWnUXojjpmuDW2cHvWloGL9UL3TC9UCfBmbIuR2YCyg4BpNg==",
-                    PasswordExpired = true
-                };
-                var adminUser = await userManager.FindByIdAsync(admin.Id);
-                if (adminUser == null)
-                {
-                    var result = await userManager.CreateAsync(admin);
-                    adminUser = await userManager.FindByIdAsync(admin.Id);
-                    await userManager.AddToRoleAsync(admin, administratorRole.Name);
+                    var admin = new ApplicationUser
+                    {
+                        Id = "1eb2fa8ac6574541afdb525833dadb46",
+                        UserName = "admin",
+                        PasswordHash = "AHQSmKnSLYrzj9vtdDWWnUXojjpmuDW2cHvWloGL9UL3TC9UCfBmbIuR2YCyg4BpNg==",
+                        PasswordExpired = true
+                    };
+                    var adminUser = await userManager.FindByIdAsync(admin.Id);
+                    if (adminUser == null)
+                    {
+                        var result = await userManager.CreateAsync(admin);
+                        adminUser = await userManager.FindByIdAsync(admin.Id);
+                        await userManager.AddToRoleAsync(admin, administratorRole.Name);
+                    }
                 }
+
 
                 //if (await manager.FindByClientIdAsync("manager-ui", CancellationToken.None) == null)
                 //{

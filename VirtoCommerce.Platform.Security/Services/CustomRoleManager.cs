@@ -78,7 +78,9 @@ namespace VirtoCommerce.Platform.Security.Services
         {
             //TODO: Unstable method work, sometimes throws EF already being tracked exception 
             //https://github.com/aspnet/Identity/issues/1807
-            var result = await base.UpdateAsync(role);
+            var existRole = await base.FindByNameAsync(role.Name);
+            role.Patch(existRole);
+            var result = await base.UpdateAsync(existRole);
             if (result.Succeeded && role.Permissions != null)
             {
                 var sourcePermissionClaims = role.Permissions.Select(x => new Claim(PlatformConstants.Security.Claims.PermissionClaimType, x.Name)).ToList();

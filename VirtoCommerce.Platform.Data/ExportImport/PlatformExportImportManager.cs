@@ -152,11 +152,24 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                                         {
                                             foreach (var role in items)
                                             {
-                                                await _roleManager.UpdateAsync(role);
+                                                if (await _roleManager.RoleExistsAsync(role.Name))
+                                                {
+                                                    await _roleManager.UpdateAsync(role);
+                                                }
+                                                else
+                                                {
+                                                    await _roleManager.CreateAsync(role);
+                                                }
+
+                                                var roleExist = await _roleManager.FindByNameAsync(role.Name);
+                                                var permissions = await _roleManager.GetClaimsAsync(roleExist);
+
                                                 foreach (var permission in role.Permissions)
                                                 {
-                                                    //TODO: Test with new and already exist
-                                                    await _roleManager.AddClaimAsync(role, new Claim(PlatformConstants.Security.Claims.PermissionClaimType, permission.Name));
+                                                    if (!permissions.Any(p => p.Value.EqualsInvariant(permission.Name)))
+                                                    {
+                                                        await _roleManager.AddClaimAsync(role, new Claim(PlatformConstants.Security.Claims.PermissionClaimType, permission.Name));
+                                                    }
                                                 }
                                             }
                                         }, processedCount =>
@@ -387,7 +400,9 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                             try
                             {
                                 //TODO: Add JsonConverter which will be materialized concrete ExportImport option type 
-                                var options = manifest.Options.FirstOrDefault(x => x.ModuleIdentity.Id == moduleDescriptor.Identity.Id);
+                                var options = manifest.Options
+                                    .DefaultIfEmpty(new ExportImportOptions { HandleBinaryData = manifest.HandleBinaryData, ModuleIdentity = new ModuleIdentity(moduleDescriptor.Identity.Id, moduleDescriptor.Identity.Version) })
+                                    .FirstOrDefault(x => x.ModuleIdentity.Id == moduleDescriptor.Identity.Id);
                                 await importer.ImportAsync(modulePartStream, options, ModuleProgressCallback, cancellationToken);
                             }
                             catch (Exception ex)

@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
+using VirtoCommerce.Platform.Core.Common;
+
 namespace VirtoCommerce.Platform.Core.Security
 {
     public class Role : IdentityRole
@@ -30,6 +32,19 @@ namespace VirtoCommerce.Platform.Core.Security
                 return Id.GetHashCode();
             }
             return base.GetHashCode();
+        }
+
+        public virtual void Patch(Role target)
+        {
+            target.Name = Name;
+            target.NormalizedName = NormalizedName;
+            target.ConcurrencyStamp = ConcurrencyStamp;
+            target.Description = Description;
+
+            if (!Permissions.IsNullCollection())
+            {
+                Permissions.Patch(target.Permissions, (sourcePermission, targetPermission) => sourcePermission.Patch(targetPermission));
+            }
         }
     }
 }

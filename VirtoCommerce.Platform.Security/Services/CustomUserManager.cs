@@ -114,13 +114,16 @@ namespace VirtoCommerce.Platform.Security.Services
         }
         public override async Task<IdentityResult> UpdateAsync(ApplicationUser user)
         {
-            var oldUser = await FindByIdAsync(user.Id);
+            var existUser = await FindByIdAsync(user.Id);
+
             var changedEntries = new List<GenericChangedEntry<ApplicationUser>>
             {
-                new GenericChangedEntry<ApplicationUser>(user, oldUser, EntryState.Modified)
+                new GenericChangedEntry<ApplicationUser>(user, existUser, EntryState.Modified)
             };
             await _eventPublisher.Publish(new UserChangingEvent(changedEntries));
-            var result = await base.UpdateAsync(user);
+
+            user.Patch(existUser);
+            var result = await base.UpdateAsync(existUser);
             if (result.Succeeded)
             {
                 await _eventPublisher.Publish(new UserChangedEvent(changedEntries));
@@ -139,7 +142,7 @@ namespace VirtoCommerce.Platform.Security.Services
                         await RemoveFromRoleAsync(user, removeRole);
                     }
                 }
-                SecurityCacheRegion.ExpireUser(user);
+                SecurityCacheRegion.ExpireUser(existUser);
             }
             return result;
         }
