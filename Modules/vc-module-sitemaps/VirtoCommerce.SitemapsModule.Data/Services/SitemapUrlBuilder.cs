@@ -34,8 +34,8 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
             if (seoSupport != null)
             {
                 var hasOutlines = entity as IHasOutlines;
-                var seoInfos = seoSupport.SeoInfos.Select(x => x.JsonConvert<Tools.Models.SeoInfo>());
-                seoInfos = seoInfos.GetBestMatchingSeoInfos(toolsStore.Id, toolsStore.DefaultLanguage, language, null);
+                var seoInfos = seoSupport.SeoInfos?.Select(x => x.JsonConvert<Tools.Models.SeoInfo>());
+                seoInfos = seoInfos?.GetBestMatchingSeoInfos(toolsStore.Id, toolsStore.DefaultLanguage, language, null);
                 if (!seoInfos.IsNullOrEmpty())
                 {
                     slug = seoInfos.Select(x => x.SemanticUrl).FirstOrDefault();

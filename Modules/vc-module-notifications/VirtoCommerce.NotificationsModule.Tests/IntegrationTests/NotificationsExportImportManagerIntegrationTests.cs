@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Newtonsoft.Json;
 using VirtoCommerce.NotificationsModule.Core.Model;
@@ -41,6 +42,18 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             _notificationSearchService = new NotificationSearchService(RepositoryFactory);
             _notificationService = new NotificationService(RepositoryFactory, _eventPulisherMock.Object);
             _notificationsExportImportManager = new NotificationsExportImport(_notificationSearchService, _notificationService, GetJsonSerializer());
+
+            var mvcJsonOptions = new MvcJsonOptions()
+            {
+                SerializerSettings =
+                {
+                    NullValueHandling = NullValueHandling.Ignore,
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                    Formatting = Formatting.Indented
+                }
+            };
+
+            _notificationsExportImportManager = new NotificationsExportImport(_notificationSearchService, _notificationService, JsonSerializer.Create(mvcJsonOptions.SerializerSettings));
 
             _notificationRegistrar = new NotificationService(RepositoryFactory, _eventPulisherMock.Object);
 

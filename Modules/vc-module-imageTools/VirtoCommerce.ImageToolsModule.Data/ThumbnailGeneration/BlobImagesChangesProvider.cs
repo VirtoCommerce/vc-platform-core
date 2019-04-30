@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.ImageToolsModule.Core.Services;
 using VirtoCommerce.ImageToolsModule.Core.ThumbnailGeneration;
+using VirtoCommerce.ImageToolsModule.Data.Caching;
 using VirtoCommerce.Platform.Core.Assets;
+using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
@@ -16,41 +18,46 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
     {
         public bool IsTotalCountSupported => true;
 
-        private IList<ImageChange> _changeBlobs;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
+        private readonly IBlobStorageProvider _storageProvider;
+        private readonly IThumbnailOptionSearchService _thumbnailOptionSearchService;
+        private static readonly string[] SupportedImageExtensions = { ".bmp", ".gif", ".jpg", ".jpeg", ".png" };
 
-        public BlobImagesChangesProvider(IBlobStorageProvider storageProvider, IThumbnailOptionSearchService thumbnailOptionSearchService)
+        public BlobImagesChangesProvider(IBlobStorageProvider storageProvider, IThumbnailOptionSearchService thumbnailOptionSearchService, IPlatformMemoryCache platformMemoryCache)
         {
-            StorageProvider = storageProvider;
-            ThumbnailOptionSearchService = thumbnailOptionSearchService;
+            _platformMemoryCache = platformMemoryCache;
+            _storageProvider = storageProvider;
+            _thumbnailOptionSearchService = thumbnailOptionSearchService;
         }
 
-        private static readonly string[] SupportedImageExtensions = { ".bmp", ".gif", ".jpg", ".jpeg", ".jpe", ".jif", ".jfif", ".jfi", ".png", ".tiff", ".tif" };
-
-        protected IBlobStorageProvider StorageProvider { get; }
-        protected IThumbnailOptionSearchService ThumbnailOptionSearchService { get; }
-
-        protected virtual async Task<IList<ImageChange>> GetChangeFiles(ThumbnailTask task, DateTime? changedSince,
-            ICancellationToken token)
+        protected virtual async Task<IList<ImageChange>> GetChangeFiles(ThumbnailTask task, DateTime? changedSince, ICancellationToken token)
         {
             var options = await GetOptionsCollection();
-            var allBlobInfos = await ReadBlobFolderAsync(task.WorkPath, token);
-            var orignalBlobInfos = GetOriginalItems(allBlobInfos, options.Select(x => x.FileSuffix).ToList());
-
-            var result = new List<ImageChange>();
-            foreach (var blobInfo in orignalBlobInfos)
+            var cacheKey = CacheKey.With(GetType(), "GetChangeFiles", task.WorkPath, string.Join(":", options.Select(x => x.FileSuffix)));
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                token?.ThrowIfCancellationRequested();
+                cacheEntry.AddExpirationToken(ThumbnailCacheRegion.CreateChangeToken());
+                cacheEntry.SetAbsoluteExpiration(TimeSpan.FromMinutes(5));
 
-                var imageChange = new ImageChange
+                var allBlobInfos = await ReadBlobFolderAsync(task.WorkPath, token);
+                var orignalBlobInfos = GetOriginalItems(allBlobInfos, options.Select(x => x.FileSuffix).ToList());
+
+                var result = new List<ImageChange>();
+                foreach (var blobInfo in orignalBlobInfos)
                 {
-                    Name = blobInfo.Name,
-                    Url = blobInfo.Url,
-                    ModifiedDate = blobInfo.ModifiedDate,
-                    ChangeState = !changedSince.HasValue ? EntryState.Added : GetItemState(blobInfo, changedSince, task.ThumbnailOptions)
-                };
-                result.Add(imageChange);
-            }
-            return result.Where(x => x.ChangeState != EntryState.Unchanged).ToList();
+                    token?.ThrowIfCancellationRequested();
+
+                    var imageChange = new ImageChange
+                    {
+                        Name = blobInfo.Name,
+                        Url = blobInfo.Url,
+                        ModifiedDate = blobInfo.ModifiedDate,
+                        ChangeState = !changedSince.HasValue ? EntryState.Added : GetItemState(blobInfo, changedSince, task.ThumbnailOptions)
+                    };
+                    result.Add(imageChange);
+                }
+                return result.Where(x => x.ChangeState != EntryState.Unchanged).ToList();
+            });
         }
 
         #region Implementation of IImagesChangesProvider
@@ -58,29 +65,25 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
         public async Task<long> GetTotalChangesCount(ThumbnailTask task, DateTime? changedSince,
             ICancellationToken token)
         {
-            if (_changeBlobs == null)
-            {
-                _changeBlobs = await GetChangeFiles(task, changedSince, token);
-            }
-            return _changeBlobs.Count;
+            var changedFiles = await GetChangeFiles(task, changedSince, token);
+
+            return changedFiles.Count;
         }
 
         public async Task<ImageChange[]> GetNextChangesBatch(ThumbnailTask task, DateTime? changedSince, long? skip,
             long? take, ICancellationToken token)
         {
-            if (_changeBlobs == null)
-            {
-                _changeBlobs = await GetChangeFiles(task, changedSince, token);
-            }
 
-            var count = _changeBlobs.Count;
+            var changedFiles = await GetChangeFiles(task, changedSince, token);
+
+            var count = changedFiles.Count;
 
             if (skip >= count)
             {
                 return new ImageChange[] { };
             }
 
-            return _changeBlobs.Skip((int)skip).Take((int)take).ToArray();
+            return changedFiles.Skip((int)skip).Take((int)take).ToArray();
         }
 
         #endregion
@@ -91,10 +94,10 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
 
             var result = new List<BlobEntry>();
 
-            var searchResults = await StorageProvider.SearchAsync(folderPath, null);
+            var searchResults = await _storageProvider.SearchAsync(folderPath, null);
 
-            result.AddRange(searchResults.Results.Where(item => SupportedImageExtensions.Contains(Path.GetExtension(item.Name))));
-            foreach (var blobFolder in searchResults.Results.Where( x => x.Type == "folder"))
+            result.AddRange(searchResults.Results.Where(item => SupportedImageExtensions.Contains(Path.GetExtension(item.Name).ToLowerInvariant())));
+            foreach (var blobFolder in searchResults.Results.Where(x => x.Type == "folder"))
             {
                 var folderResult = await ReadBlobFolderAsync(blobFolder.RelativeUrl, token);
                 result.AddRange(folderResult);
@@ -113,7 +116,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
         /// </returns>
         protected virtual async Task<bool> ExistsAsync(string imageUrl)
         {
-            var blobInfo = await StorageProvider.GetBlobInfoAsync(imageUrl);
+            var blobInfo = await _storageProvider.GetBlobInfoAsync(imageUrl);
             return blobInfo != null;
         }
 
@@ -143,9 +146,9 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
         //get all options to create a map of all potential file names
         protected virtual async Task<ICollection<ThumbnailOption>> GetOptionsCollection()
         {
-            var options = await ThumbnailOptionSearchService.SearchAsync(new ThumbnailOptionSearchCriteria()
+            var options = await _thumbnailOptionSearchService.SearchAsync(new ThumbnailOptionSearchCriteria()
             {
-                Take = Int32.MaxValue
+                Take = int.MaxValue
             });
 
             return options.Results.ToList();
