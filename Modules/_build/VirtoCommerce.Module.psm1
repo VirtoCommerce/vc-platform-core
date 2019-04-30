@@ -51,6 +51,10 @@ function Compress-Module
 	
 	Copy-Item "$InputDir\module.manifest" -Destination "$OutputDir\$tmp"
 	
+	if(Test-Path "$InputDir\module.ignore" -PathType Leaf) {
+		Copy-Item "$InputDir\module.ignore" -Destination "$OutputDir\$tmp"
+	}
+	
 	dotnet publish -c Release -o "$OutputDir\$tmp\bin" -f netcoreapp2.2 --self-contained false
 	
 	$platformDlls = 
@@ -101,15 +105,19 @@ function Compress-Module
 
 	$dlls = @(Get-ChildItem -Path "$OutputDir\$tmp\bin" -Name)
 
-	$moduleName = "VirtoCommerce.CatalogModule"
-
 	foreach ($_ in $dlls) {                                                                                                             
 		if($_.StartsWith("VirtoCommerce")) {
-			if(!$_.StartsWith($moduleName)) {			
+			if(!$_.StartsWith($VCModuleId)) {			
 				Remove-Item ("$OutputDir\$tmp\bin\" + $_)
 			}
 		}
 	}
+	
+	if(Test-Path "$OutputDir\$tmp\module.ignore" -PathType Leaf) {
+		$ignore = Get-Content "$OutputDir\$tmp\module.ignore"	
+
+		Compare-Object -ReferenceObject $ignore -DifferenceObject $dlls -IncludeEqual | ForEach-Object -Process { if($_.SideIndicator -eq "==") { Remove-Item ("$OutputDir\$tmp\bin\" + $_.InputObject) }}
+	}	
 
 	Compare-Object -ReferenceObject $platformDlls -DifferenceObject $dlls -IncludeEqual | ForEach-Object -Process { if($_.SideIndicator -eq "==") { Remove-Item ("$OutputDir\$tmp\bin\" + $_.InputObject) }}
 	
