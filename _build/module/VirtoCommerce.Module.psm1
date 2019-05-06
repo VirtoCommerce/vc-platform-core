@@ -54,8 +54,10 @@ function Compress-Module
 	if(Test-Path "$InputDir\module.ignore" -PathType Leaf) {
 		Copy-Item "$InputDir\module.ignore" -Destination "$OutputDir\$tmp"
 	}
+
+	dotnet clean -c Release
 	
-	dotnet publish -c Release -o "$OutputDir\$tmp\bin" -f netcoreapp2.2 --self-contained false
+	dotnet publish -c Release -o "$OutputDir\$tmp\bin" --self-contained false
 	
 	$platformDlls = 
 "AspNet.Security.OAuth.Validation.dll",

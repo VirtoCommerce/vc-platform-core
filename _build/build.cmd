@@ -16,13 +16,19 @@ IF !ERRORLEVEL! NEQ 0 goto error
 call npm run webpack:build
 IF !ERRORLEVEL! NEQ 0 goto error
 
-call dotnet publish -c Release -o %ARTIFACTS_PATH% -f netcoreapp2.2 --self-contained false
+call dotnet clean -c Release
+IF !ERRORLEVEL! NEQ 0 goto error
+
+call dotnet publish -c Release -o %ARTIFACTS_PATH% --self-contained false
 IF !ERRORLEVEL! NEQ 0 goto error
 
 goto end
 
 :error
 echo An error has occurred during platform build.
+goto exit
 
 :end
 echo Finished successfully.
+
+:exit
