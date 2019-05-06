@@ -127,19 +127,19 @@ namespace VirtoCommerce.Platform.Security.Services
             if (result.Succeeded)
             {
                 await _eventPublisher.Publish(new UserChangedEvent(changedEntries));
-                if (user.Roles != null)
+                if (!user.Roles.IsNullOrEmpty())
                 {
-                    var targetRoles = (await GetRolesAsync(user));
+                    var targetRoles = (await GetRolesAsync(existUser));
                     var sourceRoles = user.Roles.Select(x => x.Name);
                     //Add
                     foreach (var newRole in sourceRoles.Except(targetRoles))
                     {
-                        await AddToRoleAsync(user, newRole);
+                        await AddToRoleAsync(existUser, newRole);
                     }
                     //Remove
                     foreach (var removeRole in targetRoles.Except(sourceRoles))
                     {
-                        await RemoveFromRoleAsync(user, removeRole);
+                        await RemoveFromRoleAsync(existUser, removeRole);
                     }
                 }
                 SecurityCacheRegion.ExpireUser(existUser);
@@ -158,7 +158,7 @@ namespace VirtoCommerce.Platform.Security.Services
             if (result.Succeeded)
             {
                 await _eventPublisher.Publish(new UserChangedEvent(changedEntries));
-                if (user.Roles != null)
+                if (!user.Roles.IsNullOrEmpty())
                 {
                     //Add
                     foreach (var newRole in user.Roles)

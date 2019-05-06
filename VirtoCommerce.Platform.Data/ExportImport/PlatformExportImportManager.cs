@@ -131,6 +131,7 @@ namespace VirtoCommerce.Platform.Data.ExportImport
             var progressInfo = new ExportImportProgressInfo();
             var jsonSerializer = GetJsonSerializer();
             var batchSize = 20;
+            var securityEntries = new PlatformExportSecurityEntries();
 
 
             var platformZipEntries = zipArchive.GetEntry(PlatformZipEntryName);
@@ -147,31 +148,34 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                             {
                                 if (manifest.HandleSecurity && reader.Value.ToString().EqualsInvariant("Roles"))
                                 {
+
                                     await reader.DeserializeJsonArrayWithPagingAsync<Role>(jsonSerializer, batchSize,
-                                        async items =>
+                                         items =>
                                         {
-                                            foreach (var role in items)
-                                            {
-                                                if (await _roleManager.RoleExistsAsync(role.Name))
-                                                {
-                                                    await _roleManager.UpdateAsync(role);
-                                                }
-                                                else
-                                                {
-                                                    await _roleManager.CreateAsync(role);
-                                                }
+                                            securityEntries.Roles.AddRange(items);
+                                            return Task.CompletedTask;
+                                            //foreach (var role in items)
+                                            //{
+                                            //    if (await _roleManager.RoleExistsAsync(role.Name))
+                                            //    {
+                                            //        await _roleManager.UpdateAsync(role);
+                                            //    }
+                                            //    else
+                                            //    {
+                                            //        await _roleManager.CreateAsync(role);
+                                            //    }
 
-                                                var roleExist = await _roleManager.FindByNameAsync(role.Name);
-                                                var permissions = await _roleManager.GetClaimsAsync(roleExist);
+                                            //    var roleExist = await _roleManager.FindByNameAsync(role.Name);
+                                            //    var permissions = await _roleManager.GetClaimsAsync(roleExist);
 
-                                                foreach (var permission in role.Permissions)
-                                                {
-                                                    if (!permissions.Any(p => p.Value.EqualsInvariant(permission.Name)))
-                                                    {
-                                                        await _roleManager.AddClaimAsync(role, new Claim(PlatformConstants.Security.Claims.PermissionClaimType, permission.Name));
-                                                    }
-                                                }
-                                            }
+                                            //    foreach (var permission in role.Permissions)
+                                            //    {
+                                            //        if (!permissions.Any(p => p.Value.EqualsInvariant(permission.Name)))
+                                            //        {
+                                            //            await _roleManager.AddClaimAsync(role, new Claim(PlatformConstants.Security.Claims.PermissionClaimType, permission.Name));
+                                            //        }
+                                            //    }
+                                            //}
                                         }, processedCount =>
                                     {
                                         progressInfo.Description = $"{ processedCount } roles have been imported";
@@ -181,20 +185,22 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                                 else if (manifest.HandleSecurity && reader.Value.ToString().EqualsInvariant("Users"))
                                 {
                                     await reader.DeserializeJsonArrayWithPagingAsync<ApplicationUser>(jsonSerializer, batchSize,
-                                        async items =>
+                                        items =>
                                         {
-                                            foreach (var user in items)
-                                            {
-                                                var userExist = await _userManager.FindByIdAsync(user.Id);
-                                                if (userExist != null)
-                                                {
-                                                    await _userManager.UpdateAsync(user);
-                                                }
-                                                else
-                                                {
-                                                    await _userManager.CreateAsync(user);
-                                                }
-                                            }
+                                            securityEntries.Users.AddRange(items);
+                                            return Task.CompletedTask;
+                                            //foreach (var user in items)
+                                            //{
+                                            //    var userExist = await _userManager.FindByIdAsync(user.Id);
+                                            //    if (userExist != null)
+                                            //    {
+                                            //        await _userManager.UpdateAsync(user);
+                                            //    }
+                                            //    else
+                                            //    {
+                                            //        await _userManager.CreateAsync(user);
+                                            //    }
+                                            //}
                                         }, processedCount =>
                                         {
                                             progressInfo.Description = $"{ processedCount } roles have been imported";
@@ -237,6 +243,45 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                                     }, cancellationToken);
                                 }
                             }
+                        }
+                    }
+                }
+
+                if (manifest.HandleSecurity)
+                {
+                    foreach (var role in securityEntries.Roles)
+                    {
+                        if (await _roleManager.RoleExistsAsync(role.Name))
+                        {
+                            await _roleManager.UpdateAsync(role);
+                        }
+                        else
+                        {
+                            await _roleManager.CreateAsync(role);
+                        }
+
+                        var roleExist = await _roleManager.FindByNameAsync(role.Name);
+                        var permissions = await _roleManager.GetClaimsAsync(roleExist);
+
+                        foreach (var permission in role.Permissions)
+                        {
+                            if (!permissions.Any(p => p.Value.EqualsInvariant(permission.Name)))
+                            {
+                                await _roleManager.AddClaimAsync(role, new Claim(PlatformConstants.Security.Claims.PermissionClaimType, permission.Name));
+                            }
+                        }
+                    }
+                    
+                    foreach (var user in securityEntries.Users)
+                    {
+                        var userExist = await _userManager.FindByIdAsync(user.Id);
+                        if (userExist != null)
+                        {
+                            await _userManager.UpdateAsync(user);
+                        }
+                        else
+                        {
+                            await _userManager.CreateAsync(user);
                         }
                     }
                 }

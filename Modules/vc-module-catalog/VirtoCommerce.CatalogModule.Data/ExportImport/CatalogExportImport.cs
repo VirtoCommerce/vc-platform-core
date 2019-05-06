@@ -143,15 +143,15 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                 await writer.WritePropertyNameAsync("Products");
                 await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
                 {
-                    var searchResponse = _listEntrySearchService.SearchAsync(new CatalogListEntrySearchCriteria { WithHidden = true, Take = take, Skip = skip, ResponseGroup = ItemResponseGroup.Full.ToString() });
+                    var searchResult = await _productSearchService.SearchProductsAsync(new ProductSearchCriteria { Skip = skip, Take = take, ResponseGroup = (ItemResponseGroup.Full & ~ItemResponseGroup.Variations).ToString() });
 
-                    var products = await _itemService.GetByIdsAsync(searchResponse.Result.Results.Select(x => x.Id).ToArray(), ItemResponseGroup.ItemLarge.ToString());
+                    var products = await _itemService.GetByIdsAsync(searchResult.Results.Select(x => x.Id).ToArray(), ItemResponseGroup.ItemLarge.ToString());
 
                     if (options.HandleBinaryData)
                     {
                         LoadImages(products.OfType<IHasImages>().ToArray(), progressInfo);
                     }
-                    return new GenericSearchResult<CatalogProduct> { Results = products, TotalCount = searchResponse.Result.TotalCount };
+                    return new GenericSearchResult<CatalogProduct> { Results = products, TotalCount = searchResult.TotalCount };
                 }, (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } Products have been exported";

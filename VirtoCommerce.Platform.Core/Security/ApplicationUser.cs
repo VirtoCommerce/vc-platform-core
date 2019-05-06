@@ -70,7 +70,7 @@ namespace VirtoCommerce.Platform.Core.Security
             target.Password = Password;
             target.PasswordExpired = PasswordExpired;
 
-            if (!Roles.IsNullCollection())
+            if (!Roles.IsNullOrEmpty())
             {
                 Roles.Patch(target.Roles, (sourcePhone, targetPhone) => sourcePhone.Patch(targetPhone));
             }
