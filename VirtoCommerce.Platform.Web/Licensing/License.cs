@@ -1,10 +1,10 @@
 using System;
-using System.ComponentModel;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Exceptions;
+using VirtoCommerce.Platform.Core.Extensions;
 
 namespace VirtoCommerce.Platform.Web.Licensing
 {
@@ -17,7 +17,6 @@ namespace VirtoCommerce.Platform.Web.Licensing
         public string CustomerEmail { get; set; }
         public DateTime ExpirationDate { get; set; }
         public string RawLicense { get; set; }
-      
 
         public static License Parse(string rawLicense, string publicKeyPath)
         {
@@ -44,7 +43,6 @@ namespace VirtoCommerce.Platform.Web.Licensing
             return result;
         }
 
-
         private static bool ValidateSignature(string data, string signature, string publicKeyPath)
         {
             bool result;
@@ -60,23 +58,12 @@ namespace VirtoCommerce.Platform.Web.Licensing
 
             try
             {
-                var rsaParam = new RSAParameters()
-                {
-                    Modulus = Convert.FromBase64String(ReadFileWithKey(publicKeyPath)),
-                    Exponent = Convert.FromBase64String("AQAB")
-                };
-
                 using (var rsa = new RSACryptoServiceProvider())
                 {
-                    // Import public key
-                    rsa.ImportParameters(rsaParam);
+                    rsa.FromXmlStringCustom(ReadFileWithKey(publicKeyPath));
 
-                    // Create signature verifier with the rsa key
                     var signatureDeformatter = new RSAPKCS1SignatureDeformatter(rsa);
-
-                    // Set the hash algorithm to SHA256.
                     signatureDeformatter.SetHashAlgorithm(_hashAlgorithmName);
-
                     result = signatureDeformatter.VerifySignature(dataHash, signatureBytes);
                 }
             }
@@ -90,21 +77,12 @@ namespace VirtoCommerce.Platform.Web.Licensing
 
         private static string ReadFileWithKey(string path)
         {
-            string fileContent;
-
             if (!File.Exists(path))
             {
                 throw new LicenseOrKeyNotFoundException(path);
             }
 
-            using (var streamReader = File.OpenText(path))
-            {
-                fileContent = streamReader.ReadToEnd();
-            }
-
-            return fileContent;
+            return File.ReadAllText(path);
         }
-
-        
     }
 }

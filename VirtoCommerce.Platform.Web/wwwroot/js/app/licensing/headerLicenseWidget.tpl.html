@@ -16,7 +16,7 @@
             ng-click="showLicense()">{{'platform.templates.licensing.renew' | translate}}</button>
     </div>
 
-    <div class="license" ng-if="license && !license.hasExpired" ng-click="showLicense()">
+    <div class="license active" ng-if="license && !license.hasExpired" ng-click="showLicense()">
         <div class="license__text">
             {{'platform.templates.licensing.license-present' | translate: license}}
         </div>

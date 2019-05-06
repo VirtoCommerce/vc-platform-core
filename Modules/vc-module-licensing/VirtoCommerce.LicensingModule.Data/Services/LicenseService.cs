@@ -17,7 +17,7 @@ using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Exceptions;
-using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Core.Extensions;
 
 namespace VirtoCommerce.LicensingModule.Data.Services
 {
@@ -26,15 +26,13 @@ namespace VirtoCommerce.LicensingModule.Data.Services
         private readonly Func<ILicenseRepository> _licenseRepositoryFactory;
         private readonly IChangeLogService _changeLogService;
         private readonly IEventPublisher _eventPublisher;
-        private readonly ISettingsManager _settingsManager;
         private readonly LicenseOptions _licenseOptions;
 
-        public LicenseService(Func<ILicenseRepository> licenseRepositoryFactory, IChangeLogService changeLogService, ISettingsManager settingsManager, IEventPublisher eventPublisher
+        public LicenseService(Func<ILicenseRepository> licenseRepositoryFactory, IChangeLogService changeLogService, IEventPublisher eventPublisher
             , IOptions<LicenseOptions> licenseOptions)
         {
             _licenseRepositoryFactory = licenseRepositoryFactory;
             _changeLogService = changeLogService;
-            _settingsManager = settingsManager;
             _eventPublisher = eventPublisher;
             _licenseOptions = licenseOptions.Value;
         }
@@ -123,7 +121,7 @@ namespace VirtoCommerce.LicensingModule.Data.Services
                         }
                     }
                 }
-                
+
                 await repository.UnitOfWork.CommitAsync();
                 await _eventPublisher.Publish(new LicenseChangedEvent(changedEntries));
                 pkMap.ResolvePrimaryKeys();
@@ -155,7 +153,7 @@ namespace VirtoCommerce.LicensingModule.Data.Services
                 };
 
                 var licenseString = JsonConvert.SerializeObject(license);
-                var signature = CreateSignature(licenseString);
+                var signature = await CreateSignatureAsync(licenseString);
 
                 result = string.Join("\r\n", licenseString, signature);
 
@@ -176,7 +174,7 @@ namespace VirtoCommerce.LicensingModule.Data.Services
             }
         }
 
-        private string CreateSignature(string data)
+        private async Task<string> CreateSignatureAsync(string data)
         {
             var hashAlgorithmName = HashAlgorithmName.SHA256.Name;
 
@@ -184,10 +182,11 @@ namespace VirtoCommerce.LicensingModule.Data.Services
             using (var rsa = new RSACryptoServiceProvider())
             {
                 // TODO: Store private key in a more secure storage, for example in Azure Key Vault
-                var privateKey = ReadFileWithKey(Path.GetFullPath(_licenseOptions.LicensePrivateKeyPath));
+                var privateKeyFilePath = Path.GetFullPath(_licenseOptions.LicensePrivateKeyPath);
+                var privateKey = await ReadFileWithKey(privateKeyFilePath);
                 if (!string.IsNullOrEmpty(privateKey))
                 {
-                    rsa.FromXmlString(privateKey);
+                    rsa.FromXmlStringCustom(privateKey);
                 }
 
                 var signatureFormatter = new RSAPKCS1SignatureFormatter(rsa);
@@ -202,21 +201,14 @@ namespace VirtoCommerce.LicensingModule.Data.Services
             }
         }
 
-        private static string ReadFileWithKey(string path)
+        private static async Task<string> ReadFileWithKey(string path)
         {
-            string fileContent;
-
             if (!File.Exists(path))
             {
                 throw new LicenseOrKeyNotFoundException(path);
             }
 
-            using (var streamReader = File.OpenText(path))
-            {
-                fileContent = streamReader.ReadToEnd();
-            }
-
-            return fileContent;
+            return await File.ReadAllTextAsync(path);
         }
     }
 }

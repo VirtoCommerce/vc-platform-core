@@ -1,6 +1,4 @@
 using System.Linq;
-using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,7 +13,7 @@ namespace VirtoCommerce.LicensingModule.Web.Controllers.Api
     public class LicensingModuleController : Controller
     {
         private readonly ILicenseService _licenseService;
-        
+
         public LicensingModuleController(ILicenseService licenseService)
         {
             _licenseService = licenseService;
@@ -85,20 +83,20 @@ namespace VirtoCommerce.LicensingModule.Web.Controllers.Api
         [Route("download/{activationCode}")]
         [ProducesResponseType(typeof(ContentResult), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Issue)]
-        public Task<IActionResult> Download(string activationCode)
+        public async Task<IActionResult> Download(string activationCode)
         {
             var remoteIpAddress = Request.HttpContext.Connection.RemoteIpAddress;
-            return GetSignedLicenseAsync(activationCode, false, remoteIpAddress.ToString());
+            return await GetSignedLicenseAsync(activationCode, false, remoteIpAddress.ToString());
         }
 
         [HttpGet]
         [Route("activate/{activationCode}")]
         [ProducesResponseType(typeof(ContentResult), 200)]
         [AllowAnonymous]
-        public Task<IActionResult> Activate(string activationCode)
+        public async Task<IActionResult> Activate(string activationCode)
         {
             var remoteIpAddress = HttpContext.Connection.RemoteIpAddress;
-            return GetSignedLicenseAsync(activationCode, true, remoteIpAddress.ToString());
+            return await GetSignedLicenseAsync(activationCode, true, remoteIpAddress.ToString());
         }
 
 
@@ -110,9 +108,9 @@ namespace VirtoCommerce.LicensingModule.Web.Controllers.Api
             {
                 var result = new ContentResult
                 {
-                    Content = signedLicense
-                    , StatusCode = 200
-                    , ContentType = "application/octet-stream"
+                    Content = signedLicense,
+                    StatusCode = 200,
+                    ContentType = "application/octet-stream"
                 };
 
                 var contentDisposition = new System.Net.Mime.ContentDisposition("attachment")
