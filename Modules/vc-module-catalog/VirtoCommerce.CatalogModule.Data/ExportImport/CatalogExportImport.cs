@@ -30,14 +30,13 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
         private readonly JsonSerializer _jsonSerializer;
         private readonly IBlobStorageProvider _blobStorageProvider;
         private readonly ISeoService _seoService;
-        private readonly IListEntrySearchService _listEntrySearchService;
         private readonly IAssociationService _associationService;
 
         private int _batchSize = 50;
 
         public CatalogExportImport(ICatalogService catalogService, IProductSearchService productSearchService, ICategorySearchService categorySearchService, ICategoryService categoryService,
                                   IItemService itemService, IPropertyService propertyService, IPropertySearchService propertySearchService, IProperyDictionaryItemSearchService propertyDictionarySearchService,
-                                  IProperyDictionaryItemService propertyDictionaryService, JsonSerializer jsonSerializer, IBlobStorageProvider blobStorageProvider, ISeoService seoService, IListEntrySearchService listEntrySearchService, IAssociationService associationService)
+                                  IProperyDictionaryItemService propertyDictionaryService, JsonSerializer jsonSerializer, IBlobStorageProvider blobStorageProvider, ISeoService seoService, IAssociationService associationService)
         {
             _catalogService = catalogService;
             _productSearchService = productSearchService;
@@ -51,7 +50,6 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             _jsonSerializer = jsonSerializer;
             _blobStorageProvider = blobStorageProvider;
             _seoService = seoService;
-            _listEntrySearchService = listEntrySearchService;
             _associationService = associationService;
         }
 
@@ -198,7 +196,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                             {
                                 var itemsArray = items.ToArray();
                                 await _categoryService.SaveChangesAsync(itemsArray);
-                                await _seoService.SaveSeoForObjectsAsync(itemsArray);
+                                await _seoService.SaveSeoForObjectsAsync(itemsArray.OfType<ISeoSupport>().ToArray());
                                 //if (options.HandleBinaryData)
                                 {
                                     ImportImages(itemsArray.OfType<IHasImages>().ToArray(), progressInfo);
@@ -214,7 +212,8 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                         {
                             await reader.DeserializeJsonArrayWithPagingAsync<Property>(_jsonSerializer, _batchSize, async (items) =>
                             {
-                                foreach (var property in items)
+                                var itemsArray = items.ToArray();
+                                foreach (var property in itemsArray)
                                 {
                                     if (property.CategoryId != null || property.CatalogId != null)
                                     {
@@ -224,7 +223,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                                         property.CatalogId = null;
                                     }
                                 }
-                                await _propertyService.SaveChangesAsync(items.ToArray());
+                                await _propertyService.SaveChangesAsync(itemsArray);
                             }, processedCount =>
                         {
                             progressInfo.Description = $"{ processedCount } properties have been imported";
