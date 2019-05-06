@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Text;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -45,7 +43,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Models
 
             if (task.ThumbnailOptions != null)
             {
-                this.ThumbnailTaskOptions = new ObservableCollection<ThumbnailTaskOptionEntity>(task.ThumbnailOptions.Select(x => FromModel(x, task)));
+                ThumbnailTaskOptions = new ObservableCollection<ThumbnailTaskOptionEntity>(task.ThumbnailOptions.Select(x => FromModel(x, task)));
             }
 
             return this;
@@ -53,9 +51,11 @@ namespace VirtoCommerce.ImageToolsModule.Data.Models
 
         public virtual ThumbnailTaskOptionEntity FromModel(ThumbnailOption option, ThumbnailTask task)
         {
-            var result = new ThumbnailTaskOptionEntity();
-            result.ThumbnailTaskId = task.Id;
-            result.ThumbnailOptionId = option.Id;
+            var result = new ThumbnailTaskOptionEntity
+            {
+                ThumbnailTaskId = task.Id,
+                ThumbnailOptionId = option.Id
+            };
             return result;
         }
 

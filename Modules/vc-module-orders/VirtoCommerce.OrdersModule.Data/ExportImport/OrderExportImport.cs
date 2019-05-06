@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using VirtoCommerce.OrdersModule.Core.Model;
@@ -10,69 +8,62 @@ using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
+using VirtoCommerce.Platform.Data.ExportImport;
 
 namespace VirtoCommerce.OrdersModule.Data.ExportImport
 {
-    public sealed class OrderExportImport : IExportSupport, IImportSupport
+    public sealed class OrderExportImport
     {
         private readonly ICustomerOrderSearchService _customerOrderSearchService;
         private readonly ICustomerOrderService _customerOrderService;
-        private readonly JsonSerializer _serializer;
+        private readonly JsonSerializer _jsonSerializer;
         private const int _batchSize = 50;
 
-        public OrderExportImport(ICustomerOrderSearchService customerOrderSearchService, ICustomerOrderService customerOrderService)
+        public OrderExportImport(ICustomerOrderSearchService customerOrderSearchService, ICustomerOrderService customerOrderService, JsonSerializer jsonSerializer)
         {
             _customerOrderSearchService = customerOrderSearchService;
             _customerOrderService = customerOrderService;
-            _serializer = new JsonSerializer
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                Formatting = Formatting.Indented,
-                NullValueHandling = NullValueHandling.Ignore
-            };
+            _jsonSerializer = jsonSerializer;
         }
 
-
-        public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
-            ICancellationToken cancellationToken)
+        public async Task DoExportAsync(Stream outStream, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             var progressInfo = new ExportImportProgressInfo { Description = "Orders are loading" };
             progressCallback(progressInfo);
 
-            using (var sw = new StreamWriter(outStream, Encoding.UTF8))
+            using (var sw = new StreamWriter(outStream))
             using (var writer = new JsonTextWriter(sw))
             {
-                writer.WriteStartObject();
+                await writer.WriteStartObjectAsync();
 
-                var orders = await _customerOrderSearchService.SearchCustomerOrdersAsync(new CustomerOrderSearchCriteria { Take = int.MaxValue });
-                writer.WritePropertyName("OrderTotalCount");
-                writer.WriteValue(orders.TotalCount);
+                progressInfo.Description = "CustomerOrders are started export";
+                progressCallback(progressInfo);
 
-                writer.WritePropertyName("CustomerOrders");
-                writer.WriteStartArray();
-
-                foreach (var order in orders.Results)
+                await writer.WritePropertyNameAsync("CustomerOrders");
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) =>
                 {
-                    _serializer.Serialize(writer, order);
-                }
+                    var searchCriteria = AbstractTypeFactory<CustomerOrderSearchCriteria>.TryCreateInstance();
+                    searchCriteria.Take = take;
+                    searchCriteria.Skip = skip;
+                    return _customerOrderSearchService.SearchCustomerOrdersAsync(searchCriteria);
+                }, (processedCount, totalCount) =>
+                {
+                    progressInfo.Description = $"{ processedCount } of { totalCount } orders have been exported";
+                    progressCallback(progressInfo);
+                }, cancellationToken);
 
-                writer.WriteEndArray();
-
-                writer.WriteEndObject();
-                writer.Flush();
+                await writer.WriteEndObjectAsync();
+                await writer.FlushAsync();
             }
         }
 
-        public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback,
-            ICancellationToken cancellationToken)
+        public async Task DoImportAsync(Stream inputStream, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
-            //TDODO: Use AbstractTypeFactory for deserialization of the derived types
             cancellationToken.ThrowIfCancellationRequested();
 
             var progressInfo = new ExportImportProgressInfo();
-            var orderTotalCount = 0;
 
             using (var streamReader = new StreamReader(inputStream))
             using (var reader = new JsonTextReader(streamReader))
@@ -81,49 +72,17 @@ namespace VirtoCommerce.OrdersModule.Data.ExportImport
                 {
                     if (reader.TokenType == JsonToken.PropertyName)
                     {
-                        if (reader.Value.ToString() == "OrderTotalCount")
+                        if (reader.Value.ToString() == "CustomerOrders")
                         {
-                            orderTotalCount = reader.ReadAsInt32() ?? 0;
-                        }
-                        else if (reader.Value.ToString() == "CustomerOrders")
-                        {
-                            reader.Read();
-                            if (reader.TokenType == JsonToken.StartArray)
+                            await reader.DeserializeJsonArrayWithPagingAsync<CustomerOrder>(_jsonSerializer, _batchSize, items => _customerOrderService.SaveChangesAsync(items.ToArray()), processedCount =>
                             {
-                                reader.Read();
-
-                                var orders = new List<CustomerOrder>();
-                                var orderCount = 0;
-                                while (reader.TokenType != JsonToken.EndArray)
-                                {
-                                    var order = _serializer.Deserialize<CustomerOrder>(reader);
-                                    orders.Add(order);
-                                    orderCount++;
-
-                                    reader.Read();
-                                }
-
-                                for (var i = 0; i < orderCount; i += _batchSize)
-                                {
-                                    await _customerOrderService.SaveChangesAsync(orders.Skip(i).Take(_batchSize).ToArray());
-
-                                    if (orderCount > 0)
-                                    {
-                                        progressInfo.Description = $"{ i } of { orderCount } orders have been imported";
-                                    }
-                                    else
-                                    {
-                                        progressInfo.Description = $"{ i } orders have been imported";
-                                    }
-                                    progressCallback(progressInfo);
-                                }
-                            }
-
+                                progressInfo.Description = $"{ processedCount } orders have been imported";
+                                progressCallback(progressInfo);
+                            }, cancellationToken);
                         }
                     }
                 }
             }
-
         }
     }
 }

@@ -15,17 +15,20 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
 {
     public class VendorSitemapItemRecordProvider : SitemapItemRecordProviderBase, ISitemapItemRecordProvider
     {
+        private readonly IMemberService _memberService;
+
+
         public VendorSitemapItemRecordProvider(
             ISitemapUrlBuilder urlBuilder,
             ISettingsManager settingsManager,
             IMemberService memberService)
             : base(settingsManager, urlBuilder)
         {
-            MemberService = memberService;
+            _memberService = memberService;
         }
 
-        protected IMemberService MemberService { get; }
 
+        #region ISitemapItemRecordProvider members
         public virtual async Task LoadSitemapItemRecordsAsync(Store store, Sitemap sitemap, string baseUrl, Action<ExportImportProgressInfo> progressCallback = null)
         {
             var progressInfo = new ExportImportProgressInfo();
@@ -33,27 +36,32 @@ namespace VirtoCommerce.SitemapsModule.Data.Services.SitemapItemRecordProviders
             var sitemapItemRecords = new List<SitemapItemRecord>();
             var vendorOptions = new SitemapItemOptions();
 
-            var vendorSitemapItems = sitemap.Items.Where(x => x.ObjectType.EqualsInvariant(SitemapItemTypes.Vendor));
-            var vendorIds = vendorSitemapItems.Select(x => x.ObjectId).ToArray();
-            var members = await MemberService.GetByIdsAsync(vendorIds);
+            var vendorSitemapItems = sitemap.Items.Where(x => x.ObjectType.EqualsInvariant(SitemapItemTypes.Vendor)).ToList();
 
-            var totalCount = members.Length;
-            var processedCount = 0;
-            progressInfo.Description = $"Vendor: start generating {totalCount} records for vendors";
-            progressCallback?.Invoke(progressInfo);
-
-            foreach (var sitemapItem in vendorSitemapItems)
+            if (vendorSitemapItems.Count > 0)
             {
-                var vendor = members.FirstOrDefault(x => x.Id == sitemapItem.ObjectId) as Vendor;
-                if (vendor != null)
-                {
-                    sitemapItem.ItemsRecords = GetSitemapItemRecords(store, vendorOptions, sitemap.UrlTemplate, baseUrl, vendor);
+                var vendorIds = vendorSitemapItems.Select(x => x.ObjectId).ToArray();
+                var members = await _memberService.GetByIdsAsync(vendorIds);
 
-                    processedCount++;
-                    progressInfo.Description = $"Vendor: generated  {processedCount} of {totalCount} records for vendors";
-                    progressCallback?.Invoke(progressInfo);
+                var totalCount = members.Length;
+                var processedCount = 0;
+                progressInfo.Description = $"Vendor: Starting records generation for {totalCount} vendors";
+                progressCallback?.Invoke(progressInfo);
+
+                foreach (var sitemapItem in vendorSitemapItems)
+                {
+                    var vendor = members.FirstOrDefault(x => x.Id == sitemapItem.ObjectId) as Vendor;
+                    if (vendor != null)
+                    {
+                        sitemapItem.ItemsRecords = GetSitemapItemRecords(store, vendorOptions, sitemap.UrlTemplate, baseUrl, vendor);
+
+                        processedCount++;
+                        progressInfo.Description = $"Vendor: Have been generated  {processedCount} of {totalCount} records for vendors items";
+                        progressCallback?.Invoke(progressInfo);
+                    }
                 }
             }
         }
+        #endregion
     }
 }

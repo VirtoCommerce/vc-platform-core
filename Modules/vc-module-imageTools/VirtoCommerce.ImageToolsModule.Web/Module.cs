@@ -20,6 +20,7 @@ using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Data.Extensions;
 
 namespace VirtoCommerce.ImageToolsModule.Web
 {
@@ -73,6 +74,7 @@ namespace VirtoCommerce.ImageToolsModule.Web
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
                 var thumbnailDbContext = serviceScope.ServiceProvider.GetRequiredService<ThumbnailDbContext>();
+                thumbnailDbContext.Database.MigrateIfNotApplied(MigrationName.GetUpdateV2MigrationName(ModuleInfo.Id));
                 thumbnailDbContext.Database.EnsureCreated();
                 thumbnailDbContext.Database.Migrate();
             }
@@ -84,12 +86,12 @@ namespace VirtoCommerce.ImageToolsModule.Web
 
         public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
-            await _appBuilder.ApplicationServices.GetRequiredService<ThumbnailsExportImport>().ExportAsync(outStream, options, progressCallback, cancellationToken);
+            await _appBuilder.ApplicationServices.GetRequiredService<ThumbnailsExportImport>().DoExportAsync(outStream, progressCallback, cancellationToken);
         }
 
         public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
-            await _appBuilder.ApplicationServices.GetRequiredService<ThumbnailsExportImport>().ImportAsync(inputStream, options, progressCallback, cancellationToken);
+            await _appBuilder.ApplicationServices.GetRequiredService<ThumbnailsExportImport>().DoImportAsync(inputStream, progressCallback, cancellationToken);
         }
     }
 }

@@ -57,26 +57,29 @@ namespace VirtoCommerce.CatalogModule.Data.Search
             //Because products and categories represent in search result as two separated collections for handle paging request 
             //we should join two resulting collection artificially
             //search categories
+            if (criteria.ObjectTypes.IsNullOrEmpty() || criteria.ObjectTypes.Contains(nameof(Category)))
+            {
+                var categoriesSearchResult = await SearchCategoriesAsync(criteria);
+                var categoriesTotalCount = categoriesSearchResult.TotalCount;
 
-            var categoriesSearchResult = await SearchCategoriesAsync(criteria);
-            var categoriesTotalCount = categoriesSearchResult.TotalCount;
+                categorySkip = Math.Min(categoriesTotalCount, criteria.Skip);
+                categoryTake = Math.Min(criteria.Take, Math.Max(0, categoriesTotalCount - criteria.Skip));
+                var categoryListEntries = categoriesSearchResult.Results.Select(x => AbstractTypeFactory<CategoryListEntry>.TryCreateInstance().FromModel(x)).ToList();
 
-            categorySkip = Math.Min(categoriesTotalCount, criteria.Skip);
-            categoryTake = Math.Min(criteria.Take, Math.Max(0, categoriesTotalCount - criteria.Skip));
-            var categoryListEntries = categoriesSearchResult.Results.Select(x => AbstractTypeFactory<CategoryListEntry>.TryCreateInstance().FromModel(x)).ToList();
+                result.TotalCount = categoriesTotalCount;
+                result.ListEntries.AddRange(categoryListEntries);
+            }
+            if (criteria.ObjectTypes.IsNullOrEmpty() || criteria.ObjectTypes.Contains(nameof(CatalogProduct)))
+            {
+                criteria.Skip = criteria.Skip - categorySkip;
+                criteria.Take = criteria.Take - categoryTake;
+                var productsSearchResult = await SearchItemsAsync(criteria);
 
-            result.TotalCount = categoriesTotalCount;
-            result.ListEntries.AddRange(categoryListEntries);
+                var productListEntries = productsSearchResult.Results.Select(x => AbstractTypeFactory<ProductListEntry>.TryCreateInstance().FromModel(x)).ToList();
 
-            criteria.Skip = criteria.Skip - categorySkip;
-            criteria.Take = criteria.Take - categoryTake;
-            var productsSearchResult = await SearchItemsAsync(criteria);
-
-            var productListEntries = productsSearchResult.Results.Select(x => AbstractTypeFactory<ProductListEntry>.TryCreateInstance().FromModel(x)).ToList();
-
-            result.TotalCount += productsSearchResult.TotalCount;
-            result.ListEntries.AddRange(productListEntries);
-
+                result.TotalCount += productsSearchResult.TotalCount;
+                result.ListEntries.AddRange(productListEntries);
+            }
             return result;
 
         }

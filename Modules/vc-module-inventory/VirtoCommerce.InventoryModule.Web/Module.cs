@@ -21,6 +21,7 @@ using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.SearchModule.Core.Model;
 
 namespace VirtoCommerce.InventoryModule.Web
@@ -59,6 +60,7 @@ namespace VirtoCommerce.InventoryModule.Web
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
                 var inventoryDbContext = serviceScope.ServiceProvider.GetRequiredService<InventoryDbContext>();
+                inventoryDbContext.Database.MigrateIfNotApplied(MigrationName.GetUpdateV2MigrationName(ModuleInfo.Id));
                 inventoryDbContext.Database.EnsureCreated();
                 inventoryDbContext.Database.Migrate();
             }
@@ -98,12 +100,12 @@ namespace VirtoCommerce.InventoryModule.Web
 
         public async Task ExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
-            await _appBuilder.ApplicationServices.GetRequiredService<InventoryExportImport>().ExportAsync(outStream, options, progressCallback, cancellationToken);
+            await _appBuilder.ApplicationServices.GetRequiredService<InventoryExportImport>().DoExportAsync(outStream, progressCallback, cancellationToken);
         }
 
         public async Task ImportAsync(Stream inputStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
-            await _appBuilder.ApplicationServices.GetRequiredService<InventoryExportImport>().ImportAsync(inputStream, options, progressCallback, cancellationToken);
+            await _appBuilder.ApplicationServices.GetRequiredService<InventoryExportImport>().DoImportAsync(inputStream, progressCallback, cancellationToken);
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.IO.Packaging;
 using System.Linq;
 using System.Net;
@@ -19,6 +20,7 @@ using VirtoCommerce.Platform.Core.PushNotifications;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.SitemapsModule.Core;
 using VirtoCommerce.SitemapsModule.Core.Models;
+using VirtoCommerce.SitemapsModule.Core.Models.Search;
 using VirtoCommerce.SitemapsModule.Core.Services;
 using VirtoCommerce.SitemapsModule.Data.Services;
 using VirtoCommerce.SitemapsModule.Web.Model.PushNotifications;
@@ -32,6 +34,8 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
     {
         private readonly ISitemapService _sitemapService;
         private readonly ISitemapItemService _sitemapItemService;
+        private readonly ISitemapSearchService _sitemapSearchService;
+        private readonly ISitemapItemSearchService _sitemapItemSearchService;
         private readonly ISitemapXmlGenerator _sitemapXmlGenerator;
         private readonly IUserNameResolver _userNameResolver;
         private readonly IPushNotificationManager _notifier;
@@ -42,6 +46,8 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
         public SitemapsModuleApiController(
             ISitemapService sitemapService,
             ISitemapItemService sitemapItemService,
+            ISitemapSearchService sitemapSearchService,
+            ISitemapItemSearchService sitemapItemSearchService,
             ISitemapXmlGenerator sitemapXmlGenerator,
             IUserNameResolver userNameResolver,
             IPushNotificationManager notifier,
@@ -51,6 +57,8 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
         {
             _sitemapService = sitemapService;
             _sitemapItemService = sitemapItemService;
+            _sitemapSearchService = sitemapSearchService;
+            _sitemapItemSearchService = sitemapItemSearchService;
             _sitemapXmlGenerator = sitemapXmlGenerator;
             _userNameResolver = userNameResolver;
             _notifier = notifier;
@@ -61,26 +69,21 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
 
         [HttpPost]
         [Route("search")]
-        [ProducesResponseType(typeof(GenericSearchResult<Sitemap>), 200)]
-        [ProducesResponseType(typeof(string), 400)]
-        public async Task<IActionResult> SearchSitemaps([FromBody]SitemapSearchCriteria request)
+        public async Task<ActionResult<SitemapSearchResult>> SearchSitemaps([FromBody] SitemapSearchCriteria request)
         {
             if (request == null)
             {
                 return BadRequest("request is null");
             }
 
-            var sitemapSearchResponse = await _sitemapService.SearchAsync(request);
+            var sitemapSearchResponse = await _sitemapSearchService.SearchAsync(request);
 
             return Ok(sitemapSearchResponse);
         }
 
         [HttpGet]
         [Route("{id}")]
-        [ProducesResponseType(typeof(Sitemap), 200)]
-        [ProducesResponseType(typeof(string), 400)]
-        [ProducesResponseType(typeof(void), 404)]
-        public async Task<IActionResult> GetSitemapById(string id)
+        public async Task<ActionResult<Sitemap>> GetSitemapById(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -99,9 +102,8 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
 
         [HttpPost]
         [Route("")]
-        [ProducesResponseType(typeof(Sitemap), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Create)]
-        public async Task<IActionResult> AddSitemap([FromBody]Sitemap sitemap)
+        public async Task<ActionResult<Sitemap>> AddSitemap([FromBody]Sitemap sitemap)
         {
             if (sitemap == null)
             {
@@ -115,9 +117,8 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
 
         [HttpPut]
         [Route("")]
-        [ProducesResponseType(typeof(void), 204)]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<IActionResult> UpdateSitemap([FromBody]Sitemap sitemap)
+        public async Task<ActionResult<Sitemap>> UpdateSitemap([FromBody]Sitemap sitemap)
         {
             if (sitemap == null)
             {
@@ -126,14 +127,13 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
 
             await _sitemapService.SaveChangesAsync(new[] { sitemap });
 
-            return NoContent();
+            return Ok(sitemap);
         }
 
         [HttpDelete]
         [Route("")]
-        [ProducesResponseType(typeof(void), 204)]
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
-        public async Task<IActionResult> DeleteSitemap(string[] ids)
+        public async Task<ActionResult> DeleteSitemap(string[] ids)
         {
             if (ids == null)
             {
@@ -142,28 +142,26 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
 
             await _sitemapService.RemoveAsync(ids);
 
-            return NoContent();
+            return Ok();
         }
 
         [HttpPost]
         [Route("items/search")]
-        [ProducesResponseType(typeof(GenericSearchResult<SitemapItem>), 200)]
-        public async Task<IActionResult> SearchSitemapItems([FromBody]SitemapItemSearchCriteria request)
+        public async Task<ActionResult<SitemapItemsSearchResult>> SearchSitemapItems([FromBody] SitemapItemSearchCriteria request)
         {
             if (request == null)
             {
                 return BadRequest("request is null");
             }
 
-            var searchSitemapItemResponse = await _sitemapItemService.SearchAsync(request);
+            var result = await _sitemapItemSearchService.SearchAsync(request);
 
-            return Ok(searchSitemapItemResponse);
+            return Ok(result);
         }
 
         [HttpPost]
         [Route("{sitemapId}/items")]
-        [ProducesResponseType(typeof(void), 200)]
-        public async Task<IActionResult> AddSitemapItems(string sitemapId, [FromBody]SitemapItem[] items)
+        public async Task<ActionResult> AddSitemapItems(string sitemapId, [FromBody]SitemapItem[] items)
         {
             if (string.IsNullOrEmpty(sitemapId))
             {
@@ -185,7 +183,6 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
 
         [HttpDelete]
         [Route("items")]
-        [ProducesResponseType(typeof(void), 204)]
         public async Task<IActionResult> RemoveSitemapItems(string[] itemIds)
         {
             if (itemIds == null)
@@ -195,13 +192,12 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
 
             await _sitemapItemService.RemoveAsync(itemIds);
 
-            return NoContent();
+            return Ok();
         }
 
         [HttpGet]
         [Route("schema")]
-        [ProducesResponseType(typeof(string[]), 200)]
-        public async Task<IActionResult> GetSitemapsSchema(string storeId)
+        public async Task<ActionResult<string[]>> GetSitemapsSchema(string storeId)
         {
             if (string.IsNullOrEmpty(storeId))
             {
@@ -227,8 +223,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
 
         [HttpGet]
         [Route("download")]
-        [ProducesResponseType(typeof(SitemapDownloadNotification), 200)]
-        public async Task<IActionResult> DownloadSitemap(string storeId, string baseUrl)
+        public async Task<ActionResult<SitemapDownloadNotification>> DownloadSitemap(string storeId, string baseUrl)
         {
             var notification = new SitemapDownloadNotification(_userNameResolver.GetCurrentUserName())
             {
@@ -270,16 +265,16 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
                 //Import first to local tmp folder because Azure blob storage doesn't support some special file access mode 
                 using (var stream = SystemFile.Open(localTmpPath, FileMode.OpenOrCreate))
                 {
-                    using (var zipPackage = ZipPackage.Open(stream, FileMode.Create))
+                    using (var zipArchive = new ZipArchive(stream, ZipArchiveMode.Create, true))
                     {
-                        await CreateSitemapPartAsync(zipPackage, storeId, baseUrl, "sitemap.xml", SendNotificationWithProgressInfo);
+                        await CreateSitemapPartAsync(zipArchive, storeId, baseUrl, "sitemap.xml", SendNotificationWithProgressInfo);
 
                         var sitemapUrls = await _sitemapXmlGenerator.GetSitemapUrlsAsync(storeId);
                         foreach (var sitemapUrl in sitemapUrls)
                         {
                             if (!string.IsNullOrEmpty(sitemapUrl))
                             {
-                                await CreateSitemapPartAsync(zipPackage, storeId, baseUrl, sitemapUrl, SendNotificationWithProgressInfo);
+                                await CreateSitemapPartAsync(zipArchive, storeId, baseUrl, sitemapUrl, SendNotificationWithProgressInfo);
                             }
                         }
                     }
@@ -305,13 +300,14 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
             }
         }
 
-        private async Task CreateSitemapPartAsync(Package package, string storeId, string baseUrl, string sitemapUrl, Action<ExportImportProgressInfo> progressCallback)
+        private async Task CreateSitemapPartAsync(ZipArchive zipArchive, string storeId, string baseUrl, string sitemapUrl, Action<ExportImportProgressInfo> progressCallback)
         {
-            var uri = PackUriHelper.CreatePartUri(new Uri(sitemapUrl, UriKind.Relative));
-            var sitemapPart = package.CreatePart(uri, System.Net.Mime.MediaTypeNames.Text.Xml, CompressionOption.Normal);
-            var stream = await _sitemapXmlGenerator.GenerateSitemapXmlAsync(storeId, baseUrl, sitemapUrl, progressCallback);
-            var sitemapPartStream = sitemapPart.GetStream();
-            stream.CopyTo(sitemapPartStream);
+            var sitemapPart = zipArchive.CreateEntry(sitemapUrl, CompressionLevel.Optimal);
+            using (var sitemapPartStream = sitemapPart.Open())
+            {
+                var stream = await _sitemapXmlGenerator.GenerateSitemapXmlAsync(storeId, baseUrl, sitemapUrl, progressCallback);
+                stream.CopyTo(sitemapPartStream);
+            }
         }
 
         private static string MapPath(IHostingEnvironment hostEnv, string path)

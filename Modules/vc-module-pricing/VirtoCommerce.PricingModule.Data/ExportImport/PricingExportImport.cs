@@ -3,8 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
@@ -25,14 +23,13 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
 
         private int? _batchSize;
 
-        public PricingExportImport(IPricingService pricingService, IPricingSearchService pricingSearchService, ISettingsManager settingsManager,
-            IOptions<MvcJsonOptions> jsonOptions)
+        public PricingExportImport(IPricingService pricingService, IPricingSearchService pricingSearchService, ISettingsManager settingsManager, JsonSerializer jsonSerializer)
         {
             _pricingService = pricingService;
             _pricingSearchService = pricingSearchService;
             _settingsManager = settingsManager;
 
-            _jsonSerializer = JsonSerializer.Create(jsonOptions.Value.SerializerSettings);
+            _jsonSerializer = jsonSerializer;
         }
 
         private int BatchSize
