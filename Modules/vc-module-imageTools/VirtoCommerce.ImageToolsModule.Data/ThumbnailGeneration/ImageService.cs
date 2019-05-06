@@ -1,9 +1,10 @@
 using System;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.PixelFormats;
 using VirtoCommerce.ImageToolsModule.Core.Models;
 using VirtoCommerce.ImageToolsModule.Core.ThumbnailGeneration;
 using VirtoCommerce.Platform.Core.Assets;
@@ -25,45 +26,46 @@ namespace VirtoCommerce.ImageToolsModule.Data.ThumbnailGeneration
         /// Load to Image from blob.
         /// </summary>
         /// <param name="imageUrl">image url.</param>
+        /// <param name="format">image format.</param>
         /// <returns>Image object.</returns>
-        public virtual async Task<Image> LoadImageAsync(string imageUrl)
+        public virtual Task<Image<Rgba32>> LoadImageAsync(string imageUrl, out IImageFormat format)
         {
             try
             {
                 using (var blobStream = StorageProvider.OpenRead(imageUrl))
-                using (var stream = new MemoryStream())
                 {
-                    await blobStream.CopyToAsync(stream);
-                    var result = Image.FromStream(stream);
-                    return result;
+                    var result = Image.Load(blobStream, out format);
+                    return Task.FromResult(result);
                 }
             }
             catch (Exception)
             {
-                return null;
+                format = null;
+                return Task.FromResult<Image<Rgba32>>(null);
             }
         }
 
+        /// <inheritdoc />
         /// <summary>
         /// Save given image to blob storage.
         /// </summary>
         /// <param name="imageUrl">Image url.</param>
         /// <param name="image">Image object.</param>
         /// <param name="format">Image object format.</param>
-        /// <param name="quality">Target image quality.</param>
-        public virtual async Task SaveImageAsync(string imageUrl, Image image, ImageFormat format, JpegQuality quality)
+        /// <param name="jpegQuality">Target image quality.</param>
+        public virtual async Task SaveImageAsync(string imageUrl, Image<Rgba32> image, IImageFormat format, JpegQuality jpegQuality)
         {
             using (var blobStream = StorageProvider.OpenWrite(imageUrl))
             using (var stream = new MemoryStream())
             {
-                if (format.Guid == ImageFormat.Jpeg.Guid)
+                if (format.DefaultMimeType == "image/jpeg")
                 {
-                    var codecInfo = ImageCodecInfo.GetImageEncoders().FirstOrDefault(c => c.FormatID == format.Guid);
-                    var encoderParams = new EncoderParameters
+                    var options = new JpegEncoder
                     {
-                        Param = new[] { new EncoderParameter(Encoder.Quality, (int)quality) }
+                        Quality = (int)jpegQuality
                     };
-                    image.Save(stream, codecInfo, encoderParams);
+
+                    image.Save(stream, options);
                 }
                 else
                 {

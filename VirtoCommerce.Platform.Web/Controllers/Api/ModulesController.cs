@@ -113,7 +113,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("getmissingdependencies")]
         [Authorize(PlatformConstants.Security.Permissions.ModuleQuery)]
-        public ActionResult<ModuleDescriptor[]> GetMissingDependencies(ModuleDescriptor[] moduleDescriptors)
+        public ActionResult<ModuleDescriptor[]> GetMissingDependencies([FromBody] ModuleDescriptor[] moduleDescriptors)
         {
             EnsureModulesCatalogInitialized();
             var modules = _externalModuleCatalog.Modules
@@ -158,7 +158,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             var section = await reader.ReadNextSectionAsync();
             if (section != null)
             {
-                var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out ContentDispositionHeaderValue contentDisposition);
+                var hasContentDispositionHeader = ContentDispositionHeaderValue.TryParse(section.ContentDisposition, out var contentDisposition);
 
                 if (hasContentDispositionHeader)
                 {
@@ -212,7 +212,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("install")]
         [Authorize(PlatformConstants.Security.Permissions.ModuleManage)]
-        public ActionResult<ModulePushNotification> InstallModules(ModuleDescriptor[] modules)
+        public ActionResult<ModulePushNotification> InstallModules([FromBody] ModuleDescriptor[] modules)
         {
             EnsureModulesCatalogInitialized();
 
@@ -233,7 +233,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("uninstall")]
         [Authorize(PlatformConstants.Security.Permissions.ModuleManage)]
-        public ActionResult<ModulePushNotification> UninstallModule(ModuleDescriptor[] modules)
+        public ActionResult<ModulePushNotification> UninstallModule([FromBody] ModuleDescriptor[] modules)
         {
             EnsureModulesCatalogInitialized();
 

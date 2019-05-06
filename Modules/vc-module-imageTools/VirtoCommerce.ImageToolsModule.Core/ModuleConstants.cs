@@ -59,13 +59,7 @@ namespace VirtoCommerce.ImageToolsModule.Core
                     }
                 }
             }
-            public static IEnumerable<SettingDescriptor> AllSettings
-            {
-                get
-                {
-                    return General.AllSettings;
-                }
-            }
+            public static IEnumerable<SettingDescriptor> AllSettings => General.AllSettings;
         }
     }
 }

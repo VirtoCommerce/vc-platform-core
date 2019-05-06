@@ -1,39 +1,39 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Data.ExportImport;
 using VirtoCommerce.SitemapsModule.Core.Models;
+using VirtoCommerce.SitemapsModule.Core.Models.Search;
 using VirtoCommerce.SitemapsModule.Core.Services;
 
 namespace VirtoCommerce.SitemapsModule.Data.ExportImport
 {
-
     public sealed class SitemapExportImport
     {
         private readonly ISitemapService _sitemapService;
         private readonly ISitemapItemService _sitemapItemService;
+        private readonly ISitemapSearchService _sitemapSearchService;
+        private readonly ISitemapItemSearchService _sitemapItemSearchService;
         private const int _batchSize = 50;
         private readonly JsonSerializer _jsonSerializer;
 
-        public SitemapExportImport(ISitemapService sitemapService, ISitemapItemService sitemapItemService,
-            IOptions<MvcJsonOptions> mvcJsonOptions)
+        public SitemapExportImport(ISitemapService sitemapService, ISitemapItemService sitemapItemService, ISitemapSearchService sitemapSearchService, ISitemapItemSearchService sitemapItemSearchService, JsonSerializer jsonSerializer)
         {
             _sitemapService = sitemapService;
             _sitemapItemService = sitemapItemService;
-            _jsonSerializer = JsonSerializer.Create(mvcJsonOptions.Value.SerializerSettings);
+            _sitemapSearchService = sitemapSearchService;
+            _sitemapItemSearchService = sitemapItemSearchService;
+            _jsonSerializer = jsonSerializer;
         }
 
         public async Task DoExportAsync(Stream outStream, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
+
             var progressInfo = new ExportImportProgressInfo { Description = "loading data..." };
             progressCallback(progressInfo);
 
@@ -47,7 +47,7 @@ namespace VirtoCommerce.SitemapsModule.Data.ExportImport
 
                 await writer.WritePropertyNameAsync("Sitemaps");
 
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) => _sitemapService.SearchAsync(new SitemapSearchCriteria { Skip = skip, Take = take }), (processedCount, totalCount) =>
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) => (GenericSearchResult<Sitemap>)await _sitemapSearchService.SearchAsync(new SitemapSearchCriteria { Skip = skip, Take = take }), (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } site maps have been exported";
                     progressCallback(progressInfo);
@@ -57,7 +57,7 @@ namespace VirtoCommerce.SitemapsModule.Data.ExportImport
                 progressCallback(progressInfo);
 
                 await writer.WritePropertyNameAsync("SitemapItems");
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) => _sitemapItemService.SearchAsync(new SitemapItemSearchCriteria { Skip = skip, Take = take }), (processedCount, totalCount) =>
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) => (GenericSearchResult<SitemapItem>)await _sitemapItemSearchService.SearchAsync(new SitemapItemSearchCriteria { Skip = skip, Take = take }), (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } site maps items have been exported";
                     progressCallback(progressInfo);
@@ -67,7 +67,6 @@ namespace VirtoCommerce.SitemapsModule.Data.ExportImport
                 await writer.FlushAsync();
             }
         }
-
 
         public async Task DoImportAsync(Stream inputStream, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
         {

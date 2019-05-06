@@ -32,7 +32,7 @@ module.exports = env => {
                     },
                     {
                         test: /\.css$/,
-                        loaders: [ MiniCssExtractPlugin.loader, "css-loader" ]
+                        loaders: [MiniCssExtractPlugin.loader, "css-loader"]
                     },
                     {
                         test: /\.(jpe?g|png|gif)$/i,
@@ -84,6 +84,9 @@ module.exports = env => {
                     Vendor: path.resolve(__dirname, 'wwwroot/vendor'),
                     modernizr$: path.resolve(__dirname, ".modernizrrc.js")
                 }
+            },
+            node: {
+                fs: 'empty'
             }
         },
         {
@@ -112,6 +115,9 @@ module.exports = env => {
                         }
                     }
                 ]
+            },
+            node: {
+                fs: 'empty'
             }
         }
     ];

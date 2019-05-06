@@ -11,6 +11,7 @@ using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.SitemapsModule.Core;
 using VirtoCommerce.SitemapsModule.Core.Services;
 using VirtoCommerce.SitemapsModule.Data.ExportImport;
@@ -40,6 +41,8 @@ namespace VirtoCommerce.SitemapsModule.Web
 
             serviceCollection.AddTransient<ISitemapService, SitemapService>();
             serviceCollection.AddTransient<ISitemapItemService, SitemapItemService>();
+            serviceCollection.AddTransient<ISitemapSearchService, SitemapSearchService>();
+            serviceCollection.AddTransient<ISitemapItemSearchService, SitemapItemSearchService>();
             serviceCollection.AddTransient<IUrlBuilder, UrlBuilder>();
             serviceCollection.AddTransient<ISitemapUrlBuilder, SitemapUrlBuilder>();
             serviceCollection.AddTransient<ISitemapItemRecordProvider, CatalogSitemapItemRecordProvider>();
@@ -57,6 +60,7 @@ namespace VirtoCommerce.SitemapsModule.Web
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {
                 var dbContext = serviceScope.ServiceProvider.GetRequiredService<SitemapDbContext>();
+                dbContext.Database.MigrateIfNotApplied(MigrationName.GetUpdateV2MigrationName(ModuleInfo.Id));
                 dbContext.Database.EnsureCreated();
                 dbContext.Database.Migrate();
             }

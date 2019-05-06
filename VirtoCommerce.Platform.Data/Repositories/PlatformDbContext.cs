@@ -1,6 +1,5 @@
 using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
-using VirtoCommerce.Platform.Data.Assets;
 using VirtoCommerce.Platform.Data.Model;
 
 namespace VirtoCommerce.Platform.Data.Repositories
@@ -24,6 +23,7 @@ namespace VirtoCommerce.Platform.Data.Repositories
             modelBuilder.Entity<OperationLogEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<OperationLogEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
             modelBuilder.Entity<OperationLogEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
+            modelBuilder.Entity<OperationLogEntity>().Property(x => x.Detail).HasMaxLength(2048);
             modelBuilder.Entity<OperationLogEntity>().HasIndex(x => new { x.ObjectType, x.ObjectId })
                         .IsUnique(false)
                         .HasName("IX_ObjectType_ObjectId");
@@ -131,7 +131,7 @@ namespace VirtoCommerce.Platform.Data.Repositories
             modelBuilder.Entity<AssetEntryEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<AssetEntryEntity>().Property(x => x.CreatedBy).HasMaxLength(64);
             modelBuilder.Entity<AssetEntryEntity>().Property(x => x.ModifiedBy).HasMaxLength(64);
-            modelBuilder.Entity<AssetEntryEntity>().HasIndex(x => new { x.RelativeUrl, x.Name})
+            modelBuilder.Entity<AssetEntryEntity>().HasIndex(x => new { x.RelativeUrl, x.Name })
                 .IsUnique(false)
                 .HasName("IX_AssetEntry_RelativeUrl_Name");
 
@@ -141,5 +141,35 @@ namespace VirtoCommerce.Platform.Data.Repositories
             base.OnModelCreating(modelBuilder);
         }
 
+
     }
+
+    //public class PlatformPKMigrationsSqlGenerator : SqlServerMigrationsSqlGenerator
+    //{
+    //    private static readonly string PREFIX = "PK_dbo.";
+    //    public PlatformPKMigrationsSqlGenerator(MigrationsSqlGeneratorDependencies dependencies, IMigrationsAnnotationProvider migrationsAnnotations) : base(dependencies, migrationsAnnotations)
+    //    {
+    //    }
+
+    //    protected override void Generate(AddPrimaryKeyOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate)
+    //    {
+    //        operation.Name = GetPkName(operation.Table);
+    //        base.Generate(operation, model, builder, terminate);
+    //    }
+
+    //    protected override void Generate(DropPrimaryKeyOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate)
+    //    {
+    //        operation.Name = GetPkName(operation.Table);
+    //        base.Generate(operation, model, builder, terminate);
+    //    }
+
+
+    //    // Prefix + Table name without schema
+    //    private string GetPkName(string tableName)
+    //    {
+    //        return PREFIX + tableName.Substring(tableName.IndexOf('.') + 1);
+    //    }
+
+
+    //}
 }

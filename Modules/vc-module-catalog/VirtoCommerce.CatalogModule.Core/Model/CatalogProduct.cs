@@ -137,9 +137,9 @@ namespace VirtoCommerce.CatalogModule.Core.Model
 
         public IList<Variation> Variations { get; set; }
         /// <summary>
-        /// Each derivative type should override this property tp use other object type in seo records 
+        /// Each descendant type should override this property to use other object type for seo records 
         /// </summary>
-        public virtual string SeoObjectType { get; } = "Product";
+        public virtual string SeoObjectType { get; } = "CatalogProduct";
         public IList<SeoInfo> SeoInfos { get; set; }
         public IList<EditorialReview> Reviews { get; set; }
 

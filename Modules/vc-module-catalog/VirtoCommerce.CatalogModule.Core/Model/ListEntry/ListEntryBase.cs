@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model.ListEntry
@@ -6,7 +7,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model.ListEntry
     /// <summary>
     /// Base class for all entries used in catalog categories browsing.
     /// </summary>
-	public class ListEntryBase : AuditableEntity
+	public class ListEntryBase : AuditableEntity, ISeoSupport
     {
         /// <summary>
         /// Gets or sets the type. E.g. "product", "category"
@@ -63,6 +64,11 @@ namespace VirtoCommerce.CatalogModule.Core.Model.ListEntry
         /// </summary>
         public IList<string> Path { get; set; }
 
+        #region ISeoSupport members
+        public virtual string SeoObjectType { get; set; }
+
+        public virtual IList<SeoInfo> SeoInfos { get; set; }
+        #endregion
 
         public virtual ListEntryBase FromModel(AuditableEntity entity)
         {
@@ -74,6 +80,12 @@ namespace VirtoCommerce.CatalogModule.Core.Model.ListEntry
             ModifiedDate = entity.ModifiedDate;
             CreatedBy = entity.CreatedBy;
             ModifiedBy = entity.ModifiedBy;
+
+            if (entity is ISeoSupport seoSupport)
+            {
+                SeoObjectType = seoSupport.SeoObjectType;
+                SeoInfos = seoSupport.SeoInfos;
+            }
 
             return this;
         }
