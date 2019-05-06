@@ -143,13 +143,11 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                 {
                     var searchResult = await _productSearchService.SearchProductsAsync(new ProductSearchCriteria { Skip = skip, Take = take, ResponseGroup = (ItemResponseGroup.Full & ~ItemResponseGroup.Variations).ToString() });
 
-                    var products = await _itemService.GetByIdsAsync(searchResult.Results.Select(x => x.Id).ToArray(), ItemResponseGroup.ItemLarge.ToString());
-
                     if (options.HandleBinaryData)
                     {
-                        LoadImages(products.OfType<IHasImages>().ToArray(), progressInfo);
+                        LoadImages(searchResult.Results.OfType<IHasImages>().ToArray(), progressInfo);
                     }
-                    return new GenericSearchResult<CatalogProduct> { Results = products, TotalCount = searchResult.TotalCount };
+                    return new GenericSearchResult<CatalogProduct> { Results = searchResult.Results, TotalCount = searchResult.TotalCount };
                 }, (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } Products have been exported";
