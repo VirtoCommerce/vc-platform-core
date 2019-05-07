@@ -25,6 +25,8 @@ namespace VirtoCommerce.Platform.Security.Extensions
             //Identity dependencies override
             services.TryAddScoped<RoleManager<Role>, CustomRoleManager>();
             services.TryAddScoped<UserManager<ApplicationUser>, CustomUserManager>();
+            //Use custom ClaimsPrincipalFactory to add system roles claims for user principal
+            services.TryAddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, CustomUserCalimsPrincipalFactory>();
 
             if (setupAction != null)
             {
