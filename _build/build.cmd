@@ -19,6 +19,9 @@ IF !ERRORLEVEL! NEQ 0 goto error
 call dotnet clean -c Release
 IF !ERRORLEVEL! NEQ 0 goto error
 
+del /q %ARTIFACTS_PATH%\*
+for /d %%x in (%ARTIFACTS_PATH%\*) do @rd /s /q ^"%%x^"
+
 call dotnet publish -c Release -o %ARTIFACTS_PATH% --self-contained false
 IF !ERRORLEVEL! NEQ 0 goto error
 
