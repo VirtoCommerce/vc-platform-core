@@ -117,7 +117,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             var result = new UserDetail
             {
                 Id = user.Id,
-                isAdministrator = await _userManager.IsInRoleAsync(user, PlatformConstants.Security.SystemRoles.Administrator),
+                isAdministrator = user.IsAdministrator,
                 UserName = user.UserName,
                 PasswordExpired = user.PasswordExpired
             };
