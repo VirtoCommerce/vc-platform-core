@@ -22,10 +22,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <!-- End Google Tag Manager -->
     }
 
-    <environment include="Development">
-        <link rel="stylesheet" href="~/dist/style.css" asp-append-version="true" />
-        <modules-style-bundle bundle-path="~/dist/style.css" asp-append-version="true"></modules-style-bundle>
-    </environment>
+
+    <link rel="stylesheet" href="~/dist/style.css" asp-append-version="true" />
+    <modules-style-bundle bundle-path="~/dist/style.css" asp-append-version="true"></modules-style-bundle>
+
 
     <meta name="viewport" content="width=device-width" />
     <base href="~/" />
@@ -48,11 +48,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     <partial name="_AppDependencies" />
 
-    <environment include="Development">
-        <script src="~/dist/vendor.js" type="text/javascript" asp-append-version="true"></script>
-        <script src="~/dist/app.js" type="text/javascript" asp-append-version="true"></script>
-        <modules-script-bundle bundle-path="~/dist/app.js" asp-append-version="true"></modules-script-bundle>
-    </environment>
+    <script src="~/dist/vendor.js" type="text/javascript" asp-append-version="true"></script>
+    <script src="~/dist/app.js" type="text/javascript" asp-append-version="true"></script>
+    <modules-script-bundle bundle-path="~/dist/app.js" asp-append-version="true"></modules-script-bundle>
 
     @RenderSection("scripts", required: false)
 </body>
