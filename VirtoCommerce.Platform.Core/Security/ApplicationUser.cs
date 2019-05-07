@@ -57,7 +57,6 @@ namespace VirtoCommerce.Platform.Core.Security
             target.EmailConfirmed = EmailConfirmed;
             target.PasswordHash = PasswordHash;
             target.SecurityStamp = SecurityStamp;
-            target.ConcurrencyStamp = ConcurrencyStamp;
             target.PhoneNumberConfirmed = PhoneNumberConfirmed;
             target.TwoFactorEnabled = TwoFactorEnabled;
             target.LockoutEnabled = LockoutEnabled;

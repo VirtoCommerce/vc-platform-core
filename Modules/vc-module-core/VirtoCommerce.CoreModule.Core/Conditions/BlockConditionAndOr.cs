@@ -15,7 +15,7 @@ namespace VirtoCommerce.CoreModule.Core.Conditions
         {
             var result = false;
 
-            if (Children.IsNullOrEmpty() && AvailableChildren.IsNullOrEmpty())
+            if (Children.IsNullOrEmpty())
             {
                 return true;
             }
@@ -29,19 +29,6 @@ namespace VirtoCommerce.CoreModule.Core.Conditions
                 else
                 {
                     result = All ? !Children.All(ch => ch.Evaluate(context)) : !Children.Any(ch => ch.Evaluate(context));
-                }
-
-            }
-
-            if (AvailableChildren != null && AvailableChildren.Any())
-            {
-                if (!Not)
-                {
-                    result = All ? AvailableChildren.All(ch => ch.Evaluate(context)) : AvailableChildren.Any(ch => ch.Evaluate(context));
-                }
-                else
-                {
-                    result = All ? !AvailableChildren.All(ch => ch.Evaluate(context)) : !AvailableChildren.Any(ch => ch.Evaluate(context));
                 }
 
             }
