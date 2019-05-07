@@ -41,6 +41,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             _repositoryMock.Setup(ss => ss.UnitOfWork).Returns(_mockUnitOfWork.Object);
             _notificationSearchService = new NotificationSearchService(RepositoryFactory);
             _notificationService = new NotificationService(RepositoryFactory, _eventPulisherMock.Object);
+            _notificationsExportImportManager = new NotificationsExportImport(_notificationSearchService, _notificationService, GetJsonSerializer());
 
             var mvcJsonOptions = new MvcJsonOptions()
             {
@@ -74,6 +75,16 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             }
 
             _notificationRegistrar.RegisterNotification<RegistrationEmailNotification>();
+        }
+
+        private JsonSerializer GetJsonSerializer()
+        {
+            return JsonSerializer.Create(new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                NullValueHandling = NullValueHandling.Ignore,
+                Formatting = Formatting.Indented
+            });
         }
 
         [Fact]

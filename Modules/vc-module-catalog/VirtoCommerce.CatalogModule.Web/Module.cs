@@ -61,7 +61,8 @@ namespace VirtoCommerce.CatalogModule.Web
 
             serviceCollection.AddSingleton<IItemService, ItemService>();
             serviceCollection.AddSingleton<IProductIndexedSearchService, ProductIndexedSearchService>();
-
+            serviceCollection.AddSingleton<IAssociationService, AssociationService>();
+            
             serviceCollection.AddSingleton<IAggregationConverter, AggregationConverter>();
             serviceCollection.AddSingleton<IBrowseFilterService, BrowseFilterService>();
             serviceCollection.AddSingleton<ITermFilterBuilder, TermFilterBuilder>();

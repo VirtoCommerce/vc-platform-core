@@ -114,32 +114,35 @@ namespace VirtoCommerce.Platform.Security.Services
         }
         public override async Task<IdentityResult> UpdateAsync(ApplicationUser user)
         {
-            var oldUser = await FindByIdAsync(user.Id);
+            var existUser = await FindByIdAsync(user.Id);
+
             var changedEntries = new List<GenericChangedEntry<ApplicationUser>>
             {
-                new GenericChangedEntry<ApplicationUser>(user, oldUser, EntryState.Modified)
+                new GenericChangedEntry<ApplicationUser>(user, existUser, EntryState.Modified)
             };
             await _eventPublisher.Publish(new UserChangingEvent(changedEntries));
-            var result = await base.UpdateAsync(user);
+
+            user.Patch(existUser);
+            var result = await base.UpdateAsync(existUser);
             if (result.Succeeded)
             {
                 await _eventPublisher.Publish(new UserChangedEvent(changedEntries));
-                if (user.Roles != null)
+                if (!user.Roles.IsNullOrEmpty())
                 {
-                    var targetRoles = (await GetRolesAsync(user));
+                    var targetRoles = (await GetRolesAsync(existUser));
                     var sourceRoles = user.Roles.Select(x => x.Name);
                     //Add
                     foreach (var newRole in sourceRoles.Except(targetRoles))
                     {
-                        await AddToRoleAsync(user, newRole);
+                        await AddToRoleAsync(existUser, newRole);
                     }
                     //Remove
                     foreach (var removeRole in targetRoles.Except(sourceRoles))
                     {
-                        await RemoveFromRoleAsync(user, removeRole);
+                        await RemoveFromRoleAsync(existUser, removeRole);
                     }
                 }
-                SecurityCacheRegion.ExpireUser(user);
+                SecurityCacheRegion.ExpireUser(existUser);
             }
             return result;
         }
@@ -155,7 +158,7 @@ namespace VirtoCommerce.Platform.Security.Services
             if (result.Succeeded)
             {
                 await _eventPublisher.Publish(new UserChangedEvent(changedEntries));
-                if (user.Roles != null)
+                if (!user.Roles.IsNullOrEmpty())
                 {
                     //Add
                     foreach (var newRole in user.Roles)

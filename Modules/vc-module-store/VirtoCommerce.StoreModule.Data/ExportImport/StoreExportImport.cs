@@ -42,12 +42,15 @@ namespace VirtoCommerce.StoreModule.Data.ExportImport
                 progressCallback(progressInfo);
 
                 await writer.WritePropertyNameAsync("Stores");
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) =>
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
                 {
                     var searchCriteria = AbstractTypeFactory<StoreSearchCriteria>.TryCreateInstance();
                     searchCriteria.Take = take;
                     searchCriteria.Skip = skip;
-                    return _storeSearchService.SearchStoresAsync(searchCriteria);
+
+                    var searchResult = await _storeSearchService.SearchStoresAsync(searchCriteria);
+                    var result = await _storeService.GetByIdsAsync(searchResult.Results.Select(r => r.Id).ToArray());
+                    return new GenericSearchResult<Store> { Results = result, TotalCount = result.Length };
                 }, (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{processedCount} of {totalCount} stores have been exported";

@@ -72,7 +72,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 var user = await _userManager.FindByNameAsync(request.UserName);
                 await _eventPublisher.Publish(new UserLoginEvent(user));
                 //Do not allow login to admin customers and rejected users
-                if (await _signInManager.UserManager.IsInRoleAsync(user, PlatformConstants.Security.Roles.Customer))
+                if (await _signInManager.UserManager.IsInRoleAsync(user, PlatformConstants.Security.SystemRoles.Customer))
                 {
                     loginResult = Microsoft.AspNetCore.Identity.SignInResult.NotAllowed;
                 }
@@ -117,7 +117,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             var result = new UserDetail
             {
                 Id = user.Id,
-                isAdministrator = await _userManager.IsInRoleAsync(user, PlatformConstants.Security.Roles.Administrator),
+                isAdministrator = user.IsAdministrator,
                 UserName = user.UserName,
                 PasswordExpired = user.PasswordExpired
             };
@@ -522,7 +522,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
             }
 
             //Do not permit rejected users and customers
-            if (user?.Email != null && IsUserEditable(user.UserName) && !(await _userManager.IsInRoleAsync(user, PlatformConstants.Security.Roles.Customer)))
+            if (user?.Email != null && IsUserEditable(user.UserName) && !(await _userManager.IsInRoleAsync(user, PlatformConstants.Security.SystemRoles.Customer)))
             {
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var callbackUrl = $"{Request.Scheme}{Request.Host}/api/platform/security/#/resetpassword/{user.Id}/{token}";

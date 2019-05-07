@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -243,18 +242,7 @@ namespace VirtoCommerce.SitemapsModule.Test
 
             InitSitemapService();
             InitSitemapItemService();
-
-            var mvcJsonOptions = new MvcJsonOptions()
-            {
-                SerializerSettings =
-                {
-                    NullValueHandling = NullValueHandling.Ignore,
-                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                    Formatting = Formatting.Indented
-                }
-            };
-
-            _sitemapExportImport = new SitemapExportImport(_sitemapService.Object, _sitemapItemService.Object, _sitemapSearchService.Object, _sitemapItemSearchService.Object, JsonSerializer.Create(mvcJsonOptions.SerializerSettings));
+            _sitemapExportImport = new SitemapExportImport(_sitemapService.Object, _sitemapItemService.Object, _sitemapSearchService.Object, _sitemapItemSearchService.Object, GetJsonSerializer());
         }
 
         private static Stream ReadEmbeddedResource(string filePath)
@@ -267,6 +255,16 @@ namespace VirtoCommerce.SitemapsModule.Test
 
         private static void IgnoreProgressInfo(ExportImportProgressInfo progressInfo)
         {
+        }
+
+        private JsonSerializer GetJsonSerializer()
+        {
+            return JsonSerializer.Create(new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                NullValueHandling = NullValueHandling.Ignore,
+                Formatting = Formatting.Indented
+            });
         }
 
         [Fact]

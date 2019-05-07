@@ -15,7 +15,7 @@ using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.CustomerModule.Data.ExportImport
 {
-    public sealed class CustomerExportImport : IExportSupport, IImportSupport
+    public sealed class CustomerExportImport
     {
         private readonly IMemberService _memberService;
         private readonly IMemberSearchService _memberSearchService;

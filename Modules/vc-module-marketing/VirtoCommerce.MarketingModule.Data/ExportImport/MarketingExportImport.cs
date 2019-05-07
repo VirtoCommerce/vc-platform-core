@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -62,7 +63,11 @@ namespace VirtoCommerce.MarketingModule.Data.ExportImport
                 progressCallback(progressInfo);
 
                 await writer.WritePropertyNameAsync("DynamicContentFolders");
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) => _dynamicContentSearchService.SearchFoldersAsync(new DynamicContentFolderSearchCriteria { Skip = skip, Take = take }), (processedCount, totalCount) =>
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
+                {
+                    var result = await LoadFoldersRecursiveAsync(null);
+                    return new GenericSearchResult<DynamicContentFolder>() { Results = result, TotalCount = result.Count };
+                }, (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } dynamic content folders have been exported";
                     progressCallback(progressInfo);
@@ -197,6 +202,20 @@ namespace VirtoCommerce.MarketingModule.Data.ExportImport
                     }
                 }
             }
+        }
+
+        private async Task<IList<DynamicContentFolder>> LoadFoldersRecursiveAsync(DynamicContentFolder folder)
+        {
+            var result = new List<DynamicContentFolder>();
+
+            var childrenFolders = (await _dynamicContentSearchService.SearchFoldersAsync(new DynamicContentFolderSearchCriteria { FolderId = folder?.Id, Take = int.MaxValue })).Results.ToList();
+            foreach (var childFolder in childrenFolders)
+            {
+                result.Add(childFolder);
+                result.AddRange(await LoadFoldersRecursiveAsync(childFolder));
+            }
+
+            return result;
         }
     }
 }

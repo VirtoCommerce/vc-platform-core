@@ -21,5 +21,12 @@ namespace VirtoCommerce.Platform.Core.Security
             yield return Name;
             yield return ModuleId;
         }
+
+        public virtual void Patch(Permission target)
+        {
+            target.Name = Name;
+            target.ModuleId = ModuleId;
+            target.GroupName = GroupName;
+        }
     }
 }

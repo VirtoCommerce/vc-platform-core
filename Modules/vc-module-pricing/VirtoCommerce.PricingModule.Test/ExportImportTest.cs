@@ -1,7 +1,5 @@
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Moq;
 using Newtonsoft.Json;
 using VirtoCommerce.Platform.Core.Common;
@@ -39,7 +37,7 @@ namespace VirtoCommerce.PricingModule.Test
 
         private PricingExportImport GetImportExportProcessor(IPricingService pricingService, ISettingsManager settingsManager)
         {
-            return new PricingExportImport(pricingService, GetPricingSearchService(), settingsManager, JsonSerializer.Create(GetMvcJsonOptions().Value.SerializerSettings));
+            return new PricingExportImport(pricingService, GetPricingSearchService(), settingsManager, GetJsonSerializer());
         }
 
         private Mock<IPricingService> GetPricingService()
@@ -71,19 +69,14 @@ namespace VirtoCommerce.PricingModule.Test
         {
         }
 
-        private IOptions<MvcJsonOptions> GetMvcJsonOptions()
+        private JsonSerializer GetJsonSerializer()
         {
-            var options = new MvcJsonOptions
+            return JsonSerializer.Create(new JsonSerializerSettings()
             {
-                SerializerSettings =
-                {
-                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                    NullValueHandling = NullValueHandling.Ignore,
-                    Formatting = Formatting.Indented
-                }
-            };
-
-            return new OptionsWrapper<MvcJsonOptions>(options);
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                NullValueHandling = NullValueHandling.Ignore,
+                Formatting = Formatting.Indented
+            });
         }
 
         private Stream GetSampleDataStream()

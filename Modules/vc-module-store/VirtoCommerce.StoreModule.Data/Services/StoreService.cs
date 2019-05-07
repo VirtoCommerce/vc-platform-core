@@ -7,7 +7,6 @@ using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.CoreModule.Core.Shipping;
-using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
@@ -118,11 +117,11 @@ namespace VirtoCommerce.StoreModule.Data.Services
                         repository.Add(sourceEntity);
                         changedEntries.Add(new GenericChangedEntry<Store>(store, EntryState.Added));
                     }
-
-                    await repository.UnitOfWork.CommitAsync();
-                    pkMap.ResolvePrimaryKeys();
-                    await EventPublisher.Publish(new StoreChangedEvent(changedEntries));
                 }
+
+                await repository.UnitOfWork.CommitAsync();
+                pkMap.ResolvePrimaryKeys();
+                await EventPublisher.Publish(new StoreChangedEvent(changedEntries));
             }
 
             ClearCache(stores);

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
@@ -288,6 +290,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             var retVal = publications.FirstOrDefault();
             if (retVal != null)
             {
+                FillConditions(retVal);
                 return Ok(retVal);
             }
             return NotFound();
@@ -390,6 +393,30 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
         {
             await _dynamicContentService.DeleteFoldersAsync(ids);
             return Ok();
+        }
+
+        private void FillConditions(coreModel.DynamicContentPublication publication)
+        {
+            publication.DynamicExpression = _marketingExtensionManager.ContentCondition;
+            if (!string.IsNullOrEmpty(publication.PredicateVisualTreeSerialized))
+            {
+                publication.DynamicExpression = JsonConvert.DeserializeObject<IConditionTree>(publication.PredicateVisualTreeSerialized, new ConditionJsonConverter());
+                if (_marketingExtensionManager.ContentCondition != null)
+                {
+                    //Copy available elements from etalon because they not persisted
+                    var sourceBlocks = _marketingExtensionManager.ContentCondition.Traverse(x => x.Children);
+                    var targetBlocks = publication.DynamicExpression.Traverse(x => x.Children).ToList();
+                    foreach (var sourceBlock in sourceBlocks)
+                    {
+                        foreach (var targetBlock in targetBlocks.Where(x => x.Id == sourceBlock.Id))
+                        {
+                            targetBlock.AvailableChildren = sourceBlock.AvailableChildren;
+                        }
+                    }
+                    //copy available elements from etalon
+                    publication.DynamicExpression.AvailableChildren = _marketingExtensionManager.ContentCondition.AvailableChildren;
+                }
+            }
         }
     }
 }

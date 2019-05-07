@@ -126,33 +126,9 @@ namespace VirtoCommerce.MarketingModule.Web.JsonConverters
             if (dynamicPromotion?.IsTransient() == true ||
                 dynamicPromotion?.PredicateVisualTreeSerialized != null && dynamicPromotion.PredicateSerialized != null && dynamicPromotion.RewardsSerialized != null)
             {
-                var etalonEpressionTree = _marketingExtensionManager.PromotionCondition;
-                if (etalonEpressionTree != null)
-                {
-                    result = etalonEpressionTree;
-
-                    if (!string.IsNullOrEmpty(dynamicPromotion.PredicateVisualTreeSerialized))
-                    {
-                        result = JsonConvert.DeserializeObject<PromotionConditionAndRewardTree>(
-                            dynamicPromotion.PredicateVisualTreeSerialized,
-                            new ConditionJsonConverter(), new RewardJsonConverter());
-
-                        //// Copy available elements from etalon because they not persisted
-                        var sourceBlocks = etalonEpressionTree.Traverse(x => x.Children);
-                        var targetBlocks = result.Traverse(x => x.Children).ToList();
-
-                        foreach (var sourceBlock in sourceBlocks)
-                        {
-                            foreach (var targetBlock in targetBlocks.Where(x => x.Id == sourceBlock.Id))
-                            {
-                                targetBlock.AvailableChildren = sourceBlock.AvailableChildren;
-                            }
-                        }
-
-                        // Copy available elements from etalon
-                        result.AvailableChildren = etalonEpressionTree.AvailableChildren;
-                    }
-                }
+                result = JsonConvert.DeserializeObject<PromotionConditionAndRewardTree>(
+                    dynamicPromotion.PredicateVisualTreeSerialized,
+                    new ConditionJsonConverter(), new RewardJsonConverter());
             }
 
             return result;

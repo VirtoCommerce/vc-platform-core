@@ -11,7 +11,7 @@ namespace VirtoCommerce.Platform.Web.Hangfire
             var result = httpcontext != null && httpcontext.User.Identity.IsAuthenticated;
             if (result)
             {
-                result = httpcontext.User.IsInRole(PlatformConstants.Security.Roles.Administrator) || httpcontext.User.HasClaim(PlatformConstants.Security.Claims.PermissionClaimType, PlatformConstants.Security.Permissions.BackgroundJobsManage);
+                result = httpcontext.User.IsInRole(PlatformConstants.Security.SystemRoles.Administrator) || httpcontext.User.HasClaim(PlatformConstants.Security.Claims.PermissionClaimType, PlatformConstants.Security.Permissions.BackgroundJobsManage);
             }
             return result;
         }
