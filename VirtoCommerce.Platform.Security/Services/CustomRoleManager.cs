@@ -74,27 +74,27 @@ namespace VirtoCommerce.Platform.Security.Services
             return result;
         }
 
-        public override async Task<IdentityResult> UpdateAsync(Role role)
+        public override async Task<IdentityResult> UpdateAsync(Role updateRole)
         {
             //TODO: Unstable method work, sometimes throws EF already being tracked exception 
             //https://github.com/aspnet/Identity/issues/1807
-            var existRole = await base.FindByNameAsync(role.Name);
-            role.Patch(existRole);
+            var existRole = await base.FindByNameAsync(updateRole.Name);
+            updateRole.Patch(existRole);
             var result = await base.UpdateAsync(existRole);
-            if (result.Succeeded && role.Permissions != null)
+            if (result.Succeeded && updateRole.Permissions != null)
             {
-                var sourcePermissionClaims = role.Permissions.Select(x => new Claim(PlatformConstants.Security.Claims.PermissionClaimType, x.Name)).ToList();
-                var targetPermissionClaims = (await GetClaimsAsync(role)).Where(x => x.Type == PlatformConstants.Security.Claims.PermissionClaimType).ToList();
+                var sourcePermissionClaims = updateRole.Permissions.Select(x => new Claim(PlatformConstants.Security.Claims.PermissionClaimType, x.Name)).ToList();
+                var targetPermissionClaims = (await GetClaimsAsync(existRole)).Where(x => x.Type == PlatformConstants.Security.Claims.PermissionClaimType).ToList();
                 var comparer = AnonymousComparer.Create((Claim x) => x.Value);
                 //Add
                 foreach (var sourceClaim in sourcePermissionClaims.Except(targetPermissionClaims, comparer))
                 {
-                    await base.AddClaimAsync(role, sourceClaim);
+                    await base.AddClaimAsync(existRole, sourceClaim);
                 }
                 //Remove
                 foreach (var targetClaim in targetPermissionClaims.Except(sourcePermissionClaims, comparer).ToArray())
                 {
-                    await base.RemoveClaimAsync(role, targetClaim);
+                    await base.RemoveClaimAsync(existRole, targetClaim);
                 }
 
                 SecurityCacheRegion.ExpireRegion();

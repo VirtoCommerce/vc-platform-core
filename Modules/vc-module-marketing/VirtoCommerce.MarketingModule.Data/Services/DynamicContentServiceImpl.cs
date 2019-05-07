@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
-using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core.Events;
 using VirtoCommerce.MarketingModule.Core.Model;
 using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
@@ -184,12 +183,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                 using (var repository = _repositoryFactory())
                 {
                     var publications = await repository.GetContentPublicationsByIdsAsync(ids);
-                    return publications.Select(x =>
-                    {
-                        var result = x.ToModel(AbstractTypeFactory<DynamicContentPublication>.TryCreateInstance());
-                        FillConditions(result);
-                        return result;
-                    }).ToArray();
+                    return publications.Select(x => x.ToModel(AbstractTypeFactory<DynamicContentPublication>.TryCreateInstance())).ToArray();
                 }
             });
         }
@@ -239,31 +233,6 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             }
 
             DynamicContentPublicationCacheRegion.ExpireRegion();
-        }
-
-
-        private void FillConditions(DynamicContentPublication publication)
-        {
-            publication.DynamicExpression = _marketingExtensionManager.ContentCondition;
-            if (!string.IsNullOrEmpty(publication.PredicateVisualTreeSerialized))
-            {
-                publication.DynamicExpression = JsonConvert.DeserializeObject<IConditionTree>(publication.PredicateVisualTreeSerialized, new ConditionJsonConverter());
-                if (_marketingExtensionManager.ContentCondition != null)
-                {
-                    //Copy available elements from etalon because they not persisted
-                    var sourceBlocks = _marketingExtensionManager.ContentCondition.Traverse(x => x.Children);
-                    var targetBlocks = publication.DynamicExpression.Traverse(x => x.Children).ToList();
-                    foreach (var sourceBlock in sourceBlocks)
-                    {
-                        foreach (var targetBlock in targetBlocks.Where(x => x.Id == sourceBlock.Id))
-                        {
-                            targetBlock.AvailableChildren = sourceBlock.AvailableChildren;
-                        }
-                    }
-                    //copy available elements from etalon
-                    publication.DynamicExpression.AvailableChildren = _marketingExtensionManager.ContentCondition.AvailableChildren;
-                }
-            }
         }
 
         private void SerializeDynamicContentPublicationConditions(DynamicContentPublication publication)

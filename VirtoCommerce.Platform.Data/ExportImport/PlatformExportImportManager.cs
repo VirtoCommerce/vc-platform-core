@@ -2,12 +2,10 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
-using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
@@ -155,22 +153,6 @@ namespace VirtoCommerce.Platform.Data.ExportImport
                                                 else
                                                 {
                                                     await _roleManager.CreateAsync(role);
-                                                }
-
-                                                var existRole = await _roleManager.FindByNameAsync(role.Name);
-                                                var existClaims = (await _roleManager.GetClaimsAsync(existRole)).Where(cl => cl.Type.EqualsInvariant(PlatformConstants.Security.Claims.PermissionClaimType)).ToArray();
-                                                var targetPermissions = existClaims.Select(cl => cl.Value).ToArray();
-                                                var sourcePermissions = role.Permissions.Select(p => p.Name).ToArray();
-
-                                                foreach (var newPermission in sourcePermissions.Except(targetPermissions))
-                                                {
-                                                    await _roleManager.AddClaimAsync(role, new Claim(PlatformConstants.Security.Claims.PermissionClaimType, newPermission));
-                                                }
-
-                                                foreach (var removePermissionValue in targetPermissions.Except(sourcePermissions))
-                                                {
-                                                    var removeClaim = existClaims.SingleOrDefault(cl => cl.Value.EqualsInvariant(removePermissionValue));
-                                                    await _roleManager.RemoveClaimAsync(role, removeClaim);
                                                 }
                                             }
                                         }, processedCount =>

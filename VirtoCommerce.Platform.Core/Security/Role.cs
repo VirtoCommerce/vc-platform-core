@@ -6,6 +6,11 @@ namespace VirtoCommerce.Platform.Core.Security
 {
     public class Role : IdentityRole
     {
+        public Role()
+        {
+            Permissions = new List<Permission>();
+        }
+
         public string Description { get; set; }
         public IList<Permission> Permissions { get; set; }
 
