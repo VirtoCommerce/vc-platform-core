@@ -1,11 +1,10 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
+using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.InventoryModule.Core.Model
 {
-    public class InventoryInfo : AuditableEntity
+    public class InventoryInfo : AuditableEntity, IChangesLog
     {
         public string FulfillmentCenterId { get; set; }
         public FulfillmentCenter FulfillmentCenter { get; set; }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using VirtoCommerce.InventoryModule.Core.Model;
 using VirtoCommerce.InventoryModule.Core.Services;
 using VirtoCommerce.InventoryModule.Data.Model;
 using VirtoCommerce.Platform.Core.ChangeLog;
@@ -15,7 +16,7 @@ namespace VirtoCommerce.InventoryModule.Data.Search.Indexing
     /// </summary>
     public class ProductAvailabilityChangesProvider : IIndexDocumentChangesProvider
     {
-        public const string ChangeLogObjectType = nameof(InventoryEntity);
+        public const string ChangeLogObjectType = nameof(InventoryInfo);
 
         private readonly IChangeLogService _changeLogService;
         private readonly IInventoryService _inventoryService;
@@ -46,22 +47,22 @@ namespace VirtoCommerce.InventoryModule.Data.Search.Indexing
             startDate = startDate ?? DateTime.MinValue;
             endDate = endDate ?? DateTime.MaxValue;
 
-                // Get changes from operation log
-                var changeLogOperations = _changeLogService.FindChangeHistory(ChangeLogObjectType, startDate, endDate)
-                    .Skip((int)skip)
-                    .Take((int)take)
-                    .ToArray();
+            // Get changes from operation log
+            var changeLogOperations = _changeLogService.FindChangeHistory(ChangeLogObjectType, startDate, endDate)
+                .Skip((int)skip)
+                .Take((int)take)
+                .ToArray();
 
             var inventories = await _inventoryService.GetByIdsAsync(
                 changeLogOperations.Select(o => o.ObjectId).ToArray(), InventoryResponseGroup.Default.ToString());
 
-                result = changeLogOperations.Join(inventories, o => o.ObjectId,  i => i .Id, (o, i) => new IndexDocumentChange
-                {
-                    DocumentId = i.ProductId,
-                    ChangeType = IndexDocumentChangeType.Modified,
-                    ChangeDate = o.ModifiedDate ?? o.CreatedDate,
-                }).ToList();
-            
+            result = changeLogOperations.Join(inventories, o => o.ObjectId, i => i.Id, (o, i) => new IndexDocumentChange
+            {
+                DocumentId = i.ProductId,
+                ChangeType = IndexDocumentChangeType.Modified,
+                ChangeDate = o.ModifiedDate ?? o.CreatedDate,
+            }).ToList();
+
 
             return await Task.FromResult(result);
         }

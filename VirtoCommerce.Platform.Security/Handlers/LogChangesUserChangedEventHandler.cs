@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
@@ -21,25 +20,23 @@ namespace VirtoCommerce.Platform.Security.Handlers
             _changeLogService = changeLogService;
         }
 
-        public virtual Task Handle(UserChangedEvent message)
+        public virtual async Task Handle(UserChangedEvent message)
         {
             foreach (var changedEntry in message.ChangedEntries)
             {
                 if (changedEntry.EntryState == EntryState.Added)
                 {
-                    SaveOperationLog(changedEntry.NewEntry.Id, "Created", EntryState.Added);
+                    await SaveOperationLogAsync(changedEntry.NewEntry.Id, "Created", EntryState.Added);
                 }
                 else if (changedEntry.EntryState == EntryState.Modified)
                 {
                     var changes = DetectAccountChanges(changedEntry.NewEntry, changedEntry.OldEntry);
                     foreach (var key in changes.Keys)
                     {
-                        SaveOperationLog(changedEntry.NewEntry.Id, string.Format(key, string.Join(", ", changes[key].ToArray())), EntryState.Modified);
+                        await SaveOperationLogAsync(changedEntry.NewEntry.Id, string.Format(key, string.Join(", ", changes[key].ToArray())), EntryState.Modified);
                     }
                 }
             }
-            
-            return Task.CompletedTask;
         }
 
         public virtual Task Handle(UserLoginEvent message)
@@ -52,16 +49,14 @@ namespace VirtoCommerce.Platform.Security.Handlers
             return Task.CompletedTask;
         }
 
-        public virtual Task Handle(UserPasswordChangedEvent message)
+        public virtual async Task Handle(UserPasswordChangedEvent message)
         {
-            SaveOperationLog(message.UserId, "Password changed", EntryState.Modified);
-            return Task.CompletedTask;
+            await SaveOperationLogAsync(message.UserId, "Password changed", EntryState.Modified);
         }
 
-        public virtual Task Handle(UserResetPasswordEvent message)
+        public virtual async Task Handle(UserResetPasswordEvent message)
         {
-            SaveOperationLog(message.UserId, "Password resets", EntryState.Modified);
-            return Task.CompletedTask;
+            await SaveOperationLogAsync(message.UserId, "Password resets", EntryState.Modified);
         }
 
         protected virtual ListDictionary<string, string> DetectAccountChanges(ApplicationUser newUser, ApplicationUser oldUser)
@@ -123,7 +118,7 @@ namespace VirtoCommerce.Platform.Security.Handlers
             return result;
         }
 
-        protected virtual void SaveOperationLog(string objectId, string detail, EntryState entryState)
+        protected virtual async Task SaveOperationLogAsync(string objectId, string detail, EntryState entryState)
         {
             var operation = new OperationLog
             {
@@ -132,7 +127,7 @@ namespace VirtoCommerce.Platform.Security.Handlers
                 OperationType = entryState,
                 Detail = detail
             };
-            _changeLogService.SaveChanges(operation);
+            await _changeLogService.SaveChangesAsync(operation);
         }
     }
 }

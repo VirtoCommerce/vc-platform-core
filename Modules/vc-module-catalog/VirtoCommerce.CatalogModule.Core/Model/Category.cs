@@ -4,11 +4,12 @@ using System.Linq;
 using Newtonsoft.Json;
 using VirtoCommerce.CoreModule.Core.Outlines;
 using VirtoCommerce.CoreModule.Core.Seo;
+using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model
 {
-    public class Category : AuditableEntity, IHasLinks, ISeoSupport, IHasOutlines, IHasImages, IHasProperties, ICloneable, IHasTaxType, IHasName
+    public class Category : AuditableEntity, IHasLinks, ISeoSupport, IHasOutlines, IHasImages, IHasProperties, ICloneable, IHasTaxType, IHasName, IChangesLog
     {
         public Category()
         {

@@ -1,18 +1,19 @@
 using System;
 using Newtonsoft.Json.Linq;
+using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.PricingModule.Core.Model
 {
-	public class Price : AuditableEntity, ICloneable
-	{
-		public string PricelistId { get; set; }
+    public class Price : AuditableEntity, ICloneable, IChangesLog
+    {
+        public string PricelistId { get; set; }
         public Pricelist Pricelist { get; set; }
-		public string Currency { get; set; }
-		public string ProductId { get; set; }
-		public decimal? Sale { get; set; }
-		public decimal List { get; set; }
-		public int MinQuantity { get; set; }
+        public string Currency { get; set; }
+        public string ProductId { get; set; }
+        public decimal? Sale { get; set; }
+        public decimal List { get; set; }
+        public int MinQuantity { get; set; }
 
         /// <summary>
         /// Optional start date for this price, so that we can prepare prices ahead of time.
@@ -26,23 +27,23 @@ namespace VirtoCommerce.PricingModule.Core.Model
         /// </summary>
         public DateTime? EndDate { get; set; }
 
-		public decimal EffectiveValue
-		{
-			get
-			{
-				return Sale ?? List;
-			}
-		}
+        public decimal EffectiveValue
+        {
+            get
+            {
+                return Sale ?? List;
+            }
+        }
 
-		#region ICloneable Members
+        #region ICloneable Members
 
-		public object Clone()
-		{
+        public object Clone()
+        {
             var jObject = JObject.FromObject(this);
-            var result = jObject.ToObject(this.GetType());
+            var result = jObject.ToObject(GetType());
             return result;
         }
 
-		#endregion
-	}
+        #endregion
+    }
 }

@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.CoreModule.Core.Conditions.Browse;
 using VirtoCommerce.CoreModule.Core.Conditions.GeoConditions;
+using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -19,10 +20,12 @@ using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Extensions;
 using VirtoCommerce.PricingModule.Core;
+using VirtoCommerce.PricingModule.Core.Events;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Conditions;
 using VirtoCommerce.PricingModule.Core.Services;
 using VirtoCommerce.PricingModule.Data.ExportImport;
+using VirtoCommerce.PricingModule.Data.Handlers;
 using VirtoCommerce.PricingModule.Data.Repositories;
 using VirtoCommerce.PricingModule.Data.Search;
 using VirtoCommerce.PricingModule.Data.Services;
@@ -54,6 +57,8 @@ namespace VirtoCommerce.PricingModule.Web
             serviceCollection.AddSingleton<PolymorphicPricingJsonConverter>();
             serviceCollection.AddTransient<ProductPriceDocumentChangesProvider>();
             serviceCollection.AddTransient<ProductPriceDocumentBuilder>();
+
+            serviceCollection.AddSingleton<PriceChangesLogEventHandler>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -114,6 +119,9 @@ namespace VirtoCommerce.PricingModule.Web
             {
                 Children = new List<IConditionTree>() { GetPricingDynamicExpression() }
             };
+
+            var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
+            inProcessBus.RegisterHandler<PriceChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<PriceChangesLogEventHandler>().Handle(message));
         }
 
         public void Uninstall()

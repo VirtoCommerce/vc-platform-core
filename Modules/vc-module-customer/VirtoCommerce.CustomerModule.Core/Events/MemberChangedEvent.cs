@@ -4,7 +4,7 @@ using VirtoCommerce.Platform.Core.Events;
 
 namespace VirtoCommerce.CustomerModule.Core.Events
 {
-    public class MemberChangedEvent : GenericChangedEntryEvent<Member>
+    public class MemberChangedEvent : ChangesLogEvent<Member>
     {
         public MemberChangedEvent(IEnumerable<GenericChangedEntry<Member>> changedEntries)
             : base(changedEntries)

@@ -69,6 +69,7 @@ namespace VirtoCommerce.CustomerModule.Web
             });
 
             serviceCollection.AddSingleton<MemberChangedEventHandler>();
+            serviceCollection.AddSingleton<MemberChangesLogEventHandler>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -104,6 +105,7 @@ namespace VirtoCommerce.CustomerModule.Web
             var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
             inProcessBus.RegisterHandler<MemberChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<MemberChangedEventHandler>().Handle(message));
             inProcessBus.RegisterHandler<MemberChangingEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<MemberChangedEventHandler>().Handle(message));
+            inProcessBus.RegisterHandler<MemberChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<MemberChangesLogEventHandler>().Handle(message));
 
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {

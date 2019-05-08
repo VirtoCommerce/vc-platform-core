@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using VirtoCommerce.CatalogModule.Data.Model;
+using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
@@ -14,7 +14,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
 {
     public class CategoryDocumentChangesProvider : IIndexDocumentChangesProvider
     {
-        public const string ChangeLogObjectType = nameof(CategoryEntity);
+        public const string ChangeLogObjectType = nameof(Category);
 
         private readonly Func<ICatalogRepository> _catalogRepositoryFactory;
         private readonly IChangeLogService _changeLogService;

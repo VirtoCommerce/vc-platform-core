@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using VirtoCommerce.CustomerModule.Data.Model;
+using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
@@ -13,7 +13,7 @@ namespace VirtoCommerce.CustomerModule.Data.Search.Indexing
 {
     public class MemberDocumentChangesProvider : IIndexDocumentChangesProvider
     {
-        public const string ChangeLogObjectType = nameof(MemberEntity);
+        public const string ChangeLogObjectType = nameof(Member);
 
         private readonly Func<IMemberRepository> _memberRepositoryFactory;
         private readonly IChangeLogService _changeLogService;

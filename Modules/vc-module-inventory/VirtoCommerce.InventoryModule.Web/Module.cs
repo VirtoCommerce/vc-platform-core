@@ -10,12 +10,15 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.InventoryModule.Core;
+using VirtoCommerce.InventoryModule.Core.Events;
 using VirtoCommerce.InventoryModule.Core.Services;
 using VirtoCommerce.InventoryModule.Data.ExportImport;
+using VirtoCommerce.InventoryModule.Data.Handlers;
 using VirtoCommerce.InventoryModule.Data.Repositories;
 using VirtoCommerce.InventoryModule.Data.Search.Indexing;
 using VirtoCommerce.InventoryModule.Data.Services;
 using VirtoCommerce.InventoryModule.Web.JsonConverters;
+using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -44,6 +47,7 @@ namespace VirtoCommerce.InventoryModule.Web
             serviceCollection.AddSingleton<IFulfillmentCenterSearchService, FulfillmentCenterSearchService>();
             serviceCollection.AddSingleton<IFulfillmentCenterService, FulfillmentCenterService>();
             serviceCollection.AddSingleton<InventoryExportImport>();
+            serviceCollection.AddSingleton<InventoryChangesLogEventHandler>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -92,6 +96,9 @@ namespace VirtoCommerce.InventoryModule.Web
             // enable polymorphic types in API controller methods
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicInventoryJsonConverter());
+
+            var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
+            inProcessBus.RegisterHandler<InventoryChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<InventoryChangesLogEventHandler>().Handle(message));
         }
 
         public void Uninstall()

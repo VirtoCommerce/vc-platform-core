@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.Platform.Core.ChangeLog;
+using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Services;
-using VirtoCommerce.PricingModule.Data.Model;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.SearchModule.Core.Services;
 
@@ -12,7 +12,7 @@ namespace VirtoCommerce.PricingModule.Data.Search
 {
     public class ProductPriceDocumentChangesProvider : IIndexDocumentChangesProvider
     {
-        public const string ChangeLogObjectType = nameof(PriceEntity);
+        public const string ChangeLogObjectType = nameof(Price);
 
         private readonly IChangeLogService _changeLogService;
         private readonly IPricingService _pricingService;

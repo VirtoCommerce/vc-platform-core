@@ -1,10 +1,11 @@
 using System.Collections.Generic;
+using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.CustomerModule.Core.Model
 {
-    public abstract class Member : AuditableEntity, IHasDynamicProperties
+    public abstract class Member : AuditableEntity, IHasDynamicProperties, IChangesLog
     {
         protected Member()
         {

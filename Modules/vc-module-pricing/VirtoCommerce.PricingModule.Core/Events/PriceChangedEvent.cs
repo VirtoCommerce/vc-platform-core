@@ -4,7 +4,7 @@ using VirtoCommerce.PricingModule.Core.Model;
 
 namespace VirtoCommerce.PricingModule.Core.Events
 {
-    public class PriceChangedEvent : GenericChangedEntryEvent<Price>
+    public class PriceChangedEvent : ChangesLogEvent<Price>
     {
         public PriceChangedEvent(IEnumerable<GenericChangedEntry<Price>> changedEntries)
             : base(changedEntries)

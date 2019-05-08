@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Model;
@@ -32,7 +34,7 @@ namespace VirtoCommerce.Platform.Data.ChangeLog
             }
         }
 
-        public void SaveChanges(params OperationLog[] operationLogs)
+        public async Task SaveChangesAsync(params OperationLog[] operationLogs)
         {
             if (operationLogs == null)
             {
@@ -46,7 +48,7 @@ namespace VirtoCommerce.Platform.Data.ChangeLog
                 var origDbOperations = repository.OperationLogs.Where(x => ids.Contains(x.Id));
                 foreach (var operation in operationLogs)
                 {
-                    var originalEntity = origDbOperations.FirstOrDefault(x => x.Id == operation.Id);
+                    var originalEntity = await origDbOperations.FirstOrDefaultAsync(x => x.Id == operation.Id);
                     var modifiedEntity = AbstractTypeFactory<OperationLogEntity>.TryCreateInstance().FromModel(operation, pkMap);
                     if (originalEntity != null)
                     {
@@ -57,7 +59,7 @@ namespace VirtoCommerce.Platform.Data.ChangeLog
                         repository.Add(modifiedEntity);
                     }
                 }
-                repository.UnitOfWork.Commit();
+                await repository.UnitOfWork.CommitAsync();
             }
         }
 
