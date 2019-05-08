@@ -41,6 +41,8 @@ namespace VirtoCommerce.SitemapsModule.Web
 
             serviceCollection.AddTransient<ISitemapService, SitemapService>();
             serviceCollection.AddTransient<ISitemapItemService, SitemapItemService>();
+            serviceCollection.AddTransient<ISitemapSearchService, SitemapSearchService>();
+            serviceCollection.AddTransient<ISitemapItemSearchService, SitemapItemSearchService>();
             serviceCollection.AddTransient<IUrlBuilder, UrlBuilder>();
             serviceCollection.AddTransient<ISitemapUrlBuilder, SitemapUrlBuilder>();
             serviceCollection.AddTransient<ISitemapItemRecordProvider, CatalogSitemapItemRecordProvider>();

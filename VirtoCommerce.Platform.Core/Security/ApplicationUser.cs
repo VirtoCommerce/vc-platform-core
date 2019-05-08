@@ -46,5 +46,33 @@ namespace VirtoCommerce.Platform.Core.Security
             }
             return base.GetHashCode();
         }
+
+        public virtual void Patch(ApplicationUser target)
+        {
+            target.UserName = UserName;
+            target.IsAdministrator = IsAdministrator;
+            target.Email = Email;
+            target.NormalizedEmail = NormalizedEmail;
+            target.NormalizedUserName = NormalizedUserName;
+            target.EmailConfirmed = EmailConfirmed;
+            target.PasswordHash = PasswordHash;
+            target.SecurityStamp = SecurityStamp;
+            target.PhoneNumberConfirmed = PhoneNumberConfirmed;
+            target.TwoFactorEnabled = TwoFactorEnabled;
+            target.LockoutEnabled = LockoutEnabled;
+            target.AccessFailedCount = AccessFailedCount;
+
+            target.MemberId = MemberId;
+            target.StoreId = StoreId;
+            target.PhotoUrl = PhotoUrl;
+            target.UserType = UserType;
+            target.Password = Password;
+            target.PasswordExpired = PasswordExpired;
+
+            if (!Roles.IsNullOrEmpty())
+            {
+                Roles.Patch(target.Roles, (sourcePhone, targetPhone) => sourcePhone.Patch(targetPhone));
+            }
+        }
     }
 }

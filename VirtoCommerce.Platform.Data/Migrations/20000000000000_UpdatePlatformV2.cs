@@ -11,6 +11,11 @@ namespace VirtoCommerce.Platform.Data.Migrations
                  WHERE TABLE_NAME = '__MigrationHistory'))
                     BEGIN
 	                    INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20180411091908_InitialPlatform', '2.2.3-servicing-35854')
+                        ALTER TABLE [PlatformSetting] DROP COLUMN [IsSystem]
+                        ALTER TABLE [PlatformSetting] DROP COLUMN [SettingValueType]
+                        ALTER TABLE [PlatformSetting] DROP COLUMN [IsEnum]
+                        ALTER TABLE [PlatformSetting] DROP COLUMN [IsMultiValue]
+                        ALTER TABLE [PlatformSetting] DROP COLUMN [IsLocaleDependant]
                     END");
         }
 

@@ -6,6 +6,7 @@
     <dependencies>
         <dependency id="VirtoCommerce.Core" version="3.0.0" />
         <dependency id="VirtoCommerce.Catalog" version="3.0.0" />
+        <dependency id="VirtoCommerce.Notifications" version="3.0.0" />
     </dependencies>
 
     <title>Store module</title>

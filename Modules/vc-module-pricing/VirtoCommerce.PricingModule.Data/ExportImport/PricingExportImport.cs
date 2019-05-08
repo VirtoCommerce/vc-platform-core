@@ -8,6 +8,7 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.ExportImport;
+using VirtoCommerce.PricingModule.Core;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Search;
 using VirtoCommerce.PricingModule.Core.Services;
@@ -38,7 +39,7 @@ namespace VirtoCommerce.PricingModule.Data.ExportImport
             {
                 if (_batchSize == null)
                 {
-                    _batchSize = _settingsManager.GetValue("Pricing.ExportImport.PageSize", 50);
+                    _batchSize = _settingsManager.GetValue(ModuleConstants.Settings.General.ExportImportPageSize.Name, 50);
                 }
 
                 return (int)_batchSize;

@@ -32,12 +32,12 @@ namespace VirtoCommerce.Platform.Security.Authorization
             else
             {
                 //TODO: Check cases with locked user
-                if (context.User.IsInRole(PlatformConstants.Security.Roles.Administrator))
+                if (context.User.IsInRole(PlatformConstants.Security.SystemRoles.Administrator))
                 {
                     context.Succeed(requirement);
                 }
 
-                if (context.User.IsInRole(PlatformConstants.Security.Roles.Customer))
+                if (context.User.IsInRole(PlatformConstants.Security.SystemRoles.Customer))
                 {
                     return Task.CompletedTask;
                 }

@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Primitives;
 using Hangfire;
+using Hangfire.Common;
 using Hangfire.MemoryStorage;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -97,6 +98,7 @@ namespace VirtoCommerce.Platform.Web
                     options.SerializerSettings.ContractResolver = new PolymorphJsonContractResolver();
                     //Next line allow to use polymorph types as parameters in API controller methods
                     options.SerializerSettings.Converters.Add(new PolymorphJsonConverter());
+                    options.SerializerSettings.Converters.Add(new ModuleIdentityJsonConverter());
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                     options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
                     options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
@@ -137,7 +139,7 @@ namespace VirtoCommerce.Platform.Web
                 options.NonEditableUsers = new[] { "admin" };
             });
 
-            services.AddIdentity<ApplicationUser, Role>()
+            services.AddIdentity<ApplicationUser, Role>(options => options.Stores.MaxLengthForKeys = 128)
                     .AddEntityFrameworkStores<SecurityDbContext>()
                     .AddDefaultTokenProviders();
 
@@ -303,6 +305,12 @@ namespace VirtoCommerce.Platform.Web
             {
                 services.AddHangfire(config => config.UseMemoryStorage());
             }
+
+            JobHelper.SetSerializerSettings(new JsonSerializerSettings
+            {
+                Converters = new JsonConverter[] { new ModuleIdentityJsonConverter() },
+                NullValueHandling = NullValueHandling.Ignore
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

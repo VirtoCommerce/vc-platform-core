@@ -21,7 +21,7 @@ namespace VirtoCommerce.ImageToolsModule.Data.Repositories
         {
             return await ThumbnailTasks
                 .Include(t => t.ThumbnailTaskOptions)
-                    .ThenInclude( o => o.ThumbnailOption)
+                .ThenInclude(o => o.ThumbnailOption)
                 .Where(t => ids.Contains(t.Id))
                 .ToArrayAsync();
         }

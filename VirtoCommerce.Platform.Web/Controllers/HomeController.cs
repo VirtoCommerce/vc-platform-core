@@ -44,7 +44,7 @@ namespace VirtoCommerce.Platform.Web.Controllers
                 {
                     ContractResolver = new CamelCasePropertyNamesContractResolver(),
                     DateTimeZoneHandling = DateTimeZoneHandling.Utc
-                });
+                }).Replace("\"", "'");
             }
 
             if (!string.IsNullOrEmpty(model.DemoResetTime))

@@ -3,12 +3,10 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.Platform.Core;
-using VirtoCommerce.Platform.Web.Infrastructure;
 using VirtoCommerce.Platform.Web.Licensing;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api
@@ -19,11 +17,9 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
     [ApiExplorerSettings(IgnoreApi = true)]
     public class LicensingController : Controller
     {
-        private readonly IHostingEnvironment _hostingEnv;
         private readonly PlatformOptions _platformOptions;
-        public LicensingController(IHostingEnvironment hostingEnv, IOptions<PlatformOptions> platformOptions)
+        public LicensingController(IOptions<PlatformOptions> platformOptions)
         {
-            _hostingEnv = hostingEnv;
             _platformOptions = platformOptions.Value;
         }
 
@@ -71,15 +67,14 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("activateLicense")]
         [ProducesResponseType(typeof(License), 200)]
-        public IActionResult ActivateLicense(License license)
+        public IActionResult ActivateLicense([FromBody]License license)
         {
             license = License.Parse(license?.RawLicense, Path.GetFullPath(_platformOptions.LicensePublicKeyPath));
 
             if (license != null)
             {
-
                 var licenseFilePath = Path.GetFullPath(_platformOptions.LicenseFilePath);
-                File(licenseFilePath, license.RawLicense);
+                System.IO.File.WriteAllText(licenseFilePath, license.RawLicense);
             }
 
             return Ok(license);

@@ -30,12 +30,13 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
         private readonly JsonSerializer _jsonSerializer;
         private readonly IBlobStorageProvider _blobStorageProvider;
         private readonly ISeoService _seoService;
+        private readonly IAssociationService _associationService;
 
         private int _batchSize = 50;
 
         public CatalogExportImport(ICatalogService catalogService, IProductSearchService productSearchService, ICategorySearchService categorySearchService, ICategoryService categoryService,
                                   IItemService itemService, IPropertyService propertyService, IPropertySearchService propertySearchService, IProperyDictionaryItemSearchService propertyDictionarySearchService,
-                                  IProperyDictionaryItemService propertyDictionaryService, JsonSerializer jsonSerializer, IBlobStorageProvider blobStorageProvider, ISeoService seoService)
+                                  IProperyDictionaryItemService propertyDictionaryService, JsonSerializer jsonSerializer, IBlobStorageProvider blobStorageProvider, ISeoService seoService, IAssociationService associationService)
         {
             _catalogService = catalogService;
             _productSearchService = productSearchService;
@@ -49,6 +50,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             _jsonSerializer = jsonSerializer;
             _blobStorageProvider = blobStorageProvider;
             _seoService = seoService;
+            _associationService = associationService;
         }
 
         public async Task DoExportAsync(Stream outStream, ExportImportOptions options, Action<ExportImportProgressInfo> progressCallback, ICancellationToken cancellationToken)
@@ -140,6 +142,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                 await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
                 {
                     var searchResult = await _productSearchService.SearchProductsAsync(new ProductSearchCriteria { Skip = skip, Take = take, ResponseGroup = (ItemResponseGroup.Full & ~ItemResponseGroup.Variations).ToString() });
+
                     if (options.HandleBinaryData)
                     {
                         LoadImages(searchResult.Results.OfType<IHasImages>().ToArray(), progressInfo);
@@ -191,7 +194,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                             {
                                 var itemsArray = items.ToArray();
                                 await _categoryService.SaveChangesAsync(itemsArray);
-                                await _seoService.SaveSeoForObjectsAsync(itemsArray);
+                                await _seoService.SaveSeoForObjectsAsync(itemsArray.OfType<ISeoSupport>().ToArray());
                                 //if (options.HandleBinaryData)
                                 {
                                     ImportImages(itemsArray.OfType<IHasImages>().ToArray(), progressInfo);
@@ -207,7 +210,8 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                         {
                             await reader.DeserializeJsonArrayWithPagingAsync<Property>(_jsonSerializer, _batchSize, async (items) =>
                             {
-                                foreach (var property in items)
+                                var itemsArray = items.ToArray();
+                                foreach (var property in itemsArray)
                                 {
                                     if (property.CategoryId != null || property.CatalogId != null)
                                     {
@@ -217,7 +221,7 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                                         property.CatalogId = null;
                                     }
                                 }
-                                await _propertyService.SaveChangesAsync(items.ToArray());
+                                await _propertyService.SaveChangesAsync(itemsArray);
                             }, processedCount =>
                         {
                             progressInfo.Description = $"{ processedCount } properties have been imported";
@@ -234,20 +238,55 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                         }
                         else if (reader.Value.ToString() == "Products")
                         {
+                            var associationBackupMap = new Dictionary<string, IList<ProductAssociation>>();
+                            var products = new List<CatalogProduct>();
+
                             await reader.DeserializeJsonArrayWithPagingAsync<CatalogProduct>(_jsonSerializer, _batchSize, async (items) =>
                             {
                                 var itemsArray = items.ToArray();
-                                await _itemService.SaveChangesAsync(itemsArray);
-                                await _seoService.SaveSeoForObjectsAsync(itemsArray);
-                                //if (options.HandleBinaryData)
+                                foreach (var product in itemsArray)
+                                {
+                                    //Do not save associations withing product to prevent dependency conflicts in db
+                                    //we will save separateley after product import
+                                    if (!product.Associations.IsNullOrEmpty())
+                                    {
+                                        associationBackupMap[product.Id] = product.Associations;
+                                    }
+
+                                    product.Associations = null;
+                                    products.Add(product);
+                                }
+                                await _itemService.SaveChangesAsync(products.ToArray());
+                                await _seoService.SaveSeoForObjectsAsync(products.OfType<ISeoSupport>().ToArray());
+                                if (options != null && options.HandleBinaryData)
                                 {
                                     ImportImages(itemsArray.OfType<IHasImages>().ToArray(), progressInfo);
                                 }
+
+                                products.Clear();
                             }, processedCount =>
                             {
                                 progressInfo.Description = $"{ processedCount } products have been imported";
                                 progressCallback(progressInfo);
                             }, cancellationToken);
+
+                            //Import products associations separately to avoid DB constrain violation
+                            var totalProductsWithAssociationsCount = associationBackupMap.Count;
+                            for (var i = 0; i < totalProductsWithAssociationsCount; i += _batchSize)
+                            {
+                                var fakeProducts = new List<CatalogProduct>();
+                                foreach (var pair in associationBackupMap.Skip(i).Take(_batchSize))
+                                {
+                                    var fakeProduct = AbstractTypeFactory<CatalogProduct>.TryCreateInstance();
+                                    fakeProduct.Id = pair.Key;
+                                    fakeProduct.Associations = pair.Value;
+                                    fakeProducts.Add(fakeProduct);
+                                }
+
+                                await _associationService.SaveChangesAsync(fakeProducts.OfType<IHasAssociations>().ToArray());
+                                progressInfo.Description = $"{ Math.Min(totalProductsWithAssociationsCount, i + _batchSize) } of { totalProductsWithAssociationsCount } products associations imported";
+                                progressCallback(progressInfo);
+                            }
                         }
                     }
                 }

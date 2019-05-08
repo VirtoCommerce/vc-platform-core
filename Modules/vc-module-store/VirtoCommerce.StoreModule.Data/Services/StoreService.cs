@@ -114,11 +114,11 @@ namespace VirtoCommerce.StoreModule.Data.Services
                         repository.Add(sourceEntity);
                         changedEntries.Add(new GenericChangedEntry<Store>(store, EntryState.Added));
                     }
-
-                    await repository.UnitOfWork.CommitAsync();
-                    pkMap.ResolvePrimaryKeys();
-                    await EventPublisher.Publish(new StoreChangedEvent(changedEntries));
                 }
+
+                await repository.UnitOfWork.CommitAsync();
+                pkMap.ResolvePrimaryKeys();
+                await EventPublisher.Publish(new StoreChangedEvent(changedEntries));
             }
 
             ClearCache(stores);

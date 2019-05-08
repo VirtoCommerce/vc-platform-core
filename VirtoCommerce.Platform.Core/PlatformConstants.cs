@@ -19,11 +19,11 @@ namespace VirtoCommerce.Platform.Core
                 public const string LimitedPermissionsClaimType = "limited_permissions";
             }
 
-            public static class Roles
+            public static class SystemRoles
             {
-                public const string Customer = "Customer";
-                public const string Manager = "Manager";
-                public const string Administrator = "Administrator";
+                public const string Customer = "__customer";
+                public const string Manager = "__manager";
+                public const string Administrator = "__administrator";
             }
 
             public static class Permissions
