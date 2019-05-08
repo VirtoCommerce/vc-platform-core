@@ -4,10 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
 using Microsoft.Extensions.Caching.Memory;
-using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.CoreModule.Core.Shipping;
-using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
@@ -28,7 +26,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
     public class StoreService : IStoreService
     {
         public StoreService(Func<IStoreRepository> repositoryFactory, ISeoService seoService, ISettingsManager settingManager,
-                            IDynamicPropertyService dynamicPropertyService, IShippingMethodsRegistrar shippingService, IPaymentMethodsRegistrar paymentService,
+                            IDynamicPropertyService dynamicPropertyService, IShippingMethodsRegistrar shippingService,
                             IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
         {
             RepositoryFactory = repositoryFactory;
@@ -36,7 +34,6 @@ namespace VirtoCommerce.StoreModule.Data.Services
             SettingManager = settingManager;
             DynamicPropertyService = dynamicPropertyService;
             ShippingMethodRegistrar = shippingService;
-            PaymentMethodRegistrar = paymentService;
             EventPublisher = eventPublisher;
             PlatformMemoryCache = platformMemoryCache;
         }
@@ -46,7 +43,6 @@ namespace VirtoCommerce.StoreModule.Data.Services
         protected ISettingsManager SettingManager { get; }
         protected IDynamicPropertyService DynamicPropertyService { get; }
         protected IShippingMethodsRegistrar ShippingMethodRegistrar { get; }
-        protected IPaymentMethodsRegistrar PaymentMethodRegistrar { get; }
         protected IEventPublisher EventPublisher { get; }
         protected IPlatformMemoryCache PlatformMemoryCache { get; }
 
@@ -208,15 +204,6 @@ namespace VirtoCommerce.StoreModule.Data.Services
         protected virtual void PopulateStore(Store store, StoreEntity dbStore)
         {
             //Return all registered methods with store settings 
-            store.PaymentMethods = PaymentMethodRegistrar.GetAllPaymentMethods();
-            foreach (var paymentMethod in store.PaymentMethods)
-            {
-                var dbStoredPaymentMethod = dbStore.PaymentMethods.FirstOrDefault(x => x.Code.EqualsInvariant(paymentMethod.Code));
-                if (dbStoredPaymentMethod != null)
-                {
-                    dbStoredPaymentMethod.ToModel(paymentMethod);
-                }
-            }
             store.ShippingMethods = ShippingMethodRegistrar.GetAllShippingMethods();
             foreach (var shippingMethod in store.ShippingMethods)
             {

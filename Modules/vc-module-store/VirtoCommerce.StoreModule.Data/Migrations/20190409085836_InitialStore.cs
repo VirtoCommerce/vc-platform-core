@@ -99,31 +99,6 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "StorePaymentMethod",
-                columns: table => new
-                {
-                    Id = table.Column<string>(maxLength: 128, nullable: false),
-                    Code = table.Column<string>(maxLength: 128, nullable: false),
-                    Priority = table.Column<int>(nullable: false),
-                    Name = table.Column<string>(maxLength: 128, nullable: true),
-                    Description = table.Column<string>(nullable: true),
-                    LogoUrl = table.Column<string>(maxLength: 2048, nullable: true),
-                    IsActive = table.Column<bool>(nullable: false),
-                    IsAvailableForPartial = table.Column<bool>(nullable: false),
-                    StoreId = table.Column<string>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_StorePaymentMethod", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_StorePaymentMethod_Store_StoreId",
-                        column: x => x.StoreId,
-                        principalTable: "Store",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "StoreShippingMethod",
                 columns: table => new
                 {
@@ -183,11 +158,6 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                 column: "StoreId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_StorePaymentMethod_StoreId",
-                table: "StorePaymentMethod",
-                column: "StoreId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_StoreShippingMethod_StoreId",
                 table: "StoreShippingMethod",
                 column: "StoreId");
@@ -208,9 +178,6 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "StoreLanguage");
-
-            migrationBuilder.DropTable(
-                name: "StorePaymentMethod");
 
             migrationBuilder.DropTable(
                 name: "StoreShippingMethod");

@@ -39,20 +39,12 @@ namespace VirtoCommerce.StoreModule.Data.Repositories
                 .HasForeignKey(x => x.StoreId).IsRequired().OnDelete(DeleteBehavior.Cascade);
             #endregion
 
-            #region StorePaymentMethod
-            modelBuilder.Entity<StorePaymentMethodEntity>().ToTable("StorePaymentMethod").HasKey(x => x.Id);
-            modelBuilder.Entity<StorePaymentMethodEntity>().Property(x => x.Id).HasMaxLength(128);
-            modelBuilder.Entity<StorePaymentMethodEntity>().HasOne(x => x.Store).WithMany(x => x.PaymentMethods)
-                .HasForeignKey(x => x.StoreId).IsRequired().OnDelete(DeleteBehavior.Cascade);
-            #endregion
-
             #region StoreShippingMethod
             modelBuilder.Entity<StoreShippingMethodEntity>().ToTable("StoreShippingMethod").HasKey(x => x.Id);
             modelBuilder.Entity<StoreShippingMethodEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<StoreShippingMethodEntity>().HasOne(x => x.Store).WithMany(x => x.ShippingMethods)
                 .HasForeignKey(x => x.StoreId).IsRequired().OnDelete(DeleteBehavior.Cascade);
             #endregion
-
 
             #region FulfillmentCenters
             modelBuilder.Entity<StoreFulfillmentCenterEntity>().ToTable("StoreFulfillmentCenter").HasKey(x => x.Id);

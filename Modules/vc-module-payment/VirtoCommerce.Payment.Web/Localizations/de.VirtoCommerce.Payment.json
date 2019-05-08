@@ -1,0 +1,40 @@
+{
+    "payment": {
+        "blades": {
+            "paymentMethod-detail": {
+                "subtitle": "Zahlungsmethode bearbeiten",
+                "labels": {
+                    "is-active": "Ist aktiv",
+                    "is-partial-payments-available": "Teilweiser Zahlungen verfügbar",
+                    "name": "Name",
+                    "code": "Code",
+                    "description": "Beschreibung",
+                    "settings": "Einstellungen"
+                },
+                "placeholders": {
+                    "description": "Beschreibung eingeben"
+                }
+            },
+            "paymentMethod-list": {
+                "subtitle": "Zahlungsmethode bearbeiten",
+                "labels": {
+                    "is-active": "Ist aktiv",
+                    "payment-method": "Zahlungsmethode",
+                    "note": "Legen Sie den Auftrag fest, wie Zahlungsmethoden im Web Store sortiert werden. Ziehen und loslassen, um die Reihenfolge zu ändern."
+                },
+                "placeholders": {
+                    "description": "Beschreibung eingeben"
+                }
+            }
+        },
+        "widgets": {
+            "storePaymentsWidget": {
+                "title": "Zahlungsmethoden",
+                "blade-subtitle": "Zahlungsmethoden"
+            }
+        }
+    },
+    "settings": {
+       
+    }
+}

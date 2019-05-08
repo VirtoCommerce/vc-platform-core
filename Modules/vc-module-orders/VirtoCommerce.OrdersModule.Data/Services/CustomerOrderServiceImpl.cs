@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CoreModule.Core.Common;
-using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.CoreModule.Core.Shipping;
 using VirtoCommerce.OrdersModule.Core.Events;
 using VirtoCommerce.OrdersModule.Core.Model;
@@ -12,6 +11,7 @@ using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.OrdersModule.Data.Caching;
 using VirtoCommerce.OrdersModule.Data.Model;
 using VirtoCommerce.OrdersModule.Data.Repositories;
+using VirtoCommerce.PaymentModule.Core.Services;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
@@ -53,7 +53,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             _platformMemoryCache = platformMemoryCache;
             _uniqueNumberGenerator = uniqueNumberGenerator;
         }
-        
+
         #region ICustomerOrderService Members
 
         public virtual async Task<CustomerOrder[]> GetByIdsAsync(string[] orderIds, string responseGroup = null)
@@ -95,7 +95,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
 
         public virtual async Task<CustomerOrder> GetByIdAsync(string orderId, string responseGroup = null)
         {
-            var orders = await GetByIdsAsync(new[] {orderId}, responseGroup);
+            var orders = await GetByIdsAsync(new[] { orderId }, responseGroup);
             return orders.FirstOrDefault();
         }
 
@@ -167,7 +167,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             }
             ClearCache(orders);
         }
-        
+
         #endregion
 
         protected virtual void LoadOrderDependencies(CustomerOrder order)

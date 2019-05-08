@@ -213,13 +213,21 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CatalogModule
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.CatalogModule.Web", "Modules\vc-module-catalog\VirtoCommerce.CatalogModule.Web\VirtoCommerce.CatalogModule.Web.csproj", "{2AD7E879-2ADD-4D0A-ABEA-C4B64409E8DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.TaxModule.Core", "Modules\vc-module-tax\VirtoCommerce.TaxModule.Core\VirtoCommerce.TaxModule.Core.csproj", "{53C1BCBD-6F50-427A-8A34-7546C750A127}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.TaxModule.Core", "Modules\vc-module-tax\VirtoCommerce.TaxModule.Core\VirtoCommerce.TaxModule.Core.csproj", "{53C1BCBD-6F50-427A-8A34-7546C750A127}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vc-module-tax", "vc-module-tax", "{1DFC8DC8-DF91-4AEF-AFB4-B2E2C7AAB811}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.TaxModule.Data", "Modules\vc-module-tax\VirtoCommerce.TaxModule.Data\VirtoCommerce.TaxModule.Data.csproj", "{A89D2D2C-7CD0-4CB9-B6D6-7437ED72DF17}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.TaxModule.Data", "Modules\vc-module-tax\VirtoCommerce.TaxModule.Data\VirtoCommerce.TaxModule.Data.csproj", "{A89D2D2C-7CD0-4CB9-B6D6-7437ED72DF17}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VirtoCommerce.TaxModule.Web", "Modules\vc-module-tax\VirtoCommerce.TaxModule.Web\VirtoCommerce.TaxModule.Web.csproj", "{D609CE39-BD8F-4794-AA37-EAE5BEF8839F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.TaxModule.Web", "Modules\vc-module-tax\VirtoCommerce.TaxModule.Web\VirtoCommerce.TaxModule.Web.csproj", "{D609CE39-BD8F-4794-AA37-EAE5BEF8839F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vc-module-payment", "vc-module-payment", "{73AAC059-AB31-431E-9D62-1C46551FAD7E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.PaymentModule.Core", "Modules\vc-module-payment\VirtoCommerce.Payment.Core\VirtoCommerce.PaymentModule.Core.csproj", "{5052B473-5CCC-43B5-AB8B-62461B192BCF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.PaymentModule.Data", "Modules\vc-module-payment\VirtoCommerce.Payment.Data\VirtoCommerce.PaymentModule.Data.csproj", "{7DDB4046-67E1-4273-91FD-31AF2DD62B89}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VirtoCommerce.PaymentModule.Web", "Modules\vc-module-payment\VirtoCommerce.Payment.Web\VirtoCommerce.PaymentModule.Web.csproj", "{D57464F0-D36D-4362-8134-66ABEE2C9C8D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -575,6 +583,18 @@ Global
 		{D609CE39-BD8F-4794-AA37-EAE5BEF8839F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D609CE39-BD8F-4794-AA37-EAE5BEF8839F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D609CE39-BD8F-4794-AA37-EAE5BEF8839F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5052B473-5CCC-43B5-AB8B-62461B192BCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5052B473-5CCC-43B5-AB8B-62461B192BCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5052B473-5CCC-43B5-AB8B-62461B192BCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5052B473-5CCC-43B5-AB8B-62461B192BCF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DDB4046-67E1-4273-91FD-31AF2DD62B89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DDB4046-67E1-4273-91FD-31AF2DD62B89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DDB4046-67E1-4273-91FD-31AF2DD62B89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DDB4046-67E1-4273-91FD-31AF2DD62B89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D57464F0-D36D-4362-8134-66ABEE2C9C8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D57464F0-D36D-4362-8134-66ABEE2C9C8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D57464F0-D36D-4362-8134-66ABEE2C9C8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D57464F0-D36D-4362-8134-66ABEE2C9C8D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -680,6 +700,10 @@ Global
 		{1DFC8DC8-DF91-4AEF-AFB4-B2E2C7AAB811} = {7052A390-9A84-46DA-BD3B-556FD74DEC97}
 		{A89D2D2C-7CD0-4CB9-B6D6-7437ED72DF17} = {1DFC8DC8-DF91-4AEF-AFB4-B2E2C7AAB811}
 		{D609CE39-BD8F-4794-AA37-EAE5BEF8839F} = {1DFC8DC8-DF91-4AEF-AFB4-B2E2C7AAB811}
+		{73AAC059-AB31-431E-9D62-1C46551FAD7E} = {7052A390-9A84-46DA-BD3B-556FD74DEC97}
+		{5052B473-5CCC-43B5-AB8B-62461B192BCF} = {73AAC059-AB31-431E-9D62-1C46551FAD7E}
+		{7DDB4046-67E1-4273-91FD-31AF2DD62B89} = {73AAC059-AB31-431E-9D62-1C46551FAD7E}
+		{D57464F0-D36D-4362-8134-66ABEE2C9C8D} = {73AAC059-AB31-431E-9D62-1C46551FAD7E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {80F99D88-A3B2-4ED2-9148-43D43EBFFFC3}
