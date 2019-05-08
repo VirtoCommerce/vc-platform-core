@@ -8,6 +8,7 @@ function Compress-Module
 	$env:Path += ";C:\Program Files\nodejs\"
 
 	$InputDir = ""
+	$OutputDir = ""
 
 	if (Get-Module -ListAvailable -Name Get-Project) {
 		if ($ProjectName) {
@@ -17,10 +18,6 @@ function Compress-Module
 		}
 		
 		$InputDir = Split-Path $project.FullName -Parent
-		
-		if (-not $OutputDir) {
-			$OutputDir = $InputDir
-		}
 	} 
 	else {
 		if ($ProjectName) {
@@ -28,38 +25,47 @@ function Compress-Module
 				$InputDir = $ProjectName
 			}
 		} else {
-			$InputDir = (Get-Item -Path ".\").FullName
+			$InputDir = $PSScriptRoot
 		}		
 	}    
 	
-	Set-Location ($InputDir)
-	
-	$tmp = [Guid]::NewGuid()
-	
-	[xml]$xml = Get-Content $InputDir\module.manifest
-	$VCModuleId = (Select-Xml -Xml $xml -XPath "//module/id" | Select-Object -ExpandProperty Node).InnerText
-	$VCModuleVersion = (Select-Xml -Xml $xml -XPath "//module/version" | Select-Object -ExpandProperty Node).InnerText
-	$VCModuleZip = "$VCModuleId" + "_" + "$VCModuleVersion.zip"
-	
-	npm i
-	
-	npm run webpack:build
-	
-	Copy-Item "$InputDir\dist" -Destination "$OutputDir\$tmp\dist" -Recurse
-	
-	Copy-Item "$InputDir\Localizations" -Destination "$OutputDir\$tmp\Localizations" -Recurse
-	
-	Copy-Item "$InputDir\module.manifest" -Destination "$OutputDir\$tmp"
-	
-	if(Test-Path "$InputDir\module.ignore" -PathType Leaf) {
-		Copy-Item "$InputDir\module.ignore" -Destination "$OutputDir\$tmp"
+	if (-not $OutputDir) {
+		$OutputDir = $InputDir
 	}
+	
+	Set-Location ($InputDir)
+		
+	if(Test-Path "$InputDir\module.manifest" -PathType Leaf) {
+		$tmp = [Guid]::NewGuid()
+	
+		[xml]$xml = Get-Content $InputDir\module.manifest
+		$VCModuleId = (Select-Xml -Xml $xml -XPath "//module/id" | Select-Object -ExpandProperty Node).InnerText
+		$VCModuleVersion = (Select-Xml -Xml $xml -XPath "//module/version" | Select-Object -ExpandProperty Node).InnerText
+		$VCModuleZip = "$VCModuleId" + "_" + "$VCModuleVersion.zip"
+	
+		npm i
+	
+		npm run webpack:build
+	
+		if(Test-Path "$InputDir\dist") {
+			Copy-Item "$InputDir\dist" -Destination "$OutputDir\$tmp\dist" -Recurse
+		}
+	
+		if(Test-Path "$InputDir\Localizations") {
+			Copy-Item "$InputDir\Localizations" -Destination "$OutputDir\$tmp\Localizations" -Recurse
+		}
+	
+		Copy-Item "$InputDir\module.manifest" -Destination "$OutputDir\$tmp"
+	
+		if(Test-Path "$InputDir\module.ignore" -PathType Leaf) {
+			Copy-Item "$InputDir\module.ignore" -Destination "$OutputDir\$tmp"
+		}
 
-	dotnet clean -c Release
+		dotnet clean -c Release
 	
-	dotnet publish -c Release -o "$OutputDir\$tmp\bin" --self-contained false
+		dotnet publish -c Release -o "$OutputDir\$tmp\bin" --self-contained false
 	
-	$platformDlls = 
+		$platformDlls = 
 "AspNet.Security.OAuth.Validation.dll",
 "EntityFrameworkCore.Triggers.dll", 
 "Hangfire.AspNetCore.dll",
@@ -105,27 +111,31 @@ function Compress-Module
 "VirtoCommerce.Smidge.Nuglify.dll",
 "WindowsAzure.Storage.dll"
 
-	$dlls = @(Get-ChildItem -Path "$OutputDir\$tmp\bin" -Name)
+		$dlls = @(Get-ChildItem -Path "$OutputDir\$tmp\bin" -Name)
 
-	foreach ($_ in $dlls) {                                                                                                             
-		if($_.StartsWith("VirtoCommerce")) {
-			if(!$_.StartsWith($VCModuleId)) {			
-				Remove-Item ("$OutputDir\$tmp\bin\" + $_)
+		foreach ($_ in $dlls) {                                                                                                             
+			if($_.StartsWith("VirtoCommerce")) {
+				if(!$_.StartsWith($VCModuleId)) {			
+					Remove-Item ("$OutputDir\$tmp\bin\" + $_)
+				}
 			}
 		}
-	}
 	
-	if(Test-Path "$OutputDir\$tmp\module.ignore" -PathType Leaf) {
-		$ignore = Get-Content "$OutputDir\$tmp\module.ignore"	
+		if(Test-Path "$OutputDir\$tmp\module.ignore" -PathType Leaf) {
+			$ignore = Get-Content "$OutputDir\$tmp\module.ignore"	
 
-		Compare-Object -ReferenceObject $ignore -DifferenceObject $dlls -IncludeEqual | ForEach-Object -Process { if($_.SideIndicator -eq "==") { Remove-Item ("$OutputDir\$tmp\bin\" + $_.InputObject) }}
-	}	
+			Compare-Object -ReferenceObject $ignore -DifferenceObject $dlls -IncludeEqual | ForEach-Object -Process { if($_.SideIndicator -eq "==") { Remove-Item ("$OutputDir\$tmp\bin\" + $_.InputObject) }}
+		}	
 
-	Compare-Object -ReferenceObject $platformDlls -DifferenceObject $dlls -IncludeEqual | ForEach-Object -Process { if($_.SideIndicator -eq "==") { Remove-Item ("$OutputDir\$tmp\bin\" + $_.InputObject) }}
+		Compare-Object -ReferenceObject $platformDlls -DifferenceObject $dlls -IncludeEqual | ForEach-Object -Process { if($_.SideIndicator -eq "==") { Remove-Item ("$OutputDir\$tmp\bin\" + $_.InputObject) }}
 	
-	Compress-Archive -Path "$OutputDir\$tmp\*" -DestinationPath "$OutputDir\$VCModuleZip" -Force
+		Compress-Archive -Path "$OutputDir\$tmp\*" -DestinationPath "$OutputDir\$VCModuleZip" -Force
 	
-	Remove-Item "$OutputDir\$tmp" -Recurse
+		Remove-Item "$OutputDir\$tmp" -Recurse
+		}
+		else {
+			"Module isn't exist"
+		}
 }
 
 Export-ModuleMember -Function Compress-Module
