@@ -71,11 +71,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
                         if (subscription != null)
                         {
                             subscription = subscriptionEntity.ToModel(subscription) as Subscription;
-                            if (subscriptionResponseGroup.HasFlag(SubscriptionResponseGroup.WithChangeLog))
-                            {
-                                //Load change log by separate request
-                                ChangeLogService.LoadChangeLogs(subscription);
-                            }
+
                             retVal.Add(subscription);
                         }
                     }

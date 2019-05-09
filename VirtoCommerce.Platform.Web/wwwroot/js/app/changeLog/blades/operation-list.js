@@ -5,11 +5,12 @@ angular.module('platformWebApp')
     if (!$scope.blade.currentEntities) {
         $scope.blade.isLoading = true;
         changeLogApi.search({
-            id: $scope.blade.tenantId,
-            type: $scope.blade.tenantType.split('.').pop()
+            objectIds: [ $scope.blade.tenantId ],
+            objectType: $scope.blade.tenantType.split('.').pop(),
+            take: 50
         }, function (data) {
             $scope.blade.isLoading = false;
-            $scope.blade.currentEntities = data;
+            $scope.blade.currentEntities = data.results;
         });
     }
 

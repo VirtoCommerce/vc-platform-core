@@ -46,7 +46,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         private readonly INotificationSender _notificationSender;
 
         private readonly INotificationTemplateRenderer _notificationTemplateRenderer;
-        private readonly IChangeLogService _changeLogService;
+        private readonly IChangeLogSearchService _changeLogSearchService;
         private static readonly object _lockObject = new object();
 
         public OrderModuleController(ICustomerOrderService customerOrderService, ICustomerOrderSearchService searchService, IStoreService storeService
@@ -58,7 +58,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             , ICustomerOrderBuilder customerOrderBuilder
             , IShoppingCartService cartService
             , INotificationSender notificationSender
-            , IChangeLogService changeLogService, INotificationTemplateRenderer notificationTemplateRenderer)
+            , IChangeLogSearchService changeLogSearchService, INotificationTemplateRenderer notificationTemplateRenderer)
         {
             _customerOrderService = customerOrderService;
             _searchService = searchService;
@@ -71,7 +71,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             _customerOrderBuilder = customerOrderBuilder;
             _cartService = cartService;
             _notificationSender = notificationSender;
-            _changeLogService = changeLogService;
+            _changeLogSearchService = changeLogSearchService;
             _notificationTemplateRenderer = notificationTemplateRenderer;
         }
 
@@ -510,17 +510,21 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         [Route("{id}/changes")]
         public async Task<ActionResult<OperationLog[]>> GetOrderChanges(string id)
         {
-            var result = new OperationLog[] { };
+            var result = Array.Empty<OperationLog>();
             var order = await _customerOrderService.GetByIdAsync(id);
             if (order != null)
             {
-                _changeLogService.LoadChangeLogs(order);
                 //Load general change log for order
-                result = order.GetFlatObjectsListWithInterface<IHasChangesHistory>()
-                                          .Distinct()
-                                          .SelectMany(x => x.OperationsLog)
-                                          .OrderBy(x => x.CreatedDate)
+                var allHasHangesObjects = order.GetFlatObjectsListWithInterface<IHasChangesHistory>()
                                           .Distinct().ToArray();
+
+                var criteria = new ChangeLogSearchCriteria
+                {
+                    ObjectIds = allHasHangesObjects.Select(x => x.Id).Distinct().ToArray(),
+                    ObjectTypes = allHasHangesObjects.Select(x => x.GetType().Name).Distinct().ToArray()
+                };
+                result = (await _changeLogSearchService.SearchAsync(criteria)).Results.ToArray();
+
             }
             return Ok(result);
         }

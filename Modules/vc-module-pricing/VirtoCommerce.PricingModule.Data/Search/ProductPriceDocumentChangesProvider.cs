@@ -14,16 +14,16 @@ namespace VirtoCommerce.PricingModule.Data.Search
     {
         public const string ChangeLogObjectType = nameof(PriceEntity);
 
-        private readonly IChangeLogService _changeLogService;
+        private readonly IChangeLogSearchService _changeLogSearchService;
         private readonly IPricingService _pricingService;
 
-        public ProductPriceDocumentChangesProvider(IChangeLogService changeLogService, IPricingService pricingService)
+        public ProductPriceDocumentChangesProvider(IChangeLogSearchService changeLogSearchService, IPricingService pricingService)
         {
-            _changeLogService = changeLogService;
+            _changeLogSearchService = changeLogSearchService;
             _pricingService = pricingService;
         }
 
-        public virtual Task<long> GetTotalChangesCountAsync(DateTime? startDate, DateTime? endDate)
+        public virtual async Task<long> GetTotalChangesCountAsync(DateTime? startDate, DateTime? endDate)
         {
             long result;
 
@@ -34,11 +34,18 @@ namespace VirtoCommerce.PricingModule.Data.Search
             }
             else
             {
+                var criteria = new ChangeLogSearchCriteria
+                {
+                    ObjectType = ChangeLogObjectType,
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    Take = 0
+                };
                 // Get changes count from operation log
-                result = _changeLogService.FindChangeHistory(ChangeLogObjectType, startDate, endDate).Count();
+                result = (await _changeLogSearchService.SearchAsync(criteria)).TotalCount;
             }
 
-            return Task.FromResult(result);
+            return result;
         }
 
         public virtual async Task<IList<IndexDocumentChange>> GetChangesAsync(DateTime? startDate, DateTime? endDate, long skip, long take)
@@ -51,11 +58,18 @@ namespace VirtoCommerce.PricingModule.Data.Search
             }
             else
             {
+                var criteria = new ChangeLogSearchCriteria
+                {
+                    ObjectType = ChangeLogObjectType,
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    Skip = (int)skip,
+                    Take = (int)take
+                };
+
                 // Get changes from operation log
-                var operations = _changeLogService.FindChangeHistory(ChangeLogObjectType, startDate, endDate)
-                    .Skip((int)skip)
-                    .Take((int)take)
-                    .ToArray();
+                var operations = (await _changeLogSearchService.SearchAsync(criteria)).Results;
+
 
                 var priceIds = operations.Select(c => c.ObjectId).ToArray();
                 var priceIdsAndProductIds = await GetProductIdsAsync(priceIds);

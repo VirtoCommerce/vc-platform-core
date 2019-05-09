@@ -24,15 +24,15 @@ namespace VirtoCommerce.LicensingModule.Data.Services
     public class LicenseService : ILicenseService
     {
         private readonly Func<ILicenseRepository> _licenseRepositoryFactory;
-        private readonly IChangeLogService _changeLogService;
+        private readonly IChangeLogSearchService _changeLogSearchService;
         private readonly IEventPublisher _eventPublisher;
         private readonly LicenseOptions _licenseOptions;
 
-        public LicenseService(Func<ILicenseRepository> licenseRepositoryFactory, IChangeLogService changeLogService, IEventPublisher eventPublisher
+        public LicenseService(Func<ILicenseRepository> licenseRepositoryFactory, IChangeLogSearchService changeLogSearchService, IEventPublisher eventPublisher
             , IOptions<LicenseOptions> licenseOptions)
         {
             _licenseRepositoryFactory = licenseRepositoryFactory;
-            _changeLogService = changeLogService;
+            _changeLogSearchService = changeLogSearchService;
             _eventPublisher = eventPublisher;
             _licenseOptions = licenseOptions.Value;
         }
@@ -67,7 +67,7 @@ namespace VirtoCommerce.LicensingModule.Data.Services
 
         public async Task<License[]> GetByIdsAsync(string[] ids)
         {
-            License[] result;
+            var result = Array.Empty<License>();
 
             using (var repository = _licenseRepositoryFactory())
             {
@@ -76,13 +76,14 @@ namespace VirtoCommerce.LicensingModule.Data.Services
                     .Select(x =>
                     {
                         var retVal = x.ToModel(AbstractTypeFactory<License>.TryCreateInstance());
-                        //Load change log by separate request
-                        _changeLogService.LoadChangeLogs(retVal);
                         return retVal;
-                    })
-                    .ToArray();
+                    }).ToArray();
             }
-
+            var searchResult = await _changeLogSearchService.SearchAsync(new ChangeLogSearchCriteria { ObjectIds = ids, ObjectType = typeof(License).Name, Take = int.MaxValue });
+            foreach (var license in result)
+            {
+                license.OperationsLog = searchResult.Results.Where(x => x.ObjectId == license.Id).ToList();
+            }
             return result;
         }
 

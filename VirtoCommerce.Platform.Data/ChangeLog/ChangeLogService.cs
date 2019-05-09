@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Data.Model;
@@ -10,29 +11,25 @@ namespace VirtoCommerce.Platform.Data.ChangeLog
 {
     public class ChangeLogService : IChangeLogService
     {
-        private readonly Func<IPlatformRepository> _platformRepositoryFactory;
+        private readonly Func<IPlatformRepository> _repositoryFactory;
 
         public ChangeLogService(Func<IPlatformRepository> platformRepositoryFactory)
         {
-            _platformRepositoryFactory = platformRepositoryFactory;
+            _repositoryFactory = platformRepositoryFactory;
         }
 
         #region IChangeLogService Members
 
-        public void LoadChangeLogs(IHasChangesHistory owner)
+        public async Task<OperationLog[]> GetByIdsAsync(string[] ids)
         {
-            var objectsWithChangesHistory = owner.GetFlatObjectsListWithInterface<IHasChangesHistory>().Distinct();
-
-            foreach (var objectWithChangesHistory in objectsWithChangesHistory)
+            using (var repository = _repositoryFactory())
             {
-                if (objectWithChangesHistory.Id != null)
-                {
-                    objectWithChangesHistory.OperationsLog = FindObjectChangeHistory(objectWithChangesHistory.Id, objectWithChangesHistory.GetType().Name).ToList();
-                }
+                var existEntities = await repository.GetOperationLogsByIdsAsync(ids);
+                return existEntities.Select(x => x.ToModel(AbstractTypeFactory<OperationLog>.TryCreateInstance())).ToArray();
             }
         }
 
-        public void SaveChanges(params OperationLog[] operationLogs)
+        public virtual async Task SaveChangesAsync(params OperationLog[] operationLogs)
         {
             if (operationLogs == null)
             {
@@ -40,17 +37,17 @@ namespace VirtoCommerce.Platform.Data.ChangeLog
             }
             var pkMap = new PrimaryKeyResolvingMap();
 
-            using (var repository = _platformRepositoryFactory())
+            using (var repository = _repositoryFactory())
             {
-                var ids = operationLogs.Where(x => x.Id != null).Select(x => x.Id).Distinct().ToArray();
-                var origDbOperations = repository.OperationLogs.Where(x => ids.Contains(x.Id));
+                var ids = operationLogs.Where(x => !x.IsTransient()).Select(x => x.Id).Distinct().ToArray();
+                var existEntities = await repository.GetOperationLogsByIdsAsync(ids);
                 foreach (var operation in operationLogs)
                 {
-                    var originalEntity = origDbOperations.FirstOrDefault(x => x.Id == operation.Id);
+                    var existsEntity = existEntities.FirstOrDefault(x => x.Id == operation.Id);
                     var modifiedEntity = AbstractTypeFactory<OperationLogEntity>.TryCreateInstance().FromModel(operation, pkMap);
-                    if (originalEntity != null)
+                    if (existsEntity != null)
                     {
-                        modifiedEntity.Patch(originalEntity);
+                        modifiedEntity.Patch(existsEntity);
                     }
                     else
                     {
@@ -61,59 +58,17 @@ namespace VirtoCommerce.Platform.Data.ChangeLog
             }
         }
 
-        ///TODO: Replace to paginate version that  receive SearchCriteria as parameter and return response GenericResult
-        public IEnumerable<OperationLog> FindObjectChangeHistory(string objectId, string objectType)
+        public virtual async Task DeleteAsync(string[] ids)
         {
-            if (objectId == null)
-                throw new ArgumentNullException(nameof(objectId));
-
-            if (objectType == null)
-                throw new ArgumentNullException(nameof(objectType));
-
-            using (var repository = _platformRepositoryFactory())
+            using (var repository = _repositoryFactory())
             {
-                var retVal = repository.OperationLogs.Where(x => x.ObjectId == objectId && x.ObjectType == objectType)
-                                                    .OrderBy(x => x.ModifiedDate).ToArray()
-                                                    .Select(x => x.ToModel(AbstractTypeFactory<OperationLog>.TryCreateInstance()))
-                                                    .ToList();
-                return retVal;
-            }
-        }
-        ///TODO: Replace to paginate version that  receive SearchCriteria as parameter and return response GenericResult
-        public OperationLog GetObjectLastChange(string objectId, string objectType)
-        {
-            if (objectId == null)
-                throw new ArgumentNullException(nameof(objectId));
-
-            if (objectType == null)
-                throw new ArgumentNullException(nameof(objectType));
-
-            OperationLog retVal = null;
-            using (var repository = _platformRepositoryFactory())
-            {
-                var entity = repository.OperationLogs.Where(x => x.ObjectId == objectId && x.ObjectType == objectType)
-                                                     .OrderByDescending(x => x.ModifiedDate).FirstOrDefault();
-                if (entity != null)
+                var existEntities = await repository.GetOperationLogsByIdsAsync(ids);
+                foreach (var entity in existEntities)
                 {
-                    retVal = entity.ToModel(AbstractTypeFactory<OperationLog>.TryCreateInstance());
+
+                    repository.Remove(entity);
                 }
-
-            }
-            return retVal;
-        }
-        ///TODO: Replace to paginate version that  receive SearchCriteria as parameter and return response GenericResult
-        public IEnumerable<OperationLog> FindChangeHistory(string objectType, DateTime? startDate, DateTime? endDate)
-        {
-            if (objectType == null)
-                throw new ArgumentNullException(nameof(objectType));
-
-            using (var repository = _platformRepositoryFactory())
-            {
-                var retVal = repository.OperationLogs.Where(x => x.ObjectType == objectType && (startDate == null || x.ModifiedDate >= startDate) && (endDate == null || x.ModifiedDate <= endDate))
-                                                 .OrderBy(x => x.ModifiedDate).ToArray()
-                                                 .Select(x => x.ToModel(AbstractTypeFactory<OperationLog>.TryCreateInstance()))
-                                                 .ToList();
-                return retVal;
+                await repository.UnitOfWork.CommitAsync();
             }
         }
 

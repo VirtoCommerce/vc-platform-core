@@ -79,13 +79,13 @@ namespace VirtoCommerce.Platform.Data.Assets
                     .Skip(criteria.Skip)
                     .Take(criteria.Take)
                     .Select(x => x.Id)
-                    .ToListAsync();
+                    .ToArrayAsync();
 
                 var asetsResult = await repository.GetAssetsByIdsAsync(ids);
 
                 result.Results = asetsResult
                     .Select(x => x.ToModel(AbstractTypeFactory<AssetEntry>.TryCreateInstance(), _blobUrlResolver))
-                    .OrderBy(x => ids.IndexOf(x.Id))
+                    .AsQueryable().OrderBySortInfos(sortInfos)
                     .ToList();
 
                 return result;
@@ -96,7 +96,7 @@ namespace VirtoCommerce.Platform.Data.Assets
         {
             using (var repository = _platformRepository())
             {
-                var entities = await repository.GetAssetsByIdsAsync(ids);
+                var entities = await repository.GetAssetsByIdsAsync(ids.ToArray());
                 return entities.Select(x => x.ToModel(AbstractTypeFactory<AssetEntry>.TryCreateInstance(), _blobUrlResolver));
             }
         }
