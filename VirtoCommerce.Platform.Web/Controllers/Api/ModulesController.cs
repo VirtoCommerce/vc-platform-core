@@ -23,7 +23,6 @@ using VirtoCommerce.Platform.Data.Helpers;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api
 {
-    [Produces("application/json")]
     [Route("api/platform/modules")]
     public class ModulesController : Controller
     {

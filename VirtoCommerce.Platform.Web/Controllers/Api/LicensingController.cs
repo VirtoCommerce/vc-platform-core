@@ -11,7 +11,6 @@ using VirtoCommerce.Platform.Web.Licensing;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api
 {
-    [Produces("application/json")]
     [Route("api/platform/licensing")]
     [Authorize(PlatformConstants.Security.Permissions.ModuleManage)]
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -25,8 +24,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
         [HttpPost]
         [Route("activateByCode")]
-        [ProducesResponseType(typeof(License), 200)]
-        public async Task<IActionResult> ActivateByCode([FromBody]string activationCode)
+        public async Task<ActionResult<License>> ActivateByCode([FromBody]string activationCode)
         {
             License license = null;
 
@@ -46,8 +44,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
         [HttpPost]
         [Route("activateByFile")]
-        [ProducesResponseType(typeof(License), 200)]
-        public async Task<IActionResult> ActivateByFile(IFormFile file)
+        public async Task<ActionResult<License>> ActivateByFile(IFormFile file)
         {
             License license = null;
             var rawLicense = string.Empty;
@@ -66,8 +63,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
         [HttpPost]
         [Route("activateLicense")]
-        [ProducesResponseType(typeof(License), 200)]
-        public IActionResult ActivateLicense([FromBody]License license)
+        public ActionResult<License> ActivateLicense([FromBody]License license)
         {
             license = License.Parse(license?.RawLicense, Path.GetFullPath(_platformOptions.LicensePublicKeyPath));
 

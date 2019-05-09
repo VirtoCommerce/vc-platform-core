@@ -21,7 +21,7 @@ namespace VirtoCommerce.Platform.Data.Assets
             _blobUrlResolver = blobUrlResolver;
         }
 
-        public async Task<GenericSearchResult<AssetEntry>> SearchAssetEntriesAsync(AssetEntrySearchCriteria criteria)
+        public async Task<AssetEntrySearchResult> SearchAssetEntriesAsync(AssetEntrySearchCriteria criteria)
         {
             criteria = criteria ?? AbstractTypeFactory<AssetEntrySearchCriteria>.TryCreateInstance();
 
@@ -55,10 +55,9 @@ namespace VirtoCommerce.Platform.Data.Assets
                     }
                 }
 
-                var result = new GenericSearchResult<AssetEntry>()
-                {
-                    TotalCount = await query.CountAsync()
-                };
+                var result = AbstractTypeFactory<AssetEntrySearchResult>.TryCreateInstance();
+
+                result.TotalCount = await query.CountAsync();
 
                 var sortInfos = criteria.SortInfos;
                 if (sortInfos.IsNullOrEmpty())

@@ -15,7 +15,7 @@ namespace VirtoCommerce.Platform.Core.Assets
         /// <param name="folderUrl"></param>
         /// <param name="keyword"></param>
         /// <returns></returns>
-        Task<GenericSearchResult<BlobEntry>> SearchAsync(string folderUrl, string keyword);
+        Task<BlobEntrySearchResult> SearchAsync(string folderUrl, string keyword);
 
         /// <summary>
         /// Get blog info by url

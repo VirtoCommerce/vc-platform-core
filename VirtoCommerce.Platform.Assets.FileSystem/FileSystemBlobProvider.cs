@@ -103,9 +103,9 @@ namespace VirtoCommerce.Platform.Assets.FileSystem
         /// <param name="folderUrl">absolute or relative path</param>
         /// <param name="keyword"></param>
         /// <returns></returns>
-        public virtual Task<GenericSearchResult<BlobEntry>> SearchAsync(string folderUrl, string keyword)
+        public virtual Task<BlobEntrySearchResult> SearchAsync(string folderUrl, string keyword)
         {
-            var retVal = new GenericSearchResult<BlobEntry>();
+            var retVal = AbstractTypeFactory<BlobEntrySearchResult>.TryCreateInstance();
             folderUrl = folderUrl ?? _basePublicUrl;
 
             var storageFolderPath = GetStoragePathFromUrl(folderUrl);
