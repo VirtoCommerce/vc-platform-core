@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using EntityFrameworkCore.Triggers;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.CustomerModule.Data.Model;
@@ -13,7 +10,7 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
             : base(options)
         {
         }
-        
+
         protected CustomerDbContext(DbContextOptions options)
             : base(options)
         {
@@ -117,6 +114,15 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
 
             #region Vendor
             modelBuilder.Entity<VendorEntity>().Property(p => p.Description).HasColumnName("Description");
+
+            #endregion
+
+
+            #region SeoInfo
+            modelBuilder.Entity<SeoInfoEntity>().ToTable("MemberSeoInfo").HasKey(x => x.Id);
+            modelBuilder.Entity<SeoInfoEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<SeoInfoEntity>().HasOne(x => x.Member).WithMany(x => x.SeoInfos).HasForeignKey(x => x.MemberId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             #endregion
 

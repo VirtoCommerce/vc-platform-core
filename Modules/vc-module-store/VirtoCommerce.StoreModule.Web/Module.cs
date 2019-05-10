@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.CoreModule.Core.Shipping;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.Platform.Core.Bus;
@@ -46,6 +47,7 @@ namespace VirtoCommerce.StoreModule.Web
             serviceCollection.AddSingleton<IStoreSearchService, StoreSearchService>();
             serviceCollection.AddSingleton<StoreExportImport>();
             serviceCollection.AddSingleton<StoreChangedEventHandler>();
+            serviceCollection.AddSingleton<ISeoBySlugResolver, SeoBySlugResolver>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)

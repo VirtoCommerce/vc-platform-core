@@ -28,12 +28,11 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         private readonly AbstractValidator<IHasProperties> _hasPropertyValidator;
         private readonly ICatalogService _catalogService;
         private readonly IOutlineService _outlineService;
-        private readonly ISeoService _seoService;
         private readonly IBlobUrlResolver _blobUrlResolver;
 
         public CategoryService(Func<ICatalogRepository> catalogRepositoryFactory, IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache,
-                                   AbstractValidator<IHasProperties> hasPropertyValidator, ICatalogService catalogService, IOutlineService outlineService,
-                                   ISeoService seoService, IBlobUrlResolver blobUrlResolver)
+                               AbstractValidator<IHasProperties> hasPropertyValidator, ICatalogService catalogService, IOutlineService outlineService,
+                               IBlobUrlResolver blobUrlResolver)
         {
             _repositoryFactory = catalogRepositoryFactory;
             _eventPublisher = eventPublisher;
@@ -41,7 +40,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             _hasPropertyValidator = hasPropertyValidator;
             _catalogService = catalogService;
             _outlineService = outlineService;
-            _seoService = seoService;
             _blobUrlResolver = blobUrlResolver;
         }
 
@@ -147,12 +145,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
 
                // Fill outlines for categories            
                _outlineService.FillOutlinesForObjects(result.Values, catalogId);
-
-               var objectsWithSeo = new List<ISeoSupport>(result.Values);
-               var outlineItems = result.Values.Where(c => c.Outlines != null).SelectMany(c => c.Outlines.SelectMany(o => o.Items));
-               objectsWithSeo.AddRange(outlineItems);
-               await _seoService.LoadSeoForObjectsAsync(objectsWithSeo.ToArray());
-
                return result;
            });
         }

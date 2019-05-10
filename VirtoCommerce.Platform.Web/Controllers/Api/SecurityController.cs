@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using OpenIddict.Abstractions;
-using OpenIddict.Core;
 using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
@@ -19,10 +18,10 @@ using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Core.Security.Events;
 using VirtoCommerce.Platform.Core.Security.Search;
 using VirtoCommerce.Platform.Web.Model.Security;
+using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
 namespace VirtoCommerce.Platform.Web.Controllers.Api
 {
-    [Produces("application/json")]
     [Route("api/platform/security")]
     public class SecurityController : Controller
     {
@@ -62,9 +61,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <param name="request">Login request.</param>
         [HttpPost]
         [Route("login")]
-        [ProducesResponseType(typeof(Microsoft.AspNetCore.Identity.SignInResult), 200)]
         [AllowAnonymous]
-        public async Task<ActionResult> Login([FromBody]LoginRequest request)
+        public async Task<ActionResult<SignInResult>> Login([FromBody]LoginRequest request)
         {
             var loginResult = await _signInManager.PasswordSignInAsync(request.UserName, request.Password, request.RememberMe, true);
             if (loginResult.Succeeded)
@@ -74,7 +72,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 //Do not allow login to admin customers and rejected users
                 if (await _signInManager.UserManager.IsInRoleAsync(user, PlatformConstants.Security.SystemRoles.Customer))
                 {
-                    loginResult = Microsoft.AspNetCore.Identity.SignInResult.NotAllowed;
+                    loginResult = SignInResult.NotAllowed;
                 }
             }
             return Ok(loginResult);
@@ -105,9 +103,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpGet]
         [Authorize]
         [Route("currentuser")]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(typeof(UserDetail), 200)]
-        public async Task<ActionResult> GetCurrentUser()
+        public async Task<ActionResult<UserDetail>> GetCurrentUser()
         {
             var user = await _userManager.FindByNameAsync(User.Identity.Name);
             if (user == null)
@@ -136,8 +132,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpGet]
         [Authorize(AuthenticationSchemes = OAuthValidationDefaults.AuthenticationScheme)]
         [Route("userinfo")]
-        [ProducesResponseType(typeof(Claim[]), 200)]
-        public async Task<IActionResult> Userinfo()
+        public async Task<ActionResult<Claim[]>> Userinfo()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -149,12 +144,14 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 });
             }
 
-            var claims = new JObject();
+            var claims = new JObject
+            {
 
-            //TODO: replace to PrinciplaClaims
+                //TODO: replace to PrinciplaClaims
 
-            // Note: the "sub" claim is a mandatory claim and must be included in the JSON response.
-            claims[OpenIdConnectConstants.Claims.Subject] = await _userManager.GetUserIdAsync(user);
+                // Note: the "sub" claim is a mandatory claim and must be included in the JSON response.
+                [OpenIdConnectConstants.Claims.Subject] = await _userManager.GetUserIdAsync(user)
+            };
 
             if (User.HasClaim(OpenIdConnectConstants.Claims.Scope, OpenIdConnectConstants.Scopes.Email))
             {
@@ -185,8 +182,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpGet]
         [Route("permissions")]
         [Authorize(PlatformConstants.Security.Permissions.SecurityQuery)]
-        [ProducesResponseType(typeof(Permission[]), 200)]
-        public ActionResult GetAllRegisteredPermissions()
+        public ActionResult<Permission[]> GetAllRegisteredPermissions()
         {
             var result = _permissionsProvider.GetAllPermissions().ToArray();
             return Ok(result);
@@ -198,9 +194,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <param name="request">SearchAsync parameters.</param>
         [HttpPost]
         [Route("roles/search")]
-        [ProducesResponseType(typeof(GenericSearchResult<Role>), 200)]
         [Authorize(PlatformConstants.Security.Permissions.SecurityQuery)]
-        public async Task<ActionResult> SearchRoles([FromBody] RoleSearchCriteria request)
+        public async Task<ActionResult<RoleSearchResult>> SearchRoles([FromBody] RoleSearchCriteria request)
         {
             var result = await _roleSearchService.SearchRolesAsync(request);
             return Ok(result);
@@ -212,9 +207,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <param name="roleName"></param>
         [HttpGet]
         [Route("roles/{roleName}")]
-        [ProducesResponseType(typeof(Role), 200)]
         [Authorize(PlatformConstants.Security.Permissions.SecurityQuery)]
-        public async Task<ActionResult> GetRoleAsync([FromRoute] string roleName)
+        public async Task<ActionResult<Role>> GetRoleAsync([FromRoute] string roleName)
         {
             var result = await _roleManager.FindByNameAsync(roleName);
             return Ok(result);
@@ -226,7 +220,6 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <param name="roleIds">An array of role IDs.</param>
         [HttpDelete]
         [Route("roles")]
-        [ProducesResponseType(200)]
         [Authorize(PlatformConstants.Security.Permissions.SecurityDelete)]
         public async Task<ActionResult> DeleteRolesAsync([FromQuery(Name = "ids")] string[] roleIds)
         {
@@ -250,9 +243,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <param name="role"></param>
         [HttpPost]
         [Route("roles")]
-        [ProducesResponseType(typeof(IdentityResult), 200)]
         [Authorize(PlatformConstants.Security.Permissions.SecurityUpdate)]
-        public async Task<ActionResult> CreateRoleAsync([FromBody] Role role)
+        public async Task<ActionResult<IdentityResult>> CreateRoleAsync([FromBody] Role role)
         {
             var result = await _roleManager.CreateAsync(role);
             return Ok(result);
@@ -264,11 +256,19 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <param name="role"></param>
         [HttpPut]
         [Route("roles")]
-        [ProducesResponseType(typeof(IdentityResult), 200)]
         [Authorize(PlatformConstants.Security.Permissions.SecurityUpdate)]
-        public async Task<ActionResult> UpdateRoleAsync([FromBody] Role role)
+        public async Task<ActionResult<IdentityResult>> UpdateRoleAsync([FromBody] Role role)
         {
-            var result = await _roleManager.UpdateAsync(role);
+            var result = IdentityResult.Success;
+            var roleExists = await _roleManager.RoleExistsAsync(role.Name);
+            if (!roleExists)
+            {
+                result = await _roleManager.CreateAsync(role);
+            }
+            else
+            {
+                result = await _roleManager.UpdateAsync(role);
+            }
             return Ok(result);
         }
 
@@ -278,9 +278,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <param name="criteria">Search criteria.</param>
         [HttpPost]
         [Route("users")]
-        [ProducesResponseType(typeof(GenericSearchResult<ApplicationUser>), 200)]
         [Authorize(PlatformConstants.Security.Permissions.SecurityQuery)]
-        public async Task<ActionResult> SearchUsersAsync([FromBody] UserSearchCriteria criteria)
+        public async Task<ActionResult<UserSearchResult>> SearchUsersAsync([FromBody] UserSearchCriteria criteria)
         {
             var result = await _userSearchService.SearchUsersAsync(criteria);
             return Ok(result);
@@ -292,9 +291,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <param name="userName"></param>
         [HttpGet]
         [Route("users/{userName}")]
-        [ProducesResponseType(typeof(ApplicationUser), 200)]
         [Authorize(PlatformConstants.Security.Permissions.SecurityQuery)]
-        public async Task<ActionResult> GetUserByNameAsync([FromRoute] string userName)
+        public async Task<ActionResult<ApplicationUser>> GetUserByNameAsync([FromRoute] string userName)
         {
             var retVal = await _userManager.FindByNameAsync(userName);
             return Ok(retVal);
@@ -307,9 +305,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <param name="id"></param>
         [HttpGet]
         [Route("users/id/{id}")]
-        [ProducesResponseType(typeof(ApplicationUser), 200)]
         [Authorize(PlatformConstants.Security.Permissions.SecurityQuery)]
-        public async Task<ActionResult> GetUserByIdAsync([FromRoute] string id)
+        public async Task<ActionResult<ApplicationUser>> GetUserByIdAsync([FromRoute] string id)
         {
             var retVal = await _userManager.FindByIdAsync(id);
             return Ok(retVal);
@@ -321,9 +318,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <param name="newUser"></param>
         [HttpPost]
         [Route("users/create")]
-        [ProducesResponseType(typeof(IdentityResult), 200)]
         [Authorize(PlatformConstants.Security.Permissions.SecurityCreate)]
-        public async Task<ActionResult> CreateAsync([FromBody] ApplicationUser newUser)
+        public async Task<ActionResult<IdentityResult>> CreateAsync([FromBody] ApplicationUser newUser)
         {
             var result = await _userManager.CreateAsync(newUser, newUser.Password);
             return Ok(result);
@@ -337,9 +333,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("users/{userName}/changepassword")]
         [ProducesResponseType(400)]
-        [ProducesResponseType(typeof(IdentityResult), 200)]
         [Authorize(PlatformConstants.Security.Permissions.SecurityUpdate)]
-        public async Task<ActionResult> ChangePasswordAsync([FromRoute] string userName, [FromBody] ChangePasswordRequest changePassword)
+        public async Task<ActionResult<IdentityResult>> ChangePasswordAsync([FromRoute] string userName, [FromBody] ChangePasswordRequest changePassword)
         {
             if (!IsUserEditable(userName))
             {
@@ -374,9 +369,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <returns>Result of password reset.</returns>
         [HttpPost]
         [Route("currentuser/resetpassword")]
-        [ProducesResponseType(typeof(IdentityResult), 200)]
-        [ProducesResponseType(typeof(IdentityResult), 400)]
-        public async Task<ActionResult> ResetCurrentUserPassword([FromBody] ResetPasswordConfirmRequest resetPassword)
+        public async Task<ActionResult<IdentityResult>> ResetCurrentUserPassword([FromBody] ResetPasswordConfirmRequest resetPassword)
         {
             var currentUserName = User.Identity.Name;
 
@@ -415,10 +408,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <param name="resetPasswordConfirm">New password.</param>
         [HttpPost]
         [Route("users/{userName}/resetpassword")]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(typeof(IdentityResult), 200)]
         [Authorize(PlatformConstants.Security.Permissions.SecurityUpdate)]
-        public async Task<ActionResult> ResetPassword([FromRoute] string userName, [FromBody] ResetPasswordConfirmRequest resetPasswordConfirm)
+        public async Task<ActionResult<IdentityResult>> ResetPassword([FromRoute] string userName, [FromBody] ResetPasswordConfirmRequest resetPasswordConfirm)
         {
             var user = await _userManager.FindByNameAsync(userName);
             if (user == null)
@@ -455,10 +446,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <param name="resetPasswordConfirm">New password.</param>
         [HttpPost]
         [Route("users/{userId}/resetpasswordconfirm")]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(typeof(IdentityResult), 200)]
         [AllowAnonymous]
-        public async Task<ActionResult> ResetPasswordByToken([FromRoute] string userId, [FromBody] ResetPasswordConfirmRequest resetPasswordConfirm)
+        public async Task<ActionResult<IdentityResult>> ResetPasswordByToken([FromRoute] string userId, [FromBody] ResetPasswordConfirmRequest resetPasswordConfirm)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
@@ -511,7 +500,6 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// </remarks>
         [HttpPost]
         [Route("users/{loginOrEmail}/requestpasswordreset")]
-        [ProducesResponseType(200)]
         [AllowAnonymous]
         public async Task<ActionResult> RequestPasswordReset(string loginOrEmail)
         {
@@ -537,8 +525,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
 
         [HttpPost]
         [Route("validatepassword")]
-        [ProducesResponseType(typeof(PasswordValidationResult), 200)]
-        public async Task<ActionResult> ValidatePasswordAsync([FromBody] string password)
+        public async Task<ActionResult<PasswordValidationResult>> ValidatePasswordAsync([FromBody] string password)
         {
             var result = await _passwordCheckService.ValidatePasswordAsync(password);
             return Ok(result);
@@ -550,9 +537,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <param name="user">User details.</param>
         [HttpPut]
         [Route("users")]
-        [ProducesResponseType(typeof(IdentityResult), 200)]
         [Authorize(PlatformConstants.Security.Permissions.SecurityUpdate)]
-        public async Task<ActionResult> UpdateAsync([FromBody] ApplicationUser user)
+        public async Task<ActionResult<IdentityResult>> UpdateAsync([FromBody] ApplicationUser user)
         {
             if (user == null)
             {
@@ -574,7 +560,6 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <param name="names">An array of user names.</param>
         [HttpDelete]
         [Route("users")]
-        [ProducesResponseType(typeof(IdentityResult), 200)]
         [Authorize(PlatformConstants.Security.Permissions.SecurityDelete)]
         public async Task<ActionResult> DeleteAsync([FromQuery] string[] names)
         {
@@ -608,9 +593,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <returns></returns>
         [HttpGet]
         [Route("users/{id}/locked")]
-        [ProducesResponseType(typeof(UserLockedResult), 200)]
         [Authorize(PlatformConstants.Security.Permissions.SecurityQuery)]
-        public async Task<ActionResult> IsUserLockedAsync([FromRoute] string id)
+        public async Task<ActionResult<UserLockedResult>> IsUserLockedAsync([FromRoute] string id)
         {
             var result = new UserLockedResult(false);
             var user = await _userManager.FindByIdAsync(id);
@@ -628,9 +612,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("users/{id}/unlock")]
-        [ProducesResponseType(typeof(IdentityResult), 200)]
         [Authorize(PlatformConstants.Security.Permissions.SecurityUpdate)]
-        public async Task<ActionResult> UnlockUserAsync([FromRoute] string id)
+        public async Task<ActionResult<IdentityResult>> UnlockUserAsync([FromRoute] string id)
         {
             var user = await _userManager.FindByIdAsync(id);
             if (user != null)

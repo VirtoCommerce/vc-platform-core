@@ -28,14 +28,12 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         private readonly ICatalogService _catalogService;
         private readonly ICategoryService _categoryService;
         private readonly IOutlineService _outlineService;
-        private readonly ISeoService _seoService;
         private readonly IPlatformMemoryCache _platformMemoryCache;
         private readonly IBlobUrlResolver _blobUrlResolver;
         private readonly ISkuGenerator _skuGenerator;
 
         public ItemService(Func<ICatalogRepository> catalogRepositoryFactory, IEventPublisher eventPublisher, AbstractValidator<IHasProperties> hasPropertyValidator,
-                           ICatalogService catalogService, ICategoryService categoryService, IOutlineService outlineService, ISeoService seoService,
-                           IPlatformMemoryCache platformMemoryCache, IBlobUrlResolver blobUrlResolver, ISkuGenerator skuGenerator)
+                           ICatalogService catalogService, ICategoryService categoryService, IOutlineService outlineService, IPlatformMemoryCache platformMemoryCache, IBlobUrlResolver blobUrlResolver, ISkuGenerator skuGenerator)
         {
             _repositoryFactory = catalogRepositoryFactory;
             _eventPublisher = eventPublisher;
@@ -43,7 +41,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
             _catalogService = catalogService;
             _categoryService = categoryService;
             _outlineService = outlineService;
-            _seoService = seoService;
             _platformMemoryCache = platformMemoryCache;
             _blobUrlResolver = blobUrlResolver;
             _skuGenerator = skuGenerator;
@@ -83,16 +80,6 @@ namespace VirtoCommerce.CatalogModule.Data.Services
                     _outlineService.FillOutlinesForObjects(productsWithVariationsList, catalogId);
                 }
 
-                // Fill SEO info for products, variations and outline items
-                if (itemResponseGroup.HasFlag(ItemResponseGroup.Seo))
-                {
-                    var objectsWithSeo = productsWithVariationsList.OfType<ISeoSupport>().ToList();
-                    //Load SEO information for all Outline.Items
-                    var outlineItems = productsWithVariationsList.Where(p => p.Outlines != null)
-                                             .SelectMany(p => p.Outlines.SelectMany(o => o.Items));
-                    objectsWithSeo.AddRange(outlineItems);
-                    await _seoService.LoadSeoForObjectsAsync(objectsWithSeo.ToArray());
-                }
 
                 //Reduce details according to response group
                 foreach (var product in productsWithVariationsList)

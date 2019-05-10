@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CoreModule.Core.Seo
 {
@@ -8,6 +9,6 @@ namespace VirtoCommerce.CoreModule.Core.Seo
     /// </summary>
     public interface ISeoDuplicatesDetector
     {
-        Task<IEnumerable<SeoInfo>> DetectSeoDuplicatesAsync(string objectType, string objectId, IEnumerable<SeoInfo> allSeoDuplicates);
+        Task<IEnumerable<SeoInfo>> DetectSeoDuplicatesAsync(TenantIdentity tenantIdentity);
     }
 }

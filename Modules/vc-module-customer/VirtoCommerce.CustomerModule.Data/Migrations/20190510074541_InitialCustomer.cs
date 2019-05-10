@@ -153,6 +153,36 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "MemberSeoInfo",
+                columns: table => new
+                {
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    ModifiedDate = table.Column<DateTime>(nullable: true),
+                    CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
+                    ModifiedBy = table.Column<string>(maxLength: 64, nullable: true),
+                    Keyword = table.Column<string>(maxLength: 255, nullable: false),
+                    StoreId = table.Column<string>(maxLength: 128, nullable: true),
+                    IsActive = table.Column<bool>(nullable: false),
+                    Language = table.Column<string>(maxLength: 5, nullable: true),
+                    Title = table.Column<string>(maxLength: 255, nullable: true),
+                    MetaDescription = table.Column<string>(maxLength: 1024, nullable: true),
+                    MetaKeywords = table.Column<string>(maxLength: 255, nullable: true),
+                    ImageAltDescription = table.Column<string>(maxLength: 255, nullable: true),
+                    MemberId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MemberSeoInfo", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MemberSeoInfo_Member_MemberId",
+                        column: x => x.MemberId,
+                        principalTable: "Member",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Note",
                 columns: table => new
                 {
@@ -245,6 +275,11 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                 column: "DescendantId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_MemberSeoInfo_MemberId",
+                table: "MemberSeoInfo",
+                column: "MemberId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Note_MemberId",
                 table: "Note",
                 column: "MemberId");
@@ -268,6 +303,9 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "MemberRelation");
+
+            migrationBuilder.DropTable(
+                name: "MemberSeoInfo");
 
             migrationBuilder.DropTable(
                 name: "Note");

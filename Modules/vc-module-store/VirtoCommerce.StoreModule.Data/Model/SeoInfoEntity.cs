@@ -2,9 +2,9 @@ using System.ComponentModel.DataAnnotations;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.CoreModule.Data.Seo
+namespace VirtoCommerce.StoreModule.Data.Model
 {
-    public class SeoUrlKeywordEntity : AuditableEntity
+    public class SeoInfoEntity : AuditableEntity
     {
         [StringLength(255)]
         [Required]
@@ -12,14 +12,6 @@ namespace VirtoCommerce.CoreModule.Data.Seo
 
         [StringLength(128)]
         public string StoreId { get; set; }
-
-        [StringLength(255)]
-        [Required]
-        public string ObjectId { get; set; }
-
-        [StringLength(64)]
-        [Required]
-        public string ObjectType { get; set; }
 
         [Required]
         public bool IsActive { get; set; }
@@ -39,6 +31,10 @@ namespace VirtoCommerce.CoreModule.Data.Seo
         [StringLength(255)]
         public string ImageAltDescription { get; set; }
 
+        #region Navigation Properties
+        public virtual StoreEntity Store { get; set; }
+        #endregion
+
         public virtual SeoInfo ToModel(SeoInfo seoInfo)
         {
             seoInfo.Id = Id;
@@ -54,14 +50,14 @@ namespace VirtoCommerce.CoreModule.Data.Seo
             seoInfo.IsActive = IsActive;
             seoInfo.MetaDescription = MetaDescription;
             seoInfo.MetaKeywords = MetaKeywords;
-            seoInfo.ObjectId = ObjectId;
-            seoInfo.ObjectType = ObjectType;
+            seoInfo.ObjectId = StoreId;
+            seoInfo.ObjectType = "Store";
             seoInfo.StoreId = StoreId;
 
             return seoInfo;
         }
 
-        public virtual SeoUrlKeywordEntity FromModel(SeoInfo seoInfo, PrimaryKeyResolvingMap pkMap)
+        public virtual SeoInfoEntity FromModel(SeoInfo seoInfo, PrimaryKeyResolvingMap pkMap)
         {
             pkMap.AddPair(seoInfo, this);
 
@@ -78,14 +74,12 @@ namespace VirtoCommerce.CoreModule.Data.Seo
             IsActive = seoInfo.IsActive;
             MetaDescription = seoInfo.MetaDescription;
             MetaKeywords = seoInfo.MetaKeywords;
-            ObjectId = seoInfo.ObjectId;
-            ObjectType = seoInfo.ObjectType;
             StoreId = seoInfo.StoreId;
 
             return this;
         }
 
-        public virtual void Patch(SeoUrlKeywordEntity target)
+        public virtual void Patch(SeoInfoEntity target)
         {
             target.Language = Language;
             target.Keyword = Keyword;
@@ -94,8 +88,6 @@ namespace VirtoCommerce.CoreModule.Data.Seo
             target.IsActive = IsActive;
             target.MetaDescription = MetaDescription;
             target.MetaKeywords = MetaKeywords;
-            target.ObjectId = ObjectId;
-            target.ObjectType = ObjectType;
             target.StoreId = StoreId;
         }
     }

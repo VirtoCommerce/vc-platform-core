@@ -125,6 +125,7 @@ namespace VirtoCommerce.CartModule.Data.Model
             cart.ModifiedBy = ModifiedBy;
             cart.ModifiedDate = ModifiedDate;
 
+            cart.StoreId = StoreId;
             cart.Fee = Fee;
             cart.FeeWithTax = FeeWithTax;
             cart.Status = Status;

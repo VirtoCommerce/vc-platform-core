@@ -10,7 +10,7 @@ using VirtoCommerce.CatalogModule.Data.Repositories;
 namespace VirtoCommerce.CatalogModule.Data.Migrations
 {
     [DbContext(typeof(CatalogDbContext))]
-    [Migration("20190409085401_InitialCatalog")]
+    [Migration("20190510073242_InitialCatalog")]
     partial class InitialCatalog
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -699,6 +699,59 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
                     b.ToTable("PropertyValue");
                 });
 
+            modelBuilder.Entity("VirtoCommerce.CatalogModule.Data.Model.SeoInfoEntity", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
+
+                    b.Property<string>("CategoryId");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(64);
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("ImageAltDescription")
+                        .HasMaxLength(255);
+
+                    b.Property<bool>("IsActive");
+
+                    b.Property<string>("ItemId");
+
+                    b.Property<string>("Keyword")
+                        .IsRequired()
+                        .HasMaxLength(255);
+
+                    b.Property<string>("Language")
+                        .HasMaxLength(5);
+
+                    b.Property<string>("MetaDescription")
+                        .HasMaxLength(1024);
+
+                    b.Property<string>("MetaKeywords")
+                        .HasMaxLength(255);
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(64);
+
+                    b.Property<DateTime?>("ModifiedDate");
+
+                    b.Property<string>("StoreId")
+                        .HasMaxLength(128);
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(255);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("ItemId");
+
+                    b.ToTable("CatalogSeoInfo");
+                });
+
             modelBuilder.Entity("VirtoCommerce.CatalogModule.Data.Model.AssetEntity", b =>
                 {
                     b.HasOne("VirtoCommerce.CatalogModule.Data.Model.ItemEntity", "CatalogItem")
@@ -895,6 +948,19 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
                         .WithMany("ItemPropertyValues")
                         .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("VirtoCommerce.CatalogModule.Data.Model.SeoInfoEntity", b =>
+                {
+                    b.HasOne("VirtoCommerce.CatalogModule.Data.Model.CategoryEntity", "Category")
+                        .WithMany("SeoInfos")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("VirtoCommerce.CatalogModule.Data.Model.ItemEntity", "Item")
+                        .WithMany("SeoInfos")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 #pragma warning restore 612, 618
         }

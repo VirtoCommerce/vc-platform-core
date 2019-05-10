@@ -149,9 +149,9 @@ namespace VirtoCommerce.Platform.Assets.AzureBlobStorage
             }
         }
 
-        public virtual async Task<GenericSearchResult<BlobEntry>> SearchAsync(string folderUrl, string keyword)
+        public virtual async Task<BlobEntrySearchResult> SearchAsync(string folderUrl, string keyword)
         {
-            var retVal = new GenericSearchResult<BlobEntry>();
+            var retVal = AbstractTypeFactory<BlobEntrySearchResult>.TryCreateInstance();
 
             if (!string.IsNullOrEmpty(folderUrl))
             {

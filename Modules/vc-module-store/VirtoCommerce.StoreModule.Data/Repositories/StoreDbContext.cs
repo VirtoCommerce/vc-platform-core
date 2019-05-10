@@ -52,6 +52,14 @@ namespace VirtoCommerce.StoreModule.Data.Repositories
             modelBuilder.Entity<StoreFulfillmentCenterEntity>().HasOne(x => x.Store).WithMany(x => x.FulfillmentCenters)
                 .HasForeignKey(x => x.StoreId).IsRequired().OnDelete(DeleteBehavior.Cascade);
             #endregion
+
+            #region SeoInfo
+            modelBuilder.Entity<SeoInfoEntity>().ToTable("StoreSeoInfo").HasKey(x => x.Id);
+            modelBuilder.Entity<SeoInfoEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<SeoInfoEntity>().HasOne(x => x.Store).WithMany(x => x.SeoInfos).HasForeignKey(x => x.StoreId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            #endregion
         }
     }
 }

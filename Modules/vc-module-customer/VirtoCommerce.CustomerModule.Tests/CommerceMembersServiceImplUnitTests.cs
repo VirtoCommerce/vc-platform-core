@@ -28,7 +28,6 @@ namespace VirtoCommerce.CustomerModule.Tests
         private readonly Func<ICustomerRepository> _repositoryFactory;
         private readonly Mock<IEventPublisher> _eventPublisherMock;
         private readonly Mock<IDynamicPropertyService> _dynamicPropertyServiceMock;
-        private readonly Mock<ISeoService> _seoSericeMock;
         private readonly Mock<IPlatformMemoryCache> _platformMemoryCacheMock;
         private readonly Mock<ICacheEntry> _сacheEntryMock;
         private readonly Mock<IUserSearchService> _userSearchMock;
@@ -40,14 +39,13 @@ namespace VirtoCommerce.CustomerModule.Tests
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _eventPublisherMock = new Mock<IEventPublisher>();
             _dynamicPropertyServiceMock = new Mock<IDynamicPropertyService>();
-            _seoSericeMock = new Mock<ISeoService>();
             _repositoryMock.Setup(ss => ss.UnitOfWork).Returns(_mockUnitOfWork.Object);
             _repositoryFactory = () => _repositoryMock.Object;
             _platformMemoryCacheMock = new Mock<IPlatformMemoryCache>();
             _сacheEntryMock = new Mock<ICacheEntry>();
             _userSearchMock = new Mock<IUserSearchService>();
             _сacheEntryMock.SetupGet(c => c.ExpirationTokens).Returns(new List<IChangeToken>());
-            _commerceMembersServiceImpl = new CommerceMembersServiceImpl(_repositoryFactory, _eventPublisherMock.Object, _dynamicPropertyServiceMock.Object, _seoSericeMock.Object, _platformMemoryCacheMock.Object, _userSearchMock.Object);
+            _commerceMembersServiceImpl = new CommerceMembersServiceImpl(_repositoryFactory, _eventPublisherMock.Object, _dynamicPropertyServiceMock.Object, _platformMemoryCacheMock.Object, _userSearchMock.Object);
 
             AbstractTypeFactory<Member>.RegisterType<Organization>().MapToType<OrganizationEntity>();
             AbstractTypeFactory<Member>.RegisterType<Contact>().MapToType<ContactEntity>();

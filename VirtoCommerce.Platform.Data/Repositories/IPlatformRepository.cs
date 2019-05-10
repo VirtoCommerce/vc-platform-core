@@ -1,8 +1,6 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Data.Assets;
 using VirtoCommerce.Platform.Data.Model;
 
 namespace VirtoCommerce.Platform.Data.Repositories
@@ -24,6 +22,8 @@ namespace VirtoCommerce.Platform.Data.Repositories
 
         Task<SettingEntity[]> GetObjectSettingsAsync(string objectType, string objectId);
 
-        Task<AssetEntryEntity[]> GetAssetsByIdsAsync(IEnumerable<string> ids);
+        Task<AssetEntryEntity[]> GetAssetsByIdsAsync(string[] ids);
+
+        Task<OperationLogEntity[]> GetOperationLogsByIdsAsync(string[] ids);
     }
 }

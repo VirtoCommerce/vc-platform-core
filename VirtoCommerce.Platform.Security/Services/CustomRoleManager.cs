@@ -76,10 +76,18 @@ namespace VirtoCommerce.Platform.Security.Services
 
         public override async Task<IdentityResult> UpdateAsync(Role updateRole)
         {
-            //TODO: Unstable method work, sometimes throws EF already being tracked exception 
-            //https://github.com/aspnet/Identity/issues/1807
+            if (updateRole == null)
+            {
+                throw new ArgumentNullException(nameof(updateRole));
+            }
+
             var existRole = await base.FindByNameAsync(updateRole.Name);
-            updateRole.Patch(existRole);
+            if (existRole != null)
+            {
+                //Need to path exists tracked by EF  entity due to already being tracked exception 
+                //https://github.com/aspnet/Identity/issues/1807
+                updateRole.Patch(existRole);
+            }
             var result = await base.UpdateAsync(existRole);
             if (result.Succeeded && updateRole.Permissions != null)
             {

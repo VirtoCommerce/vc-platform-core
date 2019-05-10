@@ -17,12 +17,12 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
         public const string ChangeLogObjectType = nameof(ItemEntity);
 
         private readonly Func<ICatalogRepository> _catalogRepositoryFactory;
-        private readonly IChangeLogService _changeLogService;
+        private readonly IChangeLogSearchService _changeLogSearchService;
 
-        public ProductDocumentChangesProvider(Func<ICatalogRepository> catalogRepositoryFactory, IChangeLogService changeLogService)
+        public ProductDocumentChangesProvider(Func<ICatalogRepository> catalogRepositoryFactory, IChangeLogSearchService changeLogSearchService)
         {
             _catalogRepositoryFactory = catalogRepositoryFactory;
-            _changeLogService = changeLogService;
+            _changeLogSearchService = changeLogSearchService;
         }
 
         public virtual async Task<long> GetTotalChangesCountAsync(DateTime? startDate, DateTime? endDate)
@@ -39,8 +39,15 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
             }
             else
             {
+                var criteria = new ChangeLogSearchCriteria
+                {
+                    ObjectType = ChangeLogObjectType,
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    Take = 0
+                };
                 // Get changes count from operation log
-                result = _changeLogService.FindChangeHistory(ChangeLogObjectType, startDate, endDate).Count();
+                result = (await _changeLogSearchService.SearchAsync(criteria)).TotalCount;
             }
 
             return result;
@@ -76,10 +83,17 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
             else
             {
                 // Get changes from operation log
-                var operations = _changeLogService.FindChangeHistory(ChangeLogObjectType, startDate, endDate)
-                    .Skip((int)skip)
-                    .Take((int)take)
-                    .ToArray();
+                var criteria = new ChangeLogSearchCriteria
+                {
+                    ObjectType = ChangeLogObjectType,
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    Skip = (int)skip,
+                    Take = (int)take
+                };
+
+                // Get changes from operation log
+                var operations = (await _changeLogSearchService.SearchAsync(criteria)).Results;
 
                 result = operations.Select(o =>
                     new IndexDocumentChange

@@ -45,31 +45,6 @@ namespace VirtoCommerce.CoreModule.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SeoUrlKeyword",
-                columns: table => new
-                {
-                    Id = table.Column<string>(maxLength: 128, nullable: false),
-                    CreatedDate = table.Column<DateTime>(nullable: false),
-                    ModifiedDate = table.Column<DateTime>(nullable: true),
-                    CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
-                    ModifiedBy = table.Column<string>(maxLength: 64, nullable: true),
-                    Keyword = table.Column<string>(maxLength: 255, nullable: false),
-                    StoreId = table.Column<string>(maxLength: 128, nullable: true),
-                    ObjectId = table.Column<string>(maxLength: 255, nullable: false),
-                    ObjectType = table.Column<string>(maxLength: 64, nullable: false),
-                    IsActive = table.Column<bool>(nullable: false),
-                    Language = table.Column<string>(maxLength: 5, nullable: true),
-                    Title = table.Column<string>(maxLength: 255, nullable: true),
-                    MetaDescription = table.Column<string>(maxLength: 1024, nullable: true),
-                    MetaKeywords = table.Column<string>(maxLength: 255, nullable: true),
-                    ImageAltDescription = table.Column<string>(maxLength: 255, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SeoUrlKeyword", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Sequence",
                 columns: table => new
                 {
@@ -86,16 +61,6 @@ namespace VirtoCommerce.CoreModule.Data.Migrations
                 name: "IX_Code",
                 table: "Currency",
                 column: "Code");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_KeywordStoreId",
-                table: "SeoUrlKeyword",
-                columns: new[] { "Keyword", "StoreId" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ObjectIdAndObjectType",
-                table: "SeoUrlKeyword",
-                columns: new[] { "ObjectId", "ObjectType" });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -105,9 +70,6 @@ namespace VirtoCommerce.CoreModule.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "PackageType");
-
-            migrationBuilder.DropTable(
-                name: "SeoUrlKeyword");
 
             migrationBuilder.DropTable(
                 name: "Sequence");

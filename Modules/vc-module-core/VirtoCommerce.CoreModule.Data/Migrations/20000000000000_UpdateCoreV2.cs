@@ -10,7 +10,7 @@ namespace VirtoCommerce.CoreModule.Data.Migrations
                  FROM INFORMATION_SCHEMA.TABLES 
                  WHERE TABLE_NAME = '__MigrationHistory'))
                     BEGIN
-	                    INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20180709083434_InitialCore', '2.2.3-servicing-35854')
+	                    INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20190510073611_InitialCore', '2.2.3-servicing-35854')
                     END");
         }
 

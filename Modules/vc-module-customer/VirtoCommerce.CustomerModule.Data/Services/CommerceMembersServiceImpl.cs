@@ -23,8 +23,8 @@ namespace VirtoCommerce.CustomerModule.Data.Services
     public class CommerceMembersServiceImpl : MemberServiceBase
     {
         public CommerceMembersServiceImpl(Func<ICustomerRepository> repositoryFactory, IEventPublisher eventPublisher
-            , IDynamicPropertyService dynamicPropertyService, ISeoService seoService, IPlatformMemoryCache platformMemoryCache, IUserSearchService userSearchService)
-            : base(repositoryFactory, eventPublisher, dynamicPropertyService, seoService, platformMemoryCache)
+            , IDynamicPropertyService dynamicPropertyService, IPlatformMemoryCache platformMemoryCache, IUserSearchService userSearchService)
+            : base(repositoryFactory, eventPublisher, dynamicPropertyService, platformMemoryCache)
         {
             UserSearchService = userSearchService;
         }

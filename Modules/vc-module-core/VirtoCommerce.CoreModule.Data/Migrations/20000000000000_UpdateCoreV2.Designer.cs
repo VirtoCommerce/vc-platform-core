@@ -21,145 +21,86 @@ namespace VirtoCommerce.CoreModule.Data.Migrations
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("VirtoCommerce.CoreModule.Data.Currency.CurrencyEntity", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(128);
+            {
+                b.Property<string>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasMaxLength(128);
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(16);
+                b.Property<string>("Code")
+                    .IsRequired()
+                    .HasMaxLength(16);
 
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(64);
+                b.Property<string>("CreatedBy")
+                    .HasMaxLength(64);
 
-                    b.Property<DateTime>("CreatedDate");
+                b.Property<DateTime>("CreatedDate");
 
-                    b.Property<string>("CustomFormatting")
-                        .HasMaxLength(64);
+                b.Property<string>("CustomFormatting")
+                    .HasMaxLength(64);
 
-                    b.Property<decimal>("ExchangeRate")
-                        .HasColumnType("Money");
+                b.Property<decimal>("ExchangeRate")
+                    .HasColumnType("Money");
 
-                    b.Property<bool>("IsPrimary");
+                b.Property<bool>("IsPrimary");
 
-                    b.Property<string>("ModifiedBy")
-                        .HasMaxLength(64);
+                b.Property<string>("ModifiedBy")
+                    .HasMaxLength(64);
 
-                    b.Property<DateTime?>("ModifiedDate");
+                b.Property<DateTime?>("ModifiedDate");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(256);
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasMaxLength(256);
 
-                    b.Property<string>("Symbol")
-                        .HasMaxLength(16);
+                b.Property<string>("Symbol")
+                    .HasMaxLength(16);
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("Code")
-                        .HasName("IX_Code");
+                b.HasIndex("Code")
+                    .HasName("IX_Code");
 
-                    b.ToTable("Currency");
-                });
+                b.ToTable("Currency");
+            });
 
             modelBuilder.Entity("VirtoCommerce.CoreModule.Data.Model.SequenceEntity", b =>
-                {
-                    b.Property<string>("ObjectType")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(256);
+            {
+                b.Property<string>("ObjectType")
+                    .ValueGeneratedOnAdd()
+                    .HasMaxLength(256);
 
-                    b.Property<DateTime?>("ModifiedDate");
+                b.Property<DateTime?>("ModifiedDate");
 
-                    b.Property<int>("Value");
+                b.Property<int>("Value");
 
-                    b.HasKey("ObjectType");
+                b.HasKey("ObjectType");
 
-                    b.ToTable("Sequence");
-                });
+                b.ToTable("Sequence");
+            });
 
             modelBuilder.Entity("VirtoCommerce.CoreModule.Data.Package.PackageTypeEntity", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(128);
+            {
+                b.Property<string>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasMaxLength(128);
 
-                    b.Property<decimal>("Height");
+                b.Property<decimal>("Height");
 
-                    b.Property<decimal>("Length");
+                b.Property<decimal>("Length");
 
-                    b.Property<string>("MeasureUnit")
-                        .HasMaxLength(16);
+                b.Property<string>("MeasureUnit")
+                    .HasMaxLength(16);
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(254);
+                b.Property<string>("Name")
+                    .IsRequired()
+                    .HasMaxLength(254);
 
-                    b.Property<decimal>("Width");
+                b.Property<decimal>("Width");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("PackageType");
-                });
-
-            modelBuilder.Entity("VirtoCommerce.CoreModule.Data.Seo.SeoUrlKeywordEntity", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(128);
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(64);
-
-                    b.Property<DateTime>("CreatedDate");
-
-                    b.Property<string>("ImageAltDescription")
-                        .HasMaxLength(255);
-
-                    b.Property<bool>("IsActive");
-
-                    b.Property<string>("Keyword")
-                        .IsRequired()
-                        .HasMaxLength(255);
-
-                    b.Property<string>("Language")
-                        .HasMaxLength(5);
-
-                    b.Property<string>("MetaDescription")
-                        .HasMaxLength(1024);
-
-                    b.Property<string>("MetaKeywords")
-                        .HasMaxLength(255);
-
-                    b.Property<string>("ModifiedBy")
-                        .HasMaxLength(64);
-
-                    b.Property<DateTime?>("ModifiedDate");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasMaxLength(255);
-
-                    b.Property<string>("ObjectType")
-                        .IsRequired()
-                        .HasMaxLength(64);
-
-                    b.Property<string>("StoreId")
-                        .HasMaxLength(128);
-
-                    b.Property<string>("Title")
-                        .HasMaxLength(255);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Keyword", "StoreId")
-                        .HasName("IX_KeywordStoreId");
-
-                    b.HasIndex("ObjectId", "ObjectType")
-                        .HasName("IX_ObjectIdAndObjectType");
-
-                    b.ToTable("SeoUrlKeyword");
-                });
+                b.ToTable("PackageType");
+            });
 #pragma warning restore 612, 618
         }
     }

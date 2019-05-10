@@ -99,6 +99,35 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "StoreSeoInfo",
+                columns: table => new
+                {
+                    Id = table.Column<string>(maxLength: 128, nullable: false),
+                    CreatedDate = table.Column<DateTime>(nullable: false),
+                    ModifiedDate = table.Column<DateTime>(nullable: true),
+                    CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
+                    ModifiedBy = table.Column<string>(maxLength: 64, nullable: true),
+                    Keyword = table.Column<string>(maxLength: 255, nullable: false),
+                    StoreId = table.Column<string>(maxLength: 128, nullable: true),
+                    IsActive = table.Column<bool>(nullable: false),
+                    Language = table.Column<string>(maxLength: 5, nullable: true),
+                    Title = table.Column<string>(maxLength: 255, nullable: true),
+                    MetaDescription = table.Column<string>(maxLength: 1024, nullable: true),
+                    MetaKeywords = table.Column<string>(maxLength: 255, nullable: true),
+                    ImageAltDescription = table.Column<string>(maxLength: 255, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StoreSeoInfo", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_StoreSeoInfo_Store_StoreId",
+                        column: x => x.StoreId,
+                        principalTable: "Store",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "StoreShippingMethod",
                 columns: table => new
                 {
@@ -158,6 +187,11 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                 column: "StoreId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_StoreSeoInfo_StoreId",
+                table: "StoreSeoInfo",
+                column: "StoreId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_StoreShippingMethod_StoreId",
                 table: "StoreShippingMethod",
                 column: "StoreId");
@@ -178,6 +212,9 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "StoreLanguage");
+
+            migrationBuilder.DropTable(
+                name: "StoreSeoInfo");
 
             migrationBuilder.DropTable(
                 name: "StoreShippingMethod");

@@ -10,18 +10,18 @@ using VirtoCommerce.CustomerModule.Data.Repositories;
 namespace VirtoCommerce.CustomerModule.Data.Migrations
 {
     [DbContext(typeof(CustomerDbContext))]
-    [Migration("20180718074308_InitialCustomer")]
+    [Migration("20190510074541_InitialCustomer")]
     partial class InitialCustomer
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.0-rtm-30799")
+                .HasAnnotation("ProductVersion", "2.2.3-servicing-35854")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.AddressDataEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.AddressEntity", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
@@ -106,7 +106,7 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                     b.ToTable("Address");
                 });
 
-            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.EmailDataEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.EmailEntity", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
@@ -133,7 +133,7 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                     b.ToTable("Email");
                 });
 
-            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.MemberDataEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.MemberEntity", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
@@ -168,10 +168,10 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
 
                     b.ToTable("Member");
 
-                    b.HasDiscriminator<string>("Discriminator").HasValue("MemberDataEntity");
+                    b.HasDiscriminator<string>("Discriminator").HasValue("MemberEntity");
                 });
 
-            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.MemberGroupDataEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.MemberGroupEntity", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
@@ -193,7 +193,7 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                     b.ToTable("MemberGroup");
                 });
 
-            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.MemberRelationDataEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.MemberRelationEntity", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
@@ -221,7 +221,7 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                     b.ToTable("MemberRelation");
                 });
 
-            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.NoteDataEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.NoteEntity", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
@@ -259,7 +259,7 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                     b.ToTable("Note");
                 });
 
-            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.PhoneDataEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.PhoneEntity", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
@@ -281,9 +281,58 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                     b.ToTable("Phone");
                 });
 
-            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.ContactDataEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.SeoInfoEntity", b =>
                 {
-                    b.HasBaseType("VirtoCommerce.CustomerModule.Data.Model.MemberDataEntity");
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(64);
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("ImageAltDescription")
+                        .HasMaxLength(255);
+
+                    b.Property<bool>("IsActive");
+
+                    b.Property<string>("Keyword")
+                        .IsRequired()
+                        .HasMaxLength(255);
+
+                    b.Property<string>("Language")
+                        .HasMaxLength(5);
+
+                    b.Property<string>("MemberId");
+
+                    b.Property<string>("MetaDescription")
+                        .HasMaxLength(1024);
+
+                    b.Property<string>("MetaKeywords")
+                        .HasMaxLength(255);
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(64);
+
+                    b.Property<DateTime?>("ModifiedDate");
+
+                    b.Property<string>("StoreId")
+                        .HasMaxLength(128);
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(255);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberId");
+
+                    b.ToTable("MemberSeoInfo");
+                });
+
+            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.ContactEntity", b =>
+                {
+                    b.HasBaseType("VirtoCommerce.CustomerModule.Data.Model.MemberEntity");
 
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnName("BirthDate");
@@ -329,14 +378,12 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                         .HasColumnName("TimeZone")
                         .HasMaxLength(32);
 
-                    b.ToTable("ContactDataEntity");
-
-                    b.HasDiscriminator().HasValue("ContactDataEntity");
+                    b.HasDiscriminator().HasValue("ContactEntity");
                 });
 
-            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.EmployeeDataEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.EmployeeEntity", b =>
                 {
-                    b.HasBaseType("VirtoCommerce.CustomerModule.Data.Model.MemberDataEntity");
+                    b.HasBaseType("VirtoCommerce.CustomerModule.Data.Model.MemberEntity");
 
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnName("BirthDate");
@@ -375,14 +422,12 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                     b.Property<string>("Type")
                         .HasMaxLength(64);
 
-                    b.ToTable("EmployeeDataEntity");
-
-                    b.HasDiscriminator().HasValue("EmployeeDataEntity");
+                    b.HasDiscriminator().HasValue("EmployeeEntity");
                 });
 
-            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.OrganizationDataEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.OrganizationEntity", b =>
                 {
-                    b.HasBaseType("VirtoCommerce.CustomerModule.Data.Model.MemberDataEntity");
+                    b.HasBaseType("VirtoCommerce.CustomerModule.Data.Model.MemberEntity");
 
                     b.Property<string>("BusinessCategory")
                         .HasMaxLength(64);
@@ -394,14 +439,12 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                     b.Property<string>("OwnerId")
                         .HasMaxLength(128);
 
-                    b.ToTable("OrganizationDataEntity");
-
-                    b.HasDiscriminator().HasValue("OrganizationDataEntity");
+                    b.HasDiscriminator().HasValue("OrganizationEntity");
                 });
 
-            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.VendorDataEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.VendorEntity", b =>
                 {
-                    b.HasBaseType("VirtoCommerce.CustomerModule.Data.Model.MemberDataEntity");
+                    b.HasBaseType("VirtoCommerce.CustomerModule.Data.Model.MemberEntity");
 
                     b.Property<string>("Description")
                         .HasColumnName("Description")
@@ -416,60 +459,66 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                     b.Property<string>("SiteUrl")
                         .HasMaxLength(2048);
 
-                    b.ToTable("VendorDataEntity");
-
-                    b.HasDiscriminator().HasValue("VendorDataEntity");
+                    b.HasDiscriminator().HasValue("VendorEntity");
                 });
 
-            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.AddressDataEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.AddressEntity", b =>
                 {
-                    b.HasOne("VirtoCommerce.CustomerModule.Data.Model.MemberDataEntity", "Member")
+                    b.HasOne("VirtoCommerce.CustomerModule.Data.Model.MemberEntity", "Member")
                         .WithMany("Addresses")
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.EmailDataEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.EmailEntity", b =>
                 {
-                    b.HasOne("VirtoCommerce.CustomerModule.Data.Model.MemberDataEntity", "Member")
+                    b.HasOne("VirtoCommerce.CustomerModule.Data.Model.MemberEntity", "Member")
                         .WithMany("Emails")
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.MemberGroupDataEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.MemberGroupEntity", b =>
                 {
-                    b.HasOne("VirtoCommerce.CustomerModule.Data.Model.MemberDataEntity", "Member")
+                    b.HasOne("VirtoCommerce.CustomerModule.Data.Model.MemberEntity", "Member")
                         .WithMany("Groups")
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.MemberRelationDataEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.MemberRelationEntity", b =>
                 {
-                    b.HasOne("VirtoCommerce.CustomerModule.Data.Model.MemberDataEntity", "Ancestor")
+                    b.HasOne("VirtoCommerce.CustomerModule.Data.Model.MemberEntity", "Ancestor")
                         .WithMany()
                         .HasForeignKey("AncestorId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("VirtoCommerce.CustomerModule.Data.Model.MemberDataEntity", "Descendant")
+                    b.HasOne("VirtoCommerce.CustomerModule.Data.Model.MemberEntity", "Descendant")
                         .WithMany("MemberRelations")
                         .HasForeignKey("DescendantId")
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
-            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.NoteDataEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.NoteEntity", b =>
                 {
-                    b.HasOne("VirtoCommerce.CustomerModule.Data.Model.MemberDataEntity", "Member")
+                    b.HasOne("VirtoCommerce.CustomerModule.Data.Model.MemberEntity", "Member")
                         .WithMany("Notes")
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
-            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.PhoneDataEntity", b =>
+            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.PhoneEntity", b =>
                 {
-                    b.HasOne("VirtoCommerce.CustomerModule.Data.Model.MemberDataEntity", "Member")
+                    b.HasOne("VirtoCommerce.CustomerModule.Data.Model.MemberEntity", "Member")
                         .WithMany("Phones")
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.SeoInfoEntity", b =>
+                {
+                    b.HasOne("VirtoCommerce.CustomerModule.Data.Model.MemberEntity", "Member")
+                        .WithMany("SeoInfos")
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });

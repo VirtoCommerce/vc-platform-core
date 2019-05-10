@@ -100,65 +100,6 @@ namespace VirtoCommerce.CoreModule.Data.Migrations
 
                     b.ToTable("PackageType");
                 });
-
-            modelBuilder.Entity("VirtoCommerce.CoreModule.Data.Seo.SeoUrlKeywordEntity", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(128);
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(64);
-
-                    b.Property<DateTime>("CreatedDate");
-
-                    b.Property<string>("ImageAltDescription")
-                        .HasMaxLength(255);
-
-                    b.Property<bool>("IsActive");
-
-                    b.Property<string>("Keyword")
-                        .IsRequired()
-                        .HasMaxLength(255);
-
-                    b.Property<string>("Language")
-                        .HasMaxLength(5);
-
-                    b.Property<string>("MetaDescription")
-                        .HasMaxLength(1024);
-
-                    b.Property<string>("MetaKeywords")
-                        .HasMaxLength(255);
-
-                    b.Property<string>("ModifiedBy")
-                        .HasMaxLength(64);
-
-                    b.Property<DateTime?>("ModifiedDate");
-
-                    b.Property<string>("ObjectId")
-                        .IsRequired()
-                        .HasMaxLength(255);
-
-                    b.Property<string>("ObjectType")
-                        .IsRequired()
-                        .HasMaxLength(64);
-
-                    b.Property<string>("StoreId")
-                        .HasMaxLength(128);
-
-                    b.Property<string>("Title")
-                        .HasMaxLength(255);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Keyword", "StoreId")
-                        .HasName("IX_KeywordStoreId");
-
-                    b.HasIndex("ObjectId", "ObjectType")
-                        .HasName("IX_ObjectIdAndObjectType");
-
-                    b.ToTable("SeoUrlKeyword");
-                });
 #pragma warning restore 612, 618
         }
     }

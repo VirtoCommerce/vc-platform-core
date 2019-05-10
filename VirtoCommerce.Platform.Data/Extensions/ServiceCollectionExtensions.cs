@@ -42,6 +42,7 @@ namespace VirtoCommerce.Platform.Data.Extensions
             services.AddSingleton<IHandlerRegistrar>(inProcessBus);
             services.AddSingleton<IEventPublisher>(inProcessBus);
             services.AddSingleton<IChangeLogService, ChangeLogService>();
+            services.AddSingleton<IChangeLogSearchService, ChangeLogSearchService>();
             //Use MemoryCache decorator to use global platform cache settings
             services.AddSingleton<IPlatformMemoryCache, PlatformMemoryCache>();
             services.AddScoped<IPlatformExportImportManager, PlatformExportImportManager>();

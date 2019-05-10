@@ -28,6 +28,7 @@ namespace VirtoCommerce.Platform.Core
 
             public static class Permissions
             {
+                public const string ResetCache = "cache:reset";
                 public const string AssetAccess = "platform:asset:access",
                   AssetDelete = "platform:asset:delete",
                   AssetUpdate = "platform:asset:update",
@@ -56,7 +57,7 @@ namespace VirtoCommerce.Platform.Core
                     PlatformImport = "platform:import",
                     PlatformExport = "platform:export";
 
-                public static string[] AllPermissions = new[] { AssetAccess, AssetDelete, AssetUpdate, AssetCreate, AssetRead, ModuleQuery, ModuleAccess, ModuleManage,
+                public static string[] AllPermissions = new[] { ResetCache, AssetAccess, AssetDelete, AssetUpdate, AssetCreate, AssetRead, ModuleQuery, ModuleAccess, ModuleManage,
                                               SettingQuery, SettingAccess, SettingUpdate, DynamicPropertiesQuery, DynamicPropertiesCreate, DynamicPropertiesAccess, DynamicPropertiesUpdate, DynamicPropertiesDelete,
                                               SecurityQuery, SecurityCreate, SecurityAccess,  SecurityUpdate,  SecurityDelete, SecurityCallApi, BackgroundJobsManage, PlatformExportImportAccess, PlatformImport, PlatformExport};
             }

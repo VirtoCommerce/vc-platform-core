@@ -169,6 +169,14 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
                 .HasForeignKey(x => x.TargetCatalogId).OnDelete(DeleteBehavior.Restrict);
             #endregion
 
+            #region SeoInfo
+            modelBuilder.Entity<SeoInfoEntity>().ToTable("CatalogSeoInfo").HasKey(x => x.Id);
+            modelBuilder.Entity<SeoInfoEntity>().Property(x => x.Id).HasMaxLength(128);
+            modelBuilder.Entity<SeoInfoEntity>().HasOne(x => x.Category).WithMany(x => x.SeoInfos).HasForeignKey(x => x.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<SeoInfoEntity>().HasOne(x => x.Item).WithMany(x => x.SeoInfos).HasForeignKey(x => x.ItemId)
+                .OnDelete(DeleteBehavior.Restrict);
+            #endregion
 
             base.OnModelCreating(modelBuilder);
         }

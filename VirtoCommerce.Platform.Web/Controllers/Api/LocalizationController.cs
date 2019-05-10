@@ -36,9 +36,8 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <returns></returns>
         [HttpGet]
         [Route("")]
-        [ProducesResponseType(typeof(object), 200)]
         [AllowAnonymous]
-        public ActionResult GetLocalization(string lang = "en")
+        public ActionResult<object> GetLocalization(string lang = "en")
         {
             var searchPattern = string.Format("{0}.*{1}", lang, LocalizationFilesFormat);
             var files = GetAllLocalizationFiles(searchPattern, LocalizationFilesFolder);
@@ -59,7 +58,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [Route("locales")]
         [ApiExplorerSettings(IgnoreApi = true)]
         [AllowAnonymous]
-        public ActionResult GetLocales()
+        public ActionResult<string[]> GetLocales()
         {
             var files = GetAllLocalizationFiles("*" + LocalizationFilesFormat, LocalizationFilesFolder);
             var locales = files
@@ -76,7 +75,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpGet]
         [Route("regionalformats")]
         [AllowAnonymous]
-        public ActionResult GetRegionalFormats()
+        public ActionResult<string[]> GetRegionalFormats()
         {
             var files = GetAllInternationalizationFiles("*" + InternationalizationFilesFormat, InternationalizationFilesFolder);
             var formats = files
@@ -107,7 +106,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
                 .OfType<ManifestModuleInfo>();
 
             foreach (var module in manifestModules)
-            {             
+            {
                 if (!string.IsNullOrEmpty(module.FullPhysicalPath))
                 {
                     var moduleFileNames = GetFilesByPath(module.FullPhysicalPath, searchPattern, localizationsFolder);

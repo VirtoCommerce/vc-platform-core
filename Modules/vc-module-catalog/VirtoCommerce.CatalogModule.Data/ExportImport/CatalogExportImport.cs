@@ -29,14 +29,13 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
         private readonly IProperyDictionaryItemService _propertyDictionaryService;
         private readonly JsonSerializer _jsonSerializer;
         private readonly IBlobStorageProvider _blobStorageProvider;
-        private readonly ISeoService _seoService;
         private readonly IAssociationService _associationService;
 
         private int _batchSize = 50;
 
         public CatalogExportImport(ICatalogService catalogService, IProductSearchService productSearchService, ICategorySearchService categorySearchService, ICategoryService categoryService,
                                   IItemService itemService, IPropertyService propertyService, IPropertySearchService propertySearchService, IProperyDictionaryItemSearchService propertyDictionarySearchService,
-                                  IProperyDictionaryItemService propertyDictionaryService, JsonSerializer jsonSerializer, IBlobStorageProvider blobStorageProvider, ISeoService seoService, IAssociationService associationService)
+                                  IProperyDictionaryItemService propertyDictionaryService, JsonSerializer jsonSerializer, IBlobStorageProvider blobStorageProvider, IAssociationService associationService)
         {
             _catalogService = catalogService;
             _productSearchService = productSearchService;
@@ -49,7 +48,6 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
             _propertyDictionaryService = propertyDictionaryService;
             _jsonSerializer = jsonSerializer;
             _blobStorageProvider = blobStorageProvider;
-            _seoService = seoService;
             _associationService = associationService;
         }
 
@@ -194,7 +192,6 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                             {
                                 var itemsArray = items.ToArray();
                                 await _categoryService.SaveChangesAsync(itemsArray);
-                                await _seoService.SaveSeoForObjectsAsync(itemsArray.OfType<ISeoSupport>().ToArray());
                                 //if (options.HandleBinaryData)
                                 {
                                     ImportImages(itemsArray.OfType<IHasImages>().ToArray(), progressInfo);
@@ -257,7 +254,6 @@ namespace VirtoCommerce.CatalogModule.Data.ExportImport
                                     products.Add(product);
                                 }
                                 await _itemService.SaveChangesAsync(products.ToArray());
-                                await _seoService.SaveSeoForObjectsAsync(products.OfType<ISeoSupport>().ToArray());
                                 if (options != null && options.HandleBinaryData)
                                 {
                                     ImportImages(itemsArray.OfType<IHasImages>().ToArray(), progressInfo);
