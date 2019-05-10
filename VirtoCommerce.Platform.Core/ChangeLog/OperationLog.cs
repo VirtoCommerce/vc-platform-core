@@ -1,4 +1,6 @@
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Events;
+using System;
 
 namespace VirtoCommerce.Platform.Core.ChangeLog
 {
@@ -11,5 +13,19 @@ namespace VirtoCommerce.Platform.Core.ChangeLog
         public EntryState OperationType { get; set; }
 
         public string Detail { get; set; }
+
+        public virtual OperationLog FromChangedEntry<T>(GenericChangedEntry<T> changedEntry) where T : IEntity
+        {
+            if (changedEntry == null)
+            {
+                throw new ArgumentNullException(nameof(changedEntry));
+            }
+
+            ObjectId = changedEntry.OldEntry.Id;
+            ObjectType = changedEntry.OldEntry.GetType().Name;
+            OperationType = changedEntry.EntryState;
+
+            return this;
+        }
     }
 }

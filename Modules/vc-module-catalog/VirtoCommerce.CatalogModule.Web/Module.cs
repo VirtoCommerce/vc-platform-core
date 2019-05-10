@@ -10,11 +10,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.CatalogModule.Core;
+using VirtoCommerce.CatalogModule.Core.Events;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.OutlinePart;
 using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.ExportImport;
+using VirtoCommerce.CatalogModule.Data.Handlers;
 using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.CatalogModule.Data.Search;
 using VirtoCommerce.CatalogModule.Data.Search.BrowseFilters;
@@ -23,6 +25,7 @@ using VirtoCommerce.CatalogModule.Data.Services;
 using VirtoCommerce.CatalogModule.Data.Validation;
 using VirtoCommerce.CatalogModule.Web.JsonConverters;
 using VirtoCommerce.CoreModule.Core.Seo;
+using VirtoCommerce.Platform.Core.Bus;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -75,6 +78,8 @@ namespace VirtoCommerce.CatalogModule.Web
             serviceCollection.AddSingleton<IProductAssociationSearchService, ProductAssociationSearchService>();
             serviceCollection.AddSingleton<IOutlineService, OutlineService>();
             serviceCollection.AddSingleton<ISkuGenerator, DefaultSkuGenerator>();
+
+            serviceCollection.AddSingleton<LogChangesChangedEventHandler>();
 
             serviceCollection.AddSingleton<ISeoBySlugResolver, SeoBySlugResolver>();
 
@@ -140,6 +145,10 @@ namespace VirtoCommerce.CatalogModule.Web
 
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new SearchCriteriaJsonConverter());
+
+            var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
+            inProcessBus.RegisterHandler<ProductChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<LogChangesChangedEventHandler>().Handle(message));
+            inProcessBus.RegisterHandler<CategoryChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<LogChangesChangedEventHandler>().Handle(message));
 
 
             //Force migrations
