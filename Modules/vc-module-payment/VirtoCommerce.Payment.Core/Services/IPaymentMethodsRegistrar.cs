@@ -1,12 +1,10 @@
 using System;
-using VirtoCommerce.PaymentModule.Core.Models;
+using VirtoCommerce.PaymentModule.Core.Model;
 
 namespace VirtoCommerce.PaymentModule.Core.Services
 {
     public interface IPaymentMethodsRegistrar
     {
-        PaymentMethod[] GetAllPaymentMethods();
-
-        void RegisterPaymentMethod(Func<PaymentMethod> methodGetter);
+        void RegisterPaymentMethod<T>(Func<T> factory = null) where T : PaymentMethod;
     }
 }

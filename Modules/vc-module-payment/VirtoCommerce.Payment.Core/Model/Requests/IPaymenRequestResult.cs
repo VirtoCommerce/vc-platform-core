@@ -1,8 +1,8 @@
-using VirtoCommerce.PaymentModule.Core.Models;
+using VirtoCommerce.PaymentModule.Core.Model;
 
-namespace VirtoCommerce.PaymentModule.Core.PaymentResults
+namespace VirtoCommerce.PaymentModule.Model.Requests
 {
-    public interface IProcessResult
+    public interface IPaymenRequestResult
     {
         bool IsSuccess { get; set; }
         string ErrorMessage { get; set; }

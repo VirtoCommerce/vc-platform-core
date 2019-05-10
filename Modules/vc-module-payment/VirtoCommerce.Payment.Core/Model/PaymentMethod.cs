@@ -2,12 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using VirtoCommerce.CoreModule.Core.Tax;
-using VirtoCommerce.PaymentModule.Core.Contexts;
-using VirtoCommerce.PaymentModule.Core.PaymentResults;
+using VirtoCommerce.PaymentModule.Model.Requests;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
 
-namespace VirtoCommerce.PaymentModule.Core.Models
+namespace VirtoCommerce.PaymentModule.Core.Model
 {
     public abstract class PaymentMethod : Entity, IHasSettings, IHasTaxDetalization, ITaxable
     {
@@ -98,32 +97,29 @@ namespace VirtoCommerce.PaymentModule.Core.Models
         /// <summary>
         /// Method that contains logic of registration payment in external payment system
         /// </summary>
-        /// <param name="context"></param>
         /// <returns>Result of registration payment in external payment system</returns>
-        public abstract ProcessPaymentResult ProcessPayment(ProcessPaymentEvaluationContext context);
+        public abstract ProcessPaymentRequestResult ProcessPayment(ProcessPaymentRequest request);
 
         /// <summary>
         /// Method that contains logic of checking payment status of payment in external payment system
         /// </summary>
-        /// <param name="context"></param>
         /// <returns>Result of checking payment in external payment system</returns>
-        public abstract PostProcessPaymentResult PostProcessPayment(PostProcessPaymentEvaluationContext context);
+        public abstract PostProcessPaymentRequestResult PostProcessPayment(PostProcessPaymentRequest request);
 
         /// <summary>
         /// Voids the payment
         /// </summary>
-        /// <param name="context"></param>
         /// <returns>Result of voiding payment in external payment system</returns>
-        public abstract VoidProcessPaymentResult VoidProcessPayment(VoidProcessPaymentEvaluationContext context);
+        public abstract VoidPaymentRequestResult VoidProcessPayment(VoidPaymentRequest request);
 
         /// <summary>
         /// Capture authorized payment
         /// </summary>
         /// <param name="context"></param>
         /// <returns>Result of capturing payment in external system</returns>
-        public abstract CaptureProcessPaymentResult CaptureProcessPayment(CaptureProcessPaymentEvaluationContext context);
+        public abstract CapturePaymentRequestResult CaptureProcessPayment(CapturePaymentRequest context);
 
-        public abstract RefundProcessPaymentResult RefundProcessPayment(RefundProcessPaymentEvaluationContext context);
+        public abstract RefundPaymentRequestResult RefundProcessPayment(RefundPaymentRequest context);
 
         /// <summary>
         /// Method that validates parameters in querystring of request to push URL

@@ -1,4 +1,4 @@
-namespace VirtoCommerce.PaymentModule.Web.Models
+namespace VirtoCommerce.OrdersModule.Web.Model
 {
     public class PaymentCallbackParameters
     {

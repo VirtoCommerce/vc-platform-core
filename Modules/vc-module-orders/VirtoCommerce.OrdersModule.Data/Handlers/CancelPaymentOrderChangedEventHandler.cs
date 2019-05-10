@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using VirtoCommerce.OrdersModule.Core.Events;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Services;
-using VirtoCommerce.PaymentModule.Core.Contexts;
-using VirtoCommerce.PaymentModule.Core.Models;
-using VirtoCommerce.PaymentModule.Core.Models.Search;
+using VirtoCommerce.PaymentModule.Core.Model;
+using VirtoCommerce.PaymentModule.Core.Model.Search;
 using VirtoCommerce.PaymentModule.Core.Services;
+using VirtoCommerce.PaymentModule.Model.Requests;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.StoreModule.Core.Services;
@@ -83,11 +83,11 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
             {
                 if (payment.PaymentStatus == PaymentStatus.Authorized)
                 {
-                    payment.PaymentMethod?.VoidProcessPayment(new VoidProcessPaymentEvaluationContext { PaymentId = payment.Id });
+                    payment.PaymentMethod?.VoidProcessPayment(new VoidPaymentRequest { PaymentId = payment.Id });
                 }
                 else if (payment.PaymentStatus == PaymentStatus.Paid)
                 {
-                    payment.PaymentMethod?.RefundProcessPayment(new RefundProcessPaymentEvaluationContext { PaymentId = payment.Id });
+                    payment.PaymentMethod?.RefundProcessPayment(new RefundPaymentRequest { PaymentId = payment.Id });
                 }
                 else
                 {

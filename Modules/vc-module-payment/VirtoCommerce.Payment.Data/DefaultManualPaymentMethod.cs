@@ -1,7 +1,7 @@
 using System;
-using VirtoCommerce.PaymentModule.Core.Contexts;
-using VirtoCommerce.PaymentModule.Core.Models;
-using VirtoCommerce.PaymentModule.Core.PaymentResults;
+using VirtoCommerce.PaymentModule.Core.Model;
+using VirtoCommerce.PaymentModule.Model.Requests;
+using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.PaymentModule.Data
 {
@@ -15,22 +15,22 @@ namespace VirtoCommerce.PaymentModule.Data
 
         public override PaymentMethodGroupType PaymentMethodGroupType => PaymentMethodGroupType.Manual;
 
-        public override ProcessPaymentResult ProcessPayment(ProcessPaymentEvaluationContext context)
+        public override ProcessPaymentRequestResult ProcessPayment(ProcessPaymentRequest request)
         {
             //TODO
             //context.Payment.PaymentStatus = PaymentStatus.Paid;
             //context.Payment.OuterId = context.Payment.Number;
             //context.Payment.CapturedDate = DateTime.UtcNow;
             //         context.Payment.IsApproved = true;
-            return new ProcessPaymentResult { IsSuccess = true, NewPaymentStatus = PaymentStatus.Paid };
+            return new ProcessPaymentRequestResult { IsSuccess = true, NewPaymentStatus = PaymentStatus.Paid };
         }
 
-        public override PostProcessPaymentResult PostProcessPayment(PostProcessPaymentEvaluationContext context)
+        public override PostProcessPaymentRequestResult PostProcessPayment(PostProcessPaymentRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public override VoidProcessPaymentResult VoidProcessPayment(VoidProcessPaymentEvaluationContext context)
+        public override VoidPaymentRequestResult VoidProcessPayment(VoidPaymentRequest request)
         {
             //TODO
             //context.Payment.IsApproved = false;
@@ -38,19 +38,19 @@ namespace VirtoCommerce.PaymentModule.Data
             //context.Payment.VoidedDate = DateTime.UtcNow;
             //context.Payment.IsCancelled = true;
             //context.Payment.CancelledDate = DateTime.UtcNow;
-            return new VoidProcessPaymentResult { IsSuccess = true, NewPaymentStatus = PaymentStatus.Voided };
+            return new VoidPaymentRequestResult { IsSuccess = true, NewPaymentStatus = PaymentStatus.Voided };
         }
 
-        public override CaptureProcessPaymentResult CaptureProcessPayment(CaptureProcessPaymentEvaluationContext context)
+        public override CapturePaymentRequestResult CaptureProcessPayment(CapturePaymentRequest request)
         {
             //TODO
             //context.Payment.IsApproved = true;
             //context.Payment.PaymentStatus = PaymentStatus.Paid;
             //context.Payment.VoidedDate = DateTime.UtcNow;
-            return new CaptureProcessPaymentResult { IsSuccess = true, NewPaymentStatus = PaymentStatus.Paid };
+            return new CapturePaymentRequestResult { IsSuccess = true, NewPaymentStatus = PaymentStatus.Paid };
         }
 
-        public override RefundProcessPaymentResult RefundProcessPayment(RefundProcessPaymentEvaluationContext context)
+        public override RefundPaymentRequestResult RefundProcessPayment(RefundPaymentRequest request)
         {
             throw new NotImplementedException();
         }
@@ -59,5 +59,6 @@ namespace VirtoCommerce.PaymentModule.Data
         {
             return new ValidatePostProcessRequestResult { IsSuccess = false };
         }
+
     }
 }

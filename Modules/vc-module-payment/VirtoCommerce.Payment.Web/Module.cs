@@ -31,8 +31,8 @@ namespace VirtoCommerce.PaymentModule.Web
             serviceCollection.AddTransient<IPaymentRepository, PaymentRepository>();
             serviceCollection.AddSingleton<Func<IPaymentRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetService<IPaymentRepository>());
 
-            serviceCollection.AddSingleton<IPaymentMethodsRegistrar>(new PaymentMethodsRegistrar());
             serviceCollection.AddSingleton<IPaymentMethodsService, PaymentMethodsService>();
+            serviceCollection.AddSingleton<IPaymentMethodsRegistrar, PaymentMethodsService>();
             serviceCollection.AddSingleton<IPaymentMethodsSearchService, PaymentMethodsSearchService>();
         }
 
@@ -42,6 +42,9 @@ namespace VirtoCommerce.PaymentModule.Web
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
 
             var paymentMethodsRegistrar = applicationBuilder.ApplicationServices.GetRequiredService<IPaymentMethodsRegistrar>();
+            paymentMethodsRegistrar.RegisterPaymentMethod<DefaultManualPaymentMethod>();
+            settingsRegistrar.RegisterSettingsForType(Core.ModuleConstants.Settings.DefaultManualPaymentMethod.AllSettings, typeof(DefaultManualPaymentMethod).Name);
+
             var mvcJsonOptions = applicationBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicJsonConverter(paymentMethodsRegistrar));
 

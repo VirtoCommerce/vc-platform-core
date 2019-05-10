@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
-using VirtoCommerce.PaymentModule.Core.Models;
-using VirtoCommerce.PaymentModule.Core.PaymentResults;
+using VirtoCommerce.PaymentModule.Core.Model;
+using VirtoCommerce.PaymentModule.Model.Requests;
 
 namespace VirtoCommerce.OrdersModule.Core.Model
 {
@@ -33,7 +33,7 @@ namespace VirtoCommerce.OrdersModule.Core.Model
         public DateTime? CapturedDate { get; set; }
         public DateTime? VoidedDate { get; set; }
 
-        public ProcessPaymentResult ProcessPaymentResult { get; set; }
+        public ProcessPaymentRequestResult ProcessPaymentResult { get; set; }
 
         //the self cost of the payment method
         public virtual decimal Price { get; set; }

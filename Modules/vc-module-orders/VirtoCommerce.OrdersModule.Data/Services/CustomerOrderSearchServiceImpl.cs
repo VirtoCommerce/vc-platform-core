@@ -20,11 +20,13 @@ namespace VirtoCommerce.OrdersModule.Data.Services
     {
         private readonly Func<IOrderRepository> _repositoryFactory;
         private readonly IPlatformMemoryCache _platformMemoryCache;
+        private readonly ICustomerOrderService _customerOrderService;
 
-        public CustomerOrderSearchServiceImpl(Func<IOrderRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache)
+        public CustomerOrderSearchServiceImpl(Func<IOrderRepository> repositoryFactory, ICustomerOrderService customerOrderService, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _platformMemoryCache = platformMemoryCache;
+            _customerOrderService = customerOrderService;
         }
 
         public virtual async Task<GenericSearchResult<CustomerOrder>> SearchCustomerOrdersAsync(CustomerOrderSearchCriteria criteria)
@@ -58,10 +60,9 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                     retVal.TotalCount = await query.CountAsync();
                     var orderIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
 
-                    var list = await repository.GetCustomerOrdersByIdsAsync(orderIds, orderResponseGroup);
-
-                    retVal.Results = list.Select(x =>
-                        x.ToModel(AbstractTypeFactory<CustomerOrder>.TryCreateInstance()) as CustomerOrder).ToList();
+                    retVal.Results = (await _customerOrderService.GetByIdsAsync(orderIds, criteria.ResponseGroup)).AsQueryable()
+                                                   .OrderBySortInfos(sortInfos)
+                                                   .ToArray();
 
                     return retVal;
                 }

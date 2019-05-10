@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,6 +21,8 @@ using VirtoCommerce.OrdersModule.Data.Repositories;
 using VirtoCommerce.OrdersModule.Data.Services;
 using VirtoCommerce.OrdersModule.Web.BackgroundJobs;
 using VirtoCommerce.OrdersModule.Web.Model;
+using VirtoCommerce.PaymentModule.Core.Model;
+using VirtoCommerce.PaymentModule.Model.Requests;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
@@ -161,6 +164,64 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
 
         }
 
+        /// <summary>
+        /// Register customer order payment in external payment system
+        /// </summary>
+        /// <remarks>Used in storefront checkout or manual order payment registration</remarks>
+        /// <param name="orderId">customer order id</param>
+        /// <param name="paymentId">payment id</param>
+        /// <param name="bankCardInfo">banking card information</param>
+        [HttpPost]
+        [Route("{orderId}/processPayment/{paymentId}")]
+        public async Task<ActionResult<ProcessPaymentRequestResult>> ProcessOrderPayments(string orderId, string paymentId, [SwaggerOptional] BankCardInfo bankCardInfo)
+        {
+            var order = await _customerOrderService.GetByIdAsync(orderId, CustomerOrderResponseGroup.Full.ToString());
+
+            if (order == null)
+            {
+                var searchCriteria = AbstractTypeFactory<CustomerOrderSearchCriteria>.TryCreateInstance();
+                searchCriteria.Number = orderId;
+                searchCriteria.ResponseGroup = CustomerOrderResponseGroup.Full.ToString();
+
+                var orders = await _searchService.SearchCustomerOrdersAsync(searchCriteria);
+                order = orders.Results.FirstOrDefault();
+            }
+
+            if (order == null)
+            {
+                throw new InvalidOperationException($"Cannot find order with ID {orderId}");
+            }
+
+            var inPayment = order.InPayments.FirstOrDefault(x => x.Id == paymentId);
+            if (inPayment == null)
+            {
+                throw new InvalidOperationException($"Cannot find payment with ID {paymentId}");
+            }
+            if (inPayment.PaymentMethod == null)
+            {
+                throw new InvalidOperationException($"Cannot find payment method with code {inPayment.GatewayCode}");
+            }
+
+            var request = new ProcessPaymentRequest
+            {
+                OrderId = order.Id,
+                Order = order,
+                PaymentId = inPayment.Id,
+                Payment = inPayment,
+                //TODO
+                //Store = store,
+                BankCardInfo = bankCardInfo
+            };
+            var result = inPayment.PaymentMethod.ProcessPayment(request);
+            if (result.OuterId != null)
+            {
+                inPayment.OuterId = result.OuterId;
+            }
+
+            await _customerOrderService.SaveChangesAsync(new[] { order });
+
+            return Ok(result);
+        }
 
         /// <summary>
         /// Create new customer order based on shopping cart.
@@ -323,6 +384,75 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
 
             return Ok(retVal);
         }
+
+        /// <summary>
+        /// Payment callback operation used by external payment services to inform post process payment in our system
+        /// </summary>
+        /// <param name="callback">payment callback parameters</param>
+        [HttpPost]
+        [Route("~/api/paymentcallback")]
+        public async Task<ActionResult<PostProcessPaymentRequestResult>> PostProcessPayment([FromBody]PaymentCallbackParameters callback)
+        {
+            var parameters = new NameValueCollection();
+            foreach (var param in callback?.Parameters ?? Array.Empty<KeyValuePair>())
+            {
+                parameters.Add(param.Key, param.Value);
+            }
+            var orderId = parameters.Get("orderid");
+            if (string.IsNullOrEmpty(orderId))
+            {
+                throw new InvalidOperationException("the 'orderid' parameter must be passed");
+            }
+
+            //some payment method require customer number to be passed and returned. First search customer order by number
+            var searchCriteria = AbstractTypeFactory<CustomerOrderSearchCriteria>.TryCreateInstance();
+            searchCriteria.Number = orderId;
+            searchCriteria.ResponseGroup = CustomerOrderResponseGroup.Full.ToString();
+            //if order not found by order number search by order id
+            var orders = await _searchService.SearchCustomerOrdersAsync(searchCriteria);
+            var order = orders.Results.FirstOrDefault() ?? await _customerOrderService.GetByIdAsync(orderId, CustomerOrderResponseGroup.Full.ToString());
+
+            if (order == null)
+            {
+                throw new InvalidOperationException($"Cannot find order with ID {orderId}");
+            }
+
+            var paymentMethodCode = parameters.Get("code");
+
+            //Need to use concrete  payment method if it code passed otherwise use all order payment methods
+            foreach (var inPayment in order.InPayments.Where(x => x.PaymentMethod != null && (string.IsNullOrEmpty(paymentMethodCode) ? true : x.GatewayCode.EqualsInvariant(paymentMethodCode))))
+            {
+                //Each payment method must check that these parameters are addressed to it
+                var result = inPayment.PaymentMethod.ValidatePostProcessRequest(parameters);
+                if (result.IsSuccess)
+                {
+
+                    var request = new PostProcessPaymentRequest
+                    {
+                        OrderId = order.Id,
+                        Order = order,
+                        PaymentId = inPayment.Id,
+                        Payment = inPayment,
+                        StoreId = order.StoreId,
+                        //TODO
+                        //Store = store,
+                        OuterId = result.OuterId,
+                        Parameters = parameters
+                    };
+                    var retVal = inPayment.PaymentMethod.PostProcessPayment(request);
+                    if (retVal != null)
+                    {
+                        await _customerOrderService.SaveChangesAsync(new[] { order });
+
+                        // order Number is required
+                        retVal.OrderId = order.Number;
+                    }
+                    return Ok(retVal);
+                }
+            }
+            return Ok(new PostProcessPaymentRequestResult { ErrorMessage = "Payment method not found" });
+        }
+
 
         [HttpGet]
         [Route("invoice/{orderNumber}")]

@@ -1,4 +1,4 @@
-namespace VirtoCommerce.PaymentModule.Core.Models
+namespace VirtoCommerce.PaymentModule.Core.Model
 {
     /// <summary>
     /// Represents a payment status enumeration

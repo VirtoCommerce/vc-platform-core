@@ -6,7 +6,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Shipping;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
-using VirtoCommerce.PaymentModule.Core.Models;
+using VirtoCommerce.PaymentModule.Core.Model;
 using VirtoCommerce.PaymentModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -14,7 +14,7 @@ namespace VirtoCommerce.OrdersModule.Web.JsonConverters
 {
     public class PolymorphicOperationJsonConverter : JsonConverter
     {
-        private static readonly Type[] _knowTypes = { typeof(IOperation), typeof(LineItem), typeof(CustomerOrderSearchCriteria), typeof(PaymentMethod), typeof(ShippingMethod) };
+        private static readonly Type[] _knowTypes = { typeof(IOperation), typeof(LineItem), typeof(CustomerOrderSearchCriteria), typeof(ShippingMethod) };
 
         private readonly IPaymentMethodsRegistrar _paymentMethodsRegistrar;
         private readonly IShippingMethodsRegistrar _shippingMethodsRegistrar;
@@ -37,12 +37,7 @@ namespace VirtoCommerce.OrdersModule.Web.JsonConverters
             object retVal;
             var obj = JObject.Load(reader);
 
-            if (objectType == typeof(PaymentMethod))
-            {
-                var paymentGatewayCode = obj["code"].Value<string>();
-                retVal = _paymentMethodsRegistrar.GetAllPaymentMethods().FirstOrDefault(x => x.Code.EqualsInvariant(paymentGatewayCode));
-            }
-            else if (objectType == typeof(ShippingMethod))
+            if (objectType == typeof(ShippingMethod))
             {
                 var shippingGatewayCode = obj["code"].Value<string>();
                 retVal = _shippingMethodsRegistrar.GetAllShippingMethods().FirstOrDefault(x => x.Code.EqualsInvariant(shippingGatewayCode));

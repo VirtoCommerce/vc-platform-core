@@ -6,7 +6,7 @@ using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Services;
-using VirtoCommerce.PaymentModule.Core.Models;
+using VirtoCommerce.PaymentModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 using Address = VirtoCommerce.OrdersModule.Core.Model.Address;
 using LineItem = VirtoCommerce.OrdersModule.Core.Model.LineItem;

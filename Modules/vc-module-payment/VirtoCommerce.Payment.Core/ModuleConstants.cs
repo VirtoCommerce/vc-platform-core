@@ -13,7 +13,24 @@ namespace VirtoCommerce.PaymentModule.Core
                 public static IEnumerable<SettingDescriptor> AllSettings => Enumerable.Empty<SettingDescriptor>();
             }
 
-            public static IEnumerable<SettingDescriptor> AllSettings => General.AllSettings;
+            public static class DefaultManualPaymentMethod
+            {
+                public static SettingDescriptor Logo = new SettingDescriptor
+                {
+                    Name = "VirtoCommerce.Payment.DefaultManualPaymentMethodSettings.Logo",
+                    GroupName = "Payment|DefaultManualPaymentMethod",
+                    ValueType = SettingValueType.ShortText
+                };
+
+                public static IEnumerable<SettingDescriptor> AllSettings
+                {
+                    get
+                    {
+                        yield return Logo;
+                    }
+                }
+            }
+            public static IEnumerable<SettingDescriptor> AllSettings => General.AllSettings.Concat(DefaultManualPaymentMethod.AllSettings);
         }
     }
 }

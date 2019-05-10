@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
-using VirtoCommerce.PaymentModule.Core.Models;
+using VirtoCommerce.PaymentModule.Core.Model;
 using VirtoCommerce.PaymentModule.Core.Services;
 using VirtoCommerce.PaymentModule.Data.Caching;
 using VirtoCommerce.PaymentModule.Data.Model;
@@ -15,7 +15,7 @@ using VirtoCommerce.Platform.Data.Infrastructure;
 
 namespace VirtoCommerce.PaymentModule.Data.Services
 {
-    public class PaymentMethodsService : IPaymentMethodsService
+    public class PaymentMethodsService : IPaymentMethodsService, IPaymentMethodsRegistrar
     {
         private readonly Func<IPaymentRepository> _repositoryFactory;
         private readonly ISettingsManager _settingManager;
@@ -30,6 +30,20 @@ namespace VirtoCommerce.PaymentModule.Data.Services
             _settingManager = settingManager;
             _memCache = memCache;
         }
+
+        #region IPaymentMethodsRegistrar members
+        public void RegisterPaymentMethod<T>(Func<T> factory = null) where T : PaymentMethod
+        {
+            if (AbstractTypeFactory<PaymentMethod>.AllTypeInfos.All(t => t.Type != typeof(T)))
+            {
+                var typeInfo = AbstractTypeFactory<PaymentMethod>.RegisterType<T>();
+                if (factory != null)
+                {
+                    typeInfo.WithFactory(factory);
+                }
+            }
+        }
+        #endregion
 
         public async Task<PaymentMethod[]> GetByIdsAsync(string[] ids, string responseGroup)
         {

@@ -6,7 +6,7 @@ using System.Linq;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.OrdersModule.Core.Model;
-using VirtoCommerce.PaymentModule.Core.Models;
+using VirtoCommerce.PaymentModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 using Address = VirtoCommerce.OrdersModule.Core.Model.Address;
 

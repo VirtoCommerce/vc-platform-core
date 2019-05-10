@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using VirtoCommerce.PaymentModule.Core.Models;
+using VirtoCommerce.PaymentModule.Core.Model;
 
 namespace VirtoCommerce.PaymentModule.Core.Services
 {

@@ -1,6 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using VirtoCommerce.PaymentModule.Core.Models;
+using VirtoCommerce.PaymentModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.PaymentModule.Data.Model
