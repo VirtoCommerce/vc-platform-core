@@ -48,7 +48,6 @@ namespace VirtoCommerce.CoreModule.Web
             var connectionString = configuration.GetConnectionString("VirtoCommerce.Core") ?? configuration.GetConnectionString("VirtoCommerce");
             serviceCollection.AddDbContext<CoreDbContext>(options => options.UseSqlServer(connectionString));
             serviceCollection.AddSingleton<Func<ICoreRepository>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<ICoreRepository>());
-            serviceCollection.AddSingleton<ISeoService, SeoService>();
             serviceCollection.AddSingleton<ICurrencyService, CurrencyService>();
             serviceCollection.AddSingleton<IPackageTypesService, PackageTypesService>();
             //Can be overrided
@@ -57,6 +56,8 @@ namespace VirtoCommerce.CoreModule.Web
             serviceCollection.AddSingleton<IPaymentMethodsRegistrar>(new PaymentMethodsRegistrar());
             serviceCollection.AddSingleton<CoreExportImport>();
             serviceCollection.AddSingleton<IUniqueNumberGenerator, SequenceUniqueNumberGeneratorService>();
+
+            serviceCollection.AddSingleton<CompositeSeoBySlugResolver>();
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)

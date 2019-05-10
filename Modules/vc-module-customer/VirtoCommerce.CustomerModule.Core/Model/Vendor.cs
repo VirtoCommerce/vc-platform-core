@@ -25,12 +25,5 @@ namespace VirtoCommerce.CustomerModule.Core.Model
         /// </summary>
         public string GroupName { get; set; }
 
-        #region ISeoSupport Members
-
-        public string SeoObjectType => GetType().Name;
-
-        public IList<SeoInfo> SeoInfos { get; set; }
-
-        #endregion
     }
 }

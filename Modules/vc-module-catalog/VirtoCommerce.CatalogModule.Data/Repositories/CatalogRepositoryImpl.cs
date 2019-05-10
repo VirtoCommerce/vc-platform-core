@@ -38,6 +38,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
         public IQueryable<AssociationEntity> Associations => DbContext.Set<AssociationEntity>();
         public IQueryable<CategoryRelationEntity> CategoryLinks => DbContext.Set<CategoryRelationEntity>();
         public IQueryable<PropertyValidationRuleEntity> PropertyValidationRules => DbContext.Set<PropertyValidationRuleEntity>();
+        public IQueryable<SeoInfoEntity> SeoInfos => DbContext.Set<SeoInfoEntity>();
 
         public async Task<CatalogEntity[]> GetCatalogsByIdsAsync(string[] catalogIds)
         {
@@ -86,6 +87,10 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
                 var images = await Images.Where(x => categoriesIds.Contains(x.CategoryId)).ToArrayAsync();
             }
 
+            if (respGroup.HasFlag(CategoryResponseGroup.WithSeo))
+            {
+                var seoInfos = await SeoInfos.Where(x => categoriesIds.Contains(x.CategoryId)).ToArrayAsync();
+            }
             //Load all properties meta information and information for inheritance
             if (respGroup.HasFlag(CategoryResponseGroup.WithProperties))
             {
@@ -139,6 +144,11 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
                 var editorialReviews = await EditorialReviews.Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
             }
 
+            if (respGroup.HasFlag(ItemResponseGroup.WithSeo))
+            {
+                var seoInfos = await SeoInfos.Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
+            }
+
             if (respGroup.HasFlag(ItemResponseGroup.Variations))
             {
                 // TODO: Call GetItemByIds for variations recursively (need to measure performance and data amount first)
@@ -158,6 +168,11 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
                 if (respGroup.HasFlag(ItemResponseGroup.ItemEditorialReviews))
                 {
                     var variationEditorialReviews = await EditorialReviews.Where(x => variationIds.Contains(x.ItemId)).ToArrayAsync();
+                }
+
+                if (respGroup.HasFlag(ItemResponseGroup.Seo))
+                {
+                    var variationsSeoInfos = await SeoInfos.Where(x => variationIds.Contains(x.ItemId)).ToArrayAsync();
                 }
             }
 
@@ -287,7 +302,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
                 do
                 {
                     const string commandTemplate = @"
-                        DELETE SEO FROM SeoUrlKeyword SEO INNER JOIN Item I ON I.Id = SEO.ObjectId AND SEO.ObjectType = 'CatalogProduct'
+                        DELETE SEO FROM CatalogSeoInfo SEO INNER JOIN Item I ON I.Id = SEO.ItemId
                         WHERE I.Id IN ({0}) OR I.ParentId IN ({0})
 
                         DELETE CR FROM CategoryItemRelation  CR INNER JOIN Item I ON I.Id = CR.ItemId
@@ -336,7 +351,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
                 await RemoveItemsAsync(itemIds);
 
                 const string commandTemplate = @"
-                    DELETE FROM SeoUrlKeyword WHERE ObjectType = 'Category' AND ObjectId IN ({0})
+                    DELETE SEO FROM CatalogSeoInfo SEO INNER JOIN Category C ON C.Id = SEO.CategoryId WHERE C.Id IN ({0}) 
                     DELETE CI FROM CatalogImage CI INNER JOIN Category C ON C.Id = CI.CategoryId WHERE C.Id IN ({0}) 
                     DELETE PV FROM PropertyValue PV INNER JOIN Category C ON C.Id = PV.CategoryId WHERE C.Id IN ({0}) 
                     DELETE CR FROM CategoryRelation CR INNER JOIN Category C ON C.Id = CR.SourceCategoryId OR C.Id = CR.TargetCategoryId  WHERE C.Id IN ({0}) 

@@ -10,7 +10,7 @@ using VirtoCommerce.StoreModule.Data.Repositories;
 namespace VirtoCommerce.StoreModule.Data.Migrations
 {
     [DbContext(typeof(StoreDbContext))]
-    [Migration("20190409085836_InitialStore")]
+    [Migration("20190510074155_InitialStore")]
     partial class InitialStore
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -20,6 +20,53 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                 .HasAnnotation("ProductVersion", "2.2.3-servicing-35854")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+            modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.SeoInfoEntity", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(64);
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("ImageAltDescription")
+                        .HasMaxLength(255);
+
+                    b.Property<bool>("IsActive");
+
+                    b.Property<string>("Keyword")
+                        .IsRequired()
+                        .HasMaxLength(255);
+
+                    b.Property<string>("Language")
+                        .HasMaxLength(5);
+
+                    b.Property<string>("MetaDescription")
+                        .HasMaxLength(1024);
+
+                    b.Property<string>("MetaKeywords")
+                        .HasMaxLength(255);
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(64);
+
+                    b.Property<DateTime?>("ModifiedDate");
+
+                    b.Property<string>("StoreId")
+                        .HasMaxLength(128);
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(255);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StoreId");
+
+                    b.ToTable("StoreSeoInfo");
+                });
 
             modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreCurrencyEntity", b =>
                 {
@@ -247,6 +294,14 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                     b.HasIndex("StoreId");
 
                     b.ToTable("StoreTrustedGroup");
+                });
+
+            modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.SeoInfoEntity", b =>
+                {
+                    b.HasOne("VirtoCommerce.StoreModule.Data.Model.StoreEntity", "Store")
+                        .WithMany("SeoInfos")
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreCurrencyEntity", b =>

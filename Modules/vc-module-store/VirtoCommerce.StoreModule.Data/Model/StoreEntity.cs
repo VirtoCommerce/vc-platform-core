@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.StoreModule.Core.Model;
 
@@ -17,6 +18,7 @@ namespace VirtoCommerce.StoreModule.Data.Model
             ShippingMethods = new NullCollection<StoreShippingMethodEntity>();
             TrustedGroups = new NullCollection<StoreTrustedGroupEntity>();
             FulfillmentCenters = new NullCollection<StoreFulfillmentCenterEntity>();
+            SeoInfos = new NullCollection<SeoInfoEntity>();
         }
 
         [Required]
@@ -79,12 +81,16 @@ namespace VirtoCommerce.StoreModule.Data.Model
         public virtual ObservableCollection<StoreShippingMethodEntity> ShippingMethods { get; set; }
 
         public virtual ObservableCollection<StoreFulfillmentCenterEntity> FulfillmentCenters { get; set; }
+        public virtual ObservableCollection<SeoInfoEntity> SeoInfos { get; set; }
+
         #endregion
 
         public virtual Store ToModel(Store store)
         {
             if (store == null)
+            {
                 throw new ArgumentNullException(nameof(store));
+            }
 
             store.Id = Id;
             store.AdminEmail = AdminEmail;
@@ -107,12 +113,15 @@ namespace VirtoCommerce.StoreModule.Data.Model
             store.MainFulfillmentCenterId = FulfillmentCenterId;
             store.MainReturnsFulfillmentCenterId = ReturnsFulfillmentCenterId;
 
-            store.StoreState = EnumUtility.SafeParse<StoreState>(StoreState.ToString(), Core.Model.StoreState.Open);
+            store.StoreState = EnumUtility.SafeParse(StoreState.ToString(), Core.Model.StoreState.Open);
             store.Languages = Languages.Select(x => x.LanguageCode).ToList();
             store.Currencies = Currencies.Select(x => x.CurrencyCode).ToList();
             store.TrustedGroups = TrustedGroups.Select(x => x.GroupName).ToList();
             store.AdditionalFulfillmentCenterIds = FulfillmentCenters.Where(x => x.Type == FulfillmentCenterType.Main).Select(x => x.FulfillmentCenterId).ToList();
             store.ReturnsFulfillmentCenterIds = FulfillmentCenters.Where(x => x.Type == FulfillmentCenterType.Returns).Select(x => x.FulfillmentCenterId).ToList();
+            // SeoInfos
+            store.SeoInfos = SeoInfos.Select(x => x.ToModel(AbstractTypeFactory<SeoInfo>.TryCreateInstance())).ToList();
+
             return store;
         }
 
@@ -210,6 +219,10 @@ namespace VirtoCommerce.StoreModule.Data.Model
                     Type = FulfillmentCenterType.Returns
                 }));
             }
+            if (store.SeoInfos != null)
+            {
+                SeoInfos = new ObservableCollection<SeoInfoEntity>(store.SeoInfos.Select(x => AbstractTypeFactory<SeoInfoEntity>.TryCreateInstance().FromModel(x, pkMap)));
+            }
 
             return this;
         }
@@ -234,7 +247,7 @@ namespace VirtoCommerce.StoreModule.Data.Model
             target.SecureUrl = SecureUrl;
             target.TimeZone = TimeZone;
             target.Url = Url;
-            target.StoreState = (int)StoreState;
+            target.StoreState = StoreState;
             target.FulfillmentCenterId = FulfillmentCenterId;
             target.ReturnsFulfillmentCenterId = ReturnsFulfillmentCenterId;
 
@@ -274,6 +287,10 @@ namespace VirtoCommerce.StoreModule.Data.Model
                 var fulfillmentCenterComparer = AnonymousComparer.Create((StoreFulfillmentCenterEntity fc) => $"{fc.FulfillmentCenterId}-{fc.Type}");
                 FulfillmentCenters.Patch(target.FulfillmentCenters, fulfillmentCenterComparer,
                                       (sourceFulfillmentCenter, targetFulfillmentCenter) => sourceFulfillmentCenter.Patch(targetFulfillmentCenter));
+            }
+            if (!SeoInfos.IsNullCollection())
+            {
+                SeoInfos.Patch(target.SeoInfos, (sourceSeoInfo, targetSeoInfo) => sourceSeoInfo.Patch(targetSeoInfo));
             }
         }
     }

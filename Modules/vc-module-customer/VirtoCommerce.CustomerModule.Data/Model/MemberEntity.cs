@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Collections.ObjectModel;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.CoreModule.Core.Seo;
 
 namespace VirtoCommerce.CustomerModule.Data.Model
 {
@@ -17,6 +18,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             Phones = new NullCollection<PhoneEntity>();
             Emails = new NullCollection<EmailEntity>();
             Groups = new NullCollection<MemberGroupEntity>();
+            SeoInfos = new NullCollection<SeoInfoEntity>();
         }
 
         [StringLength(64)]
@@ -39,6 +41,8 @@ namespace VirtoCommerce.CustomerModule.Data.Model
 
         public ObservableCollection<MemberGroupEntity> Groups { get; set; }
 
+        public ObservableCollection<SeoInfoEntity> SeoInfos { get; set; }
+
         #endregion
 
         public virtual Member ToModel(Member member)
@@ -58,6 +62,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             member.Notes = Notes.OrderBy(x => x.Id).Select(x => x.ToModel(new Note())).ToList();
             member.Phones = Phones.OrderBy(x => x.Id).Select(x => x.Number).ToList();
             member.Groups = Groups.OrderBy(x => x.Id).Select(x => x.Group).ToList();
+            member.SeoInfos = SeoInfos.Select(x => x.ToModel(AbstractTypeFactory<SeoInfo>.TryCreateInstance())).ToList();
 
             return member;
         }
@@ -131,6 +136,11 @@ namespace VirtoCommerce.CustomerModule.Data.Model
                     note.MemberId = member.Id;
                 }
             }
+
+            if (member.SeoInfos != null)
+            {
+                SeoInfos = new ObservableCollection<SeoInfoEntity>(member.SeoInfos.Select(x => AbstractTypeFactory<SeoInfoEntity>.TryCreateInstance().FromModel(x, pkMap)));
+            }
             return this;
         }
 
@@ -173,6 +183,11 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             {
                 var relationComparer = AnonymousComparer.Create((MemberRelationEntity x) => x.AncestorId);
                 MemberRelations.Patch(target.MemberRelations, relationComparer, (sourceRel, targetRel) => { /*Nothing todo*/ });
+            }
+
+            if (!SeoInfos.IsNullCollection())
+            {
+                SeoInfos.Patch(target.SeoInfos, (sourceSeoInfo, targetSeoInfo) => sourceSeoInfo.Patch(targetSeoInfo));
             }
         }
     }

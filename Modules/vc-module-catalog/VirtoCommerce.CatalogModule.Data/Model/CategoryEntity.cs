@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using VirtoCommerce.CatalogModule.Core.Model;
+using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Data.Model
@@ -18,6 +19,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             OutgoingLinks = new NullCollection<CategoryRelationEntity>();
             IncommingLinks = new NullCollection<CategoryRelationEntity>();
             Properties = new NullCollection<PropertyEntity>();
+            SeoInfos = new NullCollection<SeoInfoEntity>();
         }
 
         [Required]
@@ -74,6 +76,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
         public virtual ObservableCollection<CategoryRelationEntity> OutgoingLinks { get; set; }
         public virtual ObservableCollection<CategoryRelationEntity> IncommingLinks { get; set; }
         public virtual ObservableCollection<PropertyEntity> Properties { get; set; }
+        public virtual ObservableCollection<SeoInfoEntity> SeoInfos { get; set; }
+
         #endregion
 
 
@@ -102,7 +106,8 @@ namespace VirtoCommerce.CatalogModule.Data.Model
 
             category.Links = OutgoingLinks.Select(x => x.ToModel(new CategoryLink())).ToList();
             category.Images = Images.OrderBy(x => x.SortOrder).Select(x => x.ToModel(AbstractTypeFactory<Image>.TryCreateInstance())).ToList();
-
+            // SeoInfos
+            category.SeoInfos = SeoInfos.Select(x => x.ToModel(AbstractTypeFactory<SeoInfo>.TryCreateInstance())).ToList();
             category.Properties = Properties.Select(x => x.ToModel(AbstractTypeFactory<Property>.TryCreateInstance()))
                                            .OrderBy(x => x.Name)
                                            .ToList();
@@ -208,6 +213,11 @@ namespace VirtoCommerce.CatalogModule.Data.Model
                 Images = new ObservableCollection<ImageEntity>(category.Images.Select(x => AbstractTypeFactory<ImageEntity>.TryCreateInstance().FromModel(x, pkMap)));
             }
 
+            if (category.SeoInfos != null)
+            {
+                SeoInfos = new ObservableCollection<SeoInfoEntity>(category.SeoInfos.Select(x => AbstractTypeFactory<SeoInfoEntity>.TryCreateInstance().FromModel(x, pkMap)));
+            }
+
             return this;
         }
 
@@ -238,6 +248,11 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             if (!Images.IsNullCollection())
             {
                 Images.Patch(target.Images, (sourceImage, targetImage) => sourceImage.Patch(targetImage));
+            }
+
+            if (!SeoInfos.IsNullCollection())
+            {
+                SeoInfos.Patch(target.SeoInfos, (sourceSeoInfo, targetSeoInfo) => sourceSeoInfo.Patch(targetSeoInfo));
             }
 
         }

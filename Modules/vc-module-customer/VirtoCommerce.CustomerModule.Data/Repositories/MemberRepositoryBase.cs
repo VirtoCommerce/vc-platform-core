@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VirtoCommerce.CustomerModule.Data.Model;
@@ -26,6 +25,7 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
         public IQueryable<PhoneEntity> Phones => DbContext.Set<PhoneEntity>();
         public IQueryable<MemberEntity> Members => DbContext.Set<MemberEntity>();
         public IQueryable<MemberRelationEntity> MemberRelations => DbContext.Set<MemberRelationEntity>();
+        public IQueryable<SeoInfoEntity> SeoInfos => DbContext.Set<SeoInfoEntity>();
 
         public virtual async Task<MemberEntity[]> GetMembersByIdsAsync(string[] ids, string responseGroup = null, string[] memberTypes = null)
         {
@@ -92,7 +92,7 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
                     tasks.Add(Members.Where(x => ancestorIds.Contains(x.Id)).ToArrayAsync());
                 }
 
-                var memberResponseGroup = EnumUtility.SafeParse(responseGroup, MemberResponseGroup.Full);
+                var memberResponseGroup = EnumUtility.SafeParseFlags(responseGroup, MemberResponseGroup.Full);
 
                 if (memberResponseGroup.HasFlag(MemberResponseGroup.WithNotes))
                 {
@@ -117,6 +117,11 @@ namespace VirtoCommerce.CustomerModule.Data.Repositories
                 if (memberResponseGroup.HasFlag(MemberResponseGroup.WithGroups))
                 {
                     tasks.Add(Groups.Where(x => ids.Contains(x.MemberId)).ToArrayAsync());
+                }
+
+                if (memberResponseGroup.HasFlag(MemberResponseGroup.WithSeo))
+                {
+                    tasks.Add(SeoInfos.Where(x => ids.Contains(x.MemberId)).ToArrayAsync());
                 }
             }
             await Task.WhenAll(tasks);

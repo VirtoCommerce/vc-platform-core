@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CoreModule.Core.Package;
-using VirtoCommerce.CoreModule.Data.Caching;
 using VirtoCommerce.CoreModule.Data.Repositories;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;

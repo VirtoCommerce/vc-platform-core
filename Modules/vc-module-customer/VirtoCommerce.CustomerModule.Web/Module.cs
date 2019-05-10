@@ -13,7 +13,6 @@ using VirtoCommerce.CustomerModule.Core.Events;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Services;
 using VirtoCommerce.CustomerModule.Data.ExportImport;
-using VirtoCommerce.CustomerModule.Data.Handlers;
 using VirtoCommerce.CustomerModule.Data.Model;
 using VirtoCommerce.CustomerModule.Data.Repositories;
 using VirtoCommerce.CustomerModule.Data.Search;
@@ -68,7 +67,7 @@ namespace VirtoCommerce.CustomerModule.Web
                 },
             });
 
-            serviceCollection.AddSingleton<MemberChangedEventHandler>();
+
         }
 
         public void PostInitialize(IApplicationBuilder appBuilder)
@@ -102,8 +101,6 @@ namespace VirtoCommerce.CustomerModule.Web
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicMemberJsonConverter());
 
             var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
-            inProcessBus.RegisterHandler<MemberChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<MemberChangedEventHandler>().Handle(message));
-            inProcessBus.RegisterHandler<MemberChangingEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<MemberChangedEventHandler>().Handle(message));
 
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {

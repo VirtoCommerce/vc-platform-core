@@ -10,13 +10,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using VirtoCommerce.CatalogModule.Core;
-using VirtoCommerce.CatalogModule.Core.Events;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Model.OutlinePart;
 using VirtoCommerce.CatalogModule.Core.Search;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CatalogModule.Data.ExportImport;
-using VirtoCommerce.CatalogModule.Data.Handlers;
 using VirtoCommerce.CatalogModule.Data.Repositories;
 using VirtoCommerce.CatalogModule.Data.Search;
 using VirtoCommerce.CatalogModule.Data.Search.BrowseFilters;
@@ -24,7 +22,7 @@ using VirtoCommerce.CatalogModule.Data.Search.Indexing;
 using VirtoCommerce.CatalogModule.Data.Services;
 using VirtoCommerce.CatalogModule.Data.Validation;
 using VirtoCommerce.CatalogModule.Web.JsonConverters;
-using VirtoCommerce.Platform.Core.Bus;
+using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.ExportImport;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -62,7 +60,7 @@ namespace VirtoCommerce.CatalogModule.Web
             serviceCollection.AddSingleton<IItemService, ItemService>();
             serviceCollection.AddSingleton<IProductIndexedSearchService, ProductIndexedSearchService>();
             serviceCollection.AddSingleton<IAssociationService, AssociationService>();
-            
+
             serviceCollection.AddSingleton<IAggregationConverter, AggregationConverter>();
             serviceCollection.AddSingleton<IBrowseFilterService, BrowseFilterService>();
             serviceCollection.AddSingleton<ITermFilterBuilder, TermFilterBuilder>();
@@ -78,12 +76,14 @@ namespace VirtoCommerce.CatalogModule.Web
             serviceCollection.AddSingleton<IOutlineService, OutlineService>();
             serviceCollection.AddSingleton<ISkuGenerator, DefaultSkuGenerator>();
 
+            serviceCollection.AddSingleton<ISeoBySlugResolver, SeoBySlugResolver>();
+
+
             PropertyValueValidator PropertyValueValidatorFactory(PropertyValidationRule rule) => new PropertyValueValidator(rule);
             serviceCollection.AddSingleton((Func<PropertyValidationRule, PropertyValueValidator>)PropertyValueValidatorFactory);
             serviceCollection.AddSingleton<AbstractValidator<IHasProperties>, HasPropertiesValidator>();
 
             serviceCollection.AddSingleton<CatalogExportImport>();
-            serviceCollection.AddSingleton<SaveSeoForCatalogEntitesEventHandler>();
 
             serviceCollection.AddSingleton<IOutlinePartResolver>(provider =>
             {
@@ -141,9 +141,6 @@ namespace VirtoCommerce.CatalogModule.Web
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
             mvcJsonOptions.Value.SerializerSettings.Converters.Add(new SearchCriteriaJsonConverter());
 
-            var inProcessBus = appBuilder.ApplicationServices.GetService<IHandlerRegistrar>();
-            inProcessBus.RegisterHandler<CategoryChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<SaveSeoForCatalogEntitesEventHandler>().Handle(message));
-            inProcessBus.RegisterHandler<ProductChangedEvent>(async (message, token) => await appBuilder.ApplicationServices.GetService<SaveSeoForCatalogEntitesEventHandler>().Handle(message));
 
             //Force migrations
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())

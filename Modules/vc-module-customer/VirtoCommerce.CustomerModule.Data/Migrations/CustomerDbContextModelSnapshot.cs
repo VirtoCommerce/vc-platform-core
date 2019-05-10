@@ -279,6 +279,55 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                     b.ToTable("Phone");
                 });
 
+            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.SeoInfoEntity", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(128);
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(64);
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("ImageAltDescription")
+                        .HasMaxLength(255);
+
+                    b.Property<bool>("IsActive");
+
+                    b.Property<string>("Keyword")
+                        .IsRequired()
+                        .HasMaxLength(255);
+
+                    b.Property<string>("Language")
+                        .HasMaxLength(5);
+
+                    b.Property<string>("MemberId");
+
+                    b.Property<string>("MetaDescription")
+                        .HasMaxLength(1024);
+
+                    b.Property<string>("MetaKeywords")
+                        .HasMaxLength(255);
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(64);
+
+                    b.Property<DateTime?>("ModifiedDate");
+
+                    b.Property<string>("StoreId")
+                        .HasMaxLength(128);
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(255);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberId");
+
+                    b.ToTable("MemberSeoInfo");
+                });
+
             modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.ContactEntity", b =>
                 {
                     b.HasBaseType("VirtoCommerce.CustomerModule.Data.Model.MemberEntity");
@@ -460,6 +509,14 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                 {
                     b.HasOne("VirtoCommerce.CustomerModule.Data.Model.MemberEntity", "Member")
                         .WithMany("Phones")
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("VirtoCommerce.CustomerModule.Data.Model.SeoInfoEntity", b =>
+                {
+                    b.HasOne("VirtoCommerce.CustomerModule.Data.Model.MemberEntity", "Member")
+                        .WithMany("SeoInfos")
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });

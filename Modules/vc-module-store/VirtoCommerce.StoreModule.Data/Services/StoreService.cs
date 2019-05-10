@@ -26,39 +26,36 @@ namespace VirtoCommerce.StoreModule.Data.Services
 {
     public class StoreService : IStoreService
     {
-        public StoreService(Func<IStoreRepository> repositoryFactory, ISeoService seoService, ISettingsManager settingManager,
-                            IDynamicPropertyService dynamicPropertyService, IShippingMethodsRegistrar shippingService, IPaymentMethodsRegistrar paymentService,
+        private readonly Func<IStoreRepository> _repositoryFactory;
+        private readonly ISettingsManager _settingManager;
+        private readonly IDynamicPropertyService _dynamicPropertyService;
+        private readonly IShippingMethodsRegistrar _shippingMethodRegistrar;
+        private readonly IPaymentMethodsRegistrar _paymentMethodRegistrar;
+        private readonly IEventPublisher _eventPublisher;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
+
+        public StoreService(Func<IStoreRepository> repositoryFactory, ISettingsManager settingManager, IDynamicPropertyService dynamicPropertyService, IShippingMethodsRegistrar shippingService, IPaymentMethodsRegistrar paymentService,
                             IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
         {
-            RepositoryFactory = repositoryFactory;
-            SeoService = seoService;
-            SettingManager = settingManager;
-            DynamicPropertyService = dynamicPropertyService;
-            ShippingMethodRegistrar = shippingService;
-            PaymentMethodRegistrar = paymentService;
-            EventPublisher = eventPublisher;
-            PlatformMemoryCache = platformMemoryCache;
+            _repositoryFactory = repositoryFactory;
+            _settingManager = settingManager;
+            _dynamicPropertyService = dynamicPropertyService;
+            _shippingMethodRegistrar = shippingService;
+            _paymentMethodRegistrar = paymentService;
+            _eventPublisher = eventPublisher;
+            _platformMemoryCache = platformMemoryCache;
         }
-
-        protected Func<IStoreRepository> RepositoryFactory { get; }
-        protected ISeoService SeoService { get; }
-        protected ISettingsManager SettingManager { get; }
-        protected IDynamicPropertyService DynamicPropertyService { get; }
-        protected IShippingMethodsRegistrar ShippingMethodRegistrar { get; }
-        protected IPaymentMethodsRegistrar PaymentMethodRegistrar { get; }
-        protected IEventPublisher EventPublisher { get; }
-        protected IPlatformMemoryCache PlatformMemoryCache { get; }
 
         #region IStoreService Members
 
         public virtual async Task<Store[]> GetByIdsAsync(string[] ids)
         {
             var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", ids));
-            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 var stores = new List<Store>();
 
-                using (var repository = RepositoryFactory())
+                using (var repository = _repositoryFactory())
                 {
                     repository.DisableChangesTracking();
 
@@ -70,16 +67,14 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
                         PopulateStore(store, dbStore);
 
-                        await SettingManager.DeepLoadSettingsAsync(store);
+                        await _settingManager.DeepLoadSettingsAsync(store);
                         stores.Add(store);
                         cacheEntry.AddExpirationToken(StoreCacheRegion.CreateChangeToken(store));
                     }
                 }
 
                 var result = stores.ToArray();
-                var taskLoadDynamicPropertyValues = DynamicPropertyService.LoadDynamicPropertyValuesAsync(result);
-                var taskLoadSeoForObjects = SeoService.LoadSeoForObjectsAsync(result);
-                await Task.WhenAll(taskLoadDynamicPropertyValues, taskLoadSeoForObjects);
+                await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(result);
 
                 return result;
             });
@@ -95,7 +90,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
         {
             ValidateStoresProperties(stores);
 
-            using (var repository = RepositoryFactory())
+            using (var repository = _repositoryFactory())
             {
                 var changedEntries = new List<GenericChangedEntry<Store>>();
                 var pkMap = new PrimaryKeyResolvingMap();
@@ -121,7 +116,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
-                await EventPublisher.Publish(new StoreChangedEvent(changedEntries));
+                await _eventPublisher.Publish(new StoreChangedEvent(changedEntries));
             }
 
             ClearCache(stores);
@@ -129,7 +124,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
 
         public virtual async Task DeleteAsync(string[] ids)
         {
-            using (var repository = RepositoryFactory())
+            using (var repository = _repositoryFactory())
             {
                 var changedEntries = new List<GenericChangedEntry<Store>>();
                 var stores = await GetByIdsAsync(ids);
@@ -145,7 +140,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
                     }
                 }
                 await repository.UnitOfWork.CommitAsync();
-                await EventPublisher.Publish(new StoreChangedEvent(changedEntries));
+                await _eventPublisher.Publish(new StoreChangedEvent(changedEntries));
 
                 ClearCache(stores);
             }
@@ -207,7 +202,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
         protected virtual void PopulateStore(Store store, StoreEntity dbStore)
         {
             //Return all registered methods with store settings 
-            store.PaymentMethods = PaymentMethodRegistrar.GetAllPaymentMethods();
+            store.PaymentMethods = _paymentMethodRegistrar.GetAllPaymentMethods();
             foreach (var paymentMethod in store.PaymentMethods)
             {
                 var dbStoredPaymentMethod = dbStore.PaymentMethods.FirstOrDefault(x => x.Code.EqualsInvariant(paymentMethod.Code));
@@ -216,7 +211,7 @@ namespace VirtoCommerce.StoreModule.Data.Services
                     dbStoredPaymentMethod.ToModel(paymentMethod);
                 }
             }
-            store.ShippingMethods = ShippingMethodRegistrar.GetAllShippingMethods();
+            store.ShippingMethods = _shippingMethodRegistrar.GetAllShippingMethods();
             foreach (var shippingMethod in store.ShippingMethods)
             {
                 var dbStoredShippingMethod = dbStore.ShippingMethods.FirstOrDefault(x => x.Code.EqualsInvariant(shippingMethod.Code));

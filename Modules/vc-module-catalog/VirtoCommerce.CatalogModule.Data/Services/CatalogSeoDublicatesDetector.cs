@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -5,7 +6,6 @@ using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Services;
 
 namespace VirtoCommerce.CatalogModule.Data.Services
@@ -27,46 +27,48 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         }
 
         #region ISeoConflictDetector Members
-        public async Task<IEnumerable<SeoInfo>> DetectSeoDuplicatesAsync(string objectType, string objectId, IEnumerable<SeoInfo> allSeoDuplicates)
+        public async Task<IEnumerable<SeoInfo>> DetectSeoDuplicatesAsync(TenantIdentity tenantIdentity)
         {
-            var retVal = new List<SeoInfo>();
-            string catalogId = null;
-            if (objectType.EqualsInvariant(typeof(Store).Name))
-            {
-                var store = await _storeService.GetByIdAsync(objectId);
-                if (store != null)
-                {
-                    catalogId = store.Catalog;
-                }
-            }
-            else if (objectType.EqualsInvariant(typeof(Category).Name))
-            {
-                var category = (await _categoryService.GetByIdsAsync(new[] { objectId }, CategoryResponseGroup.Info.ToString())).FirstOrDefault();
-                if (category != null)
-                {
-                    catalogId = category.CatalogId;
-                }
-            }
-            else if (objectType.EqualsInvariant(typeof(CatalogProduct).Name))
-            {
-                var product = (await _productService.GetByIdsAsync(new[] { objectId }, ItemResponseGroup.ItemInfo.ToString())).FirstOrDefault();
-                if (product != null)
-                {
-                    catalogId = product.CatalogId;
-                }
-            }
+            //TODO:
+            throw new NotImplementedException();
+            //var retVal = new List<SeoInfo>();
+            //string catalogId = null;
+            //if (objectType.EqualsInvariant(typeof(Store).Name))
+            //{
+            //    var store = await _storeService.GetByIdAsync(objectId);
+            //    if (store != null)
+            //    {
+            //        catalogId = store.Catalog;
+            //    }
+            //}
+            //else if (objectType.EqualsInvariant(typeof(Category).Name))
+            //{
+            //    var category = (await _categoryService.GetByIdsAsync(new[] { objectId }, CategoryResponseGroup.Info.ToString())).FirstOrDefault();
+            //    if (category != null)
+            //    {
+            //        catalogId = category.CatalogId;
+            //    }
+            //}
+            //else if (objectType.EqualsInvariant(typeof(CatalogProduct).Name))
+            //{
+            //    var product = (await _productService.GetByIdsAsync(new[] { objectId }, ItemResponseGroup.ItemInfo.ToString())).FirstOrDefault();
+            //    if (product != null)
+            //    {
+            //        catalogId = product.CatalogId;
+            //    }
+            //}
 
-            if (!string.IsNullOrEmpty(catalogId))
-            {
-                //Get all SEO owners witch related to requested catalog and contains Seo duplicates
-                var objectsWithSeoDuplicates = await GetSeoOwnersContainsDuplicatesAsync(catalogId, allSeoDuplicates);
-                //Need select for each seo owner one seo defined for requested container or without it if not exist
-                var seoInfos = objectsWithSeoDuplicates.Select(x => x.SeoInfos.Where(s => s.StoreId == objectId || string.IsNullOrEmpty(s.StoreId)).OrderByDescending(s => s.StoreId).FirstOrDefault())
-                                                       .Where(x => x != null);
-                //return only Seo infos with have duplicate slug keyword
-                retVal = seoInfos.GroupBy(x => x.SemanticUrl).Where(x => x.Count() > 1).SelectMany(x => x).ToList();
-            }
-            return retVal;
+            //if (!string.IsNullOrEmpty(catalogId))
+            //{
+            //    //Get all SEO owners witch related to requested catalog and contains Seo duplicates
+            //    var objectsWithSeoDuplicates = await GetSeoOwnersContainsDuplicatesAsync(catalogId, allSeoDuplicates);
+            //    //Need select for each seo owner one seo defined for requested container or without it if not exist
+            //    var seoInfos = objectsWithSeoDuplicates.Select(x => x.SeoInfos.Where(s => s.StoreId == objectId || string.IsNullOrEmpty(s.StoreId)).OrderByDescending(s => s.StoreId).FirstOrDefault())
+            //                                           .Where(x => x != null);
+            //    //return only Seo infos with have duplicate slug keyword
+            //    retVal = seoInfos.GroupBy(x => x.SemanticUrl).Where(x => x.Count() > 1).SelectMany(x => x).ToList();
+            //}
+            //return retVal;
         }
         #endregion
         /// <summary>

@@ -49,7 +49,7 @@ namespace VirtoCommerce.ContentModule.Azure
             await base.RemoveAsync(urls);
         }
 
-        public override async Task<GenericSearchResult<BlobEntry>> SearchAsync(string folderUrl, string keyword)
+        public override async Task<BlobEntrySearchResult> SearchAsync(string folderUrl, string keyword)
         {
             folderUrl = NormalizeUrl(folderUrl);
             return await base.SearchAsync(folderUrl, keyword);

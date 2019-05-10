@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -6,23 +7,23 @@ using VirtoCommerce.CoreModule.Core;
 using VirtoCommerce.CoreModule.Core.Currency;
 using VirtoCommerce.CoreModule.Core.Package;
 using VirtoCommerce.CoreModule.Core.Seo;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CoreModule.Web.Controllers.Api
 {
     [Route("api")]
     public class CommerceController : Controller
     {
-        private readonly ISeoService _seoService;
         private readonly ICurrencyService _currencyService;
         private readonly IPackageTypesService _packageTypesService;
         private readonly ISeoDuplicatesDetector _seoDuplicateDetector;
-
-        public CommerceController(ISeoService seoService, ICurrencyService currencyService, IPackageTypesService packageTypesService, ISeoDuplicatesDetector seoDuplicateDetector)
+        private readonly CompositeSeoBySlugResolver _seoBySlugResolverDecorator;
+        public CommerceController(ICurrencyService currencyService, IPackageTypesService packageTypesService, ISeoDuplicatesDetector seoDuplicateDetector, CompositeSeoBySlugResolver seoBySlugResolverDecorator)
         {
-            _seoService = seoService;
             _currencyService = currencyService;
             _packageTypesService = packageTypesService;
             _seoDuplicateDetector = seoDuplicateDetector;
+            _seoBySlugResolverDecorator = seoBySlugResolverDecorator;
         }
 
 
@@ -34,10 +35,9 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         [HttpPut]
         [ProducesResponseType(typeof(void), 200)]
         [Route("seoinfos/batchupdate")]
-        public async Task<IActionResult> BatchUpdateSeoInfos(SeoInfo[] seoInfos)
+        public Task<IActionResult> BatchUpdateSeoInfos(SeoInfo[] seoInfos)
         {
-            await _seoService.SaveSeoInfosAsync(seoInfos);
-            return Ok();
+            throw new NotImplementedException();
         }
 
         [HttpGet]
@@ -45,9 +45,9 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         [Route("seoinfos/duplicates")]
         public async Task<IActionResult> GetSeoDuplicates(string objectId, string objectType)
         {
-            var seoDuplicates = await _seoService.GetAllSeoDuplicatesAsync();
-            var retVal = await _seoDuplicateDetector.DetectSeoDuplicatesAsync(objectType, objectId, seoDuplicates);
-            return Ok(retVal.ToArray());
+            var result = await _seoDuplicateDetector.DetectSeoDuplicatesAsync(new TenantIdentity(objectId, objectType));
+
+            return Ok(result.ToArray());
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         [Route("seoinfos/{slug}")]
         public async Task<IActionResult> GetSeoInfoBySlug(string slug)
         {
-            var retVal = await _seoService.GetSeoByKeywordAsync(slug);
+            var retVal = await _seoBySlugResolverDecorator.FindSeoBySlugAsync(slug);
             return Ok(retVal.ToArray());
         }
 

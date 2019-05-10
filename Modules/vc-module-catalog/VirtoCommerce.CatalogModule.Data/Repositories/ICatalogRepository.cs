@@ -22,6 +22,7 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
         IQueryable<CategoryItemRelationEntity> CategoryItemRelations { get; }
         IQueryable<AssociationEntity> Associations { get; }
         IQueryable<CategoryRelationEntity> CategoryLinks { get; }
+        IQueryable<SeoInfoEntity> SeoInfos { get; }
 
         Task<string[]> GetAllChildrenCategoriesIdsAsync(string[] categoryIds);
         Task<CatalogEntity[]> GetCatalogsByIdsAsync(string[] catalogIds);

@@ -1,3 +1,4 @@
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.CustomerModule.Data.Migrations
@@ -12,7 +13,7 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                     BEGIN
 
 	                    BEGIN
-		                    INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20180718074308_InitialCustomer', '2.2.3-servicing-35854')
+		                    INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20190510074541_InitialCustomer', '2.2.3-servicing-35854')
 	                    END
 	                    
 	                    BEGIN
@@ -59,12 +60,51 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
 	                    END
 
                         BEGIN
-                            UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.CustomerModule.Core.Model.Contact' WHERE [Name] = 'Married' AND ObjectType = 'VirtoCommerce.Domain.Customer.Model.Contact'
-                            UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.CustomerModule.Core.Model.Contact' WHERE [Name] = 'occupation' AND ObjectType = 'VirtoCommerce.Domain.Customer.Model.Contact'
-                            UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.CustomerModule.Core.Model.Contact' WHERE [Name] = 'Sex' AND ObjectType = 'VirtoCommerce.Domain.Customer.Model.Contact'
+                            UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.CustomerModule.Core.Model.Contact' WHERE ObjectType = 'VirtoCommerce.Domain.Customer.Model.Contact'
+                            UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.CustomerModule.Core.Model.Organization' WHERE ObjectType = 'VirtoCommerce.Domain.Customer.Model.Organization'
+                            UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.CustomerModule.Core.Model.Employee' WHERE ObjectType = 'VirtoCommerce.Domain.Customer.Model.Employee'
+                            UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.CustomerModule.Core.Model.Vendor' WHERE ObjectType = 'VirtoCommerce.Domain.Customer.Model.Vendor'
                         END
+            END");
 
-                    END");
+
+            migrationBuilder.CreateTable(
+              name: "MemberSeoInfo",
+              columns: table => new
+              {
+                  Id = table.Column<string>(maxLength: 128, nullable: false),
+                  CreatedDate = table.Column<DateTime>(nullable: false),
+                  ModifiedDate = table.Column<DateTime>(nullable: true),
+                  CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
+                  ModifiedBy = table.Column<string>(maxLength: 64, nullable: true),
+                  Keyword = table.Column<string>(maxLength: 255, nullable: false),
+                  StoreId = table.Column<string>(maxLength: 128, nullable: true),
+                  IsActive = table.Column<bool>(nullable: false),
+                  Language = table.Column<string>(maxLength: 5, nullable: true),
+                  Title = table.Column<string>(maxLength: 255, nullable: true),
+                  MetaDescription = table.Column<string>(maxLength: 1024, nullable: true),
+                  MetaKeywords = table.Column<string>(maxLength: 255, nullable: true),
+                  ImageAltDescription = table.Column<string>(maxLength: 255, nullable: true),
+                  MemberId = table.Column<string>(nullable: true)
+              },
+              constraints: table =>
+              {
+                  table.PrimaryKey("PK_MemberSeoInfo", x => x.Id);
+                  table.ForeignKey(
+                      name: "FK_MemberSeoInfo_Member_MemberId",
+                      column: x => x.MemberId,
+                      principalTable: "Member",
+                      principalColumn: "Id",
+                      onDelete: ReferentialAction.Cascade);
+              });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MemberSeoInfo_MemberId",
+                table: "MemberSeoInfo",
+                column: "MemberId");
+
+            migrationBuilder.Sql(@" INSERT INTO [MemberSeoInfo] ([Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [MemberId])
+                              SELECT [Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [ObjectId] as [MemberId]  FROM [SeoUrlKeyword] WHERE ObjectType = 'Vendor'");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

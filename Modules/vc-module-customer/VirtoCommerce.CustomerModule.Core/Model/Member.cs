@@ -1,10 +1,11 @@
 using System.Collections.Generic;
+using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 
 namespace VirtoCommerce.CustomerModule.Core.Model
 {
-    public abstract class Member : AuditableEntity, IHasDynamicProperties
+    public abstract class Member : AuditableEntity, IHasDynamicProperties, ISeoSupport
     {
         protected Member()
         {
@@ -23,6 +24,14 @@ namespace VirtoCommerce.CustomerModule.Core.Model
 
         public string ObjectType { get; set; }
         public ICollection<DynamicObjectProperty> DynamicProperties { get; set; }
+
+        #endregion
+
+        #region ISeoSupport Members
+
+        public virtual string SeoObjectType => GetType().Name;
+
+        public virtual IList<SeoInfo> SeoInfos { get; set; }
 
         #endregion
     }
