@@ -14,7 +14,7 @@ namespace VirtoCommerce.StoreModule.Data.Repositories
 
         #region IStoreRepository Members
 
-        public async Task<StoreEntity[]> GetStoresByIdsAsync(string[] ids)
+        public virtual async Task<StoreEntity[]> GetStoresByIdsAsync(string[] ids)
         {
             var retVal = await Stores.Where(x => ids.Contains(x.Id))
                                .Include(x => x.Languages)
@@ -39,7 +39,5 @@ namespace VirtoCommerce.StoreModule.Data.Repositories
 
 
         #endregion
-
-
     }
 }

@@ -43,21 +43,20 @@ namespace VirtoCommerce.PricingModule.Data.Repositories
             return retVal;
         }
 
-        public async Task DeletePricesAsync(string[] ids)
+        public virtual async Task DeletePricesAsync(string[] ids)
         {
             await ExecuteStoreCommand("DELETE FROM Price WHERE Id IN ({0})", ids);
         }
 
-        public async Task DeletePricelistsAsync(string[] ids)
+        public virtual async Task DeletePricelistsAsync(string[] ids)
         {
             await ExecuteStoreCommand("DELETE FROM Pricelist WHERE Id IN ({0})", ids);
         }
 
-        public async Task DeletePricelistAssignmentsAsync(string[] ids)
+        public virtual async Task DeletePricelistAssignmentsAsync(string[] ids)
         {
             await ExecuteStoreCommand("DELETE FROM PricelistAssignment WHERE Id IN ({0})", ids);
         }
-
 
         protected virtual async Task ExecuteStoreCommand(string commandTemplate, IEnumerable<string> parameterValues)
         {
