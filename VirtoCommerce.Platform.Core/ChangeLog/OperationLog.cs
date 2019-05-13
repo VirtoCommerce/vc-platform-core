@@ -1,6 +1,6 @@
+using System;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
-using System;
 
 namespace VirtoCommerce.Platform.Core.ChangeLog
 {

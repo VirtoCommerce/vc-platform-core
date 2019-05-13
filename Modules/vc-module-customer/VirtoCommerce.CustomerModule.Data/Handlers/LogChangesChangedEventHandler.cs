@@ -1,14 +1,14 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Hangfire;
-using VirtoCommerce.CatalogModule.Core.Events;
+using VirtoCommerce.CustomerModule.Core.Events;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Events;
 
-namespace VirtoCommerce.CatalogModule.Data.Handlers
+namespace VirtoCommerce.CustomerModule.Data.Handlers
 {
-    public class LogChangesChangedEventHandler : IEventHandler<ProductChangedEvent>, IEventHandler<CategoryChangedEvent>
+    public class LogChangesChangedEventHandler : IEventHandler<MemberChangedEvent>
     {
         private readonly IChangeLogService _changeLogService;
 
@@ -17,13 +17,7 @@ namespace VirtoCommerce.CatalogModule.Data.Handlers
             _changeLogService = changeLogService;
         }
 
-        public virtual Task Handle(ProductChangedEvent @event)
-        {
-            InnerHandle(@event);
-            return Task.CompletedTask;
-        }
-
-        public virtual Task Handle(CategoryChangedEvent @event)
+        public virtual Task Handle(MemberChangedEvent @event)
         {
             InnerHandle(@event);
             return Task.CompletedTask;

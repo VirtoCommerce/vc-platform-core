@@ -54,7 +54,7 @@ namespace VirtoCommerce.Platform.Data.ChangeLog
                         repository.Add(modifiedEntity);
                     }
                 }
-                repository.UnitOfWork.Commit();
+                await repository.UnitOfWork.CommitAsync();
             }
         }
 

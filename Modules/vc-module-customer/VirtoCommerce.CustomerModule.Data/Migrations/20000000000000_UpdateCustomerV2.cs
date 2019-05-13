@@ -1,4 +1,3 @@
-using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.CustomerModule.Data.Migrations
@@ -67,44 +66,45 @@ namespace VirtoCommerce.CustomerModule.Data.Migrations
                         END
             END");
 
+            migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_NAME = '__MigrationHistory'))
+                    BEGIN
+                        CREATE TABLE [dbo].[MemberSeoInfo](
+	                        [Id] [nvarchar](128) NOT NULL,
+	                        [CreatedDate] [datetime2](7) NOT NULL,
+	                        [ModifiedDate] [datetime2](7) NULL,
+	                        [CreatedBy] [nvarchar](64) NULL,
+	                        [ModifiedBy] [nvarchar](64) NULL,
+	                        [Keyword] [nvarchar](255) NOT NULL,
+	                        [StoreId] [nvarchar](128) NULL,
+	                        [IsActive] [bit] NOT NULL,
+	                        [Language] [nvarchar](5) NULL,
+	                        [Title] [nvarchar](255) NULL,
+	                        [MetaDescription] [nvarchar](1024) NULL,
+	                        [MetaKeywords] [nvarchar](255) NULL,
+	                        [ImageAltDescription] [nvarchar](255) NULL,
+	                        [MemberId] [nvarchar](128) NULL,
+                         CONSTRAINT [PK_MemberSeoInfo] PRIMARY KEY CLUSTERED 
+                        (
+	                        [Id] ASC
+                        )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+                        ) ON [PRIMARY]
+                        
+                        BEGIN
+                            ALTER TABLE [dbo].[MemberSeoInfo]  WITH CHECK ADD  CONSTRAINT [FK_MemberSeoInfo_Member_MemberId] FOREIGN KEY([MemberId])
+                                REFERENCES [dbo].[Member] ([Id]) ON DELETE CASCADE
+                            ALTER TABLE [dbo].[MemberSeoInfo] CHECK CONSTRAINT [FK_MemberSeoInfo_Member_MemberId]
+                        END
+                    END");
 
-            migrationBuilder.CreateTable(
-              name: "MemberSeoInfo",
-              columns: table => new
-              {
-                  Id = table.Column<string>(maxLength: 128, nullable: false),
-                  CreatedDate = table.Column<DateTime>(nullable: false),
-                  ModifiedDate = table.Column<DateTime>(nullable: true),
-                  CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
-                  ModifiedBy = table.Column<string>(maxLength: 64, nullable: true),
-                  Keyword = table.Column<string>(maxLength: 255, nullable: false),
-                  StoreId = table.Column<string>(maxLength: 128, nullable: true),
-                  IsActive = table.Column<bool>(nullable: false),
-                  Language = table.Column<string>(maxLength: 5, nullable: true),
-                  Title = table.Column<string>(maxLength: 255, nullable: true),
-                  MetaDescription = table.Column<string>(maxLength: 1024, nullable: true),
-                  MetaKeywords = table.Column<string>(maxLength: 255, nullable: true),
-                  ImageAltDescription = table.Column<string>(maxLength: 255, nullable: true),
-                  MemberId = table.Column<string>(nullable: true)
-              },
-              constraints: table =>
-              {
-                  table.PrimaryKey("PK_MemberSeoInfo", x => x.Id);
-                  table.ForeignKey(
-                      name: "FK_MemberSeoInfo_Member_MemberId",
-                      column: x => x.MemberId,
-                      principalTable: "Member",
-                      principalColumn: "Id",
-                      onDelete: ReferentialAction.Cascade);
-              });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MemberSeoInfo_MemberId",
-                table: "MemberSeoInfo",
-                column: "MemberId");
-
-            migrationBuilder.Sql(@" INSERT INTO [MemberSeoInfo] ([Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [MemberId])
-                              SELECT [Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [ObjectId] as [MemberId]  FROM [SeoUrlKeyword] WHERE ObjectType = 'Vendor'");
+            migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_NAME = '__MigrationHistory'))
+                    BEGIN
+                        INSERT INTO [MemberSeoInfo] ([Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [MemberId])
+                              SELECT [Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [ObjectId] as [MemberId]  FROM [SeoUrlKeyword] WHERE ObjectType = 'Vendor'
+				    END");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
