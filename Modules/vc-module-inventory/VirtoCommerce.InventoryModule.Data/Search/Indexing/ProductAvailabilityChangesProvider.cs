@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using VirtoCommerce.InventoryModule.Core.Model;
 using VirtoCommerce.InventoryModule.Core.Services;
 using VirtoCommerce.InventoryModule.Data.Model;
 using VirtoCommerce.Platform.Core.ChangeLog;
@@ -15,7 +16,7 @@ namespace VirtoCommerce.InventoryModule.Data.Search.Indexing
     /// </summary>
     public class ProductAvailabilityChangesProvider : IIndexDocumentChangesProvider
     {
-        public const string ChangeLogObjectType = nameof(InventoryEntity);
+        public const string ChangeLogObjectType = nameof(InventoryInfo);
 
         private readonly IChangeLogSearchService _changeLogSearchService;
         private readonly IInventoryService _inventoryService;

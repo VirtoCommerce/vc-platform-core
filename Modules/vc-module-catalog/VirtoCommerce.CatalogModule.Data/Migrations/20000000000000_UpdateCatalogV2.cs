@@ -1,4 +1,3 @@
-using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.CatalogModule.Data.Migrations
@@ -16,57 +15,55 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
                         END
                     END");
 
-            migrationBuilder.CreateTable(
-              name: "CatalogSeoInfo",
-              columns: table => new
-              {
-                  Id = table.Column<string>(maxLength: 128, nullable: false),
-                  CreatedDate = table.Column<DateTime>(nullable: false),
-                  ModifiedDate = table.Column<DateTime>(nullable: true),
-                  CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
-                  ModifiedBy = table.Column<string>(maxLength: 64, nullable: true),
-                  Keyword = table.Column<string>(maxLength: 255, nullable: false),
-                  StoreId = table.Column<string>(maxLength: 128, nullable: true),
-                  IsActive = table.Column<bool>(nullable: false),
-                  Language = table.Column<string>(maxLength: 5, nullable: true),
-                  Title = table.Column<string>(maxLength: 255, nullable: true),
-                  MetaDescription = table.Column<string>(maxLength: 1024, nullable: true),
-                  MetaKeywords = table.Column<string>(maxLength: 255, nullable: true),
-                  ImageAltDescription = table.Column<string>(maxLength: 255, nullable: true),
-                  ItemId = table.Column<string>(nullable: true),
-                  CategoryId = table.Column<string>(nullable: true)
-              },
-              constraints: table =>
-              {
-                  table.PrimaryKey("PK_CatalogSeoInfo", x => x.Id);
-                  table.ForeignKey(
-                      name: "FK_CatalogSeoInfo_Category_CategoryId",
-                      column: x => x.CategoryId,
-                      principalTable: "Category",
-                      principalColumn: "Id",
-                      onDelete: ReferentialAction.Restrict);
-                  table.ForeignKey(
-                      name: "FK_CatalogSeoInfo_Item_ItemId",
-                      column: x => x.ItemId,
-                      principalTable: "Item",
-                      principalColumn: "Id",
-                      onDelete: ReferentialAction.Restrict);
-              });
+            migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_NAME = '__MigrationHistory'))
+                    BEGIN
+                        CREATE TABLE [dbo].[CatalogSeoInfo](
+	                        [Id] [nvarchar](128) NOT NULL,
+	                        [CreatedDate] [datetime2](7) NOT NULL,
+	                        [ModifiedDate] [datetime2](7) NULL,
+	                        [CreatedBy] [nvarchar](64) NULL,
+	                        [ModifiedBy] [nvarchar](64) NULL,
+	                        [Keyword] [nvarchar](255) NOT NULL,
+	                        [StoreId] [nvarchar](128) NULL,
+	                        [IsActive] [bit] NOT NULL,
+	                        [Language] [nvarchar](5) NULL,
+	                        [Title] [nvarchar](255) NULL,
+	                        [MetaDescription] [nvarchar](1024) NULL,
+	                        [MetaKeywords] [nvarchar](255) NULL,
+	                        [ImageAltDescription] [nvarchar](255) NULL,
+	                        [ItemId] [nvarchar](128) NULL,
+	                        [CategoryId] [nvarchar](128) NULL,
+                         CONSTRAINT [PK_CatalogSeoInfo] PRIMARY KEY CLUSTERED 
+                        (
+	                        [Id] ASC
+                        )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+                        ) ON [PRIMARY]
 
-            migrationBuilder.CreateIndex(
-              name: "IX_CatalogSeoInfo_CategoryId",
-              table: "CatalogSeoInfo",
-              column: "CategoryId");
+                        BEGIN
+                            ALTER TABLE [dbo].[CatalogSeoInfo]  WITH CHECK ADD  CONSTRAINT [FK_CatalogSeoInfo_Category_CategoryId] FOREIGN KEY([CategoryId])
+                            REFERENCES [dbo].[Category] ([Id])
 
-            migrationBuilder.CreateIndex(
-                name: "IX_CatalogSeoInfo_ItemId",
-                table: "CatalogSeoInfo",
-                column: "ItemId");
+                            ALTER TABLE [dbo].[CatalogSeoInfo] CHECK CONSTRAINT [FK_CatalogSeoInfo_Category_CategoryId]
 
-            migrationBuilder.Sql(@"INSERT INTO [CatalogSeoInfo] ([Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [CategoryId])
-                              SELECT[Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [ObjectId] as CategoryId FROM[SeoUrlKeyword] WHERE ObjectType = 'Category'");
-            migrationBuilder.Sql(@" INSERT INTO [CatalogSeoInfo] ([Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [ItemId])
-                              SELECT [Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [ObjectId] as ItemId FROM [SeoUrlKeyword] WHERE ObjectType = 'CatalogProduct'");
+                            ALTER TABLE [dbo].[CatalogSeoInfo]  WITH CHECK ADD  CONSTRAINT [FK_CatalogSeoInfo_Item_ItemId] FOREIGN KEY([ItemId])
+                            REFERENCES [dbo].[Item] ([Id])
+
+                            ALTER TABLE [dbo].[CatalogSeoInfo] CHECK CONSTRAINT [FK_CatalogSeoInfo_Item_ItemId]
+                        END
+	                    
+				    END");
+
+            migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_NAME = '__MigrationHistory'))
+                    BEGIN
+                        INSERT INTO [CatalogSeoInfo]([Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [CategoryId])
+                            SELECT[Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [ObjectId] as CategoryId FROM [SeoUrlKeyword] WHERE ObjectType = 'Category'
+                        INSERT INTO [CatalogSeoInfo] ([Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [ItemId])
+                              SELECT [Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription], [ObjectId] as ItemId FROM [SeoUrlKeyword] WHERE ObjectType = 'CatalogProduct'
+				    END");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

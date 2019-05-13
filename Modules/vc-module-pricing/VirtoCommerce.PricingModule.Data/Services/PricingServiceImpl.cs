@@ -12,6 +12,8 @@ using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Events;
+using VirtoCommerce.PricingModule.Core.Events;
 using VirtoCommerce.PricingModule.Core.Model;
 using VirtoCommerce.PricingModule.Core.Model.Conditions;
 using VirtoCommerce.PricingModule.Core.Services;
@@ -28,16 +30,18 @@ namespace VirtoCommerce.PricingModule.Data.Services
         private readonly ILogger<PricingServiceImpl> _logger;
         private readonly IPlatformMemoryCache _platformMemoryCache;
         private readonly IPricingExtensionManager _extensionManager;
+        private readonly IEventPublisher _eventPublisher;
 
         public PricingServiceImpl(Func<IPricingRepository> repositoryFactory, IItemService productService,
             ILogger<PricingServiceImpl> logger, IPlatformMemoryCache platformMemoryCache,
-            IPricingExtensionManager extensionManager)
+            IPricingExtensionManager extensionManager, IEventPublisher eventPublisher)
         {
             _repositoryFactory = repositoryFactory;
             _productService = productService;
             _logger = logger;
             _platformMemoryCache = platformMemoryCache;
             _extensionManager = extensionManager;
+            _eventPublisher = eventPublisher;
         }
 
         #region IPricingService Members
@@ -301,6 +305,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
         public virtual async Task SavePricesAsync(Price[] prices)
         {
             var pkMap = new PrimaryKeyResolvingMap();
+            var changedEntries = new List<GenericChangedEntry<Price>>();
             using (var repository = _repositoryFactory())
             {
                 var pricesIds = prices.Select(x => x.Id).Where(x => x != null).Distinct().ToArray();
@@ -332,16 +337,19 @@ namespace VirtoCommerce.PricingModule.Data.Services
                     var targetEntity = alreadyExistPricesEntities.FirstOrDefault(x => x.Id == price.Id);
                     if (targetEntity != null)
                     {
+                        changedEntries.Add(new GenericChangedEntry<Price>(price, targetEntity.ToModel(AbstractTypeFactory<Price>.TryCreateInstance()), EntryState.Modified));
                         sourceEntity.Patch(targetEntity);
                     }
                     else
                     {
+                        changedEntries.Add(new GenericChangedEntry<Price>(price, EntryState.Added));
                         repository.Add(sourceEntity);
                     }
                 }
 
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
+                await _eventPublisher.Publish(new PriceChangedEvent(changedEntries));
 
                 foreach (var price in prices)
                 {
@@ -423,8 +431,11 @@ namespace VirtoCommerce.PricingModule.Data.Services
         {
             using (var repository = _repositoryFactory())
             {
+                var prices = await GetPricesByIdAsync(ids);
+                var changedEntries = prices.Select(x => new GenericChangedEntry<Price>(x, EntryState.Deleted));
                 await repository.DeletePricesAsync(ids);
                 await repository.UnitOfWork.CommitAsync();
+                await _eventPublisher.Publish(new PriceChangedEvent(changedEntries));
 
                 foreach (var id in ids)
                 {
