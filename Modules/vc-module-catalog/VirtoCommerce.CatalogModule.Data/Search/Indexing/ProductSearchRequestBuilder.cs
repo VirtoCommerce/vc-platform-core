@@ -168,7 +168,7 @@ namespace VirtoCommerce.CatalogModule.Data.Search.Indexing
             if (criteria.PriceRange != null)
             {
                 var range = criteria.PriceRange;
-                result.Add(FiltersHelper.CreatePriceRangeFilter(criteria.Currency, null, range.Lower, range.Upper, range.IncludeLower, range.IncludeUpper));
+                result.Add(FiltersHelper.CreatePriceRangeFilter(criteria.Currency, criteria.Pricelists, range.Lower, range.Upper, range.IncludeLower, range.IncludeUpper));
             }
 
             if (criteria.GeoDistanceFilter != null)
