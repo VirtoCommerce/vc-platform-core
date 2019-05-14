@@ -331,7 +331,8 @@
                     "no-items": "No Variations yet",
                     "picture": "Pic",
                     "name": "Name",
-                    "sku": "SKU"
+                    "sku": "SKU",
+                    "manufacturer-part-number": "Manufacturer part number"
                 }
             },
             "editorialReviews-list": {

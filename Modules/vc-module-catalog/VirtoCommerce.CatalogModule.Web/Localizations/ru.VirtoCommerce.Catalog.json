@@ -329,7 +329,8 @@
               "no-items": "Пока нет вариаций",
               "picture": "Картинка",
               "name": "Название",
-              "sku": "SKU"
+              "sku": "SKU",
+              "manufacturer-part-number": "Номер детали производителя"
           }
       },
       "editorialReviews-list": {
