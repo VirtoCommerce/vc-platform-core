@@ -21,12 +21,12 @@
                     </div>
 
                     <div class="form-group clearfix">
-                        <div class="column" >
+                        <div class="column">
                             <div class="form-group __info list">
                                 <label class="form-label">{{ 'marketing.blades.promotion-detail.labels.is-active' | translate }}</label>
                                 <div class="form-input">
                                     <label class="form-label __switch">
-                                        <input type="checkbox" ng-model="blade.currentEntity.isActive"/>
+                                        <input type="checkbox" ng-model="blade.currentEntity.isActive" />
                                         <span class="switch"></span>
                                     </label>
                                 </div>
@@ -37,7 +37,7 @@
                             <div class="form-group __info list" ng-if="blade.allowCombination">
                                 <label class="form-label">{{ 'marketing.blades.promotion-detail.labels.priority' | translate }}</label>
                                 <div class="form-input __number">
-                                    <input smart-float num-type="integer" ng-disabled="blade.currentEntity.isExclusive" required ng-model="blade.currentEntity.priority" type="text"/>
+                                    <input smart-float num-type="integer" ng-disabled="blade.currentEntity.isExclusive" required ng-model="blade.currentEntity.priority" type="text" />
                                 </div>
                                 <div class="list-descr">{{ 'marketing.blades.promotion-detail.descr.priority' | translate }}</div>
                             </div>
@@ -111,24 +111,25 @@
                                             <span ng-bind-html="x.name | highlight: $select.search"></span>
                                         </ui-select-choices>
                                     </ui-select>
-                                    </div>
-                                    <div class="list-descr">{{ 'marketing.blades.promotion-detail.descr.store' | translate }}</div>
                                 </div>
+                                <div class="list-descr">{{ 'marketing.blades.promotion-detail.descr.store' | translate }}</div>
+                            </div>
                         </div>
                     </div>
 
                     <va-metaform registered-inputs="blade.metaFields" blade="blade" column-count="1" ng-if="blade.currentEntity"></va-metaform>
                 </fieldset>
-            </form>
 
-            <va-widget-container group="promotionDetail" blade="blade" data="blade.currentEntity" gridster-opts="{width: 526}"></va-widget-container>
-            <!--ui-validate=" 'promotionExpressionValidator(blade.isExpresionValid)' " ng-model="blade.isExpresionValid"-->
-            <fieldset ng-if="blade.currentEntity.dynamicExpression && blade.currentEntity.type==='DynamicPromotion'">
-                <legend>{{ 'marketing.blades.promotion-detail.labels.promotion-conditions' | translate }}</legend>
-                <div class="dynamic-expression">
-                    <va-dynamic-expression-tree ng-controller="virtoCommerce.marketingModule.promotionExpressionsController" template-url="blade.expressionTreeTemplateUrl" source="blade.currentEntity.dynamicExpression"></va-dynamic-expression-tree>
-                </div>
-            </fieldset>
+
+                <va-widget-container group="promotionDetail" blade="blade" data="blade.currentEntity" gridster-opts="{width: 526}"></va-widget-container>
+                <!--ui-validate=" 'promotionExpressionValidator(blade.isExpresionValid)' " ng-model="blade.isExpresionValid"-->
+                <fieldset ng-if="blade.currentEntity.dynamicExpression && blade.currentEntity.type==='DynamicPromotion'">
+                    <legend>{{ 'marketing.blades.promotion-detail.labels.promotion-conditions' | translate }}</legend>
+                    <div class="dynamic-expression">
+                        <va-dynamic-expression-tree ng-controller="virtoCommerce.marketingModule.promotionExpressionsController" template-url="blade.expressionTreeTemplateUrl" source="blade.currentEntity.dynamicExpression"></va-dynamic-expression-tree>
+                    </div>
+                </fieldset>
+            </form>
         </div>
     </div>
 </div>
