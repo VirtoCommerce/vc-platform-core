@@ -195,6 +195,7 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
                     IsInput = table.Column<bool>(nullable: false),
                     IsRequired = table.Column<bool>(nullable: false),
                     IsMultiValue = table.Column<bool>(nullable: false),
+                    IsHidden = table.Column<bool>(nullable: false),
                     IsLocaleDependant = table.Column<bool>(nullable: false),
                     AllowAlias = table.Column<bool>(nullable: false),
                     PropertyValueType = table.Column<int>(nullable: false),

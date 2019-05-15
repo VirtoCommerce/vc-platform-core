@@ -164,7 +164,8 @@
                     "manage-dictionary": "Manage dictionary",
                     "new-dictionary-property-caution": "You can manage dictionary items only after saving property",
                     "attributes": "Attributes",
-                    "manage-attributes": "Manage property attributes"
+                    "manage-attributes": "Manage property attributes",
+                    "hidden": "Hidden"
                 },
                 "placeholders": {
                     "display-name": "Enter display name..."

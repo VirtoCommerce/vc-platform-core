@@ -165,7 +165,8 @@
           "manage-dictionary": "Управление словарем",
           "new-dictionary-property-caution": "Для доступа к значениям в начале сохраните свойство",
           "attributes": "Атрибуты",
-          "manage-attributes": "Управление атрибутами свойств"
+          "manage-attributes": "Управление атрибутами свойств",
+          "hidden": "Скрыто"
         },
         "placeholders": {
           "display-name": "Введите отображаемое название..."
