@@ -1,7 +1,7 @@
 //Call this to register our module to main application
 var moduleName = "virtoCommerce.inventoryModule";
 
-if (AppDependencies != undefined) {
+if (AppDependencies !== undefined) {
     AppDependencies.push(moduleName);
 }
 
@@ -28,4 +28,5 @@ angular.module(moduleName, [])
         }, 'storeDetail');
 
         metaFormsService.registerMetaFields('inventoryDetails', []);
+        metaFormsService.registerMetaFields('fulfillmentCenterDetails', []);
     }]);
