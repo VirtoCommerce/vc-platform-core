@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using VirtoCommerce.CoreModule.Core.Tax;
@@ -10,13 +9,7 @@ namespace VirtoCommerce.PaymentModule.Core.Model
 {
     public abstract class PaymentMethod : Entity, IHasSettings, IHasTaxDetalization, ITaxable
     {
-        private PaymentMethod()
-        {
-            Id = Guid.NewGuid().ToString("N");
-        }
-
         public PaymentMethod(string code)
-            : this()
         {
             Code = code;
         }
@@ -26,8 +19,6 @@ namespace VirtoCommerce.PaymentModule.Core.Model
         /// </summary>
         public string Code { get; set; }
 
-        public string Name { get; set; }
-        public string Description { get; set; }
         public string LogoUrl { get; set; }
         public bool IsActive { get; set; }
         public int Priority { get; set; }

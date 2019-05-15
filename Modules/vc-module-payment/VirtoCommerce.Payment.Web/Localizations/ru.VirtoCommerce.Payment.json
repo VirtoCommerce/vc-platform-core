@@ -1,7 +1,7 @@
 {
     "payment": {
         "blades": {
-            "paymentMethod-detail": {
+            "payment-method-detail": {
                 "subtitle": "Изменить способ оплаты",
                 "labels": {
                     "is-active": "Активен",
@@ -27,10 +27,22 @@
                 }
             }
         },
+        "dialogs": {
+            "payment-method-save": {
+                "title": "Сохранить изменения",
+                "message": "Способ оплаты изменился. Хотите сохранить изменения?"
+            }
+        },
         "widgets": {
             "storePaymentsWidget": {
                 "title": "Способы оплаты",
                 "blade-subtitle": "Способы оплаты"
+            }
+        },
+        "labels": {
+            "DefaultManualPaymentMethod": {
+                "name": "Ручной тестовый метод",
+                "description": "Ручной тестовы метод, не использовать в poduction"
             }
         }
     },

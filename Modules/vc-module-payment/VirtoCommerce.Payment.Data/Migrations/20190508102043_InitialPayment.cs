@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.PaymentModule.Data.Migrations
 {
@@ -25,6 +25,13 @@ namespace VirtoCommerce.PaymentModule.Data.Migrations
                 {
                     table.PrimaryKey("PK_StorePaymentMethod", x => x.Id);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StorePaymentMethodEntity_TypeName_StoreId",
+                table: "StorePaymentMethod",
+                columns: new[] { "TypeName", "StoreId" },
+                unique: true,
+                filter: "[StoreId] IS NOT NULL");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

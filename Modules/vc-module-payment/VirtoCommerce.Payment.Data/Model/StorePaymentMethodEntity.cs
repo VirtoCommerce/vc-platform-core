@@ -13,11 +13,6 @@ namespace VirtoCommerce.PaymentModule.Data.Model
 
         public int Priority { get; set; }
 
-        [StringLength(128)]
-        public string Name { get; set; }
-
-        public string Description { get; set; }
-
         [StringLength(2048)]
         public string LogoUrl { get; set; }
 
@@ -41,10 +36,8 @@ namespace VirtoCommerce.PaymentModule.Data.Model
             paymentMethod.Id = Id;
             paymentMethod.IsActive = IsActive;
             paymentMethod.Code = Code;
-            paymentMethod.Description = Description;
             paymentMethod.IsAvailableForPartial = IsAvailableForPartial;
             paymentMethod.LogoUrl = LogoUrl;
-            paymentMethod.Name = Name;
             paymentMethod.Priority = Priority;
             paymentMethod.StoreId = StoreId;
 
@@ -61,12 +54,11 @@ namespace VirtoCommerce.PaymentModule.Data.Model
             Id = paymentMethod.Id;
             IsActive = paymentMethod.IsActive;
             Code = paymentMethod.Code;
-            Description = paymentMethod.Description;
             IsAvailableForPartial = paymentMethod.IsAvailableForPartial;
             LogoUrl = paymentMethod.LogoUrl;
-            Name = paymentMethod.Name;
             Priority = paymentMethod.Priority;
             StoreId = paymentMethod.StoreId;
+            TypeName = paymentMethod.TypeName;
 
             return this;
         }
@@ -78,10 +70,8 @@ namespace VirtoCommerce.PaymentModule.Data.Model
 
             target.IsActive = IsActive;
             target.Code = Code;
-            target.Description = Description;
             target.IsAvailableForPartial = IsAvailableForPartial;
             target.LogoUrl = LogoUrl;
-            target.Name = Name;
             target.Priority = Priority;
             target.StoreId = StoreId;
         }

@@ -1,7 +1,6 @@
 using System;
 using VirtoCommerce.PaymentModule.Core.Model;
 using VirtoCommerce.PaymentModule.Model.Requests;
-using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.PaymentModule.Data
 {

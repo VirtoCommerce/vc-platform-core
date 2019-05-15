@@ -1,4 +1,3 @@
-using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace VirtoCommerce.StoreModule.Data.Migrations
@@ -11,50 +10,49 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                  FROM INFORMATION_SCHEMA.TABLES 
                  WHERE TABLE_NAME = '__MigrationHistory'))
                  BEGIN
-                    BEGIN
-	                    INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20190510103633_InitialStore', '2.2.3-servicing-35854')
-                    END               
+                    INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20190510103633_InitialStore', '2.2.3-servicing-35854')
+                    UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.StoreModule.Core.Model.Store' WHERE [Name] = 'FilteredBrowsing' AND ObjectType = 'VirtoCommerce.Domain.Store.Model.Store'
                 END");
 
-            migrationBuilder.Sql(@"UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.StoreModule.Core.Model.Store' WHERE [Name] = 'FilteredBrowsing' AND ObjectType = 'VirtoCommerce.Domain.Store.Model.Store'");
+            migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_NAME = '__MigrationHistory'))
+                    BEGIN
+                        CREATE TABLE [dbo].[StoreSeoInfo](
+                            [Id] [nvarchar](128) NOT NULL,
+                            [CreatedDate] [datetime2](7) NOT NULL,
+                            [ModifiedDate] [datetime2](7) NULL,
+                            [CreatedBy] [nvarchar](64) NULL,
+                            [ModifiedBy] [nvarchar](64) NULL,
+                            [Keyword] [nvarchar](255) NOT NULL,
+                            [StoreId] [nvarchar](128) NULL,
+                            [IsActive] [bit] NOT NULL,
+                            [Language] [nvarchar](5) NULL,
+                            [Title] [nvarchar](255) NULL,
+                            [MetaDescription] [nvarchar](1024) NULL,
+                            [MetaKeywords] [nvarchar](255) NULL,
+                            [ImageAltDescription] [nvarchar](255) NULL,
+                         CONSTRAINT [PK_StoreSeoInfo] PRIMARY KEY CLUSTERED 
+                        (
+                            [Id] ASC
+                        )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+                        ) ON [PRIMARY]
 
-            migrationBuilder.CreateTable(
-              name: "StoreSeoInfo",
-              columns: table => new
-              {
-                  Id = table.Column<string>(maxLength: 128, nullable: false),
-                  CreatedDate = table.Column<DateTime>(nullable: false),
-                  ModifiedDate = table.Column<DateTime>(nullable: true),
-                  CreatedBy = table.Column<string>(maxLength: 64, nullable: true),
-                  ModifiedBy = table.Column<string>(maxLength: 64, nullable: true),
-                  Keyword = table.Column<string>(maxLength: 255, nullable: false),
-                  StoreId = table.Column<string>(maxLength: 128, nullable: true),
-                  IsActive = table.Column<bool>(nullable: false),
-                  Language = table.Column<string>(maxLength: 5, nullable: true),
-                  Title = table.Column<string>(maxLength: 255, nullable: true),
-                  MetaDescription = table.Column<string>(maxLength: 1024, nullable: true),
-                  MetaKeywords = table.Column<string>(maxLength: 255, nullable: true),
-                  ImageAltDescription = table.Column<string>(maxLength: 255, nullable: true)
-              },
-              constraints: table =>
-              {
-                  table.PrimaryKey("PK_StoreSeoInfo", x => x.Id);
-                  table.ForeignKey(
-                      name: "FK_StoreSeoInfo_Store_StoreId",
-                      column: x => x.StoreId,
-                      principalTable: "Store",
-                      principalColumn: "Id",
-                      onDelete: ReferentialAction.Cascade);
-              });
+                        BEGIN
+                            ALTER TABLE [dbo].[StoreSeoInfo]  WITH CHECK ADD  CONSTRAINT [FK_StoreSeoInfo_Store_StoreId] FOREIGN KEY([StoreId])
+                            REFERENCES [dbo].[Store] ([Id]) ON DELETE CASCADE
+                            ALTER TABLE [dbo].[StoreSeoInfo] CHECK CONSTRAINT [FK_StoreSeoInfo_Store_StoreId]
+                        END
+                        
+                    END");
 
-            migrationBuilder.CreateIndex(
-              name: "IX_StoreSeoInfo_StoreId",
-              table: "StoreSeoInfo",
-              column: "StoreId");
-
-
-            migrationBuilder.Sql(@" INSERT INTO [StoreSeoInfo] ([Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription])
-                          SELECT [Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [ObjectId] as [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription]  FROM [SeoUrlKeyword] WHERE ObjectType = 'Store'");
+            migrationBuilder.Sql(@"IF (EXISTS (SELECT * 
+                 FROM INFORMATION_SCHEMA.TABLES 
+                 WHERE TABLE_NAME = '__MigrationHistory'))
+                    BEGIN
+                        INSERT INTO [StoreSeoInfo] ([Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription])
+                          SELECT [Id], [CreatedDate], [ModifiedDate], [CreatedBy], [ModifiedBy], [Keyword], [ObjectId] as [StoreId], [IsActive], [Language], [Title], [MetaDescription], [MetaKeywords], [ImageAltDescription]  FROM [SeoUrlKeyword] WHERE ObjectType = 'Store'              
+                    END");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

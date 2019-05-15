@@ -148,7 +148,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
                 var members = await GetByIdsAsync(ids, null, memberTypes);
                 if (!members.IsNullOrEmpty())
                 {
-                    var changedEntries = members.Select(x => new GenericChangedEntry<Member>(x, EntryState.Deleted));
+                    var changedEntries = members.Select(x => new GenericChangedEntry<Member>(x, EntryState.Deleted)).ToArray();
                     await _eventPublisher.Publish(new MemberChangingEvent(changedEntries));
 
                     await repository.RemoveMembersByIdsAsync(members.Select(m => m.Id).ToArray());

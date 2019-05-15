@@ -16,6 +16,7 @@ namespace VirtoCommerce.Platform.Data.Migrations
                         ALTER TABLE [PlatformSetting] DROP COLUMN [IsEnum]
                         ALTER TABLE [PlatformSetting] DROP COLUMN [IsMultiValue]
                         ALTER TABLE [PlatformSetting] DROP COLUMN [IsLocaleDependant]
+                        UPDATE [PlatformOperationLog] SET [ObjectType] = REPLACE([ObjectType], 'Entity', '')
                     END");
         }
 

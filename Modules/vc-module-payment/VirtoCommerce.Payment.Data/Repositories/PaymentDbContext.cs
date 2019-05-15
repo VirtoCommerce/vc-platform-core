@@ -16,6 +16,10 @@ namespace VirtoCommerce.PaymentModule.Data.Repositories
             modelBuilder.Entity<StorePaymentMethodEntity>().Property(x => x.Id).HasMaxLength(128);
             modelBuilder.Entity<StorePaymentMethodEntity>().Property(x => x.StoreId).HasMaxLength(128);
             modelBuilder.Entity<StorePaymentMethodEntity>().Property(x => x.TypeName).HasMaxLength(128);
+
+            modelBuilder.Entity<StorePaymentMethodEntity>().HasIndex(x => new { x.TypeName, x.StoreId })
+                .HasName("IX_StorePaymentMethodEntity_TypeName_StoreId")
+                .IsUnique();
         }
     }
 }

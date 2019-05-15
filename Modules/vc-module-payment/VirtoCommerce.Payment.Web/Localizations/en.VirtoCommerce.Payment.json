@@ -1,7 +1,7 @@
 {
     "payment": {
         "blades": {
-            "paymentMethod-detail": {
+            "payment-method-detail": {
                 "subtitle": "Edit payment method",
                 "labels": {
                     "is-active": "Is active",
@@ -27,10 +27,22 @@
                 }
             }
         },
+        "dialogs": {
+            "payment-method-save": {
+                "title": "Save changes",
+                "message": "The payment method has been modified. Do you want to save changes?"
+            }
+        },
         "widgets": {
             "storePaymentsWidget": {
                 "title": "Payment methods",
                 "blade-subtitle": "Payment methods"
+            }
+        },
+        "labels": {
+            "DefaultManualPaymentMethod": {
+                "name": "Manual test payment method",
+                "description": "Manual test method, don't use on production"
             }
         }
     },

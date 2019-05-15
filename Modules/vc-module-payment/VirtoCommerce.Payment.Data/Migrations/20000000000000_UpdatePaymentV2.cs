@@ -11,9 +11,8 @@ namespace VirtoCommerce.PaymentModule.Data.Migrations
                  WHERE TABLE_NAME = '__MigrationHistory'))
                     BEGIN
                         INSERT INTO [dbo].[__EFMigrationsHistory] ([MigrationId],[ProductVersion]) VALUES ('20190508102043_InitialPayment', '2.2.3-servicing-35854')
+                        ALTER TABLE [StorePaymentMethod] ADD [TypeName] nvarchar(128) NOT NULL Default ('')
                     END");
-
-            migrationBuilder.AddColumn<string>(name: "TypeName", table: "StorePaymentMethod", maxLength: 128, nullable: true, defaultValue: "");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

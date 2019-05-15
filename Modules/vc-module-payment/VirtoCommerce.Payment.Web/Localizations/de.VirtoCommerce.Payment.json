@@ -1,7 +1,7 @@
 {
     "payment": {
         "blades": {
-            "paymentMethod-detail": {
+            "payment-method-detail": {
                 "subtitle": "Zahlungsmethode bearbeiten",
                 "labels": {
                     "is-active": "Ist aktiv",
@@ -27,10 +27,22 @@
                 }
             }
         },
+        "dialogs": {
+            "payment-method-save": {
+                "title": "Save changes",
+                "message": "The payment method has been modified. Do you want to save changes?"
+            }
+        },
         "widgets": {
             "storePaymentsWidget": {
                 "title": "Zahlungsmethoden",
                 "blade-subtitle": "Zahlungsmethoden"
+            }
+        },
+        "labels": {
+            "DefaultManualPaymentMethod": {
+                "name": "Manuelle test methode",
+                "description": "Manuelle test methode, nicht in der produktion verwenden"
             }
         }
     },

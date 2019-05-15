@@ -51,6 +51,11 @@ namespace VirtoCommerce.PaymentModule.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TypeName", "StoreId")
+                        .IsUnique()
+                        .HasName("IX_StorePaymentMethodEntity_TypeName_StoreId")
+                        .HasFilter("[StoreId] IS NOT NULL");
+
                     b.ToTable("StorePaymentMethod");
                 });
 #pragma warning restore 612, 618
