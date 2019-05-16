@@ -6,6 +6,7 @@
 
     <ItemGroup>
         <PackageReference Include="AutoCompare.Core" Version="1.0.0" />
+        <PackageReference Include="Hangfire.AspNetCore" Version="1.6.22" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.3" />
     </ItemGroup>
 
