@@ -312,9 +312,11 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             if (promotion is DynamicPromotion dynamicPromotion)
             {
                 var etalonEpressionTree = _marketingExtensionManager.PromotionCondition;
-                var promotionConditionAndRewardTree = JsonConvert.DeserializeObject<PromotionConditionAndRewardTree>(
+
+                var promotionConditionAndRewardTree = dynamicPromotion.PredicateVisualTreeSerialized != null ? JsonConvert.DeserializeObject<PromotionConditionAndRewardTree>(
                     dynamicPromotion.PredicateVisualTreeSerialized,
-                    new ConditionJsonConverter(), new RewardJsonConverter());
+                    new ConditionJsonConverter(), new RewardJsonConverter())
+                    : (PromotionConditionAndRewardTree)etalonEpressionTree;
 
                 //// Copy available elements from etalon because they not persisted
                 var sourceBlocks = etalonEpressionTree.Traverse(x => x.Children);
