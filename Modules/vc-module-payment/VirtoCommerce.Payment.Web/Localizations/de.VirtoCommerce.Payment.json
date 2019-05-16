@@ -47,6 +47,11 @@
         }
     },
     "settings": {
-       
+        "VirtoCommerce.Payment.DefaultManualPaymentMethod": {
+            "Logo": {
+                "title": "Logo url",
+                "description": "Zahlungsmethode logo url"
+            }
+        }
     }
 }

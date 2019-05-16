@@ -17,7 +17,7 @@ namespace VirtoCommerce.PaymentModule.Core
             {
                 public static SettingDescriptor Logo = new SettingDescriptor
                 {
-                    Name = "VirtoCommerce.Payment.DefaultManualPaymentMethodSettings.Logo",
+                    Name = "VirtoCommerce.Payment.DefaultManualPaymentMethod.Logo",
                     GroupName = "Payment|DefaultManualPaymentMethod",
                     ValueType = SettingValueType.ShortText
                 };

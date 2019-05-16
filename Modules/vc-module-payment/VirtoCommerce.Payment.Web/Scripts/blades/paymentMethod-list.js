@@ -40,9 +40,7 @@ angular.module('virtoCommerce.paymentModule').controller('virtoCommerce.paymentM
     }
 
     $scope.selectNode = function (node) {
-        console.log(node);
         $scope.selectedNodeId = node.typeName;
-
         var newBlade = {
             id: 'paymentMethodDetail',
             paymentMethod: node,
