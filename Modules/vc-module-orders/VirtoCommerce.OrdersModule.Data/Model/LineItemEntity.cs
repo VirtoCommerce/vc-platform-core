@@ -87,6 +87,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public virtual CustomerOrderEntity CustomerOrder { get; set; }
         public string CustomerOrderId { get; set; }
 
+        public virtual ObservableCollection<ShipmentItemEntity> ShipmentItems { get; set; } = new NullCollection<ShipmentItemEntity>();
 
         public virtual LineItem ToModel(LineItem lineItem)
         {
@@ -139,7 +140,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public virtual LineItemEntity FromModel(LineItem lineItem, PrimaryKeyResolvingMap pkMap)
         {
             if (lineItem == null)
+            {
                 throw new ArgumentNullException(nameof(lineItem));
+            }
 
             ModelLineItem = lineItem;
             pkMap.AddPair(lineItem, this);
@@ -201,7 +204,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public virtual void Patch(LineItemEntity target)
         {
             if (target == null)
+            {
                 throw new ArgumentNullException(nameof(target));
+            }
 
 
             target.Price = Price;
