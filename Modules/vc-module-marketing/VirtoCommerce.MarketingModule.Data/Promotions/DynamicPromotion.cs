@@ -39,7 +39,7 @@ namespace VirtoCommerce.MarketingModule.Data.Promotions
         {
             get
             {
-                if (_promotionConditionAndRewardTree == null && PredicateVisualTreeSerialized != null)
+                if (_promotionConditionAndRewardTree == null && !string.IsNullOrEmpty(PredicateVisualTreeSerialized))
                 {
                     _promotionConditionAndRewardTree = JsonConvert.DeserializeObject<PromotionConditionAndRewardTree>(PredicateVisualTreeSerialized
                         , new ConditionJsonConverter(), new RewardJsonConverter());

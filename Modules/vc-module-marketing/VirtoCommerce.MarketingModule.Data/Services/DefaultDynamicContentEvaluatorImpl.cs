@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Conditions;
 using VirtoCommerce.MarketingModule.Core.Model;
+using VirtoCommerce.MarketingModule.Core.Model.DynamicContent;
 using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.MarketingModule.Data.Promotions;
 using VirtoCommerce.MarketingModule.Data.Repositories;
@@ -42,7 +43,7 @@ namespace VirtoCommerce.MarketingModule.Data.Services
             var retVal = new List<DynamicContentItem>();
             using (var repository = _repositoryFactory())
             {
-                var publishings = await repository.PublishingGroups
+                var publishingEntities = await repository.PublishingGroups
                                                        .Include(x => x.ContentItems)
                                                        .Where(x => x.IsActive)
                                                        .Where(x => x.StoreId == dynamicContext.StoreId)
@@ -51,21 +52,22 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                                                        .OrderBy(x => x.Priority)
                                                        .ToArrayAsync();
 
-                //Get content items ids for publishings without ConditionExpression
-                var contentItemIds = publishings.Where(x => x.ConditionExpression == null)
-                                                .SelectMany(x => x.ContentItems)
-                                                .Select(x => x.DynamicContentItemId)
-                                                .ToList();
-                foreach (var publishing in publishings.Where(x => x.ConditionExpression != null))
+                var contentItemIds = new List<string>();
+                foreach (var publishing in publishingEntities.Where(x => x.ConditionExpression != null))
                 {
                     try
                     {
                         //Next step need filter assignments contains dynamicexpression
-                        var conditions = JsonConvert.DeserializeObject<Condition[]>(publishing.ConditionExpression, new ConditionJsonConverter());
-                        if (conditions.All(c => c.Evaluate(context)))
+                        if (!string.IsNullOrEmpty(publishing.PredicateVisualTreeSerialized))
                         {
-                            contentItemIds.AddRange(publishing.ContentItems.Select(x => x.DynamicContentItemId));
+                            var dynamicContentConditionTree = JsonConvert.DeserializeObject<DynamicContentConditionTree>(publishing.PredicateVisualTreeSerialized, new ConditionJsonConverter());
+                            var conditions = dynamicContentConditionTree.GetConditions();
+                            if (conditions.All(c => c.Evaluate(context)))
+                            {
+                                contentItemIds.AddRange(publishing.ContentItems.Select(x => x.DynamicContentItemId));
+                            }
                         }
+                        
                     }
                     catch (Exception ex)
                     {
@@ -73,8 +75,8 @@ namespace VirtoCommerce.MarketingModule.Data.Services
                     }
                 }
 
-                var dunamicContentItems = await _dynamicContentService.GetContentItemsByIdsAsync(contentItemIds.ToArray());
-                retVal.AddRange(dunamicContentItems);
+                var dynamicContentItems = await _dynamicContentService.GetContentItemsByIdsAsync(contentItemIds.ToArray());
+                retVal.AddRange(dynamicContentItems);
             }
 
             return retVal.ToArray();

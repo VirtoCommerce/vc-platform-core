@@ -36,8 +36,8 @@ namespace VirtoCommerce.MarketingModule.Test
         [Fact]
         public void EvaluateItemsAsync_Evaluate()
         {
-            //TODO
-            ////Arrange
+            //TODO remove IMarketingRepository part to Sevice in DefaultDynamicContentEvaluatorImpl
+            //Arrange
             //var expected = new List<DynamicContentItem>();
             //var evalContext = new DynamicContentEvaluationContext();
 
@@ -45,7 +45,8 @@ namespace VirtoCommerce.MarketingModule.Test
             //{
             //    new DynamicContentPublishingGroupEntity
             //    {
-            //        ConditionExpression = GetConditionExpression(), IsActive = true,
+            //        PredicateVisualTreeSerialized = "",
+            //        IsActive = true,
             //        ContentPlaces = new ObservableCollection<PublishingGroupContentPlaceEntity>
             //        {
             //            new PublishingGroupContentPlaceEntity() {ContentPlace = new DynamicContentPlaceEntity()}
@@ -70,7 +71,7 @@ namespace VirtoCommerce.MarketingModule.Test
                 .Options;
             var mockContext = new Mock<MarketingDbContext>(options);
             mockContext.Setup(c => c.Set<DynamicContentPublishingGroupEntity>()).Returns(mockSet.Object);
-            var mockDatabase = new Mock<DatabaseFacade>();
+            var mockDatabase = new Mock<DatabaseFacade>(mockContext.Object);
             mockContext.Setup(c => c.Database).Returns(mockDatabase.Object);
             var repository = new MarketingRepositoryImpl(mockContext.Object);
             _repositoryFactory = () => repository;

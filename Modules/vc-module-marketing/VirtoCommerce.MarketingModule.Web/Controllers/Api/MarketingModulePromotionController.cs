@@ -311,7 +311,7 @@ namespace VirtoCommerce.MarketingModule.Web.Controllers.Api
             {
                 var etalonEpressionTree = _marketingExtensionManager.PromotionCondition;
 
-                var promotionConditionAndRewardTree = dynamicPromotion.PredicateVisualTreeSerialized != null ? JsonConvert.DeserializeObject<PromotionConditionAndRewardTree>(
+                var promotionConditionAndRewardTree = !string.IsNullOrEmpty(dynamicPromotion.PredicateVisualTreeSerialized) ? JsonConvert.DeserializeObject<PromotionConditionAndRewardTree>(
                     dynamicPromotion.PredicateVisualTreeSerialized,
                     new ConditionJsonConverter(), new RewardJsonConverter())
                     : (PromotionConditionAndRewardTree)etalonEpressionTree;
