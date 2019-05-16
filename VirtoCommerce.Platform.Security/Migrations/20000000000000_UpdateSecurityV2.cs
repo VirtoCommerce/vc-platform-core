@@ -31,6 +31,8 @@ namespace VirtoCommerce.Platform.Security.Migrations
 		                    ALTER TABLE [AspNetUsers] ADD [PhotoUrl] nvarchar(2048);
 		                    ALTER TABLE [AspNetUsers] ADD [UserType] nvarchar(64);
 		                    ALTER TABLE [AspNetUsers] ADD [PasswordExpired] bit NOT NULL Default(0);
+
+                            EXEC ('UPDATE [dbo].[AspNetUsers] SET StoreId = pa.StoreId, MemberId = pa.MemberId, IsAdministrator = pa.IsAdministrator, UserType = pa.UserType, PasswordExpired = pa.PasswordExpired FROM PlatformAccount pa WHERE [dbo].[AspNetUsers].Id = pa.Id')
 	                    END
 
 	                    BEGIN
