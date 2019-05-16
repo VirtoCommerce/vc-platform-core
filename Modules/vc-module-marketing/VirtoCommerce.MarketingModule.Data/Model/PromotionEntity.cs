@@ -72,8 +72,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             promotion.IsExclusive = IsExclusive;
             promotion.IsAllowCombiningWithSelf = IsAllowCombiningWithSelf;
             promotion.PredicateVisualTreeSerialized = PredicateVisualTreeSerialized;
-            promotion.PredicateSerialized = PredicateSerialized;
-            promotion.RewardsSerialized = RewardsSerialized;
             promotion.MaxPersonalUsageCount = PerCustomerLimit;
             promotion.MaxUsageCount = TotalLimit;
             promotion.MaxPersonalUsageCount = PerCustomerLimit;
@@ -83,10 +81,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             if (!string.IsNullOrEmpty(promotion.PredicateVisualTreeSerialized))
             {
                 promotion.PredicateVisualTreeSerialized = promotion.PredicateVisualTreeSerialized;
-            }
-            if (!string.IsNullOrEmpty(promotion.PredicateSerialized))
-            {
-                promotion.PredicateSerialized = promotion.PredicateSerialized;
             }
 
             if (Stores != null)
@@ -120,8 +114,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             IsExclusive = promotion.IsExclusive;
             IsAllowCombiningWithSelf = promotion.IsAllowCombiningWithSelf;
             PredicateVisualTreeSerialized = promotion.PredicateVisualTreeSerialized;
-            PredicateSerialized = promotion.PredicateSerialized;
-            RewardsSerialized = promotion.RewardsSerialized;
             PerCustomerLimit = promotion.MaxPersonalUsageCount;
             TotalLimit = promotion.MaxUsageCount;
             PerCustomerLimit = promotion.MaxPersonalUsageCount;
@@ -149,8 +141,6 @@ namespace VirtoCommerce.MarketingModule.Data.Model
             target.EndDate = EndDate;
             target.Priority = Priority;
             target.PredicateVisualTreeSerialized = PredicateVisualTreeSerialized;
-            target.PredicateSerialized = PredicateSerialized;
-            target.RewardsSerialized = RewardsSerialized;
             target.PerCustomerLimit = PerCustomerLimit;
             target.TotalLimit = TotalLimit;
             target.PerCustomerLimit = PerCustomerLimit;

@@ -16,6 +16,8 @@ namespace VirtoCommerce.MarketingModule.Data.Migrations
                         UPDATE [PlatformDynamicProperty] SET ObjectType = 'VirtoCommerce.MarketingModule.Core.Model.DynamicContentItem' WHERE [Name] = 'Html' AND ObjectType = 'VirtoCommerce.Domain.Marketing.Model.DynamicContentItem'
                         UPDATE [Promotion] SET [PredicateVisualTreeSerialized] = REPLACE([PredicateVisualTreeSerialized], 'PromoDynamicExpressionTree', 'PromotionConditionAndRewardTree')
                         UPDATE [Promotion] SET [PredicateVisualTreeSerialized] = REPLACE([PredicateVisualTreeSerialized], 'RewardBlock', 'BlockReward')
+                        UPDATE [Promotion] SET [PredicateSerialized] = null
+                        UPDATE [Promotion] SET [RewardsSerialized] = null
 						UPDATE [DynamicContentPublishingGroup] SET [PredicateVisualTreeSerialized] = REPLACE([PredicateVisualTreeSerialized], 'ConditionExpressionTree', 'DynamicContentConditionTree')
                     END");
         }
