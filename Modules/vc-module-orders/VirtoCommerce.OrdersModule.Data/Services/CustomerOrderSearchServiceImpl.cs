@@ -37,7 +37,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                 {
                     repository.DisableChangesTracking();
                     var retVal = new GenericSearchResult<CustomerOrder>();
-                    var orderResponseGroup = EnumUtility.SafeParse(criteria.ResponseGroup, CustomerOrderResponseGroup.Full);
+                    var orderResponseGroup = EnumUtility.SafeParseFlags(criteria.ResponseGroup, CustomerOrderResponseGroup.Full);
 
                     var query = GetOrdersQuery(repository, criteria);
 

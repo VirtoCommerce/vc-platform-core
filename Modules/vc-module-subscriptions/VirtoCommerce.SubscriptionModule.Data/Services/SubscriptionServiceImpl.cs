@@ -9,19 +9,19 @@ using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.Platform.Core.Caching;
+using VirtoCommerce.Platform.Core.ChangeLog;
+using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Platform.Core.Events;
+using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Platform.Data.Infrastructure;
+using VirtoCommerce.StoreModule.Core.Services;
+using VirtoCommerce.SubscriptionModule.Core.Events;
 using VirtoCommerce.SubscriptionModule.Core.Model;
 using VirtoCommerce.SubscriptionModule.Core.Model.Search;
 using VirtoCommerce.SubscriptionModule.Core.Services;
+using VirtoCommerce.SubscriptionModule.Data.Caching;
 using VirtoCommerce.SubscriptionModule.Data.Model;
 using VirtoCommerce.SubscriptionModule.Data.Repositories;
-using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Settings;
-using VirtoCommerce.Platform.Data.Infrastructure;
-using VirtoCommerce.Platform.Core.ChangeLog;
-using VirtoCommerce.Platform.Core.Events;
-using VirtoCommerce.SubscriptionModule.Core.Events;
-using VirtoCommerce.StoreModule.Core.Services;
-using VirtoCommerce.SubscriptionModule.Data.Caching;
 
 namespace VirtoCommerce.SubscriptionModule.Data.Services
 {
@@ -59,7 +59,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Services
             return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
             {
                 var retVal = new List<Subscription>();
-                var subscriptionResponseGroup = EnumUtility.SafeParse(responseGroup, SubscriptionResponseGroup.Full);
+                var subscriptionResponseGroup = EnumUtility.SafeParseFlags(responseGroup, SubscriptionResponseGroup.Full);
                 using (var repository = SubscriptionRepositoryFactory())
                 {
                     repository.DisableChangesTracking();

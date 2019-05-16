@@ -70,7 +70,7 @@ namespace VirtoCommerce.InventoryModule.Data.Model
             inventory.ReorderMinQuantity = (long)ReorderMinQuantity;
             inventory.ProductId = Sku;
             inventory.ReservedQuantity = (long)ReservedQuantity;
-            inventory.Status = EnumUtility.SafeParse(Status.ToString(), InventoryStatus.Enabled);
+            inventory.Status = EnumUtility.SafeParseFlags(Status.ToString(), InventoryStatus.Enabled);
 
             if(FulfillmentCenter != null)
             {

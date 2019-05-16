@@ -36,7 +36,7 @@ namespace VirtoCommerce.CustomerModule.Data.Services
         public override async Task<Member[]> GetByIdsAsync(string[] memberIds, string responseGroup = null, string[] memberTypes = null)
         {
             var result = await base.GetByIdsAsync(memberIds, responseGroup, memberTypes);
-            var memberRespGroup = EnumUtility.SafeParse(responseGroup, MemberResponseGroup.Full);
+            var memberRespGroup = EnumUtility.SafeParseFlags(responseGroup, MemberResponseGroup.Full);
             //Load member security accounts by separate request
             if (memberRespGroup.HasFlag(MemberResponseGroup.WithSecurityAccounts))
             {

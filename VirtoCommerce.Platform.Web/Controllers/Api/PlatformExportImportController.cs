@@ -87,7 +87,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         {
             lock (_lockObject)
             {
-                var sampleDataState = EnumUtility.SafeParse(_settingsManager.GetValue(PlatformConstants.Settings.Setup.SampleDataState.Name, SampleDataState.Undefined.ToString()), SampleDataState.Undefined);
+                var sampleDataState = EnumUtility.SafeParseFlags(_settingsManager.GetValue(PlatformConstants.Settings.Setup.SampleDataState.Name, SampleDataState.Undefined.ToString()), SampleDataState.Undefined);
                 if (sampleDataState == SampleDataState.Undefined)
                 {
                     //Sample data initialization
@@ -118,7 +118,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [AllowAnonymous]
         public ActionResult<SampleDataState> GetSampleDataState()
         {
-            var state = EnumUtility.SafeParse(_settingsManager.GetValue(PlatformConstants.Settings.Setup.SampleDataState.Name, string.Empty), SampleDataState.Undefined);
+            var state = EnumUtility.SafeParseFlags(_settingsManager.GetValue(PlatformConstants.Settings.Setup.SampleDataState.Name, string.Empty), SampleDataState.Undefined);
             return Ok(state);
         }
 

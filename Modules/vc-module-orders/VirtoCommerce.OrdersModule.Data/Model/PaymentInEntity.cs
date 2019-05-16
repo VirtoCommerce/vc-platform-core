@@ -115,7 +115,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
             base.ToModel(payment);
 
-            payment.PaymentStatus = EnumUtility.SafeParse(Status, PaymentStatus.Custom);
+            payment.PaymentStatus = EnumUtility.SafeParseFlags(Status, PaymentStatus.Custom);
 
             return payment;
         }

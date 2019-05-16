@@ -113,7 +113,7 @@ namespace VirtoCommerce.StoreModule.Data.Model
             store.MainFulfillmentCenterId = FulfillmentCenterId;
             store.MainReturnsFulfillmentCenterId = ReturnsFulfillmentCenterId;
 
-            store.StoreState = EnumUtility.SafeParse(StoreState.ToString(), Core.Model.StoreState.Open);
+            store.StoreState = EnumUtility.SafeParseFlags(StoreState.ToString(), Core.Model.StoreState.Open);
             store.Languages = Languages.Select(x => x.LanguageCode).ToList();
             store.Currencies = Currencies.Select(x => x.CurrencyCode).ToList();
             store.TrustedGroups = TrustedGroups.Select(x => x.GroupName).ToList();

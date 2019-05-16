@@ -25,7 +25,7 @@ namespace VirtoCommerce.InventoryModule.Data.Repositories
         {
             var inventories = await Inventories.Where(x => productIds.Contains(x.Sku)).ToListAsync();
 
-            var inventoryResponseGroup = EnumUtility.SafeParse(responseGroup, InventoryResponseGroup.Full);
+            var inventoryResponseGroup = EnumUtility.SafeParseFlags(responseGroup, InventoryResponseGroup.Full);
 
             foreach (var inventory in inventories)
             {
@@ -47,7 +47,7 @@ namespace VirtoCommerce.InventoryModule.Data.Repositories
         {
             var inventories = await Inventories.Where(x => ids.Contains(x.Id)).ToListAsync();
 
-            var inventoryResponseGroup = EnumUtility.SafeParse(responseGroup, InventoryResponseGroup.Full);
+            var inventoryResponseGroup = EnumUtility.SafeParseFlags(responseGroup, InventoryResponseGroup.Full);
 
             foreach (var inventory in inventories)
             {

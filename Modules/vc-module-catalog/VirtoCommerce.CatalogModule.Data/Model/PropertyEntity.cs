@@ -86,7 +86,7 @@ namespace VirtoCommerce.CatalogModule.Data.Model
             property.Multilanguage = IsLocaleDependant;
             property.Dictionary = IsEnum;
             property.ValueType = (PropertyValueType)PropertyValueType;
-            property.Type = EnumUtility.SafeParse(TargetType, PropertyType.Catalog);
+            property.Type = EnumUtility.SafeParseFlags(TargetType, PropertyType.Catalog);
 
 
             property.Attributes = PropertyAttributes.Select(x => x.ToModel(AbstractTypeFactory<PropertyAttribute>.TryCreateInstance())).ToList();

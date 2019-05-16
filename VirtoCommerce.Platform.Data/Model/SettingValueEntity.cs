@@ -27,7 +27,7 @@ namespace VirtoCommerce.Platform.Data.Model
 
         public object GetValue()
         {
-            switch (EnumUtility.SafeParse<SettingValueType>(ValueType, SettingValueType.LongText))
+            switch (EnumUtility.SafeParseFlags(ValueType, SettingValueType.LongText))
             {
                 case SettingValueType.Boolean:
                     return BooleanValue;
