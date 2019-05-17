@@ -45,7 +45,7 @@ namespace VirtoCommerce.OrdersModule.Data.Repositories
             modelBuilder.Entity<ShipmentItemEntity>().HasKey(x => x.Id);
             modelBuilder.Entity<ShipmentItemEntity>().Property(x => x.Id).HasMaxLength(128); ;
 
-            modelBuilder.Entity<ShipmentItemEntity>().HasOne(x => x.LineItem).WithMany()
+            modelBuilder.Entity<ShipmentItemEntity>().HasOne(x => x.LineItem).WithMany(x => x.ShipmentItems)
                         .HasForeignKey(x => x.LineItemId).OnDelete(DeleteBehavior.Cascade).IsRequired();
 
             modelBuilder.Entity<ShipmentItemEntity>().HasOne(x => x.Shipment).WithMany(x => x.Items)
