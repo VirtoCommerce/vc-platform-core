@@ -37,17 +37,11 @@ namespace VirtoCommerce.SubscriptionModule.Web.Controllers.Api
         /// <param name="criteria">criteria</param>
         [HttpPost]
         [Route("search")]
-        [ProducesResponseType(typeof(SubscriptionSearchResult), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
-        public async Task<IActionResult> SearchSubscriptions([FromBody] SubscriptionSearchCriteria criteria)
+        public async Task<ActionResult<SubscriptionSearchResult>> SearchSubscriptions([FromBody] SubscriptionSearchCriteria criteria)
         {
             var result = await _subscriptionSearchService.SearchSubscriptionsAsync(criteria);
-            var retVal = new SubscriptionSearchResult
-            {
-                Subscriptions = result.Results.ToList(),
-                TotalCount = result.TotalCount
-            };
-            return Ok(retVal);
+            return Ok(result);
         }
 
         [HttpGet]

@@ -11,16 +11,16 @@ namespace VirtoCommerce.ImageToolsModule.Data.Services
 {
     public class ThumbnailOptionSearchService : IThumbnailOptionSearchService
     {
-        public ThumbnailOptionSearchService(Func<IThumbnailRepository> thumbnailRepositoryFactory)
-        {
-            ThumbnailRepositoryFactory = thumbnailRepositoryFactory;
-        }
+        private readonly Func<IThumbnailRepository> _thumbnailRepositoryFactor;
 
-        protected Func<IThumbnailRepository> ThumbnailRepositoryFactory { get; }
+        public ThumbnailOptionSearchService(Func<IThumbnailRepository> thumbnailRepositoryFactor)
+        {
+            _thumbnailRepositoryFactor = thumbnailRepositoryFactor;
+        }
 
         public virtual async Task<GenericSearchResult<ThumbnailOption>> SearchAsync(ThumbnailOptionSearchCriteria criteria)
         {
-            using (var repository = ThumbnailRepositoryFactory())
+            using (var repository = _thumbnailRepositoryFactor())
             {
                 var sortInfos = criteria.SortInfos;
                 if (sortInfos.IsNullOrEmpty())
