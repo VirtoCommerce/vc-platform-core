@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Payment;
-using VirtoCommerce.CoreModule.Core.Shipping;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.Platform.Core.Common;
@@ -13,14 +12,12 @@ namespace VirtoCommerce.OrdersModule.Web.JsonConverters
 {
     public class PolymorphicOperationJsonConverter : JsonConverter
     {
-        private static readonly Type[] _knowTypes = { typeof(IOperation), typeof(LineItem), typeof(CustomerOrderSearchCriteria), typeof(PaymentMethod), typeof(ShippingMethod) };
+        private static readonly Type[] _knowTypes = { typeof(IOperation), typeof(LineItem), typeof(CustomerOrderSearchCriteria), typeof(PaymentMethod) };
 
         private readonly IPaymentMethodsRegistrar _paymentMethodsRegistrar;
-        private readonly IShippingMethodsRegistrar _shippingMethodsRegistrar;
-        public PolymorphicOperationJsonConverter(IPaymentMethodsRegistrar paymentMethodsRegistrar, IShippingMethodsRegistrar shippingMethodsRegistrar)
+        public PolymorphicOperationJsonConverter(IPaymentMethodsRegistrar paymentMethodsRegistrar)
         {
             _paymentMethodsRegistrar = paymentMethodsRegistrar;
-            _shippingMethodsRegistrar = shippingMethodsRegistrar;
         }
 
         public override bool CanWrite => false;
@@ -40,11 +37,6 @@ namespace VirtoCommerce.OrdersModule.Web.JsonConverters
             {
                 var paymentGatewayCode = obj["code"].Value<string>();
                 retVal = _paymentMethodsRegistrar.GetAllPaymentMethods().FirstOrDefault(x => x.Code.EqualsInvariant(paymentGatewayCode));
-            }
-            else if (objectType == typeof(ShippingMethod))
-            {
-                var shippingGatewayCode = obj["code"].Value<string>();
-                retVal = _shippingMethodsRegistrar.GetAllShippingMethods().FirstOrDefault(x => x.Code.EqualsInvariant(shippingGatewayCode));
             }
             else
             {

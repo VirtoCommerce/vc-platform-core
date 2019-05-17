@@ -1,9 +1,9 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using VirtoCommerce.CoreModule.Core.Shipping;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.ShippingModule.Core.Model;
 
-namespace VirtoCommerce.StoreModule.Data.Model
+namespace VirtoCommerce.ShippingModule.Data.Model
 {
     public class StoreShippingMethodEntity : Entity
     {
@@ -13,11 +13,6 @@ namespace VirtoCommerce.StoreModule.Data.Model
 
         public int Priority { get; set; }
 
-        [StringLength(128)]
-        public string Name { get; set; }
-
-        public string Description { get; set; }
-
         [StringLength(2048)]
         public string LogoUrl { get; set; }
 
@@ -26,12 +21,11 @@ namespace VirtoCommerce.StoreModule.Data.Model
 
         public bool IsActive { get; set; }
 
+        public string TypeName { get; set; }
 
         #region Navigation Properties
 
         public string StoreId { get; set; }
-
-        public StoreEntity Store { get; set; }
 
         #endregion
 
@@ -42,11 +36,10 @@ namespace VirtoCommerce.StoreModule.Data.Model
 
             shippingMethod.IsActive = IsActive;
             shippingMethod.Code = Code;
-            shippingMethod.Description = Description;
             shippingMethod.TaxType = TaxType;
             shippingMethod.LogoUrl = LogoUrl;
-            shippingMethod.Name = Name;
             shippingMethod.Priority = Priority;
+            shippingMethod.StoreId = StoreId;
 
             return shippingMethod;
         }
@@ -60,11 +53,11 @@ namespace VirtoCommerce.StoreModule.Data.Model
 
             IsActive = shippingMethod.IsActive;
             Code = shippingMethod.Code;
-            Description = shippingMethod.Description;
             TaxType = shippingMethod.TaxType;
             LogoUrl = shippingMethod.LogoUrl;
-            Name = shippingMethod.Name;
             Priority = shippingMethod.Priority;
+            StoreId = shippingMethod.StoreId;
+            TypeName = shippingMethod.TypeName;
 
             return this;
         }
@@ -76,11 +69,10 @@ namespace VirtoCommerce.StoreModule.Data.Model
 
             target.IsActive = IsActive;
             target.Code = Code;
-            target.Description = Description;
             target.TaxType = TaxType;
             target.LogoUrl = LogoUrl;
-            target.Name = Name;
             target.Priority = Priority;
+            target.StoreId = StoreId;
         }
     }
 }

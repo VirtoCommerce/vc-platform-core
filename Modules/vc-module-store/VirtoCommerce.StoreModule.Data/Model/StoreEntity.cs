@@ -15,7 +15,6 @@ namespace VirtoCommerce.StoreModule.Data.Model
             Languages = new NullCollection<StoreLanguageEntity>();
             Currencies = new NullCollection<StoreCurrencyEntity>();
             PaymentMethods = new NullCollection<StorePaymentMethodEntity>();
-            ShippingMethods = new NullCollection<StoreShippingMethodEntity>();
             TrustedGroups = new NullCollection<StoreTrustedGroupEntity>();
             FulfillmentCenters = new NullCollection<StoreFulfillmentCenterEntity>();
             SeoInfos = new NullCollection<SeoInfoEntity>();
@@ -78,7 +77,6 @@ namespace VirtoCommerce.StoreModule.Data.Model
         public virtual ObservableCollection<StoreTrustedGroupEntity> TrustedGroups { get; set; }
 
         public virtual ObservableCollection<StorePaymentMethodEntity> PaymentMethods { get; set; }
-        public virtual ObservableCollection<StoreShippingMethodEntity> ShippingMethods { get; set; }
 
         public virtual ObservableCollection<StoreFulfillmentCenterEntity> FulfillmentCenters { get; set; }
         public virtual ObservableCollection<SeoInfoEntity> SeoInfos { get; set; }
@@ -154,7 +152,7 @@ namespace VirtoCommerce.StoreModule.Data.Model
 
             if (store.DefaultCurrency != null)
             {
-                DefaultCurrency = store.DefaultCurrency.ToString();
+                DefaultCurrency = store.DefaultCurrency;
             }
             if (store.MainFulfillmentCenterId != null)
             {
@@ -188,10 +186,6 @@ namespace VirtoCommerce.StoreModule.Data.Model
                 }));
             }
 
-            if (store.ShippingMethods != null)
-            {
-                ShippingMethods = new ObservableCollection<StoreShippingMethodEntity>(store.ShippingMethods.Select(x => AbstractTypeFactory<StoreShippingMethodEntity>.TryCreateInstance().FromModel(x, pkMap)));
-            }
             if (store.PaymentMethods != null)
             {
                 PaymentMethods = new ObservableCollection<StorePaymentMethodEntity>(store.PaymentMethods.Select(x => AbstractTypeFactory<StorePaymentMethodEntity>.TryCreateInstance().FromModel(x, pkMap)));
@@ -269,17 +263,10 @@ namespace VirtoCommerce.StoreModule.Data.Model
                 TrustedGroups.Patch(target.TrustedGroups, trustedGroupComparer,
                                       (sourceGroup, targetGroup) => sourceGroup.GroupName = targetGroup.GroupName);
             }
-
             if (!PaymentMethods.IsNullCollection())
             {
                 var paymentComparer = AnonymousComparer.Create((StorePaymentMethodEntity x) => x.Code);
                 PaymentMethods.Patch(target.PaymentMethods, paymentComparer,
-                                      (sourceMethod, targetMethod) => sourceMethod.Patch(targetMethod));
-            }
-            if (!ShippingMethods.IsNullCollection())
-            {
-                var shippingComparer = AnonymousComparer.Create((StoreShippingMethodEntity x) => x.Code);
-                ShippingMethods.Patch(target.ShippingMethods, shippingComparer,
                                       (sourceMethod, targetMethod) => sourceMethod.Patch(targetMethod));
             }
             if (!FulfillmentCenters.IsNullCollection())

@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using VirtoCommerce.CoreModule.Core.Common;
 
-namespace VirtoCommerce.CoreModule.Core.Shipping
+namespace VirtoCommerce.ShippingModule.Core.Model
 {
     public class ShippingRateEvaluationContext : IEvaluationContext
     {

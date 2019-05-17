@@ -34,29 +34,6 @@
                     "description": "Enter description"
                 }
             },
-            "shippingMethod-detail": {
-                "subtitle": "Edit shipping method",
-                "labels": {
-                    "is-active": "Is active",
-                    "name": "Name",
-                    "code": "Code",
-                    "tax-type": "Tax type",
-                    "description": "Description",
-                    "settings": "Settings"
-                },
-                "placeholders": {
-                    "tax-type": "Select...",
-                    "description": "Enter description"
-                }
-            },
-            "shippingMethod-list": {
-                "subtitle": "",
-                "labels": {
-                    "is-active": "Is active",
-                    "shipping-method": "Shipping method",
-                    "note": "Set the order how shipping methods appear sorted in web store. Drag and drop to change the order."
-                }
-            },
             "store-advanced": {
                 "subtitle": "",
                 "labels": {
@@ -184,10 +161,6 @@
             "storeSettingsWidget": {
                 "title": "Settings",
                 "blade-subtitle": "Settings"
-            },
-            "storeShippingWidget": {
-                "title": "Shipping methods",
-                "blade-subtitle": "Shipping methods"
             },
             "storeTaxingWidget": {
                 "title": "Tax providers",

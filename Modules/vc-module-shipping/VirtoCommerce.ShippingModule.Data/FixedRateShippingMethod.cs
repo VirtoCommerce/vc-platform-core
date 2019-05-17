@@ -2,28 +2,22 @@ using System;
 using System.Collections.Generic;
 using VirtoCommerce.CoreModule.Core;
 using VirtoCommerce.CoreModule.Core.Common;
-using VirtoCommerce.CoreModule.Core.Shipping;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.ShippingModule.Core.Model;
 
-namespace VirtoCommerce.CoreModule.Data.Shipping
+namespace VirtoCommerce.ShippingModule.Data
 {
     public class FixedRateShippingMethod : ShippingMethod
     {
-        private decimal GroundOptionRate
+        public FixedRateShippingMethod() : base("FixedRateShippingMethod")
         {
-            get
-            {
-                return Settings.GetSettingValue(ModuleConstants.Settings.General.FixedRateShippingMethodGroundRate.Name, 0m);
-            }
         }
 
+        private decimal GroundOptionRate
+            => Settings.GetSettingValue(ModuleConstants.Settings.General.FixedRateShippingMethodGroundRate.Name, 0m);
+
         private decimal AirOptionRate
-        {
-            get
-            {
-                return Settings.GetSettingValue(ModuleConstants.Settings.General.FixedRateShippingMethodAirRate.Name, 0m);
-            }
-        }
+            => Settings.GetSettingValue(ModuleConstants.Settings.General.FixedRateShippingMethodAirRate.Name, 0m);
 
         public override IEnumerable<ShippingRate> CalculateRates(IEvaluationContext context)
         {
@@ -31,7 +25,7 @@ namespace VirtoCommerce.CoreModule.Data.Shipping
             {
                 throw new ArgumentException(nameof(context));
             }
-            return new ShippingRate[]
+            return new[]
             {
                 new ShippingRate { Rate = GroundOptionRate, Currency = shippingContext.Currency, ShippingMethod = this, OptionName = "Ground" },
                 new ShippingRate { Rate = AirOptionRate, Currency = shippingContext.Currency, ShippingMethod = this, OptionName = "Air" }

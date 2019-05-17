@@ -1,6 +1,6 @@
 using VirtoCommerce.Platform.Core.Common;
 
-namespace VirtoCommerce.CoreModule.Core.Shipping
+namespace VirtoCommerce.ShippingModule.Core.Model
 {
     public class ShippingRate : ValueObject
     {

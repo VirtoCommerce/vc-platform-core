@@ -22,24 +22,21 @@ namespace VirtoCommerce.StoreModule.Data.Repositories
                                .Include(x => x.TrustedGroups)
                                .ToArrayAsync();
             var paymentMethods = StorePaymentMethods.Where(x => ids.Contains(x.StoreId)).ToArrayAsync();
-            var shipmentMethods = StoreShippingMethods.Where(x => ids.Contains(x.StoreId)).ToArrayAsync();
             var fulfillmentCenters = StoreFulfillmentCenters.Where(x => ids.Contains(x.StoreId)).ToArrayAsync();
             var seoInfos = SeoInfos.Where(x => ids.Contains(x.StoreId)).ToArrayAsync();
 
-            await Task.WhenAll(paymentMethods, shipmentMethods, fulfillmentCenters, seoInfos);
-
+            await Task.WhenAll(paymentMethods, fulfillmentCenters, seoInfos);
             return retVal;
         }
 
         public IQueryable<StoreEntity> Stores => DbContext.Set<StoreEntity>();
+
         public IQueryable<StorePaymentMethodEntity> StorePaymentMethods => DbContext.Set<StorePaymentMethodEntity>();
-        public IQueryable<StoreShippingMethodEntity> StoreShippingMethods => DbContext.Set<StoreShippingMethodEntity>();
+
         public IQueryable<StoreFulfillmentCenterEntity> StoreFulfillmentCenters => DbContext.Set<StoreFulfillmentCenterEntity>();
+
         public IQueryable<SeoInfoEntity> SeoInfos => DbContext.Set<SeoInfoEntity>();
 
-
         #endregion
-
-
     }
 }

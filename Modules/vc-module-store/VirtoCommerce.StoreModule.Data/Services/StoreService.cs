@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 using FluentValidation;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CoreModule.Core.Payment;
-using VirtoCommerce.CoreModule.Core.Seo;
-using VirtoCommerce.CoreModule.Core.Shipping;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
@@ -29,18 +27,18 @@ namespace VirtoCommerce.StoreModule.Data.Services
         private readonly Func<IStoreRepository> _repositoryFactory;
         private readonly ISettingsManager _settingManager;
         private readonly IDynamicPropertyService _dynamicPropertyService;
-        private readonly IShippingMethodsRegistrar _shippingMethodRegistrar;
         private readonly IPaymentMethodsRegistrar _paymentMethodRegistrar;
         private readonly IEventPublisher _eventPublisher;
         private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public StoreService(Func<IStoreRepository> repositoryFactory, ISettingsManager settingManager, IDynamicPropertyService dynamicPropertyService, IShippingMethodsRegistrar shippingService, IPaymentMethodsRegistrar paymentService,
-                            IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
+        public StoreService(
+            Func<IStoreRepository> repositoryFactory, ISettingsManager settingManager,
+            IDynamicPropertyService dynamicPropertyService, IPaymentMethodsRegistrar paymentService,
+            IEventPublisher eventPublisher, IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = repositoryFactory;
             _settingManager = settingManager;
             _dynamicPropertyService = dynamicPropertyService;
-            _shippingMethodRegistrar = shippingService;
             _paymentMethodRegistrar = paymentService;
             _eventPublisher = eventPublisher;
             _platformMemoryCache = platformMemoryCache;
@@ -211,16 +209,8 @@ namespace VirtoCommerce.StoreModule.Data.Services
                     dbStoredPaymentMethod.ToModel(paymentMethod);
                 }
             }
-            store.ShippingMethods = _shippingMethodRegistrar.GetAllShippingMethods();
-            foreach (var shippingMethod in store.ShippingMethods)
-            {
-                var dbStoredShippingMethod = dbStore.ShippingMethods.FirstOrDefault(x => x.Code.EqualsInvariant(shippingMethod.Code));
-                if (dbStoredShippingMethod != null)
-                {
-                    dbStoredShippingMethod.ToModel(shippingMethod);
-                }
-            }
         }
+
         #endregion
     }
 }
