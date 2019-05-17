@@ -37,10 +37,11 @@ namespace VirtoCommerce.LicensingModule.Data.Services
             _licenseOptions = licenseOptions.Value;
         }
 
-        public async Task<GenericSearchResult<License>> SearchAsync(LicenseSearchCriteria criteria)
+        public async Task<LicenseSearchResult> SearchAsync(LicenseSearchCriteria criteria)
         {
             using (var repository = _licenseRepositoryFactory())
             {
+                var result = AbstractTypeFactory<LicenseSearchResult>.TryCreateInstance();
                 var query = repository.Licenses;
 
                 if (criteria.Keyword != null)
@@ -56,12 +57,10 @@ namespace VirtoCommerce.LicensingModule.Data.Services
                 query = query.OrderBySortInfos(sortInfos);
                 var arrayLicense = await query.Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
 
-                var retVal = new GenericSearchResult<License>
-                {
-                    TotalCount = await query.CountAsync(),
-                    Results = arrayLicense.Select(x => x.ToModel(AbstractTypeFactory<License>.TryCreateInstance())).ToArray()
-                };
-                return retVal;
+                result.TotalCount = await query.CountAsync();
+                result.Results = arrayLicense.Select(x => x.ToModel(AbstractTypeFactory<License>.TryCreateInstance())).ToArray();
+
+                return result;
             }
         }
 

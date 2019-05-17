@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.IO.Packaging;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -183,7 +182,7 @@ namespace VirtoCommerce.SitemapsModule.Web.Controllers.Api
 
         [HttpDelete]
         [Route("items")]
-        public async Task<IActionResult> RemoveSitemapItems(string[] itemIds)
+        public async Task<ActionResult> RemoveSitemapItems(string[] itemIds)
         {
             if (itemIds == null)
             {

@@ -50,12 +50,13 @@ namespace VirtoCommerce.ImageToolsModule.Data.ExportImport
                     progressCallback(progressInfo);
 
                     await writer.WritePropertyNameAsync("Options");
-                    await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) =>
+                    await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
                     {
                         var searchCriteria = AbstractTypeFactory<ThumbnailOptionSearchCriteria>.TryCreateInstance();
                         searchCriteria.Take = take;
                         searchCriteria.Skip = skip;
-                        return _optionSearchService.SearchAsync(searchCriteria);
+                        var searchResult = await _optionSearchService.SearchAsync(searchCriteria);
+                        return (GenericSearchResult<ThumbnailOption>)searchResult;
                     }, (processedCount, totalCount) =>
                     {
                         progressInfo.Description = $"{processedCount} of {totalCount} Options have been exported";

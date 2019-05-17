@@ -113,7 +113,6 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <returns></returns>
         [HttpGet]
         [Route("sampledata/state")]
-        [ProducesResponseType(typeof(SampleDataState), 200)]
         [ApiExplorerSettings(IgnoreApi = true)]
         [AllowAnonymous]
         public ActionResult<SampleDataState> GetSampleDataState()
