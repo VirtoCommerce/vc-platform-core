@@ -84,7 +84,10 @@ namespace VirtoCommerce.PaymentModule.Data.Services
 
             using (var repository = _repositoryFactory())
             {
-                var dataExistEntities = await repository.GetStorePaymentMethodsByIdsAsync(paymentMethods.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
+                var dataExistEntities = await repository.GetStorePaymentMethodsByIdsAsync(paymentMethods.Where(x => !x.IsTransient())
+                    .Select(x => x.Id)
+                    .ToArray());
+
                 foreach (var paymentMethod in paymentMethods)
                 {
                     var originalEntity = dataExistEntities.FirstOrDefault(x => x.Id == paymentMethod.Id);
@@ -98,6 +101,7 @@ namespace VirtoCommerce.PaymentModule.Data.Services
                         repository.Add(modifiedEntity);
                     }
                 }
+
                 //Raise domain events
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();

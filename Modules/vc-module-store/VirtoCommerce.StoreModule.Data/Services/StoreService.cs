@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
 using Microsoft.Extensions.Caching.Memory;
-using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.CoreModule.Core.Shipping;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
@@ -42,8 +41,6 @@ namespace VirtoCommerce.StoreModule.Data.Services
             _eventPublisher = eventPublisher;
             _platformMemoryCache = platformMemoryCache;
         }
-
-
 
         #region IStoreService Members
 

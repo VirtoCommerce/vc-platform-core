@@ -26,7 +26,6 @@ namespace VirtoCommerce.StoreModule.Data.Repositories
             var seoInfos = SeoInfos.Where(x => ids.Contains(x.StoreId)).ToArrayAsync();
 
             await Task.WhenAll(shipmentMethods, fulfillmentCenters, seoInfos);
-
             return retVal;
         }
 
@@ -35,8 +34,8 @@ namespace VirtoCommerce.StoreModule.Data.Repositories
         public IQueryable<StoreShippingMethodEntity> StoreShippingMethods => DbContext.Set<StoreShippingMethodEntity>();
 
         public IQueryable<StoreFulfillmentCenterEntity> StoreFulfillmentCenters => DbContext.Set<StoreFulfillmentCenterEntity>();
-        public IQueryable<SeoInfoEntity> SeoInfos => DbContext.Set<SeoInfoEntity>();
 
+        public IQueryable<SeoInfoEntity> SeoInfos => DbContext.Set<SeoInfoEntity>();
 
         #endregion
     }

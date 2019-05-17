@@ -40,15 +40,19 @@ namespace VirtoCommerce.PaymentModule.Web.JsonConverters
                 {
                     typeName = pt.Value<string>();
                 }
+
                 result = AbstractTypeFactory<PaymentMethod>.TryCreateInstance(typeName);
                 if (result == null)
                 {
-                    throw new NotSupportedException("Unknown payment method  type: " + typeName);
+                    throw new NotSupportedException("Unknown payment method type: " + typeName);
                 }
             }
             else
             {
-                var tryCreateInstance = typeof(AbstractTypeFactory<>).MakeGenericType(objectType).GetMethods().FirstOrDefault(x => x.Name.EqualsInvariant("TryCreateInstance") && x.GetParameters().Length == 0);
+                var tryCreateInstance = typeof(AbstractTypeFactory<>)
+                                        .MakeGenericType(objectType)
+                                        .GetMethods()
+                                        .FirstOrDefault(x => x.Name.EqualsInvariant("TryCreateInstance") && x.GetParameters().Length == 0);
                 result = tryCreateInstance?.Invoke(null, null);
             }
 

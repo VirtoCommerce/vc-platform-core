@@ -7,7 +7,6 @@ using VirtoCommerce.CoreModule.Core.Shipping;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.PaymentModule.Core.Model;
-using VirtoCommerce.PaymentModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.OrdersModule.Web.JsonConverters
@@ -16,11 +15,9 @@ namespace VirtoCommerce.OrdersModule.Web.JsonConverters
     {
         private static readonly Type[] _knowTypes = { typeof(IOperation), typeof(LineItem), typeof(CustomerOrderSearchCriteria), typeof(ShippingMethod) };
 
-        private readonly IPaymentMethodsRegistrar _paymentMethodsRegistrar;
         private readonly IShippingMethodsRegistrar _shippingMethodsRegistrar;
-        public PolymorphicOperationJsonConverter(IPaymentMethodsRegistrar paymentMethodsRegistrar, IShippingMethodsRegistrar shippingMethodsRegistrar)
+        public PolymorphicOperationJsonConverter(IShippingMethodsRegistrar shippingMethodsRegistrar)
         {
-            _paymentMethodsRegistrar = paymentMethodsRegistrar;
             _shippingMethodsRegistrar = shippingMethodsRegistrar;
         }
 

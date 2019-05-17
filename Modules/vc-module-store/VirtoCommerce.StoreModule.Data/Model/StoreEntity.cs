@@ -191,7 +191,6 @@ namespace VirtoCommerce.StoreModule.Data.Model
                 ShippingMethods = new ObservableCollection<StoreShippingMethodEntity>(store.ShippingMethods.Select(x => AbstractTypeFactory<StoreShippingMethodEntity>.TryCreateInstance().FromModel(x, pkMap)));
             }
 
-
             FulfillmentCenters = new ObservableCollection<StoreFulfillmentCenterEntity>();
             if (store.AdditionalFulfillmentCenterIds != null)
             {
