@@ -1,4 +1,4 @@
-﻿angular.module('virtoCommerce.pricingModule')
+angular.module('virtoCommerce.pricingModule')
 .controller('virtoCommerce.pricingModule.pricelistListController', ['$scope', 'virtoCommerce.pricingModule.pricelists', 'platformWebApp.dialogService', 'platformWebApp.uiGridHelper', 'platformWebApp.bladeUtils',
 function ($scope, pricelists, dialogService, uiGridHelper, bladeUtils) {
     var blade = $scope.blade;
@@ -69,8 +69,9 @@ function ($scope, pricelists, dialogService, uiGridHelper, bladeUtils) {
                 if (remove) {
                     bladeNavigationService.closeChildrenBlades(blade, function () {
                         pricelists.remove({ ids: _.pluck(list, 'id') },
-                            blade.refresh(true),
-                            function (error) { bladeNavigationService.setError('Error ' + error.status, blade); });
+                            function() {
+                                return blade.refresh(true);
+                            });
                     });
                 }
             }
