@@ -1,8 +1,8 @@
-﻿<script type="text/ng-template" id="order-statistics-revenue.html">
+<script type="text/ng-template" id="order-statistics-revenue.html">
     <div class="gridster-cnt">
         <div class="cnt-inner">
             <div class="list-count">
-                <div ng-repeat="data in $storage.ordersDashboardStatistics.revenuePerCustomer track by $index">{{data.amount | currency:data.currency}}</div>
+                <div ng-repeat="data in $storage.ordersDashboardStatistics.revenue track by $index">{{data.amount | currency:data.currency}}</div>
             </div>
             <div class="list-t">{{'orders.widgets.statistics-templates.revenue' | translate}}</div>
         </div>
