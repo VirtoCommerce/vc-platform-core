@@ -252,6 +252,30 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 
             if (!Shipments.IsNullCollection())
             {
+                foreach (var shipment in Shipments.Where(x => !x.Items.IsNullCollection()))
+                {
+                    ////Need to remove all items from the shipment with references to non-existing line items.
+                    ///Left join shipment.Items with cart.Items to detect shipment items are referenced to no longer exist line items
+                    var toRemoveItems = shipment.Items.GroupJoin(Items,
+                            shipmentItem => shipmentItem.LineItemId ?? shipmentItem.LineItem?.Id,
+                            lineItem => lineItem.Id,
+                            (shipmentItem, lineItem) => new { ShipmentItem = shipmentItem, LineItem = lineItem.SingleOrDefault() })
+                        .Where(x => x.LineItem == null)
+                        .Select(x => x.ShipmentItem)
+                        .ToArray();
+                    foreach (var toRemoveItem in toRemoveItems)
+                    {
+                        shipment.Items.Remove(toRemoveItem);
+                    }
+                    //Trying to set appropriator lineItem  from EF dynamic proxy lineItem to avoid EF exception (if shipmentItem.LineItem is new object with Id for already exist LineItem)
+                    foreach (var shipmentItem in shipment.Items)
+                    {
+                        if (shipmentItem.LineItem != null)
+                        {
+                            shipmentItem.LineItem = target.Items.FirstOrDefault(x => x == shipmentItem.LineItem) ?? shipmentItem.LineItem;
+                        }
+                    }
+                }
                 Shipments.Patch(target.Shipments, (sourceShipment, targetShipment) => sourceShipment.Patch(targetShipment));
             }
 
