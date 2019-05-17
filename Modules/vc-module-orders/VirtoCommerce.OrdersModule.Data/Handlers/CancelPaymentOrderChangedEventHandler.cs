@@ -26,7 +26,7 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
 
         public virtual async Task Handle(OrderChangedEvent message)
         {
-            foreach (var changedEntry in message.ChangedEntries.Where(x=>x.EntryState == EntryState.Modified))
+            foreach (var changedEntry in message.ChangedEntries.Where(x => x.EntryState == EntryState.Modified))
             {
                 await TryToCancelOrder(changedEntry);
             }
@@ -58,24 +58,24 @@ namespace VirtoCommerce.OrdersModule.Data.Handlers
                     }
                 }
             }
-            TryToCancelOrderPayments(toCancelPayments);
+            TryToCancelOrderPayments(toCancelPayments, changedEntry.NewEntry);
             if (!toCancelPayments.IsNullOrEmpty())
             {
                 await _orderService.SaveChangesAsync(new[] { changedEntry.NewEntry });
             }
         }
-        
-        protected virtual void TryToCancelOrderPayments(IEnumerable<PaymentIn> toCancelPayments)
+
+        protected virtual void TryToCancelOrderPayments(IEnumerable<PaymentIn> toCancelPayments, CustomerOrder order)
         {
             foreach (var payment in toCancelPayments ?? Enumerable.Empty<PaymentIn>())
             {
                 if (payment.PaymentStatus == PaymentStatus.Authorized)
                 {
-                    payment.PaymentMethod?.VoidProcessPayment(new VoidProcessPaymentEvaluationContext { PaymentId = payment.Id });
+                    payment.PaymentMethod?.VoidProcessPayment(new VoidProcessPaymentEvaluationContext { PaymentId = payment.Id, OrderId = order.Id });
                 }
                 else if (payment.PaymentStatus == PaymentStatus.Paid)
                 {
-                    payment.PaymentMethod?.RefundProcessPayment(new RefundProcessPaymentEvaluationContext { PaymentId = payment.Id });
+                    payment.PaymentMethod?.RefundProcessPayment(new RefundProcessPaymentEvaluationContext { PaymentId = payment.Id, OrderId = order.Id });
                 }
                 else
                 {
