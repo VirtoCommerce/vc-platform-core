@@ -14,6 +14,7 @@ function ($scope, $localStorage, customerOrders, bladeUtils, dialogService, auth
         } else {
             blade.isLoading = true;
             var criteria = {
+                responseGroup: "Default",
                 keyword: filter.keyword,
                 sort: uiGridHelper.getSortExpression($scope),
                 skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
