@@ -21,24 +21,21 @@ namespace VirtoCommerce.ShippingModule.Web.Controllers.Api
             _shippingMethodsService = shippingMethodsService;
         }
 
-        [HttpPost]
-        [Route("search")]
+        [HttpPost("search")]
         public async Task<ActionResult<ShippingMethodsSearchResult>> SearchShippingMethods([FromBody]ShippingMethodsSearchCriteria criteria)
         {
             var result = await _shippingMethodsSearchService.SearchShippingMethodsAsync(criteria);
             return Ok(result);
         }
 
-        [HttpGet]
-        [Route("{id}")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<ShippingMethod>> GetShippingMethodById(string id)
         {
             var result = await _shippingMethodsService.GetByIdAsync(id, null);
             return Ok(result);
         }
 
-        [HttpPut]
-        [Route("")]
+        [HttpPut("")]
         public async Task<ActionResult<ShippingMethod>> UpdateShippingMethod([FromBody]ShippingMethod shippingMethod)
         {
             await _shippingMethodsService.SaveChangesAsync(new[] { shippingMethod });
