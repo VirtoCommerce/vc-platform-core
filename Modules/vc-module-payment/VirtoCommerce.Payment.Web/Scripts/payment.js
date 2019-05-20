@@ -5,7 +5,7 @@ if (AppDependencies != undefined) {
     AppDependencies.push(moduleName);
 }
 
-angular.module(moduleName, ['ngSanitize'])
+angular.module(moduleName, [])
     .run(
         ['platformWebApp.toolbarService', 'platformWebApp.bladeNavigationService', 'platformWebApp.widgetService',
             function (toolbarService, bladeNavigationService, widgetService) {
