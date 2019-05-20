@@ -99,6 +99,9 @@
                 "title-product": "Pick Product for promotion condition",
                 "title-category": "Pick Category for promotion condition"
             },
+            "catalog-entries": {
+                "title-product": "Selected items"
+            },
             "dynamicContent-list": {
                 "menu": {
                     "items": {

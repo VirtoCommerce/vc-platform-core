@@ -43,6 +43,14 @@ namespace VirtoCommerce.CatalogModule.Core.Model
         public bool Multivalue { get; set; }
         public bool Multilanguage { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="Property"/> is hidden.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if hidden; otherwise, <c>false</c>.
+        /// </value>
+        public bool Hidden { get; set; }
+
         public PropertyValueType ValueType { get; set; }
         public PropertyType Type { get; set; }
         public IList<PropertyValue> Values { get; set; } = new List<PropertyValue>();

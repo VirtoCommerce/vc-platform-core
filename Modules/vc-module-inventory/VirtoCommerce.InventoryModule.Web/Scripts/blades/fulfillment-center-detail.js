@@ -1,27 +1,29 @@
 angular.module('virtoCommerce.inventoryModule')
-    .controller('virtoCommerce.inventoryModule.fulfillmentCenterDetailController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.bladeNavigationService', 'virtoCommerce.inventoryModule.fulfillments', 'platformWebApp.common.countries', function ($scope, dialogService, bladeNavigationService, fulfillments, countries) {
+    .controller('virtoCommerce.inventoryModule.fulfillmentCenterDetailController', ['$scope', 'platformWebApp.dialogService', 'platformWebApp.bladeNavigationService', 'virtoCommerce.inventoryModule.fulfillments', 'platformWebApp.common.countries', 'platformWebApp.metaFormsService', function ($scope, dialogService, bladeNavigationService, fulfillments, countries, metaFormsService) {
         var blade = $scope.blade;
         blade.updatePermission = 'inventory:fulfillment:edit';
-        blade.refresh = function (parentRefresh) {
+        blade.refresh = function(parentRefresh) {
             if (blade.currentEntityId) {
                 blade.isLoading = true;
-                fulfillments.get({ id: blade.currentEntityId }, function (data) {
-                    initializeBlade(data);
-                    if (parentRefresh) {
-                        blade.parentBlade.refresh();
-                    }
-                });
-            }
-            else {
+                fulfillments.get({ id: blade.currentEntityId },
+                    function(data) {
+                        initializeBlade(data);
+                        if (parentRefresh) {
+                            blade.parentBlade.refresh();
+                        }
+                    });
+            } else {
                 initializeBlade(blade.currentEntity);
             }
-        }
+        };
+
+        blade.metaFields = blade.metaFields ? blade.metaFields : metaFormsService.getMetaFields('fulfillmentCenterDetail');
 
         function initializeBlade(data) {
             blade.currentEntity = angular.copy(data);
             blade.origEntity = data;
             blade.isLoading = false;
-        };
+        }
 
         $scope.setForm = function (form) {
             $scope.formScope = form;
@@ -63,7 +65,7 @@ angular.module('virtoCommerce.inventoryModule')
             {
                 name: "platform.commands.delete", icon: 'fa fa-trash-o',
                 executeMethod: deleteEntry,
-                canExecuteMethod: function () { return blade.currentEntity.id != null && blade.currentEntity.id != undefined; },
+                canExecuteMethod: function () { return blade.currentEntity.id !== null && blade.currentEntity.id !== undefined; },
                 permission: 'inventory:fulfillment:delete'
             }
         ];
@@ -85,7 +87,7 @@ angular.module('virtoCommerce.inventoryModule')
                         });
                     }
                 }
-            }
+            };
             dialogService.showConfirmationDialog(dialog);
         }
 
