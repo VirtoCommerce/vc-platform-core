@@ -1,4 +1,4 @@
-﻿angular.module('virtoCommerce.pricingModule')
+angular.module('virtoCommerce.pricingModule')
     .factory('virtoCommerce.pricingModule.prices', ['$resource', function ($resource) {
         return $resource('api/products/:id/prices', { id: '@Id', catalogId: '@catalogId' }, {
             search: { url: 'api/catalog/products/prices/search' },
@@ -20,6 +20,7 @@
     	return $resource('api/pricing/assignments/:id', { id: '@Id' }, {
     		search: { url: 'api/pricing/assignments' },
             getNew: { url: 'api/pricing/assignments/new' },
-            update: { method: 'PUT' }
+            update: { method: 'PUT' },
+            removeFiltered: { method: 'DELETE', url: 'api/pricing/filteredAssignments' }
         });
     }]);

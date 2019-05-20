@@ -7,6 +7,7 @@ function ($scope, pricelists, dialogService, uiGridHelper, bladeUtils) {
     blade.refresh = function (parentRefresh) {
         blade.isLoading = true;
         return pricelists.search({
+            keyword: filter.keyword,
             sort: uiGridHelper.getSortExpression($scope),
             skip: ($scope.pageSettings.currentPage - 1) * $scope.pageSettings.itemsPerPageCount,
             take: $scope.pageSettings.itemsPerPageCount
