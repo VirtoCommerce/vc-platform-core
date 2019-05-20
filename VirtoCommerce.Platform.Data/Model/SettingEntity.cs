@@ -84,7 +84,7 @@ namespace VirtoCommerce.Platform.Data.Model
 
             if (!SettingValues.IsNullCollection())
             {
-                var comparer = AnonymousComparer.Create((SettingValueEntity x) => x.ToString(EnumUtility.SafeParseFlags(x.ValueType, Core.Settings.SettingValueType.LongText), CultureInfo.InvariantCulture) ?? string.Empty);
+                var comparer = AnonymousComparer.Create((SettingValueEntity x) => x.ToString(EnumUtility.SafeParse(x.ValueType, Core.Settings.SettingValueType.LongText), CultureInfo.InvariantCulture) ?? string.Empty);
                 SettingValues.Patch(target.SettingValues, comparer, (sourceSetting, targetSetting) => { });
             }
         }

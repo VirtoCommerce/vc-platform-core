@@ -260,14 +260,14 @@ namespace VirtoCommerce.Platform.Data.DynamicProperties
                 foreach (var modifiedPropertyEntityGroupItem in modifiedPropertyEntitiesGroup)
                 {
                     var modifiedPropertyObjectValues = modifiedPropertyEntityGroupItem.SelectMany(x => x.ObjectValues)
-                                                                                    .Where(x => x.GetValue(EnumUtility.SafeParseFlags(x.ValueType, DynamicPropertyValueType.LongText)) != null)
+                                                                                    .Where(x => x.GetValue(EnumUtility.SafeParse(x.ValueType, DynamicPropertyValueType.LongText)) != null)
                                                                                     .ToList();
                     //Try to find original property with same complex key
                     var originalEntity = originalPropertyEntitites.FirstOrDefault(x => $"{x.Name}:{x.ObjectType}".EqualsInvariant(modifiedPropertyEntityGroupItem.Key));
                     if (originalEntity != null)
                     {
                         //Update only property values
-                        var comparer = AnonymousComparer.Create((DynamicPropertyObjectValueEntity x) => $"{x.ObjectId}:{x.ObjectType}:{x.Locale}:{x.GetValue(EnumUtility.SafeParseFlags(x.ValueType, DynamicPropertyValueType.LongText))}");
+                        var comparer = AnonymousComparer.Create((DynamicPropertyObjectValueEntity x) => $"{x.ObjectId}:{x.ObjectType}:{x.Locale}:{x.GetValue(EnumUtility.SafeParse(x.ValueType, DynamicPropertyValueType.LongText))}");
                         modifiedPropertyObjectValues.Patch(originalEntity.ObjectValues, comparer, (sourceValue, targetValue) => { });
                     }
                 }

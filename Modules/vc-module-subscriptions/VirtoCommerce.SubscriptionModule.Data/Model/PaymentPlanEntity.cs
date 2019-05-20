@@ -30,7 +30,7 @@ namespace VirtoCommerce.SubscriptionModule.Data.Model
             paymentPlan.ModifiedDate = ModifiedDate;
             paymentPlan.IntervalCount = IntervalCount;
             paymentPlan.TrialPeriodDays = TrialPeriodDays;
-            paymentPlan.Interval = EnumUtility.SafeParseFlags(Interval, PaymentInterval.Months);
+            paymentPlan.Interval = EnumUtility.SafeParse(Interval, PaymentInterval.Months);
 
             return paymentPlan;
         }

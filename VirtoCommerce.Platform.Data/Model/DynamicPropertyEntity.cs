@@ -61,7 +61,7 @@ namespace VirtoCommerce.Platform.Data.Model
             dynamicProp.Name = Name;
             dynamicProp.ObjectType = ObjectType;
 
-            dynamicProp.ValueType = EnumUtility.SafeParseFlags(ValueType, DynamicPropertyValueType.LongText);
+            dynamicProp.ValueType = EnumUtility.SafeParse(ValueType, DynamicPropertyValueType.LongText);
             dynamicProp.DisplayNames = DisplayNames.Select(x => x.ToModel(AbstractTypeFactory<DynamicPropertyName>.TryCreateInstance())).ToArray();
             if (dynamicProp is DynamicObjectProperty dynamicObjectProp)
             {
@@ -133,7 +133,7 @@ namespace VirtoCommerce.Platform.Data.Model
 
             if (!ObjectValues.IsNullCollection())
             {
-                var comparer = AnonymousComparer.Create((DynamicPropertyObjectValueEntity x) => $"{x.ObjectId}:{x.ObjectType}:{x.Locale}:{x.GetValue(EnumUtility.SafeParseFlags(x.ValueType, DynamicPropertyValueType.LongText))}");
+                var comparer = AnonymousComparer.Create((DynamicPropertyObjectValueEntity x) => $"{x.ObjectId}:{x.ObjectType}:{x.Locale}:{x.GetValue(EnumUtility.SafeParse(x.ValueType, DynamicPropertyValueType.LongText))}");
                 ObjectValues.Patch(target.ObjectValues, comparer, (sourceValue, targetValue) => sourceValue.Patch(targetValue));
             }
         }

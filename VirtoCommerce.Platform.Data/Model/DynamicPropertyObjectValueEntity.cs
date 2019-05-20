@@ -45,7 +45,7 @@ namespace VirtoCommerce.Platform.Data.Model
             propValue.Locale = Locale;
             propValue.ObjectId = ObjectId;
             propValue.ObjectType = ObjectType;
-            propValue.ValueType = EnumUtility.SafeParseFlags(ValueType, DynamicPropertyValueType.LongText);
+            propValue.ValueType = EnumUtility.SafeParse(ValueType, DynamicPropertyValueType.LongText);
 
             if (DictionaryItem != null)
             {

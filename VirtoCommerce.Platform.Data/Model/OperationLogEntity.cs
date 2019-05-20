@@ -35,7 +35,7 @@ namespace VirtoCommerce.Platform.Data.Model
             operation.ModifiedDate = ModifiedDate;
             operation.ObjectId = ObjectId;
             operation.ObjectType = ObjectType;
-            operation.OperationType = EnumUtility.SafeParseFlags(OperationType, EntryState.Unchanged);
+            operation.OperationType = EnumUtility.SafeParse(OperationType, EntryState.Unchanged);
             return operation;
         }
 

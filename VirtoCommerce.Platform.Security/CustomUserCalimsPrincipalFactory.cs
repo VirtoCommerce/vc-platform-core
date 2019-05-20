@@ -21,7 +21,7 @@ namespace VirtoCommerce.Platform.Security
         protected override async Task<ClaimsIdentity> GenerateClaimsAsync(ApplicationUser user)
         {
             var result = await base.GenerateClaimsAsync(user);
-            var userType = EnumUtility.SafeParseFlags(user.UserType, UserType.Customer);
+            var userType = EnumUtility.SafeParse(user.UserType, UserType.Customer);
             //need to transform isAdministrator flag and user types into special system roles claims
             if (user.IsAdministrator)
             {

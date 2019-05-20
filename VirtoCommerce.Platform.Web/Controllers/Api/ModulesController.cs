@@ -342,7 +342,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [AllowAnonymous]
         public ActionResult<string> GetAutoInstallState()
         {
-            var state = EnumUtility.SafeParseFlags(_settingsManager.GetValue(PlatformConstants.Settings.Setup.ModulesAutoInstallState.Name, string.Empty), AutoInstallState.Undefined);
+            var state = EnumUtility.SafeParse(_settingsManager.GetValue(PlatformConstants.Settings.Setup.ModulesAutoInstallState.Name, string.Empty), AutoInstallState.Undefined);
             return Ok(state);
         }
 
