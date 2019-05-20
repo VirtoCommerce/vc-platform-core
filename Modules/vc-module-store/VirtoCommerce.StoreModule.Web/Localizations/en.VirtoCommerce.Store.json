@@ -232,10 +232,13 @@
                 "title": "Enable Tax Calculation",
                 "description": "Setting to off prevents tax calculation on storefront"
             },
+            "Stores.AllowAnonymousUsers": {
+                "title": "Allow anonymous user for store",
+                "description": "Set to false to prevent anonymous user access to store"
+            },
             "Stores.SeoLinksType": {
                 "title": "SEO Links",
-                "description":
-                    "Determines how to generate links for products and categories. Long: /virtual-parent-category/physical-parent-category/my-cool-category/my-cool-product, Collapsed: /virtual-parent-category/my-cool-category/my-cool-product, Short: /my-cool-product, None: /product/123"
+                "description": "Determines how to generate links for products and categories. Long: /virtual-parent-category/physical-parent-category/my-cool-category/my-cool-product, Collapsed: /virtual-parent-category/my-cool-category/my-cool-product, Short: /my-cool-product, None: /product/123"
             }
         },
         "module": {

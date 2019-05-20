@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Settings;
 
 namespace VirtoCommerce.StoreModule.Core
@@ -43,6 +42,13 @@ namespace VirtoCommerce.StoreModule.Core
                     ValueType = SettingValueType.Boolean,
                     DefaultValue = true,
                 };
+                public static SettingDescriptor AllowAnonymousUsers = new SettingDescriptor
+                {
+                    Name = "Stores.AllowAnonymousUsers",
+                    GroupName = "Store|General",
+                    ValueType = SettingValueType.Boolean,
+                    DefaultValue = true,
+                };
 
                 public static IEnumerable<SettingDescriptor> AllSettings
                 {
@@ -50,6 +56,7 @@ namespace VirtoCommerce.StoreModule.Core
                     {
                         yield return States;
                         yield return TaxCalculationEnabled;
+                        yield return AllowAnonymousUsers;
                     }
                 }
             }
