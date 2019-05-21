@@ -69,7 +69,7 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             address.LastName = LastName;
             address.Line1 = Line1;
             address.Line2 = Line2;
-            address.AddressType = EnumUtility.SafeParse(AddressType, CoreModule.Core.Common.AddressType.BillingAndShipping);
+            address.AddressType = EnumUtility.SafeParseFlags(AddressType, CoreModule.Core.Common.AddressType.BillingAndShipping);
             return address;
         }
 

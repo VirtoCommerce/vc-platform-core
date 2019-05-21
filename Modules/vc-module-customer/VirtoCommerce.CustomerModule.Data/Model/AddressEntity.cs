@@ -105,7 +105,7 @@ namespace VirtoCommerce.CustomerModule.Data.Model
             address.Line2 = Line2;
             address.Key = Id;
             address.Phone = DaytimePhoneNumber;
-            address.AddressType = EnumUtility.SafeParse(Type, AddressType.BillingAndShipping);
+            address.AddressType = EnumUtility.SafeParseFlags(Type, AddressType.BillingAndShipping);
             return address;
         }
 

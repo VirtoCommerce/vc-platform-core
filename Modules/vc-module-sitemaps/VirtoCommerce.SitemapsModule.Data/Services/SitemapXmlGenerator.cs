@@ -20,12 +20,12 @@ namespace VirtoCommerce.SitemapsModule.Data.Services
     public class SitemapXmlGenerator : ISitemapXmlGenerator
     {
         private readonly ILogger _logger;
-        protected ISitemapSearchService _sitemapSearchService;
-        protected ISitemapItemSearchService _sitemapItemSearchService;
-        protected ISitemapUrlBuilder _sitemapUrlBuilder;
-        protected IEnumerable<ISitemapItemRecordProvider> _sitemapItemRecordProviders;
-        protected ISettingsManager _settingsManager;
-        protected IStoreService _storeService;
+        private readonly ISitemapSearchService _sitemapSearchService;
+        private readonly ISitemapItemSearchService _sitemapItemSearchService;
+        private readonly ISitemapUrlBuilder _sitemapUrlBuilder;
+        private readonly IEnumerable<ISitemapItemRecordProvider> _sitemapItemRecordProviders;
+        private readonly ISettingsManager _settingsManager;
+        private readonly IStoreService _storeService;
 
 
         public SitemapXmlGenerator(

@@ -33,17 +33,15 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         /// <param name="seoInfos"></param>
         /// <returns></returns>
         [HttpPut]
-        [ProducesResponseType(typeof(void), 200)]
         [Route("seoinfos/batchupdate")]
-        public Task<IActionResult> BatchUpdateSeoInfos(SeoInfo[] seoInfos)
+        public Task<ActionResult> BatchUpdateSeoInfos(SeoInfo[] seoInfos)
         {
             throw new NotImplementedException();
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(SeoInfo[]), 200)]
         [Route("seoinfos/duplicates")]
-        public async Task<IActionResult> GetSeoDuplicates(string objectId, string objectType)
+        public async Task<ActionResult<SeoInfo[]>> GetSeoDuplicates(string objectId, string objectType)
         {
             var result = await _seoDuplicateDetector.DetectSeoDuplicatesAsync(new TenantIdentity(objectId, objectType));
 
@@ -55,9 +53,8 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         /// </summary>
         /// <param name="slug">slug</param>
         [HttpGet]
-        [ProducesResponseType(typeof(SeoInfo[]), 200)]
         [Route("seoinfos/{slug}")]
-        public async Task<IActionResult> GetSeoInfoBySlug(string slug)
+        public async Task<ActionResult<SeoInfo[]>> GetSeoInfoBySlug(string slug)
         {
             var retVal = await _seoBySlugResolverDecorator.FindSeoBySlugAsync(slug);
             return Ok(retVal.ToArray());
@@ -67,9 +64,8 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         /// Return all currencies registered in the system
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(Currency[]), 200)]
         [Route("currencies")]
-        public async Task<IActionResult> GetAllCurrencies()
+        public async Task<ActionResult<Currency[]>> GetAllCurrencies()
         {
             var retVal = await _currencyService.GetAllCurrenciesAsync();
             return Ok(retVal.ToArray());
@@ -80,10 +76,9 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         /// </summary>
         /// <param name="currency">currency</param>
         [HttpPut]
-        [ProducesResponseType(typeof(void), 200)]
         [Route("currencies")]
         [Authorize(ModuleConstants.Security.Permissions.CurrencyUpdate)]
-        public async Task<IActionResult> UpdateCurrency([FromBody]Currency currency)
+        public async Task<ActionResult> UpdateCurrency([FromBody]Currency currency)
         {
             await _currencyService.SaveChangesAsync(new[] { currency });
             return Ok();
@@ -94,10 +89,9 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         /// </summary>
         /// <param name="currency">currency</param>
         [HttpPost]
-        [ProducesResponseType(typeof(void), 200)]
         [Route("currencies")]
         [Authorize(ModuleConstants.Security.Permissions.CurrencyCreate)]
-        public async Task<IActionResult> CreateCurrency([FromBody]Currency currency)
+        public async Task<ActionResult> CreateCurrency([FromBody]Currency currency)
         {
             await _currencyService.SaveChangesAsync(new[] { currency });
             return Ok();
@@ -108,10 +102,9 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         /// </summary>
         /// <param name="codes">currency codes</param>
         [HttpDelete]
-        [ProducesResponseType(typeof(void), 200)]
         [Route("currencies")]
         [Authorize(ModuleConstants.Security.Permissions.CurrencyDelete)]
-        public async Task<IActionResult> DeleteCurrencies([FromQuery] string[] codes)
+        public async Task<ActionResult> DeleteCurrencies([FromQuery] string[] codes)
         {
             await _currencyService.DeleteCurrenciesAsync(codes);
             return Ok();
@@ -122,9 +115,8 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         /// Return all package types registered in the system
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(PackageType[]), 200)]
         [Route("packageTypes")]
-        public async Task<IActionResult> GetAllPackageTypes()
+        public async Task<ActionResult<PackageType[]>> GetAllPackageTypes()
         {
             var retVal = await _packageTypesService.GetAllPackageTypesAsync();
             return Ok(retVal.ToArray());
@@ -135,10 +127,9 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         /// </summary>
         /// <param name="packageType">package type</param>
         [HttpPut]
-        [ProducesResponseType(typeof(void), 200)]
         [Route("packageTypes")]
         [Authorize(ModuleConstants.Security.Permissions.PackageTypeUpdate)]
-        public async Task<IActionResult> UpdatePackageType([FromBody]PackageType packageType)
+        public async Task<ActionResult> UpdatePackageType([FromBody]PackageType packageType)
         {
             await _packageTypesService.SaveChangesAsync(new[] { packageType });
             return Ok();
@@ -149,10 +140,9 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         /// </summary>
         /// <param name="packageType">package type</param>
         [HttpPost]
-        [ProducesResponseType(typeof(void), 200)]
         [Route("packageTypes")]
         [Authorize(ModuleConstants.Security.Permissions.PackageTypeCreate)]
-        public async Task<IActionResult> CreatePackageType(PackageType packageType)
+        public async Task<ActionResult> CreatePackageType(PackageType packageType)
         {
             await _packageTypesService.SaveChangesAsync(new[] { packageType });
             return Ok();
@@ -163,10 +153,9 @@ namespace VirtoCommerce.CoreModule.Web.Controllers.Api
         /// </summary>
         /// <param name="ids">package type ids</param>
         [HttpDelete]
-        [ProducesResponseType(typeof(void), 200)]
         [Route("packageTypes")]
         [Authorize(ModuleConstants.Security.Permissions.PackageTypeDelete)]
-        public async Task<IActionResult> DeletePackageTypes([FromQuery] string[] ids)
+        public async Task<ActionResult> DeletePackageTypes([FromQuery] string[] ids)
         {
             await _packageTypesService.DeletePackageTypesAsync(ids);
             return Ok();

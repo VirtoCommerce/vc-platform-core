@@ -247,7 +247,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="products">The products.</param>
         [HttpPost]
         [Route("batch")]
-        public async Task<IActionResult> SaveProducts([FromBody] CatalogProduct[] products)
+        public async Task<ActionResult> SaveProducts([FromBody] CatalogProduct[] products)
         {
             await InnerSaveProducts(products);
             return Ok();
@@ -260,7 +260,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="ids">The items ids.</param>
         [HttpDelete]
         [Route("")]
-        public async Task<IActionResult> Delete([FromQuery] string[] ids)
+        public async Task<ActionResult> Delete([FromQuery] string[] ids)
         {
             //var products = await _itemsService.GetByIdsAsync(ids, ItemResponseGroup.ItemInfo);
             //CheckCurrentUserHasPermissionForObjects(CatalogPredefinedPermissions.Delete, products);
