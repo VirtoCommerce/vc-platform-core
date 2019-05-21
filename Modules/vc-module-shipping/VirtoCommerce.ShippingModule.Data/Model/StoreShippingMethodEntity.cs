@@ -34,6 +34,7 @@ namespace VirtoCommerce.ShippingModule.Data.Model
             if (shippingMethod == null)
                 throw new ArgumentNullException(nameof(shippingMethod));
 
+            shippingMethod.Id = Id;
             shippingMethod.IsActive = IsActive;
             shippingMethod.Code = Code;
             shippingMethod.TaxType = TaxType;
@@ -51,6 +52,7 @@ namespace VirtoCommerce.ShippingModule.Data.Model
 
             pkMap.AddPair(shippingMethod, this);
 
+            Id = shippingMethod.Id;
             IsActive = shippingMethod.IsActive;
             Code = shippingMethod.Code;
             TaxType = shippingMethod.TaxType;

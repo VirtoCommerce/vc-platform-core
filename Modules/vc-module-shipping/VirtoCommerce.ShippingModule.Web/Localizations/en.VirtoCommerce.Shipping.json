@@ -21,7 +21,8 @@
                 "labels": {
                     "is-active": "Is active",
                     "shipping-method": "Shipping method",
-                    "note": "Set the order how shipping methods appear sorted in web store. Drag and drop to change the order."
+                    "note":
+                        "Set the order how shipping methods appear sorted in web store. Drag and drop to change the order."
                 }
             }
         },
@@ -34,8 +35,22 @@
             }
         },
         "labels": {
+            "FixedRateShippingMethod": {
+                "name": "Fixed shipping rate",
+                "description": "Fixed rate shipping method"
+            }
         }
     },
     "settings": {
+        "VirtoCommerce.Shipping.FixedRateShippingMethod": {
+            "Air.Rate": {
+                "title": "Air shipping rate",
+                "description": "Fixed Air shipping rate"
+            },
+            "Ground.Rate": {
+                "title": "Ground shipping rate",
+                "description": "Fixed Ground shipping rate"
+            }
+        }
     }
 }

@@ -34,6 +34,10 @@
             }
         },
         "labels": {
+            "FixedRateShippingMethod": {
+                "name": "Фиксированная стоимость доставки",
+                "description": "Фиксированный способ доставки"
+            }
         }
     },
     "settings": {

@@ -1,4 +1,4 @@
-angular.module('virtoCommerce.shippingModule').controller('virtoCommerce.shippingModule.shippingMethodListController', ['$scope', 'platformWebApp.bladeNavigationService', function ($scope, bladeNavigationService) {
+angular.module('virtoCommerce.shippingModule').controller('virtoCommerce.shippingModule.shippingMethodListController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.shippingModule.shippingMethods', function ($scope, bladeNavigationService, shippingMethods) {
     var blade = $scope.blade;
 
     function initializeBlade() {
@@ -42,15 +42,16 @@ angular.module('virtoCommerce.shippingModule').controller('virtoCommerce.shippin
     $scope.selectNode = function (node) {
         $scope.selectedNodeId = node.typeName;
         var newBlade = {
-            id: 'shippingMethodList',
+            id: 'shippingMethodDetail',
             shippingMethod: node,
             storeId: blade.storeId,
-            title: $scope.blade.title,
-            subtitle: 'stores.blades.shipping-method-detail.subtitle',
-            controller: 'virtoCommerce.storeModule.shippingMethodDetailController',
+            subtitle: 'shipping.blades.shipping-method-detail.subtitle',
+            controller: 'virtoCommerce.shippingModule.shippingMethodDetailController',
             template: 'Modules/$(VirtoCommerce.Shipping)/Scripts/blades/shippingMethod-detail.tpl.html'
         };
         bladeNavigationService.showBlade(newBlade, $scope.blade);
     };
+
+    initializeBlade();
 
 }]);

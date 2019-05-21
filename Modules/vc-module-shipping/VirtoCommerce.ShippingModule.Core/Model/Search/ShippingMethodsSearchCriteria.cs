@@ -10,5 +10,7 @@ namespace VirtoCommerce.ShippingModule.Core.Model.Search
         public IList<string> Codes { get; set; } = new List<string>();
 
         public bool? IsActive { get; set; }
+
+        public string TaxType { get; set; }
     }
 }

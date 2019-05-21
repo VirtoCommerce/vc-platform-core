@@ -5,16 +5,17 @@ if (AppDependencies != undefined) {
     AppDependencies.push(moduleName);
 }
 
-angular.module(moduleName, []).run(['platformWebApp.widgetService', function (widgetService) {
+angular.module(moduleName, ['virtoCommerce.taxModule'])
+    .run(['platformWebApp.widgetService', function (widgetService) {
 
-    widgetService.registerWidget({
-        controller: 'virtoCommerce.shippingModule.storeShippingWidgetController',
-        template: 'Modules/$(VirtoCommerce.Shipping)/Scripts/widgets/storeShippingWidget.tpl.html'
-    }, 'storeDetail');
+        widgetService.registerWidget({
+            controller: 'virtoCommerce.shippingModule.storeShippingWidgetController',
+            template: 'Modules/$(VirtoCommerce.Shipping)/Scripts/widgets/storeShippingWidget.tpl.html'
+        }, 'storeDetail');
 
-    widgetService.registerWidget({
-        controller: 'platformWebApp.entitySettingsWidgetController',
-        template: '$(Platform)/Scripts/app/settings/widgets/entitySettingsWidget.tpl.html'
-    }, 'paymentMethodDetail');
+        widgetService.registerWidget({
+            controller: 'platformWebApp.entitySettingsWidgetController',
+            template: '$(Platform)/Scripts/app/settings/widgets/entitySettingsWidget.tpl.html'
+        }, 'shippingMethodDetail');
 
-}]);
+    }]);

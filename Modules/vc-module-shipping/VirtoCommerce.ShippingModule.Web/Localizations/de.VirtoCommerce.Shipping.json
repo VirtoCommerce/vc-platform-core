@@ -34,6 +34,10 @@
             }
         },
         "labels": {
+            "FixedRateShippingMethod": {
+                "name": "Versandart festpreis",
+                "description": "Versandart festpreis"
+            }
         }
     },
     "settings": {
