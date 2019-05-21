@@ -13,20 +13,22 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
 {
     [Produces("application/json")]
     [Route("api/notifications")]
+    [Route("api/platform/notification")]
     public class NotificationsController : Controller
     {
         private readonly INotificationSearchService _notificationSearchService;
         private readonly INotificationService _notificationService;
         private readonly INotificationTemplateRenderer _notificationTemplateRender;
+        private readonly INotificationSender _notificationSender;
 
         public NotificationsController(INotificationSearchService notificationSearchService
             , INotificationService notificationService
-            , INotificationTemplateRenderer notificationTemplateRender
-            )
+            , INotificationTemplateRenderer notificationTemplateRender, INotificationSender notificationSender)
         {
             _notificationSearchService = notificationSearchService;
             _notificationService = notificationService;
             _notificationTemplateRender = notificationTemplateRender;
+            _notificationSender = notificationSender;
         }
 
         /// <summary>
@@ -35,9 +37,8 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         /// <param name="searchCriteria">criteria for search(keyword, skip, take and etc.)</param>
         /// <returns></returns>
         [HttpPost]
-        [ProducesResponseType(typeof(GenericSearchResult<Notification>), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
-        public async Task<IActionResult> GetNotifications(NotificationSearchCriteria searchCriteria)
+        public async Task<ActionResult<GenericSearchResult<Notification>>> GetNotifications(NotificationSearchCriteria searchCriteria)
         {
             var notifications = await _notificationSearchService.SearchNotificationsAsync(searchCriteria);
 
@@ -57,9 +58,8 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("{type}")]
-        [ProducesResponseType(typeof(Notification), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Access)]
-        public async Task<IActionResult> GetNotificationByTypeId(string type, string tenantId = null, string tenantType = null)
+        public async Task<ActionResult<Notification>> GetNotificationByTypeId(string type, string tenantId = null, string tenantType = null)
         {
             var responseGroup = NotificationResponseGroup.Full.ToString();
             var notification = await _notificationService.GetByTypeAsync(type, tenantId, tenantType, responseGroup);
@@ -74,9 +74,8 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         /// <returns></returns>
         [HttpPut]
         [Route("{type}")]
-        [ProducesResponseType(typeof(void), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<IActionResult> UpdateNotification([FromBody]Notification notification)
+        public async Task<ActionResult> UpdateNotification([FromBody]Notification notification)
         {
             await _notificationService.SaveChangesAsync(new[] { notification });
 
@@ -91,13 +90,31 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("{type}/templates/{language}/rendercontent")]
-        [ProducesResponseType(typeof(string), 200)]
         [Authorize(ModuleConstants.Security.Permissions.ReadTemplates)]
-        public IActionResult RenderingTemplate([FromBody]NotificationTemplateRequest request)
+        public ActionResult RenderingTemplate([FromBody]NotificationTemplateRequest request)
         {
             var result = _notificationTemplateRender.Render(request.Text, request.Data);
 
             return Ok(new { html = result });
+        }
+
+        /// <summary>
+        /// Sending test notification
+        /// </summary>
+        /// <remarks>
+        /// Method sending notification, that based on notification template. Template for rendering chosen by type, objectId, objectTypeId, language.
+        /// Parameters for template may be prepared by the method of getTestingParameters. Method returns string. If sending finished with success status
+        /// this string is empty, otherwise string contains error message.
+        /// </remarks>
+        /// <param name="request">Test notification request</param>
+        /// <param name="languageCode"></param>
+        [HttpPost]
+        [Route("template/sendnotification")]
+        public async Task<ActionResult<NotificationSendResult>> SendNotification([FromBody]Notification request, [FromBody]string languageCode)
+        {
+            var result = await _notificationSender.SendNotificationAsync(request, languageCode);
+
+            return Ok(result);
         }
     }
 }

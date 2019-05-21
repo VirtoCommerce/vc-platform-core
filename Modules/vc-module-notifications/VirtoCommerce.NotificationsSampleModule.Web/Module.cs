@@ -37,6 +37,7 @@ namespace VirtoCommerce.NotificationsSampleModule.Web
             var registrar = appBuilder.ApplicationServices.GetService<INotificationRegistrar>();
             registrar.RegisterNotification<PostTwitterNotification>();
             registrar.RegisterNotification<RegistrationEmailNotification>();
+            registrar.RegisterNotification<ResetPasswordEmailNotification>();
 
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {

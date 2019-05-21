@@ -313,6 +313,19 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         }
 
         /// <summary>
+        /// Get user details by user ID
+        /// </summary>
+        /// <param name="id"></param>
+        [HttpGet]
+        [Route("users/email/{email}")]
+        [Authorize(PlatformConstants.Security.Permissions.SecurityQuery)]
+        public async Task<ActionResult<ApplicationUser>> GetUserByEmailAsync([FromRoute] string email)
+        {
+            var retVal = await _userManager.FindByEmailAsync(email);
+            return Ok(retVal);
+        }
+
+        /// <summary>
         /// Create new user
         /// </summary>
         /// <param name="newUser"></param>
