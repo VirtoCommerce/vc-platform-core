@@ -42,6 +42,7 @@ namespace VirtoCommerce.StoreModule.Core
                     ValueType = SettingValueType.Boolean,
                     DefaultValue = true,
                 };
+
                 public static SettingDescriptor AllowAnonymousUsers = new SettingDescriptor
                 {
                     Name = "Stores.AllowAnonymousUsers",

@@ -28,8 +28,7 @@
                 "labels": {
                     "is-active": "Is active",
                     "payment-method": "Payment method",
-                    "note":
-                        "Set the order how payment methods appear sorted in web store. Drag and drop to change the order."
+                    "note": "Set the order how payment methods appear sorted in web store. Drag and drop to change the order."
                 },
                 "placeholders": {
                     "description": "Enter description"
@@ -55,8 +54,7 @@
                 "labels": {
                     "is-active": "Is active",
                     "shipping-method": "Shipping method",
-                    "note":
-                        "Set the order how shipping methods appear sorted in web store. Drag and drop to change the order."
+                    "note": "Set the order how shipping methods appear sorted in web store. Drag and drop to change the order."
                 }
             },
             "store-advanced": {
