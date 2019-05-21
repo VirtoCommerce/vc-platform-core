@@ -19,11 +19,13 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
     {
         private readonly Func<INotificationRepository> _repositoryFactory;
         private readonly IEventPublisher _eventPublisher;
+        private readonly INotificationService _notificationService;
 
-        public NotificationMessageService(Func<INotificationRepository> repositoryFactory, IEventPublisher eventPublisher)
+        public NotificationMessageService(Func<INotificationRepository> repositoryFactory, IEventPublisher eventPublisher, INotificationService notificationService)
         {
             _repositoryFactory = repositoryFactory;
             _eventPublisher = eventPublisher;
+            _notificationService = notificationService;
         }
 
         public async Task<NotificationMessage[]> GetNotificationsMessageByIds(string[] ids)
@@ -47,7 +49,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
                 foreach (var message in messages)
                 {
                     var originalEntity = existingMessageEntities.FirstOrDefault(n => n.Id.Equals(message.Id));
-                    var modifiedEntity = AbstractTypeFactory<NotificationMessageEntity>.TryCreateInstance().FromModel(message);
+                    var notification = (await _notificationService.GetByIdsAsync(new[] {message.NotificationId})).FirstOrDefault();
+                    var modifiedEntity = AbstractTypeFactory<NotificationMessageEntity>.TryCreateInstance($"{notification?.Kind}MessageEntity").FromModel(message);
 
                     if (originalEntity != null)
                     {

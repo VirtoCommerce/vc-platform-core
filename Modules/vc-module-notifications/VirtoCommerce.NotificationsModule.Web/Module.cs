@@ -45,6 +45,7 @@ namespace VirtoCommerce.NotificationsModule.Web
             serviceCollection.AddSingleton<INotificationRegistrar, NotificationService>();
             serviceCollection.AddSingleton<INotificationSearchService, NotificationSearchService>();
             serviceCollection.AddSingleton<INotificationMessageService, NotificationMessageService>();
+            serviceCollection.AddSingleton<INotificationMessageSearchService, NotificationMessageSearchService>();
             serviceCollection.AddSingleton<INotificationSender, NotificationSender>();
             serviceCollection.AddSingleton<INotificationTemplateRenderer, LiquidTemplateRenderer>();
             serviceCollection.AddSingleton<INotificationMessageSenderProviderFactory, NotificationMessageSenderProviderFactory>();
@@ -68,6 +69,7 @@ namespace VirtoCommerce.NotificationsModule.Web
             AbstractTypeFactory<NotificationMessage>.RegisterType<SmsNotificationMessage>().MapToType<NotificationMessageEntity>();
             AbstractTypeFactory<NotificationEntity>.RegisterType<EmailNotificationEntity>();
             AbstractTypeFactory<NotificationEntity>.RegisterType<SmsNotificationEntity>();
+            AbstractTypeFactory<NotificationMessageEntity>.RegisterType<EmailNotificationMessageEntity>();
 
             var settingsRegistrar = appBuilder.ApplicationServices.GetRequiredService<ISettingsRegistrar>();
             settingsRegistrar.RegisterSettings(ModuleConstants.Settings.AllSettings, ModuleInfo.Id);
@@ -82,7 +84,7 @@ namespace VirtoCommerce.NotificationsModule.Web
                 }).ToArray());
 
             var mvcJsonOptions = appBuilder.ApplicationServices.GetService<IOptions<MvcJsonOptions>>();
-            mvcJsonOptions.Value.SerializerSettings.Converters.Add(new PolymorphicJsonConverter());
+            mvcJsonOptions.Value.SerializerSettings.Converters.Add(new NotificationPolymorphicJsonConverter());
 
             using (var serviceScope = appBuilder.ApplicationServices.CreateScope())
             {

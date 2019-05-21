@@ -52,8 +52,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 
         public override NotificationEntity FromModel(Notification notification, PrimaryKeyResolvingMap pkMap)
         {
-            var emailNotification = notification as EmailNotification;
-            if (emailNotification != null)
+            if (notification is EmailNotification emailNotification)
             {
                 From = emailNotification.From;
                 To = emailNotification.To;
@@ -84,8 +83,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
 
         public override void Patch(NotificationEntity notification)
         {
-            var emailNotification = notification as EmailNotificationEntity;
-            if (emailNotification != null)
+            if (notification is EmailNotificationEntity emailNotification)
             {
                 emailNotification.From = From;
                 emailNotification.To = To;

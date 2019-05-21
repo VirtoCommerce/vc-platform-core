@@ -104,6 +104,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             message.CreatedDate = CreatedDate;
             message.ModifiedBy = ModifiedBy;
             message.ModifiedDate = ModifiedDate;
+            message.LanguageCode = LanguageCode;
 
             return message;
         }
@@ -126,6 +127,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Model
             CreatedDate = message.CreatedDate;
             ModifiedBy = message.ModifiedBy;
             ModifiedDate = message.ModifiedDate;
+            LanguageCode = message.LanguageCode;
 
             return this;
         }

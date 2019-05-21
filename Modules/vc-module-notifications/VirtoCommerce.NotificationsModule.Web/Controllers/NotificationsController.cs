@@ -1,12 +1,17 @@
+using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using VirtoCommerce.NotificationsModule.Core;
 using VirtoCommerce.NotificationsModule.Core.Model;
+using VirtoCommerce.NotificationsModule.Core.Model.Search;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Web.Model;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Web.Controllers
 {
@@ -19,15 +24,19 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         private readonly INotificationService _notificationService;
         private readonly INotificationTemplateRenderer _notificationTemplateRender;
         private readonly INotificationSender _notificationSender;
+        private readonly INotificationMessageSearchService _notificationMessageSearchService;
 
         public NotificationsController(INotificationSearchService notificationSearchService
             , INotificationService notificationService
-            , INotificationTemplateRenderer notificationTemplateRender, INotificationSender notificationSender)
+            , INotificationTemplateRenderer notificationTemplateRender
+            , INotificationSender notificationSender
+            , INotificationMessageSearchService notificationMessageSearchService)
         {
             _notificationSearchService = notificationSearchService;
             _notificationService = notificationService;
             _notificationTemplateRender = notificationTemplateRender;
             _notificationSender = notificationSender;
+            _notificationMessageSearchService = notificationMessageSearchService;
         }
 
         /// <summary>
@@ -105,15 +114,119 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         /// Parameters for template may be prepared by the method of getTestingParameters. Method returns string. If sending finished with success status
         /// this string is empty, otherwise string contains error message.
         /// </remarks>
-        /// <param name="request">Test notification request</param>
-        /// <param name="languageCode"></param>
+        /// <param name="request">Notification request</param>
         [HttpPost]
         [Route("template/sendnotification")]
-        public async Task<ActionResult<NotificationSendResult>> SendNotification([FromBody]Notification request, [FromBody]string languageCode)
+        public async Task<ActionResult<NotificationSendResult>> SendNotification([FromBody]NotificationRequest request)
         {
-            var result = await _notificationSender.SendNotificationAsync(request, languageCode);
+            var notification = await _notificationService.GetByTypeAsync(request.Type);
+            PopulateNotification(request, notification);
+            var result = await _notificationSender.SendNotificationAsync(notification, request.Language);
 
             return Ok(result);
+        }
+
+        /// <summary>
+        /// Get all notification journal 
+        /// </summary>
+        /// <remarks>
+        /// Method returns notification journal page with array of notification, that was send, sending or will be send in future. Result contains total count, that can be used
+        /// for paging.
+        /// </remarks>
+        /// <param name="start">Page setting start</param>
+        /// <param name="count">Page setting count</param>
+        /// <param name="sort">Sort expression</param>
+        [HttpGet]
+        [Route("journal")]
+        public async Task<ActionResult<NotificationMessageSearchResult>> GetNotificationJournal([FromQuery]int start, [FromQuery]int count, [FromQuery]string sort)
+        {
+            var searchCriteria = AbstractTypeFactory<NotificationMessageSearchCriteria>.TryCreateInstance();
+            searchCriteria.Skip = start;
+            searchCriteria.Take = count;
+            searchCriteria.Sort = sort;
+
+            var result = await _notificationMessageSearchService.SearchMessageAsync(searchCriteria);
+
+            return Ok(result);
+        }
+
+
+
+        private void PopulateNotification(NotificationRequest request, Notification notification)
+        {
+            notification.TenantIdentity = new TenantIdentity(request.ObjectId, request.ObjectTypeId);
+
+            foreach (var parameter in request.NotificationParameters)
+            {
+                SetValue(notification, parameter);
+            }
+        }
+
+        private void SetValue(Notification notification, NotificationParameter param)
+        {
+            var property = notification.GetType().GetProperty(ConvertPropertyName(param.ParameterName));
+            if (property == null) return;
+
+            var jObject = param.Value as JObject;
+            var jArray = param.Value as JArray;
+            if (jObject != null && param.IsDictionary)
+            {
+                property.SetValue(notification, jObject.ToObject<Dictionary<string, string>>());
+            }
+            else
+            {
+                switch (param.Type)
+                {
+                    case NotificationParameterValueType.Boolean:
+                        if (jArray != null && param.IsArray)
+                            property.SetValue(notification, jArray.ToObject<Boolean[]>());
+                        else
+                            property.SetValue(notification, param.Value.ToNullable<Boolean>());
+                        break;
+
+                    case NotificationParameterValueType.DateTime:
+                        if (jArray != null && param.IsArray)
+                            property.SetValue(notification, jArray.ToObject<DateTime[]>());
+                        else
+                            property.SetValue(notification, param.Value.ToNullable<DateTime>());
+                        break;
+
+                    case NotificationParameterValueType.Decimal:
+                        if (jArray != null && param.IsArray)
+                            property.SetValue(notification, jArray.ToObject<Decimal[]>());
+                        else
+                            property.SetValue(notification, Convert.ToDecimal(param.Value));
+                        break;
+
+                    case NotificationParameterValueType.Integer:
+                        if (jArray != null && param.IsArray)
+                            property.SetValue(notification, jArray.ToObject<Int32[]>());
+                        else
+                            property.SetValue(notification, param.Value.ToNullable<Int32>());
+                        break;
+
+                    case NotificationParameterValueType.String:
+                        if (jArray != null && param.IsArray)
+                            property.SetValue(notification, jArray.ToObject<String[]>());
+                        else
+                            property.SetValue(notification, (string)param.Value);
+                        break;
+
+                    default:
+                        if (jArray != null && param.IsArray)
+                            property.SetValue(notification, jArray.ToObject<String[]>());
+                        else
+                            property.SetValue(notification, (string)param.Value);
+                        break;
+                }
+            }
+        }
+
+        private string ConvertPropertyName(string propertyName)
+        {
+            return propertyName
+                .Replace("Sender", "From")
+                .Replace("Recipient", "To");
         }
     }
 }
