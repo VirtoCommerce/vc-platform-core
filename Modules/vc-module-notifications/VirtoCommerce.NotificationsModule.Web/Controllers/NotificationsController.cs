@@ -7,7 +7,6 @@ using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Web.Model;
-using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Web.Controllers
 {
@@ -38,7 +37,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         /// <returns></returns>
         [HttpPost]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
-        public async Task<ActionResult<GenericSearchResult<Notification>>> GetNotifications(NotificationSearchCriteria searchCriteria)
+        public async Task<ActionResult<NotificationSearchResult>> GetNotifications(NotificationSearchCriteria searchCriteria)
         {
             var notifications = await _notificationSearchService.SearchNotificationsAsync(searchCriteria);
 

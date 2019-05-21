@@ -19,22 +19,22 @@ namespace VirtoCommerce.CartModule.Data.Services
 {
     public class ShoppingCartServiceImpl : IShoppingCartService
     {
+        private readonly Func<ICartRepository> _repositoryFactory;
+        private readonly IDynamicPropertyService _dynamicPropertyService;
+        private readonly IShoppingCartTotalsCalculator _totalsCalculator;
+        private readonly IEventPublisher _eventPublisher;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
+
         public ShoppingCartServiceImpl(Func<ICartRepository> repositoryFactory, IDynamicPropertyService dynamicPropertyService,
                                       IShoppingCartTotalsCalculator totalsCalculator, IEventPublisher eventPublisher,
                                       IPlatformMemoryCache platformMemoryCache)
         {
-            RepositoryFactory = repositoryFactory;
-            EventPublisher = eventPublisher;
-            DynamicPropertyService = dynamicPropertyService;
-            TotalsCalculator = totalsCalculator;
-            PlatformMemoryCache = platformMemoryCache;
+            _repositoryFactory = repositoryFactory;
+            _dynamicPropertyService = dynamicPropertyService;
+            _totalsCalculator = totalsCalculator;
+            _eventPublisher = eventPublisher;
+            _platformMemoryCache = platformMemoryCache;
         }
-
-        protected Func<ICartRepository> RepositoryFactory { get; }
-        protected IDynamicPropertyService DynamicPropertyService { get; }
-        protected IShoppingCartTotalsCalculator TotalsCalculator { get; }
-        protected IEventPublisher EventPublisher { get; }
-        protected IPlatformMemoryCache PlatformMemoryCache { get; }
 
         #region IShoppingCartService Members
 
@@ -42,9 +42,9 @@ namespace VirtoCommerce.CartModule.Data.Services
         {
             var retVal = new List<ShoppingCart>();
             var cacheKey = CacheKey.With(GetType(), "GetByIdsAsync", string.Join("-", cartIds), responseGroup);
-            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
-                using (var repository = RepositoryFactory())
+                using (var repository = _repositoryFactory())
                 {
                     //Disable DBContext change tracking for better performance 
                     repository.DisableChangesTracking();
@@ -56,14 +56,14 @@ namespace VirtoCommerce.CartModule.Data.Services
                         //Calculate totals only for full responseGroup
                         if (responseGroup == null)
                         {
-                            TotalsCalculator.CalculateTotals(cart);
+                            _totalsCalculator.CalculateTotals(cart);
                         }
                         retVal.Add(cart);
                         cacheEntry.AddExpirationToken(CartCacheRegion.CreateChangeToken(cart));
                     }
                 }
 
-                await DynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal.ToArray<IHasDynamicProperties>());
+                await _dynamicPropertyService.LoadDynamicPropertyValuesAsync(retVal.ToArray<IHasDynamicProperties>());
 
                 return retVal;
             });
@@ -71,7 +71,7 @@ namespace VirtoCommerce.CartModule.Data.Services
 
         public virtual async Task<ShoppingCart> GetByIdAsync(string id, string responseGroup = null)
         {
-            var carts = await GetByIdsAsync(new[] {id}, responseGroup);
+            var carts = await GetByIdsAsync(new[] { id }, responseGroup);
             return carts.FirstOrDefault();
         }
 
@@ -80,13 +80,13 @@ namespace VirtoCommerce.CartModule.Data.Services
             var pkMap = new PrimaryKeyResolvingMap();
             var changedEntries = new List<GenericChangedEntry<ShoppingCart>>();
 
-            using (var repository = RepositoryFactory())
+            using (var repository = _repositoryFactory())
             {
                 var dataExistCarts = await repository.GetShoppingCartsByIdsAsync(carts.Where(x => !x.IsTransient()).Select(x => x.Id).ToArray());
                 foreach (var cart in carts)
                 {
                     //Calculate cart totals before save
-                    TotalsCalculator.CalculateTotals(cart);
+                    _totalsCalculator.CalculateTotals(cart);
 
                     var originalEntity = dataExistCarts.FirstOrDefault(x => x.Id == cart.Id);
                     var modifiedEntity = AbstractTypeFactory<ShoppingCartEntity>.TryCreateInstance()
@@ -104,10 +104,10 @@ namespace VirtoCommerce.CartModule.Data.Services
                 }
 
                 //Raise domain events
-                await EventPublisher.Publish(new CartChangeEvent(changedEntries));
+                await _eventPublisher.Publish(new CartChangeEvent(changedEntries));
                 await repository.UnitOfWork.CommitAsync();
                 pkMap.ResolvePrimaryKeys();
-                await EventPublisher.Publish(new CartChangedEvent(changedEntries));
+                await _eventPublisher.Publish(new CartChangedEvent(changedEntries));
             }
 
             ClearCache(carts);
@@ -115,19 +115,19 @@ namespace VirtoCommerce.CartModule.Data.Services
 
         public virtual async Task DeleteAsync(string[] cartIds)
         {
-            var carts = await GetByIdsAsync(cartIds);
+            var carts = (await GetByIdsAsync(cartIds)).ToArray();
 
-            using (var repository = RepositoryFactory())
+            using (var repository = _repositoryFactory())
             {
                 //Raise domain events before deletion
-                var changedEntries = carts.Select(x => new GenericChangedEntry<ShoppingCart>(x, EntryState.Deleted));
-                await EventPublisher.Publish(new CartChangeEvent(changedEntries));
+                var changedEntries = carts.Select(x => new GenericChangedEntry<ShoppingCart>(x, EntryState.Deleted)).ToArray();
+                await _eventPublisher.Publish(new CartChangeEvent(changedEntries));
 
                 await repository.RemoveCartsAsync(cartIds);
 
                 await repository.UnitOfWork.CommitAsync();
                 //Raise domain events after deletion
-                await EventPublisher.Publish(new CartChangedEvent(changedEntries));
+                await _eventPublisher.Publish(new CartChangedEvent(changedEntries));
             }
 
             ClearCache(carts);

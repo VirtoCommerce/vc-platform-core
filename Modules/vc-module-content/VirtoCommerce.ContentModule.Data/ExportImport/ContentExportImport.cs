@@ -131,12 +131,13 @@ namespace VirtoCommerce.ContentModule.Data.ExportImport
                                 progressCallback(progressInfo);
 
                                 await reader.DeserializeJsonArrayWithPagingAsync<ContentFolder>(_jsonSerializer, _batchSize,
-                                    async items =>
+                                    items =>
                                     {
                                         foreach (var item in items)
                                         {
                                             SaveContentFolderRecursive(item, progressCallback);
                                         }
+                                        return Task.CompletedTask;
                                     }, processedCount =>
                                     {
                                         progressInfo.Description = $"{ processedCount } menu links have been imported";

@@ -358,7 +358,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         [HttpDelete]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
-        public async Task<IActionResult> DeleteOrdersByIds([FromQuery] string[] ids)
+        public async Task<ActionResult> DeleteOrdersByIds([FromQuery] string[] ids)
         {
             await _customerOrderService.DeleteAsync(ids);
             return Ok();
@@ -473,7 +473,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         [HttpGet]
         [Route("invoice/{orderNumber}")]
         [SwaggerFileResponse]
-        public async Task<IActionResult> GetInvoicePdf(string orderNumber)
+        public async Task<ActionResult> GetInvoicePdf(string orderNumber)
         {
             var searchCriteria = AbstractTypeFactory<CustomerOrderSearchCriteria>.TryCreateInstance();
             searchCriteria.Number = orderNumber;

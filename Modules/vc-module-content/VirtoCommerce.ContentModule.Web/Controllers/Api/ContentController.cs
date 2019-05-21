@@ -45,7 +45,6 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         /// <returns>Object contains counters with main content types</returns>
         [HttpGet]
         [Route("~/api/content/{storeId}/stats")]
-        [ProducesResponseType(typeof(ContentStatistic), 200)]
         [Authorize(Permissions.Read)]
         public async Task<ActionResult<ContentStatistic>> GetStoreContentStatsAsync(string storeId)
         {
@@ -86,7 +85,6 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpDelete]
         [Route("")]
-        [ProducesResponseType(200)]
         [Authorize(Permissions.Delete)]
         public async Task<ActionResult> DeleteContentAsync(string contentType, string storeId, [FromQuery] string[] urls)
         {
@@ -108,9 +106,8 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         /// <returns>stream</returns>
         [HttpGet]
         [Route("")]
-        [ProducesResponseType(typeof(byte[]), 200)]
         [Authorize(Permissions.Read)]
-        public async Task<ActionResult> GetContentItemDataStream(string contentType, string storeId, [FromQuery] string relativeUrl)
+        public async Task<ActionResult<byte[]>> GetContentItemDataStream(string contentType, string storeId, [FromQuery] string relativeUrl)
         {
             var storageProvider = _blobContentStorageProviderFactory.CreateProvider(GetContentBasePath(contentType, storeId));
             if ((await storageProvider.GetBlobInfoAsync(relativeUrl)) != null)
@@ -131,7 +128,6 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         /// <returns>content items</returns>
         [HttpGet]
         [Route("search")]
-        [ProducesResponseType(typeof(ContentItem[]), 200)]
         [Authorize(Permissions.Read)]
         public async Task<ActionResult<ContentItem[]>> SearchContentAsync(string contentType, string storeId, [FromQuery] string folderUrl = null, [FromQuery] string keyword = null)
         {
@@ -156,7 +152,6 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpGet]
         [Route("move")]
-        [ProducesResponseType(200)]
         [Authorize(Permissions.Update)]
         public ActionResult MoveContent(string contentType, string storeId, string oldUrl, string newUrl)
         {
@@ -174,7 +169,6 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpGet]
         [Route("~/api/content/copy")]
-        [ProducesResponseType(200)]
         [Authorize(Permissions.Update)]
         public ActionResult CopyContent(string srcPath, string destPath)
         {
@@ -195,9 +189,8 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpGet]
         [Route("unpack")]
-        [ProducesResponseType(200)]
         [Authorize(Permissions.Update)]
-        public async Task<IActionResult> UnpackAsync(string contentType, string storeId, string archivePath, string destPath)
+        public async Task<ActionResult> UnpackAsync(string contentType, string storeId, string archivePath, string destPath)
         {
             var storageProvider = _blobContentStorageProviderFactory.CreateProvider(GetContentBasePath(contentType, storeId));
 
@@ -232,9 +225,8 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         /// <returns></returns>
         [HttpPost]
         [Route("folder")]
-        [ProducesResponseType(200)]
         [Authorize(Permissions.Create)]
-        public async Task<IActionResult> CreateContentFolderAsync(string contentType, string storeId, [FromBody] ContentFolder folder)
+        public async Task<ActionResult> CreateContentFolderAsync(string contentType, string storeId, [FromBody] ContentFolder folder)
         {
             var storageProvider = _blobContentStorageProviderFactory.CreateProvider(GetContentBasePath(contentType, storeId));
 
@@ -255,9 +247,8 @@ namespace VirtoCommerce.ContentModule.Web.Controllers.Api
         [HttpPost]
         [Route("")]
         [DisableFormValueModelBinding]
-        [ProducesResponseType(typeof(ContentItem[]), 200)]
         [Authorize(Permissions.Create)]
-        public async Task<IActionResult> UploadContent(string contentType, string storeId, [FromQuery] string folderUrl, [FromQuery]string url = null)
+        public async Task<ActionResult<ContentItem[]>> UploadContent(string contentType, string storeId, [FromQuery] string folderUrl, [FromQuery]string url = null)
         {
             if (url == null && !MultipartRequestHelper.IsMultipartContentType(Request.ContentType))
             {

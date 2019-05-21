@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using VirtoCommerce.NotificationsModule.Core.Model;
-using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Core.Services
 {
@@ -9,6 +8,6 @@ namespace VirtoCommerce.NotificationsModule.Core.Services
     /// </summary>
     public interface INotificationSearchService
     {
-        Task<GenericSearchResult<Notification>> SearchNotificationsAsync(NotificationSearchCriteria criteria);
+        Task<NotificationSearchResult> SearchNotificationsAsync(NotificationSearchCriteria criteria);
     }
 }

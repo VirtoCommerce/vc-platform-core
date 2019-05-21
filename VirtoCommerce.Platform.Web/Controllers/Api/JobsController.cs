@@ -22,8 +22,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         /// <returns></returns>
         [HttpGet]
         [Route("{id}")]
-        [ProducesResponseType(typeof(Job), 200)]
-        public IActionResult GetStatus(string id)
+        public ActionResult<Job> GetStatus(string id)
         {
             var result = GetJob(id);
             return Ok(result);

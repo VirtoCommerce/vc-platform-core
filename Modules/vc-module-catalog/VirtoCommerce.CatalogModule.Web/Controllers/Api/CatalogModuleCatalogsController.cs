@@ -140,7 +140,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [HttpPut]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.CatalogUpdate)]
-        public async Task<IActionResult> Update([FromBody]Catalog catalog)
+        public async Task<ActionResult> Update([FromBody]Catalog catalog)
         {
             await _catalogService.SaveChangesAsync(new[] { catalog });
             return NoContent();
@@ -155,7 +155,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         [HttpDelete]
         [Route("{id}")]
         [Authorize(ModuleConstants.Security.Permissions.CatalogDelete)]
-        public async Task<IActionResult> Delete(string id)
+        public async Task<ActionResult> Delete(string id)
         {
             //TODO
             //var catalog = (await _catalogService.GetByIdsAsync(new [] { id})).FirstOrDefault();

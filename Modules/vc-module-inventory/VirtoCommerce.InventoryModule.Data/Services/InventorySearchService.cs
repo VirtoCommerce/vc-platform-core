@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.Domain.Inventory.Model.Search;
-using VirtoCommerce.InventoryModule.Core.Model;
+using VirtoCommerce.InventoryModule.Core.Model.Search;
 using VirtoCommerce.InventoryModule.Core.Services;
 using VirtoCommerce.InventoryModule.Data.Caching;
 using VirtoCommerce.InventoryModule.Data.Model;
@@ -18,25 +18,25 @@ namespace VirtoCommerce.InventoryModule.Data.Services
 {
     public class InventorySearchService : IInventorySearchService
     {
+        private readonly Func<IInventoryRepository> _repositoryFactory;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
+        private readonly IInventoryService _inventoryService;
+
         public InventorySearchService(Func<IInventoryRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache, IInventoryService inventoryService)
         {
-            RepositoryFactory = repositoryFactory;
-            PlatformMemoryCache = platformMemoryCache;
-            InventoryService = inventoryService;
+            _repositoryFactory = repositoryFactory;
+            _platformMemoryCache = platformMemoryCache;
+            _inventoryService = inventoryService;
         }
 
-        protected Func<IInventoryRepository> RepositoryFactory { get; }
-        protected IPlatformMemoryCache PlatformMemoryCache { get; }
-        protected IInventoryService InventoryService { get; }
-
-        public virtual async Task<GenericSearchResult<InventoryInfo>> SearchInventoriesAsync(InventorySearchCriteria criteria)
+        public virtual async Task<InventoryInfoSearchResult> SearchInventoriesAsync(InventorySearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), "SearchInventoriesAsync", criteria.GetCacheKey());
-            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(InventorySearchCacheRegion.CreateChangeToken());
-                var result = new GenericSearchResult<InventoryInfo>();
-                using (var repository = RepositoryFactory())
+                var result = AbstractTypeFactory<InventoryInfoSearchResult>.TryCreateInstance();
+                using (var repository = _repositoryFactory())
                 {
                     repository.DisableChangesTracking();
 
@@ -47,7 +47,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
                     if (criteria.Take > 0)
                     {
                         var inventoryIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
-                        result.Results = (await InventoryService.GetByIdsAsync(inventoryIds, criteria.ResponseGroup)).AsQueryable().OrderBySortInfos(sortInfos).ToArray();
+                        result.Results = (await _inventoryService.GetByIdsAsync(inventoryIds, criteria.ResponseGroup)).AsQueryable().OrderBySortInfos(sortInfos).ToArray();
                     }
                 }
                 return result;
@@ -66,7 +66,7 @@ namespace VirtoCommerce.InventoryModule.Data.Services
             {
                 query = query.Where(x => criteria.FulfillmentCenterIds.Contains(x.FulfillmentCenterId));
             }
-            
+
             return query.OrderBySortInfos(sortInfos);
         }
 
