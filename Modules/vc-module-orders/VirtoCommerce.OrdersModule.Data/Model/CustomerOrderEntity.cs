@@ -14,59 +14,84 @@ namespace VirtoCommerce.OrdersModule.Data.Model
 {
     public class CustomerOrderEntity : OperationEntity, ISupportPartialPriceUpdate
     {
-        [Required] [StringLength(64)] public string CustomerId { get; set; }
-        [StringLength(255)] public string CustomerName { get; set; }
+        [Required]
+        [StringLength(64)]
+        public string CustomerId { get; set; }
+        [StringLength(255)]
 
-        [Required] [StringLength(64)] public string StoreId { get; set; }
-        [StringLength(255)] public string StoreName { get; set; }
+        public string CustomerName { get; set; }
 
-        [StringLength(64)] public string ChannelId { get; set; }
-        [StringLength(64)] public string OrganizationId { get; set; }
-        [StringLength(255)] public string OrganizationName { get; set; }
+        [Required]
+        [StringLength(64)]
+        public string StoreId { get; set; }
+        [StringLength(255)]
+        public string StoreName { get; set; }
 
-        [StringLength(64)] public string EmployeeId { get; set; }
-        [StringLength(255)] public string EmployeeName { get; set; }
+        [StringLength(64)]
 
-        [StringLength(64)] public string SubscriptionId { get; set; }
-        [StringLength(64)] public string SubscriptionNumber { get; set; }
+        public string ChannelId { get; set; }
+        [StringLength(64)]
+        public string OrganizationId { get; set; }
+        [StringLength(255)]
+        public string OrganizationName { get; set; }
+
+        [StringLength(64)]
+
+        public string EmployeeId { get; set; }
+        [StringLength(255)]
+        public string EmployeeName { get; set; }
+
+        [StringLength(64)]
+        public string SubscriptionId { get; set; }
+        [StringLength(64)]
+        public string SubscriptionNumber { get; set; }
 
         public bool IsPrototype { get; set; }
 
-        [Column(TypeName = "Money")] public decimal DiscountAmount { get; set; }
-        [Column(TypeName = "Money")] public decimal TaxTotal { get; set; }
-        [Column(TypeName = "Money")] public decimal Total { get; set; }
-        [Column(TypeName = "Money")] public decimal SubTotal { get; set; }
-        [Column(TypeName = "Money")] public decimal SubTotalWithTax { get; set; }
-        [Column(TypeName = "Money")] public decimal ShippingTotal { get; set; }
-        [Column(TypeName = "Money")] public decimal ShippingTotalWithTax { get; set; }
-        [Column(TypeName = "Money")] public decimal PaymentTotal { get; set; }
-        [Column(TypeName = "Money")] public decimal PaymentTotalWithTax { get; set; }
-        [Column(TypeName = "Money")] public decimal HandlingTotal { get; set; }
-        [Column(TypeName = "Money")] public decimal HandlingTotalWithTax { get; set; }
-        [Column(TypeName = "Money")] public decimal DiscountTotal { get; set; }
-        [Column(TypeName = "Money")] public decimal DiscountTotalWithTax { get; set; }
-        [StringLength(16)] public string LanguageCode { get; set; }
+        [Column(TypeName = "Money")]
+        public decimal DiscountAmount { get; set; }
+        [Column(TypeName = "Money")]
+        public decimal TaxTotal { get; set; }
+        [Column(TypeName = "Money")]
+        public decimal Total { get; set; }
+        [Column(TypeName = "Money")]
+        public decimal SubTotal { get; set; }
+        [Column(TypeName = "Money")]
+        public decimal SubTotalWithTax { get; set; }
+        [Column(TypeName = "Money")]
+        public decimal ShippingTotal { get; set; }
+        [Column(TypeName = "Money")]
+        public decimal ShippingTotalWithTax { get; set; }
+        [Column(TypeName = "Money")]
+        public decimal PaymentTotal { get; set; }
+        [Column(TypeName = "Money")]
+        public decimal PaymentTotalWithTax { get; set; }
+        [Column(TypeName = "Money")]
+        public decimal HandlingTotal { get; set; }
+        [Column(TypeName = "Money")]
+        public decimal HandlingTotalWithTax { get; set; }
+        [Column(TypeName = "Money")]
+        public decimal DiscountTotal { get; set; }
+        [Column(TypeName = "Money")]
+        public decimal DiscountTotalWithTax { get; set; }
+        [StringLength(16)]
+        public string LanguageCode { get; set; }
         public decimal TaxPercentRate { get; set; }
 
-        [StringLength(128)] public string ShoppingCartId { get; set; }
+        [StringLength(128)]
+        public string ShoppingCartId { get; set; }
 
-        public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } =
-            new NullCollection<TaxDetailEntity>();
+        public virtual ObservableCollection<TaxDetailEntity> TaxDetails { get; set; } = new NullCollection<TaxDetailEntity>();
 
-        public virtual ObservableCollection<AddressEntity> Addresses { get; set; } =
-            new NullCollection<AddressEntity>();
+        public virtual ObservableCollection<AddressEntity> Addresses { get; set; } = new NullCollection<AddressEntity>();
 
-        public virtual ObservableCollection<PaymentInEntity> InPayments { get; set; } =
-            new NullCollection<PaymentInEntity>();
+        public virtual ObservableCollection<PaymentInEntity> InPayments { get; set; } = new NullCollection<PaymentInEntity>();
 
         public virtual ObservableCollection<LineItemEntity> Items { get; set; } = new NullCollection<LineItemEntity>();
 
-        public virtual ObservableCollection<ShipmentEntity> Shipments { get; set; } =
-            new NullCollection<ShipmentEntity>();
+        public virtual ObservableCollection<ShipmentEntity> Shipments { get; set; } = new NullCollection<ShipmentEntity>();
 
-        public virtual ObservableCollection<DiscountEntity> Discounts { get; set; } =
-            new NullCollection<DiscountEntity>();
-
+        public virtual ObservableCollection<DiscountEntity> Discounts { get; set; } = new NullCollection<DiscountEntity>();
 
         public override OrderOperation ToModel(OrderOperation operation)
         {
@@ -104,17 +129,12 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             order.LanguageCode = LanguageCode;
             order.TaxPercentRate = TaxPercentRate;
 
-            order.Discounts = Discounts.Select(x => x.ToModel(AbstractTypeFactory<Discount>.TryCreateInstance()))
-                .ToList();
+            order.Discounts = Discounts.Select(x => x.ToModel(AbstractTypeFactory<Discount>.TryCreateInstance())).ToList();
             order.Items = Items.Select(x => x.ToModel(AbstractTypeFactory<LineItem>.TryCreateInstance())).ToList();
-            order.Addresses = Addresses.Select(x => x.ToModel(AbstractTypeFactory<Address>.TryCreateInstance()))
-                .ToList();
-            order.Shipments = Shipments.Select(x => x.ToModel(AbstractTypeFactory<Shipment>.TryCreateInstance()))
-                .OfType<Shipment>().ToList();
-            order.InPayments = InPayments.Select(x => x.ToModel(AbstractTypeFactory<PaymentIn>.TryCreateInstance()))
-                .OfType<PaymentIn>().ToList();
-            order.TaxDetails = TaxDetails.Select(x => x.ToModel(AbstractTypeFactory<TaxDetail>.TryCreateInstance()))
-                .ToList();
+            order.Addresses = Addresses.Select(x => x.ToModel(AbstractTypeFactory<Address>.TryCreateInstance())).ToList();
+            order.Shipments = Shipments.Select(x => x.ToModel(AbstractTypeFactory<Shipment>.TryCreateInstance())).OfType<Shipment>().ToList();
+            order.InPayments = InPayments.Select(x => x.ToModel(AbstractTypeFactory<PaymentIn>.TryCreateInstance())).OfType<PaymentIn>().ToList();
+            order.TaxDetails = TaxDetails.Select(x => x.ToModel(AbstractTypeFactory<TaxDetail>.TryCreateInstance())).ToList();
 
             base.ToModel(order);
 
@@ -215,7 +235,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             var target = operation as CustomerOrderEntity;
             if (target == null)
             {
-                throw new ArgumentException(@"operation argument must be of type CustomerOrderEntity", nameof(operation));
+                throw new ArgumentException(@"operation argument must be of type CustomerOrderEntity",
+                    nameof(operation));
             }
 
             target.CustomerId = CustomerId;
@@ -232,7 +253,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             target.LanguageCode = LanguageCode;
 
             // Checks whether calculation of sum is needed to pass the result to the property of base class before calling of base.Patch
-            var needPatchPrices = !(GetNonCalculatablePrices().All(x => x == 0m) && target.GetNonCalculatablePrices().Any(x => x != 0m));
+            var needPatchPrices = !(GetNonCalculatablePrices().All(x => x == 0m) &&
+                                    target.GetNonCalculatablePrices().Any(x => x != 0m));
 
             if (needPatchPrices)
             {
@@ -354,8 +376,8 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             {
                 item.ResetPrices();
             }
-
         }
+
         public virtual IEnumerable<decimal> GetNonCalculatablePrices()
         {
             yield return TaxPercentRate;
