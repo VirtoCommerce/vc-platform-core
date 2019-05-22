@@ -61,12 +61,14 @@ namespace VirtoCommerce.NotificationsModule.Web
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
             _appBuilder = appBuilder;
-            AbstractTypeFactory<Notification>.RegisterType<EmailNotification>().MapToType<NotificationEntity>();
-            AbstractTypeFactory<Notification>.RegisterType<SmsNotification>().MapToType<NotificationEntity>();
-            AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>().MapToType<NotificationTemplateEntity>();
-            AbstractTypeFactory<NotificationTemplate>.RegisterType<SmsNotificationTemplate>().MapToType<NotificationTemplateEntity>();
-            AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>().MapToType<NotificationMessageEntity>();
-            AbstractTypeFactory<NotificationMessage>.RegisterType<SmsNotificationMessage>().MapToType<NotificationMessageEntity>();
+            var registrar = appBuilder.ApplicationServices.GetService<INotificationRegistrar>();
+            registrar.RegisterNotification<EmailNotification, NotificationEntity>();
+            registrar.RegisterNotification<SmsNotification, NotificationEntity>();
+            registrar.RegisterNotificationTemplate<EmailNotificationTemplate, NotificationTemplateEntity>();
+            registrar.RegisterNotificationTemplate<SmsNotificationTemplate, NotificationTemplateEntity>();
+            registrar.RegisterNotificationMessage<EmailNotificationMessage, NotificationMessageEntity>();
+            registrar.RegisterNotificationMessage<SmsNotificationMessage, NotificationMessageEntity>();
+
             AbstractTypeFactory<NotificationEntity>.RegisterType<EmailNotificationEntity>();
             AbstractTypeFactory<NotificationEntity>.RegisterType<SmsNotificationEntity>();
             AbstractTypeFactory<NotificationMessageEntity>.RegisterType<EmailNotificationMessageEntity>();

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -10,13 +9,13 @@ using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Senders;
+using VirtoCommerce.NotificationsModule.Data.Services;
 using VirtoCommerce.NotificationsModule.LiquidRenderer;
 using VirtoCommerce.NotificationsModule.Smtp;
 using VirtoCommerce.NotificationsModule.Tests.Common;
 using VirtoCommerce.NotificationsModule.Tests.Model;
 using VirtoCommerce.NotificationsModule.Tests.NotificationTypes;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Notifications;
 using Xunit;
 
 namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
@@ -50,30 +49,20 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
 
             _sender = new NotificationSender(_templateRender, _messageServiceMock.Object, _logNotificationSenderMock.Object, _senderFactoryMock.Object);
 
-            //todo
-            if (!AbstractTypeFactory<Notification>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotification))))
-            {
-                AbstractTypeFactory<Notification>.RegisterType<EmailNotification>().MapToType<NotificationEntity>();
-            }
+            var notificationService = new NotificationService(null, null);
+            notificationService.RegisterNotification<EmailNotification, NotificationEntity>();
+            notificationService.RegisterNotificationTemplate<EmailNotificationTemplate, NotificationTemplateEntity>();
+            notificationService.RegisterNotificationMessage<EmailNotificationMessage, NotificationMessageEntity>();
 
-            if (!AbstractTypeFactory<NotificationTemplate>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotificationTemplate))))
-            {
-                AbstractTypeFactory<NotificationTemplate>.RegisterType<EmailNotificationTemplate>().MapToType<NotificationTemplateEntity>();
-            }
-
-            if (!AbstractTypeFactory<NotificationMessage>.AllTypeInfos.Any(t => t.IsAssignableTo(nameof(EmailNotificationMessage))))
-            {
-                AbstractTypeFactory<NotificationMessage>.RegisterType<EmailNotificationMessage>().MapToType<NotificationMessageEntity>();
-            }
         }
 
         [Fact]
         public async Task OrderSendEmailNotification_SentNotification()
         {
             //Arrange
-            string language = "en-US";
-            string subject = "Your order was sent";
-            string body = "Your order <strong>{{ customer_order.number}}</strong> was sent.<br> Number of sent parcels - " +
+            var language = "en-US";
+            var subject = "Your order was sent";
+            var body = "Your order <strong>{{ customer_order.number}}</strong> was sent.<br> Number of sent parcels - " +
                           "<strong>{{ customer_order.shipments | size}}</strong>.<br> Parcels tracking numbers:<br> {% for shipment in customer_order.shipments %} " +
                           "<br><strong>{{ shipment.number}}</strong> {% endfor %}<br><br>Sent date - <strong>{{ customer_order.modified_date }}</strong>.";
             var notification = new OrderSentEmailNotification()
@@ -106,7 +95,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                 Body = body,
                 SendDate = date
             };
-            //_serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(OrderSentEmailNotification), null, null, null)).ReturnsAsync(notification);
+
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
 
             //Act
@@ -120,9 +109,9 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         public async Task InvoiceEmailNotification_SentNotification()
         {
             //Arrange
-            string language = "default";
-            string subject = "Invoice for order - <strong>{{ customer_order.number }}</strong>";
-            string body = TestUtility.GetStringByPath($"Content\\{nameof(InvoiceEmailNotification)}.html");
+            var language = "default";
+            var subject = "Invoice for order - <strong>{{ customer_order.number }}</strong>";
+            var body = TestUtility.GetStringByPath($"Content\\{nameof(InvoiceEmailNotification)}.html");
             var notification = new InvoiceEmailNotification()
             {
                 CustomerOrder = new CustomerOrder()
@@ -165,7 +154,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                 Body = body,
                 SendDate = date
             };
-            //_serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(InvoiceEmailNotification), null, null, null)).ReturnsAsync(notification);
+
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
 
 
@@ -180,9 +169,9 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         public async Task RegistrationEmailNotification_SentNotification()
         {
             //Arrange
-            string language = "default";
-            string subject = "Your login - {{ login }}.";
-            string body = "Thank you for registration {{ firstname }} {{ lastname }}!!!";
+            var language = "default";
+            var subject = "Your login - {{ login }}.";
+            var body = "Thank you for registration {{ firstname }} {{ lastname }}!!!";
             var notification = new RegistrationEmailNotification()
             {
                 FirstName = "First Name",
@@ -207,7 +196,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                 Body = body,
                 SendDate = date
             };
-            //_serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(RegistrationEmailNotification), null, null, null)).ReturnsAsync(notification);
+
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
 
             //Act
@@ -221,9 +210,9 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         public async Task OrderPaidEmailNotification_SentNotification()
         {
             //Arrange
-            string language = "default";
-            string subject = "Your order was fully paid";
-            string body = "Thank you for paying <strong>{{ customer_order.number }}</strong> order.<br> " +
+            var language = "default";
+            var subject = "Your order was fully paid";
+            var body = "Thank you for paying <strong>{{ customer_order.number }}</strong> order.<br> " +
                           "You had paid <strong>{{ customer_order.total | math.format 'N'}} {{ customer_order.currency }}</strong>.<br>" +
                           " Paid date - <strong>{{ customer_order.modified_date }}</strong>.";
             var notification = new OrderPaidEmailNotification()
@@ -254,7 +243,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                 Body = body,
                 SendDate = date
             };
-            //_serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(OrderPaidEmailNotification), null, null, null)).ReturnsAsync(notification);
+
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
 
             //Act
@@ -269,8 +258,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         {
             //Arrange
             string language = null;
-            string subject = "some subject";
-            string body = "some body";
+            var subject = "some subject";
+            var body = "some body";
             var notification = new EmailNotification()
             {
                 Templates = new List<NotificationTemplate>()
@@ -294,7 +283,6 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                 SendDate = DateTime.Now,
                 TenantIdentity = new TenantIdentity(null, null)
             };
-            //_serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(EmailNotification), null, null, null)).ReturnsAsync(notification);
 
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
 
@@ -309,9 +297,9 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         public async Task EmailNotification_FailSend()
         {
             //Arrange
-            string language = "default";
-            string subject = "some subject";
-            string body = "some body";
+            var language = "default";
+            var subject = "some subject";
+            var body = "some body";
             var notification = new EmailNotification()
             {
                 Templates = new List<NotificationTemplate>()
@@ -333,7 +321,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                 Body = body,
                 SendDate = DateTime.Now
             };
-            //_serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(EmailNotification), null, null, null)).ReturnsAsync(notification);
+
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
             _messageSenderMock.Setup(ms => ms.SendNotificationAsync(It.IsAny<NotificationMessage>())).Throws(new SmtpException());
 
@@ -348,7 +336,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         public async Task EmailNotification_ArgumentNullException()
         {
             //Arrange
-            string language = "default";
+            var language = "default";
             NotificationMessage message = null;
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new[] { message }));
 
@@ -360,9 +348,9 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
         public async Task SendNotificationAsync_SentEmailNotification()
         {
             //Arrange
-            string language = "default";
-            string subject = "some subject";
-            string body = "some body";
+            var language = "default";
+            var subject = "some subject";
+            var body = "some body";
             var notification = new EmailNotification()
             {
                 Templates = new List<NotificationTemplate>()
@@ -384,7 +372,7 @@ namespace VirtoCommerce.NotificationsModule.Tests.UnitTests
                 Body = body,
                 SendDate = DateTime.Now
             };
-            //_serviceMock.Setup(serv => serv.GetByTypeAsync(nameof(EmailNotification), null, null, null)).ReturnsAsync(notification);
+
             _messageServiceMock.Setup(ms => ms.SaveNotificationMessagesAsync(new NotificationMessage[] { message }));
             _messageSenderMock.Setup(ms => ms.SendNotificationAsync(It.IsAny<NotificationMessage>())).Throws(new SmtpException());
 

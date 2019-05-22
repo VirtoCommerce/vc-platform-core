@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -26,8 +27,8 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
     {
         private NotificationsExportImport _notificationsExportImportManager;
         private readonly INotificationRegistrar _notificationRegistrar;
-        private readonly NotificationSearchService _notificationSearchService;
-        private readonly NotificationService _notificationService;
+        private readonly Mock<INotificationSearchService> _notificationSearchServiceMock;
+        private readonly Mock<INotificationService> _notificationServiceMock;
         private readonly Mock<INotificationRepository> _repositoryMock;
         private readonly Mock<IEventPublisher> _eventPulisherMock;
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
@@ -39,21 +40,10 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             INotificationRepository RepositoryFactory() => _repositoryMock.Object;
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _repositoryMock.Setup(ss => ss.UnitOfWork).Returns(_mockUnitOfWork.Object);
-            //_notificationSearchService = new NotificationSearchService(RepositoryFactory);
-            _notificationService = new NotificationService(RepositoryFactory, _eventPulisherMock.Object);
-            _notificationsExportImportManager = new NotificationsExportImport(_notificationSearchService, _notificationService, GetJsonSerializer());
+            _notificationSearchServiceMock = new Mock<INotificationSearchService>();
+            _notificationServiceMock = new Mock<INotificationService>();
 
-            var mvcJsonOptions = new MvcJsonOptions()
-            {
-                SerializerSettings =
-                {
-                    NullValueHandling = NullValueHandling.Ignore,
-                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                    Formatting = Formatting.Indented
-                }
-            };
-
-            _notificationsExportImportManager = new NotificationsExportImport(_notificationSearchService, _notificationService, JsonSerializer.Create(mvcJsonOptions.SerializerSettings));
+            _notificationsExportImportManager = new NotificationsExportImport(_notificationSearchServiceMock.Object, _notificationServiceMock.Object, GetJsonSerializer());
 
             _notificationRegistrar = new NotificationService(RepositoryFactory, _eventPulisherMock.Object);
 
@@ -93,22 +83,19 @@ namespace VirtoCommerce.NotificationsModule.Tests.IntegrationTests
             //Arrange
             var manifest = new PlatformExportManifest();
             var fileStream = new FileStream(Path.GetFullPath("export_test.json"), FileMode.Create);
-            var entity = AbstractTypeFactory<NotificationEntity>.TryCreateInstance(nameof(EmailNotificationEntity));
+            var entity = AbstractTypeFactory<Notification>.TryCreateInstance(nameof(EmailNotification));
             entity.Id = Guid.NewGuid().ToString();
             entity.Type = nameof(RegistrationEmailNotification);
             entity.Kind = nameof(EmailNotification);
-            entity.TenantId = Guid.NewGuid().ToString();
-            entity.TenantType = nameof(Notification);
-            entity.Templates = new ObservableCollection<NotificationTemplateEntity>()
+            entity.TenantIdentity = new TenantIdentity(Guid.NewGuid().ToString(), nameof(Notification));
+            entity.Templates = new ObservableCollection<NotificationTemplate>()
             {
-                new NotificationTemplateEntity() { Body = "test", LanguageCode = "en-US" },
+                new EmailNotificationTemplate() { Body = "test", LanguageCode = "en-US" },
             };
 
-            //_repositoryMock.Setup(r => r.GetByTypesAsync(new[] { nameof(RegistrationEmailNotification) }, null, null, NotificationResponseGroup.Default.ToString(), true))
-            //               .ReturnsAsync(new[] { entity });
-
-            //_repositoryMock.Setup(r => r.GetByTypesAsync(new[] { nameof(RegistrationEmailNotification) }, null, null, NotificationResponseGroup.Full.ToString(), true))
-            //               .ReturnsAsync(new[] { entity });
+            _notificationSearchServiceMock
+                .Setup(nss => nss.SearchNotificationsAsync(It.IsAny<NotificationSearchCriteria>()))
+                .ReturnsAsync(new NotificationSearchResult {Results = new List<Notification> { entity } , TotalCount = 1});
 
             //Act
             await _notificationsExportImportManager.DoExportAsync(fileStream, exportImportProgressInfo => { }, new CancellationTokenWrapper(CancellationToken.None));

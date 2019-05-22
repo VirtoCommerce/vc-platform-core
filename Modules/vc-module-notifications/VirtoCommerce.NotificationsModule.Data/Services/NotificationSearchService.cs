@@ -56,6 +56,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
             criteria.Skip = criteria.Skip - tmpSkip;
             criteria.Take = criteria.Take - tmpTake;
+
             if (criteria.Take > 0)
             {
                 var transientNotificationsQuery = AbstractTypeFactory<Notification>.AllTypeInfos.Select(x => AbstractTypeFactory<Notification>.TryCreateInstance(x.Type.Name))
@@ -67,6 +68,8 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
 
                 var allPersistentProvidersTypes = result.Results.Select(x => x.GetType()).Distinct();
                 transientNotificationsQuery = transientNotificationsQuery.Where(x => !allPersistentProvidersTypes.Contains(x.GetType()));
+
+                transientNotificationsQuery = transientNotificationsQuery.Where(x => !x.Kind.EqualsInvariant(x.Type));
 
                 result.TotalCount += transientNotificationsQuery.Count();
                 var transientNotifications = transientNotificationsQuery.Skip(criteria.Skip).Take(criteria.Take).ToList();

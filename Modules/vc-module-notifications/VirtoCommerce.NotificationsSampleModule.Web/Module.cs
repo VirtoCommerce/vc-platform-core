@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Data.Repositories;
@@ -31,10 +30,10 @@ namespace VirtoCommerce.NotificationsSampleModule.Web
         public void PostInitialize(IApplicationBuilder appBuilder)
         {
             AbstractTypeFactory<NotificationEntity>.RegisterType<TwitterNotificationEntity>();
-            AbstractTypeFactory<Notification>.RegisterType<TwitterNotification>().MapToType<NotificationEntity>();
-            AbstractTypeFactory<NotificationTemplate>.RegisterType<TwitterNotificationTemplate>().MapToType<NotificationTemplateEntity>();
-            AbstractTypeFactory<NotificationMessage>.RegisterType<TwitterNotificationMessage>().MapToType<NotificationMessageEntity>();
             var registrar = appBuilder.ApplicationServices.GetService<INotificationRegistrar>();
+            registrar.RegisterNotification<TwitterNotification, NotificationEntity>();
+            registrar.RegisterNotificationTemplate<TwitterNotificationTemplate, NotificationTemplateEntity>();
+            registrar.RegisterNotificationMessage<TwitterNotificationMessage, NotificationMessageEntity>();
             registrar.RegisterNotification<PostTwitterNotification>();
             registrar.RegisterNotification<RegistrationEmailNotification>();
             registrar.RegisterNotification<ResetPasswordEmailNotification>();

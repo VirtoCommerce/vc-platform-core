@@ -92,6 +92,38 @@ namespace VirtoCommerce.NotificationsModule.Data.Services
             }
         }
 
+        public void RegisterNotificationMessage<T>() where T : NotificationMessage
+        {
+            if (AbstractTypeFactory<NotificationMessage>.AllTypeInfos.All(t => t.Type != typeof(T)))
+            {
+                AbstractTypeFactory<NotificationMessage>.RegisterType<T>();
+            }
+        }
+
+        public void RegisterNotificationMessage<T, TMap>() where T : NotificationMessage where TMap : AuditableEntity
+        {
+            if (AbstractTypeFactory<NotificationMessage>.AllTypeInfos.All(t => t.Type != typeof(T)))
+            {
+                AbstractTypeFactory<NotificationMessage>.RegisterType<T>().MapToType<TMap>();
+            }
+        }
+
+        public void RegisterNotificationTemplate<T>() where T : NotificationTemplate
+        {
+            if (AbstractTypeFactory<NotificationTemplate>.AllTypeInfos.All(t => t.Type != typeof(T)))
+            {
+                AbstractTypeFactory<NotificationTemplate>.RegisterType<T>();
+            }
+        }
+
+        public void RegisterNotificationTemplate<T, TMap>() where T : NotificationTemplate where TMap : AuditableEntity
+        {
+            if (AbstractTypeFactory<NotificationTemplate>.AllTypeInfos.All(t => t.Type != typeof(T)))
+            {
+                AbstractTypeFactory<NotificationTemplate>.RegisterType<T>().MapToType<TMap>();
+            }
+        }
+
         private void ValidateNotificationProperties(IEnumerable<Notification> notifications)
         {
             if (notifications == null)

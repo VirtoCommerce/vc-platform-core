@@ -124,7 +124,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         [Route("template/sendnotification")]
         public async Task<ActionResult<NotificationSendResult>> SendNotification([FromBody]NotificationRequest request)
         {
-            var notification = await _notificationService.GetByTypeAsync(request.Type);
+            var notification = await _notificationSearchService.GetNotificationAsync(request.Type, new TenantIdentity(request.ObjectId, request.ObjectTypeId));
 
             if (notification == null)
             {
