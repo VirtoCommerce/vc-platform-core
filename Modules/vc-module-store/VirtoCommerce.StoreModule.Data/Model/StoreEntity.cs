@@ -14,7 +14,7 @@ namespace VirtoCommerce.StoreModule.Data.Model
         {
             Languages = new NullCollection<StoreLanguageEntity>();
             Currencies = new NullCollection<StoreCurrencyEntity>();
-            ShippingMethods = new NullCollection<StoreShippingMethodEntity>();
+
             TrustedGroups = new NullCollection<StoreTrustedGroupEntity>();
             FulfillmentCenters = new NullCollection<StoreFulfillmentCenterEntity>();
             SeoInfos = new NullCollection<SeoInfoEntity>();
@@ -76,7 +76,6 @@ namespace VirtoCommerce.StoreModule.Data.Model
         public virtual ObservableCollection<StoreCurrencyEntity> Currencies { get; set; }
         public virtual ObservableCollection<StoreTrustedGroupEntity> TrustedGroups { get; set; }
 
-        public virtual ObservableCollection<StoreShippingMethodEntity> ShippingMethods { get; set; }
 
         public virtual ObservableCollection<StoreFulfillmentCenterEntity> FulfillmentCenters { get; set; }
         public virtual ObservableCollection<SeoInfoEntity> SeoInfos { get; set; }
@@ -186,10 +185,6 @@ namespace VirtoCommerce.StoreModule.Data.Model
                 }));
             }
 
-            if (store.ShippingMethods != null)
-            {
-                ShippingMethods = new ObservableCollection<StoreShippingMethodEntity>(store.ShippingMethods.Select(x => AbstractTypeFactory<StoreShippingMethodEntity>.TryCreateInstance().FromModel(x, pkMap)));
-            }
 
             FulfillmentCenters = new ObservableCollection<StoreFulfillmentCenterEntity>();
             if (store.AdditionalFulfillmentCenterIds != null)
@@ -263,12 +258,7 @@ namespace VirtoCommerce.StoreModule.Data.Model
                 TrustedGroups.Patch(target.TrustedGroups, trustedGroupComparer,
                                       (sourceGroup, targetGroup) => sourceGroup.GroupName = targetGroup.GroupName);
             }
-            if (!ShippingMethods.IsNullCollection())
-            {
-                var shippingComparer = AnonymousComparer.Create((StoreShippingMethodEntity x) => x.Code);
-                ShippingMethods.Patch(target.ShippingMethods, shippingComparer,
-                                      (sourceMethod, targetMethod) => sourceMethod.Patch(targetMethod));
-            }
+
             if (!FulfillmentCenters.IsNullCollection())
             {
                 var fulfillmentCenterComparer = AnonymousComparer.Create((StoreFulfillmentCenterEntity fc) => $"{fc.FulfillmentCenterId}-{fc.Type}");

@@ -21,18 +21,16 @@ namespace VirtoCommerce.StoreModule.Data.Repositories
                                .Include(x => x.Currencies)
                                .Include(x => x.TrustedGroups)
                                .ToArrayAsync();
-            var shipmentMethods = StoreShippingMethods.Where(x => ids.Contains(x.StoreId)).ToArrayAsync();
+
             var fulfillmentCenters = StoreFulfillmentCenters.Where(x => ids.Contains(x.StoreId)).ToArrayAsync();
             var seoInfos = SeoInfos.Where(x => ids.Contains(x.StoreId)).ToArrayAsync();
 
-            await Task.WhenAll(shipmentMethods, fulfillmentCenters, seoInfos);
+            await Task.WhenAll(fulfillmentCenters, seoInfos);
+
             return retVal;
         }
 
         public IQueryable<StoreEntity> Stores => DbContext.Set<StoreEntity>();
-
-        public IQueryable<StoreShippingMethodEntity> StoreShippingMethods => DbContext.Set<StoreShippingMethodEntity>();
-
         public IQueryable<StoreFulfillmentCenterEntity> StoreFulfillmentCenters => DbContext.Set<StoreFulfillmentCenterEntity>();
 
         public IQueryable<SeoInfoEntity> SeoInfos => DbContext.Set<SeoInfoEntity>();

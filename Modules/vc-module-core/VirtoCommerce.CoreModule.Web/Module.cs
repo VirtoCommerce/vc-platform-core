@@ -16,13 +16,11 @@ using VirtoCommerce.CoreModule.Core.Conditions.GeoConditions;
 using VirtoCommerce.CoreModule.Core.Currency;
 using VirtoCommerce.CoreModule.Core.Package;
 using VirtoCommerce.CoreModule.Core.Seo;
-using VirtoCommerce.CoreModule.Core.Shipping;
 using VirtoCommerce.CoreModule.Data.Currency;
 using VirtoCommerce.CoreModule.Data.Package;
 using VirtoCommerce.CoreModule.Data.Repositories;
 using VirtoCommerce.CoreModule.Data.Seo;
 using VirtoCommerce.CoreModule.Data.Services;
-using VirtoCommerce.CoreModule.Data.Shipping;
 using VirtoCommerce.CoreModule.Web.ExportImport;
 using VirtoCommerce.CoreModule.Web.JsonConverters;
 using VirtoCommerce.Platform.Core.Common;
@@ -50,7 +48,6 @@ namespace VirtoCommerce.CoreModule.Web
             serviceCollection.AddSingleton<IPackageTypesService, PackageTypesService>();
             //Can be overrided
             serviceCollection.AddSingleton<ISeoDuplicatesDetector, NullSeoDuplicateDetector>();
-            serviceCollection.AddSingleton<IShippingMethodsRegistrar>(new ShippingMethodRegistrar());
             serviceCollection.AddSingleton<CoreExportImport>();
             serviceCollection.AddSingleton<IUniqueNumberGenerator, SequenceUniqueNumberGeneratorService>();
 

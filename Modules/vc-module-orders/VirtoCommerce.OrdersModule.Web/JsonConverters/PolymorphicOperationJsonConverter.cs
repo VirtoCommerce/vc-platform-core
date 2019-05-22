@@ -3,23 +3,19 @@ using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VirtoCommerce.CoreModule.Core.Common;
-using VirtoCommerce.CoreModule.Core.Shipping;
+
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.PaymentModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.ShippingModule.Core.Model;
 
 namespace VirtoCommerce.OrdersModule.Web.JsonConverters
 {
     public class PolymorphicOperationJsonConverter : JsonConverter
     {
-        private static readonly Type[] _knowTypes = { typeof(IOperation), typeof(LineItem), typeof(CustomerOrderSearchCriteria), typeof(ShippingMethod) };
+        private static readonly Type[] _knowTypes = { typeof(IOperation), typeof(LineItem), typeof(CustomerOrderSearchCriteria), typeof(ShippingMethod), typeof(PaymentMethod) };
 
-        private readonly IShippingMethodsRegistrar _shippingMethodsRegistrar;
-        public PolymorphicOperationJsonConverter(IShippingMethodsRegistrar shippingMethodsRegistrar)
-        {
-            _shippingMethodsRegistrar = shippingMethodsRegistrar;
-        }
 
         public override bool CanWrite => false;
         public override bool CanRead => true;
@@ -34,16 +30,10 @@ namespace VirtoCommerce.OrdersModule.Web.JsonConverters
             object retVal;
             var obj = JObject.Load(reader);
 
-            if (objectType == typeof(ShippingMethod))
-            {
-                var shippingGatewayCode = obj["code"].Value<string>();
-                retVal = _shippingMethodsRegistrar.GetAllShippingMethods().FirstOrDefault(x => x.Code.EqualsInvariant(shippingGatewayCode));
-            }
-            else
-            {
-                var tryCreateInstance = typeof(AbstractTypeFactory<>).MakeGenericType(objectType).GetMethods().FirstOrDefault(x => x.Name.EqualsInvariant("TryCreateInstance") && x.GetParameters().Length == 0);
-                retVal = tryCreateInstance?.Invoke(null, null);
-            }
+
+            var tryCreateInstance = typeof(AbstractTypeFactory<>).MakeGenericType(objectType).GetMethods().FirstOrDefault(x => x.Name.EqualsInvariant("TryCreateInstance") && x.GetParameters().Length == 0);
+            retVal = tryCreateInstance?.Invoke(null, null);
+
 
             //Reset ChildrenOperations property to prevent polymorphic deserialization  error
             var operation = retVal as IOperation;

@@ -8,7 +8,7 @@ namespace VirtoCommerce.StoreModule.Data.Repositories
     public interface IStoreRepository : IRepository
     {
         IQueryable<StoreEntity> Stores { get; }
-        IQueryable<StoreShippingMethodEntity> StoreShippingMethods { get; }
+
         IQueryable<SeoInfoEntity> SeoInfos { get; }
         Task<StoreEntity[]> GetStoresByIdsAsync(string[] ids);
     }

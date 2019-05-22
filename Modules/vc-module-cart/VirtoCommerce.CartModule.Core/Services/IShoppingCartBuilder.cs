@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using VirtoCommerce.CartModule.Core.Model;
-using VirtoCommerce.CoreModule.Core.Shipping;
+using VirtoCommerce.ShippingModule.Core.Model;
 using VirtoCommerce.PaymentModule.Core.Model;
 
 namespace VirtoCommerce.CartModule.Core.Services
@@ -70,7 +70,7 @@ namespace VirtoCommerce.CartModule.Core.Services
         /// </summary>
         /// <param name="shipment"></param>
         /// <returns></returns>
-        IShoppingCartBuilder AddOrUpdateShipment(Shipment shipment);
+        Task<IShoppingCartBuilder> AddOrUpdateShipmentAsync(Shipment shipment);
 
         /// <summary>
         /// Remove exist shipment from cart
@@ -103,7 +103,7 @@ namespace VirtoCommerce.CartModule.Core.Services
         /// Returns all available shipment methods for current cart
         /// </summary>
         /// <returns></returns>
-        ICollection<ShippingRate> GetAvailableShippingRates();
+        Task<ICollection<ShippingRate>> GetAvailableShippingRatesAsync();
 
         /// <summary>
         /// Returns all available payment methods for current cart

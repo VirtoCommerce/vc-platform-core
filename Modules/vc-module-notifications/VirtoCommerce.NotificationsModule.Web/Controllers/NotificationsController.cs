@@ -3,14 +3,15 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.NotificationsModule.Core;
+using VirtoCommerce.NotificationsModule.Core.Extensions;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Data.Model;
 using VirtoCommerce.NotificationsModule.Web.Model;
+using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Web.Controllers
 {
-    [Produces("application/json")]
     [Route("api/notifications")]
     public class NotificationsController : Controller
     {
@@ -34,6 +35,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         /// <param name="searchCriteria">criteria for search(keyword, skip, take and etc.)</param>
         /// <returns></returns>
         [HttpPost]
+        [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
         public async Task<ActionResult<NotificationSearchResult>> GetNotifications(NotificationSearchCriteria searchCriteria)
         {
@@ -59,7 +61,7 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         public async Task<ActionResult<Notification>> GetNotificationByTypeId(string type, string tenantId = null, string tenantType = null)
         {
             var responseGroup = NotificationResponseGroup.Full.ToString();
-            var notification = await _notificationService.GetByTypeAsync(type, tenantId, tenantType, responseGroup);
+            var notification = await _notificationSearchService.GetNotificationAsync(type, new TenantIdentity(tenantId, tenantType));
 
             return Ok(notification);
         }

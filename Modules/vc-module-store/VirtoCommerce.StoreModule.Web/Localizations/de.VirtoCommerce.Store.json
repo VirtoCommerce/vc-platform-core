@@ -9,29 +9,7 @@
           "name": "Name"
         }
       },
-      "shippingMethod-detail": {
-        "subtitle": "Versandart eingeben",
-        "labels": {
-          "is-active": "Ist aktiv",
-          "name": "Name",
-          "code": "Code",
-          "tax-type": "Steuertyp",
-          "description": "Beschreibung",
-          "settings": "Einstellungen"
-        },
-        "placeholders": {
-          "tax-type": "Wählen Sie aus...",
-          "description": "Beschreibung eingeben"
-        }
-      },
-      "shippingMethod-list": {
-        "subtitle": {},
-        "labels": {
-          "is-active": "Ist aktiv",
-          "shipping-method": "Versandart",
-          "note": "Legen Sie den Auftrag fest, wie die Versandmethoden im Web Store sortiert werden. Ziehen und loslassen, um die Reihenfolge zu ändern."
-        }
-      },
+     
       "store-advanced": {
         "subtitle": {},
         "labels": {
@@ -153,10 +131,6 @@
       "storeSettingsWidget": {
         "title": "Einstellungen",
         "blade-subtitle": "Einstellungen"
-      },
-      "storeShippingWidget": {
-        "title": "Versandarten",
-        "blade-subtitle": "Versandarten"
       },
       "storeTaxingWidget": {
         "title": "Steueranbieter",

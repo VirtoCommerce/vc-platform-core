@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CoreModule.Core.Common;
-using VirtoCommerce.CoreModule.Core.Shipping;
+
 using VirtoCommerce.OrdersModule.Core.Events;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Services;
@@ -20,6 +20,8 @@ using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Events;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Platform.Data.Infrastructure;
+using VirtoCommerce.ShippingModule.Core.Model.Search;
+using VirtoCommerce.ShippingModule.Core.Services;
 using VirtoCommerce.StoreModule.Core.Services;
 
 namespace VirtoCommerce.OrdersModule.Data.Services
@@ -32,16 +34,18 @@ namespace VirtoCommerce.OrdersModule.Data.Services
         private readonly IStoreService _storeService;
 
         private readonly IUniqueNumberGenerator _uniqueNumberGenerator;
+        private readonly IShippingMethodsSearchService _shippingMethodsSearchService;
         private readonly IPaymentMethodsSearchService _paymentMethodSearchService;
-        private readonly IShippingMethodsRegistrar _shippingMethodsRegistrar;
         private readonly IChangeLogService _changeLogService;
         private readonly ICustomerOrderTotalsCalculator _totalsCalculator;
         private readonly IPlatformMemoryCache _platformMemoryCache;
 
-        public CustomerOrderServiceImpl(Func<IOrderRepository> orderRepositoryFactory, IUniqueNumberGenerator uniqueNumberGenerator
+        public CustomerOrderServiceImpl(
+            Func<IOrderRepository> orderRepositoryFactory, IUniqueNumberGenerator uniqueNumberGenerator
             , IDynamicPropertyService dynamicPropertyService, IStoreService storeService, IChangeLogService changeLogService
             , IEventPublisher eventPublisher, ICustomerOrderTotalsCalculator totalsCalculator
-            , IShippingMethodsRegistrar shippingMethodsRegistrar, IPaymentMethodsSearchService paymentMethodSearchService, IPlatformMemoryCache platformMemoryCache)
+            , IShippingMethodsSearchService shippingMethodsSearchService, IPaymentMethodsSearchService paymentMethodSearchService,
+            IPlatformMemoryCache platformMemoryCache)
         {
             _repositoryFactory = orderRepositoryFactory;
             _eventPublisher = eventPublisher;
@@ -49,7 +53,8 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             _storeService = storeService;
             _changeLogService = changeLogService;
             _totalsCalculator = totalsCalculator;
-            _shippingMethodsRegistrar = shippingMethodsRegistrar;
+            _shippingMethodsSearchService = shippingMethodsSearchService;
+
             _paymentMethodSearchService = paymentMethodSearchService;
             _platformMemoryCache = platformMemoryCache;
             _uniqueNumberGenerator = uniqueNumberGenerator;
@@ -177,12 +182,13 @@ namespace VirtoCommerce.OrdersModule.Data.Services
             {
                 throw new ArgumentNullException(nameof(order));
             }
-            var shippingMethods = _shippingMethodsRegistrar.GetAllShippingMethods();
-            if (!shippingMethods.IsNullOrEmpty())
+
+            var shippingMethods = await _shippingMethodsSearchService.SearchShippingMethodsAsync(new ShippingMethodsSearchCriteria { StoreId = order.StoreId });
+            if (!shippingMethods.Results.IsNullOrEmpty())
             {
                 foreach (var shipment in order.Shipments)
                 {
-                    shipment.ShippingMethod = shippingMethods.FirstOrDefault(x => x.Code.EqualsInvariant(shipment.ShipmentMethodCode));
+                    shipment.ShippingMethod = shippingMethods.Results.FirstOrDefault(x => x.Code.EqualsInvariant(shipment.ShipmentMethodCode));
                 }
             }
             var paymentMethods = await _paymentMethodSearchService.SearchPaymentMethodsAsync(new PaymentMethodsSearchCriteria { StoreId = order.StoreId });

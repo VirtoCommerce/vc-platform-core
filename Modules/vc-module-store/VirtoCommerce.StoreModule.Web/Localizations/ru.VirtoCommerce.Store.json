@@ -9,29 +9,7 @@
           "name": "Название"
         }
       },
-      "shippingMethod-detail": {
-        "subtitle": "Изменить метод доставки",
-        "labels": {
-          "is-active": "Активен",
-          "name": "Название",
-          "code": "Код",
-          "tax-type": "Тип налога",
-          "description": "Описание",
-          "settings": "Настройки"
-        },
-        "placeholders": {
-          "tax-type": "Выбрать...",
-          "description": "Введите описание"
-        }
-      },
-      "shippingMethod-list": {
-        "subtitle": "",
-        "labels": {
-          "is-active": "Активен",
-          "shipping-method": "Метод доставки",
-          "note": "Укажите порядок отображения методов доставки в интернет-магазине. Перетащите элементы, чтобы изменить порядок"
-        }
-      },
+     
       "store-advanced": {
         "subtitle": "",
         "labels": {
@@ -155,10 +133,6 @@
       "storeSettingsWidget": {
         "title": "Настройки",
         "blade-subtitle": "Настройки"
-      },
-      "storeShippingWidget": {
-        "title": "Способы доставки",
-        "blade-subtitle": "Способы доставки"
       },
       "storeTaxingWidget": {
         "title": "Провайдеры налогов",

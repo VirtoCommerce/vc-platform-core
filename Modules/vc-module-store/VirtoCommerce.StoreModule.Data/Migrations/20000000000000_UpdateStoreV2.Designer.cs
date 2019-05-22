@@ -206,41 +206,6 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
                 b.ToTable("StoreLanguage");
             });
 
-            modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreShippingMethodEntity", b =>
-            {
-                b.Property<string>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasMaxLength(128);
-
-                b.Property<string>("Code")
-                    .IsRequired()
-                    .HasMaxLength(128);
-
-                b.Property<string>("Description");
-
-                b.Property<bool>("IsActive");
-
-                b.Property<string>("LogoUrl")
-                    .HasMaxLength(2048);
-
-                b.Property<string>("Name")
-                    .HasMaxLength(128);
-
-                b.Property<int>("Priority");
-
-                b.Property<string>("StoreId")
-                    .IsRequired();
-
-                b.Property<string>("TaxType")
-                    .HasMaxLength(64);
-
-                b.HasKey("Id");
-
-                b.HasIndex("StoreId");
-
-                b.ToTable("StoreShippingMethod");
-            });
-
             modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreTrustedGroupEntity", b =>
             {
                 b.Property<string>("Id")
@@ -289,14 +254,6 @@ namespace VirtoCommerce.StoreModule.Data.Migrations
             {
                 b.HasOne("VirtoCommerce.StoreModule.Data.Model.StoreEntity", "Store")
                     .WithMany("Languages")
-                    .HasForeignKey("StoreId")
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
-
-            modelBuilder.Entity("VirtoCommerce.StoreModule.Data.Model.StoreShippingMethodEntity", b =>
-            {
-                b.HasOne("VirtoCommerce.StoreModule.Data.Model.StoreEntity", "Store")
-                    .WithMany("ShippingMethods")
                     .HasForeignKey("StoreId")
                     .OnDelete(DeleteBehavior.Cascade);
             });

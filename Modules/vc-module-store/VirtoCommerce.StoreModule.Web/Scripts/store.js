@@ -77,12 +77,7 @@ angular.module(moduleName, [
             //template: 'Modules/$(VirtoCommerce.Store)/Scripts/widgets/storeSettingsWidget.tpl.html'
             controller: 'platformWebApp.entitySettingsWidgetController',
             template: '$(Platform)/Scripts/app/settings/widgets/entitySettingsWidget.tpl.html'
-        }, 'storeDetail');
-
-        widgetService.registerWidget({
-            controller: 'virtoCommerce.storeModule.storeShippingWidgetController',
-            template: 'Modules/$(VirtoCommerce.Store)/Scripts/widgets/storeShippingWidget.tpl.html'
-        }, 'storeDetail');
+        }, 'storeDetail');     
      
         widgetService.registerWidget({
             controller: 'virtoCommerce.storeModule.storeNotificationsWidgetController',
@@ -93,19 +88,7 @@ angular.module(moduleName, [
             template: 'Modules/$(VirtoCommerce.Store)/Scripts/widgets/storeNotificationsLogWidget.tpl.html'
         }, 'storeDetail');
 
-        var resetCommand = {
-            name: "platform.commands.reset",
-            icon: 'fa fa-undo',
-            executeMethod: function (blade) {
-                angular.copy(blade.origEntity, blade.currentEntity);
-            },
-            canExecuteMethod: function (blade) {
-                return !angular.equals(blade.origEntity, blade.currentEntity);
-            },
-            permission: 'store:update',
-            index: 0
-        };
-        toolbarService.register(resetCommand, 'virtoCommerce.storeModule.shippingMethodDetailController');
+      
 
         // register login-on-behalf command in platform account blade
         var loginOnBehalfCommand = {

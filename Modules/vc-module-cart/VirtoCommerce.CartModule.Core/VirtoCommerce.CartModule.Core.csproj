@@ -10,6 +10,7 @@
     <ProjectReference Include="..\..\vc-module-core\VirtoCommerce.CoreModule.Core\VirtoCommerce.CoreModule.Core.csproj" />
     <ProjectReference Include="..\..\vc-module-payment\VirtoCommerce.Payment.Core\VirtoCommerce.PaymentModule.Core.csproj" />
     <ProjectReference Include="..\..\vc-module-search\VirtoCommerce.SearchModule.Core\VirtoCommerce.SearchModule.Core.csproj" />
+    <ProjectReference Include="..\..\vc-module-shipping\VirtoCommerce.ShippingModule.Core\VirtoCommerce.ShippingModule.Core.csproj" />
   </ItemGroup>
 
 </Project>

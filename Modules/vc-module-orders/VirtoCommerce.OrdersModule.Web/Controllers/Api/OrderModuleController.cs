@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CartModule.Core.Services;
 using VirtoCommerce.CoreModule.Core.Common;
+using VirtoCommerce.NotificationsModule.Core.Extensions;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.OrdersModule.Core;
@@ -42,20 +43,26 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         private readonly Func<IOrderRepository> _repositoryFactory;
         private readonly ICustomerOrderBuilder _customerOrderBuilder;
         private readonly IShoppingCartService _cartService;
-        private readonly INotificationSender _notificationSender;
+        private readonly ICustomerOrderTotalsCalculator _totalsCalculator;
+        private readonly INotificationSearchService _notificationSearchService;
 
         private readonly INotificationTemplateRenderer _notificationTemplateRenderer;
         private readonly IChangeLogSearchService _changeLogSearchService;
         private static readonly object _lockObject = new object();
 
-        public OrderModuleController(ICustomerOrderService customerOrderService, ICustomerOrderSearchService searchService, IStoreService storeService
+        public OrderModuleController(
+              ICustomerOrderService customerOrderService
+            , ICustomerOrderSearchService searchService
+            , IStoreService storeService
             , IUniqueNumberGenerator numberGenerator
             , IPlatformMemoryCache platformMemoryCache
             , Func<IOrderRepository> repositoryFactory
             , ICustomerOrderBuilder customerOrderBuilder
             , IShoppingCartService cartService
-            , INotificationSender notificationSender
-            , IChangeLogSearchService changeLogSearchService, INotificationTemplateRenderer notificationTemplateRenderer)
+            , IChangeLogSearchService changeLogSearchService
+            , INotificationTemplateRenderer notificationTemplateRenderer
+            , INotificationSearchService notificationSearchService
+            , ICustomerOrderTotalsCalculator totalsCalculator)
         {
             _customerOrderService = customerOrderService;
             _searchService = searchService;
@@ -67,9 +74,10 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             //_permissionScopeService = permissionScopeService;
             _customerOrderBuilder = customerOrderBuilder;
             _cartService = cartService;
-            _notificationSender = notificationSender;
             _changeLogSearchService = changeLogSearchService;
             _notificationTemplateRenderer = notificationTemplateRenderer;
+            _notificationSearchService = notificationSearchService;
+            _totalsCalculator = totalsCalculator;
         }
 
         /// <summary>
@@ -159,7 +167,8 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         [Route("recalculate")]
         public ActionResult<CustomerOrder> CalculateTotals([FromBody]CustomerOrder order)
         {
-            //Nothing to do special because all order totals will be evaluated in domain CustomerOrder properties transiently        
+            _totalsCalculator.CalculateTotals(order);
+
             return Ok(order);
 
         }
@@ -471,8 +480,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
                 throw new InvalidOperationException($"Cannot find order with number {orderNumber}");
             }
 
-            var notification = new InvoiceEmailNotification { CustomerOrder = order };
-            await _notificationSender.SendNotificationAsync(notification, order.LanguageCode);
+            var notification = await _notificationSearchService.GetNotificationAsync<InvoiceEmailNotification>(new TenantIdentity(order.StoreId, nameof(StoreModule.Core.Model.Store)));
             var message = AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{notification.Kind}Message");
             message.LanguageCode = order.LanguageCode;
             var emailNotificationMessage = (EmailNotificationMessage)notification.ToMessage(message, _notificationTemplateRenderer);
