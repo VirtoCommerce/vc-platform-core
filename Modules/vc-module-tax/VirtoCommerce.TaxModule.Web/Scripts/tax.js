@@ -20,22 +20,3 @@ angular.module(moduleName, ['ngSanitize'])
                     template: '$(Platform)/Scripts/app/settings/widgets/entitySettingsWidget.tpl.html'
                 }, 'taxProviderDetail');
             }])
-
-    .factory('virtoCommerce.taxModule.taxUtils', ['virtoCommerce.taxModule.taxProviders', 'platformWebApp.bladeNavigationService', function (taxProviders, bladeNavigationService) {
-        var taxProvidersRef;
-        return {
-            getTaxProviders: function (storeId) {
-                taxProvidersRef = taxProviders.search({ storeId });
-                return taxProvidersRef;
-            },
-            editTaxProviders: function (blade) {
-                var newBlade = {
-                    id: 'taxProviders',
-                    parentRefresh: function (data) { angular.copy(data, taxProvidersRef); },
-                    controller: 'virtoCommerce.taxModule.taxProviderListController',
-                    template: 'Modules/$(VirtoCommerce.Tax)/Scripts/blades/taxProvider-list.tpl.html'
-                };
-                bladeNavigationService.showBlade(newBlade, blade);
-            }
-        };
-    }])

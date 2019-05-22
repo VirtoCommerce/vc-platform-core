@@ -1,6 +1,6 @@
 angular.module('virtoCommerce.shippingModule')
-    .controller('virtoCommerce.shippingModule.shippingMethodDetailController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.shippingModule.shippingMethods', 
-        function ($scope, bladeNavigationService, shippingMethods) {
+    .controller('virtoCommerce.shippingModule.shippingMethodDetailController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.shippingModule.shippingMethods', 'platformWebApp.settings',
+        function ($scope, bladeNavigationService, shippingMethods, settings) {
             var blade = $scope.blade;
 
             function initializeBlade(data) {
@@ -59,6 +59,25 @@ angular.module('virtoCommerce.shippingModule')
                 callback(setting.allowedValues);
             };
 
+            blade.openDictionarySettingManagement = function (setting) {
+                var newBlade = {
+                    id: 'settingDetailChild',
+                    isApiSave: true,
+                    controller: 'platformWebApp.settingDictionaryController',
+                    template: '$(Platform)/Scripts/app/settings/blades/setting-dictionary.tpl.html'
+                };
+                switch (setting) {
+                    case 'TaxTypes':
+                        _.extend(newBlade, {
+                            currentEntityId: 'VirtoCommerce.Core.General.TaxTypes',
+                            parentRefresh: function (data) { blade.taxTypes = data; }
+                        });
+                        break;
+                }
+
+                bladeNavigationService.showBlade(newBlade, blade);
+            };
+
             blade.headIcon = 'fa-archive';
 
             blade.toolbarCommands = [             
@@ -79,6 +98,8 @@ angular.module('virtoCommerce.shippingModule')
                     permission: blade.updatePermission
                 }
             ];
+
+            blade.taxTypes = settings.getValues({ id: 'VirtoCommerce.Core.General.TaxTypes' });
 
             blade.refresh();
 

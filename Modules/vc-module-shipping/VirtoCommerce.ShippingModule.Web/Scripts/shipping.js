@@ -5,7 +5,7 @@ if (AppDependencies != undefined) {
     AppDependencies.push(moduleName);
 }
 
-angular.module(moduleName, ['virtoCommerce.taxModule'])
+angular.module(moduleName, ['ngSanitize'])
     .run(['platformWebApp.widgetService', function (widgetService) {
 
         widgetService.registerWidget({
