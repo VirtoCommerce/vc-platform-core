@@ -20,6 +20,7 @@ namespace VirtoCommerce.CatalogModule.Core.Model.ListEntry
                 Name = category.Name;
                 IsActive = category.IsActive;
                 Links = category.Links;
+                CatalogId = category.CatalogId;
 
                 if (!category.Outlines.IsNullOrEmpty())
                 {

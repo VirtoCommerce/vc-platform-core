@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -10,8 +9,8 @@ using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CartModule.Core.Model.Search;
 using VirtoCommerce.CartModule.Core.Services;
 using VirtoCommerce.CartModule.Data.Model;
-using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.CoreModule.Core.Shipping;
+using VirtoCommerce.PaymentModule.Core.Model;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 
@@ -144,7 +143,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
         public async Task<ActionResult<ICollection<PaymentMethod>>> GetAvailablePaymentMethods(string cartId)
         {
             var cart = await _shoppingCartService.GetByIdAsync(cartId, CartResponseGroup.WithPayments.ToString());
-            var paymentMethods = _cartBuilder.TakeCart(cart).GetAvailablePaymentMethods();
+            var paymentMethods = await _cartBuilder.TakeCart(cart).GetAvailablePaymentMethodsAsync();
             return Ok(paymentMethods);
         }
 
@@ -191,7 +190,7 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
             using (await AsyncLock.GetLockByKey(CacheKey.With(typeof(ShoppingCart), cartId)).LockAsync())
             {
                 var cart = await _shoppingCartService.GetByIdAsync(cartId, CartResponseGroup.WithPayments.ToString());
-                await _cartBuilder.TakeCart(cart).AddOrUpdatePayment(payment).SaveAsync();
+                await (await _cartBuilder.TakeCart(cart).AddOrUpdatePaymentAsync(payment)).SaveAsync();
             }
 
             return Ok();
@@ -250,7 +249,6 @@ namespace VirtoCommerce.CartModule.Web.Controllers.Api
             }
             return Ok(cart);
         }
-
 
         /// <summary>
         /// Delete shopping carts by ids

@@ -17,7 +17,7 @@
         <owner>Virto Commerce</owner>
     </owners>
     <projectUrl>https://virtocommerce.com/apps/extensions/virto-tax-module</projectUrl>
-    <iconUrl>Modules/$(VirtoCommerce.Tax)/Content/logoVC.png</iconUrl>
+    <iconUrl>Modules/$(VirtoCommerce.Tax)/Content/logo.png</iconUrl>
     <releaseNotes></releaseNotes>
     <copyright>Copyright © 2011-2019 Virto Commerce. All rights reserved</copyright>
     <tags>stores</tags>

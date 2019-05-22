@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using VirtoCommerce.MarketingModule.Core.Model;
+using VirtoCommerce.MarketingModule.Core.Model.DynamicContent.Search;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
 using VirtoCommerce.MarketingModule.Core.Services;
@@ -53,7 +54,9 @@ namespace VirtoCommerce.MarketingModule.Data.ExportImport
 
                 await writer.WritePropertyNameAsync("Promotions");
 
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) => _promotionSearchService.SearchPromotionsAsync(new PromotionSearchCriteria { Skip = skip, Take = take }), (processedCount, totalCount) =>
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
+                    (GenericSearchResult<Promotion>)await _promotionSearchService.SearchPromotionsAsync(new PromotionSearchCriteria { Skip = skip, Take = take })
+                , (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } promotions have been exported";
                     progressCallback(progressInfo);
@@ -65,8 +68,11 @@ namespace VirtoCommerce.MarketingModule.Data.ExportImport
                 await writer.WritePropertyNameAsync("DynamicContentFolders");
                 await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
                 {
+                    var searchResult = AbstractTypeFactory<DynamicContentFolderSearchResult>.TryCreateInstance();
                     var result = await LoadFoldersRecursiveAsync(null);
-                    return new GenericSearchResult<DynamicContentFolder>() { Results = result, TotalCount = result.Count };
+                    searchResult.Results = result;
+                    searchResult.TotalCount = result.Count;
+                    return (GenericSearchResult<DynamicContentFolder>)searchResult;
                 }, (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } dynamic content folders have been exported";
@@ -77,7 +83,9 @@ namespace VirtoCommerce.MarketingModule.Data.ExportImport
                 progressCallback(progressInfo);
 
                 await writer.WritePropertyNameAsync("DynamicContentItems");
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) => _dynamicContentSearchService.SearchContentItemsAsync(new DynamicContentItemSearchCriteria { Skip = skip, Take = take }), (processedCount, totalCount) =>
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
+                    (GenericSearchResult<DynamicContentItem>)await _dynamicContentSearchService.SearchContentItemsAsync(new DynamicContentItemSearchCriteria { Skip = skip, Take = take })
+                , (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } dynamic content items have been exported";
                     progressCallback(progressInfo);
@@ -87,7 +95,9 @@ namespace VirtoCommerce.MarketingModule.Data.ExportImport
                 progressCallback(progressInfo);
 
                 await writer.WritePropertyNameAsync("DynamicContentPlaces");
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) => _dynamicContentSearchService.SearchContentPlacesAsync(new DynamicContentPlaceSearchCriteria { Skip = skip, Take = take }), (processedCount, totalCount) =>
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
+                    (GenericSearchResult<DynamicContentPlace>)await _dynamicContentSearchService.SearchContentPlacesAsync(new DynamicContentPlaceSearchCriteria { Skip = skip, Take = take })
+                , (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } dynamic content places have been exported";
                     progressCallback(progressInfo);
@@ -97,7 +107,11 @@ namespace VirtoCommerce.MarketingModule.Data.ExportImport
                 progressCallback(progressInfo);
 
                 await writer.WritePropertyNameAsync("DynamicContentPublications");
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) => _dynamicContentSearchService.SearchContentPublicationsAsync(new DynamicContentPublicationSearchCriteria { Skip = skip, Take = take }), (processedCount, totalCount) =>
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
+                {
+                    var searchResult = await _dynamicContentSearchService.SearchContentPublicationsAsync(new DynamicContentPublicationSearchCriteria { Skip = skip, Take = take });
+                    return (GenericSearchResult<DynamicContentPublication>)searchResult;
+                }, (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{ processedCount } of { totalCount } dynamic content publications have been exported";
                     progressCallback(progressInfo);

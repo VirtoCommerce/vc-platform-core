@@ -27,7 +27,7 @@ namespace VirtoCommerce.CatalogModule.Data.Services
         }
 
         #region ISeoConflictDetector Members
-        public async Task<IEnumerable<SeoInfo>> DetectSeoDuplicatesAsync(TenantIdentity tenantIdentity)
+        public Task<IEnumerable<SeoInfo>> DetectSeoDuplicatesAsync(TenantIdentity tenantIdentity)
         {
             //TODO:
             throw new NotImplementedException();

@@ -1,8 +1,6 @@
 using System.Collections.Generic;
-using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.CoreModule.Core.Seo;
 using VirtoCommerce.CoreModule.Core.Shipping;
-using VirtoCommerce.CoreModule.Core.Tax;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.DynamicProperties;
 using VirtoCommerce.Platform.Core.Security;
@@ -76,7 +74,6 @@ namespace VirtoCommerce.StoreModule.Core.Model
         /// </summary>
         public ICollection<string> TrustedGroups { get; set; }
 
-        public ICollection<PaymentMethod> PaymentMethods { get; set; }
         public ICollection<ShippingMethod> ShippingMethods { get; set; }
 
         #region ISeoSupport Members

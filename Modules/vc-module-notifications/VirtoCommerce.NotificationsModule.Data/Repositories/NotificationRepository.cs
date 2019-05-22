@@ -26,7 +26,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
                 .OrderBy(x => x.Type)
                 .ToArrayAsync();
 
-            var notificaionResponseGroup = EnumUtility.SafeParse(responseGroup, NotificationResponseGroup.Full);
+            var notificaionResponseGroup = EnumUtility.SafeParseFlags(responseGroup, NotificationResponseGroup.Full);
 
             foreach (var notification in notifications)
             {
@@ -78,7 +78,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
             {
                 foreach (var entity in result)
                 {
-                    var notificaionResponseGroup = EnumUtility.SafeParse(responseGroup, NotificationResponseGroup.Full);
+                    var notificaionResponseGroup = EnumUtility.SafeParseFlags(responseGroup, NotificationResponseGroup.Full);
 
                     if ((notificaionResponseGroup & NotificationResponseGroup.WithTemplates) == NotificationResponseGroup.WithTemplates)
                     {
@@ -118,7 +118,7 @@ namespace VirtoCommerce.NotificationsModule.Data.Repositories
 
             if (result != null)
             {
-                var notificaionResponseGroup = EnumUtility.SafeParse(responseGroup, NotificationResponseGroup.Full);
+                var notificaionResponseGroup = EnumUtility.SafeParseFlags(responseGroup, NotificationResponseGroup.Full);
 
                 if ((notificaionResponseGroup & NotificationResponseGroup.WithTemplates) == NotificationResponseGroup.WithTemplates)
                 {

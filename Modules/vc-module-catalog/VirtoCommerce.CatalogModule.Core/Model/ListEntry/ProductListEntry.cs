@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.CatalogModule.Core.Model.ListEntry
@@ -26,14 +23,15 @@ namespace VirtoCommerce.CatalogModule.Core.Model.ListEntry
                 IsActive = product.IsActive ?? true;
                 ProductType = product.ProductType;
                 Links = product.Links;
+                CatalogId = product.CatalogId;
 
                 if (!product.Outlines.IsNullOrEmpty())
                 {
                     //TODO:  Use only physical catalog outline which this category belongs to
                     Outline = product.Outlines.FirstOrDefault().Items.Select(x => x.Id).ToList();
                     Path = product.Outlines.FirstOrDefault().Items.Select(x => x.Name).ToList();
-                }           
-             
+                }
+
             }
             return this;
         }

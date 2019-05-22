@@ -42,63 +42,77 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
 
         public async Task<CatalogEntity[]> GetCatalogsByIdsAsync(string[] catalogIds)
         {
-            var retVal = await Catalogs.Include(x => x.CatalogLanguages)
-                                 .Include(x => x.IncommingLinks)
-                                 .Where(x => catalogIds.Contains(x.Id))
-                                 .ToArrayAsync();
+            var result = Array.Empty<CatalogEntity>();
 
-            var propertyValues = await PropertyValues.Include(x => x.DictionaryItem.DictionaryItemValues).Where(x => catalogIds.Contains(x.CatalogId) && x.CategoryId == null).ToArrayAsync();
-            var catalogPropertiesIds = await Properties.Where(x => catalogIds.Contains(x.CatalogId) && x.CategoryId == null)
-                                                 .Select(x => x.Id)
-                                                 .ToArrayAsync();
-            var catalogProperties = await GetPropertiesByIdsAsync(catalogPropertiesIds);
+            if (!catalogIds.IsNullOrEmpty())
+            {
+                result = await Catalogs.Include(x => x.CatalogLanguages)
+                    .Include(x => x.IncommingLinks)
+                    .Where(x => catalogIds.Contains(x.Id))
+                    .ToArrayAsync();
 
-            return retVal;
+                if (result.Any())
+                {
+                    var propertyValues = await PropertyValues.Include(x => x.DictionaryItem.DictionaryItemValues).Where(x => catalogIds.Contains(x.CatalogId) && x.CategoryId == null).ToArrayAsync();
+                    var catalogPropertiesIds = await Properties.Where(x => catalogIds.Contains(x.CatalogId) && x.CategoryId == null)
+                        .Select(x => x.Id)
+                        .ToArrayAsync();
+                    var catalogProperties = await GetPropertiesByIdsAsync(catalogPropertiesIds);
+
+                }
+
+            }
+
+            return result;
         }
 
         public async Task<CategoryEntity[]> GetCategoriesByIdsAsync(string[] categoriesIds, CategoryResponseGroup respGroup)
         {
-            if (categoriesIds == null)
-            {
-                throw new ArgumentNullException(nameof(categoriesIds));
-            }
 
-            if (!categoriesIds.Any())
-            {
-                return new CategoryEntity[] { };
-            }
+            var result = Array.Empty<CategoryEntity>();
 
-            if (respGroup.HasFlag(CategoryResponseGroup.WithOutlines))
+            if (!categoriesIds.IsNullOrEmpty())
             {
-                respGroup |= CategoryResponseGroup.WithLinks | CategoryResponseGroup.WithParents;
-            }
+                result = await Categories.Where(x => categoriesIds.Contains(x.Id)).ToArrayAsync();
 
-            var result = await Categories.Where(x => categoriesIds.Contains(x.Id)).ToArrayAsync();
+                if (result.Any())
+                {
+                    if (respGroup.HasFlag(CategoryResponseGroup.WithOutlines))
+                    {
+                        respGroup |= CategoryResponseGroup.WithLinks | CategoryResponseGroup.WithParents;
+                    }
 
-            if (respGroup.HasFlag(CategoryResponseGroup.WithLinks))
-            {
-                var incommingLinksTask = CategoryLinks.Where(x => categoriesIds.Contains(x.TargetCategoryId)).ToArrayAsync();
-                var outgoingLinksTask = CategoryLinks.Where(x => categoriesIds.Contains(x.SourceCategoryId)).ToArrayAsync();
-                await Task.WhenAll(incommingLinksTask, outgoingLinksTask);
-            }
+                    if (respGroup.HasFlag(CategoryResponseGroup.WithLinks))
+                    {
+                        var incommingLinksTask = CategoryLinks.Where(x => categoriesIds.Contains(x.TargetCategoryId))
+                            .ToArrayAsync();
+                        var outgoingLinksTask = CategoryLinks.Where(x => categoriesIds.Contains(x.SourceCategoryId))
+                            .ToArrayAsync();
+                        await Task.WhenAll(incommingLinksTask, outgoingLinksTask);
+                    }
 
-            if (respGroup.HasFlag(CategoryResponseGroup.WithImages))
-            {
-                var images = await Images.Where(x => categoriesIds.Contains(x.CategoryId)).ToArrayAsync();
-            }
+                    if (respGroup.HasFlag(CategoryResponseGroup.WithImages))
+                    {
+                        var images = await Images.Where(x => categoriesIds.Contains(x.CategoryId)).ToArrayAsync();
+                    }
 
-            if (respGroup.HasFlag(CategoryResponseGroup.WithSeo))
-            {
-                var seoInfos = await SeoInfos.Where(x => categoriesIds.Contains(x.CategoryId)).ToArrayAsync();
-            }
-            //Load all properties meta information and information for inheritance
-            if (respGroup.HasFlag(CategoryResponseGroup.WithProperties))
-            {
-                //Load category property values by separate query
-                var propertyValues = await PropertyValues.Include(x => x.DictionaryItem.DictionaryItemValues).Where(x => categoriesIds.Contains(x.CategoryId)).ToArrayAsync();
+                    if (respGroup.HasFlag(CategoryResponseGroup.WithSeo))
+                    {
+                        var seoInfos = await SeoInfos.Where(x => categoriesIds.Contains(x.CategoryId)).ToArrayAsync();
+                    }
 
-                var categoryPropertiesIds = await Properties.Where(x => categoriesIds.Contains(x.CategoryId)).Select(x => x.Id).ToArrayAsync();
-                var categoryProperties = await GetPropertiesByIdsAsync(categoryPropertiesIds);
+                    //Load all properties meta information and information for inheritance
+                    if (respGroup.HasFlag(CategoryResponseGroup.WithProperties))
+                    {
+                        //Load category property values by separate query
+                        var propertyValues = await PropertyValues.Include(x => x.DictionaryItem.DictionaryItemValues)
+                            .Where(x => categoriesIds.Contains(x.CategoryId)).ToArrayAsync();
+
+                        var categoryPropertiesIds = await Properties.Where(x => categoriesIds.Contains(x.CategoryId))
+                            .Select(x => x.Id).ToArrayAsync();
+                        var categoryProperties = await GetPropertiesByIdsAsync(categoryPropertiesIds);
+                    }
+                }
             }
 
             return result;
@@ -106,117 +120,123 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
 
         public async Task<ItemEntity[]> GetItemByIdsAsync(string[] itemIds, ItemResponseGroup respGroup = ItemResponseGroup.ItemLarge)
         {
-            if (itemIds == null)
+            var result = Array.Empty<ItemEntity>();
+
+            if (!itemIds.IsNullOrEmpty())
             {
-                throw new ArgumentNullException(nameof(itemIds));
-            }
+                // Use breaking query EF performance concept https://msdn.microsoft.com/en-us/data/hh949853.aspx#8
+                result = await Items.Include(x => x.Images).Where(x => itemIds.Contains(x.Id)).ToArrayAsync();
 
-            if (!itemIds.Any())
-            {
-                return new ItemEntity[] { };
-            }
-
-            // Use breaking query EF performance concept https://msdn.microsoft.com/en-us/data/hh949853.aspx#8
-            var retVal = await Items.Include(x => x.Images).Where(x => itemIds.Contains(x.Id)).ToArrayAsync();
-
-            if (respGroup.HasFlag(ItemResponseGroup.Outlines))
-            {
-                respGroup |= ItemResponseGroup.Links;
-            }
-
-            if (respGroup.HasFlag(ItemResponseGroup.ItemProperties))
-            {
-                var propertyValues = await PropertyValues.Include(x => x.DictionaryItem.DictionaryItemValues).Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
-            }
-
-            if (respGroup.HasFlag(ItemResponseGroup.Links))
-            {
-                var relations = await CategoryItemRelations.Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
-            }
-
-            if (respGroup.HasFlag(ItemResponseGroup.ItemAssets))
-            {
-                var assets = await Assets.Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
-            }
-
-            if (respGroup.HasFlag(ItemResponseGroup.ItemEditorialReviews))
-            {
-                var editorialReviews = await EditorialReviews.Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
-            }
-
-            if (respGroup.HasFlag(ItemResponseGroup.WithSeo))
-            {
-                var seoInfos = await SeoInfos.Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
-            }
-
-            if (respGroup.HasFlag(ItemResponseGroup.Variations))
-            {
-                // TODO: Call GetItemByIds for variations recursively (need to measure performance and data amount first)
-
-                var variationIds = await Items.Where(x => itemIds.Contains(x.ParentId)).Select(x => x.Id).ToArrayAsync();
-
-                // Always load info, images and property values for variations
-                var variationsTask = Items.Include(x => x.Images).Where(x => variationIds.Contains(x.Id)).ToArrayAsync();
-                var variationPropertyValuesTask = PropertyValues.Where(x => variationIds.Contains(x.ItemId)).ToArrayAsync();
-                await Task.WhenAll(variationsTask, variationPropertyValuesTask);
-
-                if (respGroup.HasFlag(ItemResponseGroup.ItemAssets))
+                if (result.Any())
                 {
-                    var variationAssets = await Assets.Where(x => variationIds.Contains(x.ItemId)).ToArrayAsync();
-                }
+                    if (respGroup.HasFlag(ItemResponseGroup.Outlines))
+                    {
+                        respGroup |= ItemResponseGroup.Links;
+                    }
 
-                if (respGroup.HasFlag(ItemResponseGroup.ItemEditorialReviews))
-                {
-                    var variationEditorialReviews = await EditorialReviews.Where(x => variationIds.Contains(x.ItemId)).ToArrayAsync();
-                }
+                    if (respGroup.HasFlag(ItemResponseGroup.ItemProperties))
+                    {
+                        var propertyValues = await PropertyValues.Include(x => x.DictionaryItem.DictionaryItemValues).Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
+                    }
 
-                if (respGroup.HasFlag(ItemResponseGroup.Seo))
-                {
-                    var variationsSeoInfos = await SeoInfos.Where(x => variationIds.Contains(x.ItemId)).ToArrayAsync();
+                    if (respGroup.HasFlag(ItemResponseGroup.Links))
+                    {
+                        var relations = await CategoryItemRelations.Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
+                    }
+
+                    if (respGroup.HasFlag(ItemResponseGroup.ItemAssets))
+                    {
+                        var assets = await Assets.Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
+                    }
+
+                    if (respGroup.HasFlag(ItemResponseGroup.ItemEditorialReviews))
+                    {
+                        var editorialReviews = await EditorialReviews.Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
+                    }
+
+                    if (respGroup.HasFlag(ItemResponseGroup.WithSeo))
+                    {
+                        var seoInfos = await SeoInfos.Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
+                    }
+
+                    if (respGroup.HasFlag(ItemResponseGroup.Variations))
+                    {
+                        // TODO: Call GetItemByIds for variations recursively (need to measure performance and data amount first)
+
+                        var variationIds = await Items.Where(x => itemIds.Contains(x.ParentId)).Select(x => x.Id).ToArrayAsync();
+
+                        // Always load info, images and property values for variations
+                        var variationsTask = Items.Include(x => x.Images).Where(x => variationIds.Contains(x.Id)).ToArrayAsync();
+                        var variationPropertyValuesTask = PropertyValues.Where(x => variationIds.Contains(x.ItemId)).ToArrayAsync();
+                        await Task.WhenAll(variationsTask, variationPropertyValuesTask);
+
+                        if (respGroup.HasFlag(ItemResponseGroup.ItemAssets))
+                        {
+                            var variationAssets = await Assets.Where(x => variationIds.Contains(x.ItemId)).ToArrayAsync();
+                        }
+
+                        if (respGroup.HasFlag(ItemResponseGroup.ItemEditorialReviews))
+                        {
+                            var variationEditorialReviews = await EditorialReviews.Where(x => variationIds.Contains(x.ItemId)).ToArrayAsync();
+                        }
+
+                        if (respGroup.HasFlag(ItemResponseGroup.Seo))
+                        {
+                            var variationsSeoInfos = await SeoInfos.Where(x => variationIds.Contains(x.ItemId)).ToArrayAsync();
+                        }
+                    }
+
+                    if (respGroup.HasFlag(ItemResponseGroup.ItemAssociations))
+                    {
+                        var assosiations = await Associations.Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
+                        var assosiatedProductIds = assosiations.Where(x => x.AssociatedItemId != null)
+                            .Select(x => x.AssociatedItemId).Distinct().ToArray();
+
+                        var assosiatedItems = await GetItemByIdsAsync(assosiatedProductIds, ItemResponseGroup.ItemInfo | ItemResponseGroup.ItemAssets);
+
+                        var assosiatedCategoryIdsIds = assosiations.Where(x => x.AssociatedCategoryId != null).Select(x => x.AssociatedCategoryId).Distinct().ToArray();
+                        var associatedCategories = await GetCategoriesByIdsAsync(assosiatedCategoryIdsIds, CategoryResponseGroup.Info | CategoryResponseGroup.WithImages);
+                    }
+
+                    if (respGroup.HasFlag(ItemResponseGroup.ReferencedAssociations))
+                    {
+                        var referencedAssociations = await Associations.Where(x => itemIds.Contains(x.AssociatedItemId)).ToArrayAsync();
+                        var referencedProductIds = referencedAssociations.Select(x => x.ItemId).Distinct().ToArray();
+                        var referencedProducts = await GetItemByIdsAsync(referencedProductIds, ItemResponseGroup.ItemInfo);
+                    }
+
+                    // Load parents
+                    var parentIds = result.Where(x => x.Parent == null && x.ParentId != null).Select(x => x.ParentId).ToArray();
+                    var parents = await GetItemByIdsAsync(parentIds, respGroup);
                 }
             }
 
-            if (respGroup.HasFlag(ItemResponseGroup.ItemAssociations))
-            {
-                var assosiations = await Associations.Where(x => itemIds.Contains(x.ItemId)).ToArrayAsync();
-                var assosiatedProductIds = assosiations.Where(x => x.AssociatedItemId != null)
-                                                       .Select(x => x.AssociatedItemId).Distinct().ToArray();
-
-                var assosiatedItems = await GetItemByIdsAsync(assosiatedProductIds, ItemResponseGroup.ItemInfo | ItemResponseGroup.ItemAssets);
-
-                var assosiatedCategoryIdsIds = assosiations.Where(x => x.AssociatedCategoryId != null).Select(x => x.AssociatedCategoryId).Distinct().ToArray();
-                var associatedCategories = await GetCategoriesByIdsAsync(assosiatedCategoryIdsIds, CategoryResponseGroup.Info | CategoryResponseGroup.WithImages);
-            }
-
-            if (respGroup.HasFlag(ItemResponseGroup.ReferencedAssociations))
-            {
-                var referencedAssociations = await Associations.Where(x => itemIds.Contains(x.AssociatedItemId)).ToArrayAsync();
-                var referencedProductIds = referencedAssociations.Select(x => x.ItemId).Distinct().ToArray();
-                var referencedProducts = await GetItemByIdsAsync(referencedProductIds, ItemResponseGroup.ItemInfo);
-            }
-
-            // Load parents
-            var parentIds = retVal.Where(x => x.Parent == null && x.ParentId != null).Select(x => x.ParentId).ToArray();
-            var parents = await GetItemByIdsAsync(parentIds, respGroup);
-
-            return retVal;
+            return result;
         }
 
         public async Task<PropertyEntity[]> GetPropertiesByIdsAsync(string[] propIds, bool loadDictValues = false)
         {
-            //Used breaking query EF performance concept https://msdn.microsoft.com/en-us/data/hh949853.aspx#8
-            var retVal = await Properties.Where(x => propIds.Contains(x.Id)).ToArrayAsync();
+            var result = Array.Empty<PropertyEntity>();
 
-            var propAttributesTask = PropertyAttributes.Where(x => propIds.Contains(x.PropertyId)).ToArrayAsync();
-            var propDisplayNamesTask = PropertyDisplayNames.Where(x => propIds.Contains(x.PropertyId)).ToArrayAsync();
-            var propValidationRulesTask = PropertyValidationRules.Where(x => propIds.Contains(x.PropertyId)).ToArrayAsync();
-            await Task.WhenAll(propAttributesTask, propDisplayNamesTask, propValidationRulesTask);
-
-            if (loadDictValues)
+            if (!propIds.IsNullOrEmpty())
             {
-                var propDictionaryItems = await PropertyDictionaryItems.Include(x => x.DictionaryItemValues).Where(x => propIds.Contains(x.PropertyId)).ToArrayAsync();
+                //Used breaking query EF performance concept https://msdn.microsoft.com/en-us/data/hh949853.aspx#8
+                result = await Properties.Where(x => propIds.Contains(x.Id)).ToArrayAsync();
+
+                if (result.Any())
+                {
+                    var propAttributesTask = PropertyAttributes.Where(x => propIds.Contains(x.PropertyId)).ToArrayAsync();
+                    var propDisplayNamesTask = PropertyDisplayNames.Where(x => propIds.Contains(x.PropertyId)).ToArrayAsync();
+                    var propValidationRulesTask = PropertyValidationRules.Where(x => propIds.Contains(x.PropertyId)).ToArrayAsync();
+                    await Task.WhenAll(propAttributesTask, propDisplayNamesTask, propValidationRulesTask);
+
+                    if (loadDictValues)
+                    {
+                        var propDictionaryItems = await PropertyDictionaryItems.Include(x => x.DictionaryItemValues).Where(x => propIds.Contains(x.PropertyId)).ToArrayAsync();
+                    }
+                }
             }
-            return retVal;
+            return result;
         }
 
         /// <summary>
@@ -227,47 +247,55 @@ namespace VirtoCommerce.CatalogModule.Data.Repositories
         /// <returns></returns>
         public async Task<PropertyEntity[]> GetAllCatalogPropertiesAsync(string catalogId)
         {
-            var retVal = new List<PropertyEntity>();
+            var result = Array.Empty<PropertyEntity>();
 
-            var catalog = await Catalogs.FirstOrDefaultAsync(x => x.Id == catalogId);
-            if (catalog != null)
+            if (!string.IsNullOrEmpty(catalogId))
             {
-                var propertyIds = await Properties.Where(x => x.CatalogId == catalogId).Select(x => x.Id).ToArrayAsync();
+                var catalog = await Catalogs.FirstOrDefaultAsync(x => x.Id == catalogId);
 
-                if (catalog.Virtual)
+                if (catalog != null)
                 {
-                    //get all category relations
-                    var linkedCategoryIds = await CategoryLinks.Where(x => x.TargetCatalogId == catalogId)
-                                                         .Select(x => x.SourceCategoryId)
-                                                         .Distinct()
-                                                         .ToArrayAsync();
-                    //linked product categories links
-                    var linkedProductCategoryIds = await CategoryItemRelations.Where(x => x.CatalogId == catalogId)
-                                                             .Join(Items, link => link.ItemId, item => item.Id, (link, item) => item)
-                                                             .Select(x => x.CategoryId)
-                                                             .Distinct()
-                                                             .ToArrayAsync();
-                    linkedCategoryIds = linkedCategoryIds.Concat(linkedProductCategoryIds).Distinct().ToArray();
-                    var expandedFlatLinkedCategoryIds = linkedCategoryIds.Concat(await GetAllChildrenCategoriesIdsAsync(linkedCategoryIds)).Distinct().ToArray();
+                    var propertyIds = await Properties.Where(x => x.CatalogId == catalogId).Select(x => x.Id).ToArrayAsync();
 
-                    propertyIds = propertyIds.Concat(Properties.Where(x => expandedFlatLinkedCategoryIds.Contains(x.CategoryId)).Select(x => x.Id)).Distinct().ToArray();
-                    var linkedCatalogIds = await Categories.Where(x => expandedFlatLinkedCategoryIds.Contains(x.Id)).Select(x => x.CatalogId).Distinct().ToArrayAsync();
-                    propertyIds = propertyIds.Concat(Properties.Where(x => linkedCatalogIds.Contains(x.CatalogId) && x.CategoryId == null).Select(x => x.Id)).Distinct().ToArray();
+                    if (catalog.Virtual)
+                    {
+                        //get all category relations
+                        var linkedCategoryIds = await CategoryLinks.Where(x => x.TargetCatalogId == catalogId)
+                            .Select(x => x.SourceCategoryId)
+                            .Distinct()
+                            .ToArrayAsync();
+                        //linked product categories links
+                        var linkedProductCategoryIds = await CategoryItemRelations.Where(x => x.CatalogId == catalogId)
+                            .Join(Items, link => link.ItemId, item => item.Id, (link, item) => item)
+                            .Select(x => x.CategoryId)
+                            .Distinct()
+                            .ToArrayAsync();
+                        linkedCategoryIds = linkedCategoryIds.Concat(linkedProductCategoryIds).Distinct().ToArray();
+                        var expandedFlatLinkedCategoryIds = linkedCategoryIds.Concat(await GetAllChildrenCategoriesIdsAsync(linkedCategoryIds)).Distinct().ToArray();
+
+                        propertyIds = propertyIds.Concat(Properties.Where(x => expandedFlatLinkedCategoryIds.Contains(x.CategoryId)).Select(x => x.Id)).Distinct().ToArray();
+                        var linkedCatalogIds = await Categories.Where(x => expandedFlatLinkedCategoryIds.Contains(x.Id)).Select(x => x.CatalogId).Distinct().ToArrayAsync();
+                        propertyIds = propertyIds.Concat(Properties.Where(x => linkedCatalogIds.Contains(x.CatalogId) && x.CategoryId == null).Select(x => x.Id)).Distinct().ToArray();
+                    }
+
+                    result = await GetPropertiesByIdsAsync(propertyIds);
                 }
-
-                retVal.AddRange(await GetPropertiesByIdsAsync(propertyIds));
             }
 
-            return retVal.ToArray();
+            return result;
         }
 
         public async Task<PropertyDictionaryItemEntity[]> GetPropertyDictionaryItemsByIdsAsync(string[] dictItemIds)
         {
-            if (dictItemIds == null)
+            var result = Array.Empty<PropertyDictionaryItemEntity>();
+
+            if (!dictItemIds.IsNullOrEmpty())
             {
-                throw new ArgumentNullException(nameof(dictItemIds));
+                result = await PropertyDictionaryItems.Include(x => x.DictionaryItemValues)
+                    .Where(x => dictItemIds.Contains(x.Id))
+                    .ToArrayAsync();
             }
-            var result = await PropertyDictionaryItems.Include(x => x.DictionaryItemValues).Where(x => dictItemIds.Contains(x.Id)).ToArrayAsync();
+
             return result;
         }
 
