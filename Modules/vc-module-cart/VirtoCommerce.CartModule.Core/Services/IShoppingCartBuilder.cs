@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using VirtoCommerce.CartModule.Core.Model;
-using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.ShippingModule.Core.Model;
+using VirtoCommerce.PaymentModule.Core.Model;
 
 namespace VirtoCommerce.CartModule.Core.Services
 {
@@ -84,7 +84,7 @@ namespace VirtoCommerce.CartModule.Core.Services
         /// </summary>
         /// <param name="payment"></param>
         /// <returns></returns>
-        IShoppingCartBuilder AddOrUpdatePayment(Payment payment);
+        Task<IShoppingCartBuilder> AddOrUpdatePaymentAsync(Model.Payment payment);
 
         /// <summary>
         /// Merge other cart with captured
@@ -109,8 +109,7 @@ namespace VirtoCommerce.CartModule.Core.Services
         /// Returns all available payment methods for current cart
         /// </summary>
         /// <returns></returns>
-        ICollection<PaymentMethod> GetAvailablePaymentMethods();
-
+        Task<ICollection<PaymentMethod>> GetAvailablePaymentMethodsAsync();
 
         //Save cart changes
         Task SaveAsync();

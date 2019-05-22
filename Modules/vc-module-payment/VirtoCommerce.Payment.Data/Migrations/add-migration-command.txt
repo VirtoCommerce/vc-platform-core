@@ -1,0 +1,3 @@
+Add-Migration Initial -Context VirtoCommerce.PaymentModule.Data.Repositories.PaymentDbContext  -Verbose -OutputDir Migrations -Project VirtoCommerce.PaymentModule.Data -StartupProject VirtoCommerce.PaymentModule.Data  -Debug
+
+Remove-Migration -Context VirtoCommerce.PaymentModule.Data.Repositories.PaymentDbContext  -Verbose -Project VirtoCommerce.PaymentModule.Data -StartupProject VirtoCommerce.PaymentModule.Data  -Debug

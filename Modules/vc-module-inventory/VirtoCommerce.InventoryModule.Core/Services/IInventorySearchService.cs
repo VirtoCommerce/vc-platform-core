@@ -1,12 +1,11 @@
 using System.Threading.Tasks;
 using VirtoCommerce.Domain.Inventory.Model.Search;
-using VirtoCommerce.InventoryModule.Core.Model;
-using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.InventoryModule.Core.Model.Search;
 
 namespace VirtoCommerce.InventoryModule.Core.Services
 {
     public interface IInventorySearchService
     {
-        Task<GenericSearchResult<InventoryInfo>> SearchInventoriesAsync(InventorySearchCriteria criteria);
+        Task<InventoryInfoSearchResult> SearchInventoriesAsync(InventorySearchCriteria criteria);
     }
 }

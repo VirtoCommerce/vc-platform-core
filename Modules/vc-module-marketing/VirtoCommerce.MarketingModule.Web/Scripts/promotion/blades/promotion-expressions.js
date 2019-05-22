@@ -3,10 +3,23 @@ angular.module('virtoCommerce.marketingModule')
     $scope.currencyUtils = currencyUtils;
 }])
 
-.controller('virtoCommerce.marketingModule.promotionExpressionsController', ['$scope', 'platformWebApp.authService', 'platformWebApp.bladeNavigationService', function ($scope, authService, bladeNavigationService) {
+    .controller('virtoCommerce.marketingModule.promotionExpressionsController', ['$scope', 'virtoCommerce.catalogModule.items', 'platformWebApp.authService', 'platformWebApp.bladeNavigationService', function ($scope, items, authService, bladeNavigationService) {
 
-    $scope.openItemSelectWizard = function (parentElement) {
+    $scope.openItemSelectWizard = function (parentElement, isMultiSelect) {
         if (!authService.checkPermission('marketing:update')) {
+            return;
+        }
+
+        if (isMultiSelect) {
+            var newBlade = {
+                id: "CatalogEntries",
+                title: "marketing.blades.catalog-entries.title-product",
+                controller: 'virtoCommerce.marketingModule.catalogEntriesController',
+                template: 'Modules/$(VirtoCommerce.Marketing)/Scripts/promotion/blades/catalog-entry-list.tpl.html',
+                breadcrumbs: [],
+                promotion: parentElement
+            };
+            bladeNavigationService.showBlade(newBlade, $scope.blade);
             return;
         }
 
@@ -21,10 +34,9 @@ angular.module('virtoCommerce.marketingModule')
             bladeNavigationService.showBlade(itemDetailBlade, $scope.blade);
             return;
         }
-
-
+        
         var selectedListEntries = [];
-        var newBlade = {
+        var catalogBlade = {
             id: "CatalogEntrySelect",
             title: "marketing.blades.catalog-items-select.title-product",
             controller: 'virtoCommerce.catalogModule.catalogItemSelectController',
@@ -34,7 +46,6 @@ angular.module('virtoCommerce.marketingModule')
             {
                 name: "platform.commands.pick-selected", icon: 'fa fa-plus',
                 executeMethod: function (blade) {
-                    //parentElement.selectedListEntry = selectedListEntries[0];
                     parentElement.productId = selectedListEntries[0].id;
                     parentElement.productName = selectedListEntries[0].name;
                     parentElement.productCode = selectedListEntries[0].code;
@@ -46,11 +57,11 @@ angular.module('virtoCommerce.marketingModule')
             }]
         };
 
-        newBlade.options = {
+        catalogBlade.options = {
             showCheckingMultiple: false,
             checkItemFn: function (listItem, isSelected) {
                 if (listItem.type == 'category') {
-                    newBlade.error = 'Must select Product';
+                    catalogBlade.error = 'Must select Product';
                     listItem.selected = undefined;
                 } else {
                     if (isSelected) {
@@ -61,13 +72,13 @@ angular.module('virtoCommerce.marketingModule')
                     else {
                         selectedListEntries = _.reject(selectedListEntries, function (x) { return x.id == listItem.id; });
                     }
-                    newBlade.error = undefined;
+                    catalogBlade.error = undefined;
                 }
             }
         };
 
-        bladeNavigationService.showBlade(newBlade, $scope.blade);
-    }
+        bladeNavigationService.showBlade(catalogBlade, $scope.blade);
+    };
 
     $scope.openCategorySelectWizard = function (parentElement) {
         if (!authService.checkPermission('marketing:update')) {
@@ -118,5 +129,5 @@ angular.module('virtoCommerce.marketingModule')
         };
 
         bladeNavigationService.showBlade(newBlade, $scope.blade);
-    }
+    };
 }]);

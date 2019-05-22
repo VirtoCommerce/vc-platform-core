@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CartModule.Core.Model.Search;
 using VirtoCommerce.CartModule.Core.Services;
-using VirtoCommerce.CoreModule.Core.Payment;
+using VirtoCommerce.PaymentModule.Core.Model;
+using VirtoCommerce.PaymentModule.Core.Model.Search;
+using VirtoCommerce.PaymentModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.ShippingModule.Core.Model;
 using VirtoCommerce.ShippingModule.Core.Model.Search;
@@ -22,6 +24,8 @@ namespace VirtoCommerce.CartModule.Data.Services
         private readonly IShoppingCartService _shoppingCartService;
         private readonly IShoppingCartSearchService _shoppingCartSearchService;
         private readonly IShippingMethodsSearchService _shippingMethodsSearchService;
+        private readonly IPaymentMethodsSearchService _paymentMethodsSearchService;
+
         //private readonly IMemberService _memberService;
 
         private Store _store;
@@ -30,13 +34,15 @@ namespace VirtoCommerce.CartModule.Data.Services
             IStoreService storeService,
             IShoppingCartService shoppingShoppingCartService,
             IShoppingCartSearchService shoppingCartSearchService,
-            IShippingMethodsSearchService shippingMethodsSearchService
+            IShippingMethodsSearchService shippingMethodsSearchService,
+             IPaymentMethodsSearchService paymentMethodsSearchService
             //, IMemberService memberService
             )
         {
             _storeService = storeService;
             _shoppingCartService = shoppingShoppingCartService;
             _shoppingCartSearchService = shoppingCartSearchService;
+            _paymentMethodsSearchService = paymentMethodsSearchService;
             _shippingMethodsSearchService = shippingMethodsSearchService;
             //_memberService = memberService;
         }
@@ -45,10 +51,7 @@ namespace VirtoCommerce.CartModule.Data.Services
 
         public virtual IShoppingCartBuilder TakeCart(ShoppingCart cart)
         {
-            if (cart == null)
-                throw new ArgumentNullException(nameof(cart));
-
-            Cart = cart;
+            Cart = cart ?? throw new ArgumentNullException(nameof(cart));
             return this;
         }
 
@@ -200,7 +203,7 @@ namespace VirtoCommerce.CartModule.Data.Services
             return this;
         }
 
-        public virtual IShoppingCartBuilder AddOrUpdatePayment(Payment payment)
+        public virtual async Task<IShoppingCartBuilder> AddOrUpdatePaymentAsync(Payment payment)
         {
             Payment existingPayment = null;
 
@@ -217,7 +220,7 @@ namespace VirtoCommerce.CartModule.Data.Services
 
             if (!string.IsNullOrEmpty(payment.PaymentGatewayCode))
             {
-                var availablePaymentMethods = GetAvailablePaymentMethods();
+                var availablePaymentMethods = await GetAvailablePaymentMethodsAsync();
                 var paymentMethod = availablePaymentMethods.FirstOrDefault(pm => string.Equals(pm.Code, payment.PaymentGatewayCode, StringComparison.InvariantCultureIgnoreCase));
                 if (paymentMethod == null)
                 {
@@ -276,14 +279,22 @@ namespace VirtoCommerce.CartModule.Data.Services
             return availableShippingRates;
         }
 
-        public virtual ICollection<PaymentMethod> GetAvailablePaymentMethods()
+        public virtual async Task<ICollection<PaymentMethod>> GetAvailablePaymentMethodsAsync()
         {
-            return Store.PaymentMethods.Where(x => x.IsActive).ToList();
+            var criteria = new PaymentMethodsSearchCriteria
+            {
+                IsActive = true,
+                Take = int.MaxValue,
+                StoreId = Store.Id
+            };
+
+            var searchResult = await _paymentMethodsSearchService.SearchPaymentMethodsAsync(criteria);
+            return searchResult.Results;
         }
 
-        public virtual Task SaveAsync()
+        public virtual async Task SaveAsync()
         {
-            return _shoppingCartService.SaveChangesAsync(new[] { Cart });
+            await _shoppingCartService.SaveChangesAsync(new[] { Cart });
         }
 
         public ShoppingCart Cart { get; private set; }

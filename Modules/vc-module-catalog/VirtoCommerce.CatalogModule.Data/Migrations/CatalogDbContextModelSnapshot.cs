@@ -579,6 +579,8 @@ namespace VirtoCommerce.CatalogModule.Data.Migrations
 
                     b.Property<bool>("IsEnum");
 
+                    b.Property<bool>("IsHidden");
+
                     b.Property<bool>("IsInput");
 
                     b.Property<bool>("IsKey");

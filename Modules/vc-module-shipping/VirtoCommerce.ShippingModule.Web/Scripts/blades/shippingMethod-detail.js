@@ -1,8 +1,7 @@
 angular.module('virtoCommerce.shippingModule')
-    .controller('virtoCommerce.shippingModule.shippingMethodDetailController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.shippingModule.shippingMethods', 'virtoCommerce.taxModule.taxUtils',
-        function ($scope, bladeNavigationService, shippingMethods, taxUtils) {
+    .controller('virtoCommerce.shippingModule.shippingMethodDetailController', ['$scope', 'platformWebApp.bladeNavigationService', 'virtoCommerce.shippingModule.shippingMethods', 
+        function ($scope, bladeNavigationService, shippingMethods) {
             var blade = $scope.blade;
-            $scope.taxUtils = taxUtils;
 
             function initializeBlade(data) {
                 blade.title = 'shipping.labels.' + data.typeName + '.name';
@@ -62,13 +61,7 @@ angular.module('virtoCommerce.shippingModule')
 
             blade.headIcon = 'fa-archive';
 
-            blade.toolbarCommands = [
-                {
-                    name: "platform.commands.refresh",
-                    icon: 'fa fa-refresh',
-                    executeMethod: blade.refresh,
-                    canExecuteMethod: function () { return true; }
-                },
+            blade.toolbarCommands = [             
                 {
                     name: "platform.commands.save",
                     icon: 'fa fa-save',

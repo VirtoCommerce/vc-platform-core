@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using VirtoCommerce.CoreModule.Core.Payment;
+
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Model.Search;
@@ -11,13 +11,9 @@ namespace VirtoCommerce.StoreModule.Web.JsonConverters
 {
     public class PolymorphicStoreJsonConverter : JsonConverter
     {
-        private static Type[] _knowTypes = { typeof(Store), typeof(StoreSearchCriteria), typeof(PaymentMethod) };
+        private static Type[] _knowTypes = new[] { typeof(Store), typeof(StoreSearchCriteria), };
 
-        private readonly IPaymentMethodsRegistrar _paymentMethodsService;
-        public PolymorphicStoreJsonConverter(IPaymentMethodsRegistrar paymentMethodsService)
-        {
-            _paymentMethodsService = paymentMethodsService;
-        }
+
 
         public override bool CanWrite => false;
         public override bool CanRead => true;
@@ -40,12 +36,7 @@ namespace VirtoCommerce.StoreModule.Web.JsonConverters
             {
                 retVal = AbstractTypeFactory<StoreSearchCriteria>.TryCreateInstance();
             }
-            else if (objectType == typeof(PaymentMethod))
-            {
-                var paymentGatewayCode = obj["code"].Value<string>();
-                retVal = _paymentMethodsService.GetAllPaymentMethods().FirstOrDefault(x => x.Code.EqualsInvariant(paymentGatewayCode));
-            }
-
+           
             serializer.Populate(obj.CreateReader(), retVal);
             return retVal;
         }

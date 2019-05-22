@@ -14,7 +14,7 @@ namespace VirtoCommerce.StoreModule.Data.Model
         {
             Languages = new NullCollection<StoreLanguageEntity>();
             Currencies = new NullCollection<StoreCurrencyEntity>();
-            PaymentMethods = new NullCollection<StorePaymentMethodEntity>();
+
             TrustedGroups = new NullCollection<StoreTrustedGroupEntity>();
             FulfillmentCenters = new NullCollection<StoreFulfillmentCenterEntity>();
             SeoInfos = new NullCollection<SeoInfoEntity>();
@@ -76,7 +76,6 @@ namespace VirtoCommerce.StoreModule.Data.Model
         public virtual ObservableCollection<StoreCurrencyEntity> Currencies { get; set; }
         public virtual ObservableCollection<StoreTrustedGroupEntity> TrustedGroups { get; set; }
 
-        public virtual ObservableCollection<StorePaymentMethodEntity> PaymentMethods { get; set; }
 
         public virtual ObservableCollection<StoreFulfillmentCenterEntity> FulfillmentCenters { get; set; }
         public virtual ObservableCollection<SeoInfoEntity> SeoInfos { get; set; }
@@ -186,10 +185,6 @@ namespace VirtoCommerce.StoreModule.Data.Model
                 }));
             }
 
-            if (store.PaymentMethods != null)
-            {
-                PaymentMethods = new ObservableCollection<StorePaymentMethodEntity>(store.PaymentMethods.Select(x => AbstractTypeFactory<StorePaymentMethodEntity>.TryCreateInstance().FromModel(x, pkMap)));
-            }
 
             FulfillmentCenters = new ObservableCollection<StoreFulfillmentCenterEntity>();
             if (store.AdditionalFulfillmentCenterIds != null)
@@ -263,12 +258,7 @@ namespace VirtoCommerce.StoreModule.Data.Model
                 TrustedGroups.Patch(target.TrustedGroups, trustedGroupComparer,
                                       (sourceGroup, targetGroup) => sourceGroup.GroupName = targetGroup.GroupName);
             }
-            if (!PaymentMethods.IsNullCollection())
-            {
-                var paymentComparer = AnonymousComparer.Create((StorePaymentMethodEntity x) => x.Code);
-                PaymentMethods.Patch(target.PaymentMethods, paymentComparer,
-                                      (sourceMethod, targetMethod) => sourceMethod.Patch(targetMethod));
-            }
+
             if (!FulfillmentCenters.IsNullCollection())
             {
                 var fulfillmentCenterComparer = AnonymousComparer.Create((StoreFulfillmentCenterEntity fc) => $"{fc.FulfillmentCenterId}-{fc.Type}");

@@ -10,6 +10,7 @@
     <ItemGroup>
         <PackageReference Include="EntityFrameworkCore.Triggers" Version="1.1.1" />
         <PackageReference Include="FluentValidation" Version="8.0.101" />
+        <PackageReference Include="Hangfire" Version="1.6.22" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.3" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.3" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="2.2.3" />

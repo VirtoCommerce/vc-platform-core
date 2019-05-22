@@ -65,12 +65,13 @@ namespace VirtoCommerce.InventoryModule.Data.ExportImport
                 await writer.WriteStartObjectAsync();
 
                 await writer.WritePropertyNameAsync("FulfillmentCenters");
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, BatchSize, (skip, take) =>
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, BatchSize, async (skip, take) =>
                 {
                     var searchCriteria = AbstractTypeFactory<FulfillmentCenterSearchCriteria>.TryCreateInstance();
                     searchCriteria.Take = take;
                     searchCriteria.Skip = skip;
-                    return _fulfillmentCenterSearchService.SearchCentersAsync(searchCriteria);
+                    var searchResult = await _fulfillmentCenterSearchService.SearchCentersAsync(searchCriteria);
+                    return (GenericSearchResult<FulfillmentCenter>) searchResult;
                 }, (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{processedCount} of {totalCount} FulfillmentCenters have been exported";
@@ -81,12 +82,13 @@ namespace VirtoCommerce.InventoryModule.Data.ExportImport
                 progressCallback(progressInfo);
 
                 await writer.WritePropertyNameAsync("Inventories");
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, BatchSize, (skip, take) =>
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, BatchSize, async (skip, take) =>
                 {
                     var searchCriteria = AbstractTypeFactory<InventorySearchCriteria>.TryCreateInstance();
                     searchCriteria.Take = take;
                     searchCriteria.Skip = skip;
-                    return _inventorySearchService.SearchInventoriesAsync(searchCriteria);
+                    var searchResult = await _inventorySearchService.SearchInventoriesAsync(searchCriteria);
+                    return (GenericSearchResult<InventoryInfo>)searchResult;
                 }, (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{processedCount} of {totalCount} inventories have been exported";

@@ -12,7 +12,7 @@
                 <div class="form-group">
                     <label class="form-label">{{ 'inventory.blades.fulfillment-center-detail.labels.description' | translate }}</label>
                     <div class="form-input">
-                        <textarea class="form-control" cols="30" rows="3" placeholder="{{ 'inventory.blades.fulfillment-center-detail.placeholders.description' | translate }}"  ng-model="blade.currentEntity.description"></textarea>
+                        <textarea class="form-control" cols="30" rows="3" placeholder="{{ 'inventory.blades.fulfillment-center-detail.placeholders.description' | translate }}" ng-model="blade.currentEntity.description"></textarea>
                         <span class="table-descr">{{ 'inventory.blades.fulfillment-center-detail.description.description' | translate }}</span>
                     </div>
                 </div>
@@ -22,11 +22,12 @@
                         <input ng-model="blade.currentEntity.geoLocation"
                                name="geoLocation"
                                ng-pattern="/^(\-?\d+(\.\d+)?),\s*(\-?\d+(\.\d+)?)$/"
-                               placeholder="{{ 'inventory.properties.geoPoint.placeholder' | translate }}"                             
+                               placeholder="{{ 'inventory.properties.geoPoint.placeholder' | translate }}"
                                type="text">
                         <span class="table-descr">{{ 'catalog.properties.geoPoint.description' | translate }}</span>
                     </div>
                 </div>
+                <va-metaform blade="blade" registered-inputs="blade.metaFields"></va-metaform>
             </form>
             <va-widget-container group="fulfillmentCenterDetail" blade="blade" gridster-opts="{width: 396}"></va-widget-container>
         </div>

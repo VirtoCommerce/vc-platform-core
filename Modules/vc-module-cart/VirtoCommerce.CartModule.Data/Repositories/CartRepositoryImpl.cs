@@ -28,7 +28,7 @@ namespace VirtoCommerce.CartModule.Data.Repositories
         {
             var carts = await ShoppingCarts.Where(x => ids.Contains(x.Id)).ToArrayAsync();
 
-            var cartResponseGroup = EnumUtility.SafeParse(responseGroup, CartResponseGroup.Full);
+            var cartResponseGroup = EnumUtility.SafeParseFlags(responseGroup, CartResponseGroup.Full);
 
             var cartTaxDetails = TaxDetails.Where(x => ids.Contains(x.ShoppingCartId)).ToArrayAsync();
             var cartDiscounts = Discounts.Where(x => ids.Contains(x.ShoppingCartId)).ToArrayAsync();

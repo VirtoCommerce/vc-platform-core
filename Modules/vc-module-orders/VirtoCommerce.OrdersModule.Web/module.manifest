@@ -4,13 +4,11 @@
     <version>3.0.0</version>
     <platformVersion>3.0.0</platformVersion>
     <dependencies>
-        <dependency id="VirtoCommerce.Core" version="3.0.0" />
-        <!--TODO:-->
-        <!--
+        <dependency id="VirtoCommerce.Core" version="3.0.0" />      
         <dependency id="VirtoCommerce.Pricing" version="3.0.0" />
         <dependency id="VirtoCommerce.Customer" version="3.0.0" />
-        -->
         <dependency id="VirtoCommerce.Store" version="3.0.0" />
+        <dependency id="VirtoCommerce.Payment" version="3.0.0" />
     </dependencies>
 
     <title>Orders module</title>

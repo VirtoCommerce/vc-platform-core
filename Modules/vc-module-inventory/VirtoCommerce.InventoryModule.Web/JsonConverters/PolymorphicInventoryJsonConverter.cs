@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using VirtoCommerce.Domain.Inventory.Model.Search;
 using VirtoCommerce.InventoryModule.Core.Model;
 using VirtoCommerce.InventoryModule.Core.Model.Search;
 using VirtoCommerce.Platform.Core.Common;
@@ -10,14 +11,14 @@ namespace VirtoCommerce.InventoryModule.Web.JsonConverters
 {
     public class PolymorphicInventoryJsonConverter : JsonConverter
     {
-        private readonly Type[] _knowTypes = new[] { typeof(InventoryInfo), typeof(FulfillmentCenter), typeof(Address), typeof(FulfillmentCenterSearchCriteria) };
+        private readonly Type[] _knownTypes = new[] { typeof(InventoryInfo), typeof(FulfillmentCenter), typeof(InventorySearchCriteria), typeof(FulfillmentCenterSearchCriteria) };
 
         public override bool CanWrite => false;
         public override bool CanRead => true;
 
         public override bool CanConvert(Type objectType)
         {
-            return _knowTypes.Any(x => x.IsAssignableFrom(objectType));
+            return _knownTypes.Any(x => x.IsAssignableFrom(objectType));
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)

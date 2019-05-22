@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using VirtoCommerce.InventoryModule.Data.Model;
 using Microsoft.EntityFrameworkCore;
+using VirtoCommerce.InventoryModule.Data.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.Platform.Data.Infrastructure;
@@ -21,11 +21,11 @@ namespace VirtoCommerce.InventoryModule.Data.Repositories
 
         public IQueryable<FulfillmentCenterEntity> FulfillmentCenters => DbContext.Set<FulfillmentCenterEntity>();
 
-        public async Task<IEnumerable<InventoryEntity>> GetProductsInventoriesAsync(IEnumerable<string> productIds, string responseGroup)
+        public virtual async Task<IEnumerable<InventoryEntity>> GetProductsInventoriesAsync(IEnumerable<string> productIds, string responseGroup)
         {
             var inventories = await Inventories.Where(x => productIds.Contains(x.Sku)).ToListAsync();
 
-            var inventoryResponseGroup = EnumUtility.SafeParse(responseGroup, InventoryResponseGroup.Full);
+            var inventoryResponseGroup = EnumUtility.SafeParseFlags(responseGroup, InventoryResponseGroup.Full);
 
             foreach (var inventory in inventories)
             {
@@ -38,7 +38,7 @@ namespace VirtoCommerce.InventoryModule.Data.Repositories
             return inventories;
         }
 
-        public async Task<IEnumerable<FulfillmentCenterEntity>> GetFulfillmentCentersAsync(IEnumerable<string> ids)
+        public virtual async Task<IEnumerable<FulfillmentCenterEntity>> GetFulfillmentCentersAsync(IEnumerable<string> ids)
         {
             return await FulfillmentCenters.Where(x => ids.Contains(x.Id)).ToListAsync();
         }
@@ -47,7 +47,7 @@ namespace VirtoCommerce.InventoryModule.Data.Repositories
         {
             var inventories = await Inventories.Where(x => ids.Contains(x.Id)).ToListAsync();
 
-            var inventoryResponseGroup = EnumUtility.SafeParse(responseGroup, InventoryResponseGroup.Full);
+            var inventoryResponseGroup = EnumUtility.SafeParseFlags(responseGroup, InventoryResponseGroup.Full);
 
             foreach (var inventory in inventories)
             {

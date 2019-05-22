@@ -42,14 +42,15 @@ namespace VirtoCommerce.NotificationsModule.Data.ExportImport
                 progressCallback(progressInfo);
 
                 await writer.WritePropertyNameAsync("Notifications");
-                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, (skip, take) =>
+                await writer.SerializeJsonArrayWithPagingAsync(_jsonSerializer, _batchSize, async (skip, take) =>
                 {
                     var searchCriteria = AbstractTypeFactory<NotificationSearchCriteria>.TryCreateInstance();
                     searchCriteria.Take = take;
                     searchCriteria.Skip = skip;
                     searchCriteria.ResponseGroup = NotificationResponseGroup.Full.ToString();
                     searchCriteria.IsActive = true;
-                    return _notificationSearchService.SearchNotificationsAsync(searchCriteria);
+                    var searchResult = await _notificationSearchService.SearchNotificationsAsync(searchCriteria);
+                    return (GenericSearchResult<Notification>)searchResult;
                 }, (processedCount, totalCount) =>
                 {
                     progressInfo.Description = $"{processedCount} of {totalCount} notifications have been exported";
