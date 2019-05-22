@@ -60,7 +60,7 @@ namespace VirtoCommerce.OrdersModule.Data.Services
                     result.TotalCount = await query.CountAsync();
                     var orderIds = await query.Select(x => x.Id).Skip(criteria.Skip).Take(criteria.Take).ToArrayAsync();
 
-                    retVal.Results = (await _customerOrderService.GetByIdsAsync(orderIds, criteria.ResponseGroup)).AsQueryable()
+                    result.Results = (await _customerOrderService.GetByIdsAsync(orderIds, criteria.ResponseGroup)).AsQueryable()
                                                    .OrderBySortInfos(sortInfos)
                                                    .ToList();
                     return result;
