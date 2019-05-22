@@ -36,6 +36,7 @@ namespace VirtoCommerce.MarketingModule.Test
 
         private static IMarketingPromoEvaluator GetPromotionEvaluationPolicy(IEnumerable<Promotion> promotions)
         {
+
             var result = new PromotionSearchResult
             {
                 Results = promotions.ToList()
