@@ -5,20 +5,18 @@ if (AppDependencies != undefined) {
     AppDependencies.push(moduleName);
 }
 
-angular.module(moduleName, [])
-    .run(
-        ['platformWebApp.toolbarService', 'platformWebApp.bladeNavigationService', 'platformWebApp.widgetService',
-            function (toolbarService, bladeNavigationService, widgetService) {
+angular.module(moduleName, []).run(['platformWebApp.widgetService',
+    function (widgetService) {
 
-                //Register payment widget for store
-                widgetService.registerWidget({
-                    controller: 'virtoCommerce.paymentModule.storePaymentsWidgetController',
-                    template: 'Modules/$(VirtoCommerce.Payment)/Scripts/widgets/storePaymentsWidget.tpl.html'
-                }, 'storeDetail');
+        //Register payment widget for store
+        widgetService.registerWidget({
+            controller: 'virtoCommerce.paymentModule.storePaymentsWidgetController',
+            template: 'Modules/$(VirtoCommerce.Payment)/Scripts/widgets/storePaymentsWidget.tpl.html'
+        }, 'storeDetail');
 
-                widgetService.registerWidget({
-                    controller: 'platformWebApp.entitySettingsWidgetController',
-                    template: '$(Platform)/Scripts/app/settings/widgets/entitySettingsWidget.tpl.html'
-                }, 'paymentMethodDetail');
+        widgetService.registerWidget({
+            controller: 'platformWebApp.entitySettingsWidgetController',
+            template: '$(Platform)/Scripts/app/settings/widgets/entitySettingsWidget.tpl.html'
+        }, 'paymentMethodDetail');
 
-            }]);
+    }]);

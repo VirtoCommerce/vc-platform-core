@@ -15,7 +15,7 @@
                     "description": "Beschreibung eingeben"
                 }
             },
-            "paymentMethod-list": {
+            "payment-method-list": {
                 "subtitle": "Zahlungsmethode bearbeiten",
                 "labels": {
                     "is-active": "Ist aktiv",
@@ -34,7 +34,7 @@
             }
         },
         "widgets": {
-            "storePaymentsWidget": {
+            "store-payment-widget": {
                 "title": "Zahlungsmethoden",
                 "blade-subtitle": "Zahlungsmethoden"
             }

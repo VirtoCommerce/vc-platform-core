@@ -21,8 +21,7 @@
                 "labels": {
                     "is-active": "Is active",
                     "shipping-method": "Shipping method",
-                    "note":
-                        "Set the order how shipping methods appear sorted in web store. Drag and drop to change the order."
+                    "note": "Set the order how shipping methods appear sorted in web store. Drag and drop to change the order."
                 }
             }
         },

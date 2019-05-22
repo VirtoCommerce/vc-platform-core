@@ -41,5 +41,15 @@
         }
     },
     "settings": {
+        "VirtoCommerce.Shipping.FixedRateShippingMethod": {
+            "Air.Rate": {
+                "title": "Стоимость доставки по воздуху",
+                "description": "Фиксированная стоимость доставки по воздуху"
+            },
+            "Ground.Rate": {
+                "title": "Стоимость доставки по земле",
+                "description": "Фиксированная стоимость доставки по земле"
+            }
+        }
     }
 }

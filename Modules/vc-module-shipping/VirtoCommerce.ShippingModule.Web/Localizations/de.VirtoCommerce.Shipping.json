@@ -17,7 +17,7 @@
                 }
             },
             "shipping-method-list": {
-                "subtitle": {},
+                "subtitle": "",
                 "labels": {
                     "is-active": "Ist aktiv",
                     "shipping-method": "Versandart",
@@ -41,5 +41,15 @@
         }
     },
     "settings": {
+        "VirtoCommerce.Shipping.FixedRateShippingMethod": {
+            "Air.Rate": {
+                "title": "Luftfracht rate",
+                "description": "Feste luftfracht"
+            },
+            "Ground.Rate": {
+                "title": "Grundverschiffenrate",
+                "description": "Feste grundversandrate"
+            }
+        }
     }
 }

@@ -15,7 +15,7 @@
                     "description": "Enter description"
                 }
             },
-            "paymentMethod-list": {
+            "payment-method-list": {
                 "subtitle": "Edit payment method",
                 "labels": {
                     "is-active": "Is active",
@@ -34,7 +34,7 @@
             }
         },
         "widgets": {
-            "storePaymentsWidget": {
+            "store-payment-widget": {
                 "title": "Payment methods",
                 "blade-subtitle": "Payment methods"
             }
