@@ -1,7 +1,8 @@
 angular.module('virtoCommerce.orderModule')
-.controller('virtoCommerce.orderModule.customerOrderItemsController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'virtoCommerce.orderModule.catalogItems', 'virtoCommerce.pricingModule.prices', '$translate', function ($scope, bladeNavigationService, dialogService, items, prices, $translate) {
+    .controller('virtoCommerce.orderModule.customerOrderItemsController', ['$scope', 'platformWebApp.bladeNavigationService', 'platformWebApp.dialogService', 'virtoCommerce.orderModule.catalogItems', 'virtoCommerce.pricingModule.prices', '$translate', 'platformWebApp.authService', function ($scope, bladeNavigationService, dialogService, items, prices, $translate, authService) {
     var blade = $scope.blade;
     blade.updatePermission = 'order:update';
+    blade.isVisiblePrices = authService.checkPermission('order:read_prices');
 
     //pagination settings
     $scope.pageSettings = {};
@@ -32,16 +33,16 @@ angular.module('virtoCommerce.orderModule')
 
                     var newLineItem =
 					{
-					    productId: data.id,
-					    catalogId: data.catalogId,
-					    categoryId: data.categoryId,
-					    name: data.name,
-					    imageUrl: data.imgSrc,
-					    sku: data.code,
-					    quantity: 1,
-					    price: price && price.list ? price.list : 0,
-					    discountAmount: price && price.list && price.sale ? price.list - price.sale : 0,
-					    currency: blade.currentEntity.currency
+                        productId: data.id,
+                        catalogId: data.catalogId,
+                        categoryId: data.categoryId,
+                        name: data.name,
+                        imageUrl: data.imgSrc,
+                        sku: data.code,
+                        quantity: 1,
+                        price: price && price.list ? price.list : 0,
+                        discountAmount: price && price.list && price.sale ? price.list - price.sale : 0,
+                        currency: blade.currentEntity.currency
 					};
                     blade.currentEntity.items.push(newLineItem);
                     blade.recalculateFn();
@@ -94,18 +95,17 @@ angular.module('virtoCommerce.orderModule')
             options: options,
             breadcrumbs: [],
             toolbarCommands: [
-			  {
-			      name: "orders.commands.add-selected", icon: 'fa fa-plus',
-			      executeMethod: function (blade) {
-			          addProductsToOrder(selectedProducts);
-			          selectedProducts.length = 0;
-			          bladeNavigationService.closeBlade(blade);
-
-			      },
-			      canExecuteMethod: function () {
-			          return selectedProducts.length > 0;
-			      }
-			  }]
+              {
+                  name: "orders.commands.add-selected", icon: 'fa fa-plus',
+                  executeMethod: function (blade) {
+                      addProductsToOrder(selectedProducts);
+                      selectedProducts.length = 0;
+                      bladeNavigationService.closeBlade(blade);
+                  },
+                  canExecuteMethod: function () {
+                      return selectedProducts.length > 0;
+                  }
+              }]
         };
         bladeNavigationService.showBlade(newBlade, $scope.blade);
     }
@@ -130,7 +130,7 @@ angular.module('virtoCommerce.orderModule')
                 $scope.pageSettings.totalItems = blade.currentEntity.items.length;
             },
             canExecuteMethod: function () {
-                return _.any(blade.currentEntity.items, function (x) { return x.selected; });;
+                return _.any(blade.currentEntity.items, function (x) { return x.selected; });
             },
             permission: blade.updatePermission
         }

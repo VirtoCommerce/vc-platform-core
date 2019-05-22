@@ -1,4 +1,4 @@
-﻿<div class="blade-static __bottom" ng-include="'$(Platform)/Scripts/common/templates/ok-cancel2.tpl.html'"></div>
+<div class="blade-static __bottom" ng-include="'$(Platform)/Scripts/common/templates/ok-cancel2.tpl.html'"></div>
 <div class="blade-content __medium-wide">
     <div class="blade-inner">
         <div class="inner-block" ng-controller="virtoCommerce.orderModule.shipmentDetailController">
@@ -108,12 +108,12 @@
 <script type="text/ng-template" id="price.html">
     <div class="form-input __currency">
         <span class="currency">{{blade.currentEntity.currency}}</span>
-        <input money required ng-model="blade.currentEntity.price" ng-change="blade.updateRecalculationFlag()">
+        <input money mask-money="!blade.isVisiblePrices" required ng-model="blade.currentEntity.price" ng-change="blade.updateRecalculationFlag()">
     </div>
 </script>
 <script type="text/ng-template" id="priceWithTax.html">
     <div class="form-input __currency">
         <span class="currency">{{blade.currentEntity.currency}}</span>
-        <input money required ng-model="blade.currentEntity.priceWithTax" ng-change="blade.updateRecalculationFlag()">
+        <input money mask-money="!blade.isVisiblePrices" required ng-model="blade.currentEntity.priceWithTax" ng-change="blade.updateRecalculationFlag()">
     </div>
 </script>

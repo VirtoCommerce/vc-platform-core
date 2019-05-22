@@ -14,8 +14,9 @@ namespace VirtoCommerce.OrdersModule.Core
                 public const string Update = "order:update";
                 public const string Access = "order:access";
                 public const string Delete = "order:delete";
+                public const string ReadPrices = "order:read_prices";
 
-                public static string[] AllPermissions = new[] { Read, Create, Update, Access, Delete };
+                public static string[] AllPermissions = new[] { Read, Create, Update, Access, Delete, ReadPrices };
             }
         }
 

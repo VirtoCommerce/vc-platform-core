@@ -12,6 +12,7 @@ using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Payment;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
+using VirtoCommerce.OrderModule.Web.Security;
 using VirtoCommerce.OrdersModule.Core;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
@@ -103,7 +104,8 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         {
             var searchCriteria = AbstractTypeFactory<CustomerOrderSearchCriteria>.TryCreateInstance();
             searchCriteria.Number = number;
-            searchCriteria.ResponseGroup = respGroup;
+            //ToDo
+            //searchCriteria.ResponseGroup = OrderReadPricesPermission.ApplyResponseGroupFiltering(_securityService.GetUserPermissions(User.Identity.Name), respGroup); ;
 
             var result = await _searchService.SearchCustomerOrdersAsync(searchCriteria);
 
@@ -134,7 +136,9 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         [Route("{id}")]
         public async Task<ActionResult<CustomerOrder>> GetById(string id, [FromRoute] string respGroup = null)
         {
-            var retVal = await _customerOrderService.GetByIdAsync(id, respGroup);
+            var retVal = await _customerOrderService.GetByIdAsync(id,
+                /* OrderReadPricesPermission.ApplyResponseGroupFiltering(_securityService.GetUserPermissions(User.Identity.Name),*/ respGroup);
+
             if (retVal == null)
             {
                 return NotFound();
@@ -478,6 +482,8 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             var searchCriteria = AbstractTypeFactory<CustomerOrderSearchCriteria>.TryCreateInstance();
             searchCriteria.Number = orderNumber;
             searchCriteria.Take = 1;
+            //ToDo
+            //searchCriteria.ResponseGroup = OrderReadPricesPermission.ApplyResponseGroupFiltering(_securityService.GetUserPermissions(User.Identity.Name), null);
 
             var orders = await _searchService.SearchCustomerOrdersAsync(searchCriteria);
             var order = orders.Results.FirstOrDefault();
@@ -552,6 +558,8 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             //    {
             //        criteria.EmployeeId = userName;
             //    }
+            //// ResponseGroup
+            // criteria.ResponseGroup = OrderReadPricesPermission.ApplyResponseGroupFiltering(_securityService.GetUserPermissions(User.Identity.Name), criteria.ResponseGroup);
             //}
             return criteria;
         }

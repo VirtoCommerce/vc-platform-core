@@ -32,10 +32,15 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         [StringLength(2048)]
         public string CancelReason { get; set; }
 
+        [NotMapped]
+        public bool NeedPatchSum { get; set; } = true;
+
         public virtual OrderOperation ToModel(OrderOperation operation)
         {
             if (operation == null)
+            {
                 throw new ArgumentNullException(nameof(operation));
+            }
 
             operation.Id = Id;
             operation.CreatedDate = CreatedDate;
@@ -59,7 +64,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public virtual OperationEntity FromModel(OrderOperation operation, PrimaryKeyResolvingMap pkMap)
         {
             if (operation == null)
+            {
                 throw new ArgumentNullException(nameof(operation));
+            }
 
             pkMap.AddPair(operation, this);
 
@@ -85,7 +92,9 @@ namespace VirtoCommerce.OrdersModule.Data.Model
         public virtual void Patch(OperationEntity operation)
         {
             if (operation == null)
+            {
                 throw new ArgumentNullException(nameof(operation));
+            }
 
             operation.Comment = Comment;
             operation.Currency = Currency;
@@ -95,7 +104,11 @@ namespace VirtoCommerce.OrdersModule.Data.Model
             operation.CancelledDate = CancelledDate;
             operation.CancelReason = CancelReason;
             operation.IsApproved = IsApproved;
-            operation.Sum = Sum;
+
+            if (NeedPatchSum)
+            {
+                operation.Sum = Sum;
+            }
         }
 
         private static IEnumerable<IOperation> GetAllChildOperations(IOperation operation)
