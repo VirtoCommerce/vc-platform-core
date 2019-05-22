@@ -15,7 +15,7 @@
                     "description": "Введите описание"
                 }
             },
-            "paymentMethod-list": {
+            "payment-method-list": {
                 "subtitle": "Изменить способ оплаты",
                 "labels": {
                     "is-active": "Активен",
@@ -34,7 +34,7 @@
             }
         },
         "widgets": {
-            "storePaymentsWidget": {
+            "store-payment-widget": {
                 "title": "Способы оплаты",
                 "blade-subtitle": "Способы оплаты"
             }

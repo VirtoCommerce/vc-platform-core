@@ -6,7 +6,7 @@ angular.module('virtoCommerce.paymentModule').controller('virtoCommerce.paymentM
             id: "storeChildBlade",
             storeId: blade.currentEntity.id,
             title: blade.title,
-            subtitle: 'payment.widgets.storePaymentsWidget.blade-subtitle',
+            subtitle: 'payment.widgets.store-payment-widget.blade-subtitle',
             controller: 'virtoCommerce.paymentModule.paymentMethodListController',
             template: 'Modules/$(VirtoCommerce.Payment)/Scripts/blades/paymentMethod-list.tpl.html'
         };
