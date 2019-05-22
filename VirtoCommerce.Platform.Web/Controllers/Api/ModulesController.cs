@@ -56,7 +56,7 @@ namespace VirtoCommerce.Platform.Web.Controllers.Api
         [HttpPost]
         [Route("reload")]
         [Authorize(PlatformConstants.Security.Permissions.ModuleQuery)]
-        public IActionResult ReloadModules()
+        public ActionResult ReloadModules()
         {
             _externalModuleCatalog.Reload();
             return Ok();

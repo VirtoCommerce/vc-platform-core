@@ -1,0 +1,55 @@
+{
+    "shipping": {
+        "blades": {
+            "shipping-method-detail": {
+                "subtitle": "Versandart eingeben",
+                "labels": {
+                    "is-active": "Ist aktiv",
+                    "name": "Name",
+                    "code": "Code",
+                    "tax-type": "Steuertyp",
+                    "description": "Beschreibung",
+                    "settings": "Einstellungen"
+                },
+                "placeholders": {
+                    "tax-type": "Wählen Sie aus...",
+                    "description": "Beschreibung eingeben"
+                }
+            },
+            "shipping-method-list": {
+                "subtitle": "",
+                "labels": {
+                    "is-active": "Ist aktiv",
+                    "shipping-method": "Versandart",
+                    "note": "Legen Sie den Auftrag fest, wie die Versandmethoden im Web Store sortiert werden. Ziehen und loslassen, um die Reihenfolge zu ändern."
+                }
+            }
+        },
+        "dialogs": {
+        },
+        "widgets": {
+            "store-shipping-widget": {
+                "title": "Versandarten",
+                "blade-subtitle": "Versandarten"
+            }
+        },
+        "labels": {
+            "FixedRateShippingMethod": {
+                "name": "Versandart festpreis",
+                "description": "Versandart festpreis"
+            }
+        }
+    },
+    "settings": {
+        "VirtoCommerce.Shipping.FixedRateShippingMethod": {
+            "Air.Rate": {
+                "title": "Luftfracht rate",
+                "description": "Feste luftfracht"
+            },
+            "Ground.Rate": {
+                "title": "Grundverschiffenrate",
+                "description": "Feste grundversandrate"
+            }
+        }
+    }
+}

@@ -18,23 +18,23 @@ namespace VirtoCommerce.InventoryModule.Data.Services
 {
     public class FulfillmentCenterSearchService : IFulfillmentCenterSearchService
     {
+        private readonly Func<IInventoryRepository> _repositoryFactory;
+        private readonly IPlatformMemoryCache _platformMemoryCache;
+
         public FulfillmentCenterSearchService(Func<IInventoryRepository> repositoryFactory, IPlatformMemoryCache platformMemoryCache)
         {
-            RepositoryFactory = repositoryFactory;
-            PlatformMemoryCache = platformMemoryCache;
+            _repositoryFactory = repositoryFactory;
+            _platformMemoryCache = platformMemoryCache;
         }
 
-        protected Func<IInventoryRepository> RepositoryFactory { get; }
-        protected IPlatformMemoryCache PlatformMemoryCache { get; }
-
-        public virtual async Task<GenericSearchResult<FulfillmentCenter>> SearchCentersAsync(FulfillmentCenterSearchCriteria criteria)
+        public virtual async Task<FulfillmentCenterSearchResult> SearchCentersAsync(FulfillmentCenterSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), "SearchCentersAsync", criteria.GetCacheKey());
-            return await PlatformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
+            return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async (cacheEntry) =>
             {
                 cacheEntry.AddExpirationToken(FulfillmentCenterCacheRegion.CreateChangeToken());
-                var result = new GenericSearchResult<FulfillmentCenter>();
-                using (var repository = RepositoryFactory())
+                var result = AbstractTypeFactory<FulfillmentCenterSearchResult>.TryCreateInstance();
+                using (var repository = _repositoryFactory())
                 {
                     repository.DisableChangesTracking();
 

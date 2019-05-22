@@ -4,9 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using VirtoCommerce.CatalogModule.Core.Model;
-using VirtoCommerce.CatalogModule.Core.Model.Search;
-using VirtoCommerce.CatalogModule.Core.Services;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.PricingModule.Core.Model;
@@ -35,7 +32,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
 
         #region IPricingSearchService Members
 
-        public virtual Task<GenericSearchResult<Price>> SearchPricesAsync(PricesSearchCriteria criteria)
+        public virtual Task<PriceSearchResult> SearchPricesAsync(PricesSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), nameof(SearchPricesAsync), criteria.GetCacheKey());
             return _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
@@ -43,7 +40,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
                     cacheEntry.AddExpirationToken(PricesCacheRegion.CreateChangeToken());
                     cacheEntry.AddExpirationToken(PricingSearchCacheRegion.CreateChangeToken());
 
-                    var retVal = new GenericSearchResult<Price>();
+                    var retVal = AbstractTypeFactory<PriceSearchResult>.TryCreateInstance();
 
                     using (var repository = _repositoryFactory())
                     {
@@ -100,14 +97,14 @@ namespace VirtoCommerce.PricingModule.Data.Services
                 });
         }
 
-        public virtual async Task<GenericSearchResult<Pricelist>> SearchPricelistsAsync(PricelistSearchCriteria criteria)
+        public virtual async Task<PricelistSearchResult> SearchPricelistsAsync(PricelistSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), nameof(SearchPricelistsAsync), criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
             {
                 cacheEntry.AddExpirationToken(PricingSearchCacheRegion.CreateChangeToken());
 
-                var retVal = new GenericSearchResult<Pricelist>();
+                var retVal = AbstractTypeFactory<PricelistSearchResult>.TryCreateInstance();
                 using (var repository = _repositoryFactory())
                 {
                     var query = repository.Pricelists;
@@ -145,7 +142,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
             });
         }
 
-        public virtual async Task<GenericSearchResult<PricelistAssignment>> SearchPricelistAssignmentsAsync(PricelistAssignmentsSearchCriteria criteria)
+        public virtual async Task<PricelistAssignmentSearchResult> SearchPricelistAssignmentsAsync(PricelistAssignmentsSearchCriteria criteria)
         {
             var cacheKey = CacheKey.With(GetType(), nameof(SearchPricelistAssignmentsAsync), criteria.GetCacheKey());
             return await _platformMemoryCache.GetOrCreateExclusiveAsync(cacheKey, async cacheEntry =>
@@ -153,7 +150,7 @@ namespace VirtoCommerce.PricingModule.Data.Services
                 cacheEntry.AddExpirationToken(PricingSearchCacheRegion.CreateChangeToken());
                 cacheEntry.AddExpirationToken(PricingCacheRegion.CreateChangeToken());
 
-                var retVal = new GenericSearchResult<PricelistAssignment>();
+                var retVal = AbstractTypeFactory<PricelistAssignmentSearchResult>.TryCreateInstance();
                 using (var repository = _repositoryFactory())
                 {
                     var query = repository.PricelistAssignments;

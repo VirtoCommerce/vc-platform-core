@@ -109,7 +109,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="category">The category.</param>
         [HttpPost]
         [Route("")]
-        public async Task<IActionResult> CreateOrUpdateCategory([FromBody]Category category)
+        public async Task<ActionResult> CreateOrUpdateCategory([FromBody]Category category)
         {
             if (category.Id == null)
             {
@@ -146,7 +146,7 @@ namespace VirtoCommerce.CatalogModule.Web.Controllers.Api
         /// <param name="ids">The categories ids.</param>
         [HttpDelete]
         [Route("")]
-        public async Task<IActionResult> Delete([FromQuery]string[] ids)
+        public async Task<ActionResult> Delete([FromQuery]string[] ids)
         {
             //TODO
             //var categories = _categoryService.GetByIds(ids, Domain.Catalog.Model.CategoryResponseGroup.WithParents);

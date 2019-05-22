@@ -1,0 +1,57 @@
+{
+    "payment": {
+        "blades": {
+            "payment-method-detail": {
+                "subtitle": "Zahlungsmethode bearbeiten",
+                "labels": {
+                    "is-active": "Ist aktiv",
+                    "is-partial-payments-available": "Teilweiser Zahlungen verfügbar",
+                    "name": "Name",
+                    "code": "Code",
+                    "description": "Beschreibung",
+                    "settings": "Einstellungen"
+                },
+                "placeholders": {
+                    "description": "Beschreibung eingeben"
+                }
+            },
+            "payment-method-list": {
+                "subtitle": "Zahlungsmethode bearbeiten",
+                "labels": {
+                    "is-active": "Ist aktiv",
+                    "payment-method": "Zahlungsmethode",
+                    "note": "Legen Sie den Auftrag fest, wie Zahlungsmethoden im Web Store sortiert werden. Ziehen und loslassen, um die Reihenfolge zu ändern."
+                },
+                "placeholders": {
+                    "description": "Beschreibung eingeben"
+                }
+            }
+        },
+        "dialogs": {
+            "payment-method-save": {
+                "title": "Save changes",
+                "message": "The payment method has been modified. Do you want to save changes?"
+            }
+        },
+        "widgets": {
+            "store-payment-widget": {
+                "title": "Zahlungsmethoden",
+                "blade-subtitle": "Zahlungsmethoden"
+            }
+        },
+        "labels": {
+            "DefaultManualPaymentMethod": {
+                "name": "Manuelle test methode",
+                "description": "Manuelle test methode, nicht in der produktion verwenden"
+            }
+        }
+    },
+    "settings": {
+        "VirtoCommerce.Payment.DefaultManualPaymentMethod": {
+            "Logo": {
+                "title": "Logo url",
+                "description": "Zahlungsmethode logo url"
+            }
+        }
+    }
+}

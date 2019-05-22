@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using VirtoCommerce.CartModule.Core.Services;
 using VirtoCommerce.CoreModule.Core.Common;
-using VirtoCommerce.CoreModule.Core.Payment;
+using VirtoCommerce.NotificationsModule.Core.Extensions;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.OrdersModule.Core;
@@ -22,6 +22,8 @@ using VirtoCommerce.OrdersModule.Data.Repositories;
 using VirtoCommerce.OrdersModule.Data.Services;
 using VirtoCommerce.OrdersModule.Web.BackgroundJobs;
 using VirtoCommerce.OrdersModule.Web.Model;
+using VirtoCommerce.PaymentModule.Core.Model;
+using VirtoCommerce.PaymentModule.Model.Requests;
 using VirtoCommerce.Platform.Core.Caching;
 using VirtoCommerce.Platform.Core.ChangeLog;
 using VirtoCommerce.Platform.Core.Common;
@@ -39,26 +41,28 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         private readonly IStoreService _storeService;
         private readonly IPlatformMemoryCache _platformMemoryCache;
         private readonly Func<IOrderRepository> _repositoryFactory;
-        //private readonly ISecurityService _securityService;
-        //private readonly IPermissionScopeService _permissionScopeService;
         private readonly ICustomerOrderBuilder _customerOrderBuilder;
         private readonly IShoppingCartService _cartService;
-        private readonly INotificationSender _notificationSender;
+        private readonly ICustomerOrderTotalsCalculator _totalsCalculator;
+        private readonly INotificationSearchService _notificationSearchService;
 
         private readonly INotificationTemplateRenderer _notificationTemplateRenderer;
         private readonly IChangeLogSearchService _changeLogSearchService;
         private static readonly object _lockObject = new object();
 
-        public OrderModuleController(ICustomerOrderService customerOrderService, ICustomerOrderSearchService searchService, IStoreService storeService
+        public OrderModuleController(
+              ICustomerOrderService customerOrderService
+            , ICustomerOrderSearchService searchService
+            , IStoreService storeService
             , IUniqueNumberGenerator numberGenerator
             , IPlatformMemoryCache platformMemoryCache
             , Func<IOrderRepository> repositoryFactory
-            //, IPermissionScopeService permissionScopeService
-            //, ISecurityService securityService
             , ICustomerOrderBuilder customerOrderBuilder
             , IShoppingCartService cartService
-            , INotificationSender notificationSender
-            , IChangeLogSearchService changeLogSearchService, INotificationTemplateRenderer notificationTemplateRenderer)
+            , IChangeLogSearchService changeLogSearchService
+            , INotificationTemplateRenderer notificationTemplateRenderer
+            , INotificationSearchService notificationSearchService
+            , ICustomerOrderTotalsCalculator totalsCalculator)
         {
             _customerOrderService = customerOrderService;
             _searchService = searchService;
@@ -70,9 +74,10 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             //_permissionScopeService = permissionScopeService;
             _customerOrderBuilder = customerOrderBuilder;
             _cartService = cartService;
-            _notificationSender = notificationSender;
             _changeLogSearchService = changeLogSearchService;
             _notificationTemplateRenderer = notificationTemplateRenderer;
+            _notificationSearchService = notificationSearchService;
+            _totalsCalculator = totalsCalculator;
         }
 
         /// <summary>
@@ -123,7 +128,6 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             return Ok(retVal);
         }
 
-
         /// <summary>
         /// Find customer order by id
         /// </summary>
@@ -155,15 +159,16 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         }
 
         /// <summary>
-		/// Calculate order totals after changes
+        /// Calculate order totals after changes
         /// </summary>
-		/// <remarks>Return order with recalculated totals</remarks>
-		/// <param name="order">Customer order</param>
+        /// <remarks>Return order with recalculated totals</remarks>
+        /// <param name="order">Customer order</param>
         [HttpPut]
         [Route("recalculate")]
         public ActionResult<CustomerOrder> CalculateTotals([FromBody]CustomerOrder order)
         {
-            //Nothing to do special because all order totals will be evaluated in domain CustomerOrder properties transiently        
+            _totalsCalculator.CalculateTotals(order);
+
             return Ok(order);
 
         }
@@ -177,7 +182,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         /// <param name="bankCardInfo">banking card information</param>
         [HttpPost]
         [Route("{orderId}/processPayment/{paymentId}")]
-        public async Task<ActionResult<ProcessPaymentResult>> ProcessOrderPayments(string orderId, string paymentId, [SwaggerOptional] BankCardInfo bankCardInfo)
+        public async Task<ActionResult<ProcessPaymentRequestResult>> ProcessOrderPayments(string orderId, string paymentId, [SwaggerOptional] BankCardInfo bankCardInfo)
         {
             var order = await _customerOrderService.GetByIdAsync(orderId, CustomerOrderResponseGroup.Full.ToString());
 
@@ -196,32 +201,30 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
                 throw new InvalidOperationException($"Cannot find order with ID {orderId}");
             }
 
-            var payment = order.InPayments.FirstOrDefault(x => x.Id == paymentId);
-            if (payment == null)
+            var inPayment = order.InPayments.FirstOrDefault(x => x.Id == paymentId);
+            if (inPayment == null)
             {
                 throw new InvalidOperationException($"Cannot find payment with ID {paymentId}");
             }
-
-            var store = await _storeService.GetByIdAsync(order.StoreId);
-            var paymentMethod = store.PaymentMethods.FirstOrDefault(x => x.Code == payment.GatewayCode);
-            if (paymentMethod == null)
+            if (inPayment.PaymentMethod == null)
             {
-                throw new InvalidOperationException($"Cannot find payment method with code {payment.GatewayCode}");
+                throw new InvalidOperationException($"Cannot find payment method with code {inPayment.GatewayCode}");
             }
 
-            var context = new ProcessPaymentEvaluationContext
+            var request = new ProcessPaymentRequest
             {
                 OrderId = order.Id,
-                PaymentId = payment.Id,
+                Order = order,
+                PaymentId = inPayment.Id,
+                Payment = inPayment,
                 //TODO
                 //Store = store,
-                //BankCardInfo = bankCardInfo
+                BankCardInfo = bankCardInfo
             };
-
-            var result = paymentMethod.ProcessPayment(context);
+            var result = inPayment.PaymentMethod.ProcessPayment(request);
             if (result.OuterId != null)
             {
-                payment.OuterId = result.OuterId;
+                inPayment.OuterId = result.OuterId;
             }
 
             await _customerOrderService.SaveChangesAsync(new[] { order });
@@ -358,12 +361,11 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         [HttpDelete]
         [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Delete)]
-        public async Task<IActionResult> DeleteOrdersByIds([FromQuery] string[] ids)
+        public async Task<ActionResult> DeleteOrdersByIds([FromQuery] string[] ids)
         {
             await _customerOrderService.DeleteAsync(ids);
             return Ok();
         }
-
 
         /// <summary>
         ///  Get a some order statistic information for Commerce manager dashboard
@@ -398,7 +400,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
         /// <param name="callback">payment callback parameters</param>
         [HttpPost]
         [Route("~/api/paymentcallback")]
-        public async Task<ActionResult<PostProcessPaymentResult>> PostProcessPayment([FromBody]PaymentCallbackParameters callback)
+        public async Task<ActionResult<PostProcessPaymentRequestResult>> PostProcessPayment([FromBody]PaymentCallbackParameters callback)
         {
             var parameters = new NameValueCollection();
             foreach (var param in callback?.Parameters ?? Array.Empty<KeyValuePair>())
@@ -424,39 +426,29 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
                 throw new InvalidOperationException($"Cannot find order with ID {orderId}");
             }
 
-            var orderPaymentsCodes = order.InPayments.Select(x => x.GatewayCode).Distinct().ToArray();
-            var store = await _storeService.GetByIdAsync(order.StoreId);
             var paymentMethodCode = parameters.Get("code");
-            //Need to use concrete  payment method if it code passed otherwise use all order payment methods
-            var paymentMethods = store.PaymentMethods.Where(x => x.IsActive)
-                                                     .Where(x => orderPaymentsCodes.Contains(x.Code));
-            if (!string.IsNullOrEmpty(paymentMethodCode))
-            {
-                paymentMethods = paymentMethods.Where(x => x.Code.EqualsInvariant(paymentMethodCode));
-            }
 
-            foreach (var paymentMethod in paymentMethods)
+            //Need to use concrete  payment method if it code passed otherwise use all order payment methods
+            foreach (var inPayment in order.InPayments.Where(x => x.PaymentMethod != null && (string.IsNullOrEmpty(paymentMethodCode) ? true : x.GatewayCode.EqualsInvariant(paymentMethodCode))))
             {
                 //Each payment method must check that these parameters are addressed to it
-                var result = paymentMethod.ValidatePostProcessRequest(parameters);
+                var result = inPayment.PaymentMethod.ValidatePostProcessRequest(parameters);
                 if (result.IsSuccess)
                 {
-                    var paymentOuterId = result.OuterId;
-                    var payment = order.InPayments.FirstOrDefault(x => string.IsNullOrEmpty(x.OuterId) || x.OuterId == paymentOuterId);
-                    if (payment == null)
-                    {
-                        throw new InvalidOperationException(@"Cannot find payment");
-                    }
-                    var context = new PostProcessPaymentEvaluationContext
+
+                    var request = new PostProcessPaymentRequest
                     {
                         OrderId = order.Id,
-                        PaymentId = payment.Id,
+                        Order = order,
+                        PaymentId = inPayment.Id,
+                        Payment = inPayment,
+                        StoreId = order.StoreId,
                         //TODO
                         //Store = store,
-                        //OuterId = paymentOuterId,
+                        OuterId = result.OuterId,
                         Parameters = parameters
                     };
-                    var retVal = paymentMethod.PostProcessPayment(context);
+                    var retVal = inPayment.PaymentMethod.PostProcessPayment(request);
                     if (retVal != null)
                     {
                         await _customerOrderService.SaveChangesAsync(new[] { order });
@@ -467,13 +459,14 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
                     return Ok(retVal);
                 }
             }
-            return Ok(new PostProcessPaymentResult { ErrorMessage = "Payment method not found" });
+            return Ok(new PostProcessPaymentRequestResult { ErrorMessage = "Payment method not found" });
         }
+
 
         [HttpGet]
         [Route("invoice/{orderNumber}")]
         [SwaggerFileResponse]
-        public async Task<IActionResult> GetInvoicePdf(string orderNumber)
+        public async Task<ActionResult> GetInvoicePdf(string orderNumber)
         {
             var searchCriteria = AbstractTypeFactory<CustomerOrderSearchCriteria>.TryCreateInstance();
             searchCriteria.Number = orderNumber;
@@ -487,8 +480,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
                 throw new InvalidOperationException($"Cannot find order with number {orderNumber}");
             }
 
-            var notification = new InvoiceEmailNotification { CustomerOrder = order };
-            await _notificationSender.SendNotificationAsync(notification, order.LanguageCode);
+            var notification = await _notificationSearchService.GetNotificationAsync<InvoiceEmailNotification>(new TenantIdentity(order.StoreId, nameof(StoreModule.Core.Model.Store)));
             var message = AbstractTypeFactory<NotificationMessage>.TryCreateInstance($"{notification.Kind}Message");
             message.LanguageCode = order.LanguageCode;
             var emailNotificationMessage = (EmailNotificationMessage)notification.ToMessage(message, _notificationTemplateRenderer);
@@ -504,7 +496,6 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
 
             return new FileStreamResult(stream, "application/pdf");
         }
-
 
         [HttpGet]
         [Route("{id}/changes")]
@@ -528,6 +519,7 @@ namespace VirtoCommerce.OrdersModule.Web.Controllers.Api
             }
             return Ok(result);
         }
+
         private CustomerOrderSearchCriteria FilterOrderSearchCriteria(string userName, CustomerOrderSearchCriteria criteria)
         {
             //TODO

@@ -22,13 +22,11 @@ namespace VirtoCommerce.TaxModule.Data.Model
 
         public bool IsActive { get; set; }
 
-
         #region Navigation Properties
 
         public string StoreId { get; set; }
 
         #endregion
-
 
         public virtual TaxProvider ToModel(TaxProvider taxProvider)
         {

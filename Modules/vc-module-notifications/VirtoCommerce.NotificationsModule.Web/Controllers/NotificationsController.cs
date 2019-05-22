@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VirtoCommerce.NotificationsModule.Core;
+using VirtoCommerce.NotificationsModule.Core.Extensions;
 using VirtoCommerce.NotificationsModule.Core.Model;
 using VirtoCommerce.NotificationsModule.Core.Services;
 using VirtoCommerce.NotificationsModule.Data.Model;
@@ -11,7 +12,6 @@ using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.NotificationsModule.Web.Controllers
 {
-    [Produces("application/json")]
     [Route("api/notifications")]
     public class NotificationsController : Controller
     {
@@ -35,9 +35,9 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         /// <param name="searchCriteria">criteria for search(keyword, skip, take and etc.)</param>
         /// <returns></returns>
         [HttpPost]
-        [ProducesResponseType(typeof(GenericSearchResult<Notification>), 200)]
+        [Route("")]
         [Authorize(ModuleConstants.Security.Permissions.Read)]
-        public async Task<IActionResult> GetNotifications(NotificationSearchCriteria searchCriteria)
+        public async Task<ActionResult<NotificationSearchResult>> GetNotifications(NotificationSearchCriteria searchCriteria)
         {
             var notifications = await _notificationSearchService.SearchNotificationsAsync(searchCriteria);
 
@@ -57,12 +57,11 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("{type}")]
-        [ProducesResponseType(typeof(Notification), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Access)]
-        public async Task<IActionResult> GetNotificationByTypeId(string type, string tenantId = null, string tenantType = null)
+        public async Task<ActionResult<Notification>> GetNotificationByTypeId(string type, string tenantId = null, string tenantType = null)
         {
             var responseGroup = NotificationResponseGroup.Full.ToString();
-            var notification = await _notificationService.GetByTypeAsync(type, tenantId, tenantType, responseGroup);
+            var notification = await _notificationSearchService.GetNotificationAsync(type, new TenantIdentity(tenantId, tenantType));
 
             return Ok(notification);
         }
@@ -74,9 +73,8 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         /// <returns></returns>
         [HttpPut]
         [Route("{type}")]
-        [ProducesResponseType(typeof(void), 200)]
         [Authorize(ModuleConstants.Security.Permissions.Update)]
-        public async Task<IActionResult> UpdateNotification([FromBody]Notification notification)
+        public async Task<ActionResult> UpdateNotification([FromBody]Notification notification)
         {
             await _notificationService.SaveChangesAsync(new[] { notification });
 
@@ -91,9 +89,8 @@ namespace VirtoCommerce.NotificationsModule.Web.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("{type}/templates/{language}/rendercontent")]
-        [ProducesResponseType(typeof(string), 200)]
         [Authorize(ModuleConstants.Security.Permissions.ReadTemplates)]
-        public IActionResult RenderingTemplate([FromBody]NotificationTemplateRequest request)
+        public ActionResult RenderingTemplate([FromBody]NotificationTemplateRequest request)
         {
             var result = _notificationTemplateRender.Render(request.Text, request.Data);
 
